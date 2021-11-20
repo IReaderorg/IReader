@@ -6,15 +6,13 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import ir.kazemcodes.infinity.data.local.BookDatabase
-import ir.kazemcodes.infinity.data.local.repository.LocalRepositoryImpl
-import ir.kazemcodes.infinity.data.remote.ParsedHttpSource
-import ir.kazemcodes.infinity.data.remote.RealWebnovel
-import ir.kazemcodes.infinity.data.remote.repository.RemoteRepositoryImpl
-import ir.kazemcodes.infinity.domain.repository.LocalRepository
-import ir.kazemcodes.infinity.domain.repository.RemoteRepository
-import ir.kazemcodes.infinity.domain.use_case.InfinityUseCases
-import ir.kazemcodes.infinity.domain.use_case.local.*
+import ir.kazemcodes.infinity.base_feature.repository.Repository
+import ir.kazemcodes.infinity.base_feature.repository.RepositoryImpl
+import ir.kazemcodes.infinity.explore_feature.data.ParsedHttpSource
+import ir.kazemcodes.infinity.explore_feature.data.RealWebnovel
+import ir.kazemcodes.infinity.library_feature.data.BookDao
+import ir.kazemcodes.infinity.library_feature.data.BookDatabase
+import ir.kazemcodes.infinity.library_feature.domain.use_case.*
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.create
@@ -27,55 +25,67 @@ class AppModule {
 
     @Provides
     @Singleton
-    fun provideNoteDatabase(app: Application): BookDatabase {
+
+    fun provideBookDatabase(app: Application): BookDatabase {
         return Room.databaseBuilder(
             app,
             BookDatabase::class.java,
             BookDatabase.DATABASE_NAME
-        ).build()
+        )
+            .build()
     }
+
 
     @Provides
     @Singleton
-    fun provideBookRepository(db: BookDatabase): LocalRepository {
-        return LocalRepositoryImpl(db.bookDao)
+    fun providesBookDao(db: BookDatabase): BookDao {
+        return db.bookDao
     }
+
 
     @Provides
     @Singleton
-    fun provideLocalUseCases(repository: LocalRepository): InfinityUseCases {
-        return InfinityUseCases(
-            getBooksUseCase = GetBooksUseCase(repository),
-            getBookUseCase = GetBookUseCase(repository),
-            addBookUserCase = AddBookUserCase(repository),
-            deleteBookUseCase = DeleteBookUseCase(repository),
-            deleteAllBooksUseCase = DeleteAllBooksUseCase(repository),
+    fun providesRepository(api: ParsedHttpSource, bookDao: BookDao): Repository {
+        return RepositoryImpl(api = api, dao = bookDao)
+    }
+//    @Provides
+//    @Singleton
+//    fun provideLocalRepository(db: BookDatabase): LocalRepository {
+//        return LocalRepositoryImpl(db.bookDao)
+//    }
+
+    @Provides
+    @Singleton
+    fun provideLocalUseCases(repository: Repository): LocalUseCase {
+        return LocalUseCase(
+            getLocalBooksUseCase = GetLocalBooksUseCase(repository),
+            GetLocalBookUseCase = GetLocalBookUseCase(repository),
+            insertLocalBookUserCase = InsertLocalBookUserCase(repository),
+            deleteLocalBookUseCase = DeleteLocalBookUseCase(repository),
+            deleteAllLocalBooksUseCase = DeleteAllLocalBooksUseCase(repository),
         )
     }
 
     @Provides
     @Singleton
-    fun providesRetrofit() : Retrofit {
-        return  Retrofit.Builder()
+    fun providesRetrofit(): Retrofit {
+        return Retrofit.Builder()
             .addConverterFactory(MoshiConverterFactory.create())
             .build()
             .create()
     }
 
-    @Provides
-    @Singleton
-    fun provideRemoteRepository(api : ParsedHttpSource) : RemoteRepository {
-        return RemoteRepositoryImpl(api)
-    }
+//    @Provides
+//    @Singleton
+//    fun provideRemoteRepository(api : ParsedHttpSource) : RemoteRepository {
+//        return RemoteRepositoryImpl(api)
+//    }
 
 
     @Provides
     @Singleton
-    fun provideApi() : ParsedHttpSource {
+    fun provideApi(): ParsedHttpSource {
         return RealWebnovel()
     }
-
-
-
 
 }
