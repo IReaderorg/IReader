@@ -1,4 +1,4 @@
-package ir.kazemcodes.infinity.library_feature.domain.use_case
+package ir.kazemcodes.infinity.library_feature.domain.use_case.book
 
 import ir.kazemcodes.infinity.base_feature.repository.Repository
 import javax.inject.Inject
@@ -8,6 +8,6 @@ class DeleteAllLocalBooksUseCase @Inject constructor(
 ) {
 
     suspend operator fun invoke() {
-        repository.local.deleteAllBook()
+        repository.localBookRepository.deleteAllBook()
     }
 }

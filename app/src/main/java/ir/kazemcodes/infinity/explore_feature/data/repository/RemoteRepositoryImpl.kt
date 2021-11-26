@@ -1,6 +1,6 @@
 package ir.kazemcodes.infinity.explore_feature.data.repository
 
-import ir.kazemcodes.infinity.explore_feature.data.ParsedHttpSource
+import ir.kazemcodes.infinity.api_feature.ParsedHttpSource
 import ir.kazemcodes.infinity.explore_feature.data.model.Book
 import ir.kazemcodes.infinity.explore_feature.data.model.Chapter
 import ir.kazemcodes.infinity.explore_feature.domain.repository.RemoteRepository

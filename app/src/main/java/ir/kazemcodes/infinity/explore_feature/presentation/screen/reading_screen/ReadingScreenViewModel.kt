@@ -7,14 +7,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import ir.kazemcodes.infinity.core.Resource
-import ir.kazemcodes.infinity.explore_feature.domain.use_case.GetReadingContentUseCase
+import ir.kazemcodes.infinity.explore_feature.domain.use_case.RemoteUseCase
+import ir.kazemcodes.infinity.explore_feature.presentation.screen.book_detail_screen.Constants.PARAM_BOOK_ID
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 
 @HiltViewModel
 class ReadingScreenViewModel @Inject constructor(
-    private val getReadingContentUseCase: GetReadingContentUseCase,
+    private val remoteUseCase: RemoteUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -24,11 +25,12 @@ class ReadingScreenViewModel @Inject constructor(
 
 
     init {
-        savedStateHandle.get<String>("url").let { url->
+        savedStateHandle.get<Int>(PARAM_BOOK_ID).let { bookId->
 
-            getReadingContent(url = url?:"" , headers = mutableMapOf(
-                Pair<String, String>("Referer","https://readwebnovels.net/")
-            ))
+//            getReadingContent(url = url?:"" , headers = mutableMapOf(
+//                Pair<String, String>("Referer","https://readwebnovels.net/")
+//            ))
+            //TODO I need to add this that get book by id
 
         }
 
@@ -37,10 +39,7 @@ class ReadingScreenViewModel @Inject constructor(
 
 
     private fun getReadingContent(url: String , headers : Map<String,String>) {
-
-
-        getReadingContentUseCase(url , headers ).onEach { result ->
-
+        remoteUseCase.getReadingContentUseCase(url , headers ).onEach { result ->
             when (result) {
                 is Resource.Success -> {
                     _state.value = ReadingScreenState(

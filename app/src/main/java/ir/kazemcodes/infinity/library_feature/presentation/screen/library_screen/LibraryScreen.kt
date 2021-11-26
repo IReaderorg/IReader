@@ -15,7 +15,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import ir.kazemcodes.infinity.presentation.screen.components.LinearViewList
+import ir.kazemcodes.infinity.base_feature.util.Routes
+import ir.kazemcodes.infinity.explore_feature.presentation.screen.components.LinearViewList
 
 @Composable
 fun LibraryScreen(
@@ -30,7 +31,9 @@ fun LibraryScreen(
         modifier = Modifier.fillMaxSize()
     ) {
         if (state.books.isNotEmpty()) {
-            LinearViewList(books = state.books, navController)
+            LinearViewList(books = state.books, navController , onClick = { index->
+                navController.navigate(Routes.BookDetailScreen)
+            })
         }
 
 

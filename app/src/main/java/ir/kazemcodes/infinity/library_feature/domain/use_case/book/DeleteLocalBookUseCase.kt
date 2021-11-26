@@ -1,4 +1,4 @@
-package ir.kazemcodes.infinity.library_feature.domain.use_case
+package ir.kazemcodes.infinity.library_feature.domain.use_case.book
 
 import ir.kazemcodes.infinity.base_feature.repository.Repository
 import ir.kazemcodes.infinity.library_feature.domain.model.BookEntity
@@ -9,6 +9,6 @@ class DeleteLocalBookUseCase @Inject constructor(
 ) {
 
     suspend operator fun invoke(bookEntity : BookEntity) {
-        repository.local.deleteBook(bookEntity)
+        bookEntity.bookId?.let { repository.localBookRepository.deleteBook(it) }
     }
 }

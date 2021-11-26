@@ -23,6 +23,8 @@ class GetReadingContentUseCase @Inject constructor(
 
         } catch (e: IOException) {
             emit(Resource.Error<String>(message = "Couldn't Read Server, Check Your Internet Connection."))
+        }catch (e: Exception) {
+            emit(Resource.Error<String>(message = e.localizedMessage?:"An Unexpected Error Occurred"))
         }
     }
 

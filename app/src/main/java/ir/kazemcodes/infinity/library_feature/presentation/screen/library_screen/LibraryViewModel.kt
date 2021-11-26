@@ -34,7 +34,7 @@ class LibraryViewModel @Inject constructor(
             when (result) {
                 is Resource.Success -> {
                     _state.value = LibraryState(
-                        books = result.data ?: emptyList()
+                        books = result.data?.map { it.copy(inLibrary = true) } ?: emptyList()
                     )
                 }
                 is Resource.Error -> {

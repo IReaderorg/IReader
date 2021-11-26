@@ -1,11 +1,11 @@
-package ir.kazemcodes.infinity.explore_feature.data
+package ir.kazemcodes.infinity.api_feature
 
 import ir.kazemcodes.infinity.explore_feature.data.model.Book
 import ir.kazemcodes.infinity.explore_feature.data.model.Chapter
 import okhttp3.Headers
 import org.jsoup.select.Elements
 
-abstract class ParsedHttpSource {
+abstract class ParsedHttpSource : CatalogueSource {
 
 
     abstract val baseUrl : String
@@ -20,18 +20,18 @@ abstract class ParsedHttpSource {
 
     )) : Elements
 
-    abstract  fun fetchBook(book: Book, elements: Elements) : Book
+    abstract override fun fetchBook(book: Book, elements: Elements) : Book
 
-    abstract  fun fetchBooks(elements: Elements): List<Book>
+    abstract override fun fetchBooks(elements: Elements): List<Book>
 
-    abstract  fun fetchChapters(book: Book, elements: Elements): List<Chapter>
-
-
-    abstract  fun fetchReadingContent(elements: Elements): String
+    abstract override fun fetchChapters(book: Book, elements: Elements): List<Chapter>
 
 
+    abstract  override fun fetchReadingContent(elements: Elements): String
 
-    abstract fun searchBook(query: String) : List<Book>
+
+
+    abstract override  fun searchBook(query: String) : List<Book>
 
     protected open fun headersBuilder() = Headers.Builder().apply {
         add("User-Agent", DEFAULT_USER_AGENT)

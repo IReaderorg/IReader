@@ -1,16 +1,18 @@
-package ir.kazemcodes.infinity.presentation.screen
+package ir.kazemcodes.infinity.explore_feature.presentation.screen.book_detail_screen
 
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import android.util.Log
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.runtime.*
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -20,13 +22,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import ir.kazemcodes.infinity.base_feature.theme.InfinityTheme
-import ir.kazemcodes.infinity.base_feature.util.BookTest
-import ir.kazemcodes.infinity.explore_feature.data.model.Book
-import ir.kazemcodes.infinity.explore_feature.presentation.screen.book_detail_screen.BookDetailViewModel
 import ir.kazemcodes.infinity.explore_feature.presentation.screen.book_detail_screen.components.BookDetailChapterInfoComposable
 import ir.kazemcodes.infinity.explore_feature.presentation.screen.book_detail_screen.components.BookDetailToggleButtonsComposable
 import ir.kazemcodes.infinity.explore_feature.presentation.screen.book_detail_screen.components.BookImageInfoComposable
 import ir.kazemcodes.infinity.presentation.screen.components.ExpandableCardComposable
+import kotlinx.coroutines.CoroutineScope
 
 
 @ExperimentalMaterialApi
@@ -34,40 +34,72 @@ import ir.kazemcodes.infinity.presentation.screen.components.ExpandableCardCompo
 fun BookDetailScreen(
     modifier: Modifier = Modifier,
     viewModel: BookDetailViewModel = hiltViewModel(),
-    book: Book = Book.create(),
     scrollState: ScrollState = rememberScrollState(),
-    navController: NavController = rememberNavController()
+    navController: NavController = rememberNavController(),
+    coroutineScope: CoroutineScope = rememberCoroutineScope()
 ) {
     val detailState = viewModel.detailState.value
     val chapterState = viewModel.chapterState.value
+    val book = viewModel.detailState.value.book
 
-    var isDetailScreen by remember {
-        mutableStateOf(true)
-    }
 
     Box(modifier = Modifier.fillMaxSize()) {
 
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    backgroundColor = MaterialTheme.colors.background,
+                    elevation = 0.dp,
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(end = 16.dp, top = 16.dp),
+                        Arrangement.End
+                    ) {
 
-        if (!detailState.book.description.isNullOrEmpty()) {
-            val bookDetail = detailState.book
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = "Refresh Icon",
+                            tint = MaterialTheme.colors.onBackground,
+                            modifier = modifier.clickable {
+                                Log.d("TAG", "BookDetailScreen: ${book.link}")
+                                    viewModel.getRemoteBookDetail(book = book)
+                            }
+                        )
+                    }
+                }
+            }
+        ) {
+            if (!detailState.book.description.isNullOrEmpty()) {
+                Column(
+                    modifier = modifier
+                        .padding(8.dp)
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    BookImageInfoComposable(bookDetail = book)
+                    Spacer(modifier = modifier.height(16.dp))
+                    BookDetailToggleButtonsComposable(
+                        book,
+                        chapters = chapterState.chapters,
+                        navController = navController,
+                        viewModel = viewModel
+                    )
+                    Spacer(modifier = modifier.height(16.dp))
+                    ExpandableCardComposable(
+                        title = "Summary",
+                        description = book.description ?: "Unknown"
+                    )
+                    Spacer(modifier = modifier.height(16.dp))
 
+                    BookDetailChapterInfoComposable(
+                        chapters = chapterState,
+                        navController = navController,
+                        viewModel = viewModel,
+                        book = book
+                    )
+                }
 
-
-            Column(
-                modifier = modifier
-                    .padding(8.dp)
-                    .verticalScroll(rememberScrollState())
-            ) {
-                BookImageInfoComposable(bookDetail = bookDetail)
-                Spacer(modifier = modifier.height(16.dp))
-                BookDetailToggleButtonsComposable(bookDetail , navController)
-                Spacer(modifier = modifier.height(16.dp))
-                ExpandableCardComposable(
-                    title = "Summary",
-                    description = bookDetail.description ?: "Unknown"
-                )
-                Spacer(modifier = modifier.height(16.dp))
-                BookDetailChapterInfoComposable(chapterState = chapterState , navController = navController)
 
             }
 
@@ -90,7 +122,9 @@ fun BookDetailScreen(
                 modifier = Modifier.align(Alignment.Center)
             )
         }
+
     }
+
 
 }
 
@@ -110,7 +144,7 @@ fun BookDetailScreenPreview() {
 @Composable
 fun BookDetailScreenPreviewDark() {
     InfinityTheme {
-        BookDetailScreen(book = BookTest.bookTest)
+        BookDetailScreen()
     }
 }
 

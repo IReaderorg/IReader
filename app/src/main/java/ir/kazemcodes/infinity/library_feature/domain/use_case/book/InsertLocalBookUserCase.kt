@@ -1,4 +1,4 @@
-package ir.kazemcodes.infinity.library_feature.domain.use_case
+package ir.kazemcodes.infinity.library_feature.domain.use_case.book
 
 import android.util.Log
 import ir.kazemcodes.infinity.base_feature.repository.Repository
@@ -14,7 +14,7 @@ class InsertLocalBookUserCase @Inject constructor(
     @Throws(InvalidBookException::class)
     suspend operator fun invoke(bookEntity: BookEntity)  {
         try {
-            repository.local.insertBook(bookEntity = bookEntity)
+            repository.localBookRepository.insertBook(bookEntity = bookEntity)
         }catch (e : Exception) {
             Log.e(TAG, "invoke: ${e.localizedMessage}", )
         }

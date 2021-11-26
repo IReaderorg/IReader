@@ -5,7 +5,11 @@ plugins {
     id 'kotlin-kapt'
     id 'dagger.hilt.android.plugin'
     id 'kotlin-parcelize'
+
+    id 'androidx.navigation.safeargs.kotlin'
+
 }
+
 
 android {
     compileSdk 31
@@ -53,7 +57,7 @@ android {
 dependencies {
 
     implementation 'androidx.core:core-ktx:1.7.0'
-    implementation 'androidx.appcompat:appcompat:1.3.1'
+    implementation 'androidx.appcompat:appcompat:1.4.0'
     implementation 'com.google.android.material:material:1.4.0'
     implementation "androidx.compose.ui:ui:$compose_version"
     implementation "androidx.compose.material:material:$compose_version"
@@ -68,9 +72,9 @@ dependencies {
 
     // Compose dependencies
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.4.0"
-    implementation "androidx.navigation:navigation-compose:2.3.5"
+    implementation("androidx.navigation:navigation-compose:2.4.0-beta02")
     implementation "androidx.compose.material:material-icons-extended:$compose_version"
-    implementation "androidx.hilt:hilt-navigation-compose:1.0.0-alpha03"
+    implementation "androidx.hilt:hilt-navigation-compose:1.0.0-beta01"
     // Accompanist Navigation Animation
     implementation "com.google.accompanist:accompanist-navigation-animation:0.19.0"
 
@@ -97,11 +101,9 @@ dependencies {
     // For for working with JSoup
     implementation('org.jsoup:jsoup:1.14.3')
 
-//    // For Json
-//    def moshiVersion = "1.12.0"
-//    implementation("com.squareup.moshi:moshi:$moshiVersion")
-//    implementation("com.squareup.moshi:moshi-kotlin:$moshiVersion")
-//    kapt("com.squareup.moshi:moshi-kotlin-codegen:$moshiVersion")
+
+    //DataStore
+    implementation "androidx.datastore:datastore-preferences:1.0.0"
 
     // For web requests
     def okhttpVersion = "4.9.0"
@@ -120,6 +122,13 @@ dependencies {
 
     implementation 'com.google.code.gson:gson:2.8.9'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+
+
+    // For Json
+    def moshiVersion = "1.12.0"
+    implementation("com.squareup.moshi:moshi:$moshiVersion")
+    implementation("com.squareup.moshi:moshi-kotlin:$moshiVersion")
+    kapt("com.squareup.moshi:moshi-kotlin-codegen:$moshiVersion")
 
 
 }

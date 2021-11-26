@@ -1,4 +1,4 @@
-package ir.kazemcodes.infinity.library_feature.domain.use_case
+package ir.kazemcodes.infinity.library_feature.domain.use_case.book
 
 import android.util.Log
 import ir.kazemcodes.infinity.base_feature.repository.Repository
@@ -19,7 +19,7 @@ class GetLocalBooksUseCase @Inject constructor(
     operator fun invoke(): Flow<Resource<List<Book>>> = flow {
         try {
             emit(Resource.Loading())
-            val localRepository = repository.local
+            val localRepository = repository.localBookRepository
             localRepository.getBooks().map { it.map { book -> book.toBook() } }.collect { data ->
 
                 emit(Resource.Success<List<Book>>(data = data))

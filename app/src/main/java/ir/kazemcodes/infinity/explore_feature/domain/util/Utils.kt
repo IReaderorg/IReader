@@ -4,9 +4,9 @@ import java.net.URLDecoder
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
-fun encodeUrl(string: String) : String {
+fun encodeString(string: String) : String {
     return URLEncoder.encode(string , StandardCharsets.UTF_8.name())
 }
-fun decodeUrl(string: String) : String {
+fun decodeString(string: String) : String {
     return URLDecoder.decode(string , StandardCharsets.UTF_8.name())
 }

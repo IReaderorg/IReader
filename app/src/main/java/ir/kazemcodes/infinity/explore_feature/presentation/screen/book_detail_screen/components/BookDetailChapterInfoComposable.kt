@@ -8,16 +8,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import ir.kazemcodes.infinity.base_feature.util.Routes
-import ir.kazemcodes.infinity.explore_feature.data.model.Chapter
-import ir.kazemcodes.infinity.explore_feature.domain.util.encodeUrl
+import ir.kazemcodes.infinity.explore_feature.data.model.Book
+import ir.kazemcodes.infinity.explore_feature.presentation.screen.book_detail_screen.BookDetailViewModel
 import ir.kazemcodes.infinity.explore_feature.presentation.screen.book_detail_screen.ChapterState
-import java.lang.reflect.Type
 
 @Composable
-fun BookDetailChapterInfoComposable(modifier : Modifier = Modifier, chapterState : ChapterState ,navController : NavController) {
+fun BookDetailChapterInfoComposable(viewModel: BookDetailViewModel,modifier : Modifier = Modifier, chapters : ChapterState ,navController : NavController,book : Book) {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
@@ -26,19 +23,18 @@ fun BookDetailChapterInfoComposable(modifier : Modifier = Modifier, chapterState
             .height(40.dp)
     ) {
 
-        if (chapterState.chapters.isNotEmpty()) {
+        if (chapters.chapters.isNotEmpty()) {
             Text(
-                text = "${chapterState.chapters.size} Chapters",
+                text = "${chapters.chapters.size} Chapters",
                 color = MaterialTheme.colors.onBackground
             )
-        } else {
+        }
+        if (chapters.chapters.isEmpty()){
             Text(text = "0 Chapters", color = MaterialTheme.colors.onBackground)
         }
         Text(text = "Details" , color = MaterialTheme.colors.primary , modifier = modifier.clickable {
-            val listType: Type =
-                object : TypeToken<List<Chapter>>() {}.type
-            val json = Gson().toJson(chapterState.chapters , listType)
-            navController.navigate(Routes.ChapterDetailScreen.plus("/${encodeUrl(json)}"))
+            viewModel.insertChaptersToLocal(chapterEntities = chapters.chapters.map { it.copy(bookName = viewModel.detailState.value.book.bookName).toChapterEntity() },bookName = viewModel.detailState.value.book.bookName)
+            navController.navigate(Routes.ChapterDetailScreen.plus("/${viewModel.detailState.value.book.bookName}"))
         })
 
     }

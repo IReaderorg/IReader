@@ -1,5 +1,6 @@
 package ir.kazemcodes.infinity.explore_feature.presentation.screen.book_detail_screen.components
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
@@ -14,29 +15,35 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import ir.kazemcodes.infinity.base_feature.util.Constants.TAG
 import ir.kazemcodes.infinity.base_feature.util.Routes
 import ir.kazemcodes.infinity.explore_feature.data.model.Book
+import ir.kazemcodes.infinity.explore_feature.data.model.Chapter
 import ir.kazemcodes.infinity.explore_feature.presentation.screen.book_detail_screen.BookDetailViewModel
 
 @Composable
-fun BookDetailToggleButtonsComposable(bookDetail : Book , navController : NavController , viewmodel : BookDetailViewModel) {
+fun BookDetailToggleButtonsComposable(bookDetail : Book,chapters: List<Chapter>, navController : NavController, viewModel : BookDetailViewModel) {
 
     Row(
         horizontalArrangement = Arrangement.SpaceAround,
         modifier = Modifier.fillMaxWidth()
     ) {
-        var isInitialized by remember { mutableStateOf(bookDetail.initialized) }
+        var inLibrary by remember { mutableStateOf(bookDetail.inLibrary) }
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.clickable {
-                isInitialized = !isInitialized
-                if (!isInitialized) {
-                    viewmodel.insertBookDetail(bookDetail.toBookEntity())
+                if (!inLibrary) {
+                    viewModel.insertBookDetailToLocal(bookDetail.copy(inLibrary = true).toBookEntity())
+                    Log.d(TAG, "BookDetailToggleButtonsComposable: ${bookDetail.bookName} was inserted")
+                    viewModel.insertChaptersToLocal(chapters.map { it.copy(bookName = bookDetail.bookName).toChapterEntity() },bookName = bookDetail.bookName)
+                    Log.d(TAG, "BookDetailToggleButtonsComposable: ${chapters.size} Chapter was inserted with the name of ${bookDetail.bookName}")
+                    inLibrary = true
                 } else {
-                    viewmodel.deleteBook(bookDetail.toBookEntity())
+                    viewModel.deleteLocalBook(bookDetail.toBookEntity())
+                    inLibrary = false
                 }
             }) {
-            if (!isInitialized) {
+            if (!inLibrary) {
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = "Add to Library Icon",
@@ -64,8 +71,7 @@ fun BookDetailToggleButtonsComposable(bookDetail : Book , navController : NavCon
 
         }
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.clickable { }) {
+            horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(
                 imageVector = Icons.Default.Language,
                 contentDescription = "WebView",

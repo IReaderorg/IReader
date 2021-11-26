@@ -6,19 +6,22 @@ import ir.kazemcodes.infinity.explore_feature.data.model.Chapter
 
 @Entity(tableName = "chapter_entity")
 data class ChapterEntity(
-    val bookName : String,
+    val bookName : String? = null,
     val link : String,
     val title: String,
+    val dateAdded: String?,
     val index: Int? = null,
     val content: String? = null,
-    @PrimaryKey val BookID : Int? = null
+    @PrimaryKey  val chapterId : Int? = null
 ) {
     fun toChapter() : Chapter {
         return Chapter(
-            bookName = bookName,
             link = link,
-            title = title,
+            bookName = title,
             index = index,
+            content = content,
+            dateAdded = dateAdded,
+            chapterId = chapterId
         )
     }
 }

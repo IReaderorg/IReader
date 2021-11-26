@@ -1,5 +1,6 @@
 package ir.kazemcodes.infinity.explore_feature.data
 
+import ir.kazemcodes.infinity.api_feature.ParsedHttpSource
 import ir.kazemcodes.infinity.explore_feature.data.model.Book
 import ir.kazemcodes.infinity.explore_feature.data.model.Chapter
 import kotlinx.coroutines.Dispatchers
@@ -51,7 +52,7 @@ class RealWebnovel : ParsedHttpSource() {
                 .eachAttr("href")
         for (i in 0..11) {
             books.add(Book.create().apply {
-                name = eTitle[i].toString()
+                bookName = eTitle[i].toString()
                 coverLink = eImage[i]
                 link = eLink[i]
             })
@@ -67,7 +68,7 @@ class RealWebnovel : ParsedHttpSource() {
 
         eChaptersTitle.forEachIndexed { index, element ->
             chapters.add(Chapter(
-                title = element,
+                bookName = element,
                 link = eChaptersUrl[index],
                 index = index,
             ))
@@ -82,6 +83,9 @@ class RealWebnovel : ParsedHttpSource() {
     override fun searchBook(query: String): List<Book> {
         TODO("Not yet implemented")
     }
+
+    override val supportsLatest: Boolean
+        get() = true
 }
 
 

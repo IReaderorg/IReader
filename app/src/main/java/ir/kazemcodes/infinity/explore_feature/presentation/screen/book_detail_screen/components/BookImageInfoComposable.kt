@@ -26,7 +26,7 @@ fun BookImageInfoComposable(modifier : Modifier = Modifier , bookDetail : Book) 
         Spacer(modifier = modifier.height(8.dp))
         Column {
             Text(
-                text = bookDetail.name,
+                text = bookDetail.bookName,
                 style = MaterialTheme.typography.h4.copy(
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 24.sp

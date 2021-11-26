@@ -10,11 +10,14 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import ir.kazemcodes.infinity.presentation.screen.components.LinearViewList
+import ir.kazemcodes.infinity.base_feature.util.Routes
+import ir.kazemcodes.infinity.explore_feature.presentation.screen.components.LinearViewList
+
 
 @Composable
 fun BrowseScreen(
@@ -25,8 +28,12 @@ fun BrowseScreen(
     Box(
             modifier = Modifier.fillMaxSize()
         ) {
+        val context = LocalContext.current
         if (state.books.isNotEmpty()) {
-        LinearViewList(books = state.books, navController)
+        LinearViewList(books = state.books, navController , onClick = {index->
+            viewModel.insertTODataStore(context = context , book = state.books[index])
+            navController.navigate(Routes.BookDetailScreen)
+        })
         }
 
 

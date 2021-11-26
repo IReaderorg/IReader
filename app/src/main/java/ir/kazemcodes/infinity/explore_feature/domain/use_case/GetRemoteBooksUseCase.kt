@@ -10,7 +10,7 @@ import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
 
-class GetBooksUseCase @Inject constructor(
+class GetRemoteBooksUseCase @Inject constructor(
     private val repository: Repository
 ) {
 
@@ -28,7 +28,10 @@ class GetBooksUseCase @Inject constructor(
 
     } catch (e: IOException) {
         emit(Resource.Error<List<Book>>(message = "Couldn't Read Server, Check Your Internet Connection."))
-    }
+    }catch (e: Exception) {
+            emit(Resource.Error<List<Book>>(message = e.localizedMessage ?: "An Unexpected Error Occurred."))
+
+        }
     }
 
 }

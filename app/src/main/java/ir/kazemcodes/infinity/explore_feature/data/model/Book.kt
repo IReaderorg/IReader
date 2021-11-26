@@ -13,22 +13,21 @@ data class Book(
     @Json(name = "url")
     var link: String,
     @Json(name = "title")
-    var name: String,
+    var bookName: String,
     @Json(name = "thumbnail")
      var coverLink: String? = "",
     @Json(name = "author")
-    var author: String?= "Unknown",
+    var author: String?= "",
     @Json(name = "translator")
-    var translator: String?= "Unknown",
+    var translator: String?= "",
     @Json(name = "description")
     var description: String? = "",
-    @Json(name = "genre")
+    @Json(name = "category")
     var category: String? = "",
     @Json(name = "status")
     var status: Int = 0,
-    @Json(name = "thumbnail")
-    var initialized: Boolean = false,
-
+    @Json(name = "inLibrary")
+    var inLibrary: Boolean = false,
     ) : Parcelable {
 
     companion object {
@@ -37,20 +36,20 @@ data class Book(
         const val COMPLETED = 2
         const val LICENSED = 3
         fun create(): Book {
-            return Book(name = "" , link = "")
+            return Book(bookName = "" , link = "")
         }
     }
     fun toBookEntity() : BookEntity {
         return BookEntity(
-            title = name,
+            bookName = bookName,
             link = link,
             coverLink = coverLink,
             translator = translator,
             author = author,
             status = status,
             description = description,
-            initialized = initialized,
-            category = category
+            inLibrary = inLibrary,
+            category = category,
         )
     }
 

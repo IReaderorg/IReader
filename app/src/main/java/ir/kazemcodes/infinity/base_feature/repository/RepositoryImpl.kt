@@ -1,15 +1,24 @@
 package ir.kazemcodes.infinity.base_feature.repository
 
-import ir.kazemcodes.infinity.explore_feature.data.ParsedHttpSource
+import ir.kazemcodes.infinity.api_feature.ParsedHttpSource
 import ir.kazemcodes.infinity.explore_feature.data.repository.RemoteRepositoryImpl
 import ir.kazemcodes.infinity.explore_feature.domain.repository.RemoteRepository
 import ir.kazemcodes.infinity.library_feature.data.BookDao
-import ir.kazemcodes.infinity.library_feature.data.repository.LocalRepositoryImpl
-import ir.kazemcodes.infinity.library_feature.domain.repository.LocalRepository
+import ir.kazemcodes.infinity.library_feature.data.ChapterDao
+import ir.kazemcodes.infinity.library_feature.data.repository.LocalBookRepositoryImpl
+import ir.kazemcodes.infinity.library_feature.data.repository.LocalChapterRepositoryImpl
+import ir.kazemcodes.infinity.library_feature.domain.repository.LocalBookRepository
+import ir.kazemcodes.infinity.library_feature.domain.repository.LocalChapterRepository
 
-class RepositoryImpl(private val api: ParsedHttpSource , private val dao : BookDao) : Repository {
+class RepositoryImpl(
+    private val api: ParsedHttpSource,
+    private val bookDao: BookDao,
+    private val chapterDao: ChapterDao
+) : Repository {
     override val remote: RemoteRepository
         get() = RemoteRepositoryImpl(api)
-    override val local: LocalRepository
-        get() = LocalRepositoryImpl(dao)
+    override val localBookRepository: LocalBookRepository
+        get() = LocalBookRepositoryImpl(bookDao)
+    override val localChapterRepository: LocalChapterRepository
+        get() = LocalChapterRepositoryImpl(chapterDao)
 }

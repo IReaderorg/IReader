@@ -20,9 +20,6 @@ import ir.kazemcodes.infinity.base_feature.theme.InfinityTheme
 
 @Composable
 fun ReadingScreen(
-    url: String,
-    name: String,
-    chapterNumber: String,
     viewModel: ReadingScreenViewModel = hiltViewModel()
 ) {
     val state = viewModel.state.value
@@ -56,7 +53,7 @@ fun ReadingScreen(
 @Composable
 fun ReadingDark() {
     InfinityTheme {
-        ReadingScreen("", "", "")
+        ReadingScreen()
     }
 }
 
@@ -65,7 +62,7 @@ fun ReadingDark() {
 fun ReadingLight() {
     InfinityTheme {
 
-        ReadingScreen("", "", "")
+        ReadingScreen()
     }
 }
 

@@ -7,28 +7,28 @@ import ir.kazemcodes.infinity.explore_feature.data.model.Book
 @Entity(tableName = "book_table")
 data class BookEntity(
     val link: String,
-    val title: String,
+    val bookName: String,
     val coverLink: String? = null,
-    val description: String?,
+    val description: String? = null,
     val author: String? = null,
     val translator: String? = null,
     val category: String? =null,
-    val initialized: Boolean = false,
+    val inLibrary: Boolean = false,
     val status : Int = -1,
-    @PrimaryKey val BookID : Int? = null
+    @PrimaryKey val bookId : Int? = null
 ) {
 
     fun toBook() : Book {
         return Book(
             link = link,
-            name = title,
+            bookName = bookName,
             coverLink = coverLink,
             description = description,
             author = author,
             translator = translator,
             category = category,
-            initialized = initialized,
-            status = status
+            inLibrary = inLibrary,
+            status = status,
         )
     }
 }

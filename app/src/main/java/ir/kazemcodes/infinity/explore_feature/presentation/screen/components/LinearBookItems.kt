@@ -1,4 +1,4 @@
-package ir.kazemcodes.infinity.presentation.screen.components
+package ir.kazemcodes.infinity.explore_feature.presentation.screen.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import ir.kazemcodes.infinity.explore_feature.data.model.Book
-import ir.kazemcodes.infinity.base_feature.util.Routes
+import ir.kazemcodes.infinity.presentation.screen.components.BookImageComposable
 
 
 @Composable
@@ -38,16 +38,17 @@ fun LinearBookItem(
 @Composable
 fun LinearViewList(
     books: List<Book>,
-    navController: NavController
+    navController: NavController,
+    onClick: (index : Int) -> Unit
 ) {
 
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         items(count = books.size) { index ->
             LinearBookItem(
-                title = books[index].name,
+                title = books[index].bookName,
                 img_thumbnail = books[index].coverLink?:"",
                 modifier = Modifier.clickable {
-                    navController.navigate(Routes.BookDetailScreen + "?bookTitle=${books[index].name}&bookUrl=${books[index].link}")
+                    onClick(index)
                 }
             )
         }
