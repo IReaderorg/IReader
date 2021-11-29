@@ -13,16 +13,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
-import ir.kazemcodes.infinity.base_feature.util.Routes
+import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
+import ir.kazemcodes.infinity.base_feature.navigation.BookDetailKey
 import ir.kazemcodes.infinity.explore_feature.presentation.screen.components.LinearViewList
 
 @Composable
 fun LibraryScreen(
-    navController : NavController = rememberNavController(),
     viewModel: LibraryViewModel = hiltViewModel()
 ) {
+    val backStack = LocalBackstack.current
 
     val state = viewModel.state.value
 
@@ -31,8 +30,8 @@ fun LibraryScreen(
         modifier = Modifier.fillMaxSize()
     ) {
         if (state.books.isNotEmpty()) {
-            LinearViewList(books = state.books, navController , onClick = { index->
-                navController.navigate(Routes.BookDetailScreen)
+            LinearViewList(books = state.books , onClick = { index->
+                backStack.goTo(BookDetailKey(state.books[index]))
             })
         }
 

@@ -1,4 +1,4 @@
-package ir.kazemcodes.infinity.explore_feature.presentation.screen.book_detail_screen
+package ir.kazemcodes.infinity.explore_feature.presentation.screen.chapters_screen
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -12,37 +12,36 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
-import ir.kazemcodes.infinity.base_feature.util.Routes
-import ir.kazemcodes.infinity.explore_feature.domain.util.encodeString
-import ir.kazemcodes.infinity.explore_feature.presentation.screen.chapters_screen.ChapterDetailViewModel
+import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
+import ir.kazemcodes.infinity.base_feature.navigation.ReadingContentKey
+import ir.kazemcodes.infinity.explore_feature.data.model.Book
+import ir.kazemcodes.infinity.explore_feature.data.model.Chapter
 
 
 @Composable
 fun ChapterDetailScreen(
     modifier: Modifier = Modifier,
-    navController: NavController = rememberNavController(),
-    viewModel: ChapterDetailViewModel = hiltViewModel()
+    viewModel: ChapterDetailViewModel = hiltViewModel(),
+    chapters : List<Chapter>,
+    book:Book
 ) {
-
-
-
+    val backStack = LocalBackstack.current
     Box(modifier = modifier.fillMaxSize()) {
-    val chapters = viewModel.state.value.chapters
-        if (viewModel.state.value.chapters.isNotEmpty()) {
+        if (chapters.isNotEmpty()) {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(count = chapters.size) { index ->
                     Row(
                         modifier = modifier
                             .fillMaxWidth()
-                            .padding(8.dp)
+                            .padding(12.dp)
+                            .height(40.dp)
                             .clickable {
-                                navController.navigate(Routes.ReadingScreen.plus("?url=${encodeString(chapters[index].link)}&name=${chapters[index].bookName}&chapterNumber=${chapters[index].index}"))
-                            }
+                                backStack.goTo(ReadingContentKey(book = book, chapter = chapters[index]))
+                            },
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Spacer(modifier = modifier.width(8.dp))
-                        Text(text = chapters[index].bookName)
+                        Text(text = chapters[index].title , color =  MaterialTheme.colors.onBackground)
                     }
                 }
 

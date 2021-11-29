@@ -1,6 +1,5 @@
 package ir.kazemcodes.infinity.explore_feature.presentation.screen.book_detail_screen.components
 
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
@@ -14,32 +13,36 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import ir.kazemcodes.infinity.base_feature.util.Constants.TAG
-import ir.kazemcodes.infinity.base_feature.util.Routes
+import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
+import ir.kazemcodes.infinity.base_feature.navigation.WebViewKey
 import ir.kazemcodes.infinity.explore_feature.data.model.Book
 import ir.kazemcodes.infinity.explore_feature.data.model.Chapter
 import ir.kazemcodes.infinity.explore_feature.presentation.screen.book_detail_screen.BookDetailViewModel
 
 @Composable
-fun BookDetailToggleButtonsComposable(bookDetail : Book,chapters: List<Chapter>, navController : NavController, viewModel : BookDetailViewModel) {
+fun BookDetailToggleButtonsComposable(
+    book: Book,
+    chapters: List<Chapter>,
+    viewModel: BookDetailViewModel
+) {
+    val backStack = LocalBackstack.current
 
     Row(
         horizontalArrangement = Arrangement.SpaceAround,
         modifier = Modifier.fillMaxWidth()
     ) {
-        var inLibrary by remember { mutableStateOf(bookDetail.inLibrary) }
+        var inLibrary by remember { mutableStateOf(book.inLibrary) }
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.clickable {
                 if (!inLibrary) {
-                    viewModel.insertBookDetailToLocal(bookDetail.copy(inLibrary = true).toBookEntity())
-                    Log.d(TAG, "BookDetailToggleButtonsComposable: ${bookDetail.bookName} was inserted")
-                    viewModel.insertChaptersToLocal(chapters.map { it.copy(bookName = bookDetail.bookName).toChapterEntity() },bookName = bookDetail.bookName)
-                    Log.d(TAG, "BookDetailToggleButtonsComposable: ${chapters.size} Chapter was inserted with the name of ${bookDetail.bookName}")
+                    viewModel.insertBookDetailToLocal(book.copy(inLibrary = true).toBookEntity())
+                    val chapterEntities = chapters.map { it.copy(bookName = book.bookName).toChapterEntity() }
+                    viewModel.insertChaptersToLocal(chapterEntities)
                     inLibrary = true
                 } else {
-                    viewModel.deleteLocalBook(bookDetail.toBookEntity())
+                    viewModel.deleteLocalBook(book.bookName)
+                    viewModel.insertBookDetailToLocal(book.copy(inLibrary = false).toBookEntity())
                     inLibrary = false
                 }
             }) {
@@ -79,7 +82,7 @@ fun BookDetailToggleButtonsComposable(bookDetail : Book,chapters: List<Chapter>,
                 modifier = Modifier
                     .size(50.dp)
                     .clickable {
-                        navController.navigate(Routes.WebViewScreen.plus("?url=${bookDetail.link}"))
+                        backStack.goTo(WebViewKey(book.link))
                     }
             )
             Text(text = "WebView", color = MaterialTheme.colors.onBackground)

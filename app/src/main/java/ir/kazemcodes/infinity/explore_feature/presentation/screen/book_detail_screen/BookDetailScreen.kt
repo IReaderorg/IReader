@@ -2,7 +2,6 @@ package ir.kazemcodes.infinity.explore_feature.presentation.screen.book_detail_s
 
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
-import android.util.Log
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -12,6 +11,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,6 +22,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import ir.kazemcodes.infinity.base_feature.theme.InfinityTheme
+import ir.kazemcodes.infinity.explore_feature.data.model.Book
 import ir.kazemcodes.infinity.explore_feature.presentation.screen.book_detail_screen.components.BookDetailChapterInfoComposable
 import ir.kazemcodes.infinity.explore_feature.presentation.screen.book_detail_screen.components.BookDetailToggleButtonsComposable
 import ir.kazemcodes.infinity.explore_feature.presentation.screen.book_detail_screen.components.BookImageInfoComposable
@@ -32,16 +33,19 @@ import kotlinx.coroutines.CoroutineScope
 @ExperimentalMaterialApi
 @Composable
 fun BookDetailScreen(
+    book: Book = Book.create(),
     modifier: Modifier = Modifier,
     viewModel: BookDetailViewModel = hiltViewModel(),
     scrollState: ScrollState = rememberScrollState(),
     navController: NavController = rememberNavController(),
     coroutineScope: CoroutineScope = rememberCoroutineScope()
 ) {
+    LaunchedEffect(key1 = true) {
+        viewModel.getBookData(book = book)
+    }
     val detailState = viewModel.detailState.value
     val chapterState = viewModel.chapterState.value
-    val book = viewModel.detailState.value.book
-
+    val aBook = detailState.book
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -63,41 +67,38 @@ fun BookDetailScreen(
                             contentDescription = "Refresh Icon",
                             tint = MaterialTheme.colors.onBackground,
                             modifier = modifier.clickable {
-                                Log.d("TAG", "BookDetailScreen: ${book.link}")
-                                    viewModel.getRemoteBookDetail(book = book)
+                                viewModel.getRemoteBookDetail()
                             }
                         )
                     }
                 }
             }
         ) {
-            if (!detailState.book.description.isNullOrEmpty()) {
+            if (!aBook.description.isNullOrEmpty()) {
                 Column(
                     modifier = modifier
                         .padding(8.dp)
                         .verticalScroll(rememberScrollState())
                 ) {
-                    BookImageInfoComposable(bookDetail = book)
+                    BookImageInfoComposable(bookDetail = aBook)
                     Spacer(modifier = modifier.height(16.dp))
                     BookDetailToggleButtonsComposable(
-                        book,
+                        aBook,
                         chapters = chapterState.chapters,
-                        navController = navController,
                         viewModel = viewModel
                     )
                     Spacer(modifier = modifier.height(16.dp))
                     ExpandableCardComposable(
                         title = "Summary",
-                        description = book.description ?: "Unknown"
+                        description = aBook.description ?: "Unknown"
                     )
                     Spacer(modifier = modifier.height(16.dp))
-
                     BookDetailChapterInfoComposable(
                         chapters = chapterState,
-                        navController = navController,
                         viewModel = viewModel,
-                        book = book
+                        book = aBook
                     )
+
                 }
 
 

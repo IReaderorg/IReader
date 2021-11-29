@@ -1,18 +1,18 @@
 package ir.kazemcodes.infinity.library_feature.domain.use_case
 
 import ir.kazemcodes.infinity.library_feature.domain.use_case.book.*
-import ir.kazemcodes.infinity.library_feature.domain.use_case.chapter.GetLocalChapterUseCase
-import ir.kazemcodes.infinity.library_feature.domain.use_case.chapter.GetLocalChaptersByBookNameUseCase
-import ir.kazemcodes.infinity.library_feature.domain.use_case.chapter.InsertLocalChapterUseCase
+import ir.kazemcodes.infinity.library_feature.domain.use_case.chapter.*
 
 data class LocalUseCase(
+    val getLocalBookByNameUseCase: GetLocalBookByNameUseCase,
+    val getLocalChaptersByBookNameByBookNameUseCase: GetLocalChaptersByBookNameUseCase,
     val getLocalBooksUseCase: GetLocalBooksUseCase,
     val getLocalBookByIdByIdUseCase: GetLocalBookByIdUseCase,
-    val getLocalBookByNameUseCase: GetLocalBookByNameUseCase,
     val insertLocalBookUserCase: InsertLocalBookUserCase,
-    val insertLocalChapterUseCase: InsertLocalChapterUseCase,
+    val insertLocalChaptersUseCase: InsertLocalChaptersUseCase,
+    val insertLocalChapterContentUseCase: InsertLocalChapterContentUseCase,
     val getLocalChapterUseCase: GetLocalChapterUseCase,
-    val getLocalChaptersByBookNameByBookNameUseCase: GetLocalChaptersByBookNameUseCase,
+    val getLocalChapterReadingContent: GetLocalChapterReadingContent,
     val deleteLocalBookUseCase: DeleteLocalBookUseCase,
     val deleteAllLocalBooksUseCase: DeleteAllLocalBooksUseCase
 )

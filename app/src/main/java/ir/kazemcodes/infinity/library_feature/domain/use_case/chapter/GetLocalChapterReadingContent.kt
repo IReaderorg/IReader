@@ -8,22 +8,20 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
-class GetLocalChaptersByBookNameUseCase @Inject constructor(
+class GetLocalChapterReadingContent @Inject constructor(
     private val repository: Repository
 ) {
 
-    operator fun invoke(bookName: String): Flow<Resource<List<Chapter>>> =
+    operator fun invoke(chapter:Chapter): Flow<Resource<Chapter>> =
         flow {
             try {
                 emit(Resource.Loading())
-                repository.localChapterRepository.getChapterByName(bookName = bookName)
-                    .collect { chapters ->
-                        emit(Resource.Success<List<Chapter>>(data = chapters.map { chapterEntity ->
-                            chapterEntity.toChapter()
-                        }))
+                repository.localChapterRepository.getChapterByChapter(chapterTitle = chapter.title , bookName = chapter.bookName?:"")
+                    .collect { chapter ->
+                        emit(Resource.Success<Chapter>(data = chapter.toChapter()))
                     }
             } catch (e: Exception) {
-                emit(Resource.Error<List<Chapter>>(message = e.message.toString()))
+                emit(Resource.Error<Chapter>(message = e.message.toString()))
             }
         }
 

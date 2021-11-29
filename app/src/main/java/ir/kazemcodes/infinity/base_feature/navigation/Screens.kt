@@ -1,8 +1,8 @@
 package ir.kazemcodes.infinity.base_feature.navigation
 
-import androidx.navigation.NavHostController
 
-class Screens(navController: NavHostController) {
+
+//class Screens(navController: NavHostController) {
 //    val bookshelf: () -> Unit = {
 //        navController.navigate(route = "${}/${Action.NO_ACTION}") {
 //            popUpTo(SPLASH_SCREEN) { inclusive = true }
@@ -16,4 +16,4 @@ class Screens(navController: NavHostController) {
 //            popUpTo(LIST_SCREEN) { inclusive = true }
 //        }
 //    }
-}
+//}

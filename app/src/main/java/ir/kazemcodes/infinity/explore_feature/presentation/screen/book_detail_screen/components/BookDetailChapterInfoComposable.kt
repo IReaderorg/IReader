@@ -7,14 +7,20 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import ir.kazemcodes.infinity.base_feature.util.Routes
+import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
+import ir.kazemcodes.infinity.base_feature.navigation.ChapterDetailKey
 import ir.kazemcodes.infinity.explore_feature.data.model.Book
 import ir.kazemcodes.infinity.explore_feature.presentation.screen.book_detail_screen.BookDetailViewModel
 import ir.kazemcodes.infinity.explore_feature.presentation.screen.book_detail_screen.ChapterState
 
 @Composable
-fun BookDetailChapterInfoComposable(viewModel: BookDetailViewModel,modifier : Modifier = Modifier, chapters : ChapterState ,navController : NavController,book : Book) {
+fun BookDetailChapterInfoComposable(
+    viewModel: BookDetailViewModel,
+    modifier: Modifier = Modifier,
+    chapters: ChapterState,
+    book: Book
+) {
+    val backStack = LocalBackstack.current
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
@@ -33,8 +39,8 @@ fun BookDetailChapterInfoComposable(viewModel: BookDetailViewModel,modifier : Mo
             Text(text = "0 Chapters", color = MaterialTheme.colors.onBackground)
         }
         Text(text = "Details" , color = MaterialTheme.colors.primary , modifier = modifier.clickable {
-            viewModel.insertChaptersToLocal(chapterEntities = chapters.chapters.map { it.copy(bookName = viewModel.detailState.value.book.bookName).toChapterEntity() },bookName = viewModel.detailState.value.book.bookName)
-            navController.navigate(Routes.ChapterDetailScreen.plus("/${viewModel.detailState.value.book.bookName}"))
+            //navController.navigate(Routes.ChapterDetailScreen.plus("/${viewModel.detailState.value.book.bookName}"))
+            backStack.goTo(ChapterDetailKey(chapters = chapters.chapters, book = book))
         })
 
     }

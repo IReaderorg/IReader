@@ -17,10 +17,10 @@ interface BookDao {
     fun getBooks() : Flow<List<BookEntity>>
 
     @Query("SELECT * FROM book_table WHERE bookId = :bookId")
-    suspend fun getBookById(bookId : Int) : BookEntity
+    fun getBookById(bookId : Int) : Flow<BookEntity>
 
     @Query("SELECT * FROM book_table WHERE bookName = :bookName")
-    suspend fun getBookByName(bookName : String) : BookEntity
+    fun getBookByName(bookName : String) : Flow<BookEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertBook(bookEntity: BookEntity)
@@ -28,8 +28,8 @@ interface BookDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertBooks(bookEntity: List<BookEntity>)
 
-    @Query("DELETE FROM book_table WHERE bookId = :bookId ")
-    suspend fun deleteBook(bookId: Int)
+    @Query("DELETE FROM book_table WHERE bookName = :bookName ")
+    suspend fun deleteBook(bookName: String)
 
     @Query("DELETE FROM book_table")
     suspend fun deleteAllBook()

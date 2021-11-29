@@ -7,15 +7,21 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import ir.kazemcodes.infinity.core.Resource
+import ir.kazemcodes.infinity.explore_feature.data.model.Chapter
 import ir.kazemcodes.infinity.explore_feature.domain.use_case.RemoteUseCase
-import ir.kazemcodes.infinity.explore_feature.presentation.screen.book_detail_screen.Constants.PARAM_BOOK_ID
+import ir.kazemcodes.infinity.library_feature.domain.model.ChapterEntity
+import ir.kazemcodes.infinity.library_feature.domain.use_case.LocalUseCase
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
 class ReadingScreenViewModel @Inject constructor(
     private val remoteUseCase: RemoteUseCase,
+    private val localUseCase: LocalUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -24,38 +30,76 @@ class ReadingScreenViewModel @Inject constructor(
     val state: State<ReadingScreenState> = _state
 
 
-    init {
-        savedStateHandle.get<Int>(PARAM_BOOK_ID).let { bookId->
-
-//            getReadingContent(url = url?:"" , headers = mutableMapOf(
-//                Pair<String, String>("Referer","https://readwebnovels.net/")
-//            ))
-            //TODO I need to add this that get book by id
-
+    fun getReadingContent(chapter: Chapter) {
+        _state.value = state.value.copy(chapter = chapter)
+        if (chapter.content == null) {
+            getReadingContentLocally()
         }
-
-        //_state.value = BrowseScreenState(books = BookTest.booksTest)
     }
 
-
-    private fun getReadingContent(url: String , headers : Map<String,String>) {
-        remoteUseCase.getReadingContentUseCase(url , headers ).onEach { result ->
+    private fun getReadingContentLocally() {
+        localUseCase.getLocalChapterReadingContent(state.value.chapter).onEach { result ->
             when (result) {
                 is Resource.Success -> {
-                    _state.value = ReadingScreenState(
-                        readingContent = result.data ?: ""
-                    )
+                    if (result.data?.content != null) {
+                        Timber.d("getReadingContentLocally Copying" + _state.value)
+                        _state.value = state.value.copy(
+                            chapter = state.value.chapter.copy(content = result.data.content),
+                            isLoading = false,
+                            error = ""
+                        )
+                    } else {
+                        if (state.value.chapter.content ==null) {
+
+                        getReadingContentRemotely()
+                        }
+                    }
                 }
                 is Resource.Error -> {
                     _state.value =
-                        ReadingScreenState(error = result.message ?: "An Unknown Error Occurred")
+                        state.value.copy(error = result.message ?: "An Unknown Error Occurred", isLoading = false)
                 }
                 is Resource.Loading -> {
-
-                    _state.value = ReadingScreenState(isLoading = true)
+                    _state.value = state.value.copy(isLoading = true ,error = "")
                 }
             }
+
         }.launchIn(viewModelScope)
     }
 
+
+    private fun getReadingContentRemotely() {
+        Timber.d("getReadingContentRemotely Successfully Triggered")
+        remoteUseCase.getRemoteReadingContentUseCase(state.value.chapter.link).onEach { result ->
+            when (result) {
+                is Resource.Success -> {
+                    Timber.d("getReadingContentRemotely Successfully Called")
+                    _state.value = state.value
+                        .copy(
+                            chapter = state.value.chapter.copy(content = result.data),
+                            isLoading = false,
+                            error = ""
+                        )
+                    if (!state.value.chapter.content.isNullOrBlank()) {
+                        insertChapterContent(state.value.chapter.toChapterEntity())
+                    }
+                }
+                is Resource.Error -> {
+                    _state.value =
+                        state.value.copy(error = result.message ?: "An Unknown Error Occurred", isLoading = false)
+                }
+                is Resource.Loading -> {
+                    _state.value = state.value.copy(isLoading = true , error = "")
+                }
+            }
+        }.launchIn(viewModelScope)
+
+
+    }
+
+    fun insertChapterContent(chapterEntity: ChapterEntity) {
+        viewModelScope.launch(Dispatchers.IO) {
+            localUseCase.insertLocalChapterContentUseCase(chapterEntity)
+        }
+    }
 }

@@ -12,11 +12,11 @@ class LocalBookRepositoryImpl @Inject constructor(
     override fun getBooks(): Flow<List<BookEntity>> {
         return dao.getInitializedBooks()
     }
-    override suspend fun getBookById(bookId: Int): BookEntity {
+    override fun getBookById(bookId: Int): Flow<BookEntity> {
         return dao.getBookById(bookId)
     }
 
-    override suspend fun getBookByName(bookName: String): BookEntity {
+    override fun getBookByName(bookName: String): Flow<BookEntity> {
         return dao.getBookByName(bookName)
     }
 
@@ -27,8 +27,8 @@ class LocalBookRepositoryImpl @Inject constructor(
     override suspend fun insertBooks(bookEntities: List<BookEntity>) {
         return dao.insertBooks(bookEntities)
     }
-    override suspend fun deleteBook(bookId: Int) {
-        return dao.deleteBook(bookId = bookId)
+    override suspend fun deleteBook(bookName: String) {
+        return dao.deleteBook(bookName = bookName)
     }
     override suspend fun deleteAllBook() {
         return dao.deleteAllBook()

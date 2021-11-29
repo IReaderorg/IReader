@@ -16,11 +16,12 @@ data class ChapterEntity(
 ) {
     fun toChapter() : Chapter {
         return Chapter(
+            bookName = bookName,
             link = link,
-            bookName = title,
+            title = title,
+            dateAdded = dateAdded,
             index = index,
             content = content,
-            dateAdded = dateAdded,
             chapterId = chapterId
         )
     }

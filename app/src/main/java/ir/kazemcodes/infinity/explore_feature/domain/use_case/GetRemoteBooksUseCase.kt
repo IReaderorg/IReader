@@ -25,7 +25,6 @@ class GetRemoteBooksUseCase @Inject constructor(
             emit(Resource.Success<List<Book>>(books))
         } catch (e: HttpException) {
         emit(Resource.Error<List<Book>>(message = e.localizedMessage ?: "An Unexpected Error Occurred."))
-
     } catch (e: IOException) {
         emit(Resource.Error<List<Book>>(message = "Couldn't Read Server, Check Your Internet Connection."))
     }catch (e: Exception) {

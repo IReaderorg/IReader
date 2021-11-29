@@ -7,17 +7,19 @@ import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
 
-class GetReadingContentUseCase @Inject constructor(
+class GetRemoteReadingContentUseCase @Inject constructor(
     private val repository : Repository
 ) {
 
 
-    operator fun invoke(url : String, headers : Map<String,String>) = flow<Resource<String>> {
+    operator fun invoke(link : String) = flow<Resource<String>> {
         try {
             emit(Resource.Loading())
-            val elements = repository.remote.getElements(url = url, headers = headers)
-            val books = repository.remote.getReadingContent(elements)
-            emit(Resource.Success<String>(books))
+            val elements = repository.remote.getElements(url = link, headers = mutableMapOf(
+                Pair<String, String>("Referer", link)
+            ))
+            val readingContent = repository.remote.getReadingContent(elements)
+            emit(Resource.Success<String>(readingContent))
         } catch (e: HttpException) {
             emit(Resource.Error<String>(message = e.localizedMessage ?: "An Unexpected Error Occurred."))
 

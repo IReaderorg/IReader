@@ -68,7 +68,8 @@ class RealWebnovel : ParsedHttpSource() {
 
         eChaptersTitle.forEachIndexed { index, element ->
             chapters.add(Chapter(
-                bookName = element,
+                bookName = book.bookName,
+                title = element,
                 link = eChaptersUrl[index],
                 index = index,
             ))

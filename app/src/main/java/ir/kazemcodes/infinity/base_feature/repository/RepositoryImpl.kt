@@ -9,8 +9,9 @@ import ir.kazemcodes.infinity.library_feature.data.repository.LocalBookRepositor
 import ir.kazemcodes.infinity.library_feature.data.repository.LocalChapterRepositoryImpl
 import ir.kazemcodes.infinity.library_feature.domain.repository.LocalBookRepository
 import ir.kazemcodes.infinity.library_feature.domain.repository.LocalChapterRepository
+import javax.inject.Inject
 
-class RepositoryImpl(
+class RepositoryImpl @Inject constructor(
     private val api: ParsedHttpSource,
     private val bookDao: BookDao,
     private val chapterDao: ChapterDao

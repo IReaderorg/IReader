@@ -19,9 +19,7 @@ import ir.kazemcodes.infinity.library_feature.data.ChapterDao
 import ir.kazemcodes.infinity.library_feature.domain.use_case.GetLocalBookByNameUseCase
 import ir.kazemcodes.infinity.library_feature.domain.use_case.LocalUseCase
 import ir.kazemcodes.infinity.library_feature.domain.use_case.book.*
-import ir.kazemcodes.infinity.library_feature.domain.use_case.chapter.GetLocalChapterUseCase
-import ir.kazemcodes.infinity.library_feature.domain.use_case.chapter.GetLocalChaptersByBookNameUseCase
-import ir.kazemcodes.infinity.library_feature.domain.use_case.chapter.InsertLocalChapterUseCase
+import ir.kazemcodes.infinity.library_feature.domain.use_case.chapter.*
 import javax.inject.Singleton
 
 @Module
@@ -75,10 +73,12 @@ class AppModule {
             insertLocalBookUserCase = InsertLocalBookUserCase(repository),
             deleteLocalBookUseCase = DeleteLocalBookUseCase(repository),
             deleteAllLocalBooksUseCase = DeleteAllLocalBooksUseCase(repository),
-            insertLocalChapterUseCase = InsertLocalChapterUseCase(repository),
+            insertLocalChaptersUseCase = InsertLocalChaptersUseCase(repository),
             getLocalChaptersByBookNameByBookNameUseCase = GetLocalChaptersByBookNameUseCase(repository),
             getLocalChapterUseCase = GetLocalChapterUseCase(repository),
-            getLocalBookByNameUseCase = GetLocalBookByNameUseCase(repository)
+            getLocalBookByNameUseCase = GetLocalBookByNameUseCase(repository),
+            insertLocalChapterContentUseCase = InsertLocalChapterContentUseCase(repository),
+            getLocalChapterReadingContent = GetLocalChapterReadingContent(repository = repository)
         )
     }
     @Provides
@@ -88,8 +88,7 @@ class AppModule {
             getRemoteBookDetailUseCase = GetRemoteBookDetailUseCase(repository),
             getRemoteBooksUseCase= GetRemoteBooksUseCase(repository),
             getRemoteChaptersUseCase= GetRemoteChaptersUseCase(repository),
-            getRemoteChapterUseCase= GetRemoteChaptersUseCase(repository),
-            getReadingContentUseCase = GetReadingContentUseCase(repository)
+            getRemoteReadingContentUseCase = GetRemoteReadingContentUseCase(repository)
         )
     }
 

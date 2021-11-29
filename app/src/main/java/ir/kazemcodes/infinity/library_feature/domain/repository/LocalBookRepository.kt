@@ -7,16 +7,16 @@ interface LocalBookRepository {
 
     fun getBooks() : Flow<List<BookEntity>>
 
-    suspend fun getBookById(bookId : Int): BookEntity?
+    fun getBookById(bookId : Int): Flow<BookEntity?>
 
-    suspend fun getBookByName(bookName : String): BookEntity?
+    fun getBookByName(bookName : String): Flow<BookEntity?>
 
 
     suspend fun insertBook(bookEntity : BookEntity)
 
     suspend fun insertBooks(bookEntities : List<BookEntity>)
 
-    suspend fun deleteBook(bookId: Int)
+    suspend fun deleteBook(bookName: String)
 
     suspend fun deleteAllBook()
 

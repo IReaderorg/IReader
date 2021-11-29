@@ -16,6 +16,10 @@ private val DarkColorPalette = darkColors(
     surface = Colour.white_50,
     onBackground = Colour.white_50,
     onSurface = Colour.white_50,
+    error = Colour.red_600,
+    onError = Colour.black_900,
+
+
 )
 
 private val LightColorPalette = lightColors(
@@ -28,6 +32,8 @@ private val LightColorPalette = lightColors(
     surface = Colour.white_50,
     onBackground = Colour.black_900,
     onSurface = Colour.black_900,
+    error = Colour.red_600,
+    onError = Colour.white_50,
 )
 
 @Composable

@@ -6,9 +6,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import ir.kazemcodes.infinity.explore_feature.data.model.Book
 import ir.kazemcodes.infinity.presentation.screen.components.BookImageComposable
 
@@ -22,14 +23,20 @@ fun LinearBookItem(
 ) {
 
     Box(modifier = modifier
-        .padding(vertical = 8.dp, horizontal = 4.dp)
+        .padding(vertical = 8.dp, horizontal = 8.dp),
+        contentAlignment = Alignment.Center,
     ) {
         Row(modifier = Modifier
             .fillMaxWidth()
             .height(40.dp)){
             BookImageComposable(image = img_thumbnail, modifier = modifier.height(40.dp).width(40.dp))
             Spacer(modifier = Modifier.width(15.dp))
-            Text(text = title,  style = MaterialTheme.typography.body2 , color = MaterialTheme.colors.onBackground)
+            Text(
+                text = title,
+                style = MaterialTheme.typography.body2,
+                color = MaterialTheme.colors.onBackground,
+                textAlign = TextAlign.Center
+            )
         }
     }
 
@@ -38,7 +45,6 @@ fun LinearBookItem(
 @Composable
 fun LinearViewList(
     books: List<Book>,
-    navController: NavController,
     onClick: (index : Int) -> Unit
 ) {
 

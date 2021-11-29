@@ -10,10 +10,12 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 @JsonClass(generateAdapter = true)
 data class Chapter(
+    @Json(name = "bookName")
+    var bookName: String? = null,
     @Json(name = "link")
     var link: String,
     @Json(name = "title")
-    var bookName: String,
+    var title: String,
     @Json(name = "content")
     var content: String? =null,
     @Json(name = "index")
@@ -23,15 +25,22 @@ data class Chapter(
     @Json(name = "dataAdded")
     var dateAdded: String? = null,
 ) : Parcelable {
+    companion object {
+        fun create() : Chapter {
+            return Chapter(
+                link = "",title = ""
+            )
+        }
+    }
 
     fun toChapterEntity() : ChapterEntity {
         return ChapterEntity(
             bookName = bookName,
             index = index,
             link = link,
-            title = bookName,
+            title = title,
             content = content,
-            dateAdded = dateAdded
+            dateAdded = dateAdded,
         )
     }
 

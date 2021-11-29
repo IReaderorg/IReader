@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -15,24 +16,27 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import ir.kazemcodes.infinity.base_feature.util.Routes
+import androidx.navigation.compose.rememberNavController
+import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
+import ir.kazemcodes.infinity.base_feature.navigation.BookDetailKey
 import ir.kazemcodes.infinity.explore_feature.presentation.screen.components.LinearViewList
 
 
+@ExperimentalMaterialApi
 @Composable
 fun BrowseScreen(
     viewModel: BrowseViewModel = hiltViewModel(),
-    navController: NavController
+    navController : NavController = rememberNavController()
 ) {
+    val backstack = LocalBackstack.current
     val state = viewModel.state.value
     Box(
             modifier = Modifier.fillMaxSize()
         ) {
         val context = LocalContext.current
         if (state.books.isNotEmpty()) {
-        LinearViewList(books = state.books, navController , onClick = {index->
-            viewModel.insertTODataStore(context = context , book = state.books[index])
-            navController.navigate(Routes.BookDetailScreen)
+        LinearViewList(books = state.books , onClick = {index->
+            backstack.goTo(BookDetailKey(state.books[index]))
         })
         }
 

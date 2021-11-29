@@ -18,6 +18,7 @@ data class BookEntity(
     @PrimaryKey val bookId : Int? = null
 ) {
 
+
     fun toBook() : Book {
         return Book(
             link = link,
