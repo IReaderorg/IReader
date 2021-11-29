@@ -77,8 +77,8 @@ class AppModule {
             getLocalChaptersByBookNameByBookNameUseCase = GetLocalChaptersByBookNameUseCase(repository),
             getLocalChapterUseCase = GetLocalChapterUseCase(repository),
             getLocalBookByNameUseCase = GetLocalBookByNameUseCase(repository),
-            insertLocalChapterContentUseCase = InsertLocalChapterContentUseCase(repository),
-            getLocalChapterReadingContent = GetLocalChapterReadingContent(repository = repository)
+            UpdateLocalChapterContentUseCase = UpdateLocalChapterContentUseCase(repository),
+            getLocalChapterReadingContentUseCase = GetLocalChapterReadingContentUseCase(repository = repository)
         )
     }
     @Provides

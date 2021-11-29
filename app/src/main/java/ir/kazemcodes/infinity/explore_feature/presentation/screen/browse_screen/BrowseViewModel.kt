@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import ir.kazemcodes.infinity.base_feature.util.merge
 import ir.kazemcodes.infinity.core.Resource
 import ir.kazemcodes.infinity.explore_feature.data.model.Book
 import ir.kazemcodes.infinity.explore_feature.domain.repository.dataStore
@@ -20,6 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -31,36 +33,33 @@ class BrowseViewModel @Inject constructor(
 
     private val _state = mutableStateOf<BrowseScreenState>(BrowseScreenState())
     val state: State<BrowseScreenState> = _state
-
-
+    var currentPage = mutableStateOf(1)
     init {
         getBooks(
-            url = "https://readwebnovels.net/", headers = mutableMapOf(
-                Pair<String, String>("Referer", "https://readwebnovels.net/")
-            )
+            url = "https://readwebnovels.net/"
         )
-        //_state.value = BrowseScreenState(books = BookTest.booksTest)
     }
 
 
-    private fun getBooks(url: String, headers: Map<String, String>) {
-
-
-        remoteUseCase.getRemoteBooksUseCase(url, headers).onEach { result ->
-
+    fun getBooks(url: String) {
+        remoteUseCase.getRemoteBooksUseCase(url).onEach { result ->
+            Timber.d("getRemoteBooksUseCase is called")
             when (result) {
                 is Resource.Success -> {
-                    _state.value = BrowseScreenState(
-                        books = result.data ?: emptyList()
+                    _state.value = state.value.copy(
+                        books = merge(result.data ?: emptyList(), state.value.books),
+                        isLoading = false,
+                        error = ""
                     )
+                    currentPage.value++
                 }
                 is Resource.Error -> {
                     _state.value =
-                        BrowseScreenState(error = result.message ?: "An Unknown Error Occurred")
+                        state.value.copy(error = result.message ?: "An Unknown Error Occurred", isLoading = false)
                 }
                 is Resource.Loading -> {
 
-                    _state.value = BrowseScreenState(isLoading = true)
+                    _state.value = state.value.copy(isLoading = true, error = "")
                 }
             }
         }.launchIn(viewModelScope)

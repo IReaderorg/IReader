@@ -9,6 +9,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -38,10 +39,18 @@ fun ChapterDetailScreen(
                             .clickable {
                                 backStack.goTo(ReadingContentKey(book = book, chapter = chapters[index]))
                             },
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Spacer(modifier = modifier.width(8.dp))
-                        Text(text = chapters[index].title , color =  MaterialTheme.colors.onBackground)
+                        Text(
+                            text = chapters[index].title,
+                            color = MaterialTheme.colors.onBackground
+                        )
+                        Text(
+                            text = if (chapters[index].content != null) "Cached" else "",
+                            fontStyle = FontStyle.Italic,
+                            color = MaterialTheme.colors.onBackground
+                        )
                     }
                 }
 

@@ -2,14 +2,12 @@ package ir.kazemcodes.infinity.explore_feature.presentation.screen.reading_scree
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import ir.kazemcodes.infinity.core.Resource
 import ir.kazemcodes.infinity.explore_feature.data.model.Chapter
 import ir.kazemcodes.infinity.explore_feature.domain.use_case.RemoteUseCase
-import ir.kazemcodes.infinity.library_feature.domain.model.ChapterEntity
 import ir.kazemcodes.infinity.library_feature.domain.use_case.LocalUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
@@ -21,12 +19,11 @@ import javax.inject.Inject
 @HiltViewModel
 class ReadingScreenViewModel @Inject constructor(
     private val remoteUseCase: RemoteUseCase,
-    private val localUseCase: LocalUseCase,
-    savedStateHandle: SavedStateHandle
+    private val localUseCase: LocalUseCase
 ) : ViewModel() {
 
 
-    private val _state = mutableStateOf<ReadingScreenState>(ReadingScreenState())
+    private val _state = mutableStateOf(ReadingScreenState())
     val state: State<ReadingScreenState> = _state
 
 
@@ -38,7 +35,7 @@ class ReadingScreenViewModel @Inject constructor(
     }
 
     private fun getReadingContentLocally() {
-        localUseCase.getLocalChapterReadingContent(state.value.chapter).onEach { result ->
+        localUseCase.getLocalChapterReadingContentUseCase(state.value.chapter).onEach { result ->
             when (result) {
                 is Resource.Success -> {
                     if (result.data?.content != null) {
@@ -81,7 +78,8 @@ class ReadingScreenViewModel @Inject constructor(
                             error = ""
                         )
                     if (!state.value.chapter.content.isNullOrBlank()) {
-                        insertChapterContent(state.value.chapter.toChapterEntity())
+                        Timber.d("insertChapterContent Successfully Called")
+                        updateChapterContent(state.value.chapter)
                     }
                 }
                 is Resource.Error -> {
@@ -97,9 +95,10 @@ class ReadingScreenViewModel @Inject constructor(
 
     }
 
-    fun insertChapterContent(chapterEntity: ChapterEntity) {
+    private fun updateChapterContent(chapter: Chapter) {
         viewModelScope.launch(Dispatchers.IO) {
-            localUseCase.insertLocalChapterContentUseCase(chapterEntity)
+            localUseCase.UpdateLocalChapterContentUseCase(chapter)
         }
     }
+
 }

@@ -6,22 +6,29 @@ import ir.kazemcodes.infinity.explore_feature.data.model.Chapter
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
+import timber.log.Timber
 import javax.inject.Inject
 
-class GetLocalChapterReadingContent @Inject constructor(
+class GetLocalChapterReadingContentUseCase @Inject constructor(
     private val repository: Repository
 ) {
 
-    operator fun invoke(chapter:Chapter): Flow<Resource<Chapter>> =
+    operator fun invoke(chapter:Chapter): Flow<Resource<Chapter?>> =
         flow {
             try {
                 emit(Resource.Loading())
                 repository.localChapterRepository.getChapterByChapter(chapterTitle = chapter.title , bookName = chapter.bookName?:"")
                     .collect { chapter ->
-                        emit(Resource.Success<Chapter>(data = chapter.toChapter()))
+                        if (chapter!= null) {
+                            Timber.d("GetLocalChapterReadingContentUseCase $chapter")
+                            emit(Resource.Success<Chapter?>(data = chapter.toChapter()))
+                        } else {
+                            emit(Resource.Success<Chapter?>(data = null))
+                        }
+
                     }
             } catch (e: Exception) {
-                emit(Resource.Error<Chapter>(message = e.message.toString()))
+                emit(Resource.Error<Chapter?>(message = e.message.toString()))
             }
         }
 

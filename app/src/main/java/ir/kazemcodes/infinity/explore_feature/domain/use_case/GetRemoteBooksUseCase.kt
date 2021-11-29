@@ -17,10 +17,12 @@ class GetRemoteBooksUseCase @Inject constructor(
 
 
     @Throws(InvalidBookException::class)
-    operator fun invoke(url : String, headers : Map<String,String>) : Flow<Resource<List<Book>>> = flow {
+    operator fun invoke(url : String) : Flow<Resource<List<Book>>> = flow {
         try {
             emit(Resource.Loading())
-            val elements = repository.remote.getElements(url = url, headers = headers)
+            val elements = repository.remote.getElements(url = url, headers = mutableMapOf(
+                Pair<String, String>("Referer", "https://readwebnovels.net/")
+            ))
             val books = repository.remote.getBooks(elements)
             emit(Resource.Success<List<Book>>(books))
         } catch (e: HttpException) {

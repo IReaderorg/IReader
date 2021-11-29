@@ -1,8 +1,11 @@
 package ir.kazemcodes.infinity.explore_feature.presentation.screen.reading_screen
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
-import androidx.compose.foundation.*
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,10 +25,10 @@ import ir.kazemcodes.infinity.explore_feature.presentation.screen.reading_screen
 @ExperimentalMaterialApi
 @Composable
 fun ReadingScreen(
+    modifier: Modifier = Modifier,
     book: Book = Book.create(),
     chapter: Chapter = Chapter.create(),
     viewModel: ReadingScreenViewModel = hiltViewModel(),
-    modifier: Modifier = Modifier
 ) {
 
     val state = viewModel.state.value
@@ -38,13 +41,11 @@ fun ReadingScreen(
     var font by remember {
         mutableStateOf(poppins)
     }
-
-
     Box(modifier = modifier.fillMaxSize()) {
         Scaffold(
             topBar = {
                 if (!readMode) {
-                    TopAppBar(
+                    TopAppBar(backgroundColor = MaterialTheme.colors.background.copy(.8f),
                         title = { Text(text = book.bookName) }
                     )
                 }
@@ -55,9 +56,8 @@ fun ReadingScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(100.dp)
-                            .background(MaterialTheme.colors.background)
-                            //.shadow(2.dp)
-                            .border(1.dp, color = MaterialTheme.colors.onBackground.copy(.4f))
+                            .border(1.dp, color = MaterialTheme.colors.onBackground.copy(.4f)),
+                        backgroundColor = MaterialTheme.colors.background.copy(.8f)
                     ) {
                         Column(
                             modifier = modifier
@@ -82,7 +82,6 @@ fun ReadingScreen(
                 }
 
 
-
             }
         ) {
             Box(
@@ -98,7 +97,11 @@ fun ReadingScreen(
                     viewModel.getReadingContent(chapter.copy(bookName = book.bookName))
                 }
                 if (!state.chapter.content.isNullOrBlank()) {
-                    Text(text = state.chapter.content?:"", fontSize = fontSize.sp, fontFamily = font)
+                    Text(
+                        text = state.chapter.content ?: "",
+                        fontSize = fontSize.sp,
+                        fontFamily = font
+                    )
                 }
                 if (state.error.isNotBlank()) {
                     Text(

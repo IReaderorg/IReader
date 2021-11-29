@@ -12,14 +12,14 @@ class LocalChapterRepositoryImpl @Inject constructor(private val dao: ChapterDao
         return dao.insertChapters(chapterEntities = chapterEntity)
     }
 
-    override suspend fun insertChapter(chapterEntity: ChapterEntity) {
-        return dao.insertChapter(chapterEntities = chapterEntity)
+    override suspend fun updateChapter(readingContent : String , bookName: String , chapterTitle: String) {
+        return dao.updateChapter(readingContent = readingContent , bookName = bookName ,chapterTitle = chapterTitle )
     }
 
     override  fun getChapterByName(bookName : String): Flow<List<ChapterEntity>> {
         return dao.getChapters(bookName)
     }
-    override  fun getChapterByChapter(chapterTitle : String, bookName: String): Flow<ChapterEntity> {
+    override  fun getChapterByChapter(chapterTitle : String, bookName: String): Flow<ChapterEntity?> {
         return dao.getChapterByChapter(chapterTitle , bookName )
     }
 
