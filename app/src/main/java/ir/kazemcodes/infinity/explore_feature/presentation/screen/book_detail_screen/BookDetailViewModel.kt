@@ -1,9 +1,7 @@
 package ir.kazemcodes.infinity.explore_feature.presentation.screen.book_detail_screen
 
-import android.app.Application
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,8 +21,6 @@ import javax.inject.Inject
 class BookDetailViewModel @Inject constructor(
     private val localUseCase: LocalUseCase,
     private val remoteUseCase: RemoteUseCase,
-    savedStateHandle: SavedStateHandle,
-    application: Application
 ) : ViewModel() {
 
 

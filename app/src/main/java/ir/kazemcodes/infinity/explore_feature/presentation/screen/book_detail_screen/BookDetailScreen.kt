@@ -2,7 +2,6 @@ package ir.kazemcodes.infinity.explore_feature.presentation.screen.book_detail_s
 
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -12,22 +11,18 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import ir.kazemcodes.infinity.base_feature.theme.InfinityTheme
 import ir.kazemcodes.infinity.explore_feature.data.model.Book
 import ir.kazemcodes.infinity.explore_feature.presentation.screen.book_detail_screen.components.BookDetailChapterInfoComposable
 import ir.kazemcodes.infinity.explore_feature.presentation.screen.book_detail_screen.components.BookDetailToggleButtonsComposable
 import ir.kazemcodes.infinity.explore_feature.presentation.screen.book_detail_screen.components.BookImageInfoComposable
 import ir.kazemcodes.infinity.presentation.screen.components.ExpandableCardComposable
-import kotlinx.coroutines.CoroutineScope
 
 
 @ExperimentalMaterialApi
@@ -36,9 +31,6 @@ fun BookDetailScreen(
     book: Book = Book.create(),
     modifier: Modifier = Modifier,
     viewModel: BookDetailViewModel = hiltViewModel(),
-    scrollState: ScrollState = rememberScrollState(),
-    navController: NavController = rememberNavController(),
-    coroutineScope: CoroutineScope = rememberCoroutineScope()
 ) {
     LaunchedEffect(key1 = true) {
         viewModel.getBookData(book = book)
