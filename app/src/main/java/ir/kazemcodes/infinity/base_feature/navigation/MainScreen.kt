@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ir.kazemcodes.infinity.explore_feature.presentation.screen.browse_screen.BrowseScreen
 import ir.kazemcodes.infinity.library_feature.presentation.screen.library_screen.LibraryScreen
-import ir.kazemcodes.infinity.presentation.screen.setting_screen.SettingScreen
+import ir.kazemcodes.infinity.setting_feature.presentation.SettingScreen
 
 
 sealed class BottomNavigationScreens(

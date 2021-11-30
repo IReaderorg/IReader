@@ -15,19 +15,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ir.kazemcodes.infinity.base_feature.theme.poppins
 import ir.kazemcodes.infinity.base_feature.theme.sourceSansPro
+import ir.kazemcodes.infinity.explore_feature.presentation.screen.reading_screen.ReadingScreenViewModel
 
 
 @ExperimentalMaterialApi
 @Composable
 fun FontMenuComposable(
     modifier: Modifier = Modifier,
-    onClick : (selectedFont : FontFamily , fontName : String) -> Unit
+    onClick : (selectedFont : FontFamily , fontName : String) -> Unit,
+    viewModel : ReadingScreenViewModel
 ) {
-    var selectedFontName by remember { mutableStateOf("Poppins") }
     var expanded by remember { mutableStateOf(false) }
-    var selectedFont by remember { mutableStateOf(poppins) }
-
-
 
     Row(
         modifier = modifier.fillMaxWidth().padding(end = 28.dp),
@@ -45,28 +43,23 @@ fun FontMenuComposable(
             modifier = modifier
                 .fillMaxWidth(.8f)
                 .clickable {
-                    onClick(selectedFont, selectedFontName)
                     expanded = !expanded
                 }
                 .border(.8.dp, color = MaterialTheme.colors.onBackground.copy(.5f))
                 .padding(8.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text(text = selectedFontName)
+            Text(text = viewModel.convertFontIntoString(viewModel.fontState.value))
             DropdownMenu(expanded = expanded, onDismissRequest = {expanded = false},) {
                 DropdownMenuItem(onClick = {
-                    selectedFont = poppins
-                    selectedFontName = "Poppins"
-                    onClick(selectedFont , selectedFontName)
+                    viewModel.setFont(poppins)
                 }) {
-                    Text(text = "Poppins")
+                    Text(text = "Poppins", color = MaterialTheme.colors.onBackground)
                 }
                 DropdownMenuItem(onClick = {
-                    selectedFont  = sourceSansPro
-                    selectedFontName = "Source Sans Pro"
-                    onClick(selectedFont , selectedFontName)
+                    viewModel.setFont(sourceSansPro)
                 }) {
-                    Text(text = "Source Sans Pro")
+                    Text(text = "Source Sans Pro", color = MaterialTheme.colors.onBackground)
                 }
             }
         }

@@ -17,6 +17,7 @@
         <item name="colorOnSurface">@color/black_900</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
+        <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
         <!-- Customize your theme here. -->
     </style>
 

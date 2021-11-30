@@ -10,13 +10,13 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ir.kazemcodes.infinity.base_feature.theme.InfinityTheme
-import ir.kazemcodes.infinity.base_feature.theme.poppins
 import ir.kazemcodes.infinity.explore_feature.data.model.Book
 import ir.kazemcodes.infinity.explore_feature.data.model.Chapter
 import ir.kazemcodes.infinity.explore_feature.presentation.screen.reading_screen.components.FontMenuComposable
@@ -31,16 +31,13 @@ fun ReadingScreen(
     viewModel: ReadingScreenViewModel = hiltViewModel(),
 ) {
 
+    val context = LocalContext.current
     val state = viewModel.state.value
     var readMode by remember {
         mutableStateOf(true)
     }
-    var fontSize by remember {
-        mutableStateOf(18)
-    }
-    var font by remember {
-        mutableStateOf(poppins)
-    }
+
+
     Box(modifier = modifier.fillMaxSize()) {
         Scaffold(
             topBar = {
@@ -65,15 +62,20 @@ fun ReadingScreen(
                                 .padding(8.dp),
                         ) {
                             FontSizeChangerComposable(
-                                onFontDecease = { fontSize-- },
-                                ontFontIncrease = { fontSize++ },
-                                fontSize = fontSize
+                                onFontDecease = {
+                                    viewModel.decreaseFontSize()
+                                },
+                                ontFontIncrease = {
+                                    viewModel.increaseFontsSize()
+                                },
+                                fontSize = viewModel.fontSize.value
                             )
                             Spacer(modifier = Modifier.height(12.dp))
                             FontMenuComposable(
-                                onClick = { selectedFont, selectedFontName ->
-                                    font = selectedFont
-                                }
+                                onClick = { selectedFont, fds ->
+                                    viewModel.setFont(selectedFont)
+                                },
+                                viewModel = viewModel
                             )
 
 
@@ -95,12 +97,13 @@ fun ReadingScreen(
 //
                 LaunchedEffect(key1 = true) {
                     viewModel.getReadingContent(chapter.copy(bookName = book.bookName))
+                    viewModel.readFromDatastore()
                 }
                 if (!state.chapter.content.isNullOrBlank()) {
                     Text(
                         text = state.chapter.content ?: "",
-                        fontSize = fontSize.sp,
-                        fontFamily = font
+                        fontSize = viewModel.fontSize.value.sp,
+                        fontFamily = viewModel.fontState.value
                     )
                 }
                 if (state.error.isNotBlank()) {

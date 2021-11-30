@@ -4,7 +4,6 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
-import ir.kazemcodes.infinity.base_feature.theme.InfinityTheme
 import ir.kazemcodes.infinity.explore_feature.data.model.Book
 import ir.kazemcodes.infinity.explore_feature.data.model.Chapter
 import ir.kazemcodes.infinity.explore_feature.presentation.screen.book_detail_screen.BookDetailScreen
@@ -22,10 +21,10 @@ data class MainScreenKey(val noArgument: String = "") : ComposeKey() {
     @ExperimentalMaterialApi
     @Composable
     override fun ScreenComposable(modifier: Modifier) {
-        InfinityTheme() {
+
         MainScreen()
 
-        }
+
     }
 
 }
@@ -36,11 +35,7 @@ data class BookDetailKey(val book: Book) : ComposeKey() {
     @ExperimentalMaterialApi
     @Composable
     override fun ScreenComposable(modifier: Modifier) {
-
-        InfinityTheme() {
-
         BookDetailScreen(book)
-        }
     }
 }
 @Immutable
@@ -49,10 +44,8 @@ data class WebViewKey(val url: String) : ComposeKey() {
     @ExperimentalMaterialApi
     @Composable
     override fun ScreenComposable(modifier: Modifier) {
-        InfinityTheme() {
-
         WebPageScreen(url)
-        }
+
     }
 }
 @Immutable
@@ -61,10 +54,7 @@ data class ChapterDetailKey(val book: Book,val chapters: List<Chapter>) : Compos
     @ExperimentalMaterialApi
     @Composable
     override fun ScreenComposable(modifier: Modifier) {
-        InfinityTheme() {
         ChapterDetailScreen(chapters = chapters , book = book)
-
-        }
     }
 }
 @Immutable
@@ -73,9 +63,6 @@ data class ReadingContentKey(val book: Book, val chapter: Chapter) : ComposeKey(
     @ExperimentalMaterialApi
     @Composable
     override fun ScreenComposable(modifier: Modifier) {
-        InfinityTheme() {
         ReadingScreen(book = book, chapter = chapter)
-
-        }
     }
 }

@@ -5,5 +5,7 @@ object Constants {
     const val PARAM_BOOK_NAME = "PARAM_BOOK_NAME"
     const val PARAM_CHAPTERS_DETAIL = "chaptersDetail"
 
-    const val TEMP_BOOK = "TEMP_BOOK"
+    const val TEMP_SAVED_SETTING = "TEMP_SAVED_SETTING"
+    const val SAVED_FONT_SIZE_PREFERENCES = "SAVED_FONT_SIZE_PREFERENCES"
+    const val SAVED_FONT_PREFERENCES = "SAVED_FONT_PREFERENCES"
 }

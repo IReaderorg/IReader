@@ -23,7 +23,11 @@ class LibraryViewModel @Inject constructor(
 
     init {
         getLocalBooks()
-
+//        val request = GET("https://www.google.com/",headers =  Headers.Builder().apply {
+//            add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0 ")
+//            add("Referer", "https://www.google.com/")
+//        }.build(), )
+//        Timber.d("GET REQUEST " + request.)
     }
 
 

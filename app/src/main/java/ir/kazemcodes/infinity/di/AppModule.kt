@@ -99,14 +99,7 @@ class AppModule {
 
     }
 
-//    @Provides
-//    @Singleton
-//    fun providesRetrofit(): Retrofit {
-//        return Retrofit.Builder()
-//            .addConverterFactory(MoshiConverterFactory.create())
-//            .build()
-//            .create()
-//    }
+
 
 //    @Provides
 //    @Singleton

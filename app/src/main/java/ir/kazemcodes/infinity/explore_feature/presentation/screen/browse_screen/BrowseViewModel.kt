@@ -1,20 +1,13 @@
 package ir.kazemcodes.infinity.explore_feature.presentation.screen.browse_screen
 
-import android.content.Context
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import ir.kazemcodes.infinity.base_feature.util.merge
 import ir.kazemcodes.infinity.core.Resource
-import ir.kazemcodes.infinity.explore_feature.data.model.Book
-import ir.kazemcodes.infinity.explore_feature.domain.repository.dataStore
-import ir.kazemcodes.infinity.explore_feature.domain.repository.moshi
 import ir.kazemcodes.infinity.explore_feature.domain.use_case.RemoteUseCase
-import ir.kazemcodes.infinity.explore_feature.presentation.screen.book_detail_screen.Constants.TEMP_BOOK
 import ir.kazemcodes.infinity.library_feature.domain.model.BookEntity
 import ir.kazemcodes.infinity.library_feature.domain.use_case.LocalUseCase
 import kotlinx.coroutines.Dispatchers
@@ -47,7 +40,7 @@ class BrowseViewModel @Inject constructor(
             when (result) {
                 is Resource.Success -> {
                     _state.value = state.value.copy(
-                        books = merge(result.data ?: emptyList(), state.value.books),
+                        books = merge(state.value.books , result.data ?: emptyList() ),
                         isLoading = false,
                         error = ""
                     )
@@ -69,14 +62,6 @@ class BrowseViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             localUseCase.insertLocalBookUserCase(bookEntity)
 
-        }
-    }
-    fun insertTODataStore(context : Context , book: Book) {
-            val jsonBook = moshi.adapter(Book::class.java).toJson(book)
-        viewModelScope.launch(Dispatchers.IO) {
-            context.dataStore.edit { shared ->
-                shared[stringPreferencesKey(TEMP_BOOK)] = jsonBook
-            }
         }
     }
 
