@@ -1,4 +1,4 @@
-# InfinityReader
+# InfiniteBook
 
 InfiniteBook is a free and open source applicaiton for Android.
 
