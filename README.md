@@ -1,6 +1,6 @@
 # InfinityReader
 
-Infinity Reader is a free and open source applicaiton for Android.
+InfiniteBook is a free and open source applicaiton for Android.
 
 ## License
 
