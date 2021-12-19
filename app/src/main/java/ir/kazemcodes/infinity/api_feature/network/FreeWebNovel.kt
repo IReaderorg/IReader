@@ -86,7 +86,7 @@ class FreeWebNovel : ParsedHttpSource() {
 
 
     override fun pageContentParse(document: Document): String {
-        return document.select(".txt p").eachText().joinToString("\n\n\n")
+        return document.select("div.txt h4,p").eachText().joinToString("\n\n\n")
     }
 
 

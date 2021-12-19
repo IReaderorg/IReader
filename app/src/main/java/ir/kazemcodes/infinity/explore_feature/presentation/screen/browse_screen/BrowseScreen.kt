@@ -17,6 +17,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
+import ir.kazemcodes.infinity.api_feature.network.InfinityInstance
 import ir.kazemcodes.infinity.api_feature.network.ParsedHttpSource
 import ir.kazemcodes.infinity.base_feature.navigation.BookDetailKey
 import ir.kazemcodes.infinity.base_feature.navigation.WebViewKey
@@ -32,6 +33,7 @@ fun BrowserScreen(
     val backstack = LocalBackstack.current
     val state = viewModel.state.value
     val backStack = LocalBackstack.current
+    InfinityInstance.inDetailScreen = false
 
     LaunchedEffect(key1 = true) {
         viewModel.cleanState()

@@ -1,5 +1,6 @@
 package ir.kazemcodes.infinity.explore_feature.domain.use_case
 
+import ir.kazemcodes.infinity.api_feature.network.InfinityInstance
 import ir.kazemcodes.infinity.api_feature.network.ParsedHttpSource
 import ir.kazemcodes.infinity.core.Resource
 import ir.kazemcodes.infinity.explore_feature.data.model.Book
@@ -23,7 +24,7 @@ class GetRemoteChaptersUseCase {
                 val chapters = mutableListOf<Chapter>()
                 var hasNext = true
                var page : Int = 1
-                while (hasNext){
+                while (hasNext && InfinityInstance.inDetailScreen){
                     val req = source.chapterListRequest(book,page)
                     val res = source.client.newCall(req).await()
                     val content = source.chapterListParse(res)

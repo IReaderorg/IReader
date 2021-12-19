@@ -4,7 +4,7 @@ import ir.kazemcodes.infinity.api_feature.data.BookPage
 import ir.kazemcodes.infinity.api_feature.data.ChapterPage
 import ir.kazemcodes.infinity.api_feature.network.GET
 import ir.kazemcodes.infinity.api_feature.network.NetworkHelper
-import ir.kazemcodes.infinity.api_feature.network.NetworkHelperInstance
+import ir.kazemcodes.infinity.api_feature.network.InfinityInstance
 import ir.kazemcodes.infinity.explore_feature.data.model.Book
 import ir.kazemcodes.infinity.explore_feature.data.model.Chapter
 import okhttp3.Headers
@@ -24,7 +24,7 @@ import java.security.MessageDigest
 abstract class HttpSource : Source {
 
 
-    protected val network: NetworkHelper = NetworkHelperInstance.networkHelper
+    protected val network: NetworkHelper = InfinityInstance.networkHelper
 
     /**
      * Base url of the website without the trailing slash, like: http://mysite.com

@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import ir.kazemcodes.infinity.api_feature.network.FreeWebNovel
+import ir.kazemcodes.infinity.api_feature.network.InfinityInstance
 import ir.kazemcodes.infinity.api_feature.network.ParsedHttpSource
 import ir.kazemcodes.infinity.core.Resource
 import ir.kazemcodes.infinity.explore_feature.data.model.Book
@@ -50,9 +51,11 @@ class BookDetailViewModel @Inject constructor(
 
 
     fun getBookData(book: Book) {
+        _detailState.value = DetailState(book = book,error = "",loaded = false,isLoading = false)
+        _chapterState.value = ChapterState(chapters = emptyList(), loaded = false,isLoading = false,error = "")
+        InfinityInstance.inDetailScreen = true
         getLocalBookByName()
         getLocalChaptersByBookName()
-        _detailState.value = detailState.value.copy(book = book)
     }
 
     fun clearStates() {
