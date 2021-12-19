@@ -36,7 +36,7 @@ class BrowseViewModel @Inject constructor(
         currentPage.value = 1
     }
     fun getBooks(source: ParsedHttpSource) {
-        remoteUseCase.getRemoteBooksUseCase(page = state.value.page, source = source).onEach { result ->
+        remoteUseCase.getRemoteBooksUseCase(page =  currentPage.value, source = source).onEach { result ->
             Timber.d("TAG getRemoteBooksUseCase is called")
             when (result) {
                 is Resource.Success -> {

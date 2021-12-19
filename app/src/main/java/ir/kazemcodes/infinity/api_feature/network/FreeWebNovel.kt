@@ -61,11 +61,11 @@ class FreeWebNovel : ParsedHttpSource() {
         return book
     }
 
-    override fun hasNextSelector() = "div.page a:nth-child(4)"
+    override fun hasNextChapterSelector() = "div.page a:nth-child(4)"
 
-    override fun hasNextParse(document: Document): Boolean {
+    override fun hasNextChaptersParse(document: Document): Boolean {
 
-        val res = document.select(hasNextSelector()).text()
+        val res = document.select(hasNextChapterSelector()).text()
 
         return res.contains("Next")
     }

@@ -95,7 +95,7 @@ abstract class ParsedHttpSource : HttpSource() {
     override fun chapterListParse(response: Response): ChapterPage {
         val document = response.asJsoup()
         val chapters =  document.select(chapterListSelector()).map { chapterFromElement(it) }
-        val hasNext = hasNextParse(document)
+        val hasNext = hasNextChaptersParse(document)
 
         return ChapterPage(chapters, hasNext)
     }

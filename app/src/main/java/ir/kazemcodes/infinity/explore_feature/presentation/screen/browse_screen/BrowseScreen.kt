@@ -22,6 +22,7 @@ import ir.kazemcodes.infinity.api_feature.network.ParsedHttpSource
 import ir.kazemcodes.infinity.base_feature.navigation.BookDetailKey
 import ir.kazemcodes.infinity.base_feature.navigation.WebViewKey
 import ir.kazemcodes.infinity.explore_feature.presentation.screen.components.LinearViewList
+import timber.log.Timber
 
 
 @Composable
@@ -36,7 +37,10 @@ fun BrowserScreen(
     InfinityInstance.inDetailScreen = false
 
     LaunchedEffect(key1 = true) {
-        viewModel.cleanState()
+        if (api != viewModel.state.value.api) {
+
+            viewModel.cleanState()
+        }
         viewModel.changeApi(api = api)
         viewModel.getBooks(source = api)
     }
@@ -63,16 +67,16 @@ fun BrowserScreen(
             if (state.books.isNotEmpty()) {
                 LinearViewList(books = state.books, onClick = { index ->
                     backstack.goTo(BookDetailKey(state.books[index], api = api))
-                } , scrollState = scrollState)
+                }, scrollState = scrollState)
 
             }
 
-//            if (scrollState.layoutInfo.visibleItemsInfo.lastOrNull()?.index == scrollState.layoutInfo.totalItemsCount - 1) {
-//                Timber.d("Scroll state reach the bottom")
-//                LaunchedEffect(key1 = true ) {
-//                    viewModel.getBooks(api.nextPageLinkFormat.replace(oldValue = "{page}", newValue = viewModel.currentPage.value.toString()),api)
-//                }
-//            }
+            if (scrollState.layoutInfo.visibleItemsInfo.lastOrNull()?.index == scrollState.layoutInfo.totalItemsCount - 1) {
+                Timber.d("Scroll state reach the bottom")
+                LaunchedEffect(key1 = true) {
+                    viewModel.getBooks(api)
+                }
+            }
             if (state.error.isNotBlank()) {
                 Text(
                     text = state.error,

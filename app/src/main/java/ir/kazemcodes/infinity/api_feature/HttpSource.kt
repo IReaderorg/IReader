@@ -3,8 +3,8 @@ package ir.kazemcodes.infinity.api_feature
 import ir.kazemcodes.infinity.api_feature.data.BookPage
 import ir.kazemcodes.infinity.api_feature.data.ChapterPage
 import ir.kazemcodes.infinity.api_feature.network.GET
-import ir.kazemcodes.infinity.api_feature.network.NetworkHelper
 import ir.kazemcodes.infinity.api_feature.network.InfinityInstance
+import ir.kazemcodes.infinity.api_feature.network.NetworkHelper
 import ir.kazemcodes.infinity.explore_feature.data.model.Book
 import ir.kazemcodes.infinity.explore_feature.data.model.Chapter
 import okhttp3.Headers
@@ -146,9 +146,9 @@ abstract class HttpSource : Source {
     abstract fun chapterListRequest(Book: Book,page: Int): Request
 
 
-    abstract fun hasNextSelector() : String
+    abstract fun hasNextChapterSelector() : String
 
-    abstract fun hasNextParse(document: Document) : Boolean
+    abstract fun hasNextChaptersParse(document: Document) : Boolean
 
 
     /**

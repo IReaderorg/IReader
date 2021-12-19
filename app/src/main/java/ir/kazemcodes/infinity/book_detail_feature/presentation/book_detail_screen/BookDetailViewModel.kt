@@ -18,7 +18,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -26,11 +25,6 @@ class BookDetailViewModel @Inject constructor(
         private val localUseCase: LocalUseCase,
         private val remoteUseCase: RemoteUseCase
 ) : ViewModel() {
-
-
-    init {
-        Timber.d("Timber: Init")
-    }
     private val _detailState = mutableStateOf<DetailState>(DetailState())
     val detailState: State<DetailState> = _detailState
 
