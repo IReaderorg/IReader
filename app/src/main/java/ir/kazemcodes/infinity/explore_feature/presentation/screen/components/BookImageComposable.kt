@@ -15,13 +15,12 @@ import androidx.compose.ui.unit.dp
 import com.skydoves.landscapist.coil.CoilImage
 
 @Composable
-fun BookImageComposable(image : Any, modifier: Modifier = Modifier) {
+fun BookImageComposable(image : Any, modifier: Modifier = Modifier, alignment: Alignment = Alignment.Center,contentScale : ContentScale = ContentScale.Crop) {
         CoilImage(
             image,
             contentDescription = "Book Cover",
-            modifier = modifier
-                .fillMaxSize(),
-            contentScale = ContentScale.Fit,
+            modifier = modifier,
+            contentScale = contentScale,
             loading = {
                 Box(contentAlignment = Alignment.Center) {
                     CircularProgressIndicator(modifier = modifier.size(4.dp))

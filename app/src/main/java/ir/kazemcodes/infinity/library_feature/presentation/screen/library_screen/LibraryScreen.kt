@@ -16,6 +16,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import ir.kazemcodes.infinity.base_feature.navigation.BookDetailKey
 import ir.kazemcodes.infinity.explore_feature.presentation.screen.components.LinearViewList
+import ir.kazemcodes.infinity.library_feature.util.mappingApiNameToAPi
 
 @Composable
 fun LibraryScreen(
@@ -31,7 +32,7 @@ fun LibraryScreen(
     ) {
         if (state.books.isNotEmpty()) {
             LinearViewList(books = state.books , onClick = { index->
-                backStack.goTo(BookDetailKey(state.books[index]))
+                backStack.goTo(BookDetailKey(state.books[index], api = mappingApiNameToAPi(state.books[index].source?:"")))
             })
         }
 

@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ir.kazemcodes.infinity.explore_feature.presentation.screen.browse_screen.BrowseScreen
+import ir.kazemcodes.infinity.extension_feature.presentation.extension_screen.ExtensionScreen
 import ir.kazemcodes.infinity.library_feature.presentation.screen.library_screen.LibraryScreen
 import ir.kazemcodes.infinity.setting_feature.presentation.SettingScreen
 
@@ -29,7 +29,7 @@ sealed class BottomNavigationScreens(
             icon = Icons.Default.Book
         )
 
-    object Browse : BottomNavigationScreens(
+    object ExtensionScreen : BottomNavigationScreens(
         1,
         "Explore",
         Icons.Default.Explore
@@ -48,7 +48,7 @@ fun MainScreen(modifier : Modifier = Modifier) {
     var currentIndex by remember { mutableStateOf(0) }
     val bottomNavigationItems = listOf(
         BottomNavigationScreens.Library,
-        BottomNavigationScreens.Browse,
+        BottomNavigationScreens.ExtensionScreen,
         BottomNavigationScreens.Setting
     )
 
@@ -84,7 +84,7 @@ fun MainScreen(modifier : Modifier = Modifier) {
         if (currentIndex == 0) {
             LibraryScreen()
         } else if (currentIndex == 1) {
-            BrowseScreen()
+            ExtensionScreen()
         } else if (currentIndex == 2) {
             SettingScreen()
         }

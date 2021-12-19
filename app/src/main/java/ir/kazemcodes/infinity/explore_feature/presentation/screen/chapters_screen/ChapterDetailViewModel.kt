@@ -8,8 +8,8 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import ir.kazemcodes.infinity.core.Resource
 import ir.kazemcodes.infinity.explore_feature.data.model.Chapter
-import ir.kazemcodes.infinity.explore_feature.presentation.screen.book_detail_screen.Constants
-import ir.kazemcodes.infinity.library_feature.domain.use_case.chapter.GetLocalChaptersByBookNameUseCase
+import ir.kazemcodes.infinity.book_detail_feature.presentation.book_detail_screen.Constants
+import ir.kazemcodes.infinity.local_feature.domain.use_case.chapter.GetLocalChaptersByBookNameUseCase
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject

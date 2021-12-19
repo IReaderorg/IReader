@@ -3,6 +3,9 @@ buildscript {
     ext {
         compose_version = '1.0.5'
         kotlin_version = '1.5.31'
+        okhttp_version = '4.9.1'
+        moshi_version = '1.12.0'
+        lifecycle_version = "2.4.0"
     }
     repositories {
         google()
@@ -10,7 +13,7 @@ buildscript {
         maven { url "https://jitpack.io" }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.0.3'
+        classpath 'com.android.tools.build:gradle:7.0.4'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "com.google.dagger:hilt-android-gradle-plugin:2.39.1"
         classpath 'com.google.gms:google-services:4.3.3'

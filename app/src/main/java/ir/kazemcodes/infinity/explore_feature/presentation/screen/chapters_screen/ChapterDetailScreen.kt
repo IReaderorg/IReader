@@ -14,9 +14,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
+import ir.kazemcodes.infinity.api_feature.HttpSource
 import ir.kazemcodes.infinity.base_feature.navigation.ReadingContentKey
 import ir.kazemcodes.infinity.explore_feature.data.model.Book
 import ir.kazemcodes.infinity.explore_feature.data.model.Chapter
+import timber.log.Timber
 
 
 @Composable
@@ -24,10 +26,12 @@ fun ChapterDetailScreen(
     modifier: Modifier = Modifier,
     viewModel: ChapterDetailViewModel = hiltViewModel(),
     chapters : List<Chapter>,
-    book:Book
+    book:Book,
+    api:HttpSource
 ) {
     val backStack = LocalBackstack.current
     Box(modifier = modifier.fillMaxSize()) {
+        Timber.d("TAG Chapters: " + chapters)
         if (chapters.isNotEmpty()) {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(count = chapters.size) { index ->
@@ -37,7 +41,7 @@ fun ChapterDetailScreen(
                             .padding(12.dp)
                             .height(40.dp)
                             .clickable {
-                                backStack.goTo(ReadingContentKey(book = book, chapter = chapters[index]))
+                                backStack.goTo(ReadingContentKey(book = book, chapter = chapters[index], api = api))
                             },
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween

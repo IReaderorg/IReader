@@ -1,26 +1,25 @@
 package ir.kazemcodes.infinity.explore_feature.presentation.screen.reading_screen
 
-import android.content.res.Configuration.UI_MODE_NIGHT_YES
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import ir.kazemcodes.infinity.base_feature.theme.InfinityTheme
+import ir.kazemcodes.infinity.api_feature.HttpSource
+import ir.kazemcodes.infinity.book_detail_feature.presentation.book_detail_screen.DEFAULT.MAX_BRIGHTNESS
+import ir.kazemcodes.infinity.book_detail_feature.presentation.book_detail_screen.DEFAULT.MIN_BRIGHTNESS
 import ir.kazemcodes.infinity.explore_feature.data.model.Book
 import ir.kazemcodes.infinity.explore_feature.data.model.Chapter
 import ir.kazemcodes.infinity.explore_feature.presentation.screen.reading_screen.components.FontMenuComposable
 import ir.kazemcodes.infinity.explore_feature.presentation.screen.reading_screen.components.FontSizeChangerComposable
+import kotlin.math.abs
+
 
 @ExperimentalMaterialApi
 @Composable
@@ -29,20 +28,20 @@ fun ReadingScreen(
     book: Book = Book.create(),
     chapter: Chapter = Chapter.create(),
     viewModel: ReadingScreenViewModel = hiltViewModel(),
+    api:HttpSource
 ) {
-
-    val context = LocalContext.current
+    
     val state = viewModel.state.value
     var readMode by remember {
         mutableStateOf(true)
     }
-
-
     Box(modifier = modifier.fillMaxSize()) {
+
         Scaffold(
             topBar = {
                 if (!readMode) {
-                    TopAppBar(backgroundColor = MaterialTheme.colors.background.copy(.8f),
+                    TopAppBar(backgroundColor = MaterialTheme.colors.background,
+                        modifier = modifier.border(1.dp, color = MaterialTheme.colors.onBackground.copy(.4f)),
                         title = { Text(text = book.bookName) }
                     )
                 }
@@ -52,15 +51,21 @@ fun ReadingScreen(
                     BottomAppBar(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(100.dp)
+                            .height(150.dp)
                             .border(1.dp, color = MaterialTheme.colors.onBackground.copy(.4f)),
-                        backgroundColor = MaterialTheme.colors.background.copy(.8f)
+                        backgroundColor = MaterialTheme.colors.background
                     ) {
                         Column(
                             modifier = modifier
                                 .fillMaxSize()
                                 .padding(8.dp),
                         ) {
+                            Slider(
+                                viewModel.brightness.value, { viewModel.changeBrightness(it) },
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                valueRange = MIN_BRIGHTNESS..MAX_BRIGHTNESS
+                            )
                             FontSizeChangerComposable(
                                 onFontDecease = {
                                     viewModel.decreaseFontSize()
@@ -72,7 +77,7 @@ fun ReadingScreen(
                             )
                             Spacer(modifier = Modifier.height(12.dp))
                             FontMenuComposable(
-                                onClick = { selectedFont, fds ->
+                                onClick = { selectedFont ->
                                     viewModel.setFont(selectedFont)
                                 },
                                 viewModel = viewModel
@@ -96,7 +101,7 @@ fun ReadingScreen(
 
 //
                 LaunchedEffect(key1 = true) {
-                    viewModel.getReadingContent(chapter.copy(bookName = book.bookName))
+                    viewModel.getReadingContent(chapter.copy(bookName = book.bookName) )
                     viewModel.readFromDatastore()
                 }
                 if (!state.chapter.content.isNullOrBlank()) {
@@ -124,27 +129,9 @@ fun ReadingScreen(
                 }
             }
         }
+        /**  I done this because the slider range start from 0f until 1f so i need to reverse the number **/
+        Box(modifier = modifier.fillMaxSize().background(color = Color.Black.copy(abs(viewModel.brightness.value-MAX_BRIGHTNESS)))){}
     }
 }
 
-
-@ExperimentalMaterialApi
-@Preview(showBackground = true)
-@Composable
-fun ReadingLight() {
-    InfinityTheme {
-
-        ReadingScreen()
-    }
-}
-
-
-@ExperimentalMaterialApi
-@Preview(uiMode = UI_MODE_NIGHT_YES, showBackground = true)
-@Composable
-fun ReadingDark() {
-    InfinityTheme {
-        ReadingScreen()
-    }
-}
 

@@ -1,25 +1,30 @@
 package ir.kazemcodes.infinity.explore_feature.domain.use_case
 
-import ir.kazemcodes.infinity.base_feature.repository.Repository
+import ir.kazemcodes.infinity.api_feature.network.ParsedHttpSource
 import ir.kazemcodes.infinity.core.Resource
+import ir.kazemcodes.infinity.explore_feature.data.model.Chapter
 import kotlinx.coroutines.flow.flow
 import retrofit2.HttpException
+import ru.gildor.coroutines.okhttp.await
+import timber.log.Timber
 import java.io.IOException
-import javax.inject.Inject
 
-class GetRemoteReadingContentUseCase @Inject constructor(
-    private val repository : Repository
-) {
+class GetRemoteReadingContentUseCase {
 
 
-    operator fun invoke(link : String) = flow<Resource<String>> {
+    operator fun invoke(chapter: Chapter,source:ParsedHttpSource) = flow<Resource<String>> {
         try {
+            Timber.d("Timber: GetRemoteReadingContentUseCase was Called")
             emit(Resource.Loading())
-            val elements = repository.remote.getElements(url = link, headers = mutableMapOf(
-                Pair<String, String>("Referer", link)
-            ))
-            val readingContent = repository.remote.getReadingContent(elements)
-            emit(Resource.Success<String>(readingContent))
+            val req = source.pageContentRequest(chapter)
+            val res = source.client.newCall(req).await()
+            val content = source.pageContentParse(res)
+//            val elements = api.fetchElements(url = link, headers = mutableMapOf(
+//                Pair<String, String>("Referer", link)
+//            ))
+//            val readingContent = api.fetchReadingContent(elements)
+            Timber.d("Timber: GetRemoteReadingContentUseCase was Finished Successfully")
+            emit(Resource.Success<String>(content))
         } catch (e: HttpException) {
             emit(Resource.Error<String>(message = e.localizedMessage ?: "An Unexpected Error Occurred."))
 

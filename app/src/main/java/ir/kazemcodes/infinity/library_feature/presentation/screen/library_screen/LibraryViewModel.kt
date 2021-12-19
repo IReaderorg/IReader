@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import ir.kazemcodes.infinity.core.Resource
-import ir.kazemcodes.infinity.library_feature.domain.use_case.LocalUseCase
+import ir.kazemcodes.infinity.local_feature.domain.use_case.LocalUseCase
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
@@ -23,11 +23,6 @@ class LibraryViewModel @Inject constructor(
 
     init {
         getLocalBooks()
-//        val request = GET("https://www.google.com/",headers =  Headers.Builder().apply {
-//            add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0 ")
-//            add("Referer", "https://www.google.com/")
-//        }.build(), )
-//        Timber.d("GET REQUEST " + request.)
     }
 
 

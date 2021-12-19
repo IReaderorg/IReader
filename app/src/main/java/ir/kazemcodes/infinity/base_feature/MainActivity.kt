@@ -11,11 +11,15 @@ import com.zhuinden.simplestackcomposeintegration.core.ComposeStateChanger
 import com.zhuinden.simplestackextensions.navigatorktx.androidContentFrame
 import com.zhuinden.simplestackextensions.services.DefaultServiceProvider
 import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.scopes.ActivityScoped
+import ir.kazemcodes.infinity.api_feature.network.NetworkHelper
+import ir.kazemcodes.infinity.api_feature.network.NetworkHelperInstance
 import ir.kazemcodes.infinity.base_feature.navigation.MainScreenKey
 import ir.kazemcodes.infinity.base_feature.theme.InfinityTheme
 
 
 @AndroidEntryPoint
+@ActivityScoped
 class MainActivity : ComponentActivity() {
 
 
@@ -27,6 +31,8 @@ class MainActivity : ComponentActivity() {
             .setScopedServices(DefaultServiceProvider())
             .setStateChanger(AsyncStateChanger(composeStateChanger))
             .install(this, androidContentFrame, History.of(MainScreenKey()))
+
+        NetworkHelperInstance.networkHelper = NetworkHelper(this)
 
         setContent {
             BackstackProvider(backstack) {
@@ -43,6 +49,8 @@ class MainActivity : ComponentActivity() {
             super.onBackPressed()
         }
     }
+
+
 
 
 }

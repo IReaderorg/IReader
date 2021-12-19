@@ -1,8 +1,10 @@
 package ir.kazemcodes.infinity.explore_feature.presentation.screen.browse_screen
 
+import ir.kazemcodes.infinity.api_feature.HttpSource
 import ir.kazemcodes.infinity.explore_feature.data.model.Book
 
 data class BrowseScreenState(
+    val api:HttpSource? = null,
     val isLoading : Boolean = false,
     val books: List<Book> = emptyList(),
     val error: String = "",

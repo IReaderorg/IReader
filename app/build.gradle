@@ -56,74 +56,82 @@ dependencies {
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.4.0'
     implementation 'com.google.android.material:material:1.4.0'
-    implementation "androidx.compose.ui:ui:$compose_version"
-    implementation "androidx.compose.material:material:$compose_version"
-    implementation "androidx.compose.ui:ui-tooling-preview:$compose_version"
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.4.0'
     implementation 'androidx.activity:activity-compose:1.4.0'
-    implementation 'com.google.firebase:firebase-analytics:17.2.2'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
-    androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_version"
 
-    // Compose dependencies
+    /** Compose Dependencies**/
+    androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
+
+    /** Compose **/
+    implementation "androidx.compose.ui:ui:$compose_version"
+    implementation "androidx.compose.material:material:$compose_version"
+    implementation "androidx.compose.ui:ui-tooling-preview:$compose_version"
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.4.0"
     implementation "androidx.compose.material:material-icons-extended:$compose_version"
 
-    // Coroutines
+    /** LifeCycle **/
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
+
+
+    /** Firebase **/
+    implementation 'com.google.firebase:firebase-analytics:17.2.2'
+
+
+    /** Coroutine **/
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2'
 
-    //Dagger - Hilt
+
+    /** Hilt **/
     implementation "com.google.dagger:hilt-android:2.38.1"
-    kapt "com.google.dagger:hilt-android-compiler:2.37"
+    kapt "com.google.dagger:hilt-compiler:2.38.1"
+
+
     implementation "androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha03"
+    implementation "androidx.hilt:hilt-navigation-compose:1.0.0-rc01"
+
     kapt "androidx.hilt:hilt-compiler:1.0.0"
 
-    // Room
-    implementation "androidx.room:room-runtime:2.3.0"
-    kapt "androidx.room:room-compiler:2.3.0"
 
-    // Kotlin Extensions and Coroutines support for Room
+    /** Room **/
+    implementation "androidx.room:room-runtime:2.3.0"
+    kapt  "androidx.room:room-compiler:2.3.0"
     implementation "androidx.room:room-ktx:2.3.0"
 
-
+    /** Coil **/
     implementation("io.coil-kt:coil:1.3.2")
 
-    // For for working with JSoup
+    /** JSoup **/
     implementation('org.jsoup:jsoup:1.14.3')
 
 
-    //DataStore
+    /** DataStore **/
     implementation "androidx.datastore:datastore-preferences:1.0.0"
 
-    // For web requests
-    def okhttpVersion = "4.9.0"
+    /** Retrofit **/
     def retrofitVersion = "2.9.0"
     implementation("com.squareup.retrofit2:retrofit:$retrofitVersion")
     implementation("com.squareup.retrofit2:converter-moshi:$retrofitVersion")
-    implementation("com.squareup.okhttp3:okhttp:$okhttpVersion")
-    implementation("com.squareup.okhttp3:logging-interceptor:$okhttpVersion")
-
-    implementation "com.github.skydoves:landscapist-glide:1.4.1"
-    implementation "com.github.skydoves:landscapist-coil:1.4.1"
 
 
-    //for WebView
+    /** WebView **/
     implementation "androidx.browser:browser:1.4.0"
 
+    /** Gson **/
     implementation 'com.google.code.gson:gson:2.8.9'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
 
 
-    // For Json
-    def moshiVersion = "1.12.0"
-    implementation("com.squareup.moshi:moshi:$moshiVersion")
-    implementation("com.squareup.moshi:moshi-kotlin:$moshiVersion")
-    kapt("com.squareup.moshi:moshi-kotlin-codegen:$moshiVersion")
+    /** Moshi **/
+    implementation("com.squareup.moshi:moshi:$moshi_version")
+    implementation("com.squareup.moshi:moshi-kotlin:$moshi_version")
+    kapt("com.squareup.moshi:moshi-kotlin-codegen:$moshi_version")
 
+    /** Simple Stack**/
     implementation 'com.github.Zhuinden:simple-stack:2.6.2'
     implementation 'com.github.Zhuinden:simple-stack-extensions:2.2.2'
     implementation 'com.github.Zhuinden:simple-stack-compose-integration:0.9.4'
@@ -131,12 +139,22 @@ dependencies {
 
     implementation "androidx.activity:activity-ktx:1.4.0"
 
-    implementation "androidx.hilt:hilt-navigation-compose:1.0.0-beta01"
 
+    /** Timber **/
     implementation 'com.jakewharton.timber:timber:5.0.1'
 
+    /** Network Client - OkHttp**/
+    implementation("com.squareup.okhttp3:okhttp:$okhttp_version")
+    implementation("com.squareup.okhttp3:logging-interceptor:$okhttp_version")
+    implementation("com.squareup.okhttp3:okhttp-dnsoverhttps:$okhttp_version")
+    implementation("com.squareup.okio:okio:3.0.0")
+    implementation("ru.gildor.coroutines:kotlin-coroutines-okhttp:1.0")
 
+    /**glide**/
+    implementation "com.github.skydoves:landscapist-glide:1.4.4"
+    implementation "com.github.skydoves:landscapist-coil:1.4.4"
 
+    implementation 'org.kodein.di:kodein-di:7.9.0'
 }
 
 kapt {

@@ -3,27 +3,32 @@ package ir.kazemcodes.infinity.di
 import android.app.Application
 import android.content.Context
 import androidx.room.Room
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import ir.kazemcodes.infinity.api_feature.ParsedHttpSource
+import ir.kazemcodes.infinity.api_feature.MemoryCookieJar
+import ir.kazemcodes.infinity.api_feature.network.NetworkHelper
 import ir.kazemcodes.infinity.base_feature.repository.Repository
 import ir.kazemcodes.infinity.base_feature.repository.RepositoryImpl
-import ir.kazemcodes.infinity.explore_feature.data.RealWebnovel
 import ir.kazemcodes.infinity.explore_feature.domain.use_case.*
-import ir.kazemcodes.infinity.library_feature.data.BookDao
-import ir.kazemcodes.infinity.library_feature.data.BookDatabase
-import ir.kazemcodes.infinity.library_feature.data.ChapterDao
-import ir.kazemcodes.infinity.library_feature.domain.use_case.GetLocalBookByNameUseCase
-import ir.kazemcodes.infinity.library_feature.domain.use_case.LocalUseCase
-import ir.kazemcodes.infinity.library_feature.domain.use_case.book.*
-import ir.kazemcodes.infinity.library_feature.domain.use_case.chapter.*
+import ir.kazemcodes.infinity.local_feature.data.BookDao
+import ir.kazemcodes.infinity.local_feature.data.BookDatabase
+import ir.kazemcodes.infinity.local_feature.data.ChapterDao
+import ir.kazemcodes.infinity.local_feature.domain.use_case.GetLocalBookByNameUseCase
+import ir.kazemcodes.infinity.local_feature.domain.use_case.LocalUseCase
+import ir.kazemcodes.infinity.local_feature.domain.use_case.book.*
+import ir.kazemcodes.infinity.local_feature.domain.use_case.chapter.*
+import okhttp3.CookieJar
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import javax.inject.Singleton
 
-@Module
 @InstallIn(SingletonComponent::class)
+@Module
 class AppModule {
 
 
@@ -44,6 +49,7 @@ class AppModule {
     fun providesBookDao(db: BookDatabase): BookDao {
         return db.bookDao
     }
+
     @Provides
     @Singleton
     fun provideChapterDao(db: BookDatabase): ChapterDao {
@@ -54,16 +60,15 @@ class AppModule {
     @Provides
     @Singleton
     fun providesRepository(
-        api: ParsedHttpSource,
         bookDao: BookDao,
         chapterDao: ChapterDao
     ): Repository {
         return RepositoryImpl(
-            api = api,
             bookDao = bookDao,
             chapterDao = chapterDao
         )
     }
+
     @Provides
     @Singleton
     fun provideLocalUseCases(repository: Repository): LocalUseCase {
@@ -78,27 +83,27 @@ class AppModule {
             getLocalChapterUseCase = GetLocalChapterUseCase(repository),
             getLocalBookByNameUseCase = GetLocalBookByNameUseCase(repository),
             UpdateLocalChapterContentUseCase = UpdateLocalChapterContentUseCase(repository),
-            getLocalChapterReadingContentUseCase = GetLocalChapterReadingContentUseCase(repository = repository)
+            getLocalChapterReadingContentUseCase = GetLocalChapterReadingContentUseCase(repository = repository),
+            deleteChaptersUseCase = DeleteLocalChaptersUseCase(repository = repository)
         )
     }
+
     @Provides
     @Singleton
-    fun providesRemoteUSeCases(repository: Repository) : RemoteUseCase {
+    fun providesRemoteUSeCases(): RemoteUseCase {
         return RemoteUseCase(
-            getRemoteBookDetailUseCase = GetRemoteBookDetailUseCase(repository),
-            getRemoteBooksUseCase= GetRemoteBooksUseCase(repository),
-            getRemoteChaptersUseCase= GetRemoteChaptersUseCase(repository),
-            getRemoteReadingContentUseCase = GetRemoteReadingContentUseCase(repository)
+            getRemoteBookDetailUseCase = GetRemoteBookDetailUseCase(),
+            getRemoteBooksUseCase = GetRemoteBooksUseCase(),
+            getRemoteChaptersUseCase = GetRemoteChaptersUseCase(),
+            getRemoteReadingContentUseCase = GetRemoteReadingContentUseCase()
         )
     }
 
     @Provides
     @Singleton
-    fun providesContext(@ApplicationContext appContext: Context) : Context{
+    fun providesContext(@ApplicationContext appContext: Context): Context {
         return appContext
-
     }
-
 
 
 //    @Provides
@@ -107,11 +112,45 @@ class AppModule {
 //        return RemoteRepositoryImpl(api)
 //    }
 
+//
+//    @Provides
+//    @Singleton
+//    fun provideApi(): ParsedHttpSource {
+//        return WuxiaorldApi()
+//    }
 
-    @Provides
     @Singleton
-    fun provideApi(): ParsedHttpSource {
-        return RealWebnovel()
+    @Provides
+    fun providesCookieJar(): CookieJar {
+        return MemoryCookieJar()
     }
+
+    @Singleton
+    @Provides
+    fun providesOkHttpClient(cookieJar: CookieJar): OkHttpClient {
+        return OkHttpClient.Builder().apply {
+            networkInterceptors().add(
+                HttpLoggingInterceptor().apply {
+                    setLevel(HttpLoggingInterceptor.Level.BASIC)
+                }
+            )
+            cookieJar(cookieJar)
+        }.build()
+    }
+    @Singleton
+    @Provides
+    fun providesMosh() : Moshi {
+        return Moshi.Builder()
+            .add(KotlinJsonAdapterFactory())
+            .build()
+    }
+
+    @Singleton
+    @Provides
+    fun providesNetworkHelper(context: Context) : NetworkHelper {
+        return NetworkHelper(context = context)
+    }
+
+
 
 }

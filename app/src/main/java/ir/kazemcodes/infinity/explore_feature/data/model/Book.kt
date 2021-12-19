@@ -1,32 +1,31 @@
 package ir.kazemcodes.infinity.explore_feature.data.model
 
 import android.os.Parcelable
-import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
-import ir.kazemcodes.infinity.library_feature.domain.model.BookEntity
+import ir.kazemcodes.infinity.local_feature.domain.model.BookEntity
 import kotlinx.parcelize.Parcelize
 
 
 @Parcelize
-@JsonClass(generateAdapter = true)
 data class Book(
-    @Json(name = "url")
+
     var link: String,
-    @Json(name = "title")
+
     var bookName: String,
-    @Json(name = "thumbnail")
+
      var coverLink: String? = "",
-    @Json(name = "author")
+
+    var source: String? = null,
+
     var author: String?= "",
-    @Json(name = "translator")
+
     var translator: String?= "",
-    @Json(name = "description")
+
     var description: String? = "",
-    @Json(name = "category")
+
     var category: String? = "",
-    @Json(name = "status")
+
     var status: Int = 0,
-    @Json(name = "inLibrary")
+
     var inLibrary: Boolean = false,
     ) : Parcelable {
 
@@ -50,6 +49,7 @@ data class Book(
             description = description,
             inLibrary = inLibrary,
             category = category,
+            source=source
         )
     }
 

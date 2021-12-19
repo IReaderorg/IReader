@@ -22,7 +22,7 @@ import ir.kazemcodes.infinity.explore_feature.presentation.screen.reading_screen
 @Composable
 fun FontMenuComposable(
     modifier: Modifier = Modifier,
-    onClick : (selectedFont : FontFamily , fontName : String) -> Unit,
+    onClick : (selectedFont : FontFamily) -> Unit,
     viewModel : ReadingScreenViewModel
 ) {
     var expanded by remember { mutableStateOf(false) }
