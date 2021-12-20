@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ir.kazemcodes.infinity.extension_feature.presentation.extension_screen.ExtensionScreen
+import ir.kazemcodes.infinity.presentation.extension.ExtensionScreen
 import ir.kazemcodes.infinity.presentation.library.LibraryScreen
 import ir.kazemcodes.infinity.setting_feature.presentation.SettingScreen
 

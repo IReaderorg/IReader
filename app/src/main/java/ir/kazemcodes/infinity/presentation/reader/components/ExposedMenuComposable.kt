@@ -13,9 +13,10 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ir.kazemcodes.infinity.presentation.reader.ReaderEvent
+import ir.kazemcodes.infinity.presentation.reader.ReaderScreenViewModel
 import ir.kazemcodes.infinity.presentation.theme.poppins
 import ir.kazemcodes.infinity.presentation.theme.sourceSansPro
-import ir.kazemcodes.infinity.presentation.reader.ReadingScreenViewModel
 
 
 @ExperimentalMaterialApi
@@ -23,7 +24,7 @@ import ir.kazemcodes.infinity.presentation.reader.ReadingScreenViewModel
 fun FontMenuComposable(
     modifier: Modifier = Modifier,
     onClick : (selectedFont : FontFamily) -> Unit,
-    viewModel : ReadingScreenViewModel
+    viewModel : ReaderScreenViewModel
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -52,12 +53,12 @@ fun FontMenuComposable(
             Text(text = viewModel.convertFontIntoString(viewModel.fontState.value))
             DropdownMenu(expanded = expanded, onDismissRequest = {expanded = false},) {
                 DropdownMenuItem(onClick = {
-                    viewModel.setFont(poppins)
+                    viewModel.onEvent(ReaderEvent.ChangeFont(poppins))
                 }) {
                     Text(text = "Poppins", color = MaterialTheme.colors.onBackground)
                 }
                 DropdownMenuItem(onClick = {
-                    viewModel.setFont(sourceSansPro)
+                    viewModel.onEvent(ReaderEvent.ChangeFont(sourceSansPro))
                 }) {
                     Text(text = "Source Sans Pro", color = MaterialTheme.colors.onBackground)
                 }

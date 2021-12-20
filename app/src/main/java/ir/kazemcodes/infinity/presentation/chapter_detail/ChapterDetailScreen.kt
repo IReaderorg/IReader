@@ -16,23 +16,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
-import ir.kazemcodes.infinity.domain.network.models.HttpSource
-import ir.kazemcodes.infinity.base_feature.navigation.ReadingContentKey
+import com.zhuinden.simplestackcomposeintegration.services.rememberService
+import ir.kazemcodes.infinity.base_feature.navigation.ReaderScreenKey
 import ir.kazemcodes.infinity.domain.models.Book
 import ir.kazemcodes.infinity.domain.models.Chapter
+import ir.kazemcodes.infinity.domain.network.models.HttpSource
 import timber.log.Timber
 
 
 @Composable
 fun ChapterDetailScreen(
     modifier: Modifier = Modifier,
-    viewModel: ChapterDetailViewModel = hiltViewModel(),
     chapters: List<Chapter>,
     book: Book,
     api: HttpSource
 ) {
+    val viewModel = rememberService<ChapterDetailViewModel>()
     val backStack = LocalBackstack.current
     val chapterState = viewModel.state.value.chapters
     if (chapterState.isEmpty() || chapterState.size != chapters.size && chapterState.last().bookName != chapters.last().bookName) {
@@ -96,7 +96,7 @@ fun ChapterDetailScreen(
                                 .height(40.dp)
                                 .clickable {
                                     backStack.goTo(
-                                        ReadingContentKey(
+                                        ReaderScreenKey(
                                             book = book,
                                             chapter = state.chapters[index],
                                             api = api

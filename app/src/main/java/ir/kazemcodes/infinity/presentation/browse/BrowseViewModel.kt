@@ -4,32 +4,31 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
-import ir.kazemcodes.infinity.domain.network.models.HttpSource
-import ir.kazemcodes.infinity.domain.network.models.ParsedHttpSource
-import ir.kazemcodes.infinity.domain.utils.merge
-import ir.kazemcodes.infinity.domain.models.Resource
-import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
 import ir.kazemcodes.infinity.domain.local_feature.domain.use_case.LocalUseCase
+import ir.kazemcodes.infinity.domain.models.Resource
+import ir.kazemcodes.infinity.domain.network.models.ParsedHttpSource
+import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
+import ir.kazemcodes.infinity.domain.utils.merge
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import timber.log.Timber
-import javax.inject.Inject
 
-@HiltViewModel
-class BrowseViewModel @Inject constructor(
+
+class BrowseViewModel(
+    private val localUseCase: LocalUseCase,
     private val remoteUseCase: RemoteUseCase,
-    private val localUseCase: LocalUseCase
+    private val api: ParsedHttpSource
 ) : ViewModel() {
     private val _state = mutableStateOf<BrowseScreenState>(BrowseScreenState())
-
-
     val state: State<BrowseScreenState> = _state
+    val source = api
     var currentPage = mutableStateOf(1)
 
-    fun changeApi(api: HttpSource) {
-        _state.value =state.value.copy(api = api)
+    init {
+        Timber.d("Timber browse viewmodel")
+        getBooks(source = source)
     }
+
 
     fun cleanState() {
         _state.value = BrowseScreenState()

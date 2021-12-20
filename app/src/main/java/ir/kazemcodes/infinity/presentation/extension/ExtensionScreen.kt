@@ -1,6 +1,7 @@
-package ir.kazemcodes.infinity.extension_feature.presentation.extension_screen
+package ir.kazemcodes.infinity.presentation.extension
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.MaterialTheme
@@ -21,10 +22,19 @@ fun ExtensionScreen(modifier: Modifier= Modifier) {
     Scaffold(
         topBar = {
             TopAppBar(
-                backgroundColor = MaterialTheme.colors.background,elevation = 0.dp
-            ) {
-                Text("Extension", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.h5)
-            }
+                title = {
+                    Text(
+                        text = "Extensions",
+                        color = MaterialTheme.colors.onBackground,
+                        style = MaterialTheme.typography.h6,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                modifier = Modifier.fillMaxWidth(),
+                backgroundColor = MaterialTheme.colors.background,
+                contentColor = MaterialTheme.colors.onBackground,
+                elevation = 8.dp,
+            )
         }
     ) {
         LazyColumn {

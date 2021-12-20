@@ -1,6 +1,5 @@
 package ir.kazemcodes.infinity.presentation.browse
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -8,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -15,10 +15,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
+import com.zhuinden.simplestackcomposeintegration.services.rememberService
 import ir.kazemcodes.infinity.api_feature.network.InfinityInstance
-import ir.kazemcodes.infinity.domain.network.models.ParsedHttpSource
 import ir.kazemcodes.infinity.base_feature.navigation.BookDetailKey
 import ir.kazemcodes.infinity.base_feature.navigation.WebViewKey
 import ir.kazemcodes.infinity.presentation.components.LinearViewList
@@ -26,38 +25,40 @@ import timber.log.Timber
 
 
 @Composable
-fun BrowserScreen(
-    viewModel: BrowseViewModel = hiltViewModel(),
-    api: ParsedHttpSource
-) {
+fun BrowserScreen() {
+    val viewModel = rememberService<BrowseViewModel>()
     val scrollState = rememberLazyListState()
     val backstack = LocalBackstack.current
     val state = viewModel.state.value
     val backStack = LocalBackstack.current
+    val source = viewModel.source
     InfinityInstance.inDetailScreen = false
 
     LaunchedEffect(key1 = true) {
-        if (api != viewModel.state.value.api) {
 
-            viewModel.cleanState()
-        }
-        viewModel.changeApi(api = api)
-        viewModel.getBooks(source = api)
     }
 
     Scaffold(
         topBar = {
-            TopAppBar(backgroundColor = MaterialTheme.colors.background) {
-                Icon(
-                    imageVector = Icons.Default.Language,
-                    contentDescription = "WebView",
-                    tint = MaterialTheme.colors.onBackground,
-                    modifier = Modifier
-                        .clickable {
-                            backStack.goTo(WebViewKey(api.baseUrl))
-                        }
-                )
-            }
+            TopAppBar(title = {Text("Explore")} , backgroundColor = MaterialTheme.colors.background, actions = {
+                IconButton(onClick = { backStack.goTo(WebViewKey(source.baseUrl)) }) {
+                    Icon(
+                        imageVector = Icons.Default.Language,
+                        contentDescription = "WebView",
+                        tint = MaterialTheme.colors.onBackground,
+                    )
+                }
+
+            },navigationIcon = {
+                IconButton(onClick = { backStack.goBack()}) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = "ArrowBack Icon",
+                        tint = MaterialTheme.colors.onBackground,
+                    )
+                }
+
+            })
         }
     ) {
         Box(
@@ -66,7 +67,7 @@ fun BrowserScreen(
             ) {
             if (state.books.isNotEmpty()) {
                 LinearViewList(books = state.books, onClick = { index ->
-                    backstack.goTo(BookDetailKey(state.books[index], api = api))
+                    backstack.goTo(BookDetailKey(state.books[index], api = source))
                 }, scrollState = scrollState)
 
             }
@@ -74,7 +75,7 @@ fun BrowserScreen(
             if (scrollState.layoutInfo.visibleItemsInfo.lastOrNull()?.index == scrollState.layoutInfo.totalItemsCount - 1) {
                 Timber.d("Scroll state reach the bottom")
                 LaunchedEffect(key1 = true) {
-                    viewModel.getBooks(api)
+                    viewModel.getBooks(source)
                 }
             }
             if (state.error.isNotBlank()) {

@@ -21,16 +21,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
-import ir.kazemcodes.infinity.domain.network.models.HttpSource
+import com.zhuinden.simplestackcomposeintegration.services.rememberService
 import ir.kazemcodes.infinity.base_feature.navigation.ChapterDetailKey
 import ir.kazemcodes.infinity.base_feature.navigation.WebViewKey
+import ir.kazemcodes.infinity.domain.models.Book
+import ir.kazemcodes.infinity.domain.network.models.HttpSource
 import ir.kazemcodes.infinity.presentation.book_detail.components.ButtonWithIconAndText
 import ir.kazemcodes.infinity.presentation.book_detail.components.CardTileComposable
 import ir.kazemcodes.infinity.presentation.book_detail.components.DotsFlashing
 import ir.kazemcodes.infinity.presentation.book_detail.components.ExpandingText
-import ir.kazemcodes.infinity.domain.models.Book
 import ir.kazemcodes.infinity.presentation.screen.components.BookImageComposable
 
 
@@ -38,9 +38,9 @@ import ir.kazemcodes.infinity.presentation.screen.components.BookImageComposable
 fun BookDetailScreen(
     modifier: Modifier = Modifier,
     book: Book = Book.create(),
-    viewModel: BookDetailViewModel = hiltViewModel(),
     api: HttpSource
 ) {
+    val viewModel = rememberService<BookDetailViewModel>()
     val detailState = viewModel.detailState.value
     val chapterState = viewModel.chapterState.value
 
@@ -94,34 +94,37 @@ fun BookDetailScreenLoadedComposable(
     Scaffold(topBar = {
         TopAppBar(
             title = {},
-            modifier = modifier.fillMaxWidth().padding(horizontal = 8.dp),
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
             backgroundColor = MaterialTheme.colors.background,
             contentColor = MaterialTheme.colors.onBackground,
             elevation = 0.dp,
             actions = {
-                        Icon(
-                            imageVector = Icons.Default.Language,
-                            contentDescription = "WebView",
-                            tint = MaterialTheme.colors.onBackground,
-                            modifier = Modifier
-                                .clickable(role = Role.Button) {
-                                    backStack.goTo(WebViewKey(book.link))
-                                }
-                        )
-                        Spacer(modifier = modifier.width(16.dp))
-                        Icon(
-                            imageVector = Icons.Default.IosShare,
-                            contentDescription = "more information",
-                            tint = MaterialTheme.colors.onBackground
-                        )
+                IconButton(onClick = {backStack.goTo(WebViewKey(book.link))}) {
+                    Icon(
+                        imageVector = Icons.Default.Language,
+                        contentDescription = "WebView",
+                        tint = MaterialTheme.colors.onBackground,
+                    )
+                }
+                IconButton(onClick = {}) {
+                    Icon(
+                        imageVector = Icons.Default.IosShare,
+                        contentDescription = "more information",
+                        tint = MaterialTheme.colors.onBackground
+                    )
+                }
             },
             navigationIcon = {
-                Icon(
-                    modifier = modifier.clickable(role = Role.Button) { backStack.goBack() },
+                IconButton(onClick = {backStack.goBack()}) {
+                    Icon(
                     imageVector = Icons.Default.ArrowBack,
                     contentDescription = "back Button",
                     tint = MaterialTheme.colors.onBackground
                 )
+                }
+
             }
         )
     }, bottomBar = {

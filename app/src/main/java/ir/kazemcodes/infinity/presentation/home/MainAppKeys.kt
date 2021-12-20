@@ -4,16 +4,29 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
-import ir.kazemcodes.infinity.domain.network.models.HttpSource
-import ir.kazemcodes.infinity.domain.network.models.ParsedHttpSource
-import ir.kazemcodes.infinity.presentation.book_detail.BookDetailScreen
-import ir.kazemcodes.infinity.presentation.chapter_detail.ChapterDetailScreen
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import com.zhuinden.simplestack.ServiceBinder
+import com.zhuinden.simplestackextensions.servicesktx.add
+import com.zhuinden.simplestackextensions.servicesktx.lookup
+import ir.kazemcodes.infinity.domain.local_feature.domain.use_case.LocalUseCase
 import ir.kazemcodes.infinity.domain.models.Book
 import ir.kazemcodes.infinity.domain.models.Chapter
-import ir.kazemcodes.infinity.extension_feature.presentation.extension_screen.ExtensionScreen
+import ir.kazemcodes.infinity.domain.network.models.HttpSource
+import ir.kazemcodes.infinity.domain.network.models.ParsedHttpSource
+import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
+import ir.kazemcodes.infinity.presentation.book_detail.BookDetailScreen
+import ir.kazemcodes.infinity.presentation.book_detail.BookDetailViewModel
+import ir.kazemcodes.infinity.presentation.browse.BrowseViewModel
 import ir.kazemcodes.infinity.presentation.browse.BrowserScreen
+import ir.kazemcodes.infinity.presentation.chapter_detail.ChapterDetailScreen
+import ir.kazemcodes.infinity.presentation.chapter_detail.ChapterDetailViewModel
+import ir.kazemcodes.infinity.presentation.core.Constants.DatastoreServiceTAG
+import ir.kazemcodes.infinity.presentation.extension.ExtensionScreen
 import ir.kazemcodes.infinity.presentation.home.ComposeKey
 import ir.kazemcodes.infinity.presentation.home.MainScreen
+import ir.kazemcodes.infinity.presentation.library.LibraryViewModel
+import ir.kazemcodes.infinity.presentation.reader.ReaderScreenViewModel
 import ir.kazemcodes.infinity.presentation.reader.ReadingScreen
 import ir.kazemcodes.infinity.presentation.screen.components.WebPageScreen
 import kotlinx.parcelize.Parcelize
@@ -29,13 +42,25 @@ data class MainScreenKey(val noArgument: String = "") : ComposeKey() {
         MainScreen()
     }
 
+    override fun bindServices(serviceBinder: ServiceBinder) {
+        with(serviceBinder) {
+            add(LibraryViewModel(lookup<LocalUseCase>() ))
+        }
+    }
 }
 @Immutable
 @Parcelize
 data class BrowserScreenKey(val api: @RawValue ParsedHttpSource) : ComposeKey() {
     @Composable
     override fun ScreenComposable(modifier: Modifier) {
-        BrowserScreen(api=api)
+        BrowserScreen()
+    }
+
+    override fun bindServices(serviceBinder: ServiceBinder) {
+        with(serviceBinder) {
+            add(BrowseViewModel(lookup<LocalUseCase>() , lookup<RemoteUseCase>(),api))
+        }
+
     }
 
 }
@@ -49,6 +74,11 @@ data class BookDetailKey(val book: Book, val api: @RawValue HttpSource) : Compos
 
     }
 
+    override fun bindServices(serviceBinder: ServiceBinder) {
+        with(serviceBinder) {
+            add(BookDetailViewModel(lookup<LocalUseCase>() , lookup<RemoteUseCase>()))
+        }
+    }
 }
 @Immutable
 @Parcelize
@@ -57,7 +87,6 @@ data class WebViewKey(val url: String) : ComposeKey() {
     @Composable
     override fun ScreenComposable(modifier: Modifier) {
         WebPageScreen(url)
-
     }
 }
 @Immutable
@@ -68,16 +97,26 @@ data class ChapterDetailKey(val book: Book, val chapters: List<Chapter>, val api
     override fun ScreenComposable(modifier: Modifier) {
         ChapterDetailScreen(chapters = chapters , book = book ,api=api)
     }
+    override fun bindServices(serviceBinder: ServiceBinder) {
+        with(serviceBinder) {
+            add(ChapterDetailViewModel(lookup<LocalUseCase>()))
+        }
+    }
 }
 @Immutable
 @Parcelize
-data class ReadingContentKey(val book: Book, val chapter: Chapter, val api: @RawValue HttpSource) : ComposeKey() {
+data class ReaderScreenKey(val book: Book, val chapter: Chapter, val api: @RawValue HttpSource) : ComposeKey() {
 
     @ExperimentalMaterialApi
     @Composable
     override fun ScreenComposable(modifier: Modifier) {
 
         ReadingScreen(book = book, chapter = chapter,api = api)
+    }
+    override fun bindServices(serviceBinder: ServiceBinder) {
+        with(serviceBinder) {
+            add(ReaderScreenViewModel(lookup<LocalUseCase>() , lookup<RemoteUseCase>(), lookup<DataStore<Preferences>>(DatastoreServiceTAG)))
+        }
     }
 }
 @Immutable
@@ -86,7 +125,6 @@ data class ExtensionScreenKey(val noArgs : String = "") : ComposeKey() {
 
     @Composable
     override fun ScreenComposable(modifier: Modifier) {
-
         ExtensionScreen()
     }
 }

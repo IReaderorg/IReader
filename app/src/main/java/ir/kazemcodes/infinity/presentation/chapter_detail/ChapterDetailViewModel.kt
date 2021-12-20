@@ -2,22 +2,18 @@ package ir.kazemcodes.infinity.presentation.chapter_detail
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
-import ir.kazemcodes.infinity.domain.models.Resource
+import ir.kazemcodes.infinity.domain.local_feature.domain.use_case.LocalUseCase
 import ir.kazemcodes.infinity.domain.models.Chapter
-import ir.kazemcodes.infinity.domain.local_feature.domain.use_case.chapter.GetLocalChaptersByBookNameUseCase
+import ir.kazemcodes.infinity.domain.models.Resource
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import javax.inject.Inject
 
 
-@HiltViewModel
-class ChapterDetailViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
-    private val getLocalChaptersByBookNameUseCase: GetLocalChaptersByBookNameUseCase
+
+class ChapterDetailViewModel(
+    private val localUseCase: LocalUseCase
 ) : ViewModel() {
 
     private val _state = mutableStateOf<ChapterDetailState>(ChapterDetailState())
@@ -38,7 +34,7 @@ class ChapterDetailViewModel @Inject constructor(
     }
 
     fun getLocalChapters(bookName: String) {
-        getLocalChaptersByBookNameUseCase(bookName = bookName ).onEach { result ->
+        localUseCase.getLocalChaptersByBookNameByBookNameUseCase(bookName = bookName ).onEach { result ->
 
             when (result) {
                 is Resource.Success -> {

@@ -2,10 +2,10 @@ package ir.kazemcodes.infinity.presentation.reader
 
 
 import androidx.compose.ui.text.font.FontFamily
-import ir.kazemcodes.infinity.presentation.theme.poppins
 import ir.kazemcodes.infinity.domain.models.Chapter
+import ir.kazemcodes.infinity.presentation.theme.poppins
 
-data class ReadingScreenState(
+data class ReaderScreenState(
     val isLoading : Boolean = false,
     val chapter: Chapter = Chapter.create(),
     val error: String = "",

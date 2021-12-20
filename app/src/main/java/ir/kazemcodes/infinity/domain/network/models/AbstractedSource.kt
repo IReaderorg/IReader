@@ -1,6 +1,5 @@
-package ir.kazemcodes.infinity.api_feature.network
-
-import ir.kazemcodes.infinity.api_feature.Source
+import ir.kazemcodes.infinity.api_feature.network.NetworkHelper
+import ir.kazemcodes.infinity.domain.network.models.Source
 import okhttp3.Headers
 import okhttp3.OkHttpClient
 import java.security.MessageDigest

@@ -4,24 +4,23 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
-import ir.kazemcodes.infinity.domain.network.apis.FreeWebNovel
 import ir.kazemcodes.infinity.api_feature.network.InfinityInstance
-import ir.kazemcodes.infinity.domain.network.models.ParsedHttpSource
-import ir.kazemcodes.infinity.domain.models.Resource
-import ir.kazemcodes.infinity.domain.models.Book
-import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
 import ir.kazemcodes.infinity.domain.local_feature.domain.model.BookEntity
 import ir.kazemcodes.infinity.domain.local_feature.domain.model.ChapterEntity
 import ir.kazemcodes.infinity.domain.local_feature.domain.use_case.LocalUseCase
+import ir.kazemcodes.infinity.domain.models.Book
+import ir.kazemcodes.infinity.domain.models.Resource
+import ir.kazemcodes.infinity.domain.network.apis.FreeWebNovel
+import ir.kazemcodes.infinity.domain.network.models.ParsedHttpSource
+import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import javax.inject.Inject
+import timber.log.Timber
 
-@HiltViewModel
-class BookDetailViewModel @Inject constructor(
+
+class BookDetailViewModel(
         private val localUseCase: LocalUseCase,
         private val remoteUseCase: RemoteUseCase
 ) : ViewModel() {
@@ -41,6 +40,11 @@ class BookDetailViewModel @Inject constructor(
 
     fun toggleInLibrary() {
         _inLibrary.value = !inLibrary.value
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        Timber.d("Timber: ViewModel Cleared")
     }
 
 

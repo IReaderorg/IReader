@@ -3,6 +3,9 @@ package ir.kazemcodes.infinity.presentation.home
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Modifier
 import com.zhuinden.simplestack.AsyncStateChanger
 import com.zhuinden.simplestack.History
 import com.zhuinden.simplestack.navigator.Navigator
@@ -12,6 +15,7 @@ import com.zhuinden.simplestackextensions.navigatorktx.androidContentFrame
 import com.zhuinden.simplestackextensions.services.DefaultServiceProvider
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.scopes.ActivityScoped
+import ir.kazemcodes.infinity.MyApplication
 import ir.kazemcodes.infinity.api_feature.network.InfinityInstance
 import ir.kazemcodes.infinity.api_feature.network.NetworkHelper
 import ir.kazemcodes.infinity.base_feature.navigation.MainScreenKey
@@ -27,7 +31,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val app = application as MyApplication
         val backstack = Navigator.configure()
+            .setGlobalServices(app.globalServices)
             .setScopedServices(DefaultServiceProvider())
             .setStateChanger(AsyncStateChanger(composeStateChanger))
             .install(this, androidContentFrame, History.of(MainScreenKey()))
@@ -37,7 +43,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             BackstackProvider(backstack) {
                 InfinityTheme {
-                    composeStateChanger.RenderScreen()
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        composeStateChanger.RenderScreen()
+
+                    }
                 }
 
             }
@@ -49,8 +58,6 @@ class MainActivity : ComponentActivity() {
             super.onBackPressed()
         }
     }
-
-
 
 
 }
