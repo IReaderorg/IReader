@@ -1,6 +1,6 @@
-# InfiniteBook
+# Infinity
 
-InfiniteBook is a free and open source applicaiton for Android.
+Infinity is a free and open source applicaiton for Android.
 
 ## License
 
