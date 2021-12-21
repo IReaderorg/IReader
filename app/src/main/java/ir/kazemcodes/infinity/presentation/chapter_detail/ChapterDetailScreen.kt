@@ -21,7 +21,6 @@ import com.zhuinden.simplestackcomposeintegration.services.rememberService
 import ir.kazemcodes.infinity.base_feature.navigation.ReaderScreenKey
 import ir.kazemcodes.infinity.domain.models.Book
 import ir.kazemcodes.infinity.domain.models.Chapter
-import ir.kazemcodes.infinity.domain.network.models.HttpSource
 import timber.log.Timber
 
 
@@ -30,7 +29,6 @@ fun ChapterDetailScreen(
     modifier: Modifier = Modifier,
     chapters: List<Chapter>,
     book: Book,
-    api: HttpSource
 ) {
     val viewModel = rememberService<ChapterDetailViewModel>()
     val backStack = LocalBackstack.current
@@ -99,7 +97,7 @@ fun ChapterDetailScreen(
                                         ReaderScreenKey(
                                             book = book,
                                             chapter = state.chapters[index],
-                                            api = api
+                                            source = viewModel.getSource()
                                         )
                                     )
                                 },

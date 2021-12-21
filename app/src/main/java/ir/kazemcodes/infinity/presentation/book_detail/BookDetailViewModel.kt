@@ -4,14 +4,14 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.zhuinden.simplestack.ScopedServices
 import ir.kazemcodes.infinity.api_feature.network.InfinityInstance
 import ir.kazemcodes.infinity.domain.local_feature.domain.model.BookEntity
 import ir.kazemcodes.infinity.domain.local_feature.domain.model.ChapterEntity
 import ir.kazemcodes.infinity.domain.local_feature.domain.use_case.LocalUseCase
 import ir.kazemcodes.infinity.domain.models.Book
 import ir.kazemcodes.infinity.domain.models.Resource
-import ir.kazemcodes.infinity.domain.network.apis.FreeWebNovel
-import ir.kazemcodes.infinity.domain.network.models.ParsedHttpSource
+import ir.kazemcodes.infinity.domain.network.models.Source
 import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
@@ -22,8 +22,10 @@ import timber.log.Timber
 
 class BookDetailViewModel(
         private val localUseCase: LocalUseCase,
-        private val remoteUseCase: RemoteUseCase
-) : ViewModel() {
+        private val remoteUseCase: RemoteUseCase,
+        private val  source: Source
+) : ViewModel(), ScopedServices.Registered{
+
     private val _detailState = mutableStateOf<DetailState>(DetailState())
     val detailState: State<DetailState> = _detailState
 
@@ -34,8 +36,10 @@ class BookDetailViewModel(
     private val _inLibrary = mutableStateOf<Boolean>(false)
     val inLibrary = _inLibrary
 
-    private val _api = mutableStateOf<ParsedHttpSource>(FreeWebNovel())
-    val api = _api.value
+
+    fun getSource() : Source {
+        return source
+    }
 
 
     fun toggleInLibrary() {
@@ -48,6 +52,7 @@ class BookDetailViewModel(
     }
 
 
+
     fun getBookData(book: Book) {
         _detailState.value = DetailState(book = book,error = "",loaded = false,isLoading = false)
         _chapterState.value = ChapterState(chapters = emptyList(), loaded = false,isLoading = false,error = "")
@@ -55,12 +60,6 @@ class BookDetailViewModel(
         getLocalBookByName()
         getLocalChaptersByBookName()
     }
-
-    fun clearStates() {
-        _detailState.value = DetailState()
-        _chapterState.value = ChapterState()
-    }
-
 
     private fun getLocalBookByName() {
         localUseCase.getLocalBookByNameUseCase(book = detailState.value.book).onEach { result ->
@@ -135,7 +134,7 @@ class BookDetailViewModel(
 
 
     fun getRemoteBookDetail() {
-        remoteUseCase.getRemoteBookDetailUseCase(book = detailState.value.book, api)
+        remoteUseCase.getRemoteBookDetailUseCase(book = detailState.value.book, source= source)
                 .onEach { result ->
                     when (result) {
 
@@ -164,7 +163,7 @@ class BookDetailViewModel(
     }
 
     private fun getRemoteChapterDetail() {
-        remoteUseCase.getRemoteChaptersUseCase(book = detailState.value.book, api)
+        remoteUseCase.getRemoteChaptersUseCase(book = detailState.value.book, source= source)
                 .onEach { result ->
 
                     when (result) {
@@ -213,6 +212,14 @@ class BookDetailViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             localUseCase.deleteChaptersUseCase(bookName)
         }
+    }
+
+    override fun onServiceRegistered() {
+        Timber.d("Timber: register")
+    }
+
+    override fun onServiceUnregistered() {
+        Timber.d("Timber: unregister")
     }
 
 }

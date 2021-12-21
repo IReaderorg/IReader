@@ -1,4 +1,4 @@
-package ir.kazemcodes.infinity.domain.network.apis
+package ir.kazemcodes.infinity.domain.network.sources
 
 //
 //class RealWebnovel : HttpSource() {

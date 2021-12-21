@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ir.kazemcodes.infinity.domain.local_feature.domain.use_case.LocalUseCase
 import ir.kazemcodes.infinity.domain.models.Resource
-import ir.kazemcodes.infinity.domain.network.models.ParsedHttpSource
+import ir.kazemcodes.infinity.domain.network.models.Source
 import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
 import ir.kazemcodes.infinity.domain.utils.merge
 import kotlinx.coroutines.flow.launchIn
@@ -17,24 +17,22 @@ import timber.log.Timber
 class BrowseViewModel(
     private val localUseCase: LocalUseCase,
     private val remoteUseCase: RemoteUseCase,
-    private val api: ParsedHttpSource
+    private val source: Source
 ) : ViewModel() {
     private val _state = mutableStateOf<BrowseScreenState>(BrowseScreenState())
     val state: State<BrowseScreenState> = _state
-    val source = api
     var currentPage = mutableStateOf(1)
 
     init {
         Timber.d("Timber browse viewmodel")
         getBooks(source = source)
     }
-
-
-    fun cleanState() {
-        _state.value = BrowseScreenState()
-        currentPage.value = 1
+    fun getSource() : Source {
+        return source
     }
-    fun getBooks(source: ParsedHttpSource) {
+
+
+    fun getBooks(source: Source) {
         remoteUseCase.getRemoteBooksUseCase(page =  currentPage.value, source = source).onEach { result ->
             Timber.d("TAG getRemoteBooksUseCase is called")
             when (result) {

@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
-import ir.kazemcodes.infinity.api_feature.network.apis
+import ir.kazemcodes.infinity.api_feature.network.sources
 import ir.kazemcodes.infinity.base_feature.navigation.BrowserScreenKey
 
 @Composable
@@ -38,13 +38,13 @@ fun ExtensionScreen(modifier: Modifier= Modifier) {
         }
     ) {
         LazyColumn {
-            items(apis.size) {index ->
-                Text(apis[index].name, modifier = modifier.padding(16.dp).clickable {
-                    backStack.goTo(BrowserScreenKey(apis[index]))
+            items(sources.size) { index ->
+                Text(sources[index].name, modifier = modifier.padding(16.dp).clickable {
+                    backStack.goTo(BrowserScreenKey(sources[index]))
                 })
             }
         }
-        apis.forEach {api->
+        sources.forEach { api->
 
         }
 

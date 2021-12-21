@@ -61,7 +61,7 @@ fun LibraryScreen(
                     backStack.goTo(
                         BookDetailKey(
                             state.books[index],
-                            api = mappingApiNameToAPi(state.books[index].source ?: "")
+                            source = mappingApiNameToAPi(state.books[index].source ?: "")
                         )
                     )
                 })

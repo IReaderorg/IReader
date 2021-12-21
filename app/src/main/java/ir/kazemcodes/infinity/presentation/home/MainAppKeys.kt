@@ -12,8 +12,7 @@ import com.zhuinden.simplestackextensions.servicesktx.lookup
 import ir.kazemcodes.infinity.domain.local_feature.domain.use_case.LocalUseCase
 import ir.kazemcodes.infinity.domain.models.Book
 import ir.kazemcodes.infinity.domain.models.Chapter
-import ir.kazemcodes.infinity.domain.network.models.HttpSource
-import ir.kazemcodes.infinity.domain.network.models.ParsedHttpSource
+import ir.kazemcodes.infinity.domain.network.models.Source
 import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
 import ir.kazemcodes.infinity.presentation.book_detail.BookDetailScreen
 import ir.kazemcodes.infinity.presentation.book_detail.BookDetailViewModel
@@ -50,7 +49,7 @@ data class MainScreenKey(val noArgument: String = "") : ComposeKey() {
 }
 @Immutable
 @Parcelize
-data class BrowserScreenKey(val api: @RawValue ParsedHttpSource) : ComposeKey() {
+data class BrowserScreenKey(val source: @RawValue Source) : ComposeKey() {
     @Composable
     override fun ScreenComposable(modifier: Modifier) {
         BrowserScreen()
@@ -58,7 +57,7 @@ data class BrowserScreenKey(val api: @RawValue ParsedHttpSource) : ComposeKey() 
 
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
-            add(BrowseViewModel(lookup<LocalUseCase>() , lookup<RemoteUseCase>(),api))
+            add(BrowseViewModel(lookup<LocalUseCase>() , lookup<RemoteUseCase>(),source = source))
         }
 
     }
@@ -67,16 +66,16 @@ data class BrowserScreenKey(val api: @RawValue ParsedHttpSource) : ComposeKey() 
 
 @Immutable
 @Parcelize
-data class BookDetailKey(val book: Book, val api: @RawValue HttpSource) : ComposeKey() {
+data class BookDetailKey(val book: Book, val source: @RawValue Source) : ComposeKey() {
     @Composable
     override fun ScreenComposable(modifier: Modifier) {
-        BookDetailScreen(book=book, api = api)
+        BookDetailScreen(book=book)
 
     }
 
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
-            add(BookDetailViewModel(lookup<LocalUseCase>() , lookup<RemoteUseCase>()))
+            add(BookDetailViewModel(lookup<LocalUseCase>() , lookup<RemoteUseCase>(),source = source))
         }
     }
 }
@@ -91,31 +90,38 @@ data class WebViewKey(val url: String) : ComposeKey() {
 }
 @Immutable
 @Parcelize
-data class ChapterDetailKey(val book: Book, val chapters: List<Chapter>, val api: @RawValue HttpSource) : ComposeKey() {
+data class ChapterDetailKey(val book: Book, val chapters: List<Chapter>, val source: @RawValue Source) : ComposeKey() {
 
     @Composable
     override fun ScreenComposable(modifier: Modifier) {
-        ChapterDetailScreen(chapters = chapters , book = book ,api=api)
+        ChapterDetailScreen(chapters = chapters , book = book)
     }
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
-            add(ChapterDetailViewModel(lookup<LocalUseCase>()))
+            add(ChapterDetailViewModel(lookup<LocalUseCase>(), source = source))
         }
     }
 }
 @Immutable
 @Parcelize
-data class ReaderScreenKey(val book: Book, val chapter: Chapter, val api: @RawValue HttpSource) : ComposeKey() {
+data class ReaderScreenKey(val book: Book, val chapter: Chapter, val source: @RawValue Source) : ComposeKey() {
 
     @ExperimentalMaterialApi
     @Composable
     override fun ScreenComposable(modifier: Modifier) {
 
-        ReadingScreen(book = book, chapter = chapter,api = api)
+        ReadingScreen(book = book, chapter = chapter)
     }
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
-            add(ReaderScreenViewModel(lookup<LocalUseCase>() , lookup<RemoteUseCase>(), lookup<DataStore<Preferences>>(DatastoreServiceTAG)))
+            add(ReaderScreenViewModel(
+                lookup<LocalUseCase>(),
+                lookup<RemoteUseCase>(),
+                lookup<DataStore<Preferences>>(DatastoreServiceTAG),
+                source = source,
+                book = book,
+                chapter = chapter
+            ))
         }
     }
 }

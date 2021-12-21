@@ -1,11 +1,11 @@
 package ir.kazemcodes.infinity.library_feature.util
 
-import ir.kazemcodes.infinity.domain.network.models.HttpSource
-import ir.kazemcodes.infinity.api_feature.network.apis
+import ir.kazemcodes.infinity.api_feature.network.sources
+import ir.kazemcodes.infinity.domain.network.models.Source
 
-fun mappingApiNameToAPi(apiName : String) : HttpSource {
-    var api = apis[0]
-      apis.forEach {apiItem->
+fun mappingApiNameToAPi(apiName : String) : Source {
+    var api = sources[0]
+      sources.forEach { apiItem->
         if (apiItem.name == apiName) {
             api = apiItem
         }

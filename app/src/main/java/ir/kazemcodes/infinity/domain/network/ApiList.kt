@@ -1,8 +1,8 @@
 package ir.kazemcodes.infinity.api_feature.network
 
-import ir.kazemcodes.infinity.domain.network.apis.FreeWebNovel
-import ir.kazemcodes.infinity.domain.network.models.ParsedHttpSource
+import ir.kazemcodes.infinity.domain.network.sources.FreeWebNovel
+import ir.kazemcodes.infinity.domain.network.models.Source
 
-val apis = listOf<ParsedHttpSource>(
+val sources = listOf<Source>(
     FreeWebNovel()
 )

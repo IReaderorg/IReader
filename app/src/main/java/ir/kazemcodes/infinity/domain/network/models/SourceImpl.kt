@@ -15,7 +15,7 @@ abstract class Source : Source {
     /**
      * Base url of the website without the trailing slash, like: http://mysite.com
      */
-    abstract val baseUrl: String
+    abstract override val baseUrl: String
 
 
 

@@ -8,10 +8,10 @@ import androidx.datastore.preferences.core.*
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ir.kazemcodes.infinity.domain.local_feature.domain.use_case.LocalUseCase
+import ir.kazemcodes.infinity.domain.models.Book
 import ir.kazemcodes.infinity.domain.models.Chapter
 import ir.kazemcodes.infinity.domain.models.Resource
-import ir.kazemcodes.infinity.domain.network.apis.FreeWebNovel
-import ir.kazemcodes.infinity.domain.network.models.ParsedHttpSource
+import ir.kazemcodes.infinity.domain.network.models.Source
 import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
 import ir.kazemcodes.infinity.presentation.book_detail.PreferenceKeys.SAVED_BRIGHTNESS_PREFERENCES
 import ir.kazemcodes.infinity.presentation.book_detail.PreferenceKeys.SAVED_FONT_PREFERENCES
@@ -28,69 +28,83 @@ class ReaderScreenViewModel(
     private val localUseCase: LocalUseCase,
     private val remoteUseCase: RemoteUseCase,
     private val dataStore: DataStore<Preferences>,
+    private val source: Source,
+    private val  chapter: Chapter,
+    private val book: Book
 ) : ViewModel() {
 
     private val _state = mutableStateOf(ReaderScreenState())
     val state: State<ReaderScreenState> = _state
-    private val _fontSize = mutableStateOf(18)
-    val fontSize = _fontSize
-    private val _fontState = mutableStateOf(poppins)
-    val fontState = _fontState
     private val fontSizeDataStore = intPreferencesKey(SAVED_FONT_SIZE_PREFERENCES)
     private val fontDatastore = stringPreferencesKey(SAVED_FONT_PREFERENCES)
     private val brightnessDatastore = floatPreferencesKey(SAVED_BRIGHTNESS_PREFERENCES)
-    private val _brightness = mutableStateOf(0.5f)
-    val brightness = _brightness
-    private val _api = mutableStateOf<ParsedHttpSource>(FreeWebNovel())
-    val api = _api.value
+
+    init {
+        readFromDatastore()
+        getContent(chapter = chapter.copy(bookName = book.bookName))
+
+    }
 
 
     fun onEvent(event: ReaderEvent) {
         when(event) {
             is ReaderEvent.ChangeBrightness -> {
-                _brightness.value = event.brightness
-                viewModelScope.launch(Dispatchers.IO) {
-                    dataStore.edit { preferences ->
-                        val currentFontSize = preferences[fontSizeDataStore] ?: 18
-                        preferences[brightnessDatastore] = event.brightness
-                    }
-                }
-
+                changeBrightness(event.brightness)
             }
             is ReaderEvent.ChangeFontSize -> {
-                if (event.fontEvent == FontEvent.Increase) {
-                    fontSize.value++
-                    viewModelScope.launch(Dispatchers.IO) {
-                        dataStore.edit { preferences ->
-                            val currentFontSize = preferences[fontSizeDataStore] ?: 18
-                            preferences[fontSizeDataStore] = currentFontSize + 1
-                        }
-                    }
-                } else {
-                    fontSize.value--
-                    viewModelScope.launch(Dispatchers.IO) {
-                        dataStore.edit { preferences ->
-                            val currentFontSize = preferences[fontSizeDataStore] ?: 18
-                            preferences[fontSizeDataStore] = currentFontSize - 1
-                        }
-                    }
-                }
+                changeFontSize(event.fontSizeEvent)
             }
             is ReaderEvent.ChangeFont -> {
-                _fontState.value = event.fontFamily
-                viewModelScope.launch(Dispatchers.IO) {
-                    dataStore.edit { preferences ->
-                        preferences[fontDatastore] = fontState.value.toString()
-                    }
+                changeFont(event.fontFamily)
+            }
+            is ReaderEvent.GetContent -> {
+                getContent(event.chapter)
+            }
+        }
+    }
+
+    private fun changeBrightness(brightness : Float) {
+        _state.value = state.value.copy(brightness = brightness)
+        viewModelScope.launch(Dispatchers.IO) {
+            dataStore.edit { preferences ->
+                val currentFontSize = preferences[fontSizeDataStore] ?: 18
+                preferences[brightnessDatastore] = brightness
+            }
+        }
+    }
+
+    private fun changeFontSize(event: FontSizeEvent) {
+        if (event == FontSizeEvent.Increase) {
+            _state.value = state.value.copy(fontSize = state.value.fontSize+1)
+            viewModelScope.launch(Dispatchers.IO) {
+                dataStore.edit { preferences ->
+                    val currentFontSize = preferences[fontSizeDataStore] ?: 18
+                    preferences[fontSizeDataStore] = currentFontSize + 1
                 }
+            }
+        } else {
+            _state.value = state.value.copy(fontSize = state.value.fontSize-1)
+            viewModelScope.launch(Dispatchers.IO) {
+                dataStore.edit { preferences ->
+                    val currentFontSize = preferences[fontSizeDataStore] ?: 18
+                    preferences[fontSizeDataStore] = currentFontSize - 1
+                }
+            }
+        }
+    }
+
+    private fun changeFont(fontFamily: FontFamily) {
+        _state.value = state.value.copy(font = fontFamily)
+        viewModelScope.launch(Dispatchers.IO) {
+            dataStore.edit { preferences ->
+                preferences[fontDatastore] = fontFamily.toString()
             }
         }
     }
 
 
 
-
-    fun getReadingContent(chapter: Chapter) {
+    private fun getContent(chapter: Chapter) {
         _state.value = state.value.copy(chapter = chapter)
         if (chapter.content == null) {
             getReadingContentLocally()
@@ -133,7 +147,7 @@ class ReaderScreenViewModel(
 
     private fun getReadingContentRemotely() {
         Timber.d("getReadingContentRemotely Successfully Triggered")
-        remoteUseCase.getRemoteReadingContentUseCase(state.value.chapter,api).onEach { result ->
+        remoteUseCase.getRemoteReadingContentUseCase(state.value.chapter,source = source).onEach { result ->
             when (result) {
                 is Resource.Success -> {
                     Timber.d("getReadingContentRemotely Successfully Called")
@@ -173,40 +187,40 @@ class ReaderScreenViewModel(
 
 
 
-    fun readFromDatastore() {
+    private fun readFromDatastore() {
         viewModelScope.launch(Dispatchers.IO) {
             getFontSizeFromDatastore().collectLatest {
-                fontSize.value = it
+                _state.value = state.value.copy(fontSize = it)
 
             }
         }
         viewModelScope.launch(Dispatchers.IO) {
             getFontFromDatastore().collectLatest {
-                    fontState.value = convertStringToFont(it?: poppins.toString())
+                _state.value = state.value.copy(font = convertStringToFont(it))
             }
         }
         viewModelScope.launch(Dispatchers.IO) {
             getBrightnessFromDatastore().collectLatest {
-                    _brightness.value = it
+                _state.value = state.value.copy(brightness = it)
             }
         }
     }
 
 
-    fun getFontFromDatastore(): Flow<String> {
+    private fun getFontFromDatastore(): Flow<String> {
         return dataStore.data
             .map { preferences ->
                 preferences[fontDatastore] ?: poppins.toString()
             }
     }
-    fun getBrightnessFromDatastore(): Flow<Float> {
+    private fun getBrightnessFromDatastore(): Flow<Float> {
         return dataStore.data
             .map { preferences ->
                 preferences[brightnessDatastore] ?: 1f
             }
     }
 
-    fun getFontSizeFromDatastore(): Flow<Int> {
+    private fun getFontSizeFromDatastore(): Flow<Int> {
         return dataStore.data
             .map { preferences ->
                 preferences[fontSizeDataStore] ?: 18
@@ -215,7 +229,7 @@ class ReaderScreenViewModel(
 
 
 
-    fun convertStringToFont(font: String?): FontFamily {
+    private fun convertStringToFont(font: String?): FontFamily {
         return if (font == poppins.toString()) {
             poppins
         } else if (font == sourceSansPro.toString()) {

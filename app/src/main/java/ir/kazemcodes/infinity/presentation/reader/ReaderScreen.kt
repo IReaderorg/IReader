@@ -20,7 +20,6 @@ import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import com.zhuinden.simplestackcomposeintegration.services.rememberService
 import ir.kazemcodes.infinity.domain.models.Book
 import ir.kazemcodes.infinity.domain.models.Chapter
-import ir.kazemcodes.infinity.domain.network.models.HttpSource
 import ir.kazemcodes.infinity.presentation.book_detail.DEFAULT.MAX_BRIGHTNESS
 import ir.kazemcodes.infinity.presentation.book_detail.DEFAULT.MIN_BRIGHTNESS
 import ir.kazemcodes.infinity.presentation.reader.components.FontMenuComposable
@@ -34,7 +33,6 @@ fun ReadingScreen(
     modifier: Modifier = Modifier,
     book: Book = Book.create(),
     chapter: Chapter = Chapter.create(),
-    api: HttpSource
 ) {
     val viewModel = rememberService<ReaderScreenViewModel>()
     val backStack = LocalBackstack.current
@@ -87,19 +85,19 @@ fun ReadingScreen(
                                 .padding(8.dp),
                         ) {
                             Slider(
-                                viewModel.brightness.value, { viewModel.onEvent(ReaderEvent.ChangeBrightness(it)) },
+                                viewModel.state.value.brightness, { viewModel.onEvent(ReaderEvent.ChangeBrightness(it)) },
                                 modifier = Modifier
                                     .fillMaxWidth(),
                                 valueRange = MIN_BRIGHTNESS..MAX_BRIGHTNESS
                             )
                             FontSizeChangerComposable(
                                 onFontDecease = {
-                                    viewModel.onEvent(ReaderEvent.ChangeFontSize(FontEvent.Decrease))
+                                    viewModel.onEvent(ReaderEvent.ChangeFontSize(FontSizeEvent.Decrease))
                                 },
                                 ontFontIncrease = {
-                                    viewModel.onEvent(ReaderEvent.ChangeFontSize(FontEvent.Increase))
+                                    viewModel.onEvent(ReaderEvent.ChangeFontSize(FontSizeEvent.Increase))
                                 },
-                                fontSize = viewModel.fontSize.value
+                                fontSize = viewModel.state.value.fontSize
                             )
                             Spacer(modifier = Modifier.height(12.dp))
                             FontMenuComposable(
@@ -124,17 +122,11 @@ fun ReadingScreen(
                     .clickable { readMode = !readMode }
                     .padding(16.dp)
             ) {
-
-//
-                LaunchedEffect(key1 = true) {
-                    viewModel.getReadingContent(chapter.copy(bookName = book.bookName) )
-                    viewModel.readFromDatastore()
-                }
                 if (!state.chapter.content.isNullOrBlank()) {
                     Text(
                         text = state.chapter.content ?: "",
-                        fontSize = viewModel.fontSize.value.sp,
-                        fontFamily = viewModel.fontState.value
+                        fontSize = viewModel.state.value.fontSize.sp,
+                        fontFamily = viewModel.state.value.font
                     )
                 }
                 if (state.error.isNotBlank()) {
@@ -160,7 +152,7 @@ fun ReadingScreen(
          * **/
         Box(modifier = modifier
             .fillMaxSize()
-            .background(color = Color.Black.copy(abs(viewModel.brightness.value - MAX_BRIGHTNESS)))){}
+            .background(color = Color.Black.copy(abs(viewModel.state.value.brightness - MAX_BRIGHTNESS)))){}
     }
 }
 

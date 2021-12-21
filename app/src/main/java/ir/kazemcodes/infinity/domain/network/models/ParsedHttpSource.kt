@@ -1,7 +1,8 @@
 package ir.kazemcodes.infinity.domain.network.models
 
-import ir.kazemcodes.infinity.api_feature.data.BookPage
+import ir.kazemcodes.infinity.api_feature.data.BooksPage
 import ir.kazemcodes.infinity.api_feature.data.ChapterPage
+import ir.kazemcodes.infinity.api_feature.data.ChaptersPage
 import ir.kazemcodes.infinity.domain.models.Book
 import ir.kazemcodes.infinity.domain.models.Chapter
 import ir.kazemcodes.infinity.domain.utils.asJsoup
@@ -20,7 +21,7 @@ abstract class ParsedHttpSource : HttpSource() {
     abstract fun popularBookFromElement(element: Element): Book
 
 
-    override fun popularBookParse(response: Response): BookPage {
+    override fun popularBookParse(response: Response): BooksPage {
         val document = response.asJsoup()
 
         val books = document.select(popularMangaSelector()).map { element ->
@@ -31,7 +32,7 @@ abstract class ParsedHttpSource : HttpSource() {
             document.select(selector).first()
         } != null
 
-        return BookPage(books, hasNextPage)
+        return BooksPage(books, hasNextPage)
     }
 
     /**
@@ -53,7 +54,7 @@ abstract class ParsedHttpSource : HttpSource() {
      */
     abstract fun latestUpdatesNextPageSelector(): String?
 
-    override fun latestUpdatesParse(response: Response): BookPage {
+    override fun latestUpdatesParse(response: Response): BooksPage {
         val document = response.asJsoup()
 
         val books = document.select(latestUpdatesSelector()).map { element ->
@@ -64,7 +65,7 @@ abstract class ParsedHttpSource : HttpSource() {
             document.select(selector).first()
         } != null
 
-        return BookPage(books, hasNextPage)
+        return BooksPage(books, hasNextPage)
     }
 
     /**
@@ -91,23 +92,23 @@ abstract class ParsedHttpSource : HttpSource() {
 
     abstract fun chapterListNextPageSelector(): String?
 
-    override fun chapterListParse(response: Response): ChapterPage {
+    override fun chapterListParse(response: Response): ChaptersPage {
         val document = response.asJsoup()
         val chapters =  document.select(chapterListSelector()).map { chapterFromElement(it) }
         val hasNext = hasNextChaptersParse(document)
 
-        return ChapterPage(chapters, hasNext)
+        return ChaptersPage(chapters, hasNext)
     }
 
 
 
 
 
-    override fun pageContentParse(response: Response): String {
+    override fun pageContentParse(response: Response): ChapterPage {
         return pageContentParse(response.asJsoup())
     }
 
-    abstract fun pageContentParse(document: Document): String
+    abstract fun pageContentParse(document: Document): ChapterPage
 
     override fun searchMangaSelector(): String {
         TODO("Not yet implemented")

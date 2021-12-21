@@ -26,7 +26,6 @@ import com.zhuinden.simplestackcomposeintegration.services.rememberService
 import ir.kazemcodes.infinity.base_feature.navigation.ChapterDetailKey
 import ir.kazemcodes.infinity.base_feature.navigation.WebViewKey
 import ir.kazemcodes.infinity.domain.models.Book
-import ir.kazemcodes.infinity.domain.network.models.HttpSource
 import ir.kazemcodes.infinity.presentation.book_detail.components.ButtonWithIconAndText
 import ir.kazemcodes.infinity.presentation.book_detail.components.CardTileComposable
 import ir.kazemcodes.infinity.presentation.book_detail.components.DotsFlashing
@@ -37,8 +36,7 @@ import ir.kazemcodes.infinity.presentation.screen.components.BookImageComposable
 @Composable
 fun BookDetailScreen(
     modifier: Modifier = Modifier,
-    book: Book = Book.create(),
-    api: HttpSource
+    book: Book = Book.create()
 ) {
     val viewModel = rememberService<BookDetailViewModel>()
     val detailState = viewModel.detailState.value
@@ -53,8 +51,7 @@ fun BookDetailScreen(
 
             BookDetailScreenLoadedComposable(
                 modifier = modifier,
-                viewModel = viewModel,
-                api = api
+                viewModel = viewModel
             )
 
         }
@@ -85,8 +82,8 @@ fun BookDetailScreen(
 fun BookDetailScreenLoadedComposable(
     modifier: Modifier = Modifier,
     viewModel: BookDetailViewModel,
-    api: HttpSource
 ) {
+    val source = viewModel.getSource()
     val backStack = LocalBackstack.current
     val inLibrary = viewModel.inLibrary.value
     val book = viewModel.detailState.value.book
@@ -149,7 +146,7 @@ fun BookDetailScreenLoadedComposable(
                         .clickable(role = Role.Button) {
                             if (!inLibrary) {
                                 viewModel.insertBookDetailToLocal(
-                                    book.copy(inLibrary = true, source = api.name).toBookEntity()
+                                    book.copy(inLibrary = true, source = source.name).toBookEntity()
                                 )
                                 val chapterEntities = chapters.map {
                                     it.copy(bookName = book.bookName).toChapterEntity()
@@ -160,7 +157,7 @@ fun BookDetailScreenLoadedComposable(
                                 viewModel.deleteLocalBook(book.bookName)
                                 viewModel.deleteLocalChapters(book.bookName)
                                 viewModel.insertBookDetailToLocal(
-                                    book.copy(inLibrary = false, source = api.name).toBookEntity()
+                                    book.copy(inLibrary = false, source = source.name).toBookEntity()
                                 )
                                 viewModel.toggleInLibrary()
                             }
@@ -265,7 +262,7 @@ fun BookDetailScreenLoadedComposable(
             /** Chapter Content **/
             CardTileComposable(
                 modifier = modifier.clickable {
-                    backStack.goTo(ChapterDetailKey(chapters = chapters, book = book, api = api))
+                    backStack.goTo(ChapterDetailKey(chapters = chapters, book = book, source = viewModel.getSource()))
                 },
                 title = "Contents",
                 subtitle = "${chapters.size} Chapters",

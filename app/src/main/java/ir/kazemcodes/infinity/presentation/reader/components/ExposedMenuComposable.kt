@@ -50,7 +50,7 @@ fun FontMenuComposable(
                 .padding(8.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text(text = viewModel.convertFontIntoString(viewModel.fontState.value))
+            Text(text = viewModel.convertFontIntoString(viewModel.state.value.font))
             DropdownMenu(expanded = expanded, onDismissRequest = {expanded = false},) {
                 DropdownMenuItem(onClick = {
                     viewModel.onEvent(ReaderEvent.ChangeFont(poppins))

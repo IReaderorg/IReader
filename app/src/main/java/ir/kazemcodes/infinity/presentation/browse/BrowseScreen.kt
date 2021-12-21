@@ -31,12 +31,9 @@ fun BrowserScreen() {
     val backstack = LocalBackstack.current
     val state = viewModel.state.value
     val backStack = LocalBackstack.current
-    val source = viewModel.source
+    val source = viewModel.getSource()
     InfinityInstance.inDetailScreen = false
 
-    LaunchedEffect(key1 = true) {
-
-    }
 
     Scaffold(
         topBar = {
@@ -67,7 +64,7 @@ fun BrowserScreen() {
             ) {
             if (state.books.isNotEmpty()) {
                 LinearViewList(books = state.books, onClick = { index ->
-                    backstack.goTo(BookDetailKey(state.books[index], api = source))
+                    backstack.goTo(BookDetailKey(state.books[index], source = source))
                 }, scrollState = scrollState)
 
             }

@@ -7,13 +7,15 @@ import androidx.lifecycle.viewModelScope
 import ir.kazemcodes.infinity.domain.local_feature.domain.use_case.LocalUseCase
 import ir.kazemcodes.infinity.domain.models.Chapter
 import ir.kazemcodes.infinity.domain.models.Resource
+import ir.kazemcodes.infinity.domain.network.models.Source
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
 
 
 class ChapterDetailViewModel(
-    private val localUseCase: LocalUseCase
+    private val localUseCase: LocalUseCase,
+    private val source: Source
 ) : ViewModel() {
 
     private val _state = mutableStateOf<ChapterDetailState>(ChapterDetailState())
@@ -30,7 +32,11 @@ class ChapterDetailViewModel(
             is ChapterDetailEvent.UpdateChapters -> {
                 _state.value = state.value.copy(chapters=event.chapters)
             }
+
         }
+    }
+    fun getSource() : Source {
+        return source
     }
 
     fun getLocalChapters(bookName: String) {
@@ -55,9 +61,3 @@ class ChapterDetailViewModel(
 
 }
 
-data class ChapterDetailState (
-    val isLoading : Boolean = false,
-    val chapters : List<Chapter> = emptyList(),
-    val error: String = "",
-    val chapterOrderType: OrderType = OrderType.Ascending
-)

@@ -1,7 +1,8 @@
 package ir.kazemcodes.infinity.domain.network.models
 
-import ir.kazemcodes.infinity.api_feature.data.BookPage
+import ir.kazemcodes.infinity.api_feature.data.BooksPage
 import ir.kazemcodes.infinity.api_feature.data.ChapterPage
+import ir.kazemcodes.infinity.api_feature.data.ChaptersPage
 import ir.kazemcodes.infinity.api_feature.network.GET
 import ir.kazemcodes.infinity.api_feature.network.InfinityInstance
 import ir.kazemcodes.infinity.api_feature.network.NetworkHelper
@@ -29,7 +30,7 @@ abstract class HttpSource : Source {
     /**
      * Base url of the website without the trailing slash, like: http://mysite.com
      */
-    abstract val baseUrl : String
+    abstract override val baseUrl : String
 
     /**
      * Default network client for doing requests.
@@ -85,18 +86,18 @@ abstract class HttpSource : Source {
 
 
     /**
-     * Parses the response from the site and returns a [BookPage] object.
+     * Parses the response from the site and returns a [BooksPage] object.
      *
      * @param response the response from the site.
      */
-    abstract fun popularBookParse(response: Response): BookPage
+    abstract fun popularBookParse(response: Response): BooksPage
 
     /**
      * Returns an observable containing a page with a list of latest Book updates.
      *
      * @param page the page number to retrieve.
      */
-    suspend fun fetchLatestUpdates(page: Int): BookPage {
+    override suspend fun fetchLatestUpdates(page: Int): BooksPage {
         val response =  client.newCall(latestUpdatesRequest(page))
             .await()
         return  latestUpdatesParse(response)
@@ -109,11 +110,11 @@ abstract class HttpSource : Source {
     abstract fun latestUpdatesRequest(page: Int): Request
 
     /**
-     * Parses the response from the site and returns a [BookPage] object.
+     * Parses the response from the site and returns a [BooksPage] object.
      *
      * @param response the response from the site.
      */
-    abstract fun latestUpdatesParse(response: Response): BookPage
+    abstract fun latestUpdatesParse(response: Response): BooksPage
 
 
     /**
@@ -156,7 +157,7 @@ abstract class HttpSource : Source {
      *
      * @param response the response from the site.
      */
-    abstract fun chapterListParse(response: Response): ChapterPage
+    abstract fun chapterListParse(response: Response): ChaptersPage
 
     /**
      * Returns the request for getting the page list. Override only if it's needed to override the
@@ -173,7 +174,7 @@ abstract class HttpSource : Source {
      *
      * @param response the response from the site.
      */
-    abstract fun pageContentParse(response: Response): String
+    abstract fun pageContentParse(response: Response): ChapterPage
 
 
 
