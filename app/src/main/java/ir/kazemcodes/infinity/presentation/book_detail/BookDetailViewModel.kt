@@ -2,10 +2,7 @@ package ir.kazemcodes.infinity.presentation.book_detail
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.zhuinden.simplestack.ScopedServices
-import ir.kazemcodes.infinity.api_feature.network.InfinityInstance
 import ir.kazemcodes.infinity.domain.local_feature.domain.model.BookEntity
 import ir.kazemcodes.infinity.domain.local_feature.domain.model.ChapterEntity
 import ir.kazemcodes.infinity.domain.local_feature.domain.use_case.LocalUseCase
@@ -13,74 +10,81 @@ import ir.kazemcodes.infinity.domain.models.Book
 import ir.kazemcodes.infinity.domain.models.Resource
 import ir.kazemcodes.infinity.domain.network.models.Source
 import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
-import timber.log.Timber
 
 
 class BookDetailViewModel(
         private val localUseCase: LocalUseCase,
         private val remoteUseCase: RemoteUseCase,
-        private val  source: Source
-) : ViewModel(), ScopedServices.Registered{
+        private val  source: Source,
+        private val book: Book
+) : ScopedServices.Registered{
 
-    private val _detailState = mutableStateOf<DetailState>(DetailState())
-    val detailState: State<DetailState> = _detailState
+    private val _state = mutableStateOf<DetailState>(DetailState())
+    val state: State<DetailState> = _state
 
     private val _chapterState = mutableStateOf<ChapterState>(ChapterState())
     val chapterState: State<ChapterState> = _chapterState
 
 
-    private val _inLibrary = mutableStateOf<Boolean>(false)
-    val inLibrary = _inLibrary
 
+    private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+
+
+    fun onEvent(event: BookDetailEvent) {
+        when(event) {
+            is BookDetailEvent.ToggleInLibrary -> {
+                toggleInLibrary()
+            }
+        }
+    }
+    override fun onServiceRegistered() {
+        getBookData(book)
+    }
 
     fun getSource() : Source {
         return source
     }
 
 
-    fun toggleInLibrary() {
-        _inLibrary.value = !inLibrary.value
+    private fun toggleInLibrary(isAdded: Boolean? = null) {
+        if (isAdded != null) {
+            _state.value = state.value.copy(inLibrary = isAdded)
+        } else {
+            _state.value = state.value.copy(inLibrary = !state.value.inLibrary)
+        }
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        Timber.d("Timber: ViewModel Cleared")
-    }
 
-
-
-    fun getBookData(book: Book) {
-        _detailState.value = DetailState(book = book,error = "",loaded = false,isLoading = false)
+    private fun getBookData(book: Book) {
+        _state.value = DetailState(book = book,error = "",loaded = false,isLoading = false)
         _chapterState.value = ChapterState(chapters = emptyList(), loaded = false,isLoading = false,error = "")
-        InfinityInstance.inDetailScreen = true
         getLocalBookByName()
         getLocalChaptersByBookName()
     }
 
     private fun getLocalBookByName() {
-        localUseCase.getLocalBookByNameUseCase(book = detailState.value.book).onEach { result ->
+        localUseCase.getLocalBookByNameUseCase(book = state.value.book).onEach { result ->
             when (result) {
                 is Resource.Success -> {
                     if (result.data != Book.create()) {
-                        _detailState.value = detailState.value.copy(
-                                book = result.data ?: detailState.value.book,
+                        _state.value = state.value.copy(
+                                book = result.data ?: state.value.book,
                                 error = "",
                                 isLoading = false,
                                 loaded = true
                         )
                     } else {
-                        if (!detailState.value.loaded) {
+                        if (!state.value.loaded) {
                             getRemoteBookDetail()
                         }
                     }
                 }
                 is Resource.Error -> {
-                    _detailState.value =
-                            detailState.value.copy(
+                    _state.value =
+                            state.value.copy(
                                     error = result.message ?: "An Unknown Error Occurred",
                                     isLoading = false,
                                     loaded = false
@@ -88,16 +92,16 @@ class BookDetailViewModel(
 
                 }
                 is Resource.Loading -> {
-                    _detailState.value =
-                            detailState.value.copy(isLoading = true, error = "", loaded = false)
+                    _state.value =
+                            state.value.copy(isLoading = true, error = "", loaded = false)
                 }
             }
-        }.launchIn(viewModelScope)
+        }.launchIn(coroutineScope)
     }
 
 
     private fun getLocalChaptersByBookName() {
-        localUseCase.getLocalChaptersByBookNameByBookNameUseCase(detailState.value.book.bookName)
+        localUseCase.getLocalChaptersByBookNameByBookNameUseCase(state.value.book.bookName)
                 .onEach { result ->
                     when (result) {
                         is Resource.Success -> {
@@ -109,7 +113,7 @@ class BookDetailViewModel(
                                         isLoading = false,
                                         loaded = true
                                 )
-                                _inLibrary.value = true
+                                toggleInLibrary(true)
                             } else {
                                 if (!chapterState.value.loaded) {
                                     getRemoteChapterDetail()
@@ -129,41 +133,41 @@ class BookDetailViewModel(
                                     chapterState.value.copy(isLoading = true, error = "", loaded = false)
                         }
                     }
-                }.launchIn(viewModelScope)
+                }.launchIn(coroutineScope)
     }
 
 
-    fun getRemoteBookDetail() {
-        remoteUseCase.getRemoteBookDetailUseCase(book = detailState.value.book, source= source)
+    private fun getRemoteBookDetail() {
+        remoteUseCase.getRemoteBookDetailUseCase(book = state.value.book, source= source)
                 .onEach { result ->
                     when (result) {
 
                         is Resource.Success -> {
-                            _detailState.value = detailState.value.copy(
-                                    book = result.data ?: detailState.value.book,
+                            _state.value = state.value.copy(
+                                    book = result.data ?: state.value.book,
                                     isLoading = false,
                                     error = "",
                                     loaded = true
                             )
                         }
                         is Resource.Error -> {
-                            _detailState.value =
-                                    detailState.value.copy(
+                            _state.value =
+                                    state.value.copy(
                                             error = result.message ?: "An Unknown Error Occurred",
                                             isLoading = false,
                                             loaded = false
                                     )
                         }
                         is Resource.Loading -> {
-                            _detailState.value =
-                                    detailState.value.copy(isLoading = true, error = "", loaded = false)
+                            _state.value =
+                                    state.value.copy(isLoading = true, error = "", loaded = false)
                         }
                     }
-                }.launchIn(viewModelScope)
+                }.launchIn(coroutineScope)
     }
 
     private fun getRemoteChapterDetail() {
-        remoteUseCase.getRemoteChaptersUseCase(book = detailState.value.book, source= source)
+        remoteUseCase.getRemoteChaptersUseCase(book = state.value.book, source= source)
                 .onEach { result ->
 
                     when (result) {
@@ -187,39 +191,37 @@ class BookDetailViewModel(
                                     chapterState.value.copy(isLoading = true, error = "", loaded = false)
                         }
                     }
-                }.launchIn(viewModelScope)
+                }.launchIn(coroutineScope)
     }
 
     fun insertBookDetailToLocal(bookEntity: BookEntity) {
-        viewModelScope.launch(Dispatchers.IO) {
+        coroutineScope.launch(Dispatchers.IO) {
             localUseCase.insertLocalBookUserCase(bookEntity)
         }
     }
 
     fun insertChaptersToLocal(chapterEntities: List<ChapterEntity>) {
-        viewModelScope.launch(Dispatchers.IO) {
+        coroutineScope.launch(Dispatchers.IO) {
             localUseCase.insertLocalChaptersUseCase(chapterEntities)
         }
     }
 
     fun deleteLocalBook(bookName: String) {
-        viewModelScope.launch(Dispatchers.IO) {
+        coroutineScope.launch(Dispatchers.IO) {
             localUseCase.deleteLocalBookUseCase(bookName)
         }
     }
 
     fun deleteLocalChapters(bookName: String) {
-        viewModelScope.launch(Dispatchers.IO) {
+        coroutineScope.launch(Dispatchers.IO) {
             localUseCase.deleteChaptersUseCase(bookName)
         }
     }
 
-    override fun onServiceRegistered() {
-        Timber.d("Timber: register")
-    }
+
 
     override fun onServiceUnregistered() {
-        Timber.d("Timber: unregister")
+        coroutineScope.cancel()
     }
 
 }

@@ -1,8 +1,8 @@
 package ir.kazemcodes.infinity.domain.local_feature.domain.use_case.chapter
 
-import ir.kazemcodes.infinity.domain.repository.Repository
-import ir.kazemcodes.infinity.domain.models.Resource
 import ir.kazemcodes.infinity.domain.models.Chapter
+import ir.kazemcodes.infinity.domain.models.Resource
+import ir.kazemcodes.infinity.domain.repository.Repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
@@ -21,12 +21,10 @@ class GetLocalChapterReadingContentUseCase @Inject constructor(
                 repository.localChapterRepository.getChapterByChapter(chapterTitle = chapter.title , bookName = chapter.bookName?:"")
                     .collect { chapter ->
                         if (chapter!= null) {
-                            Timber.d("Timber: GetLocalChapterReadingContentUseCase $chapter")
                             emit(Resource.Success<Chapter?>(data = chapter.toChapter()))
                         } else {
                             emit(Resource.Success<Chapter?>(data = null))
                         }
-
                     }
                 Timber.d("GetLocalChapterReadingContentUseCase was Finished Successfully")
             } catch (e: Exception) {

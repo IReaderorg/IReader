@@ -19,12 +19,12 @@ fun ButtonWithIconAndText(
 ) {
 
     Column(modifier = modifier, verticalArrangement = Arrangement.Center,horizontalAlignment = Alignment.CenterHorizontally) {
-        Icon(
-            modifier = modifier,
-            imageVector = imageVector,
-            contentDescription = contentDescription,
-            tint = MaterialTheme.colors.onBackground
-        )
+            Icon(
+                imageVector = imageVector,
+                contentDescription = contentDescription,
+                tint = MaterialTheme.colors.onBackground
+            )
+
         Text(
             text = text, style = MaterialTheme.typography.caption,
             color = MaterialTheme.colors.onBackground

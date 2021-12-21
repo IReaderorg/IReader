@@ -2,12 +2,15 @@ package ir.kazemcodes.infinity.presentation.chapter_detail
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import com.zhuinden.simplestack.ScopedServices
 import ir.kazemcodes.infinity.domain.local_feature.domain.use_case.LocalUseCase
-import ir.kazemcodes.infinity.domain.models.Chapter
+import ir.kazemcodes.infinity.domain.models.Book
 import ir.kazemcodes.infinity.domain.models.Resource
 import ir.kazemcodes.infinity.domain.network.models.Source
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
@@ -15,12 +18,14 @@ import kotlinx.coroutines.flow.onEach
 
 class ChapterDetailViewModel(
     private val localUseCase: LocalUseCase,
+    private val book: Book,
     private val source: Source
-) : ViewModel() {
+) : ScopedServices.Registered {
 
     private val _state = mutableStateOf<ChapterDetailState>(ChapterDetailState())
     val state: State<ChapterDetailState> = _state
 
+    private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     fun onEvent(event: ChapterDetailEvent) {
         when(event) {
@@ -39,14 +44,17 @@ class ChapterDetailViewModel(
         return source
     }
 
-    fun getLocalChapters(bookName: String) {
+    private fun getLocalChapters(bookName: String) {
         localUseCase.getLocalChaptersByBookNameByBookNameUseCase(bookName = bookName ).onEach { result ->
 
             when (result) {
                 is Resource.Success -> {
-                    _state.value = ChapterDetailState(
-                        chapters = result.data ?: emptyList()
-                    )
+                    if (!result.data.isNullOrEmpty()) {
+                        _state.value = ChapterDetailState(
+                            chapters = result.data
+                        )
+                    }
+
                 }
                 is Resource.Error -> {
                     _state.value =
@@ -56,7 +64,15 @@ class ChapterDetailViewModel(
                     _state.value = ChapterDetailState(isLoading = true)
                 }
             }
-        }.launchIn(viewModelScope)
+        }.launchIn(coroutineScope)
+    }
+
+    override fun onServiceRegistered() {
+        getLocalChapters(bookName = book.bookName)
+    }
+
+    override fun onServiceUnregistered() {
+        coroutineScope.cancel()
     }
 
 }

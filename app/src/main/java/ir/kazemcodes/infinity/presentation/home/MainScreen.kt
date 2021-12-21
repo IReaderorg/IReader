@@ -1,17 +1,16 @@
 package ir.kazemcodes.infinity.presentation.home
 
 
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.zhuinden.simplestackcomposeintegration.services.rememberService
 import ir.kazemcodes.infinity.presentation.extension.ExtensionScreen
 import ir.kazemcodes.infinity.presentation.library.LibraryScreen
 import ir.kazemcodes.infinity.setting_feature.presentation.SettingScreen
@@ -45,7 +44,8 @@ sealed class BottomNavigationScreens(
 @ExperimentalMaterialApi
 @Composable
 fun MainScreen(modifier : Modifier = Modifier) {
-    var currentIndex by remember { mutableStateOf(0) }
+    val viewModel = rememberService<MainViewModel>()
+    val currentIndex = viewModel.state.value.index
     val bottomNavigationItems = listOf(
         BottomNavigationScreens.Library,
         BottomNavigationScreens.ExtensionScreen,
@@ -64,7 +64,7 @@ fun MainScreen(modifier : Modifier = Modifier) {
                     BottomNavigationItem(
                         selected = screen.title == bottomNavigationItems[currentIndex].title,
                         onClick = {
-                            currentIndex = screen.index
+                            viewModel.onEvent(MainScreenEvent.ChangeScreenIndex(screen.index))
                         },
                         label = { Text(text = screen.title) },
                         icon = {
@@ -88,21 +88,5 @@ fun MainScreen(modifier : Modifier = Modifier) {
         } else if (currentIndex == 2) {
             SettingScreen()
         }
-    }
-
-
-    @Composable
-    fun TopBar(title: String) {
-        TopAppBar(
-            title = {
-                Text(
-                    text = title,
-                    fontSize = 18.sp,
-                )
-            },
-            backgroundColor = MaterialTheme.colors.background,
-            contentColor = MaterialTheme.colors.onBackground,
-            modifier = Modifier.fillMaxWidth()
-        )
     }
 }

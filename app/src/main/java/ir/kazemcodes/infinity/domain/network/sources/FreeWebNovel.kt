@@ -3,7 +3,6 @@ package ir.kazemcodes.infinity.domain.network.sources
 import ir.kazemcodes.infinity.api_feature.data.BooksPage
 import ir.kazemcodes.infinity.api_feature.data.ChapterPage
 import ir.kazemcodes.infinity.api_feature.network.GET
-import ir.kazemcodes.infinity.api_feature.network.InfinityInstance
 import ir.kazemcodes.infinity.domain.models.Book
 import ir.kazemcodes.infinity.domain.models.Chapter
 import ir.kazemcodes.infinity.domain.network.models.ParsedHttpSource
@@ -50,7 +49,7 @@ class FreeWebNovel : ParsedHttpSource() {
         val chapters = mutableListOf<Chapter>()
         var hasNext = true
         var page : Int = 1
-        while (hasNext && InfinityInstance.inDetailScreen){
+        while (hasNext){
             val req = chapterListRequest(book,page)
             val res = client.newCall(req).await()
             val content = chapterListParse(res)

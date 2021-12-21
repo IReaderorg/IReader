@@ -2,13 +2,16 @@ package ir.kazemcodes.infinity.presentation.browse
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import com.zhuinden.simplestack.ScopedServices
 import ir.kazemcodes.infinity.domain.local_feature.domain.use_case.LocalUseCase
 import ir.kazemcodes.infinity.domain.models.Resource
 import ir.kazemcodes.infinity.domain.network.models.Source
 import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
 import ir.kazemcodes.infinity.domain.utils.merge
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import timber.log.Timber
@@ -18,22 +21,33 @@ class BrowseViewModel(
     private val localUseCase: LocalUseCase,
     private val remoteUseCase: RemoteUseCase,
     private val source: Source
-) : ViewModel() {
-    private val _state = mutableStateOf<BrowseScreenState>(BrowseScreenState())
-    val state: State<BrowseScreenState> = _state
-    var currentPage = mutableStateOf(1)
+) : ScopedServices.Registered {
 
-    init {
-        Timber.d("Timber browse viewmodel")
+    private val _state = mutableStateOf<BrowseScreenState>(BrowseScreenState())
+
+    val state: State<BrowseScreenState> = _state
+
+
+    private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+
+    override fun onServiceRegistered() {
         getBooks(source = source)
     }
+
     fun getSource() : Source {
         return source
+    }
+    fun onEvent(event: BrowseScreenEvents) {
+        when(event) {
+            is BrowseScreenEvents.UpdatePage -> {
+                _state.value = state.value.copy(page = event.page)
+            }
+        }
     }
 
 
     fun getBooks(source: Source) {
-        remoteUseCase.getRemoteBooksUseCase(page =  currentPage.value, source = source).onEach { result ->
+        remoteUseCase.getRemoteBooksUseCase(page =  state.value.page, source = source).onEach { result ->
             Timber.d("TAG getRemoteBooksUseCase is called")
             when (result) {
                 is Resource.Success -> {
@@ -42,7 +56,7 @@ class BrowseViewModel(
                         isLoading = false,
                         error = ""
                     )
-                    currentPage.value++
+                    onEvent(BrowseScreenEvents.UpdatePage(state.value.page + 1))
                 }
                 is Resource.Error -> {
                     _state.value =
@@ -53,7 +67,13 @@ class BrowseViewModel(
                     _state.value = state.value.copy(isLoading = true, error = "")
                 }
             }
-        }.launchIn(viewModelScope)
+        }.launchIn(coroutineScope)
+    }
+
+
+
+    override fun onServiceUnregistered() {
+        coroutineScope.cancel()
     }
 
 }

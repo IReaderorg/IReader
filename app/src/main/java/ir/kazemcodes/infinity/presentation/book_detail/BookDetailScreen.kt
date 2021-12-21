@@ -10,7 +10,6 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,15 +38,11 @@ fun BookDetailScreen(
     book: Book = Book.create()
 ) {
     val viewModel = rememberService<BookDetailViewModel>()
-    val detailState = viewModel.detailState.value
+    val detailState = viewModel.state.value
     val chapterState = viewModel.chapterState.value
 
-    LaunchedEffect(key1 = true) {
-        viewModel.getBookData(book)
-    }
-
     Box(modifier = Modifier.fillMaxSize()) {
-        if (!viewModel.detailState.value.book.description.isNullOrBlank()) {
+        if (!viewModel.state.value.book.description.isNullOrBlank()) {
 
             BookDetailScreenLoadedComposable(
                 modifier = modifier,
@@ -85,8 +80,8 @@ fun BookDetailScreenLoadedComposable(
 ) {
     val source = viewModel.getSource()
     val backStack = LocalBackstack.current
-    val inLibrary = viewModel.inLibrary.value
-    val book = viewModel.detailState.value.book
+    val inLibrary = viewModel.state.value.inLibrary
+    val book = viewModel.state.value.book
     val chapters = viewModel.chapterState.value.chapters
     Scaffold(topBar = {
         TopAppBar(
@@ -103,13 +98,6 @@ fun BookDetailScreenLoadedComposable(
                         imageVector = Icons.Default.Language,
                         contentDescription = "WebView",
                         tint = MaterialTheme.colors.onBackground,
-                    )
-                }
-                IconButton(onClick = {}) {
-                    Icon(
-                        imageVector = Icons.Default.IosShare,
-                        contentDescription = "more information",
-                        tint = MaterialTheme.colors.onBackground
                     )
                 }
             },
@@ -152,14 +140,11 @@ fun BookDetailScreenLoadedComposable(
                                     it.copy(bookName = book.bookName).toChapterEntity()
                                 }
                                 viewModel.insertChaptersToLocal(chapterEntities)
-                                viewModel.toggleInLibrary()
+                                viewModel.onEvent(BookDetailEvent.ToggleInLibrary)
                             } else {
                                 viewModel.deleteLocalBook(book.bookName)
                                 viewModel.deleteLocalChapters(book.bookName)
-                                viewModel.insertBookDetailToLocal(
-                                    book.copy(inLibrary = false, source = source.name).toBookEntity()
-                                )
-                                viewModel.toggleInLibrary()
+                                viewModel.onEvent(BookDetailEvent.ToggleInLibrary)
                             }
 
                         }

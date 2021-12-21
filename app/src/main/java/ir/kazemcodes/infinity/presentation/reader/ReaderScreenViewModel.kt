@@ -5,8 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.text.font.FontFamily
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import com.zhuinden.simplestack.ScopedServices
 import ir.kazemcodes.infinity.domain.local_feature.domain.use_case.LocalUseCase
 import ir.kazemcodes.infinity.domain.models.Book
 import ir.kazemcodes.infinity.domain.models.Chapter
@@ -18,9 +17,8 @@ import ir.kazemcodes.infinity.presentation.book_detail.PreferenceKeys.SAVED_FONT
 import ir.kazemcodes.infinity.presentation.book_detail.PreferenceKeys.SAVED_FONT_SIZE_PREFERENCES
 import ir.kazemcodes.infinity.presentation.theme.poppins
 import ir.kazemcodes.infinity.presentation.theme.sourceSansPro
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import timber.log.Timber
 
 
@@ -31,7 +29,7 @@ class ReaderScreenViewModel(
     private val source: Source,
     private val  chapter: Chapter,
     private val book: Book
-) : ViewModel() {
+) : ScopedServices.Registered{
 
     private val _state = mutableStateOf(ReaderScreenState())
     val state: State<ReaderScreenState> = _state
@@ -39,12 +37,12 @@ class ReaderScreenViewModel(
     private val fontDatastore = stringPreferencesKey(SAVED_FONT_PREFERENCES)
     private val brightnessDatastore = floatPreferencesKey(SAVED_BRIGHTNESS_PREFERENCES)
 
-    init {
+    private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+
+    override fun onServiceRegistered() {
         readFromDatastore()
         getContent(chapter = chapter.copy(bookName = book.bookName))
-
     }
-
 
     fun onEvent(event: ReaderEvent) {
         when(event) {
@@ -60,14 +58,14 @@ class ReaderScreenViewModel(
             is ReaderEvent.GetContent -> {
                 getContent(event.chapter)
             }
+            else -> {}
         }
     }
 
     private fun changeBrightness(brightness : Float) {
         _state.value = state.value.copy(brightness = brightness)
-        viewModelScope.launch(Dispatchers.IO) {
+        coroutineScope.launch(Dispatchers.IO) {
             dataStore.edit { preferences ->
-                val currentFontSize = preferences[fontSizeDataStore] ?: 18
                 preferences[brightnessDatastore] = brightness
             }
         }
@@ -76,7 +74,7 @@ class ReaderScreenViewModel(
     private fun changeFontSize(event: FontSizeEvent) {
         if (event == FontSizeEvent.Increase) {
             _state.value = state.value.copy(fontSize = state.value.fontSize+1)
-            viewModelScope.launch(Dispatchers.IO) {
+            coroutineScope.launch(Dispatchers.IO) {
                 dataStore.edit { preferences ->
                     val currentFontSize = preferences[fontSizeDataStore] ?: 18
                     preferences[fontSizeDataStore] = currentFontSize + 1
@@ -84,7 +82,7 @@ class ReaderScreenViewModel(
             }
         } else {
             _state.value = state.value.copy(fontSize = state.value.fontSize-1)
-            viewModelScope.launch(Dispatchers.IO) {
+            coroutineScope.launch(Dispatchers.IO) {
                 dataStore.edit { preferences ->
                     val currentFontSize = preferences[fontSizeDataStore] ?: 18
                     preferences[fontSizeDataStore] = currentFontSize - 1
@@ -95,14 +93,12 @@ class ReaderScreenViewModel(
 
     private fun changeFont(fontFamily: FontFamily) {
         _state.value = state.value.copy(font = fontFamily)
-        viewModelScope.launch(Dispatchers.IO) {
+        coroutineScope.launch(Dispatchers.IO) {
             dataStore.edit { preferences ->
                 preferences[fontDatastore] = fontFamily.toString()
             }
         }
     }
-
-
 
     private fun getContent(chapter: Chapter) {
         _state.value = state.value.copy(chapter = chapter)
@@ -124,7 +120,6 @@ class ReaderScreenViewModel(
                         )
                     } else {
                         if (state.value.chapter.content == null) {
-
                             getReadingContentRemotely()
                         }
                     }
@@ -141,7 +136,7 @@ class ReaderScreenViewModel(
                 }
             }
 
-        }.launchIn(viewModelScope)
+        }.launchIn(coroutineScope)
     }
 
 
@@ -174,13 +169,13 @@ class ReaderScreenViewModel(
                     _state.value = state.value.copy(isLoading = true, error = "")
                 }
             }
-        }.launchIn(viewModelScope)
+        }.launchIn(coroutineScope)
 
 
     }
 
     private fun updateChapterContent(chapter: Chapter) {
-        viewModelScope.launch(Dispatchers.IO) {
+        coroutineScope.launch(Dispatchers.IO) {
             localUseCase.UpdateLocalChapterContentUseCase(chapter)
         }
     }
@@ -188,18 +183,18 @@ class ReaderScreenViewModel(
 
 
     private fun readFromDatastore() {
-        viewModelScope.launch(Dispatchers.IO) {
+        coroutineScope.launch(Dispatchers.IO) {
             getFontSizeFromDatastore().collectLatest {
                 _state.value = state.value.copy(fontSize = it)
 
             }
         }
-        viewModelScope.launch(Dispatchers.IO) {
+        coroutineScope.launch(Dispatchers.IO) {
             getFontFromDatastore().collectLatest {
                 _state.value = state.value.copy(font = convertStringToFont(it))
             }
         }
-        viewModelScope.launch(Dispatchers.IO) {
+        coroutineScope.launch(Dispatchers.IO) {
             getBrightnessFromDatastore().collectLatest {
                 _state.value = state.value.copy(brightness = it)
             }
@@ -216,7 +211,7 @@ class ReaderScreenViewModel(
     private fun getBrightnessFromDatastore(): Flow<Float> {
         return dataStore.data
             .map { preferences ->
-                preferences[brightnessDatastore] ?: 1f
+                preferences[brightnessDatastore] ?: 0.6f
             }
     }
 
@@ -247,6 +242,10 @@ class ReaderScreenViewModel(
         } else {
             "Unknown"
         }
+    }
+
+    override fun onServiceUnregistered() {
+        coroutineScope.cancel()
     }
 
 }

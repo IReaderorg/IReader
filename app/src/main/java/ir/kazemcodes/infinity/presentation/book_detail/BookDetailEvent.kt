@@ -1,3 +1,5 @@
 package ir.kazemcodes.infinity.presentation.book_detail
 
-class BookDetailEvent
+sealed class BookDetailEvent {
+    object ToggleInLibrary : BookDetailEvent()
+}

@@ -24,6 +24,7 @@ import ir.kazemcodes.infinity.presentation.core.Constants.DatastoreServiceTAG
 import ir.kazemcodes.infinity.presentation.extension.ExtensionScreen
 import ir.kazemcodes.infinity.presentation.home.ComposeKey
 import ir.kazemcodes.infinity.presentation.home.MainScreen
+import ir.kazemcodes.infinity.presentation.home.MainViewModel
 import ir.kazemcodes.infinity.presentation.library.LibraryViewModel
 import ir.kazemcodes.infinity.presentation.reader.ReaderScreenViewModel
 import ir.kazemcodes.infinity.presentation.reader.ReadingScreen
@@ -44,6 +45,7 @@ data class MainScreenKey(val noArgument: String = "") : ComposeKey() {
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
             add(LibraryViewModel(lookup<LocalUseCase>() ))
+            add(MainViewModel())
         }
     }
 }
@@ -75,7 +77,7 @@ data class BookDetailKey(val book: Book, val source: @RawValue Source) : Compose
 
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
-            add(BookDetailViewModel(lookup<LocalUseCase>() , lookup<RemoteUseCase>(),source = source))
+            add(BookDetailViewModel(lookup<LocalUseCase>() , lookup<RemoteUseCase>(),source = source, book = book))
         }
     }
 }
@@ -98,7 +100,7 @@ data class ChapterDetailKey(val book: Book, val chapters: List<Chapter>, val sou
     }
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
-            add(ChapterDetailViewModel(lookup<LocalUseCase>(), source = source))
+            add(ChapterDetailViewModel(lookup<LocalUseCase>(), source = source,book = book))
         }
     }
 }
@@ -109,7 +111,6 @@ data class ReaderScreenKey(val book: Book, val chapter: Chapter, val source: @Ra
     @ExperimentalMaterialApi
     @Composable
     override fun ScreenComposable(modifier: Modifier) {
-
         ReadingScreen(book = book, chapter = chapter)
     }
     override fun bindServices(serviceBinder: ServiceBinder) {
@@ -128,7 +129,6 @@ data class ReaderScreenKey(val book: Book, val chapter: Chapter, val source: @Ra
 @Immutable
 @Parcelize
 data class ExtensionScreenKey(val noArgs : String = "") : ComposeKey() {
-
     @Composable
     override fun ScreenComposable(modifier: Modifier) {
         ExtensionScreen()

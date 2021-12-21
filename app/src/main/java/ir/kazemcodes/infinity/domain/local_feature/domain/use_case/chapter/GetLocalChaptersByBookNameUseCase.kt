@@ -1,8 +1,8 @@
 package ir.kazemcodes.infinity.domain.local_feature.domain.use_case.chapter
 
-import ir.kazemcodes.infinity.domain.repository.Repository
-import ir.kazemcodes.infinity.domain.models.Resource
 import ir.kazemcodes.infinity.domain.models.Chapter
+import ir.kazemcodes.infinity.domain.models.Resource
+import ir.kazemcodes.infinity.domain.repository.Repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
@@ -12,7 +12,6 @@ import javax.inject.Inject
 class GetLocalChaptersByBookNameUseCase @Inject constructor(
     private val repository: Repository
 ) {
-
     operator fun invoke(bookName: String): Flow<Resource<List<Chapter>>> =
         flow {
             try {
