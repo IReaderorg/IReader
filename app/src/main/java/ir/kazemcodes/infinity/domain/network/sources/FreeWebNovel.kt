@@ -112,7 +112,7 @@ class FreeWebNovel : ParsedHttpSource() {
         book.bookName = document.select("div.m-desc h1.tit").text()
         book.description = document.select("div.inner").eachText().joinToString("\n\n\n")
         book.author = document.select("div.right a.a1").attr("title")
-        book.category = document.select("div.item div.right a.a1").eachText().joinToString(" ,")
+        book.category = document.select("div.item div.right a.a1").eachText().drop(1).map {value-> value.trim()  }.joinToString(" ,")
         book.source = name
         return book
     }

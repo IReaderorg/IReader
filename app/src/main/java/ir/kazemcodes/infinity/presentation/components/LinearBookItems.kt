@@ -52,7 +52,6 @@ fun LinearViewList(
     onClick: (index : Int) -> Unit,
     scrollState: LazyListState = rememberLazyListState()
 ) {
-
     LazyColumn(modifier = Modifier.fillMaxSize() , state = scrollState ) {
         items(count = books.size) { index ->
             LinearBookItem(
@@ -65,7 +64,5 @@ fun LinearViewList(
         }
 
     }
-
-
 }
 

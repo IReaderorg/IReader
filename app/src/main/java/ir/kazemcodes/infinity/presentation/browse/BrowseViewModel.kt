@@ -42,11 +42,26 @@ class BrowseViewModel(
             is BrowseScreenEvents.UpdatePage -> {
                 _state.value = state.value.copy(page = event.page)
             }
+            is BrowseScreenEvents.UpdateLayoutType -> {
+                updateLayoutType(event.layoutType)
+            }
+            is BrowseScreenEvents.ToggleMenuDropDown -> {
+                toggleMenuDropDown(isShown = event.isShown)
+            }
+            is BrowseScreenEvents.GetBooks -> {
+                getBooks(event.source)
+            }
         }
     }
+    private fun updateLayoutType(layoutType: LayoutType) {
+        _state.value = state.value.copy(layout = layoutType)
+    }
 
+    private fun toggleMenuDropDown(isShown : Boolean) {
+        _state.value = state.value.copy(isMenuDropDownShown = isShown)
+    }
 
-    fun getBooks(source: Source) {
+    private fun getBooks(source: Source) {
         remoteUseCase.getRemoteBooksUseCase(page =  state.value.page, source = source).onEach { result ->
             Timber.d("TAG getRemoteBooksUseCase is called")
             when (result) {

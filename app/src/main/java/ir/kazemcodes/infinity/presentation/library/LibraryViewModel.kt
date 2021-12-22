@@ -4,7 +4,9 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import com.zhuinden.simplestack.ScopedServices
 import ir.kazemcodes.infinity.domain.local_feature.domain.use_case.LocalUseCase
+import ir.kazemcodes.infinity.domain.models.Book
 import ir.kazemcodes.infinity.domain.models.Resource
+import ir.kazemcodes.infinity.presentation.browse.LayoutType
 import ir.kazemcodes.infinity.presentation.library.components.LibraryEvents
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -36,7 +38,33 @@ class LibraryViewModel (
             is  LibraryEvents.GetLocalBooks -> {
                 getLocalBooks()
             }
+            is LibraryEvents.UpdateLayoutType -> {
+                updateLayoutType(event.layoutType)
+            }
+            is LibraryEvents.ToggleSearchMode -> {
+                toggleSearchMode(event.inSearchMode)
+            }
+            is LibraryEvents.UpdateSearchInput -> {
+                updateSearchInput(event.query)
+            }
+            is LibraryEvents.SearchBooks -> {
+                searchBook(event.query)
+            }
         }
+
+    }
+    private fun updateSearchInput(query : String) {
+        _state.value = state.value.copy(searchQuery= query)
+    }
+    private fun toggleSearchMode(inSearchMode : Boolean? = null) {
+        _state.value = state.value.copy(inSearchMode=inSearchMode?: !state.value.inSearchMode)
+        if (inSearchMode == false) {
+            _state.value = state.value.copy(searchedBook = emptyList(),searchQuery = "")
+        }
+    }
+
+    private fun updateLayoutType(layoutType: LayoutType) {
+        _state.value = state.value.copy(layout = layoutType)
     }
 
 
@@ -62,6 +90,16 @@ class LibraryViewModel (
         }.launchIn(coroutineScope)
     }
 
+    private fun searchBook(query: String) {
+        val searchBook = mutableListOf<Book>()
+        state.value.books.forEach { book ->
+            if (book.bookName.contains(query)) {
+                searchBook.add(book)
+            }
+        }
+        _state.value = state.value.copy(searchedBook = searchBook)
+
+    }
 
 
 }

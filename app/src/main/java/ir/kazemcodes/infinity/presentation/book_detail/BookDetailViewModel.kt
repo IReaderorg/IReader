@@ -217,9 +217,7 @@ class BookDetailViewModel(
             localUseCase.deleteChaptersUseCase(bookName)
         }
     }
-
-
-
+    
     override fun onServiceUnregistered() {
         coroutineScope.cancel()
     }

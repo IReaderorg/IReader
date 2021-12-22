@@ -7,4 +7,12 @@ data class BrowseScreenState(
     val books: List<Book> = emptyList(),
     val error: String = "",
     val page: Int = 1,
+    val layout : LayoutType = LayoutType.GridLayout,
+    val isMenuDropDownShown : Boolean = false
+
 )
+
+sealed class LayoutType {
+    object CompactLayout : LayoutType()
+    object GridLayout : LayoutType()
+}

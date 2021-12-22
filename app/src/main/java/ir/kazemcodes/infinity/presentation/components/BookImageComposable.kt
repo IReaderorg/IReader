@@ -37,5 +37,4 @@ fun BookImageComposable(image : Any, modifier: Modifier = Modifier, alignment: A
             },
 
             )
-
 }
