@@ -40,7 +40,7 @@ class BrowseViewModel(
     fun onEvent(event: BrowseScreenEvents) {
         when(event) {
             is BrowseScreenEvents.UpdatePage -> {
-                _state.value = state.value.copy(page = event.page)
+                updatePage(event.page)
             }
             is BrowseScreenEvents.UpdateLayoutType -> {
                 updateLayoutType(event.layoutType)
@@ -51,8 +51,37 @@ class BrowseViewModel(
             is BrowseScreenEvents.GetBooks -> {
                 getBooks(event.source)
             }
+            is BrowseScreenEvents.ToggleSearchMode -> {
+                toggleSearchMode(event.inSearchMode)
+            }
+            is BrowseScreenEvents.UpdateSearchInput -> {
+                updateSearchInput(event.query)
+            }
+            is BrowseScreenEvents.SearchBooks -> {
+                searchBook(event.query)
+            }
         }
     }
+    private fun updatePage(page: Int) {
+        if (state.value.isSearchModeEnable) {
+            _state.value = state.value.copy(page = page)
+        } else {
+            _state.value = state.value.copy(searchPage = page)
+        }
+    }
+    private fun updateSearchInput(query : String) {
+        _state.value = state.value.copy(searchQuery= query)
+    }
+    private fun toggleSearchMode(inSearchMode : Boolean? = null) {
+        _state.value = state.value.copy(isSearchModeEnable=inSearchMode?: !state.value.isSearchModeEnable)
+        if (inSearchMode == false) {
+            exitSearchedMode()
+        }
+    }
+    private fun exitSearchedMode() {
+        _state.value = state.value.copy(searchedBook = emptyList(),searchQuery = "",page = 1,isLoading = false,error = "")
+    }
+
     private fun updateLayoutType(layoutType: LayoutType) {
         _state.value = state.value.copy(layout = layoutType)
     }
@@ -89,6 +118,27 @@ class BrowseViewModel(
 
     override fun onServiceUnregistered() {
         coroutineScope.cancel()
+    }
+    private fun searchBook(query: String) {
+        remoteUseCase.getSearchedBooksUseCase(page =  state.value.page,query, source = source).onEach { result ->
+            when (result) {
+                is Resource.Success -> {
+                    _state.value = state.value.copy(
+                        searchedBook = merge(state.value.searchedBook , result.data ?: emptyList() ),
+                        isLoading = false,
+                        error = ""
+                    )
+                    onEvent(BrowseScreenEvents.UpdatePage(state.value.searchPage + 1))
+                }
+                is Resource.Error -> {
+                    _state.value =
+                        state.value.copy(error = result.message ?: "An Unknown Error Occurred", isLoading = false)
+                }
+                is Resource.Loading -> {
+                    _state.value = state.value.copy(isLoading = true, error = "")
+                }
+            }
+        }.launchIn(coroutineScope)
     }
 
 }

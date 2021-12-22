@@ -19,8 +19,6 @@ import kotlinx.coroutines.flow.onEach
 class LibraryViewModel (
     private val localUseCase: LocalUseCase
 ) : ScopedServices.Registered {
-
-
     private val _state = mutableStateOf<LibraryState>(LibraryState())
     val state: State<LibraryState> = _state
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -29,6 +27,7 @@ class LibraryViewModel (
     override fun onServiceRegistered() {
         onEvent(LibraryEvents.GetLocalBooks)
     }
+
     override fun onServiceUnregistered() {
         coroutineScope.cancel()
     }
@@ -53,15 +52,18 @@ class LibraryViewModel (
         }
 
     }
+
     private fun updateSearchInput(query : String) {
         _state.value = state.value.copy(searchQuery= query)
     }
+
     private fun toggleSearchMode(inSearchMode : Boolean? = null) {
         _state.value = state.value.copy(inSearchMode=inSearchMode?: !state.value.inSearchMode)
         if (inSearchMode == false) {
             _state.value = state.value.copy(searchedBook = emptyList(),searchQuery = "")
         }
     }
+
 
     private fun updateLayoutType(layoutType: LayoutType) {
         _state.value = state.value.copy(layout = layoutType)
@@ -93,12 +95,11 @@ class LibraryViewModel (
     private fun searchBook(query: String) {
         val searchBook = mutableListOf<Book>()
         state.value.books.forEach { book ->
-            if (book.bookName.contains(query)) {
+            if (book.bookName.contains(query,ignoreCase = true)) {
                 searchBook.add(book)
             }
         }
         _state.value = state.value.copy(searchedBook = searchBook)
-
     }
 
 

@@ -23,12 +23,17 @@ class FreeWebNovel : ParsedHttpSource() {
 
     override val supportsLatest: Boolean = true
     override suspend fun fetchPopular(page: Int): BooksPage {
-        TODO("Not yet implemented")
+        val req = popularBookRequest(page)
+        val res = client.newCall(req).await()
+        return popularBookParse(res)
     }
 
     override suspend fun fetchSearchBook(page: Int, query: String): BooksPage {
-        TODO("Not yet implemented")
+        val req = searchBookRequest(page,query = query)
+        val res = client.newCall(req).await()
+        return searchBookParse(res)
     }
+
 
     override suspend fun fetchContent(chapter: Chapter): ChapterPage {
         val req = pageContentRequest(chapter)
@@ -78,7 +83,7 @@ class FreeWebNovel : ParsedHttpSource() {
         add("Referer", baseUrl)
     }
 
-    override fun popularMangaSelector(): String = "div.ul-list1"
+    override fun popularBookSelector(): String = "div.ul-list1"
 
     override fun popularBookNextPageSelector(): String? = "div.ul-list1"
 
@@ -126,7 +131,6 @@ class FreeWebNovel : ParsedHttpSource() {
         return res.contains("Next")
     }
 
-    /** **/
     override fun chapterListRequest(book: Book, page: Int): Request =
         GET(baseUrl + book.link.replace(".html", "/$page.html"))
 
@@ -148,6 +152,20 @@ class FreeWebNovel : ParsedHttpSource() {
 
         return ChapterPage(content)
     }
+
+    override fun searchBookSelector(): String = "div.ul-list1 div.li"
+
+    override fun searchBookFromElement(element: Element): Book {
+        val book: Book = Book.create()
+        book.link = element.select("div.txt a").attr("href").substringAfter(baseUrl)
+        book.bookName = element.select("div.txt a").attr("title")
+        book.coverLink = element.select("div.pic img").attr("src")
+        return book
+    }
+
+    override fun searchBookRequest(page: Int,query: String): Request = GET("https://freewebnovel.com/search?searchkey=$query")
+
+    override fun searchBookNextPageSelector(): String? = null
 
 
 }

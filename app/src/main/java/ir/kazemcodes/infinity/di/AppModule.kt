@@ -10,11 +10,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import ir.kazemcodes.infinity.domain.network.utils.MemoryCookieJar
 import ir.kazemcodes.infinity.api_feature.network.NetworkHelper
-import ir.kazemcodes.infinity.domain.repository.Repository
-import ir.kazemcodes.infinity.domain.repository.RepositoryImpl
-import ir.kazemcodes.infinity.domain.use_cases.remote.*
 import ir.kazemcodes.infinity.domain.local_feature.data.BookDao
 import ir.kazemcodes.infinity.domain.local_feature.data.BookDatabase
 import ir.kazemcodes.infinity.domain.local_feature.data.ChapterDao
@@ -22,6 +18,10 @@ import ir.kazemcodes.infinity.domain.local_feature.domain.use_case.GetLocalBookB
 import ir.kazemcodes.infinity.domain.local_feature.domain.use_case.LocalUseCase
 import ir.kazemcodes.infinity.domain.local_feature.domain.use_case.book.*
 import ir.kazemcodes.infinity.domain.local_feature.domain.use_case.chapter.*
+import ir.kazemcodes.infinity.domain.network.utils.MemoryCookieJar
+import ir.kazemcodes.infinity.domain.repository.Repository
+import ir.kazemcodes.infinity.domain.repository.RepositoryImpl
+import ir.kazemcodes.infinity.domain.use_cases.remote.*
 import okhttp3.CookieJar
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -95,7 +95,8 @@ class AppModule {
             getRemoteBookDetailUseCase = GetRemoteBookDetailUseCase(),
             getRemoteBooksUseCase = GetRemoteBooksUseCase(),
             getRemoteChaptersUseCase = GetRemoteChaptersUseCase(),
-            getRemoteReadingContentUseCase = GetRemoteReadingContentUseCase()
+            getRemoteReadingContentUseCase = GetRemoteReadingContentUseCase(),
+            getSearchedBooksUseCase = GetRemoteSearchBookUseCase()
         )
     }
 

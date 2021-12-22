@@ -67,9 +67,9 @@ abstract class HttpSource : Source {
 
 
     /**
-     * Returns the Jsoup selector that returns a list of [Element] corresponding to each manga.
+     * Returns the Jsoup selector that returns a list of [Element] corresponding to each Book.
      */
-    abstract fun popularMangaSelector(): String
+    abstract fun popularBookSelector(): String
 
     /**
      * Returns the Jsoup selector that returns the <a> tag linking to the next page, or null if
@@ -179,23 +179,38 @@ abstract class HttpSource : Source {
 
 
     /**
-     * Returns the Jsoup selector that returns a list of [Element] corresponding to each manga.
+     * Returns the Jsoup selector that returns a list of [Element] corresponding to each Book.
      */
-    abstract fun searchMangaSelector(): String
+    abstract fun searchBookSelector(): String
 
     /**
-     * Returns a manga from the given [element]. Most sites only show the title and the url, it's
+     * Returns a Book from the given [element]. Most sites only show the title and the url, it's
      * totally fine to fill only those two values.
      *
-     * @param element an element obtained from [searchMangaSelector].
+     * @param element an element obtained from [searchBookSelector].
      */
-    abstract fun searchMangaFromElement(element: Element): Book
+    abstract fun searchBookFromElement(element: Element): Book
 
     /**
      * Returns the Jsoup selector that returns the <a> tag linking to the next page, or null if
      * there's no next page.
      */
-    abstract fun searchMangaNextPageSelector(): String?
+    abstract fun searchBookNextPageSelector(): String?
+
+
+    /**
+     * Returns the request for latest  Books given the page.
+     *
+     * @param page the page number to retrieve.
+     */
+    abstract fun searchBookRequest(page: Int,query: String): Request
+
+    /**
+     * Parses the response from the site and returns a [BooksPage] object.
+     *
+     * @param response the response from the site.
+     */
+    abstract fun searchBookParse(response: Response): BooksPage
 
     /**
      * Returns the url of the given string without the scheme and domain.

@@ -1,30 +1,33 @@
 package ir.kazemcodes.infinity.presentation.browse
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import com.zhuinden.simplestackcomposeintegration.services.rememberService
-import ir.kazemcodes.infinity.base_feature.navigation.BookDetailKey
 import ir.kazemcodes.infinity.base_feature.navigation.WebViewKey
 import ir.kazemcodes.infinity.explore_feature.domain.util.isScrolledToTheEnd
-import ir.kazemcodes.infinity.library_feature.util.mappingApiNameToAPi
-import ir.kazemcodes.infinity.presentation.components.GridLayoutComposable
-import ir.kazemcodes.infinity.presentation.components.LinearViewList
 import ir.kazemcodes.infinity.presentation.library.DisplayMode
+import ir.kazemcodes.infinity.presentation.library.components.LayoutComposable
 import ir.kazemcodes.infinity.presentation.library.components.RadioButtonWithTitleComposable
 
 
@@ -37,14 +40,74 @@ fun BrowserScreen() {
     val state = viewModel.state.value
     val backStack = LocalBackstack.current
     val source = viewModel.getSource()
+    val focusManager = LocalFocusManager.current
 
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(source.name) },
+                title = {
+                    if (!state.isSearchModeEnable) {
+                        Text(
+                            text = source.name,
+                            color = MaterialTheme.colors.onBackground,
+                            style = MaterialTheme.typography.h6,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    } else {
+                        Box() {
+                            if (state.searchQuery.isEmpty()) {
+                                Text(
+                                    text = "Search...",
+                                    style = MaterialTheme.typography.subtitle1,
+                                    color = MaterialTheme.colors.onBackground.copy(alpha = .7F)
+                                )
+                            }
+                            BasicTextField(
+                                modifier = Modifier.fillMaxWidth(),
+                                value = state.searchQuery,
+                                onValueChange = {
+                                    viewModel.onEvent(BrowseScreenEvents.UpdateSearchInput(it))
+                                },
+                                maxLines = 1,
+                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                                keyboardActions = KeyboardActions(onSearch = {
+                                    viewModel.onEvent(BrowseScreenEvents.SearchBooks(state.searchQuery))
+                                    focusManager.clearFocus()
+                                }),
+                                singleLine = true,
+                                textStyle = TextStyle(color = MaterialTheme.colors.onBackground),
+                            )
+                        }
+                    }
+
+
+                },
                 backgroundColor = MaterialTheme.colors.background,
                 actions = {
+                    if (state.isSearchModeEnable) {
+                        IconButton(onClick = {
+                            viewModel.onEvent(BrowseScreenEvents.ToggleSearchMode(false))
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Close Icon",
+                                tint = MaterialTheme.colors.onBackground
+                            )
+                        }
+                    } else {
+                        IconButton(
+                            onClick = {
+                                viewModel.onEvent(BrowseScreenEvents.ToggleSearchMode())
+                            },
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = "Search Icon",
+                                tint = MaterialTheme.colors.onBackground
+                            )
+                        }
+                    }
                     IconButton(onClick = {
                         backStack.goTo(WebViewKey(source.baseUrl))
                     }) {
@@ -65,6 +128,7 @@ fun BrowserScreen() {
                         )
                     }
                     DropdownMenu(
+                        modifier = Modifier.background(MaterialTheme.colors.background),
                         expanded = viewModel.state.value.isMenuDropDownShown,
                         onDismissRequest = {
                             viewModel.onEvent(BrowseScreenEvents.ToggleMenuDropDown(false))
@@ -108,21 +172,17 @@ fun BrowserScreen() {
         }
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            if (state.books.isNotEmpty()) {
-                if (state.layout == LayoutType.CompactLayout) {
-                    LinearViewList(books = state.books, onClick = { index ->
-                        backstack.goTo(BookDetailKey(state.books[index], source = source))
-                    }, scrollState = scrollState)
-                } else if (state.layout == LayoutType.GridLayout) {
-                    GridLayoutComposable(books = state.books, onClick = { index ->
-                        backStack.goTo(
-                            BookDetailKey(
-                                state.books[index],
-                                source = mappingApiNameToAPi(state.books[index].source ?: "")
-                            )
-                        )
-                    }, scrollState = scrollState)
-                }
+            if (state.searchedBook.isNotEmpty()) {
+                LayoutComposable(
+                    books = state.searchedBook,
+                    layout = state.layout
+                )
+            }
+            if (state.books.isNotEmpty() && !state.isSearchModeEnable) {
+                    LayoutComposable(
+                        books = state.books,
+                        layout = state.layout
+                    )
             }
             if (scrollState.isScrolledToTheEnd() && !state.isLoading && state.error.isEmpty()) {
                 viewModel.onEvent(BrowseScreenEvents.GetBooks(source = source))

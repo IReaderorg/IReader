@@ -24,7 +24,7 @@ abstract class ParsedHttpSource : HttpSource() {
     override fun popularBookParse(response: Response): BooksPage {
         val document = response.asJsoup()
 
-        val books = document.select(popularMangaSelector()).map { element ->
+        val books = document.select(popularBookSelector()).map { element ->
             popularBookFromElement(element)
         }
 
@@ -110,15 +110,17 @@ abstract class ParsedHttpSource : HttpSource() {
 
     abstract fun pageContentParse(document: Document): ChapterPage
 
-    override fun searchMangaSelector(): String {
-        TODO("Not yet implemented")
-    }
 
-    override fun searchMangaFromElement(element: Element): Book {
-        TODO("Not yet implemented")
-    }
 
-    override fun searchMangaNextPageSelector(): String? {
-        TODO("Not yet implemented")
+    override fun searchBookParse(response: Response): BooksPage {
+        val document = response.asJsoup()
+
+        val books = document.select(searchBookSelector()).map { element ->
+            searchBookFromElement(element)
+        }
+
+        val hasNextPage = false
+
+        return BooksPage(books, hasNextPage)
     }
 }

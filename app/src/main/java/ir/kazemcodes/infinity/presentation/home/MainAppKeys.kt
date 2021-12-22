@@ -1,5 +1,6 @@
 package ir.kazemcodes.infinity.base_feature.navigation
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -36,6 +37,7 @@ import kotlinx.parcelize.RawValue
 @Immutable
 @Parcelize
 data class MainScreenKey(val noArgument: String = "") : ComposeKey() {
+    @ExperimentalFoundationApi
     @ExperimentalMaterialApi
     @Composable
     override fun ScreenComposable(modifier: Modifier) {
@@ -52,6 +54,7 @@ data class MainScreenKey(val noArgument: String = "") : ComposeKey() {
 @Immutable
 @Parcelize
 data class BrowserScreenKey(val source: @RawValue Source) : ComposeKey() {
+    @ExperimentalFoundationApi
     @Composable
     override fun ScreenComposable(modifier: Modifier) {
         BrowserScreen()

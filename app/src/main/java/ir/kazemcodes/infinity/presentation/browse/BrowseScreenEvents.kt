@@ -8,4 +8,6 @@ sealed class BrowseScreenEvents {
     data class UpdateLayoutType(val layoutType: LayoutType) : BrowseScreenEvents()
     data class ToggleMenuDropDown(val isShown : Boolean) : BrowseScreenEvents()
     data class SearchBooks(val query: String) : BrowseScreenEvents()
+    data class ToggleSearchMode(val inSearchMode: Boolean?= null) : BrowseScreenEvents()
+    data class UpdateSearchInput(val query : String) : BrowseScreenEvents()
 }

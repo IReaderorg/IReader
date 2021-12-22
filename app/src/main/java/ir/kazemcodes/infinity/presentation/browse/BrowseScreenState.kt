@@ -7,10 +7,15 @@ data class BrowseScreenState(
     val books: List<Book> = emptyList(),
     val error: String = "",
     val page: Int = 1,
+    val searchPage: Int = 1,
     val layout : LayoutType = LayoutType.GridLayout,
-    val isMenuDropDownShown : Boolean = false
+    val isMenuDropDownShown : Boolean = false,
+    val isSearchModeEnable : Boolean = false,
+    val searchQuery:String = "",
+    val searchedBook : List<Book> = emptyList(),
 
-)
+
+    )
 
 sealed class LayoutType {
     object CompactLayout : LayoutType()
