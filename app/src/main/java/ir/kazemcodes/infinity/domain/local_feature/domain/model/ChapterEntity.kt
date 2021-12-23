@@ -9,9 +9,9 @@ data class ChapterEntity(
     val bookName : String? = null,
     val link : String,
     val title: String,
-    val dateAdded: String?,
-    val index: Int? = null,
+    var dateUploaded: String? = null,
     val content: String? = null,
+    var haveBeenRead : Boolean? =null,
     @PrimaryKey  val chapterId : Int? = null
 ) {
     fun toChapter() : Chapter {
@@ -19,10 +19,9 @@ data class ChapterEntity(
             bookName = bookName,
             link = link,
             title = title,
-            dateAdded = dateAdded,
-            index = index,
+            dateUploaded = dateUploaded,
             content = content,
-            chapterId = chapterId
+            haveBeenRead = haveBeenRead
         )
     }
 }

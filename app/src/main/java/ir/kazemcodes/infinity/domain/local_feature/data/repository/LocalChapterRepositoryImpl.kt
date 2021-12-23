@@ -12,9 +12,15 @@ class LocalChapterRepositoryImpl @Inject constructor(private val dao: ChapterDao
         return dao.insertChapters(chapterEntities = chapterEntity)
     }
 
-    override suspend fun updateChapter(readingContent : String , bookName: String , chapterTitle: String) {
-        return dao.updateChapter(readingContent = readingContent , bookName = bookName ,chapterTitle = chapterTitle )
+    override suspend fun updateChapter(
+        readingContent: String,
+        haveBeenRead: Boolean,
+        bookName: String,
+        chapterTitle: String,
+    ) {
+        return dao.updateChapter(readingContent = readingContent , bookName = bookName ,chapterTitle = chapterTitle,haveBeenRead = haveBeenRead)
     }
+
 
     override  fun getChapterByName(bookName : String): Flow<List<ChapterEntity>> {
         return dao.getChapters(bookName)

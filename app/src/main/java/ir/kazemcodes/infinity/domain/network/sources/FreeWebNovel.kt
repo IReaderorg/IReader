@@ -38,9 +38,8 @@ class FreeWebNovel : ParsedHttpSource() {
     override suspend fun fetchContent(chapter: Chapter): ChapterPage {
         val req = pageContentRequest(chapter)
         val res = client.newCall(req).await()
-        val content = pageContentParse(res)
 
-        return content
+        return pageContentParse(res)
     }
 
     override suspend fun fetchBook(book: Book): Book {
@@ -49,6 +48,7 @@ class FreeWebNovel : ParsedHttpSource() {
 
         return bookDetailsParse(res)
     }
+
 
     override suspend fun fetchChapters(book: Book): List<Chapter> {
         val chapters = mutableListOf<Chapter>()

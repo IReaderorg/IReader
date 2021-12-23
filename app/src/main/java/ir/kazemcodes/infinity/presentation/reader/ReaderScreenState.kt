@@ -11,11 +11,9 @@ data class ReaderScreenState(
     val isLoading : Boolean = false,
     val chapter: Chapter = Chapter.create(),
     val error: String = "",
-    val readingModel : Boolean= false,
     val fontSize : Int = 18,
     val font : FontFamily = poppins,
     val brightness : Float = 0.5f,
     val source : Source = FreeWebNovel(),
-
-
+    val isReaderModeEnable : Boolean = true
     )

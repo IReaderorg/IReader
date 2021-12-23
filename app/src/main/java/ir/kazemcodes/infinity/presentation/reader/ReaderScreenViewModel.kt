@@ -33,6 +33,7 @@ class ReaderScreenViewModel(
 
     private val _state = mutableStateOf(ReaderScreenState())
     val state: State<ReaderScreenState> = _state
+
     private val fontSizeDataStore = intPreferencesKey(SAVED_FONT_SIZE_PREFERENCES)
     private val fontDatastore = stringPreferencesKey(SAVED_FONT_PREFERENCES)
     private val brightnessDatastore = floatPreferencesKey(SAVED_BRIGHTNESS_PREFERENCES)
@@ -58,8 +59,15 @@ class ReaderScreenViewModel(
             is ReaderEvent.GetContent -> {
                 getContent(event.chapter)
             }
+            is ReaderEvent.ToggleReaderMode -> {
+                toggleReaderMode(event.enable)
+            }
             else -> {}
         }
+    }
+
+    private fun toggleReaderMode(enable : Boolean? =null) {
+        _state.value = state.value.copy(isReaderModeEnable = enable?: !state.value.isReaderModeEnable)
     }
 
     private fun changeBrightness(brightness : Float) {
@@ -146,7 +154,6 @@ class ReaderScreenViewModel(
             when (result) {
                 is Resource.Success -> {
                     Timber.d("getReadingContentRemotely Successfully Called")
-                    Timber.d("TAG "+ result.data)
                     _state.value = state.value
                         .copy(
                             chapter = state.value.chapter.copy(content = result.data),
@@ -176,7 +183,7 @@ class ReaderScreenViewModel(
 
     private fun updateChapterContent(chapter: Chapter) {
         coroutineScope.launch(Dispatchers.IO) {
-            localUseCase.UpdateLocalChapterContentUseCase(chapter)
+            localUseCase.UpdateLocalChapterContentUseCase(chapter.copy(haveBeenRead = true))
         }
     }
 

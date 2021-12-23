@@ -4,8 +4,6 @@ object Constants {
     const val PARAM_BOOK_ID = "PARAM_BOOK_ID"
     const val PARAM_BOOK_NAME = "PARAM_BOOK_NAME"
     const val PARAM_CHAPTERS_DETAIL = "chaptersDetail"
-
-
 }
 
 object PreferenceKeys {
@@ -18,5 +16,5 @@ object PreferenceKeys {
 }
 object DEFAULT {
     const val MAX_BRIGHTNESS = .9F
-    const val MIN_BRIGHTNESS = .1F
+    const val MIN_BRIGHTNESS = 0F
 }

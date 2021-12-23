@@ -13,10 +13,10 @@ import org.jsoup.nodes.Element
 abstract class ParsedHttpSource : HttpSource() {
 
     /**
-     * Returns a manga from the given [element]. Most sites only show the title and the url, it's
+     * Returns a Book from the given [element]. Most sites only show the title and the url, it's
      * totally fine to fill only those two values.
      *
-     * @param element an element obtained from [popularMangaSelector].
+     * @param element an element obtained from [popularBookSelector].
      */
     abstract fun popularBookFromElement(element: Element): Book
 
@@ -36,12 +36,12 @@ abstract class ParsedHttpSource : HttpSource() {
     }
 
     /**
-     * Returns the Jsoup selector that returns a list of [Element] corresponding to each manga.
+     * Returns the Jsoup selector that returns a list of [Element] corresponding to each Book.
      */
     abstract fun latestUpdatesSelector(): String
 
     /**
-     * Returns a manga from the given [element]. Most sites only show the title and the url, it's
+     * Returns a Book from the given [element]. Most sites only show the title and the url, it's
      * totally fine to fill only those two values.
      *
      * @param element an element obtained from [latestUpdatesSelector].
@@ -69,7 +69,7 @@ abstract class ParsedHttpSource : HttpSource() {
     }
 
     /**
-     * Returns the details of the manga from the given [document].
+     * Returns the details of the Book from the given [document].
      *
      * @param document the parsed document.
      */

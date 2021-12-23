@@ -13,8 +13,8 @@ interface ChapterDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertChapters(chapterEntities: List<ChapterEntity>)
 
-    @Query("UPDATE chapter_entity SET content = :readingContent WHERE bookName = :bookName AND title = :chapterTitle")
-    suspend fun updateChapter(readingContent : String , bookName: String , chapterTitle: String)
+    @Query("UPDATE chapter_entity SET haveBeenRead = :haveBeenRead, content = :readingContent   WHERE bookName = :bookName AND title = :chapterTitle")
+    suspend fun updateChapter(readingContent : String , bookName: String , chapterTitle: String,haveBeenRead : Boolean)
 
     @Query("SELECT * FROM chapter_entity WHERE bookName= :bookName")
     fun getChapters(bookName : String) : Flow<List<ChapterEntity>>

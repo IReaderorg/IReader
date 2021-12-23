@@ -106,14 +106,18 @@ fun ChapterDetailScreen(
                         ) {
                             Text(
                                 text = state.chapters[index].title,
-                                color = MaterialTheme.colors.onBackground,
-                                style = MaterialTheme.typography.subtitle2,
+                                color = if (state.chapters[index].haveBeenRead == true) MaterialTheme.colors.onBackground.copy(
+                                    alpha = .4f) else MaterialTheme.colors.onBackground,
+                                style = MaterialTheme.typography.subtitle1,
+                                fontWeight = FontWeight.SemiBold,
                                 overflow = TextOverflow.Ellipsis
                             )
                             Text(
                                 text = if (state.chapters[index].content != null) "Cached" else "",
                                 fontStyle = FontStyle.Italic,
-                                color = MaterialTheme.colors.onBackground,
+                                color = if (state.chapters[index].haveBeenRead == true) MaterialTheme.colors.onBackground.copy(
+                                    alpha = .4f) else MaterialTheme.colors.onBackground,
+                                fontWeight = FontWeight.SemiBold,
                                 style = MaterialTheme.typography.subtitle2
                             )
                         }

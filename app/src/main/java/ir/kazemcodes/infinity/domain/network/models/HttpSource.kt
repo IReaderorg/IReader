@@ -46,7 +46,7 @@ abstract class HttpSource : Source {
 
     /**
      * Id of the source. By default it uses a generated id using the first 16 characters (64 bits)
-     * of the MD5 of the string: sourcename/language/versionId
+     * of the MD5 of the string: source name/language/versionId
      * Note the generated id sets the sign bit to 0.
      */
     override val id by lazy {
@@ -121,10 +121,10 @@ abstract class HttpSource : Source {
      * Returns the request for the details of a Book. Override only if it's needed to change the
      * url, send different headers or request method like POST.
      *
-     * @param Book the Book to be updated.
+     * @param book the Book to be updated.
      */
-    open fun bookDetailsRequest(Book: Book): Request {
-        return GET(baseUrl + Book.link, headers)
+    open fun bookDetailsRequest(book: Book): Request {
+        return GET(baseUrl + book.link, headers)
     }
 
     /**
@@ -138,13 +138,13 @@ abstract class HttpSource : Source {
      * Returns the request for updating the chapter list. Override only if it's needed to override
      * the url, send different headers or request method like POST.
      *
-     * @param Book the Book to look for chapters.
+     * @param book the Book to look for chapters.
      */
-    open fun chapterListRequest(Book: Book): Request {
-        return GET(baseUrl + Book.link, headers)
+    open fun chapterListRequest(book: Book): Request {
+        return GET(baseUrl + book.link, headers)
     }
 
-    abstract fun chapterListRequest(Book: Book, page: Int): Request
+    abstract fun chapterListRequest(book: Book, page: Int): Request
 
 
     abstract fun hasNextChapterSelector() : String
@@ -234,12 +234,12 @@ abstract class HttpSource : Source {
     }
     /**
      * Called before inserting a new chapter into database. Use it if you need to override chapter
-     * fields, like the title or the chapter number. Do not change anything to [Book].
+     * fields, like the title or the chapter number. Do not change anything to [book].
      *
      * @param chapter the chapter to be added.
-     * @param Book the Book of the chapter.
+     * @param book the Book of the chapter.
      */
-    open fun prepareNewChapter(chapter: Chapter, Book: Book) {
+    open fun prepareNewChapter(chapter: Chapter, book: Book) {
     }
 
     protected open fun headersBuilder() = Headers.Builder().apply {

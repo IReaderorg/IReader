@@ -8,7 +8,7 @@ import ir.kazemcodes.infinity.domain.local_feature.domain.model.ChapterEntity
 @Database(
     entities = [BookEntity::class,ChapterEntity::class],
     version = 1,
-    exportSchema = false
+    exportSchema = false,
 )
 abstract class BookDatabase : RoomDatabase() {
     abstract val bookDao : BookDao

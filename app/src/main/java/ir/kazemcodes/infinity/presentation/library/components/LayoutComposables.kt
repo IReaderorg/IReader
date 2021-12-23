@@ -12,25 +12,29 @@ import ir.kazemcodes.infinity.presentation.components.LinearViewList
 
 @ExperimentalFoundationApi
 @Composable
-fun LayoutComposable(books : List<Book>,layout : LayoutType) {
+fun LayoutComposable(books: List<Book>, layout: LayoutType) {
     val backStack = LocalBackstack.current
-    if(layout == LayoutType.GridLayout) {
-    GridLayoutComposable(books = books,
-        onClick = { index ->
-            backStack.goTo(
-                BookDetailKey(
-                    book = books[index],
-                    source = mappingApiNameToAPi(books[index].source ?: "")
+    when (layout) {
+        is LayoutType.GridLayout -> {
+            GridLayoutComposable(books = books,
+                onClick = { index ->
+                    backStack.goTo(
+                        BookDetailKey(
+                            book = books[index],
+                            source = mappingApiNameToAPi(books[index].source ?: "")
+                        )
+                    )
+                })
+        }
+        is LayoutType.CompactLayout -> {
+            LinearViewList(books = books, onClick = { index ->
+                backStack.goTo(
+                    BookDetailKey(
+                        books[index],
+                        source = mappingApiNameToAPi(books[index].source ?: "")
+                    )
                 )
-            )
-        }) } else if (layout == LayoutType.CompactLayout) {
-        LinearViewList(books = books, onClick = { index ->
-            backStack.goTo(
-                BookDetailKey(
-                    books[index],
-                    source = mappingApiNameToAPi(books[index].source ?: "")
-                )
-            )
-        })
+            })
+        }
     }
 }

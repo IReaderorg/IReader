@@ -1,6 +1,7 @@
 package ir.kazemcodes.infinity.presentation.reader.components
 
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -51,7 +52,12 @@ fun FontMenuComposable(
             contentAlignment = Alignment.Center
         ) {
             Text(text = viewModel.convertFontIntoString(viewModel.state.value.font))
-            DropdownMenu(expanded = expanded, onDismissRequest = {expanded = false},) {
+            DropdownMenu(
+                modifier = Modifier.background(MaterialTheme.colors.background
+                ),
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+            ) {
                 DropdownMenuItem(onClick = {
                     viewModel.onEvent(ReaderEvent.ChangeFont(poppins))
                 }) {

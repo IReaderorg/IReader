@@ -10,6 +10,7 @@ sealed class ReaderEvent {
     data class GetContent(val chapter: Chapter) : ReaderEvent()
     object GetContentLocally : ReaderEvent()
     object GetContentRemotely : ReaderEvent()
+    data class ToggleReaderMode(val enable : Boolean ?= null) : ReaderEvent()
 }
 
 sealed class FontSizeEvent {

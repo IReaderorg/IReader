@@ -220,6 +220,7 @@ class BookDetailViewModel(
     
     override fun onServiceUnregistered() {
         coroutineScope.cancel()
+        _state.value = state.value.copy(loaded = false)
     }
 
 }

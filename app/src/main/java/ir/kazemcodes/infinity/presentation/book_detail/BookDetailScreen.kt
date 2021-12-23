@@ -42,7 +42,7 @@ fun BookDetailScreen(
     val chapterState = viewModel.chapterState.value
 
     Box(modifier = Modifier.fillMaxSize()) {
-        if (!viewModel.state.value.book.description.isNullOrBlank()) {
+        if (viewModel.state.value.loaded) {
 
             BookDetailScreenLoadedComposable(
                 modifier = modifier,

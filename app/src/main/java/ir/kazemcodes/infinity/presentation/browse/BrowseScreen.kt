@@ -36,7 +36,6 @@ import ir.kazemcodes.infinity.presentation.library.components.RadioButtonWithTit
 fun BrowserScreen() {
     val viewModel = rememberService<BrowseViewModel>()
     val scrollState = rememberLazyListState()
-    val backstack = LocalBackstack.current
     val state = viewModel.state.value
     val backStack = LocalBackstack.current
     val source = viewModel.getSource()
@@ -172,7 +171,7 @@ fun BrowserScreen() {
         }
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            if (state.searchedBook.isNotEmpty()) {
+            if (state.searchedBook.isNotEmpty() && state.isSearchModeEnable) {
                 LayoutComposable(
                     books = state.searchedBook,
                     layout = state.layout

@@ -8,12 +8,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
@@ -37,21 +38,20 @@ fun ReadingScreen(
     val viewModel = rememberService<ReaderScreenViewModel>()
     val backStack = LocalBackstack.current
     val state = viewModel.state.value
-    var readMode by remember {
-        mutableStateOf(true)
-    }
-    Box(modifier = modifier.fillMaxSize()) {
 
+    Box(modifier = modifier.fillMaxSize()) {
         Scaffold(
             topBar = {
-                if (!readMode) {
+                if (!state.isReaderModeEnable) {
                     TopAppBar(
                         title = {
                             Text(
                                 text = book.bookName,
                                 color = MaterialTheme.colors.onBackground,
-                                style = MaterialTheme.typography.h6,
-                                fontWeight = FontWeight.Bold
+                                style = MaterialTheme.typography.subtitle1,
+                                fontWeight = FontWeight.Bold,
+                                overflow = TextOverflow.Ellipsis,
+                                maxLines = 1
                             )
                         },
                         modifier = Modifier.fillMaxWidth(),
@@ -71,7 +71,7 @@ fun ReadingScreen(
                 }
             },
             bottomBar = {
-                if (!readMode) {
+                if (!state.isReaderModeEnable) {
                     BottomAppBar(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -119,7 +119,7 @@ fun ReadingScreen(
                 Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .clickable { readMode = !readMode }
+                    .clickable { viewModel.onEvent(ReaderEvent.ToggleReaderMode(!state.isReaderModeEnable)) }
                     .padding(16.dp)
             ) {
                 if (!state.chapter.content.isNullOrBlank()) {
