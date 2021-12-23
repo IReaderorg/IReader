@@ -15,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -23,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import com.zhuinden.simplestackcomposeintegration.services.rememberService
 import ir.kazemcodes.infinity.base_feature.navigation.ChapterDetailKey
+import ir.kazemcodes.infinity.base_feature.navigation.ReaderScreenKey
 import ir.kazemcodes.infinity.base_feature.navigation.WebViewKey
 import ir.kazemcodes.infinity.domain.models.Book
 import ir.kazemcodes.infinity.presentation.book_detail.components.ButtonWithIconAndText
@@ -130,24 +130,22 @@ fun BookDetailScreenLoadedComposable(
                 ButtonWithIconAndText(
                     text = if (!inLibrary) "Add to Library" else "Added To Library",
                     imageVector = if (!inLibrary) Icons.Default.AddCircleOutline else Icons.Default.Check,
-                    modifier = modifier
-                        .clickable(role = Role.Button) {
-                            if (!inLibrary) {
-                                viewModel.insertBookDetailToLocal(
-                                    book.copy(inLibrary = true, source = source.name).toBookEntity()
-                                )
-                                val chapterEntities = chapters.map {
-                                    it.copy(bookName = book.bookName).toChapterEntity()
-                                }
-                                viewModel.insertChaptersToLocal(chapterEntities)
-                                viewModel.onEvent(BookDetailEvent.ToggleInLibrary)
-                            } else {
-                                viewModel.deleteLocalBook(book.bookName)
-                                viewModel.deleteLocalChapters(book.bookName)
-                                viewModel.onEvent(BookDetailEvent.ToggleInLibrary)
+                    onClick = {
+                        if (!inLibrary) {
+                            viewModel.insertBookDetailToLocal(
+                                book.copy(inLibrary = true, source = source.name).toBookEntity()
+                            )
+                            val chapterEntities = chapters.map {
+                                it.copy(bookName = book.bookName).toChapterEntity()
                             }
-
+                            viewModel.insertChaptersToLocal(chapterEntities)
+                            viewModel.onEvent(BookDetailEvent.ToggleInLibrary)
+                        } else {
+                            viewModel.deleteLocalBook(book.bookName)
+                            viewModel.deleteLocalChapters(book.bookName)
+                            viewModel.onEvent(BookDetailEvent.ToggleInLibrary)
                         }
+                    },
                 )
                 Divider(
                     modifier = Modifier
@@ -156,7 +154,14 @@ fun BookDetailScreenLoadedComposable(
                 )
                 ButtonWithIconAndText(
                     text = "Continue Reading",
-                    imageVector = Icons.Default.AutoStories
+                    imageVector = Icons.Default.AutoStories,
+                    onClick = {
+                        if(viewModel.chapterState.value.lastChapter != null) {
+                            backStack.goTo(ReaderScreenKey(chapter = viewModel.chapterState.value.lastChapter!!, book = book, source = viewModel.getSource()))
+                        } else if(viewModel.chapterState.value.chapters.isNotEmpty()) {
+                            backStack.goTo(ReaderScreenKey(chapter = viewModel.chapterState.value.chapters.first(), book = book, source = viewModel.getSource()))
+                        }
+                    }
                 )
                 Divider(
                     modifier = Modifier
@@ -166,7 +171,8 @@ fun BookDetailScreenLoadedComposable(
                 )
                 ButtonWithIconAndText(
                     text = "Download",
-                    imageVector = Icons.Default.FileDownload
+                    imageVector = Icons.Default.FileDownload,
+                    onClick = {}
                 )
             }
         }

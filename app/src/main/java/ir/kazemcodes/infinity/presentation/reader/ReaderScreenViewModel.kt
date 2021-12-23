@@ -3,29 +3,28 @@ package ir.kazemcodes.infinity.presentation.reader
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.text.font.FontFamily
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.*
 import com.zhuinden.simplestack.ScopedServices
-import ir.kazemcodes.infinity.domain.local_feature.domain.use_case.LocalUseCase
+import ir.kazemcodes.infinity.data.network.models.Source
 import ir.kazemcodes.infinity.domain.models.Book
 import ir.kazemcodes.infinity.domain.models.Chapter
-import ir.kazemcodes.infinity.domain.models.Resource
-import ir.kazemcodes.infinity.domain.network.models.Source
+import ir.kazemcodes.infinity.domain.models.FontType
+import ir.kazemcodes.infinity.domain.use_cases.datastore.DataStoreUseCase
+import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
 import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
-import ir.kazemcodes.infinity.presentation.book_detail.PreferenceKeys.SAVED_BRIGHTNESS_PREFERENCES
-import ir.kazemcodes.infinity.presentation.book_detail.PreferenceKeys.SAVED_FONT_PREFERENCES
-import ir.kazemcodes.infinity.presentation.book_detail.PreferenceKeys.SAVED_FONT_SIZE_PREFERENCES
+import ir.kazemcodes.infinity.domain.utils.Resource
+import ir.kazemcodes.infinity.presentation.theme.fonts
 import ir.kazemcodes.infinity.presentation.theme.poppins
 import ir.kazemcodes.infinity.presentation.theme.sourceSansPro
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import timber.log.Timber
 
 
 class ReaderScreenViewModel(
     private val localUseCase: LocalUseCase,
     private val remoteUseCase: RemoteUseCase,
-    private val dataStore: DataStore<Preferences>,
+    private val dataStoreUseCase: DataStoreUseCase,
     private val source: Source,
     private val  chapter: Chapter,
     private val book: Book
@@ -34,14 +33,9 @@ class ReaderScreenViewModel(
     private val _state = mutableStateOf(ReaderScreenState())
     val state: State<ReaderScreenState> = _state
 
-    private val fontSizeDataStore = intPreferencesKey(SAVED_FONT_SIZE_PREFERENCES)
-    private val fontDatastore = stringPreferencesKey(SAVED_FONT_PREFERENCES)
-    private val brightnessDatastore = floatPreferencesKey(SAVED_BRIGHTNESS_PREFERENCES)
-
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     override fun onServiceRegistered() {
-        readFromDatastore()
         getContent(chapter = chapter.copy(bookName = book.bookName))
     }
 
@@ -54,7 +48,7 @@ class ReaderScreenViewModel(
                 changeFontSize(event.fontSizeEvent)
             }
             is ReaderEvent.ChangeFont -> {
-                changeFont(event.fontFamily)
+                changeFont(event.fontType)
             }
             is ReaderEvent.GetContent -> {
                 getContent(event.chapter)
@@ -70,45 +64,12 @@ class ReaderScreenViewModel(
         _state.value = state.value.copy(isReaderModeEnable = enable?: !state.value.isReaderModeEnable)
     }
 
-    private fun changeBrightness(brightness : Float) {
-        _state.value = state.value.copy(brightness = brightness)
-        coroutineScope.launch(Dispatchers.IO) {
-            dataStore.edit { preferences ->
-                preferences[brightnessDatastore] = brightness
-            }
-        }
-    }
 
-    private fun changeFontSize(event: FontSizeEvent) {
-        if (event == FontSizeEvent.Increase) {
-            _state.value = state.value.copy(fontSize = state.value.fontSize+1)
-            coroutineScope.launch(Dispatchers.IO) {
-                dataStore.edit { preferences ->
-                    val currentFontSize = preferences[fontSizeDataStore] ?: 18
-                    preferences[fontSizeDataStore] = currentFontSize + 1
-                }
-            }
-        } else {
-            _state.value = state.value.copy(fontSize = state.value.fontSize-1)
-            coroutineScope.launch(Dispatchers.IO) {
-                dataStore.edit { preferences ->
-                    val currentFontSize = preferences[fontSizeDataStore] ?: 18
-                    preferences[fontSizeDataStore] = currentFontSize - 1
-                }
-            }
-        }
-    }
-
-    private fun changeFont(fontFamily: FontFamily) {
-        _state.value = state.value.copy(font = fontFamily)
-        coroutineScope.launch(Dispatchers.IO) {
-            dataStore.edit { preferences ->
-                preferences[fontDatastore] = fontFamily.toString()
-            }
-        }
-    }
 
     private fun getContent(chapter: Chapter) {
+        readSelectedFontState()
+        readBrightness()
+        readFontSize()
         _state.value = state.value.copy(chapter = chapter)
         if (chapter.content == null) {
             getReadingContentLocally()
@@ -177,8 +138,6 @@ class ReaderScreenViewModel(
                 }
             }
         }.launchIn(coroutineScope)
-
-
     }
 
     private fun updateChapterContent(chapter: Chapter) {
@@ -186,47 +145,91 @@ class ReaderScreenViewModel(
             localUseCase.UpdateLocalChapterContentUseCase(chapter.copy(haveBeenRead = true))
         }
     }
-
-
-
-    private fun readFromDatastore() {
+    private fun changeBrightness(brightness : Float) {
+        _state.value = state.value.copy(brightness = brightness)
         coroutineScope.launch(Dispatchers.IO) {
-            getFontSizeFromDatastore().collectLatest {
-                _state.value = state.value.copy(fontSize = it)
-
-            }
+            dataStoreUseCase.saveBrightnessStateUseCase(brightness)
         }
-        coroutineScope.launch(Dispatchers.IO) {
-            getFontFromDatastore().collectLatest {
-                _state.value = state.value.copy(font = convertStringToFont(it))
+    }
+
+    private fun changeFontSize(event: FontSizeEvent) {
+        if (event == FontSizeEvent.Increase) {
+            _state.value = state.value.copy(fontSize = state.value.fontSize+1)
+            coroutineScope.launch(Dispatchers.IO) {
+                dataStoreUseCase.saveFontSizeStateUseCase(state.value.fontSize)
             }
-        }
-        coroutineScope.launch(Dispatchers.IO) {
-            getBrightnessFromDatastore().collectLatest {
-                _state.value = state.value.copy(brightness = it)
+        } else {
+            _state.value = state.value.copy(fontSize = state.value.fontSize-1)
+            coroutineScope.launch(Dispatchers.IO) {
+                dataStoreUseCase.saveFontSizeStateUseCase(state.value.fontSize)
             }
         }
     }
 
-
-    private fun getFontFromDatastore(): Flow<String> {
-        return dataStore.data
-            .map { preferences ->
-                preferences[fontDatastore] ?: poppins.toString()
-            }
-    }
-    private fun getBrightnessFromDatastore(): Flow<Float> {
-        return dataStore.data
-            .map { preferences ->
-                preferences[brightnessDatastore] ?: 0.6f
-            }
+    private fun changeFont(fontType: FontType) {
+        _state.value = state.value.copy(font = fontType)
+        coroutineScope.launch(Dispatchers.IO) {
+            dataStoreUseCase.saveSelectedFontStateUseCase(fonts.indexOf(fontType))
+        }
     }
 
-    private fun getFontSizeFromDatastore(): Flow<Int> {
-        return dataStore.data
-            .map { preferences ->
-                preferences[fontSizeDataStore] ?: 18
+
+    private fun readSelectedFontState() {
+        Timber.d("readSelectedFontState Successfully Triggered")
+        dataStoreUseCase.readSelectedFontStateUseCase().onEach { result ->
+            when (result) {
+                is Resource.Success -> {
+                    Timber.d("readSelectedFontState Successfully Called")
+                    _state.value = state.value
+                        .copy(
+                            font = (result.data?: FontType.Poppins)
+                        )
+                }
+                is Resource.Error -> {
+                    Timber.d("Timber: readSelectedFontState have a error : ${result.message?: ""}")
+                }
+                else -> {}
             }
+        }.launchIn(coroutineScope)
+
+
+    }
+    private fun readBrightness() {
+        Timber.d("readBrightness Successfully Triggered")
+        dataStoreUseCase.readBrightnessStateUseCase().onEach { result ->
+            when (result) {
+                is Resource.Success -> {
+                    Timber.d("getFontFromDatastore Successfully Called")
+                    _state.value = state.value
+                        .copy(
+                            brightness = result.data?: .8f
+                        )
+                }
+                is Resource.Error -> {
+                    Timber.d("Timber: readBrightness have a error : ${(result.message?: "")}")
+                }
+                else -> {}
+            }
+        }.launchIn(coroutineScope)
+    }
+
+    private fun readFontSize() {
+        Timber.d("readFontSize Successfully Triggered")
+        dataStoreUseCase.readFontSizeStateUseCase().onEach { result ->
+            when (result) {
+                is Resource.Success -> {
+                    Timber.d("readFontSize Successfully Called")
+                    _state.value = state.value
+                        .copy(
+                            fontSize = result.data?: 18
+                        )
+                }
+                is Resource.Error -> {
+                    Timber.d("Timber: readFontSize have a error : ${(result.message?: "")}")
+                }
+                else -> {}
+            }
+        }.launchIn(coroutineScope)
     }
 
 

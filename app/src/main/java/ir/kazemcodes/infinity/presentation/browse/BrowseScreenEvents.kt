@@ -1,6 +1,6 @@
 package ir.kazemcodes.infinity.presentation.browse
 
-import ir.kazemcodes.infinity.domain.network.models.Source
+import ir.kazemcodes.infinity.data.network.models.Source
 
 sealed class BrowseScreenEvents {
     data class GetBooks(val source : Source) : BrowseScreenEvents()

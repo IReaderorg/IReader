@@ -1,7 +1,6 @@
 package ir.kazemcodes.infinity.domain.models
 
 import android.os.Parcelable
-import ir.kazemcodes.infinity.domain.local_feature.domain.model.BookEntity
 import kotlinx.parcelize.Parcelize
 
 

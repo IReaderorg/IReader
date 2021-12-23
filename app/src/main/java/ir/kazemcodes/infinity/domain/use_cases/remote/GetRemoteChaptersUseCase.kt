@@ -1,10 +1,10 @@
 package ir.kazemcodes.infinity.domain.use_cases.remote
 
-import ir.kazemcodes.infinity.domain.local_feature.domain.util.InvalidBookException
+import ir.kazemcodes.infinity.domain.utils.InvalidBookException
 import ir.kazemcodes.infinity.domain.models.Book
 import ir.kazemcodes.infinity.domain.models.Chapter
-import ir.kazemcodes.infinity.domain.models.Resource
-import ir.kazemcodes.infinity.domain.network.models.Source
+import ir.kazemcodes.infinity.domain.utils.Resource
+import ir.kazemcodes.infinity.data.network.models.Source
 import kotlinx.coroutines.flow.flow
 import retrofit2.HttpException
 import timber.log.Timber

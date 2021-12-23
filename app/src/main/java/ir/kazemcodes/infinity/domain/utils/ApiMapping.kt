@@ -1,7 +1,7 @@
 package ir.kazemcodes.infinity.library_feature.util
 
 import ir.kazemcodes.infinity.api_feature.network.sources
-import ir.kazemcodes.infinity.domain.network.models.Source
+import ir.kazemcodes.infinity.data.network.models.Source
 
 fun mappingApiNameToAPi(apiName : String) : Source {
     var api = sources[0]

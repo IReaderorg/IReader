@@ -5,8 +5,9 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.zhuinden.simplestack.GlobalServices
 import com.zhuinden.simplestackextensions.servicesktx.add
 import dagger.hilt.android.HiltAndroidApp
-import ir.kazemcodes.infinity.api_feature.network.dataStore
-import ir.kazemcodes.infinity.domain.local_feature.domain.use_case.LocalUseCase
+import ir.kazemcodes.infinity.data.repository.dataStore
+import ir.kazemcodes.infinity.domain.use_cases.datastore.DataStoreUseCase
+import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
 import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
 import ir.kazemcodes.infinity.presentation.core.Constants.DatastoreServiceTAG
 import timber.log.Timber
@@ -17,6 +18,7 @@ import javax.inject.Inject
 class MyApplication : Application() {
     @Inject lateinit var localUseCase: LocalUseCase
     @Inject lateinit var remoteUseCase: RemoteUseCase
+    @Inject lateinit var dataStoreUseCase: DataStoreUseCase
 
     lateinit var globalServices: GlobalServices
         private set
@@ -32,6 +34,7 @@ class MyApplication : Application() {
             .add(localUseCase)
             .add(remoteUseCase)
             .add(this.dataStore,DatastoreServiceTAG)
+            .add(dataStoreUseCase)
             .build()
     }
 }

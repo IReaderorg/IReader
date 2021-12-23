@@ -11,16 +11,16 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import ir.kazemcodes.infinity.api_feature.network.NetworkHelper
-import ir.kazemcodes.infinity.domain.local_feature.data.BookDao
-import ir.kazemcodes.infinity.domain.local_feature.data.BookDatabase
-import ir.kazemcodes.infinity.domain.local_feature.data.ChapterDao
-import ir.kazemcodes.infinity.domain.local_feature.domain.use_case.GetLocalBookByNameUseCase
-import ir.kazemcodes.infinity.domain.local_feature.domain.use_case.LocalUseCase
-import ir.kazemcodes.infinity.domain.local_feature.domain.use_case.book.*
-import ir.kazemcodes.infinity.domain.local_feature.domain.use_case.chapter.*
-import ir.kazemcodes.infinity.domain.network.utils.MemoryCookieJar
+import ir.kazemcodes.infinity.data.local.BookDatabase
+import ir.kazemcodes.infinity.data.local.dao.BookDao
+import ir.kazemcodes.infinity.data.local.dao.ChapterDao
+import ir.kazemcodes.infinity.data.network.utils.MemoryCookieJar
+import ir.kazemcodes.infinity.data.repository.RepositoryImpl
 import ir.kazemcodes.infinity.domain.repository.Repository
-import ir.kazemcodes.infinity.domain.repository.RepositoryImpl
+import ir.kazemcodes.infinity.domain.use_cases.datastore.*
+import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
+import ir.kazemcodes.infinity.domain.use_cases.local.book.*
+import ir.kazemcodes.infinity.domain.use_cases.local.chapter.*
 import ir.kazemcodes.infinity.domain.use_cases.remote.*
 import okhttp3.CookieJar
 import okhttp3.OkHttpClient
@@ -61,11 +61,13 @@ class AppModule {
     @Singleton
     fun providesRepository(
         bookDao: BookDao,
-        chapterDao: ChapterDao
+        chapterDao: ChapterDao,
+        context: Context
     ): Repository {
         return RepositoryImpl(
             bookDao = bookDao,
-            chapterDao = chapterDao
+            chapterDao = chapterDao,
+            context = context
         )
     }
 
@@ -99,6 +101,18 @@ class AppModule {
             getSearchedBooksUseCase = GetRemoteSearchBookUseCase()
         )
     }
+    @Provides
+    @Singleton
+    fun provideDataStoreUseCase(repository: Repository) : DataStoreUseCase {
+        return DataStoreUseCase(
+            readSelectedFontStateUseCase = ReadSelectedFontStateUseCase(repository),
+            saveSelectedFontStateUseCase = SaveSelectedFontStateUseCase(repository),
+            readFontSizeStateUseCase = ReadFontSizeStateUseCase(repository),
+            saveFontSizeStateUseCase = SaveFontSizeStateUseCase(repository),
+            readBrightnessStateUseCase = ReadBrightnessStateUseCase(repository),
+            saveBrightnessStateUseCase = SaveBrightnessStateUseCase(repository)
+        )
+    }
 
     @Provides
     @Singleton
@@ -106,19 +120,6 @@ class AppModule {
         return appContext
     }
 
-
-//    @Provides
-//    @Singleton
-//    fun provideRemoteRepository(api : ParsedHttpSource) : RemoteRepository {
-//        return RemoteRepositoryImpl(api)
-//    }
-
-//
-//    @Provides
-//    @Singleton
-//    fun provideApi(): ParsedHttpSource {
-//        return WuxiaorldApi()
-//    }
 
     @Singleton
     @Provides

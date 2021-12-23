@@ -3,9 +3,9 @@ package ir.kazemcodes.infinity.presentation.library
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import com.zhuinden.simplestack.ScopedServices
-import ir.kazemcodes.infinity.domain.local_feature.domain.use_case.LocalUseCase
+import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
 import ir.kazemcodes.infinity.domain.models.Book
-import ir.kazemcodes.infinity.domain.models.Resource
+import ir.kazemcodes.infinity.domain.utils.Resource
 import ir.kazemcodes.infinity.presentation.browse.LayoutType
 import ir.kazemcodes.infinity.presentation.library.components.LibraryEvents
 import kotlinx.coroutines.CoroutineScope
@@ -68,7 +68,6 @@ class LibraryViewModel (
     private fun updateLayoutType(layoutType: LayoutType) {
         _state.value = state.value.copy(layout = layoutType)
     }
-
 
     private fun getLocalBooks() {
 

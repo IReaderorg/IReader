@@ -101,9 +101,6 @@ fun ReadingScreen(
                             )
                             Spacer(modifier = Modifier.height(12.dp))
                             FontMenuComposable(
-                                onClick = { selectedFont ->
-                                    viewModel.onEvent(ReaderEvent.ChangeFont(selectedFont))
-                                },
                                 viewModel = viewModel
                             )
 
@@ -126,7 +123,7 @@ fun ReadingScreen(
                     Text(
                         text = state.chapter.content ?: "",
                         fontSize = viewModel.state.value.fontSize.sp,
-                        fontFamily = viewModel.state.value.font
+                        fontFamily = viewModel.state.value.font.fontFamily
                     )
                 }
                 if (state.error.isNotBlank()) {

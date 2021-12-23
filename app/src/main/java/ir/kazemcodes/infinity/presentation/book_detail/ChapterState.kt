@@ -6,5 +6,6 @@ data class ChapterState (
     val isLoading : Boolean = false,
     val chapters : List<Chapter> = emptyList(),
     val error: String = "",
-    val loaded : Boolean = false
+    val loaded : Boolean = false,
+    val lastChapter : Chapter? = null
 )

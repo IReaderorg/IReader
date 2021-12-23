@@ -3,23 +3,24 @@ package ir.kazemcodes.infinity.presentation.book_detail
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import com.zhuinden.simplestack.ScopedServices
-import ir.kazemcodes.infinity.domain.local_feature.domain.model.BookEntity
-import ir.kazemcodes.infinity.domain.local_feature.domain.model.ChapterEntity
-import ir.kazemcodes.infinity.domain.local_feature.domain.use_case.LocalUseCase
+import ir.kazemcodes.infinity.data.network.models.Source
 import ir.kazemcodes.infinity.domain.models.Book
-import ir.kazemcodes.infinity.domain.models.Resource
-import ir.kazemcodes.infinity.domain.network.models.Source
+import ir.kazemcodes.infinity.domain.models.BookEntity
+import ir.kazemcodes.infinity.domain.models.ChapterEntity
+import ir.kazemcodes.infinity.domain.models.LastReadChapter
+import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
 import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
+import ir.kazemcodes.infinity.domain.utils.Resource
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
 
 class BookDetailViewModel(
-        private val localUseCase: LocalUseCase,
-        private val remoteUseCase: RemoteUseCase,
-        private val  source: Source,
-        private val book: Book
+    private val localUseCase: LocalUseCase,
+    private val remoteUseCase: RemoteUseCase,
+    private val  source: Source,
+    private val book: Book
 ) : ScopedServices.Registered{
 
     private val _state = mutableStateOf<DetailState>(DetailState())
@@ -42,6 +43,7 @@ class BookDetailViewModel(
     }
     override fun onServiceRegistered() {
         getBookData(book)
+        updateLastReadBook(emptyList())
     }
 
     fun getSource() : Source {
@@ -192,6 +194,14 @@ class BookDetailViewModel(
                         }
                     }
                 }.launchIn(coroutineScope)
+    }
+
+    private fun updateLastReadBook(list : List<LastReadChapter>) {
+        list.forEach { item ->
+            if (item.book == state.value.book && item.latestReadChapter != null) {
+                _chapterState.value = chapterState.value.copy(lastChapter = item.latestReadChapter)
+            }
+        }
     }
 
     fun insertBookDetailToLocal(bookEntity: BookEntity) {

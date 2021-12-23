@@ -10,21 +10,18 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ir.kazemcodes.infinity.presentation.reader.ReaderEvent
 import ir.kazemcodes.infinity.presentation.reader.ReaderScreenViewModel
-import ir.kazemcodes.infinity.presentation.theme.poppins
-import ir.kazemcodes.infinity.presentation.theme.sourceSansPro
+import ir.kazemcodes.infinity.presentation.theme.fonts
 
 
 @ExperimentalMaterialApi
 @Composable
 fun FontMenuComposable(
     modifier: Modifier = Modifier,
-    onClick : (selectedFont : FontFamily) -> Unit,
     viewModel : ReaderScreenViewModel
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -51,22 +48,19 @@ fun FontMenuComposable(
                 .padding(8.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text(text = viewModel.convertFontIntoString(viewModel.state.value.font))
+            Text(text = viewModel.state.value.font.fontName)
             DropdownMenu(
                 modifier = Modifier.background(MaterialTheme.colors.background
                 ),
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
             ) {
-                DropdownMenuItem(onClick = {
-                    viewModel.onEvent(ReaderEvent.ChangeFont(poppins))
-                }) {
-                    Text(text = "Poppins", color = MaterialTheme.colors.onBackground)
-                }
-                DropdownMenuItem(onClick = {
-                    viewModel.onEvent(ReaderEvent.ChangeFont(sourceSansPro))
-                }) {
-                    Text(text = "Source Sans Pro", color = MaterialTheme.colors.onBackground)
+                fonts.forEach {font ->
+                    DropdownMenuItem(onClick = {
+                        viewModel.onEvent(ReaderEvent.ChangeFont(font))
+                    }) {
+                        Text(text = font.fontName, color = MaterialTheme.colors.onBackground)
+                    }
                 }
             }
         }

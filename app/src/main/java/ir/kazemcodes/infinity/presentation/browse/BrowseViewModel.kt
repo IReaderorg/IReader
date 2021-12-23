@@ -3,9 +3,9 @@ package ir.kazemcodes.infinity.presentation.browse
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import com.zhuinden.simplestack.ScopedServices
-import ir.kazemcodes.infinity.domain.local_feature.domain.use_case.LocalUseCase
-import ir.kazemcodes.infinity.domain.models.Resource
-import ir.kazemcodes.infinity.domain.network.models.Source
+import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
+import ir.kazemcodes.infinity.domain.utils.Resource
+import ir.kazemcodes.infinity.data.network.models.Source
 import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
 import ir.kazemcodes.infinity.domain.utils.merge
 import kotlinx.coroutines.CoroutineScope
