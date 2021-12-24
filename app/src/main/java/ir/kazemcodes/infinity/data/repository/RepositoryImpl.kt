@@ -3,7 +3,7 @@ package ir.kazemcodes.infinity.data.repository
 import android.content.Context
 import ir.kazemcodes.infinity.data.local.dao.BookDao
 import ir.kazemcodes.infinity.data.local.dao.ChapterDao
-import ir.kazemcodes.infinity.domain.repository.DataStoreOperations
+import ir.kazemcodes.infinity.domain.repository.DataStoreHelper
 import ir.kazemcodes.infinity.domain.repository.LocalBookRepository
 import ir.kazemcodes.infinity.domain.repository.LocalChapterRepository
 import ir.kazemcodes.infinity.domain.repository.Repository
@@ -18,6 +18,6 @@ class RepositoryImpl @Inject constructor(
         get() = LocalBookRepositoryImpl(bookDao)
     override val localChapterRepository: LocalChapterRepository
         get() = LocalChapterRepositoryImpl(chapterDao)
-    override val dataStoreRepository: DataStoreOperations
-        get() = DataStoreOperationsImpl(context)
+    override val dataStoreRepository: DataStoreHelper
+        get() = DataStoreHelperImpl(context)
 }

@@ -11,12 +11,14 @@ data class Chapter(
     var title: String,
     var content: String? =null,
     var dateUploaded: String? = null,
-    var haveBeenRead : Boolean? =null
+    var haveBeenRead : Boolean = false,
+    var lastRead:  Boolean = false,
+    var source:  String,
 ) : Parcelable {
     companion object {
         fun create() : Chapter {
             return Chapter(
-                link = "",title = ""
+                link = "",title = "",source = ""
             )
         }
     }
@@ -28,6 +30,9 @@ data class Chapter(
             title = title,
             content = content,
             dateUploaded = dateUploaded,
+            lastRead = lastRead,
+            haveBeenRead = haveBeenRead,
+            source = source
         )
     }
 

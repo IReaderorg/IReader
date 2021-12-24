@@ -2,7 +2,6 @@ package ir.kazemcodes.infinity.presentation.reader
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.text.font.FontFamily
 import com.zhuinden.simplestack.ScopedServices
 import ir.kazemcodes.infinity.data.network.models.Source
 import ir.kazemcodes.infinity.domain.models.Book
@@ -13,9 +12,8 @@ import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
 import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
 import ir.kazemcodes.infinity.domain.utils.Resource
 import ir.kazemcodes.infinity.presentation.theme.fonts
-import ir.kazemcodes.infinity.presentation.theme.poppins
-import ir.kazemcodes.infinity.presentation.theme.sourceSansPro
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import timber.log.Timber
@@ -26,9 +24,10 @@ class ReaderScreenViewModel(
     private val remoteUseCase: RemoteUseCase,
     private val dataStoreUseCase: DataStoreUseCase,
     private val source: Source,
-    private val  chapter: Chapter,
-    private val book: Book
-) : ScopedServices.Registered{
+    private val chapter: Chapter,
+    private val book: Book,
+    private val chapters: List<Chapter>,
+) : ScopedServices.Registered {
 
     private val _state = mutableStateOf(ReaderScreenState())
     val state: State<ReaderScreenState> = _state
@@ -36,19 +35,20 @@ class ReaderScreenViewModel(
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     override fun onServiceRegistered() {
+        toggleLastRead()
         getContent(chapter = chapter.copy(bookName = book.bookName))
     }
 
     fun onEvent(event: ReaderEvent) {
-        when(event) {
+        when (event) {
             is ReaderEvent.ChangeBrightness -> {
-                changeBrightness(event.brightness)
+                saveBrightness(event.brightness)
             }
             is ReaderEvent.ChangeFontSize -> {
-                changeFontSize(event.fontSizeEvent)
+                saveFontSize(event.fontSizeEvent)
             }
             is ReaderEvent.ChangeFont -> {
-                changeFont(event.fontType)
+                saveFont(event.fontType)
             }
             is ReaderEvent.GetContent -> {
                 getContent(event.chapter)
@@ -56,37 +56,36 @@ class ReaderScreenViewModel(
             is ReaderEvent.ToggleReaderMode -> {
                 toggleReaderMode(event.enable)
             }
-            else -> {}
+            else -> {
+            }
         }
     }
 
-    private fun toggleReaderMode(enable : Boolean? =null) {
-        _state.value = state.value.copy(isReaderModeEnable = enable?: !state.value.isReaderModeEnable)
+    private fun toggleReaderMode(enable: Boolean? = null) {
+        _state.value =
+            state.value.copy(isReaderModeEnable = enable ?: !state.value.isReaderModeEnable)
     }
-
-
-
+    
     private fun getContent(chapter: Chapter) {
+        _state.value = state.value.copy(chapter = chapter)
+        getReadingContentLocally()
         readSelectedFontState()
         readBrightness()
         readFontSize()
-        _state.value = state.value.copy(chapter = chapter)
-        if (chapter.content == null) {
-            getReadingContentLocally()
-        }
     }
 
     private fun getReadingContentLocally() {
         localUseCase.getLocalChapterReadingContentUseCase(state.value.chapter).onEach { result ->
+            Timber.d("Timber getLocalChapterReadingContentUseCase was Called")
             when (result) {
                 is Resource.Success -> {
                     if (result.data?.content != null) {
-                        Timber.d("getReadingContentLocally Copying" + _state.value)
                         _state.value = state.value.copy(
-                            chapter = state.value.chapter.copy(content = result.data.content),
+                            chapter = result.data,
                             isLoading = false,
                             error = ""
                         )
+                        Timber.d("Timber getLocalChapterReadingContentUseCase was Finished Successfully")
                     } else {
                         if (state.value.chapter.content == null) {
                             getReadingContentRemotely()
@@ -108,65 +107,80 @@ class ReaderScreenViewModel(
         }.launchIn(coroutineScope)
     }
 
-
     private fun getReadingContentRemotely() {
-        Timber.d("getReadingContentRemotely Successfully Triggered")
-        remoteUseCase.getRemoteReadingContentUseCase(state.value.chapter,source = source).onEach { result ->
-            when (result) {
-                is Resource.Success -> {
-                    Timber.d("getReadingContentRemotely Successfully Called")
-                    _state.value = state.value
-                        .copy(
-                            chapter = state.value.chapter.copy(content = result.data),
-                            isLoading = false,
-                            error = ""
-                        )
-                    if (!state.value.chapter.content.isNullOrBlank()) {
-                        Timber.d("insertChapterContent Successfully Called")
-                        updateChapterContent(state.value.chapter)
+        Timber.d("Timber: getReadingContentRemotely Successfully Triggered")
+        remoteUseCase.getRemoteReadingContentUseCase(state.value.chapter, source = source)
+            .onEach { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        Timber.d("Timber: getReadingContentRemotely Successfully Called")
+                        _state.value = state.value
+                            .copy(
+                                chapter = state.value.chapter.copy(content = result.data),
+                                isLoading = false,
+                                error = ""
+                            )
+                        if (!state.value.chapter.content.isNullOrBlank()) {
+                            Timber.d("Timber: insertChapterContent Successfully Called")
+                            updateChapterContent(state.value.chapter)
+                        }
+                    }
+                    is Resource.Error -> {
+                        _state.value =
+                            state.value.copy(
+                                error = result.message ?: "An Unknown Error Occurred",
+                                isLoading = false
+                            )
+                    }
+                    is Resource.Loading -> {
+                        _state.value = state.value.copy(isLoading = true, error = "")
                     }
                 }
-                is Resource.Error -> {
-                    _state.value =
-                        state.value.copy(
-                            error = result.message ?: "An Unknown Error Occurred",
-                            isLoading = false
-                        )
-                }
-                is Resource.Loading -> {
-                    _state.value = state.value.copy(isLoading = true, error = "")
-                }
-            }
-        }.launchIn(coroutineScope)
+            }.launchIn(coroutineScope)
     }
 
     private fun updateChapterContent(chapter: Chapter) {
+        Timber.d("Timber: updateChapterContent Successfully Called")
         coroutineScope.launch(Dispatchers.IO) {
             localUseCase.UpdateLocalChapterContentUseCase(chapter.copy(haveBeenRead = true))
         }
     }
-    private fun changeBrightness(brightness : Float) {
+
+    private fun toggleLastRead() {
+        coroutineScope.launch(Dispatchers.IO) {
+            chapters.forEach {
+                if (it.lastRead) {
+                    localUseCase.UpdateLocalChapterContentUseCase(it.copy(lastRead = false))
+                }
+            }
+            localUseCase.UpdateLocalChapterContentUseCase(chapter.copy(lastRead = true))
+        }
+    }
+
+    private fun saveBrightness(brightness: Float) {
         _state.value = state.value.copy(brightness = brightness)
         coroutineScope.launch(Dispatchers.IO) {
             dataStoreUseCase.saveBrightnessStateUseCase(brightness)
         }
     }
 
-    private fun changeFontSize(event: FontSizeEvent) {
+    private fun saveFontSize(event: FontSizeEvent) {
         if (event == FontSizeEvent.Increase) {
-            _state.value = state.value.copy(fontSize = state.value.fontSize+1)
+            _state.value = state.value.copy(fontSize = state.value.fontSize + 1)
             coroutineScope.launch(Dispatchers.IO) {
                 dataStoreUseCase.saveFontSizeStateUseCase(state.value.fontSize)
             }
         } else {
-            _state.value = state.value.copy(fontSize = state.value.fontSize-1)
-            coroutineScope.launch(Dispatchers.IO) {
-                dataStoreUseCase.saveFontSizeStateUseCase(state.value.fontSize)
+            if (state.value.fontSize > 0) {
+                _state.value = state.value.copy(fontSize = state.value.fontSize - 1)
+                coroutineScope.launch(Dispatchers.IO) {
+                    dataStoreUseCase.saveFontSizeStateUseCase(state.value.fontSize)
+                }
             }
         }
     }
 
-    private fun changeFont(fontType: FontType) {
+    private fun saveFont(fontType: FontType) {
         _state.value = state.value.copy(font = fontType)
         coroutineScope.launch(Dispatchers.IO) {
             dataStoreUseCase.saveSelectedFontStateUseCase(fonts.indexOf(fontType))
@@ -176,86 +190,73 @@ class ReaderScreenViewModel(
 
     private fun readSelectedFontState() {
         Timber.d("readSelectedFontState Successfully Triggered")
-        dataStoreUseCase.readSelectedFontStateUseCase().onEach { result ->
-            when (result) {
-                is Resource.Success -> {
-                    Timber.d("readSelectedFontState Successfully Called")
-                    _state.value = state.value
-                        .copy(
-                            font = (result.data?: FontType.Poppins)
-                        )
+        coroutineScope.launch(Dispatchers.IO) {
+            dataStoreUseCase.readSelectedFontStateUseCase().collectLatest { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        Timber.d("readSelectedFontState Successfully Called")
+                        _state.value = state.value
+                            .copy(
+                                font = (result.data ?: FontType.Poppins)
+                            )
+                    }
+                    is Resource.Error -> {
+                        Timber.d("Timber: readSelectedFontState have a error : ${result.message ?: ""}")
+                    }
+                    else -> {
+                    }
                 }
-                is Resource.Error -> {
-                    Timber.d("Timber: readSelectedFontState have a error : ${result.message?: ""}")
-                }
-                else -> {}
             }
-        }.launchIn(coroutineScope)
+        }
 
 
     }
+
     private fun readBrightness() {
         Timber.d("readBrightness Successfully Triggered")
-        dataStoreUseCase.readBrightnessStateUseCase().onEach { result ->
-            when (result) {
-                is Resource.Success -> {
-                    Timber.d("getFontFromDatastore Successfully Called")
-                    _state.value = state.value
-                        .copy(
-                            brightness = result.data?: .8f
-                        )
+        coroutineScope.launch(Dispatchers.IO) {
+            dataStoreUseCase.readBrightnessStateUseCase().collectLatest { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        Timber.d("getFontFromDatastore Successfully Called")
+                        _state.value = state.value
+                            .copy(
+                                brightness = result.data ?: .8f
+                            )
+                    }
+                    is Resource.Error -> {
+                        Timber.d("Timber: readBrightness have a error : ${(result.message ?: "")}")
+                    }
+                    else -> {
+                    }
                 }
-                is Resource.Error -> {
-                    Timber.d("Timber: readBrightness have a error : ${(result.message?: "")}")
-                }
-                else -> {}
             }
-        }.launchIn(coroutineScope)
+        }
     }
 
     private fun readFontSize() {
         Timber.d("readFontSize Successfully Triggered")
-        dataStoreUseCase.readFontSizeStateUseCase().onEach { result ->
-            when (result) {
-                is Resource.Success -> {
-                    Timber.d("readFontSize Successfully Called")
-                    _state.value = state.value
-                        .copy(
-                            fontSize = result.data?: 18
-                        )
+        coroutineScope.launch(Dispatchers.IO) {
+            dataStoreUseCase.readFontSizeStateUseCase().collectLatest { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        Timber.d("readFontSize Successfully Called")
+                        _state.value = state.value
+                            .copy(
+                                fontSize = result.data ?: 18
+                            )
+                    }
+                    is Resource.Error -> {
+                        Timber.d("Timber: readFontSize have a error : ${(result.message ?: "")}")
+                    }
+                    else -> {
+                    }
                 }
-                is Resource.Error -> {
-                    Timber.d("Timber: readFontSize have a error : ${(result.message?: "")}")
-                }
-                else -> {}
             }
-        }.launchIn(coroutineScope)
-    }
-
-
-
-    private fun convertStringToFont(font: String?): FontFamily {
-        return if (font == poppins.toString()) {
-            poppins
-        } else if (font == sourceSansPro.toString()) {
-            sourceSansPro
-        } else {
-            poppins
-        }
-    }
-
-    fun convertFontIntoString(fontFamily: FontFamily): String {
-        return if (fontFamily == poppins) {
-            "Poppins"
-        } else if (fontFamily == sourceSansPro) {
-            "Source Sans Pro"
-        } else {
-            "Unknown"
         }
     }
 
     override fun onServiceUnregistered() {
         coroutineScope.cancel()
     }
-
 }

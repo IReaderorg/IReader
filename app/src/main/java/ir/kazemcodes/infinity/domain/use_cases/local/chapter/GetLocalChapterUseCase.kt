@@ -15,23 +15,18 @@ class GetLocalChapterUseCase @Inject constructor(
 ) {
 
     @Throws(InvalidBookException::class)
-    operator fun invoke(bookName : String) : Flow<Resource<Chapter>> = flow{
+    operator fun invoke(bookName : String) : Flow<Resource<Chapter?>> = flow{
         try {
             Timber.d("Timber: GetLocalChapterUseCase was Called")
 
             emit(Resource.Loading())
             repository.localChapterRepository.getChapter(bookName= bookName).collect { chapter->
-                if (chapter != null) {
-                    emit(Resource.Success<Chapter>(data = chapter.toChapter() ))
-                }else{
-                    emit(Resource.Success<Chapter>(data = Chapter.create()))
-                }
-
+                    emit(Resource.Success<Chapter?>(data = chapter?.toChapter() ))
             }
             Timber.d("Timber: GetLocalChapterUseCase was Finished Successfully")
         }catch (e : Exception) {
             Timber.e("GetLocalChapterUseCase: " + e.localizedMessage)
-            emit(Resource.Error<Chapter>(message = e.message.toString()))
+            emit(Resource.Error<Chapter?>(message = e.message.toString()))
         }
     }
 

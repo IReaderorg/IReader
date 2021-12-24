@@ -3,10 +3,10 @@ package ir.kazemcodes.infinity.presentation.chapter_detail
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import com.zhuinden.simplestack.ScopedServices
-import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
-import ir.kazemcodes.infinity.domain.models.Book
-import ir.kazemcodes.infinity.domain.utils.Resource
 import ir.kazemcodes.infinity.data.network.models.Source
+import ir.kazemcodes.infinity.domain.models.Book
+import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
+import ir.kazemcodes.infinity.domain.utils.Resource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.onEach
 class ChapterDetailViewModel(
     private val localUseCase: LocalUseCase,
     private val book: Book,
-    private val source: Source
+    private val source: Source,
 ) : ScopedServices.Registered {
 
     private val _state = mutableStateOf<ChapterDetailState>(ChapterDetailState())

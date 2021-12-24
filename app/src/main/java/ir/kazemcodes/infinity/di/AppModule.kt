@@ -40,6 +40,7 @@ class AppModule {
             BookDatabase::class.java,
             BookDatabase.DATABASE_NAME
         )
+            .fallbackToDestructiveMigration()
             .build()
     }
 
@@ -86,7 +87,8 @@ class AppModule {
             getLocalBookByNameUseCase = GetLocalBookByNameUseCase(repository),
             UpdateLocalChapterContentUseCase = UpdateLocalChapterContentUseCase(repository),
             getLocalChapterReadingContentUseCase = GetLocalChapterReadingContentUseCase(repository = repository),
-            deleteChaptersUseCase = DeleteLocalChaptersUseCase(repository = repository)
+            deleteChaptersUseCase = DeleteLocalChaptersUseCase(repository = repository),
+            UpdateLocalChaptersContentUseCase = UpdateLocalChaptersContentUseCase(repository = repository)
         )
     }
 
@@ -110,7 +112,9 @@ class AppModule {
             readFontSizeStateUseCase = ReadFontSizeStateUseCase(repository),
             saveFontSizeStateUseCase = SaveFontSizeStateUseCase(repository),
             readBrightnessStateUseCase = ReadBrightnessStateUseCase(repository),
-            saveBrightnessStateUseCase = SaveBrightnessStateUseCase(repository)
+            saveBrightnessStateUseCase = SaveBrightnessStateUseCase(repository),
+            saveLatestChapterUseCase = SaveLatestChapterUseCase(repository),
+            readLatestChapterUseCase = ReadLatestChapterUseCase(repository)
         )
     }
 

@@ -3,10 +3,11 @@ package ir.kazemcodes.infinity.presentation.browse
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import com.zhuinden.simplestack.ScopedServices
-import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
-import ir.kazemcodes.infinity.domain.utils.Resource
+import ir.kazemcodes.infinity.api_feature.data.BooksPage
 import ir.kazemcodes.infinity.data.network.models.Source
+import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
 import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
+import ir.kazemcodes.infinity.domain.utils.Resource
 import ir.kazemcodes.infinity.domain.utils.merge
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -14,7 +15,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import timber.log.Timber
 
 
 class BrowseViewModel(
@@ -79,7 +79,7 @@ class BrowseViewModel(
         }
     }
     private fun exitSearchedMode() {
-        _state.value = state.value.copy(searchedBook = emptyList(),searchQuery = "",page = 1,isLoading = false,error = "")
+        _state.value = state.value.copy(searchedBook = BooksPage(),searchQuery = "",page = 1,isLoading = false,error = "")
     }
 
     private fun updateLayoutType(layoutType: LayoutType) {
@@ -92,7 +92,6 @@ class BrowseViewModel(
 
     private fun getBooks(source: Source) {
         remoteUseCase.getRemoteBooksUseCase(page =  state.value.page, source = source).onEach { result ->
-            Timber.d("TAG getRemoteBooksUseCase is called")
             when (result) {
                 is Resource.Success -> {
                     _state.value = state.value.copy(
@@ -107,7 +106,6 @@ class BrowseViewModel(
                         state.value.copy(error = result.message ?: "An Unknown Error Occurred", isLoading = false)
                 }
                 is Resource.Loading -> {
-
                     _state.value = state.value.copy(isLoading = true, error = "")
                 }
             }
@@ -123,11 +121,14 @@ class BrowseViewModel(
         remoteUseCase.getSearchedBooksUseCase(page =  state.value.page,query, source = source).onEach { result ->
             when (result) {
                 is Resource.Success -> {
-                    _state.value = state.value.copy(
-                        searchedBook = merge(state.value.searchedBook , result.data ?: emptyList() ),
-                        isLoading = false,
-                        error = ""
-                    )
+                    if (result.data != null) {
+                        _state.value = state.value.copy(
+                            searchedBook = result.data ?: BooksPage(),
+                            isLoading = false,
+                            error = ""
+                        )
+                    }
+
                     onEvent(BrowseScreenEvents.UpdatePage(state.value.searchPage + 1))
                 }
                 is Resource.Error -> {

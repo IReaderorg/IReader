@@ -6,5 +6,8 @@ data class DataStoreUseCase(
     val readFontSizeStateUseCase: ReadFontSizeStateUseCase,
     val saveFontSizeStateUseCase: SaveFontSizeStateUseCase,
     val readBrightnessStateUseCase: ReadBrightnessStateUseCase,
-    val saveBrightnessStateUseCase: SaveBrightnessStateUseCase
+    val saveBrightnessStateUseCase: SaveBrightnessStateUseCase,
+    val saveLatestChapterUseCase: SaveLatestChapterUseCase,
+    val readLatestChapterUseCase: ReadLatestChapterUseCase
+
 )

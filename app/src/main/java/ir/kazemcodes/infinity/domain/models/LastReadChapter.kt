@@ -5,7 +5,9 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class LastReadChapter(
-    val book: Book,
-    val latestReadChapter : Chapter?=null
+    val bookName : String,
+    val source : String,
+    val chapterLink : String,
+    val chapterTitle : String,
 ) : Parcelable
 

@@ -171,19 +171,21 @@ fun BrowserScreen() {
         }
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            if (state.searchedBook.isNotEmpty() && state.isSearchModeEnable) {
+            if (state.searchedBook.books.isNotEmpty() && state.isSearchModeEnable) {
                 LayoutComposable(
-                    books = state.searchedBook,
-                    layout = state.layout
+                    books = state.searchedBook.books,
+                    layout = state.layout,
+                    scrollState = scrollState
                 )
             }
             if (state.books.isNotEmpty() && !state.isSearchModeEnable) {
                     LayoutComposable(
                         books = state.books,
-                        layout = state.layout
+                        layout = state.layout,
+                        scrollState = scrollState
                     )
             }
-            if (scrollState.isScrolledToTheEnd() && !state.isLoading && state.error.isEmpty()) {
+            if (scrollState.isScrolledToTheEnd() && !state.isLoading && state.error.isEmpty() && !state.isSearchModeEnable) {
                 viewModel.onEvent(BrowseScreenEvents.GetBooks(source = source))
             }
             if (state.error.isNotBlank()) {

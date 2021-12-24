@@ -20,11 +20,7 @@ class GetLocalChapterReadingContentUseCase @Inject constructor(
                 emit(Resource.Loading())
                 repository.localChapterRepository.getChapterByChapter(chapterTitle = chapter.title , bookName = chapter.bookName?:"")
                     .collect { chapter ->
-                        if (chapter!= null) {
-                            emit(Resource.Success<Chapter?>(data = chapter.toChapter()))
-                        } else {
-                            emit(Resource.Success<Chapter?>(data = null))
-                        }
+                            emit(Resource.Success<Chapter?>(data = chapter?.toChapter()))
                     }
                 Timber.d("GetLocalChapterReadingContentUseCase was Finished Successfully")
             } catch (e: Exception) {

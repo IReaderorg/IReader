@@ -6,6 +6,6 @@ interface Repository {
 
     val localChapterRepository : LocalChapterRepository
 
-    val dataStoreRepository : DataStoreOperations
+    val dataStoreRepository : DataStoreHelper
 
 }

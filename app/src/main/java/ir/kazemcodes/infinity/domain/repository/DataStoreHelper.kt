@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 
 
 
-interface DataStoreOperations {
+interface DataStoreHelper {
     suspend fun saveSelectedFontState(fontIndex: Int)
 
     fun readSelectedFontState(): Flow<Int>
@@ -18,6 +18,11 @@ interface DataStoreOperations {
     suspend fun saveBrightnessState(brightness: Float)
 
     fun readBrightnessState(): Flow<Float>
+
+    suspend fun saveLatestChapterUseCase(latestChapter : String)
+
+    fun readLatestChapterUseCase(): Flow<String>
+
 
 }
 

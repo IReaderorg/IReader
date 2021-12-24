@@ -7,20 +7,22 @@ import ir.kazemcodes.infinity.data.network.models.Source
 import ir.kazemcodes.infinity.domain.models.Book
 import ir.kazemcodes.infinity.domain.models.BookEntity
 import ir.kazemcodes.infinity.domain.models.ChapterEntity
-import ir.kazemcodes.infinity.domain.models.LastReadChapter
+import ir.kazemcodes.infinity.domain.use_cases.datastore.DataStoreUseCase
 import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
 import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
 import ir.kazemcodes.infinity.domain.utils.Resource
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import timber.log.Timber
 
 
 class BookDetailViewModel(
     private val localUseCase: LocalUseCase,
     private val remoteUseCase: RemoteUseCase,
     private val  source: Source,
-    private val book: Book
+    private val book: Book,
+    private val dataStoreUseCase: DataStoreUseCase,
 ) : ScopedServices.Registered{
 
     private val _state = mutableStateOf<DetailState>(DetailState())
@@ -43,7 +45,6 @@ class BookDetailViewModel(
     }
     override fun onServiceRegistered() {
         getBookData(book)
-        updateLastReadBook(emptyList())
     }
 
     fun getSource() : Source {
@@ -107,7 +108,6 @@ class BookDetailViewModel(
                 .onEach { result ->
                     when (result) {
                         is Resource.Success -> {
-
                             if (!result.data.isNullOrEmpty()) {
                                 _chapterState.value = chapterState.value.copy(
                                         chapters = result.data,
@@ -115,6 +115,7 @@ class BookDetailViewModel(
                                         isLoading = false,
                                         loaded = true
                                 )
+                                readLastReadBook()
                                 toggleInLibrary(true)
                             } else {
                                 if (!chapterState.value.loaded) {
@@ -196,12 +197,12 @@ class BookDetailViewModel(
                 }.launchIn(coroutineScope)
     }
 
-    private fun updateLastReadBook(list : List<LastReadChapter>) {
-        list.forEach { item ->
-            if (item.book == state.value.book && item.latestReadChapter != null) {
-                _chapterState.value = chapterState.value.copy(lastChapter = item.latestReadChapter)
-            }
+    private fun readLastReadBook() {
+        val lastChapter = chapterState.value.chapters.findLast {
+            it.lastRead == true
         }
+        Timber.d("Test: $lastChapter")
+        _chapterState.value = chapterState.value.copy(lastChapter = lastChapter?: chapterState.value.chapters.first())
     }
 
     fun insertBookDetailToLocal(bookEntity: BookEntity) {

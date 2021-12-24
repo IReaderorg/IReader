@@ -30,6 +30,7 @@ import ir.kazemcodes.infinity.presentation.book_detail.components.CardTileCompos
 import ir.kazemcodes.infinity.presentation.book_detail.components.DotsFlashing
 import ir.kazemcodes.infinity.presentation.book_detail.components.ExpandingText
 import ir.kazemcodes.infinity.presentation.screen.components.BookImageComposable
+import timber.log.Timber
 
 
 @Composable
@@ -136,7 +137,7 @@ fun BookDetailScreenLoadedComposable(
                                 book.copy(inLibrary = true, source = source.name).toBookEntity()
                             )
                             val chapterEntities = chapters.map {
-                                it.copy(bookName = book.bookName).toChapterEntity()
+                                it.copy(bookName = book.bookName,source = source.name).toChapterEntity()
                             }
                             viewModel.insertChaptersToLocal(chapterEntities)
                             viewModel.onEvent(BookDetailEvent.ToggleInLibrary)
@@ -156,10 +157,11 @@ fun BookDetailScreenLoadedComposable(
                     text = "Continue Reading",
                     imageVector = Icons.Default.AutoStories,
                     onClick = {
+                        Timber.d("Timber : Test " + viewModel.chapterState.value.lastChapter?.title)
                         if(viewModel.chapterState.value.lastChapter != null) {
-                            backStack.goTo(ReaderScreenKey(chapter = viewModel.chapterState.value.lastChapter!!, book = book, source = viewModel.getSource()))
+                            backStack.goTo(ReaderScreenKey(chapter = viewModel.chapterState.value.lastChapter!!, book = book, source = viewModel.getSource(),chapters = viewModel.chapterState.value.chapters))
                         } else if(viewModel.chapterState.value.chapters.isNotEmpty()) {
-                            backStack.goTo(ReaderScreenKey(chapter = viewModel.chapterState.value.chapters.first(), book = book, source = viewModel.getSource()))
+                            backStack.goTo(ReaderScreenKey(chapter = viewModel.chapterState.value.chapters.first(), book = book, source = viewModel.getSource(),chapters = viewModel.chapterState.value.chapters))
                         }
                     }
                 )

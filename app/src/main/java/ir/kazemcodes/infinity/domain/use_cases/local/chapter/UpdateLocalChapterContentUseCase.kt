@@ -18,7 +18,8 @@ class UpdateLocalChapterContentUseCase @Inject constructor(
                 readingContent = chapter.content ?: "",
                 bookName = chapter.bookName ?: "",
                 chapterTitle = chapter.title,
-                haveBeenRead = chapter.haveBeenRead ?: false
+                haveBeenRead = chapter.haveBeenRead ?: false,
+                lastRead = chapter.lastRead?:false
             )
             Timber.d("Timber: GetLocalBookByNameUseCase was Finished Successfully")
         } catch (e: Exception) {

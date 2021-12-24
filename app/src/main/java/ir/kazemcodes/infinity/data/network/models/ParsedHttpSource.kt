@@ -115,9 +115,16 @@ abstract class ParsedHttpSource : HttpSource() {
     override fun searchBookParse(response: Response): BooksPage {
         val document = response.asJsoup()
 
+        /**
+         * I Add Filter Because sometimes this value contains null values
+         * so the null book shows in search screen
+         */
         val books = document.select(searchBookSelector()).map { element ->
             searchBookFromElement(element)
+        }.filter {
+            it.bookName.isNotBlank()
         }
+
 
         val hasNextPage = false
 

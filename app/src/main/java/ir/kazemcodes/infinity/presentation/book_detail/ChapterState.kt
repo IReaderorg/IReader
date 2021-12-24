@@ -7,5 +7,5 @@ data class ChapterState (
     val chapters : List<Chapter> = emptyList(),
     val error: String = "",
     val loaded : Boolean = false,
-    val lastChapter : Chapter? = null
+    val lastChapter : Chapter? = null,
 )

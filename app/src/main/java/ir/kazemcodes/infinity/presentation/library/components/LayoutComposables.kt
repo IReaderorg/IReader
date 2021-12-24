@@ -1,6 +1,8 @@
 package ir.kazemcodes.infinity.presentation.library.components
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import ir.kazemcodes.infinity.base_feature.navigation.BookDetailKey
@@ -12,7 +14,7 @@ import ir.kazemcodes.infinity.presentation.components.LinearViewList
 
 @ExperimentalFoundationApi
 @Composable
-fun LayoutComposable(books: List<Book>, layout: LayoutType) {
+fun LayoutComposable(books: List<Book>, layout: LayoutType,scrollState: LazyListState = rememberLazyListState()) {
     val backStack = LocalBackstack.current
     when (layout) {
         is LayoutType.GridLayout -> {
@@ -24,7 +26,7 @@ fun LayoutComposable(books: List<Book>, layout: LayoutType) {
                             source = mappingApiNameToAPi(books[index].source ?: "")
                         )
                     )
-                })
+                },scrollState = scrollState)
         }
         is LayoutType.CompactLayout -> {
             LinearViewList(books = books, onClick = { index ->
@@ -34,7 +36,7 @@ fun LayoutComposable(books: List<Book>, layout: LayoutType) {
                         source = mappingApiNameToAPi(books[index].source ?: "")
                     )
                 )
-            })
+            },scrollState = scrollState)
         }
     }
 }

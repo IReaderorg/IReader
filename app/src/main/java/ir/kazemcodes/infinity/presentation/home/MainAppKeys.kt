@@ -78,7 +78,7 @@ data class BookDetailKey(val book: Book, val source: @RawValue Source) : Compose
 
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
-            add(BookDetailViewModel(lookup<LocalUseCase>() , lookup<RemoteUseCase>(),source = source, book = book))
+            add(BookDetailViewModel(lookup<LocalUseCase>() , lookup<RemoteUseCase>(),source = source, book = book,lookup<DataStoreUseCase>()))
         }
     }
 }
@@ -107,7 +107,7 @@ data class ChapterDetailKey(val book: Book, val chapters: List<Chapter>, val sou
 }
 @Immutable
 @Parcelize
-data class ReaderScreenKey(val book: Book, val chapter: Chapter, val source: @RawValue Source) : ComposeKey() {
+data class ReaderScreenKey(val book: Book, val chapter: Chapter, val source: @RawValue Source,val chapters: List<Chapter>) : ComposeKey() {
 
     @ExperimentalMaterialApi
     @Composable
@@ -122,7 +122,8 @@ data class ReaderScreenKey(val book: Book, val chapter: Chapter, val source: @Ra
                 dataStoreUseCase = lookup<DataStoreUseCase>(),
                 source = source,
                 book = book,
-                chapter = chapter
+                chapter = chapter,
+                chapters = chapters
             ))
         }
     }

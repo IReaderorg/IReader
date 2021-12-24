@@ -1,5 +1,6 @@
 package ir.kazemcodes.infinity.presentation.browse
 
+import ir.kazemcodes.infinity.api_feature.data.BooksPage
 import ir.kazemcodes.infinity.domain.models.Book
 
 data class BrowseScreenState(
@@ -12,7 +13,7 @@ data class BrowseScreenState(
     val isMenuDropDownShown : Boolean = false,
     val isSearchModeEnable : Boolean = false,
     val searchQuery:String = "",
-    val searchedBook : List<Book> = emptyList(),
+    val searchedBook : BooksPage = BooksPage(),
 
 
     )

@@ -18,19 +18,29 @@ class LocalChapterRepositoryImpl @Inject constructor(private val dao: ChapterDao
         haveBeenRead: Boolean,
         bookName: String,
         chapterTitle: String,
+        lastRead: Boolean,
     ) {
-        return dao.updateChapter(readingContent = readingContent , bookName = bookName ,chapterTitle = chapterTitle,haveBeenRead = haveBeenRead)
+        return dao.updateChapter(readingContent = readingContent,
+            bookName = bookName,
+            chapterTitle = chapterTitle,
+            haveBeenRead = haveBeenRead,
+            lastRead = lastRead)
+    }
+
+    override suspend fun updateChapters(chapterEntities: List<ChapterEntity>) {
+        return dao.updateChapters(chapterEntities)
     }
 
 
-    override  fun getChapterByName(bookName : String): Flow<List<ChapterEntity>> {
+    override fun getChapterByName(bookName: String): Flow<List<ChapterEntity>> {
         return dao.getChapters(bookName)
     }
-    override  fun getChapterByChapter(chapterTitle : String, bookName: String): Flow<ChapterEntity?> {
-        return dao.getChapterByChapter(chapterTitle , bookName )
+
+    override fun getChapterByChapter(chapterTitle: String, bookName: String): Flow<ChapterEntity?> {
+        return dao.getChapterByChapter(chapterTitle, bookName)
     }
 
-    override fun getChapter(bookName : String): Flow<ChapterEntity?> {
+    override fun getChapter(bookName: String): Flow<ChapterEntity?> {
         return dao.getChapter(bookName)
     }
 

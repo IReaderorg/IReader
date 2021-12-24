@@ -186,7 +186,7 @@ fun LibraryScreen(
             if (state.books.isNotEmpty()) {
                 LayoutComposable(
                     books = if (state.searchedBook.isEmpty()) state.books else state.searchedBook,
-                    layout = state.layout
+                    layout = state.layout,
                 )
 //                if (state.layout == LayoutType.GridLayout) {
 //                    GridLayoutComposable(books = if (state.searchedBook.isEmpty()) state.books else state.searchedBook,

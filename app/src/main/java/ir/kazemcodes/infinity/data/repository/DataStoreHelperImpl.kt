@@ -4,11 +4,12 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
-import ir.kazemcodes.infinity.domain.repository.DataStoreOperations
+import ir.kazemcodes.infinity.domain.repository.DataStoreHelper
 import ir.kazemcodes.infinity.presentation.book_detail.PreferenceKeys
 import ir.kazemcodes.infinity.presentation.book_detail.PreferenceKeys.SAVED_BRIGHTNESS_PREFERENCES
 import ir.kazemcodes.infinity.presentation.book_detail.PreferenceKeys.SAVED_FONT_PREFERENCES
 import ir.kazemcodes.infinity.presentation.book_detail.PreferenceKeys.SAVED_FONT_SIZE_PREFERENCES
+import ir.kazemcodes.infinity.presentation.book_detail.PreferenceKeys.SAVED_LATEST_CHAPTER_KEY
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
@@ -16,12 +17,13 @@ import java.io.IOException
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = PreferenceKeys.TEMP_SAVED_SETTING)
 
-class DataStoreOperationsImpl(context: Context) : DataStoreOperations {
+class DataStoreHelperImpl(context: Context) : DataStoreHelper {
 
     private object PreferencesKey {
         val fontStateKey = intPreferencesKey(SAVED_FONT_PREFERENCES)
         val fontSizeStateKey = intPreferencesKey(SAVED_FONT_SIZE_PREFERENCES)
         val brightnessStateKey = floatPreferencesKey(SAVED_BRIGHTNESS_PREFERENCES)
+        val latestChapterStateKey = stringPreferencesKey(SAVED_LATEST_CHAPTER_KEY)
     }
 
     private val dataStore = context.dataStore
@@ -89,6 +91,26 @@ class DataStoreOperationsImpl(context: Context) : DataStoreOperations {
             }
             .map { preferences ->
                 preferences[PreferencesKey.brightnessStateKey] ?: .8f
+            }
+    }
+
+    override suspend fun saveLatestChapterUseCase(listOfLatestReadBook: String) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKey.latestChapterStateKey] = listOfLatestReadBook
+        }
+    }
+
+    override fun readLatestChapterUseCase(): Flow<String> {
+        return dataStore.data
+            .catch { exception ->
+                if (exception is IOException) {
+                    emit(emptyPreferences())
+                } else {
+                    throw exception
+                }
+            }
+            .map { preferences ->
+                preferences[PreferencesKey.latestChapterStateKey] ?: "[]"
             }
     }
 
