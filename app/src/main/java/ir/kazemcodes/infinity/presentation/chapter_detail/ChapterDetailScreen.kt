@@ -21,7 +21,6 @@ import com.zhuinden.simplestackcomposeintegration.services.rememberService
 import ir.kazemcodes.infinity.base_feature.navigation.ReaderScreenKey
 import ir.kazemcodes.infinity.domain.models.Book
 import ir.kazemcodes.infinity.domain.models.Chapter
-import timber.log.Timber
 
 
 @Composable
@@ -37,7 +36,6 @@ fun ChapterDetailScreen(
         viewModel.onEvent(ChapterDetailEvent.UpdateChapters(chapters = chapters))
     }
     val state = viewModel.state.value
-    Timber.d("Timber: ChapterDetail Screen was Loaded Successfully with ${chapterState.size} chapters")
     Box(modifier = modifier.fillMaxSize()) {
 
         if (state.chapters.isNotEmpty()) {

@@ -12,7 +12,7 @@ import javax.inject.Inject
 class RepositoryImpl @Inject constructor(
     private val bookDao: BookDao,
     private val chapterDao: ChapterDao,
-    private val context: Context
+    private val context: Context,
 ) : Repository {
     override val localBookRepository: LocalBookRepository
         get() = LocalBookRepositoryImpl(bookDao)

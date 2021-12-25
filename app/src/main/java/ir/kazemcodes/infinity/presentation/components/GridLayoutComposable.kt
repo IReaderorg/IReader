@@ -33,7 +33,7 @@ fun GridLayoutComposable(
     modifier: Modifier = Modifier,
     books: List<Book>,
     onClick: (index: Int) -> Unit,
-    scrollState: LazyListState = rememberLazyListState()
+    scrollState: LazyListState = rememberLazyListState(),
 ) {
     LazyVerticalGrid(
         state = scrollState,
@@ -58,14 +58,16 @@ fun GridLayoutComposable(
                     )
                     Box(
                         Modifier
-                            .fillMaxWidth().height(50.dp)
+                            .fillMaxWidth()
+                            .height(50.dp)
                             .background(
                                 Brush.verticalGradient(
-                                    colors = listOf(Color.Transparent , Color.Black ),
+                                    colors = listOf(Color.Transparent, Color.Black),
                                     startY = 3f,  // 1/3
                                     endY = 80F
                                 )
-                            ).align(Alignment.BottomCenter)
+                            )
+                            .align(Alignment.BottomCenter)
                     ) {
                         Text(
                             modifier = modifier

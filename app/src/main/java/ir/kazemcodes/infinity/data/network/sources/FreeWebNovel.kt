@@ -1,8 +1,8 @@
 package ir.kazemcodes.infinity.data.network.sources
 
+import ir.kazemcodes.infinity.api_feature.network.GET
 import ir.kazemcodes.infinity.data.network.models.BooksPage
 import ir.kazemcodes.infinity.data.network.models.ChapterPage
-import ir.kazemcodes.infinity.api_feature.network.GET
 import ir.kazemcodes.infinity.data.network.models.ParsedHttpSource
 import ir.kazemcodes.infinity.domain.models.Book
 import ir.kazemcodes.infinity.domain.models.Chapter
@@ -29,7 +29,7 @@ class FreeWebNovel : ParsedHttpSource() {
     }
 
     override suspend fun fetchSearchBook(page: Int, query: String): BooksPage {
-        val req = searchBookRequest(page,query = query)
+        val req = searchBookRequest(page, query = query)
         val res = client.newCall(req).await()
         return searchBookParse(res)
     }
@@ -53,15 +53,14 @@ class FreeWebNovel : ParsedHttpSource() {
     override suspend fun fetchChapters(book: Book): List<Chapter> {
         val chapters = mutableListOf<Chapter>()
         var hasNext = true
-        var page : Int = 1
-        while (hasNext){
-            val req = chapterListRequest(book,page)
+        var page: Int = 1
+        while (hasNext) {
+            val req = chapterListRequest(book, page)
             val res = client.newCall(req).await()
             val content = chapterListParse(res)
             chapters.addAll(content.chapters)
             hasNext = content.hasNextPage
             page += 1
-            Timber.d("Timber: GetRemoteChaptersUseCase + ${chapters.size} Chapters Added , current page: $page" )
         }
         Timber.d("Timber: GetRemoteChaptersUseCase was Finished Successfully with $page tries")
         return chapters
@@ -117,7 +116,8 @@ class FreeWebNovel : ParsedHttpSource() {
         book.bookName = document.select("div.m-desc h1.tit").text()
         book.description = document.select("div.inner").eachText().joinToString("\n\n\n")
         book.author = document.select("div.right a.a1").attr("title")
-        book.category = document.select("div.item div.right a.a1").eachText().drop(1).map {value-> value.trim()  }.joinToString(" ,")
+        book.category = document.select("div.item div.right a.a1").eachText().drop(1)
+            .map { value -> value.trim() }.joinToString(" ,")
         book.source = name
         return book
     }
@@ -164,7 +164,8 @@ class FreeWebNovel : ParsedHttpSource() {
         return book
     }
 
-    override fun searchBookRequest(page: Int,query: String): Request = GET("https://freewebnovel.com/search?searchkey=$query")
+    override fun searchBookRequest(page: Int, query: String): Request =
+        GET("https://freewebnovel.com/search?searchkey=$query")
 
     override fun searchBookNextPageSelector(): String? = null
 

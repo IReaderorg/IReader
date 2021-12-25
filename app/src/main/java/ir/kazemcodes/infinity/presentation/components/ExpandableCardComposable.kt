@@ -34,10 +34,10 @@ fun ExpandableCardComposable(
     fontSize: TextUnit = 18.sp,
     fontWeight: FontWeight = FontWeight.W400,
     maxLine: Int = 5,
-    durationMillis: Int = 500
+    durationMillis: Int = 500,
 
 
-) {
+    ) {
     var isExpanded by remember { mutableStateOf(false) }
 
     Card(
@@ -66,12 +66,12 @@ fun ExpandableCardComposable(
             )
             Text(
                 text = description,
-                maxLines = if(!isExpanded) maxLine else 100,
+                maxLines = if (!isExpanded) maxLine else 100,
                 overflow = TextOverflow.Ellipsis,
                 softWrap = true, fontSize = fontSize,
                 fontWeight = fontWeight,
 
-            )
+                )
 
 
             Text(
@@ -100,7 +100,7 @@ fun ExpandableCardComposable(
 @Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
 @Composable
 fun ExpandableCardComposablePrev() {
-    ExpandableCardComposable(title = "Summary" , description = """This is a brand new story.
+    ExpandableCardComposable(title = "Summary", description = """This is a brand new story.
 Survive the darkness, see the light
 There is no right or wrong, it just depends on which side you are standing on.
 To be a god, or to be a man.

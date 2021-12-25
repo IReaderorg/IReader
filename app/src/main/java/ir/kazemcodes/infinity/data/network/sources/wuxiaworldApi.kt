@@ -13,9 +13,8 @@ import okhttp3.Request
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import ru.gildor.coroutines.okhttp.await
-import timber.log.Timber
 
-class WuxiaWorldApi: ParsedHttpSource() {
+class WuxiaWorldApi : ParsedHttpSource() {
 
     override val baseUrl: String = "https://wuxiaworld.site"
     override val name: String = "WuxiaWorld.site"
@@ -31,7 +30,7 @@ class WuxiaWorldApi: ParsedHttpSource() {
     }
 
     override suspend fun fetchSearchBook(page: Int, query: String): BooksPage {
-        val req = searchBookRequest(page,query = query)
+        val req = searchBookRequest(page, query = query)
         val res = client.newCall(req).await()
         return searchBookParse(res)
     }
@@ -53,14 +52,12 @@ class WuxiaWorldApi: ParsedHttpSource() {
 
     override suspend fun fetchChapters(book: Book): List<Chapter> {
         val chapters = mutableListOf<Chapter>()
-        var page : Int = 1
-            val req = chapterListRequest(book,page)
-            val res = client.newCall(req).await()
-            val content = chapterListParse(res)
-            chapters.addAll(content.chapters)
-            page += 1
-            Timber.d("Timber: GetRemoteChaptersUseCase + ${chapters.size} Chapters Added , current page: $page" )
-        Timber.d("Timber: GetRemoteChaptersUseCase was Finished Successfully with $page tries")
+        var page: Int = 1
+        val req = chapterListRequest(book, page)
+        val res = client.newCall(req).await()
+        val content = chapterListParse(res)
+        chapters.addAll(content.chapters)
+        page += 1
         return chapters
     }
 
@@ -84,7 +81,9 @@ class WuxiaWorldApi: ParsedHttpSource() {
 
     override fun popularBookNextPageSelector(): String? = "div.nav-previous"
 
-    override fun popularBookRequest(page: Int): Request = GET("$baseUrl/novel-list/?m_orderby=trending")
+    override fun popularBookRequest(page: Int): Request =
+        GET("$baseUrl/novel-list/?m_orderby=trending")
+
     override fun popularBookFromElement(element: Element): Book {
         val book: Book = Book.create()
         book.link = element.select("a").attr("href").substringAfter(baseUrl)
@@ -113,9 +112,12 @@ class WuxiaWorldApi: ParsedHttpSource() {
     override fun bookDetailsParse(document: Document): Book {
         val book = Book.create()
         book.bookName = document.select("div.post-title h1").text()
-        book.description = document.select("div.description-summary p").eachText().joinToString("\n\n\n")
+        book.description =
+            document.select("div.description-summary p").eachText().joinToString("\n\n\n")
         book.author = document.select("div.author-content a").text()
-        book.category = document.select("div.genres-content a").eachText().drop(1).map {value-> value.trim()  }.joinToString(" ,")
+        book.category =
+            document.select("div.genres-content a").eachText().drop(1).map { value -> value.trim() }
+                .joinToString(" ,")
         book.source = name
         return book
     }
@@ -123,7 +125,7 @@ class WuxiaWorldApi: ParsedHttpSource() {
     override fun hasNextChapterSelector(): String? = null
 
     override fun hasNextChaptersParse(document: Document): Boolean {
-        return  false
+        return false
     }
 
 
@@ -159,7 +161,8 @@ class WuxiaWorldApi: ParsedHttpSource() {
         return book
     }
 
-    override fun searchBookRequest(page: Int,query: String): Request = GET("$baseUrl/?s=$query&post_type=wp-manga&op=&author=&artist=&release=&adult=")
+    override fun searchBookRequest(page: Int, query: String): Request =
+        GET("$baseUrl/?s=$query&post_type=wp-manga&op=&author=&artist=&release=&adult=")
 
     override fun searchBookNextPageSelector(): String? = null
 }

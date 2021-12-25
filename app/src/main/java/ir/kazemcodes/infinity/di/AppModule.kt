@@ -63,7 +63,7 @@ class AppModule {
     fun providesRepository(
         bookDao: BookDao,
         chapterDao: ChapterDao,
-        context: Context
+        context: Context,
     ): Repository {
         return RepositoryImpl(
             bookDao = bookDao,
@@ -82,7 +82,8 @@ class AppModule {
             deleteLocalBookUseCase = DeleteLocalBookUseCase(repository),
             deleteAllLocalBooksUseCase = DeleteAllLocalBooksUseCase(repository),
             insertLocalChaptersUseCase = InsertLocalChaptersUseCase(repository),
-            getLocalChaptersByBookNameByBookNameUseCase = GetLocalChaptersByBookNameUseCase(repository),
+            getLocalChaptersByBookNameByBookNameUseCase = GetLocalChaptersByBookNameUseCase(
+                repository),
             getLocalChapterUseCase = GetLocalChapterUseCase(repository),
             getLocalBookByNameUseCase = GetLocalBookByNameUseCase(repository),
             UpdateLocalChapterContentUseCase = UpdateLocalChapterContentUseCase(repository),
@@ -103,9 +104,10 @@ class AppModule {
             getSearchedBooksUseCase = GetRemoteSearchBookUseCase()
         )
     }
+
     @Provides
     @Singleton
-    fun provideDataStoreUseCase(repository: Repository) : DataStoreUseCase {
+    fun provideDataStoreUseCase(repository: Repository): DataStoreUseCase {
         return DataStoreUseCase(
             readSelectedFontStateUseCase = ReadSelectedFontStateUseCase(repository),
             saveSelectedFontStateUseCase = SaveSelectedFontStateUseCase(repository),
@@ -143,9 +145,10 @@ class AppModule {
             cookieJar(cookieJar)
         }.build()
     }
+
     @Singleton
     @Provides
-    fun providesMosh() : Moshi {
+    fun providesMosh(): Moshi {
         return Moshi.Builder()
             .add(KotlinJsonAdapterFactory())
             .build()
@@ -153,10 +156,9 @@ class AppModule {
 
     @Singleton
     @Provides
-    fun providesNetworkHelper(context: Context) : NetworkHelper {
+    fun providesNetworkHelper(context: Context): NetworkHelper {
         return NetworkHelper(context = context)
     }
-
 
 
 }

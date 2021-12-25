@@ -10,7 +10,7 @@ import timber.log.Timber
 import javax.inject.Inject
 
 class GetLocalChaptersByBookNameUseCase @Inject constructor(
-    private val repository: Repository
+    private val repository: Repository,
 ) {
     operator fun invoke(bookName: String): Flow<Resource<List<Chapter>>> =
         flow {

@@ -36,7 +36,7 @@ fun ExpandingText(modifier: Modifier = Modifier, text: String) {
                 val lastCharIndex = textLayoutResult.getLineEnd(MINIMIZED_MAX_LINES - 1)
                 val showMoreString = "..."
                 val adjustedText = text
-                    .substring(startIndex = 0, endIndex = lastCharIndex-1)
+                    .substring(startIndex = 0, endIndex = lastCharIndex - 1)
                     .dropLast(showMoreString.length)
                     .dropLastWhile { it == ' ' || it == '.' }
 

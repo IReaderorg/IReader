@@ -10,17 +10,18 @@ import timber.log.Timber
 import javax.inject.Inject
 
 class GetLocalChapterReadingContentUseCase @Inject constructor(
-    private val repository: Repository
+    private val repository: Repository,
 ) {
 
     operator fun invoke(chapter: Chapter): Flow<Resource<Chapter?>> =
         flow {
             try {
-            emit(Resource.Loading())
+                emit(Resource.Loading())
                 Timber.d("Timber: GetLocalChapterReadingContentUseCase was Called")
-                repository.localChapterRepository.getChapterByChapter(chapterTitle = chapter.title , bookName = chapter.bookName?:"")
+                repository.localChapterRepository.getChapterByChapter(chapterTitle = chapter.title,
+                    bookName = chapter.bookName ?: "")
                     .collect { chapter ->
-                            emit(Resource.Success<Chapter?>(data = chapter?.toChapter()))
+                        emit(Resource.Success<Chapter?>(data = chapter?.toChapter()))
                     }
                 Timber.d("GetLocalChapterReadingContentUseCase was Finished Successfully")
             } catch (e: Exception) {

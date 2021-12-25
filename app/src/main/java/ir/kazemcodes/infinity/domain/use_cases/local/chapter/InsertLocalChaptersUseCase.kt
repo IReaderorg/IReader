@@ -5,8 +5,9 @@ import ir.kazemcodes.infinity.domain.repository.Repository
 import ir.kazemcodes.infinity.domain.utils.InvalidBookException
 import timber.log.Timber
 import javax.inject.Inject
+
 class InsertLocalChaptersUseCase @Inject constructor(
-    private val repository: Repository
+    private val repository: Repository,
 ) {
 
     @Throws(InvalidBookException::class)

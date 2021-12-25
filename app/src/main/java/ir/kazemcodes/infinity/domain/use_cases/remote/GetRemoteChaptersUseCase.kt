@@ -1,10 +1,10 @@
 package ir.kazemcodes.infinity.domain.use_cases.remote
 
-import ir.kazemcodes.infinity.domain.utils.InvalidBookException
+import ir.kazemcodes.infinity.data.network.models.Source
 import ir.kazemcodes.infinity.domain.models.Book
 import ir.kazemcodes.infinity.domain.models.Chapter
+import ir.kazemcodes.infinity.domain.utils.InvalidBookException
 import ir.kazemcodes.infinity.domain.utils.Resource
-import ir.kazemcodes.infinity.data.network.models.Source
 import kotlinx.coroutines.flow.flow
 import retrofit2.HttpException
 import timber.log.Timber
@@ -15,10 +15,10 @@ class GetRemoteChaptersUseCase {
     @Throws(InvalidBookException::class)
     operator fun invoke(
         book: Book,
-        source: Source
+        source: Source,
     ) =
         flow {
-                emit(Resource.Loading())
+            emit(Resource.Loading())
             try {
                 Timber.d("Timber: GetRemoteChaptersUseCase was Called")
 
@@ -36,7 +36,8 @@ class GetRemoteChaptersUseCase {
             } catch (e: IOException) {
                 emit(Resource.Error<List<Chapter>>(message = "Couldn't Read Remote Server, Check Your Internet Connection."))
             } catch (e: Exception) {
-                emit(Resource.Error<List<Chapter>>(message = e.localizedMessage?:"An Unexpected Error Occurred"))
+                emit(Resource.Error<List<Chapter>>(message = e.localizedMessage
+                    ?: "An Unexpected Error Occurred"))
             }
         }
 

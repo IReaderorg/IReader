@@ -23,7 +23,7 @@ import ir.kazemcodes.infinity.presentation.book_detail.BookDetailViewModel
 fun BookDetailToggleButtonsComposable(
     book: Book,
     chapters: List<Chapter>,
-    viewModel: BookDetailViewModel
+    viewModel: BookDetailViewModel,
 ) {
     val backStack = LocalBackstack.current
 
@@ -37,7 +37,8 @@ fun BookDetailToggleButtonsComposable(
             modifier = Modifier.clickable {
                 if (!inLibrary) {
                     viewModel.insertBookDetailToLocal(book.copy(inLibrary = true).toBookEntity())
-                    val chapterEntities = chapters.map { it.copy(bookName = book.bookName).toChapterEntity() }
+                    val chapterEntities =
+                        chapters.map { it.copy(bookName = book.bookName).toChapterEntity() }
                     viewModel.insertChaptersToLocal(chapterEntities)
                     inLibrary = true
                 } else {

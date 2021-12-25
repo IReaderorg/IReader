@@ -27,7 +27,7 @@ abstract class HttpSource : Source {
     /**
      * Base url of the website without the trailing slash, like: http://mysite.com
      */
-    abstract override val baseUrl : String
+    abstract override val baseUrl: String
 
     /**
      * Default network client for doing requests.
@@ -49,8 +49,10 @@ abstract class HttpSource : Source {
     override val id by lazy {
         val key = "${name.lowercase()}/$lang/$versionId"
         val bytes = MessageDigest.getInstance("MD5").digest(key.toByteArray())
-        (0..7).map { bytes[it].toLong() and 0xff shl 8 * (7 - it) }.reduce(Long::or) and Long.MAX_VALUE
+        (0..7).map { bytes[it].toLong() and 0xff shl 8 * (7 - it) }
+            .reduce(Long::or) and Long.MAX_VALUE
     }
+
     /**
      * Version id used to generate the source id. If the site completely changes and urls are
      * incompatible, you may increase this value and it'll be considered as a new source.
@@ -95,10 +97,11 @@ abstract class HttpSource : Source {
      * @param page the page number to retrieve.
      */
     override suspend fun fetchLatestUpdates(page: Int): BooksPage {
-        val response =  client.newCall(latestUpdatesRequest(page))
+        val response = client.newCall(latestUpdatesRequest(page))
             .await()
-        return  latestUpdatesParse(response)
+        return latestUpdatesParse(response)
     }
+
     /**
      * Returns the request for latest  Books given the page.
      *
@@ -144,10 +147,9 @@ abstract class HttpSource : Source {
     abstract fun chapterListRequest(book: Book, page: Int): Request
 
 
-    abstract fun hasNextChapterSelector() : String?
+    abstract fun hasNextChapterSelector(): String?
 
-    abstract fun hasNextChaptersParse(document: Document) : Boolean
-
+    abstract fun hasNextChaptersParse(document: Document): Boolean
 
 
     /**
@@ -175,7 +177,6 @@ abstract class HttpSource : Source {
     abstract fun pageContentParse(response: Response): ChapterPage
 
 
-
     /**
      * Returns the Jsoup selector that returns a list of [Element] corresponding to each Book.
      */
@@ -201,7 +202,7 @@ abstract class HttpSource : Source {
      *
      * @param page the page number to retrieve.
      */
-    abstract fun searchBookRequest(page: Int,query: String): Request
+    abstract fun searchBookRequest(page: Int, query: String): Request
 
     /**
      * Parses the response from the site and returns a [BooksPage] object.
@@ -230,6 +231,7 @@ abstract class HttpSource : Source {
             orig
         }
     }
+
     /**
      * Called before inserting a new chapter into database. Use it if you need to override chapter
      * fields, like the title or the chapter number. Do not change anything to [book].
@@ -243,7 +245,9 @@ abstract class HttpSource : Source {
     protected open fun headersBuilder() = Headers.Builder().apply {
         add("User-Agent", DEFAULT_USER_AGENT)
     }
+
     companion object {
-        const val DEFAULT_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36 Edg/88.0.705.63"
+        const val DEFAULT_USER_AGENT =
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36 Edg/88.0.705.63"
     }
 }

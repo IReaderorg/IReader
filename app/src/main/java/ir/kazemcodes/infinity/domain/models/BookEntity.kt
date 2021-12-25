@@ -11,15 +11,15 @@ data class BookEntity(
     val description: String? = null,
     val author: String? = null,
     val translator: String? = null,
-    val category: String? =null,
+    val category: String? = null,
     val inLibrary: Boolean = false,
-    val status : Int = -1,
+    val status: Int = -1,
     val source: String? = null,
-    @PrimaryKey val bookId : Int? = null
+    @PrimaryKey val bookId: Int? = null,
 ) {
 
 
-    fun toBook() : Book {
+    fun toBook(): Book {
         return Book(
             link = link,
             bookName = bookName,

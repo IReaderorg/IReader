@@ -23,7 +23,7 @@ fun DotsPulsing() {
 
     @Composable
     fun Dot(
-        scale: Float
+        scale: Float,
     ) = Spacer(
         Modifier
             .size(dotSize)
@@ -74,7 +74,7 @@ fun DotsElastic() {
 
     @Composable
     fun Dot(
-        scale: Float
+        scale: Float,
     ) = Spacer(
         Modifier
             .size(dotSize)
@@ -125,7 +125,7 @@ fun DotsFlashing() {
 
     @Composable
     fun Dot(
-        alpha: Float
+        alpha: Float,
     ) = Spacer(
         Modifier
             .size(dotSize)
@@ -176,7 +176,7 @@ fun DotsTyping() {
 
     @Composable
     fun Dot(
-        offset: Float
+        offset: Float,
     ) = Spacer(
         Modifier
             .size(dotSize)
@@ -229,7 +229,7 @@ fun DotsCollision() {
 
     @Composable
     fun Dot(
-        offset: Float
+        offset: Float,
     ) = Spacer(
         Modifier
             .size(dotSize)

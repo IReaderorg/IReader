@@ -22,16 +22,18 @@ import ir.kazemcodes.infinity.presentation.theme.fonts
 @Composable
 fun FontMenuComposable(
     modifier: Modifier = Modifier,
-    viewModel : ReaderScreenViewModel
+    viewModel: ReaderScreenViewModel,
 ) {
     var expanded by remember { mutableStateOf(false) }
 
     Row(
-        modifier = modifier.fillMaxWidth().padding(end = 28.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(end = 28.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
 
-    ) {
+        ) {
         Text(
             modifier = modifier.fillMaxWidth(.2f),
             text = "Font",
@@ -55,7 +57,7 @@ fun FontMenuComposable(
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
             ) {
-                fonts.forEach {font ->
+                fonts.forEach { font ->
                     DropdownMenuItem(onClick = {
                         viewModel.onEvent(ReaderEvent.ChangeFont(font))
                     }) {

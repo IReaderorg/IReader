@@ -14,7 +14,6 @@ import ir.kazemcodes.infinity.domain.utils.Resource
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import timber.log.Timber
 
 
 class BookDetailViewModel(
@@ -198,9 +197,8 @@ class BookDetailViewModel(
 
     private fun readLastReadBook() {
         val lastChapter = chapterState.value.chapters.findLast {
-            it.lastRead == true
+            it.lastRead
         }
-        Timber.d("Test: $lastChapter")
         _chapterState.value = chapterState.value.copy(lastChapter = lastChapter?: chapterState.value.chapters.first())
     }
 

@@ -14,7 +14,7 @@ import ir.kazemcodes.infinity.domain.models.Book
 import ir.kazemcodes.infinity.presentation.screen.components.BookImageComposable
 
 @Composable
-fun BookImageInfoComposable(modifier : Modifier = Modifier , bookDetail : Book) {
+fun BookImageInfoComposable(modifier: Modifier = Modifier, bookDetail: Book) {
     Row {
         BookImageComposable(
             image = bookDetail.coverLink ?: "",

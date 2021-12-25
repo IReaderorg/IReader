@@ -18,9 +18,9 @@ import ir.kazemcodes.infinity.setting_feature.presentation.SettingScreen
 
 
 sealed class BottomNavigationScreens(
-    val index : Int,
+    val index: Int,
     val title: String,
-    val icon: ImageVector
+    val icon: ImageVector,
 ) {
     object Library :
         BottomNavigationScreens(
@@ -45,7 +45,7 @@ sealed class BottomNavigationScreens(
 @ExperimentalFoundationApi
 @ExperimentalMaterialApi
 @Composable
-fun MainScreen(modifier : Modifier = Modifier) {
+fun MainScreen(modifier: Modifier = Modifier) {
     val viewModel = rememberService<MainViewModel>()
     val currentIndex = viewModel.state.value.index
     val bottomNavigationItems = listOf(

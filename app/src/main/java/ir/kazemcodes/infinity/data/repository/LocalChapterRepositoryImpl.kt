@@ -27,6 +27,10 @@ class LocalChapterRepositoryImpl @Inject constructor(private val dao: ChapterDao
             lastRead = lastRead)
     }
 
+    override suspend fun updateChapter(chapterEntity: ChapterEntity) {
+        return dao.updateChapter(chapterEntity)
+    }
+
     override suspend fun updateChapters(chapterEntities: List<ChapterEntity>) {
         return dao.updateChapters(chapterEntities)
     }

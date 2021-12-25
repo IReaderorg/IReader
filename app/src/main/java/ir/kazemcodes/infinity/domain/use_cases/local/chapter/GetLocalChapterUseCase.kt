@@ -11,25 +11,24 @@ import timber.log.Timber
 import javax.inject.Inject
 
 class GetLocalChapterUseCase @Inject constructor(
-    private val repository: Repository
+    private val repository: Repository,
 ) {
 
     @Throws(InvalidBookException::class)
-    operator fun invoke(bookName : String) : Flow<Resource<Chapter?>> = flow{
+    operator fun invoke(bookName: String): Flow<Resource<Chapter?>> = flow {
         try {
             Timber.d("Timber: GetLocalChapterUseCase was Called")
 
             emit(Resource.Loading())
-            repository.localChapterRepository.getChapter(bookName= bookName).collect { chapter->
-                    emit(Resource.Success<Chapter?>(data = chapter?.toChapter() ))
+            repository.localChapterRepository.getChapter(bookName = bookName).collect { chapter ->
+                emit(Resource.Success<Chapter?>(data = chapter?.toChapter()))
             }
             Timber.d("Timber: GetLocalChapterUseCase was Finished Successfully")
-        }catch (e : Exception) {
+        } catch (e: Exception) {
             Timber.e("GetLocalChapterUseCase: " + e.localizedMessage)
             emit(Resource.Error<Chapter?>(message = e.message.toString()))
         }
     }
-
 
 
 }

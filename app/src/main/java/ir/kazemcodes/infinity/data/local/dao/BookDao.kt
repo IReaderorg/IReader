@@ -11,16 +11,16 @@ import kotlinx.coroutines.flow.Flow
 interface BookDao {
 
     @Query("SELECT * FROM book_table WHERE inLibrary = 1")
-    fun getInitializedBooks() : Flow<List<BookEntity>>
+    fun getInitializedBooks(): Flow<List<BookEntity>>
 
     @Query("SELECT * FROM book_table")
-    fun getBooks() : Flow<List<BookEntity>>
+    fun getBooks(): Flow<List<BookEntity>>
 
     @Query("SELECT * FROM book_table WHERE bookId = :bookId Limit 1")
-    fun getBookById(bookId : Int) : Flow<BookEntity>
+    fun getBookById(bookId: Int): Flow<BookEntity>
 
     @Query("SELECT * FROM book_table WHERE bookName = :bookName Limit 1")
-    fun getBookByName(bookName : String) : Flow<BookEntity>
+    fun getBookByName(bookName: String): Flow<BookEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertBook(bookEntity: BookEntity)

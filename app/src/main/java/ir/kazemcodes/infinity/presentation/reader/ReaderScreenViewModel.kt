@@ -14,6 +14,7 @@ import ir.kazemcodes.infinity.domain.utils.Resource
 import ir.kazemcodes.infinity.presentation.theme.fonts
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
 import timber.log.Timber
 
 
@@ -31,7 +32,6 @@ class ReaderScreenViewModel(
     val state: State<ReaderScreenState> = _state
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
-    private val coroutineScope1 = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     override fun onServiceRegistered() {
         getContent(chapter = chapter.copy(bookName = book.bookName))
@@ -64,100 +64,106 @@ class ReaderScreenViewModel(
         _state.value =
             state.value.copy(isReaderModeEnable = enable ?: !state.value.isReaderModeEnable)
     }
-    
+
     private fun getContent(chapter: Chapter) {
         _state.value = state.value.copy(chapter = chapter)
         getReadingContentLocally()
         readSelectedFontState()
         readBrightness()
         readFontSize()
-        toggleLastRead()
     }
 
     private fun getReadingContentLocally() {
-        coroutineScope1.launch(Dispatchers.IO) {
-            localUseCase.getLocalChapterReadingContentUseCase(state.value.chapter).collect { result ->
-                Timber.d("Timber getLocalChapterReadingContentUseCase was Called")
-                when (result) {
-                    is Resource.Success -> {
-                        if (result.data?.content != null) {
-                            _state.value = state.value.copy(
-                                chapter = result.data,
-                                isLoading = false,
-                                isLoaded = true,
-                                error = ""
-                            )
-                            Timber.d("Timber getLocalChapterReadingContentUseCase was Finished Successfully")
-                        } else {
-                            if (state.value.chapter.content == null) {
-                                getReadingContentRemotely()
+        coroutineScope.launch(Dispatchers.IO) {
+            localUseCase.getLocalChapterReadingContentUseCase(state.value.chapter)
+                .collect { result ->
+                    when (result) {
+                        is Resource.Success -> {
+                            if (result.data != null) {
+                                _state.value = state.value.copy(
+                                    chapter = result.data,
+                                    isLoading = false,
+                                    isLoaded = true,
+                                    error = ""
+                                )
+                                if (book.inLibrary) {
+                                    toggleLastRead()
+                                }
+                            } else {
+                                if (state.value.chapter.content.isNullOrEmpty()) {
+                                    getReadingContentRemotely()
+                                }
                             }
                         }
-                    }
-                    is Resource.Error -> {
-                        _state.value =
-                            state.value.copy(
-                                error = result.message ?: "An Unknown Error Occurred",
-                                isLoading = false,
-                                isLoaded = false,
-                            )
-                    }
-                    is Resource.Loading -> {
-                        _state.value = state.value.copy(isLoading = true, error = "",
-                            isLoaded = false,)
-                    }
-                }
-
-            }
-        }
-    }
-
-    private fun getReadingContentRemotely() {
-        coroutineScope1.launch(Dispatchers.IO) {
-        Timber.d("Timber: getReadingContentRemotely Successfully Triggered")
-        remoteUseCase.getRemoteReadingContentUseCase(state.value.chapter, source = source)
-            .collect { result ->
-                when (result) {
-                    is Resource.Success -> {
-                        Timber.d("Timber: getReadingContentRemotely Successfully Called")
-                        _state.value = state.value
-                            .copy(
-                                chapter = state.value.chapter.copy(content = result.data),
-                                isLoading = false,
-                                error = "",
-                                isLoaded = true,
-                            )
-                        if (!state.value.chapter.content.isNullOrEmpty()) {
-                            Timber.d("Timber: insertChapterContent Successfully Called")
-                            updateChapterContent(state.value.chapter)
-                        } else {
+                        is Resource.Error -> {
                             _state.value =
                                 state.value.copy(
-                                    error =  "Empty Chapter",
+                                    error = result.message ?: "An Unknown Error Occurred",
                                     isLoading = false,
                                     isLoaded = false,
                                 )
                         }
-                    }
-                    is Resource.Error -> {
-                        _state.value =
-                            state.value.copy(
-                                error = result.message ?: "An Unknown Error Occurred",
-                                isLoading = false,
+                        is Resource.Loading -> {
+                            _state.value = state.value.copy(
+                                isLoading = true, error = "",
                                 isLoaded = false,
                             )
+                        }
                     }
-                    is Resource.Loading -> {
-                        _state.value = state.value.copy(isLoading = true, error = "",
-                            isLoaded = false,)
+
+                }
+        }
+    }
+
+    private fun getReadingContentRemotely() {
+        coroutineScope.launch(Dispatchers.IO) {
+            remoteUseCase.getRemoteReadingContentUseCase(state.value.chapter, source = source)
+                .collect { result ->
+                    when (result) {
+                        is Resource.Success -> {
+                            _state.value = state.value
+                                .copy(
+                                    chapter = state.value.chapter.copy(content = result.data?.content
+                                        ?: "Empty Chapter"),
+                                    isLoading = false,
+                                    error = "",
+                                    isLoaded = true,
+                                )
+                            if (book.inLibrary) {
+                                toggleLastRead()
+                            }
+                            if (!state.value.chapter.content.isNullOrEmpty()) {
+                                updateChapterContent(chapter.copy(content = state.value.chapter.content))
+                            } else {
+                                _state.value =
+                                    state.value.copy(
+                                        error = "Empty Chapter",
+                                        isLoading = false,
+                                        isLoaded = false,
+                                    )
+                            }
+                        }
+                        is Resource.Error -> {
+                            _state.value =
+                                state.value.copy(
+                                    error = result.message ?: "An Unknown Error Occurred",
+                                    isLoading = false,
+                                    isLoaded = false,
+                                )
+                        }
+                        is Resource.Loading -> {
+                            _state.value = state.value.copy(
+                                isLoading = true, error = "",
+                                isLoaded = false,
+                            )
+                        }
                     }
                 }
-            }}
+        }
 
     }
 
     private fun updateChapterContent(chapter: Chapter) {
-        Timber.d("Timber: updateChapterContent Successfully Called")
         coroutineScope.launch(Dispatchers.IO) {
             localUseCase.UpdateLocalChapterContentUseCase(chapter.copy(haveBeenRead = true))
         }
@@ -207,12 +213,11 @@ class ReaderScreenViewModel(
 
 
     private fun readSelectedFontState() {
-        Timber.d("readSelectedFontState Successfully Triggered")
         coroutineScope.launch(Dispatchers.IO) {
-            dataStoreUseCase.readSelectedFontStateUseCase().collect { result ->
+            dataStoreUseCase.readSelectedFontStateUseCase().collectLatest { result ->
                 when (result) {
                     is Resource.Success -> {
-                        Timber.d("readSelectedFontState Successfully Called")
+
                         _state.value = state.value
                             .copy(
                                 font = (result.data ?: FontType.Poppins)
@@ -231,12 +236,12 @@ class ReaderScreenViewModel(
     }
 
     private fun readBrightness() {
-        Timber.d("readBrightness Successfully Triggered")
+
         coroutineScope.launch(Dispatchers.IO) {
-            dataStoreUseCase.readBrightnessStateUseCase().collect { result ->
+            dataStoreUseCase.readBrightnessStateUseCase().collectLatest { result ->
                 when (result) {
                     is Resource.Success -> {
-                        Timber.d("getFontFromDatastore Successfully Called")
+
                         _state.value = state.value
                             .copy(
                                 brightness = result.data ?: .8f
@@ -253,12 +258,10 @@ class ReaderScreenViewModel(
     }
 
     private fun readFontSize() {
-        Timber.d("readFontSize Successfully Triggered")
         coroutineScope.launch(Dispatchers.IO) {
-            dataStoreUseCase.readFontSizeStateUseCase().collect { result ->
+            dataStoreUseCase.readFontSizeStateUseCase().collectLatest { result ->
                 when (result) {
                     is Resource.Success -> {
-                        Timber.d("readFontSize Successfully Called")
                         _state.value = state.value
                             .copy(
                                 fontSize = result.data ?: 18
@@ -276,6 +279,6 @@ class ReaderScreenViewModel(
 
     override fun onServiceUnregistered() {
         coroutineScope.cancel()
-        coroutineScope1.cancel()
+
     }
 }

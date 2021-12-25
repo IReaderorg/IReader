@@ -8,10 +8,15 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 
 @Composable
-fun TitleText(text: String  , color: Colors? =null , style: FontStyle? = null , fontWeight: FontWeight? =null) {
+fun TitleText(
+    text: String,
+    color: Colors? = null,
+    style: FontStyle? = null,
+    fontWeight: FontWeight? = null,
+) {
     Text(
         text = text,
-        color = MaterialTheme.colors.onBackground ,
+        color = MaterialTheme.colors.onBackground,
         style = MaterialTheme.typography.h6,
         fontWeight = FontWeight.Bold
     )

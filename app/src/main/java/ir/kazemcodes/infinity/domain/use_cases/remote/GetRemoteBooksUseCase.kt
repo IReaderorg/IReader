@@ -19,7 +19,7 @@ class GetRemoteBooksUseCase {
             emit(Resource.Loading())
             Timber.d("Timber: GetRemoteBooksUseCase page: $page was Called")
             val books = source.fetchLatestUpdates(page)
-                emit(Resource.Success<List<Book>>(books.books))
+            emit(Resource.Success<List<Book>>(books.books))
             Timber.d("Timber: GetRemoteBooksUseCase page: $page was Finished Successfully")
             if (!books.hasNextPage) {
                 Resource.Error<List<Book>>(

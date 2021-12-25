@@ -73,8 +73,9 @@ abstract class ParsedHttpSource : HttpSource() {
     abstract fun bookDetailsParse(document: Document): Book
 
     override fun bookDetailsParse(response: Response): Book {
-       return bookDetailsParse(response.asJsoup())
+        return bookDetailsParse(response.asJsoup())
     }
+
     /**
      * Returns the Jsoup selector that returns a list of [Element] corresponding to each chapter.
      */
@@ -91,14 +92,11 @@ abstract class ParsedHttpSource : HttpSource() {
 
     override fun chapterListParse(response: Response): ChaptersPage {
         val document = response.asJsoup()
-        val chapters =  document.select(chapterListSelector()).map { chapterFromElement(it) }
+        val chapters = document.select(chapterListSelector()).map { chapterFromElement(it) }
         val hasNext = hasNextChaptersParse(document)
 
         return ChaptersPage(chapters, hasNext)
     }
-
-
-
 
 
     override fun pageContentParse(response: Response): ChapterPage {
@@ -106,7 +104,6 @@ abstract class ParsedHttpSource : HttpSource() {
     }
 
     abstract fun pageContentParse(document: Document): ChapterPage
-
 
 
     override fun searchBookParse(response: Response): BooksPage {

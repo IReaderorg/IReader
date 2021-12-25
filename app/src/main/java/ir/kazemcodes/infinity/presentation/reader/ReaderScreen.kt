@@ -40,7 +40,7 @@ fun ReadingScreen(
     val state = viewModel.state.value
 
     Box(modifier = modifier.fillMaxSize()) {
-        if (!state.isLoaded) {
+        if (state.isLoaded) {
             Scaffold(
                 topBar = {
                     if (!state.isReaderModeEnable) {
@@ -60,7 +60,7 @@ fun ReadingScreen(
                             contentColor = MaterialTheme.colors.onBackground,
                             elevation = 8.dp,
                             navigationIcon = {
-                                IconButton(onClick = { backStack.goBack()}) {
+                                IconButton(onClick = { backStack.goBack() }) {
                                     Icon(
                                         imageVector = Icons.Default.ArrowBack,
                                         contentDescription = "ArrowBack",
@@ -86,7 +86,8 @@ fun ReadingScreen(
                                     .padding(8.dp),
                             ) {
                                 Slider(
-                                    viewModel.state.value.brightness, { viewModel.onEvent(ReaderEvent.ChangeBrightness(it)) },
+                                    viewModel.state.value.brightness,
+                                    { viewModel.onEvent(ReaderEvent.ChangeBrightness(it)) },
                                     modifier = Modifier
                                         .fillMaxWidth(),
                                     valueRange = MIN_BRIGHTNESS..MAX_BRIGHTNESS
@@ -133,7 +134,7 @@ fun ReadingScreen(
                  * **/
                 Box(modifier = modifier
                     .fillMaxSize()
-                    .background(color = Color.Black.copy(abs(viewModel.state.value.brightness - MAX_BRIGHTNESS)))){}
+                    .background(color = Color.Black.copy(abs(viewModel.state.value.brightness - MAX_BRIGHTNESS)))) {}
             }
         }
 

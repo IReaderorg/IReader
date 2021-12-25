@@ -54,7 +54,7 @@ fun BrowserScreen() {
                             fontWeight = FontWeight.Bold,
                         )
                     } else {
-                        Box() {
+                        Box {
                             if (state.searchQuery.isEmpty()) {
                                 Text(
                                     text = "Search...",
@@ -179,11 +179,11 @@ fun BrowserScreen() {
                 )
             }
             if (state.books.isNotEmpty() && !state.isSearchModeEnable) {
-                    LayoutComposable(
-                        books = state.books,
-                        layout = state.layout,
-                        scrollState = scrollState
-                    )
+                LayoutComposable(
+                    books = state.books,
+                    layout = state.layout,
+                    scrollState = scrollState
+                )
             }
             if (scrollState.isScrolledToTheEnd() && !state.isLoading && state.error.isEmpty() && !state.isSearchModeEnable) {
                 viewModel.onEvent(BrowseScreenEvents.GetBooks(source = source))

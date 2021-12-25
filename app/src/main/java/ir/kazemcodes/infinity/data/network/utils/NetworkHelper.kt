@@ -35,7 +35,7 @@ class NetworkHelper(context: Context) {
 }
 
 object InfinityInstance {
-    lateinit var networkHelper : NetworkHelper
+    lateinit var networkHelper: NetworkHelper
     //var inDetailScreen : Boolean = false
 
 }

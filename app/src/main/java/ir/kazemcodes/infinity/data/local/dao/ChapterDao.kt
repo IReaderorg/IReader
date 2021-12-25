@@ -20,8 +20,11 @@ interface ChapterDao {
     )
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun updateChapter(chapterEntities: ChapterEntity)
+
+    @Update(onConflict = OnConflictStrategy.REPLACE)
     suspend fun updateChapters(
-        chapterEntities : List<ChapterEntity>
+        chapterEntities: List<ChapterEntity>,
     )
 
     @Query("SELECT * FROM chapter_entity WHERE bookName= :bookName")

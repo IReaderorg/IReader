@@ -22,15 +22,16 @@ fun LinearBookItem(
     title: String,
     img_thumbnail: Any,
 
-) {
+    ) {
 
-    Box(modifier = modifier
-        .padding(vertical = 8.dp, horizontal = 8.dp),
+    Box(
+        modifier = modifier
+            .padding(vertical = 8.dp, horizontal = 8.dp),
         contentAlignment = Alignment.Center,
     ) {
         Row(modifier = Modifier
             .fillMaxWidth()
-            .height(40.dp)){
+            .height(40.dp)) {
             BookImageComposable(image = img_thumbnail, modifier = modifier
                 .height(40.dp)
                 .width(40.dp))
@@ -49,14 +50,14 @@ fun LinearBookItem(
 @Composable
 fun LinearViewList(
     books: List<Book>,
-    onClick: (index : Int) -> Unit,
-    scrollState: LazyListState = rememberLazyListState()
+    onClick: (index: Int) -> Unit,
+    scrollState: LazyListState = rememberLazyListState(),
 ) {
-    LazyColumn(modifier = Modifier.fillMaxSize() , state = scrollState ) {
+    LazyColumn(modifier = Modifier.fillMaxSize(), state = scrollState) {
         items(count = books.size) { index ->
             LinearBookItem(
                 title = books[index].bookName,
-                img_thumbnail = books[index].coverLink?:"",
+                img_thumbnail = books[index].coverLink ?: "",
                 modifier = Modifier.clickable {
                     onClick(index)
                 }

@@ -11,13 +11,13 @@ data class Book(
 
     var bookName: String,
 
-     var coverLink: String? = "",
+    var coverLink: String? = "",
 
     var source: String? = null,
 
-    var author: String?= "",
+    var author: String? = "",
 
-    var translator: String?= "",
+    var translator: String? = "",
 
     var description: String? = "",
 
@@ -26,7 +26,7 @@ data class Book(
     var status: Int = 0,
 
     var inLibrary: Boolean = false,
-    ) : Parcelable {
+) : Parcelable {
 
     companion object {
         const val UNKNOWN = 0
@@ -34,10 +34,11 @@ data class Book(
         const val COMPLETED = 2
         const val LICENSED = 3
         fun create(): Book {
-            return Book(bookName = "" , link = "")
+            return Book(bookName = "", link = "")
         }
     }
-    fun toBookEntity() : BookEntity {
+
+    fun toBookEntity(): BookEntity {
         return BookEntity(
             bookName = bookName,
             link = link,
@@ -48,7 +49,7 @@ data class Book(
             description = description,
             inLibrary = inLibrary,
             category = category,
-            source=source
+            source = source
         )
     }
 

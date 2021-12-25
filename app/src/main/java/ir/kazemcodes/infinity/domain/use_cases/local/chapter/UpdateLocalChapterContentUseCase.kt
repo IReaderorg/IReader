@@ -7,23 +7,20 @@ import timber.log.Timber
 import javax.inject.Inject
 
 class UpdateLocalChapterContentUseCase @Inject constructor(
-    private val repository: Repository
+    private val repository: Repository,
 ) {
 
     @Throws(InvalidBookException::class)
-    suspend operator fun invoke(chapter : Chapter) =
+    suspend operator fun invoke(chapter: Chapter) {
         try {
             Timber.d("Timber: UpdateLocalChapterContentUseCase was Called")
             repository.localChapterRepository.updateChapter(
-                readingContent = chapter.content ?: "",
-                bookName = chapter.bookName ?: "",
-                chapterTitle = chapter.title,
-                haveBeenRead = chapter.haveBeenRead ?: false,
-                lastRead = chapter.lastRead?:false
+                chapterEntity = chapter.toChapterEntity()
             )
             Timber.d("Timber: GetLocalBookByNameUseCase was Finished Successfully")
         } catch (e: Exception) {
             Timber.e("Timber: InsertLocalChapterContentUseCase: " + e.localizedMessage)
         }
 
+    }
 }

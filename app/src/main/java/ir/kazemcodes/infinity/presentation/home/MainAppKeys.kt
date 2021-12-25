@@ -44,11 +44,12 @@ data class MainScreenKey(val noArgument: String = "") : ComposeKey() {
 
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
-            add(LibraryViewModel(lookup<LocalUseCase>() ))
+            add(LibraryViewModel(lookup<LocalUseCase>()))
             add(MainViewModel())
         }
     }
 }
+
 @Immutable
 @Parcelize
 data class BrowserScreenKey(val source: @RawValue Source) : ComposeKey() {
@@ -60,7 +61,7 @@ data class BrowserScreenKey(val source: @RawValue Source) : ComposeKey() {
 
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
-            add(BrowseViewModel(lookup<LocalUseCase>() , lookup<RemoteUseCase>(),source = source))
+            add(BrowseViewModel(lookup<LocalUseCase>(), lookup<RemoteUseCase>(), source = source))
         }
 
     }
@@ -72,16 +73,21 @@ data class BrowserScreenKey(val source: @RawValue Source) : ComposeKey() {
 data class BookDetailKey(val book: Book, val source: @RawValue Source) : ComposeKey() {
     @Composable
     override fun ScreenComposable(modifier: Modifier) {
-        BookDetailScreen(book=book)
+        BookDetailScreen(book = book)
 
     }
 
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
-            add(BookDetailViewModel(lookup<LocalUseCase>() , lookup<RemoteUseCase>(),source = source, book = book,lookup<DataStoreUseCase>()))
+            add(BookDetailViewModel(lookup<LocalUseCase>(),
+                lookup<RemoteUseCase>(),
+                source = source,
+                book = book,
+                lookup<DataStoreUseCase>()))
         }
     }
 }
+
 @Immutable
 @Parcelize
 data class WebViewKey(val url: String) : ComposeKey() {
@@ -91,29 +97,42 @@ data class WebViewKey(val url: String) : ComposeKey() {
         WebPageScreen(url)
     }
 }
+
 @Immutable
 @Parcelize
-data class ChapterDetailKey(val book: Book, val chapters: List<Chapter>, val source: @RawValue Source) : ComposeKey() {
+data class ChapterDetailKey(
+    val book: Book,
+    val chapters: List<Chapter>,
+    val source: @RawValue Source,
+) : ComposeKey() {
 
     @Composable
     override fun ScreenComposable(modifier: Modifier) {
-        ChapterDetailScreen(chapters = chapters , book = book)
+        ChapterDetailScreen(chapters = chapters, book = book)
     }
+
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
-            add(ChapterDetailViewModel(lookup<LocalUseCase>(), source = source,book = book))
+            add(ChapterDetailViewModel(lookup<LocalUseCase>(), source = source, book = book))
         }
     }
 }
+
 @Immutable
 @Parcelize
-data class ReaderScreenKey(val book: Book, val chapter: Chapter, val source: @RawValue Source,val chapters: List<Chapter>) : ComposeKey() {
+data class ReaderScreenKey(
+    val book: Book,
+    val chapter: Chapter,
+    val source: @RawValue Source,
+    val chapters: List<Chapter>,
+) : ComposeKey() {
 
     @ExperimentalMaterialApi
     @Composable
     override fun ScreenComposable(modifier: Modifier) {
         ReadingScreen(book = book, chapter = chapter)
     }
+
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
             add(ReaderScreenViewModel(
@@ -128,9 +147,10 @@ data class ReaderScreenKey(val book: Book, val chapter: Chapter, val source: @Ra
         }
     }
 }
+
 @Immutable
 @Parcelize
-data class ExtensionScreenKey(val noArgs : String = "") : ComposeKey() {
+data class ExtensionScreenKey(val noArgs: String = "") : ComposeKey() {
     @Composable
     override fun ScreenComposable(modifier: Modifier) {
         ExtensionScreen()

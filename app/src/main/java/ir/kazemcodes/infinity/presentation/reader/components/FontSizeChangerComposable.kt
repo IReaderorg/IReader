@@ -21,10 +21,12 @@ fun FontSizeChangerComposable(
     modifier: Modifier = Modifier,
     onFontDecease: () -> Unit,
     ontFontIncrease: () -> Unit,
-    fontSize: Int
+    fontSize: Int,
 ) {
     Row(
-        modifier = modifier.fillMaxWidth().padding(end = 28.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(end = 28.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -32,7 +34,7 @@ fun FontSizeChangerComposable(
             text = "Font Size",
             fontSize = 12.sp,
             style = TextStyle(fontWeight = FontWeight.W400),
-            modifier =modifier.fillMaxWidth(.2f)
+            modifier = modifier.fillMaxWidth(.2f)
         )
         Row(
             modifier = modifier.fillMaxWidth(.8f),

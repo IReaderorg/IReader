@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import timber.log.Timber
 
-class ReadFontSizeStateUseCase (
+class ReadFontSizeStateUseCase(
     private val repository: Repository,
 ) {
     operator fun invoke(): Flow<Resource<Int>> = flow {

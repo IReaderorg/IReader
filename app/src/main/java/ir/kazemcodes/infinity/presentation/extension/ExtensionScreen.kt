@@ -17,7 +17,7 @@ import ir.kazemcodes.infinity.base_feature.navigation.BrowserScreenKey
 import ir.kazemcodes.infinity.data.network.sources
 
 @Composable
-fun ExtensionScreen(modifier: Modifier= Modifier) {
+fun ExtensionScreen(modifier: Modifier = Modifier) {
     val backStack = LocalBackstack.current
     Scaffold(
         topBar = {
@@ -39,9 +39,11 @@ fun ExtensionScreen(modifier: Modifier= Modifier) {
     ) {
         LazyColumn {
             items(sources.size) { index ->
-                Text(sources[index].name, modifier = modifier.padding(16.dp).clickable {
-                    backStack.goTo(BrowserScreenKey(sources[index]))
-                })
+                Text(sources[index].name, modifier = modifier
+                    .padding(16.dp)
+                    .clickable {
+                        backStack.goTo(BrowserScreenKey(sources[index]))
+                    })
             }
         }
 

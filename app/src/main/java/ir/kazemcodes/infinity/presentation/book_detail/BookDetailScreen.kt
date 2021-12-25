@@ -36,7 +36,7 @@ import timber.log.Timber
 @Composable
 fun BookDetailScreen(
     modifier: Modifier = Modifier,
-    book: Book = Book.create()
+    book: Book = Book.create(),
 ) {
     val viewModel = rememberService<BookDetailViewModel>()
     val detailState = viewModel.state.value
@@ -94,9 +94,7 @@ fun BookDetailScreenLoadedComposable(
             contentColor = MaterialTheme.colors.onBackground,
             elevation = 0.dp,
             actions = {
-                Timber.d("Timber: source = ${source.baseUrl}")
-                Timber.d("Timber: source = ${book.link}")
-                IconButton(onClick = {backStack.goTo(WebViewKey(source.baseUrl+book.link))}) {
+                IconButton(onClick = { backStack.goTo(WebViewKey(source.baseUrl + book.link)) }) {
                     Icon(
                         imageVector = Icons.Default.Language,
                         contentDescription = "WebView",
@@ -105,12 +103,12 @@ fun BookDetailScreenLoadedComposable(
                 }
             },
             navigationIcon = {
-                IconButton(onClick = {backStack.goBack()}) {
+                IconButton(onClick = { backStack.goBack() }) {
                     Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "back Button",
-                    tint = MaterialTheme.colors.onBackground
-                )
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = "back Button",
+                        tint = MaterialTheme.colors.onBackground
+                    )
                 }
 
             }
@@ -139,7 +137,8 @@ fun BookDetailScreenLoadedComposable(
                                 book.copy(inLibrary = true, source = source.name).toBookEntity()
                             )
                             val chapterEntities = chapters.map {
-                                it.copy(bookName = book.bookName,source = source.name).toChapterEntity()
+                                it.copy(bookName = book.bookName, source = source.name)
+                                    .toChapterEntity()
                             }
                             viewModel.insertChaptersToLocal(chapterEntities)
                             viewModel.onEvent(BookDetailEvent.ToggleInLibrary)
@@ -156,13 +155,21 @@ fun BookDetailScreenLoadedComposable(
                         .width(1.dp)
                 )
                 ButtonWithIconAndText(
-                    text = if(viewModel.chapterState.value.lastChapter != viewModel.chapterState.value.chapters.getOrNull(0) ) "Continue Reading" else "Read",
+                    text = if (viewModel.chapterState.value.lastChapter != viewModel.chapterState.value.chapters.getOrNull(
+                            0)
+                    ) "Continue Reading" else "Read",
                     imageVector = Icons.Default.AutoStories,
                     onClick = {
-                        if(viewModel.chapterState.value.lastChapter != null) {
-                            backStack.goTo(ReaderScreenKey(chapter = viewModel.chapterState.value.lastChapter!!, book = book, source = viewModel.getSource(),chapters = viewModel.chapterState.value.chapters))
-                        } else if(viewModel.chapterState.value.chapters.isNotEmpty()) {
-                            backStack.goTo(ReaderScreenKey(chapter = viewModel.chapterState.value.chapters.first(), book = book, source = viewModel.getSource(),chapters = viewModel.chapterState.value.chapters))
+                        if (viewModel.chapterState.value.lastChapter != null) {
+                            backStack.goTo(ReaderScreenKey(chapter = viewModel.chapterState.value.lastChapter!!,
+                                book = book,
+                                source = viewModel.getSource(),
+                                chapters = viewModel.chapterState.value.chapters))
+                        } else if (viewModel.chapterState.value.chapters.isNotEmpty()) {
+                            backStack.goTo(ReaderScreenKey(chapter = viewModel.chapterState.value.chapters.first(),
+                                book = book,
+                                source = viewModel.getSource(),
+                                chapters = viewModel.chapterState.value.chapters))
                         }
                     }
                 )
@@ -256,7 +263,9 @@ fun BookDetailScreenLoadedComposable(
             /** Chapter Content **/
             CardTileComposable(
                 modifier = modifier.clickable {
-                    backStack.goTo(ChapterDetailKey(chapters = chapters, book = book, source = viewModel.getSource()))
+                    backStack.goTo(ChapterDetailKey(chapters = chapters,
+                        book = book,
+                        source = viewModel.getSource()))
                 },
                 title = "Contents",
                 subtitle = "${chapters.size} Chapters",

@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.onEach
 class BrowseViewModel(
     private val localUseCase: LocalUseCase,
     private val remoteUseCase: RemoteUseCase,
-    private val source: Source
+    private val source: Source,
 ) : ScopedServices.Registered {
 
     private val _state = mutableStateOf<BrowseScreenState>(BrowseScreenState())
@@ -35,11 +35,12 @@ class BrowseViewModel(
 
     }
 
-    fun getSource() : Source {
+    fun getSource(): Source {
         return source
     }
+
     fun onEvent(event: BrowseScreenEvents) {
-        when(event) {
+        when (event) {
             is BrowseScreenEvents.UpdatePage -> {
                 updatePage(event.page)
             }
@@ -63,6 +64,7 @@ class BrowseViewModel(
             }
         }
     }
+
     private fun updatePage(page: Int) {
         if (!state.value.isSearchModeEnable) {
             _state.value = state.value.copy(page = page)
@@ -70,77 +72,89 @@ class BrowseViewModel(
             _state.value = state.value.copy(searchPage = page)
         }
     }
-    private fun updateSearchInput(query : String) {
-        _state.value = state.value.copy(searchQuery= query)
+
+    private fun updateSearchInput(query: String) {
+        _state.value = state.value.copy(searchQuery = query)
     }
-    private fun toggleSearchMode(inSearchMode : Boolean? = null) {
-        _state.value = state.value.copy(isSearchModeEnable=inSearchMode?: !state.value.isSearchModeEnable)
+
+    private fun toggleSearchMode(inSearchMode: Boolean? = null) {
+        _state.value =
+            state.value.copy(isSearchModeEnable = inSearchMode ?: !state.value.isSearchModeEnable)
         if (inSearchMode == false) {
             exitSearchedMode()
         }
     }
+
     private fun exitSearchedMode() {
-        _state.value = state.value.copy(searchedBook = BooksPage(),searchQuery = "",page = 1,isLoading = false,error = "")
+        _state.value = state.value.copy(searchedBook = BooksPage(),
+            searchQuery = "",
+            page = 1,
+            isLoading = false,
+            error = "")
     }
 
     private fun updateLayoutType(layoutType: LayoutType) {
         _state.value = state.value.copy(layout = layoutType)
     }
 
-    private fun toggleMenuDropDown(isShown : Boolean) {
+    private fun toggleMenuDropDown(isShown: Boolean) {
         _state.value = state.value.copy(isMenuDropDownShown = isShown)
     }
 
     private fun getBooks(source: Source) {
-        remoteUseCase.getRemoteBooksUseCase(page =  state.value.page, source = source).onEach { result ->
-            when (result) {
-                is Resource.Success -> {
-                    _state.value = state.value.copy(
-                        books = merge(state.value.books , result.data ?: emptyList() ),
-                        isLoading = false,
-                        error = ""
-                    )
-                    onEvent(BrowseScreenEvents.UpdatePage(state.value.page + 1))
+        remoteUseCase.getRemoteBooksUseCase(page = state.value.page, source = source)
+            .onEach { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        _state.value = state.value.copy(
+                            books = merge(state.value.books, result.data ?: emptyList()),
+                            isLoading = false,
+                            error = ""
+                        )
+                        onEvent(BrowseScreenEvents.UpdatePage(state.value.page + 1))
+                    }
+                    is Resource.Error -> {
+                        _state.value =
+                            state.value.copy(error = result.message ?: "An Unknown Error Occurred",
+                                isLoading = false)
+                    }
+                    is Resource.Loading -> {
+                        _state.value = state.value.copy(isLoading = true, error = "")
+                    }
                 }
-                is Resource.Error -> {
-                    _state.value =
-                        state.value.copy(error = result.message ?: "An Unknown Error Occurred", isLoading = false)
-                }
-                is Resource.Loading -> {
-                    _state.value = state.value.copy(isLoading = true, error = "")
-                }
-            }
-        }.launchIn(coroutineScope)
+            }.launchIn(coroutineScope)
     }
-
 
 
     override fun onServiceUnregistered() {
         coroutineScope.cancel()
     }
-    private fun searchBook(query: String) {
-        remoteUseCase.getSearchedBooksUseCase(page =  state.value.page,query, source = source).onEach { result ->
-            when (result) {
-                is Resource.Success -> {
-                    if (result.data != null) {
-                        _state.value = state.value.copy(
-                            searchedBook = result.data ?: BooksPage(),
-                            isLoading = false,
-                            error = ""
-                        )
-                    }
 
-                    onEvent(BrowseScreenEvents.UpdatePage(state.value.searchPage + 1))
+    private fun searchBook(query: String) {
+        remoteUseCase.getSearchedBooksUseCase(page = state.value.page, query, source = source)
+            .onEach { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        if (result.data != null) {
+                            _state.value = state.value.copy(
+                                searchedBook = result.data,
+                                isLoading = false,
+                                error = ""
+                            )
+                        }
+
+                        onEvent(BrowseScreenEvents.UpdatePage(state.value.searchPage + 1))
+                    }
+                    is Resource.Error -> {
+                        _state.value =
+                            state.value.copy(error = result.message ?: "An Unknown Error Occurred",
+                                isLoading = false)
+                    }
+                    is Resource.Loading -> {
+                        _state.value = state.value.copy(isLoading = true, error = "")
+                    }
                 }
-                is Resource.Error -> {
-                    _state.value =
-                        state.value.copy(error = result.message ?: "An Unknown Error Occurred", isLoading = false)
-                }
-                is Resource.Loading -> {
-                    _state.value = state.value.copy(isLoading = true, error = "")
-                }
-            }
-        }.launchIn(coroutineScope)
+            }.launchIn(coroutineScope)
     }
 
 }

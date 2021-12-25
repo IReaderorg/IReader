@@ -15,6 +15,7 @@ object PreferenceKeys {
 
 
 }
+
 object DEFAULT {
     const val MAX_BRIGHTNESS = .9F
     const val MIN_BRIGHTNESS = 0F

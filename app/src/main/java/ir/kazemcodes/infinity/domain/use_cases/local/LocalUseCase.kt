@@ -16,5 +16,5 @@ data class LocalUseCase(
     val getLocalChapterReadingContentUseCase: GetLocalChapterReadingContentUseCase,
     val deleteLocalBookUseCase: DeleteLocalBookUseCase,
     val deleteChaptersUseCase: DeleteLocalChaptersUseCase,
-    val deleteAllLocalBooksUseCase: DeleteAllLocalBooksUseCase
+    val deleteAllLocalBooksUseCase: DeleteAllLocalBooksUseCase,
 )

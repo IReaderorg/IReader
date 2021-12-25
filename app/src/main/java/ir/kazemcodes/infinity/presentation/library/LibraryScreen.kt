@@ -32,8 +32,6 @@ import ir.kazemcodes.infinity.presentation.library.components.RadioButtonWithTit
 import kotlinx.coroutines.launch
 
 
-
-
 @ExperimentalMaterialApi
 @ExperimentalFoundationApi
 @Composable
@@ -60,7 +58,7 @@ fun LibraryScreen(
                                 fontWeight = FontWeight.Bold,
                             )
                         } else {
-                            Box() {
+                            Box {
                                 if (state.searchQuery.isEmpty()) {
                                     Text(
                                         text = "Search...",
@@ -68,21 +66,21 @@ fun LibraryScreen(
                                         color = MaterialTheme.colors.onBackground.copy(alpha = .7F)
                                     )
                                 }
-                                    BasicTextField(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        value = state.searchQuery,
-                                        onValueChange = {
-                                            viewModel.onEvent(LibraryEvents.UpdateSearchInput(it))
-                                        },
-                                        maxLines = 1,
-                                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                                        keyboardActions = KeyboardActions(onSearch = {
-                                            viewModel.onEvent(LibraryEvents.SearchBooks(state.searchQuery))
-                                            focusManager.clearFocus()
-                                        }),
-                                        singleLine = true,
-                                        textStyle = TextStyle(color = MaterialTheme.colors.onBackground),
-                                    )
+                                BasicTextField(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    value = state.searchQuery,
+                                    onValueChange = {
+                                        viewModel.onEvent(LibraryEvents.UpdateSearchInput(it))
+                                    },
+                                    maxLines = 1,
+                                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                                    keyboardActions = KeyboardActions(onSearch = {
+                                        viewModel.onEvent(LibraryEvents.SearchBooks(state.searchQuery))
+                                        focusManager.clearFocus()
+                                    }),
+                                    singleLine = true,
+                                    textStyle = TextStyle(color = MaterialTheme.colors.onBackground),
+                                )
                             }
                         }
 

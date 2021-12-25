@@ -7,7 +7,7 @@ import timber.log.Timber
 import javax.inject.Inject
 
 class UpdateLocalChaptersContentUseCase @Inject constructor(
-    private val repository: Repository
+    private val repository: Repository,
 ) {
 
     @Throws(InvalidBookException::class)

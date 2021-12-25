@@ -1,8 +1,8 @@
 package ir.kazemcodes.infinity.domain.use_cases.local.book
 
+import ir.kazemcodes.infinity.domain.models.Book
 import ir.kazemcodes.infinity.domain.repository.Repository
 import ir.kazemcodes.infinity.domain.utils.Resource
-import ir.kazemcodes.infinity.domain.models.Book
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
@@ -12,7 +12,7 @@ import java.io.IOException
 import javax.inject.Inject
 
 class GetLocalBooksUseCase @Inject constructor(
-    private val repository: Repository
+    private val repository: Repository,
 ) {
 
     operator fun invoke(): Flow<Resource<List<Book>>> = flow {
@@ -20,14 +20,15 @@ class GetLocalBooksUseCase @Inject constructor(
             Timber.d("Timber: GetLocalBooksUseCase was Called")
             emit(Resource.Loading())
 
-                repository.localBookRepository.getBooks().map { it.map { book -> book.toBook() } }.collect { data ->
+            repository.localBookRepository.getBooks().map { it.map { book -> book.toBook() } }
+                .collect { data ->
 
-                emit(Resource.Success<List<Book>>(data = data))
-            }
+                    emit(Resource.Success<List<Book>>(data = data))
+                }
             Timber.d("Timber: GetLocalBooksUseCase was Finished Successfully")
-        }  catch (e: IOException) {
+        } catch (e: IOException) {
             emit(Resource.Error<List<Book>>(message = "Couldn't load from local database."))
-        }catch (e : Exception) {
+        } catch (e: Exception) {
             emit(Resource.Error<List<Book>>(message = e.message.toString()))
         }
     }

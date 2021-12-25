@@ -6,11 +6,11 @@ import com.zhuinden.simplestack.ScopedServices
 class MainViewModel : ScopedServices.Registered {
 
     private val _state = mutableStateOf(MainScreenState())
-    val state= _state
+    val state = _state
 
 
     fun onEvent(event: MainScreenEvent) {
-        when(event) {
+        when (event) {
             is MainScreenEvent.ChangeScreenIndex -> {
                 _state.value = state.value.copy(index = event.index)
             }
@@ -24,6 +24,6 @@ class MainViewModel : ScopedServices.Registered {
 }
 
 data class MainScreenState(
-    val index : Int = 0
+    val index: Int = 0,
 )
 

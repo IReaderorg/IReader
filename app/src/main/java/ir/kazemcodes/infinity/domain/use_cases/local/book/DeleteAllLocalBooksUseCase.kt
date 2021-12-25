@@ -5,7 +5,7 @@ import timber.log.Timber
 import javax.inject.Inject
 
 class DeleteAllLocalBooksUseCase @Inject constructor(
-    private val repository: Repository
+    private val repository: Repository,
 ) {
 
     suspend operator fun invoke() {

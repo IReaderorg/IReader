@@ -3,9 +3,6 @@ package ir.kazemcodes.infinity.domain.repository
 import kotlinx.coroutines.flow.Flow
 
 
-
-
-
 interface DataStoreHelper {
     suspend fun saveSelectedFontState(fontIndex: Int)
 
@@ -19,7 +16,7 @@ interface DataStoreHelper {
 
     fun readBrightnessState(): Flow<Float>
 
-    suspend fun saveLatestChapterUseCase(latestChapter : String)
+    suspend fun saveLatestChapterUseCase(latestChapter: String)
 
     fun readLatestChapterUseCase(): Flow<String>
 

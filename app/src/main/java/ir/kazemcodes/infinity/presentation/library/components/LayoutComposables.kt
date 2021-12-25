@@ -14,7 +14,11 @@ import ir.kazemcodes.infinity.presentation.components.LinearViewList
 
 @ExperimentalFoundationApi
 @Composable
-fun LayoutComposable(books: List<Book>, layout: LayoutType,scrollState: LazyListState = rememberLazyListState()) {
+fun LayoutComposable(
+    books: List<Book>,
+    layout: LayoutType,
+    scrollState: LazyListState = rememberLazyListState(),
+) {
     val backStack = LocalBackstack.current
     when (layout) {
         is LayoutType.GridLayout -> {
@@ -26,7 +30,7 @@ fun LayoutComposable(books: List<Book>, layout: LayoutType,scrollState: LazyList
                             source = mappingApiNameToAPi(books[index].source ?: "")
                         )
                     )
-                },scrollState = scrollState)
+                }, scrollState = scrollState)
         }
         is LayoutType.CompactLayout -> {
             LinearViewList(books = books, onClick = { index ->
@@ -36,7 +40,7 @@ fun LayoutComposable(books: List<Book>, layout: LayoutType,scrollState: LazyList
                         source = mappingApiNameToAPi(books[index].source ?: "")
                     )
                 )
-            },scrollState = scrollState)
+            }, scrollState = scrollState)
         }
     }
 }

@@ -13,8 +13,8 @@ import ir.kazemcodes.infinity.domain.models.ChapterEntity
     exportSchema = false,
 )
 abstract class BookDatabase : RoomDatabase() {
-    abstract val bookDao : BookDao
-    abstract val chapterDao : ChapterDao
+    abstract val bookDao: BookDao
+    abstract val chapterDao: ChapterDao
 
 
     companion object {

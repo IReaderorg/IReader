@@ -2,10 +2,10 @@ package ir.kazemcodes.infinity.domain.repository
 
 interface Repository {
 
-    val localBookRepository : LocalBookRepository
+    val localBookRepository: LocalBookRepository
 
-    val localChapterRepository : LocalChapterRepository
+    val localChapterRepository: LocalChapterRepository
 
-    val dataStoreRepository : DataStoreHelper
+    val dataStoreRepository: DataStoreHelper
 
 }

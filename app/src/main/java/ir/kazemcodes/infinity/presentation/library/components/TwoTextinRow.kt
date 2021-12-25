@@ -8,7 +8,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun RadioButtonWithTitleComposable(modifier : Modifier = Modifier, text : String,selected: Boolean , onClick: () -> Unit = {}) {
+fun RadioButtonWithTitleComposable(
+    modifier: Modifier = Modifier,
+    text: String,
+    selected: Boolean,
+    onClick: () -> Unit = {},
+) {
     Row(modifier = modifier
         .fillMaxWidth()
         .padding(vertical = 8.dp)) {

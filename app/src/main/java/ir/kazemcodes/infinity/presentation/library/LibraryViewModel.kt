@@ -3,8 +3,8 @@ package ir.kazemcodes.infinity.presentation.library
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import com.zhuinden.simplestack.ScopedServices
-import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
 import ir.kazemcodes.infinity.domain.models.Book
+import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
 import ir.kazemcodes.infinity.domain.utils.Resource
 import ir.kazemcodes.infinity.presentation.browse.LayoutType
 import ir.kazemcodes.infinity.presentation.library.components.LibraryEvents
@@ -16,8 +16,8 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
 
-class LibraryViewModel (
-    private val localUseCase: LocalUseCase
+class LibraryViewModel(
+    private val localUseCase: LocalUseCase,
 ) : ScopedServices.Registered {
     private val _state = mutableStateOf<LibraryState>(LibraryState())
     val state: State<LibraryState> = _state
@@ -33,8 +33,8 @@ class LibraryViewModel (
     }
 
     fun onEvent(event: LibraryEvents) {
-        when(event) {
-            is  LibraryEvents.GetLocalBooks -> {
+        when (event) {
+            is LibraryEvents.GetLocalBooks -> {
                 getLocalBooks()
             }
             is LibraryEvents.UpdateLayoutType -> {
@@ -53,14 +53,14 @@ class LibraryViewModel (
 
     }
 
-    private fun updateSearchInput(query : String) {
-        _state.value = state.value.copy(searchQuery= query)
+    private fun updateSearchInput(query: String) {
+        _state.value = state.value.copy(searchQuery = query)
     }
 
-    private fun toggleSearchMode(inSearchMode : Boolean? = null) {
-        _state.value = state.value.copy(inSearchMode=inSearchMode?: !state.value.inSearchMode)
+    private fun toggleSearchMode(inSearchMode: Boolean? = null) {
+        _state.value = state.value.copy(inSearchMode = inSearchMode ?: !state.value.inSearchMode)
         if (inSearchMode == false) {
-            _state.value = state.value.copy(searchedBook = emptyList(),searchQuery = "")
+            _state.value = state.value.copy(searchedBook = emptyList(), searchQuery = "")
         }
     }
 
@@ -94,7 +94,7 @@ class LibraryViewModel (
     private fun searchBook(query: String) {
         val searchBook = mutableListOf<Book>()
         state.value.books.forEach { book ->
-            if (book.bookName.contains(query,ignoreCase = true)) {
+            if (book.bookName.contains(query, ignoreCase = true)) {
                 searchBook.add(book)
             }
         }

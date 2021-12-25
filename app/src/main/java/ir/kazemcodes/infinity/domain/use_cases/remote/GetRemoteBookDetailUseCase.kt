@@ -15,15 +15,18 @@ class GetRemoteBookDetailUseCase {
     @Throws(InvalidBookException::class)
     operator fun invoke(
         book: Book,
-        source: Source
+        source: Source,
     ): Flow<Resource<Book>> = flow {
-            emit(Resource.Loading())
+        emit(Resource.Loading())
         try {
             Timber.d("Timber: Remote Book Detail for ${book.bookName} Was called")
             val bookDetail = source.fetchBook(book)
 
             Timber.d("Timber: Remote Book Detail Was Fetched")
-      emit(Resource.Success<Book>(bookDetail.copy(bookName = book.bookName, link = book.link, coverLink = book.coverLink,source = source.name)))
+            emit(Resource.Success<Book>(bookDetail.copy(bookName = book.bookName,
+                link = book.link,
+                coverLink = book.coverLink,
+                source = source.name)))
         } catch (e: HttpException) {
             emit(
                 Resource.Error<Book>(
@@ -33,7 +36,7 @@ class GetRemoteBookDetailUseCase {
 
         } catch (e: IOException) {
             emit(Resource.Error<Book>(message = "Couldn't Read Server, Check Your Internet Connection."))
-        }catch (e: Exception) {
+        } catch (e: Exception) {
             emit(
                 Resource.Error<Book>(
                     message = e.localizedMessage ?: "An Unexpected Error Occurred."

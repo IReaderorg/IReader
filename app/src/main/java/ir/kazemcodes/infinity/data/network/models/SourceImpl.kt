@@ -9,14 +9,13 @@ import java.security.MessageDigest
  */
 abstract class Source : Source {
 
-    lateinit var network : NetworkHelper
+    lateinit var network: NetworkHelper
 
 
     /**
      * Base url of the website without the trailing slash, like: http://mysite.com
      */
     abstract override val baseUrl: String
-
 
 
     /**
@@ -33,7 +32,8 @@ abstract class Source : Source {
     override val id by lazy {
         val key = "${name.lowercase()}/$lang/$versionId"
         val bytes = MessageDigest.getInstance("MD5").digest(key.toByteArray())
-        (0..7).map { bytes[it].toLong() and 0xff shl 8 * (7 - it) }.reduce(Long::or) and Long.MAX_VALUE
+        (0..7).map { bytes[it].toLong() and 0xff shl 8 * (7 - it) }
+            .reduce(Long::or) and Long.MAX_VALUE
     }
 
     /**
@@ -60,8 +60,8 @@ abstract class Source : Source {
     override fun toString() = "$name (${lang.uppercase()})"
 
 
-
     companion object {
-        const val DEFAULT_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36 Edg/88.0.705.63"
+        const val DEFAULT_USER_AGENT =
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36 Edg/88.0.705.63"
     }
 }

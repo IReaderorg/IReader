@@ -5,5 +5,5 @@ data class RemoteUseCase(
     val getRemoteBooksUseCase: GetRemoteBooksUseCase,
     val getRemoteChaptersUseCase: GetRemoteChaptersUseCase,
     val getRemoteReadingContentUseCase: GetRemoteReadingContentUseCase,
-    val getSearchedBooksUseCase: GetRemoteSearchBookUseCase
+    val getSearchedBooksUseCase: GetRemoteSearchBookUseCase,
 )

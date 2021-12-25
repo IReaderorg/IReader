@@ -12,7 +12,7 @@ fun CardTileComposable(
     modifier: Modifier = Modifier,
     title: String = "",
     subtitle: String = "",
-    trailing: @Composable RowScope.() -> Unit
+    trailing: @Composable RowScope.() -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.Center) {
         Text(

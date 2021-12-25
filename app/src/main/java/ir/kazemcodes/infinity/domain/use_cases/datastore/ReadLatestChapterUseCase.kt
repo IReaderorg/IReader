@@ -18,8 +18,9 @@ class ReadLatestChapterUseCase(
             emit(Resource.Loading<List<LastReadChapter>>())
             repository.dataStoreRepository.readLatestChapterUseCase().collect { latestRead ->
                 kotlin.runCatching {
-                val latest = moshi.adapter<List<LastReadChapter>>(LastReadChapter::class.java).fromJson(latestRead)
-                emit(Resource.Success<List<LastReadChapter>>(latest?: emptyList()))
+                    val latest = moshi.adapter<List<LastReadChapter>>(LastReadChapter::class.java)
+                        .fromJson(latestRead)
+                    emit(Resource.Success<List<LastReadChapter>>(latest ?: emptyList()))
                 }
             }
             Timber.d("Timber: ReadFontSizeState was Finished Successfully")

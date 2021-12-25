@@ -14,7 +14,7 @@ import org.jsoup.nodes.Element
 import ru.gildor.coroutines.okhttp.await
 
 
-class RealWebNovelApi: ParsedHttpSource() {
+class RealWebNovelApi : ParsedHttpSource() {
 
     override val baseUrl: String = "https://readwebnovels.net"
     override val name: String = "RealWebNovels.net"
@@ -30,7 +30,7 @@ class RealWebNovelApi: ParsedHttpSource() {
     }
 
     override suspend fun fetchSearchBook(page: Int, query: String): BooksPage {
-        val req = searchBookRequest(page,query = query)
+        val req = searchBookRequest(page, query = query)
         val res = client.newCall(req).await()
         return searchBookParse(res)
     }
@@ -42,7 +42,8 @@ class RealWebNovelApi: ParsedHttpSource() {
         return pageContentParse(res)
     }
 
-    override fun pageContentRequest(chapter: Chapter): Request  = GET(chapter.link,headers = headers)
+    override fun pageContentRequest(chapter: Chapter): Request =
+        GET(chapter.link, headers = headers)
 
     override suspend fun fetchBook(book: Book): Book {
         val req = bookDetailsRequest(book)
@@ -53,7 +54,7 @@ class RealWebNovelApi: ParsedHttpSource() {
 
     override suspend fun fetchChapters(book: Book): List<Chapter> {
         val chapters = mutableListOf<Chapter>()
-        val req = chapterListRequest(book,1)
+        val req = chapterListRequest(book, 1)
         val res = client.newCall(req).await()
         val content = chapterListParse(res)
         chapters.addAll(content.chapters)
@@ -80,7 +81,9 @@ class RealWebNovelApi: ParsedHttpSource() {
 
     override fun popularBookNextPageSelector(): String? = "div.nav-previous"
 
-    override fun popularBookRequest(page: Int): Request = GET("$baseUrl/manga-2/page/$page/?m_orderby=trending")
+    override fun popularBookRequest(page: Int): Request =
+        GET("$baseUrl/manga-2/page/$page/?m_orderby=trending")
+
     override fun popularBookFromElement(element: Element): Book {
         val book: Book = Book.create()
         book.link = element.select("a").attr("href").substringAfter(baseUrl)
@@ -112,7 +115,9 @@ class RealWebNovelApi: ParsedHttpSource() {
         book.bookName = document.select("div.post-title h1").text()
         book.description = document.select("div.summary__content").eachText().joinToString("\n\n\n")
         book.author = document.select("div.author-content a").text()
-        book.category = document.select("div.genres-content a").eachText().drop(1).map {value-> value.trim()  }.joinToString(" ,")
+        book.category =
+            document.select("div.genres-content a").eachText().drop(1).map { value -> value.trim() }
+                .joinToString(" ,")
         book.source = name
         return book
     }
@@ -120,7 +125,7 @@ class RealWebNovelApi: ParsedHttpSource() {
     override fun hasNextChapterSelector(): String? = null
 
     override fun hasNextChaptersParse(document: Document): Boolean {
-        return  false
+        return false
     }
 
 
@@ -139,7 +144,6 @@ class RealWebNovelApi: ParsedHttpSource() {
     override fun chapterListNextPageSelector(): String? = null
 
 
-
     override fun pageContentParse(document: Document): ChapterPage {
         val content = document.select("div.reading-content h4,p").eachText().joinToString("\n\n\n")
 
@@ -156,7 +160,8 @@ class RealWebNovelApi: ParsedHttpSource() {
         return book
     }
 
-    override fun searchBookRequest(page: Int,query: String): Request = GET("$baseUrl/?s=$query&post_type=wp-manga")
+    override fun searchBookRequest(page: Int, query: String): Request =
+        GET("$baseUrl/?s=$query&post_type=wp-manga")
 
     override fun searchBookNextPageSelector(): String? = null
 }
@@ -255,9 +260,6 @@ class RealWebNovelApi: ParsedHttpSource() {
 //    override val supportsLatest: Boolean
 //        get() = true
 //}
-
-
-
 
 
 //    override  fun fetchBook(book: Book): Book {

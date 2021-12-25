@@ -10,7 +10,7 @@ import timber.log.Timber
 import javax.inject.Inject
 
 class GetLocalBookByNameUseCase @Inject constructor(
-    private val repository: Repository
+    private val repository: Repository,
 ) {
 
     operator fun invoke(book: Book): Flow<Resource<Book?>> =
@@ -18,13 +18,14 @@ class GetLocalBookByNameUseCase @Inject constructor(
             try {
                 Timber.d("Timber: GetLocalBookByNameUseCase was Called")
                 emit(Resource.Loading())
-                repository.localBookRepository.getBookByName(bookName = book.bookName).collect { bookEntity->
-                    if (bookEntity != null) {
-                        emit(Resource.Success<Book?>(data = bookEntity.toBook()))
-                    } else {
-                        emit(Resource.Success<Book?>(data = Book.create()))
+                repository.localBookRepository.getBookByName(bookName = book.bookName)
+                    .collect { bookEntity ->
+                        if (bookEntity != null) {
+                            emit(Resource.Success<Book?>(data = bookEntity.toBook()))
+                        } else {
+                            emit(Resource.Success<Book?>(data = Book.create()))
+                        }
                     }
-                }
                 Timber.d("Timber: GetLocalBookByNameUseCase was Finished Successfully")
 
             } catch (e: Exception) {

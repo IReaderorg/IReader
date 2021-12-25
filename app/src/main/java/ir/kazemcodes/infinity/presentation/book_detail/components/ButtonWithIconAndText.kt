@@ -14,10 +14,13 @@ fun ButtonWithIconAndText(
     imageVector: ImageVector,
     text: String,
     contentDescription: String = "an Icon",
-    onClick : () -> Unit
+    onClick: () -> Unit,
 ) {
-    Button(modifier = modifier,onClick = { onClick() },colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.background)) {
-        Column(verticalArrangement = Arrangement.Center,horizontalAlignment = Alignment.CenterHorizontally) {
+    Button(modifier = modifier,
+        onClick = { onClick() },
+        colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.background)) {
+        Column(verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(
                 imageVector = imageVector,
                 contentDescription = contentDescription,

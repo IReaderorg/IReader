@@ -9,21 +9,22 @@ data class Chapter(
     var bookName: String? = null,
     var link: String,
     var title: String,
-    var content: String? =null,
+    var content: String? = null,
     var dateUploaded: String? = null,
-    var haveBeenRead : Boolean = false,
-    var lastRead:  Boolean = false,
-    var source:  String,
+    var haveBeenRead: Boolean = false,
+    var lastRead: Boolean = false,
+    var source: String,
+    var id: Int? = null,
 ) : Parcelable {
     companion object {
-        fun create() : Chapter {
+        fun create(): Chapter {
             return Chapter(
-                link = "",title = "",source = ""
+                link = "", title = "", source = ""
             )
         }
     }
 
-    fun toChapterEntity() : ChapterEntity {
+    fun toChapterEntity(): ChapterEntity {
         return ChapterEntity(
             bookName = bookName,
             link = link,
@@ -32,12 +33,9 @@ data class Chapter(
             dateUploaded = dateUploaded,
             lastRead = lastRead,
             haveBeenRead = haveBeenRead,
-            source = source
+            source = source,
+            chapterId = id
         )
     }
-
-//    @IgnoredOnParcel
-//    var encodedLink = URLEncoder.encode(link , StandardCharsets.UTF_8.toString())
-//    var decodedLink = URLEncoder.encode(encodedLink , StandardCharsets.UTF_8.toString())
 
 }

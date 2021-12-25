@@ -1,8 +1,8 @@
 package ir.kazemcodes.infinity.domain.use_cases.local.book
 
+import ir.kazemcodes.infinity.domain.models.Book
 import ir.kazemcodes.infinity.domain.repository.Repository
 import ir.kazemcodes.infinity.domain.utils.Resource
-import ir.kazemcodes.infinity.domain.models.Book
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
@@ -10,7 +10,7 @@ import timber.log.Timber
 import javax.inject.Inject
 
 class GetLocalBookByIdUseCase @Inject constructor(
-    private val repository: Repository
+    private val repository: Repository,
 ) {
 
     suspend operator fun invoke(bookId: Int): Flow<Resource<Book?>> =
@@ -18,8 +18,8 @@ class GetLocalBookByIdUseCase @Inject constructor(
             try {
                 Timber.d("Timber: GetLocalBookByIdUseCase was Called")
                 emit(Resource.Loading())
-                repository.localBookRepository.getBookById(bookId = bookId).collect { book->
-                    if (book !=null) {
+                repository.localBookRepository.getBookById(bookId = bookId).collect { book ->
+                    if (book != null) {
                         emit(Resource.Success<Book?>(data = book.toBook()))
                     } else {
                         emit(Resource.Success<Book?>(data = null))

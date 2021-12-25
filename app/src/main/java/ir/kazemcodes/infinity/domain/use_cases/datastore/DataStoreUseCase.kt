@@ -8,6 +8,6 @@ data class DataStoreUseCase(
     val readBrightnessStateUseCase: ReadBrightnessStateUseCase,
     val saveBrightnessStateUseCase: SaveBrightnessStateUseCase,
     val saveLatestChapterUseCase: SaveLatestChapterUseCase,
-    val readLatestChapterUseCase: ReadLatestChapterUseCase
+    val readLatestChapterUseCase: ReadLatestChapterUseCase,
 
-)
+    )

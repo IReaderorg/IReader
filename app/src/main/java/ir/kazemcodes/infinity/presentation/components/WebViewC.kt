@@ -24,6 +24,6 @@ fun WebPageScreen(urlToRender: String) {
         }
     }, update = {
         it.loadUrl(urlToRender)
-    },modifier = Modifier.fillMaxSize())
+    }, modifier = Modifier.fillMaxSize())
 
 }

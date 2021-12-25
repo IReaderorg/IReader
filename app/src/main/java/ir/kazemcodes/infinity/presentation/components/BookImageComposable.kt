@@ -15,26 +15,31 @@ import androidx.compose.ui.unit.dp
 import com.skydoves.landscapist.coil.CoilImage
 
 @Composable
-fun BookImageComposable(image : Any, modifier: Modifier = Modifier, alignment: Alignment = Alignment.Center,contentScale : ContentScale = ContentScale.Crop) {
-        CoilImage(
-            image,
-            contentDescription = "Book Cover",
-            modifier = modifier,
-            contentScale = contentScale,
-            loading = {
-                Box(contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(modifier = modifier.size(4.dp))
-                }
-            },
-            failure = {
-                Box(contentAlignment = Alignment.Center, modifier = modifier.fillMaxSize()) {
-                    Icon(
-                        imageVector = Icons.Default.Error,
-                        contentDescription = "Error Occurred",
-                        Modifier.size(16.dp)
-                    )
-                }
-            },
+fun BookImageComposable(
+    image: Any,
+    modifier: Modifier = Modifier,
+    alignment: Alignment = Alignment.Center,
+    contentScale: ContentScale = ContentScale.Crop,
+) {
+    CoilImage(
+        image,
+        contentDescription = "Book Cover",
+        modifier = modifier,
+        contentScale = contentScale,
+        loading = {
+            Box(contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(modifier = modifier.size(4.dp))
+            }
+        },
+        failure = {
+            Box(contentAlignment = Alignment.Center, modifier = modifier.fillMaxSize()) {
+                Icon(
+                    imageVector = Icons.Default.Error,
+                    contentDescription = "Error Occurred",
+                    Modifier.size(16.dp)
+                )
+            }
+        },
 
-            )
+        )
 }
