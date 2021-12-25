@@ -1,7 +1,5 @@
 package ir.kazemcodes.infinity.data.network.models
 
-import ir.kazemcodes.infinity.api_feature.data.BooksPage
-import ir.kazemcodes.infinity.api_feature.data.ChapterPage
 import ir.kazemcodes.infinity.domain.models.Book
 import ir.kazemcodes.infinity.domain.models.Chapter
 

@@ -94,7 +94,9 @@ fun BookDetailScreenLoadedComposable(
             contentColor = MaterialTheme.colors.onBackground,
             elevation = 0.dp,
             actions = {
-                IconButton(onClick = {backStack.goTo(WebViewKey(book.link))}) {
+                Timber.d("Timber: source = ${source.baseUrl}")
+                Timber.d("Timber: source = ${book.link}")
+                IconButton(onClick = {backStack.goTo(WebViewKey(source.baseUrl+book.link))}) {
                     Icon(
                         imageVector = Icons.Default.Language,
                         contentDescription = "WebView",
@@ -154,10 +156,9 @@ fun BookDetailScreenLoadedComposable(
                         .width(1.dp)
                 )
                 ButtonWithIconAndText(
-                    text = "Continue Reading",
+                    text = if(viewModel.chapterState.value.lastChapter != viewModel.chapterState.value.chapters.getOrNull(0) ) "Continue Reading" else "Read",
                     imageVector = Icons.Default.AutoStories,
                     onClick = {
-                        Timber.d("Timber : Test " + viewModel.chapterState.value.lastChapter?.title)
                         if(viewModel.chapterState.value.lastChapter != null) {
                             backStack.goTo(ReaderScreenKey(chapter = viewModel.chapterState.value.lastChapter!!, book = book, source = viewModel.getSource(),chapters = viewModel.chapterState.value.chapters))
                         } else if(viewModel.chapterState.value.chapters.isNotEmpty()) {

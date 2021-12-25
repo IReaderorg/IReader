@@ -1,11 +1,11 @@
 package ir.kazemcodes.infinity.data.network.sources
 
-import ir.kazemcodes.infinity.api_feature.data.BooksPage
-import ir.kazemcodes.infinity.api_feature.data.ChapterPage
+import ir.kazemcodes.infinity.data.network.models.BooksPage
+import ir.kazemcodes.infinity.data.network.models.ChapterPage
 import ir.kazemcodes.infinity.api_feature.network.GET
+import ir.kazemcodes.infinity.data.network.models.ParsedHttpSource
 import ir.kazemcodes.infinity.domain.models.Book
 import ir.kazemcodes.infinity.domain.models.Chapter
-import ir.kazemcodes.infinity.data.network.models.ParsedHttpSource
 import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -130,6 +130,7 @@ class FreeWebNovel : ParsedHttpSource() {
 
         return res.contains("Next")
     }
+
 
     override fun chapterListRequest(book: Book, page: Int): Request =
         GET(baseUrl + book.link.replace(".html", "/$page.html"))

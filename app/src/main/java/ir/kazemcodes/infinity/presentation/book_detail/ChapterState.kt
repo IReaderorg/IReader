@@ -8,4 +8,5 @@ data class ChapterState (
     val error: String = "",
     val loaded : Boolean = false,
     val lastChapter : Chapter? = null,
+    val chapterLoadingProgress : Float = 0f
 )

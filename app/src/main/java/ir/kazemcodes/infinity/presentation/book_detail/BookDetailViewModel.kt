@@ -172,7 +172,6 @@ class BookDetailViewModel(
     private fun getRemoteChapterDetail() {
         remoteUseCase.getRemoteChaptersUseCase(book = state.value.book, source= source)
                 .onEach { result ->
-
                     when (result) {
                         is Resource.Success -> {
                             _chapterState.value = chapterState.value.copy(

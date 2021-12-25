@@ -16,8 +16,8 @@ class GetLocalChapterReadingContentUseCase @Inject constructor(
     operator fun invoke(chapter: Chapter): Flow<Resource<Chapter?>> =
         flow {
             try {
+            emit(Resource.Loading())
                 Timber.d("Timber: GetLocalChapterReadingContentUseCase was Called")
-                emit(Resource.Loading())
                 repository.localChapterRepository.getChapterByChapter(chapterTitle = chapter.title , bookName = chapter.bookName?:"")
                     .collect { chapter ->
                             emit(Resource.Success<Chapter?>(data = chapter?.toChapter()))

@@ -3,7 +3,7 @@ package ir.kazemcodes.infinity.presentation.browse
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import com.zhuinden.simplestack.ScopedServices
-import ir.kazemcodes.infinity.api_feature.data.BooksPage
+import ir.kazemcodes.infinity.data.network.models.BooksPage
 import ir.kazemcodes.infinity.data.network.models.Source
 import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
 import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
@@ -32,6 +32,7 @@ class BrowseViewModel(
 
     override fun onServiceRegistered() {
         getBooks(source = source)
+
     }
 
     fun getSource() : Source {
@@ -63,7 +64,7 @@ class BrowseViewModel(
         }
     }
     private fun updatePage(page: Int) {
-        if (state.value.isSearchModeEnable) {
+        if (!state.value.isSearchModeEnable) {
             _state.value = state.value.copy(page = page)
         } else {
             _state.value = state.value.copy(searchPage = page)

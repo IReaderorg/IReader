@@ -188,28 +188,6 @@ fun LibraryScreen(
                     books = if (state.searchedBook.isEmpty()) state.books else state.searchedBook,
                     layout = state.layout,
                 )
-//                if (state.layout == LayoutType.GridLayout) {
-//                    GridLayoutComposable(books = if (state.searchedBook.isEmpty()) state.books else state.searchedBook,
-//                        onClick = { index ->
-//                            backStack.goTo(
-//                                BookDetailKey(
-//                                    if (state.searchedBook.isEmpty()) state.books[index] else state.searchedBook[index],
-//                                    source = mappingApiNameToAPi(if (state.searchedBook.isEmpty()) state.books[index].source
-//                                        ?: "" else state.searchedBook[index].source ?: "")
-//                                )
-//                            )
-//                        })
-//                } else if (state.layout == LayoutType.CompactLayout) {
-//                    LinearViewList(books = state.books, onClick = { index ->
-//                        backStack.goTo(
-//                            BookDetailKey(
-//                                state.books[index],
-//                                source = mappingApiNameToAPi(state.books[index].source ?: "")
-//                            )
-//                        )
-//                    })
-//                }
-
 
             }
 

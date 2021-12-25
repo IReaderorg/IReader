@@ -7,7 +7,7 @@ import androidx.compose.runtime.Composable
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import ir.kazemcodes.infinity.base_feature.navigation.BookDetailKey
 import ir.kazemcodes.infinity.domain.models.Book
-import ir.kazemcodes.infinity.library_feature.util.mappingApiNameToAPi
+import ir.kazemcodes.infinity.domain.utils.mappingApiNameToAPi
 import ir.kazemcodes.infinity.presentation.browse.LayoutType
 import ir.kazemcodes.infinity.presentation.components.GridLayoutComposable
 import ir.kazemcodes.infinity.presentation.components.LinearViewList

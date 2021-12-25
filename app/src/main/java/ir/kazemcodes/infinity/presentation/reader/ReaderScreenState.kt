@@ -8,6 +8,7 @@ import ir.kazemcodes.infinity.domain.models.FontType
 
 data class ReaderScreenState(
     val isLoading : Boolean = false,
+    val isLoaded : Boolean = false,
     val chapter: Chapter = Chapter.create(),
     val error: String = "",
     val fontSize : Int = 18,

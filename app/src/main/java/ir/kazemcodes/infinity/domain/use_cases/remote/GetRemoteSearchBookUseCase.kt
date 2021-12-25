@@ -1,6 +1,6 @@
 package ir.kazemcodes.infinity.domain.use_cases.remote
 
-import ir.kazemcodes.infinity.api_feature.data.BooksPage
+import ir.kazemcodes.infinity.data.network.models.BooksPage
 import ir.kazemcodes.infinity.data.network.models.Source
 import ir.kazemcodes.infinity.domain.utils.InvalidBookException
 import ir.kazemcodes.infinity.domain.utils.Resource

@@ -13,8 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
-import ir.kazemcodes.infinity.api_feature.network.sources
 import ir.kazemcodes.infinity.base_feature.navigation.BrowserScreenKey
+import ir.kazemcodes.infinity.data.network.sources
 
 @Composable
 fun ExtensionScreen(modifier: Modifier= Modifier) {
@@ -44,9 +44,7 @@ fun ExtensionScreen(modifier: Modifier= Modifier) {
                 })
             }
         }
-        sources.forEach { api->
 
-        }
 
     }
 }

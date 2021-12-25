@@ -1,6 +1,6 @@
 package ir.kazemcodes.infinity.presentation.browse
 
-import ir.kazemcodes.infinity.api_feature.data.BooksPage
+import ir.kazemcodes.infinity.data.network.models.BooksPage
 import ir.kazemcodes.infinity.domain.models.Book
 
 data class BrowseScreenState(

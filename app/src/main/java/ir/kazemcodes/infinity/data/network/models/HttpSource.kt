@@ -1,8 +1,5 @@
 package ir.kazemcodes.infinity.data.network.models
 
-import ir.kazemcodes.infinity.api_feature.data.BooksPage
-import ir.kazemcodes.infinity.api_feature.data.ChapterPage
-import ir.kazemcodes.infinity.api_feature.data.ChaptersPage
 import ir.kazemcodes.infinity.api_feature.network.GET
 import ir.kazemcodes.infinity.api_feature.network.InfinityInstance
 import ir.kazemcodes.infinity.api_feature.network.NetworkHelper
@@ -147,9 +144,10 @@ abstract class HttpSource : Source {
     abstract fun chapterListRequest(book: Book, page: Int): Request
 
 
-    abstract fun hasNextChapterSelector() : String
+    abstract fun hasNextChapterSelector() : String?
 
     abstract fun hasNextChaptersParse(document: Document) : Boolean
+
 
 
     /**

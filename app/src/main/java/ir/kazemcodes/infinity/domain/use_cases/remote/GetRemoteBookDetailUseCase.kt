@@ -1,9 +1,9 @@
 package ir.kazemcodes.infinity.domain.use_cases.remote
 
-import ir.kazemcodes.infinity.domain.utils.InvalidBookException
-import ir.kazemcodes.infinity.domain.models.Book
-import ir.kazemcodes.infinity.domain.utils.Resource
 import ir.kazemcodes.infinity.data.network.models.Source
+import ir.kazemcodes.infinity.domain.models.Book
+import ir.kazemcodes.infinity.domain.utils.InvalidBookException
+import ir.kazemcodes.infinity.domain.utils.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import retrofit2.HttpException
@@ -21,8 +21,9 @@ class GetRemoteBookDetailUseCase {
         try {
             Timber.d("Timber: Remote Book Detail for ${book.bookName} Was called")
             val bookDetail = source.fetchBook(book)
+
             Timber.d("Timber: Remote Book Detail Was Fetched")
-      emit(Resource.Success<Book>(bookDetail.copy(bookName = book.bookName, link = book.link, coverLink = book.coverLink)))
+      emit(Resource.Success<Book>(bookDetail.copy(bookName = book.bookName, link = book.link, coverLink = book.coverLink,source = source.name)))
         } catch (e: HttpException) {
             emit(
                 Resource.Error<Book>(
