@@ -2,6 +2,13 @@
 
 Infinity is a free and open source applicaiton for Android.
 
+## Screenshots :camera:
+
+| Views    | Dark                                                       | Light                                                        |
+| -------- | ---------------------------------------------------------- | ------------------------------------------------------------ |
+| Library  | ![library_view_dark](screenshots/library-dark.jpeg)         | ![library_view_light](/screenshots/library-light.jpeg)         |
+| Book     | ![book_view_dark](screenshots/detail-dark.jpeg)               | ![book_view_light](screenshots/detail-dark.jpeg)               |
+
 ## License
 
     Copyright 2015 Javier Tomás
