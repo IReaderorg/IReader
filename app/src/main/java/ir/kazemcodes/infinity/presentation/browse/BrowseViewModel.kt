@@ -21,6 +21,7 @@ class BrowseViewModel(
     private val localUseCase: LocalUseCase,
     private val remoteUseCase: RemoteUseCase,
     private val source: Source,
+    private val isLatestUpdateMode : Boolean = true
 ) : ScopedServices.Registered {
 
     private val _state = mutableStateOf<BrowseScreenState>(BrowseScreenState())
@@ -31,11 +32,17 @@ class BrowseViewModel(
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     override fun onServiceRegistered() {
-        getBooks(source = source)
+        _state.value = state.value.copy(isLatestUpdateMode = isLatestUpdateMode)
+        if (state.value.isLatestUpdateMode) {
+            getLatestUpdateBooks(source = source)
+        } else {
+            getMostPopularBooks(source = source)
+        }
 
     }
 
     fun getSource(): Source {
+
         return source
     }
 
@@ -51,7 +58,7 @@ class BrowseViewModel(
                 toggleMenuDropDown(isShown = event.isShown)
             }
             is BrowseScreenEvents.GetBooks -> {
-                getBooks(event.source)
+                getLatestUpdateBooks(event.source)
             }
             is BrowseScreenEvents.ToggleSearchMode -> {
                 toggleSearchMode(event.inSearchMode)
@@ -101,8 +108,8 @@ class BrowseViewModel(
         _state.value = state.value.copy(isMenuDropDownShown = isShown)
     }
 
-    private fun getBooks(source: Source) {
-        remoteUseCase.getRemoteBooksUseCase(page = state.value.page, source = source)
+    private fun getLatestUpdateBooks(source: Source) {
+        remoteUseCase.getRemoteLatestUpdateLatestBooksUseCase(page = state.value.page, source = source)
             .onEach { result ->
                 when (result) {
                     is Resource.Success -> {
@@ -124,7 +131,29 @@ class BrowseViewModel(
                 }
             }.launchIn(coroutineScope)
     }
-
+    private fun getMostPopularBooks(source: Source) {
+        remoteUseCase.getRemoteMostPopularBooksUseCase(page = state.value.page, source = source)
+            .onEach { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        _state.value = state.value.copy(
+                            books = merge(state.value.books, result.data ?: emptyList()),
+                            isLoading = false,
+                            error = ""
+                        )
+                        onEvent(BrowseScreenEvents.UpdatePage(state.value.page + 1))
+                    }
+                    is Resource.Error -> {
+                        _state.value =
+                            state.value.copy(error = result.message ?: "An Unknown Error Occurred",
+                                isLoading = false)
+                    }
+                    is Resource.Loading -> {
+                        _state.value = state.value.copy(isLoading = true, error = "")
+                    }
+                }
+            }.launchIn(coroutineScope)
+    }
 
     override fun onServiceUnregistered() {
         coroutineScope.cancel()

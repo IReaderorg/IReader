@@ -52,3 +52,12 @@ fun OkHttpClient.Builder.dohAdGuard() = dns(
         )
         .build()
 )
+fun OkHttpClient.Builder.dohShecan() = dns(
+    DnsOverHttps.Builder().client(build())
+        .url("https://dns.shecan.ir/dns-query".toHttpUrl())
+        .bootstrapDnsHosts(
+            InetAddress.getByName("178.22.122.100"),
+            InetAddress.getByName("185.51.200.2"),
+        )
+        .build()
+)

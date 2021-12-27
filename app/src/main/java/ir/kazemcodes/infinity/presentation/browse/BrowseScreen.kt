@@ -21,6 +21,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import com.zhuinden.simplestackcomposeintegration.services.rememberService
@@ -50,8 +51,9 @@ fun BrowserScreen() {
                         Text(
                             text = source.name,
                             color = MaterialTheme.colors.onBackground,
-                            style = MaterialTheme.typography.h6,
+                            style = MaterialTheme.typography.subtitle1,
                             fontWeight = FontWeight.Bold,
+                            overflow = TextOverflow.Ellipsis
                         )
                     } else {
                         Box {

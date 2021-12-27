@@ -9,21 +9,21 @@ import retrofit2.HttpException
 import timber.log.Timber
 import java.io.IOException
 
-class GetRemoteBooksUseCase {
+class GetRemoteLatestBooksUseCase {
     operator fun invoke(page: Int, source: Source): Flow<Resource<List<Book>>> = flow {
         try {
             emit(Resource.Loading())
-            Timber.d("Timber: GetRemoteBooksUseCase page: $page was Called")
+            Timber.d("Timber: GetRemoteLatestBooksUseCase page: $page was Called")
             val books = source.fetchLatestUpdates(page)
-            Timber.d("InfinityLog: response: ${books.response}")
+
             if (books.isCloudflareEnabled) {
                 emit(Resource.Error<List<Book>>("CloudFlare is Enable"))
             } else {
                 emit(Resource.Success<List<Book>>(books.books))
             }
-            Timber.d("InfinityLog : ${books.response}")
 
-            Timber.d("Timber: GetRemoteBooksUseCase page: $page was Finished Successfully")
+
+            Timber.d("Timber: GetRemoteLatestBooksUseCase page: $page was Finished Successfully")
             if (!books.hasNextPage) {
                 Resource.Error<List<Book>>(
                     message = "There is No More Books"

@@ -43,6 +43,8 @@ class MainActivity : ComponentActivity() {
 
         InfinityInstance.networkHelper = NetworkHelper(baseContext)
 
+
+
         setContent {
             BackstackProvider(backstack) {
                 InfinityTheme {

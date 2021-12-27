@@ -52,7 +52,7 @@ data class MainScreenKey(val noArgument: String = "") : ComposeKey() {
 
 @Immutable
 @Parcelize
-data class BrowserScreenKey(val sourceName: String) : ComposeKey() {
+data class BrowserScreenKey(val sourceName: String, val isLatestUpdateMode : Boolean = true) : ComposeKey() {
     @ExperimentalFoundationApi
     @Composable
     override fun ScreenComposable(modifier: Modifier) {
@@ -61,7 +61,7 @@ data class BrowserScreenKey(val sourceName: String) : ComposeKey() {
 
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
-            add(BrowseViewModel(lookup<LocalUseCase>(), lookup<RemoteUseCase>(), source = mappingApiNameToAPi(sourceName)))
+            add(BrowseViewModel(lookup<LocalUseCase>(), lookup<RemoteUseCase>(), source = mappingApiNameToAPi(sourceName),isLatestUpdateMode = isLatestUpdateMode))
         }
 
     }

@@ -157,6 +157,8 @@ dependencies {
 
     implementation "androidx.webkit:webkit:1.4.0"
     implementation("androidx.browser:browser:1.4.0")
+
+    implementation 'com.zhkrb.cloudflare-scrape-android:scrape-webview:0.0.4'
 }
 
 kapt {

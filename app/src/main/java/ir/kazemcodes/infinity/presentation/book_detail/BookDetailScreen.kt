@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -23,6 +24,7 @@ import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import ir.kazemcodes.infinity.base_feature.navigation.ChapterDetailKey
 import ir.kazemcodes.infinity.base_feature.navigation.ReaderScreenKey
 import ir.kazemcodes.infinity.base_feature.navigation.WebViewKey
+import ir.kazemcodes.infinity.data.network.utils.toast
 import ir.kazemcodes.infinity.domain.models.Book
 import ir.kazemcodes.infinity.presentation.book_detail.components.ButtonWithIconAndText
 import ir.kazemcodes.infinity.presentation.book_detail.components.CardTileComposable
@@ -102,6 +104,7 @@ fun BookDetailScreenLoadedComposable(
     val inLibrary = viewModel.state.value.inLibrary
     val book = viewModel.state.value.book
     val chapters = viewModel.chapterState.value.chapters
+    val context = LocalContext.current
     Scaffold(topBar = {
         TopAppBar(
             title = {},
@@ -189,7 +192,7 @@ fun BookDetailScreenLoadedComposable(
                 ButtonWithIconAndText(
                     text = "Download",
                     imageVector = Icons.Default.FileDownload,
-                    onClick = {}
+                    onClick = { context.toast("Not Supported",)}
                 )
             }
         }

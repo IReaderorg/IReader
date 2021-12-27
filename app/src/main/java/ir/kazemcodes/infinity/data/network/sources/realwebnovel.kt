@@ -31,6 +31,9 @@ class RealWebNovelApi : ParsedHttpSource() {
         add("Referer", baseUrl)
     }
 
+    override val supportsMostPopular: Boolean
+        get() = true
+
     override fun popularBookSelector(): String = "div.page-item-detail"
 
     override fun popularBookNextPageSelector(): String? = "div.nav-previous"

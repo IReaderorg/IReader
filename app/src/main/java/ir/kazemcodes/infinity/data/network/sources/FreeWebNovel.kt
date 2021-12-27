@@ -31,6 +31,8 @@ class FreeWebNovel : ParsedHttpSource() {
         add("Referer", baseUrl)
     }
 
+    override val supportsMostPopular: Boolean
+        get() = true
     override fun popularBookSelector(): String = "div.ul-list1"
 
     override fun popularBookNextPageSelector(): String? = "div.ul-list1"

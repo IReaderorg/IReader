@@ -27,6 +27,7 @@ class WuxiaWorldApi : ParsedHttpSource() {
     override val client: OkHttpClient = super.network.cloudflareClient
 
     override suspend fun fetchLatestUpdates(page: Int): BooksPage {
+
         return latestUpdatesParse(network.client.newCall(latestUpdatesRequest(page)).await())
     }
 
@@ -37,6 +38,9 @@ class WuxiaWorldApi : ParsedHttpSource() {
         )
         add("referer", baseUrl)
     }
+
+    override val supportsMostPopular: Boolean
+        get() = false
 
     override fun popularBookSelector(): String = "div.page-item-detail"
 

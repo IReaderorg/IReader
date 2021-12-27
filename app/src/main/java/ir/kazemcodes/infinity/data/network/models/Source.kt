@@ -17,6 +17,8 @@ interface Source {
 
     val supportsLatest: Boolean
 
+    val supportsMostPopular: Boolean
+
     /**
      * Returns a page with a list of latest books updates and weather is has next page or not.
      *

@@ -14,8 +14,7 @@ data class BrowseScreenState(
     val isSearchModeEnable: Boolean = false,
     val searchQuery: String = "",
     val searchedBook: BooksPage = BooksPage(),
-
-
+    val isLatestUpdateMode : Boolean = true
     )
 
 sealed class LayoutType {

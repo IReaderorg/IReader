@@ -98,10 +98,11 @@ class AppModule {
     fun providesRemoteUSeCases(): RemoteUseCase {
         return RemoteUseCase(
             getRemoteBookDetailUseCase = GetRemoteBookDetailUseCase(),
-            getRemoteBooksUseCase = GetRemoteBooksUseCase(),
+            getRemoteLatestUpdateLatestBooksUseCase = GetRemoteLatestBooksUseCase(),
             getRemoteChaptersUseCase = GetRemoteChaptersUseCase(),
             getRemoteReadingContentUseCase = GetRemoteReadingContentUseCase(),
-            getSearchedBooksUseCase = GetRemoteSearchBookUseCase()
+            getSearchedBooksUseCase = GetRemoteSearchBookUseCase(),
+            getRemoteMostPopularBooksUseCase = GetRemoteMostPopularBooksUseCase()
         )
     }
 
