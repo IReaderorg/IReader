@@ -5,6 +5,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.ui.Modifier
 import com.zhuinden.simplestack.AsyncStateChanger
 import com.zhuinden.simplestack.History
@@ -32,6 +34,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val app = application as MyApplication
+
         val backstack = Navigator.configure()
             .setGlobalServices(app.globalServices)
             .setScopedServices(DefaultServiceProvider())
@@ -43,9 +46,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             BackstackProvider(backstack) {
                 InfinityTheme {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        composeStateChanger.RenderScreen()
-
+                    Surface(color = MaterialTheme.colors.background) {
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            composeStateChanger.RenderScreen()
+                        }
                     }
                 }
 

@@ -3,6 +3,7 @@ package ir.kazemcodes.infinity.data.network.models
 import ir.kazemcodes.infinity.domain.models.Book
 import ir.kazemcodes.infinity.domain.models.Chapter
 
+
 interface Source {
 
     val id: Long

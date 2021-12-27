@@ -19,6 +19,7 @@ import java.security.MessageDigest
 /**
  * A simple implementation for sources from a website.
  */
+
 abstract class HttpSource : Source {
 
 

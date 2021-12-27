@@ -6,14 +6,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
 import com.zhuinden.simplestack.ServiceBinder
+import com.zhuinden.simplestackcomposeintegration.services.rememberService
 import com.zhuinden.simplestackextensions.servicesktx.add
 import com.zhuinden.simplestackextensions.servicesktx.lookup
-import ir.kazemcodes.infinity.data.network.models.Source
 import ir.kazemcodes.infinity.domain.models.Book
 import ir.kazemcodes.infinity.domain.models.Chapter
 import ir.kazemcodes.infinity.domain.use_cases.datastore.DataStoreUseCase
 import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
 import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
+import ir.kazemcodes.infinity.domain.utils.mappingApiNameToAPi
 import ir.kazemcodes.infinity.presentation.book_detail.BookDetailScreen
 import ir.kazemcodes.infinity.presentation.book_detail.BookDetailViewModel
 import ir.kazemcodes.infinity.presentation.browse.BrowseViewModel
@@ -29,7 +30,6 @@ import ir.kazemcodes.infinity.presentation.reader.ReaderScreenViewModel
 import ir.kazemcodes.infinity.presentation.reader.ReadingScreen
 import ir.kazemcodes.infinity.presentation.screen.components.WebPageScreen
 import kotlinx.parcelize.Parcelize
-import kotlinx.parcelize.RawValue
 
 
 @Immutable
@@ -52,7 +52,7 @@ data class MainScreenKey(val noArgument: String = "") : ComposeKey() {
 
 @Immutable
 @Parcelize
-data class BrowserScreenKey(val source: @RawValue Source) : ComposeKey() {
+data class BrowserScreenKey(val sourceName: String) : ComposeKey() {
     @ExperimentalFoundationApi
     @Composable
     override fun ScreenComposable(modifier: Modifier) {
@@ -61,7 +61,7 @@ data class BrowserScreenKey(val source: @RawValue Source) : ComposeKey() {
 
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
-            add(BrowseViewModel(lookup<LocalUseCase>(), lookup<RemoteUseCase>(), source = source))
+            add(BrowseViewModel(lookup<LocalUseCase>(), lookup<RemoteUseCase>(), source = mappingApiNameToAPi(sourceName)))
         }
 
     }
@@ -70,18 +70,21 @@ data class BrowserScreenKey(val source: @RawValue Source) : ComposeKey() {
 
 @Immutable
 @Parcelize
-data class BookDetailKey(val book: Book, val source: @RawValue Source) : ComposeKey() {
+data class BookDetailKey(val book: Book, val sourceName: String) : ComposeKey() {
     @Composable
     override fun ScreenComposable(modifier: Modifier) {
-        BookDetailScreen(book = book)
+        val viewModel = rememberService<BookDetailViewModel>()
+
+        BookDetailScreen(book = book, viewModel = viewModel)
 
     }
 
     override fun bindServices(serviceBinder: ServiceBinder) {
+
         with(serviceBinder) {
             add(BookDetailViewModel(lookup<LocalUseCase>(),
                 lookup<RemoteUseCase>(),
-                source = source,
+                source = mappingApiNameToAPi(sourceName),
                 book = book,
                 lookup<DataStoreUseCase>()))
         }
@@ -103,7 +106,7 @@ data class WebViewKey(val url: String) : ComposeKey() {
 data class ChapterDetailKey(
     val book: Book,
     val chapters: List<Chapter>,
-    val source: @RawValue Source,
+    val sourceName: String,
 ) : ComposeKey() {
 
     @Composable
@@ -113,7 +116,7 @@ data class ChapterDetailKey(
 
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
-            add(ChapterDetailViewModel(lookup<LocalUseCase>(), source = source, book = book))
+            add(ChapterDetailViewModel(lookup<LocalUseCase>(), source = mappingApiNameToAPi(sourceName), book = book))
         }
     }
 }
@@ -123,7 +126,7 @@ data class ChapterDetailKey(
 data class ReaderScreenKey(
     val book: Book,
     val chapter: Chapter,
-    val source: @RawValue Source,
+    val sourceName: String,
     val chapters: List<Chapter>,
 ) : ComposeKey() {
 
@@ -139,7 +142,7 @@ data class ReaderScreenKey(
                 localUseCase = lookup<LocalUseCase>(),
                 remoteUseCase = lookup<RemoteUseCase>(),
                 dataStoreUseCase = lookup<DataStoreUseCase>(),
-                source = source,
+                source = mappingApiNameToAPi(sourceName),
                 book = book,
                 chapter = chapter,
                 chapters = chapters

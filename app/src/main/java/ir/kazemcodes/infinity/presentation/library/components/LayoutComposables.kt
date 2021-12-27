@@ -27,7 +27,7 @@ fun LayoutComposable(
                     backStack.goTo(
                         BookDetailKey(
                             book = books[index],
-                            source = mappingApiNameToAPi(books[index].source ?: "")
+                            sourceName = books[index].source ?: ""
                         )
                     )
                 }, scrollState = scrollState)
@@ -37,7 +37,7 @@ fun LayoutComposable(
                 backStack.goTo(
                     BookDetailKey(
                         books[index],
-                        source = mappingApiNameToAPi(books[index].source ?: "")
+                        sourceName = books[index].source ?: ""
                     )
                 )
             }, scrollState = scrollState)

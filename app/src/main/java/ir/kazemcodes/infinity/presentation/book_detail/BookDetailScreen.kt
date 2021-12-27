@@ -20,7 +20,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
-import com.zhuinden.simplestackcomposeintegration.services.rememberService
 import ir.kazemcodes.infinity.base_feature.navigation.ChapterDetailKey
 import ir.kazemcodes.infinity.base_feature.navigation.ReaderScreenKey
 import ir.kazemcodes.infinity.base_feature.navigation.WebViewKey
@@ -30,43 +29,62 @@ import ir.kazemcodes.infinity.presentation.book_detail.components.CardTileCompos
 import ir.kazemcodes.infinity.presentation.book_detail.components.DotsFlashing
 import ir.kazemcodes.infinity.presentation.book_detail.components.ExpandingText
 import ir.kazemcodes.infinity.presentation.screen.components.BookImageComposable
-import timber.log.Timber
 
 
 @Composable
 fun BookDetailScreen(
     modifier: Modifier = Modifier,
     book: Book = Book.create(),
+    viewModel: BookDetailViewModel,
 ) {
-    val viewModel = rememberService<BookDetailViewModel>()
     val detailState = viewModel.state.value
     val chapterState = viewModel.chapterState.value
+    val backStack = LocalBackstack.current
+
+
 
     Box(modifier = Modifier.fillMaxSize()) {
         if (viewModel.state.value.loaded) {
-
             BookDetailScreenLoadedComposable(
                 modifier = modifier,
                 viewModel = viewModel
             )
 
+        } else {
+            Scaffold(modifier = Modifier.fillMaxSize(),topBar = {
+                TopAppBar(title = {},
+                    backgroundColor = MaterialTheme.colors.background,
+                    navigationIcon = {
+                        IconButton(onClick = { backStack.goBack() }) {
+                            Icon(
+                                imageVector = Icons.Default.ArrowBack,
+                                contentDescription = "ArrowBack",
+                                tint = MaterialTheme.colors.onBackground,
+                            )
+                        }
+                    })
+            }) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    if (detailState.error.isNotBlank()) {
+                        Text(
+                            text = detailState.error,
+                            color = MaterialTheme.colors.error,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(20.dp)
+                                .align(Alignment.Center)
+                        )
+                    }
+                    if (detailState.isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    }
+                }
+            }
         }
-        if (detailState.error.isNotBlank()) {
-            Text(
-                text = detailState.error,
-                color = MaterialTheme.colors.error,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp)
-                    .align(Alignment.Center)
-            )
-        }
-        if (detailState.isLoading) {
-            CircularProgressIndicator(
-                modifier = Modifier.align(Alignment.Center)
-            )
-        }
+
 
     }
 
@@ -149,11 +167,6 @@ fun BookDetailScreenLoadedComposable(
                         }
                     },
                 )
-                Divider(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .width(1.dp)
-                )
                 ButtonWithIconAndText(
                     text = if (viewModel.chapterState.value.lastChapter != viewModel.chapterState.value.chapters.getOrNull(
                             0)
@@ -163,21 +176,15 @@ fun BookDetailScreenLoadedComposable(
                         if (viewModel.chapterState.value.lastChapter != null) {
                             backStack.goTo(ReaderScreenKey(chapter = viewModel.chapterState.value.lastChapter!!,
                                 book = book,
-                                source = viewModel.getSource(),
+                                sourceName = viewModel.getSource().name,
                                 chapters = viewModel.chapterState.value.chapters))
                         } else if (viewModel.chapterState.value.chapters.isNotEmpty()) {
                             backStack.goTo(ReaderScreenKey(chapter = viewModel.chapterState.value.chapters.first(),
                                 book = book,
-                                source = viewModel.getSource(),
+                                sourceName = viewModel.getSource().name,
                                 chapters = viewModel.chapterState.value.chapters))
                         }
                     }
-                )
-                Divider(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .width(1.dp)
-
                 )
                 ButtonWithIconAndText(
                     text = "Download",
@@ -265,7 +272,7 @@ fun BookDetailScreenLoadedComposable(
                 modifier = modifier.clickable {
                     backStack.goTo(ChapterDetailKey(chapters = chapters,
                         book = book,
-                        source = viewModel.getSource()))
+                        sourceName = viewModel.getSource().name))
                 },
                 title = "Contents",
                 subtitle = "${chapters.size} Chapters",

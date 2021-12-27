@@ -42,7 +42,7 @@ fun ExtensionScreen(modifier: Modifier = Modifier) {
                 Text(sources[index].name, modifier = modifier
                     .padding(16.dp)
                     .clickable {
-                        backStack.goTo(BrowserScreenKey(sources[index]))
+                        backStack.goTo(BrowserScreenKey(sources[index].name))
                     })
             }
         }

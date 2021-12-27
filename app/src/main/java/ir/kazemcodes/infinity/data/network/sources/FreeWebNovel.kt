@@ -14,6 +14,7 @@ import org.jsoup.nodes.Element
 import ru.gildor.coroutines.okhttp.await
 import timber.log.Timber
 
+
 class FreeWebNovel : ParsedHttpSource() {
 
     override val baseUrl: String = "https://freewebnovel.com"

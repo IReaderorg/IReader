@@ -12,5 +12,6 @@ abstract class ComposeKey : DefaultComposeKey(), Parcelable,
     override fun getScopeTag(): String = javaClass.name
 
     override fun bindServices(serviceBinder: ServiceBinder) {
+
     }
 }
