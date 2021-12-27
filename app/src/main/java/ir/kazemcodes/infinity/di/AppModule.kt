@@ -143,7 +143,9 @@ class AppModule {
                 }
             )
             cookieJar(cookieJar)
-        }.build()
+
+        }
+            .build()
     }
 
     @Singleton

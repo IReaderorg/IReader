@@ -21,6 +21,7 @@ import ir.kazemcodes.infinity.presentation.browse.BrowseViewModel
 import ir.kazemcodes.infinity.presentation.browse.BrowserScreen
 import ir.kazemcodes.infinity.presentation.chapter_detail.ChapterDetailScreen
 import ir.kazemcodes.infinity.presentation.chapter_detail.ChapterDetailViewModel
+import ir.kazemcodes.infinity.presentation.components.WebPageScreen
 import ir.kazemcodes.infinity.presentation.extension.ExtensionScreen
 import ir.kazemcodes.infinity.presentation.home.ComposeKey
 import ir.kazemcodes.infinity.presentation.home.MainScreen
@@ -28,7 +29,6 @@ import ir.kazemcodes.infinity.presentation.home.MainViewModel
 import ir.kazemcodes.infinity.presentation.library.LibraryViewModel
 import ir.kazemcodes.infinity.presentation.reader.ReaderScreenViewModel
 import ir.kazemcodes.infinity.presentation.reader.ReadingScreen
-import ir.kazemcodes.infinity.presentation.screen.components.WebPageScreen
 import kotlinx.parcelize.Parcelize
 
 

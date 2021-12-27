@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import ir.kazemcodes.infinity.base_feature.navigation.BrowserScreenKey
 import ir.kazemcodes.infinity.data.network.sources
+import ir.kazemcodes.infinity.presentation.book_detail.Constants.DEFAULT_ELEVATION
 
 @Composable
 fun ExtensionScreen(modifier: Modifier = Modifier) {
@@ -33,7 +34,7 @@ fun ExtensionScreen(modifier: Modifier = Modifier) {
                 modifier = Modifier.fillMaxWidth(),
                 backgroundColor = MaterialTheme.colors.background,
                 contentColor = MaterialTheme.colors.onBackground,
-                elevation = 8.dp,
+                elevation = DEFAULT_ELEVATION,
             )
         }
     ) {

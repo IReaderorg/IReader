@@ -1,7 +1,6 @@
 package ir.kazemcodes.infinity.data.network.sources
 
 import ir.kazemcodes.infinity.api_feature.network.GET
-import ir.kazemcodes.infinity.data.network.models.BooksPage
 import ir.kazemcodes.infinity.data.network.models.ChapterPage
 import ir.kazemcodes.infinity.data.network.models.ParsedHttpSource
 import ir.kazemcodes.infinity.domain.models.Book
@@ -11,8 +10,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
-import ru.gildor.coroutines.okhttp.await
-import timber.log.Timber
 
 
 class FreeWebNovel : ParsedHttpSource() {
@@ -23,55 +20,6 @@ class FreeWebNovel : ParsedHttpSource() {
     override val lang: String = "en"
 
     override val supportsLatest: Boolean = true
-    override suspend fun fetchPopular(page: Int): BooksPage {
-        val req = popularBookRequest(page)
-        val res = client.newCall(req).await()
-        return popularBookParse(res)
-    }
-
-    override suspend fun fetchSearchBook(page: Int, query: String): BooksPage {
-        val req = searchBookRequest(page, query = query)
-        val res = client.newCall(req).await()
-        return searchBookParse(res)
-    }
-
-
-    override suspend fun fetchContent(chapter: Chapter): ChapterPage {
-        val req = pageContentRequest(chapter)
-        val res = client.newCall(req).await()
-
-        return pageContentParse(res)
-    }
-
-    override suspend fun fetchBook(book: Book): Book {
-        val req = bookDetailsRequest(book)
-        val res = client.newCall(req).await()
-
-        return bookDetailsParse(res)
-    }
-
-
-    override suspend fun fetchChapters(book: Book): List<Chapter> {
-        val chapters = mutableListOf<Chapter>()
-        var hasNext = true
-        var page: Int = 1
-        while (hasNext) {
-            val req = chapterListRequest(book, page)
-            val res = client.newCall(req).await()
-            val content = chapterListParse(res)
-            chapters.addAll(content.chapters)
-            hasNext = content.hasNextPage
-            page += 1
-        }
-        Timber.d("Timber: GetRemoteChaptersUseCase was Finished Successfully with $page tries")
-        return chapters
-    }
-
-    override suspend fun fetchLatestUpdates(page: Int): BooksPage {
-        val req = latestUpdatesRequest(page)
-        val res = client.newCall(req).await()
-        return latestUpdatesParse(res)
-    }
 
     override val client: OkHttpClient = super.client
 

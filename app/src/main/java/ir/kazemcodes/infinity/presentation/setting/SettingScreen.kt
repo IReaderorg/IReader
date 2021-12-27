@@ -10,7 +10,7 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
+import ir.kazemcodes.infinity.presentation.book_detail.Constants
 
 @Composable
 fun SettingScreen(modifier: Modifier = Modifier) {
@@ -28,7 +28,7 @@ fun SettingScreen(modifier: Modifier = Modifier) {
                 modifier = Modifier.fillMaxWidth(),
                 backgroundColor = MaterialTheme.colors.background,
                 contentColor = MaterialTheme.colors.onBackground,
-                elevation = 8.dp,
+                elevation = Constants.DEFAULT_ELEVATION,
             )
         }) {
 

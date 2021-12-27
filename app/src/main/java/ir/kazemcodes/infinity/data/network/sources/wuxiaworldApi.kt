@@ -23,58 +23,19 @@ class WuxiaWorldApi : ParsedHttpSource() {
 
     override val supportsLatest: Boolean = true
 
-    override suspend fun fetchPopular(page: Int): BooksPage {
-        val req = popularBookRequest(page)
-        val res = client.newCall(req).await()
-        return popularBookParse(res)
-    }
 
-    override suspend fun fetchSearchBook(page: Int, query: String): BooksPage {
-        val req = searchBookRequest(page, query = query)
-        val res = client.newCall(req).await()
-        return searchBookParse(res)
-    }
-
-
-    override suspend fun fetchContent(chapter: Chapter): ChapterPage {
-        val req = pageContentRequest(chapter)
-        val res = client.newCall(req).await()
-
-        return pageContentParse(res)
-    }
-
-    override suspend fun fetchBook(book: Book): Book {
-        val req = bookDetailsRequest(book)
-        val res = client.newCall(req).await()
-        return bookDetailsParse(res)
-    }
-
-
-    override suspend fun fetchChapters(book: Book): List<Chapter> {
-        val chapters = mutableListOf<Chapter>()
-        var page: Int = 1
-        val req = chapterListRequest(book, page)
-        val res = client.newCall(req).await()
-        val content = chapterListParse(res)
-        chapters.addAll(content.chapters)
-        page += 1
-        return chapters
-    }
+    override val client: OkHttpClient = super.network.cloudflareClient
 
     override suspend fun fetchLatestUpdates(page: Int): BooksPage {
-        val req = latestUpdatesRequest(page)
-        val res = client.newCall(req).await()
-        return latestUpdatesParse(res)
+        return latestUpdatesParse(network.client.newCall(latestUpdatesRequest(page)).await())
     }
-
-    override val client: OkHttpClient = super.client
 
     override fun headersBuilder(): Headers.Builder = Headers.Builder().apply {
         add(
-            "User-Agent",
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0 "
+            "user-agent",
+            "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Mobile Safari/537.36"
         )
-        add("Referer", baseUrl)
+        add("referer", baseUrl)
     }
 
     override fun popularBookSelector(): String = "div.page-item-detail"
@@ -86,9 +47,9 @@ class WuxiaWorldApi : ParsedHttpSource() {
 
     override fun popularBookFromElement(element: Element): Book {
         val book: Book = Book.create()
-        book.link = element.select("a").attr("href").substringAfter(baseUrl)
-        book.bookName = element.select("a").attr("title")
-        book.coverLink = element.select("img").attr("src")
+        book.bookName = element.select("h3.h5 a").text()
+        book.link = element.select("h3.h5 a").attr("href").substringAfter(baseUrl)
+        book.coverLink = element.select("div.c-image-hover img.img-responsive").attr("src")
         book.source = this.name
         return book
     }
@@ -97,16 +58,18 @@ class WuxiaWorldApi : ParsedHttpSource() {
 
     override fun latestUpdatesFromElement(element: Element): Book {
         val book: Book = Book.create()
-        book.link = element.select("a").attr("href").substringAfter(baseUrl)
-        book.bookName = element.select("a").attr("title")
-        book.coverLink = element.select("img").attr("src")
+        book.bookName = element.select("h3.h5 a").text()
+        book.link = element.select("h3.h5 a").attr("href").substringAfter(baseUrl)
+        book.coverLink = element.select("img.img-responsive").attr("src")
+        book.source = this.name
         return book
     }
 
     override fun latestUpdatesNextPageSelector(): String? = "div.nav-previous"
 
     override fun latestUpdatesRequest(page: Int): Request =
-        GET("$baseUrl/novel-list/page/$page/?m_orderby=latest")
+        GET("$baseUrl/novel-list/page/$page/?m_orderby=latest",headers)
+
 
 
     override fun bookDetailsParse(document: Document): Book {
@@ -165,4 +128,5 @@ class WuxiaWorldApi : ParsedHttpSource() {
         GET("$baseUrl/?s=$query&post_type=wp-manga&op=&author=&artist=&release=&adult=")
 
     override fun searchBookNextPageSelector(): String? = null
+
 }

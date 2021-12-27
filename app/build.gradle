@@ -13,7 +13,7 @@ android {
 
     defaultConfig {
         applicationId "ir.kazemcodes.infinityreader"
-        minSdk 21
+        minSdk 23
         targetSdk 31
         versionCode 2
         versionName "1.0.1"
@@ -154,6 +154,9 @@ dependencies {
     implementation "com.github.skydoves:landscapist-coil:1.4.4"
 
     implementation 'org.kodein.di:kodein-di:7.9.0'
+
+    implementation "androidx.webkit:webkit:1.4.0"
+    implementation("androidx.browser:browser:1.4.0")
 }
 
 kapt {

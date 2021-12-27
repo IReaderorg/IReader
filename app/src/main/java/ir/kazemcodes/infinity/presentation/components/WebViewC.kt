@@ -1,8 +1,10 @@
-package ir.kazemcodes.infinity.presentation.screen.components
+package ir.kazemcodes.infinity.presentation.components
 
+import android.os.Build
 import android.view.ViewGroup
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier

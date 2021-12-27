@@ -21,8 +21,18 @@ class GetRemoteChaptersUseCase {
             emit(Resource.Loading())
             try {
                 Timber.d("Timber: GetRemoteChaptersUseCase was Called")
+                val chapters = mutableListOf<Chapter>()
+                var currentPage = 1
 
-                val chapters = source.fetchChapters(book = book)
+                var hasNextPage = true
+
+                while(hasNextPage){
+                    val chaptersPage = source.fetchChapters(book = book,page = currentPage)
+                    chapters.addAll(chaptersPage.chapters)
+                    hasNextPage = chaptersPage.hasNextPage
+                    currentPage+=1
+                }
+
 
                 emit(Resource.Success<List<Chapter>>(chapters))
                 Timber.d("Timber: GetRemoteChaptersUseCase was Finished Successfully")

@@ -65,6 +65,15 @@ abstract class HttpSource : Source {
      */
     override fun toString() = "$name (${lang.uppercase()})"
 
+    /**
+     * Returns a page with a list of book. Normally it's not needed to
+     * override this method.
+     *
+     * @param page the page number to retrieve.
+     */
+    override suspend fun fetchPopular(page: Int): BooksPage {
+        return popularBookParse(client.newCall(popularBookRequest(page)).await())
+    }
 
     /**
      * Returns the Jsoup selector that returns a list of [Element] corresponding to each Book.
@@ -92,15 +101,15 @@ abstract class HttpSource : Source {
      */
     abstract fun popularBookParse(response: Response): BooksPage
 
+
+
     /**
-     * Returns an observable containing a page with a list of latest Book updates.
+     * Returns a page with a list of latest Book updates.
      *
      * @param page the page number to retrieve.
      */
     override suspend fun fetchLatestUpdates(page: Int): BooksPage {
-        val response = client.newCall(latestUpdatesRequest(page))
-            .await()
-        return latestUpdatesParse(response)
+        return latestUpdatesParse(client.newCall(latestUpdatesRequest(page)).await())
     }
 
     /**
@@ -117,6 +126,15 @@ abstract class HttpSource : Source {
      */
     abstract fun latestUpdatesParse(response: Response): BooksPage
 
+    /**
+     * Returns a book. Normally it's not needed to
+     * override this method.
+     *
+     * @param page the page number to retrieve.
+     */
+    override suspend fun fetchBook(book: Book): Book {
+        return bookDetailsParse(client.newCall(bookDetailsRequest(book)).await())
+    }
 
     /**
      * Returns the request for the details of a Book. Override only if it's needed to change the
@@ -125,7 +143,7 @@ abstract class HttpSource : Source {
      * @param book the Book to be updated.
      */
     open fun bookDetailsRequest(book: Book): Request {
-        return GET(baseUrl + book.link, headers)
+        return GET(baseUrl + getUrlWithoutDomain(book.link), headers)
     }
 
     /**
@@ -136,13 +154,24 @@ abstract class HttpSource : Source {
     abstract fun bookDetailsParse(response: Response): Book
 
     /**
+     * Returns a list of chapter. Normally it's not needed to
+     * override this method.
+     *
+     * @param page the page number to retrieve.
+     * @param book the chapters to retrieve.
+     */
+    override suspend fun fetchChapters(book: Book, page: Int): ChaptersPage {
+        return chapterListParse(client.newCall(chapterListRequest(book,page)).await())
+    }
+
+    /**
      * Returns the request for updating the chapter list. Override only if it's needed to override
      * the url, send different headers or request method like POST.
      *
      * @param book the Book to look for chapters.
      */
     open fun chapterListRequest(book: Book): Request {
-        return GET(baseUrl + book.link, headers)
+        return GET(baseUrl + getUrlWithoutDomain(book.link), headers)
     }
 
     abstract fun chapterListRequest(book: Book, page: Int): Request
@@ -161,13 +190,23 @@ abstract class HttpSource : Source {
     abstract fun chapterListParse(response: Response): ChaptersPage
 
     /**
+     * Returns a ChapterPage. Normally it's not needed to
+     * override this method.
+     *
+     * @param page the page number to retrieve.
+     */
+    override suspend fun fetchContent(chapter: Chapter): ChapterPage {
+        return pageContentParse(client.newCall(pageContentRequest(chapter)).await())
+    }
+
+    /**
      * Returns the request for getting the page list. Override only if it's needed to override the
      * url, send different headers or request method like POST.
      *
      * @param chapter the chapter whose page list has to be fetched.
      */
     open fun pageContentRequest(chapter: Chapter): Request {
-        return GET(baseUrl + chapter.link, headers)
+        return GET(baseUrl + getUrlWithoutDomain(chapter.link), headers)
     }
 
     /**
@@ -177,6 +216,16 @@ abstract class HttpSource : Source {
      */
     abstract fun pageContentParse(response: Response): ChapterPage
 
+    /**
+     * Returns a BooksPage. Normally it's not needed to
+     * override this method.
+     *
+     * @param page the page number to retrieve.
+     * @param query the search query to retrieve.
+     */
+    override suspend fun fetchSearchBook(page: Int, query: String): BooksPage {
+        return searchBookParse(client.newCall(searchBookRequest(page,query)).await())
+    }
 
     /**
      * Returns the Jsoup selector that returns a list of [Element] corresponding to each Book.
@@ -242,6 +291,9 @@ abstract class HttpSource : Source {
      */
     open fun prepareNewChapter(chapter: Chapter, book: Book) {
     }
+
+
+
 
     protected open fun headersBuilder() = Headers.Builder().apply {
         add("User-Agent", DEFAULT_USER_AGENT)

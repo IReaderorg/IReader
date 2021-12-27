@@ -3,11 +3,16 @@ package ir.kazemcodes.infinity.data.network.models
 import ir.kazemcodes.infinity.domain.models.Book
 import ir.kazemcodes.infinity.domain.models.Chapter
 import ir.kazemcodes.infinity.domain.utils.asJsoup
+import ir.kazemcodes.infinity.presentation.book_detail.Constants.CLOUDFLARE_LOG
 import okhttp3.Response
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 
 abstract class ParsedHttpSource : HttpSource() {
+
+
+
+
 
     /**
      * Returns a Book from the given [element]. Most sites only show the title and the url, it's
@@ -54,6 +59,8 @@ abstract class ParsedHttpSource : HttpSource() {
     override fun latestUpdatesParse(response: Response): BooksPage {
         val document = response.asJsoup()
 
+        val isCloudflareEnable = document.body().allElements.text().contains(CLOUDFLARE_LOG)
+
         val books = document.select(latestUpdatesSelector()).map { element ->
             latestUpdatesFromElement(element)
         }
@@ -62,7 +69,7 @@ abstract class ParsedHttpSource : HttpSource() {
             document.select(selector).first()
         } != null
 
-        return BooksPage(books, hasNextPage)
+        return BooksPage(books, hasNextPage,isCloudflareEnable, document.body().allElements.text())
     }
 
     /**

@@ -21,6 +21,7 @@ import com.zhuinden.simplestackcomposeintegration.services.rememberService
 import ir.kazemcodes.infinity.base_feature.navigation.ReaderScreenKey
 import ir.kazemcodes.infinity.domain.models.Book
 import ir.kazemcodes.infinity.domain.models.Chapter
+import ir.kazemcodes.infinity.presentation.book_detail.Constants
 
 
 @Composable
@@ -61,7 +62,7 @@ fun ChapterDetailScreen(
                         modifier = modifier.fillMaxWidth(),
                         backgroundColor = MaterialTheme.colors.background,
                         contentColor = MaterialTheme.colors.onBackground,
-                        elevation = 8.dp,
+                        elevation = Constants.DEFAULT_ELEVATION,
                         actions = {
                             IconButton(onClick = {
                                 viewModel.onEvent(ChapterDetailEvent.ToggleOrder)

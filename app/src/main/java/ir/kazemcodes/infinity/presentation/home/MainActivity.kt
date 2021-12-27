@@ -41,7 +41,7 @@ class MainActivity : ComponentActivity() {
             .setStateChanger(AsyncStateChanger(composeStateChanger))
             .install(this, androidContentFrame, History.of(MainScreenKey()))
 
-        InfinityInstance.networkHelper = NetworkHelper(this)
+        InfinityInstance.networkHelper = NetworkHelper(baseContext)
 
         setContent {
             BackstackProvider(backstack) {

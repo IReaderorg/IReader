@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Infinity</string>
+
+    <string name="information_webview_required">WebView is required for Infinity</string>
+    <string name="information_webview_outdated">Please update the WebView app for better compatibility</string>
+    <string name="information_cloudflare_bypass_failure">Failed to bypass Cloudflare</string>
+    <string name="copied_to_clipboard">Copied</string>
+    <string name="clipboard_copy_error">can\'t Copy it to clipboard</string>
 </resources>

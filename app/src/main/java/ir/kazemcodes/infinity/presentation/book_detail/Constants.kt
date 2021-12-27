@@ -1,9 +1,14 @@
 package ir.kazemcodes.infinity.presentation.book_detail
 
+import androidx.compose.ui.unit.dp
+
 object Constants {
     const val PARAM_BOOK_ID = "PARAM_BOOK_ID"
     const val PARAM_BOOK_NAME = "PARAM_BOOK_NAME"
     const val PARAM_CHAPTERS_DETAIL = "chaptersDetail"
+
+    val DEFAULT_ELEVATION = 1.dp
+    const val CLOUDFLARE_LOG = "Performance & security by Cloudflare"
 }
 
 object PreferenceKeys {
@@ -12,6 +17,8 @@ object PreferenceKeys {
     const val SAVED_FONT_PREFERENCES = "SAVED_FONT_PREFERENCES"
     const val SAVED_BRIGHTNESS_PREFERENCES = "SAVED_BRIGHTNESS_PREFERENCES"
     const val SAVED_LATEST_CHAPTER_KEY = "SAVED_LATEST_CHAPTER_KEY"
+
+
 
 
 }

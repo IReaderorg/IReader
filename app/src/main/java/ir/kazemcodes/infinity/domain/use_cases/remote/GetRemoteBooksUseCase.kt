@@ -2,7 +2,6 @@ package ir.kazemcodes.infinity.domain.use_cases.remote
 
 import ir.kazemcodes.infinity.data.network.models.Source
 import ir.kazemcodes.infinity.domain.models.Book
-import ir.kazemcodes.infinity.domain.utils.InvalidBookException
 import ir.kazemcodes.infinity.domain.utils.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -11,15 +10,19 @@ import timber.log.Timber
 import java.io.IOException
 
 class GetRemoteBooksUseCase {
-
-
-    @Throws(InvalidBookException::class)
     operator fun invoke(page: Int, source: Source): Flow<Resource<List<Book>>> = flow {
         try {
             emit(Resource.Loading())
             Timber.d("Timber: GetRemoteBooksUseCase page: $page was Called")
             val books = source.fetchLatestUpdates(page)
-            emit(Resource.Success<List<Book>>(books.books))
+            Timber.d("InfinityLog: response: ${books.response}")
+            if (books.isCloudflareEnabled) {
+                emit(Resource.Error<List<Book>>("CloudFlare is Enable"))
+            } else {
+                emit(Resource.Success<List<Book>>(books.books))
+            }
+            Timber.d("InfinityLog : ${books.response}")
+
             Timber.d("Timber: GetRemoteBooksUseCase page: $page was Finished Successfully")
             if (!books.hasNextPage) {
                 Resource.Error<List<Book>>(

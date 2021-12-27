@@ -24,6 +24,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import com.zhuinden.simplestackcomposeintegration.services.rememberService
+import ir.kazemcodes.infinity.presentation.book_detail.Constants
 import ir.kazemcodes.infinity.presentation.browse.LayoutType
 import ir.kazemcodes.infinity.presentation.components.TitleText
 import ir.kazemcodes.infinity.presentation.library.components.LayoutComposable
@@ -88,7 +89,7 @@ fun LibraryScreen(
                     modifier = Modifier.fillMaxWidth(),
                     backgroundColor = MaterialTheme.colors.background,
                     contentColor = MaterialTheme.colors.onBackground,
-                    elevation = 8.dp,
+                    elevation = Constants.DEFAULT_ELEVATION,
                     actions = {
                         if (state.inSearchMode) {
                             IconButton(onClick = {

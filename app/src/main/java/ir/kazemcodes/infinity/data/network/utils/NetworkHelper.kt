@@ -1,8 +1,10 @@
 package ir.kazemcodes.infinity.api_feature.network
 
 import android.content.Context
+import ir.kazemcodes.infinity.data.network.models.dohCloudflare
 import ir.kazemcodes.infinity.data.network.utils.AndroidCookieJar
 import ir.kazemcodes.infinity.data.network.utils.UserAgentInterceptor
+import ir.kazemcodes.infinity.data.network.utils.intercepter.CloudflareInterceptor
 import okhttp3.Cache
 import okhttp3.OkHttpClient
 import java.io.File
@@ -25,6 +27,7 @@ class NetworkHelper(context: Context) {
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .readTimeout(30, TimeUnit.SECONDS)
                 .addInterceptor(UserAgentInterceptor())
+                .dohCloudflare()
 
 
             return builder
@@ -32,10 +35,15 @@ class NetworkHelper(context: Context) {
 
     val client by lazy { baseClientBuilder.cache(Cache(cacheDir, cacheSize)).build() }
 
+    val cloudflareClient by lazy {
+        client.newBuilder()
+            .addInterceptor(CloudflareInterceptor(context))
+            .build()
+    }
+
 }
 
 object InfinityInstance {
     lateinit var networkHelper: NetworkHelper
-    //var inDetailScreen : Boolean = false
 
 }
