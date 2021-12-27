@@ -19,7 +19,7 @@ class GetRemoteMostPopularBooksUseCase {
             if (books.isCloudflareEnabled) {
                 emit(Resource.Error<List<Book>>("CloudFlare is Enable"))
             } else {
-                emit(Resource.Success<List<Book>>(books.books))
+                emit(Resource.Success<List<Book>>(books.books.map { it.copy(source = source.name) }))
             }
 
 

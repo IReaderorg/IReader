@@ -27,6 +27,9 @@ class WuxiaWorldApi : ParsedHttpSource() {
     override val client: OkHttpClient = super.network.cloudflareClient
 
     override suspend fun fetchLatestUpdates(page: Int): BooksPage {
+        //val res = network.cloudflareClient.newCall(POST("https://wuxiaworld.site/cdn-cgi/rum?",headers)).await()
+""
+        //Timber.d(DEBUG_LOG + res.body)
 
         return latestUpdatesParse(network.client.newCall(latestUpdatesRequest(page)).await())
     }
@@ -76,6 +79,7 @@ class WuxiaWorldApi : ParsedHttpSource() {
 
 
 
+
     override fun bookDetailsParse(document: Document): Book {
         val book = Book.create()
         book.bookName = document.select("div.post-title h1").text()
@@ -97,7 +101,7 @@ class WuxiaWorldApi : ParsedHttpSource() {
 
 
     override fun chapterListRequest(book: Book, page: Int): Request =
-        POST(baseUrl + "${book.link}/ajax/chapters/")
+        POST(baseUrl + getUrlWithoutDomain(book.link) + "ajax/chapters/")
 
     override fun chapterListSelector(): String = "li.wp-manga-chapter"
 
@@ -122,9 +126,9 @@ class WuxiaWorldApi : ParsedHttpSource() {
 
     override fun searchBookFromElement(element: Element): Book {
         val book: Book = Book.create()
-        book.link = element.select("div.tab-thumb a").attr("href").substringAfter(baseUrl)
-        book.bookName = element.select("h4").text()
-        book.coverLink = element.select("div.tab-thumb a img").attr("src")
+        book.link = element.select("div.c-image-hover a").attr("href").substringAfter(baseUrl)
+        book.bookName = element.select("div.c-image-hover a").attr("title")
+        book.coverLink = element.select("div.c-image-hover img.img-responsive").attr("src")
         return book
     }
 

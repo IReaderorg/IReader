@@ -6,7 +6,7 @@ import com.zhuinden.simplestack.ScopedServices
 import ir.kazemcodes.infinity.domain.models.Book
 import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
 import ir.kazemcodes.infinity.domain.utils.Resource
-import ir.kazemcodes.infinity.presentation.browse.LayoutType
+import ir.kazemcodes.infinity.presentation.layouts.LayoutType
 import ir.kazemcodes.infinity.presentation.library.components.LibraryEvents
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -63,6 +63,7 @@ class LibraryViewModel(
             _state.value = state.value.copy(searchedBook = emptyList(), searchQuery = "")
         }
     }
+
 
 
     private fun updateLayoutType(layoutType: LayoutType) {

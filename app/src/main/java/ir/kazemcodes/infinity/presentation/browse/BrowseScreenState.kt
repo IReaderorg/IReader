@@ -2,6 +2,7 @@ package ir.kazemcodes.infinity.presentation.browse
 
 import ir.kazemcodes.infinity.data.network.models.BooksPage
 import ir.kazemcodes.infinity.domain.models.Book
+import ir.kazemcodes.infinity.presentation.layouts.LayoutType
 
 data class BrowseScreenState(
     val isLoading: Boolean = false,
@@ -17,7 +18,3 @@ data class BrowseScreenState(
     val isLatestUpdateMode : Boolean = true
     )
 
-sealed class LayoutType {
-    object CompactLayout : LayoutType()
-    object GridLayout : LayoutType()
-}

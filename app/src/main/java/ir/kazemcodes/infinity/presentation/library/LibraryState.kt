@@ -1,7 +1,7 @@
 package ir.kazemcodes.infinity.presentation.library
 
 import ir.kazemcodes.infinity.domain.models.Book
-import ir.kazemcodes.infinity.presentation.browse.LayoutType
+import ir.kazemcodes.infinity.presentation.layouts.LayoutType
 
 data class LibraryState(
     val isLoading: Boolean = false,
@@ -13,7 +13,3 @@ data class LibraryState(
     val searchQuery: String = "",
 )
 
-sealed class DisplayMode(val title: String) {
-    object CompactModel : DisplayMode("Compact Layout")
-    object GridLayout : DisplayMode("Grid Layout")
-}

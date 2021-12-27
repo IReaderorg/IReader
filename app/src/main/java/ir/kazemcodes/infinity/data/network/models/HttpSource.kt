@@ -266,7 +266,7 @@ abstract class HttpSource : Source {
      *
      * @param orig the full url.
      */
-    private fun getUrlWithoutDomain(orig: String): String {
+    fun getUrlWithoutDomain(orig: String): String {
         return try {
             val uri = URI(orig.replace(" ", "%20"))
             var out = uri.path

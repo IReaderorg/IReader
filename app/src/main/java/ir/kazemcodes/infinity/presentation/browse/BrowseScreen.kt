@@ -27,7 +27,7 @@ import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import com.zhuinden.simplestackcomposeintegration.services.rememberService
 import ir.kazemcodes.infinity.base_feature.navigation.WebViewKey
 import ir.kazemcodes.infinity.explore_feature.domain.util.isScrolledToTheEnd
-import ir.kazemcodes.infinity.presentation.library.DisplayMode
+import ir.kazemcodes.infinity.presentation.layouts.layouts
 import ir.kazemcodes.infinity.presentation.library.components.LayoutComposable
 import ir.kazemcodes.infinity.presentation.library.components.RadioButtonWithTitleComposable
 
@@ -135,25 +135,23 @@ fun BrowserScreen() {
                             viewModel.onEvent(BrowseScreenEvents.ToggleMenuDropDown(false))
                         }
                     ) {
-                        DropdownMenuItem(onClick = {
-                            viewModel.onEvent(BrowseScreenEvents.UpdateLayoutType(
-                                layoutType = LayoutType.CompactLayout))
-                            viewModel.onEvent(BrowseScreenEvents.ToggleMenuDropDown(false))
-                        }) {
-                            RadioButtonWithTitleComposable(
-                                text = DisplayMode.CompactModel.title,
-                                selected = viewModel.state.value.layout == LayoutType.CompactLayout
-                            )
-                        }
-                        DropdownMenuItem(onClick = {
-                            viewModel.onEvent(BrowseScreenEvents.UpdateLayoutType(
-                                layoutType = LayoutType.GridLayout))
-                            viewModel.onEvent(BrowseScreenEvents.ToggleMenuDropDown(false))
-                        }) {
-                            RadioButtonWithTitleComposable(
-                                text = DisplayMode.GridLayout.title,
-                                selected = viewModel.state.value.layout == LayoutType.GridLayout,
-                            )
+                        layouts.forEach { layout ->
+                            DropdownMenuItem(onClick = {
+                                viewModel.onEvent(BrowseScreenEvents.UpdateLayoutType(
+                                    layoutType = layout.layout))
+                                viewModel.onEvent(BrowseScreenEvents.ToggleMenuDropDown(false))
+                            }) {
+                                RadioButtonWithTitleComposable(
+                                    text = layout.title,
+                                    selected = viewModel.state.value.layout == layout.layout,
+                                    onClick = {
+                                        viewModel.onEvent(BrowseScreenEvents.UpdateLayoutType(
+                                            layoutType = layout.layout))
+                                        viewModel.onEvent(BrowseScreenEvents.ToggleMenuDropDown(
+                                            false))
+                                    }
+                                )
+                            }
                         }
                     }
 
@@ -177,14 +175,16 @@ fun BrowserScreen() {
                 LayoutComposable(
                     books = state.searchedBook.books,
                     layout = state.layout,
-                    scrollState = scrollState
+                    scrollState = scrollState,
+                    source = source
                 )
             }
             if (state.books.isNotEmpty() && !state.isSearchModeEnable) {
                 LayoutComposable(
                     books = state.books,
                     layout = state.layout,
-                    scrollState = scrollState
+                    scrollState = scrollState,
+                    source = source
                 )
             }
             if (scrollState.isScrolledToTheEnd() && !state.isLoading && state.error.isEmpty() && !state.isSearchModeEnable) {

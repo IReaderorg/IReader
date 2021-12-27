@@ -1,6 +1,6 @@
 package ir.kazemcodes.infinity.presentation.library.components
 
-import ir.kazemcodes.infinity.presentation.browse.LayoutType
+import ir.kazemcodes.infinity.presentation.layouts.LayoutType
 
 sealed class LibraryEvents {
     object GetLocalBooks : LibraryEvents()

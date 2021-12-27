@@ -9,6 +9,7 @@ import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
 import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
 import ir.kazemcodes.infinity.domain.utils.Resource
 import ir.kazemcodes.infinity.domain.utils.merge
+import ir.kazemcodes.infinity.presentation.layouts.LayoutType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -171,7 +172,6 @@ class BrowseViewModel(
                                 error = ""
                             )
                         }
-
                         onEvent(BrowseScreenEvents.UpdatePage(state.value.searchPage + 1))
                     }
                     is Resource.Error -> {

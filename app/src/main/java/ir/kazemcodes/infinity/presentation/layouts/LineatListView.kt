@@ -48,7 +48,7 @@ fun LinearBookItem(
 }
 
 @Composable
-fun LinearViewList(
+fun LinearListDisplay(
     books: List<Book>,
     onClick: (index: Int) -> Unit,
     scrollState: LazyListState = rememberLazyListState(),

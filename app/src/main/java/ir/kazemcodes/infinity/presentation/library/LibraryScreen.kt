@@ -25,8 +25,8 @@ import androidx.compose.ui.unit.dp
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import com.zhuinden.simplestackcomposeintegration.services.rememberService
 import ir.kazemcodes.infinity.presentation.book_detail.Constants
-import ir.kazemcodes.infinity.presentation.browse.LayoutType
 import ir.kazemcodes.infinity.presentation.components.TitleText
+import ir.kazemcodes.infinity.presentation.layouts.layouts
 import ir.kazemcodes.infinity.presentation.library.components.LayoutComposable
 import ir.kazemcodes.infinity.presentation.library.components.LibraryEvents
 import ir.kazemcodes.infinity.presentation.library.components.RadioButtonWithTitleComposable
@@ -166,16 +166,13 @@ fun LibraryScreen(
                             .padding(12.dp)
                     ) {
                         TitleText(text = "Display")
-                        RadioButtonWithTitleComposable(
-                            text = DisplayMode.CompactModel.title,
-                            selected = viewModel.state.value.layout == LayoutType.CompactLayout,
-                            onClick = { viewModel.onEvent(LibraryEvents.UpdateLayoutType(LayoutType.CompactLayout)) }
-                        )
-                        RadioButtonWithTitleComposable(
-                            text = DisplayMode.GridLayout.title,
-                            selected = viewModel.state.value.layout == LayoutType.GridLayout,
-                            onClick = { viewModel.onEvent(LibraryEvents.UpdateLayoutType(LayoutType.GridLayout)) }
-                        )
+                        layouts.forEach { layout ->
+                            RadioButtonWithTitleComposable(
+                                text = layout.title,
+                                selected = viewModel.state.value.layout == layout.layout,
+                                onClick = { viewModel.onEvent(LibraryEvents.UpdateLayoutType(layout.layout)) }
+                            )
+                        }
                     }
                 }
 
