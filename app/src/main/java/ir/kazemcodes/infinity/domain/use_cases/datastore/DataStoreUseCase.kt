@@ -7,7 +7,8 @@ data class DataStoreUseCase(
     val saveFontSizeStateUseCase: SaveFontSizeStateUseCase,
     val readBrightnessStateUseCase: ReadBrightnessStateUseCase,
     val saveBrightnessStateUseCase: SaveBrightnessStateUseCase,
-    val saveLatestChapterUseCase: SaveLatestChapterUseCase,
-    val readLatestChapterUseCase: ReadLatestChapterUseCase,
-
+    val readLibraryLayoutUseCase: ReadLibraryLayoutTypeStateUseCase,
+    val saveLibraryLayoutUseCase: SaveLibraryLayoutTypeStateUseCase,
+    val readBrowseLayoutUseCase: ReadBrowseLayoutTypeStateUseCase,
+    val saveBrowseLayoutUseCase: SaveBrowseLayoutTypeStateUseCase,
     )

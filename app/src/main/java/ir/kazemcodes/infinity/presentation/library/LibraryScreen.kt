@@ -170,7 +170,7 @@ fun LibraryScreen(
                             RadioButtonWithTitleComposable(
                                 text = layout.title,
                                 selected = viewModel.state.value.layout == layout.layout,
-                                onClick = { viewModel.onEvent(LibraryEvents.UpdateLayoutType(layout.layout)) }
+                                onClick = { viewModel.onEvent(LibraryEvents.UpdateLayoutType(layout)) }
                             )
                         }
                     }

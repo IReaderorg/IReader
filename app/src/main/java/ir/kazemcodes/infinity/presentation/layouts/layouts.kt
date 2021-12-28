@@ -6,5 +6,4 @@ val layouts = listOf<DisplayMode>(
     DisplayMode.CompactModel,
     DisplayMode.GridLayout,
     DisplayMode.ListLayout,
-
 )

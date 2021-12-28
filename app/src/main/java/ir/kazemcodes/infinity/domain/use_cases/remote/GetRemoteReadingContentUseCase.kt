@@ -2,7 +2,7 @@ package ir.kazemcodes.infinity.domain.use_cases.remote
 
 import ir.kazemcodes.infinity.data.network.models.ChapterPage
 import ir.kazemcodes.infinity.data.network.models.Source
-import ir.kazemcodes.infinity.domain.models.Chapter
+import ir.kazemcodes.infinity.domain.models.remote.Chapter
 import ir.kazemcodes.infinity.domain.utils.Resource
 import kotlinx.coroutines.flow.flow
 import retrofit2.HttpException

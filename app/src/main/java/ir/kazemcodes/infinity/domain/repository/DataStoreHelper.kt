@@ -20,6 +20,18 @@ interface DataStoreHelper {
 
     fun readLatestChapterUseCase(): Flow<String>
 
+    fun readLibraryLayoutTypeStateUseCase(): Flow<Int>
+
+    /**
+     * param layoutIndex is the index of Layout inside the layouts list
+     */
+    suspend fun saveLibraryLayoutTypeStateUseCase(layoutIndex: Int)
+
+    fun readBrowseLayoutTypeStateUseCase(): Flow<Int>
+    /**
+     * param layoutIndex is the index of Layout inside the layouts list
+     */
+    suspend fun saveBrowseLayoutTypeStateUseCase(layoutIndex: Int)
 
 }
 

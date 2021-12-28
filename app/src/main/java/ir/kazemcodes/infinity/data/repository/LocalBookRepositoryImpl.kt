@@ -1,7 +1,7 @@
 package ir.kazemcodes.infinity.data.repository
 
 import ir.kazemcodes.infinity.data.local.dao.BookDao
-import ir.kazemcodes.infinity.domain.models.BookEntity
+import ir.kazemcodes.infinity.domain.models.local.BookEntity
 import ir.kazemcodes.infinity.domain.repository.LocalBookRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject

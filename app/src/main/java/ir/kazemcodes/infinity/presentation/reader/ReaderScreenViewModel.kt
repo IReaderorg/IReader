@@ -4,8 +4,8 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import com.zhuinden.simplestack.ScopedServices
 import ir.kazemcodes.infinity.data.network.models.Source
-import ir.kazemcodes.infinity.domain.models.Book
-import ir.kazemcodes.infinity.domain.models.Chapter
+import ir.kazemcodes.infinity.domain.models.remote.Book
+import ir.kazemcodes.infinity.domain.models.remote.Chapter
 import ir.kazemcodes.infinity.domain.models.FontType
 import ir.kazemcodes.infinity.domain.use_cases.datastore.DataStoreUseCase
 import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
@@ -213,7 +213,7 @@ class ReaderScreenViewModel(
 
 
     private fun readSelectedFontState() {
-        coroutineScope.launch(Dispatchers.IO) {
+        coroutineScope.launch {
             dataStoreUseCase.readSelectedFontStateUseCase().collectLatest { result ->
                 when (result) {
                     is Resource.Success -> {
@@ -237,7 +237,7 @@ class ReaderScreenViewModel(
 
     private fun readBrightness() {
 
-        coroutineScope.launch(Dispatchers.IO) {
+        coroutineScope.launch {
             dataStoreUseCase.readBrightnessStateUseCase().collectLatest { result ->
                 when (result) {
                     is Resource.Success -> {
@@ -258,7 +258,7 @@ class ReaderScreenViewModel(
     }
 
     private fun readFontSize() {
-        coroutineScope.launch(Dispatchers.IO) {
+        coroutineScope.launch {
             dataStoreUseCase.readFontSizeStateUseCase().collectLatest { result ->
                 when (result) {
                     is Resource.Success -> {

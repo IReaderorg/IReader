@@ -1,7 +1,7 @@
 package ir.kazemcodes.infinity.data.network.models
 
-import ir.kazemcodes.infinity.domain.models.Book
-import ir.kazemcodes.infinity.domain.models.Chapter
+import ir.kazemcodes.infinity.domain.models.remote.Book
+import ir.kazemcodes.infinity.domain.models.remote.Chapter
 import ir.kazemcodes.infinity.domain.utils.asJsoup
 import ir.kazemcodes.infinity.presentation.book_detail.Constants.CLOUDFLARE_LOG
 import okhttp3.Response

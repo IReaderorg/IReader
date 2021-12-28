@@ -1,6 +1,7 @@
 package ir.kazemcodes.infinity.presentation.library
 
-import ir.kazemcodes.infinity.domain.models.Book
+import ir.kazemcodes.infinity.domain.models.remote.Book
+import ir.kazemcodes.infinity.presentation.layouts.DisplayMode
 import ir.kazemcodes.infinity.presentation.layouts.LayoutType
 
 data class LibraryState(
@@ -8,7 +9,7 @@ data class LibraryState(
     val books: List<Book> = emptyList(),
     val searchedBook: List<Book> = emptyList(),
     val error: String = "",
-    val layout: LayoutType = LayoutType.GridLayout,
+    val layout: LayoutType = DisplayMode.GridLayout.layout,
     val inSearchMode: Boolean = false,
     val searchQuery: String = "",
 )

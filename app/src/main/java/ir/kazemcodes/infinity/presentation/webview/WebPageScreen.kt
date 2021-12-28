@@ -1,4 +1,4 @@
-package ir.kazemcodes.infinity.presentation.components
+package ir.kazemcodes.infinity.presentation.webview
 
 import android.view.ViewGroup
 import android.webkit.WebView
@@ -18,6 +18,7 @@ fun WebPageScreen(urlToRender: String) {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
+            settings.javaScriptEnabled
             webViewClient = WebViewClient()
             loadUrl(urlToRender)
         }

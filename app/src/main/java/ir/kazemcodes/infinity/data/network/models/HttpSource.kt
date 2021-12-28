@@ -3,8 +3,8 @@ package ir.kazemcodes.infinity.data.network.models
 import ir.kazemcodes.infinity.api_feature.network.GET
 import ir.kazemcodes.infinity.api_feature.network.InfinityInstance
 import ir.kazemcodes.infinity.api_feature.network.NetworkHelper
-import ir.kazemcodes.infinity.domain.models.Book
-import ir.kazemcodes.infinity.domain.models.Chapter
+import ir.kazemcodes.infinity.domain.models.remote.Book
+import ir.kazemcodes.infinity.domain.models.remote.Chapter
 import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Request

@@ -1,6 +1,6 @@
 package ir.kazemcodes.infinity.domain.use_cases.local.book
 
-import ir.kazemcodes.infinity.domain.models.Book
+import ir.kazemcodes.infinity.domain.models.remote.Book
 import ir.kazemcodes.infinity.domain.repository.Repository
 import ir.kazemcodes.infinity.domain.utils.Resource
 import kotlinx.coroutines.flow.Flow

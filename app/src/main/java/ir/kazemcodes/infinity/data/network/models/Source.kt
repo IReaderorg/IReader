@@ -1,7 +1,7 @@
 package ir.kazemcodes.infinity.data.network.models
 
-import ir.kazemcodes.infinity.domain.models.Book
-import ir.kazemcodes.infinity.domain.models.Chapter
+import ir.kazemcodes.infinity.domain.models.remote.Book
+import ir.kazemcodes.infinity.domain.models.remote.Chapter
 
 
 interface Source {
@@ -63,7 +63,7 @@ interface Source {
      *
      * @param book a book that contain need to be contain a bookName and a link
      */
-    suspend fun fetchChapters(book: Book,page: Int): ChaptersPage
+    suspend fun fetchChapters(book: Book, page: Int): ChaptersPage
 
 
 }

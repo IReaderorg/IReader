@@ -1,7 +1,7 @@
 package ir.kazemcodes.infinity.domain.repository
 
-import ir.kazemcodes.infinity.domain.models.Book
-import ir.kazemcodes.infinity.domain.models.Chapter
+import ir.kazemcodes.infinity.domain.models.remote.Book
+import ir.kazemcodes.infinity.domain.models.remote.Chapter
 import org.jsoup.select.Elements
 
 interface RemoteRepository {

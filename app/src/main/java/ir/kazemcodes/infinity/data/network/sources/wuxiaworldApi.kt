@@ -5,8 +5,8 @@ import ir.kazemcodes.infinity.api_feature.network.POST
 import ir.kazemcodes.infinity.data.network.models.BooksPage
 import ir.kazemcodes.infinity.data.network.models.ChapterPage
 import ir.kazemcodes.infinity.data.network.models.ParsedHttpSource
-import ir.kazemcodes.infinity.domain.models.Book
-import ir.kazemcodes.infinity.domain.models.Chapter
+import ir.kazemcodes.infinity.domain.models.remote.Book
+import ir.kazemcodes.infinity.domain.models.remote.Chapter
 import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -27,10 +27,6 @@ class WuxiaWorldApi : ParsedHttpSource() {
     override val client: OkHttpClient = super.network.cloudflareClient
 
     override suspend fun fetchLatestUpdates(page: Int): BooksPage {
-        //val res = network.cloudflareClient.newCall(POST("https://wuxiaworld.site/cdn-cgi/rum?",headers)).await()
-""
-        //Timber.d(DEBUG_LOG + res.body)
-
         return latestUpdatesParse(network.client.newCall(latestUpdatesRequest(page)).await())
     }
 
@@ -88,7 +84,7 @@ class WuxiaWorldApi : ParsedHttpSource() {
         book.author = document.select("div.author-content a").text()
         book.category =
             document.select("div.genres-content a").eachText().drop(1).map { value -> value.trim() }
-                .joinToString(" ,")
+                .joinToString(" - ")
         book.source = name
         return book
     }

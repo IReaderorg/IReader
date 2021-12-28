@@ -1,6 +1,6 @@
 package ir.kazemcodes.infinity.presentation.chapter_detail
 
-import ir.kazemcodes.infinity.domain.models.Chapter
+import ir.kazemcodes.infinity.domain.models.remote.Chapter
 
 sealed class
 ChapterDetailEvent {

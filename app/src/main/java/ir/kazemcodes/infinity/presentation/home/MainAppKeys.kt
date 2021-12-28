@@ -9,8 +9,8 @@ import com.zhuinden.simplestack.ServiceBinder
 import com.zhuinden.simplestackcomposeintegration.services.rememberService
 import com.zhuinden.simplestackextensions.servicesktx.add
 import com.zhuinden.simplestackextensions.servicesktx.lookup
-import ir.kazemcodes.infinity.domain.models.Book
-import ir.kazemcodes.infinity.domain.models.Chapter
+import ir.kazemcodes.infinity.domain.models.remote.Book
+import ir.kazemcodes.infinity.domain.models.remote.Chapter
 import ir.kazemcodes.infinity.domain.use_cases.datastore.DataStoreUseCase
 import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
 import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
@@ -21,7 +21,7 @@ import ir.kazemcodes.infinity.presentation.browse.BrowseViewModel
 import ir.kazemcodes.infinity.presentation.browse.BrowserScreen
 import ir.kazemcodes.infinity.presentation.chapter_detail.ChapterDetailScreen
 import ir.kazemcodes.infinity.presentation.chapter_detail.ChapterDetailViewModel
-import ir.kazemcodes.infinity.presentation.components.WebPageScreen
+import ir.kazemcodes.infinity.presentation.webview.WebPageScreen
 import ir.kazemcodes.infinity.presentation.extension.ExtensionScreen
 import ir.kazemcodes.infinity.presentation.home.ComposeKey
 import ir.kazemcodes.infinity.presentation.home.MainScreen
@@ -44,7 +44,7 @@ data class MainScreenKey(val noArgument: String = "") : ComposeKey() {
 
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
-            add(LibraryViewModel(lookup<LocalUseCase>()))
+            add(LibraryViewModel(lookup<LocalUseCase>(), lookup<DataStoreUseCase>()))
             add(MainViewModel())
         }
     }
@@ -52,7 +52,8 @@ data class MainScreenKey(val noArgument: String = "") : ComposeKey() {
 
 @Immutable
 @Parcelize
-data class BrowserScreenKey(val sourceName: String, val isLatestUpdateMode : Boolean = true) : ComposeKey() {
+data class BrowserScreenKey(val sourceName: String, val isLatestUpdateMode: Boolean = true) :
+    ComposeKey() {
     @ExperimentalFoundationApi
     @Composable
     override fun ScreenComposable(modifier: Modifier) {
@@ -61,7 +62,11 @@ data class BrowserScreenKey(val sourceName: String, val isLatestUpdateMode : Boo
 
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
-            add(BrowseViewModel(lookup<LocalUseCase>(), lookup<RemoteUseCase>(), source = mappingApiNameToAPi(sourceName),isLatestUpdateMode = isLatestUpdateMode))
+            add(BrowseViewModel(lookup<LocalUseCase>(),
+                lookup<RemoteUseCase>(),
+                dataStoreUseCase = lookup<DataStoreUseCase>(),
+                source = mappingApiNameToAPi(sourceName),
+                isLatestUpdateMode = isLatestUpdateMode),)
         }
 
     }
@@ -116,7 +121,9 @@ data class ChapterDetailKey(
 
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
-            add(ChapterDetailViewModel(lookup<LocalUseCase>(), source = mappingApiNameToAPi(sourceName), book = book))
+            add(ChapterDetailViewModel(lookup<LocalUseCase>(),
+                source = mappingApiNameToAPi(sourceName),
+                book = book))
         }
     }
 }

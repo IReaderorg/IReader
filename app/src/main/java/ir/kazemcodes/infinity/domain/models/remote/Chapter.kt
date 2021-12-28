@@ -1,6 +1,7 @@
-package ir.kazemcodes.infinity.domain.models
+package ir.kazemcodes.infinity.domain.models.remote
 
 import android.os.Parcelable
+import ir.kazemcodes.infinity.domain.models.local.ChapterEntity
 import kotlinx.parcelize.Parcelize
 
 

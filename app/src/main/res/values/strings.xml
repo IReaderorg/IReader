@@ -7,4 +7,7 @@
     <string name="copied_to_clipboard">Copied</string>
     <string name="clipboard_copy_error">can\'t Copy it to clipboard</string>
     <string name="popular">Popular</string>
+
+
+    <string name="downloader_name">Show download progress</string>
 </resources>

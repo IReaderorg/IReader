@@ -1,12 +1,12 @@
 package ir.kazemcodes.infinity.presentation.browse
 
 import ir.kazemcodes.infinity.data.network.models.Source
-import ir.kazemcodes.infinity.presentation.layouts.LayoutType
+import ir.kazemcodes.infinity.presentation.layouts.DisplayMode
 
 sealed class BrowseScreenEvents {
     data class GetBooks(val source: Source) : BrowseScreenEvents()
     data class UpdatePage(val page: Int) : BrowseScreenEvents()
-    data class UpdateLayoutType(val layoutType: LayoutType) : BrowseScreenEvents()
+    data class UpdateLayoutType(val layoutType: DisplayMode) : BrowseScreenEvents()
     data class ToggleMenuDropDown(val isShown: Boolean) : BrowseScreenEvents()
     data class SearchBooks(val query: String) : BrowseScreenEvents()
     data class ToggleSearchMode(val inSearchMode: Boolean? = null) : BrowseScreenEvents()

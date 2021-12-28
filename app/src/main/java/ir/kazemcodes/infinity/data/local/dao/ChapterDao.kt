@@ -1,7 +1,7 @@
 package ir.kazemcodes.infinity.data.local.dao
 
 import androidx.room.*
-import ir.kazemcodes.infinity.domain.models.ChapterEntity
+import ir.kazemcodes.infinity.domain.models.local.ChapterEntity
 import kotlinx.coroutines.flow.Flow
 
 

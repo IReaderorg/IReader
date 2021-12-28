@@ -24,8 +24,7 @@ import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import ir.kazemcodes.infinity.base_feature.navigation.ChapterDetailKey
 import ir.kazemcodes.infinity.base_feature.navigation.ReaderScreenKey
 import ir.kazemcodes.infinity.base_feature.navigation.WebViewKey
-import ir.kazemcodes.infinity.data.network.utils.toast
-import ir.kazemcodes.infinity.domain.models.Book
+import ir.kazemcodes.infinity.domain.models.remote.Book
 import ir.kazemcodes.infinity.presentation.book_detail.components.ButtonWithIconAndText
 import ir.kazemcodes.infinity.presentation.book_detail.components.CardTileComposable
 import ir.kazemcodes.infinity.presentation.book_detail.components.DotsFlashing
@@ -192,7 +191,10 @@ fun BookDetailScreenLoadedComposable(
                 ButtonWithIconAndText(
                     text = "Download",
                     imageVector = Icons.Default.FileDownload,
-                    onClick = { context.toast("Not Supported",)}
+                    onClick = {
+                        //context.toast("Not Supported",)
+                        viewModel.startDownloadService(context)
+                    }
                 )
             }
         }

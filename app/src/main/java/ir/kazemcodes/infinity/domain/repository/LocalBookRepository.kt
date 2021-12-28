@@ -1,6 +1,6 @@
 package ir.kazemcodes.infinity.domain.repository
 
-import ir.kazemcodes.infinity.domain.models.BookEntity
+import ir.kazemcodes.infinity.domain.models.local.BookEntity
 import kotlinx.coroutines.flow.Flow
 
 interface LocalBookRepository {

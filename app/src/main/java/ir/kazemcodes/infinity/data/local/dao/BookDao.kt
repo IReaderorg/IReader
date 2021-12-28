@@ -4,7 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import ir.kazemcodes.infinity.domain.models.BookEntity
+import ir.kazemcodes.infinity.domain.models.local.BookEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao

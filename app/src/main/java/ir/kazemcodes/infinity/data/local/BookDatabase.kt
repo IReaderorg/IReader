@@ -4,8 +4,8 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import ir.kazemcodes.infinity.data.local.dao.BookDao
 import ir.kazemcodes.infinity.data.local.dao.ChapterDao
-import ir.kazemcodes.infinity.domain.models.BookEntity
-import ir.kazemcodes.infinity.domain.models.ChapterEntity
+import ir.kazemcodes.infinity.domain.models.local.BookEntity
+import ir.kazemcodes.infinity.domain.models.local.ChapterEntity
 
 @Database(
     entities = [BookEntity::class, ChapterEntity::class],

@@ -5,25 +5,34 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
 import ir.kazemcodes.infinity.domain.repository.DataStoreHelper
-import ir.kazemcodes.infinity.presentation.book_detail.PreferenceKeys
-import ir.kazemcodes.infinity.presentation.book_detail.PreferenceKeys.SAVED_BRIGHTNESS_PREFERENCES
-import ir.kazemcodes.infinity.presentation.book_detail.PreferenceKeys.SAVED_FONT_PREFERENCES
-import ir.kazemcodes.infinity.presentation.book_detail.PreferenceKeys.SAVED_FONT_SIZE_PREFERENCES
-import ir.kazemcodes.infinity.presentation.book_detail.PreferenceKeys.SAVED_LATEST_CHAPTER_KEY
+import ir.kazemcodes.infinity.presentation.layouts.layouts
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import java.io.IOException
 
-val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = PreferenceKeys.TEMP_SAVED_SETTING)
+val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = DataStoreHelperImpl.PreferenceKeys.TEMP_SAVED_SETTING)
 
 class DataStoreHelperImpl(context: Context) : DataStoreHelper {
+    companion object PreferenceKeys {
+        const val TEMP_SAVED_SETTING = "TEMP_SAVED_SETTING"
+        const val SAVED_FONT_SIZE_PREFERENCES = "SAVED_FONT_SIZE_PREFERENCES"
+        const val SAVED_FONT_PREFERENCES = "SAVED_FONT_PREFERENCES"
+        const val SAVED_BRIGHTNESS_PREFERENCES = "SAVED_BRIGHTNESS_PREFERENCES"
+        const val SAVED_LATEST_CHAPTER_KEY = "SAVED_LATEST_CHAPTER_KEY"
+
+        const val SAVED_LIBRARY_LAYOUT_KEY = "SAVED_LIBRARY_LAYOUT_KEY"
+        const val SAVED_BROWSE_LAYOUT_KEY = "SAVED_BROWSE_LAYOUT_KEY"
+
+    }
 
     private object PreferencesKey {
         val fontStateKey = intPreferencesKey(SAVED_FONT_PREFERENCES)
         val fontSizeStateKey = intPreferencesKey(SAVED_FONT_SIZE_PREFERENCES)
         val brightnessStateKey = floatPreferencesKey(SAVED_BRIGHTNESS_PREFERENCES)
         val latestChapterStateKey = stringPreferencesKey(SAVED_LATEST_CHAPTER_KEY)
+        val libraryLayoutTypeStateKey = intPreferencesKey(SAVED_LATEST_CHAPTER_KEY)
+        val browseLayoutTypeStateKey = intPreferencesKey(SAVED_BROWSE_LAYOUT_KEY)
     }
 
     private val dataStore = context.dataStore
@@ -112,6 +121,46 @@ class DataStoreHelperImpl(context: Context) : DataStoreHelper {
             .map { preferences ->
                 preferences[PreferencesKey.latestChapterStateKey] ?: "[]"
             }
+    }
+
+    override fun readLibraryLayoutTypeStateUseCase(): Flow<Int> {
+        return dataStore.data
+            .catch { exception ->
+                if (exception is IOException) {
+                    emit(emptyPreferences())
+                } else {
+                    throw exception
+                }
+            }
+            .map { preferences ->
+                preferences[PreferencesKey.libraryLayoutTypeStateKey] ?: layouts.first().layoutIndex
+            }
+    }
+
+    override suspend fun saveLibraryLayoutTypeStateUseCase(layoutIndex: Int) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKey.libraryLayoutTypeStateKey] = layoutIndex
+        }
+    }
+
+    override fun readBrowseLayoutTypeStateUseCase(): Flow<Int> {
+        return dataStore.data
+            .catch { exception ->
+                if (exception is IOException) {
+                    emit(emptyPreferences())
+                } else {
+                    throw exception
+                }
+            }
+            .map { preferences ->
+                preferences[PreferencesKey.browseLayoutTypeStateKey] ?: layouts.first().layoutIndex
+            }
+    }
+
+    override suspend fun saveBrowseLayoutTypeStateUseCase(layoutIndex: Int) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKey.browseLayoutTypeStateKey] = layoutIndex
+        }
     }
 
 }

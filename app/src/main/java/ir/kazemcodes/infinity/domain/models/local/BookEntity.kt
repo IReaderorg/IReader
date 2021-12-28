@@ -1,7 +1,8 @@
-package ir.kazemcodes.infinity.domain.models
+package ir.kazemcodes.infinity.domain.models.local
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import ir.kazemcodes.infinity.domain.models.remote.Book
 
 @Entity(tableName = "book_table")
 data class BookEntity(

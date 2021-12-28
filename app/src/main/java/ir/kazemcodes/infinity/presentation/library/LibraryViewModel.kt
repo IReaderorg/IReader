@@ -3,21 +3,21 @@ package ir.kazemcodes.infinity.presentation.library
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import com.zhuinden.simplestack.ScopedServices
-import ir.kazemcodes.infinity.domain.models.Book
+import ir.kazemcodes.infinity.domain.models.remote.Book
+import ir.kazemcodes.infinity.domain.use_cases.datastore.DataStoreUseCase
 import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
 import ir.kazemcodes.infinity.domain.utils.Resource
-import ir.kazemcodes.infinity.presentation.layouts.LayoutType
+import ir.kazemcodes.infinity.presentation.layouts.DisplayMode
 import ir.kazemcodes.infinity.presentation.library.components.LibraryEvents
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
 
 class LibraryViewModel(
     private val localUseCase: LocalUseCase,
+    private val dataStoreUseCase: DataStoreUseCase,
 ) : ScopedServices.Registered {
     private val _state = mutableStateOf<LibraryState>(LibraryState())
     val state: State<LibraryState> = _state
@@ -26,6 +26,7 @@ class LibraryViewModel(
 
     override fun onServiceRegistered() {
         onEvent(LibraryEvents.GetLocalBooks)
+        readLayoutType()
     }
 
     override fun onServiceUnregistered() {
@@ -65,9 +66,22 @@ class LibraryViewModel(
     }
 
 
+    private fun updateLayoutType(layoutType: DisplayMode) {
+        _state.value = state.value.copy(layout = layoutType.layout)
+        coroutineScope.launch(Dispatchers.IO) {
+            dataStoreUseCase.saveLibraryLayoutUseCase(layoutType.layoutIndex)
+        }
+    }
 
-    private fun updateLayoutType(layoutType: LayoutType) {
-        _state.value = state.value.copy(layout = layoutType)
+    private fun readLayoutType() {
+        coroutineScope.launch {
+            dataStoreUseCase.readLibraryLayoutUseCase().collectLatest { result ->
+                if (result.data != null) {
+                    _state.value = state.value.copy(layout = result.data.layout)
+                }
+            }
+        }
+
     }
 
     private fun getLocalBooks() {

@@ -1,6 +1,6 @@
 package ir.kazemcodes.infinity.presentation.reader
 
-import ir.kazemcodes.infinity.domain.models.Chapter
+import ir.kazemcodes.infinity.domain.models.remote.Chapter
 import ir.kazemcodes.infinity.domain.models.FontType
 
 sealed class ReaderEvent {

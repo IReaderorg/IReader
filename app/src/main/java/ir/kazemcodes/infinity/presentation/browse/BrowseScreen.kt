@@ -138,7 +138,7 @@ fun BrowserScreen() {
                         layouts.forEach { layout ->
                             DropdownMenuItem(onClick = {
                                 viewModel.onEvent(BrowseScreenEvents.UpdateLayoutType(
-                                    layoutType = layout.layout))
+                                    layoutType = layout))
                                 viewModel.onEvent(BrowseScreenEvents.ToggleMenuDropDown(false))
                             }) {
                                 RadioButtonWithTitleComposable(
@@ -146,7 +146,7 @@ fun BrowserScreen() {
                                     selected = viewModel.state.value.layout == layout.layout,
                                     onClick = {
                                         viewModel.onEvent(BrowseScreenEvents.UpdateLayoutType(
-                                            layoutType = layout.layout))
+                                            layoutType = layout))
                                         viewModel.onEvent(BrowseScreenEvents.ToggleMenuDropDown(
                                             false))
                                     }

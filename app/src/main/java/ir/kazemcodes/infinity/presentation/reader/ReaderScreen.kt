@@ -19,8 +19,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import com.zhuinden.simplestackcomposeintegration.services.rememberService
-import ir.kazemcodes.infinity.domain.models.Book
-import ir.kazemcodes.infinity.domain.models.Chapter
+import ir.kazemcodes.infinity.domain.models.remote.Book
+import ir.kazemcodes.infinity.domain.models.remote.Chapter
 import ir.kazemcodes.infinity.presentation.book_detail.DEFAULT.MAX_BRIGHTNESS
 import ir.kazemcodes.infinity.presentation.book_detail.DEFAULT.MIN_BRIGHTNESS
 import ir.kazemcodes.infinity.presentation.reader.components.FontMenuComposable

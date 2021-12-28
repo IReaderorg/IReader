@@ -116,8 +116,10 @@ class AppModule {
             saveFontSizeStateUseCase = SaveFontSizeStateUseCase(repository),
             readBrightnessStateUseCase = ReadBrightnessStateUseCase(repository),
             saveBrightnessStateUseCase = SaveBrightnessStateUseCase(repository),
-            saveLatestChapterUseCase = SaveLatestChapterUseCase(repository),
-            readLatestChapterUseCase = ReadLatestChapterUseCase(repository)
+            saveLibraryLayoutUseCase = SaveLibraryLayoutTypeStateUseCase(repository),
+            readLibraryLayoutUseCase = ReadLibraryLayoutTypeStateUseCase(repository),
+            saveBrowseLayoutUseCase = SaveBrowseLayoutTypeStateUseCase(repository),
+            readBrowseLayoutUseCase = ReadBrowseLayoutTypeStateUseCase(repository)
         )
     }
 

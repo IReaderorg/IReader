@@ -3,7 +3,7 @@ package ir.kazemcodes.infinity.presentation.reader
 
 import ir.kazemcodes.infinity.data.network.models.Source
 import ir.kazemcodes.infinity.data.network.sources.FreeWebNovel
-import ir.kazemcodes.infinity.domain.models.Chapter
+import ir.kazemcodes.infinity.domain.models.remote.Chapter
 import ir.kazemcodes.infinity.domain.models.FontType
 
 data class ReaderScreenState(

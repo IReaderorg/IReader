@@ -1,6 +1,6 @@
 package ir.kazemcodes.infinity.presentation.book_detail
 
-import ir.kazemcodes.infinity.domain.models.Chapter
+import ir.kazemcodes.infinity.domain.models.remote.Chapter
 
 data class ChapterState(
     val isLoading: Boolean = false,

@@ -3,8 +3,8 @@ package ir.kazemcodes.infinity.data.network.sources
 import ir.kazemcodes.infinity.api_feature.network.GET
 import ir.kazemcodes.infinity.data.network.models.ChapterPage
 import ir.kazemcodes.infinity.data.network.models.ParsedHttpSource
-import ir.kazemcodes.infinity.domain.models.Book
-import ir.kazemcodes.infinity.domain.models.Chapter
+import ir.kazemcodes.infinity.domain.models.remote.Book
+import ir.kazemcodes.infinity.domain.models.remote.Chapter
 import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -74,7 +74,7 @@ class RealWebNovelApi : ParsedHttpSource() {
         book.author = document.select("div.author-content a").text()
         book.category =
             document.select("div.genres-content a").eachText().drop(1).map { value -> value.trim() }
-                .joinToString(" ,")
+                .joinToString(" - ")
         book.source = name
         return book
     }

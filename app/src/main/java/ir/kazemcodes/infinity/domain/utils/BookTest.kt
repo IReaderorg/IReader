@@ -1,6 +1,6 @@
 package ir.kazemcodes.infinity.domain.utils
 
-import ir.kazemcodes.infinity.domain.models.Book
+import ir.kazemcodes.infinity.domain.models.remote.Book
 
 object BookTest {
 

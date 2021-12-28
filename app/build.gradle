@@ -13,7 +13,7 @@ android {
 
     defaultConfig {
         applicationId "ir.kazemcodes.infinityreader"
-        minSdk 23
+        minSdk 24
         targetSdk 31
         versionCode 2
         versionName "1.0.1"
@@ -84,16 +84,19 @@ dependencies {
     /** Coroutine **/
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2'
+    implementation "androidx.work:work-runtime-ktx:$work_version"
 
 
     /** Hilt **/
     implementation "com.google.dagger:hilt-android:2.38.1"
     kapt "com.google.dagger:hilt-compiler:2.38.1"
 
-
     implementation "androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha03"
 
     kapt "androidx.hilt:hilt-compiler:1.0.0"
+
+    implementation 'androidx.hilt:hilt-work:1.0.0'
+    kapt 'androidx.hilt:hilt-compiler:1.0.0'
 
 
     /** Room **/
