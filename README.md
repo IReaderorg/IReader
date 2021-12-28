@@ -2,6 +2,12 @@
 
 Infinity is a free and open source applicaiton for Android.
 
+<br>
+
+| Build | Support Server |
+|-------|---------|
+| 0.1.1.beta | [Discord Server](https://discord.gg/HBU6zD8c5v) |
+
 ## Features :sparkles:
 
 - Access all the books available on the website
