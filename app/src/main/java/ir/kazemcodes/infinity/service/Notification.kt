@@ -13,7 +13,7 @@ import coil.transform.CircleCropTransformation
 data class Channel(
     val name: String,
     val id: String,
-    val importance: Int = NotificationManager.IMPORTANCE_DEFAULT
+    val importance: Int = NotificationManager.IMPORTANCE_HIGH
 )
 
 fun createChannel(context: Context, channel: Channel) {
@@ -22,12 +22,13 @@ fun createChannel(context: Context, channel: Channel) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         val name = channel.name
         val importance = channel.importance
+        val notificationChannel = NotificationChannel(channel.id, name, importance)
         // Register the channel with the system
-        val notificationManager: NotificationManager = context.getSystemService(
+        val notificationManager = context.getSystemService(
             Context.NOTIFICATION_SERVICE
-        ) as NotificationManager
-        notificationManager.createNotificationChannel(
-            NotificationChannel(channel.id, name, importance)
+        ) as NotificationManager?
+        notificationManager?.createNotificationChannel(
+            notificationChannel
         )
     }
 }

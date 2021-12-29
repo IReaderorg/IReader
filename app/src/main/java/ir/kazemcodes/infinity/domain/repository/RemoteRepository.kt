@@ -1,20 +1,22 @@
 package ir.kazemcodes.infinity.domain.repository
 
+import android.content.Context
+import android.webkit.WebView
+import ir.kazemcodes.infinity.data.network.models.Source
 import ir.kazemcodes.infinity.domain.models.remote.Book
 import ir.kazemcodes.infinity.domain.models.remote.Chapter
-import org.jsoup.select.Elements
+import kotlinx.coroutines.flow.Flow
 
 interface RemoteRepository {
 
 
-    suspend fun getElements(url: String, headers: Map<String, String>): Elements
+    suspend fun downloadChapter(
+        book: Book,
+        source: Source,
+        chapters: List<Chapter>,
+        factory: (Context) -> WebView,
+        totalRetries: Int = 3,
+    ): Flow<Chapter>
 
-    suspend fun getBooks(elements: Elements): List<Book>
-
-    suspend fun getBookDetail(book: Book, elements: Elements): Book
-
-    suspend fun getChapters(book: Book, elements: Elements): List<Chapter>
-
-    suspend fun getReadingContent(elements: Elements): String
 
 }

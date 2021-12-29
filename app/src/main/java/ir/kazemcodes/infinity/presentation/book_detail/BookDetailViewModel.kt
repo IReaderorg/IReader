@@ -3,10 +3,7 @@ package ir.kazemcodes.infinity.presentation.book_detail
 import android.content.Context
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.work.Data
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
+import androidx.work.*
 import com.zhuinden.simplestack.ScopedServices
 import ir.kazemcodes.infinity.data.network.models.Source
 import ir.kazemcodes.infinity.domain.models.local.BookEntity
@@ -17,6 +14,8 @@ import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
 import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
 import ir.kazemcodes.infinity.domain.utils.Resource
 import ir.kazemcodes.infinity.service.DownloadService
+import ir.kazemcodes.infinity.service.Service
+import ir.kazemcodes.infinity.service.Service.DOWNLOAD_SERVICE_NAME
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -35,7 +34,7 @@ class BookDetailViewModel(
 
     private val _chapterState = mutableStateOf<ChapterState>(ChapterState())
     val chapterState: State<ChapterState> = _chapterState
-
+    lateinit var work : OneTimeWorkRequest
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
@@ -66,15 +65,16 @@ class BookDetailViewModel(
     }
 
     fun startDownloadService(context: Context) {
-        val work = OneTimeWorkRequestBuilder<DownloadService>().apply {
+        work = OneTimeWorkRequestBuilder<DownloadService>().apply {
             setInputData(
                 Data.Builder().apply {
-                    putString("bookName", book.bookName)
+                    putString(Service.DOWNLOAD_BOOK_NAME, book.bookName)
+                    putString(Service.DOWNLOAD_SOURCE_NAME, book.source)
                 }.build()
             )
         }.build()
         WorkManager.getInstance(context).enqueueUniqueWork(
-            "download-service", ExistingWorkPolicy.KEEP, work
+            DOWNLOAD_SERVICE_NAME, ExistingWorkPolicy.REPLACE, work
         )
     }
 

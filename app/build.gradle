@@ -5,6 +5,7 @@ plugins {
     id 'dagger.hilt.android.plugin'
     id 'kotlin-parcelize'
     id 'com.google.gms.google-services'
+
 }
 
 
@@ -13,7 +14,7 @@ android {
 
     defaultConfig {
         applicationId "ir.kazemcodes.infinityreader"
-        minSdk 24
+        minSdk 23
         targetSdk 31
         versionCode 2
         versionName "1.0.1"
@@ -161,7 +162,9 @@ dependencies {
     implementation "androidx.webkit:webkit:1.4.0"
     implementation("androidx.browser:browser:1.4.0")
 
-    implementation 'com.zhkrb.cloudflare-scrape-android:scrape-webview:0.0.4'
+
+    /** Accompanist **/
+    implementation "com.google.accompanist:accompanist-systemuicontroller:$accompanist_version"
 }
 
 kapt {

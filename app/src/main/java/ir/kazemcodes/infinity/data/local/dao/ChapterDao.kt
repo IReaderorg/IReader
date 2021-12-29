@@ -30,8 +30,6 @@ interface ChapterDao {
     @Query("SELECT * FROM chapter_entity WHERE bookName= :bookName")
     fun getChapters(bookName: String): Flow<List<ChapterEntity>>
 
-    @Query("SELECT * FROM chapter_entity WHERE bookName = :bookName Limit 1")
-    fun getChapter(bookName: String): Flow<ChapterEntity?>
 
     @Query("SELECT * FROM chapter_entity WHERE title = :chapterTitle AND bookName = :bookName AND content Not Null Limit 1")
     fun getChapterByChapter(chapterTitle: String, bookName: String): Flow<ChapterEntity?>

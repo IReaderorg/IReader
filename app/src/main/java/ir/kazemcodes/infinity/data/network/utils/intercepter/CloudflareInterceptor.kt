@@ -96,6 +96,7 @@ class CloudflareInterceptor(private val context: Context) : Interceptor {
         executor.execute {
             val webview = WebView(context)
             webView = webview
+            webView?.settings?.javaScriptEnabled
             webview.setDefaultSettings()
 
             // Avoid sending empty User-Agent, Chromium WebView will reset to default if empty

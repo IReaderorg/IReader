@@ -6,9 +6,13 @@ import ir.kazemcodes.infinity.domain.repository.LocalBookRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
+
 class LocalBookRepositoryImpl @Inject constructor(
     private val dao: BookDao,
 ) : LocalBookRepository {
+
+
+
     override fun getBooks(): Flow<List<BookEntity>> {
         return dao.getInitializedBooks()
     }

@@ -5,6 +5,8 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 private val DarkColorPalette = darkColors(
     primary = Colour.blue_200,
@@ -18,8 +20,6 @@ private val DarkColorPalette = darkColors(
     onSurface = Colour.white_50,
     error = Colour.red_600,
     onError = Colour.black_900,
-
-
     )
 
 private val LightColorPalette = lightColors(
@@ -42,6 +42,13 @@ fun InfinityTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composab
         DarkColorPalette
     } else {
         LightColorPalette
+    }
+    val rememberSystemUiController = rememberSystemUiController()
+    SideEffect {
+        rememberSystemUiController.setSystemBarsColor(
+            color = colors.background
+        )
+        rememberSystemUiController.setStatusBarColor(color = colors.background)
     }
 
     MaterialTheme(

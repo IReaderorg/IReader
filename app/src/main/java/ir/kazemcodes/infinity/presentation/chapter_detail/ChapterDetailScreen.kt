@@ -110,9 +110,10 @@ fun ChapterDetailScreen(
                                     alpha = .4f) else MaterialTheme.colors.onBackground,
                                 style = MaterialTheme.typography.subtitle1,
                                 fontWeight = FontWeight.SemiBold,
-                                overflow = TextOverflow.Ellipsis
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(8f)
                             )
-                            Text(
+                            Text(modifier = Modifier.weight(2f),
                                 text = if (state.chapters[index].content != null) "Cached" else "",
                                 fontStyle = FontStyle.Italic,
                                 color = if (state.chapters[index].haveBeenRead == true) MaterialTheme.colors.onBackground.copy(

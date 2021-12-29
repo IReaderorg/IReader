@@ -24,10 +24,10 @@ class WuxiaWorldApi : ParsedHttpSource() {
     override val supportsLatest: Boolean = true
 
 
-    override val client: OkHttpClient = super.network.cloudflareClient
+    override val client: OkHttpClient = super.client
 
     override suspend fun fetchLatestUpdates(page: Int): BooksPage {
-        return latestUpdatesParse(network.client.newCall(latestUpdatesRequest(page)).await())
+        return latestUpdatesParse(client.newCall(latestUpdatesRequest(page)).await())
     }
 
     override fun headersBuilder(): Headers.Builder = Headers.Builder().apply {
@@ -38,6 +38,7 @@ class WuxiaWorldApi : ParsedHttpSource() {
         add("referer", baseUrl)
     }
 
+
     override val supportsMostPopular: Boolean
         get() = false
 
@@ -46,7 +47,7 @@ class WuxiaWorldApi : ParsedHttpSource() {
     override fun popularBookNextPageSelector(): String? = "div.nav-previous"
 
     override fun popularBookRequest(page: Int): Request =
-        GET("$baseUrl/novel-list/?m_orderby=trending")
+        GET("$baseUrl/novel-list/?m_orderby=trending",headers)
 
     override fun popularBookFromElement(element: Element): Book {
         val book: Book = Book.create()

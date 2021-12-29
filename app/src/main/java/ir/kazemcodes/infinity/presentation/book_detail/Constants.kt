@@ -7,7 +7,7 @@ object Constants {
     const val PARAM_BOOK_NAME = "PARAM_BOOK_NAME"
     const val PARAM_CHAPTERS_DETAIL = "chaptersDetail"
 
-    val DEFAULT_ELEVATION = 1.dp
+    val DEFAULT_ELEVATION = 2.dp
     const val CLOUDFLARE_LOG = "Performance & security by Cloudflare"
 
     const val ERROR_LOG = "ERROR_LOG "

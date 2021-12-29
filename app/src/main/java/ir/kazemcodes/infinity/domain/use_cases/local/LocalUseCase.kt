@@ -12,7 +12,6 @@ data class LocalUseCase(
     val insertLocalChaptersUseCase: InsertLocalChaptersUseCase,
     val UpdateLocalChapterContentUseCase: UpdateLocalChapterContentUseCase,
     val UpdateLocalChaptersContentUseCase: UpdateLocalChaptersContentUseCase,
-    val getLocalChapterUseCase: GetLocalChapterUseCase,
     val getLocalChapterReadingContentUseCase: GetLocalChapterReadingContentUseCase,
     val deleteLocalBookUseCase: DeleteLocalBookUseCase,
     val deleteChaptersUseCase: DeleteLocalChaptersUseCase,

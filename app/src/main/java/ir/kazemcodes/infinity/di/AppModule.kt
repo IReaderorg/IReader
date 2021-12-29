@@ -64,11 +64,13 @@ class AppModule {
         bookDao: BookDao,
         chapterDao: ChapterDao,
         context: Context,
+        remoteUseCase: RemoteUseCase
     ): Repository {
         return RepositoryImpl(
             bookDao = bookDao,
             chapterDao = chapterDao,
-            context = context
+            context = context,
+            remoteUseCase = remoteUseCase
         )
     }
 
@@ -84,7 +86,6 @@ class AppModule {
             insertLocalChaptersUseCase = InsertLocalChaptersUseCase(repository),
             getLocalChaptersByBookNameByBookNameUseCase = GetLocalChaptersByBookNameUseCase(
                 repository),
-            getLocalChapterUseCase = GetLocalChapterUseCase(repository),
             getLocalBookByNameUseCase = GetLocalBookByNameUseCase(repository),
             UpdateLocalChapterContentUseCase = UpdateLocalChapterContentUseCase(repository),
             getLocalChapterReadingContentUseCase = GetLocalChapterReadingContentUseCase(repository = repository),

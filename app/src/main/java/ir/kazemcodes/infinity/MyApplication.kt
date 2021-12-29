@@ -1,6 +1,8 @@
 package ir.kazemcodes.infinity
 
 import android.app.Application
+import androidx.hilt.work.HiltWorkerFactory
+import androidx.work.Configuration
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.zhuinden.simplestack.GlobalServices
 import com.zhuinden.simplestackextensions.servicesktx.add
@@ -15,10 +17,11 @@ import javax.inject.Inject
 
 
 @HiltAndroidApp
-class MyApplication : Application() {
+class MyApplication : Application(), Configuration.Provider {
     @Inject lateinit var localUseCase: LocalUseCase
     @Inject lateinit var remoteUseCase: RemoteUseCase
     @Inject lateinit var dataStoreUseCase: DataStoreUseCase
+    @Inject lateinit var workerFactory: HiltWorkerFactory
 
     lateinit var globalServices: GlobalServices
         private set
@@ -37,4 +40,9 @@ class MyApplication : Application() {
             .add(dataStoreUseCase)
             .build()
     }
+
+    override fun getWorkManagerConfiguration(): Configuration =
+        Configuration.Builder()
+            .setWorkerFactory(workerFactory)
+            .build()
 }

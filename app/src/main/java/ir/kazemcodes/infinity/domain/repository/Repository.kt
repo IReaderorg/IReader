@@ -8,4 +8,6 @@ interface Repository {
 
     val dataStoreRepository: DataStoreHelper
 
+    val remoteRepository : RemoteRepository
+
 }
