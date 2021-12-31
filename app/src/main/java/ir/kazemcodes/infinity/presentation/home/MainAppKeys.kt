@@ -23,6 +23,7 @@ import ir.kazemcodes.infinity.presentation.chapter_detail.ChapterDetailScreen
 import ir.kazemcodes.infinity.presentation.chapter_detail.ChapterDetailViewModel
 import ir.kazemcodes.infinity.presentation.downloader.DownloaderScreen
 import ir.kazemcodes.infinity.presentation.extension.ExtensionScreen
+import ir.kazemcodes.infinity.presentation.extension_creator.ExtensionCreatorScreen
 import ir.kazemcodes.infinity.presentation.home.ComposeKey
 import ir.kazemcodes.infinity.presentation.home.MainScreen
 import ir.kazemcodes.infinity.presentation.home.MainViewModel
@@ -175,5 +176,13 @@ data class DownloadScreenKey(val noArgs: String = "") : ComposeKey() {
     @Composable
     override fun ScreenComposable(modifier: Modifier) {
         DownloaderScreen()
+    }
+}
+@Immutable
+@Parcelize
+data class ExtensionCreatorScreenKey(val noArgs: String = "") : ComposeKey() {
+    @Composable
+    override fun ScreenComposable(modifier: Modifier) {
+        ExtensionCreatorScreen()
     }
 }

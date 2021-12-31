@@ -3,12 +3,8 @@ package ir.kazemcodes.infinity.presentation.library
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Sort
@@ -17,9 +13,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
@@ -30,6 +23,10 @@ import ir.kazemcodes.infinity.presentation.layouts.layouts
 import ir.kazemcodes.infinity.presentation.library.components.LayoutComposable
 import ir.kazemcodes.infinity.presentation.library.components.LibraryEvents
 import ir.kazemcodes.infinity.presentation.library.components.RadioButtonWithTitleComposable
+import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarActionButton
+import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarBackButton
+import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarSearch
+import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarTitle
 import kotlinx.coroutines.launch
 
 
@@ -52,37 +49,17 @@ fun LibraryScreen(
                 TopAppBar(
                     title = {
                         if (!state.inSearchMode) {
-                            Text(
-                                text = "Library",
-                                color = MaterialTheme.colors.onBackground,
-                                style = MaterialTheme.typography.subtitle1,
-                                fontWeight = FontWeight.Bold,
-                            )
+                            TopAppBarTitle(title = "Library")
                         } else {
-                            Box {
-                                if (state.searchQuery.isEmpty()) {
-                                    Text(
-                                        text = "Search...",
-                                        style = MaterialTheme.typography.subtitle1,
-                                        color = MaterialTheme.colors.onBackground.copy(alpha = .7F)
-                                    )
-                                }
-                                BasicTextField(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    value = state.searchQuery,
-                                    onValueChange = {
-                                        viewModel.onEvent(LibraryEvents.UpdateSearchInput(it))
-                                    },
-                                    maxLines = 1,
-                                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                                    keyboardActions = KeyboardActions(onSearch = {
-                                        viewModel.onEvent(LibraryEvents.SearchBooks(state.searchQuery))
-                                        focusManager.clearFocus()
-                                    }),
-                                    singleLine = true,
-                                    textStyle = TextStyle(color = MaterialTheme.colors.onBackground),
-                                )
-                            }
+                            TopAppBarSearch(query = state.searchQuery,
+                                onValueChange = {
+                                    viewModel.onEvent(LibraryEvents.UpdateSearchInput(it))
+                                },
+                                onSearch = {
+                                    viewModel.onEvent(LibraryEvents.SearchBooks(state.searchQuery))
+                                    focusManager.clearFocus()
+                                },
+                                isSearchModeEnable = state.searchQuery.isNotBlank())
                         }
 
                     },
@@ -92,17 +69,15 @@ fun LibraryScreen(
                     elevation = Constants.DEFAULT_ELEVATION,
                     actions = {
                         if (state.inSearchMode) {
-                            IconButton(onClick = {
-                                viewModel.onEvent(LibraryEvents.ToggleSearchMode(false))
-                            }) {
-                                Icon(
-                                    imageVector = Icons.Default.Close,
-                                    contentDescription = "Close Icon",
-                                    tint = MaterialTheme.colors.onBackground
-                                )
-                            }
+                            TopAppBarActionButton(
+                                imageVector = Icons.Default.Close,
+                                title = "Close",
+                                onClick = { viewModel.onEvent(LibraryEvents.ToggleSearchMode(false)) },
+                            )
                         }
-                        IconButton(
+                        TopAppBarActionButton(
+                            imageVector = Icons.Default.Sort,
+                            title = "Filter",
                             onClick = {
                                 coroutineScope.launch {
                                     if (bottomSheetScaffoldState.bottomSheetState.isCollapsed) {
@@ -112,34 +87,21 @@ fun LibraryScreen(
                                     }
                                 }
                             },
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Sort,
-                                contentDescription = "Filter Icon",
-                                tint = MaterialTheme.colors.onBackground
-                            )
-                        }
-                        IconButton(
+                        )
+                        TopAppBarActionButton(
+                            imageVector = Icons.Default.Search,
+                            title = "Search",
                             onClick = {
                                 viewModel.onEvent(LibraryEvents.ToggleSearchMode())
+
                             },
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Search,
-                                contentDescription = "Search Icon",
-                                tint = MaterialTheme.colors.onBackground
-                            )
-                        }
+                        )
+
 
                     },
                     navigationIcon = if (state.inSearchMode) {
                         {
-                            IconButton(onClick = {
-                                viewModel.onEvent(LibraryEvents.ToggleSearchMode(false))
-                            }) {
-                                Icon(imageVector = Icons.Default.ArrowBack,
-                                    contentDescription = "Arrow Back Icon")
-                            }
+                            TopAppBarBackButton(backStack = backStack,onClick = {viewModel.onEvent(LibraryEvents.ToggleSearchMode(false))})
                         }
                     } else null
 
@@ -180,10 +142,13 @@ fun LibraryScreen(
             scaffoldState = bottomSheetScaffoldState
         ) {
             if (state.books.isNotEmpty()) {
-                LayoutComposable(
-                    books = if (state.searchedBook.isEmpty()) state.books else state.searchedBook,
-                    layout = state.layout,
-                )
+                Box(modifier = Modifier.padding(bottom = 50.dp)) {
+                    LayoutComposable(
+                        books = if (state.searchedBook.isEmpty()) state.books else state.searchedBook,
+                        layout = state.layout,
+                    )
+                }
+
 
             }
 

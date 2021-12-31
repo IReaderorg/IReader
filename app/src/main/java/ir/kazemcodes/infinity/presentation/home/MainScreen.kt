@@ -47,7 +47,7 @@ sealed class BottomNavigationScreens(
 @Composable
 fun MainScreen(modifier: Modifier = Modifier) {
     val viewModel = rememberService<MainViewModel>()
-    val currentIndex = viewModel.state.value.index
+    val currentIndex: Int = viewModel.state.value.index
     val bottomNavigationItems = listOf(
         BottomNavigationScreens.Library,
         BottomNavigationScreens.ExtensionScreen,
@@ -62,7 +62,6 @@ fun MainScreen(modifier: Modifier = Modifier) {
                 elevation = 8.dp,
             ) {
                 bottomNavigationItems.forEach { screen ->
-
                     BottomNavigationItem(
                         selected = screen.title == bottomNavigationItems[currentIndex].title,
                         onClick = {
@@ -83,12 +82,16 @@ fun MainScreen(modifier: Modifier = Modifier) {
             }
         }
     ) {
-        if (currentIndex == 0) {
-            LibraryScreen()
-        } else if (currentIndex == 1) {
-            ExtensionScreen()
-        } else if (currentIndex == 2) {
-            SettingScreen()
+        when (currentIndex) {
+            0 -> {
+                LibraryScreen()
+            }
+            1 -> {
+                ExtensionScreen()
+            }
+            2 -> {
+                SettingScreen()
+            }
         }
     }
 }
