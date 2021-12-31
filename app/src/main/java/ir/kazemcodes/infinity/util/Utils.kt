@@ -1,4 +1,4 @@
-package ir.kazemcodes.infinity.explore_feature.domain.util
+package ir.kazemcodes.infinity.util
 
 import androidx.compose.foundation.lazy.LazyListState
 import java.net.URLDecoder

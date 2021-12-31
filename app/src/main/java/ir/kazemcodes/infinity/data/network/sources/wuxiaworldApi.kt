@@ -1,5 +1,6 @@
 package ir.kazemcodes.infinity.data.network.sources
 
+import android.content.Context
 import ir.kazemcodes.infinity.api_feature.network.GET
 import ir.kazemcodes.infinity.api_feature.network.POST
 import ir.kazemcodes.infinity.data.network.models.BooksPage
@@ -14,7 +15,7 @@ import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import ru.gildor.coroutines.okhttp.await
 
-class WuxiaWorldApi : ParsedHttpSource() {
+class WuxiaWorldApi(context: Context) : ParsedHttpSource(context) {
 
     override val baseUrl: String = "https://wuxiaworld.site"
     override val name: String = "WuxiaWorld.site"

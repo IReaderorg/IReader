@@ -1,5 +1,6 @@
 package ir.kazemcodes.infinity.base_feature.navigation
 
+import android.content.Context
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
@@ -14,14 +15,13 @@ import ir.kazemcodes.infinity.domain.models.remote.Chapter
 import ir.kazemcodes.infinity.domain.use_cases.datastore.DataStoreUseCase
 import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
 import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
-import ir.kazemcodes.infinity.domain.utils.mappingApiNameToAPi
 import ir.kazemcodes.infinity.presentation.book_detail.BookDetailScreen
 import ir.kazemcodes.infinity.presentation.book_detail.BookDetailViewModel
 import ir.kazemcodes.infinity.presentation.browse.BrowseViewModel
 import ir.kazemcodes.infinity.presentation.browse.BrowserScreen
 import ir.kazemcodes.infinity.presentation.chapter_detail.ChapterDetailScreen
 import ir.kazemcodes.infinity.presentation.chapter_detail.ChapterDetailViewModel
-import ir.kazemcodes.infinity.presentation.webview.WebPageScreen
+import ir.kazemcodes.infinity.presentation.downloader.DownloaderScreen
 import ir.kazemcodes.infinity.presentation.extension.ExtensionScreen
 import ir.kazemcodes.infinity.presentation.home.ComposeKey
 import ir.kazemcodes.infinity.presentation.home.MainScreen
@@ -29,6 +29,8 @@ import ir.kazemcodes.infinity.presentation.home.MainViewModel
 import ir.kazemcodes.infinity.presentation.library.LibraryViewModel
 import ir.kazemcodes.infinity.presentation.reader.ReaderScreenViewModel
 import ir.kazemcodes.infinity.presentation.reader.ReadingScreen
+import ir.kazemcodes.infinity.presentation.webview.WebPageScreen
+import ir.kazemcodes.infinity.util.mappingApiNameToAPi
 import kotlinx.parcelize.Parcelize
 
 
@@ -65,7 +67,7 @@ data class BrowserScreenKey(val sourceName: String, val isLatestUpdateMode: Bool
             add(BrowseViewModel(lookup<LocalUseCase>(),
                 lookup<RemoteUseCase>(),
                 dataStoreUseCase = lookup<DataStoreUseCase>(),
-                source = mappingApiNameToAPi(sourceName),
+                source = mappingApiNameToAPi(sourceName,lookup<Context>()),
                 isLatestUpdateMode = isLatestUpdateMode),)
         }
 
@@ -89,7 +91,7 @@ data class BookDetailKey(val book: Book, val sourceName: String) : ComposeKey() 
         with(serviceBinder) {
             add(BookDetailViewModel(lookup<LocalUseCase>(),
                 lookup<RemoteUseCase>(),
-                source = mappingApiNameToAPi(sourceName),
+                source = mappingApiNameToAPi(sourceName,lookup<Context>()),
                 book = book,
                 lookup<DataStoreUseCase>()))
         }
@@ -122,7 +124,7 @@ data class ChapterDetailKey(
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
             add(ChapterDetailViewModel(lookup<LocalUseCase>(),
-                source = mappingApiNameToAPi(sourceName),
+                source = mappingApiNameToAPi(sourceName,lookup<Context>()),
                 book = book))
         }
     }
@@ -144,12 +146,13 @@ data class ReaderScreenKey(
     }
 
     override fun bindServices(serviceBinder: ServiceBinder) {
+
         with(serviceBinder) {
             add(ReaderScreenViewModel(
                 localUseCase = lookup<LocalUseCase>(),
                 remoteUseCase = lookup<RemoteUseCase>(),
                 dataStoreUseCase = lookup<DataStoreUseCase>(),
-                source = mappingApiNameToAPi(sourceName),
+                source = mappingApiNameToAPi(sourceName,context = lookup<Context>()),
                 book = book,
                 chapter = chapter,
                 chapters = chapters
@@ -164,5 +167,13 @@ data class ExtensionScreenKey(val noArgs: String = "") : ComposeKey() {
     @Composable
     override fun ScreenComposable(modifier: Modifier) {
         ExtensionScreen()
+    }
+}
+@Immutable
+@Parcelize
+data class DownloadScreenKey(val noArgs: String = "") : ComposeKey() {
+    @Composable
+    override fun ScreenComposable(modifier: Modifier) {
+        DownloaderScreen()
     }
 }

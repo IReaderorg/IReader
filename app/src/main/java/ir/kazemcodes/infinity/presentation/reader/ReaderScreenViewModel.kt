@@ -4,14 +4,14 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import com.zhuinden.simplestack.ScopedServices
 import ir.kazemcodes.infinity.data.network.models.Source
+import ir.kazemcodes.infinity.domain.models.FontType
 import ir.kazemcodes.infinity.domain.models.remote.Book
 import ir.kazemcodes.infinity.domain.models.remote.Chapter
-import ir.kazemcodes.infinity.domain.models.FontType
 import ir.kazemcodes.infinity.domain.use_cases.datastore.DataStoreUseCase
 import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
 import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
-import ir.kazemcodes.infinity.domain.utils.Resource
 import ir.kazemcodes.infinity.presentation.theme.fonts
+import ir.kazemcodes.infinity.util.Resource
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
@@ -28,7 +28,7 @@ class ReaderScreenViewModel(
     private val chapters: List<Chapter>,
 ) : ScopedServices.Registered {
 
-    private val _state = mutableStateOf(ReaderScreenState())
+    private val _state = mutableStateOf(ReaderScreenState(source=source))
     val state: State<ReaderScreenState> = _state
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)

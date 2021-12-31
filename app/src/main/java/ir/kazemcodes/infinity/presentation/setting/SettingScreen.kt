@@ -1,23 +1,31 @@
 package ir.kazemcodes.infinity.setting_feature.presentation
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
+import ir.kazemcodes.infinity.base_feature.navigation.DownloadScreenKey
 import ir.kazemcodes.infinity.presentation.book_detail.Constants
+import ir.kazemcodes.infinity.presentation.home.ComposeKey
 
 @Composable
 fun SettingScreen(modifier: Modifier = Modifier) {
+    val settingItems = listOf<SettingItems>(
+        SettingItems.Downloads
+    )
     Box(modifier.fillMaxSize()) {
-        Scaffold(modifier = Modifier.fillMaxSize()
-
-                ,topBar = {
+        Scaffold(modifier = Modifier.fillMaxSize(), topBar = {
             TopAppBar(
                 title = {
                     Text(
@@ -32,27 +40,55 @@ fun SettingScreen(modifier: Modifier = Modifier) {
                 contentColor = MaterialTheme.colors.onBackground,
                 elevation = Constants.DEFAULT_ELEVATION,
             )
-        } ) {
-            Column(modifier = Modifier.fillMaxSize(),horizontalAlignment = Alignment.CenterHorizontally,verticalArrangement = Arrangement.Center) {
+        }) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.Start,
+            ) {
 
-
-                    Text(
-                        text = "＼( °□° )／",
-                        style = MaterialTheme.typography.h3
-                        //fontSize = 200.dp
-                    )
-                Spacer(modifier = Modifier.height(25.dp))
-                Text(
-                    text = "Not Implemented yet.",
-                    style = MaterialTheme.typography.subtitle1
-                    //fontSize = 200.dp
-                )
-
-
+                settingItems.forEach { item ->
+                    SettingsItem(title = item.title, imageVector = item.icon, DestinationScreenKey = DownloadScreenKey())
+                }
 
             }
 
         }
+    }
+
+}
+
+sealed class SettingItems(val title: String, val icon: ImageVector) {
+    object Downloads : SettingItems("Downloads", Icons.Default.Download)
+}
+
+@Composable
+fun SettingsItem(
+    modifier: Modifier = Modifier,
+    title: String,
+    imageVector: ImageVector,
+    DestinationScreenKey : ComposeKey,
+) {
+    val backstack = LocalBackstack.current
+    val interactionSource = remember { MutableInteractionSource() }
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .height(50.dp)
+            .clickable(interactionSource = interactionSource,
+                indication = null) { backstack.goTo(DestinationScreenKey)},
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(imageVector = imageVector, contentDescription = "$title icon")
+        Spacer(modifier = modifier.width(20.dp))
+        Text(
+            text = title,
+            style = MaterialTheme.typography.body2,
+            color = MaterialTheme.colors.onBackground,
+            textAlign = TextAlign.Center
+        )
+
+
     }
 
 }

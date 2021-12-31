@@ -1,7 +1,7 @@
 package ir.kazemcodes.infinity.domain.use_cases.datastore
 
 import ir.kazemcodes.infinity.domain.repository.Repository
-import ir.kazemcodes.infinity.domain.utils.Resource
+import ir.kazemcodes.infinity.util.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow

@@ -1,5 +1,6 @@
 package ir.kazemcodes.infinity.presentation.book_detail
 
+
 import android.content.Context
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -12,10 +13,11 @@ import ir.kazemcodes.infinity.domain.models.remote.Book
 import ir.kazemcodes.infinity.domain.use_cases.datastore.DataStoreUseCase
 import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
 import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
-import ir.kazemcodes.infinity.domain.utils.Resource
 import ir.kazemcodes.infinity.service.DownloadService
-import ir.kazemcodes.infinity.service.Service
-import ir.kazemcodes.infinity.service.Service.DOWNLOAD_SERVICE_NAME
+import ir.kazemcodes.infinity.service.DownloadService.Companion.DOWNLOAD_BOOK_NAME
+import ir.kazemcodes.infinity.service.DownloadService.Companion.DOWNLOAD_SERVICE_NAME
+import ir.kazemcodes.infinity.service.DownloadService.Companion.DOWNLOAD_SOURCE_NAME
+import ir.kazemcodes.infinity.util.Resource
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -64,12 +66,13 @@ class BookDetailViewModel(
         }
     }
 
+
     fun startDownloadService(context: Context) {
         work = OneTimeWorkRequestBuilder<DownloadService>().apply {
             setInputData(
                 Data.Builder().apply {
-                    putString(Service.DOWNLOAD_BOOK_NAME, book.bookName)
-                    putString(Service.DOWNLOAD_SOURCE_NAME, book.source)
+                    putString(DOWNLOAD_BOOK_NAME, book.bookName)
+                    putString(DOWNLOAD_SOURCE_NAME, book.source)
                 }.build()
             )
         }.build()

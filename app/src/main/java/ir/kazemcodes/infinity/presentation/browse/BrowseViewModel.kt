@@ -8,8 +8,8 @@ import ir.kazemcodes.infinity.data.network.models.Source
 import ir.kazemcodes.infinity.domain.use_cases.datastore.DataStoreUseCase
 import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
 import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
-import ir.kazemcodes.infinity.domain.utils.Resource
-import ir.kazemcodes.infinity.domain.utils.merge
+import ir.kazemcodes.infinity.util.Resource
+import ir.kazemcodes.infinity.util.merge
 import ir.kazemcodes.infinity.presentation.layouts.DisplayMode
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collectLatest

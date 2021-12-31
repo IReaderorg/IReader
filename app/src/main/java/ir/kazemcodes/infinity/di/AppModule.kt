@@ -10,7 +10,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import ir.kazemcodes.infinity.api_feature.network.NetworkHelper
+import ir.kazemcodes.infinity.data.network.utils.NetworkHelper
 import ir.kazemcodes.infinity.data.local.BookDatabase
 import ir.kazemcodes.infinity.data.local.dao.BookDao
 import ir.kazemcodes.infinity.data.local.dao.ChapterDao
@@ -165,6 +165,8 @@ class AppModule {
     fun providesNetworkHelper(context: Context): NetworkHelper {
         return NetworkHelper(context = context)
     }
+
+
 
 
 }

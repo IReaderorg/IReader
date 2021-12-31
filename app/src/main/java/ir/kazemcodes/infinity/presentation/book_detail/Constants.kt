@@ -12,6 +12,11 @@ object Constants {
 
     const val ERROR_LOG = "ERROR_LOG "
     const val DEBUG_LOG = "DEBUG_LOG "
+
+
+    const val KODEIN_MODULE = "kodein_module "
+
+
 }
 
 

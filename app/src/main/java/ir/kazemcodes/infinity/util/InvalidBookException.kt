@@ -1,4 +1,4 @@
-package ir.kazemcodes.infinity.domain.utils
+package ir.kazemcodes.infinity.util
 
 
 class InvalidBookException(message: String) : Exception(message)

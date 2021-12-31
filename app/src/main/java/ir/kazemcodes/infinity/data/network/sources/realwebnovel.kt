@@ -1,5 +1,6 @@
 package ir.kazemcodes.infinity.data.network.sources
 
+import android.content.Context
 import ir.kazemcodes.infinity.api_feature.network.GET
 import ir.kazemcodes.infinity.data.network.models.ChapterPage
 import ir.kazemcodes.infinity.data.network.models.ParsedHttpSource
@@ -12,7 +13,7 @@ import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 
 
-class RealWebNovelApi : ParsedHttpSource() {
+class RealWebNovelApi(context: Context ) : ParsedHttpSource(context) {
 
     override val baseUrl: String = "https://readwebnovels.net"
     override val name: String = "RealWebNovels.net"

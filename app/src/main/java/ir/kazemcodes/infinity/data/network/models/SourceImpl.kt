@@ -1,4 +1,4 @@
-import ir.kazemcodes.infinity.api_feature.network.NetworkHelper
+import ir.kazemcodes.infinity.data.network.utils.NetworkHelper
 import ir.kazemcodes.infinity.data.network.models.Source
 import okhttp3.Headers
 import okhttp3.OkHttpClient

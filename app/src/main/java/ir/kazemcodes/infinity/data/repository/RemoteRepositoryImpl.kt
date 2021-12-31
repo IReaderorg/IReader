@@ -8,7 +8,7 @@ import ir.kazemcodes.infinity.domain.models.remote.Book
 import ir.kazemcodes.infinity.domain.models.remote.Chapter
 import ir.kazemcodes.infinity.domain.repository.RemoteRepository
 import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
-import ir.kazemcodes.infinity.domain.utils.Resource
+import ir.kazemcodes.infinity.util.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
@@ -28,7 +28,7 @@ class RemoteRepositoryImpl(
     ): Flow<Chapter> = flow {
 
         chapters.forEachIndexed { index, chapter ->
-            if (chapter.content == null) {
+            if (chapter.content.isNullOrEmpty()) {
                 var retries = totalRetries
                 var success = false
                 while (!success || retries < 0) {

@@ -1,4 +1,4 @@
-package ir.kazemcodes.infinity.domain.utils
+package ir.kazemcodes.infinity.util
 
 import okhttp3.Response
 import org.jsoup.Jsoup

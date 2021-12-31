@@ -7,21 +7,38 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.zhuinden.simplestack.GlobalServices
 import com.zhuinden.simplestackextensions.servicesktx.add
 import dagger.hilt.android.HiltAndroidApp
+import ir.kazemcodes.infinity.data.network.Extensions
+import ir.kazemcodes.infinity.data.network.utils.NetworkHelper
 import ir.kazemcodes.infinity.data.repository.dataStore
 import ir.kazemcodes.infinity.domain.use_cases.datastore.DataStoreUseCase
 import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
 import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
+import ir.kazemcodes.infinity.notification.Notifications
 import ir.kazemcodes.infinity.presentation.core.Constants.DatastoreServiceTAG
+import org.kodein.di.DI
+import org.kodein.di.DIAware
+import org.kodein.di.android.x.androidXContextTranslators
+import org.kodein.di.bindSingleton
 import timber.log.Timber
 import javax.inject.Inject
 
 
 @HiltAndroidApp
-class MyApplication : Application(), Configuration.Provider {
-    @Inject lateinit var localUseCase: LocalUseCase
-    @Inject lateinit var remoteUseCase: RemoteUseCase
-    @Inject lateinit var dataStoreUseCase: DataStoreUseCase
-    @Inject lateinit var workerFactory: HiltWorkerFactory
+class MyApplication : Application(), DIAware, Configuration.Provider {
+
+
+
+    @Inject
+    lateinit var localUseCase: LocalUseCase
+
+    @Inject
+    lateinit var remoteUseCase: RemoteUseCase
+
+    @Inject
+    lateinit var dataStoreUseCase: DataStoreUseCase
+
+    @Inject
+    lateinit var workerFactory: HiltWorkerFactory
 
     lateinit var globalServices: GlobalServices
         private set
@@ -32,17 +49,45 @@ class MyApplication : Application(), Configuration.Provider {
             Timber.plant(Timber.DebugTree())
         }
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+        setupNotificationChannels()
+
 
         globalServices = GlobalServices.builder()
             .add(localUseCase)
             .add(remoteUseCase)
-            .add(this.dataStore,DatastoreServiceTAG)
+            .add(this.dataStore, DatastoreServiceTAG)
             .add(dataStoreUseCase)
+            .add(applicationContext)
             .build()
+
     }
 
+    override val di: DI = DI.lazy {
+        import(androidXContextTranslators)
+        import(KodeinModule)
+    }
+    private val KodeinModule = DI.Module("AppModule") {
+        bindSingleton<NetworkHelper> { NetworkHelper(this@MyApplication) }
+        bindSingleton<Extensions> { Extensions(this@MyApplication) }
+//        bindSingleton<DownloadManager> { DownloadManager() }
+
+    }
+
+    protected open fun setupNotificationChannels() {
+        try {
+            Notifications.createChannels(this)
+        } catch (e: Exception) {
+            Timber.e("Failed to modify notification channels")
+        }
+    }
     override fun getWorkManagerConfiguration(): Configuration =
         Configuration.Builder()
             .setWorkerFactory(workerFactory)
             .build()
+
+
+
 }
+
+
+

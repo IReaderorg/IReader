@@ -2,7 +2,7 @@ package ir.kazemcodes.infinity.domain.use_cases.local.chapter
 
 import ir.kazemcodes.infinity.domain.models.local.ChapterEntity
 import ir.kazemcodes.infinity.domain.repository.Repository
-import ir.kazemcodes.infinity.domain.utils.InvalidBookException
+import ir.kazemcodes.infinity.util.InvalidBookException
 import timber.log.Timber
 import javax.inject.Inject
 

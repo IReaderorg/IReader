@@ -1,14 +1,15 @@
 package ir.kazemcodes.infinity.data.network.models
 
+import android.content.Context
 import ir.kazemcodes.infinity.domain.models.remote.Book
 import ir.kazemcodes.infinity.domain.models.remote.Chapter
-import ir.kazemcodes.infinity.domain.utils.asJsoup
 import ir.kazemcodes.infinity.presentation.book_detail.Constants.CLOUDFLARE_LOG
+import ir.kazemcodes.infinity.util.asJsoup
 import okhttp3.Response
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 
-abstract class ParsedHttpSource : HttpSource() {
+abstract class ParsedHttpSource(context: Context) : HttpSource(context) {
 
 
 

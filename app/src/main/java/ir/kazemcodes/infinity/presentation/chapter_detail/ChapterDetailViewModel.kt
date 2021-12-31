@@ -6,7 +6,7 @@ import com.zhuinden.simplestack.ScopedServices
 import ir.kazemcodes.infinity.data.network.models.Source
 import ir.kazemcodes.infinity.domain.models.remote.Book
 import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
-import ir.kazemcodes.infinity.domain.utils.Resource
+import ir.kazemcodes.infinity.util.Resource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

@@ -16,12 +16,15 @@ import androidx.compose.ui.unit.dp
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import ir.kazemcodes.infinity.R
 import ir.kazemcodes.infinity.base_feature.navigation.BrowserScreenKey
-import ir.kazemcodes.infinity.data.network.sources
+import ir.kazemcodes.infinity.data.network.Extensions
 import ir.kazemcodes.infinity.presentation.book_detail.Constants.DEFAULT_ELEVATION
+import org.kodein.di.compose.rememberInstance
 
 @Composable
 fun ExtensionScreen(modifier: Modifier = Modifier) {
     val backStack = LocalBackstack.current
+    val extensions : Extensions by rememberInstance<Extensions>()
+    val sources = extensions.getSources()
     Scaffold(
         topBar = {
             TopAppBar(
@@ -51,7 +54,7 @@ fun ExtensionScreen(modifier: Modifier = Modifier) {
                     },horizontalArrangement = Arrangement.SpaceBetween,verticalAlignment = Alignment.CenterVertically) {
                     Text(sources[index].name)
                     if (sources[index].supportsMostPopular) {
-                        Text(stringResource(R.string.popular), color = MaterialTheme.colors.primary,style = MaterialTheme.typography.subtitle2,modifier = Modifier.clickable {
+                        Text(stringResource(R.string.popular_book), color = MaterialTheme.colors.primary,style = MaterialTheme.typography.subtitle2,modifier = Modifier.clickable {
                             backStack.goTo(BrowserScreenKey(sourceName = sources[index].name , isLatestUpdateMode = false))
                         })
                     }

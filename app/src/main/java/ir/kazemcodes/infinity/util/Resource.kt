@@ -1,4 +1,4 @@
-package ir.kazemcodes.infinity.domain.utils
+package ir.kazemcodes.infinity.util
 
 sealed class Resource<T>(val data: T? = null, val message: String? = null) {
     class Success<T>(data: T) : Resource<T>(data)

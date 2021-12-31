@@ -2,8 +2,8 @@ package ir.kazemcodes.infinity.domain.use_cases.remote
 
 import ir.kazemcodes.infinity.data.network.models.Source
 import ir.kazemcodes.infinity.domain.models.remote.Book
-import ir.kazemcodes.infinity.domain.utils.InvalidBookException
-import ir.kazemcodes.infinity.domain.utils.Resource
+import ir.kazemcodes.infinity.util.InvalidBookException
+import ir.kazemcodes.infinity.util.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import retrofit2.HttpException

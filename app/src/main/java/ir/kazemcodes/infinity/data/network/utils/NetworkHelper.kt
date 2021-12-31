@@ -1,9 +1,7 @@
-package ir.kazemcodes.infinity.api_feature.network
+package ir.kazemcodes.infinity.data.network.utils
 
 import android.content.Context
 import ir.kazemcodes.infinity.data.network.models.dohCloudflare
-import ir.kazemcodes.infinity.data.network.utils.AndroidCookieJar
-import ir.kazemcodes.infinity.data.network.utils.UserAgentInterceptor
 import ir.kazemcodes.infinity.data.network.utils.intercepter.CloudflareInterceptor
 import okhttp3.Cache
 import okhttp3.OkHttpClient
@@ -43,7 +41,3 @@ class NetworkHelper(context: Context) {
 
 }
 
-object InfinityInstance {
-    lateinit var networkHelper: NetworkHelper
-
-}

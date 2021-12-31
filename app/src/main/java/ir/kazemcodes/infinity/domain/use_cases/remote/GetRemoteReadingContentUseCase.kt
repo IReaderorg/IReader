@@ -3,7 +3,7 @@ package ir.kazemcodes.infinity.domain.use_cases.remote
 import ir.kazemcodes.infinity.data.network.models.ChapterPage
 import ir.kazemcodes.infinity.data.network.models.Source
 import ir.kazemcodes.infinity.domain.models.remote.Chapter
-import ir.kazemcodes.infinity.domain.utils.Resource
+import ir.kazemcodes.infinity.util.Resource
 import ir.kazemcodes.infinity.presentation.book_detail.Constants.CLOUDFLARE_LOG
 import kotlinx.coroutines.flow.flow
 import retrofit2.HttpException

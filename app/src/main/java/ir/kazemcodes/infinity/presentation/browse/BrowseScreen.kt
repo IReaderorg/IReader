@@ -26,10 +26,10 @@ import androidx.compose.ui.unit.dp
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import com.zhuinden.simplestackcomposeintegration.services.rememberService
 import ir.kazemcodes.infinity.base_feature.navigation.WebViewKey
-import ir.kazemcodes.infinity.explore_feature.domain.util.isScrolledToTheEnd
 import ir.kazemcodes.infinity.presentation.layouts.layouts
 import ir.kazemcodes.infinity.presentation.library.components.LayoutComposable
 import ir.kazemcodes.infinity.presentation.library.components.RadioButtonWithTitleComposable
+import ir.kazemcodes.infinity.util.isScrolledToTheEnd
 
 
 @ExperimentalFoundationApi

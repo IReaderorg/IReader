@@ -19,7 +19,7 @@ fun BookImageComposable(
     image: Any,
     modifier: Modifier = Modifier,
     alignment: Alignment = Alignment.Center,
-    contentScale: ContentScale = ContentScale.Crop,
+    contentScale: ContentScale = ContentScale.Fit,
 ) {
     CoilImage(
         image,

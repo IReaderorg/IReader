@@ -1,8 +1,8 @@
 package ir.kazemcodes.infinity.data.network.models
 
+import android.content.Context
 import ir.kazemcodes.infinity.api_feature.network.GET
-import ir.kazemcodes.infinity.api_feature.network.InfinityInstance
-import ir.kazemcodes.infinity.api_feature.network.NetworkHelper
+import ir.kazemcodes.infinity.data.network.utils.NetworkHelper
 import ir.kazemcodes.infinity.domain.models.remote.Book
 import ir.kazemcodes.infinity.domain.models.remote.Chapter
 import okhttp3.Headers
@@ -11,19 +11,25 @@ import okhttp3.Request
 import okhttp3.Response
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
+import org.kodein.di.*
+import org.kodein.di.android.closestDI
 import ru.gildor.coroutines.okhttp.await
 import java.net.URI
 import java.net.URISyntaxException
 import java.security.MessageDigest
+import java.util.*
 
 /**
  * A simple implementation for sources from a website.
  */
+abstract class HttpSource(context: Context) : Source,DIAware {
 
-abstract class HttpSource : Source {
+
+    final override val di: DI by closestDI(context)
+
+     protected val  network: NetworkHelper by di.instance<NetworkHelper>()
 
 
-    protected val network: NetworkHelper = InfinityInstance.networkHelper
 
     /**
      * Base url of the website without the trailing slash, like: http://mysite.com
@@ -52,6 +58,7 @@ abstract class HttpSource : Source {
         val bytes = MessageDigest.getInstance("MD5").digest(key.toByteArray())
         (0..7).map { bytes[it].toLong() and 0xff shl 8 * (7 - it) }
             .reduce(Long::or) and Long.MAX_VALUE
+
     }
 
     /**

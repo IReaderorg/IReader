@@ -1,4 +1,4 @@
-package ir.kazemcodes.infinity.explore_feature.domain.repository
+package ir.kazemcodes.infinity.util
 
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory

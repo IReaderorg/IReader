@@ -8,8 +8,6 @@ import android.webkit.WebView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import ir.kazemcodes.infinity.R
-import ir.kazemcodes.infinity.api_feature.network.InfinityInstance
-import ir.kazemcodes.infinity.api_feature.network.NetworkHelper
 import ir.kazemcodes.infinity.data.network.models.HttpSource
 import ir.kazemcodes.infinity.data.network.utils.*
 import okhttp3.Cookie
@@ -17,16 +15,20 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.Response
+import org.kodein.di.DI
+import org.kodein.di.DIAware
+import org.kodein.di.android.closestDI
+import org.kodein.di.instance
 import java.io.IOException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
-class CloudflareInterceptor(private val context: Context) : Interceptor {
+class CloudflareInterceptor(private val context: Context) : Interceptor,DIAware {
 
     private val executor = ContextCompat.getMainExecutor(context)
+    override val di: DI by closestDI(context)
 
-    private val networkHelper: NetworkHelper = InfinityInstance.networkHelper
-
+    private val networkHelper: NetworkHelper by di.instance<NetworkHelper>()
     /**
      * When this is called, it initializes the WebView if it wasn't already. We use this to avoid
      * blocking the main thread too much. If used too often we could consider moving it to the
