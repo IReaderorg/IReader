@@ -1,13 +1,9 @@
 package ir.kazemcodes.infinity.data.network.utils
 
-import androidx.annotation.RequiresApi
 import android.annotation.TargetApi
 import android.os.Build
-import android.webkit.WebResourceError
-import android.webkit.WebResourceRequest
-import android.webkit.WebResourceResponse
-import android.webkit.WebView
-import android.webkit.WebViewClient
+import android.webkit.*
+import androidx.annotation.RequiresApi
 
 @Suppress("OverridingDeprecatedMember")
 abstract class WebViewClientCompat : WebViewClient() {

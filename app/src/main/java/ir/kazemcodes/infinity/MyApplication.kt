@@ -17,7 +17,6 @@ import ir.kazemcodes.infinity.notification.Notifications
 import ir.kazemcodes.infinity.presentation.core.Constants.DatastoreServiceTAG
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.android.x.androidXContextTranslators
 import org.kodein.di.bindSingleton
 import timber.log.Timber
 import javax.inject.Inject
@@ -27,6 +26,14 @@ import javax.inject.Inject
 class MyApplication : Application(), DIAware, Configuration.Provider {
 
 
+    override val di: DI = DI.lazy {
+        import(KodeinModule)
+    }
+    private val KodeinModule = DI.Module("AppModule") {
+        bindSingleton<NetworkHelper> { NetworkHelper(this@MyApplication) }
+        bindSingleton<Extensions> { Extensions(this@MyApplication) }
+        bindSingleton<DataStoreUseCase> { dataStoreUseCase }
+    }
 
     @Inject
     lateinit var localUseCase: LocalUseCase
@@ -57,23 +64,14 @@ class MyApplication : Application(), DIAware, Configuration.Provider {
             .add(remoteUseCase)
             .add(this.dataStore, DatastoreServiceTAG)
             .add(dataStoreUseCase)
-            .add(applicationContext)
+            .add(baseContext)
             .build()
 
     }
 
-    override val di: DI = DI.lazy {
-        import(androidXContextTranslators)
-        import(KodeinModule)
-    }
-    private val KodeinModule = DI.Module("AppModule") {
-        bindSingleton<NetworkHelper> { NetworkHelper(this@MyApplication) }
-        bindSingleton<Extensions> { Extensions(this@MyApplication) }
-//        bindSingleton<DownloadManager> { DownloadManager() }
 
-    }
 
-    protected open fun setupNotificationChannels() {
+    private fun setupNotificationChannels() {
         try {
             Notifications.createChannels(this)
         } catch (e: Exception) {

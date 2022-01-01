@@ -10,11 +10,11 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import ir.kazemcodes.infinity.data.network.utils.NetworkHelper
 import ir.kazemcodes.infinity.data.local.BookDatabase
 import ir.kazemcodes.infinity.data.local.dao.BookDao
 import ir.kazemcodes.infinity.data.local.dao.ChapterDao
 import ir.kazemcodes.infinity.data.network.utils.MemoryCookieJar
+import ir.kazemcodes.infinity.data.network.utils.NetworkHelper
 import ir.kazemcodes.infinity.data.repository.RepositoryImpl
 import ir.kazemcodes.infinity.domain.repository.Repository
 import ir.kazemcodes.infinity.domain.use_cases.datastore.*
@@ -120,7 +120,9 @@ class AppModule {
             saveLibraryLayoutUseCase = SaveLibraryLayoutTypeStateUseCase(repository),
             readLibraryLayoutUseCase = ReadLibraryLayoutTypeStateUseCase(repository),
             saveBrowseLayoutUseCase = SaveBrowseLayoutTypeStateUseCase(repository),
-            readBrowseLayoutUseCase = ReadBrowseLayoutTypeStateUseCase(repository)
+            readBrowseLayoutUseCase = ReadBrowseLayoutTypeStateUseCase(repository),
+            readDohPrefUseCase = ReadDohPrefUseCase(repository = repository),
+            saveDohPrefUseCase = SaveDohPrefUseCase(repository)
         )
     }
 

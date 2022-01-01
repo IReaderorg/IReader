@@ -11,4 +11,6 @@ data class DataStoreUseCase(
     val saveLibraryLayoutUseCase: SaveLibraryLayoutTypeStateUseCase,
     val readBrowseLayoutUseCase: ReadBrowseLayoutTypeStateUseCase,
     val saveBrowseLayoutUseCase: SaveBrowseLayoutTypeStateUseCase,
+    val readDohPrefUseCase: ReadDohPrefUseCase,
+    val saveDohPrefUseCase: SaveDohPrefUseCase,
     )

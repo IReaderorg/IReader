@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.work.WorkManager
 import com.zhuinden.simplestack.AsyncStateChanger
@@ -21,11 +22,16 @@ import dagger.hilt.android.scopes.ActivityScoped
 import ir.kazemcodes.infinity.MyApplication
 import ir.kazemcodes.infinity.base_feature.navigation.MainScreenKey
 import ir.kazemcodes.infinity.presentation.theme.InfinityTheme
+import org.kodein.di.DI
+import org.kodein.di.DIAware
+import org.kodein.di.android.closestDI
 
 
 @AndroidEntryPoint
 @ActivityScoped
-class MainActivity : ComponentActivity(){
+class MainActivity : ComponentActivity(),DIAware {
+
+
 
 
     private val composeStateChanger = ComposeStateChanger()
@@ -40,16 +46,14 @@ class MainActivity : ComponentActivity(){
             .setStateChanger(AsyncStateChanger(composeStateChanger))
             .install(this, androidContentFrame, History.of(MainScreenKey()))
 
-
-
-
-
         setContent {
-            BackstackProvider(backstack) {
+            BackstackProvider(backstack)   {
                 InfinityTheme {
                     Surface(color = MaterialTheme.colors.background) {
-                        Box(modifier = Modifier.fillMaxSize()) {
-                            composeStateChanger.RenderScreen()
+                        Main {
+                            Box(modifier = Modifier.fillMaxSize())  {
+                                composeStateChanger.RenderScreen()
+                            }
                         }
                     }
                 }
@@ -88,5 +92,16 @@ class MainActivity : ComponentActivity(){
         super.onDestroy()
         WorkManager.getInstance(this).cancelAllWork()
     }
+    /**
+     * I created this in order to support the full power of kodein, because i use
+     * simple stack i can't use the kodein compose directly
+     * **/
+    @Composable
+    fun Main(content: @Composable () -> Unit,) = with(di) {
+        content()
+    }
+
+    override val di: DI by closestDI(this)
 
 }
+

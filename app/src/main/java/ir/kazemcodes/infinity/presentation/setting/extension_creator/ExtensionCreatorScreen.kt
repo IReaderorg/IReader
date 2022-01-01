@@ -1,4 +1,4 @@
-package ir.kazemcodes.infinity.presentation.extension_creator
+package ir.kazemcodes.infinity.presentation.setting.extension_creator
 
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
@@ -6,6 +6,7 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
+import ir.kazemcodes.infinity.presentation.reusable_composable.NotImplementedText
 import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarBackButton
 import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarTitle
 
@@ -27,6 +28,6 @@ fun ExtensionCreatorScreen() {
             }
         )
     }) {
-
+        NotImplementedText()
     }
 }

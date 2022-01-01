@@ -46,7 +46,7 @@ fun ReadingScreen(
                     TopAppBar(
                         title = {
                             Text(
-                                text = book.bookName,
+                                text = chapter.title,
                                 color = MaterialTheme.colors.onBackground,
                                 style = MaterialTheme.typography.subtitle1,
                                 fontWeight = FontWeight.Bold,

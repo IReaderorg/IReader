@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
+import ir.kazemcodes.infinity.data.network.models.Dns
 import ir.kazemcodes.infinity.domain.repository.DataStoreHelper
 import ir.kazemcodes.infinity.presentation.layouts.layouts
 import kotlinx.coroutines.flow.Flow
@@ -24,6 +25,10 @@ class DataStoreHelperImpl(context: Context) : DataStoreHelper {
         const val SAVED_LIBRARY_LAYOUT_KEY = "SAVED_LIBRARY_LAYOUT_KEY"
         const val SAVED_BROWSE_LAYOUT_KEY = "SAVED_BROWSE_LAYOUT_KEY"
 
+        /** Setting Pref**/
+        const val SAVED_DOH_KEY = "SAVED_DOH_KEY"
+
+
     }
 
     private object PreferencesKey {
@@ -33,6 +38,7 @@ class DataStoreHelperImpl(context: Context) : DataStoreHelper {
         val latestChapterStateKey = stringPreferencesKey(SAVED_LATEST_CHAPTER_KEY)
         val libraryLayoutTypeStateKey = intPreferencesKey(SAVED_LATEST_CHAPTER_KEY)
         val browseLayoutTypeStateKey = intPreferencesKey(SAVED_BROWSE_LAYOUT_KEY)
+        val dohStateKey = intPreferencesKey(SAVED_DOH_KEY)
     }
 
     private val dataStore = context.dataStore
@@ -160,6 +166,28 @@ class DataStoreHelperImpl(context: Context) : DataStoreHelper {
     override suspend fun saveBrowseLayoutTypeStateUseCase(layoutIndex: Int) {
         dataStore.edit { preferences ->
             preferences[PreferencesKey.browseLayoutTypeStateKey] = layoutIndex
+        }
+    }
+
+
+
+    override fun readDohPrefUseCase() : Flow<Int> {
+        return dataStore.data
+            .catch { exception ->
+                if (exception is IOException) {
+                    emit(emptyPreferences())
+                } else {
+                    throw exception
+                }
+            }
+            .map { preferences ->
+                preferences[PreferencesKey.dohStateKey] ?: Dns.Disable.prefCode
+            }
+    }
+
+    override suspend fun saveDohPrefUseCase(dohPref : Int) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKey.dohStateKey] = dohPref
         }
     }
 

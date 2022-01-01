@@ -7,21 +7,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import com.zhuinden.simplestackcomposeintegration.services.rememberService
@@ -29,6 +25,10 @@ import ir.kazemcodes.infinity.base_feature.navigation.WebViewKey
 import ir.kazemcodes.infinity.presentation.layouts.layouts
 import ir.kazemcodes.infinity.presentation.library.components.LayoutComposable
 import ir.kazemcodes.infinity.presentation.library.components.RadioButtonWithTitleComposable
+import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarActionButton
+import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarBackButton
+import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarSearch
+import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarTitle
 import ir.kazemcodes.infinity.util.isScrolledToTheEnd
 
 
@@ -48,38 +48,17 @@ fun BrowserScreen() {
             TopAppBar(
                 title = {
                     if (!state.isSearchModeEnable) {
-                        Text(
-                            text = source.name,
-                            color = MaterialTheme.colors.onBackground,
-                            style = MaterialTheme.typography.subtitle1,
-                            fontWeight = FontWeight.Bold,
-                            overflow = TextOverflow.Ellipsis
-                        )
+                        TopAppBarTitle(title = source.name)
                     } else {
-                        Box {
-                            if (state.searchQuery.isEmpty()) {
-                                Text(
-                                    text = "Search...",
-                                    style = MaterialTheme.typography.subtitle1,
-                                    color = MaterialTheme.colors.onBackground.copy(alpha = .7F)
-                                )
-                            }
-                            BasicTextField(
-                                modifier = Modifier.fillMaxWidth(),
-                                value = state.searchQuery,
-                                onValueChange = {
-                                    viewModel.onEvent(BrowseScreenEvents.UpdateSearchInput(it))
-                                },
-                                maxLines = 1,
-                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                                keyboardActions = KeyboardActions(onSearch = {
-                                    viewModel.onEvent(BrowseScreenEvents.SearchBooks(state.searchQuery))
-                                    focusManager.clearFocus()
-                                }),
-                                singleLine = true,
-                                textStyle = TextStyle(color = MaterialTheme.colors.onBackground),
-                            )
-                        }
+                        TopAppBarSearch(query = state.searchQuery,
+                            onValueChange = {
+                                viewModel.onEvent(BrowseScreenEvents.UpdateSearchInput(it))
+                            },
+                            onSearch = {
+                                viewModel.onEvent(BrowseScreenEvents.SearchBooks(state.searchQuery))
+                                focusManager.clearFocus()
+                            },
+                            isSearchModeEnable = state.searchQuery.isNotBlank())
                     }
 
 
@@ -87,47 +66,36 @@ fun BrowserScreen() {
                 backgroundColor = MaterialTheme.colors.background,
                 actions = {
                     if (state.isSearchModeEnable) {
-                        IconButton(onClick = {
-                            viewModel.onEvent(BrowseScreenEvents.ToggleSearchMode(false))
-                        }) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "Close Icon",
-                                tint = MaterialTheme.colors.onBackground
-                            )
-                        }
+                        TopAppBarActionButton(
+                            imageVector = Icons.Default.Close,
+                            title = "Close",
+                            onClick = { viewModel.onEvent(BrowseScreenEvents.ToggleSearchMode()) },
+                        )
                     } else {
-                        IconButton(
+                        TopAppBarActionButton(
+                            imageVector = Icons.Default.Search,
+                            title = "Search",
                             onClick = {
                                 viewModel.onEvent(BrowseScreenEvents.ToggleSearchMode())
-                            },
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Search,
-                                contentDescription = "Search Icon",
-                                tint = MaterialTheme.colors.onBackground
-                            )
-                        }
-                    }
-                    IconButton(onClick = {
-                        backStack.goTo(WebViewKey(source.baseUrl))
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.Language,
-                            contentDescription = "WebView",
-                            tint = MaterialTheme.colors.onBackground,
-                        )
-                    }
 
-                    IconButton(onClick = {
-                        viewModel.onEvent(BrowseScreenEvents.ToggleMenuDropDown(true))
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.Menu,
-                            contentDescription = "Menu",
-                            tint = MaterialTheme.colors.onBackground,
+                            },
                         )
                     }
+                    TopAppBarActionButton(
+                        imageVector = Icons.Default.Language,
+                        title = "WebView",
+                        onClick = {
+                            backStack.goTo(WebViewKey(source.baseUrl))
+
+                        },
+                    )
+                    TopAppBarActionButton(
+                        imageVector = Icons.Default.Menu,
+                        title = "Menu",
+                        onClick = {
+                            viewModel.onEvent(BrowseScreenEvents.ToggleMenuDropDown(true))
+                        },
+                    )
                     DropdownMenu(
                         modifier = Modifier.background(MaterialTheme.colors.background),
                         expanded = viewModel.state.value.isMenuDropDownShown,
@@ -158,13 +126,7 @@ fun BrowserScreen() {
 
                 },
                 navigationIcon = {
-                    IconButton(onClick = { backStack.goBack() }) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "ArrowBack Icon",
-                            tint = MaterialTheme.colors.onBackground,
-                        )
-                    }
+                    TopAppBarBackButton(backStack = backStack)
 
                 }
             )

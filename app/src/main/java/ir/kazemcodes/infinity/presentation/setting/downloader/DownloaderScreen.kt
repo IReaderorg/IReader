@@ -1,4 +1,4 @@
-package ir.kazemcodes.infinity.presentation.downloader
+package ir.kazemcodes.infinity.presentation.setting.downloader
 
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons

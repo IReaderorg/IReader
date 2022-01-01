@@ -23,15 +23,20 @@ interface DataStoreHelper {
     fun readLibraryLayoutTypeStateUseCase(): Flow<Int>
 
     /**
-     * param layoutIndex is the index of Layout inside the layouts list
+     * @param layoutIndex is the index of Layout inside the layouts list
      */
     suspend fun saveLibraryLayoutTypeStateUseCase(layoutIndex: Int)
 
     fun readBrowseLayoutTypeStateUseCase(): Flow<Int>
     /**
-     * param layoutIndex is the index of Layout inside the layouts list
+     * @param layoutIndex is the index of Layout inside the layouts list
      */
     suspend fun saveBrowseLayoutTypeStateUseCase(layoutIndex: Int)
+
+
+    suspend fun saveDohPrefUseCase(dohPref : Int)
+
+    fun readDohPrefUseCase() : Flow<Int>
 
 }
 

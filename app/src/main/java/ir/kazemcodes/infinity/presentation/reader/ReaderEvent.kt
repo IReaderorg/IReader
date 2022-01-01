@@ -1,7 +1,7 @@
 package ir.kazemcodes.infinity.presentation.reader
 
-import ir.kazemcodes.infinity.domain.models.remote.Chapter
 import ir.kazemcodes.infinity.domain.models.FontType
+import ir.kazemcodes.infinity.domain.models.remote.Chapter
 
 sealed class ReaderEvent {
     data class ChangeBrightness(val brightness: Float) : ReaderEvent()

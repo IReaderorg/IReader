@@ -12,6 +12,7 @@ import java.net.InetAddress
 const val PREF_DOH_CLOUDFLARE = 1
 const val PREF_DOH_GOOGLE = 2
 const val PREF_DOH_ADGUARD = 3
+const val PREF_DOH_SHECAN = 4
 
 fun OkHttpClient.Builder.dohCloudflare() = dns(
     DnsOverHttps.Builder().client(build())
@@ -61,3 +62,17 @@ fun OkHttpClient.Builder.dohShecan() = dns(
         )
         .build()
 )
+val dnsOverHttps = listOf<Dns>(
+    Dns.Cloudflare,
+    Dns.Google,
+    Dns.AdGuard,
+    Dns.Shecan,
+    Dns.Disable
+)
+sealed class Dns(val title : String , val prefCode : Int) {
+    object Cloudflare : Dns("CloudFlare", PREF_DOH_CLOUDFLARE)
+    object Google : Dns("Google", PREF_DOH_GOOGLE)
+    object AdGuard : Dns("AdGuard", PREF_DOH_ADGUARD)
+    object Shecan : Dns("Shecan", PREF_DOH_SHECAN)
+    object Disable : Dns("Disable", 0)
+}

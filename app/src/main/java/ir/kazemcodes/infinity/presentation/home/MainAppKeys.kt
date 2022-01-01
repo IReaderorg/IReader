@@ -21,15 +21,17 @@ import ir.kazemcodes.infinity.presentation.browse.BrowseViewModel
 import ir.kazemcodes.infinity.presentation.browse.BrowserScreen
 import ir.kazemcodes.infinity.presentation.chapter_detail.ChapterDetailScreen
 import ir.kazemcodes.infinity.presentation.chapter_detail.ChapterDetailViewModel
-import ir.kazemcodes.infinity.presentation.downloader.DownloaderScreen
 import ir.kazemcodes.infinity.presentation.extension.ExtensionScreen
-import ir.kazemcodes.infinity.presentation.extension_creator.ExtensionCreatorScreen
 import ir.kazemcodes.infinity.presentation.home.ComposeKey
 import ir.kazemcodes.infinity.presentation.home.MainScreen
 import ir.kazemcodes.infinity.presentation.home.MainViewModel
 import ir.kazemcodes.infinity.presentation.library.LibraryViewModel
 import ir.kazemcodes.infinity.presentation.reader.ReaderScreenViewModel
 import ir.kazemcodes.infinity.presentation.reader.ReadingScreen
+import ir.kazemcodes.infinity.presentation.setting.SettingViewModel
+import ir.kazemcodes.infinity.presentation.setting.dns.DnsOverHttpScreen
+import ir.kazemcodes.infinity.presentation.setting.downloader.DownloaderScreen
+import ir.kazemcodes.infinity.presentation.setting.extension_creator.ExtensionCreatorScreen
 import ir.kazemcodes.infinity.presentation.webview.WebPageScreen
 import ir.kazemcodes.infinity.util.mappingApiNameToAPi
 import kotlinx.parcelize.Parcelize
@@ -41,7 +43,7 @@ data class MainScreenKey(val noArgument: String = "") : ComposeKey() {
     @ExperimentalFoundationApi
     @ExperimentalMaterialApi
     @Composable
-    override fun ScreenComposable(modifier: Modifier) {
+    override fun ScreenComposable(modifier: Modifier)  {
         MainScreen()
     }
 
@@ -184,5 +186,21 @@ data class ExtensionCreatorScreenKey(val noArgs: String = "") : ComposeKey() {
     @Composable
     override fun ScreenComposable(modifier: Modifier) {
         ExtensionCreatorScreen()
+    }
+}
+@Immutable
+@Parcelize
+data class DnsOverHttpScreenKey(val noArgs: String = "") : ComposeKey() {
+    @Composable
+    override fun ScreenComposable(modifier: Modifier) {
+        val viewModel = rememberService<SettingViewModel>()
+        DnsOverHttpScreen(viewModel)
+    }
+    override fun bindServices(serviceBinder: ServiceBinder) {
+        with(serviceBinder) {
+            add(SettingViewModel(
+                dataStoreUseCase = lookup<DataStoreUseCase>(),
+            ))
+        }
     }
 }
