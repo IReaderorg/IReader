@@ -15,55 +15,55 @@ class SourceCreator(
     private val _name: String,
     private val _supportsLatest: Boolean,
     private val _supportsMostPopular: Boolean,
-    private val _latestUpdateEndpoint: String?,
-    private val _popularEndpoint: String?,
-    private val _searchEndpoint: String?,
-    private val _chaptersEndpoint: String?,
-    private val _contentEndpoint: String?,
-    private val _popularBookSelector: String?,
-    private val _popularNextBookSelector: String?,
-    private val _linkPopularSelector: String?,
-    private val _linkAttPopularSelector: String?,
-    private val _namePopularBookSelector: String?,
-    private val _nameAttPopularBookSelector: String?,
-    private val _bookCoverPopularBookSelector: String?,
-    private val _bookAttCoverPopularBookSelector: String?,
-    private val _latestBookSelector: String?,
-    private val _latestNextBookSelector: String?,
-    private val _linkLatestSelector: String?,
-    private val _linkAttLatestSelector: String?,
-    private val _nameLatestBookSelector: String?,
-    private val _nameAttLatestBookSelector: String?,
-    private val _bookCoverLatestBookSelector: String?,
-    private val _bookCoverAttLatestBookSelector: String?,
-    private val _bookNameBookDetailSelector: String?,
-    private val _bookNameAttBookDetailSelector: String?,
-    private val _descriptionBookDetailBookSelector: String?,
-    private val _descriptionAttBookDetailBookSelector: String?,
-    private val _authorBookDetailBookSelector: String?,
-    private val _authorAttBookDetailBookSelector: String?,
-    private val _categoryBookDetailBookSelector: String?,
-    private val _categoryAttBookDetailBookSelector: String?,
-    private val _hasNextChapterSelector: String?,
-    private val _hasNextChapterValue: String?,
-    private val _chapterListSelector: String?,
-    private val _linkChaptersSelector: String?,
-    private val _linkAttChaptersSelector: String?,
-    private val _nameChaptersBookSelector: String?,
-    private val _nameAttChaptersBookSelector: String?,
-    private val _hasNextChaptersNextPageSelector: String?,
-    private val _hasNextChaptersNextPageValueSelector: String?,
-    private val _chapterPageContentSelector: String?,
-    private val _chapterPageContentAttSelector: String?,
-    private val _searchBookItemSelector: String?,
-    private val _linkSearchedBookSelector: String?,
-    private val _linkAttSearchedBookSelector: String?,
-    private val _nameSearchedBookSelector: String?,
-    private val _nameAttSearchedBookSelector: String?,
-    private val _bookCoverSearchedBookSelector: String?,
-    private val _bookCoverAttSearchedBookSelector: String?,
-    private val _hasNextSearchedBookNextPageSelector: String?,
-    private val _hasNextSearchedBookNextPageValueSelector: String?,
+    private val _latestUpdateEndpoint: String? = null,
+    private val _popularEndpoint: String? = null,
+    private val _searchEndpoint: String? = null,
+    private val _chaptersEndpoint: String? = null,
+    private val _contentEndpoint: String? = null,
+    private val _popularBookSelector: String? = null,
+    private val _popularNextBookSelector: String? = null,
+    private val _linkPopularSelector: String? = null,
+    private val _linkAttPopularSelector: String? = null,
+    private val _namePopularBookSelector: String? = null,
+    private val _nameAttPopularBookSelector: String? = null,
+    private val _bookCoverPopularBookSelector: String? = null,
+    private val _bookAttCoverPopularBookSelector: String? = null,
+    private val _latestBookSelector: String? = null,
+    private val _latestNextBookSelector: String? = null,
+    private val _linkLatestSelector: String? = null,
+    private val _linkAttLatestSelector: String? = null,
+    private val _nameLatestBookSelector: String? = null,
+    private val _nameAttLatestBookSelector: String? = null,
+    private val _bookCoverLatestBookSelector: String? = null,
+    private val _bookCoverAttLatestBookSelector: String? = null,
+    private val _bookNameBookDetailSelector: String? = null,
+    private val _bookNameAttBookDetailSelector: String? = null,
+    private val _descriptionBookDetailBookSelector: String? = null,
+    private val _descriptionAttBookDetailBookSelector: String? = null,
+    private val _authorBookDetailBookSelector: String? = null,
+    private val _authorAttBookDetailBookSelector: String? = null,
+    private val _categoryBookDetailBookSelector: String? = null,
+    private val _categoryAttBookDetailBookSelector: String? = null,
+    private val _hasNextChapterSelector: String? = null,
+    private val _hasNextChapterValue: String? = null,
+    private val _chapterListSelector: String? = null,
+    private val _linkChaptersSelector: String? = null,
+    private val _linkAttChaptersSelector: String? = null,
+    private val _nameChaptersBookSelector: String? = null,
+    private val _nameAttChaptersBookSelector: String? = null,
+    private val _hasNextChaptersNextPageSelector: String? = null,
+    private val _hasNextChaptersNextPageValueSelector: String? = null,
+    private val _chapterPageContentSelector: String? = null,
+    private val _chapterPageContentAttSelector: String? = null,
+    private val _searchBookItemSelector: String? = null,
+    private val _linkSearchedBookSelector: String? = null,
+    private val _linkAttSearchedBookSelector: String? = null,
+    private val _nameSearchedBookSelector: String? = null,
+    private val _nameAttSearchedBookSelector: String? = null,
+    private val _bookCoverSearchedBookSelector: String? = null,
+    private val _bookCoverAttSearchedBookSelector: String? = null,
+    private val _hasNextSearchedBookNextPageSelector: String? = null,
+    private val _hasNextSearchedBookNextPageValueSelector: String? = null,
 
 
     ) : ParsedHttpSource(context) {
@@ -76,6 +76,7 @@ class SourceCreator(
     override val supportsMostPopular: Boolean
         get() = _supportsMostPopular
     override val baseUrl: String = _baseUrl
+
 
     override fun fetchLatestUpdatesEndpoint(): String? = _latestUpdateEndpoint
     override fun fetchPopularEndpoint(): String? = _popularEndpoint
@@ -135,15 +136,18 @@ class SourceCreator(
 
     override fun latestUpdatesNextPageSelector(): String? = _latestNextBookSelector
 
-    override fun latestUpdatesRequest(page: Int): Request =
-        GET("$baseUrl${
-            getUrlWithoutDomain(fetchLatestUpdatesEndpoint()?.replace(pageFormat,
-                page.toString()) ?: "")
+    override fun latestUpdatesRequest(page: Int): Request {
+        val url = fetchLatestUpdatesEndpoint()?.replace(pageFormat,
+            page.toString()) ?: ""
+        return GET("$baseUrl${
+            getUrlWithoutDomain(url)
         }")
+    }
 
 
     override fun bookDetailsParse(document: Document): Book {
         val book = Book.create()
+
         val selectorBookName = _bookNameBookDetailSelector
         val attBookName = _bookNameAttBookDetailSelector
         val selectorDescription = _descriptionBookDetailBookSelector
@@ -176,8 +180,14 @@ class SourceCreator(
     }
 
 
-    override fun chapterListRequest(book: Book, page: Int): Request =
-        GET(baseUrl + getUrlWithoutDomain(fetchChaptersEndpoint() ?: ""))
+    override fun chapterListRequest(book: Book, page: Int): Request {
+
+        if (!fetchChaptersEndpoint().isNullOrEmpty()) {
+            return  GET(baseUrl + getUrlWithoutDomain(fetchChaptersEndpoint() ?: ""))
+        } else {
+            return  GET(baseUrl + getUrlWithoutDomain(book.link))
+        }
+    }
 
     override fun chapterListSelector(): String? = _chapterListSelector
 
@@ -191,6 +201,7 @@ class SourceCreator(
 
         chapter.link = selectorReturnerStringType(element, selectorLink, attLink)
         chapter.title = selectorReturnerStringType(element, selectorName, attName)
+        chapter.haveBeenRead = false
 
 
         return chapter
@@ -199,15 +210,16 @@ class SourceCreator(
     override fun chapterListNextPageSelector(): String? = _hasNextChaptersNextPageSelector
     override fun chapterListNextPageValueSelector(): String? = _hasNextChaptersNextPageValueSelector
 
+
+
     override fun pageContentParse(document: Document): ChapterPage {
 
         val contentSelector = _chapterPageContentSelector
         val contentAtt = _chapterPageContentAttSelector
         val content: MutableList<String> = mutableListOf()
+        val page = selectorReturnerListType(document, contentSelector, contentAtt)
 
-        content.addAll(selectorReturnerListType(document, contentSelector, contentAtt))
-
-        //val content = document.select("div.txt h4,p").eachText().joinToString("\n\n\n")
+        content.addAll(page)
 
         return ChapterPage(content)
     }
@@ -232,7 +244,10 @@ class SourceCreator(
     }
 
     override fun searchBookRequest(page: Int, query: String): Request =
-        GET("$baseUrl${fetchContentEndpoint()?.replace(searchQueryFormat, query)}")
+        GET("$baseUrl${
+            getUrlWithoutDomain(fetchContentEndpoint()?.replace(searchQueryFormat,
+                query) ?: "")
+        }")
 
     override fun searchBookNextPageSelector(): String? = _hasNextSearchedBookNextPageSelector
 

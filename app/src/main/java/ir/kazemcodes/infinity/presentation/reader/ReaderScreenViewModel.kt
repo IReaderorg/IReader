@@ -28,7 +28,7 @@ class ReaderScreenViewModel(
     private val chapters: List<Chapter>,
 ) : ScopedServices.Registered {
 
-    private val _state = mutableStateOf(ReaderScreenState(source=source))
+    private val _state = mutableStateOf(ReaderScreenState(source = source))
     val state: State<ReaderScreenState> = _state
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -121,9 +121,11 @@ class ReaderScreenViewModel(
                 .collect { result ->
                     when (result) {
                         is Resource.Success -> {
+
                             _state.value = state.value
                                 .copy(
-                                    chapter = state.value.chapter.copy(content = result.data?.content?: emptyList()),
+                                    chapter = state.value.chapter.copy(content = result.data?.content
+                                        ?: emptyList()),
                                     isLoading = false,
                                     error = "",
                                     isLoaded = true,
@@ -169,7 +171,6 @@ class ReaderScreenViewModel(
     }
 
     private fun toggleLastRead() {
-
         coroutineScope.launch(Dispatchers.IO) {
             chapters.filter {
                 it.lastRead

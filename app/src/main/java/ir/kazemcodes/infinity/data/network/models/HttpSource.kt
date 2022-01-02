@@ -73,8 +73,8 @@ abstract class HttpSource(context: Context) : Source, DIAware {
      */
     override fun toString() = "$name (${lang.uppercase()})"
 
-    override val pageFormat: String = "##{page}##"
-    override val searchQueryFormat: String = "##{query}##"
+    override val pageFormat: String = "{page}"
+    override val searchQueryFormat: String = "{query}"
 
 
     override fun fetchLatestUpdatesEndpoint(): String? = null

@@ -133,7 +133,7 @@ fun ReadingScreen(
                     .clickable { viewModel.onEvent(ReaderEvent.ToggleReaderMode(!state.isReaderModeEnable)) }
                     .padding(16.dp)
             ) {
-                if (!state.chapter.content.isNotEmpty()) {
+                if (state.chapter.content.isNotEmpty()) {
                     Text(
                         text = state.chapter.content.joinToString("\n\n") ?: "",
                         fontSize = viewModel.state.value.fontSize.sp,
