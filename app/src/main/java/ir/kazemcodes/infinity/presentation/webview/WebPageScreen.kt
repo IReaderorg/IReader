@@ -23,6 +23,7 @@ fun WebPageScreen(urlToRender: String) {
             loadUrl(urlToRender)
         }
 
+
     }, update = {
         it.loadUrl(urlToRender)
     }, modifier = Modifier.fillMaxSize())

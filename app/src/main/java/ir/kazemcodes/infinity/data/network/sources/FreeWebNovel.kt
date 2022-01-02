@@ -59,17 +59,19 @@ class FreeWebNovel(context: Context) : ParsedHttpSource(context) {
 
     override fun latestUpdatesNextPageSelector(): String? = "div.ul-list1"
 
+    override fun fetchLatestUpdatesEndpoint(): String? = "/latest-release-novel/$pageFormat/"
+
     override fun latestUpdatesRequest(page: Int): Request =
-        GET("$baseUrl/latest-release-novel/$page/")
+        GET("$baseUrl${fetchLatestUpdatesEndpoint()?.replace(pageFormat,page.toString())}")
 
 
     override fun bookDetailsParse(document: Document): Book {
         val book = Book.create()
         book.bookName = document.select("div.m-desc h1.tit").text()
-        book.description = document.select("div.inner").eachText().joinToString("\n\n\n")
+        book.description = document.select("div.inner").eachText()
         book.author = document.select("div.right a.a1").attr("title")
         book.category = document.select("div.item div.right a.a1").eachText().drop(1)
-            .map { value -> value.trim() }.joinToString(" - ")
+            .map { value -> value.trim() }
         book.source = name
         return book
     }
@@ -101,10 +103,12 @@ class FreeWebNovel(context: Context) : ParsedHttpSource(context) {
 
 
     override fun pageContentParse(document: Document): ChapterPage {
-        val content = document.select("div.txt h4,p").eachText().joinToString("\n\n\n")
+        val content = document.select("div.txt h4,p").eachText()
 
         return ChapterPage(content)
     }
+
+
 
     override fun searchBookSelector(): String = "div.ul-list1 div.li"
 

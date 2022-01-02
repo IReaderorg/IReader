@@ -106,7 +106,7 @@ fun ChapterDetailScreen(
                         ) {
                             Text(
                                 text = state.chapters[index].title,
-                                color = if (state.chapters[index].haveBeenRead == true) MaterialTheme.colors.onBackground.copy(
+                                color = if (state.chapters[index].haveBeenRead) MaterialTheme.colors.onBackground.copy(
                                     alpha = .4f) else MaterialTheme.colors.onBackground,
                                 style = MaterialTheme.typography.subtitle1,
                                 fontWeight = FontWeight.SemiBold,

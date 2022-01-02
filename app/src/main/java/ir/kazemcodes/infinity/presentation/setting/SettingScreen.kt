@@ -1,4 +1,4 @@
-package ir.kazemcodes.infinity.setting_feature.presentation
+package ir.kazemcodes.infinity.presentation.setting
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource

@@ -10,6 +10,9 @@ import androidx.core.content.ContextCompat
 import ir.kazemcodes.infinity.R
 import ir.kazemcodes.infinity.data.network.models.HttpSource
 import ir.kazemcodes.infinity.data.network.utils.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import okhttp3.Cookie
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.Interceptor
@@ -27,6 +30,8 @@ class CloudflareInterceptor(private val context: Context) : Interceptor,DIAware 
 
     private val executor = ContextCompat.getMainExecutor(context)
     override val di: DI by closestDI(context)
+
+    private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     private val networkHelper: NetworkHelper by di.instance<NetworkHelper>()
     /**
@@ -100,6 +105,8 @@ class CloudflareInterceptor(private val context: Context) : Interceptor,DIAware 
             webView = webview
             webView?.settings?.javaScriptEnabled
             webview.setDefaultSettings()
+
+
 
             // Avoid sending empty User-Agent, Chromium WebView will reset to default if empty
             webview.settings.userAgentString = request.header("User-Agent")

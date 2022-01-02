@@ -12,9 +12,6 @@ import org.jsoup.nodes.Element
 abstract class ParsedHttpSource(context: Context) : HttpSource(context) {
 
 
-
-
-
     /**
      * Returns a Book from the given [element]. Most sites only show the title and the url, it's
      * totally fine to fill only those two values.
@@ -41,7 +38,7 @@ abstract class ParsedHttpSource(context: Context) : HttpSource(context) {
     /**
      * Returns the Jsoup selector that returns a list of [Element] corresponding to each Book.
      */
-    abstract fun latestUpdatesSelector(): String
+    abstract fun latestUpdatesSelector(): String?
 
     /**
      * Returns a Book from the given [element]. Most sites only show the title and the url, it's
@@ -57,9 +54,7 @@ abstract class ParsedHttpSource(context: Context) : HttpSource(context) {
      */
     abstract fun latestUpdatesNextPageSelector(): String?
 
-    override fun latestUpdatesParse(response: Response): BooksPage {
-        val document = response.asJsoup()
-
+    override fun latestUpdatesParse(document: Document): BooksPage {
         val isCloudflareEnable = document.body().allElements.text().contains(CLOUDFLARE_LOG)
 
         val books = document.select(latestUpdatesSelector()).map { element ->
@@ -71,6 +66,10 @@ abstract class ParsedHttpSource(context: Context) : HttpSource(context) {
         } != null
 
         return BooksPage(books, hasNextPage,isCloudflareEnable, document.body().allElements.text())
+    }
+
+    override fun latestUpdatesParse(response: Response): BooksPage {
+        return  latestUpdatesParse(response.asJsoup())
     }
 
     /**
@@ -87,7 +86,7 @@ abstract class ParsedHttpSource(context: Context) : HttpSource(context) {
     /**
      * Returns the Jsoup selector that returns a list of [Element] corresponding to each chapter.
      */
-    abstract fun chapterListSelector(): String
+    abstract fun chapterListSelector(): String?
 
     /**
      * Returns a chapter from the given element.
@@ -97,6 +96,8 @@ abstract class ParsedHttpSource(context: Context) : HttpSource(context) {
     abstract fun chapterFromElement(element: Element): Chapter
 
     abstract fun chapterListNextPageSelector(): String?
+
+    open fun chapterListNextPageValueSelector(): String? = null
 
     override fun chapterListParse(response: Response): ChaptersPage {
         val document = response.asJsoup()
@@ -132,4 +133,6 @@ abstract class ParsedHttpSource(context: Context) : HttpSource(context) {
 
         return BooksPage(books, hasNextPage)
     }
+
+    open fun searchBookNextValuePageSelector(): String? = null
 }

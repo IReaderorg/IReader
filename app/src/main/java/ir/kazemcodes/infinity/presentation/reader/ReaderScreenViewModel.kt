@@ -123,8 +123,7 @@ class ReaderScreenViewModel(
                         is Resource.Success -> {
                             _state.value = state.value
                                 .copy(
-                                    chapter = state.value.chapter.copy(content = result.data?.content
-                                        ?: "Empty Chapter"),
+                                    chapter = state.value.chapter.copy(content = result.data?.content?: emptyList()),
                                     isLoading = false,
                                     error = "",
                                     isLoaded = true,

@@ -3,7 +3,6 @@ package ir.kazemcodes.infinity.data.network.sources
 import android.content.Context
 import ir.kazemcodes.infinity.api_feature.network.GET
 import ir.kazemcodes.infinity.api_feature.network.POST
-import ir.kazemcodes.infinity.data.network.models.BooksPage
 import ir.kazemcodes.infinity.data.network.models.ChapterPage
 import ir.kazemcodes.infinity.data.network.models.ParsedHttpSource
 import ir.kazemcodes.infinity.domain.models.remote.Book
@@ -13,7 +12,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
-import ru.gildor.coroutines.okhttp.await
 
 class WuxiaWorldApi(context: Context) : ParsedHttpSource(context) {
 
@@ -27,9 +25,9 @@ class WuxiaWorldApi(context: Context) : ParsedHttpSource(context) {
 
     override val client: OkHttpClient = super.client
 
-    override suspend fun fetchLatestUpdates(page: Int): BooksPage {
-        return latestUpdatesParse(client.newCall(latestUpdatesRequest(page)).await())
-    }
+//    override suspend fun fetchLatestUpdates(page: Int): BooksPage {
+//        return latestUpdatesParse(client.newCall(latestUpdatesRequest(page)).await())
+//    }
 
     override fun headersBuilder(): Headers.Builder = Headers.Builder().apply {
         add(
@@ -49,6 +47,8 @@ class WuxiaWorldApi(context: Context) : ParsedHttpSource(context) {
 
     override fun popularBookRequest(page: Int): Request =
         GET("$baseUrl/novel-list/?m_orderby=trending",headers)
+
+
 
     override fun popularBookFromElement(element: Element): Book {
         val book: Book = Book.create()
@@ -72,8 +72,10 @@ class WuxiaWorldApi(context: Context) : ParsedHttpSource(context) {
 
     override fun latestUpdatesNextPageSelector(): String? = "div.nav-previous"
 
+    override fun fetchLatestUpdatesEndpoint(): String?  = "/novel-list/page/$pageFormat/?m_orderby=latest"
+
     override fun latestUpdatesRequest(page: Int): Request =
-        GET("$baseUrl/novel-list/page/$page/?m_orderby=latest",headers)
+        GET("$baseUrl${fetchLatestUpdatesEndpoint()?.replace(pageFormat,page.toString())},headers")
 
 
 
@@ -82,11 +84,10 @@ class WuxiaWorldApi(context: Context) : ParsedHttpSource(context) {
         val book = Book.create()
         book.bookName = document.select("div.post-title h1").text()
         book.description =
-            document.select("div.description-summary p").eachText().joinToString("\n\n\n")
+            document.select("div.description-summary p").eachText()
         book.author = document.select("div.author-content a").text()
         book.category =
             document.select("div.genres-content a").eachText().drop(1).map { value -> value.trim() }
-                .joinToString(" - ")
         book.source = name
         return book
     }
@@ -105,6 +106,7 @@ class WuxiaWorldApi(context: Context) : ParsedHttpSource(context) {
 
     override fun chapterFromElement(element: Element): Chapter {
         val chapter = Chapter.create()
+
         chapter.title = element.select("a").text()
         chapter.link = element.select("a").attr("href")
 
@@ -115,7 +117,7 @@ class WuxiaWorldApi(context: Context) : ParsedHttpSource(context) {
 
 
     override fun pageContentParse(document: Document): ChapterPage {
-        val content = document.select("div.txt h3,p").eachText().joinToString("\n\n\n")
+        val content = document.select("div.txt h3,p").eachText()
 
         return ChapterPage(content)
     }

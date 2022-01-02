@@ -10,7 +10,7 @@ data class Chapter(
     var bookName: String? = null,
     var link: String,
     var title: String,
-    var content: String? = null,
+    var content: List<String> = emptyList(),
     var dateUploaded: String? = null,
     var haveBeenRead: Boolean = false,
     var lastRead: Boolean = false,

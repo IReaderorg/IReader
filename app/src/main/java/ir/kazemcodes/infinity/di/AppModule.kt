@@ -64,7 +64,7 @@ class AppModule {
         bookDao: BookDao,
         chapterDao: ChapterDao,
         context: Context,
-        remoteUseCase: RemoteUseCase
+        remoteUseCase: RemoteUseCase,
     ): Repository {
         return RepositoryImpl(
             bookDao = bookDao,
@@ -167,8 +167,6 @@ class AppModule {
     fun providesNetworkHelper(context: Context): NetworkHelper {
         return NetworkHelper(context = context)
     }
-
-
 
 
 }

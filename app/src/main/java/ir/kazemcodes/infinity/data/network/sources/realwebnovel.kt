@@ -35,6 +35,8 @@ class RealWebNovelApi(context: Context ) : ParsedHttpSource(context) {
     override val supportsMostPopular: Boolean
         get() = true
 
+
+
     override fun popularBookSelector(): String = "div.page-item-detail"
 
     override fun popularBookNextPageSelector(): String? = "div.nav-previous"
@@ -64,18 +66,19 @@ class RealWebNovelApi(context: Context ) : ParsedHttpSource(context) {
 
     override fun latestUpdatesNextPageSelector(): String? = "div.nav-previous"
 
+    override fun fetchLatestUpdatesEndpoint(): String = "/manga-2/page/$pageFormat/?m_orderby=latest"
+
     override fun latestUpdatesRequest(page: Int): Request =
-        GET("$baseUrl/manga-2/page/$page/?m_orderby=latest")
+        GET("$baseUrl${fetchLatestUpdatesEndpoint().replace(pageFormat,page.toString())}")
 
 
     override fun bookDetailsParse(document: Document): Book {
         val book = Book.create()
         book.bookName = document.select("div.post-title h1").text()
-        book.description = document.select("div.summary__content").eachText().joinToString("\n\n\n")
+        book.description = document.select("div.summary__content").eachText()
         book.author = document.select("div.author-content a").text()
         book.category =
             document.select("div.genres-content a").eachText().drop(1).map { value -> value.trim() }
-                .joinToString(" - ")
         book.source = name
         return book
     }
@@ -102,11 +105,14 @@ class RealWebNovelApi(context: Context ) : ParsedHttpSource(context) {
     override fun chapterListNextPageSelector(): String? = null
 
 
+
     override fun pageContentParse(document: Document): ChapterPage {
-        val content = document.select("div.reading-content h4,p").eachText().joinToString("\n\n\n")
+        val content = document.select("div.reading-content h4,p").eachText()
 
         return ChapterPage(content)
     }
+
+
 
     override fun searchBookSelector(): String = "div.c-tabs-item__content"
 

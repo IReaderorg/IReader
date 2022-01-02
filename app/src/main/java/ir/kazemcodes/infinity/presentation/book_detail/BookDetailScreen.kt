@@ -266,7 +266,7 @@ fun BookDetailScreenLoadedComposable(
                 color = MaterialTheme.colors.onBackground,
                 style = MaterialTheme.typography.h6
             )
-            ExpandingText(text = book.description ?: "Unknown")
+            ExpandingText(text = book.description.joinToString("\n\n") ?: "Unknown")
             Divider(
                 modifier = modifier
                     .fillMaxWidth()

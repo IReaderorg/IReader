@@ -20,9 +20,9 @@ data class Book(
 
     var translator: String? = "",
 
-    var description: String? = "",
+    var description: List<String> = emptyList(),
 
-    var category: String? = "",
+    var category: List<String> = emptyList(),
 
     var status: Int = 0,
 

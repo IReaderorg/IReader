@@ -16,7 +16,7 @@ class GetRemoteReadingContentUseCase {
             emit(Resource.Loading())
             Timber.d("Timber: GetRemoteReadingContentUseCase was Called")
             val content = source.fetchContent(chapter)
-            if (content.content.length < 10 || content.content.contains(CLOUDFLARE_LOG)) {
+            if (content.content.isNotEmpty() || content.content.contains(CLOUDFLARE_LOG)) {
                 emit(Resource.Error<ChapterPage>(message = "Can't Get The Chapter Content."))
             } else {
                 Timber.d("Timber: GetRemoteReadingContentUseCase was Finished Successfully")

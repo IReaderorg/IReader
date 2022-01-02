@@ -1,17 +1,18 @@
 package ir.kazemcodes.infinity.data.network.utils
 
 import android.content.Context
+import android.webkit.WebView
 import ir.kazemcodes.infinity.data.network.models.*
 import ir.kazemcodes.infinity.data.network.utils.intercepter.CloudflareInterceptor
 import ir.kazemcodes.infinity.domain.use_cases.datastore.DataStoreUseCase
 import ir.kazemcodes.infinity.util.Resource
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
+import ir.kazemcodes.infinity.util.getHtml
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 import okhttp3.Cache
 import okhttp3.OkHttpClient
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.android.closestDI
@@ -21,12 +22,12 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 
 
-class NetworkHelper(context: Context): DIAware {
+class NetworkHelper(private val context: Context): DIAware {
 
     override val di: DI by closestDI(context)
 
     val datastore : DataStoreUseCase by di.instance<DataStoreUseCase>()
-    private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     private val cacheDir = File(context.cacheDir, "network_cache")
 
@@ -71,6 +72,36 @@ class NetworkHelper(context: Context): DIAware {
         client.newBuilder()
             .addInterceptor(CloudflareInterceptor(context))
             .build()
+    }
+
+    suspend fun getHtmlFromWebView(url: String): Document {
+        val webView = WebView(context)
+        webView.settings.javaScriptEnabled
+        webView.setDefaultSettings()
+        webView.loadUrl(url)
+        var docs: Document = Document("")
+
+        delay(5000)
+
+        webView.webViewClient = object : WebViewClientCompat() {
+            override fun onPageFinished(view: WebView, url: String) {
+                coroutineScope.launch(Dispatchers.Main) {
+                    docs = Jsoup.parse(webView.getHtml())
+                    //Timber.e(docs.toString())
+                }
+            }
+            override fun onReceivedErrorCompat(
+                view: WebView,
+                errorCode: Int,
+                description: String?,
+                failingUrl: String,
+                isMainFrame: Boolean,
+            ) {
+            }
+        }
+        docs = Jsoup.parse(webView.getHtml())
+        Timber.e(docs.toString())
+        return docs
     }
 
 }

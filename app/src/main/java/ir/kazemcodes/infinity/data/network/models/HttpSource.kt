@@ -1,14 +1,12 @@
 package ir.kazemcodes.infinity.data.network.models
 
 import android.content.Context
+import android.webkit.WebView
 import ir.kazemcodes.infinity.api_feature.network.GET
 import ir.kazemcodes.infinity.data.network.utils.NetworkHelper
 import ir.kazemcodes.infinity.domain.models.remote.Book
 import ir.kazemcodes.infinity.domain.models.remote.Chapter
-import okhttp3.Headers
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Response
+import okhttp3.*
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.kodein.di.*
@@ -22,13 +20,13 @@ import java.util.*
 /**
  * A simple implementation for sources from a website.
  */
-abstract class HttpSource(context: Context) : Source,DIAware {
+abstract class HttpSource(context: Context) : Source, DIAware {
+
 
 
     final override val di: DI by closestDI(context)
 
-     protected val  network: NetworkHelper by di.instance<NetworkHelper>()
-
+    protected val network: NetworkHelper by di.instance<NetworkHelper>()
 
 
     /**
@@ -41,6 +39,8 @@ abstract class HttpSource(context: Context) : Source,DIAware {
      */
     open val client: OkHttpClient
         get() = network.client
+
+    val webView = WebView(context)
 
 
     /**
@@ -61,6 +61,7 @@ abstract class HttpSource(context: Context) : Source,DIAware {
 
     }
 
+
     /**
      * Version id used to generate the source id. If the site completely changes and urls are
      * incompatible, you may increase this value and it'll be considered as a new source.
@@ -71,6 +72,20 @@ abstract class HttpSource(context: Context) : Source,DIAware {
      * Visible name of the source.
      */
     override fun toString() = "$name (${lang.uppercase()})"
+
+    override val pageFormat: String = "##{page}##"
+    override val searchQueryFormat: String = "##{query}##"
+
+
+    override fun fetchLatestUpdatesEndpoint(): String? = null
+
+    override fun fetchPopularEndpoint(): String? = null
+
+    override fun fetchSearchBookEndpoint(): String? = null
+
+    override fun fetchChaptersEndpoint(): String? = null
+
+    override fun fetchContentEndpoint(): String? = null
 
     /**
      * Returns a page with a list of book. Normally it's not needed to
@@ -85,7 +100,7 @@ abstract class HttpSource(context: Context) : Source,DIAware {
     /**
      * Returns the Jsoup selector that returns a list of [Element] corresponding to each Book.
      */
-    abstract fun popularBookSelector(): String
+    abstract fun popularBookSelector(): String?
 
     /**
      * Returns the Jsoup selector that returns the <a> tag linking to the next page, or null if
@@ -109,15 +124,21 @@ abstract class HttpSource(context: Context) : Source,DIAware {
     abstract fun popularBookParse(response: Response): BooksPage
 
 
-
     /**
      * Returns a page with a list of latest Book updates.
      *
      * @param page the page number to retrieve.
      */
     override suspend fun fetchLatestUpdates(page: Int): BooksPage {
-        return latestUpdatesParse(client.newCall(latestUpdatesRequest(page)).await())
+        var books =  latestUpdatesParse(client.newCall(latestUpdatesRequest(page)).await())
+        if (books.isCloudflareEnabled) {
+            books = latestUpdatesParse(network.getHtmlFromWebView(baseUrl + fetchLatestUpdatesEndpoint()))
+        }
+
+        return books
     }
+
+
 
     /**
      * Returns the request for latest  Books given the page.
@@ -125,6 +146,7 @@ abstract class HttpSource(context: Context) : Source,DIAware {
      * @param page the page number to retrieve.
      */
     abstract fun latestUpdatesRequest(page: Int): Request
+
 
     /**
      * Parses the response from the site and returns a [BooksPage] object.
@@ -134,12 +156,20 @@ abstract class HttpSource(context: Context) : Source,DIAware {
     abstract fun latestUpdatesParse(response: Response): BooksPage
 
     /**
+     * Parses the document from the site and returns a [BooksPage] object.
+     *
+     * @param response the response from the site.
+     */
+    abstract fun latestUpdatesParse(document: Document): BooksPage
+
+    /**
      * Returns a book. Normally it's not needed to
      * override this method.
      *
      * @param page the page number to retrieve.
      */
     override suspend fun fetchBook(book: Book): Book {
+
         return bookDetailsParse(client.newCall(bookDetailsRequest(book)).await())
     }
 
@@ -168,7 +198,7 @@ abstract class HttpSource(context: Context) : Source,DIAware {
      * @param book the chapters to retrieve.
      */
     override suspend fun fetchChapters(book: Book, page: Int): ChaptersPage {
-        return chapterListParse(client.newCall(chapterListRequest(book,page)).await())
+        return chapterListParse(client.newCall(chapterListRequest(book, page)).await())
     }
 
     /**
@@ -231,13 +261,13 @@ abstract class HttpSource(context: Context) : Source,DIAware {
      * @param query the search query to retrieve.
      */
     override suspend fun fetchSearchBook(page: Int, query: String): BooksPage {
-        return searchBookParse(client.newCall(searchBookRequest(page,query)).await())
+        return searchBookParse(client.newCall(searchBookRequest(page, query)).await())
     }
 
     /**
      * Returns the Jsoup selector that returns a list of [Element] corresponding to each Book.
      */
-    abstract fun searchBookSelector(): String
+    abstract fun searchBookSelector(): String?
 
     /**
      * Returns a Book from the given [element]. Most sites only show the title and the url, it's
@@ -298,8 +328,6 @@ abstract class HttpSource(context: Context) : Source,DIAware {
      */
     open fun prepareNewChapter(chapter: Chapter, book: Book) {
     }
-
-
 
 
     protected open fun headersBuilder() = Headers.Builder().apply {

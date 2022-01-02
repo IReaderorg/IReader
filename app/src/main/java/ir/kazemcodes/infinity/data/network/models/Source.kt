@@ -18,6 +18,40 @@ interface Source {
     val supportsLatest: Boolean
 
     val supportsMostPopular: Boolean
+    val pageFormat : String
+    val searchQueryFormat: String
+
+    /**
+     *return the end point for the fetch latest books updates feature,
+     * if there is not endpoint just return null
+     * note: use "##{page}##" in the endpoint instead of page number
+     */
+    fun fetchLatestUpdatesEndpoint(): String?
+
+    /**
+     *return the end point for the  fetch Popular books feature,
+     * if there is not endpoint just return null
+     * note: use "##{page}##" in the endpoint instead of page number
+     */
+    fun fetchPopularEndpoint() : String?
+    /**
+     *return the end point for the fetch Search feature,
+     * if there is not endpoint just return null
+     * note: use "##{page}##" in the endpoint instead of page number
+     */
+    fun fetchSearchBookEndpoint() : String?
+    /**
+     *return the end point for the fetch Chapters books feature,
+     * if there is not endpoint just return null
+     * note: use "##{page}##" in the endpoint instead of page number
+     */
+    fun fetchChaptersEndpoint() : String?
+    /**
+     *return the end point for the fetch Content  books feature,
+     * if there is not endpoint just return null
+     * note: use "##{page}##" in the endpoint instead of page number
+     */
+    fun fetchContentEndpoint() : String?
 
     /**
      * Returns a page with a list of latest books updates and weather is has next page or not.

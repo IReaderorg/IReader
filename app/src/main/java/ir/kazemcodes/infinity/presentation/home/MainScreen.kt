@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import com.zhuinden.simplestackcomposeintegration.services.rememberService
 import ir.kazemcodes.infinity.presentation.extension.ExtensionScreen
 import ir.kazemcodes.infinity.presentation.library.LibraryScreen
-import ir.kazemcodes.infinity.setting_feature.presentation.SettingScreen
+import ir.kazemcodes.infinity.presentation.setting.SettingScreen
 
 
 sealed class BottomNavigationScreens(
