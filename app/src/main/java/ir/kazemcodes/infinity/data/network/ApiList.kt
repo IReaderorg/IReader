@@ -19,7 +19,7 @@ class Extensions(context: Context) {
         sources.add(source)
     }
     init {
-        val source = SourceCreator(
+        val realwebnovel = SourceCreator(
             context = context,
             _name = "RealWebNovel",
             _baseUrl = "https://readwebnovels.net",
@@ -61,6 +61,6 @@ class Extensions(context: Context) {
             _bookCoverAttSearchedBookSelector = "src",
             _searchEndpoint = "/?s={query}&post_type=wp-manga&op=&author=&artist=&release=&adult=",
         )
-        addSource(source)
+        addSource(realwebnovel)
     }
 }

@@ -79,9 +79,9 @@ class ReaderScreenViewModel(
                 .collect { result ->
                     when (result) {
                         is Resource.Success -> {
-                            if (result.data != null) {
+                            if (result.data != null && result.data.content.joinToString().length > 10) {
                                 _state.value = state.value.copy(
-                                    chapter = result.data,
+                                    chapter = chapter.copy(content = result.data.content),
                                     isLoading = false,
                                     isLoaded = true,
                                     error = ""
@@ -90,7 +90,7 @@ class ReaderScreenViewModel(
                                     toggleLastRead()
                                 }
                             } else {
-                                if (state.value.chapter.content.isNullOrEmpty()) {
+                                if (state.value.chapter.content.joinToString().length < 10) {
                                     getReadingContentRemotely()
                                 }
                             }

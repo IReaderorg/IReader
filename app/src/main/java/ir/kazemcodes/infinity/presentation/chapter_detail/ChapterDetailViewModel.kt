@@ -47,7 +47,6 @@ class ChapterDetailViewModel(
     private fun getLocalChapters() {
         localUseCase.getLocalChaptersByBookNameByBookNameUseCase(bookName = book.bookName)
             .onEach { result ->
-
                 when (result) {
                     is Resource.Success -> {
                         if (!result.data.isNullOrEmpty()) {
