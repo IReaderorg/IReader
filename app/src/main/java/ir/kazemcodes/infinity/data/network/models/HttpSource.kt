@@ -73,19 +73,42 @@ abstract class HttpSource(context: Context) : Source, DIAware {
      */
     override fun toString() = "$name (${lang.uppercase()})"
 
-    override val pageFormat: String = "{page}"
-    override val searchQueryFormat: String = "{query}"
+    val pageFormat: String = "{page}"
+    val searchQueryFormat: String = "{query}"
 
 
-    override fun fetchLatestUpdatesEndpoint(): String? = null
+    /**
+     *return the end point for the fetch latest books updates feature,
+     * if there is not endpoint just return null
+     * note: use "{page}" in the endpoint instead of page number
+     */
+    abstract fun fetchLatestUpdatesEndpoint(): String?
 
-    override fun fetchPopularEndpoint(): String? = null
-
-    override fun fetchSearchBookEndpoint(): String? = null
-
-    override fun fetchChaptersEndpoint(): String? = null
-
-    override fun fetchContentEndpoint(): String? = null
+    /**
+     *return the end point for the  fetch Popular books feature,
+     * if there is not endpoint just return null
+     * note: use "{page}" in the endpoint instead of page number
+     */
+    abstract fun fetchPopularEndpoint() : String?
+    /**
+     *return the end point for the fetch Search feature,
+     * if there is not endpoint just return null
+     * note: use "{page}" in the endpoint instead of page number
+     */
+    abstract fun fetchSearchBookEndpoint() : String?
+    /**
+     *return the end point for the fetch Chapters books feature,
+     * if there is not endpoint just return null
+     * note: use "{page}" in the endpoint instead of page number
+     * note: use "{query}" in the endpoint instead of query
+     */
+    abstract fun fetchChaptersEndpoint() : String?
+    /**
+     *return the end point for the fetch Content  books feature,
+     * if there is not endpoint just return null
+     * note: use "{page}" in the endpoint instead of page number
+     */
+    abstract fun fetchContentEndpoint() : String?
 
     /**
      * Returns a page with a list of book. Normally it's not needed to

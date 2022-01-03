@@ -40,6 +40,7 @@ class WuxiaWorldApi(context: Context) : ParsedHttpSource(context) {
 
     override val supportsMostPopular: Boolean
         get() = false
+    override val supportSearch: Boolean = true
 
     override fun popularBookSelector(): String = "div.page-item-detail"
 
@@ -73,6 +74,13 @@ class WuxiaWorldApi(context: Context) : ParsedHttpSource(context) {
     override fun latestUpdatesNextPageSelector(): String? = "div.nav-previous"
 
     override fun fetchLatestUpdatesEndpoint(): String?  = "/novel-list/page/$pageFormat/?m_orderby=latest"
+    override fun fetchPopularEndpoint(): String? = "/novel-list/?m_orderby=trending"
+
+    override fun fetchSearchBookEndpoint(): String? = "/?s=$searchQueryFormat&post_type=wp-manga&op=&author=&artist=&release=&adult="
+
+    override fun fetchChaptersEndpoint(): String? = null
+
+    override fun fetchContentEndpoint(): String? = null
 
     override fun latestUpdatesRequest(page: Int): Request =
         GET("$baseUrl${fetchLatestUpdatesEndpoint()?.replace(pageFormat,page.toString())},headers")

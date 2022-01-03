@@ -15,6 +15,7 @@ class SourceCreator(
     private val _name: String,
     private val _supportsLatest: Boolean,
     private val _supportsMostPopular: Boolean,
+    private val _supportsSearch: Boolean,
     private val _latestUpdateEndpoint: String? = null,
     private val _popularEndpoint: String? = null,
     private val _searchEndpoint: String? = null,
@@ -77,6 +78,8 @@ class SourceCreator(
         get() = _supportsMostPopular
     override val baseUrl: String = _baseUrl
 
+    override val supportSearch: Boolean  = _supportsSearch
+
 
     override fun fetchLatestUpdatesEndpoint(): String? = _latestUpdateEndpoint
     override fun fetchPopularEndpoint(): String? = _popularEndpoint
@@ -127,7 +130,7 @@ class SourceCreator(
         val selectorCover = _bookCoverLatestBookSelector
         val attCover = _bookCoverAttLatestBookSelector
 
-        book.link = selectorReturnerStringType(element, selectorLink, attLink)
+        book.link = baseUrl + getUrlWithoutDomain(selectorReturnerStringType(element, selectorLink, attLink))
         book.bookName = selectorReturnerStringType(element, selectorName, attName)
         book.coverLink = selectorReturnerStringType(element, selectorCover, attCover)
 
@@ -245,7 +248,7 @@ class SourceCreator(
 
     override fun searchBookRequest(page: Int, query: String): Request =
         GET("$baseUrl${
-            getUrlWithoutDomain(fetchContentEndpoint()?.replace(searchQueryFormat,
+            getUrlWithoutDomain(fetchSearchBookEndpoint()?.replace(searchQueryFormat,
                 query) ?: "")
         }")
 

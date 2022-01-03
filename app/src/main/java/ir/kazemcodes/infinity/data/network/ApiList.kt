@@ -4,15 +4,13 @@ import android.content.Context
 import ir.kazemcodes.infinity.data.network.models.Source
 import ir.kazemcodes.infinity.data.network.models.SourceCreator
 import ir.kazemcodes.infinity.data.network.sources.FreeWebNovel
-import ir.kazemcodes.infinity.data.network.sources.WuxiaWorldApi
 
 
 
 class Extensions(context: Context) {
     private val sources = mutableListOf<Source>(
         FreeWebNovel(context),
-        WuxiaWorldApi(context),
-        //RealWebNovelApi(context)
+        //WuxiaWorldApi(context),
     )
     fun getSources() : List<Source>{
         return sources
@@ -28,6 +26,7 @@ class Extensions(context: Context) {
             _lang = "en",
             _supportsLatest = true,
             _supportsMostPopular = true,
+            _supportsSearch = true,
             _popularBookSelector = "div.page-item-detail",
             _popularNextBookSelector = "div.nav-previous",
             _popularEndpoint = "/manga-2/page/{page}/?m_orderby=trending",
@@ -57,12 +56,10 @@ class Extensions(context: Context) {
             _searchBookItemSelector = "div.c-tabs-item__content",
             _linkSearchedBookSelector = "div.tab-thumb a",
             _linkAttChaptersSelector = "href",
-            _nameSearchedBookSelector = "h4",
+            _nameSearchedBookSelector = "h3.h4 a",
             _bookCoverSearchedBookSelector = "div.tab-thumb a img",
             _bookCoverAttSearchedBookSelector = "src",
-            _searchEndpoint = "/?s=##{query}##&post_type=wp-manga",
-
-
+            _searchEndpoint = "/?s={query}&post_type=wp-manga&op=&author=&artist=&release=&adult=",
         )
         addSource(source)
     }

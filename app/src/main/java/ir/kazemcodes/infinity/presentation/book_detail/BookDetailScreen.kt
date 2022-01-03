@@ -30,6 +30,7 @@ import ir.kazemcodes.infinity.presentation.book_detail.components.CardTileCompos
 import ir.kazemcodes.infinity.presentation.book_detail.components.DotsFlashing
 import ir.kazemcodes.infinity.presentation.book_detail.components.ExpandingText
 import ir.kazemcodes.infinity.presentation.screen.components.BookImageComposable
+import ir.kazemcodes.infinity.util.getUrlWithoutDomain
 
 
 @Composable
@@ -114,7 +115,8 @@ fun BookDetailScreenLoadedComposable(
             contentColor = MaterialTheme.colors.onBackground,
             elevation = 0.dp,
             actions = {
-                IconButton(onClick = { backStack.goTo(WebViewKey(source.baseUrl + book.link)) }) {
+                /** ERROR: This may cause error later: mismatch between baseurl and book link**/
+                IconButton(onClick = { backStack.goTo(WebViewKey(source.baseUrl + getUrlWithoutDomain(book.link))) }) {
                     Icon(
                         imageVector = Icons.Default.Language,
                         contentDescription = "WebView",

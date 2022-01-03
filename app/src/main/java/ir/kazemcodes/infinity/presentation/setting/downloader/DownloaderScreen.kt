@@ -11,6 +11,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.work.WorkManager
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import ir.kazemcodes.infinity.data.network.utils.toast
+import ir.kazemcodes.infinity.presentation.reusable_composable.NotImplementedText
 import ir.kazemcodes.infinity.service.DownloadService
 
 @Composable
@@ -55,6 +56,7 @@ fun DownloaderScreen() {
             }
         )
     }) {
+        NotImplementedText()
 
     }
 

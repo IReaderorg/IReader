@@ -114,9 +114,9 @@ fun ChapterDetailScreen(
                                 modifier = Modifier.weight(8f)
                             )
                             Text(modifier = Modifier.weight(2f),
-                                text = if (state.chapters[index].content != null) "Cached" else "",
+                                text = if (state.chapters[index].content.isNotEmpty()) "Cached" else "",
                                 fontStyle = FontStyle.Italic,
-                                color = if (state.chapters[index].haveBeenRead == true) MaterialTheme.colors.onBackground.copy(
+                                color = if (state.chapters[index].haveBeenRead) MaterialTheme.colors.onBackground.copy(
                                     alpha = .4f) else MaterialTheme.colors.onBackground,
                                 fontWeight = FontWeight.SemiBold,
                                 style = MaterialTheme.typography.subtitle2

@@ -24,6 +24,8 @@ class FreeWebNovel(context: Context) : ParsedHttpSource(context) {
 
     override val client: OkHttpClient = super.client
 
+    override val supportSearch: Boolean = true
+
     override fun headersBuilder(): Headers.Builder = Headers.Builder().apply {
         add(
             "User-Agent",
@@ -60,6 +62,13 @@ class FreeWebNovel(context: Context) : ParsedHttpSource(context) {
     override fun latestUpdatesNextPageSelector(): String? = "div.ul-list1"
 
     override fun fetchLatestUpdatesEndpoint(): String? = "/latest-release-novel/$pageFormat/"
+    override fun fetchPopularEndpoint(): String? = "/most-popular-novel/"
+
+    override fun fetchSearchBookEndpoint(): String? = "/search?searchkey=$searchQueryFormat"
+
+    override fun fetchChaptersEndpoint(): String? = null
+
+    override fun fetchContentEndpoint(): String? = null
 
     override fun latestUpdatesRequest(page: Int): Request =
         GET("$baseUrl${fetchLatestUpdatesEndpoint()?.replace(pageFormat,page.toString())}")
