@@ -15,6 +15,13 @@ Infinity is a free and open source applicaiton for Android.
 - Suppot the offline reading
 
 
+## Not Supported right now but working on it:
+
+- Creating and editing source in the applicaiton.
+- download manager(you can download the books but there isn't a good download manager yet).
+
+
+
 
 ## Screenshots :camera:
 
