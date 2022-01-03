@@ -6,7 +6,7 @@ Infinity is a free and open source applicaiton for Android.
 
 | Build | Support Server |
 |-------|---------|
-| 0.1.1.beta | [Discord Server](https://discord.gg/HBU6zD8c5v) |
+| 0.1.2 beta | [Discord Server](https://discord.gg/HBU6zD8c5v) |
 
 ## Features :sparkles:
 
