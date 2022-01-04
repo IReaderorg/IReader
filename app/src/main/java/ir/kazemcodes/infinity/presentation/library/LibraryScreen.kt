@@ -1,6 +1,5 @@
 package ir.kazemcodes.infinity.presentation.library
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -30,8 +29,9 @@ import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarTitle
 import kotlinx.coroutines.launch
 
 
-@ExperimentalMaterialApi
-@ExperimentalFoundationApi
+
+
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun LibraryScreen(
 ) {
@@ -144,7 +144,7 @@ fun LibraryScreen(
             if (state.books.isNotEmpty()) {
                 Box(modifier = Modifier.padding(bottom = 50.dp)) {
                     LayoutComposable(
-                        books = if (state.searchedBook.isEmpty()) state.books else state.searchedBook,
+                        books = if (!state.inSearchMode) state.books else state.searchedBook,
                         layout = state.layout,
                     )
                 }

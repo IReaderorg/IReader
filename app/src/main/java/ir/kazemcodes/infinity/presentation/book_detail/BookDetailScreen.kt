@@ -30,6 +30,8 @@ import ir.kazemcodes.infinity.presentation.book_detail.components.CardTileCompos
 import ir.kazemcodes.infinity.presentation.book_detail.components.DotsFlashing
 import ir.kazemcodes.infinity.presentation.book_detail.components.ExpandingText
 import ir.kazemcodes.infinity.presentation.screen.components.BookImageComposable
+import ir.kazemcodes.infinity.util.formatBasedOnDot
+import ir.kazemcodes.infinity.util.formatList
 import ir.kazemcodes.infinity.util.getUrlWithoutDomain
 
 
@@ -247,7 +249,7 @@ fun BookDetailScreenLoadedComposable(
                         style = MaterialTheme.typography.subtitle2,
                     )
                     Text(
-                        text = "Genre: ${book.category}",
+                        text = "Genre: ${book.category.formatList()}",
                         color = MaterialTheme.colors.onBackground.copy(alpha = .5f),
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.subtitle2,
@@ -268,7 +270,7 @@ fun BookDetailScreenLoadedComposable(
                 color = MaterialTheme.colors.onBackground,
                 style = MaterialTheme.typography.h6
             )
-            ExpandingText(text = book.description.joinToString("\n\n") ?: "Unknown")
+            ExpandingText(text = book.description.formatBasedOnDot() ?: "Unknown")
             Divider(
                 modifier = modifier
                     .fillMaxWidth()

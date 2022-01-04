@@ -32,7 +32,8 @@ import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarTitle
 import ir.kazemcodes.infinity.util.isScrolledToTheEnd
 
 
-@ExperimentalFoundationApi
+
+
 @Composable
 fun BrowserScreen() {
     val viewModel = rememberService<BrowseViewModel>()

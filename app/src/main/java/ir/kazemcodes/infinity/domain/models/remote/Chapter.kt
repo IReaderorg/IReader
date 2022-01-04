@@ -38,5 +38,8 @@ data class Chapter(
             chapterId = id
         )
     }
+    fun isChapterNotEmpty() : Boolean {
+        return content.joinToString().length > 10
+    }
 
 }

@@ -27,6 +27,8 @@ interface ChapterDao {
         chapterEntities: List<ChapterEntity>,
     )
 
+//    @Query("SELECT * FROM chapter_entity WHERE bookName= :bookName")
+//    fun getChapters(bookName: String): Flow<List<ChapterEntity>>
     @Query("SELECT * FROM chapter_entity WHERE bookName= :bookName")
     fun getChapters(bookName: String): Flow<List<ChapterEntity>>
 

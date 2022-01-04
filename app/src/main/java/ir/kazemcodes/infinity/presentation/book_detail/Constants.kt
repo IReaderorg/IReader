@@ -7,7 +7,7 @@ object Constants {
     const val PARAM_BOOK_NAME = "PARAM_BOOK_NAME"
     const val PARAM_CHAPTERS_DETAIL = "chaptersDetail"
 
-    val DEFAULT_ELEVATION = 2.dp
+    val DEFAULT_ELEVATION = 0.dp
     const val CLOUDFLARE_LOG = "Performance & security by Cloudflare"
 
     const val ERROR_LOG = "ERROR_LOG "
@@ -22,6 +22,6 @@ object Constants {
 
 
 object DEFAULT {
-    const val MAX_BRIGHTNESS = .9F
+    const val MAX_BRIGHTNESS = .5F
     const val MIN_BRIGHTNESS = 0F
 }

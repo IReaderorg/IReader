@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 
 @Composable
 fun ExpandingText(modifier: Modifier = Modifier, text: String) {
@@ -57,7 +58,8 @@ fun ExpandingText(modifier: Modifier = Modifier, text: String) {
             onTextLayout = { textLayoutResultState.value = it },
             modifier = modifier
                 .animateContentSize(),
-            fontWeight = FontWeight.W400, color = MaterialTheme.colors.onBackground
+            fontWeight = FontWeight.W400, color = MaterialTheme.colors.onBackground,
+            textAlign = TextAlign.Start
         )
         Icon(
             imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,

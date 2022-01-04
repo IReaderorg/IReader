@@ -30,7 +30,7 @@ class ChapterDetailViewModel(
         when (event) {
             is ChapterDetailEvent.ToggleOrder -> {
                 _state.value = state.value.copy(
-                    chapters = state.value.chapters
+                    chapters = state.value.chapters.reversed()
                 )
             }
             is ChapterDetailEvent.UpdateChapters -> {

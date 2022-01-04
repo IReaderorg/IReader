@@ -108,7 +108,7 @@ class FreeWebNovel(context: Context) : ParsedHttpSource(context) {
         return chapter
     }
 
-    override fun chapterListNextPageSelector(): String? = "div.page a:nth-child(4)"
+//    override fun chapterListNextPageSelector(): String? = "div.page a:nth-child(4)"
 
 
     override fun pageContentParse(document: Document): ChapterPage {

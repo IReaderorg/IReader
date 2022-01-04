@@ -22,11 +22,11 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 
 
-class NetworkHelper(private val context: Context): DIAware {
+class NetworkHelper(private val context: Context) : DIAware {
 
     override val di: DI by closestDI(context)
 
-    val datastore : DataStoreUseCase by di.instance<DataStoreUseCase>()
+    val datastore: DataStoreUseCase by di.instance<DataStoreUseCase>()
     val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     private val cacheDir = File(context.cacheDir, "network_cache")
@@ -47,7 +47,7 @@ class NetworkHelper(private val context: Context): DIAware {
                 datastore.readDohPrefUseCase().collectLatest { result ->
                     when (result) {
                         is Resource.Success -> {
-                            when (result.data ?:Dns.Disable.prefCode) {
+                            when (result.data ?: Dns.Disable.prefCode) {
                                 PREF_DOH_CLOUDFLARE -> builder.dohCloudflare()
                                 PREF_DOH_GOOGLE -> builder.dohGoogle()
                                 PREF_DOH_ADGUARD -> builder.dohAdGuard()
@@ -74,22 +74,26 @@ class NetworkHelper(private val context: Context): DIAware {
             .build()
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     suspend fun getHtmlFromWebView(url: String): Document {
         val webView = WebView(context)
         webView.settings.javaScriptEnabled
         webView.setDefaultSettings()
         webView.loadUrl(url)
-        var docs: Document = Document("")
+        var docs: Document = Document("No Value Found")
+        var isLoadUp: Boolean = false
+        var delayedSec = 0
 
-        delay(5000)
+
 
         webView.webViewClient = object : WebViewClientCompat() {
             override fun onPageFinished(view: WebView, url: String) {
                 coroutineScope.launch(Dispatchers.Main) {
                     docs = Jsoup.parse(webView.getHtml())
-                    //Timber.e(docs.toString())
+                    isLoadUp = true
                 }
             }
+
             override fun onReceivedErrorCompat(
                 view: WebView,
                 errorCode: Int,
@@ -97,8 +101,14 @@ class NetworkHelper(private val context: Context): DIAware {
                 failingUrl: String,
                 isMainFrame: Boolean,
             ) {
+                isLoadUp = true
+                Timber.e("not shown")
             }
         }
+        while (!isLoadUp) {
+            delay(200)
+        }
+
         docs = Jsoup.parse(webView.getHtml())
         Timber.e(docs.toString())
         return docs

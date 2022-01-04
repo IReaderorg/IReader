@@ -121,7 +121,6 @@ class WuxiaWorldApi(context: Context) : ParsedHttpSource(context) {
         return chapter
     }
 
-    override fun chapterListNextPageSelector(): String? = null
 
 
     override fun pageContentParse(document: Document): ChapterPage {

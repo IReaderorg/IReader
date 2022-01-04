@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.Flow
 
 
 interface DataStoreHelper {
+
     suspend fun saveSelectedFontState(fontIndex: Int)
 
     fun readSelectedFontState(): Flow<Int>

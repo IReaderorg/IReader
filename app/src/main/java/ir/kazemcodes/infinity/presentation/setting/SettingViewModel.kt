@@ -22,7 +22,7 @@ class SettingViewModel(private val dataStoreUseCase: DataStoreUseCase) : ScopedS
 
     fun setDohPrfUpdate(prefCode: Int) {
         _state.value = state.value.copy(doh = prefCode)
-        coroutineScope.launch(Dispatchers.IO) {
+        coroutineScope.launch(Dispatchers.Main) {
             dataStoreUseCase.saveDohPrefUseCase(prefCode)
         }
     }

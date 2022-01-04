@@ -104,13 +104,13 @@ class BrowseViewModel(
 
     private fun updateLayoutType(layoutType: DisplayMode) {
         _state.value = state.value.copy(layout = layoutType.layout)
-        coroutineScope.launch(Dispatchers.IO) {
+        coroutineScope.launch(Dispatchers.Main){
             dataStoreUseCase.saveBrowseLayoutUseCase(layoutType.layoutIndex)
         }
     }
 
     private fun readLayoutType() {
-        coroutineScope.launch {
+        coroutineScope.launch(Dispatchers.Main) {
             dataStoreUseCase.readBrowseLayoutUseCase().collectLatest { result ->
                 if (result.data != null) {
                     _state.value = state.value.copy(layout = result.data.layout)

@@ -11,25 +11,41 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.work.WorkManager
 import com.zhuinden.simplestack.AsyncStateChanger
+import com.zhuinden.simplestack.GlobalServices
 import com.zhuinden.simplestack.History
 import com.zhuinden.simplestack.navigator.Navigator
 import com.zhuinden.simplestackcomposeintegration.core.BackstackProvider
 import com.zhuinden.simplestackcomposeintegration.core.ComposeStateChanger
 import com.zhuinden.simplestackextensions.navigatorktx.androidContentFrame
 import com.zhuinden.simplestackextensions.services.DefaultServiceProvider
+import com.zhuinden.simplestackextensions.servicesktx.add
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.scopes.ActivityScoped
-import ir.kazemcodes.infinity.MyApplication
 import ir.kazemcodes.infinity.base_feature.navigation.MainScreenKey
+import ir.kazemcodes.infinity.domain.use_cases.datastore.DataStoreUseCase
+import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
+import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
 import ir.kazemcodes.infinity.presentation.theme.InfinityTheme
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.android.closestDI
+import org.kodein.di.compose.withDI
+import javax.inject.Inject
 
 
 @AndroidEntryPoint
 @ActivityScoped
 class MainActivity : ComponentActivity(),DIAware {
+
+
+    @Inject
+    lateinit var localUseCase: LocalUseCase
+
+    @Inject
+    lateinit var remoteUseCase: RemoteUseCase
+
+    @Inject
+    lateinit var dataStoreUseCase: DataStoreUseCase
 
 
 
@@ -38,10 +54,19 @@ class MainActivity : ComponentActivity(),DIAware {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val app = application as MyApplication
+
+
+
+       val globalServices :GlobalServices  = GlobalServices.builder()
+            .add(localUseCase)
+            .add(remoteUseCase)
+            .add(dataStoreUseCase)
+            .add(this.window)
+            .add(this.baseContext)
+            .build()
 
         val backstack = Navigator.configure()
-            .setGlobalServices(app.globalServices)
+            .setGlobalServices(globalServices)
             .setScopedServices(DefaultServiceProvider())
             .setStateChanger(AsyncStateChanger(composeStateChanger))
             .install(this, androidContentFrame, History.of(MainScreenKey()))
@@ -97,11 +122,12 @@ class MainActivity : ComponentActivity(),DIAware {
      * simple stack i can't use the kodein compose directly
      * **/
     @Composable
-    fun Main(content: @Composable () -> Unit,) = with(di) {
+    fun Main(content: @Composable () -> Unit,) = withDI(di) {
         content()
     }
 
     override val di: DI by closestDI(this)
+
 
 }
 

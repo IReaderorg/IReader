@@ -12,11 +12,16 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import java.io.IOException
 
-val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = DataStoreHelperImpl.PreferenceKeys.TEMP_SAVED_SETTING)
+
+private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = DataStoreHelperImpl.PreferenceKeys.USERS_DATA)
 
 class DataStoreHelperImpl(context: Context) : DataStoreHelper {
+
+
+    val dataStore = context.dataStore
+
     companion object PreferenceKeys {
-        const val TEMP_SAVED_SETTING = "TEMP_SAVED_SETTING"
+        const val USERS_DATA = "USER_DATA"
         const val SAVED_FONT_SIZE_PREFERENCES = "SAVED_FONT_SIZE_PREFERENCES"
         const val SAVED_FONT_PREFERENCES = "SAVED_FONT_PREFERENCES"
         const val SAVED_BRIGHTNESS_PREFERENCES = "SAVED_BRIGHTNESS_PREFERENCES"
@@ -41,7 +46,6 @@ class DataStoreHelperImpl(context: Context) : DataStoreHelper {
         val dohStateKey = intPreferencesKey(SAVED_DOH_KEY)
     }
 
-    private val dataStore = context.dataStore
 
     /**
      * save the index of font according to position of font in fonts list.
@@ -170,8 +174,7 @@ class DataStoreHelperImpl(context: Context) : DataStoreHelper {
     }
 
 
-
-    override fun readDohPrefUseCase() : Flow<Int> {
+    override fun readDohPrefUseCase(): Flow<Int> {
         return dataStore.data
             .catch { exception ->
                 if (exception is IOException) {
@@ -185,7 +188,7 @@ class DataStoreHelperImpl(context: Context) : DataStoreHelper {
             }
     }
 
-    override suspend fun saveDohPrefUseCase(dohPref : Int) {
+    override suspend fun saveDohPrefUseCase(dohPref: Int) {
         dataStore.edit { preferences ->
             preferences[PreferencesKey.dohStateKey] = dohPref
         }

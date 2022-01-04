@@ -1,8 +1,8 @@
 package ir.kazemcodes.infinity.base_feature.navigation
 
 import android.content.Context
+import android.view.Window
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
@@ -40,8 +40,6 @@ import kotlinx.parcelize.Parcelize
 @Immutable
 @Parcelize
 data class MainScreenKey(val noArgument: String = "") : ComposeKey() {
-    @ExperimentalFoundationApi
-    @ExperimentalMaterialApi
     @Composable
     override fun ScreenComposable(modifier: Modifier)  {
         MainScreen()
@@ -55,11 +53,13 @@ data class MainScreenKey(val noArgument: String = "") : ComposeKey() {
     }
 }
 
+
 @Immutable
 @Parcelize
 data class BrowserScreenKey(val sourceName: String, val isLatestUpdateMode: Boolean = true) :
     ComposeKey() {
-    @ExperimentalFoundationApi
+
+    @OptIn(ExperimentalFoundationApi::class)
     @Composable
     override fun ScreenComposable(modifier: Modifier) {
         BrowserScreen()
@@ -104,7 +104,7 @@ data class BookDetailKey(val book: Book, val sourceName: String) : ComposeKey() 
 @Immutable
 @Parcelize
 data class WebViewKey(val url: String) : ComposeKey() {
-    @ExperimentalMaterialApi
+
     @Composable
     override fun ScreenComposable(modifier: Modifier) {
         WebPageScreen(url)
@@ -142,14 +142,12 @@ data class ReaderScreenKey(
     val chapters: List<Chapter>,
 ) : ComposeKey() {
 
-    @ExperimentalMaterialApi
     @Composable
     override fun ScreenComposable(modifier: Modifier) {
         ReadingScreen(book = book, chapter = chapter)
     }
 
     override fun bindServices(serviceBinder: ServiceBinder) {
-
         with(serviceBinder) {
             add(ReaderScreenViewModel(
                 localUseCase = lookup<LocalUseCase>(),
@@ -158,7 +156,8 @@ data class ReaderScreenKey(
                 source = mappingApiNameToAPi(sourceName,context = lookup<Context>()),
                 book = book,
                 chapter = chapter,
-                chapters = chapters
+                chapters = chapters,
+                window = lookup<Window>()
             ))
         }
     }

@@ -1,5 +1,7 @@
 package ir.kazemcodes.infinity.presentation.reader
 
+import android.view.Window
+import android.view.WindowManager
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import com.zhuinden.simplestack.ScopedServices
@@ -26,6 +28,7 @@ class ReaderScreenViewModel(
     private val chapter: Chapter,
     private val book: Book,
     private val chapters: List<Chapter>,
+    private val window: Window,
 ) : ScopedServices.Registered {
 
     private val _state = mutableStateOf(ReaderScreenState(source = source))
@@ -79,7 +82,7 @@ class ReaderScreenViewModel(
                 .collect { result ->
                     when (result) {
                         is Resource.Success -> {
-                            if (result.data != null && result.data.content.joinToString().length > 10) {
+                            if (result.data != null && result.data.isChapterNotEmpty()) {
                                 _state.value = state.value.copy(
                                     chapter = chapter.copy(content = result.data.content),
                                     isLoading = false,
@@ -87,10 +90,10 @@ class ReaderScreenViewModel(
                                     error = ""
                                 )
                                 if (book.inLibrary) {
-                                    toggleLastRead()
+                                    toggleLastReadAndUpdateChapterContent()
                                 }
                             } else {
-                                if (state.value.chapter.content.joinToString().length < 10) {
+                                if (!state.value.chapter.isChapterNotEmpty() ) {
                                     getReadingContentRemotely()
                                 }
                             }
@@ -121,7 +124,6 @@ class ReaderScreenViewModel(
                 .collect { result ->
                     when (result) {
                         is Resource.Success -> {
-
                             _state.value = state.value
                                 .copy(
                                     chapter = state.value.chapter.copy(content = result.data?.content
@@ -131,18 +133,11 @@ class ReaderScreenViewModel(
                                     isLoaded = true,
                                 )
                             if (book.inLibrary) {
-                                toggleLastRead()
+                                toggleLastReadAndUpdateChapterContent()
+                                updateChapterContent(state.value.chapter)
                             }
-                            if (!state.value.chapter.content.isNullOrEmpty()) {
-                                updateChapterContent(chapter.copy(content = state.value.chapter.content))
-                            } else {
-                                _state.value =
-                                    state.value.copy(
-                                        error = "Empty Chapter",
-                                        isLoading = false,
-                                        isLoaded = false,
-                                    )
-                            }
+
+
                         }
                         is Resource.Error -> {
                             _state.value =
@@ -166,23 +161,29 @@ class ReaderScreenViewModel(
 
     private fun updateChapterContent(chapter: Chapter) {
         coroutineScope.launch(Dispatchers.IO) {
-            localUseCase.UpdateLocalChapterContentUseCase(chapter.copy(haveBeenRead = true))
+            withContext(Dispatchers.IO) {
+                localUseCase.UpdateLocalChapterContentUseCase(chapter.copy(haveBeenRead = true))
+
+            }
         }
     }
 
-    private fun toggleLastRead() {
+    private fun toggleLastReadAndUpdateChapterContent() {
         coroutineScope.launch(Dispatchers.IO) {
             chapters.filter {
                 it.lastRead
             }.forEach {
                 localUseCase.UpdateLocalChapterContentUseCase(it.copy(lastRead = false))
             }
-            localUseCase.UpdateLocalChapterContentUseCase(chapter.copy(lastRead = true))
+            localUseCase.UpdateLocalChapterContentUseCase(chapter.copy(lastRead = true,content = state.value.chapter.content))
         }
     }
 
     private fun saveBrightness(brightness: Float) {
         _state.value = state.value.copy(brightness = brightness)
+        val layoutParams: WindowManager.LayoutParams = window.attributes
+        layoutParams.screenBrightness = brightness
+        window.attributes = layoutParams
         coroutineScope.launch(Dispatchers.IO) {
             dataStoreUseCase.saveBrightnessStateUseCase(brightness)
         }
@@ -191,13 +192,13 @@ class ReaderScreenViewModel(
     private fun saveFontSize(event: FontSizeEvent) {
         if (event == FontSizeEvent.Increase) {
             _state.value = state.value.copy(fontSize = state.value.fontSize + 1)
-            coroutineScope.launch(Dispatchers.IO) {
+            coroutineScope.launch(Dispatchers.Main) {
                 dataStoreUseCase.saveFontSizeStateUseCase(state.value.fontSize)
             }
         } else {
             if (state.value.fontSize > 0) {
                 _state.value = state.value.copy(fontSize = state.value.fontSize - 1)
-                coroutineScope.launch(Dispatchers.IO) {
+                coroutineScope.launch(Dispatchers.Main) {
                     dataStoreUseCase.saveFontSizeStateUseCase(state.value.fontSize)
                 }
             }
@@ -206,14 +207,14 @@ class ReaderScreenViewModel(
 
     private fun saveFont(fontType: FontType) {
         _state.value = state.value.copy(font = fontType)
-        coroutineScope.launch(Dispatchers.IO) {
+        coroutineScope.launch(Dispatchers.Main) {
             dataStoreUseCase.saveSelectedFontStateUseCase(fonts.indexOf(fontType))
         }
     }
 
 
     private fun readSelectedFontState() {
-        coroutineScope.launch {
+        coroutineScope.launch(Dispatchers.Main) {
             dataStoreUseCase.readSelectedFontStateUseCase().collectLatest { result ->
                 when (result) {
                     is Resource.Success -> {
@@ -237,7 +238,7 @@ class ReaderScreenViewModel(
 
     private fun readBrightness() {
 
-        coroutineScope.launch {
+        coroutineScope.launch(Dispatchers.Main) {
             dataStoreUseCase.readBrightnessStateUseCase().collectLatest { result ->
                 when (result) {
                     is Resource.Success -> {
@@ -258,7 +259,7 @@ class ReaderScreenViewModel(
     }
 
     private fun readFontSize() {
-        coroutineScope.launch {
+        coroutineScope.launch(Dispatchers.Main) {
             dataStoreUseCase.readFontSizeStateUseCase().collectLatest { result ->
                 when (result) {
                     is Resource.Success -> {
@@ -282,3 +283,4 @@ class ReaderScreenViewModel(
 
     }
 }
+

@@ -1,43 +1,23 @@
 package ir.kazemcodes.infinity.data.local
 
 import androidx.room.TypeConverter
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-import java.lang.reflect.Type
 
 
 class DatabaseConverter {
 
-    private val separator = ","
-
     @TypeConverter
-    fun convertListToString(list: List<String>): String {
-        val stringBuilder = StringBuilder()
-        for (item in list) {
-            stringBuilder.append(item).append(separator)
-        }
-
-        if (stringBuilder.isNotEmpty()) {
-        stringBuilder.setLength(stringBuilder.length - separator.length)
-        }
-        return stringBuilder.toString()
+    fun fromString(stringListString: String): List<String> {
+        return stringListString.split(",").map { it }
     }
 
     @TypeConverter
-    fun convertStringToList(string: String): List<String> {
-        return string.split(separator)
-    }
-}
-object Converters {
-    @TypeConverter
-    fun fromString(value: String?): ArrayList<String> {
-        val listType: Type = object : TypeToken<ArrayList<String?>?>() {}.type
-        return Gson().fromJson(value, listType)
+    fun toString(stringList: List<String>): String {
+        return stringList.joinToString(separator = ",")
     }
 
-    @TypeConverter
-    fun fromArrayList(list: ArrayList<String?>?): String {
-        val gson = Gson()
-        return gson.toJson(list)
-    }
+//    @TypeConverter
+//    fun fromList(value : List<String>) = Json.encodeToString(value)
+//
+//    @TypeConverter
+//    fun toList(value: String) = Json.decodeFromString<List<String>>(value)
 }

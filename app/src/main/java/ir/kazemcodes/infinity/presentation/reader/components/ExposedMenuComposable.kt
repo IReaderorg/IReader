@@ -18,7 +18,7 @@ import ir.kazemcodes.infinity.presentation.reader.ReaderScreenViewModel
 import ir.kazemcodes.infinity.presentation.theme.fonts
 
 
-@ExperimentalMaterialApi
+
 @Composable
 fun FontMenuComposable(
     modifier: Modifier = Modifier,

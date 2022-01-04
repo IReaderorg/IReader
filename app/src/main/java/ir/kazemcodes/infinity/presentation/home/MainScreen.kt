@@ -1,7 +1,6 @@
 package ir.kazemcodes.infinity.presentation.home
 
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
@@ -42,8 +41,7 @@ sealed class BottomNavigationScreens(
     )
 }
 
-@ExperimentalFoundationApi
-@ExperimentalMaterialApi
+
 @Composable
 fun MainScreen(modifier: Modifier = Modifier) {
     val viewModel = rememberService<MainViewModel>()

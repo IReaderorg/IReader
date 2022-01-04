@@ -16,6 +16,7 @@ import ir.kazemcodes.infinity.data.local.dao.ChapterDao
 import ir.kazemcodes.infinity.data.network.utils.MemoryCookieJar
 import ir.kazemcodes.infinity.data.network.utils.NetworkHelper
 import ir.kazemcodes.infinity.data.repository.RepositoryImpl
+import ir.kazemcodes.infinity.domain.repository.DataStoreHelper
 import ir.kazemcodes.infinity.domain.repository.Repository
 import ir.kazemcodes.infinity.domain.use_cases.datastore.*
 import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
@@ -72,6 +73,9 @@ class AppModule {
             context = context,
             remoteUseCase = remoteUseCase
         )
+    }
+    fun provideDataStore(repository: Repository) : DataStoreHelper {
+        return repository.dataStoreRepository
     }
 
     @Provides
