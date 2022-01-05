@@ -1,5 +1,6 @@
 package ir.kazemcodes.infinity.domain.use_cases.remote
 
+import com.google.gson.JsonParseException
 import ir.kazemcodes.infinity.data.network.models.BooksPage
 import ir.kazemcodes.infinity.data.network.models.Source
 import ir.kazemcodes.infinity.util.InvalidBookException
@@ -31,6 +32,8 @@ class GetRemoteSearchBookUseCase {
                 )
             } catch (e: IOException) {
                 emit(Resource.Error<BooksPage>(message = "Couldn't Read Server, Check Your Internet Connection."))
+            } catch (e : JsonParseException) {
+                emit(Resource.Error<BooksPage>(message = "something is wrong with json parser."))
             } catch (e: Exception) {
                 emit(
                     Resource.Error<BooksPage>(

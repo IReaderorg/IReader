@@ -1,7 +1,6 @@
 package ir.kazemcodes.infinity.util
 
 import com.google.gson.Gson
-
 import java.lang.reflect.Type
 
 class GsonParser(
@@ -16,3 +15,4 @@ class GsonParser(
         return gson.toJson(obj, type)
     }
 }
+

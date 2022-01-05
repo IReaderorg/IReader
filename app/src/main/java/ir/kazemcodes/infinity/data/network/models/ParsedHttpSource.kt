@@ -54,7 +54,7 @@ abstract class ParsedHttpSource(context: Context) : HttpSource(context) {
      */
     abstract fun latestUpdatesNextPageSelector(): String?
 
-    override fun latestUpdatesParse(document: Document): BooksPage {
+    override fun latestUpdatesParse(document: Document,page:Int): BooksPage {
         val isCloudflareEnable = document.body().allElements.text().contains(CLOUDFLARE_LOG)
 
         val books = document.select(latestUpdatesSelector()).map { element ->
@@ -68,8 +68,8 @@ abstract class ParsedHttpSource(context: Context) : HttpSource(context) {
         return BooksPage(books, hasNextPage,isCloudflareEnable, document.body().allElements.text())
     }
 
-    override fun latestUpdatesParse(response: Response): BooksPage {
-        return  latestUpdatesParse(response.asJsoup())
+    override fun latestUpdatesParse(response: Response,page: Int): BooksPage {
+        return  latestUpdatesParse(response.asJsoup(), page = page)
     }
 
     /**

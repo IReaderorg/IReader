@@ -77,7 +77,6 @@ class NetworkHelper(private val context: Context) : DIAware {
     @OptIn(ExperimentalCoroutinesApi::class)
     suspend fun getHtmlFromWebView(url: String): Document {
         val webView = WebView(context)
-        webView.settings.javaScriptEnabled
         webView.setDefaultSettings()
         webView.loadUrl(url)
         var docs: Document = Document("No Value Found")

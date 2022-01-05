@@ -3,10 +3,16 @@ package ir.kazemcodes.infinity.data.network.models
 import android.content.Context
 import android.util.Patterns
 import ir.kazemcodes.infinity.api_feature.network.GET
+import ir.kazemcodes.infinity.api_feature.network.POST
 import ir.kazemcodes.infinity.domain.models.remote.Book
 import ir.kazemcodes.infinity.domain.models.remote.Chapter
+import ir.kazemcodes.infinity.presentation.book_detail.Constants
 import ir.kazemcodes.infinity.util.asJsoup
 import ir.kazemcodes.infinity.util.shouldSubstring
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import okhttp3.Headers
 import okhttp3.Request
 import okhttp3.Response
 import org.jsoup.nodes.Document
@@ -83,13 +89,14 @@ class SourceCreator(
     private val _supportsMostPopular: Boolean = false,
     private val _supportsSearch: Boolean = false,
     private val _latestUpdateEndpoint: String? = null,
-    private val _popularEndpoint: String? = null,
     private val _searchEndpoint: String? = null,
     private val _chaptersEndpoint: String? = null,
     private val _chaptersEndpointWithoutPage: String? = null,
-    private val _shouldSubstringBaseUrlAtFirst : Boolean? = null,
-    private val _supportChapterPage: Boolean = false,
+    private val _shouldSubstringBaseUrlAtFirst: Boolean? = null,
+    private val _supportNextPagesList: Boolean = false,
     private val _contentEndpoint: String? = null,
+    private val _popularEndpoint: String? = null,
+    private val _popularIsGetRequest: Boolean = true,
     private val _popularBookSelector: String? = null,
     private val _popularNextBookSelector: String? = null,
     private val _popularNextBookValue: String? = null,
@@ -122,6 +129,10 @@ class SourceCreator(
     private val _hasNextChapterListSelector: String? = null,
     private val _hasNextChapterListAtt: String? = null,
     private val _hasNextChapterListValue: String? = null,
+    private val _supportPageList: Boolean = false,
+    private val _nextPageLinkSelector: String? = null,
+    private val _nextPageLinkAtt: String? = null,
+    private val _maxPageIndex: Int? = null,
     private val _chapterListSelector: String? = null,
     private val _linkChapterSelector: String? = null,
     private val _linkChapterAtt: String? = null,
@@ -130,6 +141,8 @@ class SourceCreator(
     private val _nameChapterAtt: String? = null,
     private val _chapterPageContentSelector: String? = null,
     private val _chapterPageContentAtt: String? = null,
+    private val _searchIsGetRequest: Boolean = true,
+    private val _searchIsHTMLType: Boolean = true,
     private val _searchBookSelector: String? = null,
     private val _linkSearchedSelector: String? = null,
     private val _linkSearchedAtt: String? = null,
@@ -155,6 +168,15 @@ class SourceCreator(
 
     override val supportSearch: Boolean = _supportsSearch
 
+
+    override fun headersBuilder(): Headers.Builder = Headers.Builder().apply {
+        add(
+            "User-Agent",
+            "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Mobile Safari/537.36 "
+        )
+        add("Referer", baseUrl)
+        add("cache-control", "max-age=0")
+    }
 
     override fun fetchLatestUpdatesEndpoint(): String? = _latestUpdateEndpoint
     override fun fetchPopularEndpoint(): String? = _popularEndpoint
@@ -197,6 +219,23 @@ class SourceCreator(
 
     override fun latestUpdatesSelector(): String? = _latestBookSelector
 
+    override fun latestUpdatesParse(document: Document, page: Int): BooksPage {
+        val isCloudflareEnable =
+            document.body().allElements.text().contains(Constants.CLOUDFLARE_LOG)
+
+        val books = document.select(_latestBookSelector).map { element ->
+            latestUpdatesFromElement(element)
+        }
+
+        val hasNextPage = latestUpdatesNextPageSelector()?.let { selector ->
+            document.select(selector).first()
+        } != null
+        if (_supportPageList) {
+            nextChapterListLink = parseNextChapterListType(document, page)
+        }
+
+        return BooksPage(books, hasNextPage, isCloudflareEnable, document.body().allElements.text())
+    }
 
     override fun latestUpdatesFromElement(element: Element): Book {
         val book: Book = Book.create()
@@ -213,6 +252,9 @@ class SourceCreator(
             attLink))
         book.bookName = selectorReturnerStringType(element, selectorName, attName)
         book.coverLink = selectorReturnerStringType(element, selectorCover, attCover)
+
+
+        //Timber.e("Timber: SourceCreator" + book.coverLink)
 
         return book
     }
@@ -256,21 +298,32 @@ class SourceCreator(
 
 
     override fun hasNextChaptersParse(document: Document): Boolean {
-        if (_supportChapterPage) {
+        if (_supportNextPagesList) {
             val docs = selectorReturnerStringType(document,
                 _hasNextChapterListSelector,
-                _hasNextChapterListAtt).
-            shouldSubstring(_shouldSubstringBaseUrlAtFirst?:false , baseUrl, ::getUrlWithoutDomain)
+                _hasNextChapterListAtt).shouldSubstring(_shouldSubstringBaseUrlAtFirst ?: false,
+                baseUrl,
+                ::getUrlWithoutDomain)
             val condition =
-                Patterns.WEB_URL.matcher(docs).matches() || docs.contains(_hasNextChapterListValue ?: "")
+                Patterns.WEB_URL.matcher(docs).matches() || docs.contains(_hasNextChapterListValue
+                    ?: "")
             if (Patterns.WEB_URL.matcher(docs).matches()) {
                 nextChapterListLink = baseUrl + getUrlWithoutDomain(docs)
             }
-
             return condition
         } else {
             return false
         }
+    }
+
+    fun parseNextChapterListType(document: Document, page: Int): String {
+        val selector = _nextPageLinkSelector
+        val att = _nextPageLinkAtt
+        val maxIndex = _maxPageIndex
+        val urlList = selectorReturnerListType(document,
+            selector = selector,
+            att)
+        return urlList[page % (maxIndex?:0)]
     }
 
 
@@ -347,11 +400,70 @@ class SourceCreator(
         return book
     }
 
-    override fun searchBookRequest(page: Int, query: String): Request =
-        GET("$baseUrl${
-            getUrlWithoutDomain(fetchSearchBookEndpoint()?.replace(searchQueryFormat,
-                query) ?: "")
-        }")
+    override fun searchBookRequest(page: Int, query: String): Request {
+
+        if (_searchIsGetRequest) {
+            return GET("$baseUrl${
+                getUrlWithoutDomain(fetchSearchBookEndpoint()?.replace(searchQueryFormat,
+                    query) ?: "")
+            }")
+        } else {
+            return POST(
+                "$baseUrl${
+                    getUrlWithoutDomain(fetchSearchBookEndpoint()?.replace(searchQueryFormat,
+                        query) ?: "")
+                }")
+        }
+
+    }
+
+    override fun searchBookParse(response: Response): BooksPage {
+        val document = response.asJsoup()
+
+        var books = mutableListOf<Book>()
+
+        if (_searchIsHTMLType) {
+            /**
+             * I Add Filter Because sometimes this value contains null values
+             * so the null book shows in search screen
+             */
+            books.addAll(document.select(searchBookSelector()).map { element ->
+                searchBookFromElement(element)
+            }.filter {
+                it.bookName.isNotBlank()
+            })
+        } else {
+            val pre_json = "ob:items&ar:0&ob:results&ar:each&_name:title&_link:link&_cover:cover"
+            val jsonObject = Json.parseToJsonElement(document.text()).jsonObject
+            val items = jsonObject["items"]!!
+            val res = items.jsonArray[0]
+            val result = res.jsonObject["results"]!!.jsonArray
+            result.forEach { element ->
+                val name = element.jsonObject["title"].toString()
+                val link = element.jsonObject["permalink"].toString()
+                val cover = element.jsonObject["thumbnail"].toString()
+                books.add(Book(bookName = name, link = link, coverLink = cover))
+            }
+
+
+//            val json = JSONObject(document.text())
+//                .getJSONArray("items")
+//                .getJSONArray(0)
+//            for(i in 0 until json.length()) {
+//                val name = JsonObject().getAsJsonPrimitive("title").asString
+//                val link = JsonObject().getAsJsonPrimitive("permalink").asString
+//                val cover = JsonObject().getAsJsonPrimitive("thumbnail").asString
+//                books.add(Book(bookName = name, link = link, coverLink = cover))
+//            }
+
+        }
+
+
+        val hasNextPage = false
+
+        return BooksPage(books, hasNextPage)
+    }
+
 
     override fun searchBookNextPageSelector(): String? = _hasNextSearchedBooksNextPageSelector
 
@@ -389,6 +501,7 @@ class SourceCreator(
             return ""
         }
     }
+
 
     private fun selectorReturnerListType(
         element: Element,

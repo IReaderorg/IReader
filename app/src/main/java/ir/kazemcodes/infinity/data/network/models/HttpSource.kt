@@ -153,9 +153,9 @@ abstract class HttpSource(context: Context) : Source, DIAware {
      * @param page the page number to retrieve.
      */
     override suspend fun fetchLatestUpdates(page: Int): BooksPage {
-        var books =  latestUpdatesParse(client.newCall(latestUpdatesRequest(page)).await())
+        var books =  latestUpdatesParse(client.newCall(latestUpdatesRequest(page)).await(),page = page)
         if (books.isCloudflareEnabled) {
-            books = latestUpdatesParse(network.getHtmlFromWebView(baseUrl + fetchLatestUpdatesEndpoint()))
+            books = latestUpdatesParse(network.getHtmlFromWebView(baseUrl + fetchLatestUpdatesEndpoint()?.replace(pageFormat,page.toString())), page = page)
         }
 
         return books
@@ -176,14 +176,14 @@ abstract class HttpSource(context: Context) : Source, DIAware {
      *
      * @param response the response from the site.
      */
-    abstract fun latestUpdatesParse(response: Response): BooksPage
+    abstract fun latestUpdatesParse(response: Response,page: Int): BooksPage
 
     /**
      * Parses the document from the site and returns a [BooksPage] object.
      *
      * @param response the response from the site.
      */
-    abstract fun latestUpdatesParse(document: Document): BooksPage
+    abstract fun latestUpdatesParse(document: Document, page: Int): BooksPage
 
     /**
      * Returns a book. Normally it's not needed to

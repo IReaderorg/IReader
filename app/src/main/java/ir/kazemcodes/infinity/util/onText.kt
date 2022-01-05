@@ -19,3 +19,10 @@ fun String.shouldSubstring(condition: Boolean,string: String,unit : ((string: St
         this
     }
 }
+fun String.replaceImageFormat(condition: Boolean) : String {
+    return if (condition) {
+        this.replace(".webp","")
+    }else {
+        this
+    }
+}

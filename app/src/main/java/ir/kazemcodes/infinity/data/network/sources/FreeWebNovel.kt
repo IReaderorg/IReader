@@ -85,7 +85,7 @@ class FreeWebNovel(context: Context) : ParsedHttpSource(context) {
         return book
     }
 
-    override fun hasNextChapterSelector() = "div.page a:nth-child(4)"
+        override fun hasNextChapterSelector() = "div.page a:nth-child(4)"
 
     override fun hasNextChaptersParse(document: Document): Boolean {
 
