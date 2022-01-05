@@ -103,7 +103,7 @@ class AvailableSources(context: Context) {
         _authorDetailBookSelector = "div.right a.a1",
         _authorDetailBookAtt = "title",
         _categoryDetailSelector = "div.item div.right a.a1",
-        _supportChapterPage = true,
+        _supportPageList = true,
         _chaptersEndpoint = "/{page}.html",
         _chaptersEndpointWithoutPage = ".html",
         _chapterListSelector = "div.m-newest2 ul.ul-list5 li",
