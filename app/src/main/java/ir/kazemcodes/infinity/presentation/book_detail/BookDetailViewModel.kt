@@ -162,7 +162,7 @@ class BookDetailViewModel(
     }
 
 
-    private fun getRemoteBookDetail() {
+    fun getRemoteBookDetail() {
         remoteUseCase.getRemoteBookDetailUseCase(book = state.value.book, source = source)
             .onEach { result ->
                 when (result) {
@@ -191,7 +191,7 @@ class BookDetailViewModel(
             }.launchIn(coroutineScope)
     }
 
-    private fun getRemoteChapterDetail() {
+    fun getRemoteChapterDetail() {
         remoteUseCase.getRemoteChaptersUseCase(book = state.value.book, source = source)
             .onEach { result ->
                 when (result) {

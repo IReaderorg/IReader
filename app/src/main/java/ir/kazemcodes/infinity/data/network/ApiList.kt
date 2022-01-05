@@ -3,13 +3,12 @@ package ir.kazemcodes.infinity.data.network
 import android.content.Context
 import ir.kazemcodes.infinity.data.network.models.Source
 import ir.kazemcodes.infinity.data.network.models.SourceCreator
-import ir.kazemcodes.infinity.data.network.sources.FreeWebNovel
 import ir.kazemcodes.infinity.data.network.sources.WuxiaWorldApi
 
 
 class Extensions(context: Context) {
     private val sources = mutableListOf<Source>(
-        FreeWebNovel(context),
+        //FreeWebNovel(context),
         WuxiaWorldApi(context),
     )
 
@@ -24,39 +23,40 @@ class Extensions(context: Context) {
     init {
         val realwebnovel = SourceCreator(
             context = context,
-            _name = "RealWebNovel",
             _baseUrl = "https://readwebnovels.net",
             _lang = "en",
+            _name = "RealWebNovel",
             _supportsLatest = true,
             _supportsMostPopular = true,
             _supportsSearch = true,
+            _latestUpdateEndpoint = "/manga-2/page/{page}/?m_orderby=latest",
+            _popularEndpoint = "/manga-2/page/{page}/?m_orderby=trending",
+            _searchEndpoint = "/?s={query}&post_type=wp-manga&op=&author=&artist=&release=&adult=",
             _popularBookSelector = "div.page-item-detail",
             _popularNextBookSelector = "div.nav-previous",
-            _popularEndpoint = "/manga-2/page/{page}/?m_orderby=trending",
             _linkPopularSelector = "a",
             _linkPopularAtt = "href",
             _namePopularSelector = "a",
             _namePopularAtt = "title",
             _coverPopularSelector = "img",
             _coverPopularAtt = "src",
-            _latestUpdateEndpoint = "/manga-2/page/{page}/?m_orderby=latest",
             _latestBookSelector = "div.page-item-detail",
-            _nameLatestSelector = "a",
-            _nameLatestAtt = "title",
-            _linkLatestSelector = "a",
-            _linkLatestAtt = "href",
-            _coverLatestSelector = "img",
-            _coverLatestAtt = "src",
             _latestNextPageSelector = "div.nav-previous",
             _latestNextPageValue = "Older Posts",
+            _linkLatestSelector = "a",
+            _linkLatestAtt = "href",
+            _nameLatestSelector = "a",
+            _nameLatestAtt = "title",
+            _coverLatestSelector = "img",
+            _coverLatestAtt = "src",
             _nameDetailSelector = "div.post-title h1",
             _descriptionDetailSelector = "div.summary__content",
             _authorDetailBookSelector = "div.author-content a",
             _categoryDetailSelector = "div.genres-content a",
             _isChapterStatsFromFirst = true,
             _chapterListSelector = "li.wp-manga-chapter",
-            _nameChapterSelector = "a",
             _linkChapterSelector = "a",
+            _nameChapterSelector = "a",
             _chapterPageContentSelector = "div.reading-content h4,p",
             _searchBookSelector = "div.c-tabs-item__content",
             _linkSearchedSelector = "div.tab-thumb a",
@@ -64,7 +64,6 @@ class Extensions(context: Context) {
             _nameSearchedSelector = "h3.h4 a",
             _coverSearchedSelector = "div.tab-thumb a img",
             _coverSearchedAtt = "src",
-            _searchEndpoint = "/?s={query}&post_type=wp-manga&op=&author=&artist=&release=&adult=",
         )
         val freeWebNovel = SourceCreator(
             context = context,
@@ -95,6 +94,14 @@ class Extensions(context: Context) {
             _authorDetailBookSelector = "div.right a.a1",
             _authorDetailBookAtt = "title",
             _categoryDetailSelector = "div.item div.right a.a1",
+            _supportChapterPage = true,
+            _chaptersEndpoint = "/{page}.html",
+            _chaptersEndpointWithoutPage = ".html",
+            _chapterListSelector = "div.m-newest2 ul.ul-list5 li",
+            _nameChapterSelector = "a",
+            _nameChapterAtt = "title",
+            _linkChapterSelector = "a",
+            _linkChapterAtt = "href",
             _hasNextChapterListSelector = "div.page a:nth-child(4)",
             _hasNextChapterListValue = "Next",
             _searchBookSelector = "div.ul-list1 div.li",
@@ -102,9 +109,12 @@ class Extensions(context: Context) {
             _linkSearchedAtt = "href",
             _nameSearchedSelector = "div.txt a",
             _nameSearchedAtt = "title",
-
-
+            _coverSearchedSelector = "div.pic img",
+            _coverSearchedAtt = "src",
+            _searchEndpoint = "/search?searchkey={query}",
+            _chapterPageContentSelector = "div.txt h4,p"
         )
         addSource(realwebnovel)
+        addSource(freeWebNovel)
     }
 }

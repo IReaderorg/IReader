@@ -117,6 +117,13 @@ fun BookDetailScreenLoadedComposable(
             contentColor = MaterialTheme.colors.onBackground,
             elevation = 0.dp,
             actions = {
+                IconButton(onClick = { viewModel.getRemoteChapterDetail() }) {
+                    Icon(
+                        imageVector = Icons.Default.Autorenew,
+                        contentDescription = "Refresh",
+                        tint = MaterialTheme.colors.onBackground,
+                    )
+                }
                 /** ERROR: This may cause error later: mismatch between baseurl and book link**/
                 IconButton(onClick = { backStack.goTo(WebViewKey(source.baseUrl + getUrlWithoutDomain(book.link))) }) {
                     Icon(
@@ -125,6 +132,7 @@ fun BookDetailScreenLoadedComposable(
                         tint = MaterialTheme.colors.onBackground,
                     )
                 }
+
             },
             navigationIcon = {
                 IconButton(onClick = { backStack.goBack() }) {

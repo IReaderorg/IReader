@@ -6,6 +6,7 @@ import ir.kazemcodes.infinity.domain.models.remote.Chapter
 import ir.kazemcodes.infinity.util.InvalidBookException
 import ir.kazemcodes.infinity.util.Resource
 import kotlinx.coroutines.flow.flow
+import org.jsoup.select.Selector
 import retrofit2.HttpException
 import timber.log.Timber
 import java.io.IOException
@@ -27,6 +28,7 @@ class GetRemoteChaptersUseCase {
                 var hasNextPage = true
 
                 while(hasNextPage){
+                    Timber.d("Timber: GetRemoteChaptersUseCase was with pages $currentPage Called")
                     val chaptersPage = source.fetchChapters(book = book,page = currentPage)
                     chapters.addAll(chaptersPage.chapters)
                     hasNextPage = chaptersPage.hasNextPage
@@ -45,6 +47,8 @@ class GetRemoteChaptersUseCase {
                 )
             } catch (e: IOException) {
                 emit(Resource.Error<List<Chapter>>(message = "Couldn't Read Remote Server, Check Your Internet Connection."))
+            }catch (e:Selector.SelectorParseException) {
+                emit(Resource.Error<List<Chapter>>(message = "Source is not working."))
             } catch (e: Exception) {
                 emit(Resource.Error<List<Chapter>>(message = e.localizedMessage
                     ?: "An Unexpected Error Occurred"))

@@ -1,10 +1,12 @@
 package ir.kazemcodes.infinity.data.network.models
 
 import android.content.Context
+import android.util.Patterns
 import ir.kazemcodes.infinity.api_feature.network.GET
 import ir.kazemcodes.infinity.domain.models.remote.Book
 import ir.kazemcodes.infinity.domain.models.remote.Chapter
 import ir.kazemcodes.infinity.util.asJsoup
+import ir.kazemcodes.infinity.util.shouldSubstring
 import okhttp3.Request
 import okhttp3.Response
 import org.jsoup.nodes.Document
@@ -84,12 +86,16 @@ class SourceCreator(
     private val _popularEndpoint: String? = null,
     private val _searchEndpoint: String? = null,
     private val _chaptersEndpoint: String? = null,
+    private val _chaptersEndpointWithoutPage: String? = null,
+    private val _shouldSubstringBaseUrlAtFirst : Boolean? = null,
+    private val _supportChapterPage: Boolean = false,
     private val _contentEndpoint: String? = null,
     private val _popularBookSelector: String? = null,
     private val _popularNextBookSelector: String? = null,
     private val _popularNextBookValue: String? = null,
     private val _linkPopularSelector: String? = null,
     private val _linkPopularAtt: String? = null,
+    private val _linkPopularSubString: Boolean = false,
     private val _namePopularSelector: String? = null,
     private val _namePopularAtt: String? = null,
     private val _coverPopularSelector: String? = null,
@@ -99,6 +105,7 @@ class SourceCreator(
     private val _latestNextPageValue: String? = null,
     private val _linkLatestSelector: String? = null,
     private val _linkLatestAtt: String? = null,
+    private val _linkLatestSubString: Boolean = false,
     private val _nameLatestSelector: String? = null,
     private val _nameLatestAtt: String? = null,
     private val _coverLatestSelector: String? = null,
@@ -111,12 +118,14 @@ class SourceCreator(
     private val _authorDetailBookAtt: String? = null,
     private val _categoryDetailSelector: String? = null,
     private val _categoryDetailAtt: String? = null,
-    private val _isChapterStatsFromFirst :Boolean = true,
+    private val _isChapterStatsFromFirst: Boolean = true,
     private val _hasNextChapterListSelector: String? = null,
+    private val _hasNextChapterListAtt: String? = null,
     private val _hasNextChapterListValue: String? = null,
     private val _chapterListSelector: String? = null,
     private val _linkChapterSelector: String? = null,
     private val _linkChapterAtt: String? = null,
+    private val _linkChapterSubString: Boolean = false,
     private val _nameChapterSelector: String? = null,
     private val _nameChapterAtt: String? = null,
     private val _chapterPageContentSelector: String? = null,
@@ -124,6 +133,7 @@ class SourceCreator(
     private val _searchBookSelector: String? = null,
     private val _linkSearchedSelector: String? = null,
     private val _linkSearchedAtt: String? = null,
+    private val _linkSearchedSubString: Boolean = false,
     private val _nameSearchedSelector: String? = null,
     private val _nameSearchedAtt: String? = null,
     private val _coverSearchedSelector: String? = null,
@@ -143,7 +153,7 @@ class SourceCreator(
         get() = _supportsMostPopular
     override val baseUrl: String = _baseUrl
 
-    override val supportSearch: Boolean  = _supportsSearch
+    override val supportSearch: Boolean = _supportsSearch
 
 
     override fun fetchLatestUpdatesEndpoint(): String? = _latestUpdateEndpoint
@@ -173,7 +183,10 @@ class SourceCreator(
         val selectorCover = _coverPopularSelector
         val attCover = _coverPopularAtt
 
-        book.link = selectorReturnerStringType(element, selectorLink, attLink)
+
+        book.link = baseUrl + getUrlWithoutDomain(selectorReturnerStringType(element,
+            selectorLink,
+            attLink).shouldSubstring(_linkPopularSubString, baseUrl))
         book.bookName = selectorReturnerStringType(element, selectorName, attName)
         book.coverLink = selectorReturnerStringType(element, selectorCover, attCover)
 
@@ -195,7 +208,9 @@ class SourceCreator(
         val selectorCover = _coverLatestSelector
         val attCover = _coverLatestAtt
 
-        book.link = baseUrl + getUrlWithoutDomain(selectorReturnerStringType(element, selectorLink, attLink))
+        book.link = baseUrl + getUrlWithoutDomain(selectorReturnerStringType(element,
+            selectorLink,
+            attLink))
         book.bookName = selectorReturnerStringType(element, selectorName, attName)
         book.coverLink = selectorReturnerStringType(element, selectorCover, attCover)
 
@@ -237,11 +252,22 @@ class SourceCreator(
 
 
     override fun hasNextChapterSelector() = _hasNextChapterListSelector
+    var nextChapterListLink: String = ""
+
 
     override fun hasNextChaptersParse(document: Document): Boolean {
-        if (!hasNextChapterSelector().isNullOrEmpty()) {
-            return document.select(hasNextChapterSelector()!!).text()
-                .contains("$_hasNextChapterListValue")
+        if (_supportChapterPage) {
+            val docs = selectorReturnerStringType(document,
+                _hasNextChapterListSelector,
+                _hasNextChapterListAtt).
+            shouldSubstring(_shouldSubstringBaseUrlAtFirst?:false , baseUrl, ::getUrlWithoutDomain)
+            val condition =
+                Patterns.WEB_URL.matcher(docs).matches() || docs.contains(_hasNextChapterListValue ?: "")
+            if (Patterns.WEB_URL.matcher(docs).matches()) {
+                nextChapterListLink = baseUrl + getUrlWithoutDomain(docs)
+            }
+
+            return condition
         } else {
             return false
         }
@@ -249,11 +275,13 @@ class SourceCreator(
 
 
     override fun chapterListRequest(book: Book, page: Int): Request {
-
-        if (!fetchChaptersEndpoint().isNullOrEmpty()) {
-            return  GET(baseUrl + getUrlWithoutDomain(fetchChaptersEndpoint() ?: ""))
+        if (nextChapterListLink.isNotBlank()) {
+            return GET(baseUrl + getUrlWithoutDomain(nextChapterListLink))
+        } else if (!_chaptersEndpoint.isNullOrEmpty()) {
+            return GET(baseUrl + getUrlWithoutDomain(book.link.replace(_chaptersEndpointWithoutPage
+                ?: "", _chaptersEndpoint.replace(pageFormat, page.toString()))))
         } else {
-            return  GET(baseUrl + getUrlWithoutDomain(book.link))
+            return GET(baseUrl + getUrlWithoutDomain(book.link))
         }
     }
 
@@ -267,25 +295,23 @@ class SourceCreator(
         val selectorName = _nameChapterSelector
         val attName = _nameChapterAtt
 
-        chapter.link = selectorReturnerStringType(element, selectorLink, attLink)
+        chapter.link = baseUrl + getUrlWithoutDomain(selectorReturnerStringType(element,
+            selectorLink,
+            attLink))
         chapter.title = selectorReturnerStringType(element, selectorName, attName)
         chapter.haveBeenRead = false
 
 
         return chapter
     }
+
     override fun chapterListParse(response: Response): ChaptersPage {
         val document = response.asJsoup()
-        var chapters = document.select(chapterListSelector()).map { chapterFromElement(it) }
+        val chapters = document.select(chapterListSelector()).map { chapterFromElement(it) }
         val hasNext = hasNextChaptersParse(document)
-        if (_isChapterStatsFromFirst) {
-            chapters = chapters.reversed()
-        }
 
         return ChaptersPage(chapters, hasNext)
     }
-
-
 
 
     override fun pageContentParse(document: Document): ChapterPage {
@@ -312,7 +338,9 @@ class SourceCreator(
         val selectorCover = _coverSearchedSelector
         val attCover = _coverSearchedAtt
 
-        book.link = selectorReturnerStringType(element, selectorLink, attLink)
+        book.link = baseUrl + getUrlWithoutDomain(selectorReturnerStringType(element,
+            selectorLink,
+            attLink))
         book.bookName = selectorReturnerStringType(element, selectorName, attName)
         book.coverLink = selectorReturnerStringType(element, selectorCover, attCover)
 
