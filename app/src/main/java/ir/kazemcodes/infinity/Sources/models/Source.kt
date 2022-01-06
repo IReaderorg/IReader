@@ -60,7 +60,7 @@ interface Source {
      *
      * @param book a book that contain need to be contain a bookName and a link
      */
-    suspend fun fetchBook(book: Book): Book
+    suspend fun fetchBook(book: Book): BookPage
 
     /**
      * Returns a list of chapter.

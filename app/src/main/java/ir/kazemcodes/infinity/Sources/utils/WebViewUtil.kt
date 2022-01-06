@@ -19,7 +19,7 @@ object WebViewUtil {
             // is not installed
             CookieManager.getInstance()
         } catch (e: Throwable) {
-           Timber.e("WebViewUtil : $e")
+            Timber.e("WebViewUtil : $e")
             return false
         }
 
@@ -41,6 +41,7 @@ fun WebView.setDefaultSettings() {
         useWideViewPort = true
         loadWithOverviewMode = true
         cacheMode = WebSettings.LOAD_DEFAULT
+
     }
 }
 

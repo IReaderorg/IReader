@@ -6,6 +6,7 @@ import ir.kazemcodes.infinity.api_feature.network.GET
 import ir.kazemcodes.infinity.data.network.utils.NetworkHelper
 import ir.kazemcodes.infinity.domain.models.remote.Book
 import ir.kazemcodes.infinity.domain.models.remote.Chapter
+import ir.kazemcodes.infinity.util.asJsoup
 import okhttp3.*
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
@@ -21,7 +22,6 @@ import java.util.*
  * A simple implementation for sources from a website.
  */
 abstract class HttpSource(context: Context) : Source, DIAware {
-
 
 
     final override val di: DI by closestDI(context)
@@ -89,26 +89,29 @@ abstract class HttpSource(context: Context) : Source, DIAware {
      * if there is not endpoint just return null
      * note: use "{page}" in the endpoint instead of page number
      */
-    abstract fun fetchPopularEndpoint() : String?
+    abstract fun fetchPopularEndpoint(): String?
+
     /**
      *return the end point for the fetch Search feature,
      * if there is not endpoint just return null
      * note: use "{page}" in the endpoint instead of page number
      */
-    abstract fun fetchSearchBookEndpoint() : String?
+    abstract fun fetchSearchBookEndpoint(): String?
+
     /**
      *return the end point for the fetch Chapters books feature,
      * if there is not endpoint just return null
      * note: use "{page}" in the endpoint instead of page number
      * note: use "{query}" in the endpoint instead of query
      */
-    abstract fun fetchChaptersEndpoint() : String?
+    abstract fun fetchChaptersEndpoint(): String?
+
     /**
      *return the end point for the fetch Content  books feature,
      * if there is not endpoint just return null
      * note: use "{page}" in the endpoint instead of page number
      */
-    abstract fun fetchContentEndpoint() : String?
+    abstract fun fetchContentEndpoint(): String?
 
     /**
      * Returns a page with a list of book. Normally it's not needed to
@@ -117,7 +120,14 @@ abstract class HttpSource(context: Context) : Source, DIAware {
      * @param page the page number to retrieve.
      */
     override suspend fun fetchPopular(page: Int): BooksPage {
-        return popularBookParse(client.newCall(popularBookRequest(page)).await())
+        var books = popularBookParse(client.newCall(popularBookRequest(page)).await(), page = page)
+        if (books.isCloudflareEnabled) {
+            books =
+                popularBookParse(document = network.getHtmlFromWebView(baseUrl + fetchPopularEndpoint()?.replace(
+                    pageFormat,
+                    page.toString())), page = page)
+        }
+        return books
     }
 
     /**
@@ -144,7 +154,11 @@ abstract class HttpSource(context: Context) : Source, DIAware {
      *
      * @param response the response from the site.
      */
-    abstract fun popularBookParse(response: Response): BooksPage
+    private fun popularBookParse(response: Response, page: Int): BooksPage {
+        return popularBookParse(response.asJsoup(), page)
+    }
+
+    abstract fun popularBookParse(document: Document, page: Int): BooksPage
 
 
     /**
@@ -153,14 +167,17 @@ abstract class HttpSource(context: Context) : Source, DIAware {
      * @param page the page number to retrieve.
      */
     override suspend fun fetchLatestUpdates(page: Int): BooksPage {
-        var books =  latestUpdatesParse(client.newCall(latestUpdatesRequest(page)).await(),page = page)
+        var books =
+            latestUpdatesParse(client.newCall(latestUpdatesRequest(page)).await(), page = page)
         if (books.isCloudflareEnabled) {
-            books = latestUpdatesParse(network.getHtmlFromWebView(baseUrl + fetchLatestUpdatesEndpoint()?.replace(pageFormat,page.toString())), page = page)
+            books =
+                latestUpdatesParse(network.getHtmlFromWebView(baseUrl + fetchLatestUpdatesEndpoint()?.replace(
+                    pageFormat,
+                    page.toString())), page = page)
         }
 
         return books
     }
-
 
 
     /**
@@ -176,7 +193,7 @@ abstract class HttpSource(context: Context) : Source, DIAware {
      *
      * @param response the response from the site.
      */
-    abstract fun latestUpdatesParse(response: Response,page: Int): BooksPage
+    abstract fun latestUpdatesParse(response: Response, page: Int): BooksPage
 
     /**
      * Parses the document from the site and returns a [BooksPage] object.
@@ -191,9 +208,13 @@ abstract class HttpSource(context: Context) : Source, DIAware {
      *
      * @param page the page number to retrieve.
      */
-    override suspend fun fetchBook(book: Book): Book {
+    override suspend fun fetchBook(book: Book): BookPage {
 
-        return bookDetailsParse(client.newCall(bookDetailsRequest(book)).await())
+        var Completebook = bookDetailsParse(client.newCall(bookDetailsRequest(book)).await())
+        if (Completebook.isCloudflareEnabled) {
+            Completebook = bookDetailsParse(network.getHtmlFromWebView(baseUrl + getUrlWithoutDomain(book.link)))
+        }
+        return Completebook
     }
 
     /**
@@ -211,7 +232,11 @@ abstract class HttpSource(context: Context) : Source, DIAware {
      *
      * @param response the response from the site.
      */
-    abstract fun bookDetailsParse(response: Response): Book
+    fun bookDetailsParse(response: Response): BookPage {
+        return bookDetailsParse(response.asJsoup())
+    }
+
+    abstract fun bookDetailsParse(document: Document): BookPage
 
     /**
      * Returns a list of chapter. Normally it's not needed to
@@ -221,7 +246,12 @@ abstract class HttpSource(context: Context) : Source, DIAware {
      * @param book the chapters to retrieve.
      */
     override suspend fun fetchChapters(book: Book, page: Int): ChaptersPage {
-        return chapterListParse(client.newCall(chapterListRequest(book, page)).await())
+        var chapters = chapterListParse(client.newCall(chapterListRequest(book, page)).await())
+        if (chapters.isCloudflareEnabled) {
+            chapters = chapterListParse(network.getHtmlFromWebView(baseUrl + getUrlWithoutDomain(book.link)))
+        }
+
+        return chapters
     }
 
     /**
@@ -247,7 +277,13 @@ abstract class HttpSource(context: Context) : Source, DIAware {
      *
      * @param response the response from the site.
      */
-    abstract fun chapterListParse(response: Response): ChaptersPage
+    abstract fun chapterListParse(document: Document): ChaptersPage
+
+    fun chapterListParse(response: Response): ChaptersPage {
+        return chapterListParse(response.asJsoup())
+    }
+
+
 
     /**
      * Returns a ChapterPage. Normally it's not needed to
@@ -256,7 +292,12 @@ abstract class HttpSource(context: Context) : Source, DIAware {
      * @param page the page number to retrieve.
      */
     override suspend fun fetchContent(chapter: Chapter): ChapterPage {
-        return pageContentParse(client.newCall(pageContentRequest(chapter)).await())
+        var content = pageContentParse(client.newCall(pageContentRequest(chapter)).await())
+
+        if (content.isCloudflareEnabled) {
+            content = pageContentParse(network.getHtmlFromWebView(baseUrl + getUrlWithoutDomain(chapter.link)))
+        }
+        return content
     }
 
     /**
@@ -274,7 +315,11 @@ abstract class HttpSource(context: Context) : Source, DIAware {
      *
      * @param response the response from the site.
      */
-    abstract fun pageContentParse(response: Response): ChapterPage
+    fun pageContentParse(response: Response): ChapterPage {
+        return pageContentParse(response.asJsoup())
+    }
+
+    abstract fun pageContentParse(document: Document): ChapterPage
 
     /**
      * Returns a BooksPage. Normally it's not needed to
@@ -284,7 +329,14 @@ abstract class HttpSource(context: Context) : Source, DIAware {
      * @param query the search query to retrieve.
      */
     override suspend fun fetchSearchBook(page: Int, query: String): BooksPage {
-        return searchBookParse(client.newCall(searchBookRequest(page, query)).await())
+        var books = searchBookParse(client.newCall(searchBookRequest(page, query)).await(), page)
+        if (books.isCloudflareEnabled) {
+            books =
+                searchBookParse(network.getHtmlFromWebView(baseUrl + fetchSearchBookEndpoint()?.replace(
+                    searchQueryFormat,
+                    query.toString())), page = page)
+        }
+        return books
     }
 
     /**
@@ -319,7 +371,11 @@ abstract class HttpSource(context: Context) : Source, DIAware {
      *
      * @param response the response from the site.
      */
-    abstract fun searchBookParse(response: Response): BooksPage
+    fun searchBookParse(response: Response, page: Int): BooksPage {
+        return searchBookParse(response.asJsoup(), page = page)
+    }
+
+    abstract fun searchBookParse(document: Document, page: Int): BooksPage
 
     /**
      * Returns the url of the given string without the scheme and domain.

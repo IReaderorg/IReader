@@ -23,7 +23,7 @@ class GetRemoteBookDetailUseCase {
             val bookDetail = source.fetchBook(book)
 
             Timber.d("Timber: Remote Book Detail Was Fetched")
-            emit(Resource.Success<Book>(bookDetail.copy(bookName = book.bookName,
+            emit(Resource.Success<Book>(bookDetail.book.copy(bookName = book.bookName,
                 link = book.link,
                 coverLink = book.coverLink,
                 source = source.name)))

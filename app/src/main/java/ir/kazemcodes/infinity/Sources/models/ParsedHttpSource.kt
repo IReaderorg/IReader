@@ -21,9 +21,8 @@ abstract class ParsedHttpSource(context: Context) : HttpSource(context) {
     abstract fun popularBookFromElement(element: Element): Book
 
 
-    override fun popularBookParse(response: Response): BooksPage {
-        val document = response.asJsoup()
-
+    override fun popularBookParse(document: Document,page: Int): BooksPage {
+        val isCloudflareEnable = document.body().allElements.text().contains(CLOUDFLARE_LOG)
         val books = document.select(popularBookSelector()).map { element ->
             popularBookFromElement(element)
         }
@@ -32,8 +31,9 @@ abstract class ParsedHttpSource(context: Context) : HttpSource(context) {
             document.select(selector).first()
         } != null
 
-        return BooksPage(books, hasNextPage)
+        return BooksPage(books, hasNextPage,isCloudflareEnable)
     }
+
 
     /**
      * Returns the Jsoup selector that returns a list of [Element] corresponding to each Book.
@@ -77,11 +77,8 @@ abstract class ParsedHttpSource(context: Context) : HttpSource(context) {
      *
      * @param document the parsed document.
      */
-    abstract fun bookDetailsParse(document: Document): Book
+    abstract override fun bookDetailsParse(document: Document): BookPage
 
-    override fun bookDetailsParse(response: Response): Book {
-        return bookDetailsParse(response.asJsoup())
-    }
 
     /**
      * Returns the Jsoup selector that returns a list of [Element] corresponding to each chapter.
@@ -96,25 +93,22 @@ abstract class ParsedHttpSource(context: Context) : HttpSource(context) {
     abstract fun chapterFromElement(element: Element): Chapter
 
 
-    override fun chapterListParse(response: Response): ChaptersPage {
-        val document = response.asJsoup()
+    override fun chapterListParse(document: Document): ChaptersPage {
         val chapters = document.select(chapterListSelector()).map { chapterFromElement(it) }
+
         val hasNext = hasNextChaptersParse(document)
+
 
         return ChaptersPage(chapters, hasNext)
     }
 
 
-    override fun pageContentParse(response: Response): ChapterPage {
-        return pageContentParse(response.asJsoup())
-    }
 
-    abstract fun pageContentParse(document: Document): ChapterPage
+    abstract override fun pageContentParse(document: Document): ChapterPage
 
 
-    override fun searchBookParse(response: Response): BooksPage {
-        val document = response.asJsoup()
-
+    override fun searchBookParse(document: Document,page: Int): BooksPage {
+        val isCloudflareEnable = document.body().allElements.text().contains(CLOUDFLARE_LOG)
         /**
          * I Add Filter Because sometimes this value contains null values
          * so the null book shows in search screen
@@ -128,7 +122,7 @@ abstract class ParsedHttpSource(context: Context) : HttpSource(context) {
 
         val hasNextPage = false
 
-        return BooksPage(books, hasNextPage)
+        return BooksPage(books, hasNextPage,isCloudflareEnable)
     }
 
     open fun searchBookNextValuePageSelector(): String? = null

@@ -7,8 +7,8 @@ fun List<String>.formatBasedOnDot(): String {
 fun List<String>.formatList(): String {
     return this.map { it.trim() }.joinToString("-").replace("\"", "").replace("[", "").replace("]", "")
 }
-fun String.shouldSubstring(condition: Boolean,string: String,unit : ((string: String) -> String)?=null) : String{
-    return if (condition) {
+fun String.shouldSubstring(condition: Boolean?,string: String,unit : ((string: String) -> String)?=null) : String{
+    return if (condition == true) {
         if (unit !=null) {
             return  string + unit(this)
 
