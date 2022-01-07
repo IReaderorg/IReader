@@ -35,6 +35,8 @@ class NetworkHelper(private val context: Context) : DIAware {
 
     val cookieManager = AndroidCookieJar()
 
+    val webView by lazy { WebView(context) }
+
     private val baseClientBuilder: OkHttpClient.Builder
         get() {
             val builder = OkHttpClient.Builder()
@@ -76,10 +78,10 @@ class NetworkHelper(private val context: Context) : DIAware {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     suspend fun getHtmlFromWebView(url: String): Document {
-        val webView = WebView(context)
+        //val webView = WebView(context)
         webView.setDefaultSettings()
         webView.loadUrl(url)
-        var docs: Document = Document("No Value Found")
+        var docs: Document = Document("No Data was Found")
         var isLoadUp: Boolean = false
         var delayedSec = 0
 

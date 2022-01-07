@@ -1,4 +1,4 @@
-package ir.kazemcodes.infinity.Sources.models
+package ir.kazemcodes.infinity.sources.models
 
 
 data class Latest(

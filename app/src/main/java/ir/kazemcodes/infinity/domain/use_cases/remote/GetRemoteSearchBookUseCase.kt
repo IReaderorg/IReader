@@ -19,7 +19,7 @@ class GetRemoteSearchBookUseCase {
             try {
                 emit(Resource.Loading())
                 Timber.d("Timber: GetRemoteSearchBookUseCase page: $page was Finished Called")
-                val books = source.fetchSearchBook(page, query)
+                val books = source.fetchSearch(page, query)
 
 
                 Timber.d("Timber: GetRemoteSearchBookUseCase page: $page was Finished Successfully")

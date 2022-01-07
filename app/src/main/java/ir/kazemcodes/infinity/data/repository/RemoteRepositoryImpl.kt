@@ -26,7 +26,6 @@ class RemoteRepositoryImpl(
         factory: (Context) -> WebView,
         totalRetries: Int,
     ): Flow<Chapter> = flow {
-
         chapters.forEachIndexed { index, chapter ->
             if (chapter.content.isNullOrEmpty()) {
                 var retries = totalRetries
@@ -48,13 +47,11 @@ class RemoteRepositoryImpl(
                                     is Resource.Error -> {
                                         success = false
                                     }
-                                    else -> {
-                                        success = false
+                                    is Resource.Loading -> {
+
                                     }
                                 }
                             }
-
-
                     } catch (e: Exception) {
                         if (--retries < 0) throw  e
                     }

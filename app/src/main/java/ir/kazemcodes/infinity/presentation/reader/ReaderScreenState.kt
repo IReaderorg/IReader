@@ -15,4 +15,5 @@ data class ReaderScreenState(
     val brightness: Float = 0.5f,
     val source: Source,
     val isReaderModeEnable: Boolean = true,
+    val distanceBetweenParagraphs : Int = 2
 )

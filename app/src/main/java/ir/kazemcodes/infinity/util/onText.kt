@@ -26,3 +26,10 @@ fun String.replaceImageFormat(condition: Boolean) : String {
         this
     }
 }
+
+fun String.applyPageFormat(page: Int) : String {
+    return this.replace("{page}",page.toString())
+}
+fun String.applySearchFormat(query : String,page: Int) : String {
+    return this.replace("{query}",page.toString())
+}

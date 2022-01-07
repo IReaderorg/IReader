@@ -14,7 +14,7 @@ class GetRemoteLatestBooksUseCase {
         try {
             emit(Resource.Loading())
             Timber.d("Timber: GetRemoteLatestBooksUseCase page: $page was Called")
-            val books = source.fetchLatestUpdates(page)
+            val books = source.fetchLatest(page)
 
             if (books.isCloudflareEnabled) {
                 emit(Resource.Error<List<Book>>("CloudFlare is Enable"))

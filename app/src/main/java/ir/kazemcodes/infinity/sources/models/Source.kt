@@ -28,7 +28,7 @@ interface Source {
      *
      * @param page the page number to retrieve.
      */
-    suspend fun fetchLatestUpdates(page: Int): BooksPage
+    suspend fun fetchLatest(page: Int): BooksPage
 
 
     /**
@@ -44,7 +44,7 @@ interface Source {
      * @param page the page number to retrieve.
      * @param query the search query.
      */
-    suspend fun fetchSearchBook(page: Int, query: String): BooksPage
+    suspend fun fetchSearch(page: Int, query: String): BooksPage
 
 
     /**

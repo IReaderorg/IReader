@@ -1,4 +1,4 @@
-package ir.kazemcodes.infinity.Sources.sources
+package ir.kazemcodes.infinity.sources.sources
 
 //
 //class RealWebNovelApi(context: Context ) : ParsedHttpSource(context) {

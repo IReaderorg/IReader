@@ -20,6 +20,7 @@ import javax.inject.Inject
 
 @HiltAndroidApp
 class MyApplication : Application(),DIAware, Configuration.Provider {
+
     @Inject
     lateinit var localUseCase: LocalUseCase
 
@@ -28,6 +29,9 @@ class MyApplication : Application(),DIAware, Configuration.Provider {
 
     @Inject
     lateinit var dataStoreUseCase: DataStoreUseCase
+
+    @Inject
+    lateinit var workerFactory: HiltWorkerFactory
 
     override val di: DI = DI.lazy {
         import(KodeinModule)
@@ -38,8 +42,7 @@ class MyApplication : Application(),DIAware, Configuration.Provider {
         bindSingleton<DataStoreUseCase> { dataStoreUseCase }
     }
 
-    @Inject
-    lateinit var workerFactory: HiltWorkerFactory
+
 
     private var mFirebaseAnalytics: FirebaseAnalytics? = null
     override fun onCreate() {
@@ -59,6 +62,7 @@ class MyApplication : Application(),DIAware, Configuration.Provider {
             Timber.e("Failed to modify notification channels")
         }
     }
+
     override fun getWorkManagerConfiguration(): Configuration =
         Configuration.Builder()
             .setWorkerFactory(workerFactory)

@@ -137,13 +137,17 @@ fun ReadingScreen(
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
                     .clickable { viewModel.onEvent(ReaderEvent.ToggleReaderMode(!state.isReaderModeEnable)) }
-                    .padding(16.dp)
+                    .padding(8.dp)
+                    .wrapContentSize(Alignment.CenterStart)
             ) {
                 if (state.chapter.isChapterNotEmpty()) {
                     Text(
-                        text = state.chapter.content.joinToString("\n\n") ?: "",
+                        modifier = modifier.fillMaxWidth()
+                            .align(Alignment.TopStart),
+                        text = state.chapter.content.joinToString("\n".repeat(state.distanceBetweenParagraphs)),
                         fontSize = viewModel.state.value.fontSize.sp,
-                        fontFamily = viewModel.state.value.font.fontFamily
+                        fontFamily = viewModel.state.value.font.fontFamily,
+                        textAlign = TextAlign.Start
                     )
                 }
             }

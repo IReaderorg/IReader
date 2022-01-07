@@ -1,8 +1,8 @@
 package ir.kazemcodes.infinity.data.network
 
 import android.content.Context
-import ir.kazemcodes.infinity.Sources.models.*
 import ir.kazemcodes.infinity.data.network.models.Source
+import ir.kazemcodes.infinity.sources.models.*
 
 
 class Extensions(context: Context) {
