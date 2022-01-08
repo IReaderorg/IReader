@@ -209,7 +209,6 @@ class AvailableSources(context: Context) {
 
         ),
         content = Content(
-
             pageTitleSelector = "h1.main-title",
             pageContentSelector = "div.par p"
         )
@@ -220,6 +219,9 @@ class AvailableSources(context: Context) {
         _name = "Wuxiaworld",
         _lang = "en",
         _baseUrl = "https://wuxiaworld.site",
+        _supportsMostPopular = true,
+        _supportsSearch = true,
+        _supportsLatest = true,
         latest = Latest(
             endpoint = "/novel-list/page/{page}/",
             selector = "div.page-item-detail",
@@ -251,6 +253,23 @@ class AvailableSources(context: Context) {
             ajaxSelector = "div.reading-content div.text-left p:nth-child(3)",
             selector = "div.read-container div.reading-content h3,p",
             pageContentSelector = "div.reading-content h3,p"
+        ),
+        popular = Popular(
+            endpoint = "/novel-list/page/{page}/?m_orderby=views",
+            selector = "div.page-item-detail",
+            nameSelector = "h3.h5 a",
+            linkSelector = "h3.h5 a",
+            linkAtt = "href",
+            coverSelector = "img",
+            coverAtt = "src",
+        ), search = Search(
+            endpoint = "/?s={query}&post_type=wp-manga&op=&author=&artist=&release=&adult=",
+            selector = "div.c-tabs-item__content",
+            nameSelector = "div.post-title h3.h4 a",
+            linkSelector = "div.post-title h3.h4 a",
+            linkAtt = "href",
+            coverSelector = "img",
+            coverAtt = "src",
         )
     )
     val sourcesList = listOf<Source>(

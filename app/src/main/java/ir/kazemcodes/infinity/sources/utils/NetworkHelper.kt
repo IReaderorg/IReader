@@ -81,8 +81,15 @@ class NetworkHelper(private val context: Context) : DIAware {
     @OptIn(ExperimentalCoroutinesApi::class)
     suspend fun getHtmlFromWebView(url: String, ajaxSelector: String? = null): Document {
 
-        webView.setDefaultSettings()
-        webView.settings.javaScriptEnabled = true
+        with(webView.settings) {
+            javaScriptEnabled = true
+            domStorageEnabled = true
+            databaseEnabled = true
+            setAppCacheEnabled(true)
+            useWideViewPort = true
+            loadWithOverviewMode = true
+            cacheMode = android.webkit.WebSettings.LOAD_DEFAULT
+        }
         webView.loadUrl(url)
 
 
