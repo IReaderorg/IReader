@@ -1,5 +1,6 @@
 package ir.kazemcodes.infinity.data.network.utils
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.webkit.WebView
 import ir.kazemcodes.infinity.data.network.models.*
@@ -76,22 +77,31 @@ class NetworkHelper(private val context: Context) : DIAware {
             .build()
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     @OptIn(ExperimentalCoroutinesApi::class)
-    suspend fun getHtmlFromWebView(url: String): Document {
-        //val webView = WebView(context)
+    suspend fun getHtmlFromWebView(url: String, ajaxSelector: String? = null): Document {
+
         webView.setDefaultSettings()
+        webView.settings.javaScriptEnabled = true
         webView.loadUrl(url)
+
+
         var docs: Document = Document("No Data was Found")
         var isLoadUp: Boolean = false
         var delayedSec = 0
-
-
-
+        val maxDelay = 60000
         webView.webViewClient = object : WebViewClientCompat() {
             override fun onPageFinished(view: WebView, url: String) {
                 coroutineScope.launch(Dispatchers.Main) {
                     docs = Jsoup.parse(webView.getHtml())
-                    isLoadUp = true
+                    if (ajaxSelector != null) {
+                        while (docs.select(ajaxSelector).text().isEmpty()) {
+                            docs = Jsoup.parse(webView.getHtml())
+                        }
+                        isLoadUp = true
+                    } else {
+                        isLoadUp = true
+                    }
                 }
             }
 
@@ -103,15 +113,17 @@ class NetworkHelper(private val context: Context) : DIAware {
                 isMainFrame: Boolean,
             ) {
                 isLoadUp = true
-                Timber.e("not shown")
+                Timber.e("WebView: Not shown")
+                webView.destroy()
             }
         }
-        while (!isLoadUp) {
+        docs = Jsoup.parse(webView.getHtml())
+        while (!isLoadUp && delayedSec < maxDelay) {
             delay(200)
+            delayedSec += 200
         }
 
-        docs = Jsoup.parse(webView.getHtml())
-        Timber.e(docs.toString())
+        //Timber.e(docs.toString())
         return docs
     }
 

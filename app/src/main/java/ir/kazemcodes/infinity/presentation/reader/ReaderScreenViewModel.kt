@@ -17,6 +17,8 @@ import ir.kazemcodes.infinity.util.Resource
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import timber.log.Timber
 
 
@@ -119,9 +121,8 @@ class ReaderScreenViewModel(
     }
 
     private fun getReadingContentRemotely() {
-        coroutineScope.launch(Dispatchers.IO) {
             remoteUseCase.getRemoteReadingContentUseCase(state.value.chapter, source = source)
-                .collect { result ->
+                .onEach { result ->
                     when (result) {
                         is Resource.Success -> {
                             _state.value = state.value
@@ -154,8 +155,7 @@ class ReaderScreenViewModel(
                             )
                         }
                     }
-                }
-        }
+                }.launchIn(coroutineScope)
 
     }
 

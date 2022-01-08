@@ -15,3 +15,11 @@ fun decodeString(string: String): String {
 
 fun LazyListState.isScrolledToTheEnd() =
     layoutInfo.visibleItemsInfo.lastOrNull()?.index == layoutInfo.totalItemsCount - 1
+
+
+fun Any?.isNull() : Boolean{
+    return this == null
+}
+fun Any?.isNotNull() : Boolean{
+    return this != null
+}

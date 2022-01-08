@@ -76,7 +76,7 @@ class AvailableSources(context: Context) {
             authorBookSelector = "div.author-content a",
             categorySelector = "div.genres-content a",
         ),
-        chapterList = ChapterList(
+        chapters = Chapters(
             _isChapterStatsFromFirst = true,
             selector = "li.wp-manga-chapter",
             linkSelector = "a",
@@ -132,7 +132,7 @@ class AvailableSources(context: Context) {
             authorBookAtt = "title",
             categorySelector = "div.item div.right a.a1",
         ),
-        chapterList = ChapterList(
+        chapters = Chapters(
             supportNextPagesList = true,
             _isChapterStatsFromFirst = true,
             endpoint = "/{page}.html",
@@ -181,8 +181,8 @@ class AvailableSources(context: Context) {
         ),
         search = Search(
             endpoint = "/wp-admin/admin-ajax.php?action=autosuggest&q={query}&__amp_source_origin=https%3A%2F%2Fwww.mtlnovel.com",
-            isGetRequest = true,
-            isHTMLType = false,
+            isGetRequestType = true,
+            isHtmlType = false,
             selector = "$.items[0].results",
             nameSelector = "title",
             linkSelector = "permalink",
@@ -197,7 +197,7 @@ class AvailableSources(context: Context) {
             categorySelector = "#currentgen a",
             descriptionSelector = "div.desc p"
         ),
-        chapterList = ChapterList(
+        chapters = Chapters(
             _subStringSomethingAtEnd = "/chapter-list/",
             _shouldStringSomethingAtEnd = true,
             selector = "a.ch-link",
@@ -230,21 +230,27 @@ class AvailableSources(context: Context) {
             coverAtt = "src",
         ),
         detail = Detail(
-            nameSelector = "h1",
+            nameSelector = "div.post-title h1",
             coverSelector = "div.summary_image a img",
             coverAtt = "src",
-            descriptionSelector = "div.summary__content p",
+            descriptionSelector = "div.description-summary div.summary__content p",
             authorBookSelector = "div.author-content a",
             authorBookAtt = "rel",
             categorySelector = "div.genres-content a"
         ),
-        chapterList = ChapterList(
-            _shouldStringSomethingAtEnd = true,
-            _subStringSomethingAtEnd = "ajax/chapters/",
+        chapters = Chapters(
+            //_shouldStringSomethingAtEnd = true,
+            //_subStringSomethingAtEnd = "ajax/chapters/",
+            ajaxSelector = "#manga-chapters-holder > div.page-content-listing.single-page > div > ul > li:nth-child(1) > a",
             selector = "li.wp-manga-chapter",
             nameSelector = "a",
-            linkSelector = "href",
-            isGetRequest = false
+            linkSelector = "a",
+            linkAtt = "href",
+            isGetRequestType = false
+        ), content = Content(
+            ajaxSelector = "div.reading-content > div.text-left > p:nth-child(3)",
+            selector = "div.read-container div.reading-content h3,p",
+            pageContentSelector = "div.reading-content h3,p"
         )
     )
     val sourcesList = listOf<Source>(

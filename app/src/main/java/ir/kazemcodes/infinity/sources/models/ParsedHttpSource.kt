@@ -72,12 +72,14 @@ abstract class ParsedHttpSource(context: Context) : HttpSource(context) {
         return BooksPage(books, hasNextPage,isCloudflareEnable, document.body().allElements.text())
     }
     override fun chaptersParse(document: Document): ChaptersPage {
+        val isCloudflareEnable = document.body().allElements.text().contains(CLOUDFLARE_LOG)
         val chapters = document.select(chaptersSelector).map { chapterFromElement(it) }
+
 
         val hasNext = hasNextChaptersParse(document)
 
 
-        return ChaptersPage(chapters, hasNext)
+        return ChaptersPage(chapters, hasNext, isCloudflareEnabled = isCloudflareEnable)
     }
 
 
@@ -102,5 +104,6 @@ abstract class ParsedHttpSource(context: Context) : HttpSource(context) {
     }
 
     /****************************************************************************************************/
+
 
 }

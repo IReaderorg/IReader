@@ -4,7 +4,7 @@ import ir.kazemcodes.infinity.domain.models.remote.Chapter
 import ir.kazemcodes.infinity.domain.repository.Repository
 import ir.kazemcodes.infinity.util.Resource
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import timber.log.Timber
 import javax.inject.Inject
@@ -20,8 +20,9 @@ class GetLocalChapterReadingContentUseCase @Inject constructor(
                 Timber.d("Timber: GetLocalChapterReadingContentUseCase was Called")
                 repository.localChapterRepository.getChapterByChapter(chapterTitle = chapter.title,
                     bookName = chapter.bookName ?: "")
-                    .collect { chapter ->
+                    .first { chapter ->
                             emit(Resource.Success<Chapter?>(data = chapter?.toChapter()))
+                        return@first chapter != null
                     }
                 Timber.d("GetLocalChapterReadingContentUseCase was Finished Successfully")
             } catch (e: Exception) {

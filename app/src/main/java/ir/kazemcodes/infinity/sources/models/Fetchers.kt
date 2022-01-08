@@ -2,8 +2,11 @@ package ir.kazemcodes.infinity.sources.models
 
 
 data class Latest(
-    val endpoint: String,
-    val selector: String,
+    override val endpoint: String? = null,
+    override val ajaxSelector: String? =null,
+    override val isGetRequestType: Boolean = true,
+    override val isHtmlType: Boolean= true,
+    override val selector: String? = null,
     val nextPageSelector: String? = null,
     val nextPageValue: String? = null,
     val linkSelector: String? = null,
@@ -17,12 +20,14 @@ data class Latest(
     val nextPageLinkSelector: String? = null,
     val nextPageLinkAtt: String? = null,
     val maxPageIndex: Int? = null,
-)
+) : Fetcher
 
 data class Popular(
-    val endpoint: String,
-    val selector: String,
-    val isGetRequest: Boolean = true,
+    override val endpoint: String? = null,
+    override val ajaxSelector: String? =null,
+    override val isGetRequestType: Boolean = true,
+    override val isHtmlType: Boolean= true,
+    override val selector: String? = null,
     val nextBookSelector: String? = null,
     val nextBookValue: String? = null,
     val linkSelector: String? = null,
@@ -32,9 +37,14 @@ data class Popular(
     val nameAtt: String? = null,
     val coverSelector: String? = null,
     val coverAtt: String? = null,
-)
+) : Fetcher
 
 data class Detail(
+    override val endpoint: String? = null,
+    override val ajaxSelector: String? =null,
+    override val isGetRequestType: Boolean = true,
+    override val isHtmlType: Boolean= true,
+    override val selector: String? = null,
     val nameSelector: String? = null,
     val nameAtt: String? = null,
     val coverSelector: String? = null,
@@ -45,14 +55,14 @@ data class Detail(
     val authorBookAtt: String? = null,
     val categorySelector: String? = null,
     val categoryAtt: String? = null,
-)
+) : Fetcher
 
 data class Search(
-    val endpoint: String,
-    val selector: String? = null,
-    val jsonPath: String? = null,
-    val isGetRequest: Boolean = true,
-    val isHTMLType: Boolean = true,
+    override val endpoint: String? = null,
+    override val ajaxSelector: String? =null,
+    override val isGetRequestType: Boolean = true,
+    override val isHtmlType: Boolean= true,
+    override val selector: String? = null,
     val linkSelector: String? = null,
     val linkAtt: String? = null,
     val linkSearchedSubString: Boolean = false,
@@ -62,12 +72,15 @@ data class Search(
     val coverAtt: String? = null,
     val hasNextSearchedBooksNextPageSelector: String? = null,
     val hasNextSearchedBookNextPageValue: String? = null,
-)
+) : Fetcher
 
-data class ChapterList(
-    val endpoint: String? = null,
+data class Chapters(
+    override val endpoint: String? = null,
+    override val ajaxSelector: String? =null,
+    override val isGetRequestType: Boolean = true,
+    override val isHtmlType: Boolean= true,
+    override val selector: String? = null,
     val chaptersEndpointWithoutPage: String? = null,
-    val selector: String? = null,
     val _isChapterStatsFromFirst: Boolean? = null,
     val nameSelector: String? = null,
     val nameAtt: String? = null,
@@ -81,19 +94,28 @@ data class ChapterList(
     val _shouldSubstringBaseUrlAtFirst: Boolean? = null,
     val _shouldStringSomethingAtEnd: Boolean = false,
     val _subStringSomethingAtEnd: String?=null,
-    val isHtmlType : Boolean = true,
-    val isGetRequest: Boolean=true,
-    val chapterPageNumberSelector: String?=null
-)
+    val chapterPageNumberSelector: String?=null,
+) : Fetcher
 
 data class Content(
-    val endpoint: String? = null,
+    override val endpoint: String? = null,
+    override val ajaxSelector: String? = null,
+    override val isHtmlType: Boolean = true,
+    override val isGetRequestType: Boolean = true,
+    override val selector: String? = null,
     val pageTitleSelector : String?=null,
     val pageTitleAtt : String?=null,
     val pageContentSelector: String? = null,
     val pageContentAtt: String? = null,
+    ) : Fetcher
 
-)
+interface Fetcher {
+    val endpoint: String?
+    val ajaxSelector : String?
+    val isHtmlType : Boolean
+    val isGetRequestType: Boolean
+    val selector: String?
+}
 
 
 

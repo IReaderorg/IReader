@@ -42,6 +42,7 @@ fun WebView.setDefaultSettings() {
         loadWithOverviewMode = true
         cacheMode = WebSettings.LOAD_DEFAULT
 
+
     }
 }
 
