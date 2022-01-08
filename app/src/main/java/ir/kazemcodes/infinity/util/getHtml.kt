@@ -13,12 +13,12 @@ suspend fun WebView.getHtml(): String = suspendCancellableCoroutine { continuati
 
     evaluateJavascript(
         "(function() {\n" +
-            "    return (\n" +
-            "        '<html>' +\n" +
-            "        document.getElementsByTagName('html')[0].innerHTML +\n" +
-            "        '</html>'\n" +
-            "    );\n" +
-            "})();"
+                "    return (\n" +
+                "        '<html>' +\n" +
+                "        document.getElementsByTagName('html')[0].innerHTML +\n" +
+                "        '</html>'\n" +
+                "    );\n" +
+                "})();"
     ) {
         continuation.resume(
             it!!.replace("\\u003C", "<")
@@ -32,11 +32,11 @@ suspend fun WebView.getHtml(): String = suspendCancellableCoroutine { continuati
     }
 }
 
-fun String.getHtml() : String {
-    return  this.replace("\\<.*?>", "")
+fun String.getHtml(): String {
+    return this.replace("\\<.*?>", "")
 }
 
- fun selectorReturnerStringType(
+fun selectorReturnerStringType(
     document: Document,
     selector: String? = null,
     att: String? = null,
@@ -51,7 +51,8 @@ fun String.getHtml() : String {
         return ""
     }
 }
- fun selectorReturnerStringType(
+
+fun selectorReturnerStringType(
     element: Element,
     selector: String? = null,
     att: String? = null,
@@ -67,7 +68,7 @@ fun String.getHtml() : String {
     }
 }
 
- fun selectorReturnerListType(
+fun selectorReturnerListType(
     element: Element,
     selector: String? = null,
     att: String? = null,
@@ -82,7 +83,8 @@ fun String.getHtml() : String {
         return emptyList()
     }
 }
- fun selectorReturnerListType(
+
+fun selectorReturnerListType(
     document: Document,
     selector: String? = null,
     att: String? = null,
@@ -90,7 +92,13 @@ fun String.getHtml() : String {
     if (selector.isNullOrEmpty() && !att.isNullOrEmpty()) {
         return listOf(document.attr(att))
     } else if (!selector.isNullOrEmpty() && att.isNullOrEmpty()) {
-        return document.select(selector).eachText()
+        return document.select(selector).map {
+            it.html().replace("<br>\n<br>", "\n").replace("\\u003C", "<")
+                .replace("\\n", "")
+                .replace("\\t", "")
+                .replace("\\\"", "\"")
+                .replace("<hr />", "")
+        }
     } else if (!selector.isNullOrEmpty() && !att.isNullOrEmpty()) {
         return listOf(document.select(selector).attr(att))
     } else {

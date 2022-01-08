@@ -7,11 +7,11 @@ data class Latest(
     override val isGetRequestType: Boolean = true,
     override val isHtmlType: Boolean= true,
     override val selector: String? = null,
+    override val addBaseUrlToLink: Boolean =false,
     val nextPageSelector: String? = null,
     val nextPageValue: String? = null,
     val linkSelector: String? = null,
     val linkAtt: String? = null,
-    val linkSubString: Boolean = false,
     val nameSelector: String? = null,
     val nameAtt: String? = null,
     val coverSelector: String? = null,
@@ -28,11 +28,11 @@ data class Popular(
     override val isGetRequestType: Boolean = true,
     override val isHtmlType: Boolean= true,
     override val selector: String? = null,
+    override val addBaseUrlToLink: Boolean =false,
     val nextBookSelector: String? = null,
     val nextBookValue: String? = null,
     val linkSelector: String? = null,
     val linkAtt: String? = null,
-    val linkSubString: Boolean = false,
     val nameSelector: String? = null,
     val nameAtt: String? = null,
     val coverSelector: String? = null,
@@ -45,6 +45,7 @@ data class Detail(
     override val isGetRequestType: Boolean = true,
     override val isHtmlType: Boolean= true,
     override val selector: String? = null,
+    override val addBaseUrlToLink: Boolean =false,
     val nameSelector: String? = null,
     val nameAtt: String? = null,
     val coverSelector: String? = null,
@@ -63,6 +64,7 @@ data class Search(
     override val isGetRequestType: Boolean = true,
     override val isHtmlType: Boolean= true,
     override val selector: String? = null,
+    override val addBaseUrlToLink: Boolean =false,
     val linkSelector: String? = null,
     val linkAtt: String? = null,
     val linkSearchedSubString: Boolean = false,
@@ -80,13 +82,13 @@ data class Chapters(
     override val isGetRequestType: Boolean = true,
     override val isHtmlType: Boolean= true,
     override val selector: String? = null,
+    override val addBaseUrlToLink: Boolean =false,
     val chaptersEndpointWithoutPage: String? = null,
     val _isChapterStatsFromFirst: Boolean? = null,
     val nameSelector: String? = null,
     val nameAtt: String? = null,
     val linkSelector: String? = null,
     val linkAtt: String? = null,
-    val linkSubString: Boolean = false,
     val supportNextPagesList: Boolean = false,
     val hasNextChapterListSelector: String? = null,
     val hasNextChapterListAtt: String? = null,
@@ -102,6 +104,7 @@ data class Content(
     override val ajaxSelector: String? = null,
     override val isHtmlType: Boolean = true,
     override val isGetRequestType: Boolean = true,
+    override val addBaseUrlToLink: Boolean =false,
     override val selector: String? = null,
     val pageTitleSelector : String?=null,
     val pageTitleAtt : String?=null,
@@ -115,6 +118,7 @@ interface Fetcher {
     val isHtmlType : Boolean
     val isGetRequestType: Boolean
     val selector: String?
+    val addBaseUrlToLink: Boolean
 }
 
 

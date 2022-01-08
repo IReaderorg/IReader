@@ -6,7 +6,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,6 +24,7 @@ import ir.kazemcodes.infinity.presentation.book_detail.DEFAULT.MAX_BRIGHTNESS
 import ir.kazemcodes.infinity.presentation.book_detail.DEFAULT.MIN_BRIGHTNESS
 import ir.kazemcodes.infinity.presentation.reader.components.FontMenuComposable
 import ir.kazemcodes.infinity.presentation.reader.components.FontSizeChangerComposable
+import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarBackButton
 import ir.kazemcodes.infinity.util.findActivity
 
 
@@ -61,10 +62,13 @@ fun ReadingScreen(
                         contentColor = MaterialTheme.colors.onBackground,
                         elevation = 8.dp,
                         navigationIcon = {
-                            IconButton(onClick = { backStack.goBack() }) {
+                            TopAppBarBackButton(backStack = backStack)
+                        },
+                        actions = {
+                            IconButton(onClick = { viewModel.getReadingContentRemotely() }) {
                                 Icon(
-                                    imageVector = Icons.Default.ArrowBack,
-                                    contentDescription = "ArrowBack",
+                                    imageVector = Icons.Default.Autorenew,
+                                    contentDescription = "Refresh",
                                     tint = MaterialTheme.colors.onBackground,
                                 )
                             }
@@ -75,13 +79,7 @@ fun ReadingScreen(
                         elevation = 0.dp,
                         backgroundColor = MaterialTheme.colors.background,
                         navigationIcon = {
-                            IconButton(onClick = { backStack.goBack() }) {
-                                Icon(
-                                    imageVector = Icons.Default.ArrowBack,
-                                    contentDescription = "ArrowBack",
-                                    tint = MaterialTheme.colors.onBackground,
-                                )
-                            }
+                            TopAppBarBackButton(backStack = backStack)
                         })
                 }
             },
@@ -142,7 +140,8 @@ fun ReadingScreen(
             ) {
                 if (state.chapter.isChapterNotEmpty()) {
                     Text(
-                        modifier = modifier.fillMaxWidth()
+                        modifier = modifier
+                            .fillMaxWidth()
                             .align(Alignment.TopStart),
                         text = state.chapter.content.joinToString("\n".repeat(state.distanceBetweenParagraphs)),
                         fontSize = viewModel.state.value.fontSize.sp,

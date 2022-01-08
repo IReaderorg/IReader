@@ -272,10 +272,67 @@ class AvailableSources(context: Context) {
             coverAtt = "src",
         )
     )
+    val myLoveNovel = SourceCreator(
+        context = context,
+        _name = "MyLoveNovel",
+        _lang = "en",
+        _supportsLatest = true,
+        _baseUrl = "https://m.mylovenovel.com/",
+        _supportsSearch = true,
+        _supportsMostPopular = true,
+        latest = Latest(
+            endpoint = "/lastupdate-{page}.html",
+            selector = "ul.list li a",
+            nameSelector = "p.bookname",
+            linkAtt = "href",
+            addBaseUrlToLink = true,
+            coverSelector = "img",
+            coverAtt = "src",
+        ),
+        popular = Popular(
+            endpoint = "/monthvisit-{page}.html",
+            selector = "ul.list li a",
+            nameSelector = "p.bookname",
+            linkAtt = "href",
+            addBaseUrlToLink = true,
+            coverSelector = "img",
+            coverAtt = "src",
+        ),
+        search = Search(
+            endpoint = "/index.php?s=so&module=book&keyword={query}",
+            selector = "ul.list li a",
+            nameSelector = "p.bookname",
+            linkAtt = "href",
+            addBaseUrlToLink = true,
+            coverSelector = "img",
+            coverAtt = "src",
+        ),
+        detail = Detail(
+            nameSelector = "div.detail img",
+            nameAtt = "alt",
+            coverSelector = "div.detail img",
+            coverAtt = "src",
+            authorBookSelector = "#info > div.main > div.detail > p:nth-child(3)",
+            categorySelector = "div.detail p.line a",
+            descriptionSelector = "div.intro",
+        ),
+        chapters = Chapters(
+            selector = "#morelist ul.vlist li",
+            nameSelector = "a",
+            linkSelector = "a",
+            linkAtt = "href",
+            addBaseUrlToLink = true
+        ),
+        content = Content(
+            pageTitleSelector = "h1.headline",
+            pageContentSelector = "div.content"
+        )
+    )
     val sourcesList = listOf<Source>(
         realwebnovel,
         freeWebNovel,
         mtl,
-        wuxiaworld
+        wuxiaworld,
+        myLoveNovel
         )
 }

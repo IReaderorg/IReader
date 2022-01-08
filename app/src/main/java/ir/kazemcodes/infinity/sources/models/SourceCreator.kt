@@ -156,7 +156,7 @@ class SourceCreator(
 
         book.link = baseUrl + getUrlWithoutDomain(selectorReturnerStringType(element,
             selectorLink,
-            attLink).shouldSubstring(popular?.linkSubString, baseUrl))
+            attLink).shouldSubstring(popular?.addBaseUrlToLink, baseUrl))
         book.bookName = selectorReturnerStringType(element, selectorName, attName)
         book.coverLink = selectorReturnerStringType(element, selectorCover, attCover)
 
@@ -177,7 +177,7 @@ class SourceCreator(
 
         book.link = baseUrl + getUrlWithoutDomain(selectorReturnerStringType(element,
             selectorLink,
-            attLink))
+            attLink).shouldSubstring(latest?.addBaseUrlToLink, baseUrl))
         book.bookName = selectorReturnerStringType(element, selectorName, attName)
         book.coverLink = selectorReturnerStringType(element, selectorCover, attCover)
 
@@ -197,7 +197,7 @@ class SourceCreator(
 
         chapter.link = baseUrl + getUrlWithoutDomain(selectorReturnerStringType(element,
             selectorLink,
-            attLink))
+            attLink).shouldSubstring(chapters?.addBaseUrlToLink, baseUrl))
         chapter.title = selectorReturnerStringType(element, selectorName, attName)
         chapter.haveBeenRead = false
 
@@ -216,7 +216,7 @@ class SourceCreator(
 
         book.link = baseUrl + getUrlWithoutDomain(selectorReturnerStringType(element,
             selectorLink,
-            attLink))
+            attLink).shouldSubstring(search?.addBaseUrlToLink, baseUrl))
         book.bookName = selectorReturnerStringType(element, selectorName, attName)
         book.coverLink = selectorReturnerStringType(element, selectorCover, attCover)
 

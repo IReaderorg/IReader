@@ -6,6 +6,7 @@ import android.webkit.WebViewClient
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -16,11 +17,11 @@ import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarBackButt
 
 
 @Composable
-fun WebPageScreen(urlToRender: String) {
+fun WebPageScreen(urlToRender: String,title: String?=null) {
     val backStack = LocalBackstack.current
     Scaffold(topBar = {
         TopAppBar(
-        title = {},
+        title = { Text(text = title?:"")},
         navigationIcon = {
             TopAppBarBackButton(backStack = backStack)
         },

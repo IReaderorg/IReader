@@ -120,7 +120,7 @@ class ReaderScreenViewModel(
         }
     }
 
-    private fun getReadingContentRemotely() {
+    fun getReadingContentRemotely() {
             remoteUseCase.getRemoteReadingContentUseCase(state.value.chapter, source = source)
                 .onEach { result ->
                     when (result) {
