@@ -137,7 +137,7 @@ abstract class HttpSource(context: Context) : Source, DIAware {
     override suspend fun fetchLatest(page: Int): BooksPage {
         val request = client.newCall(latestRequest(page)).await()
         var books = latestParse(request, page = page)
-        if (books.isCloudflareEnabled || request.code != 200) {
+        if (books.isCloudflareEnabled || request.code != 200 || !books.ajaxLoaded) {
             books =
                 latestParse(network.getHtmlFromWebView(baseUrl + fetchLatestEndpoint?.applyPageFormat(page)), page = page)
         }
@@ -202,7 +202,7 @@ abstract class HttpSource(context: Context) : Source, DIAware {
     override suspend fun fetchSearch(page: Int, query: String): BooksPage {
         val request = client.newCall(searchRequest(page, query)).await()
         var books = searchBookParse(request, page)
-        if (books.isCloudflareEnabled || request.code != 200) {
+        if (books.isCloudflareEnabled || request.code != 200 || !books.ajaxLoaded) {
             books =
                 searchParse(network.getHtmlFromWebView(baseUrl + fetchSearchEndpoint?.applySearchFormat(query,page)), page = page)
         }

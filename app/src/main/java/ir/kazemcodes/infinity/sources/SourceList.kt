@@ -241,14 +241,14 @@ class AvailableSources(context: Context) {
         chapters = Chapters(
             //_shouldStringSomethingAtEnd = true,
             //_subStringSomethingAtEnd = "ajax/chapters/",
-            ajaxSelector = "#manga-chapters-holder > div.page-content-listing.single-page > div > ul > li:nth-child(1) > a",
+            ajaxSelector = "div.listing-chapters_wrap li:nth-child(1)  a",
             selector = "li.wp-manga-chapter",
             nameSelector = "a",
             linkSelector = "a",
             linkAtt = "href",
             isGetRequestType = false
         ), content = Content(
-            ajaxSelector = "div.reading-content > div.text-left > p:nth-child(3)",
+            ajaxSelector = "div.reading-content div.text-left p:nth-child(3)",
             selector = "div.read-container div.reading-content h3,p",
             pageContentSelector = "div.reading-content h3,p"
         )

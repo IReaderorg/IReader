@@ -228,6 +228,8 @@ class SourceCreator(
         val isCloudflareEnable =
             document.body().allElements.text().contains(Constants.CLOUDFLARE_LOG)
 
+        val ajaxLoaded = ajaxChaptersSelector.isNull() || (selectorReturnerStringType(document,ajaxChaptersSelector).isNotEmpty() && ajaxChaptersSelector.isNotNull())
+
         val books = document.select(latest?.selector).map { element ->
             latestFromElement(element)
         }
@@ -239,14 +241,14 @@ class SourceCreator(
             nextChapterListLink = parseNextChapterListType(document, page)
         }
 
-        return BooksPage(books, hasNextPage, isCloudflareEnable, document.body().allElements.text())
+        return BooksPage(books, hasNextPage, isCloudflareEnable, document.body().allElements.text(),ajaxLoaded=ajaxLoaded)
     }
 
     override fun detailParse(document: Document): BookPage {
         val isCloudflareEnable =
             document.body().allElements.text().contains(Constants.CLOUDFLARE_LOG)
 
-        //val ajaxLoaded = ajaxChaptersSelector.isNull() || (selectorReturnerStringType(document,ajaxChaptersSelector).isNotEmpty() && ajaxChaptersSelector.isNotNull())
+        val ajaxLoaded = ajaxChaptersSelector.isNull() || (selectorReturnerStringType(document,ajaxChaptersSelector).isNotEmpty() && ajaxChaptersSelector.isNotNull())
         val book = Book.create()
 
         Timber.e("BookDetail: ${document.body()}")
@@ -272,7 +274,7 @@ class SourceCreator(
 
         book.source = name
 
-        return BookPage(book, isCloudflareEnabled = isCloudflareEnable)
+        return BookPage(book, isCloudflareEnabled = isCloudflareEnable,ajaxLoaded=ajaxLoaded)
     }
 
 
@@ -318,6 +320,7 @@ class SourceCreator(
     override fun searchParse(document: Document, page: Int): BooksPage {
         val isCloudflareEnable =
             document.body().allElements.text().contains(Constants.CLOUDFLARE_LOG)
+        val ajaxLoaded = ajaxChaptersSelector.isNull() || (selectorReturnerStringType(document,ajaxChaptersSelector).isNotEmpty() && ajaxChaptersSelector.isNotNull())
         var books = mutableListOf<Book>()
 
         if (search?.isHtmlType == true) {
@@ -340,7 +343,7 @@ class SourceCreator(
         }
         val hasNextPage = false
 
-        return BooksPage(books, hasNextPage, isCloudflareEnable)
+        return BooksPage(books, hasNextPage, isCloudflareEnable, ajaxLoaded = ajaxLoaded)
     }
     /****************************PARSE FROM JSON**********************************/
     fun chapterListFromJson(jsonObject: Map<String, String>): Chapter {

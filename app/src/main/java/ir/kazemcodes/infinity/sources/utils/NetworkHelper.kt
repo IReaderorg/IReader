@@ -88,8 +88,6 @@ class NetworkHelper(private val context: Context) : DIAware {
 
         var docs: Document = Document("No Data was Found")
         var isLoadUp: Boolean = false
-        var delayedSec = 0
-        val maxDelay = 60000
         webView.webViewClient = object : WebViewClientCompat() {
             override fun onPageFinished(view: WebView, url: String) {
                 coroutineScope.launch(Dispatchers.Main) {
@@ -114,13 +112,12 @@ class NetworkHelper(private val context: Context) : DIAware {
             ) {
                 isLoadUp = true
                 Timber.e("WebView: Not shown")
-                webView.destroy()
+//                throw  Exception("The Page was not Loaded")
             }
         }
         docs = Jsoup.parse(webView.getHtml())
-        while (!isLoadUp && delayedSec < maxDelay) {
+        while (!isLoadUp) {
             delay(200)
-            delayedSec += 200
         }
 
         //Timber.e(docs.toString())

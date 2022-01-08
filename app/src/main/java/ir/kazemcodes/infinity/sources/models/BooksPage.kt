@@ -8,6 +8,7 @@ data class BooksPage(
     val books: List<Book> = emptyList(),
     val hasNextPage: Boolean = false,
     val isCloudflareEnabled: Boolean = false, val response: String = "",
+    val ajaxLoaded: Boolean = true,
 )
 
 data class BookPage(
