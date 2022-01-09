@@ -5,11 +5,9 @@ import android.content.Context
 import android.webkit.WebView
 import ir.kazemcodes.infinity.data.network.models.*
 import ir.kazemcodes.infinity.data.network.utils.intercepter.CloudflareInterceptor
-import ir.kazemcodes.infinity.domain.use_cases.datastore.DataStoreUseCase
-import ir.kazemcodes.infinity.util.Resource
+import ir.kazemcodes.infinity.domain.use_cases.preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.util.getHtml
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.collectLatest
 import okhttp3.Cache
 import okhttp3.OkHttpClient
 import org.jsoup.Jsoup
@@ -27,7 +25,8 @@ class NetworkHelper(private val context: Context) : DIAware {
 
     override val di: DI by closestDI(context)
 
-    val datastore: DataStoreUseCase by di.instance<DataStoreUseCase>()
+    val datastore: PreferencesUseCase by di.instance<PreferencesUseCase>()
+
     val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     private val cacheDir = File(context.cacheDir, "network_cache")
@@ -46,26 +45,13 @@ class NetworkHelper(private val context: Context) : DIAware {
                 .readTimeout(30, TimeUnit.SECONDS)
                 .addInterceptor(UserAgentInterceptor())
 
-            coroutineScope.launch {
-                datastore.readDohPrefUseCase().collectLatest { result ->
-                    when (result) {
-                        is Resource.Success -> {
-                            when (result.data ?: Dns.Disable.prefCode) {
-                                PREF_DOH_CLOUDFLARE -> builder.dohCloudflare()
-                                PREF_DOH_GOOGLE -> builder.dohGoogle()
-                                PREF_DOH_ADGUARD -> builder.dohAdGuard()
-                                PREF_DOH_SHECAN -> builder.dohShecan()
-                            }
-                        }
-
-                        is Resource.Error -> {
-                            Timber.e("Timber: ReadDohPref  : ${result.message ?: ""}")
-                        }
-                        else -> {
-                        }
-                    }
-                }
+            when (datastore.readDohPrefUseCase()) {
+                PREF_DOH_CLOUDFLARE -> builder.dohCloudflare()
+                PREF_DOH_GOOGLE -> builder.dohGoogle()
+                PREF_DOH_ADGUARD -> builder.dohAdGuard()
+                PREF_DOH_SHECAN -> builder.dohShecan()
             }
+
             return builder
         }
 

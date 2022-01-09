@@ -9,23 +9,21 @@ import ir.kazemcodes.infinity.data.network.models.Source
 import ir.kazemcodes.infinity.domain.models.FontType
 import ir.kazemcodes.infinity.domain.models.remote.Book
 import ir.kazemcodes.infinity.domain.models.remote.Chapter
-import ir.kazemcodes.infinity.domain.use_cases.datastore.DataStoreUseCase
+import ir.kazemcodes.infinity.domain.use_cases.preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
 import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
 import ir.kazemcodes.infinity.presentation.theme.fonts
 import ir.kazemcodes.infinity.util.Resource
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import timber.log.Timber
 
 
 class ReaderScreenViewModel(
     private val localUseCase: LocalUseCase,
     private val remoteUseCase: RemoteUseCase,
-    private val dataStoreUseCase: DataStoreUseCase,
+    private val preferencesUseCase: PreferencesUseCase,
     private val source: Source,
     private val chapter: Chapter,
     private val book: Book,
@@ -73,9 +71,12 @@ class ReaderScreenViewModel(
     private fun getContent(chapter: Chapter) {
         _state.value = state.value.copy(chapter = chapter)
         getReadingContentLocally()
+        readFontSize()
+        if (book.inLibrary) {
+            toggleLastReadAndUpdateChapterContent()
+        }
         readSelectedFontState()
         readBrightness()
-        readFontSize()
     }
 
     private fun getReadingContentLocally() {
@@ -95,7 +96,7 @@ class ReaderScreenViewModel(
                                     toggleLastReadAndUpdateChapterContent()
                                 }
                             } else {
-                                if (!state.value.chapter.isChapterNotEmpty() ) {
+                                if (!state.value.chapter.isChapterNotEmpty()) {
                                     getReadingContentRemotely()
                                 }
                             }
@@ -121,52 +122,41 @@ class ReaderScreenViewModel(
     }
 
     fun getReadingContentRemotely() {
-            remoteUseCase.getRemoteReadingContentUseCase(state.value.chapter, source = source)
-                .onEach { result ->
-                    when (result) {
-                        is Resource.Success -> {
-                            _state.value = state.value
-                                .copy(
-                                    chapter = state.value.chapter.copy(content = result.data?.content
-                                        ?: emptyList()),
-                                    isLoading = false,
-                                    error = "",
-                                    isLoaded = true,
-                                )
-                            if (book.inLibrary) {
-                                toggleLastReadAndUpdateChapterContent()
-                                updateChapterContent(state.value.chapter)
-                            }
-
-
-                        }
-                        is Resource.Error -> {
-                            _state.value =
-                                state.value.copy(
-                                    error = result.message ?: "An Unknown Error Occurred",
-                                    isLoading = false,
-                                    isLoaded = false,
-                                )
-                        }
-                        is Resource.Loading -> {
-                            _state.value = state.value.copy(
-                                isLoading = true, error = "",
-                                isLoaded = false,
+        remoteUseCase.getRemoteReadingContentUseCase(state.value.chapter, source = source)
+            .onEach { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        _state.value = state.value
+                            .copy(
+                                chapter = state.value.chapter.copy(content = result.data?.content
+                                    ?: emptyList()),
+                                isLoading = false,
+                                error = "",
+                                isLoaded = true,
                             )
+                        if (book.inLibrary) {
+                            toggleLastReadAndUpdateChapterContent()
                         }
                     }
-                }.launchIn(coroutineScope)
+                    is Resource.Error -> {
+                        _state.value =
+                            state.value.copy(
+                                error = result.message ?: "An Unknown Error Occurred",
+                                isLoading = false,
+                                isLoaded = false,
+                            )
+                    }
+                    is Resource.Loading -> {
+                        _state.value = state.value.copy(
+                            isLoading = true, error = "",
+                            isLoaded = false,
+                        )
+                    }
+                }
+            }.launchIn(coroutineScope)
 
     }
 
-    private fun updateChapterContent(chapter: Chapter) {
-        coroutineScope.launch(Dispatchers.IO) {
-            withContext(Dispatchers.IO) {
-                localUseCase.UpdateLocalChapterContentUseCase(chapter.copy(haveBeenRead = true))
-
-            }
-        }
-    }
 
     private fun toggleLastReadAndUpdateChapterContent() {
         coroutineScope.launch(Dispatchers.IO) {
@@ -175,7 +165,9 @@ class ReaderScreenViewModel(
             }.forEach {
                 localUseCase.UpdateLocalChapterContentUseCase(it.copy(lastRead = false))
             }
-            localUseCase.UpdateLocalChapterContentUseCase(chapter.copy(lastRead = true,content = state.value.chapter.content))
+            localUseCase.UpdateLocalChapterContentUseCase(chapter.copy(lastRead = true,
+                content = state.value.chapter.content,
+                haveBeenRead = true))
         }
     }
 
@@ -184,98 +176,46 @@ class ReaderScreenViewModel(
         val layoutParams: WindowManager.LayoutParams = window.attributes
         layoutParams.screenBrightness = brightness
         window.attributes = layoutParams
-        coroutineScope.launch(Dispatchers.IO) {
-            dataStoreUseCase.saveBrightnessStateUseCase(brightness)
-        }
+
+            preferencesUseCase.saveBrightnessStateUseCase(brightness)
+
     }
 
     private fun saveFontSize(event: FontSizeEvent) {
         if (event == FontSizeEvent.Increase) {
             _state.value = state.value.copy(fontSize = state.value.fontSize + 1)
-            coroutineScope.launch(Dispatchers.Main) {
-                dataStoreUseCase.saveFontSizeStateUseCase(state.value.fontSize)
-            }
+            preferencesUseCase.saveFontSizeStateUseCase(state.value.fontSize)
         } else {
             if (state.value.fontSize > 0) {
                 _state.value = state.value.copy(fontSize = state.value.fontSize - 1)
-                coroutineScope.launch(Dispatchers.Main) {
-                    dataStoreUseCase.saveFontSizeStateUseCase(state.value.fontSize)
-                }
+                preferencesUseCase.saveFontSizeStateUseCase(state.value.fontSize)
             }
         }
     }
 
     private fun saveFont(fontType: FontType) {
         _state.value = state.value.copy(font = fontType)
-        coroutineScope.launch(Dispatchers.Main) {
-            dataStoreUseCase.saveSelectedFontStateUseCase(fonts.indexOf(fontType))
-        }
+
+            preferencesUseCase.saveSelectedFontStateUseCase(fonts.indexOf(fontType))
+
     }
 
 
     private fun readSelectedFontState() {
-        coroutineScope.launch(Dispatchers.Main) {
-            dataStoreUseCase.readSelectedFontStateUseCase().collectLatest { result ->
-                when (result) {
-                    is Resource.Success -> {
-
-                        _state.value = state.value
-                            .copy(
-                                font = (result.data ?: FontType.Poppins)
-                            )
-                    }
-                    is Resource.Error -> {
-                        Timber.d("Timber: readSelectedFontState have a error : ${result.message ?: ""}")
-                    }
-                    else -> {
-                    }
-                }
-            }
-        }
+        _state.value = state.value.copy(font = preferencesUseCase.readSelectedFontStateUseCase())
 
 
     }
 
     private fun readBrightness() {
+        _state.value =
+            state.value.copy(brightness = preferencesUseCase.readBrightnessStateUseCase())
 
-        coroutineScope.launch(Dispatchers.Main) {
-            dataStoreUseCase.readBrightnessStateUseCase().collectLatest { result ->
-                when (result) {
-                    is Resource.Success -> {
-
-                        _state.value = state.value
-                            .copy(
-                                brightness = result.data ?: .8f
-                            )
-                    }
-                    is Resource.Error -> {
-                        Timber.d("Timber: readBrightness have a error : ${(result.message ?: "")}")
-                    }
-                    else -> {
-                    }
-                }
-            }
-        }
     }
 
+
     private fun readFontSize() {
-        coroutineScope.launch(Dispatchers.Main) {
-            dataStoreUseCase.readFontSizeStateUseCase().collectLatest { result ->
-                when (result) {
-                    is Resource.Success -> {
-                        _state.value = state.value
-                            .copy(
-                                fontSize = result.data ?: 18
-                            )
-                    }
-                    is Resource.Error -> {
-                        Timber.d("Timber: readFontSize have a error : ${(result.message ?: "")}")
-                    }
-                    else -> {
-                    }
-                }
-            }
-        }
+        _state.value = state.value.copy(fontSize = preferencesUseCase.readFontSizeStateUseCase())
     }
 
     override fun onServiceUnregistered() {

@@ -22,7 +22,7 @@ import com.zhuinden.simplestackextensions.servicesktx.add
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.scopes.ActivityScoped
 import ir.kazemcodes.infinity.base_feature.navigation.MainScreenKey
-import ir.kazemcodes.infinity.domain.use_cases.datastore.DataStoreUseCase
+import ir.kazemcodes.infinity.domain.use_cases.preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
 import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
 import ir.kazemcodes.infinity.presentation.theme.InfinityTheme
@@ -45,7 +45,7 @@ class MainActivity : ComponentActivity(),DIAware {
     lateinit var remoteUseCase: RemoteUseCase
 
     @Inject
-    lateinit var dataStoreUseCase: DataStoreUseCase
+    lateinit var preferencesUseCase: PreferencesUseCase
 
 
 
@@ -60,7 +60,7 @@ class MainActivity : ComponentActivity(),DIAware {
        val globalServices :GlobalServices  = GlobalServices.builder()
             .add(localUseCase)
             .add(remoteUseCase)
-            .add(dataStoreUseCase)
+            .add(preferencesUseCase)
             .add(this.window)
             .add(this.baseContext)
             .build()

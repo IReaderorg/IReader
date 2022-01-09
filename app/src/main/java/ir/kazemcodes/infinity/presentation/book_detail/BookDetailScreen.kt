@@ -270,7 +270,7 @@ fun BookDetailScreenLoadedComposable(
                     }
                     if (book.rating != 0) {
                         Text(
-                            text = "Rating: ${"⭐".repeat(book.rating)}",
+                            text = "Rating: ${"⭐".repeat(if(book.rating < 5 && book.rating > 0 ) book.rating else 5)}",
                             style = MaterialTheme.typography.subtitle2,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colors.onBackground.copy(alpha = .5f),

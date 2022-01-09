@@ -12,7 +12,7 @@ import com.zhuinden.simplestackextensions.servicesktx.add
 import com.zhuinden.simplestackextensions.servicesktx.lookup
 import ir.kazemcodes.infinity.domain.models.remote.Book
 import ir.kazemcodes.infinity.domain.models.remote.Chapter
-import ir.kazemcodes.infinity.domain.use_cases.datastore.DataStoreUseCase
+import ir.kazemcodes.infinity.domain.use_cases.preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
 import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
 import ir.kazemcodes.infinity.presentation.book_detail.BookDetailScreen
@@ -47,7 +47,7 @@ data class MainScreenKey(val noArgument: String = "") : ComposeKey() {
 
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
-            add(LibraryViewModel(lookup<LocalUseCase>(), lookup<DataStoreUseCase>()))
+            add(LibraryViewModel(lookup<LocalUseCase>(), lookup<PreferencesUseCase>()))
             add(MainViewModel())
         }
     }
@@ -69,7 +69,7 @@ data class BrowserScreenKey(val sourceName: String, val isLatestUpdateMode: Bool
         with(serviceBinder) {
             add(BrowseViewModel(lookup<LocalUseCase>(),
                 lookup<RemoteUseCase>(),
-                dataStoreUseCase = lookup<DataStoreUseCase>(),
+                preferencesUseCase = lookup<PreferencesUseCase>(),
                 source = mappingApiNameToAPi(sourceName,lookup<Context>()),
                 isLatestUpdateMode = isLatestUpdateMode),)
         }
@@ -96,7 +96,7 @@ data class BookDetailKey(val book: Book, val sourceName: String) : ComposeKey() 
                 lookup<RemoteUseCase>(),
                 source = mappingApiNameToAPi(sourceName,lookup<Context>()),
                 book = book,
-                lookup<DataStoreUseCase>()))
+                lookup<PreferencesUseCase>()))
         }
     }
 }
@@ -152,7 +152,7 @@ data class ReaderScreenKey(
             add(ReaderScreenViewModel(
                 localUseCase = lookup<LocalUseCase>(),
                 remoteUseCase = lookup<RemoteUseCase>(),
-                dataStoreUseCase = lookup<DataStoreUseCase>(),
+                preferencesUseCase = lookup<PreferencesUseCase>(),
                 source = mappingApiNameToAPi(sourceName,context = lookup<Context>()),
                 book = book,
                 chapter = chapter,
@@ -198,7 +198,7 @@ data class DnsOverHttpScreenKey(val noArgs: String = "") : ComposeKey() {
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
             add(SettingViewModel(
-                dataStoreUseCase = lookup<DataStoreUseCase>(),
+                preferencesUseCase = lookup<PreferencesUseCase>(),
             ))
         }
     }

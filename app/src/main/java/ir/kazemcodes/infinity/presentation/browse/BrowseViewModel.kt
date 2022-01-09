@@ -5,14 +5,16 @@ import androidx.compose.runtime.mutableStateOf
 import com.zhuinden.simplestack.ScopedServices
 import ir.kazemcodes.infinity.data.network.models.BooksPage
 import ir.kazemcodes.infinity.data.network.models.Source
-import ir.kazemcodes.infinity.domain.use_cases.datastore.DataStoreUseCase
 import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
+import ir.kazemcodes.infinity.domain.use_cases.preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
 import ir.kazemcodes.infinity.presentation.layouts.DisplayMode
 import ir.kazemcodes.infinity.util.Resource
 import ir.kazemcodes.infinity.util.merge
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
@@ -20,7 +22,7 @@ import kotlinx.coroutines.flow.onEach
 class BrowseViewModel(
     private val localUseCase: LocalUseCase,
     private val remoteUseCase: RemoteUseCase,
-    private val dataStoreUseCase: DataStoreUseCase,
+    private val preferencesUseCase: PreferencesUseCase,
     private val source: Source,
     private val isLatestUpdateMode : Boolean = true
 ) : ScopedServices.Registered {
@@ -104,19 +106,14 @@ class BrowseViewModel(
 
     private fun updateLayoutType(layoutType: DisplayMode) {
         _state.value = state.value.copy(layout = layoutType.layout)
-        coroutineScope.launch(Dispatchers.Main){
-            dataStoreUseCase.saveBrowseLayoutUseCase(layoutType.layoutIndex)
-        }
+
+            preferencesUseCase.saveBrowseLayoutUseCase(layoutType.layoutIndex)
+
     }
 
     private fun readLayoutType() {
-        coroutineScope.launch(Dispatchers.Main) {
-            dataStoreUseCase.readBrowseLayoutUseCase().collectLatest { result ->
-                if (result.data != null) {
-                    _state.value = state.value.copy(layout = result.data.layout)
-                }
-            }
-        }
+            _state.value = state.value.copy(layout =  preferencesUseCase.readBrowseLayoutUseCase().layout)
+
 
     }
 

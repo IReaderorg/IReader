@@ -16,13 +16,13 @@ import ir.kazemcodes.infinity.data.local.dao.BookDao
 import ir.kazemcodes.infinity.data.local.dao.ChapterDao
 import ir.kazemcodes.infinity.data.network.utils.MemoryCookieJar
 import ir.kazemcodes.infinity.data.network.utils.NetworkHelper
+import ir.kazemcodes.infinity.data.repository.PreferencesHelper
 import ir.kazemcodes.infinity.data.repository.RepositoryImpl
-import ir.kazemcodes.infinity.domain.repository.DataStoreHelper
 import ir.kazemcodes.infinity.domain.repository.Repository
-import ir.kazemcodes.infinity.domain.use_cases.datastore.*
 import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
 import ir.kazemcodes.infinity.domain.use_cases.local.book.*
 import ir.kazemcodes.infinity.domain.use_cases.local.chapter.*
+import ir.kazemcodes.infinity.domain.use_cases.preferences.*
 import ir.kazemcodes.infinity.domain.use_cases.remote.*
 import ir.kazemcodes.infinity.presentation.book_detail.Constants.SHARED_PREF_NAME
 import okhttp3.CookieJar
@@ -68,16 +68,15 @@ class AppModule {
         chapterDao: ChapterDao,
         context: Context,
         remoteUseCase: RemoteUseCase,
+        preferencesHelper: PreferencesHelper
     ): Repository {
         return RepositoryImpl(
             bookDao = bookDao,
             chapterDao = chapterDao,
             context = context,
-            remoteUseCase = remoteUseCase
+            remoteUseCase = remoteUseCase,
+            preferences = preferencesHelper
         )
-    }
-    fun provideDataStore(repository: Repository) : DataStoreHelper {
-        return repository.dataStoreRepository
     }
 
     @Provides
@@ -115,12 +114,12 @@ class AppModule {
 
     @Provides
     @Singleton
-    fun provideDataStoreUseCase(repository: Repository): DataStoreUseCase {
-        return DataStoreUseCase(
+    fun provideDataStoreUseCase(repository: Repository): PreferencesUseCase {
+        return PreferencesUseCase(
             readSelectedFontStateUseCase = ReadSelectedFontStateUseCase(repository),
             saveSelectedFontStateUseCase = SaveSelectedFontStateUseCase(repository),
-            getFontSizeStateUseCase = GetFontSizeStateUseCase(repository),
-            saveFontSizeStateUseCase = SaveFontSizeStateUseCase(repository),
+            readFontSizeStateUseCase = ReadFontSizeStateUseCase(repository),
+            saveFontSizeStateUseCase = SaveFontSizeStateUseCase( repository),
             readBrightnessStateUseCase = ReadBrightnessStateUseCase(repository),
             saveBrightnessStateUseCase = SaveBrightnessStateUseCase(repository),
             saveLibraryLayoutUseCase = SaveLibraryLayoutTypeStateUseCase(repository),
@@ -173,10 +172,15 @@ class AppModule {
     fun providesNetworkHelper(context: Context): NetworkHelper {
         return NetworkHelper(context = context)
     }
-
+    @Singleton
     @Provides
     fun providesPreferences(@ApplicationContext context: Context): SharedPreferences {
         return context.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+    }
+    @Singleton
+    @Provides
+    fun providePreferenceHelper(sharedPreferences: SharedPreferences) : PreferencesHelper {
+        return PreferencesHelper(sharedPreferences)
     }
 
 

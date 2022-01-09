@@ -7,7 +7,7 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import dagger.hilt.android.HiltAndroidApp
 import ir.kazemcodes.infinity.data.network.Extensions
 import ir.kazemcodes.infinity.data.network.utils.NetworkHelper
-import ir.kazemcodes.infinity.domain.use_cases.datastore.DataStoreUseCase
+import ir.kazemcodes.infinity.domain.use_cases.preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
 import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
 import ir.kazemcodes.infinity.notification.Notifications
@@ -28,7 +28,7 @@ class MyApplication : Application(),DIAware, Configuration.Provider {
     lateinit var remoteUseCase: RemoteUseCase
 
     @Inject
-    lateinit var dataStoreUseCase: DataStoreUseCase
+    lateinit var preferencesUseCase: PreferencesUseCase
 
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
@@ -39,7 +39,7 @@ class MyApplication : Application(),DIAware, Configuration.Provider {
     private val KodeinModule = DI.Module("AppModule") {
         bindSingleton<NetworkHelper> { NetworkHelper(this@MyApplication) }
         bindSingleton<Extensions> { Extensions(this@MyApplication) }
-        bindSingleton<DataStoreUseCase> { dataStoreUseCase }
+        bindSingleton<PreferencesUseCase> { preferencesUseCase }
     }
 
 

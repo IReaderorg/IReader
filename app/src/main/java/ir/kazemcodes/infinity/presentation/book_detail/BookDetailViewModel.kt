@@ -10,7 +10,7 @@ import ir.kazemcodes.infinity.data.network.models.Source
 import ir.kazemcodes.infinity.domain.models.local.BookEntity
 import ir.kazemcodes.infinity.domain.models.local.ChapterEntity
 import ir.kazemcodes.infinity.domain.models.remote.Book
-import ir.kazemcodes.infinity.domain.use_cases.datastore.DataStoreUseCase
+import ir.kazemcodes.infinity.domain.use_cases.preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
 import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
 import ir.kazemcodes.infinity.service.DownloadService
@@ -28,7 +28,7 @@ class BookDetailViewModel(
     private val remoteUseCase: RemoteUseCase,
     private val source: Source,
     private val book: Book,
-    private val dataStoreUseCase: DataStoreUseCase,
+    private val preferencesUseCase: PreferencesUseCase,
 ) : ScopedServices.Registered {
 
     private val _state = mutableStateOf<DetailState>(DetailState())

@@ -4,20 +4,22 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import com.zhuinden.simplestack.ScopedServices
 import ir.kazemcodes.infinity.domain.models.remote.Book
-import ir.kazemcodes.infinity.domain.use_cases.datastore.DataStoreUseCase
 import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
+import ir.kazemcodes.infinity.domain.use_cases.preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.presentation.layouts.DisplayMode
 import ir.kazemcodes.infinity.presentation.library.components.LibraryEvents
 import ir.kazemcodes.infinity.util.Resource
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
 
 class LibraryViewModel(
     private val localUseCase: LocalUseCase,
-    private val dataStoreUseCase: DataStoreUseCase,
+    private val preferencesUseCase: PreferencesUseCase,
 ) : ScopedServices.Registered {
     private val _state = mutableStateOf<LibraryState>(LibraryState())
     val state: State<LibraryState> = _state
@@ -68,20 +70,14 @@ class LibraryViewModel(
 
     private fun updateLayoutType(layoutType: DisplayMode) {
         _state.value = state.value.copy(layout = layoutType.layout)
-        coroutineScope.launch(Dispatchers.Main) {
-            dataStoreUseCase.saveLibraryLayoutUseCase(layoutType.layoutIndex)
-        }
+
+        preferencesUseCase.saveLibraryLayoutUseCase(layoutType.layoutIndex)
+
     }
 
     private fun readLayoutType() {
-        coroutineScope.launch(Dispatchers.Main) {
-            dataStoreUseCase.readLibraryLayoutUseCase().collectLatest { result ->
-                if (result.data != null) {
-                    _state.value = state.value.copy(layout = result.data.layout)
-                }
-            }
-        }
-
+        _state.value =
+            state.value.copy(layout = preferencesUseCase.readLibraryLayoutUseCase().layout)
     }
 
     private fun getLocalBooks() {
