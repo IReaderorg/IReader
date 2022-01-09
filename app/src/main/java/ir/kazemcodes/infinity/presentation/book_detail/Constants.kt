@@ -9,6 +9,7 @@ object Constants {
     const val aa = "shared_pref_name"
     const val aaa = "shared_pref_name"
     const val aaaa = "shared_pref_name"
+    const val aaaaa = "shared_pref_name"
 
 
 
