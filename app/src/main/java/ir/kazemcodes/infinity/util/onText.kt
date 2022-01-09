@@ -5,31 +5,52 @@ fun List<String>.formatBasedOnDot(): String {
 }
 
 fun List<String>.formatList(): String {
-    return this.map { it.trim() }.joinToString("-").replace("\"", "").replace("[", "").replace("]", "")
+    return this.map { it.trim() }.joinToString("-").replace("\"", "").replace("[", "")
+        .replace("]", "")
 }
-fun String.shouldSubstring(condition: Boolean?,string: String,unit : ((string: String) -> String)?=null) : String{
+
+fun String.shouldSubstring(
+    condition: Boolean?,
+    string: String,
+    unit: ((string: String) -> String)? = null,
+): String {
     return if (condition == true) {
-        if (unit !=null) {
-            return  string + unit(this)
+        if (unit != null) {
+            return string + unit(this)
 
-        }else {
-            return  string + this
+        } else {
+            return string + this
         }
-    }else {
-        this
-    }
-}
-fun String.replaceImageFormat(condition: Boolean) : String {
-    return if (condition) {
-        this.replace(".webp","")
-    }else {
+    } else {
         this
     }
 }
 
-fun String.applyPageFormat(page: Int) : String {
-    return this.replace("{page}",page.toString())
+fun String.replaceImageFormat(condition: Boolean): String {
+    return if (condition) {
+        this.replace(".webp", "")
+    } else {
+        this
+    }
 }
-fun String.applySearchFormat(query : String,page: Int) : String {
-    return this.replace("{query}",page.toString())
+
+fun String.formatHtmlText(): String {
+    return this
+        .replace("<p>", "")
+        .replace("<p/>", "")
+        .replace("<br>\n<br>", "\n")
+        .replace("<br>", "\n")
+        .replace("\\u003C", "<")
+        .replace("\\n", "")
+        .replace("\\t", "")
+        .replace("\\\"", "\"")
+        .replace("<hr />", "")
+}
+
+fun String.applyPageFormat(page: Int): String {
+    return this.replace("{page}", page.toString())
+}
+
+fun String.applySearchFormat(query: String, page: Int): String {
+    return this.replace("{query}", page.toString())
 }

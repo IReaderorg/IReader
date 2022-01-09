@@ -17,7 +17,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
@@ -29,6 +28,7 @@ import ir.kazemcodes.infinity.presentation.book_detail.components.ButtonWithIcon
 import ir.kazemcodes.infinity.presentation.book_detail.components.CardTileComposable
 import ir.kazemcodes.infinity.presentation.book_detail.components.DotsFlashing
 import ir.kazemcodes.infinity.presentation.book_detail.components.ExpandingText
+import ir.kazemcodes.infinity.presentation.reusable_composable.ErrorTextWithEmojis
 import ir.kazemcodes.infinity.presentation.screen.components.BookImageComposable
 import ir.kazemcodes.infinity.util.formatBasedOnDot
 import ir.kazemcodes.infinity.util.formatList
@@ -48,12 +48,12 @@ fun BookDetailScreen(
 
 
     Box(modifier = Modifier.fillMaxSize()) {
+
         if (viewModel.state.value.loaded) {
             BookDetailScreenLoadedComposable(
                 modifier = modifier,
                 viewModel = viewModel
             )
-
         } else {
             Scaffold(modifier = Modifier.fillMaxSize(),topBar = {
                 TopAppBar(title = {},
@@ -70,15 +70,11 @@ fun BookDetailScreen(
             }) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     if (detailState.error.isNotBlank()) {
-                        Text(
-                            text = detailState.error,
-                            color = MaterialTheme.colors.error,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(20.dp)
-                                .align(Alignment.Center)
-                        )
+                        ErrorTextWithEmojis(error=detailState.error,modifier  = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp)
+                            .wrapContentSize(Alignment.Center)
+                            .align(Alignment.Center))
                     }
                     if (detailState.isLoading) {
                         CircularProgressIndicator(
@@ -107,7 +103,8 @@ fun BookDetailScreenLoadedComposable(
     val book = viewModel.state.value.book
     val chapters = viewModel.chapterState.value.chapters
     val context = LocalContext.current
-    Scaffold(topBar = {
+    Scaffold(
+        topBar = {
         TopAppBar(
             title = {},
             modifier = modifier
@@ -200,6 +197,7 @@ fun BookDetailScreenLoadedComposable(
                         }
                     }
                 )
+
                 ButtonWithIconAndText(
                     text = "Download",
                     imageVector = Icons.Default.FileDownload,
@@ -243,26 +241,56 @@ fun BookDetailScreenLoadedComposable(
                         color = MaterialTheme.colors.onBackground,
                         overflow = TextOverflow.Ellipsis
                     )
-                    Text(
-                        text = "Author: ${book.author}",
-                        style = MaterialTheme.typography.subtitle2,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colors.onBackground.copy(alpha = .5f),
-                        overflow = TextOverflow.Ellipsis
-                    )
+                    if (!book.author.isNullOrBlank()) {
+                        Text(
+                            text = "Author: ${book.author}",
+                            style = MaterialTheme.typography.subtitle2,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colors.onBackground.copy(alpha = .5f),
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    if (!book.translator.isNullOrBlank()) {
+                        Text(
+                            text = "Translator: ${book.translator}",
+                            style = MaterialTheme.typography.subtitle2,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colors.onBackground.copy(alpha = .5f),
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    if (book.status != -1) {
+                        Text(
+                            text = "Status: ${book.getStatusByName()}",
+                            style = MaterialTheme.typography.subtitle2,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colors.onBackground.copy(alpha = .5f),
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    if (book.rating != 0) {
+                        Text(
+                            text = "Rating: ${"⭐".repeat(book.rating)}",
+                            style = MaterialTheme.typography.subtitle2,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colors.onBackground.copy(alpha = .5f),
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                     Text(
                         text = "Source: ${book.source}",
                         color = MaterialTheme.colors.onBackground.copy(alpha = .5f),
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.subtitle2,
                     )
-                    Text(
-                        text = "Genre: ${book.category.formatList()}",
-                        color = MaterialTheme.colors.onBackground.copy(alpha = .5f),
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.subtitle2,
-                    )
-
+                    if (!book.category.isNullOrEmpty()) {
+                        Text(
+                            text = "Genre: ${book.category.formatList()}",
+                            color = MaterialTheme.colors.onBackground.copy(alpha = .5f),
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.subtitle2,
+                        )
+                    }
                 }
 
 
@@ -276,7 +304,7 @@ fun BookDetailScreenLoadedComposable(
             Text(
                 text = "Synopsis", fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colors.onBackground,
-                style = MaterialTheme.typography.h6
+                style = MaterialTheme.typography.h6,
             )
             ExpandingText(text = book.description.formatBasedOnDot() ?: "Unknown")
             Divider(

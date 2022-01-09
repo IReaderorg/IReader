@@ -2,6 +2,7 @@ package ir.kazemcodes.infinity.di
 
 import android.app.Application
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.room.Room
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -23,6 +24,7 @@ import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
 import ir.kazemcodes.infinity.domain.use_cases.local.book.*
 import ir.kazemcodes.infinity.domain.use_cases.local.chapter.*
 import ir.kazemcodes.infinity.domain.use_cases.remote.*
+import ir.kazemcodes.infinity.presentation.book_detail.Constants.SHARED_PREF_NAME
 import okhttp3.CookieJar
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -117,7 +119,7 @@ class AppModule {
         return DataStoreUseCase(
             readSelectedFontStateUseCase = ReadSelectedFontStateUseCase(repository),
             saveSelectedFontStateUseCase = SaveSelectedFontStateUseCase(repository),
-            readFontSizeStateUseCase = ReadFontSizeStateUseCase(repository),
+            getFontSizeStateUseCase = GetFontSizeStateUseCase(repository),
             saveFontSizeStateUseCase = SaveFontSizeStateUseCase(repository),
             readBrightnessStateUseCase = ReadBrightnessStateUseCase(repository),
             saveBrightnessStateUseCase = SaveBrightnessStateUseCase(repository),
@@ -170,6 +172,11 @@ class AppModule {
     @Provides
     fun providesNetworkHelper(context: Context): NetworkHelper {
         return NetworkHelper(context = context)
+    }
+
+    @Provides
+    fun providesPreferences(@ApplicationContext context: Context): SharedPreferences {
+        return context.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
     }
 
 

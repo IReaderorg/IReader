@@ -24,6 +24,7 @@ import ir.kazemcodes.infinity.presentation.book_detail.DEFAULT.MAX_BRIGHTNESS
 import ir.kazemcodes.infinity.presentation.book_detail.DEFAULT.MIN_BRIGHTNESS
 import ir.kazemcodes.infinity.presentation.reader.components.FontMenuComposable
 import ir.kazemcodes.infinity.presentation.reader.components.FontSizeChangerComposable
+import ir.kazemcodes.infinity.presentation.reusable_composable.ErrorTextWithEmojis
 import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarBackButton
 import ir.kazemcodes.infinity.util.findActivity
 
@@ -100,9 +101,7 @@ fun ReadingScreen(
                             Slider(
                                 viewModel.state.value.brightness,
                                 {
-
                                     viewModel.onEvent(ReaderEvent.ChangeBrightness(it))
-
                                 },
                                 modifier = Modifier
                                     .fillMaxWidth(),
@@ -152,15 +151,11 @@ fun ReadingScreen(
             }
         }
         if (state.error.isNotBlank()) {
-            Text(
-                text = state.error,
-                color = MaterialTheme.colors.error,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp)
-                    .align(Alignment.Center)
-            )
+            ErrorTextWithEmojis(error=state.error,modifier  = Modifier
+                .fillMaxWidth()
+                .padding(20.dp)
+                .wrapContentSize(Alignment.Center)
+                .align(Alignment.Center))
         }
 
         if (viewModel.state.value.isLoading) {

@@ -8,6 +8,7 @@ data class Latest(
     override val isHtmlType: Boolean= true,
     override val selector: String? = null,
     override val addBaseUrlToLink: Boolean =false,
+    override val openInWebView: Boolean = false,
     val nextPageSelector: String? = null,
     val nextPageValue: String? = null,
     val linkSelector: String? = null,
@@ -29,6 +30,7 @@ data class Popular(
     override val isHtmlType: Boolean= true,
     override val selector: String? = null,
     override val addBaseUrlToLink: Boolean =false,
+    override val openInWebView: Boolean = false,
     val nextBookSelector: String? = null,
     val nextBookValue: String? = null,
     val linkSelector: String? = null,
@@ -46,6 +48,7 @@ data class Detail(
     override val isHtmlType: Boolean= true,
     override val selector: String? = null,
     override val addBaseUrlToLink: Boolean =false,
+    override val openInWebView: Boolean = false,
     val nameSelector: String? = null,
     val nameAtt: String? = null,
     val coverSelector: String? = null,
@@ -65,6 +68,7 @@ data class Search(
     override val isHtmlType: Boolean= true,
     override val selector: String? = null,
     override val addBaseUrlToLink: Boolean =false,
+    override val openInWebView: Boolean = false,
     val linkSelector: String? = null,
     val linkAtt: String? = null,
     val linkSearchedSubString: Boolean = false,
@@ -83,6 +87,8 @@ data class Chapters(
     override val isHtmlType: Boolean= true,
     override val selector: String? = null,
     override val addBaseUrlToLink: Boolean =false,
+    override val openInWebView: Boolean = false,
+    val isDownloadable : Boolean= false,
     val chaptersEndpointWithoutPage: String? = null,
     val _isChapterStatsFromFirst: Boolean? = null,
     val nameSelector: String? = null,
@@ -105,7 +111,9 @@ data class Content(
     override val isHtmlType: Boolean = true,
     override val isGetRequestType: Boolean = true,
     override val addBaseUrlToLink: Boolean =false,
+    override val openInWebView: Boolean = false,
     override val selector: String? = null,
+    val supportContentAppView: Boolean = true,
     val pageTitleSelector : String?=null,
     val pageTitleAtt : String?=null,
     val pageContentSelector: String? = null,
@@ -119,6 +127,7 @@ interface Fetcher {
     val isGetRequestType: Boolean
     val selector: String?
     val addBaseUrlToLink: Boolean
+    val openInWebView : Boolean
 }
 
 

@@ -19,6 +19,11 @@ interface Source {
     val supportsMostPopular: Boolean
     val supportSearch : Boolean
 
+    /**
+     * This is false when the content is viewed in web view not in  the app
+     */
+    val supportContentAppView : Boolean
+
 
 
 

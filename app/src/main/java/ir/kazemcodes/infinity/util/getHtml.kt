@@ -60,7 +60,7 @@ fun selectorReturnerStringType(
     if (selector.isNullOrEmpty() && !att.isNullOrEmpty()) {
         return element.attr(att)
     } else if (!selector.isNullOrEmpty() && att.isNullOrEmpty()) {
-        return element.select(selector).text()
+        return element.select(selector).text().formatHtmlText()
     } else if (!selector.isNullOrEmpty() && !att.isNullOrEmpty()) {
         return element.select(selector).attr(att)
     } else {
@@ -93,11 +93,7 @@ fun selectorReturnerListType(
         return listOf(document.attr(att))
     } else if (!selector.isNullOrEmpty() && att.isNullOrEmpty()) {
         return document.select(selector).map {
-            it.html().replace("<br>\n<br>", "\n").replace("\\u003C", "<")
-                .replace("\\n", "")
-                .replace("\\t", "")
-                .replace("\\\"", "\"")
-                .replace("<hr />", "")
+            it.html().formatHtmlText()
         }
     } else if (!selector.isNullOrEmpty() && !att.isNullOrEmpty()) {
         return listOf(document.select(selector).attr(att))

@@ -10,7 +10,7 @@ import ir.kazemcodes.infinity.domain.models.local.ChapterEntity
 
 @Database(
     entities = [BookEntity::class, ChapterEntity::class],
-    version = 2,
+    version = 3,
     exportSchema = false,
 )
 @TypeConverters(DatabaseConverter::class)

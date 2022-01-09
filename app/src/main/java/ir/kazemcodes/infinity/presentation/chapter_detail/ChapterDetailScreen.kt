@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.BookmarkAdded
 import androidx.compose.material.icons.filled.Sort
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -111,15 +112,21 @@ fun ChapterDetailScreen(
                                 style = MaterialTheme.typography.subtitle1,
                                 fontWeight = FontWeight.SemiBold,
                                 overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.weight(8f)
+                                modifier = Modifier.weight(7f)
                             )
                             Text(modifier = Modifier.weight(2f),
-                                text = if (state.chapters[index].content.joinToString(" , ").length > 10) "Cached" else "",
+                                text = state.chapters[index].dateUploaded?:"",
                                 fontStyle = FontStyle.Italic,
                                 color = if (state.chapters[index].haveBeenRead) MaterialTheme.colors.onBackground.copy(
                                     alpha = .4f) else MaterialTheme.colors.onBackground,
                                 fontWeight = FontWeight.SemiBold,
-                                style = MaterialTheme.typography.subtitle2
+                                style = MaterialTheme.typography.caption
+                            )
+                            Spacer(modifier = modifier.width(20.dp))
+                            Icon(
+                                imageVector = Icons.Default.BookmarkAdded,
+                                contentDescription = "Cached",
+                                tint = if (state.chapters[index].content.joinToString(" , ").length > 10) MaterialTheme.colors.onBackground else MaterialTheme.colors.background,
                             )
                         }
                     }

@@ -1,11 +1,7 @@
 package ir.kazemcodes.infinity.presentation.browse
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -17,7 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import com.zhuinden.simplestackcomposeintegration.services.rememberService
@@ -25,10 +20,7 @@ import ir.kazemcodes.infinity.base_feature.navigation.WebViewKey
 import ir.kazemcodes.infinity.presentation.layouts.layouts
 import ir.kazemcodes.infinity.presentation.library.components.LayoutComposable
 import ir.kazemcodes.infinity.presentation.library.components.RadioButtonWithTitleComposable
-import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarActionButton
-import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarBackButton
-import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarSearch
-import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarTitle
+import ir.kazemcodes.infinity.presentation.reusable_composable.*
 import ir.kazemcodes.infinity.util.isScrolledToTheEnd
 
 
@@ -154,15 +146,11 @@ fun BrowserScreen() {
                 viewModel.onEvent(BrowseScreenEvents.GetBooks(source = source))
             }
             if (state.error.isNotBlank()) {
-                Text(
-                    text = state.error,
-                    color = MaterialTheme.colors.error,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(20.dp)
-                        .align(Alignment.Center)
-                )
+                ErrorTextWithEmojis(error=state.error,modifier  = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp)
+                    .wrapContentSize(Alignment.Center)
+                    .align(Alignment.Center))
             }
             if (state.isLoading) {
                 CircularProgressIndicator(

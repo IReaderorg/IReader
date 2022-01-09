@@ -26,6 +26,8 @@ data class Book(
 
     var status: Int = 0,
 
+    var rating: Int = 0,
+
     var inLibrary: Boolean = false,
 ) : Parcelable {
 
@@ -36,6 +38,16 @@ data class Book(
         const val LICENSED = 3
         fun create(): Book {
             return Book(bookName = "", link = "")
+        }
+    }
+
+    fun getStatusByName(): String {
+        return when (status) {
+            0 -> "UNKNOWN"
+            1 -> "ONGOING"
+            2 -> "COMPLETED"
+            3 -> "LICENSED"
+            else -> "UNKNOWN"
         }
     }
 

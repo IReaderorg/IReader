@@ -3,9 +3,10 @@ package ir.kazemcodes.infinity.presentation.book_detail
 import androidx.compose.ui.unit.dp
 
 object Constants {
-    const val PARAM_BOOK_ID = "PARAM_BOOK_ID"
-    const val PARAM_BOOK_NAME = "PARAM_BOOK_NAME"
-    const val PARAM_CHAPTERS_DETAIL = "chaptersDetail"
+
+    const val SHARED_PREF_NAME = "shared_pref_name"
+
+
 
     val DEFAULT_ELEVATION = 0.dp
     const val CLOUDFLARE_LOG = "Performance & security by Cloudflare"
@@ -14,7 +15,7 @@ object Constants {
     const val DEBUG_LOG = "DEBUG_LOG "
 
 
-    const val KODEIN_MODULE = "kodein_module "
+    const val KODEIN_MODULE = "kodein_module"
 
 
 }

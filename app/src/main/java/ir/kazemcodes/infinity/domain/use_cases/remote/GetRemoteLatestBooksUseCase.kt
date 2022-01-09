@@ -30,14 +30,16 @@ class GetRemoteLatestBooksUseCase {
                 )
             }
 
-        } catch (e: HttpException) {
+        }
+
+        catch (e: HttpException) {
             emit(
                 Resource.Error<List<Book>>(
                     message = e.localizedMessage ?: "An Unexpected Error Occurred."
                 )
             )
         } catch (e: IOException) {
-            emit(Resource.Error<List<Book>>(message = "Couldn't Read Server, Check Your Internet Connection."))
+            emit(Resource.Error<List<Book>>(message = "No Internet is Available."))
         } catch (e: Exception) {
             emit(
                 Resource.Error<List<Book>>(

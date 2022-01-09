@@ -41,6 +41,7 @@ class SourceCreator(
         get() = _supportsLatest
     override val supportsMostPopular: Boolean
         get() = _supportsMostPopular
+    override val supportContentAppView: Boolean = content?.supportContentAppView == true
     override val baseUrl: String = _baseUrl
 
     override val supportSearch: Boolean = _supportsSearch
@@ -284,8 +285,7 @@ class SourceCreator(
             book.bookName = selectorReturnerStringType(document, selectorBookName, attAuthor)
             book.coverLink = selectorReturnerStringType(document, coverSelector, coverAtt)
             book.author = selectorReturnerStringType(document, selectorAuthor, attBookName)
-            book.description =
-                selectorReturnerListType(document, selectorDescription, attDescription)
+            book.description = selectorReturnerListType(document, selectorDescription, attDescription).map { it.formatHtmlText() }
             book.category = selectorReturnerListType(document, selectorCategory, attCategory)
         } else {
             val crudeJson = Jsoup.parse(document.html()).text().trim()
@@ -420,7 +420,7 @@ class SourceCreator(
 
         book.bookName = jsonObject[mName]?.replace("</strong>", "") ?: ""
         book.coverLink = jsonObject[mCover]
-        book.description = listOf(jsonObject[mDescription] ?: "")
+        book.description = listOf(jsonObject[mDescription] ?: "").map { it.formatHtmlText() }
         book.author = jsonObject[mAuthor]
         book.category = listOf(jsonObject[mCategory] ?: "")
 
