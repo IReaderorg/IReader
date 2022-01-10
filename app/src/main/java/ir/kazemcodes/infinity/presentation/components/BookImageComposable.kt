@@ -1,18 +1,18 @@
 package ir.kazemcodes.infinity.presentation.screen.components
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.skydoves.landscapist.coil.CoilImage
+import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarTitle
 
 @Composable
 fun BookImageComposable(
@@ -33,11 +33,20 @@ fun BookImageComposable(
         },
         failure = {
             Box(contentAlignment = Alignment.Center, modifier = modifier.fillMaxSize()) {
-                Icon(
-                    imageVector = Icons.Default.Error,
-                    contentDescription = "Error Occurred",
-                    Modifier.size(16.dp)
-                )
+                Column(
+                    modifier = modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Image,
+
+                        contentDescription = "image Icon",
+                        Modifier.size(40.dp),
+                        tint = MaterialTheme.colors.onBackground
+                    )
+                    TopAppBarTitle(title = "No Image Available")
+                }
             }
         },
 
