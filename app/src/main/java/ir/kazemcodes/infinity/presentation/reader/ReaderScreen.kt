@@ -1,6 +1,7 @@
 package ir.kazemcodes.infinity.presentation.reader
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -8,9 +9,9 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -18,39 +19,34 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import com.zhuinden.simplestackcomposeintegration.services.rememberService
-import ir.kazemcodes.infinity.domain.models.remote.Book
-import ir.kazemcodes.infinity.domain.models.remote.Chapter
-import ir.kazemcodes.infinity.presentation.book_detail.DEFAULT.MAX_BRIGHTNESS
-import ir.kazemcodes.infinity.presentation.book_detail.DEFAULT.MIN_BRIGHTNESS
+import ir.kazemcodes.infinity.presentation.reader.components.BrightnessSliderComposable
+import ir.kazemcodes.infinity.presentation.reader.components.ChaptersSliderComposable
 import ir.kazemcodes.infinity.presentation.reader.components.FontMenuComposable
 import ir.kazemcodes.infinity.presentation.reader.components.FontSizeChangerComposable
 import ir.kazemcodes.infinity.presentation.reusable_composable.ErrorTextWithEmojis
 import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarBackButton
-import ir.kazemcodes.infinity.util.findActivity
 
 
 @Composable
 fun ReadingScreen(
     modifier: Modifier = Modifier,
-    book: Book = Book.create(),
-    chapter: Chapter = Chapter.create(),
 ) {
 
     val viewModel = rememberService<ReaderScreenViewModel>()
     val backStack = LocalBackstack.current
-    val  context = LocalContext.current
-    val activity = context.findActivity()
     val state = viewModel.state.value
+    val interactionSource = remember { MutableInteractionSource() }
 
 
     Box(modifier = modifier.fillMaxSize()) {
+
         Scaffold(
             topBar = {
                 if (!state.isReaderModeEnable && state.isLoaded) {
                     TopAppBar(
                         title = {
                             Text(
-                                text = chapter.title,
+                                text = viewModel.state.value.chapter.title,
                                 color = MaterialTheme.colors.onBackground,
                                 style = MaterialTheme.typography.subtitle1,
                                 fontWeight = FontWeight.Bold,
@@ -66,7 +62,7 @@ fun ReadingScreen(
                             TopAppBarBackButton(backStack = backStack)
                         },
                         actions = {
-                            IconButton(onClick = { viewModel.getReadingContentRemotely() }) {
+                            IconButton(onClick = { viewModel.getReadingContentRemotely(viewModel.state.value.chapter) }) {
                                 Icon(
                                     imageVector = Icons.Default.Autorenew,
                                     contentDescription = "Refresh",
@@ -89,7 +85,7 @@ fun ReadingScreen(
                     BottomAppBar(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(150.dp),
+                            .height(250.dp),
                         elevation = 8.dp,
                         backgroundColor = MaterialTheme.colors.background
                     ) {
@@ -98,15 +94,10 @@ fun ReadingScreen(
                                 .fillMaxSize()
                                 .padding(8.dp),
                         ) {
-                            Slider(
-                                viewModel.state.value.brightness,
-                                {
-                                    viewModel.onEvent(ReaderEvent.ChangeBrightness(it))
-                                },
-                                modifier = Modifier
-                                    .fillMaxWidth(),
-                                valueRange = MIN_BRIGHTNESS..MAX_BRIGHTNESS,
-                            )
+                            ChaptersSliderComposable( viewModel = viewModel, isChaptersReversed =viewModel.state.value.isChaptersReversed )
+                            BrightnessSliderComposable(viewModel.state.value.brightness) {
+                                viewModel.onEvent(ReaderEvent.ChangeBrightness(it))
+                            }
                             FontSizeChangerComposable(
                                 onFontDecease = {
                                     viewModel.onEvent(ReaderEvent.ChangeFontSize(FontSizeEvent.Decrease))
@@ -133,7 +124,8 @@ fun ReadingScreen(
                 Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .clickable { viewModel.onEvent(ReaderEvent.ToggleReaderMode(!state.isReaderModeEnable)) }
+                    .clickable(interactionSource = interactionSource,
+                        indication = null) { viewModel.onEvent(ReaderEvent.ToggleReaderMode(!state.isReaderModeEnable)) }
                     .padding(8.dp)
                     .wrapContentSize(Alignment.CenterStart)
             ) {
@@ -151,7 +143,7 @@ fun ReadingScreen(
             }
         }
         if (state.error.isNotBlank()) {
-            ErrorTextWithEmojis(error=state.error,modifier  = Modifier
+            ErrorTextWithEmojis(error = state.error, modifier = Modifier
                 .fillMaxWidth()
                 .padding(20.dp)
                 .wrapContentSize(Alignment.Center)

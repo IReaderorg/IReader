@@ -9,11 +9,15 @@ data class ReaderScreenState(
     val isLoading: Boolean = false,
     val isLoaded: Boolean = false,
     val chapter: Chapter = Chapter.create(),
+    val isChaptersReversed: Boolean = false,
+    val chapters : List<Chapter> = emptyList(),
     val error: String = "",
     val fontSize: Int = 18,
     val font: FontType = FontType.Poppins,
     val brightness: Float = 0.5f,
     val source: Source,
     val isReaderModeEnable: Boolean = true,
-    val distanceBetweenParagraphs : Int = 2
+    val distanceBetweenParagraphs : Int = 2,
+    val currentChapterIndex : Int = 0,
+    val isChapterSliderMoving :Boolean? =false,
 )

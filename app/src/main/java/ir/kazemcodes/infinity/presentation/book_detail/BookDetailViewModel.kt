@@ -10,8 +10,8 @@ import ir.kazemcodes.infinity.data.network.models.Source
 import ir.kazemcodes.infinity.domain.models.local.BookEntity
 import ir.kazemcodes.infinity.domain.models.local.ChapterEntity
 import ir.kazemcodes.infinity.domain.models.remote.Book
-import ir.kazemcodes.infinity.domain.use_cases.preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
+import ir.kazemcodes.infinity.domain.use_cases.preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
 import ir.kazemcodes.infinity.service.DownloadService
 import ir.kazemcodes.infinity.service.DownloadService.Companion.DOWNLOAD_BOOK_NAME
@@ -36,18 +36,9 @@ class BookDetailViewModel(
 
     private val _chapterState = mutableStateOf<ChapterState>(ChapterState())
     val chapterState: State<ChapterState> = _chapterState
-    lateinit var work : OneTimeWorkRequest
+    lateinit var work: OneTimeWorkRequest
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
-
-
-    fun onEvent(event: BookDetailEvent) {
-        when (event) {
-            is BookDetailEvent.ToggleInLibrary -> {
-                toggleInLibrary()
-            }
-        }
-    }
 
     override fun onServiceRegistered() {
         getBookData(book)
@@ -58,12 +49,8 @@ class BookDetailViewModel(
     }
 
 
-    private fun toggleInLibrary(isAdded: Boolean? = null) {
-        if (isAdded != null) {
-            _state.value = state.value.copy(inLibrary = isAdded)
-        } else {
-            _state.value = state.value.copy(inLibrary = !state.value.inLibrary)
-        }
+    fun toggleInLibrary(inLibrary: Boolean) {
+            _state.value = state.value.copy(inLibrary = inLibrary)
     }
 
 
@@ -84,8 +71,7 @@ class BookDetailViewModel(
 
     private fun getBookData(book: Book) {
         _state.value = DetailState(book = book, error = "", loaded = false, isLoading = false)
-        _chapterState.value =
-            ChapterState(chapters = emptyList(), loaded = false, isLoading = false, error = "")
+        _chapterState.value = chapterState.value.copy(chapters = emptyList(), loaded = false, isLoading = false, error = "")
         getLocalBookByName()
         getLocalChaptersByBookName()
     }
@@ -224,6 +210,18 @@ class BookDetailViewModel(
         }
         _chapterState.value = chapterState.value.copy(lastChapter = lastChapter
             ?: chapterState.value.chapters.first())
+    }
+
+    fun getLastReadChapterIndex(): Int {
+        val chapterIndex =  chapterState.value.chapters.indexOf(chapterState.value.chapters.filterIndexed { index, chapter ->
+            return index
+        }.first())
+
+        return if (chapterIndex != -1) {
+            chapterIndex
+        } else {
+            0
+        }
     }
 
     fun insertBookDetailToLocal(bookEntity: BookEntity) {

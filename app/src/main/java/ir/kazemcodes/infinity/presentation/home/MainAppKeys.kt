@@ -12,8 +12,8 @@ import com.zhuinden.simplestackextensions.servicesktx.add
 import com.zhuinden.simplestackextensions.servicesktx.lookup
 import ir.kazemcodes.infinity.domain.models.remote.Book
 import ir.kazemcodes.infinity.domain.models.remote.Chapter
-import ir.kazemcodes.infinity.domain.use_cases.preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
+import ir.kazemcodes.infinity.domain.use_cases.preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
 import ir.kazemcodes.infinity.presentation.book_detail.BookDetailScreen
 import ir.kazemcodes.infinity.presentation.book_detail.BookDetailViewModel
@@ -83,10 +83,7 @@ data class BrowserScreenKey(val sourceName: String, val isLatestUpdateMode: Bool
 data class BookDetailKey(val book: Book, val sourceName: String) : ComposeKey() {
     @Composable
     override fun ScreenComposable(modifier: Modifier) {
-        val viewModel = rememberService<BookDetailViewModel>()
-
-        BookDetailScreen(book = book, viewModel = viewModel)
-
+        BookDetailScreen()
     }
 
     override fun bindServices(serviceBinder: ServiceBinder) {
@@ -121,14 +118,14 @@ data class ChapterDetailKey(
 
     @Composable
     override fun ScreenComposable(modifier: Modifier) {
-        ChapterDetailScreen(chapters = chapters, book = book)
+        ChapterDetailScreen()
     }
 
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
             add(ChapterDetailViewModel(lookup<LocalUseCase>(),
                 source = mappingApiNameToAPi(sourceName,lookup<Context>()),
-                book = book))
+                book = book, chapters = chapters))
         }
     }
 }
@@ -137,14 +134,14 @@ data class ChapterDetailKey(
 @Parcelize
 data class ReaderScreenKey(
     val book: Book,
-    val chapter: Chapter,
+    val chapterIndex: Int,
     val sourceName: String,
     val chapters: List<Chapter>,
+    val isChaptersReversed: Boolean = false
 ) : ComposeKey() {
-
     @Composable
     override fun ScreenComposable(modifier: Modifier) {
-        ReadingScreen(book = book, chapter = chapter)
+        ReadingScreen()
     }
 
     override fun bindServices(serviceBinder: ServiceBinder) {
@@ -155,9 +152,10 @@ data class ReaderScreenKey(
                 preferencesUseCase = lookup<PreferencesUseCase>(),
                 source = mappingApiNameToAPi(sourceName,context = lookup<Context>()),
                 book = book,
-                chapter = chapter,
+                chapterIndex = chapterIndex,
                 chapters = chapters,
-                window = lookup<Window>()
+                window = lookup<Window>(),
+                isChaptersReversed = isChaptersReversed
             ))
         }
     }

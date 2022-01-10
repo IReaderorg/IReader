@@ -82,7 +82,6 @@ class LibraryViewModel(
     private fun getLocalBooks() {
 
         localUseCase.getLocalBooksUseCase().onEach { result ->
-
             when (result) {
                 is Resource.Success -> {
                     _state.value = state.value.copy(

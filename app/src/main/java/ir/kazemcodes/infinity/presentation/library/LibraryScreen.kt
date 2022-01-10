@@ -163,7 +163,7 @@ fun LibraryScreen(
                         .align(Alignment.Center)
                 )
             }
-            if (state.isLoading) {
+            if (state.isLoading && state.books.isNotEmpty()) {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center)
                 )

@@ -35,7 +35,7 @@ data class Chapter(
             lastRead = lastRead,
             haveBeenRead = haveBeenRead,
             source = source,
-            chapterId = id
+            chapterId = id,
         )
     }
     fun isChapterNotEmpty() : Boolean {

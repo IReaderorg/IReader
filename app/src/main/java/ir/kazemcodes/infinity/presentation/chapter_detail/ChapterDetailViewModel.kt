@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import com.zhuinden.simplestack.ScopedServices
 import ir.kazemcodes.infinity.data.network.models.Source
 import ir.kazemcodes.infinity.domain.models.remote.Book
+import ir.kazemcodes.infinity.domain.models.remote.Chapter
 import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
 import ir.kazemcodes.infinity.util.Resource
 import kotlinx.coroutines.CoroutineScope
@@ -18,11 +19,19 @@ import kotlinx.coroutines.flow.onEach
 class ChapterDetailViewModel(
     private val localUseCase: LocalUseCase,
     private val book: Book,
+    private val chapters : List<Chapter>,
     private val source: Source,
 ) : ScopedServices.Registered {
 
     private val _state = mutableStateOf<ChapterDetailState>(ChapterDetailState())
     val state: State<ChapterDetailState> = _state
+    init {
+        _state.value = state.value.copy(book = book, chapters = chapters)
+    }
+    override fun onServiceRegistered() {
+
+        getLocalChapters()
+    }
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
@@ -32,6 +41,7 @@ class ChapterDetailViewModel(
                 _state.value = state.value.copy(
                     chapters = state.value.chapters.reversed()
                 )
+                _state.value = state.value.copy(isChaptersReversed = !state.value.isChaptersReversed)
             }
             is ChapterDetailEvent.UpdateChapters -> {
                 _state.value = state.value.copy(chapters = event.chapters)
@@ -55,23 +65,20 @@ class ChapterDetailViewModel(
                         } else {
                             _state.value = state.value.copy(isLoading = false, error = "")
                         }
-
                     }
                     is Resource.Error -> {
                         _state.value =
-                            ChapterDetailState(error = result.message
+                            state.value.copy(error = result.message
                                 ?: "An Unknown Error Occurred")
                     }
                     is Resource.Loading -> {
-                        _state.value = ChapterDetailState(isLoading = true)
+                        _state.value = state.value.copy(isLoading = true)
                     }
                 }
             }.launchIn(coroutineScope)
     }
 
-    override fun onServiceRegistered() {
-        getLocalChapters()
-    }
+
 
     override fun onServiceUnregistered() {
         coroutineScope.cancel()

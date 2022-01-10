@@ -29,7 +29,7 @@ data class ChapterEntity(
             haveBeenRead = haveBeenRead,
             lastRead = lastRead,
             source = source,
-            id = chapterId
+            id = chapterId,
         )
     }
 }

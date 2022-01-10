@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import com.zhuinden.simplestack.Backstack
 
@@ -35,7 +36,8 @@ fun TopAppBarTitle(
         color = color ?: MaterialTheme.colors.onBackground,
         style = style ?: MaterialTheme.typography.subtitle1,
         fontWeight = fontWeight ?: FontWeight.Bold,
-        overflow = overflow ?: TextOverflow.Ellipsis
+        overflow = overflow ?: TextOverflow.Ellipsis,
+        textAlign = TextAlign.Center,
     )
 }
 
