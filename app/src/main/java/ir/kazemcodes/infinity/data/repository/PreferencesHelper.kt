@@ -16,6 +16,7 @@ class PreferencesHelper @Inject constructor(
 
         const val SAVED_LIBRARY_LAYOUT_KEY = "library_layout_type"
         const val SAVED_BROWSE_LAYOUT_KEY = "browser_layout_type"
+        const val SAVED_BACkGROUND_COLOR = "background_color"
 
         /** Setting Pref**/
         const val SAVED_DOH_KEY = "SAVED_DOH_KEY"
@@ -31,6 +32,7 @@ class PreferencesHelper @Inject constructor(
     val libraryLayoutTypeStateKey = flowPrefs.getInt(SAVED_LIBRARY_LAYOUT_KEY, 0)
     val browseLayoutTypeStateKey = flowPrefs.getInt(SAVED_BROWSE_LAYOUT_KEY, 0)
     val dohStateKey = flowPrefs.getInt(SAVED_DOH_KEY, 0)
+    val backgroundColorIndex = flowPrefs.getInt(SAVED_BACkGROUND_COLOR, 0)
 
     fun setFontScale(fontSize : Int) {
         readerFontScale.set(fontSize)
@@ -38,19 +40,4 @@ class PreferencesHelper @Inject constructor(
     /**
      * save the index of font according to position of font in fonts list.
      */
-    fun setFont(fontIndex: Int) {
-        readerFont.set(fontIndex)
-    }
-    fun setBrightness(brightness : Float) {
-        readerBrightness.set(brightness)
-    }
-    fun setLibraryLayoutTypeStateUseCase(layoutIndex: Int) {
-        libraryLayoutTypeStateKey.set(layoutIndex)
-    }
-    fun setBrowseLayoutTypeStateUseCase(layoutIndex: Int) {
-        browseLayoutTypeStateKey.set(layoutIndex)
-    }
-    fun setDohPrefUseCase(dohPref: Int) {
-        dohStateKey.set(dohPref)
-    }
 }

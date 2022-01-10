@@ -13,4 +13,6 @@ data class PreferencesUseCase(
     val saveBrowseLayoutUseCase: SaveBrowseLayoutTypeStateUseCase,
     val readDohPrefUseCase: ReadDohPrefUseCase,
     val saveDohPrefUseCase: SaveDohPrefUseCase,
-    )
+    val getBackgroundColorUseCase: GetBackgroundColorUseCase,
+    val setBackgroundColorUseCase: SetBackgroundColorUseCase,
+)

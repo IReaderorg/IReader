@@ -6,6 +6,6 @@ class SaveDohPrefUseCase(
     private val repository: Repository,
 ) {
      operator fun invoke(dohPref: Int) {
-         repository.preferencesHelper.setDohPrefUseCase(dohPref)
+         repository.preferencesHelper.dohStateKey.set(dohPref)
     }
 }

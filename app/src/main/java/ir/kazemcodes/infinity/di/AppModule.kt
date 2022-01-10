@@ -127,7 +127,9 @@ class AppModule {
             saveBrowseLayoutUseCase = SaveBrowseLayoutTypeStateUseCase(repository),
             readBrowseLayoutUseCase = ReadBrowseLayoutTypeStateUseCase(repository),
             readDohPrefUseCase = ReadDohPrefUseCase(repository = repository),
-            saveDohPrefUseCase = SaveDohPrefUseCase(repository)
+            saveDohPrefUseCase = SaveDohPrefUseCase(repository),
+            getBackgroundColorUseCase = GetBackgroundColorUseCase(repository),
+            setBackgroundColorUseCase = SetBackgroundColorUseCase(repository = repository)
         )
     }
 

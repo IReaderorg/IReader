@@ -6,6 +6,6 @@ class SaveBrightnessStateUseCase(
     private val repository: Repository,
 ) {
     operator fun invoke(brightness: Float) {
-        return repository.preferencesHelper.setBrightness(brightness)
+        return repository.preferencesHelper.readerBrightness.set(brightness)
     }
 }

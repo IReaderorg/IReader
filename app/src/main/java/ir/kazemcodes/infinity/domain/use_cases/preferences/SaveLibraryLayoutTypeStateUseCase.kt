@@ -6,6 +6,6 @@ class SaveLibraryLayoutTypeStateUseCase(
     private val repository: Repository,
 ) {
      operator fun invoke(layoutIndex: Int) {
-         repository.preferencesHelper.setLibraryLayoutTypeStateUseCase(layoutIndex)
+         repository.preferencesHelper.libraryLayoutTypeStateKey.set(layoutIndex)
     }
 }

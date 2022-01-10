@@ -2,10 +2,10 @@ package ir.kazemcodes.infinity.domain.use_cases.preferences
 
 import ir.kazemcodes.infinity.domain.repository.Repository
 
-class SaveBrowseLayoutTypeStateUseCase(
+class SetBackgroundColorUseCase(
     private val repository: Repository,
 ) {
-    operator fun invoke(layoutIndex: Int) {
-        repository.preferencesHelper.browseLayoutTypeStateKey.set(layoutIndex)
+    operator fun invoke(index : Int) {
+        repository.preferencesHelper.backgroundColorIndex.set(index)
     }
 }

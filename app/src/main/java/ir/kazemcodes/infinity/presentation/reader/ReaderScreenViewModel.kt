@@ -4,6 +4,7 @@ import android.view.Window
 import android.view.WindowManager
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.graphics.Color
 import com.zhuinden.simplestack.ScopedServices
 import ir.kazemcodes.infinity.data.network.models.Source
 import ir.kazemcodes.infinity.domain.models.FontType
@@ -13,6 +14,7 @@ import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
 import ir.kazemcodes.infinity.domain.use_cases.preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
 import ir.kazemcodes.infinity.presentation.theme.fonts
+import ir.kazemcodes.infinity.presentation.theme.readerScreenBackgroundColors
 import ir.kazemcodes.infinity.util.Resource
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
@@ -37,24 +39,33 @@ class ReaderScreenViewModel(
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     override fun onServiceRegistered() {
+        readPreferences()
+        updateState()
         if (chapters.isNotEmpty()) {
             _state.value = state.value.copy(chapter = chapters[chapterIndex])
         }
-        updateState()
         getContent(chapter =  state.value.chapter.copy(bookName = book.bookName))
-        readPreferences()
     }
 
     private fun updateState() {
         _state.value = state.value.copy(chapters = chapters,
             currentChapterIndex = if (chapters.isNullOrEmpty() && chapters.indexOf(state.value.chapter) > 0) chapters.indexOf(
-                state.value.chapter) else 0)
+                state.value.chapter) else 0, textColor = if (state.value.backgroundColor == Color.Black && state.value.textColor== Color.Black) Color.White else Color.Black)
+    }
+    fun changeBackgroundColor(colorIndex: Int) {
+        val color = readerScreenBackgroundColors[colorIndex]
+        _state.value = state.value.copy(backgroundColor = color,textColor = if (color == Color.Black) Color.White else Color.Black, isDarkThemeEnabled = false)
+        preferencesUseCase.setBackgroundColorUseCase(colorIndex)
+        if (color == Color.Black) {
+            _state.value = state.value.copy(isDarkThemeEnabled = true)
+        }
     }
 
     private fun readPreferences() {
         readSelectedFontState()
         readBrightness()
         readFontSize()
+        getBackgroundColor()
     }
 
     fun onEvent(event: ReaderEvent) {
@@ -80,8 +91,10 @@ class ReaderScreenViewModel(
     }
 
     private fun toggleReaderMode(enable: Boolean? = null) {
-        _state.value =
-            state.value.copy(isReaderModeEnable = enable ?: !state.value.isReaderModeEnable)
+        _state.value = state.value.copy(isReaderModeEnable = enable ?: !state.value.isReaderModeEnable, isMainBottomModeEnable = true, isSettingModeEnable = false)
+    }
+    fun toggleSettingMode(enable: Boolean) {
+        _state.value = state.value.copy(isSettingModeEnable = enable, isMainBottomModeEnable = false)
     }
 
     fun getContent(chapter: Chapter) {
@@ -191,6 +204,7 @@ class ReaderScreenViewModel(
 
         preferencesUseCase.saveBrightnessStateUseCase(brightness)
 
+
     }
 
     private fun saveFontSize(event: FontSizeEvent) {
@@ -222,6 +236,11 @@ class ReaderScreenViewModel(
     private fun readBrightness() {
         _state.value =
             state.value.copy(brightness = preferencesUseCase.readBrightnessStateUseCase())
+
+    }
+    private fun getBackgroundColor() {
+        _state.value =
+            state.value.copy(backgroundColor = readerScreenBackgroundColors[preferencesUseCase.getBackgroundColorUseCase()])
 
     }
 

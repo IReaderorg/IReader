@@ -1,6 +1,7 @@
 package ir.kazemcodes.infinity.presentation.theme
 
 import androidx.compose.material.Typography
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -32,4 +33,17 @@ val Typography = Typography(
 val fonts = listOf<FontType>(
     FontType.Poppins,
     FontType.SourceSansPro,
+)
+val readerScreenBackgroundColors = listOf<Color>(
+    Color.Black,
+    Color(0xffdddddd),
+    Color(150, 173, 252),
+    Color(219, 225, 241),
+    Color(237, 221, 110),
+    Color(168, 242, 154),
+    Color(237, 221, 110),
+    Color(237, 209, 176),
+    Color(185, 135, 220),
+    Color(224, 166, 170),
+    Color(248, 253, 137),
 )

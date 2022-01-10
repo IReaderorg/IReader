@@ -1,5 +1,6 @@
 package ir.kazemcodes.infinity.presentation.reader
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -8,6 +9,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Autorenew
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -19,14 +22,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import com.zhuinden.simplestackcomposeintegration.services.rememberService
-import ir.kazemcodes.infinity.presentation.reader.components.BrightnessSliderComposable
 import ir.kazemcodes.infinity.presentation.reader.components.ChaptersSliderComposable
-import ir.kazemcodes.infinity.presentation.reader.components.FontMenuComposable
-import ir.kazemcodes.infinity.presentation.reader.components.FontSizeChangerComposable
+import ir.kazemcodes.infinity.presentation.reader.components.ReaderSettingComposable
 import ir.kazemcodes.infinity.presentation.reusable_composable.ErrorTextWithEmojis
+import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarActionButton
 import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarBackButton
 
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ReadingScreen(
     modifier: Modifier = Modifier,
@@ -85,34 +88,28 @@ fun ReadingScreen(
                     BottomAppBar(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(250.dp),
+                            .height(if (viewModel.state.value.isMainBottomModeEnable) 130.dp else 260.dp),
                         elevation = 8.dp,
                         backgroundColor = MaterialTheme.colors.background
                     ) {
-                        Column(
-                            modifier = modifier
-                                .fillMaxSize()
-                                .padding(8.dp),
-                        ) {
-                            ChaptersSliderComposable( viewModel = viewModel, isChaptersReversed =viewModel.state.value.isChaptersReversed )
-                            BrightnessSliderComposable(viewModel.state.value.brightness) {
-                                viewModel.onEvent(ReaderEvent.ChangeBrightness(it))
+                        Column(modifier.fillMaxSize()) {
+                            Divider(modifier =modifier.fillMaxWidth(),color=MaterialTheme.colors.onBackground.copy(alpha = .2f), thickness = 1.dp)
+                            Spacer(modifier = modifier.height(15.dp))
+                            if (viewModel.state.value.isMainBottomModeEnable) {
+                                ChaptersSliderComposable( viewModel = viewModel, isChaptersReversed =viewModel.state.value.isChaptersReversed )
+                                Row(modifier =modifier.fillMaxWidth(),horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.CenterVertically) {
+                                    TopAppBarActionButton(imageVector = Icons.Default.Menu,
+                                        title = "Chapter List Drawer",
+                                        onClick = {  })
+                                    TopAppBarActionButton(imageVector = Icons.Default.Settings,
+                                        title = "Setting Drawer",
+                                        onClick = { viewModel.toggleSettingMode(true) })
+                                }
                             }
-                            FontSizeChangerComposable(
-                                onFontDecease = {
-                                    viewModel.onEvent(ReaderEvent.ChangeFontSize(FontSizeEvent.Decrease))
-                                },
-                                ontFontIncrease = {
-                                    viewModel.onEvent(ReaderEvent.ChangeFontSize(FontSizeEvent.Increase))
-                                },
-                                fontSize = viewModel.state.value.fontSize
-                            )
-                            Spacer(modifier = Modifier.height(12.dp))
-                            FontMenuComposable(
-                                viewModel = viewModel
-                            )
-
-
+                            if (viewModel.state.value.isSettingModeEnable) {
+                                ReaderSettingComposable(viewModel = viewModel)
+                            }
+                            
                         }
                     }
                 }
@@ -126,6 +123,7 @@ fun ReadingScreen(
                     .verticalScroll(rememberScrollState())
                     .clickable(interactionSource = interactionSource,
                         indication = null) { viewModel.onEvent(ReaderEvent.ToggleReaderMode(!state.isReaderModeEnable)) }
+                    .background(viewModel.state.value.backgroundColor)
                     .padding(8.dp)
                     .wrapContentSize(Alignment.CenterStart)
             ) {
@@ -137,7 +135,8 @@ fun ReadingScreen(
                         text = state.chapter.content.joinToString("\n".repeat(state.distanceBetweenParagraphs)),
                         fontSize = viewModel.state.value.fontSize.sp,
                         fontFamily = viewModel.state.value.font.fontFamily,
-                        textAlign = TextAlign.Start
+                        textAlign = TextAlign.Start,
+                        color = state.textColor
                     )
                 }
             }

@@ -182,8 +182,8 @@ fun BookDetailScreenLoadedComposable(
                     ) "Continue Reading" else "Read",
                     imageVector = Icons.Default.AutoStories,
                     onClick = {
-                        if (viewModel.chapterState.value.lastChapter != null) {
-                            backStack.goTo(ReaderScreenKey(chapterIndex = viewModel.getLastReadChapterIndex(),
+                        if (viewModel.chapterState.value.lastChapter != null ) {
+                            backStack.goTo(ReaderScreenKey(chapterIndex = chapters.indexOf(viewModel.chapterState.value.lastChapter),
                                 book = book,
                                 sourceName = viewModel.getSource().name,
                                 chapters = viewModel.chapterState.value.chapters),)
