@@ -69,9 +69,8 @@ class LibraryViewModel(
 
 
     private fun updateLayoutType(layoutType: DisplayMode) {
-        _state.value = state.value.copy(layout = layoutType.layout)
-
         preferencesUseCase.saveLibraryLayoutUseCase(layoutType.layoutIndex)
+        _state.value = state.value.copy(layout = layoutType.layout)
 
     }
 
@@ -86,17 +85,17 @@ class LibraryViewModel(
 
             when (result) {
                 is Resource.Success -> {
-                    _state.value = LibraryState(
+                    _state.value = state.value.copy(
                         books = result.data?.map { it.copy(inLibrary = true) } ?: emptyList()
                     )
                 }
                 is Resource.Error -> {
                     _state.value =
-                        LibraryState(error = result.message ?: "Empty")
+                        state.value.copy(error = result.message ?: "Empty")
                 }
                 is Resource.Loading -> {
 
-                    _state.value = LibraryState(isLoading = true)
+                    _state.value = state.value.copy(isLoading = true)
                 }
             }
         }.launchIn(coroutineScope)

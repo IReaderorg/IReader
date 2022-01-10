@@ -5,14 +5,6 @@ import androidx.compose.ui.unit.dp
 object Constants {
 
     const val SHARED_PREF_NAME = "shared_pref_name"
-    const val a = "shared_pref_name"
-    const val aa = "shared_pref_name"
-    const val aaa = "shared_pref_name"
-    const val aaaa = "shared_pref_name"
-    const val aaaaa = "shared_pref_name"
-    const val aaaaaa = "shared_pref_name"
-
-
 
 
 
