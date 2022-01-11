@@ -16,6 +16,7 @@ import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
 import ir.kazemcodes.infinity.presentation.theme.fonts
 import ir.kazemcodes.infinity.presentation.theme.readerScreenBackgroundColors
 import ir.kazemcodes.infinity.util.Resource
+import ir.kazemcodes.infinity.util.isNull
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -30,7 +31,7 @@ class ReaderScreenViewModel(
     private val book: Book,
     private val chapters: List<Chapter>,
     private val window: Window,
-    private val isChaptersReversed :Boolean
+    private val isChaptersReversed: Boolean,
 ) : ScopedServices.Registered {
 
     private val _state = mutableStateOf(ReaderScreenState(source = source))
@@ -44,17 +45,21 @@ class ReaderScreenViewModel(
         if (chapters.isNotEmpty()) {
             _state.value = state.value.copy(chapter = chapters[chapterIndex])
         }
-        getContent(chapter =  state.value.chapter.copy(bookName = book.bookName))
+        getContent(chapter = state.value.chapter.copy(bookName = book.bookName))
     }
 
     private fun updateState() {
         _state.value = state.value.copy(chapters = chapters,
             currentChapterIndex = if (chapters.isNullOrEmpty() && chapters.indexOf(state.value.chapter) > 0) chapters.indexOf(
-                state.value.chapter) else 0, textColor = if (state.value.backgroundColor == Color.Black && state.value.textColor== Color.Black) Color.White else Color.Black)
+                state.value.chapter) else 0,
+            textColor = if (state.value.backgroundColor == Color.Black && state.value.textColor == Color.Black) Color.White else Color.Black)
     }
+
     fun changeBackgroundColor(colorIndex: Int) {
         val color = readerScreenBackgroundColors[colorIndex]
-        _state.value = state.value.copy(backgroundColor = color,textColor = if (color == Color.Black) Color.White else Color.Black, isDarkThemeEnabled = false)
+        _state.value = state.value.copy(backgroundColor = color,
+            textColor = if (color == Color.Black) Color.White else Color.Black,
+            isDarkThemeEnabled = false)
         preferencesUseCase.setBackgroundColorUseCase(colorIndex)
         if (color == Color.Black) {
             _state.value = state.value.copy(isDarkThemeEnabled = true)
@@ -91,10 +96,21 @@ class ReaderScreenViewModel(
     }
 
     private fun toggleReaderMode(enable: Boolean? = null) {
-        _state.value = state.value.copy(isReaderModeEnable = enable ?: !state.value.isReaderModeEnable, isMainBottomModeEnable = true, isSettingModeEnable = false)
+        _state.value =
+            state.value.copy(isReaderModeEnable = enable ?: !state.value.isReaderModeEnable,
+                isMainBottomModeEnable = true,
+                isSettingModeEnable = false)
     }
-    fun toggleSettingMode(enable: Boolean) {
-        _state.value = state.value.copy(isSettingModeEnable = enable, isMainBottomModeEnable = false)
+
+    fun toggleSettingMode(enable: Boolean, returnToMain: Boolean? = null) {
+        if (returnToMain.isNull()) {
+            _state.value =
+                state.value.copy(isSettingModeEnable = enable, isMainBottomModeEnable = false)
+
+        } else {
+            _state.value =
+                state.value.copy(isSettingModeEnable = false, isMainBottomModeEnable = true)
+        }
     }
 
     fun getContent(chapter: Chapter) {
@@ -238,6 +254,7 @@ class ReaderScreenViewModel(
             state.value.copy(brightness = preferencesUseCase.readBrightnessStateUseCase())
 
     }
+
     private fun getBackgroundColor() {
         _state.value =
             state.value.copy(backgroundColor = readerScreenBackgroundColors[preferencesUseCase.getBackgroundColorUseCase()])
@@ -247,6 +264,22 @@ class ReaderScreenViewModel(
 
     private fun readFontSize() {
         _state.value = state.value.copy(fontSize = preferencesUseCase.readFontSizeStateUseCase())
+    }
+
+    fun readFontHeight() {
+        _state.value = state.value.copy(lineHeight = preferencesUseCase.readFontHeightUseCase())
+    }
+
+    fun saveFontHeight(isIncreased: Boolean) {
+        val currentFontHeight = state.value.lineHeight
+        if (isIncreased)  {
+            preferencesUseCase.saveFontHeightUseCase(currentFontHeight+1)
+            _state.value = state.value.copy(lineHeight = currentFontHeight+1)
+
+        } else if (currentFontHeight > 20 && !isIncreased){
+            preferencesUseCase.saveFontHeightUseCase(currentFontHeight-1)
+            _state.value = state.value.copy(lineHeight = currentFontHeight-1)
+        }
     }
 
     override fun onServiceUnregistered() {

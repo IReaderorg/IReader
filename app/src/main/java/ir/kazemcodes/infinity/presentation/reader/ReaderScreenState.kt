@@ -21,6 +21,7 @@ data class ReaderScreenState(
     val isSettingModeEnable: Boolean = false,
     val isMainBottomModeEnable: Boolean = true,
     val distanceBetweenParagraphs : Int = 2,
+    val lineHeight : Int = 25,
     val currentChapterIndex : Int = 0,
     val isChapterSliderMoving :Boolean? =false,
     val isDarkThemeEnabled : Boolean = false,

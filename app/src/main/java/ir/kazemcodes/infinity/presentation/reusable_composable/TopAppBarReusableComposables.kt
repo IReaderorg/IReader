@@ -43,6 +43,7 @@ fun TopAppBarTitle(
 
 @Composable
 fun TopAppBarActionButton(
+    modifier: Modifier = Modifier,
     imageVector: ImageVector,
     title: String,
     onClick: () -> Unit,
@@ -54,6 +55,7 @@ fun TopAppBarActionButton(
         },
     ) {
         Icon(
+            modifier = modifier,
             imageVector = imageVector,
             contentDescription = "$title Icon",
             tint = tint ?: MaterialTheme.colors.onBackground

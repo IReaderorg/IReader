@@ -15,4 +15,6 @@ data class PreferencesUseCase(
     val saveDohPrefUseCase: SaveDohPrefUseCase,
     val getBackgroundColorUseCase: GetBackgroundColorUseCase,
     val setBackgroundColorUseCase: SetBackgroundColorUseCase,
+    val saveFontHeightUseCase: SaveFontHeightUseCase,
+    val readFontHeightUseCase: ReadFontHeightUseCase,
 )

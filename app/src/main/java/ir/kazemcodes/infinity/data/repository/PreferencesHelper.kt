@@ -17,6 +17,8 @@ class PreferencesHelper @Inject constructor(
         const val SAVED_LIBRARY_LAYOUT_KEY = "library_layout_type"
         const val SAVED_BROWSE_LAYOUT_KEY = "browser_layout_type"
         const val SAVED_BACkGROUND_COLOR = "background_color"
+        const val SAVED_FONT_HEIGHT = "font_height"
+        const val SAVED_PARAGRAPH_DISTANCE = "paragraph_distance"
 
         /** Setting Pref**/
         const val SAVED_DOH_KEY = "SAVED_DOH_KEY"
@@ -33,6 +35,8 @@ class PreferencesHelper @Inject constructor(
     val browseLayoutTypeStateKey = flowPrefs.getInt(SAVED_BROWSE_LAYOUT_KEY, 0)
     val dohStateKey = flowPrefs.getInt(SAVED_DOH_KEY, 0)
     val backgroundColorIndex = flowPrefs.getInt(SAVED_BACkGROUND_COLOR, 0)
+    val fontHeight = flowPrefs.getInt(SAVED_FONT_HEIGHT, 0)
+    val paragraphDistance = flowPrefs.getInt(SAVED_PARAGRAPH_DISTANCE, 2)
 
     fun setFontScale(fontSize : Int) {
         readerFontScale.set(fontSize)

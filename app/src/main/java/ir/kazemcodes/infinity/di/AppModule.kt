@@ -129,7 +129,9 @@ class AppModule {
             readDohPrefUseCase = ReadDohPrefUseCase(repository = repository),
             saveDohPrefUseCase = SaveDohPrefUseCase(repository),
             getBackgroundColorUseCase = GetBackgroundColorUseCase(repository),
-            setBackgroundColorUseCase = SetBackgroundColorUseCase(repository = repository)
+            setBackgroundColorUseCase = SetBackgroundColorUseCase(repository = repository),
+            readFontHeightUseCase = ReadFontHeightUseCase(repository),
+            saveFontHeightUseCase = SaveFontHeightUseCase(repository)
         )
     }
 
