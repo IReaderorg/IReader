@@ -133,7 +133,9 @@ class AppModule {
             readFontHeightUseCase = ReadFontHeightUseCase(repository),
             saveFontHeightUseCase = SaveFontHeightUseCase(repository),
             saveParagraphDistanceUseCase = SaveParagraphDistanceUseCase(repository),
-            readParagraphDistanceUseCase = ReadParagraphDistanceUseCase(repository)
+            readParagraphDistanceUseCase = ReadParagraphDistanceUseCase(repository),
+            readOrientationUseCase = ReadOrientationUseCase(repository),
+            saveOrientationUseCase = SaveOrientationUseCase(repository)
         )
     }
 

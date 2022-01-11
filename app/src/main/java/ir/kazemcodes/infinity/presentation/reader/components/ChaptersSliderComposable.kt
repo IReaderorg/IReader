@@ -55,8 +55,11 @@ fun ChaptersSliderComposable(
                 steps = chapters.size,
                 colors = SliderDefaults.colors(
                     thumbColor = MaterialTheme.colors.primary,
-                    activeTrackColor = MaterialTheme.colors.onBackground.copy(alpha = .6f),
+                    activeTrackColor = MaterialTheme.colors.primary.copy(alpha = .6f),
+                    inactiveTickColor = MaterialTheme.colors.onBackground.copy(alpha = .6f),
                     inactiveTrackColor = MaterialTheme.colors.onBackground.copy(alpha = .6f),
+                activeTickColor = MaterialTheme.colors.primary.copy(alpha = .6f)
+
                 )
             )
             IconButton(modifier = modifier.weight(1f), onClick = {

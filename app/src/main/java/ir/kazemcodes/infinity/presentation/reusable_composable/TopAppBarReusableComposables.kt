@@ -30,8 +30,10 @@ fun TopAppBarTitle(
     style: TextStyle? = null,
     fontWeight: FontWeight? = null,
     overflow: TextOverflow? = null,
+    modifier: Modifier = Modifier,
 ) {
     Text(
+        modifier=modifier,
         text = title,
         color = color ?: MaterialTheme.colors.onBackground,
         style = style ?: MaterialTheme.typography.subtitle1,

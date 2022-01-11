@@ -1,5 +1,6 @@
 package ir.kazemcodes.infinity.presentation.reader
 
+import android.content.pm.ActivityInfo
 import android.view.Window
 import android.view.WindowManager
 import androidx.compose.runtime.State
@@ -34,7 +35,7 @@ class ReaderScreenViewModel(
     private val isChaptersReversed: Boolean,
 ) : ScopedServices.Registered {
 
-    private val _state = mutableStateOf(ReaderScreenState(source = source))
+    private val _state = mutableStateOf(ReaderScreenState(source = source, book = book, chapters = chapters, chapter = chapters[chapterIndex], isChaptersReversed = isChaptersReversed))
     val state: State<ReaderScreenState> = _state
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -213,6 +214,9 @@ class ReaderScreenViewModel(
                 haveBeenRead = true))
         }
     }
+    fun reverseChapters() {
+        _state.value = state.value.copy(chapters = state.value.chapters.reversed(), isChaptersReversed = !state.value.isChaptersReversed)
+    }
 
     private fun saveBrightness(brightness: Float) {
         _state.value = state.value.copy(brightness = brightness)
@@ -223,6 +227,24 @@ class ReaderScreenViewModel(
         preferencesUseCase.saveBrightnessStateUseCase(brightness)
 
 
+    }
+    fun saveOrientation() {
+        val layoutParams: WindowManager.LayoutParams = window.attributes
+        val orientation = layoutParams.screenOrientation
+        layoutParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        window.attributes = layoutParams
+//        if(orientation ==Configuration.ORIENTATION_LANDSCAPE ) {
+//            layoutParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+//        }else if(orientation ==Configuration.ORIENTATION_PORTRAIT ) {
+//            layoutParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+//        } else {
+//            layoutParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+//        }
+//        _state.value = state.value.copy(orientation = orientation)
+//
+//        window.attributes = layoutParams
+//
+//        preferencesUseCase.saveOrientationUseCase(orientation)
     }
 
     private fun saveFontSize(event: FontSizeEvent) {

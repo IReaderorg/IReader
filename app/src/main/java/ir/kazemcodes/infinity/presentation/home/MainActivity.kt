@@ -22,8 +22,8 @@ import com.zhuinden.simplestackextensions.servicesktx.add
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.scopes.ActivityScoped
 import ir.kazemcodes.infinity.base_feature.navigation.MainScreenKey
-import ir.kazemcodes.infinity.domain.use_cases.preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
+import ir.kazemcodes.infinity.domain.use_cases.preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
 import ir.kazemcodes.infinity.presentation.theme.InfinityTheme
 import org.kodein.di.DI
@@ -54,7 +54,6 @@ class MainActivity : ComponentActivity(),DIAware {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
 
 
        val globalServices :GlobalServices  = GlobalServices.builder()
