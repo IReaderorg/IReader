@@ -16,14 +16,12 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import com.zhuinden.simplestackcomposeintegration.services.rememberService
-import ir.kazemcodes.infinity.base_feature.navigation.WebViewKey
+import ir.kazemcodes.infinity.presentation.home.WebViewKey
 import ir.kazemcodes.infinity.presentation.layouts.layouts
 import ir.kazemcodes.infinity.presentation.library.components.LayoutComposable
 import ir.kazemcodes.infinity.presentation.library.components.RadioButtonWithTitleComposable
 import ir.kazemcodes.infinity.presentation.reusable_composable.*
 import ir.kazemcodes.infinity.util.isScrolledToTheEnd
-
-
 
 
 @Composable
@@ -146,7 +144,7 @@ fun BrowserScreen() {
                 viewModel.onEvent(BrowseScreenEvents.GetBooks(source = source))
             }
             if (state.error.isNotBlank()) {
-                ErrorTextWithEmojis(error=state.error,modifier  = Modifier
+                ErrorTextWithEmojis(error = state.error, modifier = Modifier
                     .fillMaxWidth()
                     .padding(20.dp)
                     .wrapContentSize(Alignment.Center)

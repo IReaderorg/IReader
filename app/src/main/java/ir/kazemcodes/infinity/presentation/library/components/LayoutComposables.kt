@@ -4,16 +4,13 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
-import ir.kazemcodes.infinity.base_feature.navigation.BookDetailKey
 import ir.kazemcodes.infinity.data.network.models.Source
 import ir.kazemcodes.infinity.domain.models.remote.Book
 import ir.kazemcodes.infinity.presentation.components.GridLayoutComposable
 import ir.kazemcodes.infinity.presentation.components.LinearListDisplay
+import ir.kazemcodes.infinity.presentation.home.BookDetailKey
 import ir.kazemcodes.infinity.presentation.layouts.CompactGridLayoutComposable
 import ir.kazemcodes.infinity.presentation.layouts.LayoutType
-
-
-
 
 
 @Composable
@@ -21,7 +18,7 @@ fun LayoutComposable(
     books: List<Book>,
     layout: LayoutType,
     scrollState: LazyListState = rememberLazyListState(),
-    source : Source? = null
+    source: Source? = null,
 ) {
     val backStack = LocalBackstack.current
     when (layout) {
@@ -31,7 +28,8 @@ fun LayoutComposable(
                     backStack.goTo(
                         BookDetailKey(
                             book = books[index],
-                            sourceName = if (source?.name != null) source.name else books[index].source?:""
+                            sourceName = if (source?.name != null) source.name else books[index].source
+                                ?: ""
                         )
                     )
                 }, scrollState = scrollState)
@@ -41,7 +39,8 @@ fun LayoutComposable(
                 backStack.goTo(
                     BookDetailKey(
                         books[index],
-                        sourceName = if (source?.name != null) source.name else books[index].source?:""
+                        sourceName = if (source?.name != null) source.name else books[index].source
+                            ?: ""
                     )
                 )
             }, scrollState = scrollState)
@@ -53,7 +52,8 @@ fun LayoutComposable(
                     backStack.goTo(
                         BookDetailKey(
                             book = books[index],
-                            sourceName = if (source?.name != null) source.name else books[index].source?:""
+                            sourceName = if (source?.name != null) source.name else books[index].source
+                                ?: ""
                         )
                     )
                 }, scrollState = scrollState)

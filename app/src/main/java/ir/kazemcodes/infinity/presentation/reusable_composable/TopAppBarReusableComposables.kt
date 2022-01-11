@@ -33,7 +33,7 @@ fun TopAppBarTitle(
     modifier: Modifier = Modifier,
 ) {
     Text(
-        modifier=modifier,
+        modifier = modifier,
         text = title,
         color = color ?: MaterialTheme.colors.onBackground,
         style = style ?: MaterialTheme.typography.subtitle1,
@@ -66,7 +66,7 @@ fun TopAppBarActionButton(
 }
 
 @Composable
-fun TopAppBarBackButton(backStack: Backstack, onClick: (() -> Unit?)? =null) {
+fun TopAppBarBackButton(backStack: Backstack, onClick: (() -> Unit?)? = null) {
     IconButton(onClick = {
         backStack.goBack()
         if (onClick != null) {

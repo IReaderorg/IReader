@@ -17,6 +17,8 @@ fun CoroutineScope.launchUI(block: suspend CoroutineScope.() -> Unit): Job =
 fun CoroutineScope.launchIO(block: suspend CoroutineScope.() -> Unit): Job =
     launch(Dispatchers.IO, block = block)
 
-suspend fun <T> withUIContext(block: suspend CoroutineScope.() -> T) = withContext(Dispatchers.Main, block)
+suspend fun <T> withUIContext(block: suspend CoroutineScope.() -> T) =
+    withContext(Dispatchers.Main, block)
 
-suspend fun <T> withIOContext(block: suspend CoroutineScope.() -> T) = withContext(Dispatchers.IO, block)
+suspend fun <T> withIOContext(block: suspend CoroutineScope.() -> T) =
+    withContext(Dispatchers.IO, block)

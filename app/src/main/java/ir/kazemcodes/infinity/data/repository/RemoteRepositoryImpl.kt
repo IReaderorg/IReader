@@ -33,7 +33,8 @@ class RemoteRepositoryImpl(
                 while (!success || retries < 0) {
                     kotlinx.coroutines.delay(1000)
                     try {
-                        remoteUseCase.getRemoteReadingContentUseCase(chapters[index], source = source)
+                        remoteUseCase.getRemoteReadingContentUseCase(chapters[index],
+                            source = source)
                             .collect { result ->
                                 when (result) {
                                     is Resource.Success -> {

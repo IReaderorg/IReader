@@ -27,9 +27,6 @@ import ir.kazemcodes.infinity.domain.models.remote.Book
 import ir.kazemcodes.infinity.presentation.screen.components.BookImageComposable
 
 
-
-
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun GridLayoutComposable(

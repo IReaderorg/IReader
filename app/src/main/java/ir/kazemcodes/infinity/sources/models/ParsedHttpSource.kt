@@ -40,6 +40,7 @@ abstract class ParsedHttpSource(context: Context) : HttpSource(context) {
      * @param element an element obtained from [searchSelector].
      */
     abstract fun searchFromElement(element: Element): Book
+
     /****************************************************************************************************/
 
 
@@ -53,12 +54,11 @@ abstract class ParsedHttpSource(context: Context) : HttpSource(context) {
             document.select(selector).first()
         } != null
 
-        return BooksPage(books, hasNextPage,isCloudflareEnable)
+        return BooksPage(books, hasNextPage, isCloudflareEnable)
     }
 
 
-
-    override fun latestParse(document: Document, page:Int): BooksPage {
+    override fun latestParse(document: Document, page: Int): BooksPage {
         val isCloudflareEnable = document.body().allElements.text().contains(CLOUDFLARE_LOG)
 
         val books = document.select(latestSelector).map { element ->
@@ -69,8 +69,9 @@ abstract class ParsedHttpSource(context: Context) : HttpSource(context) {
             document.select(selector).first()
         } != null
 
-        return BooksPage(books, hasNextPage,isCloudflareEnable, document.body().allElements.text())
+        return BooksPage(books, hasNextPage, isCloudflareEnable, document.body().allElements.text())
     }
+
     override fun chaptersParse(document: Document): ChaptersPage {
         val isCloudflareEnable = document.body().allElements.text().contains(CLOUDFLARE_LOG)
         val chapters = document.select(chaptersSelector).map { chapterFromElement(it) }
@@ -83,12 +84,12 @@ abstract class ParsedHttpSource(context: Context) : HttpSource(context) {
     }
 
 
-
     abstract override fun contentParse(document: Document): ChapterPage
 
 
     override fun searchParse(document: Document, page: Int): BooksPage {
         val isCloudflareEnable = document.body().allElements.text().contains(CLOUDFLARE_LOG)
+
         /**
          * I Add Filter Because sometimes this value contains null values
          * so the null book shows in search screen
@@ -100,7 +101,7 @@ abstract class ParsedHttpSource(context: Context) : HttpSource(context) {
         }
         val hasNextPage = false
 
-        return BooksPage(books, hasNextPage,isCloudflareEnable)
+        return BooksPage(books, hasNextPage, isCloudflareEnable)
     }
 
     /****************************************************************************************************/

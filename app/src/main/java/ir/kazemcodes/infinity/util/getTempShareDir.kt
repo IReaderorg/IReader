@@ -14,8 +14,8 @@ fun getTempShareDir(context: Context) = File(context.cacheDir, "shared_image")
 
 fun getPicturesDir(context: Context) = File(
     Environment.getExternalStorageDirectory().absolutePath +
-        File.separator + Environment.DIRECTORY_PICTURES +
-        File.separator + context.getString(R.string.app_name)
+            File.separator + Environment.DIRECTORY_PICTURES +
+            File.separator + context.getString(R.string.app_name)
 )
 
 /**

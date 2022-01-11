@@ -1,6 +1,5 @@
 package ir.kazemcodes.infinity.presentation.library
 
-import android.content.pm.ActivityInfo
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -28,10 +27,7 @@ import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarActionBu
 import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarBackButton
 import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarSearch
 import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarTitle
-import ir.kazemcodes.infinity.util.findActivity
 import kotlinx.coroutines.launch
-
-
 
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -39,14 +35,13 @@ import kotlinx.coroutines.launch
 fun LibraryScreen(
 ) {
     val viewModel = rememberService<LibraryViewModel>()
+    val context = LocalContext.current
     val backStack = LocalBackstack.current
     val state = viewModel.state.value
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState()
     val coroutineScope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
-    val context = LocalContext.current
-    val activity = context.findActivity()!!
-    activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -108,7 +103,8 @@ fun LibraryScreen(
                     },
                     navigationIcon = if (state.inSearchMode) {
                         {
-                            TopAppBarBackButton(backStack = backStack,onClick = {viewModel.onEvent(LibraryEvents.ToggleSearchMode(false))})
+                            TopAppBarBackButton(backStack = backStack,
+                                onClick = { viewModel.onEvent(LibraryEvents.ToggleSearchMode(false)) })
                         }
                     } else null
 

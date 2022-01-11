@@ -14,10 +14,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
-import ir.kazemcodes.infinity.base_feature.navigation.WebViewKey
 import ir.kazemcodes.infinity.domain.models.remote.Book
 import ir.kazemcodes.infinity.domain.models.remote.Chapter
 import ir.kazemcodes.infinity.presentation.book_detail.BookDetailViewModel
+import ir.kazemcodes.infinity.presentation.home.WebViewKey
 
 @Composable
 fun BookDetailToggleButtonsComposable(

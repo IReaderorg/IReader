@@ -7,7 +7,7 @@ import ir.kazemcodes.infinity.presentation.theme.fonts
 class ReadSelectedFontStateUseCase(
     private val repository: Repository,
 ) {
-    operator fun invoke(): FontType  {
-        return  fonts[repository.preferencesHelper.readerFont.get()]
+    operator fun invoke(): FontType {
+        return fonts[repository.preferencesHelper.readerFont.get()]
     }
 }

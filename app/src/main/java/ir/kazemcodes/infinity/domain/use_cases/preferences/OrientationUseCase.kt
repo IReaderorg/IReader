@@ -5,11 +5,12 @@ import ir.kazemcodes.infinity.domain.repository.Repository
 class SaveOrientationUseCase(
     private val repository: Repository,
 ) {
-    operator fun invoke(paragraphDistance : Int) {
+    operator fun invoke(paragraphDistance: Int) {
         repository.preferencesHelper.orientation.set(paragraphDistance)
     }
 }
-class  ReadOrientationUseCase(
+
+class ReadOrientationUseCase(
     private val repository: Repository,
 ) {
     operator fun invoke(): Int {

@@ -5,11 +5,12 @@ import ir.kazemcodes.infinity.domain.repository.Repository
 class SaveFontHeightUseCase(
     private val repository: Repository,
 ) {
-    operator fun invoke(fontHeight : Int) {
+    operator fun invoke(fontHeight: Int) {
         repository.preferencesHelper.fontHeight.set(fontHeight)
     }
 }
-class  ReadFontHeightUseCase(
+
+class ReadFontHeightUseCase(
     private val repository: Repository,
 ) {
     operator fun invoke(): Int {

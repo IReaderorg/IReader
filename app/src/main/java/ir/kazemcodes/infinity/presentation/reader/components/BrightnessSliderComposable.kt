@@ -11,18 +11,29 @@ import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import ir.kazemcodes.infinity.presentation.book_detail.DEFAULT
+import ir.kazemcodes.infinity.presentation.reader.ReaderEvent
+import ir.kazemcodes.infinity.presentation.reader.ReaderScreenViewModel
 
 @Composable
-fun BrightnessSliderComposable(modifier: Modifier = Modifier, brightness: Float, onValueChange: (brightness: Float) -> Unit) {
+fun BrightnessSliderComposable(
+    modifier: Modifier = Modifier,
+    viewModel: ReaderScreenViewModel
+) {
 
-    Column() {
+    val context = LocalContext.current
+    Column {
         Text(text = "Brightness", style = MaterialTheme.typography.caption)
-        Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.CenterVertically) {
-            Icon(modifier = modifier.weight(1f), imageVector = Icons.Default.LightMode, contentDescription = "less brightness" )
+        Row(modifier = modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically) {
+            Icon(modifier = modifier.weight(1f),
+                imageVector = Icons.Default.LightMode,
+                contentDescription = "less brightness")
             Slider(
-                brightness,
-                onValueChange = { onValueChange(it) },
+                viewModel.state.value.brightness,
+                onValueChange = { viewModel.onEvent(ReaderEvent.ChangeBrightness(it,context)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(8f),
@@ -35,7 +46,9 @@ fun BrightnessSliderComposable(modifier: Modifier = Modifier, brightness: Float,
                 )
 
             )
-            Icon(modifier = modifier.weight(1f),imageVector = Icons.Default.Brightness7, contentDescription = "less brightness" )
+            Icon(modifier = modifier.weight(1f),
+                imageVector = Icons.Default.Brightness7,
+                contentDescription = "less brightness")
         }
     }
 

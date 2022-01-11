@@ -22,10 +22,10 @@ import ir.kazemcodes.infinity.presentation.theme.readerScreenBackgroundColors
 @Composable
 fun ReaderBackgroundComposable(modifier: Modifier = Modifier, viewModel: ReaderScreenViewModel) {
 
-    Column() {
+    Column {
         Text(text = "Background Color", style = MaterialTheme.typography.subtitle2)
         Spacer(modifier = modifier.height(10.dp))
-        LazyRow() {
+        LazyRow {
             items(readerScreenBackgroundColors.size) { index ->
                 Spacer(modifier = modifier.width(10.dp))
                 Box(modifier = modifier
@@ -43,7 +43,7 @@ fun ReaderBackgroundComposable(modifier: Modifier = Modifier, viewModel: ReaderS
                     if (viewModel.state.value.backgroundColor == readerScreenBackgroundColors[index]) {
                         Icon(imageVector = Icons.Default.Check,
                             contentDescription = "color selected",
-                            tint =MaterialTheme.colors.primary)
+                            tint = MaterialTheme.colors.primary)
 
                     }
 

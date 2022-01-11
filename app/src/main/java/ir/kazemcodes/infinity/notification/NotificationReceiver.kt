@@ -15,7 +15,7 @@ import org.kodein.di.instance
  * Pending Broadcasts should be made from here.
  * NOTE: Use local broadcasts if possible.
  */
-class NotificationReceiver : BroadcastReceiver(),DIAware {
+class NotificationReceiver : BroadcastReceiver(), DIAware {
 
     val context by instance<Context>()
 
@@ -36,7 +36,6 @@ class NotificationReceiver : BroadcastReceiver(),DIAware {
     override fun onReceive(context: Context?, intent: Intent?) {
         TODO("Not yet implemented")
     }
-
 
 
 }

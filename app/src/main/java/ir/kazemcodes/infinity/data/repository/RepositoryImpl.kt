@@ -15,7 +15,7 @@ class RepositoryImpl @Inject constructor(
     private val chapterDao: ChapterDao,
     private val context: Context,
     private val remoteUseCase: RemoteUseCase,
-    private val preferences: PreferencesHelper
+    private val preferences: PreferencesHelper,
 ) : Repository {
     override val localBookRepository: LocalBookRepository
         get() = LocalBookRepositoryImpl(bookDao)
@@ -23,7 +23,7 @@ class RepositoryImpl @Inject constructor(
         get() = LocalChapterRepositoryImpl(chapterDao)
     override val preferencesHelper: PreferencesHelper = preferences
     override val remoteRepository: RemoteRepository
-        get() = RemoteRepositoryImpl(chapterDao,remoteUseCase)
+        get() = RemoteRepositoryImpl(chapterDao, remoteUseCase)
 
 
 }

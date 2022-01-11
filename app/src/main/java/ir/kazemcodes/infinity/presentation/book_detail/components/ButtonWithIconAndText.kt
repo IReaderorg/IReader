@@ -20,7 +20,7 @@ fun ButtonWithIconAndText(
 ) {
     Button(modifier = modifier,
         onClick = { onClick() },
-        border = BorderStroke(0.dp,MaterialTheme.colors.background),
+        border = BorderStroke(0.dp, MaterialTheme.colors.background),
         colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.background)) {
         Column(verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally) {

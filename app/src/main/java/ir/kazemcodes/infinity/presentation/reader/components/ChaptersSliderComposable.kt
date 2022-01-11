@@ -19,7 +19,6 @@ import ir.kazemcodes.infinity.presentation.reader.ReaderScreenViewModel
 @Composable
 fun ChaptersSliderComposable(
     modifier: Modifier = Modifier,
-    isChaptersReversed: Boolean,
     viewModel: ReaderScreenViewModel,
 ) {
     val context = LocalContext.current
@@ -34,7 +33,7 @@ fun ChaptersSliderComposable(
                 onClick = {
                     if (currentIndex > 0) {
                         viewModel.getContent(chapters[currentIndex - 1])
-                        viewModel.updateChapterSliderIndex(currentIndex-1)
+                        viewModel.updateChapterSliderIndex(currentIndex - 1)
                     } else context.toast("This is first chapter")
                 }) {
                 Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Previous Chapter")
@@ -58,14 +57,14 @@ fun ChaptersSliderComposable(
                     activeTrackColor = MaterialTheme.colors.primary.copy(alpha = .6f),
                     inactiveTickColor = MaterialTheme.colors.onBackground.copy(alpha = .6f),
                     inactiveTrackColor = MaterialTheme.colors.onBackground.copy(alpha = .6f),
-                activeTickColor = MaterialTheme.colors.primary.copy(alpha = .6f)
+                    activeTickColor = MaterialTheme.colors.primary.copy(alpha = .6f)
 
                 )
             )
             IconButton(modifier = modifier.weight(1f), onClick = {
-                if (currentIndex < (chapters.size-1)) {
-                    viewModel.getContent(chapters[currentIndex+1])
-                    viewModel.updateChapterSliderIndex(currentIndex+1)
+                if (currentIndex < (chapters.size - 1)) {
+                    viewModel.getContent(chapters[currentIndex + 1])
+                    viewModel.updateChapterSliderIndex(currentIndex + 1)
                 } else {
                     context.toast("This is last chapter")
                 }

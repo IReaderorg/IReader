@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.Flow
 interface RemoteRepository {
 
 
-
     suspend fun downloadChapter(
         book: Book,
         source: Source,

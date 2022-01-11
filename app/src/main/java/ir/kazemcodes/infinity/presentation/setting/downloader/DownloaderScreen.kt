@@ -33,7 +33,8 @@ fun DownloaderScreen() {
             actions = {
                 IconButton(
                     onClick = {
-                              WorkManager.getInstance(context).cancelUniqueWork(DownloadService.DOWNLOAD_SERVICE_NAME)
+                        WorkManager.getInstance(context)
+                            .cancelUniqueWork(DownloadService.DOWNLOAD_SERVICE_NAME)
                         context.toast("Downloads were Stopped Successfully")
                     },
                 ) {

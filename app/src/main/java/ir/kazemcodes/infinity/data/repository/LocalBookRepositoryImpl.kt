@@ -12,7 +12,6 @@ class LocalBookRepositoryImpl @Inject constructor(
 ) : LocalBookRepository {
 
 
-
     override fun getBooks(): Flow<List<BookEntity>> {
         return dao.getInitializedBooks()
     }

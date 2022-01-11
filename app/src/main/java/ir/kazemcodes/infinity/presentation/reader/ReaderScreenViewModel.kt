@@ -1,7 +1,9 @@
 package ir.kazemcodes.infinity.presentation.reader
 
+import android.annotation.SuppressLint
+import android.content.Context
 import android.content.pm.ActivityInfo
-import android.view.Window
+import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
 import android.view.WindowManager
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -17,10 +19,14 @@ import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
 import ir.kazemcodes.infinity.presentation.theme.fonts
 import ir.kazemcodes.infinity.presentation.theme.readerScreenBackgroundColors
 import ir.kazemcodes.infinity.util.Resource
+import ir.kazemcodes.infinity.util.findActivity
 import ir.kazemcodes.infinity.util.isNull
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+
+
+
 
 
 class ReaderScreenViewModel(
@@ -31,23 +37,30 @@ class ReaderScreenViewModel(
     private val chapterIndex: Int,
     private val book: Book,
     private val chapters: List<Chapter>,
-    private val window: Window,
     private val isChaptersReversed: Boolean,
 ) : ScopedServices.Registered {
-
-    private val _state = mutableStateOf(ReaderScreenState(source = source, book = book, chapters = chapters, chapter = chapters[chapterIndex], isChaptersReversed = isChaptersReversed))
+    private val _state = mutableStateOf(ReaderScreenState(source = source,
+        book = book,
+        chapters = chapters,
+        chapter = chapters[chapterIndex],
+        listChapters = chapters
+        ))
     val state: State<ReaderScreenState> = _state
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
+    fun updateContext(context: Context) {
+        _state.value = state.value.copy(context = context)
+    }
     override fun onServiceRegistered() {
-        readPreferences()
         updateState()
         if (chapters.isNotEmpty()) {
             _state.value = state.value.copy(chapter = chapters[chapterIndex])
         }
         getContent(chapter = state.value.chapter.copy(bookName = book.bookName))
+        //readPreferences()
     }
+
 
     private fun updateState() {
         _state.value = state.value.copy(chapters = chapters,
@@ -67,9 +80,9 @@ class ReaderScreenViewModel(
         }
     }
 
-    private fun readPreferences() {
+    fun readPreferences(context: Context) {
         readSelectedFontState()
-        readBrightness()
+        readBrightness(context = context)
         readFontSize()
         getBackgroundColor()
         readFontHeight()
@@ -79,7 +92,7 @@ class ReaderScreenViewModel(
     fun onEvent(event: ReaderEvent) {
         when (event) {
             is ReaderEvent.ChangeBrightness -> {
-                saveBrightness(event.brightness)
+                saveBrightness(event.brightness,event.context)
             }
             is ReaderEvent.ChangeFontSize -> {
                 saveFontSize(event.fontSizeEvent)
@@ -214,37 +227,50 @@ class ReaderScreenViewModel(
                 haveBeenRead = true))
         }
     }
+
     fun reverseChapters() {
-        _state.value = state.value.copy(chapters = state.value.chapters.reversed(), isChaptersReversed = !state.value.isChaptersReversed)
+        _state.value = state.value.copy(listChapters = state.value.listChapters.reversed())
     }
 
-    private fun saveBrightness(brightness: Float) {
+    private fun saveBrightness(brightness: Float,context: Context) {
+        val activity = context.findActivity()!!
+        val window = activity.window
+
         _state.value = state.value.copy(brightness = brightness)
         val layoutParams: WindowManager.LayoutParams = window.attributes
         layoutParams.screenBrightness = brightness
         window.attributes = layoutParams
 
         preferencesUseCase.saveBrightnessStateUseCase(brightness)
-
-
     }
-    fun saveOrientation() {
+    private fun restoreBrightnessAndOrientation(context: Context) {
+        val activity = context.findActivity()!!
+        val window = activity.window
         val layoutParams: WindowManager.LayoutParams = window.attributes
-        val orientation = layoutParams.screenOrientation
-        layoutParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        layoutParams.screenBrightness = -1f
         window.attributes = layoutParams
-//        if(orientation ==Configuration.ORIENTATION_LANDSCAPE ) {
-//            layoutParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-//        }else if(orientation ==Configuration.ORIENTATION_PORTRAIT ) {
-//            layoutParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-//        } else {
-//            layoutParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-//        }
-//        _state.value = state.value.copy(orientation = orientation)
-//
-//        window.attributes = layoutParams
-//
-//        preferencesUseCase.saveOrientationUseCase(orientation)
+        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+    }
+
+    @SuppressLint("SourceLockedOrientationActivity")
+    fun saveOrientation(context: Context) {
+        val activity = context.findActivity()!!
+
+        when(state.value.orientation) {
+            is Orientation.Landscape -> {
+                activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                _state.value = state.value.copy(orientation = Orientation.Portrait)
+                preferencesUseCase.saveOrientationUseCase(Orientation.Portrait.index)
+            }
+            is Orientation.Portrait -> {
+                activity.requestedOrientation = SCREEN_ORIENTATION_LANDSCAPE
+                _state.value = state.value.copy(orientation = Orientation.Landscape)
+                preferencesUseCase.saveOrientationUseCase(Orientation.Landscape.index)
+
+            }
+        }
+
+
     }
 
     private fun saveFontSize(event: FontSizeEvent) {
@@ -273,9 +299,14 @@ class ReaderScreenViewModel(
 
     }
 
-    private fun readBrightness() {
-        _state.value =
-            state.value.copy(brightness = preferencesUseCase.readBrightnessStateUseCase())
+    private fun readBrightness(context: Context) {
+        val brightness = preferencesUseCase.readBrightnessStateUseCase()
+        _state.value = state.value.copy(brightness = brightness)
+        val activity = context.findActivity()!!
+        val window = activity.window
+        val layoutParams: WindowManager.LayoutParams = window.attributes
+        layoutParams.screenBrightness = brightness
+        window.attributes = layoutParams
 
     }
 
@@ -291,37 +322,45 @@ class ReaderScreenViewModel(
     }
 
     fun readParagraphDistance() {
-        _state.value = state.value.copy(distanceBetweenParagraphs = preferencesUseCase.readParagraphDistanceUseCase())
+        _state.value =
+            state.value.copy(distanceBetweenParagraphs = preferencesUseCase.readParagraphDistanceUseCase())
     }
+
     fun readFontHeight() {
         _state.value = state.value.copy(lineHeight = preferencesUseCase.readFontHeightUseCase())
     }
 
     fun saveFontHeight(isIncreased: Boolean) {
         val currentFontHeight = state.value.lineHeight
-        if (isIncreased)  {
-            preferencesUseCase.saveFontHeightUseCase(currentFontHeight+1)
-            _state.value = state.value.copy(lineHeight = currentFontHeight+1)
+        if (isIncreased) {
+            preferencesUseCase.saveFontHeightUseCase(currentFontHeight + 1)
+            _state.value = state.value.copy(lineHeight = currentFontHeight + 1)
 
-        } else if (currentFontHeight > 20 && !isIncreased){
-            preferencesUseCase.saveFontHeightUseCase(currentFontHeight-1)
-            _state.value = state.value.copy(lineHeight = currentFontHeight-1)
+        } else if (currentFontHeight > 20 && !isIncreased) {
+            preferencesUseCase.saveFontHeightUseCase(currentFontHeight - 1)
+            _state.value = state.value.copy(lineHeight = currentFontHeight - 1)
         }
     }
+
     fun saveParagraphDistance(isIncreased: Boolean) {
         val currentDistance = state.value.distanceBetweenParagraphs
-        if (isIncreased)  {
-            preferencesUseCase.saveParagraphDistanceUseCase(currentDistance+1)
-            _state.value = state.value.copy(distanceBetweenParagraphs = currentDistance+1)
+        if (isIncreased) {
+            preferencesUseCase.saveParagraphDistanceUseCase(currentDistance + 1)
+            _state.value = state.value.copy(distanceBetweenParagraphs = currentDistance + 1)
 
-        } else if (currentDistance > 0 && !isIncreased){
-            preferencesUseCase.saveParagraphDistanceUseCase(currentDistance-1)
-            _state.value = state.value.copy(distanceBetweenParagraphs = currentDistance-1)
+        } else if (currentDistance > 0 && !isIncreased) {
+            preferencesUseCase.saveParagraphDistanceUseCase(currentDistance - 1)
+            _state.value = state.value.copy(distanceBetweenParagraphs = currentDistance - 1)
         }
     }
 
     override fun onServiceUnregistered() {
         coroutineScope.cancel()
+        if (state.value.context != null) {
+            restoreBrightnessAndOrientation(state.value.context!!)
+            _state.value = state.value.copy(context = null)
+        }
+
 
     }
 

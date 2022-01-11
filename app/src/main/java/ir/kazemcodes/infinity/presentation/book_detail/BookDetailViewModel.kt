@@ -50,7 +50,7 @@ class BookDetailViewModel(
 
 
     fun toggleInLibrary(inLibrary: Boolean) {
-            _state.value = state.value.copy(inLibrary = inLibrary)
+        _state.value = state.value.copy(inLibrary = inLibrary)
     }
 
 
@@ -71,7 +71,10 @@ class BookDetailViewModel(
 
     private fun getBookData(book: Book) {
         _state.value = DetailState(book = book, error = "", loaded = false, isLoading = false)
-        _chapterState.value = chapterState.value.copy(chapters = emptyList(), loaded = false, isLoading = false, error = "")
+        _chapterState.value = chapterState.value.copy(chapters = emptyList(),
+            loaded = false,
+            isLoading = false,
+            error = "")
         getLocalBookByName()
         getLocalChaptersByBookName()
     }
@@ -213,9 +216,10 @@ class BookDetailViewModel(
     }
 
     fun getLastReadChapterIndex(): Int {
-        val chapterIndex =  chapterState.value.chapters.indexOf(chapterState.value.chapters.filterIndexed { index, chapter ->
-            return index
-        }.first())
+        val chapterIndex =
+            chapterState.value.chapters.indexOf(chapterState.value.chapters.filterIndexed { index, chapter ->
+                return index
+            }.first())
 
         return if (chapterIndex != -1) {
             chapterIndex

@@ -11,17 +11,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.work.WorkManager
 import com.zhuinden.simplestack.AsyncStateChanger
-import com.zhuinden.simplestack.GlobalServices
 import com.zhuinden.simplestack.History
 import com.zhuinden.simplestack.navigator.Navigator
 import com.zhuinden.simplestackcomposeintegration.core.BackstackProvider
 import com.zhuinden.simplestackcomposeintegration.core.ComposeStateChanger
 import com.zhuinden.simplestackextensions.navigatorktx.androidContentFrame
 import com.zhuinden.simplestackextensions.services.DefaultServiceProvider
-import com.zhuinden.simplestackextensions.servicesktx.add
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.scopes.ActivityScoped
-import ir.kazemcodes.infinity.base_feature.navigation.MainScreenKey
+import ir.kazemcodes.infinity.MyApplication
 import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
 import ir.kazemcodes.infinity.domain.use_cases.preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
@@ -35,7 +33,7 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 @ActivityScoped
-class MainActivity : ComponentActivity(),DIAware {
+class MainActivity : ComponentActivity(), DIAware {
 
 
     @Inject
@@ -52,26 +50,20 @@ class MainActivity : ComponentActivity(),DIAware {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-
-
-       val globalServices :GlobalServices  = GlobalServices.builder()
-            .add(localUseCase)
-            .add(remoteUseCase)
-            .add(preferencesUseCase)
-            .build()
+        val app = application as MyApplication
 
         val backstack = Navigator.configure()
-            .setGlobalServices(globalServices)
+            .setGlobalServices(app.globalServices)
             .setScopedServices(DefaultServiceProvider())
             .setStateChanger(AsyncStateChanger(composeStateChanger))
             .install(this, androidContentFrame, History.of(MainScreenKey()))
 
         setContent {
-            BackstackProvider(backstack)   {
+            BackstackProvider(backstack) {
                 InfinityTheme {
                     Surface(color = MaterialTheme.colors.background) {
                         Main {
-                            Box(modifier = Modifier.fillMaxSize())  {
+                            Box(modifier = Modifier.fillMaxSize()) {
                                 composeStateChanger.RenderScreen()
                             }
                         }
@@ -112,12 +104,13 @@ class MainActivity : ComponentActivity(),DIAware {
         super.onDestroy()
         WorkManager.getInstance(this).cancelAllWork()
     }
+
     /**
      * I created this in order to support the full power of kodein, because i use
      * simple stack i can't use the kodein compose directly
      * **/
     @Composable
-    fun Main(content: @Composable () -> Unit,) = withDI(di) {
+    fun Main(content: @Composable () -> Unit) = withDI(di) {
         content()
     }
 

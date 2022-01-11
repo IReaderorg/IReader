@@ -27,10 +27,13 @@ fun NotImplementedText() {
         )
     }
 }
+
 @Composable
-fun ErrorTextWithEmojis(modifier: Modifier = Modifier,error : String) {
-    val sad_emojis = listOf<String>("ಥ_ಥ","(╥﹏╥)","(╥︣﹏᷅╥᷅)","(͠◉_◉᷅ )","⊙.☉")
-    Column(modifier = modifier.fillMaxSize().padding(bottom = 30.dp),
+fun ErrorTextWithEmojis(modifier: Modifier = Modifier, error: String) {
+    val sad_emojis = listOf<String>("ಥ_ಥ", "(╥﹏╥)", "(╥︣﹏᷅╥᷅)", "(͠◉_◉᷅ )", "⊙.☉")
+    Column(modifier = modifier
+        .fillMaxSize()
+        .padding(bottom = 30.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center) {
         Text(
@@ -51,6 +54,6 @@ fun ErrorTextWithEmojis(modifier: Modifier = Modifier,error : String) {
 
 class CuteEmojis {
     val catty_emoji = "≧◉ᴥ◉≦"
-    val happy_emoji = listOf<String>("≧◉ᴥ◉≦","(ɔ◔‿◔)ɔ")
-    val sad_emojis = listOf<String>("☉_☉","(ㆆ_ㆆ)","(╥︣﹏᷅╥)")
+    val happy_emoji = listOf<String>("≧◉ᴥ◉≦", "(ɔ◔‿◔)ɔ")
+    val sad_emojis = listOf<String>("☉_☉", "(ㆆ_ㆆ)", "(╥︣﹏᷅╥)")
 }

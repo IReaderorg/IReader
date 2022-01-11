@@ -20,7 +20,7 @@ private val DarkColorPalette = darkColors(
     onSurface = Colour.white_50,
     error = Colour.red_600,
     onError = Colour.black_900,
-    )
+)
 
 private val LightColorPalette = lightColors(
     primary = Colour.blue_500,

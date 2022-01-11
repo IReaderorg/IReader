@@ -235,7 +235,7 @@ class SourceCreator(
             ajaxChaptersSelector).isNotEmpty() && ajaxChaptersSelector.isNotNull())
         val books = mutableListOf<Book>()
         if (this.latest?.isHtmlType == true) {
-            books.addAll(document.select(latest?.selector).map { element ->
+            books.addAll(document.select(latest.selector).map { element ->
                 latestFromElement(element)
             })
         } else {
@@ -269,23 +269,25 @@ class SourceCreator(
             ajaxChaptersSelector).isNotEmpty() && ajaxChaptersSelector.isNotNull())
         var book = Book.create()
         if (this.detail?.isHtmlType == true) {
-            val selectorBookName = detail?.nameSelector
-            val attBookName = detail?.nameAtt
-            val coverSelector = detail?.coverSelector
-            val coverAtt = detail?.coverAtt
-            val selectorDescription = detail?.descriptionSelector
-            val attDescription = detail?.descriptionBookAtt
-            val selectorAuthor = detail?.authorBookSelector
-            val attAuthor = detail?.authorBookAtt
-            val selectorCategory = detail?.categorySelector
-            val attCategory = detail?.categoryAtt
+            val selectorBookName = detail.nameSelector
+            val attBookName = detail.nameAtt
+            val coverSelector = detail.coverSelector
+            val coverAtt = detail.coverAtt
+            val selectorDescription = detail.descriptionSelector
+            val attDescription = detail.descriptionBookAtt
+            val selectorAuthor = detail.authorBookSelector
+            val attAuthor = detail.authorBookAtt
+            val selectorCategory = detail.categorySelector
+            val attCategory = detail.categoryAtt
 
 
 
             book.bookName = selectorReturnerStringType(document, selectorBookName, attAuthor)
             book.coverLink = selectorReturnerStringType(document, coverSelector, coverAtt)
             book.author = selectorReturnerStringType(document, selectorAuthor, attBookName)
-            book.description = selectorReturnerListType(document, selectorDescription, attDescription).map { it.formatHtmlText() }
+            book.description = selectorReturnerListType(document,
+                selectorDescription,
+                attDescription).map { it.formatHtmlText() }
             book.category = selectorReturnerListType(document, selectorCategory, attCategory)
         } else {
             val crudeJson = Jsoup.parse(document.html()).text().trim()
@@ -337,10 +339,10 @@ class SourceCreator(
             ajaxChaptersSelector).isNotEmpty() && ajaxChaptersSelector.isNotNull())
         val contentList: MutableList<String> = mutableListOf()
         if (content?.isHtmlType == true) {
-            val contentSelector = content?.pageContentSelector
-            val contentAtt = content?.pageContentAtt
-            val titleSelector = content?.pageTitleSelector
-            val titleAtt = content?.pageTitleAtt
+            val contentSelector = content.pageContentSelector
+            val contentAtt = content.pageContentAtt
+            val titleSelector = content.pageTitleSelector
+            val titleAtt = content.pageTitleAtt
             val title = selectorReturnerStringType(document, titleSelector, titleAtt)
             val page = selectorReturnerListType(document, contentSelector, contentAtt)
             contentList.add(title)

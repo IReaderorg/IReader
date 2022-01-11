@@ -24,7 +24,7 @@ class BrowseViewModel(
     private val remoteUseCase: RemoteUseCase,
     private val preferencesUseCase: PreferencesUseCase,
     private val source: Source,
-    private val isLatestUpdateMode : Boolean = true
+    private val isLatestUpdateMode: Boolean = true,
 ) : ScopedServices.Registered {
 
     private val _state = mutableStateOf<BrowseScreenState>(BrowseScreenState())
@@ -107,12 +107,13 @@ class BrowseViewModel(
     private fun updateLayoutType(layoutType: DisplayMode) {
         _state.value = state.value.copy(layout = layoutType.layout)
 
-            preferencesUseCase.saveBrowseLayoutUseCase(layoutType.layoutIndex)
+        preferencesUseCase.saveBrowseLayoutUseCase(layoutType.layoutIndex)
 
     }
 
     private fun readLayoutType() {
-            _state.value = state.value.copy(layout =  preferencesUseCase.readBrowseLayoutUseCase().layout)
+        _state.value =
+            state.value.copy(layout = preferencesUseCase.readBrowseLayoutUseCase().layout)
 
 
     }
@@ -173,7 +174,8 @@ class BrowseViewModel(
     }
 
     private fun getLatestUpdateBooks(source: Source) {
-        remoteUseCase.getRemoteLatestUpdateLatestBooksUseCase(page = state.value.page, source = source)
+        remoteUseCase.getRemoteLatestUpdateLatestBooksUseCase(page = state.value.page,
+            source = source)
             .onEach { result ->
                 when (result) {
                     is Resource.Success -> {

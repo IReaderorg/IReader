@@ -46,7 +46,11 @@ private const val TABLET_UI_MIN_SCREEN_WIDTH_DP = 720
  * @param resource the text resource.
  * @param duration the duration of the toast. Defaults to short.
  */
-fun Context.toast(@StringRes resource: Int, duration: Int = Toast.LENGTH_SHORT, block: (Toast) -> Unit = {}): Toast {
+fun Context.toast(
+    @StringRes resource: Int,
+    duration: Int = Toast.LENGTH_SHORT,
+    block: (Toast) -> Unit = {},
+): Toast {
     return toast(getString(resource), duration, block)
 }
 
@@ -56,7 +60,11 @@ fun Context.toast(@StringRes resource: Int, duration: Int = Toast.LENGTH_SHORT, 
  * @param text the text to display.
  * @param duration the duration of the toast. Defaults to short.
  */
-fun Context.toast(text: String?, duration: Int = Toast.LENGTH_SHORT, block: (Toast) -> Unit = {}): Toast {
+fun Context.toast(
+    text: String?,
+    duration: Int = Toast.LENGTH_SHORT,
+    block: (Toast) -> Unit = {},
+): Toast {
     return Toast.makeText(this, text.orEmpty(), duration).also {
         block(it)
         it.show()
@@ -90,7 +98,10 @@ fun Context.copyToClipboard(label: String, content: String) {
  * @param block the function that will execute inside the builder.
  * @return a notification to be displayed or updated.
  */
-fun Context.notificationBuilder(channelId: String, block: (NotificationCompat.Builder.() -> Unit)? = null): NotificationCompat.Builder {
+fun Context.notificationBuilder(
+    channelId: String,
+    block: (NotificationCompat.Builder.() -> Unit)? = null,
+): NotificationCompat.Builder {
     val builder = NotificationCompat.Builder(this, channelId)
         .setColor(getColor(R.color.accent_blue))
     if (block != null) {
@@ -106,7 +117,10 @@ fun Context.notificationBuilder(channelId: String, block: (NotificationCompat.Bu
  * @param block the function that will execute inside the builder.
  * @return a notification to be displayed or updated.
  */
-fun Context.notification(channelId: String, block: (NotificationCompat.Builder.() -> Unit)?): Notification {
+fun Context.notification(
+    channelId: String,
+    block: (NotificationCompat.Builder.() -> Unit)?,
+): Notification {
     val builder = notificationBuilder(channelId, block)
     return builder.build()
 }
@@ -117,7 +131,8 @@ fun Context.notification(channelId: String, block: (NotificationCompat.Builder.(
  * @param permission the permission to check.
  * @return true if it has permissions.
  */
-fun Context.hasPermission(permission: String) = ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
+fun Context.hasPermission(permission: String) =
+    ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
 
 /**
  * Returns the color for the given attribute.
@@ -125,7 +140,8 @@ fun Context.hasPermission(permission: String) = ContextCompat.checkSelfPermissio
  * @param resource the attribute.
  * @param alphaFactor the alpha number [0,1].
  */
-@ColorInt fun Context.getResourceColor(@AttrRes resource: Int, alphaFactor: Float = 1f): Int {
+@ColorInt
+fun Context.getResourceColor(@AttrRes resource: Int, alphaFactor: Float = 1f): Int {
     val typedArray = obtainStyledAttributes(intArrayOf(resource))
     val color = typedArray.getColor(0, 0)
     typedArray.recycle()
@@ -139,7 +155,8 @@ fun Context.hasPermission(permission: String) = ContextCompat.checkSelfPermissio
 }
 
 @RequiresApi(Build.VERSION_CODES.M)
-@ColorInt fun Context.getThemeColor(attr: Int): Int {
+@ColorInt
+fun Context.getThemeColor(attr: Int): Int {
     val tv = TypedValue()
     return if (this.theme.resolveAttribute(attr, tv, true)) {
         if (tv.resourceId != 0) {
@@ -203,7 +220,9 @@ val Context.displayCompat: Display?
  * @see Settings.Global.ANIMATOR_DURATION_SCALE
  */
 val Context.animatorDurationScale: Float
-    get() = Settings.Global.getFloat(this.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f)
+    get() = Settings.Global.getFloat(this.contentResolver,
+        Settings.Global.ANIMATOR_DURATION_SCALE,
+        1f)
 
 /**
  * Convenience method to acquire a partial wake lock.

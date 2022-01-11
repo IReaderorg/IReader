@@ -7,8 +7,8 @@ import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class PreferencesHelper @Inject constructor(
-    prefs : SharedPreferences
-){
+    prefs: SharedPreferences,
+) {
     companion object PreferenceKeys {
         const val SAVED_FONT_SIZE_PREFERENCES = "reader_font_size"
         const val SAVED_FONT_PREFERENCES = "reader_font_family"
@@ -26,6 +26,7 @@ class PreferencesHelper @Inject constructor(
 
 
     }
+
     private val flowPrefs = FlowSharedPreferences(prefs)
 
 
@@ -40,7 +41,7 @@ class PreferencesHelper @Inject constructor(
     val paragraphDistance = flowPrefs.getInt(SAVED_PARAGRAPH_DISTANCE, 2)
     val orientation = flowPrefs.getInt(SAVED_ORIENTATION, 0)
 
-    fun setFontScale(fontSize : Int) {
+    fun setFontScale(fontSize: Int) {
         readerFontScale.set(fontSize)
     }
     /**

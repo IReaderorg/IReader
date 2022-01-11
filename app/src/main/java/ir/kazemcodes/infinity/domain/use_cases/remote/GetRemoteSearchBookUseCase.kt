@@ -32,7 +32,7 @@ class GetRemoteSearchBookUseCase {
                 )
             } catch (e: IOException) {
                 emit(Resource.Error<BooksPage>(message = "Couldn't Read Server, Check Your Internet Connection."))
-            } catch (e : JsonParseException) {
+            } catch (e: JsonParseException) {
                 emit(Resource.Error<BooksPage>(message = "something is wrong with json parser."))
             } catch (e: Exception) {
                 emit(

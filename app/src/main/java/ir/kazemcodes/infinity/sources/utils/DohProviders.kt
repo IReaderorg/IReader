@@ -53,6 +53,7 @@ fun OkHttpClient.Builder.dohAdGuard() = dns(
         )
         .build()
 )
+
 fun OkHttpClient.Builder.dohShecan() = dns(
     DnsOverHttps.Builder().client(build())
         .url("https://dns.shecan.ir/dns-query".toHttpUrl())
@@ -62,6 +63,7 @@ fun OkHttpClient.Builder.dohShecan() = dns(
         )
         .build()
 )
+
 val dnsOverHttps = listOf<Dns>(
     Dns.Cloudflare,
     Dns.Google,
@@ -69,7 +71,8 @@ val dnsOverHttps = listOf<Dns>(
     Dns.Shecan,
     Dns.Disable
 )
-sealed class Dns(val title : String , val prefCode : Int) {
+
+sealed class Dns(val title: String, val prefCode: Int) {
     object Cloudflare : Dns("CloudFlare", PREF_DOH_CLOUDFLARE)
     object Google : Dns("Google", PREF_DOH_GOOGLE)
     object AdGuard : Dns("AdGuard", PREF_DOH_ADGUARD)

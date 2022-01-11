@@ -8,7 +8,7 @@ import ir.kazemcodes.infinity.sources.models.*
 class Extensions(context: Context) {
     private val sources = mutableListOf<Source>(
         //FreeWebNovel(context),
-       // WuxiaWorldApi(context),
+        // WuxiaWorldApi(context),
     )
 
     fun getSources(): List<Source> {
@@ -119,7 +119,7 @@ class AvailableSources(context: Context) {
             endpoint = "/search?searchkey={query}",
             selector = "div.ul-list1 div.li",
             linkSelector = "div.txt a",
-            linkAtt ="href",
+            linkAtt = "href",
             nameSelector = "div.txt a",
             nameAtt = "title",
             coverSelector = "div.pic img",
@@ -145,7 +145,7 @@ class AvailableSources(context: Context) {
             hasNextChapterListSelector = "div.page a:nth-child(4)",
             hasNextChapterListValue = "Next",
 
-        ),
+            ),
         content = Content(
             pageContentSelector = "div.txt h4,p"
         )
@@ -164,7 +164,7 @@ class AvailableSources(context: Context) {
             selector = "div.box",
             nameSelector = "a.list-title",
             nameAtt = "aria-label",
-            linkSelector ="a.list-title",
+            linkSelector = "a.list-title",
             linkAtt = "href",
             coverSelector = "amp-img.list-img",
             coverAtt = "src",
@@ -177,7 +177,7 @@ class AvailableSources(context: Context) {
             linkSelector = "a.list-title",
             linkAtt = "href",
             nameSelector = "aria-label",
-            nameAtt =  "aria-label",
+            nameAtt = "aria-label",
         ),
         search = Search(
             endpoint = "/wp-admin/admin-ajax.php?action=autosuggest&q={query}&__amp_source_origin=https%3A%2F%2Fwww.mtlnovel.com",
@@ -334,5 +334,5 @@ class AvailableSources(context: Context) {
         mtl,
         wuxiaworld,
         myLoveNovel
-        )
+    )
 }

@@ -13,7 +13,7 @@ import coil.transform.CircleCropTransformation
 data class Channel(
     val name: String,
     val id: String,
-    val importance: Int = NotificationManager.IMPORTANCE_HIGH
+    val importance: Int = NotificationManager.IMPORTANCE_HIGH,
 )
 
 fun createChannel(context: Context, channel: Channel) {
@@ -35,7 +35,7 @@ fun createChannel(context: Context, channel: Channel) {
 
 suspend fun NotificationCompat.Builder.setLargeIcon(
     context: Context,
-    data: Any?
+    data: Any?,
 ): NotificationCompat.Builder {
     if (data != null) {
         val request = ImageRequest.Builder(context)

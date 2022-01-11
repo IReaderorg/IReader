@@ -26,7 +26,7 @@ import java.io.IOException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
-class CloudflareInterceptor(private val context: Context) : Interceptor,DIAware {
+class CloudflareInterceptor(private val context: Context) : Interceptor, DIAware {
 
     private val executor = ContextCompat.getMainExecutor(context)
     override val di: DI by closestDI(context)
@@ -34,6 +34,7 @@ class CloudflareInterceptor(private val context: Context) : Interceptor,DIAware 
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     private val networkHelper: NetworkHelper by di.instance<NetworkHelper>()
+
     /**
      * When this is called, it initializes the WebView if it wasn't already. We use this to avoid
      * blocking the main thread too much. If used too often we could consider moving it to the
@@ -97,7 +98,8 @@ class CloudflareInterceptor(private val context: Context) : Interceptor,DIAware 
         var isWebViewOutdated = false
 
         val origRequestUrl = request.url.toString()
-        val headers = request.headers.toMultimap().mapValues { it.value.getOrNull(0) ?: "" }.toMutableMap()
+        val headers =
+            request.headers.toMultimap().mapValues { it.value.getOrNull(0) ?: "" }.toMutableMap()
         headers["X-Requested-With"] = WebViewUtil.REQUESTED_WITH
 
         executor.execute {
@@ -105,7 +107,6 @@ class CloudflareInterceptor(private val context: Context) : Interceptor,DIAware 
             webView = webview
             webView?.settings?.javaScriptEnabled
             webview.setDefaultSettings()
-
 
 
             // Avoid sending empty User-Agent, Chromium WebView will reset to default if empty
@@ -136,7 +137,7 @@ class CloudflareInterceptor(private val context: Context) : Interceptor,DIAware 
                     errorCode: Int,
                     description: String?,
                     failingUrl: String,
-                    isMainFrame: Boolean
+                    isMainFrame: Boolean,
                 ) {
                     if (isMainFrame) {
                         if (errorCode in ERROR_CODES) {

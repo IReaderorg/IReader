@@ -17,16 +17,16 @@ import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarBackButt
 
 
 @Composable
-fun WebPageScreen(urlToRender: String,title: String?=null) {
+fun WebPageScreen(urlToRender: String, title: String? = null) {
     val backStack = LocalBackstack.current
     Scaffold(topBar = {
         TopAppBar(
-        title = { Text(text = title?:"")},
-        navigationIcon = {
-            TopAppBarBackButton(backStack = backStack)
-        },
+            title = { Text(text = title ?: "") },
+            navigationIcon = {
+                TopAppBarBackButton(backStack = backStack)
+            },
             backgroundColor = MaterialTheme.colors.background
-    )
+        )
     }) {
         val webView =
             AndroidView(factory = {

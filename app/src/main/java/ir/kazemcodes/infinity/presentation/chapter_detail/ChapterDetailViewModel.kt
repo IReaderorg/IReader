@@ -19,15 +19,17 @@ import kotlinx.coroutines.flow.onEach
 class ChapterDetailViewModel(
     private val localUseCase: LocalUseCase,
     private val book: Book,
-    private val chapters : List<Chapter>,
+    private val chapters: List<Chapter>,
     private val source: Source,
 ) : ScopedServices.Registered {
 
-    private val _state = mutableStateOf<ChapterDetailState>(ChapterDetailState())
+    private val _state = mutableStateOf<ChapterDetailState>(ChapterDetailState(chapters = chapters, listChapter = chapters))
     val state: State<ChapterDetailState> = _state
+
     init {
         _state.value = state.value.copy(book = book, chapters = chapters)
     }
+
     override fun onServiceRegistered() {
 
         getLocalChapters()
@@ -39,12 +41,11 @@ class ChapterDetailViewModel(
         when (event) {
             is ChapterDetailEvent.ToggleOrder -> {
                 _state.value = state.value.copy(
-                    chapters = state.value.chapters.reversed()
+                    listChapter = state.value.listChapter.reversed()
                 )
-                _state.value = state.value.copy(isChaptersReversed = !state.value.isChaptersReversed)
             }
             is ChapterDetailEvent.UpdateChapters -> {
-                _state.value = state.value.copy(chapters = event.chapters)
+                _state.value = state.value.copy(listChapter = event.chapters)
             }
 
         }
@@ -61,7 +62,7 @@ class ChapterDetailViewModel(
                     is Resource.Success -> {
                         if (!result.data.isNullOrEmpty()) {
                             _state.value = state.value.copy(
-                                chapters = result.data, isLoading = false, error = "")
+                                chapters = result.data, listChapter = chapters, isLoading = false, error = "")
                         } else {
                             _state.value = state.value.copy(isLoading = false, error = "")
                         }
@@ -77,7 +78,6 @@ class ChapterDetailViewModel(
                 }
             }.launchIn(coroutineScope)
     }
-
 
 
     override fun onServiceUnregistered() {

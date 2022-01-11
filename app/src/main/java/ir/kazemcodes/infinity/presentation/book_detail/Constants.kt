@@ -7,7 +7,6 @@ object Constants {
     const val SHARED_PREF_NAME = "shared_pref_name"
 
 
-
     val DEFAULT_ELEVATION = 0.dp
     const val CLOUDFLARE_LOG = "Performance & security by Cloudflare"
 
@@ -19,7 +18,6 @@ object Constants {
 
 
 }
-
 
 
 object DEFAULT {

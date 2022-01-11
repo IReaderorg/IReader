@@ -20,5 +20,5 @@ data class PreferencesUseCase(
     val readParagraphDistanceUseCase: ReadParagraphDistanceUseCase,
     val saveParagraphDistanceUseCase: SaveParagraphDistanceUseCase,
     val saveOrientationUseCase: SaveOrientationUseCase,
-    val readOrientationUseCase: ReadOrientationUseCase
+    val readOrientationUseCase: ReadOrientationUseCase,
 )

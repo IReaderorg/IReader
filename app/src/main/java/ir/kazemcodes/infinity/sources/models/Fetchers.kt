@@ -3,11 +3,11 @@ package ir.kazemcodes.infinity.sources.models
 
 data class Latest(
     override val endpoint: String? = null,
-    override val ajaxSelector: String? =null,
+    override val ajaxSelector: String? = null,
     override val isGetRequestType: Boolean = true,
-    override val isHtmlType: Boolean= true,
+    override val isHtmlType: Boolean = true,
     override val selector: String? = null,
-    override val addBaseUrlToLink: Boolean =false,
+    override val addBaseUrlToLink: Boolean = false,
     override val openInWebView: Boolean = false,
     val nextPageSelector: String? = null,
     val nextPageValue: String? = null,
@@ -25,11 +25,11 @@ data class Latest(
 
 data class Popular(
     override val endpoint: String? = null,
-    override val ajaxSelector: String? =null,
+    override val ajaxSelector: String? = null,
     override val isGetRequestType: Boolean = true,
-    override val isHtmlType: Boolean= true,
+    override val isHtmlType: Boolean = true,
     override val selector: String? = null,
-    override val addBaseUrlToLink: Boolean =false,
+    override val addBaseUrlToLink: Boolean = false,
     override val openInWebView: Boolean = false,
     val nextBookSelector: String? = null,
     val nextBookValue: String? = null,
@@ -43,11 +43,11 @@ data class Popular(
 
 data class Detail(
     override val endpoint: String? = null,
-    override val ajaxSelector: String? =null,
+    override val ajaxSelector: String? = null,
     override val isGetRequestType: Boolean = true,
-    override val isHtmlType: Boolean= true,
+    override val isHtmlType: Boolean = true,
     override val selector: String? = null,
-    override val addBaseUrlToLink: Boolean =false,
+    override val addBaseUrlToLink: Boolean = false,
     override val openInWebView: Boolean = false,
     val nameSelector: String? = null,
     val nameAtt: String? = null,
@@ -63,11 +63,11 @@ data class Detail(
 
 data class Search(
     override val endpoint: String? = null,
-    override val ajaxSelector: String? =null,
+    override val ajaxSelector: String? = null,
     override val isGetRequestType: Boolean = true,
-    override val isHtmlType: Boolean= true,
+    override val isHtmlType: Boolean = true,
     override val selector: String? = null,
-    override val addBaseUrlToLink: Boolean =false,
+    override val addBaseUrlToLink: Boolean = false,
     override val openInWebView: Boolean = false,
     val linkSelector: String? = null,
     val linkAtt: String? = null,
@@ -82,13 +82,13 @@ data class Search(
 
 data class Chapters(
     override val endpoint: String? = null,
-    override val ajaxSelector: String? =null,
+    override val ajaxSelector: String? = null,
     override val isGetRequestType: Boolean = true,
-    override val isHtmlType: Boolean= true,
+    override val isHtmlType: Boolean = true,
     override val selector: String? = null,
-    override val addBaseUrlToLink: Boolean =false,
+    override val addBaseUrlToLink: Boolean = false,
     override val openInWebView: Boolean = false,
-    val isDownloadable : Boolean= false,
+    val isDownloadable: Boolean = false,
     val chaptersEndpointWithoutPage: String? = null,
     val _isChapterStatsFromFirst: Boolean? = null,
     val nameSelector: String? = null,
@@ -101,8 +101,8 @@ data class Chapters(
     val hasNextChapterListValue: String? = null,
     val _shouldSubstringBaseUrlAtFirst: Boolean? = null,
     val _shouldStringSomethingAtEnd: Boolean = false,
-    val _subStringSomethingAtEnd: String?=null,
-    val chapterPageNumberSelector: String?=null,
+    val _subStringSomethingAtEnd: String? = null,
+    val chapterPageNumberSelector: String? = null,
 ) : Fetcher
 
 data class Content(
@@ -110,24 +110,24 @@ data class Content(
     override val ajaxSelector: String? = null,
     override val isHtmlType: Boolean = true,
     override val isGetRequestType: Boolean = true,
-    override val addBaseUrlToLink: Boolean =false,
+    override val addBaseUrlToLink: Boolean = false,
     override val openInWebView: Boolean = false,
     override val selector: String? = null,
     val supportContentAppView: Boolean = true,
-    val pageTitleSelector : String?=null,
-    val pageTitleAtt : String?=null,
+    val pageTitleSelector: String? = null,
+    val pageTitleAtt: String? = null,
     val pageContentSelector: String? = null,
     val pageContentAtt: String? = null,
-    ) : Fetcher
+) : Fetcher
 
 interface Fetcher {
     val endpoint: String?
-    val ajaxSelector : String?
-    val isHtmlType : Boolean
+    val ajaxSelector: String?
+    val isHtmlType: Boolean
     val isGetRequestType: Boolean
     val selector: String?
     val addBaseUrlToLink: Boolean
-    val openInWebView : Boolean
+    val openInWebView: Boolean
 }
 
 

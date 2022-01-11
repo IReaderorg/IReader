@@ -8,6 +8,6 @@ class ReadBrowseLayoutTypeStateUseCase(
     private val repository: Repository,
 ) {
     operator fun invoke(): DisplayMode {
-        return  layouts[repository.preferencesHelper.browseLayoutTypeStateKey.get()]
+        return layouts[repository.preferencesHelper.browseLayoutTypeStateKey.get()]
     }
 }

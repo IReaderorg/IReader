@@ -29,52 +29,61 @@ import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarActionBu
 @Composable
 fun FontSizeChangerComposable(
     modifier: Modifier = Modifier,
-    viewModel: ReaderScreenViewModel
+    viewModel: ReaderScreenViewModel,
 ) {
-        Row( verticalAlignment = Alignment.CenterVertically) {
-            Spacer(modifier = modifier.width(5.dp))
-            Text(
-                text = "Font Size",
-                fontSize = 12.sp,
-                style = TextStyle(fontWeight = FontWeight.W400),
-                color = MaterialTheme.colors.onBackground
-            )
-            IconButton(onClick = { viewModel.onEvent(
-                ReaderEvent.ChangeFontSize(FontSizeEvent.Decrease))}) {
-                Icon(painter = painterResource(id = R.drawable.ic_decrease_text_size), contentDescription = "Decrease font size")
-            }
-            IconButton(onClick = { viewModel.onEvent(ReaderEvent.ChangeFontSize(FontSizeEvent.Increase)) }) {
-                Icon(painter = painterResource(id = R.drawable.ic_increase_text_size), contentDescription = "Increase font size")
-            }
-            //TopAppBarActionButton(modifier = modifier.size(40.dp), imageVector = Icons.Default.TextFormat, title = "Decrease font size", onClick = {   })
-            //TopAppBarActionButton(modifier = modifier.size(60.dp),imageVector = Icons.Default.TextFormat, title = "Increase font size", onClick = {  })
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Spacer(modifier = modifier.width(5.dp))
+        Text(
+            text = "Font Size",
+            fontSize = 12.sp,
+            style = TextStyle(fontWeight = FontWeight.W400),
+            color = MaterialTheme.colors.onBackground
+        )
+        IconButton(onClick = {
+            viewModel.onEvent(
+                ReaderEvent.ChangeFontSize(FontSizeEvent.Decrease))
+        }) {
+            Icon(painter = painterResource(id = R.drawable.ic_decrease_text_size),
+                contentDescription = "Decrease font size")
         }
+        IconButton(onClick = { viewModel.onEvent(ReaderEvent.ChangeFontSize(FontSizeEvent.Increase)) }) {
+            Icon(painter = painterResource(id = R.drawable.ic_increase_text_size),
+                contentDescription = "Increase font size")
+        }
+        //TopAppBarActionButton(modifier = modifier.size(40.dp), imageVector = Icons.Default.TextFormat, title = "Decrease font size", onClick = {   })
+        //TopAppBarActionButton(modifier = modifier.size(60.dp),imageVector = Icons.Default.TextFormat, title = "Increase font size", onClick = {  })
+    }
 
 
 }
+
 @Composable
 fun FontHeightChangerComposable(
     modifier: Modifier = Modifier,
     viewModel: ReaderScreenViewModel,
 ) {
-        Row(verticalAlignment = Alignment.CenterVertically
-        ) {
-            Spacer(modifier = modifier.width(5.dp))
-            Text(
-                text = "Line Height",
-                fontSize = 12.sp,
-                style = TextStyle(fontWeight = FontWeight.W400),
-                color = MaterialTheme.colors.onBackground
-            )
-            TopAppBarActionButton( imageVector = Icons.Default.CloseFullscreen, title = "Decrease font height", onClick = { viewModel.saveFontHeight(false) })
-            TopAppBarActionButton(imageVector = Icons.Default.OpenInFull, title = "Increase font height", onClick = { viewModel.saveFontHeight(true) })
-        }
+    Row(verticalAlignment = Alignment.CenterVertically
+    ) {
+        Spacer(modifier = modifier.width(5.dp))
+        Text(
+            text = "Line Height",
+            fontSize = 12.sp,
+            style = TextStyle(fontWeight = FontWeight.W400),
+            color = MaterialTheme.colors.onBackground
+        )
+        TopAppBarActionButton(imageVector = Icons.Default.CloseFullscreen,
+            title = "Decrease font height",
+            onClick = { viewModel.saveFontHeight(false) })
+        TopAppBarActionButton(imageVector = Icons.Default.OpenInFull,
+            title = "Increase font height",
+            onClick = { viewModel.saveFontHeight(true) })
+    }
 
 
 }
 
 @Composable
-fun ParagraphDistanceComposable(modifier: Modifier=Modifier,viewModel: ReaderScreenViewModel,) {
+fun ParagraphDistanceComposable(modifier: Modifier = Modifier, viewModel: ReaderScreenViewModel) {
     Row(verticalAlignment = Alignment.CenterVertically
     ) {
         Spacer(modifier = modifier.width(5.dp))
@@ -84,7 +93,13 @@ fun ParagraphDistanceComposable(modifier: Modifier=Modifier,viewModel: ReaderScr
             style = TextStyle(fontWeight = FontWeight.W400),
             color = MaterialTheme.colors.onBackground
         )
-        TopAppBarActionButton( imageVector = Icons.Default.VerticalAlignTop, tint = MaterialTheme.colors.onBackground, title = "Decrease font height", onClick = { viewModel.saveParagraphDistance(false) })
-        TopAppBarActionButton(imageVector = Icons.Default.VerticalAlignBottom, tint = MaterialTheme.colors.onBackground,title = "Increase font height", onClick = { viewModel.saveParagraphDistance(true) })
+        TopAppBarActionButton(imageVector = Icons.Default.VerticalAlignTop,
+            tint = MaterialTheme.colors.onBackground,
+            title = "Decrease font height",
+            onClick = { viewModel.saveParagraphDistance(false) })
+        TopAppBarActionButton(imageVector = Icons.Default.VerticalAlignBottom,
+            tint = MaterialTheme.colors.onBackground,
+            title = "Increase font height",
+            onClick = { viewModel.saveParagraphDistance(true) })
     }
 }

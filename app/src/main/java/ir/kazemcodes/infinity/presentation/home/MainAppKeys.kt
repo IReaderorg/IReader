@@ -1,7 +1,5 @@
-package ir.kazemcodes.infinity.base_feature.navigation
+package ir.kazemcodes.infinity.presentation.home
 
-import android.content.Context
-import android.view.Window
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -22,9 +20,6 @@ import ir.kazemcodes.infinity.presentation.browse.BrowserScreen
 import ir.kazemcodes.infinity.presentation.chapter_detail.ChapterDetailScreen
 import ir.kazemcodes.infinity.presentation.chapter_detail.ChapterDetailViewModel
 import ir.kazemcodes.infinity.presentation.extension.ExtensionScreen
-import ir.kazemcodes.infinity.presentation.home.ComposeKey
-import ir.kazemcodes.infinity.presentation.home.MainScreen
-import ir.kazemcodes.infinity.presentation.home.MainViewModel
 import ir.kazemcodes.infinity.presentation.library.LibraryViewModel
 import ir.kazemcodes.infinity.presentation.reader.ReaderScreenViewModel
 import ir.kazemcodes.infinity.presentation.reader.ReadingScreen
@@ -33,7 +28,7 @@ import ir.kazemcodes.infinity.presentation.setting.dns.DnsOverHttpScreen
 import ir.kazemcodes.infinity.presentation.setting.downloader.DownloaderScreen
 import ir.kazemcodes.infinity.presentation.setting.extension_creator.ExtensionCreatorScreen
 import ir.kazemcodes.infinity.presentation.webview.WebPageScreen
-import ir.kazemcodes.infinity.util.mappingApiNameToAPi
+import ir.kazemcodes.infinity.util.SourceMapper
 import kotlinx.parcelize.Parcelize
 
 
@@ -41,7 +36,7 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class MainScreenKey(val noArgument: String = "") : ComposeKey() {
     @Composable
-    override fun ScreenComposable(modifier: Modifier)  {
+    override fun ScreenComposable(modifier: Modifier) {
         MainScreen()
     }
 
@@ -67,11 +62,13 @@ data class BrowserScreenKey(val sourceName: String, val isLatestUpdateMode: Bool
 
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
-            add(BrowseViewModel(lookup<LocalUseCase>(),
-                lookup<RemoteUseCase>(),
-                preferencesUseCase = lookup<PreferencesUseCase>(),
-                source = mappingApiNameToAPi(sourceName,lookup<Context>()),
-                isLatestUpdateMode = isLatestUpdateMode),)
+            add(
+                BrowseViewModel(lookup<LocalUseCase>(),
+                    lookup<RemoteUseCase>(),
+                    preferencesUseCase = lookup<PreferencesUseCase>(),
+                    source = lookup<SourceMapper>().mappingSourceNameToSource(sourceName),
+                    isLatestUpdateMode = isLatestUpdateMode),
+            )
         }
 
     }
@@ -87,11 +84,10 @@ data class BookDetailKey(val book: Book, val sourceName: String) : ComposeKey() 
     }
 
     override fun bindServices(serviceBinder: ServiceBinder) {
-
         with(serviceBinder) {
             add(BookDetailViewModel(lookup<LocalUseCase>(),
                 lookup<RemoteUseCase>(),
-                source = mappingApiNameToAPi(sourceName,lookup<Context>()),
+                source = lookup<SourceMapper>().mappingSourceNameToSource(sourceName),
                 book = book,
                 lookup<PreferencesUseCase>()))
         }
@@ -124,7 +120,7 @@ data class ChapterDetailKey(
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
             add(ChapterDetailViewModel(lookup<LocalUseCase>(),
-                source = mappingApiNameToAPi(sourceName,lookup<Context>()),
+                source = lookup<SourceMapper>().mappingSourceNameToSource(sourceName),
                 book = book, chapters = chapters))
         }
     }
@@ -137,7 +133,7 @@ data class ReaderScreenKey(
     val chapterIndex: Int,
     val sourceName: String,
     val chapters: List<Chapter>,
-    val isChaptersReversed: Boolean = false
+    val isChaptersReversed: Boolean = false,
 ) : ComposeKey() {
     @Composable
     override fun ScreenComposable(modifier: Modifier) {
@@ -150,11 +146,10 @@ data class ReaderScreenKey(
                 localUseCase = lookup<LocalUseCase>(),
                 remoteUseCase = lookup<RemoteUseCase>(),
                 preferencesUseCase = lookup<PreferencesUseCase>(),
-                source = mappingApiNameToAPi(sourceName,context = lookup<Context>()),
+                source = lookup<SourceMapper>().mappingSourceNameToSource(sourceName),
                 book = book,
                 chapterIndex = chapterIndex,
                 chapters = chapters,
-                window = lookup<Window>(),
                 isChaptersReversed = isChaptersReversed
             ))
         }
@@ -169,6 +164,7 @@ data class ExtensionScreenKey(val noArgs: String = "") : ComposeKey() {
         ExtensionScreen()
     }
 }
+
 @Immutable
 @Parcelize
 data class DownloadScreenKey(val noArgs: String = "") : ComposeKey() {
@@ -177,6 +173,7 @@ data class DownloadScreenKey(val noArgs: String = "") : ComposeKey() {
         DownloaderScreen()
     }
 }
+
 @Immutable
 @Parcelize
 data class ExtensionCreatorScreenKey(val noArgs: String = "") : ComposeKey() {
@@ -185,6 +182,7 @@ data class ExtensionCreatorScreenKey(val noArgs: String = "") : ComposeKey() {
         ExtensionCreatorScreen()
     }
 }
+
 @Immutable
 @Parcelize
 data class DnsOverHttpScreenKey(val noArgs: String = "") : ComposeKey() {
@@ -193,6 +191,7 @@ data class DnsOverHttpScreenKey(val noArgs: String = "") : ComposeKey() {
         val viewModel = rememberService<SettingViewModel>()
         DnsOverHttpScreen(viewModel)
     }
+
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
             add(SettingViewModel(

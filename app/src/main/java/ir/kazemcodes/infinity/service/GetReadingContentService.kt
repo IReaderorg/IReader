@@ -1,4 +1,3 @@
 package ir.kazemcodes.infinity.service
 
-class GetReadingContentService {
-}
+class GetReadingContentService

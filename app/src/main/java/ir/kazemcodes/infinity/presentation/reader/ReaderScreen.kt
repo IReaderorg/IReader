@@ -14,10 +14,12 @@ import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.PublishedWithChanges
 import androidx.compose.material.icons.filled.Sort
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -26,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import com.zhuinden.simplestackcomposeintegration.services.rememberService
-import ir.kazemcodes.infinity.base_feature.navigation.WebViewKey
+import ir.kazemcodes.infinity.presentation.home.WebViewKey
 import ir.kazemcodes.infinity.presentation.reader.components.MainBottomSettingComposable
 import ir.kazemcodes.infinity.presentation.reader.components.ReaderSettingComposable
 import ir.kazemcodes.infinity.presentation.reusable_composable.ErrorTextWithEmojis
@@ -40,18 +42,24 @@ import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarTitle
 fun ReadingScreen(
     modifier: Modifier = Modifier,
 ) {
+    val viewModel = rememberService<ReaderScreenViewModel>()
+    val context = LocalContext.current
+    viewModel.updateContext(context)
     val scaffoldState = rememberScaffoldState(rememberDrawerState(DrawerValue.Closed))
     val scope = rememberCoroutineScope()
-    val viewModel = rememberService<ReaderScreenViewModel>()
     val book = viewModel.state.value.book
     val backStack = LocalBackstack.current
     val state = viewModel.state.value
     val interactionSource = remember { MutableInteractionSource() }
     val drawerChapter = state.chapters
 
+    LaunchedEffect(key1 = true ) {
+        viewModel.readPreferences(context)
+    }
+
+
 
     Box(modifier = modifier.fillMaxSize()) {
-
         Scaffold(
             topBar = {
                 if (!state.isReaderModeEnable && state.isLoaded) {
@@ -139,25 +147,25 @@ fun ReadingScreen(
 
                     Spacer(modifier = modifier.height(5.dp))
                     Divider(modifier = modifier.fillMaxWidth(), thickness = 1.dp)
-                    if (state.chapters.isNotEmpty()) {
+                    if (state.listChapters.isNotEmpty()) {
                         LazyColumn(modifier = Modifier.fillMaxSize()) {
-                            items(count = state.chapters.size) { index ->
+                            items(count = state.listChapters.size) { index ->
                                 Row(
                                     modifier = modifier
                                         .fillMaxWidth()
                                         .padding(12.dp)
                                         .height(40.dp)
                                         .clickable {
-                                            viewModel.getContent(state.chapters[index])
-                                            viewModel.updateChapterSliderIndex(index = index)
+                                            viewModel.getContent(state.chapters[state.chapters.indexOf(state.listChapters[index])])
+                                            viewModel.updateChapterSliderIndex(index = state.chapters.indexOf(state.listChapters[index]))
 
                                         },
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
                                     Text(
-                                        text = state.chapters[index].title,
-                                        color = if (state.chapters[index].haveBeenRead) MaterialTheme.colors.onBackground.copy(
+                                        text = state.listChapters[index].title,
+                                        color = if (state.listChapters[index].haveBeenRead) MaterialTheme.colors.onBackground.copy(
                                             alpha = .4f) else MaterialTheme.colors.onBackground,
                                         style = MaterialTheme.typography.subtitle1,
                                         fontWeight = FontWeight.SemiBold,
@@ -165,9 +173,9 @@ fun ReadingScreen(
                                         modifier = Modifier.weight(7f)
                                     )
                                     Text(modifier = Modifier.weight(2f),
-                                        text = state.chapters[index].dateUploaded ?: "",
+                                        text = state.listChapters[index].dateUploaded ?: "",
                                         fontStyle = FontStyle.Italic,
-                                        color = if (state.chapters[index].haveBeenRead) MaterialTheme.colors.onBackground.copy(
+                                        color = if (state.listChapters[index].haveBeenRead) MaterialTheme.colors.onBackground.copy(
                                             alpha = .4f) else MaterialTheme.colors.onBackground,
                                         fontWeight = FontWeight.SemiBold,
                                         style = MaterialTheme.typography.caption
@@ -176,7 +184,7 @@ fun ReadingScreen(
                                     Icon(
                                         imageVector = Icons.Default.PublishedWithChanges,
                                         contentDescription = "Cached",
-                                        tint = if (state.chapters[index].content.joinToString(" , ").length > 10) MaterialTheme.colors.onBackground else MaterialTheme.colors.background,
+                                        tint = if (state.listChapters[index].content.joinToString(" , ").length > 10) MaterialTheme.colors.onBackground else MaterialTheme.colors.background,
                                     )
                                 }
                             }

@@ -4,13 +4,16 @@ import android.app.Application
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import com.google.firebase.analytics.FirebaseAnalytics
+import com.zhuinden.simplestack.GlobalServices
+import com.zhuinden.simplestackextensions.servicesktx.add
 import dagger.hilt.android.HiltAndroidApp
 import ir.kazemcodes.infinity.data.network.Extensions
 import ir.kazemcodes.infinity.data.network.utils.NetworkHelper
-import ir.kazemcodes.infinity.domain.use_cases.preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
+import ir.kazemcodes.infinity.domain.use_cases.preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
 import ir.kazemcodes.infinity.notification.Notifications
+import ir.kazemcodes.infinity.util.SourceMapper
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.bindSingleton
@@ -19,7 +22,10 @@ import javax.inject.Inject
 
 
 @HiltAndroidApp
-class MyApplication : Application(),DIAware, Configuration.Provider {
+class MyApplication : Application(), DIAware, Configuration.Provider {
+
+    lateinit var globalServices: GlobalServices
+        private set
 
     @Inject
     lateinit var localUseCase: LocalUseCase
@@ -43,15 +49,21 @@ class MyApplication : Application(),DIAware, Configuration.Provider {
     }
 
 
-
     private var mFirebaseAnalytics: FirebaseAnalytics? = null
     override fun onCreate() {
         super.onCreate()
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
         }
-        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+        globalServices = GlobalServices.builder()
+            .add(localUseCase)
+            .add(remoteUseCase)
+            .add(preferencesUseCase)
+            .add(SourceMapper(this))
+            .build()
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this)
         setupNotificationChannels()
+
 
     }
 

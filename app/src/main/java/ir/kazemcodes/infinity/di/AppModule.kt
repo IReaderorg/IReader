@@ -68,7 +68,7 @@ class AppModule {
         chapterDao: ChapterDao,
         context: Context,
         remoteUseCase: RemoteUseCase,
-        preferencesHelper: PreferencesHelper
+        preferencesHelper: PreferencesHelper,
     ): Repository {
         return RepositoryImpl(
             bookDao = bookDao,
@@ -119,7 +119,7 @@ class AppModule {
             readSelectedFontStateUseCase = ReadSelectedFontStateUseCase(repository),
             saveSelectedFontStateUseCase = SaveSelectedFontStateUseCase(repository),
             readFontSizeStateUseCase = ReadFontSizeStateUseCase(repository),
-            saveFontSizeStateUseCase = SaveFontSizeStateUseCase( repository),
+            saveFontSizeStateUseCase = SaveFontSizeStateUseCase(repository),
             readBrightnessStateUseCase = ReadBrightnessStateUseCase(repository),
             saveBrightnessStateUseCase = SaveBrightnessStateUseCase(repository),
             saveLibraryLayoutUseCase = SaveLibraryLayoutTypeStateUseCase(repository),
@@ -180,14 +180,16 @@ class AppModule {
     fun providesNetworkHelper(context: Context): NetworkHelper {
         return NetworkHelper(context = context)
     }
+
     @Singleton
     @Provides
     fun providesPreferences(@ApplicationContext context: Context): SharedPreferences {
-        return context.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        return context.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE)
     }
+
     @Singleton
     @Provides
-    fun providePreferenceHelper(sharedPreferences: SharedPreferences) : PreferencesHelper {
+    fun providePreferenceHelper(sharedPreferences: SharedPreferences): PreferencesHelper {
         return PreferencesHelper(sharedPreferences)
     }
 

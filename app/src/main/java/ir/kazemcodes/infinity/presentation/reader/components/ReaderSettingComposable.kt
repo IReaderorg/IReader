@@ -14,21 +14,18 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ir.kazemcodes.infinity.presentation.reader.ReaderEvent
 import ir.kazemcodes.infinity.presentation.reader.ReaderScreenViewModel
 import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarActionButton
 
 @Composable
-fun ReaderSettingComposable(modifier: Modifier = Modifier,viewModel: ReaderScreenViewModel) {
+fun ReaderSettingComposable(modifier: Modifier = Modifier, viewModel: ReaderScreenViewModel) {
     val context = LocalContext.current
 
     Column(
         modifier = modifier
             .fillMaxSize()
     ) {
-        BrightnessSliderComposable(brightness = viewModel.state.value.brightness) {
-            viewModel.onEvent(ReaderEvent.ChangeBrightness(it))
-        }
+        BrightnessSliderComposable(viewModel = viewModel)
         Spacer(modifier = Modifier.height(12.dp))
         ReaderBackgroundComposable(viewModel = viewModel)
         Spacer(modifier = Modifier.height(12.dp))
@@ -36,8 +33,10 @@ fun ReaderSettingComposable(modifier: Modifier = Modifier,viewModel: ReaderScree
             viewModel = viewModel
         )
         Spacer(modifier = Modifier.height(12.dp))
-        Row(modifier=modifier.fillMaxWidth(),horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-            FontSizeChangerComposable( viewModel=viewModel)
+        Row(modifier = modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically) {
+            FontSizeChangerComposable(viewModel = viewModel)
             Divider(
                 color = MaterialTheme.colors.onBackground.copy(alpha = .2f),
                 modifier = Modifier
@@ -46,7 +45,9 @@ fun ReaderSettingComposable(modifier: Modifier = Modifier,viewModel: ReaderScree
             )
             FontHeightChangerComposable(viewModel = viewModel)
         }
-        Row(modifier=modifier.fillMaxWidth(),horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+        Row(modifier = modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically) {
             ParagraphDistanceComposable(viewModel = viewModel)
             Divider(
                 color = MaterialTheme.colors.onBackground.copy(alpha = .2f),
@@ -60,9 +61,10 @@ fun ReaderSettingComposable(modifier: Modifier = Modifier,viewModel: ReaderScree
                 style = TextStyle(fontWeight = FontWeight.W400),
                 color = MaterialTheme.colors.onBackground
             )
-            TopAppBarActionButton(imageVector = Icons.Default.FlipCameraAndroid, title = "Change Orientation", onClick = { viewModel.saveOrientation() })
+            TopAppBarActionButton(imageVector = Icons.Default.FlipCameraAndroid,
+                title = "Change Orientation",
+                onClick = { viewModel.saveOrientation(context) })
         }
-        
 
 
     }

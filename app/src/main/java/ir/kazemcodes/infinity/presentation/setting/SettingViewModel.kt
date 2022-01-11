@@ -8,7 +8,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 
-class SettingViewModel(private val preferencesUseCase: PreferencesUseCase) : ScopedServices.Registered {
+class SettingViewModel(private val preferencesUseCase: PreferencesUseCase) :
+    ScopedServices.Registered {
     private val _state = mutableStateOf<SettingState>(SettingState())
     val state: State<SettingState> = _state
 
@@ -17,13 +18,13 @@ class SettingViewModel(private val preferencesUseCase: PreferencesUseCase) : Sco
 
     fun setDohPrfUpdate(prefCode: Int) {
         _state.value = state.value.copy(doh = prefCode)
-            preferencesUseCase.saveDohPrefUseCase(prefCode)
+        preferencesUseCase.saveDohPrefUseCase(prefCode)
     }
 
     fun readDohPref() {
         _state.value = state.value
             .copy(
-                doh =  preferencesUseCase.readDohPrefUseCase()
+                doh = preferencesUseCase.readDohPrefUseCase()
             )
     }
 

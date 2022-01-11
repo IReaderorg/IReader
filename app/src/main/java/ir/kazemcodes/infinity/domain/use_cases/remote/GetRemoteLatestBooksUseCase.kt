@@ -30,9 +30,7 @@ class GetRemoteLatestBooksUseCase {
                 )
             }
 
-        }
-
-        catch (e: HttpException) {
+        } catch (e: HttpException) {
             emit(
                 Resource.Error<List<Book>>(
                     message = e.localizedMessage ?: "An Unexpected Error Occurred."

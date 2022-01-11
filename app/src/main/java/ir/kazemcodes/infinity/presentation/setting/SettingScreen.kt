@@ -16,11 +16,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
-import ir.kazemcodes.infinity.base_feature.navigation.DnsOverHttpScreenKey
-import ir.kazemcodes.infinity.base_feature.navigation.DownloadScreenKey
-import ir.kazemcodes.infinity.base_feature.navigation.ExtensionCreatorScreenKey
 import ir.kazemcodes.infinity.presentation.book_detail.Constants
 import ir.kazemcodes.infinity.presentation.home.ComposeKey
+import ir.kazemcodes.infinity.presentation.home.DnsOverHttpScreenKey
+import ir.kazemcodes.infinity.presentation.home.DownloadScreenKey
+import ir.kazemcodes.infinity.presentation.home.ExtensionCreatorScreenKey
 import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarTitle
 
 @Composable
@@ -48,7 +48,9 @@ fun SettingScreen(modifier: Modifier = Modifier) {
             ) {
 
                 settingItems.forEach { item ->
-                    SettingsItem(title = item.title, imageVector = item.icon, DestinationScreenKey = item.DestinationScreenKey)
+                    SettingsItem(title = item.title,
+                        imageVector = item.icon,
+                        DestinationScreenKey = item.DestinationScreenKey)
                 }
 
             }
@@ -58,9 +60,15 @@ fun SettingScreen(modifier: Modifier = Modifier) {
 
 }
 
-sealed class SettingItems(val title: String, val icon: ImageVector,val DestinationScreenKey : ComposeKey) {
+sealed class SettingItems(
+    val title: String,
+    val icon: ImageVector,
+    val DestinationScreenKey: ComposeKey,
+) {
     object Downloads : SettingItems("Downloads", Icons.Default.Download, DownloadScreenKey())
-    object ExtensionCreator : SettingItems("ExtensionCreator", Icons.Default.Extension, ExtensionCreatorScreenKey())
+    object ExtensionCreator :
+        SettingItems("ExtensionCreator", Icons.Default.Extension, ExtensionCreatorScreenKey())
+
     object DnsOverHttp : SettingItems("DnsOverHttp", Icons.Default.Dns, DnsOverHttpScreenKey())
 }
 
@@ -69,7 +77,7 @@ fun SettingsItem(
     modifier: Modifier = Modifier,
     title: String,
     imageVector: ImageVector,
-    DestinationScreenKey : ComposeKey,
+    DestinationScreenKey: ComposeKey,
 ) {
     val backstack = LocalBackstack.current
     val interactionSource = remember { MutableInteractionSource() }

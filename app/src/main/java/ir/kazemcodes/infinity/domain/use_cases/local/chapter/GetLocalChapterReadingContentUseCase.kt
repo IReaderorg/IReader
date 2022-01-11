@@ -21,7 +21,7 @@ class GetLocalChapterReadingContentUseCase @Inject constructor(
                 repository.localChapterRepository.getChapterByChapter(chapterTitle = chapter.title,
                     bookName = chapter.bookName ?: "")
                     .first { chapter ->
-                            emit(Resource.Success<Chapter?>(data = chapter?.toChapter()))
+                        emit(Resource.Success<Chapter?>(data = chapter?.toChapter()))
                         return@first chapter != null
                     }
                 Timber.d("GetLocalChapterReadingContentUseCase was Finished Successfully")

@@ -17,7 +17,7 @@ data class BookEntity(
     val category: List<String> = emptyList(),
     val inLibrary: Boolean = false,
     val status: Int = -1,
-    val rating : Int = 0,
+    val rating: Int = 0,
     val source: String? = null,
     @PrimaryKey val bookId: Int? = null,
 ) {

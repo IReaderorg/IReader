@@ -21,13 +21,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import com.zhuinden.simplestackcomposeintegration.services.rememberService
-import ir.kazemcodes.infinity.base_feature.navigation.ChapterDetailKey
-import ir.kazemcodes.infinity.base_feature.navigation.ReaderScreenKey
-import ir.kazemcodes.infinity.base_feature.navigation.WebViewKey
 import ir.kazemcodes.infinity.presentation.book_detail.components.ButtonWithIconAndText
 import ir.kazemcodes.infinity.presentation.book_detail.components.CardTileComposable
 import ir.kazemcodes.infinity.presentation.book_detail.components.DotsFlashing
 import ir.kazemcodes.infinity.presentation.book_detail.components.ExpandingText
+import ir.kazemcodes.infinity.presentation.home.ChapterDetailKey
+import ir.kazemcodes.infinity.presentation.home.ReaderScreenKey
+import ir.kazemcodes.infinity.presentation.home.WebViewKey
 import ir.kazemcodes.infinity.presentation.reusable_composable.ErrorTextWithEmojis
 import ir.kazemcodes.infinity.presentation.screen.components.BookImageComposable
 import ir.kazemcodes.infinity.util.formatBasedOnDot
@@ -53,7 +53,7 @@ fun BookDetailScreen(
                 viewModel = viewModel
             )
         } else {
-            Scaffold(modifier = Modifier.fillMaxSize(),topBar = {
+            Scaffold(modifier = Modifier.fillMaxSize(), topBar = {
                 TopAppBar(title = {},
                     backgroundColor = MaterialTheme.colors.background,
                     navigationIcon = {
@@ -68,7 +68,7 @@ fun BookDetailScreen(
             }) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     if (detailState.error.isNotBlank()) {
-                        ErrorTextWithEmojis(error=detailState.error,modifier  = Modifier
+                        ErrorTextWithEmojis(error = detailState.error, modifier = Modifier
                             .fillMaxWidth()
                             .padding(20.dp)
                             .wrapContentSize(Alignment.Center)
@@ -103,110 +103,114 @@ fun BookDetailScreenLoadedComposable(
     val context = LocalContext.current
     Scaffold(
         topBar = {
-        TopAppBar(
-            title = {},
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp),
-            backgroundColor = MaterialTheme.colors.background,
-            contentColor = MaterialTheme.colors.onBackground,
-            elevation = 0.dp,
-            actions = {
-                IconButton(onClick = { viewModel.getRemoteChapterDetail() }) {
-                    Icon(
-                        imageVector = Icons.Default.Autorenew,
-                        contentDescription = "Refresh",
-                        tint = MaterialTheme.colors.onBackground,
-                    )
-                }
-                /** ERROR: This may cause error later: mismatch between baseurl and book link**/
-                IconButton(onClick = { backStack.goTo(WebViewKey(source.baseUrl + getUrlWithoutDomain(book.link))) }) {
-                    Icon(
-                        imageVector = Icons.Default.Language,
-                        contentDescription = "WebView",
-                        tint = MaterialTheme.colors.onBackground,
-                    )
-                }
-
-            },
-            navigationIcon = {
-                IconButton(onClick = { backStack.goBack() }) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "back Button",
-                        tint = MaterialTheme.colors.onBackground
-                    )
-                }
-
-            }
-        )
-    }, bottomBar = {
-        BottomAppBar(
-            modifier = modifier.fillMaxWidth(),
-            backgroundColor = MaterialTheme.colors.background,
-            contentColor = MaterialTheme.colors.onBackground,
-            elevation = 8.dp,
-        ) {
-            Row(
+            TopAppBar(
+                title = {},
                 modifier = modifier
                     .fillMaxWidth()
                     .padding(horizontal = 8.dp),
-                horizontalArrangement = Arrangement.SpaceAround,
-                verticalAlignment = Alignment.CenterVertically
+                backgroundColor = MaterialTheme.colors.background,
+                contentColor = MaterialTheme.colors.onBackground,
+                elevation = 0.dp,
+                actions = {
+                    IconButton(onClick = { viewModel.getRemoteChapterDetail() }) {
+                        Icon(
+                            imageVector = Icons.Default.Autorenew,
+                            contentDescription = "Refresh",
+                            tint = MaterialTheme.colors.onBackground,
+                        )
+                    }
+                    /** ERROR: This may cause error later: mismatch between baseurl and book link**/
+                    IconButton(onClick = {
+                        backStack.goTo(WebViewKey(source.baseUrl + getUrlWithoutDomain(book.link)))
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Language,
+                            contentDescription = "WebView",
+                            tint = MaterialTheme.colors.onBackground,
+                        )
+                    }
 
+                },
+                navigationIcon = {
+                    IconButton(onClick = { backStack.goBack() }) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "back Button",
+                            tint = MaterialTheme.colors.onBackground
+                        )
+                    }
+
+                }
+            )
+        }, bottomBar = {
+            BottomAppBar(
+                modifier = modifier.fillMaxWidth(),
+                backgroundColor = MaterialTheme.colors.background,
+                contentColor = MaterialTheme.colors.onBackground,
+                elevation = 8.dp,
             ) {
-                ButtonWithIconAndText(
-                    text = if (!inLibrary) "Add to Library" else "Added To Library",
-                    imageVector = if (!inLibrary) Icons.Default.AddCircleOutline else Icons.Default.Check,
-                    onClick = {
-                        if (!inLibrary) {
-                            viewModel.insertBookDetailToLocal(
-                                book.copy(inLibrary = true, source = source.name).toBookEntity()
-                            )
-                            val chapterEntities = chapters.map {
-                                it.copy(bookName = book.bookName, source = source.name)
-                                    .toChapterEntity()
-                            }
-                            viewModel.insertChaptersToLocal(chapterEntities)
-                            viewModel.toggleInLibrary(true)
-                        } else {
-                            viewModel.deleteLocalBook(book.bookName)
-                            viewModel.deleteLocalChapters(book.bookName)
-                            viewModel.toggleInLibrary(false)
-                        }
-                    },
-                )
-                ButtonWithIconAndText(
-                    text = if (viewModel.chapterState.value.lastChapter != viewModel.chapterState.value.chapters.getOrNull(
-                            0)
-                    ) "Continue Reading" else "Read",
-                    imageVector = Icons.Default.AutoStories,
-                    onClick = {
-                        if (viewModel.chapterState.value.lastChapter != null ) {
-                            backStack.goTo(ReaderScreenKey(chapterIndex = chapters.indexOf(viewModel.chapterState.value.lastChapter),
-                                book = book,
-                                sourceName = viewModel.getSource().name,
-                                chapters = viewModel.chapterState.value.chapters),)
-                        } else if (viewModel.chapterState.value.chapters.isNotEmpty()) {
-                            backStack.goTo(ReaderScreenKey(chapterIndex = 0,
-                                book = book,
-                                sourceName = viewModel.getSource().name,
-                                chapters = viewModel.chapterState.value.chapters))
-                        }
-                    }
-                )
+                Row(
+                    modifier = modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceAround,
+                    verticalAlignment = Alignment.CenterVertically
 
-                ButtonWithIconAndText(
-                    text = "Download",
-                    imageVector = Icons.Default.FileDownload,
-                    onClick = {
-                        //context.toast("Not Supported",)
-                        viewModel.startDownloadService(context)
-                    }
-                )
+                ) {
+                    ButtonWithIconAndText(
+                        text = if (!inLibrary) "Add to Library" else "Added To Library",
+                        imageVector = if (!inLibrary) Icons.Default.AddCircleOutline else Icons.Default.Check,
+                        onClick = {
+                            if (!inLibrary) {
+                                viewModel.insertBookDetailToLocal(
+                                    book.copy(inLibrary = true, source = source.name).toBookEntity()
+                                )
+                                val chapterEntities = chapters.map {
+                                    it.copy(bookName = book.bookName, source = source.name)
+                                        .toChapterEntity()
+                                }
+                                viewModel.insertChaptersToLocal(chapterEntities)
+                                viewModel.toggleInLibrary(true)
+                            } else {
+                                viewModel.deleteLocalBook(book.bookName)
+                                viewModel.deleteLocalChapters(book.bookName)
+                                viewModel.toggleInLibrary(false)
+                            }
+                        },
+                    )
+                    ButtonWithIconAndText(
+                        text = if (viewModel.chapterState.value.lastChapter != viewModel.chapterState.value.chapters.getOrNull(
+                                0)
+                        ) "Continue Reading" else "Read",
+                        imageVector = Icons.Default.AutoStories,
+                        onClick = {
+                            if (viewModel.chapterState.value.lastChapter != null) {
+                                backStack.goTo(
+                                    ReaderScreenKey(chapterIndex = chapters.indexOf(viewModel.chapterState.value.lastChapter),
+                                        book = book,
+                                        sourceName = viewModel.getSource().name,
+                                        chapters = viewModel.chapterState.value.chapters),
+                                )
+                            } else if (viewModel.chapterState.value.chapters.isNotEmpty()) {
+                                backStack.goTo(ReaderScreenKey(chapterIndex = 0,
+                                    book = book,
+                                    sourceName = viewModel.getSource().name,
+                                    chapters = viewModel.chapterState.value.chapters))
+                            }
+                        }
+                    )
+
+                    ButtonWithIconAndText(
+                        text = "Download",
+                        imageVector = Icons.Default.FileDownload,
+                        onClick = {
+                            //context.toast("Not Supported",)
+                            viewModel.startDownloadService(context)
+                        }
+                    )
+                }
             }
-        }
-    }) {
+        }) {
         Column(
             modifier = modifier
                 .fillMaxSize()
@@ -268,7 +272,7 @@ fun BookDetailScreenLoadedComposable(
                     }
                     if (book.rating != 0) {
                         Text(
-                            text = "Rating: ${"⭐".repeat(if(book.rating < 5 && book.rating > 0 ) book.rating else 5)}",
+                            text = "Rating: ${"⭐".repeat(if (book.rating < 5 && book.rating > 0) book.rating else 5)}",
                             style = MaterialTheme.typography.subtitle2,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colors.onBackground.copy(alpha = .5f),
@@ -304,7 +308,7 @@ fun BookDetailScreenLoadedComposable(
                 color = MaterialTheme.colors.onBackground,
                 style = MaterialTheme.typography.h6,
             )
-            ExpandingText(text = book.description.formatBasedOnDot() ?: "Unknown")
+            ExpandingText(text = book.description.formatBasedOnDot())
             Divider(
                 modifier = modifier
                     .fillMaxWidth()

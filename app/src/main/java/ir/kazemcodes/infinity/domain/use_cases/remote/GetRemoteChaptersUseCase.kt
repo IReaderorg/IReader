@@ -27,12 +27,12 @@ class GetRemoteChaptersUseCase {
 
                 var hasNextPage = true
 
-                while(hasNextPage){
+                while (hasNextPage) {
                     Timber.d("Timber: GetRemoteChaptersUseCase was with pages $currentPage Called")
-                    val chaptersPage = source.fetchChapters(book = book,page = currentPage)
+                    val chaptersPage = source.fetchChapters(book = book, page = currentPage)
                     chapters.addAll(chaptersPage.chapters)
                     hasNextPage = chaptersPage.hasNextPage
-                    currentPage+=1
+                    currentPage += 1
                 }
 
 
@@ -47,7 +47,7 @@ class GetRemoteChaptersUseCase {
                 )
             } catch (e: IOException) {
                 emit(Resource.Error<List<Chapter>>(message = "Couldn't Read Remote Server, Check Your Internet Connection."))
-            }catch (e:Selector.SelectorParseException) {
+            } catch (e: Selector.SelectorParseException) {
                 emit(Resource.Error<List<Chapter>>(message = "Source is not working."))
             } catch (e: Exception) {
                 emit(Resource.Error<List<Chapter>>(message = e.localizedMessage

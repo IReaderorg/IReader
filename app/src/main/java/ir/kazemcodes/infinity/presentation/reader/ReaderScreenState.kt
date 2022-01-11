@@ -1,7 +1,7 @@
 package ir.kazemcodes.infinity.presentation.reader
 
 
-import android.content.res.Configuration
+import android.content.Context
 import androidx.compose.ui.graphics.Color
 import ir.kazemcodes.infinity.data.network.models.Source
 import ir.kazemcodes.infinity.domain.models.FontType
@@ -12,8 +12,8 @@ data class ReaderScreenState(
     val isLoading: Boolean = false,
     val isLoaded: Boolean = false,
     val chapter: Chapter,
-    val isChaptersReversed: Boolean = false,
     val chapters: List<Chapter>,
+    val listChapters : List<Chapter>,
     val error: String = "",
     val fontSize: Int = 18,
     val font: FontType = FontType.Poppins,
@@ -30,5 +30,11 @@ data class ReaderScreenState(
     val backgroundColor: Color = Color.White,
     val textColor: Color = Color.Black,
     val book: Book,
-    val orientation : Int = Configuration.ORIENTATION_PORTRAIT,
+    val orientation: Orientation = Orientation.Portrait,
+    val context: Context?=null,
 )
+
+sealed class Orientation(val index : Int){
+    object Landscape : Orientation(0)
+    object Portrait : Orientation(1)
+}
