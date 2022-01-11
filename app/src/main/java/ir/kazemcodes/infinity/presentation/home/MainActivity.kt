@@ -47,21 +47,17 @@ class MainActivity : ComponentActivity(),DIAware {
     @Inject
     lateinit var preferencesUseCase: PreferencesUseCase
 
-
-
-
     private val composeStateChanger = ComposeStateChanger()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
 
+
        val globalServices :GlobalServices  = GlobalServices.builder()
             .add(localUseCase)
             .add(remoteUseCase)
             .add(preferencesUseCase)
-            .add(this.window)
-            .add(this.baseContext)
             .build()
 
         val backstack = Navigator.configure()

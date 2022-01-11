@@ -1,5 +1,6 @@
 package ir.kazemcodes.infinity.presentation.library
 
+import android.content.pm.ActivityInfo
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -11,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -26,6 +28,7 @@ import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarActionBu
 import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarBackButton
 import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarSearch
 import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarTitle
+import ir.kazemcodes.infinity.util.findActivity
 import kotlinx.coroutines.launch
 
 
@@ -41,6 +44,10 @@ fun LibraryScreen(
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState()
     val coroutineScope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
+    val context = LocalContext.current
+    val activity = context.findActivity()!!
+    activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
