@@ -88,7 +88,7 @@ fun ReadingScreen(
                     BottomAppBar(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(if (viewModel.state.value.isMainBottomModeEnable) 130.dp else 400.dp),
+                            .height(if (viewModel.state.value.isMainBottomModeEnable) 130.dp else 320.dp),
                         elevation = 8.dp,
                         backgroundColor = MaterialTheme.colors.background
                     ) {

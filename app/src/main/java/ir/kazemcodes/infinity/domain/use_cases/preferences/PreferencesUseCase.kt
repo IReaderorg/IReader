@@ -17,4 +17,6 @@ data class PreferencesUseCase(
     val setBackgroundColorUseCase: SetBackgroundColorUseCase,
     val saveFontHeightUseCase: SaveFontHeightUseCase,
     val readFontHeightUseCase: ReadFontHeightUseCase,
+    val readParagraphDistanceUseCase: ReadParagraphDistanceUseCase,
+    val saveParagraphDistanceUseCase: SaveParagraphDistanceUseCase,
 )

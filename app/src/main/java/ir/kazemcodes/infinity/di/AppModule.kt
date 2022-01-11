@@ -131,7 +131,9 @@ class AppModule {
             getBackgroundColorUseCase = GetBackgroundColorUseCase(repository),
             setBackgroundColorUseCase = SetBackgroundColorUseCase(repository = repository),
             readFontHeightUseCase = ReadFontHeightUseCase(repository),
-            saveFontHeightUseCase = SaveFontHeightUseCase(repository)
+            saveFontHeightUseCase = SaveFontHeightUseCase(repository),
+            saveParagraphDistanceUseCase = SaveParagraphDistanceUseCase(repository),
+            readParagraphDistanceUseCase = ReadParagraphDistanceUseCase(repository)
         )
     }
 
