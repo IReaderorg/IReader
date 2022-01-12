@@ -10,6 +10,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,6 +44,11 @@ fun BookDetailScreen(
     val detailState = viewModel.state.value
     val chapterState = viewModel.chapterState.value
     val backStack = LocalBackstack.current
+    val context = LocalContext.current
+
+    LaunchedEffect(key1 = true) {
+        viewModel.restoreBrightnessAndOrientation(context)
+    }
 
 
 

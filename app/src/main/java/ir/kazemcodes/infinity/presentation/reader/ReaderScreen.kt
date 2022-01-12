@@ -44,18 +44,19 @@ fun ReadingScreen(
 ) {
     val viewModel = rememberService<ReaderScreenViewModel>()
     val context = LocalContext.current
-    viewModel.updateContext(context)
     val scaffoldState = rememberScaffoldState(rememberDrawerState(DrawerValue.Closed))
     val scope = rememberCoroutineScope()
     val book = viewModel.state.value.book
     val backStack = LocalBackstack.current
     val state = viewModel.state.value
     val interactionSource = remember { MutableInteractionSource() }
-    val drawerChapter = state.chapters
+
 
     LaunchedEffect(key1 = true ) {
-        viewModel.readPreferences(context)
+        viewModel.readBrightness(context)
+        viewModel.readOrientation(context)
     }
+
 
 
 
@@ -156,8 +157,10 @@ fun ReadingScreen(
                                         .padding(12.dp)
                                         .height(40.dp)
                                         .clickable {
-                                            viewModel.getContent(state.chapters[state.chapters.indexOf(state.listChapters[index])])
-                                            viewModel.updateChapterSliderIndex(index = state.chapters.indexOf(state.listChapters[index]))
+                                            viewModel.getContent(state.chapters[state.chapters.indexOf(
+                                                state.listChapters[index])])
+                                            viewModel.updateChapterSliderIndex(index = state.chapters.indexOf(
+                                                state.listChapters[index]))
 
                                         },
                                     verticalAlignment = Alignment.CenterVertically,
@@ -227,7 +230,7 @@ fun ReadingScreen(
                 .align(Alignment.Center))
         }
 
-        if (viewModel.state.value.isLoading) {
+        if (viewModel.state.value.isLoading || !viewModel.state.value.isScreenLoaded) {
             CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.Center),
                 color = MaterialTheme.colors.primary

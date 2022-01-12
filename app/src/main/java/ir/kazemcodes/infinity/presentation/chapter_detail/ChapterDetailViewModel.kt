@@ -1,5 +1,9 @@
 package ir.kazemcodes.infinity.presentation.chapter_detail
 
+import android.annotation.SuppressLint
+import android.content.Context
+import android.content.pm.ActivityInfo
+import android.view.WindowManager
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import com.zhuinden.simplestack.ScopedServices
@@ -8,6 +12,7 @@ import ir.kazemcodes.infinity.domain.models.remote.Book
 import ir.kazemcodes.infinity.domain.models.remote.Chapter
 import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
 import ir.kazemcodes.infinity.util.Resource
+import ir.kazemcodes.infinity.util.findActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -23,7 +28,7 @@ class ChapterDetailViewModel(
     private val source: Source,
 ) : ScopedServices.Registered {
 
-    private val _state = mutableStateOf<ChapterDetailState>(ChapterDetailState(chapters = chapters, listChapter = chapters))
+    private val _state = mutableStateOf<ChapterDetailState>(ChapterDetailState(chapters = chapters, listChapter = chapters, source = source))
     val state: State<ChapterDetailState> = _state
 
     init {
@@ -31,9 +36,9 @@ class ChapterDetailViewModel(
     }
 
     override fun onServiceRegistered() {
-
         getLocalChapters()
     }
+
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
@@ -49,10 +54,6 @@ class ChapterDetailViewModel(
             }
 
         }
-    }
-
-    fun getSource(): Source {
-        return source
     }
 
     private fun getLocalChapters() {
@@ -77,6 +78,15 @@ class ChapterDetailViewModel(
                     }
                 }
             }.launchIn(coroutineScope)
+    }
+    @SuppressLint("SourceLockedOrientationActivity")
+    fun restoreBrightnessAndOrientation(context: Context) {
+        val activity = context.findActivity()!!
+        val window = activity.window
+        val layoutParams: WindowManager.LayoutParams = window.attributes
+        layoutParams.screenBrightness = -1f
+        window.attributes = layoutParams
+        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     }
 
 

@@ -133,7 +133,6 @@ data class ReaderScreenKey(
     val chapterIndex: Int,
     val sourceName: String,
     val chapters: List<Chapter>,
-    val isChaptersReversed: Boolean = false,
 ) : ComposeKey() {
     @Composable
     override fun ScreenComposable(modifier: Modifier) {
@@ -141,6 +140,7 @@ data class ReaderScreenKey(
     }
 
     override fun bindServices(serviceBinder: ServiceBinder) {
+
         with(serviceBinder) {
             add(ReaderScreenViewModel(
                 localUseCase = lookup<LocalUseCase>(),
@@ -150,7 +150,6 @@ data class ReaderScreenKey(
                 book = book,
                 chapterIndex = chapterIndex,
                 chapters = chapters,
-                isChaptersReversed = isChaptersReversed
             ))
         }
     }

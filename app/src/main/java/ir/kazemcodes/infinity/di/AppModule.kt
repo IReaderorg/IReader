@@ -114,7 +114,7 @@ class AppModule {
 
     @Provides
     @Singleton
-    fun provideDataStoreUseCase(repository: Repository): PreferencesUseCase {
+    fun provideDataStoreUseCase(repository: Repository,@ApplicationContext context: Context): PreferencesUseCase {
         return PreferencesUseCase(
             readSelectedFontStateUseCase = ReadSelectedFontStateUseCase(repository),
             saveSelectedFontStateUseCase = SaveSelectedFontStateUseCase(repository),

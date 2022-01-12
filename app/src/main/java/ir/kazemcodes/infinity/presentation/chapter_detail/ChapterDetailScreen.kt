@@ -9,9 +9,11 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.BookmarkAdded
 import androidx.compose.material.icons.filled.Sort
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -36,7 +38,12 @@ fun ChapterDetailScreen(
     if (chapterState.isEmpty() || chapterState.size != chapters.size && chapterState.last().title != chapters.last().title) {
         viewModel.onEvent(ChapterDetailEvent.UpdateChapters(chapters = viewModel.state.value.listChapter))
     }
+    val context = LocalContext.current
     val state = viewModel.state.value
+
+    LaunchedEffect(key1 = true ) {
+        viewModel.restoreBrightnessAndOrientation(context)
+    }
 
     Scaffold(
         topBar = {

@@ -1,7 +1,6 @@
 package ir.kazemcodes.infinity.presentation.reader
 
 
-import android.content.Context
 import androidx.compose.ui.graphics.Color
 import ir.kazemcodes.infinity.data.network.models.Source
 import ir.kazemcodes.infinity.domain.models.FontType
@@ -9,6 +8,7 @@ import ir.kazemcodes.infinity.domain.models.remote.Book
 import ir.kazemcodes.infinity.domain.models.remote.Chapter
 
 data class ReaderScreenState(
+    val isScreenLoaded : Boolean = false,
     val isLoading: Boolean = false,
     val isLoaded: Boolean = false,
     val chapter: Chapter,
@@ -31,7 +31,6 @@ data class ReaderScreenState(
     val textColor: Color = Color.Black,
     val book: Book,
     val orientation: Orientation = Orientation.Portrait,
-    val context: Context?=null,
 )
 
 sealed class Orientation(val index : Int){

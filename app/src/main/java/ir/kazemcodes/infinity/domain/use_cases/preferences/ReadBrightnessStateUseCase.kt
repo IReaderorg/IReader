@@ -7,5 +7,6 @@ class ReadBrightnessStateUseCase(
 ) {
     operator fun invoke(): Float {
         return repository.preferencesHelper.readerBrightness.get()
+
     }
 }
