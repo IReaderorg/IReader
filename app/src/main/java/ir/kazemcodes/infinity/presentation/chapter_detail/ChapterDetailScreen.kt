@@ -97,7 +97,7 @@ fun ChapterDetailScreen(
                                         ReaderScreenKey(
                                             book = book,
                                             chapterIndex = chapters.indexOf(state.listChapter[index]),
-                                            sourceName = viewModel.getSource().name,
+                                            sourceName = viewModel.state.value.source.name,
                                             chapters = chapters,
                                         )
                                     )
