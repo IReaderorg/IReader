@@ -1,77 +1,67 @@
 package ir.kazemcodes.infinity.presentation.home
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
+import androidx.appcompat.app.AppCompatActivity
 import androidx.work.WorkManager
-import com.zhuinden.simplestack.AsyncStateChanger
 import com.zhuinden.simplestack.History
+import com.zhuinden.simplestack.SimpleStateChanger
+import com.zhuinden.simplestack.StateChange
 import com.zhuinden.simplestack.navigator.Navigator
-import com.zhuinden.simplestackcomposeintegration.core.BackstackProvider
 import com.zhuinden.simplestackcomposeintegration.core.ComposeStateChanger
 import com.zhuinden.simplestackextensions.navigatorktx.androidContentFrame
 import com.zhuinden.simplestackextensions.services.DefaultServiceProvider
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.scopes.ActivityScoped
 import ir.kazemcodes.infinity.MyApplication
-import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
-import ir.kazemcodes.infinity.domain.use_cases.preferences.PreferencesUseCase
-import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
-import ir.kazemcodes.infinity.presentation.theme.InfinityTheme
+import ir.kazemcodes.infinity.R
+import ir.kazemcodes.infinity.presentation.home.core.FragmentStateChanger
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.android.closestDI
-import org.kodein.di.compose.withDI
-import javax.inject.Inject
 
 
 @AndroidEntryPoint
 @ActivityScoped
-class MainActivity : ComponentActivity(), DIAware {
+class MainActivity : AppCompatActivity(), DIAware, SimpleStateChanger.NavigationHandler {
 
-
-    @Inject
-    lateinit var localUseCase: LocalUseCase
-
-    @Inject
-    lateinit var remoteUseCase: RemoteUseCase
-
-    @Inject
-    lateinit var preferencesUseCase: PreferencesUseCase
+    private lateinit var fragmentStateChanger: FragmentStateChanger
 
     private val composeStateChanger = ComposeStateChanger()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.main_activity)
 
         val app = application as MyApplication
 
-        val backstack = Navigator.configure()
-            .setGlobalServices(app.globalServices)
+        fragmentStateChanger = FragmentStateChanger(supportFragmentManager, R.id.container)
+
+        Navigator.configure()
+            .setStateChanger(SimpleStateChanger(this))
             .setScopedServices(DefaultServiceProvider())
-            .setStateChanger(AsyncStateChanger(composeStateChanger))
+            .setGlobalServices(app.globalServices)
             .install(this, androidContentFrame, History.of(MainScreenKey()))
 
-        setContent {
-            BackstackProvider(backstack) {
-                InfinityTheme {
-                    Surface(color = MaterialTheme.colors.background) {
-                        Main {
-                            Box(modifier = Modifier.fillMaxSize()) {
-                                composeStateChanger.RenderScreen()
-                            }
-                        }
-                    }
-                }
-
-            }
-        }
+//        val backstack = Navigator.configure()
+//            .setGlobalServices(app.globalServices)
+//            .setScopedServices(DefaultServiceProvider())
+//            .setStateChanger(AsyncStateChanger(composeStateChanger))
+//            .install(this, androidContentFrame, History.of(MainScreenKey()))
+//
+//        setContent {
+//            BackstackProvider(backstack) {
+//                InfinityTheme {
+//                    Surface(color = MaterialTheme.colors.background) {
+//                        Main {
+//                            Box(modifier = Modifier.fillMaxSize()) {
+//                                composeStateChanger.RenderScreen()
+//                            }
+//                        }
+//                    }
+//                }
+//
+//            }
+//        }
     }
 
     override fun onBackPressed() {
@@ -101,20 +91,23 @@ class MainActivity : ComponentActivity(), DIAware {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         WorkManager.getInstance(this).cancelAllWork()
+        super.onDestroy()
     }
 
     /**
      * I created this in order to support the full power of kodein, because i use
      * simple stack i can't use the kodein compose directly
      * **/
-    @Composable
-    fun Main(content: @Composable () -> Unit) = withDI(di) {
-        content()
-    }
+//    @Composable
+//    fun Main(content: @Composable () -> Unit) = withDI(di) {
+//        content()
+//    }
 
     override val di: DI by closestDI(this)
+    override fun onNavigationEvent(stateChange: StateChange) {
+        fragmentStateChanger.handleStateChange(stateChange)
+    }
 
 
 }

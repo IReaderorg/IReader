@@ -129,7 +129,8 @@ fun BrowserScreen() {
                     books = state.searchedBook.books,
                     layout = state.layout,
                     scrollState = scrollState,
-                    source = source
+                    source = source,
+                    backStack = backStack
                 )
             }
             if (state.books.isNotEmpty() && !state.isSearchModeEnable) {
@@ -137,7 +138,8 @@ fun BrowserScreen() {
                     books = state.books,
                     layout = state.layout,
                     scrollState = scrollState,
-                    source = source
+                    source = source,
+                    backStack = backStack
                 )
             }
             if (scrollState.isScrolledToTheEnd() && !state.isLoading && state.error.isEmpty() && !state.isSearchModeEnable) {

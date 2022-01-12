@@ -17,10 +17,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import ir.kazemcodes.infinity.presentation.book_detail.Constants
-import ir.kazemcodes.infinity.presentation.home.ComposeKey
 import ir.kazemcodes.infinity.presentation.home.DnsOverHttpScreenKey
 import ir.kazemcodes.infinity.presentation.home.DownloadScreenKey
 import ir.kazemcodes.infinity.presentation.home.ExtensionCreatorScreenKey
+import ir.kazemcodes.infinity.presentation.home.core.FragmentKey
 import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarTitle
 
 @Composable
@@ -63,7 +63,7 @@ fun SettingScreen(modifier: Modifier = Modifier) {
 sealed class SettingItems(
     val title: String,
     val icon: ImageVector,
-    val DestinationScreenKey: ComposeKey,
+    val DestinationScreenKey: FragmentKey,
 ) {
     object Downloads : SettingItems("Downloads", Icons.Default.Download, DownloadScreenKey())
     object ExtensionCreator :
@@ -77,7 +77,7 @@ fun SettingsItem(
     modifier: Modifier = Modifier,
     title: String,
     imageVector: ImageVector,
-    DestinationScreenKey: ComposeKey,
+    DestinationScreenKey: FragmentKey,
 ) {
     val backstack = LocalBackstack.current
     val interactionSource = remember { MutableInteractionSource() }

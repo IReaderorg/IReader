@@ -3,7 +3,7 @@ package ir.kazemcodes.infinity.presentation.library.components
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
-import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
+import com.zhuinden.simplestack.Backstack
 import ir.kazemcodes.infinity.data.network.models.Source
 import ir.kazemcodes.infinity.domain.models.remote.Book
 import ir.kazemcodes.infinity.presentation.components.GridLayoutComposable
@@ -15,12 +15,13 @@ import ir.kazemcodes.infinity.presentation.layouts.LayoutType
 
 @Composable
 fun LayoutComposable(
+    backStack : Backstack,
     books: List<Book>,
     layout: LayoutType,
     scrollState: LazyListState = rememberLazyListState(),
     source: Source? = null,
 ) {
-    val backStack = LocalBackstack.current
+
     when (layout) {
         is LayoutType.GridLayout -> {
             GridLayoutComposable(books = books,

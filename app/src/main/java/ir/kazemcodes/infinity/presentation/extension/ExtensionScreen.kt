@@ -23,8 +23,9 @@ import org.kodein.di.compose.rememberInstance
 
 @Composable
 fun ExtensionScreen(modifier: Modifier = Modifier) {
-    val backStack = LocalBackstack.current
+    val backstack = LocalBackstack.current
     val extensions: Extensions by rememberInstance<Extensions>()
+
     val sources = extensions.getSources()
     Scaffold(
         topBar = {
@@ -51,7 +52,7 @@ fun ExtensionScreen(modifier: Modifier = Modifier) {
                     .padding(16.dp)
                     .height(30.dp)
                     .clickable {
-                        backStack.goTo(BrowserScreenKey(sources[index].name))
+                        backstack.goTo(BrowserScreenKey(sources[index].name))
                     },
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically) {
@@ -61,7 +62,7 @@ fun ExtensionScreen(modifier: Modifier = Modifier) {
                             color = MaterialTheme.colors.primary,
                             style = MaterialTheme.typography.subtitle2,
                             modifier = Modifier.clickable {
-                                backStack.goTo(BrowserScreenKey(sourceName = sources[index].name,
+                                backstack.goTo(BrowserScreenKey(sourceName = sources[index].name,
                                     isLatestUpdateMode = false))
                             })
                     }

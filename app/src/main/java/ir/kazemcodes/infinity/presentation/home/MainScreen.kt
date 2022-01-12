@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import com.zhuinden.simplestackcomposeintegration.services.rememberService
 import ir.kazemcodes.infinity.presentation.extension.ExtensionScreen
 import ir.kazemcodes.infinity.presentation.library.LibraryScreen
@@ -44,6 +45,7 @@ sealed class BottomNavigationScreens(
 
 @Composable
 fun MainScreen(modifier: Modifier = Modifier) {
+    val backstack = LocalBackstack.current
     val viewModel = rememberService<MainViewModel>()
     val currentIndex: Int = viewModel.state.value.index
     val bottomNavigationItems = listOf(

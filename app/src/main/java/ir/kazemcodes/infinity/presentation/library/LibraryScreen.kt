@@ -30,150 +30,162 @@ import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarTitle
 import kotlinx.coroutines.launch
 
 
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-fun LibraryScreen(
-) {
-    val viewModel = rememberService<LibraryViewModel>()
-    val context = LocalContext.current
-    val backStack = LocalBackstack.current
-    val state = viewModel.state.value
-    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState()
-    val coroutineScope = rememberCoroutineScope()
-    val focusManager = LocalFocusManager.current
 
 
-    Box(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        BottomSheetScaffold(
-            topBar = {
-                TopAppBar(
-                    title = {
-                        if (!state.inSearchMode) {
-                            TopAppBarTitle(title = "Library")
-                        } else {
-                            TopAppBarSearch(query = state.searchQuery,
-                                onValueChange = {
-                                    viewModel.onEvent(LibraryEvents.UpdateSearchInput(it))
-                                },
-                                onSearch = {
-                                    viewModel.onEvent(LibraryEvents.SearchBooks(state.searchQuery))
-                                    focusManager.clearFocus()
-                                },
-                                isSearchModeEnable = state.searchQuery.isNotBlank())
-                        }
+    @OptIn(ExperimentalMaterialApi::class)
+    @Composable
+    fun LibraryScreen() {
 
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    backgroundColor = MaterialTheme.colors.background,
-                    contentColor = MaterialTheme.colors.onBackground,
-                    elevation = Constants.DEFAULT_ELEVATION,
-                    actions = {
-                        if (state.inSearchMode) {
+        val backstack = LocalBackstack.current
+        val viewModel = rememberService<LibraryViewModel>()
+        val context = LocalContext.current
+
+        val state = viewModel.state.value
+        val bottomSheetScaffoldState = rememberBottomSheetScaffoldState()
+        val coroutineScope = rememberCoroutineScope()
+        val focusManager = LocalFocusManager.current
+
+
+        Box(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            BottomSheetScaffold(
+                topBar = {
+                    TopAppBar(
+                        title = {
+                            if (!state.inSearchMode) {
+                                TopAppBarTitle(title = "Library")
+                            } else {
+                                TopAppBarSearch(query = state.searchQuery,
+                                    onValueChange = {
+                                        viewModel.onEvent(LibraryEvents.UpdateSearchInput(it))
+                                    },
+                                    onSearch = {
+                                        viewModel.onEvent(LibraryEvents.SearchBooks(state.searchQuery))
+                                        focusManager.clearFocus()
+                                    },
+                                    isSearchModeEnable = state.searchQuery.isNotBlank())
+                            }
+
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        backgroundColor = MaterialTheme.colors.background,
+                        contentColor = MaterialTheme.colors.onBackground,
+                        elevation = Constants.DEFAULT_ELEVATION,
+                        actions = {
+                            if (state.inSearchMode) {
+                                TopAppBarActionButton(
+                                    imageVector = Icons.Default.Close,
+                                    title = "Close",
+                                    onClick = {
+                                        viewModel.onEvent(LibraryEvents.ToggleSearchMode(false))
+                                    },
+                                )
+                            }
                             TopAppBarActionButton(
-                                imageVector = Icons.Default.Close,
-                                title = "Close",
-                                onClick = { viewModel.onEvent(LibraryEvents.ToggleSearchMode(false)) },
-                            )
-                        }
-                        TopAppBarActionButton(
-                            imageVector = Icons.Default.Sort,
-                            title = "Filter",
-                            onClick = {
-                                coroutineScope.launch {
-                                    if (bottomSheetScaffoldState.bottomSheetState.isCollapsed) {
-                                        bottomSheetScaffoldState.bottomSheetState.expand()
-                                    } else {
-                                        bottomSheetScaffoldState.bottomSheetState.collapse()
+                                imageVector = Icons.Default.Sort,
+                                title = "Filter",
+                                onClick = {
+                                    coroutineScope.launch {
+                                        if (bottomSheetScaffoldState.bottomSheetState.isCollapsed) {
+                                            bottomSheetScaffoldState.bottomSheetState.expand()
+                                        } else {
+                                            bottomSheetScaffoldState.bottomSheetState.collapse()
+                                        }
                                     }
-                                }
-                            },
-                        )
-                        TopAppBarActionButton(
-                            imageVector = Icons.Default.Search,
-                            title = "Search",
-                            onClick = {
-                                viewModel.onEvent(LibraryEvents.ToggleSearchMode())
+                                },
+                            )
+                            TopAppBarActionButton(
+                                imageVector = Icons.Default.Search,
+                                title = "Search",
+                                onClick = {
+                                    viewModel.onEvent(LibraryEvents.ToggleSearchMode())
 
-                            },
-                        )
+                                },
+                            )
 
 
-                    },
-                    navigationIcon = if (state.inSearchMode) {
-                        {
-                            TopAppBarBackButton(backStack = backStack,
-                                onClick = { viewModel.onEvent(LibraryEvents.ToggleSearchMode(false)) })
-                        }
-                    } else null
+                        },
+                        navigationIcon = if (state.inSearchMode) {
+                            {
+                                TopAppBarBackButton(backStack = backstack,
+                                    onClick = {
+                                        viewModel.onEvent(LibraryEvents.ToggleSearchMode(false))
+                                    })
+                            }
+                        } else null
 
-                )
-            },
-            sheetContent = {
-                ModalBottomSheetLayout(sheetBackgroundColor = MaterialTheme.colors.background,
-                    modifier = Modifier.height(500.dp),
-                    sheetContent = {
-                        /** There is Some issue here were sheet content is not need , not sure why**/
+                    )
+                },
+                sheetContent = {
+                    ModalBottomSheetLayout(sheetBackgroundColor = MaterialTheme.colors.background,
+                        modifier = Modifier.height(500.dp),
+                        sheetContent = {
+                            /** There is Some issue here were sheet content is not need , not sure why**/
+                            Column(
+                                Modifier
+                                    .fillMaxSize()
+                                    .padding(12.dp)
+                                    .background(MaterialTheme.colors.background),
+                                content = {}
+                            )
+
+                        }) {
                         Column(
                             Modifier
                                 .fillMaxSize()
+                                .background(MaterialTheme.colors.background)
                                 .padding(12.dp)
-                                .background(MaterialTheme.colors.background),
-                            content = {}
-                        )
-
-                    }) {
-                    Column(
-                        Modifier
-                            .fillMaxSize()
-                            .background(MaterialTheme.colors.background)
-                            .padding(12.dp)
-                    ) {
-                        TitleText(text = "Display")
-                        layouts.forEach { layout ->
-                            RadioButtonWithTitleComposable(
-                                text = layout.title,
-                                selected = viewModel.state.value.layout == layout.layout,
-                                onClick = { viewModel.onEvent(LibraryEvents.UpdateLayoutType(layout)) }
-                            )
+                        ) {
+                            TitleText(text = "Display")
+                            layouts.forEach { layout ->
+                                RadioButtonWithTitleComposable(
+                                    text = layout.title,
+                                    selected = viewModel.state.value.layout == layout.layout,
+                                    onClick = {
+                                        viewModel.onEvent(LibraryEvents.UpdateLayoutType(layout))
+                                    }
+                                )
+                            }
                         }
                     }
+
+                },
+                scaffoldState = bottomSheetScaffoldState
+            ) {
+                if (state.books.isNotEmpty()) {
+                    Box(modifier = Modifier.padding(bottom = 50.dp)) {
+                        LayoutComposable(
+                            books = if (!state.inSearchMode) state.books else state.searchedBook,
+                            layout = state.layout,
+                            backStack = backstack
+                        )
+                    }
+
+
                 }
 
-            },
-            scaffoldState = bottomSheetScaffoldState
-        ) {
-            if (state.books.isNotEmpty()) {
-                Box(modifier = Modifier.padding(bottom = 50.dp)) {
-                    LayoutComposable(
-                        books = if (!state.inSearchMode) state.books else state.searchedBook,
-                        layout = state.layout,
+                if (state.error.isNotBlank()) {
+                    Text(
+                        text = state.error,
+                        color = MaterialTheme.colors.error,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp)
+                            .align(Alignment.Center)
                     )
                 }
-
-
-            }
-
-            if (state.error.isNotBlank()) {
-                Text(
-                    text = state.error,
-                    color = MaterialTheme.colors.error,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(20.dp)
-                        .align(Alignment.Center)
-                )
-            }
-            if (state.isLoading && state.books.isNotEmpty()) {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center)
-                )
+                if (state.isLoading && state.books.isNotEmpty()) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
             }
         }
+
+
     }
 
 
-}
 

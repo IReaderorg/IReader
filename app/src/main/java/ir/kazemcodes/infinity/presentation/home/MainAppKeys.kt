@@ -1,11 +1,14 @@
 package ir.kazemcodes.infinity.presentation.home
 
-import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.remember
+import androidx.fragment.app.Fragment
+import com.zhuinden.simplestack.Backstack
 import com.zhuinden.simplestack.ServiceBinder
-import com.zhuinden.simplestackcomposeintegration.services.rememberService
+import com.zhuinden.simplestackcomposeintegration.core.BackstackProvider
 import com.zhuinden.simplestackextensions.servicesktx.add
 import com.zhuinden.simplestackextensions.servicesktx.lookup
 import ir.kazemcodes.infinity.domain.models.remote.Book
@@ -20,45 +23,65 @@ import ir.kazemcodes.infinity.presentation.browse.BrowserScreen
 import ir.kazemcodes.infinity.presentation.chapter_detail.ChapterDetailScreen
 import ir.kazemcodes.infinity.presentation.chapter_detail.ChapterDetailViewModel
 import ir.kazemcodes.infinity.presentation.extension.ExtensionScreen
+import ir.kazemcodes.infinity.presentation.home.core.ComposeFragment
+import ir.kazemcodes.infinity.presentation.home.core.FragmentKey
 import ir.kazemcodes.infinity.presentation.library.LibraryViewModel
 import ir.kazemcodes.infinity.presentation.reader.ReaderScreenViewModel
 import ir.kazemcodes.infinity.presentation.reader.ReadingScreen
 import ir.kazemcodes.infinity.presentation.setting.SettingViewModel
 import ir.kazemcodes.infinity.presentation.setting.dns.DnsOverHttpScreen
-import ir.kazemcodes.infinity.presentation.setting.downloader.DownloaderScreen
 import ir.kazemcodes.infinity.presentation.setting.extension_creator.ExtensionCreatorScreen
+import ir.kazemcodes.infinity.presentation.theme.InfinityTheme
 import ir.kazemcodes.infinity.presentation.webview.WebPageScreen
 import ir.kazemcodes.infinity.util.SourceMapper
 import kotlinx.parcelize.Parcelize
 
 
-@Immutable
-@Parcelize
-data class MainScreenKey(val noArgument: String = "") : ComposeKey() {
+class MainScreenFragment() : ComposeFragment() {
     @Composable
-    override fun ScreenComposable(modifier: Modifier) {
-        MainScreen()
+    override fun FragmentComposable(backstack: Backstack) {
+        val viewModel = remember { backstack.lookup<MainViewModel>() }
+        BackstackProvider(backstack = backstack) {
+            InfinityTheme() {
+                Surface(color = MaterialTheme.colors.background) {
+                    MainScreen()
+                }
+            }
+
+        }
     }
 
+}
+
+@Parcelize
+data class MainScreenKey(val noArgument: String = "") : FragmentKey() {
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
             add(LibraryViewModel(lookup<LocalUseCase>(), lookup<PreferencesUseCase>()))
             add(MainViewModel())
         }
     }
+
+    override fun instantiateFragment(): Fragment = MainScreenFragment()
 }
 
 
-@Immutable
+class BrowserScreenFragment() : ComposeFragment() {
+    @Composable
+    override fun FragmentComposable(backstack: Backstack) {
+        BackstackProvider(backstack = backstack) {
+            InfinityTheme() {
+                BrowserScreen()
+            }
+        }
+    }
+}
+
 @Parcelize
 data class BrowserScreenKey(val sourceName: String, val isLatestUpdateMode: Boolean = true) :
-    ComposeKey() {
+    FragmentKey() {
 
-    @OptIn(ExperimentalFoundationApi::class)
-    @Composable
-    override fun ScreenComposable(modifier: Modifier) {
-        BrowserScreen()
-    }
+    override fun instantiateFragment(): Fragment = BrowserScreenFragment()
 
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
@@ -75,13 +98,23 @@ data class BrowserScreenKey(val sourceName: String, val isLatestUpdateMode: Bool
 
 }
 
-@Immutable
-@Parcelize
-data class BookDetailKey(val book: Book, val sourceName: String) : ComposeKey() {
+class BookDetailFragment() : ComposeFragment() {
     @Composable
-    override fun ScreenComposable(modifier: Modifier) {
-        BookDetailScreen()
+    override fun FragmentComposable(backstack: Backstack) {
+        BackstackProvider(backstack = backstack) {
+            InfinityTheme() {
+                BookDetailScreen()
+
+            }
+
+        }
     }
+}
+
+@Parcelize
+data class BookDetailKey(val book: Book, val sourceName: String) : FragmentKey() {
+
+    override fun instantiateFragment(): Fragment = BookDetailFragment()
 
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
@@ -94,28 +127,45 @@ data class BookDetailKey(val book: Book, val sourceName: String) : ComposeKey() 
     }
 }
 
-@Immutable
-@Parcelize
-data class WebViewKey(val url: String) : ComposeKey() {
-
+class WebViewFragment(val url: String) : ComposeFragment() {
     @Composable
-    override fun ScreenComposable(modifier: Modifier) {
-        WebPageScreen(url)
+    override fun FragmentComposable(backstack: Backstack) {
+        BackstackProvider(backstack = backstack) {
+            InfinityTheme() {
+                WebPageScreen(url)
+
+            }
+
+        }
     }
 }
 
-@Immutable
+@Parcelize
+data class WebViewKey(val url: String) : FragmentKey() {
+
+    override fun instantiateFragment(): Fragment = WebViewFragment(url = url)
+}
+
+class ChapterDetailFragment() : ComposeFragment() {
+    @Composable
+    override fun FragmentComposable(backstack: Backstack) {
+        BackstackProvider(backstack = backstack) {
+            InfinityTheme() {
+                ChapterDetailScreen()
+
+            }
+
+        }
+    }
+}
+
 @Parcelize
 data class ChapterDetailKey(
     val book: Book,
     val chapters: List<Chapter>,
     val sourceName: String,
-) : ComposeKey() {
-
-    @Composable
-    override fun ScreenComposable(modifier: Modifier) {
-        ChapterDetailScreen()
-    }
+) : FragmentKey() {
+    override fun instantiateFragment(): Fragment = ChapterDetailFragment()
 
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
@@ -126,18 +176,26 @@ data class ChapterDetailKey(
     }
 }
 
-@Immutable
+class ReaderScreenFragment() : ComposeFragment() {
+    @Composable
+    override fun FragmentComposable(backstack: Backstack) {
+        BackstackProvider(backstack = backstack) {
+            InfinityTheme() {
+                ReadingScreen()
+            }
+        }
+    }
+}
+
 @Parcelize
 data class ReaderScreenKey(
     val book: Book,
     val chapterIndex: Int,
     val sourceName: String,
     val chapters: List<Chapter>,
-) : ComposeKey() {
-    @Composable
-    override fun ScreenComposable(modifier: Modifier) {
-        ReadingScreen()
-    }
+) : FragmentKey() {
+
+    override fun instantiateFragment(): Fragment = ReaderScreenFragment()
 
     override fun bindServices(serviceBinder: ServiceBinder) {
 
@@ -155,42 +213,79 @@ data class ReaderScreenKey(
     }
 }
 
-@Immutable
-@Parcelize
-data class ExtensionScreenKey(val noArgs: String = "") : ComposeKey() {
+class ExtensionScreenFragment() : ComposeFragment() {
     @Composable
-    override fun ScreenComposable(modifier: Modifier) {
-        ExtensionScreen()
+    override fun FragmentComposable(backstack: Backstack) {
+        BackstackProvider(backstack = backstack) {
+            InfinityTheme() {
+                ExtensionScreen()
+
+            }
+
+        }
     }
 }
 
 @Immutable
 @Parcelize
-data class DownloadScreenKey(val noArgs: String = "") : ComposeKey() {
+data class ExtensionScreenKey(val noArgs: String = "") : FragmentKey() {
+    override fun instantiateFragment(): Fragment = ExtensionScreenFragment()
+}
+
+class DownloadScreenFragment() : ComposeFragment() {
     @Composable
-    override fun ScreenComposable(modifier: Modifier) {
-        DownloaderScreen()
+    override fun FragmentComposable(backstack: Backstack) {
+        BackstackProvider(backstack = backstack) {
+            InfinityTheme() {
+                ExtensionScreenKey()
+
+            }
+
+        }
     }
 }
 
 @Immutable
 @Parcelize
-data class ExtensionCreatorScreenKey(val noArgs: String = "") : ComposeKey() {
+data class DownloadScreenKey(val noArgs: String = "") : FragmentKey() {
+    override fun instantiateFragment(): Fragment = DownloadScreenFragment()
+}
+
+class ExtensionCreatorScreenFragment() : ComposeFragment() {
     @Composable
-    override fun ScreenComposable(modifier: Modifier) {
-        ExtensionCreatorScreen()
+    override fun FragmentComposable(backstack: Backstack) {
+        BackstackProvider(backstack = backstack) {
+            InfinityTheme() {
+                ExtensionCreatorScreen()
+
+            }
+
+        }
     }
 }
 
 @Immutable
 @Parcelize
-data class DnsOverHttpScreenKey(val noArgs: String = "") : ComposeKey() {
-    @Composable
-    override fun ScreenComposable(modifier: Modifier) {
-        val viewModel = rememberService<SettingViewModel>()
-        DnsOverHttpScreen(viewModel)
-    }
+data class ExtensionCreatorScreenKey(val noArgs: String = "") : FragmentKey() {
 
+    override fun instantiateFragment(): Fragment = ExtensionCreatorScreenFragment()
+}
+
+class DnsOverHttpScreenFragment() : ComposeFragment() {
+    @Composable
+    override fun FragmentComposable(backstack: Backstack) {
+        BackstackProvider(backstack = backstack) {
+            InfinityTheme() {
+                DnsOverHttpScreen()
+            }
+        }
+    }
+}
+
+@Immutable
+@Parcelize
+data class DnsOverHttpScreenKey(val noArgs: String = "") : FragmentKey() {
+    override fun instantiateFragment(): Fragment = DnsOverHttpScreenFragment()
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
             add(SettingViewModel(

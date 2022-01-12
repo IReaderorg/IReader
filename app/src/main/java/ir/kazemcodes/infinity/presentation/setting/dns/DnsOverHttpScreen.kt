@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
+import com.zhuinden.simplestackcomposeintegration.services.rememberService
 import ir.kazemcodes.infinity.data.network.models.dnsOverHttps
 import ir.kazemcodes.infinity.data.network.utils.toast
 import ir.kazemcodes.infinity.presentation.book_detail.Constants
@@ -20,8 +21,9 @@ import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarTitle
 import ir.kazemcodes.infinity.presentation.setting.SettingViewModel
 
 @Composable
-fun DnsOverHttpScreen(viewModel: SettingViewModel) {
+fun DnsOverHttpScreen() {
     val backStack = LocalBackstack.current
+    val viewModel = rememberService<SettingViewModel>()
     val context = LocalContext.current
 
     Scaffold(
