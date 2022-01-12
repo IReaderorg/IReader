@@ -10,7 +10,6 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,11 +44,6 @@ fun BookDetailScreen(
     val chapterState = viewModel.chapterState.value
     val backStack = LocalBackstack.current
     val context = LocalContext.current
-
-    LaunchedEffect(key1 = true) {
-        viewModel.restoreBrightnessAndOrientation(context)
-    }
-
 
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -195,13 +189,16 @@ fun BookDetailScreenLoadedComposable(
                                     ReaderScreenKey(chapterIndex = chapters.indexOf(viewModel.chapterState.value.lastChapter),
                                         book = book,
                                         sourceName = viewModel.getSource().name,
-                                        chapters = viewModel.chapterState.value.chapters),
+                                        chapter = viewModel.chapterState.value.lastChapter!!
+                                    ),
                                 )
                             } else if (viewModel.chapterState.value.chapters.isNotEmpty()) {
-                                backStack.goTo(ReaderScreenKey(chapterIndex = 0,
+                                backStack.goTo(ReaderScreenKey(
+                                    chapterIndex = 0,
                                     book = book,
                                     sourceName = viewModel.getSource().name,
-                                    chapters = viewModel.chapterState.value.chapters))
+                                    chapter = viewModel.chapterState.value.chapters.first()
+                                ))
                             }
                         }
                     )
@@ -323,7 +320,7 @@ fun BookDetailScreenLoadedComposable(
             /** Chapter Content **/
             CardTileComposable(
                 modifier = modifier.clickable {
-                    backStack.goTo(ChapterDetailKey(chapters = chapters,
+                    backStack.goTo(ChapterDetailKey(
                         book = book,
                         sourceName = viewModel.getSource().name))
                 },

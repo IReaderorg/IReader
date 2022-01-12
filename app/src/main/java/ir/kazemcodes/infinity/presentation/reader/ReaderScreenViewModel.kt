@@ -34,25 +34,27 @@ class ReaderScreenViewModel(
     private val remoteUseCase: RemoteUseCase,
     private val preferencesUseCase: PreferencesUseCase,
     private val source: Source,
-    private val chapterIndex: Int,
     private val book: Book,
-    private val chapters: List<Chapter>,
+    private val chapter: Chapter,
+
 ) : ScopedServices.Registered {
-    private val _state = mutableStateOf(ReaderScreenState(source = source,
-        book = book,
-        chapters = chapters,
-        chapter = chapters[chapterIndex],
-        listChapters = chapters
-        ))
+    private val _state = mutableStateOf(ReaderScreenState(source = source, book = book, chapter = chapter))
 
     val state: State<ReaderScreenState> = _state
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
+    override fun onServiceRegistered() {
+        readPreferences()
+        updateState()
+        getContent(chapter = state.value.chapter.copy(bookName = book.bookName))
+        _state.value = state.value.copy(isScreenLoaded = true)
+        getLocalChapters()
+    }
 
     private fun updateState() {
-        _state.value = state.value.copy(chapters = chapters,
-            currentChapterIndex = if (chapters.isNullOrEmpty() && chapters.indexOf(state.value.chapter) > 0) chapters.indexOf(
+        _state.value = state.value.copy(
+            currentChapterIndex = if (state.value.chapters.isNullOrEmpty() && state.value.chapters.indexOf(state.value.chapter) > 0) state.value.chapters.indexOf(
                 state.value.chapter) else 0,
             textColor = if (state.value.backgroundColor == Color.Black && state.value.textColor == Color.Black) Color.White else Color.Black)
     }
@@ -118,11 +120,35 @@ class ReaderScreenViewModel(
 
     fun getContent(chapter: Chapter) {
         _state.value = state.value.copy(chapter = chapter,
-            currentChapterIndex = if (chapters.indexOf(chapter) > 0) chapters.indexOf(chapter) else 0)
+            currentChapterIndex = if (state.value.chapters.indexOf(chapter) > 0) state.value.chapters.indexOf(chapter) else 0)
         getReadingContentLocally(chapter)
         if (book.inLibrary) {
             toggleLastReadAndUpdateChapterContent(chapter)
         }
+    }
+
+    private fun getLocalChapters() {
+        localUseCase.getLocalChaptersByBookNameByBookNameUseCase(bookName = book.bookName)
+            .onEach { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        if (!result.data.isNullOrEmpty()) {
+                            _state.value = state.value.copy(
+                                chapters = result.data, listChapters = result.data, isLoading = false, error = "")
+                        } else {
+                            _state.value = state.value.copy(isLoading = false, error = "")
+                        }
+                    }
+                    is Resource.Error -> {
+                        _state.value =
+                            state.value.copy(error = result.message
+                                ?: "An Unknown Error Occurred")
+                    }
+                    is Resource.Loading -> {
+                        _state.value = state.value.copy(isLoading = true)
+                    }
+                }
+            }.launchIn(coroutineScope)
     }
 
     private fun getReadingContentLocally(chapter: Chapter) {
@@ -204,7 +230,7 @@ class ReaderScreenViewModel(
 
     private fun toggleLastReadAndUpdateChapterContent(chapter: Chapter) {
         coroutineScope.launch(Dispatchers.Main) {
-            chapters.filter {
+            state.value.chapters.filter {
                 it.lastRead
             }.forEach {
                 localUseCase.UpdateLocalChapterContentUseCase(it.copy(lastRead = false))
@@ -347,15 +373,7 @@ class ReaderScreenViewModel(
         _state.value = state.value.copy(currentChapterIndex = index)
     }
 
-    override fun onServiceRegistered() {
-        readPreferences()
-        updateState()
-        if (chapters.isNotEmpty()) {
-            _state.value = state.value.copy(chapter = chapters[chapterIndex])
-        }
-        getContent(chapter = state.value.chapter.copy(bookName = book.bookName))
-        _state.value = state.value.copy(isScreenLoaded = true)
-    }
+
 
     override fun onServiceUnregistered() {
         coroutineScope.cancel()

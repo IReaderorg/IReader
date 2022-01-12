@@ -9,7 +9,6 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.BookmarkAdded
 import androidx.compose.material.icons.filled.Sort
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
@@ -41,9 +40,6 @@ fun ChapterDetailScreen(
     val context = LocalContext.current
     val state = viewModel.state.value
 
-    LaunchedEffect(key1 = true ) {
-        viewModel.restoreBrightnessAndOrientation(context)
-    }
 
     Scaffold(
         topBar = {
@@ -98,7 +94,7 @@ fun ChapterDetailScreen(
                                             book = book,
                                             chapterIndex = chapters.indexOf(state.listChapter[index]),
                                             sourceName = viewModel.state.value.source.name,
-                                            chapters = chapters,
+                                            chapter = state.listChapter[index]
                                         )
                                     )
                                 },

@@ -7,11 +7,11 @@ import ir.kazemcodes.infinity.domain.models.remote.Chapter
 
 data class ChapterDetailState(
     val isLoading: Boolean = false,
-    val chapters: List<Chapter> ,
+    val chapters: List<Chapter> = emptyList(),
     val book: Book = Book.create(),
     val error: String = "",
     val chapterOrderType: OrderType = OrderType.Ascending,
     val listOfLastReadChapter: List<LastReadChapter> = emptyList(),
-    val listChapter : List<Chapter>,
+    val listChapter : List<Chapter> = emptyList(),
     val source:Source
 )

@@ -14,7 +14,6 @@ import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.PublishedWithChanges
 import androidx.compose.material.icons.filled.Sort
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -50,14 +49,6 @@ fun ReadingScreen(
     val backStack = LocalBackstack.current
     val state = viewModel.state.value
     val interactionSource = remember { MutableInteractionSource() }
-
-
-    LaunchedEffect(key1 = true ) {
-        viewModel.readBrightness(context)
-        viewModel.readOrientation(context)
-    }
-
-
 
 
     Box(modifier = modifier.fillMaxSize()) {

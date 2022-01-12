@@ -1,14 +1,19 @@
 package ir.kazemcodes.infinity.presentation.home
 
+import android.content.Context
+import android.content.pm.ActivityInfo
+import android.os.Bundle
+import android.view.View
+import android.view.WindowManager
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.fragment.app.Fragment
 import com.zhuinden.simplestack.Backstack
 import com.zhuinden.simplestack.ServiceBinder
 import com.zhuinden.simplestackcomposeintegration.core.BackstackProvider
+import com.zhuinden.simplestackextensions.fragmentsktx.backstack
 import com.zhuinden.simplestackextensions.servicesktx.add
 import com.zhuinden.simplestackextensions.servicesktx.lookup
 import ir.kazemcodes.infinity.domain.models.remote.Book
@@ -28,6 +33,7 @@ import ir.kazemcodes.infinity.presentation.home.core.FragmentKey
 import ir.kazemcodes.infinity.presentation.library.LibraryViewModel
 import ir.kazemcodes.infinity.presentation.reader.ReaderScreenViewModel
 import ir.kazemcodes.infinity.presentation.reader.ReadingScreen
+import ir.kazemcodes.infinity.presentation.reader.components.getActivity
 import ir.kazemcodes.infinity.presentation.setting.SettingViewModel
 import ir.kazemcodes.infinity.presentation.setting.dns.DnsOverHttpScreen
 import ir.kazemcodes.infinity.presentation.setting.extension_creator.ExtensionCreatorScreen
@@ -147,14 +153,18 @@ data class WebViewKey(val url: String) : FragmentKey() {
 }
 
 class ChapterDetailFragment() : ComposeFragment() {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        savedInstanceState?.getParcelableArrayList<Chapter>("Chapters")
+        //bundle.putParcelable("This is just for testing purpose", "Developer program")
+    }
+
     @Composable
     override fun FragmentComposable(backstack: Backstack) {
         BackstackProvider(backstack = backstack) {
             InfinityTheme() {
                 ChapterDetailScreen()
-
             }
-
         }
     }
 }
@@ -162,16 +172,16 @@ class ChapterDetailFragment() : ComposeFragment() {
 @Parcelize
 data class ChapterDetailKey(
     val book: Book,
-    val chapters: List<Chapter>,
     val sourceName: String,
 ) : FragmentKey() {
     override fun instantiateFragment(): Fragment = ChapterDetailFragment()
-
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
-            add(ChapterDetailViewModel(lookup<LocalUseCase>(),
+            add(ChapterDetailViewModel(
+                lookup<LocalUseCase>(),
                 source = lookup<SourceMapper>().mappingSourceNameToSource(sourceName),
-                book = book, chapters = chapters))
+                book = book,
+            ))
         }
     }
 }
@@ -185,20 +195,38 @@ class ReaderScreenFragment() : ComposeFragment() {
             }
         }
     }
+
+    override fun onDestroy() {
+        val activity = context?.getActivity()!!
+        val window = activity.window
+        val layoutParams: WindowManager.LayoutParams = window.attributes
+        layoutParams.screenBrightness = -1f
+        window.attributes = layoutParams
+        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        super.onDestroy()
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        val viewModel by lazy {
+            backstack.lookup<ReaderScreenViewModel>()
+        }
+        viewModel.readBrightness(context = context)
+        viewModel.readOrientation(context)
+    }
 }
 
 @Parcelize
 data class ReaderScreenKey(
     val book: Book,
     val chapterIndex: Int,
+    val chapter: Chapter,
     val sourceName: String,
-    val chapters: List<Chapter>,
 ) : FragmentKey() {
 
     override fun instantiateFragment(): Fragment = ReaderScreenFragment()
 
     override fun bindServices(serviceBinder: ServiceBinder) {
-
         with(serviceBinder) {
             add(ReaderScreenViewModel(
                 localUseCase = lookup<LocalUseCase>(),
@@ -206,11 +234,12 @@ data class ReaderScreenKey(
                 preferencesUseCase = lookup<PreferencesUseCase>(),
                 source = lookup<SourceMapper>().mappingSourceNameToSource(sourceName),
                 book = book,
-                chapterIndex = chapterIndex,
-                chapters = chapters,
+                chapter = chapter,
+
             ))
         }
     }
+
 }
 
 class ExtensionScreenFragment() : ComposeFragment() {
@@ -226,7 +255,7 @@ class ExtensionScreenFragment() : ComposeFragment() {
     }
 }
 
-@Immutable
+
 @Parcelize
 data class ExtensionScreenKey(val noArgs: String = "") : FragmentKey() {
     override fun instantiateFragment(): Fragment = ExtensionScreenFragment()
@@ -245,7 +274,7 @@ class DownloadScreenFragment() : ComposeFragment() {
     }
 }
 
-@Immutable
+
 @Parcelize
 data class DownloadScreenKey(val noArgs: String = "") : FragmentKey() {
     override fun instantiateFragment(): Fragment = DownloadScreenFragment()
@@ -264,7 +293,7 @@ class ExtensionCreatorScreenFragment() : ComposeFragment() {
     }
 }
 
-@Immutable
+
 @Parcelize
 data class ExtensionCreatorScreenKey(val noArgs: String = "") : FragmentKey() {
 
@@ -282,7 +311,7 @@ class DnsOverHttpScreenFragment() : ComposeFragment() {
     }
 }
 
-@Immutable
+
 @Parcelize
 data class DnsOverHttpScreenKey(val noArgs: String = "") : FragmentKey() {
     override fun instantiateFragment(): Fragment = DnsOverHttpScreenFragment()

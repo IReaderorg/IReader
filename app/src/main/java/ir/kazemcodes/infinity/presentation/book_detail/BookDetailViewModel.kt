@@ -2,8 +2,6 @@ package ir.kazemcodes.infinity.presentation.book_detail
 
 
 import android.content.Context
-import android.content.pm.ActivityInfo
-import android.view.WindowManager
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.work.*
@@ -20,7 +18,6 @@ import ir.kazemcodes.infinity.service.DownloadService.Companion.DOWNLOAD_BOOK_NA
 import ir.kazemcodes.infinity.service.DownloadService.Companion.DOWNLOAD_SERVICE_NAME
 import ir.kazemcodes.infinity.service.DownloadService.Companion.DOWNLOAD_SOURCE_NAME
 import ir.kazemcodes.infinity.util.Resource
-import ir.kazemcodes.infinity.util.findActivity
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -254,14 +251,7 @@ class BookDetailViewModel(
             localUseCase.deleteChaptersUseCase(bookName)
         }
     }
-    fun restoreBrightnessAndOrientation(context: Context) {
-        val activity = context.findActivity()!!
-        val window = activity.window
-        val layoutParams: WindowManager.LayoutParams = window.attributes
-        layoutParams.screenBrightness = -1f
-        window.attributes = layoutParams
-        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-    }
+
 
     override fun onServiceUnregistered() {
         coroutineScope.cancel()

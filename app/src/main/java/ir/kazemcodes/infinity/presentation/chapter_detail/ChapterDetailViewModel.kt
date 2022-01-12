@@ -1,18 +1,12 @@
 package ir.kazemcodes.infinity.presentation.chapter_detail
 
-import android.annotation.SuppressLint
-import android.content.Context
-import android.content.pm.ActivityInfo
-import android.view.WindowManager
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import com.zhuinden.simplestack.ScopedServices
 import ir.kazemcodes.infinity.data.network.models.Source
 import ir.kazemcodes.infinity.domain.models.remote.Book
-import ir.kazemcodes.infinity.domain.models.remote.Chapter
 import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
 import ir.kazemcodes.infinity.util.Resource
-import ir.kazemcodes.infinity.util.findActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -24,15 +18,14 @@ import kotlinx.coroutines.flow.onEach
 class ChapterDetailViewModel(
     private val localUseCase: LocalUseCase,
     private val book: Book,
-    private val chapters: List<Chapter>,
     private val source: Source,
 ) : ScopedServices.Registered {
 
-    private val _state = mutableStateOf<ChapterDetailState>(ChapterDetailState(chapters = chapters, listChapter = chapters, source = source))
+    private val _state = mutableStateOf<ChapterDetailState>(ChapterDetailState(source = source))
     val state: State<ChapterDetailState> = _state
 
     init {
-        _state.value = state.value.copy(book = book, chapters = chapters)
+        _state.value = state.value.copy(book = book)
     }
 
     override fun onServiceRegistered() {
@@ -63,7 +56,7 @@ class ChapterDetailViewModel(
                     is Resource.Success -> {
                         if (!result.data.isNullOrEmpty()) {
                             _state.value = state.value.copy(
-                                chapters = result.data, listChapter = chapters, isLoading = false, error = "")
+                                chapters = result.data, listChapter = result.data, isLoading = false, error = "")
                         } else {
                             _state.value = state.value.copy(isLoading = false, error = "")
                         }
@@ -79,15 +72,7 @@ class ChapterDetailViewModel(
                 }
             }.launchIn(coroutineScope)
     }
-    @SuppressLint("SourceLockedOrientationActivity")
-    fun restoreBrightnessAndOrientation(context: Context) {
-        val activity = context.findActivity()!!
-        val window = activity.window
-        val layoutParams: WindowManager.LayoutParams = window.attributes
-        layoutParams.screenBrightness = -1f
-        window.attributes = layoutParams
-        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-    }
+
 
 
     override fun onServiceUnregistered() {
