@@ -19,6 +19,8 @@ data class PreferencesUseCase(
     val readFontHeightUseCase: ReadFontHeightUseCase,
     val readParagraphDistanceUseCase: ReadParagraphDistanceUseCase,
     val saveParagraphDistanceUseCase: SaveParagraphDistanceUseCase,
+    val saveParagraphIndentUseCase: SaveParagraphIndentUseCase,
+    val readParagraphIndentUseCase: ReadParagraphIndentUseCase,
     val saveOrientationUseCase: SaveOrientationUseCase,
     val readOrientationUseCase: ReadOrientationUseCase,
 )

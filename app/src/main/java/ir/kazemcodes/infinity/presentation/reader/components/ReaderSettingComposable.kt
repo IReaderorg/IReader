@@ -24,14 +24,28 @@ fun ReaderSettingComposable(modifier: Modifier = Modifier, viewModel: ReaderScre
     Column(
         modifier = modifier
             .fillMaxSize()
+            .padding(4.dp)
     ) {
         BrightnessSliderComposable(viewModel = viewModel)
         Spacer(modifier = Modifier.height(12.dp))
         ReaderBackgroundComposable(viewModel = viewModel)
         Spacer(modifier = Modifier.height(12.dp))
-        FontMenuComposable(
-            viewModel = viewModel
-        )
+        /** Font indent and font menu **/
+        Row(modifier = modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically) {
+            IndentChangerComposable(viewModel = viewModel)
+            Divider(
+                color = MaterialTheme.colors.onBackground.copy(alpha = .2f),
+                modifier = Modifier
+                    .height(20.dp)
+                    .width(1.dp)
+            )
+            Spacer(modifier = modifier.width(35.dp))
+            FontMenuComposable(
+                viewModel = viewModel
+            )
+        }
         Spacer(modifier = Modifier.height(12.dp))
         Row(modifier = modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,

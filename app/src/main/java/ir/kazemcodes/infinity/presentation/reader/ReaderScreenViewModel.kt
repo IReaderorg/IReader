@@ -64,6 +64,7 @@ class ReaderScreenViewModel(
         readBackgroundColor()
         readFontHeight()
         readParagraphDistance()
+        readParagraphIndent()
     }
 
     fun onEvent(event: ReaderEvent) {
@@ -256,6 +257,10 @@ class ReaderScreenViewModel(
         _state.value =
             state.value.copy(distanceBetweenParagraphs = preferencesUseCase.readParagraphDistanceUseCase())
     }
+    private fun readParagraphIndent() {
+        _state.value =
+            state.value.copy(paragraphsIndent = preferencesUseCase.readParagraphIndentUseCase())
+    }
 
     private fun readFontHeight() {
         _state.value = state.value.copy(lineHeight = preferencesUseCase.readFontHeightUseCase())
@@ -319,9 +324,20 @@ class ReaderScreenViewModel(
             preferencesUseCase.saveParagraphDistanceUseCase(currentDistance + 1)
             _state.value = state.value.copy(distanceBetweenParagraphs = currentDistance + 1)
 
-        } else if (currentDistance > 0 && !isIncreased) {
+        } else if (currentDistance > 1 && !isIncreased) {
             preferencesUseCase.saveParagraphDistanceUseCase(currentDistance - 1)
             _state.value = state.value.copy(distanceBetweenParagraphs = currentDistance - 1)
+        }
+    }
+    fun saveParagraphIndent(isIncreased: Boolean) {
+        val paragraphsIndent = state.value.paragraphsIndent
+        if (isIncreased) {
+            preferencesUseCase.saveParagraphIndentUseCase(paragraphsIndent + 1)
+            _state.value = state.value.copy(paragraphsIndent = paragraphsIndent + 1)
+
+        } else if (paragraphsIndent > 1 && !isIncreased) {
+            preferencesUseCase.saveParagraphIndentUseCase(paragraphsIndent - 1)
+            _state.value = state.value.copy(paragraphsIndent = paragraphsIndent - 1)
         }
     }
 

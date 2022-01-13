@@ -25,6 +25,7 @@ data class ReaderScreenState(
     val isSettingModeEnable: Boolean = false,
     val isMainBottomModeEnable: Boolean = true,
     val distanceBetweenParagraphs: Int = 2,
+    val paragraphsIndent: Int = 8,
     val lineHeight: Int = 25,
     val currentChapterIndex: Int,
     val backgroundColor: Color = BackgroundColor.Black.color,

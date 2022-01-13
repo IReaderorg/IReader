@@ -33,6 +33,8 @@ import ir.kazemcodes.infinity.presentation.reusable_composable.ErrorTextWithEmoj
 import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarActionButton
 import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarBackButton
 import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarTitle
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -42,6 +44,9 @@ fun ReadingScreen(
 ) {
     val viewModel = rememberService<ReaderScreenViewModel>()
     val scaffoldState = rememberScaffoldState(rememberDrawerState(DrawerValue.Closed))
+    val modalBottomSheetState =
+        rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Expanded)
+
     val scope = rememberCoroutineScope()
     val book = viewModel.state.value.book
     val backStack = LocalBackstack.current
@@ -51,7 +56,7 @@ fun ReadingScreen(
 
     Box(modifier = modifier.fillMaxSize()) {
         Scaffold(topBar = {
-            if (!state.isReaderModeEnable && state.isLoaded) {
+            if (!state.isReaderModeEnable && state.isLoaded && modalBottomSheetState.targetValue ==  ModalBottomSheetValue.Expanded) {
                 TopAppBar(
                     title = {
                         Text(
@@ -91,28 +96,32 @@ fun ReadingScreen(
             scaffoldState = scaffoldState,
             bottomBar = {
                 if (!state.isReaderModeEnable && state.isLoaded) {
-                    BottomAppBar(
+                    ModalBottomSheetLayout(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(if (viewModel.state.value.isMainBottomModeEnable) 130.dp else 320.dp),
-                        elevation = 8.dp,
-                        backgroundColor = MaterialTheme.colors.background
-                    ) {
-                        Column(modifier.fillMaxSize()) {
-                            Divider(modifier = modifier.fillMaxWidth(),
-                                color = MaterialTheme.colors.onBackground.copy(alpha = .2f),
-                                thickness = 1.dp)
-                            Spacer(modifier = modifier.height(15.dp))
-                            if (viewModel.state.value.isMainBottomModeEnable) {
-                                MainBottomSettingComposable(viewModel = viewModel,
-                                    scope = scope,
-                                    scaffoldState = scaffoldState)
-                            }
-                            if (viewModel.state.value.isSettingModeEnable) {
-                                ReaderSettingComposable(viewModel = viewModel)
-                            }
+                        sheetBackgroundColor = MaterialTheme.colors.background,
+                        sheetElevation = 8.dp,
+                        sheetState = modalBottomSheetState,
+                        sheetContent = {
+                            Column(modifier.fillMaxSize()) {
+                                Divider(modifier = modifier.fillMaxWidth(),
+                                    color = MaterialTheme.colors.onBackground.copy(alpha = .2f),
+                                    thickness = 1.dp)
+                                Spacer(modifier = modifier.height(15.dp))
+                                if (viewModel.state.value.isMainBottomModeEnable) {
+                                    MainBottomSettingComposable(viewModel = viewModel,
+                                        scope = scope,
+                                        scaffoldState = scaffoldState)
+                                }
+                                if (viewModel.state.value.isSettingModeEnable) {
+                                    ReaderSettingComposable(viewModel = viewModel)
+                                }
 
+                            }
                         }
+                    ) {
+
                     }
                 }
             },
@@ -145,8 +154,10 @@ fun ReadingScreen(
                                         .padding(12.dp)
                                         .height(40.dp)
                                         .clickable {
-                                            viewModel.getContent(viewModel.state.value.chapters[viewModel.getIndexOfChapter(index)])
-                                            viewModel.updateChapterSliderIndex(index = viewModel.getIndexOfChapter(index))
+                                            viewModel.getContent(viewModel.state.value.chapters[viewModel.getIndexOfChapter(
+                                                index)])
+                                            viewModel.updateChapterSliderIndex(index = viewModel.getIndexOfChapter(
+                                                index))
 
                                         },
                                     verticalAlignment = Alignment.CenterVertically,
@@ -190,9 +201,21 @@ fun ReadingScreen(
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
                     .clickable(interactionSource = interactionSource,
-                        indication = null) { viewModel.onEvent(ReaderEvent.ToggleReaderMode(!state.isReaderModeEnable)) }
+                        indication = null) {
+                        viewModel.onEvent(ReaderEvent.ToggleReaderMode(!state.isReaderModeEnable))
+                        if (state.isReaderModeEnable) {
+                            scope.launch(Dispatchers.Main) {
+                                modalBottomSheetState.animateTo(ModalBottomSheetValue.Expanded)
+                            }
+                        } else {
+                            scope.launch(Dispatchers.Main) {
+                                modalBottomSheetState.animateTo(ModalBottomSheetValue.Hidden)
+                            }
+                        }
+
+                    }
                     .background(viewModel.state.value.backgroundColor)
-                    .padding(8.dp)
+                    .padding(viewModel.state.value.paragraphsIndent.dp)
                     .wrapContentSize(Alignment.CenterStart)
             ) {
                 if (state.chapter.isChapterNotEmpty()) {

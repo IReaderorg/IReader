@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import com.zhuinden.simplestack.Backstack
 import com.zhuinden.simplestack.ServiceBinder
 import com.zhuinden.simplestackcomposeintegration.core.BackstackProvider
+import com.zhuinden.simplestackcomposeintegration.services.rememberService
 import com.zhuinden.simplestackextensions.fragmentsktx.backstack
 import com.zhuinden.simplestackextensions.servicesktx.add
 import com.zhuinden.simplestackextensions.servicesktx.lookup
@@ -35,6 +36,7 @@ import ir.kazemcodes.infinity.presentation.setting.dns.DnsOverHttpScreen
 import ir.kazemcodes.infinity.presentation.setting.extension_creator.ExtensionCreatorScreen
 import ir.kazemcodes.infinity.presentation.theme.InfinityTheme
 import ir.kazemcodes.infinity.presentation.webview.WebPageScreen
+import ir.kazemcodes.infinity.presentation.webview.WebViewViewModel
 import ir.kazemcodes.infinity.util.SourceMapper
 import ir.kazemcodes.infinity.util.findAppCompatAcivity
 import kotlinx.parcelize.Parcelize
@@ -128,12 +130,13 @@ data class BookDetailKey(val book: Book, val sourceName: String) : FragmentKey()
     }
 }
 
-class WebViewFragment(val url: String) : ComposeFragment() {
+class WebViewFragment() : ComposeFragment() {
     @Composable
     override fun FragmentComposable(backstack: Backstack) {
+        val viewModel = rememberService<WebViewViewModel>()
         BackstackProvider(backstack = backstack) {
             InfinityTheme() {
-                WebPageScreen(url)
+                WebPageScreen(viewModel.state.value.url)
 
             }
 
@@ -144,7 +147,16 @@ class WebViewFragment(val url: String) : ComposeFragment() {
 @Parcelize
 data class WebViewKey(val url: String) : FragmentKey() {
 
-    override fun instantiateFragment(): Fragment = WebViewFragment(url = url)
+    override fun instantiateFragment(): Fragment = WebViewFragment()
+
+    override fun bindServices(serviceBinder: ServiceBinder) {
+        with(serviceBinder) {
+            add<WebViewViewModel>(WebViewViewModel(
+                url
+            ))
+        }
+    }
+
 }
 
 class ChapterDetailFragment() : ComposeFragment() {
@@ -216,7 +228,6 @@ data class ReaderScreenKey(
     val book: Book,
     val chapterIndex: Int,
     val chapter: Chapter,
-    val chapters: List<Chapter>,
     val sourceName: String,
 ) : FragmentKey() {
 

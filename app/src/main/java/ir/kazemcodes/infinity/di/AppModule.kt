@@ -145,7 +145,9 @@ class AppModule {
             saveParagraphDistanceUseCase = SaveParagraphDistanceUseCase(repository),
             readParagraphDistanceUseCase = ReadParagraphDistanceUseCase(repository),
             readOrientationUseCase = ReadOrientationUseCase(repository),
-            saveOrientationUseCase = SaveOrientationUseCase(repository)
+            saveOrientationUseCase = SaveOrientationUseCase(repository),
+            readParagraphIndentUseCase = ReadParagraphIndentUseCase(repository),
+            saveParagraphIndentUseCase = SaveParagraphIndentUseCase(repository)
         )
     }
 

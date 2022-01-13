@@ -19,6 +19,7 @@ class PreferencesHelper @Inject constructor(
         const val SAVED_BACkGROUND_COLOR = "background_color"
         const val SAVED_FONT_HEIGHT = "font_height"
         const val SAVED_PARAGRAPH_DISTANCE = "paragraph_distance"
+        const val SAVED_PARAGRAPH_INDENT= "paragraph_indent"
         const val SAVED_ORIENTATION = "orientation_reader"
 
         /** Setting Pref**/
@@ -40,6 +41,7 @@ class PreferencesHelper @Inject constructor(
     val fontHeight = flowPrefs.getInt(SAVED_FONT_HEIGHT, 25)
     val paragraphDistance = flowPrefs.getInt(SAVED_PARAGRAPH_DISTANCE, 2)
     val orientation = flowPrefs.getInt(SAVED_ORIENTATION, 0)
+    val paragraphIndent = flowPrefs.getInt(SAVED_PARAGRAPH_INDENT, 8)
 
     fun setFontScale(fontSize: Int) {
         readerFontScale.set(fontSize)

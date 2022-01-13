@@ -8,10 +8,7 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CloseFullscreen
-import androidx.compose.material.icons.filled.OpenInFull
-import androidx.compose.material.icons.filled.VerticalAlignBottom
-import androidx.compose.material.icons.filled.VerticalAlignTop
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -101,5 +98,27 @@ fun ParagraphDistanceComposable(modifier: Modifier = Modifier, viewModel: Reader
             tint = MaterialTheme.colors.onBackground,
             title = "Increase font height",
             onClick = { viewModel.saveParagraphDistance(true) })
+    }
+}
+
+@Composable
+fun IndentChangerComposable(modifier: Modifier = Modifier, viewModel: ReaderScreenViewModel) {
+    Row(verticalAlignment = Alignment.CenterVertically
+    ) {
+        Spacer(modifier = modifier.width(5.dp))
+        Text(
+            text = "Paragraph Indent",
+            fontSize = 12.sp,
+            style = TextStyle(fontWeight = FontWeight.W400),
+            color = MaterialTheme.colors.onBackground
+        )
+        TopAppBarActionButton(imageVector = Icons.Default.FormatIndentDecrease,
+            tint = MaterialTheme.colors.onBackground,
+            title = "Decrease paragraph indent",
+            onClick = { viewModel.saveParagraphIndent(false) })
+        TopAppBarActionButton(imageVector = Icons.Default.FormatIndentIncrease,
+            tint = MaterialTheme.colors.onBackground,
+            title = "Increase paragraph indent",
+            onClick = { viewModel.saveParagraphIndent(true) })
     }
 }

@@ -189,7 +189,6 @@ fun BookDetailScreenLoadedComposable(
                                         book = book,
                                         sourceName = source.name,
                                         chapter = viewModel.chapterState.value.lastChapter!!,
-                                        chapters = viewModel.chapterState.value.chapters,
                                         ),
                                 )
                             } else if (viewModel.chapterState.value.chapters.isNotEmpty()) {
@@ -198,7 +197,6 @@ fun BookDetailScreenLoadedComposable(
                                     book = book,
                                     sourceName = source.name,
                                     chapter = viewModel.chapterState.value.chapters.first(),
-                                    chapters = viewModel.chapterState.value.chapters,
                                 ))
                             }
                         }

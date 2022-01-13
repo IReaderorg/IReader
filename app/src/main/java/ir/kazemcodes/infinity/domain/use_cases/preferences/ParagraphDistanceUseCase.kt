@@ -18,3 +18,18 @@ class ReadParagraphDistanceUseCase(
         return repository.preferencesHelper.paragraphDistance.get()
     }
 }
+class SaveParagraphIndentUseCase(
+    private val repository: Repository,
+) {
+    operator fun invoke(paragraphIndent: Int) {
+        repository.preferencesHelper.paragraphIndent.set(paragraphIndent)
+    }
+}
+
+class ReadParagraphIndentUseCase(
+    private val repository: Repository,
+) {
+    operator fun invoke(): Int {
+        return repository.preferencesHelper.paragraphIndent.get()
+    }
+}

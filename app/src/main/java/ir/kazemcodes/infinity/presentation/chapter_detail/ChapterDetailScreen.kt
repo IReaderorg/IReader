@@ -90,7 +90,6 @@ fun ChapterDetailScreen(
                                             chapterIndex = viewModel.getIndexOfChapter(index),
                                             sourceName = viewModel.state.value.source.name,
                                             chapter = state.localChapters[index],
-                                            chapters = chapters
                                         )
                                     )
                                 },
