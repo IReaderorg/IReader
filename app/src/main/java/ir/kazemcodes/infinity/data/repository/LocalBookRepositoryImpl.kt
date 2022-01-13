@@ -12,8 +12,12 @@ class LocalBookRepositoryImpl @Inject constructor(
 ) : LocalBookRepository {
 
 
-    override fun getBooks(): Flow<List<BookEntity>> {
-        return dao.getInitializedBooks()
+    override fun getAllBooks(): Flow<List<BookEntity>> {
+        return dao.getAllBooks()
+    }
+
+    override fun getInLibraryBooks(): Flow<List<BookEntity>> {
+       return  dao.getInLibraryBooks()
     }
 
     override fun getBookById(bookId: Int): Flow<BookEntity> {
@@ -38,5 +42,9 @@ class LocalBookRepositoryImpl @Inject constructor(
 
     override suspend fun deleteAllBook() {
         return dao.deleteAllBook()
+    }
+
+    override suspend fun deleteNotInLibraryBooks() {
+        return dao.deleteAllNotInLibraryBooks()
     }
 }

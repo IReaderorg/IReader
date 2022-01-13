@@ -4,8 +4,12 @@ import ir.kazemcodes.infinity.domain.models.local.ChapterEntity
 import kotlinx.coroutines.flow.Flow
 
 interface LocalChapterRepository {
-    suspend fun insertChapters(chapterEntity: List<ChapterEntity>)
 
+    fun getAllChapter(): Flow<List<ChapterEntity>>
+
+    fun getChapterByChapter(chapterTitle: String, bookName: String): Flow<ChapterEntity?>
+
+    suspend fun insertChapters(chapterEntity: List<ChapterEntity>)
 
     suspend fun updateChapter(
         readingContent: String,
@@ -21,10 +25,15 @@ interface LocalChapterRepository {
 
     fun getChapterByName(bookName: String): Flow<List<ChapterEntity>>
 
-    fun getChapterByChapter(chapterTitle: String, bookName: String): Flow<ChapterEntity?>
 
 
-    fun deleteChapters(bookName: String)
+
+    suspend fun deleteChapters(bookName: String)
+
+    suspend fun deleteNotInLibraryChapters()
+
+    suspend fun deleteAllChapters()
+
 
 
 }

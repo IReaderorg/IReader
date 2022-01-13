@@ -15,6 +15,7 @@ data class Chapter(
     var haveBeenRead: Boolean = false,
     var lastRead: Boolean = false,
     var source: String,
+    var inLibrary:Boolean=false,
     var id: Int? = null,
 ) : Parcelable {
     companion object {
@@ -36,6 +37,7 @@ data class Chapter(
             haveBeenRead = haveBeenRead,
             source = source,
             chapterId = id,
+            inLibrary = inLibrary
         )
     }
 

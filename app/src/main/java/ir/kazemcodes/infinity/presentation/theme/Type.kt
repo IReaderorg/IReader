@@ -34,16 +34,32 @@ val fonts = listOf<FontType>(
     FontType.Poppins,
     FontType.SourceSansPro,
 )
-val readerScreenBackgroundColors = listOf<Color>(
-    Color.Black,
-    Color(0xffdddddd),
-    Color(150, 173, 252),
-    Color(219, 225, 241),
-    Color(237, 221, 110),
-    Color(168, 242, 154),
-    Color(237, 221, 110),
-    Color(237, 209, 176),
-    Color(185, 135, 220),
-    Color(224, 166, 170),
-    Color(248, 253, 137),
+val readerScreenBackgroundColors = listOf<BackgroundColor>(
+    BackgroundColor.Black,
+    BackgroundColor.White,
+    BackgroundColor.Gray88,
+    BackgroundColor.CornflowerBlue,
+    BackgroundColor.NewCar,
+    BackgroundColor.AntiqueWhite,
+    BackgroundColor.LavenderRose,
+    BackgroundColor.ArylideYellow,
+    BackgroundColor.DesertSand,
+    BackgroundColor.Lavender,
+    BackgroundColor.PastelPink,
+    BackgroundColor.PastelYellow,
 )
+
+sealed class BackgroundColor(val color: Color,val onTextColor : Color,val index: Int) {
+    object Black : BackgroundColor(Color(0xff000000),Color(0xffffffff),0)
+    object White : BackgroundColor(Color(0xffffffff),Color(0xff000000),1)
+    object Gray88 : BackgroundColor(Color(136, 136, 136),Color(51, 51, 51),2)
+    object CornflowerBlue : BackgroundColor(Color(150, 173, 252),Color(0xff000000),3)
+    object NewCar : BackgroundColor(Color(219, 225, 241),Color(0xff000000),4)
+    object 	AntiqueWhite : BackgroundColor(Color(237, 221, 110),Color(0xff000000),5)
+    object 	LavenderRose : BackgroundColor(Color(168, 242, 154),Color(0xff000000),6)
+    object 	ArylideYellow : BackgroundColor(Color(233, 214, 107),Color(0xff000000),7)
+    object 	DesertSand : BackgroundColor(Color(237, 209, 176),Color(0xff000000),8)
+    object 	Lavender : BackgroundColor(Color(185, 135, 220),Color(0xff000000),9)
+    object 	PastelPink : BackgroundColor(Color(224, 166, 170),Color(0xff000000),10)
+    object 	PastelYellow : BackgroundColor(Color(248, 253, 137),Color(0xff000000),11)
+}

@@ -6,7 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.BookmarkAdded
+import androidx.compose.material.icons.filled.PublishedWithChanges
 import androidx.compose.material.icons.filled.Sort
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -29,13 +29,14 @@ import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarTitle
 fun ChapterDetailScreen(
     modifier: Modifier = Modifier,
 ) {
+
     val viewModel = rememberService<ChapterDetailViewModel>()
     val chapters = viewModel.state.value.chapters
     val book = viewModel.state.value.book
     val backStack = LocalBackstack.current
-    val chapterState = viewModel.state.value.listChapter
+    val chapterState = viewModel.state.value.reverseChapters
     if (chapterState.isEmpty() || chapterState.size != chapters.size && chapterState.last().title != chapters.last().title) {
-        viewModel.onEvent(ChapterDetailEvent.UpdateChapters(chapters = viewModel.state.value.listChapter))
+        viewModel.onEvent(ChapterDetailEvent.UpdateChapters(chapters = viewModel.state.value.reverseChapters))
     }
     val context = LocalContext.current
     val state = viewModel.state.value
@@ -80,9 +81,9 @@ fun ChapterDetailScreen(
         }
     ) {
         Box(modifier.fillMaxSize()) {
-            if (state.listChapter.isNotEmpty()) {
+            if (state.reverseChapters.isNotEmpty()) {
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(count = state.listChapter.size) { index ->
+                    items(count = state.reverseChapters.size) { index ->
                         Row(
                             modifier = modifier
                                 .fillMaxWidth()
@@ -92,9 +93,10 @@ fun ChapterDetailScreen(
                                     backStack.goTo(
                                         ReaderScreenKey(
                                             book = book,
-                                            chapterIndex = chapters.indexOf(state.listChapter[index]),
+                                            chapterIndex = chapters.indexOf(state.reverseChapters[index]),
                                             sourceName = viewModel.state.value.source.name,
-                                            chapter = state.listChapter[index]
+                                            chapter = state.reverseChapters[index],
+                                            chapters = chapters
                                         )
                                     )
                                 },
@@ -102,8 +104,8 @@ fun ChapterDetailScreen(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
-                                text = state.listChapter[index].title,
-                                color = if (state.listChapter[index].haveBeenRead) MaterialTheme.colors.onBackground.copy(
+                                text = state.reverseChapters[index].title,
+                                color = if (state.reverseChapters[index].haveBeenRead) MaterialTheme.colors.onBackground.copy(
                                     alpha = .4f) else MaterialTheme.colors.onBackground,
                                 style = MaterialTheme.typography.subtitle1,
                                 fontWeight = FontWeight.SemiBold,
@@ -111,18 +113,18 @@ fun ChapterDetailScreen(
                                 modifier = Modifier.weight(7f)
                             )
                             Text(modifier = Modifier.weight(2f),
-                                text = state.listChapter[index].dateUploaded ?: "",
+                                text = state.reverseChapters[index].dateUploaded ?: "",
                                 fontStyle = FontStyle.Italic,
-                                color = if (state.listChapter[index].haveBeenRead) MaterialTheme.colors.onBackground.copy(
+                                color = if (state.reverseChapters[index].haveBeenRead) MaterialTheme.colors.onBackground.copy(
                                     alpha = .4f) else MaterialTheme.colors.onBackground,
                                 fontWeight = FontWeight.SemiBold,
                                 style = MaterialTheme.typography.caption
                             )
                             Spacer(modifier = modifier.width(20.dp))
                             Icon(
-                                imageVector = Icons.Default.BookmarkAdded,
+                                imageVector = Icons.Default.PublishedWithChanges,
                                 contentDescription = "Cached",
-                                tint = if (state.listChapter[index].content.joinToString(" , ").length > 10) MaterialTheme.colors.onBackground else MaterialTheme.colors.background,
+                                tint = if (state.reverseChapters[index].content.joinToString(" , ").length > 10) MaterialTheme.colors.onBackground else MaterialTheme.colors.background,
                             )
                         }
                     }

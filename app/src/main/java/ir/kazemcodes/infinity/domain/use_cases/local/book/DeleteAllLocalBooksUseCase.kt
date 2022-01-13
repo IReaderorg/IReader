@@ -14,3 +14,14 @@ class DeleteAllLocalBooksUseCase @Inject constructor(
         Timber.d("Timber: DeleteAllLocalBooksUseCase was Finished Successfully")
     }
 }
+
+class DeleteNotInLibraryLocalBooksUseCase @Inject constructor(
+    private val repository: Repository,
+) {
+
+    suspend operator fun invoke() {
+        Timber.d("Timber: DeleteNotInLibraryLocalBooksUseCase was Called")
+        repository.localBookRepository.deleteNotInLibraryBooks()
+        Timber.d("Timber: DeleteNotInLibraryLocalBooksUseCase was Finished Successfully")
+    }
+}

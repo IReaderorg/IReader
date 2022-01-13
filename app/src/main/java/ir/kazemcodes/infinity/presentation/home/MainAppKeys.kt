@@ -2,8 +2,6 @@ package ir.kazemcodes.infinity.presentation.home
 
 import android.content.Context
 import android.content.pm.ActivityInfo
-import android.os.Bundle
-import android.view.View
 import android.view.WindowManager
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -33,19 +31,20 @@ import ir.kazemcodes.infinity.presentation.home.core.FragmentKey
 import ir.kazemcodes.infinity.presentation.library.LibraryViewModel
 import ir.kazemcodes.infinity.presentation.reader.ReaderScreenViewModel
 import ir.kazemcodes.infinity.presentation.reader.ReadingScreen
-import ir.kazemcodes.infinity.presentation.reader.components.getActivity
 import ir.kazemcodes.infinity.presentation.setting.SettingViewModel
 import ir.kazemcodes.infinity.presentation.setting.dns.DnsOverHttpScreen
 import ir.kazemcodes.infinity.presentation.setting.extension_creator.ExtensionCreatorScreen
 import ir.kazemcodes.infinity.presentation.theme.InfinityTheme
 import ir.kazemcodes.infinity.presentation.webview.WebPageScreen
 import ir.kazemcodes.infinity.util.SourceMapper
+import ir.kazemcodes.infinity.util.findAppCompatAcivity
 import kotlinx.parcelize.Parcelize
 
 
 class MainScreenFragment() : ComposeFragment() {
     @Composable
     override fun FragmentComposable(backstack: Backstack) {
+
         val viewModel = remember { backstack.lookup<MainViewModel>() }
         BackstackProvider(backstack = backstack) {
             InfinityTheme() {
@@ -73,8 +72,10 @@ data class MainScreenKey(val noArgument: String = "") : FragmentKey() {
 
 
 class BrowserScreenFragment() : ComposeFragment() {
+
     @Composable
     override fun FragmentComposable(backstack: Backstack) {
+
         BackstackProvider(backstack = backstack) {
             InfinityTheme() {
                 BrowserScreen()
@@ -86,9 +87,7 @@ class BrowserScreenFragment() : ComposeFragment() {
 @Parcelize
 data class BrowserScreenKey(val sourceName: String, val isLatestUpdateMode: Boolean = true) :
     FragmentKey() {
-
     override fun instantiateFragment(): Fragment = BrowserScreenFragment()
-
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
             add(
@@ -105,14 +104,13 @@ data class BrowserScreenKey(val sourceName: String, val isLatestUpdateMode: Bool
 }
 
 class BookDetailFragment() : ComposeFragment() {
+
     @Composable
     override fun FragmentComposable(backstack: Backstack) {
         BackstackProvider(backstack = backstack) {
             InfinityTheme() {
                 BookDetailScreen()
-
             }
-
         }
     }
 }
@@ -153,11 +151,7 @@ data class WebViewKey(val url: String) : FragmentKey() {
 }
 
 class ChapterDetailFragment() : ComposeFragment() {
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        savedInstanceState?.getParcelableArrayList<Chapter>("Chapters")
-        //bundle.putParcelable("This is just for testing purpose", "Developer program")
-    }
+
 
     @Composable
     override fun FragmentComposable(backstack: Backstack) {
@@ -167,17 +161,19 @@ class ChapterDetailFragment() : ComposeFragment() {
             }
         }
     }
+
+
 }
 
 @Parcelize
 data class ChapterDetailKey(
     val book: Book,
-    val sourceName: String,
+    val sourceName: String
 ) : FragmentKey() {
     override fun instantiateFragment(): Fragment = ChapterDetailFragment()
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
-            add(ChapterDetailViewModel(
+            add<ChapterDetailViewModel>(ChapterDetailViewModel(
                 lookup<LocalUseCase>(),
                 source = lookup<SourceMapper>().mappingSourceNameToSource(sourceName),
                 book = book,
@@ -196,24 +192,26 @@ class ReaderScreenFragment() : ComposeFragment() {
         }
     }
 
-    override fun onDestroy() {
-        val activity = context?.getActivity()!!
-        val window = activity.window
-        val layoutParams: WindowManager.LayoutParams = window.attributes
-        layoutParams.screenBrightness = -1f
-        window.attributes = layoutParams
-        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-        super.onDestroy()
-    }
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        val viewModel by lazy {
-            backstack.lookup<ReaderScreenViewModel>()
-        }
+        val viewModel = backstack.lookup<ReaderScreenViewModel>()
         viewModel.readBrightness(context = context)
-        viewModel.readOrientation(context)
+        viewModel.readOrientation(context=context)
     }
+
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        val activity = context?.findAppCompatAcivity()!!
+        val window = activity.window
+        val layoutParams: WindowManager.LayoutParams = window.attributes
+        layoutParams.screenBrightness = -1f
+        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        window.attributes = layoutParams
+    }
+
+
 }
 
 @Parcelize
@@ -221,6 +219,7 @@ data class ReaderScreenKey(
     val book: Book,
     val chapterIndex: Int,
     val chapter: Chapter,
+    val chapters: List<Chapter>,
     val sourceName: String,
 ) : FragmentKey() {
 
@@ -235,7 +234,6 @@ data class ReaderScreenKey(
                 source = lookup<SourceMapper>().mappingSourceNameToSource(sourceName),
                 book = book,
                 chapter = chapter,
-
             ))
         }
     }

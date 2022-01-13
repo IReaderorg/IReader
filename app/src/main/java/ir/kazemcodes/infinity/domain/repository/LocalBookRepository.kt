@@ -5,7 +5,9 @@ import kotlinx.coroutines.flow.Flow
 
 interface LocalBookRepository {
 
-    fun getBooks(): Flow<List<BookEntity>>
+    fun getAllBooks(): Flow<List<BookEntity>>
+
+    fun getInLibraryBooks(): Flow<List<BookEntity>>
 
     fun getBookById(bookId: Int): Flow<BookEntity?>
 
@@ -19,6 +21,8 @@ interface LocalBookRepository {
     suspend fun deleteBook(bookName: String)
 
     suspend fun deleteAllBook()
+
+    suspend fun deleteNotInLibraryBooks()
 
 
 }

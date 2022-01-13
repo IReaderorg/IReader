@@ -1,6 +1,6 @@
 package ir.kazemcodes.infinity.domain.use_cases.local.book
 
-import ir.kazemcodes.infinity.domain.models.local.BookEntity
+import ir.kazemcodes.infinity.domain.models.remote.Book
 import ir.kazemcodes.infinity.domain.repository.Repository
 import ir.kazemcodes.infinity.util.InvalidBookException
 import timber.log.Timber
@@ -11,10 +11,10 @@ class InsertLocalBookUserCase @Inject constructor(
 ) {
 
     @Throws(InvalidBookException::class)
-    suspend operator fun invoke(bookEntity: BookEntity) {
+    suspend operator fun invoke(book : Book) {
         try {
             Timber.d("Timber: InsertLocalBookUserCase was Called")
-            repository.localBookRepository.insertBook(bookEntity = bookEntity)
+            repository.localBookRepository.insertBook(book.toBookEntity())
             Timber.d("Timber: InsertLocalBookUserCase was Finished Successfully")
         } catch (e: Exception) {
             Timber.e("invoke: " + e.localizedMessage)

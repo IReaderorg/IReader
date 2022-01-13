@@ -12,6 +12,6 @@ data class ChapterDetailState(
     val error: String = "",
     val chapterOrderType: OrderType = OrderType.Ascending,
     val listOfLastReadChapter: List<LastReadChapter> = emptyList(),
-    val listChapter : List<Chapter> = emptyList(),
+    val reverseChapters : List<Chapter> = emptyList(),
     val source:Source
 )

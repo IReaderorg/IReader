@@ -83,7 +83,7 @@ class AppModule {
     @Singleton
     fun provideLocalUseCases(repository: Repository): LocalUseCase {
         return LocalUseCase(
-            getLocalBooksUseCase = GetLocalBooksUseCase(repository),
+            getAllLocalBooksUseCase = GetAllLocalBooksUseCase(repository),
             getLocalBookByIdByIdUseCase = GetLocalBookByIdUseCase(repository),
             insertLocalBookUserCase = InsertLocalBookUserCase(repository),
             deleteLocalBookUseCase = DeleteLocalBookUseCase(repository),
@@ -95,7 +95,12 @@ class AppModule {
             UpdateLocalChapterContentUseCase = UpdateLocalChapterContentUseCase(repository),
             getLocalChapterReadingContentUseCase = GetLocalChapterReadingContentUseCase(repository = repository),
             deleteChaptersUseCase = DeleteLocalChaptersUseCase(repository = repository),
-            UpdateLocalChaptersContentUseCase = UpdateLocalChaptersContentUseCase(repository = repository)
+            UpdateLocalChaptersContentUseCase = UpdateLocalChaptersContentUseCase(repository = repository),
+            getAllLocalChaptersUseCase = GetLocalAllChaptersUseCase(repository),
+            deleteAllLocalChaptersUseCase = DeleteAllLocalChaptersUseCase(repository),
+            deleteNotInLibraryLocalChaptersUseCase = DeleteNotInLibraryLocalChaptersUseCase(repository),
+            deleteNotInLibraryBooksUseCase = DeleteNotInLibraryLocalBooksUseCase(repository),
+            getInLibraryBooksUseCase = GetInLibraryBooksUseCase(repository)
         )
     }
 

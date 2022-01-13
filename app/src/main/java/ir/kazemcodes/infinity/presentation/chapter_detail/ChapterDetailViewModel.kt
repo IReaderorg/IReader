@@ -19,16 +19,13 @@ class ChapterDetailViewModel(
     private val localUseCase: LocalUseCase,
     private val book: Book,
     private val source: Source,
-) : ScopedServices.Registered {
+) :  ScopedServices.Registered {
 
     private val _state = mutableStateOf<ChapterDetailState>(ChapterDetailState(source = source))
     val state: State<ChapterDetailState> = _state
 
-    init {
-        _state.value = state.value.copy(book = book)
-    }
-
     override fun onServiceRegistered() {
+        _state.value = state.value.copy(book = book)
         getLocalChapters()
     }
 
@@ -39,11 +36,11 @@ class ChapterDetailViewModel(
         when (event) {
             is ChapterDetailEvent.ToggleOrder -> {
                 _state.value = state.value.copy(
-                    listChapter = state.value.listChapter.reversed()
+                    reverseChapters = state.value.reverseChapters.reversed()
                 )
             }
             is ChapterDetailEvent.UpdateChapters -> {
-                _state.value = state.value.copy(listChapter = event.chapters)
+                _state.value = state.value.copy(reverseChapters = event.chapters)
             }
 
         }
@@ -56,18 +53,21 @@ class ChapterDetailViewModel(
                     is Resource.Success -> {
                         if (!result.data.isNullOrEmpty()) {
                             _state.value = state.value.copy(
-                                chapters = result.data, listChapter = result.data, isLoading = false, error = "")
+                                chapters = result.data,
+                                reverseChapters = result.data.reversed(),
+                                isLoading = false,
+                                error = "")
                         } else {
-                            _state.value = state.value.copy(isLoading = false, error = "")
+                            _state.value = state.value.copy(isLoading = false, error = "No Chapter")
                         }
                     }
                     is Resource.Error -> {
                         _state.value =
                             state.value.copy(error = result.message
-                                ?: "An Unknown Error Occurred")
+                                ?: "An Unknown Error Occurred", isLoading = false)
                     }
                     is Resource.Loading -> {
-                        _state.value = state.value.copy(isLoading = true)
+                        _state.value = state.value.copy(isLoading = true, error = "")
                     }
                 }
             }.launchIn(coroutineScope)
@@ -78,6 +78,8 @@ class ChapterDetailViewModel(
     override fun onServiceUnregistered() {
         coroutineScope.cancel()
     }
+
+
 
 }
 

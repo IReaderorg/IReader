@@ -9,10 +9,7 @@ import ir.kazemcodes.infinity.domain.use_cases.preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.presentation.layouts.DisplayMode
 import ir.kazemcodes.infinity.presentation.library.components.LibraryEvents
 import ir.kazemcodes.infinity.util.Resource
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
@@ -27,7 +24,9 @@ class LibraryViewModel(
 
 
     override fun onServiceRegistered() {
-        onEvent(LibraryEvents.GetLocalBooks)
+        deleteNotInLibraryBooks()
+        deleteNotInLibraryChapters()
+        getLocalBooks()
         readLayoutType()
     }
 
@@ -37,9 +36,6 @@ class LibraryViewModel(
 
     fun onEvent(event: LibraryEvents) {
         when (event) {
-            is LibraryEvents.GetLocalBooks -> {
-                getLocalBooks()
-            }
             is LibraryEvents.UpdateLayoutType -> {
                 updateLayoutType(event.layoutType)
             }
@@ -81,11 +77,11 @@ class LibraryViewModel(
 
     private fun getLocalBooks() {
 
-        localUseCase.getLocalBooksUseCase().onEach { result ->
+        localUseCase.getInLibraryBooksUseCase().onEach { result ->
             when (result) {
                 is Resource.Success -> {
                     _state.value = state.value.copy(
-                        books = result.data?.map { it.copy(inLibrary = true) } ?: emptyList()
+                        books = result.data ?: emptyList()
                     )
                 }
                 is Resource.Error -> {
@@ -100,6 +96,7 @@ class LibraryViewModel(
         }.launchIn(coroutineScope)
     }
 
+
     private fun searchBook(query: String) {
         val searchBook = mutableListOf<Book>()
         state.value.books.forEach { book ->
@@ -108,6 +105,18 @@ class LibraryViewModel(
             }
         }
         _state.value = state.value.copy(searchedBook = searchBook)
+    }
+
+    private fun deleteNotInLibraryChapters() {
+        coroutineScope.launch(Dispatchers.IO) {
+            localUseCase.deleteNotInLibraryLocalChaptersUseCase()
+        }
+    }
+
+    private fun deleteNotInLibraryBooks() {
+        coroutineScope.launch(Dispatchers.IO) {
+            localUseCase.deleteNotInLibraryBooksUseCase()
+        }
     }
 
 

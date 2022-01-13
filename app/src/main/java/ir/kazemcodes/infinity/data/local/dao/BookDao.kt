@@ -10,11 +10,11 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface BookDao {
 
-    @Query("SELECT * FROM book_table WHERE inLibrary = 1")
-    fun getInitializedBooks(): Flow<List<BookEntity>>
-
     @Query("SELECT * FROM book_table")
-    fun getBooks(): Flow<List<BookEntity>>
+    fun getAllBooks(): Flow<List<BookEntity>>
+
+    @Query("SELECT * FROM book_table WHERE inLibrary = 1")
+    fun getInLibraryBooks(): Flow<List<BookEntity>>
 
     @Query("SELECT * FROM book_table WHERE bookId = :bookId Limit 1")
     fun getBookById(bookId: Int): Flow<BookEntity>
@@ -33,5 +33,8 @@ interface BookDao {
 
     @Query("DELETE FROM book_table")
     suspend fun deleteAllBook()
+
+    @Query("DELETE FROM book_table WHERE inLibrary = 0")
+    suspend fun deleteAllNotInLibraryBooks()
 
 }

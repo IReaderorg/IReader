@@ -17,6 +17,7 @@ data class ChapterEntity(
     var haveBeenRead: Boolean = false,
     var lastRead: Boolean = false,
     val source: String,
+    var inLibrary:Boolean=false,
     @PrimaryKey val chapterId: Int? = null,
 ) {
     fun toChapter(): Chapter {
@@ -30,6 +31,7 @@ data class ChapterEntity(
             lastRead = lastRead,
             source = source,
             id = chapterId,
+            inLibrary = inLibrary
         )
     }
 }

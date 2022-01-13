@@ -33,14 +33,14 @@ fun ReaderBackgroundComposable(modifier: Modifier = Modifier, viewModel: ReaderS
                     .height(30.dp)
                     .padding(horizontal = 0.dp)
                     .clip(CircleShape)
-                    .background(color = readerScreenBackgroundColors[index])
+                    .background(color = readerScreenBackgroundColors[index].color)
                     .border(2.dp,
-                        if (viewModel.state.value.backgroundColor == readerScreenBackgroundColors[index]) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground,
+                        MaterialTheme.colors.primary,
                         CircleShape)
                     .clickable { viewModel.changeBackgroundColor(index) },
                     contentAlignment = Alignment.Center
                 ) {
-                    if (viewModel.state.value.backgroundColor == readerScreenBackgroundColors[index]) {
+                    if (viewModel.state.value.backgroundColor == readerScreenBackgroundColors[index].color) {
                         Icon(imageVector = Icons.Default.Check,
                             contentDescription = "color selected",
                             tint = MaterialTheme.colors.primary)

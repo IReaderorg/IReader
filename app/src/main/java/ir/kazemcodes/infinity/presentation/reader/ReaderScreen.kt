@@ -52,8 +52,7 @@ fun ReadingScreen(
 
 
     Box(modifier = modifier.fillMaxSize()) {
-        Scaffold(
-            topBar = {
+        Scaffold(topBar = {
                 if (!state.isReaderModeEnable && state.isLoaded) {
                     TopAppBar(
                         title = {
@@ -139,9 +138,9 @@ fun ReadingScreen(
 
                     Spacer(modifier = modifier.height(5.dp))
                     Divider(modifier = modifier.fillMaxWidth(), thickness = 1.dp)
-                    if (state.listChapters.isNotEmpty()) {
+                    if (state.reverseChapters.isNotEmpty()) {
                         LazyColumn(modifier = Modifier.fillMaxSize()) {
-                            items(count = state.listChapters.size) { index ->
+                            items(count = state.reverseChapters.size) { index ->
                                 Row(
                                     modifier = modifier
                                         .fillMaxWidth()
@@ -149,17 +148,17 @@ fun ReadingScreen(
                                         .height(40.dp)
                                         .clickable {
                                             viewModel.getContent(state.chapters[state.chapters.indexOf(
-                                                state.listChapters[index])])
+                                                state.reverseChapters[index])])
                                             viewModel.updateChapterSliderIndex(index = state.chapters.indexOf(
-                                                state.listChapters[index]))
+                                                state.reverseChapters[index]))
 
                                         },
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
                                     Text(
-                                        text = state.listChapters[index].title,
-                                        color = if (state.listChapters[index].haveBeenRead) MaterialTheme.colors.onBackground.copy(
+                                        text = state.reverseChapters[index].title,
+                                        color = if (state.reverseChapters[index].haveBeenRead) MaterialTheme.colors.onBackground.copy(
                                             alpha = .4f) else MaterialTheme.colors.onBackground,
                                         style = MaterialTheme.typography.subtitle1,
                                         fontWeight = FontWeight.SemiBold,
@@ -167,9 +166,9 @@ fun ReadingScreen(
                                         modifier = Modifier.weight(7f)
                                     )
                                     Text(modifier = Modifier.weight(2f),
-                                        text = state.listChapters[index].dateUploaded ?: "",
+                                        text = state.reverseChapters[index].dateUploaded ?: "",
                                         fontStyle = FontStyle.Italic,
-                                        color = if (state.listChapters[index].haveBeenRead) MaterialTheme.colors.onBackground.copy(
+                                        color = if (state.reverseChapters[index].haveBeenRead) MaterialTheme.colors.onBackground.copy(
                                             alpha = .4f) else MaterialTheme.colors.onBackground,
                                         fontWeight = FontWeight.SemiBold,
                                         style = MaterialTheme.typography.caption
@@ -178,7 +177,7 @@ fun ReadingScreen(
                                     Icon(
                                         imageVector = Icons.Default.PublishedWithChanges,
                                         contentDescription = "Cached",
-                                        tint = if (state.listChapters[index].content.joinToString(" , ").length > 10) MaterialTheme.colors.onBackground else MaterialTheme.colors.background,
+                                        tint = if (state.reverseChapters[index].content.joinToString(" , ").length > 10) MaterialTheme.colors.onBackground else MaterialTheme.colors.background,
                                     )
                                 }
                             }
@@ -221,7 +220,7 @@ fun ReadingScreen(
                 .align(Alignment.Center))
         }
 
-        if (viewModel.state.value.isLoading || !viewModel.state.value.isScreenLoaded) {
+        if (viewModel.state.value.isLoading) {
             CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.Center),
                 color = MaterialTheme.colors.primary

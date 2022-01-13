@@ -21,6 +21,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import com.zhuinden.simplestackcomposeintegration.services.rememberService
+import ir.kazemcodes.infinity.data.network.utils.toast
 import ir.kazemcodes.infinity.presentation.book_detail.components.ButtonWithIconAndText
 import ir.kazemcodes.infinity.presentation.book_detail.components.CardTileComposable
 import ir.kazemcodes.infinity.presentation.book_detail.components.DotsFlashing
@@ -95,7 +96,7 @@ fun BookDetailScreenLoadedComposable(
     modifier: Modifier = Modifier,
     viewModel: BookDetailViewModel,
 ) {
-    val source = viewModel.getSource()
+    val source = viewModel.state.value.source
     val backStack = LocalBackstack.current
     val inLibrary = viewModel.state.value.inLibrary
     val book = viewModel.state.value.book
@@ -162,19 +163,13 @@ fun BookDetailScreenLoadedComposable(
                         imageVector = if (!inLibrary) Icons.Default.AddCircleOutline else Icons.Default.Check,
                         onClick = {
                             if (!inLibrary) {
-                                viewModel.insertBookDetailToLocal(
-                                    book.copy(inLibrary = true, source = source.name).toBookEntity()
-                                )
-                                val chapterEntities = chapters.map {
-                                    it.copy(bookName = book.bookName, source = source.name)
-                                        .toChapterEntity()
-                                }
-                                viewModel.insertChaptersToLocal(chapterEntities)
                                 viewModel.toggleInLibrary(true)
+                                viewModel.insertBookDetailToLocal()
+                                viewModel.insertChaptersToLocal()
                             } else {
+                                viewModel.toggleInLibrary(false)
                                 viewModel.deleteLocalBook(book.bookName)
                                 viewModel.deleteLocalChapters(book.bookName)
-                                viewModel.toggleInLibrary(false)
                             }
                         },
                     )
@@ -186,18 +181,22 @@ fun BookDetailScreenLoadedComposable(
                         onClick = {
                             if (viewModel.chapterState.value.lastChapter != null) {
                                 backStack.goTo(
-                                    ReaderScreenKey(chapterIndex = chapters.indexOf(viewModel.chapterState.value.lastChapter),
+                                    ReaderScreenKey(
+                                        chapterIndex = chapters.indexOf(viewModel.chapterState.value.lastChapter),
                                         book = book,
-                                        sourceName = viewModel.getSource().name,
-                                        chapter = viewModel.chapterState.value.lastChapter!!
-                                    ),
+                                        sourceName = source.name,
+                                        chapter = viewModel.chapterState.value.lastChapter!!,
+                                        chapters = viewModel.chapterState.value.chapters,
+
+                                        ),
                                 )
                             } else if (viewModel.chapterState.value.chapters.isNotEmpty()) {
                                 backStack.goTo(ReaderScreenKey(
                                     chapterIndex = 0,
                                     book = book,
-                                    sourceName = viewModel.getSource().name,
-                                    chapter = viewModel.chapterState.value.chapters.first()
+                                    sourceName = source.name,
+                                    chapter = viewModel.chapterState.value.chapters.first(),
+                                    chapters = viewModel.chapterState.value.chapters,
                                 ))
                             }
                         }
@@ -207,8 +206,8 @@ fun BookDetailScreenLoadedComposable(
                         text = "Download",
                         imageVector = Icons.Default.FileDownload,
                         onClick = {
-                            //context.toast("Not Supported",)
-                            viewModel.startDownloadService(context)
+                            context.toast("Not Supported")
+                            //viewModel.startDownloadService(context)
                         }
                     )
                 }
@@ -322,7 +321,8 @@ fun BookDetailScreenLoadedComposable(
                 modifier = modifier.clickable {
                     backStack.goTo(ChapterDetailKey(
                         book = book,
-                        sourceName = viewModel.getSource().name))
+                        sourceName = source.name
+                    ))
                 },
                 title = "Contents",
                 subtitle = "${chapters.size} Chapters",

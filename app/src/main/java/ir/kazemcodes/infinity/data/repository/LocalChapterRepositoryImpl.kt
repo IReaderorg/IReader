@@ -40,12 +40,24 @@ class LocalChapterRepositoryImpl @Inject constructor(private val dao: ChapterDao
         return dao.getChapters(bookName)
     }
 
+    override fun getAllChapter(): Flow<List<ChapterEntity>> {
+        return dao.getAllChapters()
+    }
+
     override fun getChapterByChapter(chapterTitle: String, bookName: String): Flow<ChapterEntity?> {
         return dao.getChapterByChapter(chapterTitle, bookName)
     }
 
 
-    override fun deleteChapters(bookName: String) {
+    override suspend fun deleteChapters(bookName: String) {
         return dao.deleteLocalChaptersByName(bookName = bookName)
+    }
+
+    override suspend fun deleteNotInLibraryChapters() {
+        return dao.deleteAllNotInLibraryChapters()
+    }
+
+    override suspend fun deleteAllChapters() {
+        return dao.deleteAllChapters()
     }
 }

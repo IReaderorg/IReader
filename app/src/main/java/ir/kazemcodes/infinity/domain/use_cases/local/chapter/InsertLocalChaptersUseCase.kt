@@ -1,6 +1,8 @@
 package ir.kazemcodes.infinity.domain.use_cases.local.chapter
 
-import ir.kazemcodes.infinity.domain.models.local.ChapterEntity
+import ir.kazemcodes.infinity.data.network.models.Source
+import ir.kazemcodes.infinity.domain.models.remote.Book
+import ir.kazemcodes.infinity.domain.models.remote.Chapter
 import ir.kazemcodes.infinity.domain.repository.Repository
 import ir.kazemcodes.infinity.util.InvalidBookException
 import timber.log.Timber
@@ -11,9 +13,9 @@ class InsertLocalChaptersUseCase @Inject constructor(
 ) {
 
     @Throws(InvalidBookException::class)
-    suspend operator fun invoke(chapterEntity: List<ChapterEntity>) {
+    suspend operator fun invoke(chapters: List<Chapter>,book :Book,inLibrary : Boolean, source : Source) {
         Timber.d("Timber: InsertLocalChaptersUseCase was Called")
-        repository.localChapterRepository.insertChapters(chapterEntity = chapterEntity)
+        repository.localChapterRepository.insertChapters(chapterEntity = chapters.map { it.copy(bookName = book.bookName,source=source.name, inLibrary = inLibrary).toChapterEntity() })
         Timber.d("Timber: InsertLocalChaptersUseCase was Finished Successfully")
     }
 

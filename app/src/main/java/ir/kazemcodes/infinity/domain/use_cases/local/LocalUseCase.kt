@@ -6,14 +6,19 @@ import ir.kazemcodes.infinity.domain.use_cases.local.chapter.*
 data class LocalUseCase(
     val getLocalBookByNameUseCase: GetLocalBookByNameUseCase,
     val getLocalChaptersByBookNameByBookNameUseCase: GetLocalChaptersByBookNameUseCase,
-    val getLocalBooksUseCase: GetLocalBooksUseCase,
+    val getAllLocalChaptersUseCase: GetLocalAllChaptersUseCase,
+    val getAllLocalBooksUseCase: GetAllLocalBooksUseCase,
+    val getInLibraryBooksUseCase: GetInLibraryBooksUseCase,
     val getLocalBookByIdByIdUseCase: GetLocalBookByIdUseCase,
     val insertLocalBookUserCase: InsertLocalBookUserCase,
     val insertLocalChaptersUseCase: InsertLocalChaptersUseCase,
     val UpdateLocalChapterContentUseCase: UpdateLocalChapterContentUseCase,
     val UpdateLocalChaptersContentUseCase: UpdateLocalChaptersContentUseCase,
     val getLocalChapterReadingContentUseCase: GetLocalChapterReadingContentUseCase,
+    val deleteAllLocalBooksUseCase: DeleteAllLocalBooksUseCase,
     val deleteLocalBookUseCase: DeleteLocalBookUseCase,
     val deleteChaptersUseCase: DeleteLocalChaptersUseCase,
-    val deleteAllLocalBooksUseCase: DeleteAllLocalBooksUseCase,
+    val deleteAllLocalChaptersUseCase: DeleteAllLocalChaptersUseCase,
+    val deleteNotInLibraryLocalChaptersUseCase: DeleteNotInLibraryLocalChaptersUseCase,
+    val deleteNotInLibraryBooksUseCase: DeleteNotInLibraryLocalBooksUseCase
 )

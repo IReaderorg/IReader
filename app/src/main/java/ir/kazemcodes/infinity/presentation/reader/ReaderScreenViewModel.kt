@@ -3,11 +3,9 @@ package ir.kazemcodes.infinity.presentation.reader
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.ActivityInfo
-import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
 import android.view.WindowManager
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.graphics.Color
 import com.zhuinden.simplestack.ScopedServices
 import ir.kazemcodes.infinity.data.network.models.Source
 import ir.kazemcodes.infinity.domain.models.FontType
@@ -19,14 +17,11 @@ import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
 import ir.kazemcodes.infinity.presentation.theme.fonts
 import ir.kazemcodes.infinity.presentation.theme.readerScreenBackgroundColors
 import ir.kazemcodes.infinity.util.Resource
-import ir.kazemcodes.infinity.util.findActivity
+import ir.kazemcodes.infinity.util.findAppCompatAcivity
 import ir.kazemcodes.infinity.util.isNull
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-
-
-
 
 
 class ReaderScreenViewModel(
@@ -36,38 +31,30 @@ class ReaderScreenViewModel(
     private val source: Source,
     private val book: Book,
     private val chapter: Chapter,
-
-) : ScopedServices.Registered {
-    private val _state = mutableStateOf(ReaderScreenState(source = source, book = book, chapter = chapter))
+    ) : ScopedServices.Registered {
+    private val _state =
+        mutableStateOf(ReaderScreenState(source = source, book = book, chapter = chapter))
 
     val state: State<ReaderScreenState> = _state
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     override fun onServiceRegistered() {
+        getLocalChapters()
         readPreferences()
         updateState()
         getContent(chapter = state.value.chapter.copy(bookName = book.bookName))
-        _state.value = state.value.copy(isScreenLoaded = true)
-        getLocalChapters()
     }
 
     private fun updateState() {
-        _state.value = state.value.copy(
-            currentChapterIndex = if (state.value.chapters.isNullOrEmpty() && state.value.chapters.indexOf(state.value.chapter) > 0) state.value.chapters.indexOf(
-                state.value.chapter) else 0,
-            textColor = if (state.value.backgroundColor == Color.Black && state.value.textColor == Color.Black) Color.White else Color.Black)
+        _state.value = state.value.copy(currentChapterIndex = if (state.value.chapters.isNullOrEmpty() && state.value.chapters.indexOf(state.value.chapter) > 0) state.value.chapters.indexOf(
+                state.value.chapter) else 0)
     }
 
     fun changeBackgroundColor(colorIndex: Int) {
         val color = readerScreenBackgroundColors[colorIndex]
-        _state.value = state.value.copy(backgroundColor = color,
-            textColor = if (color == Color.Black) Color.White else Color.Black,
-            isDarkThemeEnabled = false)
+        _state.value = state.value.copy(backgroundColor = color.color, textColor =color.onTextColor )
         preferencesUseCase.setBackgroundColorUseCase(colorIndex)
-        if (color == Color.Black) {
-            _state.value = state.value.copy(isDarkThemeEnabled = true)
-        }
     }
 
     fun readPreferences() {
@@ -81,7 +68,7 @@ class ReaderScreenViewModel(
     fun onEvent(event: ReaderEvent) {
         when (event) {
             is ReaderEvent.ChangeBrightness -> {
-                saveBrightness(event.brightness,event.context)
+                saveBrightness(event.brightness, event.context)
             }
             is ReaderEvent.ChangeFontSize -> {
                 saveFontSize(event.fontSizeEvent)
@@ -120,7 +107,8 @@ class ReaderScreenViewModel(
 
     fun getContent(chapter: Chapter) {
         _state.value = state.value.copy(chapter = chapter,
-            currentChapterIndex = if (state.value.chapters.indexOf(chapter) > 0) state.value.chapters.indexOf(chapter) else 0)
+            currentChapterIndex = if (state.value.chapters.indexOf(chapter) > 0) state.value.chapters.indexOf(
+                chapter) else 0)
         getReadingContentLocally(chapter)
         if (book.inLibrary) {
             toggleLastReadAndUpdateChapterContent(chapter)
@@ -134,18 +122,18 @@ class ReaderScreenViewModel(
                     is Resource.Success -> {
                         if (!result.data.isNullOrEmpty()) {
                             _state.value = state.value.copy(
-                                chapters = result.data, listChapters = result.data, isLoading = false, error = "")
+                                chapters = result.data,
+                                reverseChapters = result.data,
+                            )
                         } else {
-                            _state.value = state.value.copy(isLoading = false, error = "")
+                            _state.value = state.value.copy()
                         }
                     }
                     is Resource.Error -> {
-                        _state.value =
-                            state.value.copy(error = result.message
-                                ?: "An Unknown Error Occurred")
+
                     }
                     is Resource.Loading -> {
-                        _state.value = state.value.copy(isLoading = true)
+
                     }
                 }
             }.launchIn(coroutineScope)
@@ -242,13 +230,8 @@ class ReaderScreenViewModel(
     }
 
     fun reverseChapters() {
-        _state.value = state.value.copy(listChapters = state.value.listChapters.reversed())
+        _state.value = state.value.copy(reverseChapters = state.value.reverseChapters.reversed())
     }
-
-
-
-
-
 
 
     private fun readSelectedFontState() {
@@ -259,13 +242,14 @@ class ReaderScreenViewModel(
 
     fun readBrightness(context: Context) {
         val brightness = preferencesUseCase.readBrightnessStateUseCase()
-        val activity = context.findActivity()!!
+        val activity = context.findAppCompatAcivity()!!
         val window = activity.window
         val layoutParams: WindowManager.LayoutParams = window.attributes
         layoutParams.screenBrightness = brightness
         window.attributes = layoutParams
         _state.value = state.value.copy(brightness = brightness)
     }
+
     private fun readFontSize() {
         _state.value = state.value.copy(fontSize = preferencesUseCase.readFontSizeStateUseCase())
     }
@@ -280,22 +264,23 @@ class ReaderScreenViewModel(
     }
 
     private fun readBackgroundColor() {
+        val color =  readerScreenBackgroundColors[preferencesUseCase.getBackgroundColorUseCase()]
         _state.value =
-            state.value.copy(backgroundColor = readerScreenBackgroundColors[preferencesUseCase.getBackgroundColorUseCase()])
+            state.value.copy(backgroundColor = color.color, textColor = color.onTextColor)
     }
+
 
     @SuppressLint("SourceLockedOrientationActivity")
     fun readOrientation(context: Context) {
-        val activity = context.findActivity()!!
-        when(preferencesUseCase.readOrientationUseCase()) {
-             1 -> {
+        val activity = context.findAppCompatAcivity()!!
+        when (preferencesUseCase.readOrientationUseCase()) {
+            0 -> {
                 activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                 _state.value = state.value.copy(orientation = Orientation.Portrait)
             }
-             0 -> {
-                activity.requestedOrientation = SCREEN_ORIENTATION_LANDSCAPE
+            1 -> {
+                activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
                 _state.value = state.value.copy(orientation = Orientation.Landscape)
-
             }
         }
     }
@@ -303,21 +288,21 @@ class ReaderScreenViewModel(
 
     @SuppressLint("SourceLockedOrientationActivity")
     fun saveOrientation(context: Context) {
-        val activity = context.findActivity()!!
-        when(state.value.orientation) {
+        val activity = context.findAppCompatAcivity()!!
+        when (state.value.orientation) {
             is Orientation.Landscape -> {
                 activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                 _state.value = state.value.copy(orientation = Orientation.Portrait)
                 preferencesUseCase.saveOrientationUseCase(Orientation.Portrait.index)
             }
             is Orientation.Portrait -> {
-                activity.requestedOrientation = SCREEN_ORIENTATION_LANDSCAPE
+                activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
                 _state.value = state.value.copy(orientation = Orientation.Landscape)
                 preferencesUseCase.saveOrientationUseCase(Orientation.Landscape.index)
-
             }
         }
     }
+
     fun saveFontHeight(isIncreased: Boolean) {
         val currentFontHeight = state.value.lineHeight
         if (isIncreased) {
@@ -329,6 +314,7 @@ class ReaderScreenViewModel(
             _state.value = state.value.copy(lineHeight = currentFontHeight - 1)
         }
     }
+
     fun saveParagraphDistance(isIncreased: Boolean) {
         val currentDistance = state.value.distanceBetweenParagraphs
         if (isIncreased) {
@@ -340,6 +326,7 @@ class ReaderScreenViewModel(
             _state.value = state.value.copy(distanceBetweenParagraphs = currentDistance - 1)
         }
     }
+
     private fun saveFontSize(event: FontSizeEvent) {
         if (event == FontSizeEvent.Increase) {
             _state.value = state.value.copy(fontSize = state.value.fontSize + 1)
@@ -351,14 +338,16 @@ class ReaderScreenViewModel(
             }
         }
     }
+
     private fun saveFont(fontType: FontType) {
         _state.value = state.value.copy(font = fontType)
 
         preferencesUseCase.saveSelectedFontStateUseCase(fonts.indexOf(fontType))
 
     }
-    private fun saveBrightness(brightness: Float,context: Context) {
-        val activity = context.findActivity()!!
+
+    private fun saveBrightness(brightness: Float, context: Context) {
+        val activity = context.findAppCompatAcivity()!!
         val window = activity.window
         _state.value = state.value.copy(brightness = brightness)
         val layoutParams: WindowManager.LayoutParams = window.attributes
@@ -374,10 +363,8 @@ class ReaderScreenViewModel(
     }
 
 
-
     override fun onServiceUnregistered() {
         coroutineScope.cancel()
-
     }
 }
 

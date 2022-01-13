@@ -32,6 +32,9 @@ interface ChapterDao {
     @Query("SELECT * FROM chapter_entity WHERE bookName= :bookName")
     fun getChapters(bookName: String): Flow<List<ChapterEntity>>
 
+    @Query("SELECT * FROM chapter_entity")
+    fun getAllChapters(): Flow<List<ChapterEntity>>
+
 
     @Query("SELECT * FROM chapter_entity WHERE title = :chapterTitle AND bookName = :bookName AND content Not Null Limit 1")
     fun getChapterByChapter(chapterTitle: String, bookName: String): Flow<ChapterEntity?>
@@ -39,4 +42,9 @@ interface ChapterDao {
     @Query("DELETE FROM chapter_entity WHERE bookName = :bookName ")
     fun deleteLocalChaptersByName(bookName: String)
 
+    @Query("DELETE FROM chapter_entity ")
+    fun deleteAllChapters()
+
+    @Query("DELETE FROM chapter_entity WHERE inLibrary = 0")
+    fun deleteAllNotInLibraryChapters()
 }
