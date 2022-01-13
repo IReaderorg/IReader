@@ -12,7 +12,7 @@ Infinity is a free and open source applicaiton for Android.
 
 - Access all the books available on the website
 - Support two source
-- Suppot the offline reading
+- Support the offline reading
 
 
 ## Not Supported right now but working on it:
