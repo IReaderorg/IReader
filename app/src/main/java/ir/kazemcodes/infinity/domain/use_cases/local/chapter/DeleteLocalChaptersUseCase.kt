@@ -8,22 +8,24 @@ class DeleteLocalChaptersUseCase @Inject constructor(
     private val repository: Repository,
 ) {
 
-    suspend operator fun invoke(bookName: String) {
+    suspend operator fun invoke(bookName: String, source: String) {
         Timber.d("Timber: GetLocalBookByNameUseCase was Called")
-        repository.localChapterRepository.deleteChapters(bookName)
+        repository.localChapterRepository.deleteChapters(bookName, source)
         Timber.d("Timber: GetLocalBookByNameUseCase was Finished Successfully")
     }
 }
+
 class DeleteAllLocalChaptersUseCase @Inject constructor(
     private val repository: Repository,
 ) {
 
-     suspend operator fun invoke() {
+    suspend operator fun invoke() {
         Timber.d("Timber: GetLocalBookByNameUseCase was Called")
         repository.localChapterRepository.deleteAllChapters()
         Timber.d("Timber: GetLocalBookByNameUseCase was Finished Successfully")
     }
 }
+
 class DeleteNotInLibraryLocalChaptersUseCase @Inject constructor(
     private val repository: Repository,
 ) {
@@ -31,6 +33,22 @@ class DeleteNotInLibraryLocalChaptersUseCase @Inject constructor(
     suspend operator fun invoke() {
         Timber.d("Timber: GetLocalBookByNameUseCase was Called")
         repository.localChapterRepository.deleteNotInLibraryChapters()
+        Timber.d("Timber: GetLocalBookByNameUseCase was Finished Successfully")
+    }
+}
+
+class DeleteLastReadChapterChaptersUseCase @Inject constructor(
+    private val repository: Repository,
+) {
+
+    suspend operator fun invoke(
+        bookName: String,
+        source: String,
+    ) {
+        Timber.d("Timber: GetLocalBookByNameUseCase was Called")
+        repository.localChapterRepository.deleteLastReadChapter(
+            bookName,
+            source)
         Timber.d("Timber: GetLocalBookByNameUseCase was Finished Successfully")
     }
 }

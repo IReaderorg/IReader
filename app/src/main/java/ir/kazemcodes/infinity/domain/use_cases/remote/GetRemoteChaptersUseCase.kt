@@ -34,8 +34,6 @@ class GetRemoteChaptersUseCase {
                     hasNextPage = chaptersPage.hasNextPage
                     currentPage += 1
                 }
-
-
                 emit(Resource.Success<List<Chapter>>(chapters))
                 Timber.d("Timber: GetRemoteChaptersUseCase was Finished Successfully")
 

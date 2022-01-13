@@ -1,4 +1,4 @@
-package ir.kazemcodes.infinity.presentation.screen.components
+package ir.kazemcodes.infinity.presentation.components
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.animation.animateContentSize

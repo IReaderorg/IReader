@@ -188,8 +188,10 @@ class BrowseViewModel(
                     }
                     is Resource.Error -> {
                         _state.value =
-                            state.value.copy(error = result.message ?: "An Unknown Error Occurred",
-                                isLoading = false)
+                            state.value.copy(
+                                error = result.message ?: "An Unknown Error Occurred",
+                                isLoading = false
+                            )
                     }
                     is Resource.Loading -> {
                         _state.value = state.value.copy(isLoading = true, error = "")

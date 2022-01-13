@@ -47,7 +47,7 @@ class DownloadService @AssistedInject constructor(
         val bookName = inputData.getString(DOWNLOAD_BOOK_NAME)!!
         val source = inputData.getString(DOWNLOAD_SOURCE_NAME)!!
         val book = repository.localBookRepository.getBookByName(bookName).first()!!
-        val chapters = repository.localChapterRepository.getChapterByName(bookName).first()
+        val chapters = repository.localChapterRepository.getChapterByName(bookName, source = source).first()
             .map { it.toChapter() }
 
         val notification = NotificationCompat.Builder(applicationContext,

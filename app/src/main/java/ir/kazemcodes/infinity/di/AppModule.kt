@@ -89,18 +89,23 @@ class AppModule {
             deleteLocalBookUseCase = DeleteLocalBookUseCase(repository),
             deleteAllLocalBooksUseCase = DeleteAllLocalBooksUseCase(repository),
             insertLocalChaptersUseCase = InsertLocalChaptersUseCase(repository),
-            getLocalChaptersByBookNameByBookNameUseCase = GetLocalChaptersByBookNameUseCase(
+            getLocalChaptersByBookNameUseCase = GetLocalChaptersByBookNameUseCase(
                 repository),
             getLocalBookByNameUseCase = GetLocalBookByNameUseCase(repository),
-            UpdateLocalChapterContentUseCase = UpdateLocalChapterContentUseCase(repository),
+            updateLocalChapterContentUseCase = UpdateLocalChapterContentUseCase(repository),
             getLocalChapterReadingContentUseCase = GetLocalChapterReadingContentUseCase(repository = repository),
             deleteChaptersUseCase = DeleteLocalChaptersUseCase(repository = repository),
-            UpdateLocalChaptersContentUseCase = UpdateLocalChaptersContentUseCase(repository = repository),
+            updateLocalChaptersContentUseCase = UpdateLocalChaptersContentUseCase(repository = repository),
             getAllLocalChaptersUseCase = GetLocalAllChaptersUseCase(repository),
             deleteAllLocalChaptersUseCase = DeleteAllLocalChaptersUseCase(repository),
             deleteNotInLibraryLocalChaptersUseCase = DeleteNotInLibraryLocalChaptersUseCase(repository),
             deleteNotInLibraryBooksUseCase = DeleteNotInLibraryLocalBooksUseCase(repository),
-            getInLibraryBooksUseCase = GetInLibraryBooksUseCase(repository)
+            getInLibraryBooksUseCase = GetInLibraryBooksUseCase(repository),
+            getLastReadChapterUseCase = GetLastReadChapterUseCase(repository = repository),
+            deleteLastReadChapterChaptersUseCase = DeleteLastReadChapterChaptersUseCase(repository),
+            setLastReadChaptersUseCase = SetLastReadChaptersUseCase(repository),
+            updateLocalBookUserCase = UpdateLocalBookUserCase(repository),
+            updateAddToLibraryChaptersContentUseCase = UpdateAddToLibraryChaptersContentUseCase(repository)
         )
     }
 
@@ -119,7 +124,7 @@ class AppModule {
 
     @Provides
     @Singleton
-    fun provideDataStoreUseCase(repository: Repository,@ApplicationContext context: Context): PreferencesUseCase {
+    fun provideDataStoreUseCase(repository: Repository): PreferencesUseCase {
         return PreferencesUseCase(
             readSelectedFontStateUseCase = ReadSelectedFontStateUseCase(repository),
             saveSelectedFontStateUseCase = SaveSelectedFontStateUseCase(repository),

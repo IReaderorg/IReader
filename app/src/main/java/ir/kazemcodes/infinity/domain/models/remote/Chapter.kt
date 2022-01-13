@@ -37,7 +37,7 @@ data class Chapter(
             haveBeenRead = haveBeenRead,
             source = source,
             chapterId = id,
-            inLibrary = inLibrary
+            inLibrary = inLibrary,
         )
     }
 

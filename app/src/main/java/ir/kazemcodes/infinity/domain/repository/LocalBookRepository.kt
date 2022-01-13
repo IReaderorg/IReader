@@ -16,6 +16,8 @@ interface LocalBookRepository {
 
     suspend fun insertBook(bookEntity: BookEntity)
 
+    suspend fun updateBook(bookEntity: BookEntity)
+
     suspend fun insertBooks(bookEntities: List<BookEntity>)
 
     suspend fun deleteBook(bookName: String)

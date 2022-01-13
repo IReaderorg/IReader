@@ -8,6 +8,7 @@ import androidx.work.*
 import com.zhuinden.simplestack.ScopedServices
 import ir.kazemcodes.infinity.data.network.models.Source
 import ir.kazemcodes.infinity.domain.models.remote.Book
+import ir.kazemcodes.infinity.domain.models.remote.Chapter
 import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
 import ir.kazemcodes.infinity.domain.use_cases.preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
@@ -19,6 +20,7 @@ import ir.kazemcodes.infinity.util.Resource
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import timber.log.Timber
 
 
 class BookDetailViewModel(
@@ -38,6 +40,7 @@ class BookDetailViewModel(
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     override fun onServiceRegistered() {
+
         getLocalBookByName()
         getLocalChaptersByBookName()
     }
@@ -83,13 +86,12 @@ class BookDetailViewModel(
                         state.value.copy(
                             error = result.message ?: "An Unknown Error Occurred",
                             isLoading = false,
-                            loaded = false
                         )
 
                 }
                 is Resource.Loading -> {
                     _state.value =
-                        state.value.copy(isLoading = true, error = "", loaded = false)
+                        state.value.copy(isLoading = true, error = "")
                 }
             }
         }.launchIn(coroutineScope)
@@ -97,7 +99,7 @@ class BookDetailViewModel(
 
 
     private fun getLocalChaptersByBookName() {
-        localUseCase.getLocalChaptersByBookNameByBookNameUseCase(state.value.book.bookName)
+        localUseCase.getLocalChaptersByBookNameUseCase(state.value.book.bookName, source.name)
             .onEach { result ->
                 when (result) {
                     is Resource.Success -> {
@@ -106,10 +108,13 @@ class BookDetailViewModel(
                                 chapters = result.data,
                                 error = "",
                                 isLoading = false,
+                                loaded = true
                             )
-                            readLastReadBook()
+                            getLastReadChapter()
                         } else {
-                            getRemoteChapterDetail()
+                            if (!state.value.loaded) {
+                                getRemoteChapterDetail()
+                            }
                         }
                     }
                     is Resource.Error -> {
@@ -140,6 +145,7 @@ class BookDetailViewModel(
                                 error = "",
                                 loaded = true
                             )
+                            insertBookDetailToLocal(result.data)
                         }
                     }
                     is Resource.Error -> {
@@ -147,12 +153,11 @@ class BookDetailViewModel(
                             state.value.copy(
                                 error = result.message ?: "An Unknown Error Occurred",
                                 isLoading = false,
-                                loaded = false
                             )
                     }
                     is Resource.Loading -> {
                         _state.value =
-                            state.value.copy(isLoading = true, error = "", loaded = false)
+                            state.value.copy(isLoading = true, error = "",)
                     }
                 }
             }.launchIn(coroutineScope)
@@ -165,10 +170,11 @@ class BookDetailViewModel(
                     is Resource.Success -> {
                         if (!result.data.isNullOrEmpty()) {
                             _chapterState.value = chapterState.value.copy(
-                                chapters = result.data ?: emptyList(),
-                                isLoading = false, error = "",
+                                chapters = result.data,
+                                isLoading = false,
+                                error = "",
                             )
-                            insertChaptersToLocal()
+                            insertChaptersToLocal(result.data)
                         }
                     }
                     is Resource.Error -> {
@@ -186,6 +192,38 @@ class BookDetailViewModel(
             }.launchIn(coroutineScope)
     }
 
+    private fun getLastReadChapter() {
+        localUseCase.getLastReadChapterUseCase(bookName = state.value.book.bookName,
+            source = source.name).onEach { result ->
+            when (result) {
+                is Resource.Success -> {
+                    if (result.data != null && result.data != Chapter.create()) {
+                        _chapterState.value = chapterState.value.copy(
+                            lastChapter = result.data,
+                        )
+                    } else {
+                        if (chapterState.value.chapters.isNotEmpty()) {
+                            _chapterState.value =
+                                chapterState.value.copy(lastChapter = chapterState.value.chapters.first())
+                        }
+                    }
+                }
+                is Resource.Error -> {
+                    _state.value =
+                        state.value.copy(
+                            error = result.message ?: "An Unknown Error Occurred",
+                            isLoading = false
+                        )
+
+                }
+                is Resource.Loading -> {
+                    _state.value =
+                        state.value.copy(isLoading = true, error = "")
+                }
+            }
+        }.launchIn(coroutineScope)
+    }
+
     private fun readLastReadBook() {
         val lastChapter = chapterState.value.chapters.findLast {
             it.lastRead
@@ -194,35 +232,43 @@ class BookDetailViewModel(
             ?: chapterState.value.chapters.first())
     }
 
-    fun getLastReadChapterIndex(): Int {
-        val chapterIndex =
-            chapterState.value.chapters.indexOf(chapterState.value.chapters.filterIndexed { index, chapter ->
-                return index
-            }.first())
-
-        return if (chapterIndex != -1) {
-            chapterIndex
-        } else {
-            0
-        }
-    }
-
-    fun insertBookDetailToLocal() {
+    fun insertBookDetailToLocal(book: Book) {
         coroutineScope.launch(Dispatchers.IO) {
-            localUseCase.insertLocalBookUserCase(state.value.book.copy(inLibrary = state.value.inLibrary))
+            localUseCase.insertLocalBookUserCase(book.copy(inLibrary = false))
         }
     }
 
-    fun insertChaptersToLocal() {
+    fun updateBookDetailToLocal(inLibrary: Boolean) {
+        coroutineScope.launch(Dispatchers.IO) {
+            localUseCase.updateLocalBookUserCase(state.value.book.copy(inLibrary = inLibrary))
+        }
+    }
+
+    fun updateChaptersEntity(inLibrary: Boolean) {
+        coroutineScope.launch(Dispatchers.IO) {
+            localUseCase.updateLocalChaptersContentUseCase(chapterState.value.chapters.map {
+                it.copy(inLibrary = inLibrary)
+            })
+        }
+    }
+
+    fun updateAddToLibraryChaptersToLocal() {
+        coroutineScope.launch(Dispatchers.IO) {
+            localUseCase.updateAddToLibraryChaptersContentUseCase(chapterState.value.chapters.first())
+        }
+    }
+
+    fun insertChaptersToLocal(chapters: List<Chapter>) {
         coroutineScope.launch(Dispatchers.IO) {
             localUseCase.insertLocalChaptersUseCase(
-                chapterState.value.chapters,
+                chapters,
                 state.value.book,
                 source = source,
                 inLibrary = state.value.inLibrary
             )
         }
     }
+
 
     fun deleteLocalBook(bookName: String) {
         coroutineScope.launch(Dispatchers.IO) {
@@ -231,16 +277,14 @@ class BookDetailViewModel(
     }
 
     fun deleteLocalChapters(bookName: String) {
-
-        coroutineScope.launch {
-            localUseCase.deleteChaptersUseCase(bookName)
+        coroutineScope.launch(Dispatchers.IO) {
+            localUseCase.deleteChaptersUseCase(bookName, source.name)
         }
 
     }
 
     private fun deleteNotInLibraryChapters() {
         coroutineScope.launch(Dispatchers.IO) {
-
             localUseCase.deleteNotInLibraryLocalChaptersUseCase()
         }
 
@@ -258,8 +302,7 @@ class BookDetailViewModel(
 
 
     override fun onServiceUnregistered() {
-        deleteNotInLibraryChapters()
-        deleteAllBooksNotInLibraryChapters()
+        Timber.e("UnRegister")
         coroutineScope.cancel()
         _state.value = state.value.copy(loaded = false)
     }

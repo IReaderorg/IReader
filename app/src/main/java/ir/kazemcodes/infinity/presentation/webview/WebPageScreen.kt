@@ -28,8 +28,7 @@ fun WebPageScreen(urlToRender: String, title: String? = null) {
             backgroundColor = MaterialTheme.colors.background
         )
     }) {
-        val webView =
-            AndroidView(factory = {
+        AndroidView(factory = {
                 WebView(it).apply {
                     layoutParams = ViewGroup.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,

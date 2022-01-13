@@ -26,11 +26,11 @@ import ir.kazemcodes.infinity.presentation.book_detail.components.ButtonWithIcon
 import ir.kazemcodes.infinity.presentation.book_detail.components.CardTileComposable
 import ir.kazemcodes.infinity.presentation.book_detail.components.DotsFlashing
 import ir.kazemcodes.infinity.presentation.book_detail.components.ExpandingText
+import ir.kazemcodes.infinity.presentation.components.BookImageComposable
 import ir.kazemcodes.infinity.presentation.home.ChapterDetailKey
 import ir.kazemcodes.infinity.presentation.home.ReaderScreenKey
 import ir.kazemcodes.infinity.presentation.home.WebViewKey
 import ir.kazemcodes.infinity.presentation.reusable_composable.ErrorTextWithEmojis
-import ir.kazemcodes.infinity.presentation.screen.components.BookImageComposable
 import ir.kazemcodes.infinity.util.formatBasedOnDot
 import ir.kazemcodes.infinity.util.formatList
 import ir.kazemcodes.infinity.util.getUrlWithoutDomain
@@ -42,9 +42,7 @@ fun BookDetailScreen(
 ) {
     val viewModel = rememberService<BookDetailViewModel>()
     val detailState = viewModel.state.value
-    val chapterState = viewModel.chapterState.value
     val backStack = LocalBackstack.current
-    val context = LocalContext.current
 
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -164,11 +162,16 @@ fun BookDetailScreenLoadedComposable(
                         onClick = {
                             if (!inLibrary) {
                                 viewModel.toggleInLibrary(true)
-                                viewModel.insertBookDetailToLocal()
-                                viewModel.insertChaptersToLocal()
+
+                                viewModel.updateBookDetailToLocal(true)
+                                viewModel.updateChaptersEntity(true)
+
+                                //viewModel.updateAddToLibraryChaptersToLocal()
                             } else {
                                 viewModel.toggleInLibrary(false)
-                                viewModel.deleteLocalBook(book.bookName)
+                                viewModel.updateBookDetailToLocal(false)
+                                viewModel.updateChaptersEntity(false)
+
                                 viewModel.deleteLocalChapters(book.bookName)
                             }
                         },
@@ -187,7 +190,6 @@ fun BookDetailScreenLoadedComposable(
                                         sourceName = source.name,
                                         chapter = viewModel.chapterState.value.lastChapter!!,
                                         chapters = viewModel.chapterState.value.chapters,
-
                                         ),
                                 )
                             } else if (viewModel.chapterState.value.chapters.isNotEmpty()) {
@@ -274,7 +276,7 @@ fun BookDetailScreenLoadedComposable(
                     }
                     if (book.rating != 0) {
                         Text(
-                            text = "Rating: ${"⭐".repeat(if (book.rating < 5 && book.rating > 0) book.rating else 5)}",
+                            text = "Rating: ${"⭐".repeat(if (book.rating in 1..4) book.rating else 5)}",
                             style = MaterialTheme.typography.subtitle2,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colors.onBackground.copy(alpha = .5f),

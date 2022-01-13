@@ -6,7 +6,6 @@ import android.view.WindowManager
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.fragment.app.Fragment
 import com.zhuinden.simplestack.Backstack
 import com.zhuinden.simplestack.ServiceBinder
@@ -44,8 +43,6 @@ import kotlinx.parcelize.Parcelize
 class MainScreenFragment() : ComposeFragment() {
     @Composable
     override fun FragmentComposable(backstack: Backstack) {
-
-        val viewModel = remember { backstack.lookup<MainViewModel>() }
         BackstackProvider(backstack = backstack) {
             InfinityTheme() {
                 Surface(color = MaterialTheme.colors.background) {
@@ -234,6 +231,7 @@ data class ReaderScreenKey(
                 source = lookup<SourceMapper>().mappingSourceNameToSource(sourceName),
                 book = book,
                 chapter = chapter,
+                chapterIndex = chapterIndex
             ))
         }
     }

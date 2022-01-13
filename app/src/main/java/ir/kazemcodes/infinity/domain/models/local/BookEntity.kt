@@ -25,6 +25,7 @@ data class BookEntity(
 
     fun toBook(): Book {
         return Book(
+            bookId =bookId,
             link = link,
             bookName = bookName,
             coverLink = coverLink,
@@ -34,7 +35,8 @@ data class BookEntity(
             category = category,
             inLibrary = inLibrary,
             status = status,
-            source = source
+            source = source,
+            rating = rating
         )
     }
 }

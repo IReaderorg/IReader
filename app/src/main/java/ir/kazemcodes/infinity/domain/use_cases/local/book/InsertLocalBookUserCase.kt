@@ -23,3 +23,20 @@ class InsertLocalBookUserCase @Inject constructor(
 
 
 }
+class UpdateLocalBookUserCase @Inject constructor(
+    private val repository: Repository,
+) {
+
+    @Throws(InvalidBookException::class)
+    suspend operator fun invoke(book : Book) {
+        try {
+            Timber.d("Timber: InsertLocalBookUserCase was Called")
+            repository.localBookRepository.updateBook(book.toBookEntity())
+            Timber.d("Timber: InsertLocalBookUserCase was Finished Successfully")
+        } catch (e: Exception) {
+            Timber.e("invoke: " + e.localizedMessage)
+        }
+    }
+
+
+}

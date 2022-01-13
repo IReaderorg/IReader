@@ -5,7 +5,7 @@ import ir.kazemcodes.infinity.domain.models.remote.Book
 
 data class DetailState(
     val source: Source,
-    val book: Book,
+    val book: Book = Book.create(),
     val inLibrary : Boolean = false,
     val isLoading: Boolean = false,
     val error: String = "",

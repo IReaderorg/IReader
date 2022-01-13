@@ -6,8 +6,8 @@ import androidx.compose.runtime.Composable
 import com.zhuinden.simplestack.Backstack
 import ir.kazemcodes.infinity.data.network.models.Source
 import ir.kazemcodes.infinity.domain.models.remote.Book
-import ir.kazemcodes.infinity.presentation.components.GridLayoutComposable
-import ir.kazemcodes.infinity.presentation.components.LinearListDisplay
+import ir.kazemcodes.infinity.presentation.layouts.GridLayoutComposable
+import ir.kazemcodes.infinity.presentation.layouts.LinearListDisplay
 import ir.kazemcodes.infinity.presentation.home.BookDetailKey
 import ir.kazemcodes.infinity.presentation.layouts.CompactGridLayoutComposable
 import ir.kazemcodes.infinity.presentation.layouts.LayoutType

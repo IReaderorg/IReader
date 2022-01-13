@@ -1,4 +1,4 @@
-package ir.kazemcodes.infinity.presentation.components
+package ir.kazemcodes.infinity.presentation.layouts
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -24,7 +24,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import ir.kazemcodes.infinity.domain.models.remote.Book
-import ir.kazemcodes.infinity.presentation.screen.components.BookImageComposable
+import ir.kazemcodes.infinity.presentation.components.BookImageComposable
 
 
 @OptIn(ExperimentalFoundationApi::class)

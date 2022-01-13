@@ -32,6 +32,10 @@ class LocalBookRepositoryImpl @Inject constructor(
         return dao.insertBook(bookEntity)
     }
 
+    override suspend fun updateBook(bookEntity: BookEntity) {
+        return dao.updateBook(bookEntity)
+    }
+
     override suspend fun insertBooks(bookEntities: List<BookEntity>) {
         return dao.insertBooks(bookEntities)
     }

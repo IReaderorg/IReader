@@ -17,15 +17,14 @@ import kotlinx.coroutines.flow.onEach
 class LibraryViewModel(
     private val localUseCase: LocalUseCase,
     private val preferencesUseCase: PreferencesUseCase,
-) : ScopedServices.Registered {
-    private val _state = mutableStateOf<LibraryState>(LibraryState())
+) : ScopedServices.Activated , ScopedServices.Registered{
+    private val _state = mutableStateOf(LibraryState())
     val state: State<LibraryState> = _state
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
 
     override fun onServiceRegistered() {
-        deleteNotInLibraryBooks()
-        deleteNotInLibraryChapters()
+
         getLocalBooks()
         readLayoutType()
     }
@@ -117,6 +116,15 @@ class LibraryViewModel(
         coroutineScope.launch(Dispatchers.IO) {
             localUseCase.deleteNotInLibraryBooksUseCase()
         }
+    }
+
+    override fun onServiceActive() {
+        deleteNotInLibraryBooks()
+        deleteNotInLibraryChapters()
+    }
+
+    override fun onServiceInactive() {
+
     }
 
 

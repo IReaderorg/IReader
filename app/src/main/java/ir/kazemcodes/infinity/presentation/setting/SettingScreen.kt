@@ -25,7 +25,7 @@ import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarTitle
 
 @Composable
 fun SettingScreen(modifier: Modifier = Modifier) {
-    val settingItems = listOf<SettingItems>(
+    val settingItems = listOf(
         SettingItems.Downloads,
         SettingItems.ExtensionCreator,
         SettingItems.DnsOverHttp,

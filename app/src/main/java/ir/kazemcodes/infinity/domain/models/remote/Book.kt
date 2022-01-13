@@ -7,7 +7,7 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class Book(
-
+    var bookId: Int? = null,
     var link: String,
 
     var bookName: String,
@@ -62,7 +62,9 @@ data class Book(
             description = description,
             inLibrary = inLibrary,
             category = category,
-            source = source
+            source = source,
+            bookId = bookId,
+            rating = rating
         )
     }
 

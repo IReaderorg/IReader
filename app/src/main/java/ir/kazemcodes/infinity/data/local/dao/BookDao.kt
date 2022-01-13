@@ -1,9 +1,6 @@
 package ir.kazemcodes.infinity.data.local.dao
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room.*
 import ir.kazemcodes.infinity.domain.models.local.BookEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -24,6 +21,9 @@ interface BookDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertBook(bookEntity: BookEntity)
+
+    @Update(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun updateBook(bookEntity: BookEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertBooks(bookEntity: List<BookEntity>)

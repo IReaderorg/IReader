@@ -21,7 +21,7 @@ class ChapterDetailViewModel(
     private val source: Source,
 ) :  ScopedServices.Registered {
 
-    private val _state = mutableStateOf<ChapterDetailState>(ChapterDetailState(source = source))
+    private val _state = mutableStateOf(ChapterDetailState(source = source))
     val state: State<ChapterDetailState> = _state
 
     override fun onServiceRegistered() {
@@ -36,25 +36,26 @@ class ChapterDetailViewModel(
         when (event) {
             is ChapterDetailEvent.ToggleOrder -> {
                 _state.value = state.value.copy(
-                    reverseChapters = state.value.reverseChapters.reversed()
+                    localChapters = state.value.localChapters.reversed(),
+                    isReversed = !state.value.isReversed
                 )
             }
             is ChapterDetailEvent.UpdateChapters -> {
-                _state.value = state.value.copy(reverseChapters = event.chapters)
+                _state.value = state.value.copy(localChapters = event.chapters)
             }
 
         }
     }
 
     private fun getLocalChapters() {
-        localUseCase.getLocalChaptersByBookNameByBookNameUseCase(bookName = book.bookName)
+        localUseCase.getLocalChaptersByBookNameUseCase(bookName = book.bookName, source = source.name )
             .onEach { result ->
                 when (result) {
                     is Resource.Success -> {
                         if (!result.data.isNullOrEmpty()) {
                             _state.value = state.value.copy(
                                 chapters = result.data,
-                                reverseChapters = result.data.reversed(),
+                                localChapters = if (state.value.isReversed ) result.data.reversed() else result.data,
                                 isLoading = false,
                                 error = "")
                         } else {
@@ -71,6 +72,10 @@ class ChapterDetailViewModel(
                     }
                 }
             }.launchIn(coroutineScope)
+    }
+
+    fun getIndexOfChapter(index : Int) : Int {
+        return if (state.value.isReversed) (state.value.localChapters.size - 1 ) - index else index
     }
 
 

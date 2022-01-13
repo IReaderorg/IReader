@@ -142,7 +142,7 @@ fun BrowserScreen() {
                     backStack = backStack
                 )
             }
-            if (scrollState.isScrolledToTheEnd() && !state.isLoading && state.error.isEmpty() && !state.isSearchModeEnable) {
+            if (scrollState.isScrolledToTheEnd() && !state.isLoading  && !state.isSearchModeEnable) {
                 viewModel.onEvent(BrowseScreenEvents.GetBooks(source = source))
             }
             if (state.error.isNotBlank()) {

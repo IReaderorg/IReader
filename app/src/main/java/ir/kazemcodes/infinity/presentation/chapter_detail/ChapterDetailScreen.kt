@@ -12,7 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -34,11 +33,6 @@ fun ChapterDetailScreen(
     val chapters = viewModel.state.value.chapters
     val book = viewModel.state.value.book
     val backStack = LocalBackstack.current
-    val chapterState = viewModel.state.value.reverseChapters
-    if (chapterState.isEmpty() || chapterState.size != chapters.size && chapterState.last().title != chapters.last().title) {
-        viewModel.onEvent(ChapterDetailEvent.UpdateChapters(chapters = viewModel.state.value.reverseChapters))
-    }
-    val context = LocalContext.current
     val state = viewModel.state.value
 
 
@@ -81,9 +75,9 @@ fun ChapterDetailScreen(
         }
     ) {
         Box(modifier.fillMaxSize()) {
-            if (state.reverseChapters.isNotEmpty()) {
+            if (state.localChapters.isNotEmpty()) {
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(count = state.reverseChapters.size) { index ->
+                    items(count = state.localChapters.size) { index ->
                         Row(
                             modifier = modifier
                                 .fillMaxWidth()
@@ -93,9 +87,9 @@ fun ChapterDetailScreen(
                                     backStack.goTo(
                                         ReaderScreenKey(
                                             book = book,
-                                            chapterIndex = chapters.indexOf(state.reverseChapters[index]),
+                                            chapterIndex = viewModel.getIndexOfChapter(index),
                                             sourceName = viewModel.state.value.source.name,
-                                            chapter = state.reverseChapters[index],
+                                            chapter = state.localChapters[index],
                                             chapters = chapters
                                         )
                                     )
@@ -104,8 +98,8 @@ fun ChapterDetailScreen(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
-                                text = state.reverseChapters[index].title,
-                                color = if (state.reverseChapters[index].haveBeenRead) MaterialTheme.colors.onBackground.copy(
+                                text = state.localChapters[index].title,
+                                color = if (state.localChapters[index].haveBeenRead) MaterialTheme.colors.onBackground.copy(
                                     alpha = .4f) else MaterialTheme.colors.onBackground,
                                 style = MaterialTheme.typography.subtitle1,
                                 fontWeight = FontWeight.SemiBold,
@@ -113,9 +107,9 @@ fun ChapterDetailScreen(
                                 modifier = Modifier.weight(7f)
                             )
                             Text(modifier = Modifier.weight(2f),
-                                text = state.reverseChapters[index].dateUploaded ?: "",
+                                text = state.localChapters[index].dateUploaded ?: "",
                                 fontStyle = FontStyle.Italic,
-                                color = if (state.reverseChapters[index].haveBeenRead) MaterialTheme.colors.onBackground.copy(
+                                color = if (state.localChapters[index].haveBeenRead) MaterialTheme.colors.onBackground.copy(
                                     alpha = .4f) else MaterialTheme.colors.onBackground,
                                 fontWeight = FontWeight.SemiBold,
                                 style = MaterialTheme.typography.caption
@@ -124,7 +118,7 @@ fun ChapterDetailScreen(
                             Icon(
                                 imageVector = Icons.Default.PublishedWithChanges,
                                 contentDescription = "Cached",
-                                tint = if (state.reverseChapters[index].content.joinToString(" , ").length > 10) MaterialTheme.colors.onBackground else MaterialTheme.colors.background,
+                                tint = if (state.localChapters[index].content.joinToString(" , ").length > 10) MaterialTheme.colors.onBackground else MaterialTheme.colors.background,
                             )
                         }
                     }

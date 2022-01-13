@@ -51,7 +51,6 @@ fun ChaptersSliderComposable(
                     viewModel.getContent(chapters[viewModel.state.value.currentChapterIndex])
                 },
                 valueRange = 0f..(chapters.size - 1).toFloat(),
-                steps = chapters.size,
                 colors = SliderDefaults.colors(
                     thumbColor = MaterialTheme.colors.primary,
                     activeTrackColor = MaterialTheme.colors.primary.copy(alpha = .6f),

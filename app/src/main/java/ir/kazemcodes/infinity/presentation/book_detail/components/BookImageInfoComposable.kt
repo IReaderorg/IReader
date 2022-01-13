@@ -11,7 +11,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ir.kazemcodes.infinity.domain.models.remote.Book
-import ir.kazemcodes.infinity.presentation.screen.components.BookImageComposable
+import ir.kazemcodes.infinity.presentation.components.BookImageComposable
 
 @Composable
 fun BookImageInfoComposable(modifier: Modifier = Modifier, bookDetail: Book) {

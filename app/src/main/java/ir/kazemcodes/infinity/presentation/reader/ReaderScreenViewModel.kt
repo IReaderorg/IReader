@@ -30,10 +30,11 @@ class ReaderScreenViewModel(
     private val preferencesUseCase: PreferencesUseCase,
     private val source: Source,
     private val book: Book,
-    private val chapter: Chapter,
+    chapter: Chapter,
+    chapterIndex : Int
     ) : ScopedServices.Registered {
     private val _state =
-        mutableStateOf(ReaderScreenState(source = source, book = book, chapter = chapter))
+        mutableStateOf(ReaderScreenState(source = source, book = book, chapter = chapter, currentChapterIndex = chapterIndex))
 
     val state: State<ReaderScreenState> = _state
 
@@ -57,7 +58,7 @@ class ReaderScreenViewModel(
         preferencesUseCase.setBackgroundColorUseCase(colorIndex)
     }
 
-    fun readPreferences() {
+    private fun readPreferences() {
         readSelectedFontState()
         readFontSize()
         readBackgroundColor()
@@ -86,6 +87,10 @@ class ReaderScreenViewModel(
             }
         }
     }
+    fun getIndexOfChapter(index : Int) : Int {
+        return if (state.value.isReversed) (state.value.drawerChapters.size - 1 ) - index else index
+    }
+
 
     private fun toggleReaderMode(enable: Boolean? = null) {
         _state.value =
@@ -116,14 +121,14 @@ class ReaderScreenViewModel(
     }
 
     private fun getLocalChapters() {
-        localUseCase.getLocalChaptersByBookNameByBookNameUseCase(bookName = book.bookName)
+        localUseCase.getLocalChaptersByBookNameUseCase(bookName = book.bookName,source.name)
             .onEach { result ->
                 when (result) {
                     is Resource.Success -> {
                         if (!result.data.isNullOrEmpty()) {
                             _state.value = state.value.copy(
                                 chapters = result.data,
-                                reverseChapters = result.data,
+                                drawerChapters = if (state.value.isReversed ) result.data.reversed() else result.data,
                             )
                         } else {
                             _state.value = state.value.copy()
@@ -140,7 +145,7 @@ class ReaderScreenViewModel(
     }
 
     private fun getReadingContentLocally(chapter: Chapter) {
-        localUseCase.getLocalChapterReadingContentUseCase(chapter)
+        localUseCase.getLocalChapterReadingContentUseCase(chapter,source.name)
             .onEach { result ->
                 when (result) {
                     is Resource.Success -> {
@@ -217,27 +222,20 @@ class ReaderScreenViewModel(
 
 
     private fun toggleLastReadAndUpdateChapterContent(chapter: Chapter) {
-        coroutineScope.launch(Dispatchers.Main) {
-            state.value.chapters.filter {
-                it.lastRead
-            }.forEach {
-                localUseCase.UpdateLocalChapterContentUseCase(it.copy(lastRead = false))
-            }
-            localUseCase.UpdateLocalChapterContentUseCase(chapter.copy(lastRead = true,
-                content = chapter.content,
-                haveBeenRead = true))
+        coroutineScope.launch(Dispatchers.IO) {
+            localUseCase.updateLocalChapterContentUseCase(state.value.chapter)
+            localUseCase.deleteLastReadChapterChaptersUseCase(book.bookName, source.name )
+            localUseCase.setLastReadChaptersUseCase(state.value.book,chapter.title, source = source)
         }
     }
 
     fun reverseChapters() {
-        _state.value = state.value.copy(reverseChapters = state.value.reverseChapters.reversed())
+        _state.value = state.value.copy(isReversed = !state.value.isReversed,drawerChapters = state.value.drawerChapters.reversed())
     }
 
 
     private fun readSelectedFontState() {
         _state.value = state.value.copy(font = preferencesUseCase.readSelectedFontStateUseCase())
-
-
     }
 
     fun readBrightness(context: Context) {
@@ -254,12 +252,12 @@ class ReaderScreenViewModel(
         _state.value = state.value.copy(fontSize = preferencesUseCase.readFontSizeStateUseCase())
     }
 
-    fun readParagraphDistance() {
+    private fun readParagraphDistance() {
         _state.value =
             state.value.copy(distanceBetweenParagraphs = preferencesUseCase.readParagraphDistanceUseCase())
     }
 
-    fun readFontHeight() {
+    private fun readFontHeight() {
         _state.value = state.value.copy(lineHeight = preferencesUseCase.readFontHeightUseCase())
     }
 
@@ -341,9 +339,7 @@ class ReaderScreenViewModel(
 
     private fun saveFont(fontType: FontType) {
         _state.value = state.value.copy(font = fontType)
-
         preferencesUseCase.saveSelectedFontStateUseCase(fonts.indexOf(fontType))
-
     }
 
     private fun saveBrightness(brightness: Float, context: Context) {
@@ -361,6 +357,7 @@ class ReaderScreenViewModel(
     fun updateChapterSliderIndex(index: Int) {
         _state.value = state.value.copy(currentChapterIndex = index)
     }
+
 
 
     override fun onServiceUnregistered() {

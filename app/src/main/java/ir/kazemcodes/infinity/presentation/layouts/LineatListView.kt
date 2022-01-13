@@ -1,4 +1,4 @@
-package ir.kazemcodes.infinity.presentation.components
+package ir.kazemcodes.infinity.presentation.layouts
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ir.kazemcodes.infinity.domain.models.remote.Book
-import ir.kazemcodes.infinity.presentation.screen.components.BookImageComposable
+import ir.kazemcodes.infinity.presentation.components.BookImageComposable
 
 
 @Composable

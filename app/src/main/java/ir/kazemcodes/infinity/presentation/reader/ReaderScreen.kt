@@ -18,7 +18,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -42,7 +41,6 @@ fun ReadingScreen(
     modifier: Modifier = Modifier,
 ) {
     val viewModel = rememberService<ReaderScreenViewModel>()
-    val context = LocalContext.current
     val scaffoldState = rememberScaffoldState(rememberDrawerState(DrawerValue.Closed))
     val scope = rememberCoroutineScope()
     val book = viewModel.state.value.book
@@ -53,43 +51,43 @@ fun ReadingScreen(
 
     Box(modifier = modifier.fillMaxSize()) {
         Scaffold(topBar = {
-                if (!state.isReaderModeEnable && state.isLoaded) {
-                    TopAppBar(
-                        title = {
-                            Text(
-                                text = viewModel.state.value.chapter.title,
-                                color = MaterialTheme.colors.onBackground,
-                                style = MaterialTheme.typography.subtitle1,
-                                fontWeight = FontWeight.Bold,
-                                overflow = TextOverflow.Ellipsis,
-                                maxLines = 1
-                            )
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        backgroundColor = MaterialTheme.colors.background,
-                        contentColor = MaterialTheme.colors.onBackground,
-                        elevation = 8.dp,
-                        navigationIcon = {
-                            TopAppBarBackButton(backStack = backStack)
-                        },
-                        actions = {
-                            TopAppBarActionButton(imageVector = Icons.Default.Autorenew,
-                                title = "Refresh",
-                                onClick = { viewModel.getReadingContentRemotely(viewModel.state.value.chapter) })
-                            TopAppBarActionButton(imageVector = Icons.Default.Language,
-                                title = "WebView",
-                                onClick = { backStack.goTo(WebViewKey(url = viewModel.state.value.chapter.link)) })
-                        }
-                    )
-                } else if (!state.isLoaded) {
-                    TopAppBar(title = {},
-                        elevation = 0.dp,
-                        backgroundColor = MaterialTheme.colors.background,
-                        navigationIcon = {
-                            TopAppBarBackButton(backStack = backStack)
-                        })
-                }
-            },
+            if (!state.isReaderModeEnable && state.isLoaded) {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = viewModel.state.value.chapter.title,
+                            color = MaterialTheme.colors.onBackground,
+                            style = MaterialTheme.typography.subtitle1,
+                            fontWeight = FontWeight.Bold,
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 1
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    backgroundColor = MaterialTheme.colors.background,
+                    contentColor = MaterialTheme.colors.onBackground,
+                    elevation = 8.dp,
+                    navigationIcon = {
+                        TopAppBarBackButton(backStack = backStack)
+                    },
+                    actions = {
+                        TopAppBarActionButton(imageVector = Icons.Default.Autorenew,
+                            title = "Refresh",
+                            onClick = { viewModel.getReadingContentRemotely(viewModel.state.value.chapter) })
+                        TopAppBarActionButton(imageVector = Icons.Default.Language,
+                            title = "WebView",
+                            onClick = { backStack.goTo(WebViewKey(url = viewModel.state.value.chapter.link)) })
+                    }
+                )
+            } else if (!state.isLoaded) {
+                TopAppBar(title = {},
+                    elevation = 0.dp,
+                    backgroundColor = MaterialTheme.colors.background,
+                    navigationIcon = {
+                        TopAppBarBackButton(backStack = backStack)
+                    })
+            }
+        },
             scaffoldState = scaffoldState,
             bottomBar = {
                 if (!state.isReaderModeEnable && state.isLoaded) {
@@ -123,7 +121,7 @@ fun ReadingScreen(
             drawerContent = {
                 Column(modifier = modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center) {
+                    verticalArrangement = Arrangement.Top) {
                     Spacer(modifier = modifier.height(5.dp))
                     Row(verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -138,27 +136,25 @@ fun ReadingScreen(
 
                     Spacer(modifier = modifier.height(5.dp))
                     Divider(modifier = modifier.fillMaxWidth(), thickness = 1.dp)
-                    if (state.reverseChapters.isNotEmpty()) {
+                    if (state.chapters.isNotEmpty()) {
                         LazyColumn(modifier = Modifier.fillMaxSize()) {
-                            items(count = state.reverseChapters.size) { index ->
+                            items(count = state.drawerChapters.size) { index ->
                                 Row(
                                     modifier = modifier
                                         .fillMaxWidth()
                                         .padding(12.dp)
                                         .height(40.dp)
                                         .clickable {
-                                            viewModel.getContent(state.chapters[state.chapters.indexOf(
-                                                state.reverseChapters[index])])
-                                            viewModel.updateChapterSliderIndex(index = state.chapters.indexOf(
-                                                state.reverseChapters[index]))
+                                            viewModel.getContent(viewModel.state.value.chapters[viewModel.getIndexOfChapter(index)])
+                                            viewModel.updateChapterSliderIndex(index = viewModel.getIndexOfChapter(index))
 
                                         },
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
                                     Text(
-                                        text = state.reverseChapters[index].title,
-                                        color = if (state.reverseChapters[index].haveBeenRead) MaterialTheme.colors.onBackground.copy(
+                                        text = state.drawerChapters[index].title,
+                                        color = if (state.drawerChapters[index].haveBeenRead) MaterialTheme.colors.onBackground.copy(
                                             alpha = .4f) else MaterialTheme.colors.onBackground,
                                         style = MaterialTheme.typography.subtitle1,
                                         fontWeight = FontWeight.SemiBold,
@@ -166,9 +162,9 @@ fun ReadingScreen(
                                         modifier = Modifier.weight(7f)
                                     )
                                     Text(modifier = Modifier.weight(2f),
-                                        text = state.reverseChapters[index].dateUploaded ?: "",
+                                        text = state.drawerChapters[index].dateUploaded ?: "",
                                         fontStyle = FontStyle.Italic,
-                                        color = if (state.reverseChapters[index].haveBeenRead) MaterialTheme.colors.onBackground.copy(
+                                        color = if (state.drawerChapters[index].haveBeenRead) MaterialTheme.colors.onBackground.copy(
                                             alpha = .4f) else MaterialTheme.colors.onBackground,
                                         fontWeight = FontWeight.SemiBold,
                                         style = MaterialTheme.typography.caption
@@ -177,7 +173,9 @@ fun ReadingScreen(
                                     Icon(
                                         imageVector = Icons.Default.PublishedWithChanges,
                                         contentDescription = "Cached",
-                                        tint = if (state.reverseChapters[index].content.joinToString(" , ").length > 10) MaterialTheme.colors.onBackground else MaterialTheme.colors.background,
+                                        tint = if (state.drawerChapters[index].content.joinToString(
+                                                " , ").length > 10
+                                        ) MaterialTheme.colors.onBackground else MaterialTheme.colors.background,
                                     )
                                 }
                             }
