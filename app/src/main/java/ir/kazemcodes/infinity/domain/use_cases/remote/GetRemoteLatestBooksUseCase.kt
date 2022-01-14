@@ -1,7 +1,7 @@
 package ir.kazemcodes.infinity.domain.use_cases.remote
 
+import ir.kazemcodes.infinity.data.network.models.BooksPage
 import ir.kazemcodes.infinity.data.network.models.Source
-import ir.kazemcodes.infinity.domain.models.remote.Book
 import ir.kazemcodes.infinity.util.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -10,37 +10,35 @@ import timber.log.Timber
 import java.io.IOException
 
 class GetRemoteLatestBooksUseCase {
-    operator fun invoke(page: Int, source: Source): Flow<Resource<List<Book>>> = flow {
+    operator fun invoke(page: Int, source: Source,hasNextPage : Boolean): Flow<Resource<BooksPage>> = flow {
         try {
             emit(Resource.Loading())
             Timber.d("Timber: GetRemoteLatestBooksUseCase page: $page was Called")
-            val books = source.fetchLatest(page)
+            if (hasNextPage) {
+                val books = source.fetchLatest(page)
 
-            if (books.isCloudflareEnabled) {
-                emit(Resource.Error<List<Book>>("CloudFlare is Enable"))
+                if (books.isCloudflareEnabled) {
+                    emit(Resource.Error<BooksPage>("CloudFlare is Enable"))
+                }  else {
+                    emit(Resource.Success<BooksPage>(books))
+
+                }
             } else {
-                emit(Resource.Success<List<Book>>(books.books.map { it.copy(source = source.name) }))
+                emit(Resource.Error<BooksPage>("There is No Page"))
             }
-
-
             Timber.d("Timber: GetRemoteLatestBooksUseCase page: $page was Finished Successfully")
-            if (!books.hasNextPage) {
-                Resource.Error<List<Book>>(
-                    message = "There is No More Books"
-                )
-            }
 
         } catch (e: HttpException) {
             emit(
-                Resource.Error<List<Book>>(
+                Resource.Error<BooksPage>(
                     message = e.localizedMessage ?: "An Unexpected Error Occurred."
                 )
             )
         } catch (e: IOException) {
-            emit(Resource.Error<List<Book>>(message = "No Internet is Available."))
+            emit(Resource.Error<BooksPage>(message = "No Internet is Available."))
         } catch (e: Exception) {
             emit(
-                Resource.Error<List<Book>>(
+                Resource.Error<BooksPage>(
                     message = e.localizedMessage ?: "An Unexpected Error Occurred."
                 )
             )

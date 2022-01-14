@@ -1,5 +1,6 @@
 package ir.kazemcodes.infinity.presentation.book_detail.components
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
@@ -21,7 +22,8 @@ fun BookImageInfoComposable(modifier: Modifier = Modifier, bookDetail: Book) {
             modifier = Modifier
                 .height(180.dp)
                 .width(150.dp)
-                .clip(RoundedCornerShape(16.dp))
+                .clip(RoundedCornerShape(8.dp))
+                .border(2.dp,MaterialTheme.colors.onBackground.copy(alpha = .1f)),
         )
         Spacer(modifier = modifier.height(8.dp))
         Column {

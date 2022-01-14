@@ -232,18 +232,17 @@ class AvailableSources(context: Context) {
             coverAtt = "src",
         ),
         detail = Detail(
-            ajaxSelector = "div.description-summary div.summary__content p:nth-child(1)",
             nameSelector = "div.post-title>h1",
             coverSelector = "div.summary_image a img",
             coverAtt = "src",
             descriptionSelector = "div.description-summary div.summary__content p",
             authorBookSelector = "div.author-content>a",
-            categorySelector = "div.genres-content p",
+            categorySelector = "div.genres-content a",
         ),
         chapters = Chapters(
-            //_shouldStringSomethingAtEnd = true,
-            //_subStringSomethingAtEnd = "ajax/chapters/",
-            ajaxSelector = "div.listing-chapters_wrap li:nth-child(1)  a",
+            _shouldStringSomethingAtEnd = true,
+            _subStringSomethingAtEnd = "ajax/chapters/",
+            ajaxSelector = "ul.main>li:nth-child(1)>a",
             selector = "li.wp-manga-chapter",
             nameSelector = "a",
             linkSelector = "a",
@@ -328,11 +327,52 @@ class AvailableSources(context: Context) {
             pageContentSelector = "div.content"
         )
     )
+    val koreanMtl = SourceCreator(
+        context = context,
+        _name = "KoreanMtl.Online",
+        _lang = "en",
+        _supportsLatest = true,
+        _baseUrl = "https://www.koreanmtl.online/",
+        _supportsSearch = false,
+        _supportsMostPopular = false,
+        latest = Latest(
+            endpoint = "/p/novels-listing.html",
+            selector = "ul.a li.b",
+            nameSelector = "a",
+            linkSelector = "a",
+            linkAtt = "href",
+            nextPageSelector = "#manga-item-460401 > a > img",
+            nextPageValue = "#manga-item-460401 > a > img"
+        ),
+        search = Search(
+            endpoint = "/index.php?s=so&module=book&keyword={query}",
+            selector = "ul.list li a",
+            nameSelector = "p.bookname",
+            linkAtt = "href",
+            addBaseUrlToLink = true,
+            coverSelector = "img",
+            coverAtt = "src",
+        ),
+        detail = Detail(
+            descriptionSelector = "div.post-body p",
+        ),
+        chapters = Chapters(
+            selector = "div.post-body ul.a li.a",
+            nameSelector = "a",
+            linkSelector = "a",
+            linkAtt = "href",
+        ),
+        content = Content(
+            pageTitleSelector = "h1",
+            pageContentSelector = "p"
+        )
+    )
     val sourcesList = listOf<Source>(
         realwebnovel,
         freeWebNovel,
         mtl,
         wuxiaworld,
-        myLoveNovel
+        myLoveNovel,
+        koreanMtl
     )
 }

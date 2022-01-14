@@ -175,15 +175,18 @@ class BrowseViewModel(
 
     private fun getLatestUpdateBooks(source: Source) {
         remoteUseCase.getRemoteLatestUpdateLatestBooksUseCase(page = state.value.page,
-            source = source)
+            source = source,hasNextPage = state.value.hasNextPage)
             .onEach { result ->
                 when (result) {
                     is Resource.Success -> {
-                        _state.value = state.value.copy(
-                            books = merge(state.value.books, result.data ?: emptyList()),
-                            isLoading = false,
-                            error = ""
-                        )
+                        if (result.data !=null) {
+                            _state.value = state.value.copy(
+                                books = merge(state.value.books, result.data.books ?: emptyList()),
+                                hasNextPage = result.data.hasNextPage,
+                                isLoading = false,
+                                error = ""
+                            )
+                        }
                         onEvent(BrowseScreenEvents.UpdatePage(state.value.page + 1))
                     }
                     is Resource.Error -> {

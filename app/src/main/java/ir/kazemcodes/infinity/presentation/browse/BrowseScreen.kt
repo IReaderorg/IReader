@@ -62,7 +62,7 @@ fun BrowserScreen() {
                             title = "Close",
                             onClick = { viewModel.onEvent(BrowseScreenEvents.ToggleSearchMode()) },
                         )
-                    } else {
+                    } else if (source.supportSearch){
                         TopAppBarActionButton(
                             imageVector = Icons.Default.Search,
                             title = "Search",

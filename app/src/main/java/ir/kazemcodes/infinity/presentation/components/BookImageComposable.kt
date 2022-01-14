@@ -48,7 +48,7 @@ fun BookImageComposable(
                     TopAppBarTitle(title = "No Image Available")
                 }
             }
-        },
+        }
 
-        )
+    )
 }

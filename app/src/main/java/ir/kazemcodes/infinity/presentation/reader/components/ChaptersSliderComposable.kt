@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextOverflow
 import ir.kazemcodes.infinity.data.network.utils.toast
 import ir.kazemcodes.infinity.presentation.reader.ReaderScreenViewModel
 
@@ -27,7 +28,10 @@ fun ChaptersSliderComposable(
     Column(modifier = modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         Text(text = viewModel.state.value.chapters[currentIndex].title,
             color = MaterialTheme.colors.onBackground,
-            style = MaterialTheme.typography.subtitle2)
+            style = MaterialTheme.typography.subtitle2,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+            )
         Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             IconButton(modifier = modifier.weight(1f),
                 onClick = {

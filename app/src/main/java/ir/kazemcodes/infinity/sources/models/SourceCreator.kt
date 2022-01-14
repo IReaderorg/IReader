@@ -283,7 +283,7 @@ class SourceCreator(
 
 
             book.bookName = selectorReturnerStringType(document, selectorBookName, attAuthor)
-            book.coverLink = selectorReturnerStringType(document, coverSelector, coverAtt)
+            book.coverLink = selectorReturnerStringType(document, coverSelector, coverAtt).replace("render_isfalse","")
             book.author = selectorReturnerStringType(document, selectorAuthor, attBookName)
             book.description = selectorReturnerListType(document, selectorDescription, attDescription).map { it.formatHtmlText() }
             book.category = selectorReturnerListType(document, selectorCategory, attCategory)
@@ -343,8 +343,7 @@ class SourceCreator(
             val titleAtt = content.pageTitleAtt
             val title = selectorReturnerStringType(document, titleSelector, titleAtt)
             val page = selectorReturnerListType(document, contentSelector, contentAtt)
-            contentList.add(title)
-            contentList.addAll(page)
+            contentList.addAll(merge(listOf(title),page))
         } else {
             val crudeJson = Jsoup.parse(document.html()).text().trim()
             val json = JsonPath.parse(crudeJson)

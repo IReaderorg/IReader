@@ -1,6 +1,7 @@
 package ir.kazemcodes.infinity.presentation.book_detail
 
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -13,7 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -233,9 +233,9 @@ fun BookDetailScreenLoadedComposable(
                     modifier = modifier
                         .width(120.dp)
                         .height(180.dp)
-                        .shadow(8.dp)
-                        .clip(RoundedCornerShape(8.dp)),
-                    contentScale = ContentScale.Crop
+                        .clip(RoundedCornerShape(8.dp))
+                        .border(2.dp,MaterialTheme.colors.onBackground.copy(alpha = .1f)),
+                    contentScale = ContentScale.Crop,
                 )
                 Spacer(modifier = modifier.width(8.dp))
                 /** Book Info **/

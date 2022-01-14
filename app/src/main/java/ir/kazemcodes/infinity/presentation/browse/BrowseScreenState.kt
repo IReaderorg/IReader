@@ -16,5 +16,6 @@ data class BrowseScreenState(
     val searchQuery: String = "",
     val searchedBook: BooksPage = BooksPage(),
     val isLatestUpdateMode: Boolean = true,
+    val hasNextPage : Boolean = true
 )
 

@@ -71,6 +71,8 @@ class NetworkHelper(private val context: Context) : DIAware {
     @OptIn(ExperimentalCoroutinesApi::class)
     suspend fun getHtmlFromWebView(url: String, ajaxSelector: String? = null): Document {
 
+        Timber.d("Infinity: GetData Using WebView")
+
         with(webView.settings) {
             javaScriptEnabled = true
             domStorageEnabled = true
