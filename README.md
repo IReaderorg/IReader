@@ -21,6 +21,9 @@ Infinity is a free and open source applicaiton for Android.
 - download manager(you can download the books but there isn't a good download manager yet).
 
 
+## Release Page
+
+- You Can Download the App From [Here](https://github.com/kazemcodes/Infinity/releases)
 
 
 ## Screenshots :camera:
