@@ -1,6 +1,7 @@
 package ir.kazemcodes.infinity
 
 import android.app.Application
+import android.webkit.WebView
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import com.google.firebase.analytics.FirebaseAnalytics
@@ -8,11 +9,11 @@ import com.zhuinden.simplestack.GlobalServices
 import com.zhuinden.simplestackextensions.servicesktx.add
 import dagger.hilt.android.HiltAndroidApp
 import ir.kazemcodes.infinity.data.network.Extensions
-import ir.kazemcodes.infinity.data.network.utils.NetworkHelper
 import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
 import ir.kazemcodes.infinity.domain.use_cases.preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
 import ir.kazemcodes.infinity.notification.Notifications
+import ir.kazemcodes.infinity.sources.utils.NetworkHelper
 import ir.kazemcodes.infinity.util.SourceMapper
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -46,6 +47,7 @@ class MyApplication : Application(), DIAware, Configuration.Provider {
         bindSingleton<NetworkHelper> { NetworkHelper(this@MyApplication) }
         bindSingleton<Extensions> { Extensions(this@MyApplication) }
         bindSingleton<PreferencesUseCase> { preferencesUseCase }
+        bindSingleton<WebView> { WebView(this@MyApplication) }
     }
 
 

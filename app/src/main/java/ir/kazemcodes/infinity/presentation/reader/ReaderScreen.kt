@@ -156,8 +156,7 @@ fun ReadingScreen(
                                         .clickable {
                                             viewModel.getContent(viewModel.state.value.chapters[viewModel.getIndexOfChapter(
                                                 index)])
-                                            viewModel.updateChapterSliderIndex(index = viewModel.getIndexOfChapter(
-                                                index))
+                                            viewModel.updateChapterSliderIndex(index = index)
 
                                         },
                                     verticalAlignment = Alignment.CenterVertically,

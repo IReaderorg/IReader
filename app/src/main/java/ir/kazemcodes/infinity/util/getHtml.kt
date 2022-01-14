@@ -32,6 +32,7 @@ suspend fun WebView.getHtml(): String = suspendCancellableCoroutine { continuati
     }
 }
 
+
 fun String.getHtml(): String {
     return this.replace("\\<.*?>", "")
 }

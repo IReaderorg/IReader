@@ -36,6 +36,10 @@ fun String.replaceImageFormat(condition: Boolean): String {
 
 fun String.formatHtmlText(): String {
     return this
+        .replace("<em>","")
+        .replace("</em>","")
+        .replace("<b>","")
+        .replace("</b>","")
         .replace("<strong>", "")
         .replace("</strong>", "")
         .replace("</i>", "")

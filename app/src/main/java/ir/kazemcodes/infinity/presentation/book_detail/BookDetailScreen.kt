@@ -198,6 +198,8 @@ fun BookDetailScreenLoadedComposable(
                                     sourceName = source.name,
                                     chapter = viewModel.chapterState.value.chapters.first(),
                                 ))
+                            } else {
+                                context.toast("No Chapter is Avialable")
                             }
                         }
                     )

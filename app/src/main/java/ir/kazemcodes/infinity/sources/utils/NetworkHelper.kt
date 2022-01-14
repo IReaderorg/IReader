@@ -1,9 +1,12 @@
-package ir.kazemcodes.infinity.data.network.utils
+package ir.kazemcodes.infinity.sources.utils
 
 import android.annotation.SuppressLint
 import android.content.Context
 import android.webkit.WebView
 import ir.kazemcodes.infinity.data.network.models.*
+import ir.kazemcodes.infinity.data.network.utils.AndroidCookieJar
+import ir.kazemcodes.infinity.data.network.utils.UserAgentInterceptor
+import ir.kazemcodes.infinity.data.network.utils.WebViewClientCompat
 import ir.kazemcodes.infinity.data.network.utils.intercepter.CloudflareInterceptor
 import ir.kazemcodes.infinity.domain.use_cases.preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.util.getHtml
@@ -25,7 +28,8 @@ class NetworkHelper(private val context: Context) : DIAware {
 
     override val di: DI by closestDI(context)
 
-    val datastore: PreferencesUseCase by di.instance<PreferencesUseCase>()
+
+    val preferencesUseCase: PreferencesUseCase by di.instance<PreferencesUseCase>()
 
     val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
@@ -35,7 +39,7 @@ class NetworkHelper(private val context: Context) : DIAware {
 
     val cookieManager = AndroidCookieJar()
 
-    val webView by lazy { WebView(context) }
+    val webView by di.instance<WebView>()
 
     private val baseClientBuilder: OkHttpClient.Builder
         get() {
@@ -45,7 +49,7 @@ class NetworkHelper(private val context: Context) : DIAware {
                 .readTimeout(30, TimeUnit.SECONDS)
                 .addInterceptor(UserAgentInterceptor())
 
-            when (datastore.readDohPrefUseCase()) {
+            when (preferencesUseCase.readDohPrefUseCase()) {
                 PREF_DOH_CLOUDFLARE -> builder.dohCloudflare()
                 PREF_DOH_GOOGLE -> builder.dohGoogle()
                 PREF_DOH_ADGUARD -> builder.dohAdGuard()

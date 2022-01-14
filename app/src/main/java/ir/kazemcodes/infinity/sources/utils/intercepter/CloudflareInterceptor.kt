@@ -10,6 +10,7 @@ import androidx.core.content.ContextCompat
 import ir.kazemcodes.infinity.R
 import ir.kazemcodes.infinity.data.network.models.HttpSource
 import ir.kazemcodes.infinity.data.network.utils.*
+import ir.kazemcodes.infinity.sources.utils.NetworkHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -34,6 +35,7 @@ class CloudflareInterceptor(private val context: Context) : Interceptor, DIAware
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     private val networkHelper: NetworkHelper by di.instance<NetworkHelper>()
+
 
     /**
      * When this is called, it initializes the WebView if it wasn't already. We use this to avoid

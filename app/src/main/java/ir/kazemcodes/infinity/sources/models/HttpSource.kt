@@ -3,9 +3,9 @@ package ir.kazemcodes.infinity.data.network.models
 import android.content.Context
 import android.webkit.WebView
 import ir.kazemcodes.infinity.api_feature.network.GET
-import ir.kazemcodes.infinity.data.network.utils.NetworkHelper
 import ir.kazemcodes.infinity.domain.models.remote.Book
 import ir.kazemcodes.infinity.domain.models.remote.Chapter
+import ir.kazemcodes.infinity.sources.utils.NetworkHelper
 import ir.kazemcodes.infinity.util.applyPageFormat
 import ir.kazemcodes.infinity.util.applySearchFormat
 import ir.kazemcodes.infinity.util.asJsoup

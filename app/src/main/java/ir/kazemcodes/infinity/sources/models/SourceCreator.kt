@@ -285,9 +285,7 @@ class SourceCreator(
             book.bookName = selectorReturnerStringType(document, selectorBookName, attAuthor)
             book.coverLink = selectorReturnerStringType(document, coverSelector, coverAtt)
             book.author = selectorReturnerStringType(document, selectorAuthor, attBookName)
-            book.description = selectorReturnerListType(document,
-                selectorDescription,
-                attDescription).map { it.formatHtmlText() }
+            book.description = selectorReturnerListType(document, selectorDescription, attDescription).map { it.formatHtmlText() }
             book.category = selectorReturnerListType(document, selectorCategory, attCategory)
         } else {
             val crudeJson = Jsoup.parse(document.html()).text().trim()

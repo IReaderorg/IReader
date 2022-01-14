@@ -1,5 +1,5 @@
 import ir.kazemcodes.infinity.data.network.models.Source
-import ir.kazemcodes.infinity.data.network.utils.NetworkHelper
+import ir.kazemcodes.infinity.sources.utils.NetworkHelper
 import okhttp3.Headers
 import okhttp3.OkHttpClient
 import java.security.MessageDigest

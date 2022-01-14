@@ -197,7 +197,7 @@ class BookDetailViewModel(
             source = source.name).onEach { result ->
             when (result) {
                 is Resource.Success -> {
-                    if (result.data != null && result.data != Chapter.create()) {
+                    if (result.data != null) {
                         _chapterState.value = chapterState.value.copy(
                             lastChapter = result.data,
                         )

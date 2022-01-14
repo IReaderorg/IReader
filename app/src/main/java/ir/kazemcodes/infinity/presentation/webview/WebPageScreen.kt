@@ -14,11 +14,15 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import ir.kazemcodes.infinity.data.network.utils.setDefaultSettings
 import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarBackButton
+import org.kodein.di.compose.localDI
+import org.kodein.di.instance
 
 
 @Composable
 fun WebPageScreen(urlToRender: String, title: String? = null) {
     val backStack = LocalBackstack.current
+    val di = localDI().di
+    val webView by di.instance<WebView>()
     Scaffold(topBar = {
         TopAppBar(
             title = { Text(text = title ?: "") },
@@ -29,20 +33,21 @@ fun WebPageScreen(urlToRender: String, title: String? = null) {
         )
     }) {
         AndroidView(factory = {
-                WebView(it).apply {
+                webView.apply {
                     layoutParams = ViewGroup.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.MATCH_PARENT
                     )
                     setDefaultSettings()
-                    settings.javaScriptEnabled
                     webViewClient = WebViewClient()
                     loadUrl(urlToRender)
                 }
 
 
             }, update = {
+            if (webView.url != urlToRender) {
                 it.loadUrl(urlToRender)
+            }
             }, modifier = Modifier.fillMaxSize())
     }
 

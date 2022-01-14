@@ -133,9 +133,9 @@ data class BookDetailKey(val book: Book, val sourceName: String) : FragmentKey()
 class WebViewFragment() : ComposeFragment() {
     @Composable
     override fun FragmentComposable(backstack: Backstack) {
-        val viewModel = rememberService<WebViewViewModel>()
         BackstackProvider(backstack = backstack) {
             InfinityTheme() {
+                val viewModel = rememberService<WebViewViewModel>()
                 WebPageScreen(viewModel.state.value.url)
 
             }
@@ -177,7 +177,7 @@ class ChapterDetailFragment() : ComposeFragment() {
 @Parcelize
 data class ChapterDetailKey(
     val book: Book,
-    val sourceName: String
+    val sourceName: String,
 ) : FragmentKey() {
     override fun instantiateFragment(): Fragment = ChapterDetailFragment()
     override fun bindServices(serviceBinder: ServiceBinder) {
@@ -206,7 +206,7 @@ class ReaderScreenFragment() : ComposeFragment() {
         super.onAttach(context)
         val viewModel = backstack.lookup<ReaderScreenViewModel>()
         viewModel.readBrightness(context = context)
-        viewModel.readOrientation(context=context)
+        viewModel.readOrientation(context = context)
     }
 
 

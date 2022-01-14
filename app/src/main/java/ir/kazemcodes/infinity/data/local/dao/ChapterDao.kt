@@ -32,7 +32,7 @@ interface ChapterDao {
         source: String,
     )
 
-    @Query("SELECT * from chapter_entity WHERE bookName = :bookName AND source =:source LIMIT 1")
+    @Query("SELECT * from chapter_entity WHERE bookName = :bookName AND source =:source AND lastRead = 1 LIMIT 1")
     fun getLastReadChapter(bookName: String, source: String): Flow<ChapterEntity>
 
     @Update(onConflict = OnConflictStrategy.REPLACE)

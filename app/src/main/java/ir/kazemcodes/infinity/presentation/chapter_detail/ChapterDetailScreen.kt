@@ -14,13 +14,13 @@ import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import com.zhuinden.simplestackcomposeintegration.services.rememberService
 import ir.kazemcodes.infinity.presentation.book_detail.Constants
 import ir.kazemcodes.infinity.presentation.home.ReaderScreenKey
+import ir.kazemcodes.infinity.presentation.reusable_composable.ErrorTextWithEmojis
 import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarTitle
 
 
@@ -126,15 +126,11 @@ fun ChapterDetailScreen(
             }
 
             if (viewModel.state.value.error.isNotBlank()) {
-                Text(
-                    text = viewModel.state.value.error,
-                    color = MaterialTheme.colors.error,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(20.dp)
-                        .align(Alignment.Center)
-                )
+                ErrorTextWithEmojis(error = state.error, modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp)
+                    .wrapContentSize(Alignment.Center)
+                    .align(Alignment.Center))
             }
             if (viewModel.state.value.isLoading) {
                 CircularProgressIndicator(

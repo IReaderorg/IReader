@@ -15,7 +15,6 @@ import ir.kazemcodes.infinity.data.local.BookDatabase
 import ir.kazemcodes.infinity.data.local.dao.BookDao
 import ir.kazemcodes.infinity.data.local.dao.ChapterDao
 import ir.kazemcodes.infinity.data.network.utils.MemoryCookieJar
-import ir.kazemcodes.infinity.data.network.utils.NetworkHelper
 import ir.kazemcodes.infinity.data.repository.PreferencesHelper
 import ir.kazemcodes.infinity.data.repository.RepositoryImpl
 import ir.kazemcodes.infinity.domain.repository.Repository
@@ -187,11 +186,6 @@ class AppModule {
             .build()
     }
 
-    @Singleton
-    @Provides
-    fun providesNetworkHelper(context: Context): NetworkHelper {
-        return NetworkHelper(context = context)
-    }
 
     @Singleton
     @Provides

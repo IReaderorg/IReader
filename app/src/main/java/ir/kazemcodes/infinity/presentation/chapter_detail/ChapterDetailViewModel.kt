@@ -21,14 +21,12 @@ class ChapterDetailViewModel(
     private val source: Source,
 ) :  ScopedServices.Registered {
 
-    private val _state = mutableStateOf(ChapterDetailState(source = source))
+    private val _state = mutableStateOf(ChapterDetailState(source = source, book = book))
     val state: State<ChapterDetailState> = _state
 
     override fun onServiceRegistered() {
-        _state.value = state.value.copy(book = book)
         getLocalChapters()
     }
-
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
@@ -40,13 +38,9 @@ class ChapterDetailViewModel(
                     isReversed = !state.value.isReversed
                 )
             }
-            is ChapterDetailEvent.UpdateChapters -> {
-                _state.value = state.value.copy(localChapters = event.chapters)
-            }
 
         }
     }
-
     private fun getLocalChapters() {
         localUseCase.getLocalChaptersByBookNameUseCase(bookName = book.bookName, source = source.name )
             .onEach { result ->
@@ -75,16 +69,11 @@ class ChapterDetailViewModel(
     }
 
     fun getIndexOfChapter(index : Int) : Int {
-        return if (state.value.isReversed) (state.value.localChapters.size - 1 ) - index else index
+        return if (state.value.isReversed) ((state.value.localChapters.size - 1 ) - index) else index
     }
-
-
 
     override fun onServiceUnregistered() {
         coroutineScope.cancel()
     }
-
-
-
 }
 

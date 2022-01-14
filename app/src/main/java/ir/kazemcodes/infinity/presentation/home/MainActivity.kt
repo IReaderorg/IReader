@@ -33,13 +33,15 @@ class MainActivity : AppCompatActivity(), DIAware, SimpleStateChanger.Navigation
         setContentView(R.layout.main_activity)
 
         val app = application as MyApplication
+        val globalServices = app.globalServices
+
 
         fragmentStateChanger = FragmentStateChanger(supportFragmentManager, R.id.container)
 
         Navigator.configure()
             .setStateChanger(SimpleStateChanger(this))
             .setScopedServices(DefaultServiceProvider())
-            .setGlobalServices(app.globalServices)
+            .setGlobalServices(globalServices)
             .install(this, androidContentFrame, History.of(MainScreenKey()))
 
 //        val backstack = Navigator.configure()

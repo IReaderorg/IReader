@@ -232,13 +232,13 @@ class AvailableSources(context: Context) {
             coverAtt = "src",
         ),
         detail = Detail(
-            nameSelector = "div.post-title h1",
+            ajaxSelector = "div.description-summary div.summary__content p:nth-child(1)",
+            nameSelector = "div.post-title>h1",
             coverSelector = "div.summary_image a img",
             coverAtt = "src",
             descriptionSelector = "div.description-summary div.summary__content p",
-            authorBookSelector = "div.author-content a",
-            authorBookAtt = "rel",
-            categorySelector = "div.genres-content a"
+            authorBookSelector = "div.author-content>a",
+            categorySelector = "div.genres-content p",
         ),
         chapters = Chapters(
             //_shouldStringSomethingAtEnd = true,
