@@ -49,6 +49,7 @@ class AvailableSources(context: Context) {
             coverAtt = "src",
             nextPageLinkSelector = "div.nav-previous",
             nextPageValue = "Older Posts",
+            nextPageSelector = "div.nav-previous>a"
         ),
         popular = Popular(
             endpoint = "/manga-2/page/{page}/?m_orderby=trending",
@@ -60,6 +61,7 @@ class AvailableSources(context: Context) {
             nameAtt = "title",
             coverSelector = "img",
             coverAtt = "src",
+            nextPageSelector = "div.nav-previous>a"
         ),
         search = Search(
             endpoint = "/?s={query}&post_type=wp-manga&op=&author=&artist=&release=&adult=",
@@ -105,7 +107,8 @@ class AvailableSources(context: Context) {
             coverSelector = "div.pic img",
             coverAtt = "src",
             nextPageLinkSelector = "div.ul-list1",
-            nextPageValue = "Next"
+            nextPageValue = "Next",
+            nextPageSelector = "body > div.main > div > div.row-box > div.col-content > div.pages > ul > li > a:nth-child(14)"
         ),
         popular = Popular(
             endpoint = "/most-popular-novel/",
@@ -114,6 +117,7 @@ class AvailableSources(context: Context) {
             nameAtt = "title",
             coverSelector = "img",
             coverAtt = "src",
+            nextPageSelector = "body > div.main > div > div.row-box > div.col-content > div.pages > ul > li > a:nth-child(14)"
         ),
         search = Search(
             endpoint = "/search?searchkey={query}",
@@ -124,6 +128,7 @@ class AvailableSources(context: Context) {
             nameAtt = "title",
             coverSelector = "div.pic img",
             coverAtt = "src",
+            nextPageSelector = "body > div.main > div > div.row-box > div.col-content > div.pages > ul > li > a:nth-child(14)"
         ),
         detail = Detail(
             nameSelector = "div.m-desc h1.tit",
@@ -168,6 +173,7 @@ class AvailableSources(context: Context) {
             linkAtt = "href",
             coverSelector = "amp-img.list-img",
             coverAtt = "src",
+            nextPageSelector = "#pagination > a:nth-child(13)"
         ),
         popular = Popular(
             endpoint = "/monthly-rank/page/{page}/",
@@ -178,6 +184,7 @@ class AvailableSources(context: Context) {
             linkAtt = "href",
             nameSelector = "aria-label",
             nameAtt = "aria-label",
+            nextPageSelector = "#pagination > a:nth-child(13)"
         ),
         search = Search(
             endpoint = "/wp-admin/admin-ajax.php?action=autosuggest&q={query}&__amp_source_origin=https%3A%2F%2Fwww.mtlnovel.com",
@@ -230,6 +237,7 @@ class AvailableSources(context: Context) {
             linkAtt = "href",
             coverSelector = "img",
             coverAtt = "src",
+            nextPageSelector = "div.nav-previous>a"
         ),
         detail = Detail(
             nameSelector = "div.post-title>h1",
@@ -261,6 +269,7 @@ class AvailableSources(context: Context) {
             linkAtt = "href",
             coverSelector = "img",
             coverAtt = "src",
+            nextPageSelector = "div.nav-previous>a"
         ), search = Search(
             endpoint = "/?s={query}&post_type=wp-manga&op=&author=&artist=&release=&adult=",
             selector = "div.c-tabs-item__content",
@@ -287,6 +296,9 @@ class AvailableSources(context: Context) {
             addBaseUrlToLink = true,
             coverSelector = "img",
             coverAtt = "src",
+            nextPageSelector = "div.pagelist>a",
+            nextPageValue = "next"
+
         ),
         popular = Popular(
             endpoint = "/monthvisit-{page}.html",
@@ -296,6 +308,7 @@ class AvailableSources(context: Context) {
             addBaseUrlToLink = true,
             coverSelector = "img",
             coverAtt = "src",
+            nextPageSelector = "div.pagelist>a",
         ),
         search = Search(
             endpoint = "/index.php?s=so&module=book&keyword={query}",
@@ -305,6 +318,7 @@ class AvailableSources(context: Context) {
             addBaseUrlToLink = true,
             coverSelector = "img",
             coverAtt = "src",
+            nextPageSelector = "div.pagelist>a",
         ),
         detail = Detail(
             nameSelector = "div.detail img",

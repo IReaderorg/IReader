@@ -9,7 +9,7 @@ data class Latest(
     override val selector: String? = null,
     override val addBaseUrlToLink: Boolean = false,
     override val openInWebView: Boolean = false,
-    val nextPageSelector: String? = null,
+    override val nextPageSelector: String? = null,
     val nextPageValue: String? = null,
     val linkSelector: String? = null,
     val linkAtt: String? = null,
@@ -31,6 +31,7 @@ data class Popular(
     override val selector: String? = null,
     override val addBaseUrlToLink: Boolean = false,
     override val openInWebView: Boolean = false,
+    override val nextPageSelector: String? = null,
     val nextBookSelector: String? = null,
     val nextBookValue: String? = null,
     val linkSelector: String? = null,
@@ -49,6 +50,7 @@ data class Detail(
     override val selector: String? = null,
     override val addBaseUrlToLink: Boolean = false,
     override val openInWebView: Boolean = false,
+    override val nextPageSelector: String? = null,
     val nameSelector: String? = null,
     val nameAtt: String? = null,
     val coverSelector: String? = null,
@@ -69,6 +71,7 @@ data class Search(
     override val selector: String? = null,
     override val addBaseUrlToLink: Boolean = false,
     override val openInWebView: Boolean = false,
+    override val nextPageSelector: String? = null,
     val linkSelector: String? = null,
     val linkAtt: String? = null,
     val linkSearchedSubString: Boolean = false,
@@ -88,6 +91,7 @@ data class Chapters(
     override val selector: String? = null,
     override val addBaseUrlToLink: Boolean = false,
     override val openInWebView: Boolean = false,
+    override val nextPageSelector: String? = null,
     val isDownloadable: Boolean = false,
     val chaptersEndpointWithoutPage: String? = null,
     val _isChapterStatsFromFirst: Boolean? = null,
@@ -113,6 +117,7 @@ data class Content(
     override val addBaseUrlToLink: Boolean = false,
     override val openInWebView: Boolean = false,
     override val selector: String? = null,
+    override val nextPageSelector: String? = null,
     val supportContentAppView: Boolean = true,
     val pageTitleSelector: String? = null,
     val pageTitleAtt: String? = null,
@@ -128,6 +133,7 @@ interface Fetcher {
     val selector: String?
     val addBaseUrlToLink: Boolean
     val openInWebView: Boolean
+    val nextPageSelector: String?
 }
 
 

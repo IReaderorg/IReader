@@ -21,7 +21,6 @@ class GetRemoteLatestBooksUseCase {
                     emit(Resource.Error<BooksPage>("CloudFlare is Enable"))
                 }  else {
                     emit(Resource.Success<BooksPage>(books))
-
                 }
             } else {
                 emit(Resource.Error<BooksPage>("There is No Page"))
