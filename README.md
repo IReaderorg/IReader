@@ -25,6 +25,9 @@ Infinity is a free and open source applicaiton for Android.
 
 - You Can Download the App From [Here](https://github.com/kazemcodes/Infinity/releases)
 
+## Contribution
+- You can take a look at [here](https://github.com/kazemcodes/Infinity/blob/master/how_to_make_a_source_guide.md), to understand how to create a source for this applicaiton 
+
 
 ## Screenshots :camera:
 
