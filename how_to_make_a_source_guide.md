@@ -1,5 +1,7 @@
 # Guide
 
+This is a guide about how to make a source, you can take a look at [samples](https://github.com/kazemcodes/Infinity/blob/master/app/src/main/java/ir/kazemcodes/infinity/sources/SourceList.kt), in order to understand how everything work.
+
 ## Main Parameter
 | Parameter | value |
 |-------|---------|
@@ -13,7 +15,7 @@
 
 NOTE : ALL Uneeded Parameter can be left empty. 
 ## Latest
-| Parameter | value |
+| Parameter | Description |
 |-------|---------|
 | endpoint | the endpoint of site: sample:"/latest-release-novel/{page}/" Note: replace the page number of novel to "{page}"|
 | ajaxSelector | if the site is loaded by ajax, type the first item that is loaded by ajax. (can be ommited if Ajax is not supported)|
@@ -30,7 +32,6 @@ NOTE : ALL Uneeded Parameter can be left empty.
 |nameAtt| the css attribute to the book title of book (can be omited if there is no attribute) |
 |coverSelector| the css selector to the thumbnail link of of book (can be omited if there is no selector) |
 |coverAtt| the css attribute to the thumbnail link of book (can be omited if there is no attribute) |
-
 |supportPageList|type true if the website links are not in order and support page list|
 |maxPageIndex| if the website pages are not in order you can use this to the link for next page and max number of pages in one site for example google shows only number 1 to 10 and only when you go to page 2 you will see that it will be changes from 2 to 11|
 
@@ -38,7 +39,7 @@ NOTE : ALL Uneeded Parameter can be left empty.
 
 
 ## Search
-| Parameter | value |
+| Parameter | Description |
 |-------|---------|
 | endpoint | the endpoint of site: sample:"/latest-release-novel/{page}/" Note: replace the page number of novel to "{page} and search query with "{query}"|
 | ajaxSelector | if the site is loaded by ajax, type the first item that is loaded by ajax. (can be ommited if Ajax is not supported)|
@@ -58,7 +59,7 @@ NOTE : ALL Uneeded Parameter can be left empty.
 
 
 ## Popular
-| Parameter | value |
+| Parameter | Description |
 |-------|---------|
 | endpoint | the endpoint of site: sample:"/latest-release-novel/{page}/{query}" Note: replace the page number of novel to "{page}"|
 | ajaxSelector | if the site is loaded by ajax, type the first item that is loaded by ajax. (can be ommited if Ajax is not supported)|
@@ -78,7 +79,7 @@ NOTE : ALL Uneeded Parameter can be left empty.
 
 
 ## Chapters
-| Parameter | value |
+| Parameter | Description |
 |-------|---------|
 | endpoint | the endpoint of site: sample:"/latest-release-novel/{page}/" Note: replace the page number of novel to "{page}"|
 | ajaxSelector | if the site is loaded by ajax, type the first item that is loaded by ajax. (can be ommited if Ajax is not supported)|
@@ -97,7 +98,7 @@ NOTE : ALL Uneeded Parameter can be left empty.
 
 ## Content
 
-| Parameter | value |
+| Parameter | Description |
 |-------|---------|
 | endpoint | the endpoint of site: sample:"/latest-release-novel/{page}/" Note: replace the page number of novel to "{page}"|
 | ajaxSelector | if the site is loaded by ajax, type the first item that is loaded by ajax. (can be ommited if Ajax is not supported)|
@@ -111,7 +112,8 @@ NOTE : ALL Uneeded Parameter can be left empty.
 |pageContentAtt| the css attribute tothe chapter content of chapter (can be omited if there is no attribute) |
 
 ##Detail
-
+| Parameter | Description |
+|-------|---------|
 | ajaxSelector | if the site is loaded by ajax, type the first item that is loaded by ajax. (can be ommited if Ajax is not supported)|
 | isHtmlType | type "true" if it is html Response, type "false" if is json type, the default value is true.(can be ommited)|
 |isGetRequestType| type "true" if is GET Request else type false for Post Request, default is true (can be ommited)|
