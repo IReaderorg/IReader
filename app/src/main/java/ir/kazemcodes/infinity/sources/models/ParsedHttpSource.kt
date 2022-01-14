@@ -44,7 +44,7 @@ abstract class ParsedHttpSource(context: Context) : HttpSource(context) {
     /****************************************************************************************************/
 
 
-    override fun popularParse(document: Document, page: Int): BooksPage {
+    override fun popularParse(document: Document, page: Int,isWebViewMode : Boolean): BooksPage {
         val isCloudflareEnable = document.body().allElements.text().contains(CLOUDFLARE_LOG)
         val books = document.select(popularSelector).map { element ->
             popularFromElement(element)
@@ -58,7 +58,7 @@ abstract class ParsedHttpSource(context: Context) : HttpSource(context) {
     }
 
 
-    override fun latestParse(document: Document, page: Int): BooksPage {
+    override fun latestParse(document: Document, page: Int,isWebViewMode : Boolean): BooksPage {
         val isCloudflareEnable = document.body().allElements.text().contains(CLOUDFLARE_LOG)
 
         val books = document.select(latestSelector).map { element ->
@@ -72,7 +72,7 @@ abstract class ParsedHttpSource(context: Context) : HttpSource(context) {
         return BooksPage(books, hasNextPage, isCloudflareEnable, document.body().allElements.text())
     }
 
-    override fun chaptersParse(document: Document): ChaptersPage {
+    override fun chaptersParse(document: Document,isWebViewMode : Boolean ): ChaptersPage {
         val isCloudflareEnable = document.body().allElements.text().contains(CLOUDFLARE_LOG)
         val chapters = document.select(chaptersSelector).map { chapterFromElement(it) }
 
@@ -84,10 +84,10 @@ abstract class ParsedHttpSource(context: Context) : HttpSource(context) {
     }
 
 
-    abstract override fun contentParse(document: Document): ChapterPage
+    abstract override fun contentParse(document: Document,isWebViewMode : Boolean ): ChapterPage
 
 
-    override fun searchParse(document: Document, page: Int): BooksPage {
+    override fun searchParse(document: Document, page: Int,isWebViewMode : Boolean): BooksPage {
         val isCloudflareEnable = document.body().allElements.text().contains(CLOUDFLARE_LOG)
 
         /**

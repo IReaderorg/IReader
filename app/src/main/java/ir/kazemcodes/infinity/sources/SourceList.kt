@@ -1,4 +1,4 @@
-package ir.kazemcodes.infinity.data.network
+package ir.kazemcodes.infinity.sources
 
 import android.content.Context
 import ir.kazemcodes.infinity.data.network.models.Source
@@ -47,14 +47,12 @@ class AvailableSources(context: Context) {
             linkAtt = "href",
             coverSelector = "img",
             coverAtt = "src",
-            nextPageLinkSelector = "div.nav-previous",
             nextPageValue = "Older Posts",
             nextPageSelector = "div.nav-previous>a"
         ),
         popular = Popular(
             endpoint = "/manga-2/page/{page}/?m_orderby=trending",
             selector = "div.page-item-detail",
-            nextBookSelector = "div.nav-previous",
             linkSelector = "a",
             linkAtt = "href",
             nameSelector = "a",
@@ -79,7 +77,7 @@ class AvailableSources(context: Context) {
             categorySelector = "div.genres-content a",
         ),
         chapters = Chapters(
-            _isChapterStatsFromFirst = true,
+            isChapterStatsFromFirst = true,
             selector = "li.wp-manga-chapter",
             linkSelector = "a",
             linkAtt = "href",
@@ -106,9 +104,8 @@ class AvailableSources(context: Context) {
             linkAtt = "href",
             coverSelector = "div.pic img",
             coverAtt = "src",
-            nextPageLinkSelector = "div.ul-list1",
             nextPageValue = "Next",
-            nextPageSelector = "body > div.main > div > div.row-box > div.col-content > div.pages > ul > li > a:nth-child(14)"
+            nextPageSelector = "div.ul-list1"
         ),
         popular = Popular(
             endpoint = "/most-popular-novel/",
@@ -139,7 +136,7 @@ class AvailableSources(context: Context) {
         ),
         chapters = Chapters(
             supportNextPagesList = true,
-            _isChapterStatsFromFirst = true,
+            isChapterStatsFromFirst = true,
             endpoint = "/{page}.html",
             chaptersEndpointWithoutPage = ".html",
             selector = "div.m-newest2 ul.ul-list5 li",
@@ -147,8 +144,8 @@ class AvailableSources(context: Context) {
             linkAtt = "href",
             nameSelector = "a",
             nameAtt = "title",
-            hasNextChapterListSelector = "div.page a:nth-child(4)",
-            hasNextChapterListValue = "Next",
+            nextPageSelector = "div.page a:nth-child(4)",
+            nextPageValue = "Next",
 
             ),
         content = Content(
@@ -205,14 +202,13 @@ class AvailableSources(context: Context) {
             descriptionSelector = "div.desc p"
         ),
         chapters = Chapters(
-            _subStringSomethingAtEnd = "/chapter-list/",
-            _shouldStringSomethingAtEnd = true,
+            subStringSomethingAtEnd = "/chapter-list/",
             selector = "a.ch-link",
             nameSelector = "a",
             linkAtt = "href",
-            hasNextChapterListSelector = "div.ch-list amp-list",
-            hasNextChapterListAtt = "src",
-            _isChapterStatsFromFirst = false
+            nextPageSelector = "div.ch-list amp-list",
+            nextPageAtt = "src",
+            isChapterStatsFromFirst = false
 
         ),
         content = Content(
@@ -248,8 +244,7 @@ class AvailableSources(context: Context) {
             categorySelector = "div.genres-content a",
         ),
         chapters = Chapters(
-            _shouldStringSomethingAtEnd = true,
-            _subStringSomethingAtEnd = "ajax/chapters/",
+            subStringSomethingAtEnd = "ajax/chapters/",
             ajaxSelector = "ul.main>li:nth-child(1)>a",
             selector = "li.wp-manga-chapter",
             nameSelector = "a",
@@ -259,7 +254,8 @@ class AvailableSources(context: Context) {
         ), content = Content(
             ajaxSelector = "div.reading-content div.text-left p:nth-child(3)",
             selector = "div.read-container div.reading-content h3,p",
-            pageContentSelector = "div.reading-content h3,p"
+            pageTitleSelector = "div.text-left>h3",
+            pageContentSelector = "div.text-left>p",
         ),
         popular = Popular(
             endpoint = "/novel-list/page/{page}/?m_orderby=views",
@@ -298,7 +294,6 @@ class AvailableSources(context: Context) {
             coverAtt = "src",
             nextPageSelector = "div.pagelist>a",
             nextPageValue = "next"
-
         ),
         popular = Popular(
             endpoint = "/monthvisit-{page}.html",

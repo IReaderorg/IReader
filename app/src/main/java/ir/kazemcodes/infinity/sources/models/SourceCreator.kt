@@ -41,7 +41,7 @@ class SourceCreator(
         get() = _supportsLatest
     override val supportsMostPopular: Boolean
         get() = _supportsMostPopular
-    override val supportContentAppView: Boolean = content?.supportContentAppView == true
+    override val supportContentAppView: Boolean = content?.openInWebView == false
     override val baseUrl: String = _baseUrl
 
     override val supportSearch: Boolean = _supportsSearch
@@ -50,7 +50,7 @@ class SourceCreator(
     override fun headersBuilder(): Headers.Builder = Headers.Builder().apply {
         add(
             "User-Agent",
-            "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Mobile Safari/537.36 "
+            "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36"
         )
         add("Referer", baseUrl)
         add("cache-control", "max-age=0")
@@ -66,16 +66,16 @@ class SourceCreator(
     /****************************SELECTOR*************************************************************/
     override val popularSelector: String? = popular?.selector
 
-    override fun popularBookNextPageSelector(): String? = popular?.nextBookSelector
+    override fun popularBookNextPageSelector(): String? = popular?.nextPageSelector
     override val latestSelector: String? = latest?.selector
     override val latestUpdatesNextPageSelector: String? = latest?.nextPageSelector
-    override fun hasNextChapterSelector() = chapters?.hasNextChapterListSelector
+    override fun hasNextChapterSelector() = chapters?.nextPageSelector
     override val searchSelector: String? = search?.selector
     override fun searchBookNextPageSelector(): String? =
-        search?.hasNextSearchedBooksNextPageSelector
+        search?.nextPageSelector
 
     override fun searchBookNextValuePageSelector(): String? =
-        search?.hasNextSearchedBookNextPageValue
+        search?.nextPageValue
 
     override val chaptersSelector: String? = chapters?.selector
     override val ajaxChaptersSelector: String? = chapters?.ajaxSelector
@@ -112,8 +112,8 @@ class SourceCreator(
             url = book.link.replace(chapters?.chaptersEndpointWithoutPage
                 ?: "", (chapters?.endpoint ?: "").replace(pageFormat, page.toString()))
         }
-        if (chapters?._shouldStringSomethingAtEnd == true && !chapters._subStringSomethingAtEnd.isNullOrEmpty()) {
-            url = book.link + chapters._subStringSomethingAtEnd
+        if (!chapters?.subStringSomethingAtEnd.isNullOrEmpty()) {
+            url = book.link + chapters?.subStringSomethingAtEnd
         }
         if (chapters?.isHtmlType == true) {
             return GET(baseUrl + getUrlWithoutDomain(url))
@@ -123,7 +123,6 @@ class SourceCreator(
     }
 
     override fun searchRequest(page: Int, query: String): Request {
-
         if (search?.isHtmlType == true) {
             return GET("$baseUrl${
                 getUrlWithoutDomain(fetchSearchEndpoint?.replace(searchQueryFormat,
@@ -227,12 +226,17 @@ class SourceCreator(
 
     /****************************PARSE*************************************************************/
 
-    override fun latestParse(document: Document, page: Int): BooksPage {
+    override fun latestParse(document: Document, page: Int, isWebViewMode: Boolean): BooksPage {
         val isCloudflareEnable =
             document.body().allElements.text().contains(Constants.CLOUDFLARE_LOG)
 
-        val ajaxLoaded = ajaxChaptersSelector.isNull() || (selectorReturnerStringType(document,
-            ajaxChaptersSelector).isNotEmpty() && ajaxChaptersSelector.isNotNull())
+        val ajaxLoaded: Boolean = if (isWebViewMode) {
+            ajaxChaptersSelector.isNull() || (selectorReturnerStringType(document,
+                ajaxChaptersSelector).isNotEmpty() && ajaxChaptersSelector.isNotNull())
+        } else {
+            true
+        }
+
         val books = mutableListOf<Book>()
         if (this.latest?.isHtmlType == true) {
             books.addAll(document.select(latest.selector).map { element ->
@@ -261,12 +265,16 @@ class SourceCreator(
             ajaxLoaded = ajaxLoaded)
     }
 
-    override fun detailParse(document: Document): BookPage {
+    override fun detailParse(document: Document, isWebViewMode: Boolean): BookPage {
         val isCloudflareEnable =
             document.body().allElements.text().contains(Constants.CLOUDFLARE_LOG)
 
-        val ajaxLoaded = ajaxChaptersSelector.isNull() || (selectorReturnerStringType(document,
-            ajaxChaptersSelector).isNotEmpty() && ajaxChaptersSelector.isNotNull())
+        val ajaxLoaded: Boolean = if (isWebViewMode) {
+            ajaxChaptersSelector.isNull() || (selectorReturnerStringType(document,
+                ajaxChaptersSelector).isNotEmpty() && ajaxChaptersSelector.isNotNull())
+        } else {
+            true
+        }
         var book = Book.create()
         if (this.detail?.isHtmlType == true) {
             val selectorBookName = detail.nameSelector
@@ -283,9 +291,13 @@ class SourceCreator(
 
 
             book.bookName = selectorReturnerStringType(document, selectorBookName, attAuthor)
-            book.coverLink = selectorReturnerStringType(document, coverSelector, coverAtt).replace("render_isfalse","")
+            book.coverLink = selectorReturnerStringType(document,
+                coverSelector,
+                coverAtt).replace("render_isfalse", "")
             book.author = selectorReturnerStringType(document, selectorAuthor, attBookName)
-            book.description = selectorReturnerListType(document, selectorDescription, attDescription).map { it.formatHtmlText() }
+            book.description = selectorReturnerListType(document,
+                selectorDescription,
+                attDescription).map { it.formatHtmlText() }
             book.category = selectorReturnerListType(document, selectorCategory, attCategory)
         } else {
             val crudeJson = Jsoup.parse(document.html()).text().trim()
@@ -302,11 +314,18 @@ class SourceCreator(
     }
 
 
-    override fun chaptersParse(document: Document): ChaptersPage {
+    override fun chaptersParse(document: Document, isWebViewMode: Boolean): ChaptersPage {
         val isCloudflareEnable =
             document.body().allElements.text().contains(Constants.CLOUDFLARE_LOG)
-        val ajaxLoaded = ajaxChaptersSelector.isNull() || (selectorReturnerStringType(document,
-            ajaxChaptersSelector).isNotEmpty() && ajaxChaptersSelector.isNotNull())
+
+
+        val ajaxLoaded = if (isWebViewMode) {
+            ajaxChaptersSelector.isNull() || (selectorReturnerStringType(document,
+                ajaxChaptersSelector).isNotEmpty() && ajaxChaptersSelector.isNotNull())
+        } else {
+            true
+        }
+
 
         val chapters = mutableListOf<Chapter>()
         if (this.chapters?.isHtmlType == true) {
@@ -330,11 +349,16 @@ class SourceCreator(
             ajaxLoaded = ajaxLoaded)
     }
 
-    override fun contentParse(document: Document): ChapterPage {
+    override fun contentParse(document: Document, isWebViewMode: Boolean): ChapterPage {
         val isCloudflareEnable =
             document.body().allElements.text().contains(Constants.CLOUDFLARE_LOG)
-        val ajaxLoaded = ajaxChaptersSelector.isNull() || (selectorReturnerStringType(document,
-            ajaxChaptersSelector).isNotEmpty() && ajaxChaptersSelector.isNotNull())
+
+        val ajaxLoaded: Boolean = if (isWebViewMode) {
+            ajaxChaptersSelector.isNull() || (selectorReturnerStringType(document,
+                ajaxChaptersSelector).isNotEmpty() && ajaxChaptersSelector.isNotNull())
+        } else {
+            true
+        }
         val contentList: MutableList<String> = mutableListOf()
         if (content?.isHtmlType == true) {
             val contentSelector = content.pageContentSelector
@@ -343,7 +367,7 @@ class SourceCreator(
             val titleAtt = content.pageTitleAtt
             val title = selectorReturnerStringType(document, titleSelector, titleAtt)
             val page = selectorReturnerListType(document, contentSelector, contentAtt)
-            contentList.addAll(merge(listOf(title),page))
+            contentList.addAll(merge(listOf(title), page))
         } else {
             val crudeJson = Jsoup.parse(document.html()).text().trim()
             val json = JsonPath.parse(crudeJson)
@@ -357,11 +381,15 @@ class SourceCreator(
             ajaxLoaded = ajaxLoaded)
     }
 
-    override fun searchParse(document: Document, page: Int): BooksPage {
+    override fun searchParse(document: Document, page: Int, isWebViewMode: Boolean): BooksPage {
         val isCloudflareEnable =
             document.body().allElements.text().contains(Constants.CLOUDFLARE_LOG)
-        val ajaxLoaded = ajaxChaptersSelector.isNull() || (selectorReturnerStringType(document,
-            ajaxChaptersSelector).isNotEmpty() && ajaxChaptersSelector.isNotNull())
+        val ajaxLoaded: Boolean = if (isWebViewMode) {
+            ajaxChaptersSelector.isNull() || (selectorReturnerStringType(document,
+                ajaxChaptersSelector).isNotEmpty() && ajaxChaptersSelector.isNotNull())
+        } else {
+            true
+        }
         var books = mutableListOf<Book>()
 
         if (search?.isHtmlType == true) {
@@ -461,17 +489,17 @@ class SourceCreator(
     /****************************PARSE FROM JSON**********************************/
 
 
-    override fun hasNextChaptersParse(document: Document): Boolean {
+    override fun hasNextChaptersParse(document: Document, isWebViewMode: Boolean): Boolean {
         if (chapters?.supportNextPagesList == true) {
             val docs = selectorReturnerStringType(document,
-                chapters.hasNextChapterListSelector,
-                chapters.hasNextChapterListAtt).shouldSubstring(chapters._shouldSubstringBaseUrlAtFirst
+                chapters.nextPageSelector,
+                chapters.nextPageAtt).shouldSubstring(chapters.addBaseUrlToLink
                 ?: false,
                 baseUrl,
                 ::getUrlWithoutDomain)
             val condition =
                 Patterns.WEB_URL.matcher(docs)
-                    .matches() || docs.contains(chapters.hasNextChapterListValue
+                    .matches() || docs.contains(chapters.nextPageValue
                     ?: "")
             if (Patterns.WEB_URL.matcher(docs).matches()) {
                 nextChapterListLink = baseUrl + getUrlWithoutDomain(docs)
@@ -483,8 +511,8 @@ class SourceCreator(
     }
 
     fun parseNextChapterListType(document: Document, page: Int): String {
-        val selector = latest?.nextPageLinkSelector
-        val att = latest?.nextPageLinkAtt
+        val selector = latest?.nextPageSelector
+        val att = latest?.nextPageAtt
         val maxIndex = latest?.maxPageIndex
         val urlList = selectorReturnerListType(document,
             selector = selector,

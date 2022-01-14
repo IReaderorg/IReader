@@ -1,7 +1,7 @@
 package ir.kazemcodes.infinity.util
 
 import android.content.Context
-import ir.kazemcodes.infinity.data.network.Extensions
+import ir.kazemcodes.infinity.sources.Extensions
 import ir.kazemcodes.infinity.data.network.models.Source
 import org.kodein.di.DI
 import org.kodein.di.android.closestDI

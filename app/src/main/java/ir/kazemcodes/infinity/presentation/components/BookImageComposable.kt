@@ -28,7 +28,7 @@ fun BookImageComposable(
         contentScale = contentScale,
         loading = {
             Box(contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(modifier = modifier.size(4.dp))
+                CircularProgressIndicator(modifier = modifier.size(2.dp))
             }
         },
         failure = {

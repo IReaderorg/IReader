@@ -123,10 +123,10 @@ abstract class HttpSource(context: Context) : Source, DIAware {
     override suspend fun fetchPopular(page: Int): BooksPage {
         val request = client.newCall(popularRequest(page)).await()
         var books = popularParse(request, page = page)
-        if (books.isCloudflareEnabled || request.code != 200) {
+        if (books.isCloudflareEnabled || request.code != 200|| !books.ajaxLoaded) {
             books =
                 popularParse(document = network.getHtmlFromWebView(baseUrl + fetchPopularEndpoint?.applyPageFormat(
-                    page)), page = page)
+                    page)), page = page,isWebViewMode = true)
         }
         return books
     }
@@ -142,7 +142,7 @@ abstract class HttpSource(context: Context) : Source, DIAware {
         if (books.isCloudflareEnabled || request.code != 200 || !books.ajaxLoaded) {
             books =
                 latestParse(network.getHtmlFromWebView(baseUrl + fetchLatestEndpoint?.applyPageFormat(
-                    page)), page = page)
+                    page)), page = page,isWebViewMode = true)
         }
 
         return books
@@ -159,7 +159,7 @@ abstract class HttpSource(context: Context) : Source, DIAware {
         var completebook = detailParse(client.newCall(detailsRequest(book)).await())
         if (completebook.isCloudflareEnabled || request.code != 200 || !completebook.ajaxLoaded) {
             completebook =
-                detailParse(network.getHtmlFromWebView(baseUrl + getUrlWithoutDomain(book.link)))
+                detailParse(network.getHtmlFromWebView(baseUrl + getUrlWithoutDomain(book.link)),isWebViewMode = true)
         }
         return completebook
     }
@@ -177,7 +177,7 @@ abstract class HttpSource(context: Context) : Source, DIAware {
         if (chapters.isCloudflareEnabled || request.code != 200 || !chapters.ajaxLoaded) {
             chapters =
                 chaptersParse(network.getHtmlFromWebView(baseUrl + getUrlWithoutDomain(book.link),
-                    ajaxChaptersSelector))
+                    ajaxChaptersSelector),isWebViewMode = true)
         }
 
         return chapters
@@ -195,7 +195,7 @@ abstract class HttpSource(context: Context) : Source, DIAware {
 
         if (content.isCloudflareEnabled || request.code != 200 || !content.ajaxLoaded) {
             content =
-                contentParse(network.getHtmlFromWebView(baseUrl + getUrlWithoutDomain(chapter.link)))
+                contentParse(network.getHtmlFromWebView(baseUrl + getUrlWithoutDomain(chapter.link)),isWebViewMode = true)
         }
         return content
     }
@@ -211,10 +211,9 @@ abstract class HttpSource(context: Context) : Source, DIAware {
         val request = client.newCall(searchRequest(page, query)).await()
         var books = searchBookParse(request, page)
         if (books.isCloudflareEnabled || request.code != 200 || !books.ajaxLoaded) {
-            books =
-                searchParse(network.getHtmlFromWebView(baseUrl + fetchSearchEndpoint?.applySearchFormat(
+            books = searchParse(network.getHtmlFromWebView(baseUrl + fetchSearchEndpoint?.applySearchFormat(
                     query,
-                    page)), page = page)
+                    page)), page = page,isWebViewMode = true)
         }
         return books
     }
@@ -336,11 +335,11 @@ abstract class HttpSource(context: Context) : Source, DIAware {
      *
      * @param response the response from the site.
      */
-    private fun popularParse(response: Response, page: Int): BooksPage {
+    private fun popularParse(response: Response, page: Int,isWebViewMode : Boolean =false): BooksPage {
         return popularParse(response.asJsoup(), page)
     }
 
-    abstract fun popularParse(document: Document, page: Int): BooksPage
+    abstract fun popularParse(document: Document, page: Int,isWebViewMode : Boolean =false): BooksPage
 
 
     /**
@@ -348,7 +347,7 @@ abstract class HttpSource(context: Context) : Source, DIAware {
      *
      * @param response the response from the site.
      */
-    fun latestParse(response: Response, page: Int): BooksPage {
+    fun latestParse(response: Response, page: Int,isWebViewMode : Boolean =false): BooksPage {
         return latestParse(response.asJsoup(), page = page)
     }
 
@@ -357,7 +356,7 @@ abstract class HttpSource(context: Context) : Source, DIAware {
      *
      * @param response the response from the site.
      */
-    abstract fun latestParse(document: Document, page: Int): BooksPage
+    abstract fun latestParse(document: Document, page: Int,isWebViewMode : Boolean =false): BooksPage
 
 
     /**
@@ -365,7 +364,7 @@ abstract class HttpSource(context: Context) : Source, DIAware {
      *
      * @param response the response from the site.
      */
-    fun detailParse(response: Response): BookPage {
+    fun detailParse(response: Response,isWebViewMode : Boolean =false): BookPage {
         return detailParse(response.asJsoup())
     }
 
@@ -374,7 +373,7 @@ abstract class HttpSource(context: Context) : Source, DIAware {
      *
      * @param document the parsed document.
      */
-    abstract fun detailParse(document: Document): BookPage
+    abstract fun detailParse(document: Document,isWebViewMode : Boolean =false): BookPage
 
 
     /**
@@ -382,11 +381,11 @@ abstract class HttpSource(context: Context) : Source, DIAware {
      *
      * @param response the response from the site.
      */
-    fun pageContentParse(response: Response): ChapterPage {
+    fun pageContentParse(response: Response,isWebViewMode : Boolean =false): ChapterPage {
         return contentParse(response.asJsoup())
     }
 
-    abstract fun contentParse(document: Document): ChapterPage
+    abstract fun contentParse(document: Document,isWebViewMode : Boolean =false): ChapterPage
 
 
     /**
@@ -394,9 +393,9 @@ abstract class HttpSource(context: Context) : Source, DIAware {
      *
      * @param response the response from the site.
      */
-    abstract fun chaptersParse(document: Document): ChaptersPage
+    abstract fun chaptersParse(document: Document,isWebViewMode : Boolean =false): ChaptersPage
 
-    fun chapterListParse(response: Response): ChaptersPage {
+    fun chapterListParse(response: Response,isWebViewMode : Boolean =false): ChaptersPage {
         return chaptersParse(response.asJsoup())
     }
 
@@ -405,13 +404,13 @@ abstract class HttpSource(context: Context) : Source, DIAware {
      *
      * @param response the response from the site.
      */
-    fun searchBookParse(response: Response, page: Int): BooksPage {
+    fun searchBookParse(response: Response, page: Int,isWebViewMode : Boolean =false): BooksPage {
         return searchParse(response.asJsoup(), page = page)
     }
 
-    abstract fun searchParse(document: Document, page: Int): BooksPage
+    abstract fun searchParse(document: Document, page: Int,isWebViewMode : Boolean =false): BooksPage
 
-    abstract fun hasNextChaptersParse(document: Document): Boolean
+    abstract fun hasNextChaptersParse(document: Document,isWebViewMode : Boolean =false): Boolean
 
 
     /****************************************************************************************************/

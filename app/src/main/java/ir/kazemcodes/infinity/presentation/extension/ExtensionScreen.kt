@@ -15,7 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import ir.kazemcodes.infinity.R
-import ir.kazemcodes.infinity.data.network.Extensions
+import ir.kazemcodes.infinity.sources.Extensions
 import ir.kazemcodes.infinity.presentation.book_detail.Constants.DEFAULT_ELEVATION
 import ir.kazemcodes.infinity.presentation.home.BrowserScreenKey
 import org.kodein.di.compose.rememberInstance

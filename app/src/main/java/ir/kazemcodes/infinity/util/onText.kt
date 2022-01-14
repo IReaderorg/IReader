@@ -60,5 +60,5 @@ fun String.applyPageFormat(page: Int): String {
 }
 
 fun String.applySearchFormat(query: String, page: Int): String {
-    return this.replace("{query}", page.toString())
+    return this.replace("{query}", query.toString()).replace("{page}",page.toString())
 }
