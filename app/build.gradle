@@ -176,8 +176,8 @@ dependencies {
     implementation("ru.beryukhov:flowreactivenetwork:1.0.4")
 
     // Dependency injection
-    //implementation("com.github.inorichi.injekt:injekt-core:65b0440")
-    implementation 'org.kodein.di:kodein-di-framework-compose:7.7.0'
+    implementation("com.github.inorichi.injekt:injekt-core:65b0440")
+
 
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2"
 

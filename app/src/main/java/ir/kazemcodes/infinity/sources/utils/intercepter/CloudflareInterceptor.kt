@@ -19,22 +19,19 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.Response
-import org.kodein.di.DI
-import org.kodein.di.DIAware
-import org.kodein.di.android.closestDI
-import org.kodein.di.instance
+import uy.kohesive.injekt.injectLazy
 import java.io.IOException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
-class CloudflareInterceptor(private val context: Context) : Interceptor, DIAware {
+class CloudflareInterceptor(private val context: Context) : Interceptor {
 
     private val executor = ContextCompat.getMainExecutor(context)
-    override val di: DI by closestDI(context)
+
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
-    private val networkHelper: NetworkHelper by di.instance<NetworkHelper>()
+    private val networkHelper: NetworkHelper by injectLazy()
 
 
     /**

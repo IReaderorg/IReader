@@ -31,7 +31,6 @@ class Extensions(context: Context) {
 class AvailableSources(context: Context) {
 
     val baseSample = SourceCreator(
-        context,
         _name = "",
         _baseUrl = "",
         _lang = "",
@@ -157,7 +156,6 @@ class AvailableSources(context: Context) {
 
 
     val realwebnovel = SourceCreator(
-        context = context,
         _baseUrl = "https://readwebnovels.net",
         _lang = "en",
         _name = "RealWebNovel",
@@ -214,7 +212,6 @@ class AvailableSources(context: Context) {
         )
     )
     val freeWebNovel = SourceCreator(
-        context = context,
         _name = "FreeWebNovel",
         _lang = "en",
         _baseUrl = "https://freewebnovel.com",
@@ -280,7 +277,6 @@ class AvailableSources(context: Context) {
     )
 
     val mtl = SourceCreator(
-        context = context,
         _lang = "en",
         _name = "MtlNovel",
         _baseUrl = "https://www.mtlnovel.com",
@@ -344,7 +340,6 @@ class AvailableSources(context: Context) {
 
     )
     val wuxiaworld = SourceCreator(
-        context = context,
         _name = "Wuxiaworld",
         _lang = "en",
         _baseUrl = "https://wuxiaworld.site",
@@ -403,7 +398,6 @@ class AvailableSources(context: Context) {
         )
     )
     val myLoveNovel = SourceCreator(
-        context = context,
         _name = "MyLoveNovel",
         _lang = "en",
         _supportsLatest = true,
@@ -463,7 +457,6 @@ class AvailableSources(context: Context) {
         )
     )
     val koreanMtl = SourceCreator(
-        context = context,
         _name = "KoreanMtl.Online",
         _lang = "en",
         _supportsLatest = true,

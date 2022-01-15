@@ -1,6 +1,5 @@
 package ir.kazemcodes.infinity.data.network.models
 
-import android.content.Context
 import android.webkit.WebView
 import ir.kazemcodes.infinity.api_feature.network.GET
 import ir.kazemcodes.infinity.domain.models.remote.Book
@@ -12,9 +11,8 @@ import ir.kazemcodes.infinity.util.asJsoup
 import okhttp3.*
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
-import org.kodein.di.*
-import org.kodein.di.android.closestDI
 import ru.gildor.coroutines.okhttp.await
+import uy.kohesive.injekt.injectLazy
 import java.net.URI
 import java.net.URISyntaxException
 import java.security.MessageDigest
@@ -23,12 +21,11 @@ import java.util.*
 /**
  * A simple implementation for sources from a website.
  */
-abstract class HttpSource(context: Context) : Source, DIAware {
+abstract class HttpSource() : Source {
 
 
-    final override val di: DI by closestDI(context)
 
-    protected val network: NetworkHelper by di.instance<NetworkHelper>()
+    protected val network: NetworkHelper by injectLazy<NetworkHelper>()
 
 
     /**
@@ -42,7 +39,7 @@ abstract class HttpSource(context: Context) : Source, DIAware {
     open val client: OkHttpClient
         get() = network.client
 
-    val webView = WebView(context)
+    val webView : WebView by injectLazy()
 
 
     /**

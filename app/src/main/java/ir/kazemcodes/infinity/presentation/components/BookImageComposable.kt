@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.skydoves.landscapist.coil.CoilImage
 import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarTitle
@@ -21,6 +22,9 @@ fun BookImageComposable(
     alignment: Alignment = Alignment.Center,
     contentScale: ContentScale = ContentScale.Fit,
 ) {
+    val context = LocalContext.current
+
+
     CoilImage(
         image,
         contentDescription = "Book Cover",
@@ -48,7 +52,6 @@ fun BookImageComposable(
                     TopAppBarTitle(title = "No Image Available")
                 }
             }
-        }
-
+        },
     )
 }

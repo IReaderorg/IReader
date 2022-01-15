@@ -15,14 +15,11 @@ import dagger.hilt.android.scopes.ActivityScoped
 import ir.kazemcodes.infinity.MyApplication
 import ir.kazemcodes.infinity.R
 import ir.kazemcodes.infinity.presentation.home.core.FragmentStateChanger
-import org.kodein.di.DI
-import org.kodein.di.DIAware
-import org.kodein.di.android.closestDI
 
 
 @AndroidEntryPoint
 @ActivityScoped
-class MainActivity : AppCompatActivity(), DIAware, SimpleStateChanger.NavigationHandler {
+class MainActivity : AppCompatActivity(), SimpleStateChanger.NavigationHandler {
 
     private lateinit var fragmentStateChanger: FragmentStateChanger
 
@@ -105,8 +102,6 @@ class MainActivity : AppCompatActivity(), DIAware, SimpleStateChanger.Navigation
 //    fun Main(content: @Composable () -> Unit) = withDI(di) {
 //        content()
 //    }
-
-    override val di: DI by closestDI(this)
     override fun onNavigationEvent(stateChange: StateChange) {
         fragmentStateChanger.handleStateChange(stateChange)
     }

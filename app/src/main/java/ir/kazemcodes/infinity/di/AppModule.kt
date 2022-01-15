@@ -3,6 +3,7 @@ package ir.kazemcodes.infinity.di
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
+import android.webkit.WebView
 import androidx.room.Room
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -24,6 +25,8 @@ import ir.kazemcodes.infinity.domain.use_cases.local.chapter.*
 import ir.kazemcodes.infinity.domain.use_cases.preferences.*
 import ir.kazemcodes.infinity.domain.use_cases.remote.*
 import ir.kazemcodes.infinity.presentation.book_detail.Constants.SHARED_PREF_NAME
+import ir.kazemcodes.infinity.sources.Extensions
+import ir.kazemcodes.infinity.sources.utils.NetworkHelper
 import okhttp3.CookieJar
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -197,6 +200,22 @@ class AppModule {
     @Provides
     fun providePreferenceHelper(sharedPreferences: SharedPreferences): PreferencesHelper {
         return PreferencesHelper(sharedPreferences)
+    }
+
+    @Singleton
+    @Provides
+    fun providesWebView(context: Context): WebView {
+        return WebView(context)
+    }
+    @Singleton
+    @Provides
+    fun providesExtensions(context: Context): Extensions {
+        return Extensions(context)
+    }
+    @Singleton
+    @Provides
+    fun providesNetWorkHelper(context: Context): NetworkHelper {
+        return NetworkHelper(context)
     }
 
 

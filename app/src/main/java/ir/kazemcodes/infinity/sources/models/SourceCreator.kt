@@ -1,6 +1,5 @@
 package ir.kazemcodes.infinity.sources.models
 
-import android.content.Context
 import android.util.Patterns
 import com.nfeld.jsonpathkt.JsonPath
 import com.nfeld.jsonpathkt.extension.read
@@ -18,9 +17,8 @@ import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 
 
-class SourceCreator(
-    context: Context,
-    _baseUrl: String,
+data class SourceCreator constructor(
+    val _baseUrl: String,
     private val _lang: String,
     private val _name: String,
     private val _supportsMostPopular: Boolean = false,
@@ -32,7 +30,7 @@ class SourceCreator(
     private val search: Search? = null,
     private val chapters: Chapters? = null,
     private val content: Content? = null,
-) : ParsedHttpSource(context) {
+) : ParsedHttpSource() {
     override val lang: String
         get() = _lang
     override val name: String
@@ -45,6 +43,7 @@ class SourceCreator(
     override val baseUrl: String = _baseUrl
 
     override val supportSearch: Boolean = _supportsSearch
+
 
 
     override fun headersBuilder(): Headers.Builder = Headers.Builder().apply {

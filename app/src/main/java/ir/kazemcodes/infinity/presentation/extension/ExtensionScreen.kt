@@ -8,23 +8,26 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
+import com.zhuinden.simplestackextensions.servicesktx.lookup
 import ir.kazemcodes.infinity.R
-import ir.kazemcodes.infinity.sources.Extensions
 import ir.kazemcodes.infinity.presentation.book_detail.Constants.DEFAULT_ELEVATION
 import ir.kazemcodes.infinity.presentation.home.BrowserScreenKey
-import org.kodein.di.compose.rememberInstance
+import ir.kazemcodes.infinity.sources.Extensions
 
 
 @Composable
 fun ExtensionScreen(modifier: Modifier = Modifier) {
     val backstack = LocalBackstack.current
-    val extensions: Extensions by rememberInstance<Extensions>()
+    val extensions: Extensions = remember {
+        backstack.lookup<Extensions>()
+    }
 
     val sources = extensions.getSources()
     Scaffold(

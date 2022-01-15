@@ -15,21 +15,16 @@ import okhttp3.Cache
 import okhttp3.OkHttpClient
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import org.kodein.di.DI
-import org.kodein.di.DIAware
-import org.kodein.di.android.closestDI
-import org.kodein.di.instance
 import timber.log.Timber
+import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.util.concurrent.TimeUnit
 
 
-class NetworkHelper(private val context: Context) : DIAware {
-
-    override val di: DI by closestDI(context)
+class NetworkHelper(private val context: Context)  {
 
 
-    val preferencesUseCase: PreferencesUseCase by di.instance<PreferencesUseCase>()
+    val preferencesUseCase: PreferencesUseCase by injectLazy()
 
     val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
@@ -39,7 +34,7 @@ class NetworkHelper(private val context: Context) : DIAware {
 
     val cookieManager = AndroidCookieJar()
 
-    val webView by di.instance<WebView>()
+    val webView : WebView by injectLazy()
 
     private val baseClientBuilder: OkHttpClient.Builder
         get() {

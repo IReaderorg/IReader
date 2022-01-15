@@ -7,7 +7,7 @@ import ir.kazemcodes.infinity.presentation.book_detail.Constants.CLOUDFLARE_LOG
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 
-abstract class ParsedHttpSource(context: Context) : HttpSource(context) {
+abstract class ParsedHttpSource() : HttpSource() {
 
     /****************************************************************************************************/
     /**
