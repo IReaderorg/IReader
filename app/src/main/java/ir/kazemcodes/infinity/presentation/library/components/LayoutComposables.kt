@@ -8,7 +8,7 @@ import ir.kazemcodes.infinity.data.network.models.Source
 import ir.kazemcodes.infinity.domain.models.remote.Book
 import ir.kazemcodes.infinity.presentation.layouts.GridLayoutComposable
 import ir.kazemcodes.infinity.presentation.layouts.LinearListDisplay
-import ir.kazemcodes.infinity.presentation.home.BookDetailKey
+import ir.kazemcodes.infinity.feature_activity.presentation.BookDetailKey
 import ir.kazemcodes.infinity.presentation.layouts.CompactGridLayoutComposable
 import ir.kazemcodes.infinity.presentation.layouts.LayoutType
 

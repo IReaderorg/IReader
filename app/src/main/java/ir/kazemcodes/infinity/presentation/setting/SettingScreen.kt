@@ -17,10 +17,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import ir.kazemcodes.infinity.presentation.book_detail.Constants
-import ir.kazemcodes.infinity.presentation.home.DnsOverHttpScreenKey
-import ir.kazemcodes.infinity.presentation.home.DownloadScreenKey
-import ir.kazemcodes.infinity.presentation.home.ExtensionCreatorScreenKey
-import ir.kazemcodes.infinity.presentation.home.core.FragmentKey
+import ir.kazemcodes.infinity.feature_activity.presentation.DnsOverHttpScreenKey
+import ir.kazemcodes.infinity.feature_activity.presentation.DownloadScreenKey
+import ir.kazemcodes.infinity.feature_activity.presentation.ExtensionCreatorScreenKey
+import ir.kazemcodes.infinity.feature_activity.presentation.core.FragmentKey
 import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarTitle
 
 @Composable

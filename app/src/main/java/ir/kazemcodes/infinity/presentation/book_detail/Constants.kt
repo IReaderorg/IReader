@@ -16,6 +16,10 @@ object Constants {
 
     const val KODEIN_MODULE = "kodein_module"
 
+    const val ImageKeyTable = "images_key_table"
+    const val BOOK_TABLE = "book_table"
+    const val CHAPTER_TABLE = "chapter_entity"
+
 
 }
 

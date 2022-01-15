@@ -3,7 +3,7 @@ package ir.kazemcodes.infinity.notification
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import ir.kazemcodes.infinity.presentation.home.MainActivity
+import ir.kazemcodes.infinity.feature_activity.presentation.MainActivity
 
 /**
  * Class that manages [PendingIntent] of activity's

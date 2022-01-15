@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import com.zhuinden.simplestackcomposeintegration.services.rememberService
 import ir.kazemcodes.infinity.presentation.book_detail.Constants
-import ir.kazemcodes.infinity.presentation.home.ReaderScreenKey
+import ir.kazemcodes.infinity.feature_activity.presentation.ReaderScreenKey
 import ir.kazemcodes.infinity.presentation.reusable_composable.ErrorTextWithEmojis
 import ir.kazemcodes.infinity.presentation.reusable_composable.TopAppBarTitle
 

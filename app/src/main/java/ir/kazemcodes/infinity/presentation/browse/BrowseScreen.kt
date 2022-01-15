@@ -16,7 +16,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import com.zhuinden.simplestackcomposeintegration.services.rememberService
-import ir.kazemcodes.infinity.presentation.home.WebViewKey
+import ir.kazemcodes.infinity.feature_activity.presentation.WebViewKey
 import ir.kazemcodes.infinity.presentation.layouts.layouts
 import ir.kazemcodes.infinity.presentation.library.components.LayoutComposable
 import ir.kazemcodes.infinity.presentation.library.components.RadioButtonWithTitleComposable

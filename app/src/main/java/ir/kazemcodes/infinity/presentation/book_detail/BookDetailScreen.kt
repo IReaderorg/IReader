@@ -27,9 +27,9 @@ import ir.kazemcodes.infinity.presentation.book_detail.components.CardTileCompos
 import ir.kazemcodes.infinity.presentation.book_detail.components.DotsFlashing
 import ir.kazemcodes.infinity.presentation.book_detail.components.ExpandingText
 import ir.kazemcodes.infinity.presentation.components.BookImageComposable
-import ir.kazemcodes.infinity.presentation.home.ChapterDetailKey
-import ir.kazemcodes.infinity.presentation.home.ReaderScreenKey
-import ir.kazemcodes.infinity.presentation.home.WebViewKey
+import ir.kazemcodes.infinity.feature_activity.presentation.ChapterDetailKey
+import ir.kazemcodes.infinity.feature_activity.presentation.ReaderScreenKey
+import ir.kazemcodes.infinity.feature_activity.presentation.WebViewKey
 import ir.kazemcodes.infinity.presentation.reusable_composable.ErrorTextWithEmojis
 import ir.kazemcodes.infinity.util.formatBasedOnDot
 import ir.kazemcodes.infinity.util.formatList
@@ -233,7 +233,7 @@ fun BookDetailScreenLoadedComposable(
                     modifier = modifier
                         .width(120.dp)
                         .height(180.dp)
-                        .clip(RoundedCornerShape(8.dp))
+                        .clip(RoundedCornerShape(4.dp))
                         .border(2.dp,MaterialTheme.colors.onBackground.copy(alpha = .1f)),
                     contentScale = ContentScale.Crop,
                 )

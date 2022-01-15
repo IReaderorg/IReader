@@ -15,6 +15,7 @@ import ir.kazemcodes.infinity.notification.Notifications
 import ir.kazemcodes.infinity.sources.Extensions
 import ir.kazemcodes.infinity.sources.utils.NetworkHelper
 import ir.kazemcodes.infinity.util.SourceMapper
+import okhttp3.OkHttpClient
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.InjektModule
@@ -49,6 +50,8 @@ class MyApplication : Application(), Configuration.Provider {
     @Inject
     lateinit var networkHelper: NetworkHelper
 
+    @Inject lateinit var okHttpClient: OkHttpClient
+
 
     private var mFirebaseAnalytics: FirebaseAnalytics? = null
     override fun onCreate() {
@@ -71,6 +74,7 @@ class MyApplication : Application(), Configuration.Provider {
             .add(SourceMapper(this))
             .add(extensions)
             .add(webView)
+            .add(okHttpClient)
             .build()
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this)
         setupNotificationChannels()

@@ -17,7 +17,7 @@
 //import ir.kazemcodes.infinity.domain.models.remote.Book
 //import ir.kazemcodes.infinity.domain.models.remote.Chapter
 //import ir.kazemcodes.infinity.presentation.book_detail.BookDetailViewModel
-//import ir.kazemcodes.infinity.presentation.home.WebViewKey
+//import ir.kazemcodes.infinity.feature_activity.presentation.WebViewKey
 //
 //@Composable
 //fun BookDetailToggleButtonsComposable(

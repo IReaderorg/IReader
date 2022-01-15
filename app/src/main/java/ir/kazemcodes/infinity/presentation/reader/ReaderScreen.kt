@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import com.zhuinden.simplestackcomposeintegration.services.rememberService
-import ir.kazemcodes.infinity.presentation.home.WebViewKey
+import ir.kazemcodes.infinity.feature_activity.presentation.WebViewKey
 import ir.kazemcodes.infinity.presentation.reader.components.MainBottomSettingComposable
 import ir.kazemcodes.infinity.presentation.reader.components.ReaderSettingComposable
 import ir.kazemcodes.infinity.presentation.reusable_composable.ErrorTextWithEmojis

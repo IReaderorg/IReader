@@ -365,13 +365,12 @@ class AvailableSources(context: Context) {
             categorySelector = "div.genres-content a",
         ),
         chapters = Chapters(
-            subStringSomethingAtEnd = "ajax/chapters/",
-            ajaxSelector = "ul.main>li:nth-child(1)>a",
+            ajaxSelector = "ul.main li:nth-child(1) a.ct-active",
             selector = "li.wp-manga-chapter",
+            isChapterStatsFromFirst = false,
             nameSelector = "a",
             linkSelector = "a",
             linkAtt = "href",
-            isGetRequestType = false
         ), content = Content(
             ajaxSelector = "div.reading-content div.text-left p:nth-child(3)",
             selector = "div.read-container div.reading-content h3,p",
@@ -496,12 +495,68 @@ class AvailableSources(context: Context) {
         )
     )
 
+    val mtlNation = SourceCreator(
+        _name = "MtlNation",
+        _baseUrl = "https://mtlnation.com/",
+        _supportsSearch = true,
+        _supportsMostPopular = true,
+        _supportsLatest = true,
+        _lang = "en",
+        latest = Latest(
+            endpoint = "/novel/page/{page}/?m_orderby=latest",
+            selector = "div.page-item-detail",
+            nameSelector = "h3.h5 a",
+            linkSelector = "h3.h5 a",
+            linkAtt = "href",
+            coverSelector = "div.item-thumb a img",
+            coverAtt = "src"
+        ),
+        popular = Popular(
+            endpoint = "/novel/page/{page}/?m_orderby=views",
+            selector = "div.page-item-detail",
+            nameSelector = "h3.h5 a",
+            linkSelector = "h3.h5 a",
+            linkAtt = "href",
+            coverSelector = "div.item-thumb a img",
+            coverAtt = "src"
+        ), search = Search(
+            endpoint = "/page/{page}/?s={query}&post_type=wp-manga&op&author&artist&release&adult",
+            selector = "div.c-tabs-item div.row",
+            coverSelector = "div.c-image-hover a img",
+            coverAtt = "src",
+            linkSelector = "div.c-image-hover a",
+            linkAtt = "href",
+            nameSelector = "div.c-image-hover a",
+            nameAtt = "div.c-image-hover a"
+        ),
+        content = Content(
+            selector = "div.c-blog-post",
+            pageContentSelector = "p"
+        ),
+        chapters = Chapters(
+            ajaxSelector = "ul.main li:nth-child(1) a",
+            selector = "ul.main version-chap li.wp-manga-chapter",
+            nameSelector = "a",
+            linkSelector = "a",
+            linkAtt = "href",
+        ),
+        detail = Detail(
+            nameSelector = "div.post-title h1",
+            coverSelector = "div.summary_image a img",
+            coverAtt = "src",
+            descriptionSelector = "div.summary__content p",
+            categorySelector = "div.genres-content a",
+            authorBookSelector = "div.author-content a"
+        )
+    )
+
     val sourcesList = listOf<Source>(
-        realwebnovel,
         freeWebNovel,
-        mtl,
-        wuxiaworld,
+        koreanMtl,
         myLoveNovel,
-        koreanMtl
+        mtl,
+        realwebnovel,
+        wuxiaworld,
+        mtlNation
     )
 }

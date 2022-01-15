@@ -30,6 +30,7 @@ import ir.kazemcodes.infinity.sources.utils.NetworkHelper
 import okhttp3.CookieJar
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
@@ -175,6 +176,8 @@ class AppModule {
                     setLevel(HttpLoggingInterceptor.Level.BASIC)
                 }
             )
+            readTimeout(15,TimeUnit.SECONDS)
+            connectTimeout(15,TimeUnit.SECONDS)
             cookieJar(cookieJar)
 
         }

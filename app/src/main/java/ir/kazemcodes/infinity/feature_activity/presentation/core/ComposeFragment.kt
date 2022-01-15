@@ -1,4 +1,4 @@
-package ir.kazemcodes.infinity.presentation.home.core
+package ir.kazemcodes.infinity.feature_activity.presentation.core
 
 import android.os.Bundle
 import android.view.LayoutInflater

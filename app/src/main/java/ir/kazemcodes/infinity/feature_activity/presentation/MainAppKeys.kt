@@ -1,4 +1,4 @@
-package ir.kazemcodes.infinity.presentation.home
+package ir.kazemcodes.infinity.feature_activity.presentation
 
 import android.content.Context
 import android.content.pm.ActivityInfo
@@ -19,6 +19,8 @@ import ir.kazemcodes.infinity.domain.models.remote.Chapter
 import ir.kazemcodes.infinity.domain.use_cases.local.LocalUseCase
 import ir.kazemcodes.infinity.domain.use_cases.preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.domain.use_cases.remote.RemoteUseCase
+import ir.kazemcodes.infinity.feature_activity.presentation.core.ComposeFragment
+import ir.kazemcodes.infinity.feature_activity.presentation.core.FragmentKey
 import ir.kazemcodes.infinity.presentation.book_detail.BookDetailScreen
 import ir.kazemcodes.infinity.presentation.book_detail.BookDetailViewModel
 import ir.kazemcodes.infinity.presentation.browse.BrowseViewModel
@@ -26,13 +28,12 @@ import ir.kazemcodes.infinity.presentation.browse.BrowserScreen
 import ir.kazemcodes.infinity.presentation.chapter_detail.ChapterDetailScreen
 import ir.kazemcodes.infinity.presentation.chapter_detail.ChapterDetailViewModel
 import ir.kazemcodes.infinity.presentation.extension.ExtensionScreen
-import ir.kazemcodes.infinity.presentation.home.core.ComposeFragment
-import ir.kazemcodes.infinity.presentation.home.core.FragmentKey
 import ir.kazemcodes.infinity.presentation.library.LibraryViewModel
 import ir.kazemcodes.infinity.presentation.reader.ReaderScreenViewModel
 import ir.kazemcodes.infinity.presentation.reader.ReadingScreen
 import ir.kazemcodes.infinity.presentation.setting.SettingViewModel
 import ir.kazemcodes.infinity.presentation.setting.dns.DnsOverHttpScreen
+import ir.kazemcodes.infinity.presentation.setting.downloader.DownloaderScreen
 import ir.kazemcodes.infinity.presentation.setting.extension_creator.ExtensionCreatorScreen
 import ir.kazemcodes.infinity.presentation.theme.InfinityTheme
 import ir.kazemcodes.infinity.presentation.webview.WebPageScreen
@@ -273,10 +274,8 @@ class DownloadScreenFragment() : ComposeFragment() {
     override fun FragmentComposable(backstack: Backstack) {
         BackstackProvider(backstack = backstack) {
             InfinityTheme() {
-                ExtensionScreenKey()
-
+                DownloaderScreen()
             }
-
         }
     }
 }

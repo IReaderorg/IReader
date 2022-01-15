@@ -22,7 +22,7 @@ fun BookImageInfoComposable(modifier: Modifier = Modifier, bookDetail: Book) {
             modifier = Modifier
                 .height(180.dp)
                 .width(150.dp)
-                .clip(RoundedCornerShape(8.dp))
+                .clip(RoundedCornerShape(4.dp))
                 .border(2.dp,MaterialTheme.colors.onBackground.copy(alpha = .1f)),
         )
         Spacer(modifier = modifier.height(8.dp))

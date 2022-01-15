@@ -1,4 +1,4 @@
-package ir.kazemcodes.infinity.presentation.home
+package ir.kazemcodes.infinity.feature_activity.presentation
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -7,14 +7,13 @@ import com.zhuinden.simplestack.History
 import com.zhuinden.simplestack.SimpleStateChanger
 import com.zhuinden.simplestack.StateChange
 import com.zhuinden.simplestack.navigator.Navigator
-import com.zhuinden.simplestackcomposeintegration.core.ComposeStateChanger
 import com.zhuinden.simplestackextensions.navigatorktx.androidContentFrame
 import com.zhuinden.simplestackextensions.services.DefaultServiceProvider
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.scopes.ActivityScoped
 import ir.kazemcodes.infinity.MyApplication
 import ir.kazemcodes.infinity.R
-import ir.kazemcodes.infinity.presentation.home.core.FragmentStateChanger
+import ir.kazemcodes.infinity.feature_activity.presentation.core.FragmentStateChanger
 
 
 @AndroidEntryPoint
@@ -22,8 +21,6 @@ import ir.kazemcodes.infinity.presentation.home.core.FragmentStateChanger
 class MainActivity : AppCompatActivity(), SimpleStateChanger.NavigationHandler {
 
     private lateinit var fragmentStateChanger: FragmentStateChanger
-
-    private val composeStateChanger = ComposeStateChanger()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,27 +37,6 @@ class MainActivity : AppCompatActivity(), SimpleStateChanger.NavigationHandler {
             .setScopedServices(DefaultServiceProvider())
             .setGlobalServices(globalServices)
             .install(this, androidContentFrame, History.of(MainScreenKey()))
-
-//        val backstack = Navigator.configure()
-//            .setGlobalServices(app.globalServices)
-//            .setScopedServices(DefaultServiceProvider())
-//            .setStateChanger(AsyncStateChanger(composeStateChanger))
-//            .install(this, androidContentFrame, History.of(MainScreenKey()))
-//
-//        setContent {
-//            BackstackProvider(backstack) {
-//                InfinityTheme {
-//                    Surface(color = MaterialTheme.colors.background) {
-//                        Main {
-//                            Box(modifier = Modifier.fillMaxSize()) {
-//                                composeStateChanger.RenderScreen()
-//                            }
-//                        }
-//                    }
-//                }
-//
-//            }
-//        }
     }
 
     override fun onBackPressed() {

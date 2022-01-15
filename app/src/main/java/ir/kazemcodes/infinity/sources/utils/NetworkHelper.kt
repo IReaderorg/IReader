@@ -2,12 +2,14 @@ package ir.kazemcodes.infinity.sources.utils
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.view.ViewGroup
 import android.webkit.WebView
 import ir.kazemcodes.infinity.data.network.models.*
 import ir.kazemcodes.infinity.data.network.utils.AndroidCookieJar
 import ir.kazemcodes.infinity.data.network.utils.UserAgentInterceptor
 import ir.kazemcodes.infinity.data.network.utils.WebViewClientCompat
 import ir.kazemcodes.infinity.data.network.utils.intercepter.CloudflareInterceptor
+import ir.kazemcodes.infinity.data.network.utils.setDefaultSettings
 import ir.kazemcodes.infinity.domain.use_cases.preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.util.getHtml
 import kotlinx.coroutines.*
@@ -68,6 +70,7 @@ class NetworkHelper(private val context: Context)  {
 
         Timber.d("Infinity: GetData Using WebView")
 
+        webView.setDefaultSettings()
         with(webView.settings) {
             javaScriptEnabled = true
             domStorageEnabled = true
@@ -77,7 +80,12 @@ class NetworkHelper(private val context: Context)  {
             loadWithOverviewMode = true
             cacheMode = android.webkit.WebSettings.LOAD_DEFAULT
         }
+        webView.layoutParams = ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
+        )
         webView.loadUrl(url)
+
 
 
         var docs: Document = Document("No Data was Found")

@@ -3,10 +3,11 @@ package ir.kazemcodes.infinity.domain.models.local
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import ir.kazemcodes.infinity.domain.models.remote.Book
+import ir.kazemcodes.infinity.presentation.book_detail.Constants.BOOK_TABLE
 import kotlinx.serialization.Serializable
 
 @Serializable
-@Entity(tableName = "book_table")
+@Entity(tableName = BOOK_TABLE)
 data class BookEntity(
     val link: String,
     val bookName: String,

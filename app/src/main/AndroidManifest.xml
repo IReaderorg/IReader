@@ -20,7 +20,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Infinity">
         <activity
-            android:name=".presentation.home.MainActivity"
+            android:name=".feature_activity.presentation.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.Infinity.NoActionBar">

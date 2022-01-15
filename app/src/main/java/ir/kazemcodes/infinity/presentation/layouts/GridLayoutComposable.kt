@@ -51,7 +51,7 @@ fun GridLayoutComposable(
                         modifier = modifier
                             .width(120.dp)
                             .height(180.dp)
-                            .clip(RoundedCornerShape(8.dp))
+                            .clip(RoundedCornerShape(4.dp))
                             .border(2.5.dp,MaterialTheme.colors.onBackground.copy(alpha = .1f)),
                         image = books[index].coverLink ?: "",
                     )

@@ -1,4 +1,4 @@
-package ir.kazemcodes.infinity.presentation.home
+package ir.kazemcodes.infinity.feature_activity.presentation
 
 import androidx.compose.runtime.mutableStateOf
 import com.zhuinden.simplestack.ScopedServices

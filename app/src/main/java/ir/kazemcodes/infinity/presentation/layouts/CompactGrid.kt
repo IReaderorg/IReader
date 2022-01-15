@@ -50,8 +50,9 @@ fun CompactGridLayoutComposable(
                 ) {
                     BookImageComposable(
                         modifier = modifier
-                            .height(230.dp)
-                            .clip(RoundedCornerShape(8.dp))
+                            .height(250.dp)
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(4.dp))
                             .border(2.dp,MaterialTheme.colors.onBackground.copy(alpha = .1f)),
                         image = books[index].coverLink ?: "",
                     )

@@ -38,7 +38,7 @@ fun LinearBookItem(
             BookImageComposable(image = img_thumbnail, modifier = modifier
                 .height(40.dp)
                 .width(40.dp)
-                .clip(RoundedCornerShape(8.dp))
+                .clip(RoundedCornerShape(4.dp))
                 .border(.2.dp, MaterialTheme.colors.onBackground.copy(alpha = .1f)))
             Spacer(modifier = Modifier.width(15.dp))
             Text(

@@ -18,7 +18,7 @@ import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import com.zhuinden.simplestackextensions.servicesktx.lookup
 import ir.kazemcodes.infinity.R
 import ir.kazemcodes.infinity.presentation.book_detail.Constants.DEFAULT_ELEVATION
-import ir.kazemcodes.infinity.presentation.home.BrowserScreenKey
+import ir.kazemcodes.infinity.feature_activity.presentation.BrowserScreenKey
 import ir.kazemcodes.infinity.sources.Extensions
 
 
