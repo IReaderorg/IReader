@@ -2,56 +2,27 @@ package ir.kazemcodes.infinity.feature_activity.presentation
 
 
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Book
-import androidx.compose.material.icons.filled.Explore
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import com.zhuinden.simplestackcomposeintegration.services.rememberService
-import ir.kazemcodes.infinity.presentation.extension.ExtensionScreen
-import ir.kazemcodes.infinity.presentation.library.LibraryScreen
-import ir.kazemcodes.infinity.presentation.setting.SettingScreen
+import ir.kazemcodes.infinity.feature_activity.domain.models.BottomNavigationScreen
+import ir.kazemcodes.infinity.feature_library.presentation.LibraryScreen
+import ir.kazemcodes.infinity.feature_sources.presentation.extension.ExtensionScreen
+import ir.kazemcodes.infinity.feature_settings.presentation.setting.SettingScreen
 
 
-sealed class BottomNavigationScreens(
-    val index: Int,
-    val title: String,
-    val icon: ImageVector,
-) {
-    object Library :
-        BottomNavigationScreens(
-            0,
-            "Library",
-            icon = Icons.Default.Book
-        )
 
-    object ExtensionScreen : BottomNavigationScreens(
-        1,
-        "Explore",
-        Icons.Default.Explore
-    )
-
-    object Setting : BottomNavigationScreens(
-        2,
-        "Setting",
-        Icons.Default.Settings
-    )
-}
 
 
 @Composable
 fun MainScreen(modifier: Modifier = Modifier) {
-    val backstack = LocalBackstack.current
     val viewModel = rememberService<MainViewModel>()
-    val currentIndex: Int = viewModel.state.value.index
+    val currentScreen: BottomNavigationScreen = viewModel.state.value.currentScreen
     val bottomNavigationItems = listOf(
-        BottomNavigationScreens.Library,
-        BottomNavigationScreens.ExtensionScreen,
-        BottomNavigationScreens.Setting
+        BottomNavigationScreen.Library,
+        BottomNavigationScreen.ExtensionScreen,
+        BottomNavigationScreen.Setting
     )
 
     Scaffold(
@@ -63,9 +34,9 @@ fun MainScreen(modifier: Modifier = Modifier) {
             ) {
                 bottomNavigationItems.forEach { screen ->
                     BottomNavigationItem(
-                        selected = screen.title == bottomNavigationItems[currentIndex].title,
+                        selected = screen.title == bottomNavigationItems[currentScreen.index].title,
                         onClick = {
-                            viewModel.onEvent(MainScreenEvent.ChangeScreenIndex(screen.index))
+                            viewModel.onEvent(MainScreenEvent.NavigateTo(screen))
                         },
                         label = { Text(text = screen.title) },
                         icon = {
@@ -82,14 +53,14 @@ fun MainScreen(modifier: Modifier = Modifier) {
             }
         }
     ) {
-        when (currentIndex) {
-            0 -> {
+        when (currentScreen) {
+            is BottomNavigationScreen.Library -> {
                 LibraryScreen()
             }
-            1 -> {
+            is BottomNavigationScreen.ExtensionScreen -> {
                 ExtensionScreen()
             }
-            2 -> {
+            is BottomNavigationScreen.Setting -> {
                 SettingScreen()
             }
         }

@@ -1,0 +1,58 @@
+package ir.kazemcodes.infinity.core.domain.use_cases.local.book
+
+import ir.kazemcodes.infinity.core.domain.models.Book
+import ir.kazemcodes.infinity.core.domain.repository.Repository
+import ir.kazemcodes.infinity.core.utils.Resource
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import timber.log.Timber
+import java.io.IOException
+import javax.inject.Inject
+
+class GetAllLocalBooksUseCase @Inject constructor(
+    private val repository: Repository,
+) {
+
+    operator fun invoke(): Flow<Resource<List<Book>>> = flow {
+        try {
+            Timber.d("Timber: GetLocalBooksUseCase was Called")
+            emit(Resource.Loading())
+
+            repository.localBookRepository.getAllBooks().map { it.map { book -> book.toBook() } }
+                .collect { data ->
+
+                    emit(Resource.Success<List<Book>>(data = data))
+                }
+            Timber.d("Timber: GetLocalBooksUseCase was Finished Successfully")
+        } catch (e: IOException) {
+            emit(Resource.Error<List<Book>>(message = "Couldn't load from local database."))
+        } catch (e: Exception) {
+            emit(Resource.Error<List<Book>>(message = e.message.toString()))
+        }
+    }
+}
+
+
+class GetInLibraryBooksUseCase @Inject constructor(
+    private val repository: Repository,
+) {
+
+    operator fun invoke(): Flow<Resource<List<Book>>> = flow {
+        try {
+            Timber.d("Timber: GetLocalBooksUseCase was Called")
+            emit(Resource.Loading())
+
+            repository.localBookRepository.getInLibraryBooks().map { it.map { book -> book.toBook() } }
+                .collect { data ->
+                    emit(Resource.Success<List<Book>>(data = data))
+                }
+            Timber.d("Timber: GetLocalBooksUseCase was Finished Successfully")
+        } catch (e: IOException) {
+            emit(Resource.Error<List<Book>>(message = "Couldn't load from local database."))
+        } catch (e: Exception) {
+            emit(Resource.Error<List<Book>>(message = e.message.toString()))
+        }
+    }
+}

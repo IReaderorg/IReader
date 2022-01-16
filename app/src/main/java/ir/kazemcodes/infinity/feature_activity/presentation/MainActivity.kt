@@ -13,7 +13,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.scopes.ActivityScoped
 import ir.kazemcodes.infinity.MyApplication
 import ir.kazemcodes.infinity.R
-import ir.kazemcodes.infinity.feature_activity.presentation.core.FragmentStateChanger
+import ir.kazemcodes.infinity.feature_activity.core.FragmentStateChanger
 
 
 @AndroidEntryPoint

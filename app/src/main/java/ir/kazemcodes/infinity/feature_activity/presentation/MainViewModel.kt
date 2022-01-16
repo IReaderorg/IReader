@@ -2,6 +2,7 @@ package ir.kazemcodes.infinity.feature_activity.presentation
 
 import androidx.compose.runtime.mutableStateOf
 import com.zhuinden.simplestack.ScopedServices
+import ir.kazemcodes.infinity.feature_activity.domain.models.BottomNavigationScreen
 
 class MainViewModel : ScopedServices.Registered {
 
@@ -11,8 +12,8 @@ class MainViewModel : ScopedServices.Registered {
 
     fun onEvent(event: MainScreenEvent) {
         when (event) {
-            is MainScreenEvent.ChangeScreenIndex -> {
-                _state.value = state.value.copy(index = event.index)
+            is MainScreenEvent.NavigateTo -> {
+                _state.value = state.value.copy(currentScreen = event.screen)
             }
 
         }
@@ -24,6 +25,6 @@ class MainViewModel : ScopedServices.Registered {
 }
 
 data class MainScreenState(
-    val index: Int = 0,
+    val currentScreen: BottomNavigationScreen = BottomNavigationScreen.Library
 )
 
