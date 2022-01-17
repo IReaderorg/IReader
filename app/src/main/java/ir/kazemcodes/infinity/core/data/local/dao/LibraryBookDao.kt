@@ -5,15 +5,18 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import ir.kazemcodes.infinity.core.domain.models.BookEntity
 import ir.kazemcodes.infinity.core.data.local.ExploreBook
+import ir.kazemcodes.infinity.core.domain.models.BookEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface LibraryBookDao {
 
     @Query("SELECT * FROM explore_books_table")
-    fun getAllExploreBook(): PagingSource<Int, ExploreBook>
+    fun getAllExploreBookByPaging(): PagingSource<Int, ExploreBook>
+
+    @Query("SELECT * FROM explore_books_table")
+    suspend fun getAllExploreBook(): List<ExploreBook>
 
     @Query("SELECT * FROM explore_books_table WHERE id =:id")
     fun getExploreBookById(id:String): Flow<ExploreBook?>

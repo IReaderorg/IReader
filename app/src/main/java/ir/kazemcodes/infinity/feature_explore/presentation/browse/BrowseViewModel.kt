@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.collect
 sealed class ExploreType(val mode: Int) {
     object Latest : ExploreType(0)
     object Popular : ExploreType(1)
+    object Search : ExploreType(1)
 }
 
 class BrowseViewModel(
@@ -71,14 +72,15 @@ class BrowseViewModel(
         }
     }
 
-    private fun getBooks() {
+    fun getBooks(query: String?=null,type: ExploreType?=null) {
         coroutineScope.launch(Dispatchers.IO) {
-            remoteRepository.getRemoteBooksUseCase(source, exploreType).cachedIn(coroutineScope)
+            remoteRepository.getRemoteBooksUseCase(source, type?:exploreType, query = query).cachedIn(coroutineScope)
                 .collect { snapshot ->
                     _books.value = snapshot.map { bookEntity -> bookEntity.toBook() }
                 }
         }
     }
+
 
     private fun updatePage(page: Int) {
         if (!state.value.isSearchModeEnable) {
@@ -93,10 +95,10 @@ class BrowseViewModel(
     }
 
     private fun toggleSearchMode(inSearchMode: Boolean? = null) {
-        _state.value =
-            state.value.copy(isSearchModeEnable = inSearchMode ?: !state.value.isSearchModeEnable)
+        _state.value = state.value.copy(isSearchModeEnable = inSearchMode ?: !state.value.isSearchModeEnable)
         if (inSearchMode == false) {
             exitSearchedMode()
+            getBooks()
         }
     }
 

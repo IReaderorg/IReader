@@ -20,7 +20,7 @@ interface LocalBookRepository {
     fun getBooksById(id: String): Flow<Resource<Book>>
 
     fun getBookByName(bookName: String): Flow<Resource<Book>>
-    fun searchBook(query: String): Flow<PagingData<BookEntity>>
+    fun searchInLibraryScreenBooks(query: String): Flow<PagingData<BookEntity>>
     fun searchBooksByPaging(query: String): PagingSource<Int, BookEntity>
     fun deleteChapters()
     suspend fun insertBook(book: Book)

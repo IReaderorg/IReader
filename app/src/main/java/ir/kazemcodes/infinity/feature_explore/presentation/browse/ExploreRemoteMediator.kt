@@ -6,9 +6,9 @@ import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
 import ir.kazemcodes.infinity.core.data.local.BookDatabase
+import ir.kazemcodes.infinity.core.data.local.ExploreBook
 import ir.kazemcodes.infinity.core.data.local.dao.RemoteKeys
 import ir.kazemcodes.infinity.core.data.network.models.Source
-import ir.kazemcodes.infinity.core.data.local.ExploreBook
 import retrofit2.HttpException
 import java.io.IOException
 
@@ -16,7 +16,8 @@ import java.io.IOException
 class ExploreRemoteMediator(
     private val source: Source,
     private val database: BookDatabase,
-    private val exploreType :ExploreType,
+    private val exploreType: ExploreType,
+    private val query: String? = null,
 ) : RemoteMediator<Int, ExploreBook>() {
 
     private val bookDao = database.libraryBookDao
@@ -24,7 +25,7 @@ class ExploreRemoteMediator(
 
     override suspend fun load(
         loadType: LoadType,
-        state: PagingState<Int, ExploreBook>
+        state: PagingState<Int, ExploreBook>,
     ): MediatorResult {
         return try {
             val currentPage = when (loadType) {
@@ -50,20 +51,22 @@ class ExploreRemoteMediator(
                 }
             }
 
-            val response = when(exploreType) {
+            val response = when (exploreType) {
                 is ExploreType.Latest -> {
                     source.fetchLatest(currentPage)
                 }
                 is ExploreType.Popular -> {
                     source.fetchPopular(currentPage)
                 }
+                is ExploreType.Search -> {
+                    source.fetchSearch(currentPage, query = query ?: "")
+                }
             }
 
-//            if (response.books.isEmpty()) {
-//                MediatorResult.Error(Exception("There is No Internet Available"))
-//            }
 
             val endOfPaginationReached = response.books.isEmpty()
+
+
 
             val prevPage = if (currentPage == 1) null else currentPage - 1
             val nextPage = if (endOfPaginationReached) null else currentPage + 1
@@ -81,12 +84,14 @@ class ExploreRemoteMediator(
                     )
                 }
                 remoteKey.addAllRemoteKeys(remoteKeys = keys)
-                bookDao.insertAllExploredBook(response.books.map { it.toExploreBook().copy(isExploreMode = true) })
+                bookDao.insertAllExploredBook(response.books.map {
+                    it.toExploreBook().copy(isExploreMode = true)
+                })
             }
             MediatorResult.Success(endOfPaginationReached = endOfPaginationReached)
-        }catch (e:IOException) {
+        } catch (e: IOException) {
             return MediatorResult.Error(e)
-        }catch (e:HttpException) {
+        } catch (e: HttpException) {
             return MediatorResult.Error(e)
         } catch (e: Exception) {
             return MediatorResult.Error(e)
@@ -94,7 +99,7 @@ class ExploreRemoteMediator(
     }
 
     private suspend fun getRemoteKeyClosestToCurrentPosition(
-        state: PagingState<Int, ExploreBook>
+        state: PagingState<Int, ExploreBook>,
     ): RemoteKeys? {
         return state.anchorPosition?.let { position ->
             state.closestItemToPosition(position)?.id?.let { id ->
@@ -104,7 +109,7 @@ class ExploreRemoteMediator(
     }
 
     private suspend fun getRemoteKeyForFirstItem(
-        state: PagingState<Int, ExploreBook>
+        state: PagingState<Int, ExploreBook>,
     ): RemoteKeys? {
         return state.pages.firstOrNull { it.data.isNotEmpty() }?.data?.firstOrNull()
             ?.let { book ->
@@ -113,7 +118,7 @@ class ExploreRemoteMediator(
     }
 
     private suspend fun getRemoteKeyForLastItem(
-        state: PagingState<Int, ExploreBook>
+        state: PagingState<Int, ExploreBook>,
     ): RemoteKeys? {
         return state.pages.lastOrNull { it.data.isNotEmpty() }?.data?.lastOrNull()
             ?.let { book ->

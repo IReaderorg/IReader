@@ -48,7 +48,7 @@ fun BrowserScreen() {
                                 viewModel.onEvent(BrowseScreenEvents.UpdateSearchInput(it))
                             },
                             onSearch = {
-                               //viewModel.searchBook(state.searchQuery)
+                               viewModel.getBooks(state.searchQuery,ExploreType.Search)
                                 focusManager.clearFocus()
                             },
                             isSearchModeEnable = state.searchQuery.isNotBlank())
@@ -126,17 +126,8 @@ fun BrowserScreen() {
         }
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            if (state.searchedBook.books.isNotEmpty() && state.isSearchModeEnable) {
-                LayoutComposable(
-                    books = books,
-                    layout = state.layout,
-                    scrollState = scrollState,
-                    source = source,
-                    backStack = backStack,
-                    isLocal = false
-                )
-            }
-            if (books.loadState.refresh is LoadState.NotLoading && !state.isSearchModeEnable) {
+
+            if (books.loadState.refresh is LoadState.NotLoading) {
                 LayoutComposable(
                     books = books,
                     layout = state.layout,

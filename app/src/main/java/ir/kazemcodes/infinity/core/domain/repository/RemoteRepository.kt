@@ -25,7 +25,10 @@ interface RemoteRepository {
     fun getRemoteBooksUseCase(
         source: Source,
         exploreType: ExploreType,
+        query:String?=null,
     ): Flow<PagingData<ExploreBook>>
+
+
 
     fun getRemoteChaptersUseCase(
         book: Book,

@@ -7,9 +7,9 @@ import androidx.paging.cachedIn
 import androidx.paging.map
 import com.zhuinden.simplestack.ScopedServices
 import ir.kazemcodes.infinity.core.domain.models.Book
+import ir.kazemcodes.infinity.core.domain.repository.LocalBookRepository
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.core.presentation.layouts.DisplayMode
-import ir.kazemcodes.infinity.core.domain.repository.LocalBookRepository
 import ir.kazemcodes.infinity.feature_library.presentation.components.LibraryEvents
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -45,7 +45,7 @@ class LibraryViewModel(
     }
     fun searchBook(query: String) {
         coroutineScope.launch(Dispatchers.IO) {
-            localBookRepository.searchBook(query).cachedIn(coroutineScope)
+            localBookRepository.searchInLibraryScreenBooks(query).cachedIn(coroutineScope)
                 .collect { snapshot ->
                     _books.value = snapshot.map { bookEntity -> bookEntity.toBook() }
                 }
@@ -78,6 +78,7 @@ class LibraryViewModel(
         _state.value = state.value.copy(inSearchMode = inSearchMode ?: !state.value.inSearchMode)
         if (inSearchMode == false) {
             _state.value = state.value.copy(searchedBook = emptyList(), searchQuery = "")
+            getBooks()
         }
     }
 

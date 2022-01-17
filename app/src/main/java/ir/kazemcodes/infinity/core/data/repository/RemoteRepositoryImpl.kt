@@ -106,6 +106,7 @@ class RemoteRepositoryImpl(
     override fun getRemoteBooksUseCase(
         source: Source,
         exploreType: ExploreType,
+        query: String?
     ): Flow<PagingData<ExploreBook>> {
         return Pager(
             config = PagingConfig(pageSize = Constants.DEFAULT_PAGE_SIZE,
@@ -115,10 +116,12 @@ class RemoteRepositoryImpl(
             }, remoteMediator = ExploreRemoteMediator(
                 source = source,
                 database = database,
-                exploreType = exploreType
+                exploreType = exploreType,
+                query = query
             )
         ).flow
     }
+
 
     override fun getRemoteChaptersUseCase(
         book: Book,

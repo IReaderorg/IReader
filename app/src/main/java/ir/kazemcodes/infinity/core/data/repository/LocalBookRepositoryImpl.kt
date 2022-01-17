@@ -95,7 +95,7 @@ class LocalBookRepositoryImpl(
 
     }
 
-    override fun searchBook(query: String): Flow<PagingData<BookEntity>> {
+    override fun searchInLibraryScreenBooks(query: String): Flow<PagingData<BookEntity>> {
         return Pager(
             config = PagingConfig(pageSize = Constants.DEFAULT_PAGE_SIZE,
                 maxSize = Constants.MAX_PAGE_SIZE),
@@ -148,7 +148,7 @@ class LocalBookRepositoryImpl(
         }
 
     override fun getAllExploreBook(): PagingSource<Int, ExploreBook> {
-        return bookDao.getAllExploreBook()
+        return bookDao.getAllExploreBookByPaging()
     }
 
 
