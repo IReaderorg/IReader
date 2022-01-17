@@ -8,12 +8,14 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import ir.kazemcodes.infinity.core.data.local.dao.BookDao
-import ir.kazemcodes.infinity.core.data.local.dao.ChapterDao
-import ir.kazemcodes.infinity.core.data.repository.PreferencesHelper
-import ir.kazemcodes.infinity.core.data.repository.RepositoryImpl
+import ir.kazemcodes.infinity.core.data.local.BookDatabase
+import ir.kazemcodes.infinity.core.data.local.dao.LibraryBookDao
+import ir.kazemcodes.infinity.core.data.local.dao.LibraryChapterDao
+import ir.kazemcodes.infinity.core.data.repository.*
+import ir.kazemcodes.infinity.core.domain.repository.LocalBookRepository
+import ir.kazemcodes.infinity.core.domain.repository.LocalChapterRepository
+import ir.kazemcodes.infinity.core.domain.repository.RemoteRepository
 import ir.kazemcodes.infinity.core.domain.repository.Repository
-import ir.kazemcodes.infinity.core.domain.use_cases.remote.RemoteUseCase
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
@@ -24,21 +26,47 @@ class AppModule {
     @Provides
     @Singleton
     fun providesRepository(
-        bookDao: BookDao,
-        chapterDao: ChapterDao,
-        context: Context,
-        remoteUseCase: RemoteUseCase,
+        localChapterRepository: LocalChapterRepository,
+        localBookRepository: LocalBookRepository,
+        remoteRepository: RemoteRepository,
         preferencesHelper: PreferencesHelper,
+        bookDatabase: BookDatabase,
     ): Repository {
         return RepositoryImpl(
-            bookDao = bookDao,
-            chapterDao = chapterDao,
-            context = context,
-            remoteUseCase = remoteUseCase,
-            preferences = preferencesHelper
+            localChapterRepository = localChapterRepository,
+            localBookRepository = localBookRepository,
+            remoteRepository = remoteRepository,
+            preferencesHelper = preferencesHelper,
+            database = bookDatabase
         )
     }
 
+    @Provides
+    @Singleton
+    fun providesLocalChapterRepository(libraryChapterDao: LibraryChapterDao): LocalChapterRepository {
+        return LocalChapterRepositoryImpl(libraryChapterDao)
+    }
+
+
+    @Provides
+    @Singleton
+    fun providesLibraryRepository(
+        libraryBookDao: LibraryBookDao,
+        libraryChapterDao: LibraryChapterDao,
+        database: BookDatabase,
+    ): LocalBookRepository {
+        return LocalBookRepositoryImpl(libraryBookDao, libraryChapterDao,database)
+    }
+
+    @Provides
+    @Singleton
+    fun providesRemoteBookRepository(
+        libraryBookDao: LibraryBookDao,
+        localBookRepository: LocalBookRepository,
+        database: BookDatabase,
+    ): RemoteRepository {
+        return RemoteRepositoryImpl(libraryBookDao, localBookRepository, database)
+    }
 
     @Provides
     @Singleton
@@ -53,8 +81,4 @@ class AppModule {
             .add(KotlinJsonAdapterFactory())
             .build()
     }
-
-
-
-
 }

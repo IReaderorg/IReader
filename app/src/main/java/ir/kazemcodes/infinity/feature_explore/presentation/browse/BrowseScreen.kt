@@ -14,14 +14,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
+import androidx.paging.LoadState
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import com.zhuinden.simplestackcomposeintegration.services.rememberService
-import ir.kazemcodes.infinity.feature_activity.presentation.WebViewKey
 import ir.kazemcodes.infinity.core.presentation.layouts.layouts
+import ir.kazemcodes.infinity.core.presentation.reusable_composable.*
+import ir.kazemcodes.infinity.feature_activity.presentation.WebViewKey
 import ir.kazemcodes.infinity.feature_library.presentation.components.LayoutComposable
 import ir.kazemcodes.infinity.feature_library.presentation.components.RadioButtonWithTitleComposable
-import ir.kazemcodes.infinity.core.presentation.reusable_composable.*
-import ir.kazemcodes.infinity.core.utils.isScrolledToTheEnd
 
 
 @Composable
@@ -33,6 +34,7 @@ fun BrowserScreen() {
     val source = viewModel.getSource()
     val focusManager = LocalFocusManager.current
 
+    val books = viewModel.books.collectAsLazyPagingItems()
 
     Scaffold(
         topBar = {
@@ -46,7 +48,7 @@ fun BrowserScreen() {
                                 viewModel.onEvent(BrowseScreenEvents.UpdateSearchInput(it))
                             },
                             onSearch = {
-                                viewModel.onEvent(BrowseScreenEvents.SearchBooks(state.searchQuery))
+                               //viewModel.searchBook(state.searchQuery)
                                 focusManager.clearFocus()
                             },
                             isSearchModeEnable = state.searchQuery.isNotBlank())
@@ -126,33 +128,32 @@ fun BrowserScreen() {
         Box(modifier = Modifier.fillMaxSize()) {
             if (state.searchedBook.books.isNotEmpty() && state.isSearchModeEnable) {
                 LayoutComposable(
-                    books = state.searchedBook.books,
+                    books = books,
                     layout = state.layout,
                     scrollState = scrollState,
                     source = source,
-                    backStack = backStack
+                    backStack = backStack,
+                    isLocal = false
                 )
             }
-            if (state.books.isNotEmpty() && !state.isSearchModeEnable) {
+            if (books.loadState.refresh is LoadState.NotLoading && !state.isSearchModeEnable) {
                 LayoutComposable(
-                    books = state.books,
+                    books = books,
                     layout = state.layout,
                     scrollState = scrollState,
                     source = source,
-                    backStack = backStack
+                    backStack = backStack,
+                    isLocal = false
                 )
             }
-            if (scrollState.isScrolledToTheEnd() && !state.isLoading  && !state.isSearchModeEnable) {
-                viewModel.onEvent(BrowseScreenEvents.GetBooks(source = source))
-            }
-            if (state.error.isNotBlank()) {
+            if (books.loadState.source.refresh is LoadState.Error) {
                 ErrorTextWithEmojis(error = state.error, modifier = Modifier
                     .fillMaxWidth()
                     .padding(20.dp)
                     .wrapContentSize(Alignment.Center)
                     .align(Alignment.Center))
             }
-            if (state.isLoading) {
+            if (books.loadState.refresh is LoadState.Loading) {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center)
                 )

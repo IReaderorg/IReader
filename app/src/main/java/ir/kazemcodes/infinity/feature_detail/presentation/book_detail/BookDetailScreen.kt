@@ -22,18 +22,18 @@ import androidx.compose.ui.unit.dp
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import com.zhuinden.simplestackcomposeintegration.services.rememberService
 import ir.kazemcodes.infinity.core.data.network.utils.toast
-import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.components.ButtonWithIconAndText
-import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.components.CardTileComposable
-import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.components.DotsFlashing
-import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.components.ExpandingText
 import ir.kazemcodes.infinity.core.presentation.components.BookImageComposable
-import ir.kazemcodes.infinity.feature_activity.presentation.ChapterDetailKey
-import ir.kazemcodes.infinity.feature_activity.presentation.ReaderScreenKey
-import ir.kazemcodes.infinity.feature_activity.presentation.WebViewKey
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.ErrorTextWithEmojis
 import ir.kazemcodes.infinity.core.utils.formatBasedOnDot
 import ir.kazemcodes.infinity.core.utils.formatList
 import ir.kazemcodes.infinity.core.utils.getUrlWithoutDomain
+import ir.kazemcodes.infinity.feature_activity.presentation.ChapterDetailKey
+import ir.kazemcodes.infinity.feature_activity.presentation.ReaderScreenKey
+import ir.kazemcodes.infinity.feature_activity.presentation.WebViewKey
+import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.components.ButtonWithIconAndText
+import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.components.CardTileComposable
+import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.components.DotsFlashing
+import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.components.ExpandingText
 
 
 @Composable
@@ -161,18 +161,18 @@ fun BookDetailScreenLoadedComposable(
                         imageVector = if (!inLibrary) Icons.Default.AddCircleOutline else Icons.Default.Check,
                         onClick = {
                             if (!inLibrary) {
-                                viewModel.toggleInLibrary(true)
+                               // viewModel.toggleInLibrary(true)
 
-                                viewModel.updateBookDetailToLocal(true)
+
                                 viewModel.updateChaptersEntity(true)
 
                                 //viewModel.updateAddToLibraryChaptersToLocal()
                             } else {
-                                viewModel.toggleInLibrary(false)
-                                viewModel.updateBookDetailToLocal(false)
+                                //viewModel.toggleInLibrary(false)
+
                                 viewModel.updateChaptersEntity(false)
 
-                                viewModel.deleteLocalChapters(book.bookName)
+                                //viewModel.deleteLocalChapters(book.bookName)
                             }
                         },
                     )

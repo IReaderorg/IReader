@@ -2,29 +2,33 @@ package ir.kazemcodes.infinity.feature_explore.presentation.browse
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import androidx.paging.map
 import com.zhuinden.simplestack.ScopedServices
 import ir.kazemcodes.infinity.core.data.network.models.BooksPage
 import ir.kazemcodes.infinity.core.data.network.models.Source
-import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalUseCase
+import ir.kazemcodes.infinity.core.domain.models.Book
+import ir.kazemcodes.infinity.core.domain.repository.LocalBookRepository
+import ir.kazemcodes.infinity.core.domain.repository.RemoteRepository
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.PreferencesUseCase
-import ir.kazemcodes.infinity.core.domain.use_cases.remote.RemoteUseCase
 import ir.kazemcodes.infinity.core.presentation.layouts.DisplayMode
-import ir.kazemcodes.infinity.core.utils.Resource
-import ir.kazemcodes.infinity.core.utils.merge
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
 
+
+sealed class ExploreType(val mode: Int) {
+    object Latest : ExploreType(0)
+    object Popular : ExploreType(1)
+}
 
 class BrowseViewModel(
-    private val localUseCase: LocalUseCase,
-    private val remoteUseCase: RemoteUseCase,
     private val preferencesUseCase: PreferencesUseCase,
     private val source: Source,
-    private val isLatestUpdateMode: Boolean = true,
+    private val exploreType: ExploreType,
+    private val localBookRepository: LocalBookRepository,
+    private val remoteRepository: RemoteRepository,
 ) : ScopedServices.Registered {
 
     private val _state = mutableStateOf<BrowseScreenState>(BrowseScreenState())
@@ -32,17 +36,14 @@ class BrowseViewModel(
     val state: State<BrowseScreenState> = _state
 
 
+    private val _books = MutableStateFlow<PagingData<Book>>(PagingData.empty())
+    val books = _books
+
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     override fun onServiceRegistered() {
-        _state.value = state.value.copy(isLatestUpdateMode = isLatestUpdateMode)
+        getBooks()
         readLayoutType()
-        if (state.value.isLatestUpdateMode) {
-            getLatestUpdateBooks(source = source)
-        } else {
-            getMostPopularBooks(source = source)
-        }
-
     }
 
     fun getSource(): Source {
@@ -61,18 +62,21 @@ class BrowseViewModel(
             is BrowseScreenEvents.ToggleMenuDropDown -> {
                 toggleMenuDropDown(isShown = event.isShown)
             }
-            is BrowseScreenEvents.GetBooks -> {
-                getLatestUpdateBooks(event.source)
-            }
             is BrowseScreenEvents.ToggleSearchMode -> {
                 toggleSearchMode(event.inSearchMode)
             }
             is BrowseScreenEvents.UpdateSearchInput -> {
                 updateSearchInput(event.query)
             }
-            is BrowseScreenEvents.SearchBooks -> {
-                searchBook(event.query)
-            }
+        }
+    }
+
+    private fun getBooks() {
+        coroutineScope.launch(Dispatchers.IO) {
+            remoteRepository.getRemoteBooksUseCase(source, exploreType).cachedIn(coroutineScope)
+                .collect { snapshot ->
+                    _books.value = snapshot.map { bookEntity -> bookEntity.toBook() }
+                }
         }
     }
 
@@ -123,85 +127,8 @@ class BrowseViewModel(
     }
 
 
-    private fun getMostPopularBooks(source: Source) {
-        remoteUseCase.getRemoteMostPopularBooksUseCase(page = state.value.page, source = source)
-            .onEach { result ->
-                when (result) {
-                    is Resource.Success -> {
-                        _state.value = state.value.copy(
-                            books = merge(state.value.books, result.data ?: emptyList()),
-                            isLoading = false,
-                            error = ""
-                        )
-                        onEvent(BrowseScreenEvents.UpdatePage(state.value.page + 1))
-                    }
-                    is Resource.Error -> {
-                        _state.value =
-                            state.value.copy(error = result.message ?: "An Unknown Error Occurred",
-                                isLoading = false)
-                    }
-                    is Resource.Loading -> {
-                        _state.value = state.value.copy(isLoading = true, error = "")
-                    }
-                }
-            }.launchIn(coroutineScope)
-    }
 
-    private fun searchBook(query: String) {
-        remoteUseCase.getSearchedBooksUseCase(page = state.value.page, query, source = source)
-            .onEach { result ->
-                when (result) {
-                    is Resource.Success -> {
-                        if (result.data != null) {
-                            _state.value = state.value.copy(
-                                searchedBook = result.data,
-                                isLoading = false,
-                                error = ""
-                            )
-                        }
-                        onEvent(BrowseScreenEvents.UpdatePage(state.value.searchPage + 1))
-                    }
-                    is Resource.Error -> {
-                        _state.value =
-                            state.value.copy(error = result.message ?: "An Unknown Error Occurred",
-                                isLoading = false)
-                    }
-                    is Resource.Loading -> {
-                        _state.value = state.value.copy(isLoading = true, error = "")
-                    }
-                }
-            }.launchIn(coroutineScope)
-    }
 
-    private fun getLatestUpdateBooks(source: Source) {
-        remoteUseCase.getRemoteLatestUpdateLatestBooksUseCase(page = state.value.page,
-            source = source,hasNextPage = state.value.hasNextPage)
-            .onEach { result ->
-                when (result) {
-                    is Resource.Success -> {
-                        if (result.data !=null) {
-                            _state.value = state.value.copy(
-                                books = merge(state.value.books, result.data.books ?: emptyList()),
-                                hasNextPage = result.data.hasNextPage,
-                                isLoading = false,
-                                error = ""
-                            )
-                        }
-                        onEvent(BrowseScreenEvents.UpdatePage(state.value.page + 1))
-                    }
-                    is Resource.Error -> {
-                        _state.value =
-                            state.value.copy(
-                                error = result.message ?: "An Unknown Error Occurred",
-                                isLoading = false
-                            )
-                    }
-                    is Resource.Loading -> {
-                        _state.value = state.value.copy(isLoading = true, error = "")
-                    }
-                }
-            }.launchIn(coroutineScope)
-    }
 
     override fun onServiceUnregistered() {
         coroutineScope.cancel()

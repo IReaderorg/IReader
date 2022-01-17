@@ -1,7 +1,5 @@
 package ir.kazemcodes.infinity.core.domain.models
 
-import kotlinx.serialization.Serializable
-
 
 data class SourceResponse(
     val success: Boolean,

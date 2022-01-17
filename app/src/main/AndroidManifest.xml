@@ -9,7 +9,7 @@
 
 
     <application
-        android:name=".MyApplication"
+        android:name="ir.kazemcodes.infinity.MyApplication"
         android:screenOrientation="fullSensor"
         android:configChanges="orientation|screenSize"
         android:allowBackup="false"
@@ -20,7 +20,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Infinity">
         <activity
-            android:name=".feature_activity.presentation.MainActivity"
+            android:name="ir.kazemcodes.infinity.feature_activity.presentation.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.Infinity.NoActionBar">

@@ -11,10 +11,11 @@ import androidx.work.workDataOf
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import ir.kazemcodes.infinity.R
+import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.repository.Repository
+import ir.kazemcodes.infinity.core.utils.SourceMapper
 import ir.kazemcodes.infinity.feature_activity.domain.notification.Notifications
 import ir.kazemcodes.infinity.feature_activity.domain.notification.Notifications.CHANNEL_DOWNLOADER_PROGRESS
-import ir.kazemcodes.infinity.core.utils.SourceMapper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectIndexed
 import kotlinx.coroutines.flow.first
@@ -46,27 +47,26 @@ class DownloadService @AssistedInject constructor(
     override suspend fun doWork(): Result {
         val bookName = inputData.getString(DOWNLOAD_BOOK_NAME)!!
         val source = inputData.getString(DOWNLOAD_SOURCE_NAME)!!
-        val book = repository.localBookRepository.getBookByName(bookName).first()!!
-        val chapters = repository.localChapterRepository.getChapterByName(bookName, source = source).first()
-            .map { it.toChapter() }
+        val book = repository.localBookRepository.getBookById("1").first().data
+        val chapters = repository.localChapterRepository.getChapterByName(bookName, source = source).first().data
 
         val notification = NotificationCompat.Builder(applicationContext,
             Notifications.CHANNEL_DOWNLOADER_PROGRESS)
-            .setContentTitle("Downloading ${book.bookName}")
+            .setContentTitle("Downloading ${book?.bookName}")
             .setSmallIcon(R.drawable.ic_downloading)
             .setOnlyAlertOnce(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
 
 
         NotificationManagerCompat.from(applicationContext).apply {
-            notification.setProgress(chapters.size, 0, false)
+            notification.setProgress(chapters?.size ?: 0 , 0, false)
             notify(NOTIFICATION_ID, notification.build())
 
             try {
                 repository.remoteRepository.downloadChapter(
-                    book = book.toBook(),
+                    book = book ?: Book.create(),
                     source = SourceMapper(context = applicationContext).mappingSourceNameToSource(source),
-                    chapters = chapters,
+                    chapters = chapters?: emptyList(),
                     factory = {
                         WebView(it).apply { settings.javaScriptEnabled = true }
                     }
@@ -74,7 +74,7 @@ class DownloadService @AssistedInject constructor(
                     .collectIndexed { index, chapter ->
                         repository.localChapterRepository.updateChapter(chapter.toChapterEntity())
                         notification.setContentText(chapter.title.toString())
-                        notification.setProgress(chapters.size, index, false)
+                        notification.setProgress(chapters?.size ?: 0 , index, false)
                         notify(NOTIFICATION_ID, notification.build())
                     }
             } catch (e: Exception) {
@@ -83,7 +83,7 @@ class DownloadService @AssistedInject constructor(
                     kotlin.math.abs(nextInt()),
                     NotificationCompat.Builder(applicationContext, CHANNEL_DOWNLOADER_PROGRESS)
                         .apply {
-                            setContentTitle("Failed to download ${book.bookName}")
+                            setContentTitle("Failed to download ${book?.bookName}")
                             setSmallIcon(R.raw.downloading)
                             priority = NotificationCompat.PRIORITY_DEFAULT
                         }.build()

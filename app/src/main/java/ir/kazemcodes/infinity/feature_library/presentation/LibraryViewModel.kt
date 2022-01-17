@@ -2,33 +2,55 @@ package ir.kazemcodes.infinity.feature_library.presentation
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import androidx.paging.map
 import com.zhuinden.simplestack.ScopedServices
 import ir.kazemcodes.infinity.core.domain.models.Book
-import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalUseCase
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.PreferencesUseCase
-import ir.kazemcodes.infinity.feature_library.presentation.components.LibraryEvents
 import ir.kazemcodes.infinity.core.presentation.layouts.DisplayMode
-import ir.kazemcodes.infinity.core.utils.Resource
+import ir.kazemcodes.infinity.core.domain.repository.LocalBookRepository
+import ir.kazemcodes.infinity.feature_library.presentation.components.LibraryEvents
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
 
 
 class LibraryViewModel(
-    private val localUseCase: LocalUseCase,
+    private val localBookRepository: LocalBookRepository,
     private val preferencesUseCase: PreferencesUseCase,
-) : ScopedServices.Activated , ScopedServices.Registered{
+) : ScopedServices.Activated, ScopedServices.Registered {
+
     private val _state = mutableStateOf(LibraryState())
     val state: State<LibraryState> = _state
+
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
+    private val _books = MutableStateFlow<PagingData<Book>>(PagingData.empty())
+    val book = _books
 
-    override fun onServiceRegistered() {
-
-        getLocalBooks()
-        readLayoutType()
+    fun getBooks() {
+        coroutineScope.launch(Dispatchers.IO) {
+            localBookRepository.getBooks().cachedIn(coroutineScope)
+                .collect { snapshot ->
+                    _books.value = snapshot.map { bookEntity -> bookEntity.toBook() }
+                }
+        }
     }
 
+    override fun onServiceRegistered() {
+        getBooks()
+
+        readLayoutType()
+    }
+    fun searchBook(query: String) {
+        coroutineScope.launch(Dispatchers.IO) {
+            localBookRepository.searchBook(query).cachedIn(coroutineScope)
+                .collect { snapshot ->
+                    _books.value = snapshot.map { bookEntity -> bookEntity.toBook() }
+                }
+        }
+    }
     override fun onServiceUnregistered() {
         coroutineScope.cancel()
     }
@@ -43,9 +65,6 @@ class LibraryViewModel(
             }
             is LibraryEvents.UpdateSearchInput -> {
                 updateSearchInput(event.query)
-            }
-            is LibraryEvents.SearchBooks -> {
-                searchBook(event.query)
             }
         }
 
@@ -74,52 +93,19 @@ class LibraryViewModel(
             state.value.copy(layout = preferencesUseCase.readLibraryLayoutUseCase().layout)
     }
 
-    private fun getLocalBooks() {
 
-        localUseCase.getInLibraryBooksUseCase().onEach { result ->
-            when (result) {
-                is Resource.Success -> {
-                    _state.value = state.value.copy(
-                        books = result.data ?: emptyList()
-                    )
-                }
-                is Resource.Error -> {
-                    _state.value =
-                        state.value.copy(error = result.message ?: "Empty")
-                }
-                is Resource.Loading -> {
-
-                    _state.value = state.value.copy(isLoading = true)
-                }
-            }
-        }.launchIn(coroutineScope)
-    }
-
-
-    private fun searchBook(query: String) {
-        val searchBook = mutableListOf<Book>()
-        state.value.books.forEach { book ->
-            if (book.bookName.contains(query, ignoreCase = true)) {
-                searchBook.add(book)
-            }
-        }
-        _state.value = state.value.copy(searchedBook = searchBook)
-    }
+    
 
     private fun deleteNotInLibraryChapters() {
         coroutineScope.launch(Dispatchers.IO) {
-            localUseCase.deleteNotInLibraryLocalChaptersUseCase()
+            localBookRepository.deleteChapters()
         }
     }
 
-    private fun deleteNotInLibraryBooks() {
-        coroutineScope.launch(Dispatchers.IO) {
-            localUseCase.deleteNotInLibraryBooksUseCase()
-        }
-    }
+
 
     override fun onServiceActive() {
-        deleteNotInLibraryBooks()
+
         deleteNotInLibraryChapters()
     }
 

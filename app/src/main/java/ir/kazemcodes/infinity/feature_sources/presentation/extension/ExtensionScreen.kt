@@ -17,8 +17,9 @@ import androidx.compose.ui.unit.dp
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import com.zhuinden.simplestackextensions.servicesktx.lookup
 import ir.kazemcodes.infinity.R
-import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.Constants.DEFAULT_ELEVATION
 import ir.kazemcodes.infinity.feature_activity.presentation.BrowserScreenKey
+import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.Constants.DEFAULT_ELEVATION
+import ir.kazemcodes.infinity.feature_explore.presentation.browse.ExploreType
 import ir.kazemcodes.infinity.feature_sources.sources.Extensions
 
 
@@ -55,7 +56,7 @@ fun ExtensionScreen(modifier: Modifier = Modifier) {
                     .padding(16.dp)
                     .height(30.dp)
                     .clickable {
-                        backstack.goTo(BrowserScreenKey(sources[index].name))
+                        backstack.goTo(BrowserScreenKey(sources[index].name, exploreType = ExploreType.Latest.mode))
                     },
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically) {
@@ -66,7 +67,7 @@ fun ExtensionScreen(modifier: Modifier = Modifier) {
                             style = MaterialTheme.typography.subtitle2,
                             modifier = Modifier.clickable {
                                 backstack.goTo(BrowserScreenKey(sourceName = sources[index].name,
-                                    isLatestUpdateMode = false))
+                                    exploreType = ExploreType.Popular.mode))
                             })
                     }
                 }

@@ -1,6 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Infinity</string>
+    <string name="app_name" translatable="false">IReader</string>
+
+    <!-- IReader-->
+    <string name="no_data_found_error">No Data was Found.</string>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     <!-- Sort-->
     <string name="popular_book">Most Popular</string>

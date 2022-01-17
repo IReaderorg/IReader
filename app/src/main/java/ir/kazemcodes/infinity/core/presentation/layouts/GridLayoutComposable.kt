@@ -23,16 +23,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.paging.compose.LazyPagingItems
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.presentation.components.BookImageComposable
+import ir.kazemcodes.infinity.core.utils.items
 
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun GridLayoutComposable(
     modifier: Modifier = Modifier,
-    books: List<Book>,
-    onClick: (index: Int) -> Unit,
+    books: LazyPagingItems<Book>,
+    onClick: (book: Book) -> Unit,
     scrollState: LazyListState = rememberLazyListState(),
 ) {
     LazyVerticalGrid(
@@ -40,48 +42,52 @@ fun GridLayoutComposable(
         modifier = modifier.fillMaxSize(),
         cells = GridCells.Fixed(3),
         content = {
-            items(books.size) { index ->
-                Box(
-                    modifier = modifier
-                        .fillMaxSize()
-                        .padding(8.dp)
-                        .clickable(role = Role.Button) { onClick(index) },
-                ) {
-                    BookImageComposable(
-                        modifier = modifier
-                            .width(120.dp)
-                            .height(180.dp)
-                            .clip(RoundedCornerShape(4.dp))
-                            .border(2.5.dp,MaterialTheme.colors.onBackground.copy(alpha = .1f)),
-                        image = books[index].coverLink ?: "",
-                    )
-                    Box(
-                        Modifier
-                            .fillMaxWidth()
-                            .height(50.dp)
-                            .background(
-                                Brush.verticalGradient(
-                                    colors = listOf(Color.Transparent, Color.Black),
-                                    startY = 3f,  // 1/3
-                                    endY = 80F
-                                )
-                            )
-                            .align(Alignment.BottomCenter)
-                    ) {
-                        Text(
-                            modifier = modifier
-                                .align(Alignment.BottomCenter)
-                                .padding(bottom = 8.dp),
-                            text = books[index].bookName,
-                            style = MaterialTheme.typography.caption,
-                            fontWeight = FontWeight.Bold,
-                            overflow = TextOverflow.Ellipsis,
-                            textAlign = TextAlign.Center,
-                            color = Color.White
-                        )
-                    }
 
+            items(lazyPagingItems = books) { book ->
+                if (book !=null)  {
+                    Box(
+                        modifier = modifier
+                            .fillMaxSize()
+                            .padding(8.dp)
+                            .clickable(role = Role.Button) { onClick(book) },
+                    ) {
+                        BookImageComposable(
+                            modifier = modifier
+                                .width(120.dp)
+                                .height(180.dp)
+                                .clip(RoundedCornerShape(4.dp))
+                                .border(2.5.dp,MaterialTheme.colors.onBackground.copy(alpha = .1f)),
+                            image = book.coverLink ?: "",
+                        )
+                        Box(
+                            Modifier
+                                .fillMaxWidth()
+                                .height(50.dp)
+                                .background(
+                                    Brush.verticalGradient(
+                                        colors = listOf(Color.Transparent, Color.Black),
+                                        startY = 3f,  // 1/3
+                                        endY = 80F
+                                    )
+                                )
+                                .align(Alignment.BottomCenter)
+                        ) {
+                            Text(
+                                modifier = modifier
+                                    .align(Alignment.BottomCenter)
+                                    .padding(bottom = 8.dp),
+                                text = book.bookName,
+                                style = MaterialTheme.typography.caption,
+                                fontWeight = FontWeight.Bold,
+                                overflow = TextOverflow.Ellipsis,
+                                textAlign = TextAlign.Center,
+                                color = Color.White
+                            )
+                        }
+
+                    }
                 }
+
             }
         })
 }

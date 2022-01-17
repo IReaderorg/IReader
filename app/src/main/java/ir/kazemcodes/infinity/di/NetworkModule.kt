@@ -11,7 +11,6 @@ import ir.kazemcodes.infinity.core.data.network.utils.MemoryCookieJar
 import ir.kazemcodes.infinity.core.data.repository.PreferencesHelper
 import ir.kazemcodes.infinity.core.domain.repository.Repository
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.*
-import ir.kazemcodes.infinity.core.domain.use_cases.remote.*
 import ir.kazemcodes.infinity.feature_sources.sources.utils.NetworkHelper
 import okhttp3.CookieJar
 import okhttp3.OkHttpClient
@@ -22,18 +21,6 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 @Module
 class NetworkModule {
-    @Provides
-    @Singleton
-    fun providesRemoteUseCases(): RemoteUseCase {
-        return RemoteUseCase(
-            getRemoteBookDetailUseCase = GetRemoteBookDetailUseCase(),
-            getRemoteLatestUpdateLatestBooksUseCase = GetRemoteLatestBooksUseCase(),
-            getRemoteChaptersUseCase = GetRemoteChaptersUseCase(),
-            getRemoteReadingContentUseCase = GetRemoteReadingContentUseCase(),
-            getSearchedBooksUseCase = GetRemoteSearchBookUseCase(),
-            getRemoteMostPopularBooksUseCase = GetRemoteMostPopularBooksUseCase()
-        )
-    }
 
     @Provides
     @Singleton

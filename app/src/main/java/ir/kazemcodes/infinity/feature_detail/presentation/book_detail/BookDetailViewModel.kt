@@ -1,6 +1,5 @@
 package ir.kazemcodes.infinity.feature_detail.presentation.book_detail
 
-
 import android.content.Context
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -9,26 +8,28 @@ import com.zhuinden.simplestack.ScopedServices
 import ir.kazemcodes.infinity.core.data.network.models.Source
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
-import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalUseCase
+import ir.kazemcodes.infinity.core.domain.repository.LocalBookRepository
+import ir.kazemcodes.infinity.core.domain.repository.LocalChapterRepository
+import ir.kazemcodes.infinity.core.domain.repository.RemoteRepository
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.PreferencesUseCase
-import ir.kazemcodes.infinity.core.domain.use_cases.remote.RemoteUseCase
+import ir.kazemcodes.infinity.core.utils.Resource
 import ir.kazemcodes.infinity.feature_activity.domain.service.DownloadService
 import ir.kazemcodes.infinity.feature_activity.domain.service.DownloadService.Companion.DOWNLOAD_BOOK_NAME
 import ir.kazemcodes.infinity.feature_activity.domain.service.DownloadService.Companion.DOWNLOAD_SERVICE_NAME
 import ir.kazemcodes.infinity.feature_activity.domain.service.DownloadService.Companion.DOWNLOAD_SOURCE_NAME
-import ir.kazemcodes.infinity.core.utils.Resource
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import timber.log.Timber
 
-
 class BookDetailViewModel(
-    private val localUseCase: LocalUseCase,
-    private val remoteUseCase: RemoteUseCase,
     private val source: Source,
     private val book: Book,
     private val preferencesUseCase: PreferencesUseCase,
+    private val localBookRepository: LocalBookRepository,
+    private val localChapterRepository: LocalChapterRepository,
+    private val remoteRepository: RemoteRepository,
+    private val isLocal :Boolean
 ) : ScopedServices.Registered {
     private val _state = mutableStateOf<DetailState>(DetailState(source = source, book = book))
     val state: State<DetailState> = _state
@@ -62,7 +63,7 @@ class BookDetailViewModel(
 
 
     private fun getLocalBookByName() {
-        localUseCase.getLocalBookByNameUseCase(book = state.value.book).onEach { result ->
+        localBookRepository.getBookByName(state.value.book.bookName).onEach { result ->
             when (result) {
                 is Resource.Success -> {
                     if (result.data != null && result.data != Book.create()) {
@@ -72,9 +73,7 @@ class BookDetailViewModel(
                             isLoading = false,
                             loaded = true
                         )
-                        if (result.data.inLibrary) {
-                            toggleInLibrary(true)
-                        }
+
                     } else {
                         if (!state.value.loaded) {
                             getRemoteBookDetail()
@@ -99,7 +98,7 @@ class BookDetailViewModel(
 
 
     private fun getLocalChaptersByBookName() {
-        localUseCase.getLocalChaptersByBookNameUseCase(state.value.book.bookName, source.name)
+        localChapterRepository.getChapterByName(state.value.book.bookName, source.name)
             .onEach { result ->
                 when (result) {
                     is Resource.Success -> {
@@ -110,7 +109,6 @@ class BookDetailViewModel(
                                 isLoading = false,
                                 loaded = true
                             )
-                            getLastReadChapter()
                         } else {
                             if (!state.value.loaded) {
                                 getRemoteChapterDetail()
@@ -134,7 +132,8 @@ class BookDetailViewModel(
 
 
     fun getRemoteBookDetail() {
-        remoteUseCase.getRemoteBookDetailUseCase(book = state.value.book, source = source)
+
+        remoteRepository.getRemoteBookDetail(book = state.value.book, source = source)
             .onEach { result ->
                 when (result) {
                     is Resource.Success -> {
@@ -157,14 +156,14 @@ class BookDetailViewModel(
                     }
                     is Resource.Loading -> {
                         _state.value =
-                            state.value.copy(isLoading = true, error = "",)
+                            state.value.copy(isLoading = true, error = "")
                     }
                 }
             }.launchIn(coroutineScope)
     }
 
     fun getRemoteChapterDetail() {
-        remoteUseCase.getRemoteChaptersUseCase(book = state.value.book, source = source)
+        remoteRepository.getRemoteChaptersUseCase(book = state.value.book, source = source)
             .onEach { result ->
                 when (result) {
                     is Resource.Success -> {
@@ -192,32 +191,6 @@ class BookDetailViewModel(
             }.launchIn(coroutineScope)
     }
 
-    private fun getLastReadChapter() {
-        localUseCase.getLastReadChapterUseCase(bookName = state.value.book.bookName,
-            source = source.name).onEach { result ->
-            when (result) {
-                is Resource.Success -> {
-                    if (result.data != null) {
-                        _chapterState.value = chapterState.value.copy(
-                            lastChapter = result.data,
-                        )
-                    } else {
-                        if (chapterState.value.chapters.isNotEmpty()) {
-                            _chapterState.value =
-                                chapterState.value.copy(lastChapter = chapterState.value.chapters.first())
-                        }
-                    }
-                }
-                is Resource.Error -> {
-
-                }
-                is Resource.Loading -> {
-                    
-                }
-            }
-        }.launchIn(coroutineScope)
-    }
-
     private fun readLastReadBook() {
         val lastChapter = chapterState.value.chapters.findLast {
             it.lastRead
@@ -228,33 +201,21 @@ class BookDetailViewModel(
 
     fun insertBookDetailToLocal(book: Book) {
         coroutineScope.launch(Dispatchers.IO) {
-            localUseCase.insertLocalBookUserCase(book.copy(inLibrary = false))
-        }
-    }
-
-    fun updateBookDetailToLocal(inLibrary: Boolean) {
-        coroutineScope.launch(Dispatchers.IO) {
-            localUseCase.updateLocalBookUserCase(state.value.book.copy(inLibrary = inLibrary))
+            localBookRepository.insertBook(book)
         }
     }
 
     fun updateChaptersEntity(inLibrary: Boolean) {
         coroutineScope.launch(Dispatchers.IO) {
-            localUseCase.updateLocalChaptersContentUseCase(chapterState.value.chapters.map {
+            localChapterRepository.updateChapters(chapterState.value.chapters.map {
                 it.copy(inLibrary = inLibrary)
             })
         }
     }
 
-    fun updateAddToLibraryChaptersToLocal() {
-        coroutineScope.launch(Dispatchers.IO) {
-            localUseCase.updateAddToLibraryChaptersContentUseCase(chapterState.value.chapters.first())
-        }
-    }
-
     fun insertChaptersToLocal(chapters: List<Chapter>) {
         coroutineScope.launch(Dispatchers.IO) {
-            localUseCase.insertLocalChaptersUseCase(
+            localChapterRepository.insertChapters(
                 chapters,
                 state.value.book,
                 source = source,
@@ -264,35 +225,9 @@ class BookDetailViewModel(
     }
 
 
-    fun deleteLocalBook(bookName: String) {
-        coroutineScope.launch(Dispatchers.IO) {
-            localUseCase.deleteLocalBookUseCase(bookName)
-        }
-    }
 
-    fun deleteLocalChapters(bookName: String) {
-        coroutineScope.launch(Dispatchers.IO) {
-            localUseCase.deleteChaptersUseCase(bookName, source.name)
-        }
 
-    }
 
-    private fun deleteNotInLibraryChapters() {
-        coroutineScope.launch(Dispatchers.IO) {
-            localUseCase.deleteNotInLibraryLocalChaptersUseCase()
-        }
-
-    }
-
-    private fun deleteAllBooksNotInLibraryChapters() {
-        coroutineScope.launch(Dispatchers.IO) {
-            localUseCase.deleteNotInLibraryBooksUseCase()
-        }
-    }
-
-    fun toggleInLibrary(inLibrary: Boolean) {
-        _state.value = state.value.copy(inLibrary = inLibrary)
-    }
 
 
     override fun onServiceUnregistered() {

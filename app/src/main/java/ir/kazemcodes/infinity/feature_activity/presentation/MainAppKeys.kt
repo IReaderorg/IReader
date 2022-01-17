@@ -16,30 +16,32 @@ import com.zhuinden.simplestackextensions.servicesktx.add
 import com.zhuinden.simplestackextensions.servicesktx.lookup
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
-import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalUseCase
+import ir.kazemcodes.infinity.core.domain.repository.LocalBookRepository
+import ir.kazemcodes.infinity.core.domain.repository.LocalChapterRepository
+import ir.kazemcodes.infinity.core.domain.repository.RemoteRepository
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.PreferencesUseCase
-import ir.kazemcodes.infinity.core.domain.use_cases.remote.RemoteUseCase
+import ir.kazemcodes.infinity.core.presentation.theme.InfinityTheme
+import ir.kazemcodes.infinity.core.utils.SourceMapper
+import ir.kazemcodes.infinity.core.utils.findAppCompatAcivity
 import ir.kazemcodes.infinity.feature_activity.core.ComposeFragment
 import ir.kazemcodes.infinity.feature_activity.core.FragmentKey
-import ir.kazemcodes.infinity.feature_library.presentation.LibraryViewModel
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.BookDetailScreen
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.BookDetailViewModel
-import ir.kazemcodes.infinity.feature_explore.presentation.browse.BrowseViewModel
-import ir.kazemcodes.infinity.feature_explore.presentation.browse.BrowserScreen
 import ir.kazemcodes.infinity.feature_detail.presentation.chapter_detail.ChapterDetailScreen
 import ir.kazemcodes.infinity.feature_detail.presentation.chapter_detail.ChapterDetailViewModel
-import ir.kazemcodes.infinity.feature_sources.presentation.extension.ExtensionScreen
+import ir.kazemcodes.infinity.feature_explore.presentation.browse.BrowseViewModel
+import ir.kazemcodes.infinity.feature_explore.presentation.browse.BrowserScreen
+import ir.kazemcodes.infinity.feature_explore.presentation.browse.ExploreType
+import ir.kazemcodes.infinity.feature_library.presentation.LibraryViewModel
 import ir.kazemcodes.infinity.feature_reader.presentation.reader.ReaderScreenViewModel
 import ir.kazemcodes.infinity.feature_reader.presentation.reader.ReadingScreen
 import ir.kazemcodes.infinity.feature_settings.presentation.setting.SettingViewModel
 import ir.kazemcodes.infinity.feature_settings.presentation.setting.dns.DnsOverHttpScreen
 import ir.kazemcodes.infinity.feature_settings.presentation.setting.downloader.DownloaderScreen
 import ir.kazemcodes.infinity.feature_settings.presentation.setting.extension_creator.ExtensionCreatorScreen
-import ir.kazemcodes.infinity.core.presentation.theme.InfinityTheme
 import ir.kazemcodes.infinity.feature_settings.presentation.webview.WebPageScreen
 import ir.kazemcodes.infinity.feature_settings.presentation.webview.WebViewViewModel
-import ir.kazemcodes.infinity.core.utils.SourceMapper
-import ir.kazemcodes.infinity.core.utils.findAppCompatAcivity
+import ir.kazemcodes.infinity.feature_sources.presentation.extension.ExtensionScreen
 import kotlinx.parcelize.Parcelize
 
 
@@ -62,7 +64,7 @@ class MainScreenFragment() : ComposeFragment() {
 data class MainScreenKey(val noArgument: String = "") : FragmentKey() {
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
-            add(LibraryViewModel(lookup<LocalUseCase>(), lookup<PreferencesUseCase>()))
+            add(LibraryViewModel(lookup<LocalBookRepository>(), lookup<PreferencesUseCase>()))
             add(MainViewModel())
         }
     }
@@ -85,17 +87,24 @@ class BrowserScreenFragment() : ComposeFragment() {
 }
 
 @Parcelize
-data class BrowserScreenKey(val sourceName: String, val isLatestUpdateMode: Boolean = true) :
+data class BrowserScreenKey(val sourceName: String, val exploreType: Int) :
     FragmentKey() {
     override fun instantiateFragment(): Fragment = BrowserScreenFragment()
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
+            val exploreType = when (exploreType) {
+                0 -> ExploreType.Latest
+                else -> ExploreType.Popular
+            }
             add(
-                BrowseViewModel(lookup<LocalUseCase>(),
-                    lookup<RemoteUseCase>(),
+                BrowseViewModel(
                     preferencesUseCase = lookup<PreferencesUseCase>(),
                     source = lookup<SourceMapper>().mappingSourceNameToSource(sourceName),
-                    isLatestUpdateMode = isLatestUpdateMode),
+                    exploreType = exploreType,
+                    localBookRepository = lookup<LocalBookRepository>(),
+                    remoteRepository = lookup<RemoteRepository>()
+
+                ),
             )
         }
 
@@ -116,17 +125,24 @@ class BookDetailFragment() : ComposeFragment() {
 }
 
 @Parcelize
-data class BookDetailKey(val book: Book, val sourceName: String) : FragmentKey() {
+data class BookDetailKey(val book: Book, val sourceName: String, val isLocal: Boolean) :
+    FragmentKey() {
 
     override fun instantiateFragment(): Fragment = BookDetailFragment()
 
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
-            add(BookDetailViewModel(lookup<LocalUseCase>(),
-                lookup<RemoteUseCase>(),
-                source = lookup<SourceMapper>().mappingSourceNameToSource(sourceName),
-                book = book,
-                lookup<PreferencesUseCase>()))
+            add(
+                BookDetailViewModel(
+                    source = lookup<SourceMapper>().mappingSourceNameToSource(sourceName),
+                    book = book,
+                    lookup<PreferencesUseCase>(),
+                    isLocal = isLocal,
+                    localBookRepository = lookup<LocalBookRepository>(),
+                    remoteRepository = lookup<RemoteRepository>(),
+                    localChapterRepository = lookup<LocalChapterRepository>()
+                ),
+            )
         }
     }
 }
@@ -184,9 +200,10 @@ data class ChapterDetailKey(
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
             add<ChapterDetailViewModel>(ChapterDetailViewModel(
-                lookup<LocalUseCase>(),
                 source = lookup<SourceMapper>().mappingSourceNameToSource(sourceName),
                 book = book,
+                localChapterRepository = lookup<LocalChapterRepository>()
+
             ))
         }
     }
@@ -237,13 +254,14 @@ data class ReaderScreenKey(
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
             add(ReaderScreenViewModel(
-                localUseCase = lookup<LocalUseCase>(),
-                remoteUseCase = lookup<RemoteUseCase>(),
                 preferencesUseCase = lookup<PreferencesUseCase>(),
                 source = lookup<SourceMapper>().mappingSourceNameToSource(sourceName),
                 book = book,
                 chapter = chapter,
-                chapterIndex = chapterIndex
+                chapterIndex = chapterIndex,
+                localBookRepository = lookup<LocalBookRepository>(),
+                remoteRepository = lookup<RemoteRepository>(),
+                localChapterRepository = lookup<LocalChapterRepository>()
             ))
         }
     }

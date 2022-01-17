@@ -1,5 +1,6 @@
 package ir.kazemcodes.infinity.core.domain.repository
 
+import ir.kazemcodes.infinity.core.data.local.BookDatabase
 import ir.kazemcodes.infinity.core.data.repository.PreferencesHelper
 
 interface Repository {
@@ -11,6 +12,9 @@ interface Repository {
     val preferencesHelper: PreferencesHelper
 
     val remoteRepository: RemoteRepository
+
+    val database: BookDatabase
+
 
 
 }

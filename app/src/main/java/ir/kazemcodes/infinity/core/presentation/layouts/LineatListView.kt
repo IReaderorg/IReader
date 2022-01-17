@@ -15,6 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.items
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.presentation.components.BookImageComposable
 
@@ -54,19 +56,22 @@ fun LinearBookItem(
 
 @Composable
 fun LinearListDisplay(
-    books: List<Book>,
-    onClick: (index: Int) -> Unit,
+    books: LazyPagingItems<Book>,
+    onClick: (book: Book) -> Unit,
     scrollState: LazyListState = rememberLazyListState(),
 ) {
     LazyColumn(modifier = Modifier.fillMaxSize(), state = scrollState) {
-        items(count = books.size) { index ->
-            LinearBookItem(
-                title = books[index].bookName,
-                img_thumbnail = books[index].coverLink ?: "",
-                modifier = Modifier.clickable {
-                    onClick(index)
-                }
-            )
+        items(items = books) { book ->
+            if (book != null) {
+                LinearBookItem(
+                    title = book.bookName,
+                    img_thumbnail = book.coverLink ?: "",
+                    modifier = Modifier.clickable {
+                        onClick(book)
+                    }
+                )
+            }
+
         }
 
     }

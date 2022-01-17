@@ -11,9 +11,11 @@ import ir.kazemcodes.infinity.core.data.network.models.Source
 import ir.kazemcodes.infinity.core.domain.models.FontType
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
-import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalUseCase
+import ir.kazemcodes.infinity.core.domain.repository.LocalBookRepository
+import ir.kazemcodes.infinity.core.domain.repository.LocalChapterRepository
+import ir.kazemcodes.infinity.core.domain.repository.RemoteRepository
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.PreferencesUseCase
-import ir.kazemcodes.infinity.core.domain.use_cases.remote.RemoteUseCase
+
 import ir.kazemcodes.infinity.core.presentation.theme.fonts
 import ir.kazemcodes.infinity.core.presentation.theme.readerScreenBackgroundColors
 import ir.kazemcodes.infinity.core.utils.Resource
@@ -25,13 +27,14 @@ import kotlinx.coroutines.flow.onEach
 
 
 class ReaderScreenViewModel(
-    private val localUseCase: LocalUseCase,
-    private val remoteUseCase: RemoteUseCase,
     private val preferencesUseCase: PreferencesUseCase,
     private val source: Source,
     private val book: Book,
     private val chapter: Chapter,
     private val chapterIndex: Int,
+    private val remoteRepository: RemoteRepository,
+    private val localBookRepository: LocalBookRepository,
+    private val localChapterRepository: LocalChapterRepository
 ) : ScopedServices.Registered {
     private val _state = mutableStateOf(ReaderScreenState(source = source, book = book, chapter = chapter, currentChapterIndex = chapterIndex))
 
@@ -107,7 +110,7 @@ class ReaderScreenViewModel(
     }
 
     private fun getLocalChapters() {
-        localUseCase.getLocalChaptersByBookNameUseCase(bookName = book.bookName, source.name)
+        localChapterRepository.getChapterByName(bookName = book.bookName, source.name)
             .onEach { result ->
                 when (result) {
                     is Resource.Success -> {
@@ -131,11 +134,11 @@ class ReaderScreenViewModel(
     }
 
     private fun getReadingContentLocally(chapter: Chapter) {
-        localUseCase.getLocalChapterReadingContentUseCase(chapter, source.name)
+        remoteRepository.getRemoteReadingContentUseCase(chapter, source)
             .onEach { result ->
                 when (result) {
                     is Resource.Success -> {
-                        if (result.data != null && result.data.isChapterNotEmpty()) {
+                        if (result.data != null) {
                             _state.value = state.value.copy(
                                 chapter = chapter.copy(content = result.data.content),
                                 isLoading = false,
@@ -171,7 +174,7 @@ class ReaderScreenViewModel(
     }
 
     fun getReadingContentRemotely(chapter: Chapter) {
-        remoteUseCase.getRemoteReadingContentUseCase(chapter, source = source)
+        remoteRepository.getRemoteReadingContentUseCase(chapter, source = source)
             .onEach { result ->
                 when (result) {
                     is Resource.Success -> {
@@ -209,11 +212,11 @@ class ReaderScreenViewModel(
 
     private fun toggleLastReadAndUpdateChapterContent(chapter: Chapter) {
         coroutineScope.launch(Dispatchers.IO) {
-            localUseCase.updateLocalChapterContentUseCase(state.value.chapter)
-            localUseCase.deleteLastReadChapterChaptersUseCase(book.bookName, source.name)
-            localUseCase.setLastReadChaptersUseCase(state.value.book,
+            localChapterRepository.updateChapter(state.value.chapter.toChapterEntity())
+            localChapterRepository.deleteLastReadChapter(book.bookName, source.name)
+            localChapterRepository.setLastReadChapter(state.value.book.bookName,
                 chapter.title,
-                source = source)
+                source = source.name)
         }
     }
 

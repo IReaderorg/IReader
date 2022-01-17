@@ -5,7 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import com.zhuinden.simplestack.ScopedServices
 import ir.kazemcodes.infinity.core.data.network.models.Source
 import ir.kazemcodes.infinity.core.domain.models.Book
-import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalUseCase
+import ir.kazemcodes.infinity.core.domain.repository.LocalChapterRepository
 import ir.kazemcodes.infinity.core.utils.Resource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -16,9 +16,9 @@ import kotlinx.coroutines.flow.onEach
 
 
 class ChapterDetailViewModel(
-    private val localUseCase: LocalUseCase,
     private val book: Book,
     private val source: Source,
+    private val localChapterRepository : LocalChapterRepository
 ) :  ScopedServices.Registered {
 
     private val _state = mutableStateOf(ChapterDetailState(source = source, book = book))
@@ -42,7 +42,7 @@ class ChapterDetailViewModel(
         }
     }
     private fun getLocalChapters() {
-        localUseCase.getLocalChaptersByBookNameUseCase(bookName = book.bookName, source = source.name )
+        localChapterRepository.getChapterByName(bookName = book.bookName, source = source.name )
             .onEach { result ->
                 when (result) {
                     is Resource.Success -> {

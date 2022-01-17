@@ -8,6 +8,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 @Entity(tableName = BOOK_TABLE)
 data class BookEntity(
+    @PrimaryKey(autoGenerate = false) val id: String,
     val link: String,
     val bookName: String,
     val coverLink: String? = null,
@@ -15,17 +16,16 @@ data class BookEntity(
     val author: String? = null,
     val translator: String? = null,
     val category: List<String> = emptyList(),
-    val inLibrary: Boolean = false,
     val status: Int = -1,
     val rating: Int = 0,
     val source: String? = null,
-    @PrimaryKey val bookId: Int? = null,
+    val isExploreMode:Boolean = false,
 ) {
 
 
     fun toBook(): Book {
         return Book(
-            bookId =bookId,
+            id =id,
             link = link,
             bookName = bookName,
             coverLink = coverLink,
@@ -33,7 +33,7 @@ data class BookEntity(
             author = author,
             translator = translator,
             category = category,
-            inLibrary = inLibrary,
+            inLibrary = true,
             status = status,
             source = source,
             rating = rating

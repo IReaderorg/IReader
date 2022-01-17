@@ -8,13 +8,14 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.zhuinden.simplestack.GlobalServices
 import com.zhuinden.simplestackextensions.servicesktx.add
 import dagger.hilt.android.HiltAndroidApp
-import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalUseCase
+import ir.kazemcodes.infinity.core.domain.repository.LocalBookRepository
+import ir.kazemcodes.infinity.core.domain.repository.LocalChapterRepository
+import ir.kazemcodes.infinity.core.domain.repository.RemoteRepository
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.PreferencesUseCase
-import ir.kazemcodes.infinity.core.domain.use_cases.remote.RemoteUseCase
+import ir.kazemcodes.infinity.core.utils.SourceMapper
 import ir.kazemcodes.infinity.feature_activity.domain.notification.Notifications
 import ir.kazemcodes.infinity.feature_sources.sources.Extensions
 import ir.kazemcodes.infinity.feature_sources.sources.utils.NetworkHelper
-import ir.kazemcodes.infinity.core.utils.SourceMapper
 import okhttp3.OkHttpClient
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
@@ -30,11 +31,6 @@ class MyApplication : Application(), Configuration.Provider {
     lateinit var globalServices: GlobalServices
         private set
 
-    @Inject
-    lateinit var localUseCase: LocalUseCase
-
-    @Inject
-    lateinit var remoteUseCase: RemoteUseCase
 
     @Inject
     lateinit var preferencesUseCase: PreferencesUseCase
@@ -52,6 +48,12 @@ class MyApplication : Application(), Configuration.Provider {
 
     @Inject lateinit var okHttpClient: OkHttpClient
 
+    @Inject lateinit var localBookRepository: LocalBookRepository
+
+    @Inject lateinit var localChapterRepository: LocalChapterRepository
+
+    @Inject lateinit var remoteRepository: RemoteRepository
+
 
     private var mFirebaseAnalytics: FirebaseAnalytics? = null
     override fun onCreate() {
@@ -68,13 +70,14 @@ class MyApplication : Application(), Configuration.Provider {
         ))
 
         globalServices = GlobalServices.builder()
-            .add(localUseCase)
-            .add(remoteUseCase)
             .add(preferencesUseCase)
             .add(SourceMapper(this))
             .add(extensions)
             .add(webView)
             .add(okHttpClient)
+            .add(localBookRepository)
+            .add(remoteRepository)
+            .add(localChapterRepository)
             .build()
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this)
         setupNotificationChannels()
