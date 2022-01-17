@@ -64,7 +64,7 @@ class ExploreRemoteMediator(
             }
 
 
-            val endOfPaginationReached = response.books.isEmpty()
+            val endOfPaginationReached = !response.hasNextPage
 
 
 
