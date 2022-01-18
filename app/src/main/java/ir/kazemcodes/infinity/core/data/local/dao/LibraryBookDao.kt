@@ -26,10 +26,20 @@ interface LibraryBookDao {
 
 
 
+    @Query("SELECT * FROM book_table WHERE inLibrary = 1 ORDER BY CASE WHEN :isAsc = 1 THEN bookName END ASC, CASE WHEN :isAsc = 0 THEN bookName END DESC")
+    fun getAllLocalBooksForPagingSortedByAlphabetically(isAsc:Boolean): PagingSource<Int,BookEntity>
 
+    @Query("SELECT * FROM book_table WHERE inLibrary = 1 ORDER BY CASE WHEN :isAsc = 1 THEN dataAdded END ASC , CASE WHEN :isAsc = 0 THEN dataAdded END DESC")
+    fun getAllLocalBooksForPagingSortedByDateAdded(isAsc:Boolean): PagingSource<Int,BookEntity>
 
-    @Query("SELECT * FROM book_table WHERE inLibrary = 1")
-    fun getAllBooksForPaging(): PagingSource<Int,BookEntity>
+    @Query("SELECT * FROM book_table WHERE inLibrary = 1 ORDER BY CASE WHEN :isAsc = 1 THEN lastRead END ASC , CASE WHEN :isAsc = 0 THEN lastRead END DESC")
+    fun getAllLocalBooksForPagingSortedByLastRead(isAsc:Boolean): PagingSource<Int,BookEntity>
+
+    @Query("SELECT * FROM book_table WHERE inLibrary = 1 ORDER BY CASE WHEN :isAsc = 1 THEN download END ASC , CASE WHEN :isAsc = 0 THEN download END DESC")
+    fun getAllLocalBooksForPagingSortedByDownloads(isAsc:Boolean): PagingSource<Int,BookEntity>
+
+    @Query("SELECT * FROM book_table WHERE inLibrary = 1 ORDER BY CASE WHEN :isAsc = 1 THEN totalChapters END ASC,CASE WHEN :isAsc = 0 THEN totalChapters END DESC")
+    fun getAllLocalBooksForPagingSortedByTotalChapter(isAsc:Boolean): PagingSource<Int,BookEntity>
 
     @Query("SELECT * FROM book_table")
     fun getAllBooks(): Flow<List<BookEntity>?>
@@ -61,4 +71,4 @@ interface LibraryBookDao {
 
 }
 
-data class InLibraryUpdate(val id: String, val inLibrary:Boolean)
+data class InLibraryUpdate(val id: String, val inLibrary:Boolean, val totalChapters:Int)

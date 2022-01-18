@@ -1,20 +1,25 @@
 package ir.kazemcodes.infinity.feature_activity.presentation
 
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.google.accompanist.pager.ExperimentalPagerApi
 import com.zhuinden.simplestackcomposeintegration.services.rememberService
 import ir.kazemcodes.infinity.feature_activity.domain.models.BottomNavigationScreen
 import ir.kazemcodes.infinity.feature_library.presentation.LibraryScreen
-import ir.kazemcodes.infinity.feature_sources.presentation.extension.ExtensionScreen
 import ir.kazemcodes.infinity.feature_settings.presentation.setting.SettingScreen
+import ir.kazemcodes.infinity.feature_sources.presentation.extension.ExtensionScreen
 
 
 
 
 
+@OptIn(ExperimentalPagerApi::class)
+@ExperimentalAnimationApi
 @Composable
 fun MainScreen(modifier: Modifier = Modifier) {
     val viewModel = rememberService<MainViewModel>()
@@ -53,16 +58,14 @@ fun MainScreen(modifier: Modifier = Modifier) {
             }
         }
     ) {
-        when (currentScreen) {
-            is BottomNavigationScreen.Library -> {
-                LibraryScreen()
-            }
-            is BottomNavigationScreen.ExtensionScreen -> {
-                ExtensionScreen()
-            }
-            is BottomNavigationScreen.Setting -> {
-                SettingScreen()
+
+        Crossfade(targetState = currentScreen) { screen ->
+            when (screen) {
+                is BottomNavigationScreen.Library -> LibraryScreen()
+                is BottomNavigationScreen.ExtensionScreen -> ExtensionScreen()
+                is BottomNavigationScreen.Setting -> SettingScreen()
             }
         }
+
     }
 }

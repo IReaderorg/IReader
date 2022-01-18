@@ -16,6 +16,7 @@ import ir.kazemcodes.infinity.core.utils.Resource
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.Constants
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.Constants.NO_BOOKS_ERROR
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.Constants.NO_BOOK_ERROR
+import ir.kazemcodes.infinity.feature_library.presentation.components.SortType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
@@ -23,6 +24,7 @@ import kotlinx.coroutines.flow.flow
 import retrofit2.HttpException
 import timber.log.Timber
 import java.io.IOException
+import java.util.*
 
 class LocalBookRepositoryImpl(
     private val bookDao: LibraryBookDao,
@@ -30,19 +32,35 @@ class LocalBookRepositoryImpl(
     private val bookDatabase: BookDatabase,
 ) : LocalBookRepository {
 
-    override fun getBooks(): Flow<PagingData<BookEntity>> {
+    override fun getBooks(sortType: SortType,isAsc: Boolean): Flow<PagingData<BookEntity>> {
         return Pager(
             config = PagingConfig(pageSize = Constants.DEFAULT_PAGE_SIZE,
                 maxSize = Constants.MAX_PAGE_SIZE, enablePlaceholders = true),
             pagingSourceFactory = {
-                getAllInLibraryForPagingBooks()
+                getAllInLibraryForPagingBooks(sortType,isAsc)
             }
         ).flow
     }
 
 
-    override fun getAllInLibraryForPagingBooks(): PagingSource<Int, BookEntity> {
-        return bookDao.getAllBooksForPaging()
+    override fun getAllInLibraryForPagingBooks(sortType : SortType,isAsc:Boolean): PagingSource<Int, BookEntity> {
+        return when(sortType) {
+            is SortType.Alphabetically -> {
+                bookDao.getAllLocalBooksForPagingSortedByAlphabetically(isAsc)
+            }
+            is SortType.DateAdded -> {
+                bookDao.getAllLocalBooksForPagingSortedByDateAdded(isAsc)
+            }
+            is SortType.LastRead -> {
+                bookDao.getAllLocalBooksForPagingSortedByLastRead(isAsc)
+            }
+            is SortType.TotalChapter -> {
+                bookDao.getAllLocalBooksForPagingSortedByTotalChapter(isAsc)
+            }
+            is SortType.Download -> {
+                bookDao.getAllLocalBooksForPagingSortedByDownloads(isAsc)
+            }
+        }
     }
 
     override fun getAllBooks(): Flow<Resource<List<Book>>> = flow {
@@ -132,7 +150,7 @@ class LocalBookRepositoryImpl(
     }
 
     override suspend fun insertBook(book: Book) {
-        return bookDao.insertBook(book.toBookEntity())
+        return bookDao.insertBook(book.toBookEntity().copy(dataAdded = System.currentTimeMillis()))
     }
 
     override suspend fun deleteBook(id: String) {
@@ -203,7 +221,7 @@ class LocalBookRepositoryImpl(
         }
 
     override suspend fun updateLocalBook(book: Book) {
-       bookDao.updateBook(InLibraryUpdate(book.id,book.inLibrary))
+       bookDao.updateBook(InLibraryUpdate(book.id,book.inLibrary,book.totalChapters))
     }
 
 

@@ -1,5 +1,7 @@
 package ir.kazemcodes.infinity.core.presentation.theme
 
+import androidx.compose.material.Colors
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 //val Purple200 = Color(0xFFBB86FC)
@@ -28,6 +30,23 @@ object Colour {
     val black_800 = Color(0xFF121212)
 
     val black_900 = Color(0xFF000000)
+
+    val transparent = Color(0x00FFFFFF)
+
+    val Colors.topBarColor
+        @Composable
+        get() = if (isLight) white_50 else black_900
+
+    val Colors.contentColor
+        @Composable
+        get() = if (isLight) black_900 else white_50
+    val Colors.Transparent
+        @Composable
+        get() = if (isLight) black_900.copy(alpha = .1f) else white_50
+
+    val Colors.iconColor
+        @Composable
+        get() = if (isLight) blue_500 else blue_500
 
 
 }

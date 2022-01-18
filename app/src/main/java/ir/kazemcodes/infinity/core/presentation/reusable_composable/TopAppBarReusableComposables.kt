@@ -42,6 +42,25 @@ fun TopAppBarTitle(
         textAlign = TextAlign.Center,
     )
 }
+@Composable
+fun MidTextComposable(
+    modifier: Modifier = Modifier,
+    title: String,
+    color: Color? = null,
+    style: TextStyle? = null,
+    fontWeight: FontWeight? = null,
+    overflow: TextOverflow? = null,
+) {
+    Text(
+        modifier = modifier,
+        text = title,
+        color = color ?: MaterialTheme.colors.onBackground,
+        style = style ?: MaterialTheme.typography.subtitle1,
+        fontWeight = fontWeight ?: FontWeight.SemiBold,
+        overflow = overflow ?: TextOverflow.Ellipsis,
+        textAlign = TextAlign.Center,
+    )
+}
 
 @Composable
 fun TopAppBarActionButton(

@@ -9,11 +9,12 @@ import ir.kazemcodes.infinity.core.domain.models.BookEntity
 import ir.kazemcodes.infinity.core.domain.models.Chapter
 import ir.kazemcodes.infinity.core.domain.models.ChapterEntity
 import ir.kazemcodes.infinity.core.utils.Resource
+import ir.kazemcodes.infinity.feature_library.presentation.components.SortType
 import kotlinx.coroutines.flow.Flow
 
 interface LocalBookRepository {
-    fun getBooks(): Flow<PagingData<BookEntity>>
-    fun getAllInLibraryForPagingBooks(): PagingSource<Int, BookEntity>
+    fun getBooks(sortType: SortType,isAsc: Boolean): Flow<PagingData<BookEntity>>
+    fun getAllInLibraryForPagingBooks(sortType : SortType,isAsc:Boolean): PagingSource<Int, BookEntity>
     fun getAllBooks(): Flow<Resource<List<Book>>>
     fun getBooksById(id: String): Flow<Resource<Book>>
 

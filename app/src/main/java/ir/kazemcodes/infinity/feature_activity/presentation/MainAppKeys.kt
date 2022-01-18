@@ -3,10 +3,12 @@ package ir.kazemcodes.infinity.feature_activity.presentation
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.view.WindowManager
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.fragment.app.Fragment
+import com.google.accompanist.insets.ProvideWindowInsets
 import com.zhuinden.simplestack.Backstack
 import com.zhuinden.simplestack.ServiceBinder
 import com.zhuinden.simplestackcomposeintegration.core.BackstackProvider
@@ -45,6 +47,7 @@ import kotlinx.parcelize.Parcelize
 
 
 class MainScreenFragment() : ComposeFragment() {
+    @OptIn(ExperimentalAnimationApi::class)
     @Composable
     override fun FragmentComposable(backstack: Backstack) {
         BackstackProvider(backstack = backstack) {
@@ -117,7 +120,9 @@ class BookDetailFragment() : ComposeFragment() {
     override fun FragmentComposable(backstack: Backstack) {
         BackstackProvider(backstack = backstack) {
             InfinityTheme() {
-                BookDetailScreen()
+                ProvideWindowInsets() {
+                    BookDetailScreen()
+                }
             }
         }
     }

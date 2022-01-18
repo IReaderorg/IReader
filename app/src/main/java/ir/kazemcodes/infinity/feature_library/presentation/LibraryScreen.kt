@@ -1,6 +1,7 @@
 package ir.kazemcodes.infinity.feature_library.presentation
 
-import androidx.compose.foundation.background
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -15,18 +16,21 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.PagerState
+import com.google.accompanist.pager.rememberPagerState
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import com.zhuinden.simplestackcomposeintegration.services.rememberService
-import ir.kazemcodes.infinity.core.presentation.components.TitleText
-import ir.kazemcodes.infinity.core.presentation.layouts.layouts
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.*
+import ir.kazemcodes.infinity.core.presentation.theme.Colour.topBarColor
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.Constants
-import ir.kazemcodes.infinity.feature_library.presentation.components.LayoutComposable
-import ir.kazemcodes.infinity.feature_library.presentation.components.LibraryEvents
-import ir.kazemcodes.infinity.feature_library.presentation.components.RadioButtonWithTitleComposable
+import ir.kazemcodes.infinity.feature_library.presentation.components.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 
+@ExperimentalPagerApi
+@ExperimentalAnimationApi
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun LibraryScreen() {
@@ -40,11 +44,13 @@ fun LibraryScreen() {
     val focusManager = LocalFocusManager.current
 
     val books = viewModel.book.collectAsLazyPagingItems()
+    val pagerState = rememberPagerState()
 
 
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
+
         BottomSheetScaffold(
             topBar = {
                 TopAppBar(
@@ -62,10 +68,9 @@ fun LibraryScreen() {
                                 },
                                 isSearchModeEnable = state.searchQuery.isNotBlank())
                         }
-
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    backgroundColor = MaterialTheme.colors.background,
+                    backgroundColor = MaterialTheme.colors.topBarColor,
                     contentColor = MaterialTheme.colors.onBackground,
                     elevation = Constants.DEFAULT_ELEVATION,
                     actions = {
@@ -114,45 +119,14 @@ fun LibraryScreen() {
                 )
             },
             sheetContent = {
-                ModalBottomSheetLayout(sheetBackgroundColor = MaterialTheme.colors.background,
-                    modifier = Modifier.height(500.dp),
-                    sheetContent = {
-                        /** There is Some issue here were sheet content is not need , not sure why**/
-                        Column(
-                            Modifier
-                                .fillMaxSize()
-                                .padding(12.dp)
-                                .background(MaterialTheme.colors.background),
-                            content = {}
-                        )
-
-                    }) {
-                    Column(
-                        Modifier
-                            .fillMaxSize()
-                            .background(MaterialTheme.colors.background)
-                            .padding(12.dp)
-                    ) {
-                        TitleText(text = "Display")
-                        layouts.forEach { layout ->
-                            RadioButtonWithTitleComposable(
-                                text = layout.title,
-                                selected = viewModel.state.value.layout == layout.layout,
-                                onClick = {
-                                    viewModel.onEvent(LibraryEvents.UpdateLayoutType(layout))
-                                }
-                            )
-                        }
-                    }
-                }
-
+                BottomTabComposable(viewModel = viewModel, pagerState = pagerState, scope = coroutineScope)
             },
             scaffoldState = bottomSheetScaffoldState
         ) {
 
             Box(Modifier.fillMaxSize()) {
                 Box(modifier = Modifier.padding(bottom = 50.dp)) {
-                    if (books.loadState.refresh is LoadState.NotLoading) {
+                    AnimatedContent(books.loadState.refresh is LoadState.NotLoading) {
                         LayoutComposable(
                             books = if (!state.inSearchMode) books else books,
                             layout = state.layout,
@@ -161,8 +135,6 @@ fun LibraryScreen() {
                         )
                     }
                 }
-
-
                 if (books.loadState.refresh is LoadState.Loading) {
                     CircularProgressIndicator(
                         modifier = Modifier.align(Alignment.Center)
@@ -183,6 +155,34 @@ fun LibraryScreen() {
 
 
 }
+
+
+
+@ExperimentalMaterialApi
+@ExperimentalPagerApi
+@Composable
+fun BottomTabComposable(modifier: Modifier = Modifier, viewModel: LibraryViewModel,pagerState: PagerState,scope: CoroutineScope) {
+    val tabs = listOf(TabItem.Filter(viewModel = viewModel), TabItem.Sort(viewModel), TabItem.Display(viewModel = viewModel))
+
+    ModalBottomSheetLayout(sheetBackgroundColor = MaterialTheme.colors.background,
+        modifier = Modifier.height(500.dp),
+        sheetContent = {
+            /** There is Some issue here were sheet content is not need , not sure why**/
+            Column(modifier = modifier.fillMaxSize()) {
+                Tabs(tabs = tabs, pagerState = pagerState)
+                TabsContent(tabs = tabs, pagerState = pagerState)
+
+            }
+        }, content = {
+            Column(modifier = modifier.fillMaxSize()) {
+                Tabs(tabs = tabs, pagerState = pagerState)
+                TabsContent(tabs = tabs, pagerState = pagerState)
+            }
+        })
+
+}
+
+
 
 
 

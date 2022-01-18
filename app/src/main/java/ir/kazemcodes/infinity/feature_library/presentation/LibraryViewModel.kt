@@ -11,6 +11,7 @@ import ir.kazemcodes.infinity.core.domain.repository.LocalBookRepository
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.core.presentation.layouts.DisplayMode
 import ir.kazemcodes.infinity.feature_library.presentation.components.LibraryEvents
+import ir.kazemcodes.infinity.feature_library.presentation.components.SortType
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
@@ -31,7 +32,7 @@ class LibraryViewModel(
 
     fun getBooks() {
         coroutineScope.launch(Dispatchers.IO) {
-            localBookRepository.getBooks().cachedIn(coroutineScope)
+            localBookRepository.getBooks(state.value.sortType,state.value.isSortAcs).cachedIn(coroutineScope)
                 .collect { snapshot ->
                     _books.value = snapshot.map { bookEntity -> bookEntity.toBook() }
                 }
@@ -103,6 +104,13 @@ class LibraryViewModel(
         }
     }
 
+    fun changeSortIndex(sortType: SortType) {
+        _state.value = state.value.copy(sortType = sortType)
+        if (state.value.sortType == sortType) {
+            _state.value = _state.value.copy(isSortAcs = !state.value.isSortAcs)
+        }
+        getBooks()
+    }
 
 
     override fun onServiceActive() {

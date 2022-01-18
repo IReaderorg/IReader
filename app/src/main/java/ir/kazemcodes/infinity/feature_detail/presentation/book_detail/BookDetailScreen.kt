@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -107,7 +108,7 @@ fun BookDetailScreenLoadedComposable(
                 modifier = modifier
                     .fillMaxWidth()
                     .padding(horizontal = 8.dp),
-                backgroundColor = MaterialTheme.colors.background,
+                backgroundColor = Color.Transparent,
                 contentColor = MaterialTheme.colors.onBackground,
                 elevation = 0.dp,
                 actions = {
@@ -212,88 +213,91 @@ fun BookDetailScreenLoadedComposable(
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
         ) {
-            /** Image and Book Information **/
-            Row(
-                modifier = modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 16.dp)
-            ) {
-                /** Book Image **/
-                BookImageComposable(
-                    image = book.coverLink ?: "",
+            Box() {
+                /** Image and Book Information **/
+                Row(
                     modifier = modifier
-                        .width(120.dp)
-                        .height(180.dp)
-                        .clip(RoundedCornerShape(4.dp))
-                        .border(2.dp,MaterialTheme.colors.onBackground.copy(alpha = .1f)),
-                    contentScale = ContentScale.Crop,
-                )
-                Spacer(modifier = modifier.width(8.dp))
-                /** Book Info **/
-                Column {
-                    Text(
-                        text = book.bookName,
-                        style = MaterialTheme.typography.h6,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colors.onBackground,
-                        overflow = TextOverflow.Ellipsis
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp)
+                ) {
+                    /** Book Image **/
+                    BookImageComposable(
+                        image = book.coverLink ?: "",
+                        modifier = modifier
+                            .width(120.dp)
+                            .height(180.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                            .border(2.dp, MaterialTheme.colors.onBackground.copy(alpha = .1f)),
+                        contentScale = ContentScale.Crop,
                     )
-                    if (!book.author.isNullOrBlank()) {
+                    Spacer(modifier = modifier.width(8.dp))
+                    /** Book Info **/
+                    Column {
                         Text(
-                            text = "Author: ${book.author}",
-                            style = MaterialTheme.typography.subtitle2,
+                            text = book.bookName,
+                            style = MaterialTheme.typography.h6,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colors.onBackground.copy(alpha = .5f),
+                            color = MaterialTheme.colors.onBackground,
                             overflow = TextOverflow.Ellipsis
                         )
-                    }
-                    if (!book.translator.isNullOrBlank()) {
+                        if (!book.author.isNullOrBlank()) {
+                            Text(
+                                text = "Author: ${book.author}",
+                                style = MaterialTheme.typography.subtitle2,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colors.onBackground.copy(alpha = .5f),
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                        if (!book.translator.isNullOrBlank()) {
+                            Text(
+                                text = "Translator: ${book.translator}",
+                                style = MaterialTheme.typography.subtitle2,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colors.onBackground.copy(alpha = .5f),
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                        if (book.status != -1) {
+                            Text(
+                                text = "Status: ${book.getStatusByName()}",
+                                style = MaterialTheme.typography.subtitle2,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colors.onBackground.copy(alpha = .5f),
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                        if (book.rating != 0) {
+                            Text(
+                                text = "Rating: ${"⭐".repeat(if (book.rating in 1..4) book.rating else 5)}",
+                                style = MaterialTheme.typography.subtitle2,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colors.onBackground.copy(alpha = .5f),
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
                         Text(
-                            text = "Translator: ${book.translator}",
-                            style = MaterialTheme.typography.subtitle2,
-                            fontWeight = FontWeight.Bold,
+                            text = "Source: ${book.source}",
                             color = MaterialTheme.colors.onBackground.copy(alpha = .5f),
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.subtitle2,
                             overflow = TextOverflow.Ellipsis
                         )
+                        if (!book.category.isNullOrEmpty()) {
+                            Text(
+                                text = "Genre: ${book.category.formatList()}",
+                                color = MaterialTheme.colors.onBackground.copy(alpha = .5f),
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.subtitle2,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
                     }
-                    if (book.status != -1) {
-                        Text(
-                            text = "Status: ${book.getStatusByName()}",
-                            style = MaterialTheme.typography.subtitle2,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colors.onBackground.copy(alpha = .5f),
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                    if (book.rating != 0) {
-                        Text(
-                            text = "Rating: ${"⭐".repeat(if (book.rating in 1..4) book.rating else 5)}",
-                            style = MaterialTheme.typography.subtitle2,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colors.onBackground.copy(alpha = .5f),
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                    Text(
-                        text = "Source: ${book.source}",
-                        color = MaterialTheme.colors.onBackground.copy(alpha = .5f),
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.subtitle2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    if (!book.category.isNullOrEmpty()) {
-                        Text(
-                            text = "Genre: ${book.category.formatList()}",
-                            color = MaterialTheme.colors.onBackground.copy(alpha = .5f),
-                            fontWeight = FontWeight.Bold,
-                            style = MaterialTheme.typography.subtitle2,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
+
+
                 }
-
-
             }
+
             Divider(
                 modifier = modifier
                     .fillMaxWidth()

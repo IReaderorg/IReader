@@ -115,6 +115,7 @@ class BookDetailViewModel(
                                 loaded = true
                             )
                             getLastChapter()
+                            localBookRepository.updateLocalBook(book = book.copy(totalChapters = chapterState.value.chapters.size))
                         } else {
                             getRemoteChapterDetail()
                         }
@@ -171,7 +172,7 @@ class BookDetailViewModel(
             .onEach { result ->
                 when (result) {
                     is Resource.Success -> {
-                        if (!result.data.isNullOrEmpty()) {
+                        if (result.data != null && result.data.isNotEmpty()) {
                             _chapterState.value = chapterState.value.copy(
                                 chapters = result.data,
                                 isLoading = false,
@@ -188,7 +189,10 @@ class BookDetailViewModel(
                             )
                     }
                     is Resource.Loading -> {
-                        _chapterState.value = chapterState.value.copy(isLoading = true, error = "")
+                        _chapterState.value = chapterState.value.copy(
+                            isLoading = true,
+                            error = ""
+                        )
                     }
                 }
             }.launchIn(coroutineScope)

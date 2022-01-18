@@ -78,6 +78,7 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.4.0"
     implementation "androidx.compose.material:material-icons-extended:$compose_version"
 
+
     /** LifeCycle **/
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
 
@@ -188,6 +189,13 @@ dependencies {
 
     // Paging 3.0
     implementation 'androidx.paging:paging-compose:1.0.0-alpha14'
+
+    implementation 'com.google.accompanist:accompanist-insets:0.22.0-rc'
+    // If using insets-ui
+    implementation 'com.google.accompanist:accompanist-insets-ui:0.22.0-rc'
+    implementation "com.google.accompanist:accompanist-pager:0.22.0-rc"
+    implementation "com.google.accompanist:accompanist-pager-indicators:0.22.0-rc"
+
 }
 
 kapt {

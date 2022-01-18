@@ -21,6 +21,10 @@ data class BookEntity(
     val source: String? = null,
     val isExploreMode:Boolean = false,
     var inLibrary: Boolean = false,
+    val dataAdded: Long = 0,
+    val download:Boolean =false,
+    val lastRead:Long = 0,
+    val totalChapters:Int = 0,
 ) {
 
 
@@ -38,6 +42,10 @@ data class BookEntity(
             status = status,
             source = source,
             rating = rating,
+            totalChapters = totalChapters,
+            download = download,
+            lastRead = lastRead,
+            dataAdded = dataAdded
         )
     }
 }
