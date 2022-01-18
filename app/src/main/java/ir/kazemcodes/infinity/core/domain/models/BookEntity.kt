@@ -20,6 +20,7 @@ data class BookEntity(
     val rating: Int = 0,
     val source: String? = null,
     val isExploreMode:Boolean = false,
+    var inLibrary: Boolean = false,
 ) {
 
 
@@ -33,10 +34,10 @@ data class BookEntity(
             author = author,
             translator = translator,
             category = category,
-            inLibrary = true,
+            inLibrary = inLibrary,
             status = status,
             source = source,
-            rating = rating
+            rating = rating,
         )
     }
 }

@@ -1,8 +1,8 @@
 package ir.kazemcodes.infinity.core.domain.models
 
 import android.os.Parcelable
-import ir.kazemcodes.infinity.core.utils.getRandomString
 import ir.kazemcodes.infinity.core.data.local.ExploreBook
+import ir.kazemcodes.infinity.core.utils.getRandomString
 import kotlinx.parcelize.Parcelize
 
 
@@ -65,7 +65,9 @@ data class Book(
             category = category,
             source = source,
             id = id,
-            rating = rating
+            rating = rating,
+            inLibrary = inLibrary
+
         )
     }
     fun toExploreBook(): ExploreBook {

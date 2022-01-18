@@ -161,18 +161,9 @@ fun BookDetailScreenLoadedComposable(
                         imageVector = if (!inLibrary) Icons.Default.AddCircleOutline else Icons.Default.Check,
                         onClick = {
                             if (!inLibrary) {
-                               // viewModel.toggleInLibrary(true)
-
-
-                                viewModel.updateChaptersEntity(true)
-
-                                //viewModel.updateAddToLibraryChaptersToLocal()
+                                viewModel.toggleInLibrary(true)
                             } else {
-                                //viewModel.toggleInLibrary(false)
-
-                                viewModel.updateChaptersEntity(false)
-
-                                //viewModel.deleteLocalChapters(book.bookName)
+                                viewModel.toggleInLibrary(false)
                             }
                         },
                     )

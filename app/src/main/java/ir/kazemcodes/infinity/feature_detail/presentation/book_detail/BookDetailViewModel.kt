@@ -29,7 +29,7 @@ class BookDetailViewModel(
     private val localBookRepository: LocalBookRepository,
     private val localChapterRepository: LocalChapterRepository,
     private val remoteRepository: RemoteRepository,
-    private val isLocal :Boolean
+    private val isLocal: Boolean,
 ) : ScopedServices.Registered {
     private val _state = mutableStateOf<DetailState>(DetailState(source = source, book = book))
     val state: State<DetailState> = _state
@@ -41,9 +41,8 @@ class BookDetailViewModel(
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     override fun onServiceRegistered() {
-
         getLocalBookByName()
-        getLocalChaptersByBookName()
+
     }
 
 
@@ -63,7 +62,7 @@ class BookDetailViewModel(
 
 
     private fun getLocalBookByName() {
-        localBookRepository.getBookByName(state.value.book.bookName).onEach { result ->
+        localBookRepository.getLocalBookByName(state.value.book.bookName).onEach { result ->
             when (result) {
                 is Resource.Success -> {
                     if (result.data != null && result.data != Book.create()) {
@@ -73,7 +72,10 @@ class BookDetailViewModel(
                             isLoading = false,
                             loaded = true
                         )
-
+                        getLocalChaptersByBookName()
+                        if (result.data.inLibrary && !state.value.inLibrary) {
+                            toggleInLibrary(true)
+                        }
                     } else {
                         if (!state.value.loaded) {
                             getRemoteBookDetail()
@@ -86,6 +88,8 @@ class BookDetailViewModel(
                             error = result.message ?: "An Unknown Error Occurred",
                             isLoading = false,
                         )
+                    getRemoteBookDetail()
+
 
                 }
                 is Resource.Loading -> {
@@ -110,12 +114,11 @@ class BookDetailViewModel(
                                 loaded = true
                             )
                         } else {
-                            if (!state.value.loaded) {
-                                getRemoteChapterDetail()
-                            }
+                            getRemoteChapterDetail()
                         }
                     }
                     is Resource.Error -> {
+                        getRemoteChapterDetail()
                         _chapterState.value =
                             chapterState.value.copy(
                                 error = result.message ?: "An Unknown Error Occurred",
@@ -132,7 +135,6 @@ class BookDetailViewModel(
 
 
     fun getRemoteBookDetail() {
-
         remoteRepository.getRemoteBookDetail(book = state.value.book, source = source)
             .onEach { result ->
                 when (result) {
@@ -184,8 +186,7 @@ class BookDetailViewModel(
                             )
                     }
                     is Resource.Loading -> {
-                        _chapterState.value =
-                            chapterState.value.copy(isLoading = true, error = "")
+                        _chapterState.value = chapterState.value.copy(isLoading = true, error = "")
                     }
                 }
             }.launchIn(coroutineScope)
@@ -213,6 +214,19 @@ class BookDetailViewModel(
         }
     }
 
+    fun toggleInLibrary(add: Boolean, book: Book? = null) {
+        _state.value = state.value.copy(inLibrary = add)
+        coroutineScope.launch(Dispatchers.IO) {
+            if (add) {
+                localBookRepository.updateLocalBook((book ?: state.value.book).copy(inLibrary = true))
+                updateChaptersEntity(true)
+            } else {
+                localBookRepository.updateLocalBook((book ?: state.value.book).copy(inLibrary = false))
+                updateChaptersEntity(false)
+            }
+        }
+    }
+
     fun insertChaptersToLocal(chapters: List<Chapter>) {
         coroutineScope.launch(Dispatchers.IO) {
             localChapterRepository.insertChapters(
@@ -223,11 +237,6 @@ class BookDetailViewModel(
             )
         }
     }
-
-
-
-
-
 
 
     override fun onServiceUnregistered() {

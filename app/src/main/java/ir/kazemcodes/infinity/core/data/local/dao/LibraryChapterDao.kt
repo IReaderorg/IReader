@@ -38,7 +38,7 @@ interface LibraryChapterDao {
     @Update(onConflict = OnConflictStrategy.REPLACE)
     suspend fun updateChapter(chapterEntities: ChapterEntity)
 
-    @Update(onConflict = OnConflictStrategy.REPLACE)
+    @Update(entity = ChapterEntity::class,onConflict = OnConflictStrategy.REPLACE)
     suspend fun updateChapters(
         chapterEntities: List<ChapterEntity>,
     )

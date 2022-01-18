@@ -107,7 +107,7 @@ class LibraryViewModel(
 
     override fun onServiceActive() {
 
-        deleteNotInLibraryChapters()
+        //deleteNotInLibraryChapters()
     }
 
     override fun onServiceInactive() {
