@@ -3,6 +3,8 @@ package ir.kazemcodes.infinity.core.data.network.models
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.Constants.CLOUDFLARE_LOG
+import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.Constants.CLOUDFLARE_PROTECTION_ERROR
+import ir.kazemcodes.infinity.feature_sources.sources.models.HttpSource
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 
@@ -41,24 +43,38 @@ abstract class ParsedHttpSource() : HttpSource() {
     abstract fun searchFromElement(element: Element): Book
 
     /****************************************************************************************************/
-
+    /**
+     * Returns the Jsoup selector that returns a list of [Element] corresponding to each manga.
+     */
+    protected abstract val popularSelector: String
+    /**
+     * Returns the Jsoup selector that returns the <a> tag linking to the next page, or null if
+     * there's no next page.
+     */
+    protected abstract val popularBookNextPageSelector: String?
 
     override fun popularParse(document: Document, page: Int,isWebViewMode : Boolean): BooksPage {
-        val isCloudflareEnable = document.body().allElements.text().contains(CLOUDFLARE_LOG)
         val books = document.select(popularSelector).map { element ->
             popularFromElement(element)
         }
 
-        val hasNextPage = popularBookNextPageSelector()?.let { selector ->
+        val hasNextPage = popularBookNextPageSelector?.let { selector ->
             document.select(selector).first()
         } != null
 
-        return BooksPage(books, hasNextPage, isCloudflareEnable)
+        return BooksPage(books, hasNextPage)
     }
 
-
+    /**
+     * Returns the Jsoup selector that returns a list of [Element] corresponding to each manga.
+     */
+    protected abstract val  latestSelector: String
+    /**
+     * Returns the Jsoup selector that returns the <a> tag linking to the next page, or null if
+     * there's no next page.
+     */
+    protected abstract val latestUpdatesNextPageSelector: String?
     override fun latestParse(document: Document, page: Int,isWebViewMode : Boolean): BooksPage {
-        val isCloudflareEnable = document.body().allElements.text().contains(CLOUDFLARE_LOG)
 
         val books = document.select(latestSelector).map { element ->
             latestFromElement(element)
@@ -68,22 +84,40 @@ abstract class ParsedHttpSource() : HttpSource() {
             document.select(selector).first()
         } != null
 
-        return BooksPage(books, hasNextPage, isCloudflareEnable, document.body().allElements.text())
+        return BooksPage(books, hasNextPage, document.body().allElements.text())
     }
+    /**
+     * Returns the Jsoup selector that returns a list of [Element] corresponding to each manga.
+     */
+    protected abstract val chaptersSelector: String
+    /**
+     * Returns the Jsoup selector that returns the <a> tag linking to the next page, or null if
+     * there's no next page.
+     */
+    protected abstract val hasNextChapterSelector: String
 
     override fun chaptersParse(document: Document,isWebViewMode : Boolean ): ChaptersPage {
-        val isCloudflareEnable = document.body().allElements.text().contains(CLOUDFLARE_LOG)
-        val chapters = document.select(chaptersSelector).map { chapterFromElement(it) }
 
+        val isCloudflareEnable = document.body().allElements.text().contains(CLOUDFLARE_LOG)
+
+        val chapters = document.select(chaptersSelector).map { chapterFromElement(it) }
 
         val hasNext = hasNextChaptersParse(document)
 
-
-        return ChaptersPage(chapters, hasNext, isCloudflareEnabled = isCloudflareEnable)
+        return ChaptersPage(chapters, hasNext, errorMessage = if (isCloudflareEnable) CLOUDFLARE_PROTECTION_ERROR else "")
     }
 
+    abstract fun hasNextChaptersParse(document: Document,isWebViewMode : Boolean =false): Boolean
 
-    abstract override fun contentParse(document: Document,isWebViewMode : Boolean ): ChapterPage
+    abstract override fun contentFromElementParse(document: Document, isWebViewMode : Boolean ): ChapterPage
+
+    /**
+     * Returns the Jsoup selector that returns a list of [Element] corresponding to each manga.
+     */
+    protected abstract val searchSelector: String
+
+    protected abstract val searchBookNextPageSelector: String
+
 
 
     override fun searchParse(document: Document, page: Int,isWebViewMode : Boolean): BooksPage {
@@ -98,9 +132,11 @@ abstract class ParsedHttpSource() : HttpSource() {
         }.filter {
             it.bookName.isNotBlank()
         }
-        val hasNextPage = false
+        val hasNextPage = searchBookNextPageSelector?.let { selector ->
+            document.select(selector).first()
+        } != null
 
-        return BooksPage(books, hasNextPage, isCloudflareEnable)
+        return BooksPage(books, hasNextPage)
     }
 
     /****************************************************************************************************/

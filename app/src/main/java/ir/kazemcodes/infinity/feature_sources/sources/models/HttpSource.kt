@@ -1,16 +1,14 @@
-package ir.kazemcodes.infinity.core.data.network.models
+package ir.kazemcodes.infinity.feature_sources.sources.models
 
 import android.webkit.WebView
 import ir.kazemcodes.infinity.api_feature.network.GET
+import ir.kazemcodes.infinity.core.data.network.models.*
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
-import ir.kazemcodes.infinity.core.utils.applyPageFormat
-import ir.kazemcodes.infinity.core.utils.applySearchFormat
 import ir.kazemcodes.infinity.core.utils.asJsoup
 import ir.kazemcodes.infinity.feature_sources.sources.utils.NetworkHelper
 import okhttp3.*
 import org.jsoup.nodes.Document
-import org.jsoup.nodes.Element
 import ru.gildor.coroutines.okhttp.await
 import uy.kohesive.injekt.injectLazy
 import java.net.URI
@@ -119,14 +117,8 @@ abstract class HttpSource() : Source {
      */
     override suspend fun fetchPopular(page: Int): BooksPage {
         val request = client.newCall(popularRequest(page)).await()
-
-        var books = popularParse(request, page = page)
-        if (books.isCloudflareEnabled || request.code != 200|| !books.ajaxLoaded) {
-            books =
-                popularParse(document = network.getHtmlFromWebView(baseUrl + fetchPopularEndpoint?.applyPageFormat(
-                    page)), page = page,isWebViewMode = true)
-        }
-        return popularParse(request, page = page)
+        request.close()
+        return popularParse( request, page = page)
     }
 
     /**
@@ -135,15 +127,9 @@ abstract class HttpSource() : Source {
      * @param page the page number to retrieve.
      */
     override suspend fun fetchLatest(page: Int): BooksPage {
-        val request = client.newCall(latestRequest(page)).await()
-        var books = latestParse(request, page = page)
-        if (books.isCloudflareEnabled || request.code != 200 || !books.ajaxLoaded) {
-            books =
-                latestParse(network.getHtmlFromWebView(baseUrl + fetchLatestEndpoint?.applyPageFormat(
-                    page)), page = page,isWebViewMode = true)
-        }
-
-        return books
+        val request =client.newCall(latestRequest(page)).await()
+        request.close()
+        return latestParse(request, page = page)
     }
 
     /**
@@ -154,12 +140,8 @@ abstract class HttpSource() : Source {
      */
     override suspend fun fetchBook(book: Book): BookPage {
         val request = client.newCall(detailsRequest(book)).await()
-        var completebook = detailParse(client.newCall(detailsRequest(book)).await())
-        if (completebook.isCloudflareEnabled || request.code != 200 || !completebook.ajaxLoaded) {
-            completebook =
-                detailParse(network.getHtmlFromWebView(baseUrl + getUrlWithoutDomain(book.link)),isWebViewMode = true)
-        }
-        return completebook
+        request.close()
+        return detailParse(request)
     }
 
     /**
@@ -171,13 +153,8 @@ abstract class HttpSource() : Source {
      */
     override suspend fun fetchChapters(book: Book, page: Int): ChaptersPage {
         val request = client.newCall(chaptersRequest(book, page)).await()
-        var chapters = chapterListParse(request)
-        if (chapters.isCloudflareEnabled || request.code != 200 || !chapters.ajaxLoaded) {
-            chapters =
-                chaptersParse(network.getHtmlFromWebView(baseUrl + getUrlWithoutDomain(book.link)),isWebViewMode = true)
-        }
-
-        return chapters
+        request.close()
+        return chapterListParse(request)
     }
 
     /**
@@ -188,13 +165,8 @@ abstract class HttpSource() : Source {
      */
     override suspend fun fetchContent(chapter: Chapter): ChapterPage {
         val request = client.newCall(contentRequest(chapter)).await()
-        var content = pageContentParse(request)
-
-        if (content.isCloudflareEnabled || request.code != 200 || !content.ajaxLoaded) {
-            content =
-                contentParse(network.getHtmlFromWebView(baseUrl + getUrlWithoutDomain(chapter.link)),isWebViewMode = true)
-        }
-        return content
+        request.close()
+        return pageContentParse( request)
     }
 
     /**
@@ -206,63 +178,12 @@ abstract class HttpSource() : Source {
      */
     override suspend fun fetchSearch(page: Int, query: String): BooksPage {
         val request = client.newCall(searchRequest(page, query)).await()
-        var books = searchBookParse(request, page)
-        if (books.isCloudflareEnabled || request.code != 200 || !books.ajaxLoaded) {
-            books = searchParse(network.getHtmlFromWebView(baseUrl + fetchSearchEndpoint?.applySearchFormat(
-                    query,
-                    page)), page = page,isWebViewMode = true)
-        }
-        return books
+        request.close()
+        return searchBookParse(request, page)
     }
-    /****************************************************************************************************/
-
-    /**
-     * Returns the Jsoup selector that returns a list of [Element] corresponding to each Book.
-     */
-    abstract val popularSelector: String?
-
-    /**
-     * Returns the Jsoup selector that returns a list of [Element] corresponding to each Book.
-     */
-    abstract val searchSelector: String?
-
-    /**
-     * Returns the Jsoup selector that returns a list of [Element] corresponding to each Book.
-     */
-    abstract val latestSelector: String?
-
-    /**
-     * Returns the Jsoup selector that returns a list of [Element] corresponding to each chapter.
-     */
-    abstract val chaptersSelector: String?
 
 
-    /**
-     * Returns the Jsoup selector that returns the <a> tag linking to the next page, or null if
-     * there's no next page.
-     */
-    abstract val latestUpdatesNextPageSelector: String?
 
-    /****************************************************************************************************/
-
-    abstract fun hasNextChapterSelector(): String?
-
-
-    /**
-     * Returns the Jsoup selector that returns the <a> tag linking to the next page, or null if
-     * there's no next page.
-     */
-    abstract fun popularBookNextPageSelector(): String?
-
-    /**
-     * Returns the Jsoup selector that returns the <a> tag linking to the next page, or null if
-     * there's no next page.
-     */
-    abstract fun searchBookNextPageSelector(): String?
-
-    open fun searchBookNextValuePageSelector(): String? = null
-
-    /****************************************************************************************************/
 
     /**
      * Returns the request for the popular books given the page.
@@ -374,10 +295,10 @@ abstract class HttpSource() : Source {
      * @param response the response from the site.
      */
     fun pageContentParse(response: Response,isWebViewMode : Boolean =false): ChapterPage {
-        return contentParse(response.asJsoup())
+        return contentFromElementParse(response.asJsoup())
     }
 
-    abstract fun contentParse(document: Document,isWebViewMode : Boolean =false): ChapterPage
+    abstract fun contentFromElementParse(document: Document, isWebViewMode : Boolean =false): ChapterPage
 
 
     /**
@@ -402,10 +323,8 @@ abstract class HttpSource() : Source {
 
     abstract fun searchParse(document: Document, page: Int,isWebViewMode : Boolean =false): BooksPage
 
-    abstract fun hasNextChaptersParse(document: Document,isWebViewMode : Boolean =false): Boolean
 
 
-    /****************************************************************************************************/
 
 
     /**
@@ -427,16 +346,6 @@ abstract class HttpSource() : Source {
         } catch (e: URISyntaxException) {
             orig
         }
-    }
-
-    /**
-     * Called before inserting a new chapter into database. Use it if you need to override chapter
-     * fields, like the title or the chapter number. Do not change anything to [book].
-     *
-     * @param chapter the chapter to be added.
-     * @param book the Book of the chapter.
-     */
-    open fun prepareNewChapter(chapter: Chapter, book: Book) {
     }
 
 

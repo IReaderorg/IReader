@@ -48,7 +48,6 @@ data class SourceTower constructor(
     override val supportSearch: Boolean = _supportsSearch
 
 
-
     override fun headersBuilder(): Headers.Builder = Headers.Builder().apply {
         add(
             "User-Agent",
@@ -66,41 +65,37 @@ data class SourceTower constructor(
 
 
     /****************************SELECTOR*************************************************************/
-    override val popularSelector: String? = popular?.selector
+    override val popularSelector: String = popular?.selector ?: ""
+    override val latestSelector: String = latest?.selector ?: ""
 
-    override fun popularBookNextPageSelector(): String? = popular?.nextPageSelector
-    override val latestSelector: String? = latest?.selector
+    override val popularBookNextPageSelector: String? = popular?.nextPageSelector
     override val latestUpdatesNextPageSelector: String? = latest?.nextPageSelector
-    override fun hasNextChapterSelector() = chapters?.nextPageSelector
-    override val searchSelector: String? = search?.selector
-    override fun searchBookNextPageSelector(): String? =
-        search?.nextPageSelector
+    override val hasNextChapterSelector = chapters?.nextPageSelector ?: ""
+    override val searchSelector: String = search?.selector ?: ""
+    override val searchBookNextPageSelector: String = search?.nextPageSelector ?: ""
 
-    override fun searchBookNextValuePageSelector(): String? =
-        search?.nextPageValue
 
-    override val chaptersSelector: String? = chapters?.selector
-
+    override val chaptersSelector: String = chapters?.selector ?: ""
 
 
     /****************************SELECTOR*************************************************************/
 
-    var nextChapterListLink: String = ""
 
     /****************************REQUESTS**********************************************************/
 
     override fun popularRequest(page: Int): Request =
         GET("$baseUrl${
-            getUrlWithoutDomain(fetchPopularEndpoint?.applyPageFormat(page) ?: "")
+            getUrlWithoutDomain(popular?.endpoint?.applyPageFormat(page) ?: "")
         }")
 
     override fun latestRequest(page: Int): Request {
-        val url = fetchLatestEndpoint?.applyPageFormat(page) ?: ""
-        return GET("$baseUrl${
-            getUrlWithoutDomain(url)
-        }")
+        return GET(
+            "$baseUrl${
+                getUrlWithoutDomain(latest?.endpoint?.applyPageFormat(page) ?: "")
+            }")
     }
 
+    var nextChapterListLink: String = ""
     override fun chaptersRequest(book: Book, page: Int): Request {
         var url = book.link
         /** This condition occurs when the next chapter selector returns a link to the next chapter**/
@@ -135,6 +130,10 @@ data class SourceTower constructor(
                 }")
         }
 
+    }
+
+    override fun contentRequest(chapter: Chapter): Request {
+        return GET(baseUrl + getUrlWithoutDomain(chapter.link), headers)
     }
     /****************************REQUESTS**********************************************************/
 
@@ -221,6 +220,7 @@ data class SourceTower constructor(
 
         return book
     }
+
     /****************************PARSE FROM ELEMENTS***********************************************/
 
     /****************************PARSE*************************************************************/
@@ -259,7 +259,6 @@ data class SourceTower constructor(
 
         return BooksPage(books,
             hasNextPage,
-            isCloudflareEnable,
             document.body().allElements.text(),
             ajaxLoaded = ajaxLoaded)
     }
@@ -309,7 +308,9 @@ data class SourceTower constructor(
         book.source = name
 
 
-        return BookPage(book, isCloudflareEnabled = isCloudflareEnable, ajaxLoaded = ajaxLoaded)
+        return BookPage(book,
+            errorMessage = if (isCloudflareEnable) Constants.CLOUDFLARE_PROTECTION_ERROR else "",
+            ajaxLoaded = ajaxLoaded)
     }
 
 
@@ -344,11 +345,11 @@ data class SourceTower constructor(
 
         return ChaptersPage(chapters,
             hasNext,
-            isCloudflareEnabled = isCloudflareEnable,
+            errorMessage = if (isCloudflareEnable) Constants.CLOUDFLARE_PROTECTION_ERROR else "",
             ajaxLoaded = ajaxLoaded)
     }
 
-    override fun contentParse(document: Document, isWebViewMode: Boolean): ChapterPage {
+    override fun contentFromElementParse(document: Document, isWebViewMode: Boolean): ChapterPage {
         val isCloudflareEnable =
             document.body().allElements.text().contains(Constants.CLOUDFLARE_LOG)
 
@@ -376,7 +377,7 @@ data class SourceTower constructor(
             }
         }
         return ChapterPage(contentList,
-            isCloudflareEnabled = isCloudflareEnable,
+            errorMessage = if (isCloudflareEnable) Constants.CLOUDFLARE_PROTECTION_ERROR else "",
             ajaxLoaded = ajaxLoaded)
     }
 
@@ -411,20 +412,21 @@ data class SourceTower constructor(
         }
         val hasNextPage = false
 
-        return BooksPage(books, hasNextPage, isCloudflareEnable, ajaxLoaded = ajaxLoaded)
+        return BooksPage(books, hasNextPage, ajaxLoaded = ajaxLoaded)
     }
 
-    override fun popularParse(document: Document, page: Int,isWebViewMode : Boolean): BooksPage {
-        val isCloudflareEnable = document.body().allElements.text().contains(Constants.CLOUDFLARE_LOG)
+    override fun popularParse(document: Document, page: Int, isWebViewMode: Boolean): BooksPage {
+        val isCloudflareEnable =
+            document.body().allElements.text().contains(Constants.CLOUDFLARE_LOG)
         val books = document.select(popularSelector).map { element ->
             popularFromElement(element)
         }
 
-        val hasNextPage = popularBookNextPageSelector()?.let { selector ->
+        val hasNextPage = popularBookNextPageSelector?.let { selector ->
             document.select(selector).first()
         } != null
 
-        return BooksPage(books, hasNextPage, isCloudflareEnable)
+        return BooksPage(books, hasNextPage)
     }
 
     /****************************PARSE FROM JSON**********************************/
@@ -538,13 +540,15 @@ data class SourceTower constructor(
     override suspend fun fetchChapters(book: Book, page: Int): ChaptersPage {
         val request = client.newCall(chaptersRequest(book, page)).await()
         var chapters = chapterListParse(request)
-        if (chapters.isCloudflareEnabled || request.code != 200 || !chapters.ajaxLoaded) {
+        if (chapters.errorMessage.isNotBlank() || request.code != 200 || !chapters.ajaxLoaded) {
             chapters =
-                chaptersParse(network.getHtmlFromWebView(baseUrl + getUrlWithoutDomain(book.link),this.chapters?.ajaxSelector),isWebViewMode = true)
+                chaptersParse(network.getHtmlFromWebView(baseUrl + getUrlWithoutDomain(book.link),
+                    this.chapters?.ajaxSelector), isWebViewMode = true)
         }
 
         return chapters
     }
+
     /**
      * Returns a page with a list of book. Normally it's not needed to
      * override this method.
@@ -553,20 +557,93 @@ data class SourceTower constructor(
     override suspend fun fetchPopular(page: Int): BooksPage {
         val request = client.newCall(popularRequest(page)).await()
         var books = popularParse(request, page = page)
-        if (books.isCloudflareEnabled || request.code != 200|| !books.ajaxLoaded) {
+        if (books.errorMessage.isNotBlank() || request.code != 200 || !books.ajaxLoaded) {
             books =
                 popularParse(document = network.getHtmlFromWebView(baseUrl + fetchPopularEndpoint?.applyPageFormat(
-                    page)), page = page,isWebViewMode = true)
+                    page)), page = page, isWebViewMode = true)
         }
         return books
     }
+
     /**
      * Parses the response from the site and returns a [BooksPage] object.
      *
      * @param response the response from the site.
      */
-    private fun popularParse(response: Response, page: Int, isWebViewMode : Boolean =false): BooksPage {
+    private fun popularParse(
+        response: Response,
+        page: Int,
+        isWebViewMode: Boolean = false,
+    ): BooksPage {
         return popularParse(response.asJsoup(), page)
+    }
+
+    override suspend fun fetchLatest(page: Int): BooksPage {
+        val request = client.newCall(latestRequest(page)).await()
+        var books = latestParse(request, page = page)
+        if (books.errorMessage.isNotBlank() || request.code != 200 || !books.ajaxLoaded) {
+            books =
+                latestParse(network.getHtmlFromWebView(baseUrl + fetchLatestEndpoint?.applyPageFormat(
+                    page)), page = page, isWebViewMode = true)
+        }
+
+        return books
+    }
+
+    /**
+     * Returns a book. Normally it's not needed to
+     * override this method.
+     *
+     * @param page the page number to retrieve.
+     */
+    override suspend fun fetchBook(book: Book): BookPage {
+        val request = client.newCall(detailsRequest(book)).await()
+        var completebook = detailParse(client.newCall(detailsRequest(book)).await())
+        if (completebook.errorMessage.isNotBlank() || request.code != 200 || !completebook.ajaxLoaded) {
+            completebook =
+                detailParse(network.getHtmlFromWebView(baseUrl + getUrlWithoutDomain(book.link)),
+                    isWebViewMode = true)
+        }
+        return completebook
+    }
+
+
+    /**
+     * Returns a ChapterPage. Normally it's not needed to
+     * override this method.
+     *
+     * @param page the page number to retrieve.
+     */
+    override suspend fun fetchContent(chapter: Chapter): ChapterPage {
+        val request = client.newCall(contentRequest(chapter)).await()
+        var content = pageContentParse(request)
+
+        if (content.errorMessage.isNotBlank() || request.code != 200 || !content.ajaxLoaded) {
+            content =
+                contentFromElementParse(network.getHtmlFromWebView(baseUrl + getUrlWithoutDomain(
+                    chapter.link)),
+                    isWebViewMode = true)
+        }
+        return content
+    }
+
+    /**
+     * Returns a BooksPage. Normally it's not needed to
+     * override this method.
+     *
+     * @param page the page number to retrieve.
+     * @param query the search query to retrieve.
+     */
+    override suspend fun fetchSearch(page: Int, query: String): BooksPage {
+        val request = client.newCall(searchRequest(page, query)).await()
+        var books = searchBookParse(request, page)
+        if (books.errorMessage.isNotBlank() || request.code != 200 || !books.ajaxLoaded) {
+            books =
+                searchParse(network.getHtmlFromWebView(baseUrl + fetchSearchEndpoint?.applySearchFormat(
+                    query,
+                    page)), page = page, isWebViewMode = true)
+        }
+        return books
     }
 
 

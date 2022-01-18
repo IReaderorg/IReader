@@ -49,6 +49,7 @@ fun ErrorTextWithEmojis(modifier: Modifier = Modifier, error: String,textColor:C
             text = error,
             style = MaterialTheme.typography.subtitle1,
             textAlign = TextAlign.Center,
+            color = textColor?:MaterialTheme.colors.onBackground
             //fontSize = 200.dp
         )
     }

@@ -70,8 +70,8 @@ class RemoteRepositoryImpl(
             Timber.d("Timber: GetRemoteMostPopularBooksUseCase page: $page was Called")
             val books = source.fetchPopular(page)
 
-            if (books.isCloudflareEnabled) {
-                emit(Resource.Error<List<Book>>("CloudFlare is Enable"))
+            if (books.errorMessage.isNotBlank()) {
+                emit(Resource.Error<List<Book>>(books.errorMessage))
             } else {
                 emit(Resource.Success<List<Book>>(books.books.map { it.copy(source = source.name) }))
             }

@@ -1,6 +1,6 @@
 package ir.kazemcodes.infinity.core.data.network.utils.intercepter
 
-import ir.kazemcodes.infinity.core.data.network.models.HttpSource
+import ir.kazemcodes.infinity.feature_sources.sources.models.HttpSource
 import okhttp3.Interceptor
 import okhttp3.Response
 

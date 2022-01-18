@@ -18,6 +18,7 @@ import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.Constants.
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.Constants.NO_BOOK_ERROR
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import retrofit2.HttpException
 import timber.log.Timber
@@ -97,11 +98,13 @@ class LocalBookRepositoryImpl(
     override fun getLocalBookByName(bookName: String): Flow<Resource<Book?>> = flow {
         try {
             emit(Resource.Loading())
-            bookDao.getBookByName(bookName).collect { book ->
+            bookDao.getBookByName(bookName).first { book ->
                 if (book != null) {
                     emit(Resource.Success(data = book.toBook()))
+                    return@first true
                 } else {
                     emit(Resource.Error("There is No book"))
+                    return@first false
                 }
             }
         } catch (e: Exception) {

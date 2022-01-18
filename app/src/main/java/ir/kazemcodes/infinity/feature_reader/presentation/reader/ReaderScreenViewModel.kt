@@ -103,6 +103,7 @@ class ReaderScreenViewModel(
     }
 
     fun getContent(chapter: Chapter) {
+        _state.value = state.value.copy(chapter = chapter)
         getReadingContentLocally()
         if (state.value.book.inLibrary) {
             toggleLastReadAndUpdateChapterContent(chapter)
@@ -136,11 +137,9 @@ class ReaderScreenViewModel(
             .onEach { result ->
                 when (result) {
                     is Resource.Success -> {
-                        if (result.data != null &&
-                            state.value.chapter.content != result.data.content
-                        ) {
+                        if (result.data != null ) {
                             _state.value = state.value.copy(
-                                chapter = state.value.chapter.copy(content = result.data.content),
+                                chapter = result.data,
                                 isLoading = false,
                                 isLoaded = true,
                                 error = ""
@@ -173,38 +172,37 @@ class ReaderScreenViewModel(
     }
 
     fun getReadingContentRemotely() {
-        remoteRepository.getRemoteReadingContentUseCase(state.value.chapter, source = source)
-            .onEach { result ->
-                when (result) {
-                    is Resource.Success -> {
-                        if (result.data != null) {
-                            _state.value = state.value
-                                .copy(
-                                    chapter = state.value.chapter.copy(content = result.data.content),
-                                    isLoading = false,
-                                    error = "",
-                                    isLoaded = true,
-                                )
+            remoteRepository.getRemoteReadingContentUseCase(state.value.chapter, source = source)
+                .onEach { result ->
+                    when (result) {
+                        is Resource.Success -> {
+                            if (result.data != null) {
+                                _state.value = state.value
+                                    .copy(
+                                        chapter = state.value.chapter.copy(content = result.data.content),
+                                        isLoading = false,
+                                        error = "",
+                                        isLoaded = true,
+                                    )
                                 toggleLastReadAndUpdateChapterContent(state.value.chapter)
+                            }
                         }
-                    }
-                    is Resource.Error -> {
-                        _state.value =
-                            state.value.copy(
-                                error = result.message ?: "An Unknown Error Occurred",
-                                isLoading = false,
+                        is Resource.Error -> {
+                            _state.value =
+                                state.value.copy(
+                                    error = result.message ?: "An Unknown Error Occurred",
+                                    isLoading = false,
+                                    isLoaded = false,
+                                )
+                        }
+                        is Resource.Loading -> {
+                            _state.value = state.value.copy(
+                                isLoading = true, error = "",
                                 isLoaded = false,
                             )
+                        }
                     }
-                    is Resource.Loading -> {
-                        _state.value = state.value.copy(
-                            isLoading = true, error = "",
-                            isLoaded = false,
-                        )
-                    }
-                }
-            }.launchIn(coroutineScope)
-
+                }.launchIn(coroutineScope)
     }
 
 

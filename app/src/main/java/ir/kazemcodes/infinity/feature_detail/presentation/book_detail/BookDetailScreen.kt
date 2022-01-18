@@ -279,6 +279,7 @@ fun BookDetailScreenLoadedComposable(
                         color = MaterialTheme.colors.onBackground.copy(alpha = .5f),
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.subtitle2,
+                        overflow = TextOverflow.Ellipsis
                     )
                     if (!book.category.isNullOrEmpty()) {
                         Text(
@@ -286,6 +287,7 @@ fun BookDetailScreenLoadedComposable(
                             color = MaterialTheme.colors.onBackground.copy(alpha = .5f),
                             fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.subtitle2,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                 }

@@ -1,8 +1,10 @@
 package ir.kazemcodes.infinity.core.utils
 
+import org.jsoup.Jsoup
+
 fun List<String>.formatBasedOnDot(): String {
 
-    return this.joinToString { it.trim() }.replace(".", ".\n")
+    return this.joinToString { it.trim().formatHtmlText() }.replace(".", ".\n")
 }
 
 fun List<String>.formatList(): String {
@@ -36,7 +38,8 @@ fun String.replaceImageFormat(condition: Boolean): String {
 }
 
 fun String.formatHtmlText(): String {
-    return this
+    val text = Jsoup.parse(this).text()
+    val b = this
         .replace("\\\\<.*?\\\\>","")
         .replace("<em>","")
         .replace("</em>","")
@@ -55,6 +58,8 @@ fun String.formatHtmlText(): String {
         .replace("\\t", "")
         .replace("\\\"", "\"")
         .replace("<hr />", "")
+
+    return text
 }
 
 fun String.applyPageFormat(page: Int): String {

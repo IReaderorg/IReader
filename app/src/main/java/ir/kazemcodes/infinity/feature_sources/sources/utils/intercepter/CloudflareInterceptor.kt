@@ -8,7 +8,7 @@ import android.webkit.WebView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import ir.kazemcodes.infinity.R
-import ir.kazemcodes.infinity.core.data.network.models.HttpSource
+import ir.kazemcodes.infinity.feature_sources.sources.models.HttpSource
 import ir.kazemcodes.infinity.core.data.network.utils.*
 import ir.kazemcodes.infinity.feature_sources.sources.utils.NetworkHelper
 import kotlinx.coroutines.CoroutineScope
