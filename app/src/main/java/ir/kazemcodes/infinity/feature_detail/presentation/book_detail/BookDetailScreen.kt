@@ -177,17 +177,17 @@ fun BookDetailScreenLoadedComposable(
                                 backStack.goTo(
                                     ReaderScreenKey(
                                         chapterIndex = chapters.indexOf(viewModel.chapterState.value.lastChapter),
-                                        book = book,
+                                        bookName = book.bookName,
                                         sourceName = source.name,
-                                        chapter = viewModel.chapterState.value.lastChapter!!,
+                                        chapterName = viewModel.chapterState.value.lastChapter!!.title,
                                         ),
                                 )
                             } else if (viewModel.chapterState.value.chapters.isNotEmpty()) {
                                 backStack.goTo(ReaderScreenKey(
                                     chapterIndex = 0,
-                                    book = book,
+                                    bookName = book.bookName,
                                     sourceName = source.name,
-                                    chapter = viewModel.chapterState.value.chapters.first(),
+                                    chapterName = viewModel.chapterState.value.chapters.first().title,
                                 ))
                             } else {
                                 context.toast("No Chapter is Avialable")

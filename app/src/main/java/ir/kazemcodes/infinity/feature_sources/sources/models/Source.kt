@@ -16,7 +16,9 @@ interface Source {
 
 
     val supportsLatest: Boolean
+
     val supportsMostPopular: Boolean
+
     val supportSearch: Boolean
 
     /**

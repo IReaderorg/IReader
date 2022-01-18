@@ -18,10 +18,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import com.zhuinden.simplestackcomposeintegration.services.rememberService
-import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.Constants
-import ir.kazemcodes.infinity.feature_activity.presentation.ReaderScreenKey
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.ErrorTextWithEmojis
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarTitle
+import ir.kazemcodes.infinity.feature_activity.presentation.ReaderScreenKey
+import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.Constants
 
 
 @Composable
@@ -86,10 +86,10 @@ fun ChapterDetailScreen(
                                 .clickable {
                                     backStack.goTo(
                                         ReaderScreenKey(
-                                            book = book,
+                                            bookName = book.bookName,
                                             chapterIndex = viewModel.getIndexOfChapter(index),
                                             sourceName = viewModel.state.value.source.name,
-                                            chapter = state.localChapters[index],
+                                            chapterName = state.localChapters[index].title,
                                         )
                                     )
                                 },

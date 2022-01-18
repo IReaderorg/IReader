@@ -18,6 +18,7 @@ import ir.kazemcodes.infinity.feature_activity.domain.service.DownloadService.Co
 import ir.kazemcodes.infinity.feature_activity.domain.service.DownloadService.Companion.DOWNLOAD_SERVICE_NAME
 import ir.kazemcodes.infinity.feature_activity.domain.service.DownloadService.Companion.DOWNLOAD_SOURCE_NAME
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import timber.log.Timber
@@ -113,6 +114,7 @@ class BookDetailViewModel(
                                 isLoading = false,
                                 loaded = true
                             )
+                            getLastChapter()
                         } else {
                             getRemoteChapterDetail()
                         }
@@ -218,10 +220,12 @@ class BookDetailViewModel(
         _state.value = state.value.copy(inLibrary = add)
         coroutineScope.launch(Dispatchers.IO) {
             if (add) {
-                localBookRepository.updateLocalBook((book ?: state.value.book).copy(inLibrary = true))
+                localBookRepository.updateLocalBook((book
+                    ?: state.value.book).copy(inLibrary = true))
                 updateChaptersEntity(true)
             } else {
-                localBookRepository.updateLocalBook((book ?: state.value.book).copy(inLibrary = false))
+                localBookRepository.updateLocalBook((book
+                    ?: state.value.book).copy(inLibrary = false))
                 updateChaptersEntity(false)
             }
         }
@@ -236,6 +240,28 @@ class BookDetailViewModel(
                 inLibrary = state.value.inLibrary
             )
         }
+    }
+
+    private fun getLastChapter() {
+        coroutineScope.launch(Dispatchers.IO) {
+            localChapterRepository.getLastReadChapter(state.value.book.bookName, source.name)
+                .collect { result ->
+                    when (result) {
+                        is Resource.Success -> {
+                            if (result.data != null) {
+                                _chapterState.value = chapterState.value.copy(
+                                    lastChapter = result.data,
+                                )
+                            }
+                        }
+                        is Resource.Error -> {
+                        }
+                        is Resource.Loading -> {
+                        }
+                    }
+                }
+        }
+
     }
 
 

@@ -12,13 +12,14 @@ import ir.kazemcodes.infinity.core.utils.*
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.Constants
 import okhttp3.Headers
 import okhttp3.Request
+import okhttp3.Response
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import ru.gildor.coroutines.okhttp.await
 
 
-data class SourceCreator constructor(
+data class SourceTower constructor(
     val _baseUrl: String,
     private val _lang: String,
     private val _name: String,
@@ -32,6 +33,7 @@ data class SourceCreator constructor(
     private val chapters: Chapters? = null,
     private val content: Content? = null,
 ) : ParsedHttpSource() {
+
     override val lang: String
         get() = _lang
     override val name: String
@@ -412,6 +414,19 @@ data class SourceCreator constructor(
         return BooksPage(books, hasNextPage, isCloudflareEnable, ajaxLoaded = ajaxLoaded)
     }
 
+    override fun popularParse(document: Document, page: Int,isWebViewMode : Boolean): BooksPage {
+        val isCloudflareEnable = document.body().allElements.text().contains(Constants.CLOUDFLARE_LOG)
+        val books = document.select(popularSelector).map { element ->
+            popularFromElement(element)
+        }
+
+        val hasNextPage = popularBookNextPageSelector()?.let { selector ->
+            document.select(selector).first()
+        } != null
+
+        return BooksPage(books, hasNextPage, isCloudflareEnable)
+    }
+
     /****************************PARSE FROM JSON**********************************/
     fun chapterListFromJson(jsonObject: Map<String, String>): Chapter {
         val chapter = Chapter.create()
@@ -529,6 +544,29 @@ data class SourceCreator constructor(
         }
 
         return chapters
+    }
+    /**
+     * Returns a page with a list of book. Normally it's not needed to
+     * override this method.
+     * @param page the page number to retrieve.
+     */
+    override suspend fun fetchPopular(page: Int): BooksPage {
+        val request = client.newCall(popularRequest(page)).await()
+        var books = popularParse(request, page = page)
+        if (books.isCloudflareEnabled || request.code != 200|| !books.ajaxLoaded) {
+            books =
+                popularParse(document = network.getHtmlFromWebView(baseUrl + fetchPopularEndpoint?.applyPageFormat(
+                    page)), page = page,isWebViewMode = true)
+        }
+        return books
+    }
+    /**
+     * Parses the response from the site and returns a [BooksPage] object.
+     *
+     * @param response the response from the site.
+     */
+    private fun popularParse(response: Response, page: Int, isWebViewMode : Boolean =false): BooksPage {
+        return popularParse(response.asJsoup(), page)
     }
 
 

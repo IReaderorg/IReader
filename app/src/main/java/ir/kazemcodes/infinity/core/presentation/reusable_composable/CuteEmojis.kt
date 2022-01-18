@@ -6,6 +6,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
@@ -29,7 +30,7 @@ fun NotImplementedText() {
 }
 
 @Composable
-fun ErrorTextWithEmojis(modifier: Modifier = Modifier, error: String) {
+fun ErrorTextWithEmojis(modifier: Modifier = Modifier, error: String,textColor:Color?=null) {
     val sad_emojis = listOf<String>("ಥ_ಥ", "(╥﹏╥)", "(╥︣﹏᷅╥᷅)", "(͠◉_◉᷅ )", "⊙.☉")
     Column(modifier = modifier
         .fillMaxSize()
@@ -41,6 +42,7 @@ fun ErrorTextWithEmojis(modifier: Modifier = Modifier, error: String) {
             style = MaterialTheme.typography.h3,
             //fontSize = 200.dp
             textAlign = TextAlign.Center,
+            color = textColor?:MaterialTheme.colors.onBackground
         )
         Spacer(modifier = Modifier.height(25.dp))
         Text(

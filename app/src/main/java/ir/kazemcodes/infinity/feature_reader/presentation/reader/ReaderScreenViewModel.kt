@@ -8,14 +8,12 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import com.zhuinden.simplestack.ScopedServices
 import ir.kazemcodes.infinity.core.data.network.models.Source
-import ir.kazemcodes.infinity.core.domain.models.FontType
-import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
+import ir.kazemcodes.infinity.core.domain.models.FontType
 import ir.kazemcodes.infinity.core.domain.repository.LocalBookRepository
 import ir.kazemcodes.infinity.core.domain.repository.LocalChapterRepository
 import ir.kazemcodes.infinity.core.domain.repository.RemoteRepository
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.PreferencesUseCase
-
 import ir.kazemcodes.infinity.core.presentation.theme.fonts
 import ir.kazemcodes.infinity.core.presentation.theme.readerScreenBackgroundColors
 import ir.kazemcodes.infinity.core.utils.Resource
@@ -29,26 +27,31 @@ import kotlinx.coroutines.flow.onEach
 class ReaderScreenViewModel(
     private val preferencesUseCase: PreferencesUseCase,
     private val source: Source,
-    private val book: Book,
-    private val chapter: Chapter,
+    private val bookName: String,
+    private val chapterName: String,
     private val chapterIndex: Int,
     private val remoteRepository: RemoteRepository,
     private val localBookRepository: LocalBookRepository,
-    private val localChapterRepository: LocalChapterRepository
+    private val localChapterRepository: LocalChapterRepository,
 ) : ScopedServices.Registered {
-    private val _state = mutableStateOf(ReaderScreenState(source = source, book = book, chapter = chapter, currentChapterIndex = chapterIndex))
+    private val _state =
+        mutableStateOf(ReaderScreenState(source = source, currentChapterIndex = chapterIndex))
 
     val state: State<ReaderScreenState> = _state
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     override fun onServiceRegistered() {
-        getLocalChapters()
+        val initState = state.value
+        _state.value = state.value.copy(
+            book = initState.book.copy(bookName = bookName),
+            chapter = initState.chapter.copy(title = chapterName, bookName = bookName),
+            source = source
+        )
+        getContent(chapter = state.value.chapter)
         readPreferences()
-        getContent(chapter = state.value.chapter.copy(bookName = book.bookName))
+        getLocalChapters()
     }
-
-
 
 
     private fun readPreferences() {
@@ -81,8 +84,6 @@ class ReaderScreenViewModel(
     }
 
 
-
-
     private fun toggleReaderMode(enable: Boolean? = null) {
         _state.value =
             state.value.copy(isReaderModeEnable = enable ?: !state.value.isReaderModeEnable,
@@ -102,15 +103,14 @@ class ReaderScreenViewModel(
     }
 
     fun getContent(chapter: Chapter) {
-        _state.value = state.value.copy(chapter = chapter)
-        getReadingContentLocally(chapter)
-        if (book.inLibrary) {
+        getReadingContentLocally()
+        if (state.value.book.inLibrary) {
             toggleLastReadAndUpdateChapterContent(chapter)
         }
     }
 
     private fun getLocalChapters() {
-        localChapterRepository.getChapterByName(bookName = book.bookName, source.name)
+        localChapterRepository.getChapterByName(bookName = state.value.book.bookName, source.name)
             .onEach { result ->
                 when (result) {
                     is Resource.Success -> {
@@ -119,42 +119,40 @@ class ReaderScreenViewModel(
                                 chapters = result.data,
                                 drawerChapters = if (state.value.isReversed) result.data.reversed() else result.data,
                             )
-                        } else {
-                            _state.value = state.value.copy()
                         }
                     }
                     is Resource.Error -> {
-
                     }
                     is Resource.Loading -> {
-
                     }
                 }
             }.launchIn(coroutineScope)
     }
 
-    private fun getReadingContentLocally(chapter: Chapter) {
-        remoteRepository.getRemoteReadingContentUseCase(chapter, source)
+    private fun getReadingContentLocally() {
+        localChapterRepository.getChapterByChapter(bookName = state.value.chapter.bookName ?: "",
+            source = source.name,
+            chapterTitle = state.value.chapter.title)
             .onEach { result ->
                 when (result) {
                     is Resource.Success -> {
-                        if (result.data != null) {
+                        if (result.data != null &&
+                            state.value.chapter.content != result.data.content
+                        ) {
                             _state.value = state.value.copy(
-                                chapter = chapter.copy(content = result.data.content),
+                                chapter = state.value.chapter.copy(content = result.data.content),
                                 isLoading = false,
                                 isLoaded = true,
                                 error = ""
                             )
-                            if (book.inLibrary) {
-                                toggleLastReadAndUpdateChapterContent(state.value.chapter)
-                            }
-                        } else {
-                            if (!state.value.chapter.isChapterNotEmpty()) {
-                                getReadingContentRemotely(chapter)
+                            toggleLastReadAndUpdateChapterContent(state.value.chapter)
+                            if (state.value.chapter.content.joinToString().isBlank() ) {
+                                getReadingContentRemotely()
                             }
                         }
                     }
                     is Resource.Error -> {
+                        getReadingContentRemotely()
                         _state.value =
                             state.value.copy(
                                 error = result.message ?: "An Unknown Error Occurred",
@@ -164,7 +162,8 @@ class ReaderScreenViewModel(
                     }
                     is Resource.Loading -> {
                         _state.value = state.value.copy(
-                            isLoading = true, error = "",
+                            isLoading = true,
+                            error = "",
                             isLoaded = false,
                         )
                     }
@@ -173,21 +172,20 @@ class ReaderScreenViewModel(
             }.launchIn(coroutineScope)
     }
 
-    fun getReadingContentRemotely(chapter: Chapter) {
-        remoteRepository.getRemoteReadingContentUseCase(chapter, source = source)
+    fun getReadingContentRemotely() {
+        remoteRepository.getRemoteReadingContentUseCase(state.value.chapter, source = source)
             .onEach { result ->
                 when (result) {
                     is Resource.Success -> {
-                        _state.value = state.value
-                            .copy(
-                                chapter = chapter.copy(content = result.data?.content
-                                    ?: emptyList()),
-                                isLoading = false,
-                                error = "",
-                                isLoaded = true,
-                            )
-                        if (book.inLibrary) {
-                            toggleLastReadAndUpdateChapterContent(state.value.chapter)
+                        if (result.data != null) {
+                            _state.value = state.value
+                                .copy(
+                                    chapter = state.value.chapter.copy(content = result.data.content),
+                                    isLoading = false,
+                                    error = "",
+                                    isLoaded = true,
+                                )
+                                toggleLastReadAndUpdateChapterContent(state.value.chapter)
                         }
                     }
                     is Resource.Error -> {
@@ -213,7 +211,7 @@ class ReaderScreenViewModel(
     private fun toggleLastReadAndUpdateChapterContent(chapter: Chapter) {
         coroutineScope.launch(Dispatchers.IO) {
             localChapterRepository.updateChapter(state.value.chapter.toChapterEntity())
-            localChapterRepository.deleteLastReadChapter(book.bookName, source.name)
+            localChapterRepository.deleteLastReadChapter(state.value.book.bookName, source.name)
             localChapterRepository.setLastReadChapter(state.value.book.bookName,
                 chapter.title,
                 source = source.name)
@@ -375,6 +373,7 @@ class ReaderScreenViewModel(
     fun updateChapterSliderIndex(index: Int) {
         _state.value = state.value.copy(currentChapterIndex = getIndexOfChapter(index))
     }
+
     /**
      * get the index pf chapter based on the reversed state
      */

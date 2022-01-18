@@ -32,7 +32,7 @@ class LocalBookRepositoryImpl(
     override fun getBooks(): Flow<PagingData<BookEntity>> {
         return Pager(
             config = PagingConfig(pageSize = Constants.DEFAULT_PAGE_SIZE,
-                maxSize = Constants.MAX_PAGE_SIZE),
+                maxSize = Constants.MAX_PAGE_SIZE, enablePlaceholders = true),
             pagingSourceFactory = {
                 getAllInLibraryForPagingBooks()
             }
@@ -113,7 +113,7 @@ class LocalBookRepositoryImpl(
     override fun searchInLibraryScreenBooks(query: String): Flow<PagingData<BookEntity>> {
         return Pager(
             config = PagingConfig(pageSize = Constants.DEFAULT_PAGE_SIZE,
-                maxSize = Constants.MAX_PAGE_SIZE),
+                maxSize = Constants.MAX_PAGE_SIZE,enablePlaceholders = true),
             pagingSourceFactory = {
                 searchBooksByPaging(query)
             }
@@ -158,7 +158,7 @@ class LocalBookRepositoryImpl(
                 Timber.d("Timber: GetExploreBookByIdUseCase was Finished Successfully")
 
             } catch (e: Exception) {
-                emit(Resource.Error<Book>(message = e.message.toString()))
+                emit(Resource.Error<Book>(message = e.localizedMessage?:Constants.NO_BOOK_ERROR))
             }
         }
 
@@ -195,7 +195,7 @@ class LocalBookRepositoryImpl(
                 Timber.d("Timber: GetExploreBookByIdUseCase was Finished Successfully")
 
             } catch (e: Exception) {
-                emit(Resource.Error<Book>(message = e.message.toString()))
+                emit(Resource.Error<Book>(message = e.localizedMessage ?:Constants.NO_BOOK_ERROR))
             }
         }
 

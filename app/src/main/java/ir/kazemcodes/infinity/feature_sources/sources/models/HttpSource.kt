@@ -119,13 +119,14 @@ abstract class HttpSource() : Source {
      */
     override suspend fun fetchPopular(page: Int): BooksPage {
         val request = client.newCall(popularRequest(page)).await()
+
         var books = popularParse(request, page = page)
         if (books.isCloudflareEnabled || request.code != 200|| !books.ajaxLoaded) {
             books =
                 popularParse(document = network.getHtmlFromWebView(baseUrl + fetchPopularEndpoint?.applyPageFormat(
                     page)), page = page,isWebViewMode = true)
         }
-        return books
+        return popularParse(request, page = page)
     }
 
     /**

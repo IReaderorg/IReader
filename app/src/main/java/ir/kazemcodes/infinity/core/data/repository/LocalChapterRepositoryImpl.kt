@@ -5,10 +5,12 @@ import ir.kazemcodes.infinity.core.data.network.models.Source
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
 import ir.kazemcodes.infinity.core.domain.models.ChapterEntity
-import ir.kazemcodes.infinity.core.utils.Resource
 import ir.kazemcodes.infinity.core.domain.repository.LocalChapterRepository
+import ir.kazemcodes.infinity.core.utils.Resource
+import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.Constants
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import timber.log.Timber
 import javax.inject.Inject
@@ -16,8 +18,17 @@ import javax.inject.Inject
 class LocalChapterRepositoryImpl @Inject constructor(private val daoLibrary: LibraryChapterDao) :
     LocalChapterRepository {
 
-    override suspend fun insertChapters(chapters: List<Chapter>, book : Book, inLibrary : Boolean, source : Source) {
-        return daoLibrary.insertChapters(chapterEntities = chapters.map { it.copy(bookName = book.bookName,source=source.name, inLibrary = inLibrary).toChapterEntity() })
+    override suspend fun insertChapters(
+        chapters: List<Chapter>,
+        book: Book,
+        inLibrary: Boolean,
+        source: Source,
+    ) {
+        return daoLibrary.insertChapters(chapterEntities = chapters.map {
+            it.copy(bookName = book.bookName,
+                source = source.name,
+                inLibrary = inLibrary).toChapterEntity()
+        })
     }
 
 
@@ -42,11 +53,16 @@ class LocalChapterRepositoryImpl @Inject constructor(private val daoLibrary: Lib
                 Timber.d("Timber: GetLocalChaptersByBookNameUseCase was Called")
                 emit(Resource.Loading())
                 daoLibrary.getLastReadChapter(bookName, source).collect { chapter ->
-                    emit(Resource.Success<Chapter>(data = chapter.toChapter()))
+                    if (chapter != null) {
+                        emit(Resource.Success(data = chapter.toChapter()))
+                    } else {
+                        emit(Resource.Error<Chapter>(message = Constants.NO_CHAPTER_ERROR))
+                    }
                 }
                 Timber.d("Timber: GetLocalChaptersByBookNameUseCase was Finished Successfully")
             } catch (e: Exception) {
-                emit(Resource.Error<Chapter>(message = e.message.toString()))
+                emit(Resource.Error<Chapter>(message = e.localizedMessage
+                    ?: Constants.NO_CHAPTER_ERROR))
             }
         }
 
@@ -88,15 +104,20 @@ class LocalChapterRepositoryImpl @Inject constructor(private val daoLibrary: Lib
             try {
                 Timber.d("Timber: GetLocalChaptersByBookNameUseCase was Called")
                 emit(Resource.Loading())
-                daoLibrary.getChapters(bookName, source)
-                    .collect { chapters ->
+                daoLibrary.getChapters(bookName, source).collect { chapters ->
+                    if (!chapters.isNullOrEmpty()) {
                         emit(Resource.Success<List<Chapter>>(data = chapters.map { chapterEntity ->
                             chapterEntity.toChapter()
                         }))
+                    } else {
+                        emit(Resource.Error<List<Chapter>>(message = Constants.NO_CHAPTER_ERROR))
                     }
+
+                }
                 Timber.d("Timber: GetLocalChaptersByBookNameUseCase was Finished Successfully")
             } catch (e: Exception) {
-                emit(Resource.Error<List<Chapter>>(message = e.message.toString()))
+                emit(Resource.Error<List<Chapter>>(message = e.localizedMessage
+                    ?: Constants.NO_CHAPTER_ERROR))
             }
         }
 
@@ -107,13 +128,19 @@ class LocalChapterRepositoryImpl @Inject constructor(private val daoLibrary: Lib
             emit(Resource.Loading())
             daoLibrary.getAllChapters()
                 .collect { chapters ->
-                    emit(Resource.Success<List<Chapter>>(data = chapters.map { chapterEntity ->
-                        chapterEntity.toChapter()
-                    }))
+                    if (!chapters.isNullOrEmpty()) {
+                        emit(Resource.Success<List<Chapter>>(data = chapters.map { chapterEntity ->
+                            chapterEntity.toChapter()
+                        }))
+                    } else {
+                        emit(Resource.Error<List<Chapter>>(message = Constants.NO_CHAPTERS_ERROR))
+                    }
+
                 }
             Timber.d("Timber: GetLocalChaptersByBookNameUseCase was Finished Successfully")
         } catch (e: Exception) {
-            emit(Resource.Error<List<Chapter>>(message = e.message.toString()))
+            emit(Resource.Error<List<Chapter>>(message = e.localizedMessage
+                ?: Constants.NO_CHAPTERS_ERROR))
         }
 
     }
@@ -123,9 +150,28 @@ class LocalChapterRepositoryImpl @Inject constructor(private val daoLibrary: Lib
         chapterTitle: String,
         bookName: String,
         source: String,
-    ): Flow<ChapterEntity?> {
-        return daoLibrary.getChapterByChapter(chapterTitle, bookName, source)
+    ): Flow<Resource<Chapter>>  = flow {
+        try {
+            Timber.d("Timber: GetLocalChaptersByBookNameUseCase was Called")
+            emit(Resource.Loading())
+            daoLibrary.getChapterByChapter(chapterTitle, bookName, source).first { chapter ->
+                    if (chapter !=null) {
+                        emit(Resource.Success(data = chapter.toChapter()))
+                        return@first true
+                    } else {
+                        emit(Resource.Error(message = Constants.NO_CHAPTERS_ERROR))
+                        return@first false
+                    }
+
+                }
+            Timber.d("Timber: GetLocalChaptersByBookNameUseCase was Finished Successfully")
+        } catch (e: Exception) {
+            emit(Resource.Error(message = e.localizedMessage
+                ?: Constants.NO_CHAPTERS_ERROR))
+        }
+
     }
+
 
 
     override suspend fun deleteChapters(bookName: String, source: String) {

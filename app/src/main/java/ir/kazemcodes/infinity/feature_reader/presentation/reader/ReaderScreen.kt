@@ -26,13 +26,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import com.zhuinden.simplestackcomposeintegration.services.rememberService
-import ir.kazemcodes.infinity.feature_activity.presentation.WebViewKey
-import ir.kazemcodes.infinity.feature_reader.presentation.reader.components.MainBottomSettingComposable
-import ir.kazemcodes.infinity.feature_reader.presentation.reader.components.ReaderSettingComposable
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.ErrorTextWithEmojis
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarActionButton
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarBackButton
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarTitle
+import ir.kazemcodes.infinity.feature_activity.presentation.WebViewKey
+import ir.kazemcodes.infinity.feature_reader.presentation.reader.components.MainBottomSettingComposable
+import ir.kazemcodes.infinity.feature_reader.presentation.reader.components.ReaderSettingComposable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -78,7 +78,7 @@ fun ReadingScreen(
                     actions = {
                         TopAppBarActionButton(imageVector = Icons.Default.Autorenew,
                             title = "Refresh",
-                            onClick = { viewModel.getReadingContentRemotely(viewModel.state.value.chapter) })
+                            onClick = { viewModel.getReadingContentRemotely() })
                         TopAppBarActionButton(imageVector = Icons.Default.Language,
                             title = "WebView",
                             onClick = { backStack.goTo(WebViewKey(url = viewModel.state.value.chapter.link)) })
@@ -237,7 +237,8 @@ fun ReadingScreen(
                 .fillMaxWidth()
                 .padding(20.dp)
                 .wrapContentSize(Alignment.Center)
-                .align(Alignment.Center))
+                .align(Alignment.Center),
+            )
         }
 
         if (viewModel.state.value.isLoading) {

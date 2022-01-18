@@ -54,7 +54,7 @@ interface LocalChapterRepository {
         chapterTitle: String,
         bookName: String,
         source: String,
-    ): Flow<ChapterEntity?>
+    ): Flow<Resource<Chapter>>
 
     suspend fun insertChapters(chapters: List<Chapter>, book : Book, inLibrary : Boolean, source : Source)
 

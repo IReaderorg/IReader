@@ -30,7 +30,7 @@ class Extensions(context: Context) {
 
 class AvailableSources(context: Context) {
 
-    val baseSample = SourceCreator(
+    val baseSample = SourceTower(
         _name = "",
         _baseUrl = "",
         _lang = "",
@@ -155,7 +155,7 @@ class AvailableSources(context: Context) {
     )
 
 
-    val realwebnovel = SourceCreator(
+    val realwebnovel = SourceTower(
         _baseUrl = "https://readwebnovels.net",
         _lang = "en",
         _name = "RealWebNovel",
@@ -211,7 +211,7 @@ class AvailableSources(context: Context) {
             pageContentSelector = "div.reading-content h4,p",
         )
     )
-    val freeWebNovel = SourceCreator(
+    val freeWebNovel = SourceTower(
         _name = "FreeWebNovel",
         _lang = "en",
         _baseUrl = "https://freewebnovel.com",
@@ -276,7 +276,7 @@ class AvailableSources(context: Context) {
         )
     )
 
-    val mtl = SourceCreator(
+    val mtl = SourceTower(
         _lang = "en",
         _name = "MtlNovel",
         _baseUrl = "https://www.mtlnovel.com",
@@ -339,7 +339,7 @@ class AvailableSources(context: Context) {
         )
 
     )
-    val wuxiaworld = SourceCreator(
+    val wuxiaworld = SourceTower(
         _name = "Wuxiaworld",
         _lang = "en",
         _baseUrl = "https://wuxiaworld.site",
@@ -396,7 +396,7 @@ class AvailableSources(context: Context) {
             coverAtt = "src",
         )
     )
-    val myLoveNovel = SourceCreator(
+    val myLoveNovel = SourceTower(
         _name = "MyLoveNovel",
         _lang = "en",
         _supportsLatest = true,
@@ -455,7 +455,7 @@ class AvailableSources(context: Context) {
             pageContentSelector = "div.content"
         )
     )
-    val koreanMtl = SourceCreator(
+    val koreanMtl = SourceTower(
         _name = "KoreanMtl.Online",
         _lang = "en",
         _supportsLatest = true,
@@ -495,7 +495,7 @@ class AvailableSources(context: Context) {
         )
     )
 
-    val mtlNation = SourceCreator(
+    val mtlNation = SourceTower(
         _name = "MtlNation",
         _baseUrl = "https://mtlnation.com/",
         _supportsSearch = true,

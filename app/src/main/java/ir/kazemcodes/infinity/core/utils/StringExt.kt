@@ -1,6 +1,7 @@
 package ir.kazemcodes.infinity.core.utils
 
 fun List<String>.formatBasedOnDot(): String {
+
     return this.joinToString { it.trim() }.replace(".", ".\n")
 }
 
@@ -36,6 +37,7 @@ fun String.replaceImageFormat(condition: Boolean): String {
 
 fun String.formatHtmlText(): String {
     return this
+        .replace("\\\\<.*?\\\\>","")
         .replace("<em>","")
         .replace("</em>","")
         .replace("<b>","")

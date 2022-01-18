@@ -33,7 +33,7 @@ interface LibraryChapterDao {
     )
 
     @Query("SELECT * from chapter_table WHERE bookName = :bookName AND source =:source AND lastRead = 1 LIMIT 1")
-    fun getLastReadChapter(bookName: String, source: String): Flow<ChapterEntity>
+    fun getLastReadChapter(bookName: String, source: String): Flow<ChapterEntity?>
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
     suspend fun updateChapter(chapterEntities: ChapterEntity)
@@ -52,10 +52,10 @@ interface LibraryChapterDao {
     //    @Query("SELECT * FROM chapter_entity WHERE bookName= :bookName")
 //    fun getChapters(bookName: String): Flow<List<ChapterEntity>>
     @Query("SELECT * FROM chapter_table WHERE bookName= :bookName AND source = :source")
-    fun getChapters(bookName: String, source: String): Flow<List<ChapterEntity>>
+    fun getChapters(bookName: String, source: String): Flow<List<ChapterEntity>?>
 
     @Query("SELECT * FROM chapter_table")
-    fun getAllChapters(): Flow<List<ChapterEntity>>
+    fun getAllChapters(): Flow<List<ChapterEntity>?>
 
 
     @Query("SELECT * FROM chapter_table WHERE title = :chapterTitle AND bookName = :bookName AND source = :source AND content Not Null Limit 1")

@@ -34,8 +34,10 @@ object Constants {
 
 
 
-    const val NO_BOOKS_ERROR = "There is No Book"
-    const val NO_BOOK_ERROR = "There is No Book with this name"
+    const val NO_BOOKS_ERROR = "There is no book"
+    const val NO_BOOK_ERROR = "There is no book with this name"
+    const val NO_CHAPTER_ERROR = "There is No chapter with this name"
+    const val NO_CHAPTERS_ERROR = "There are no chapters with this name"
 
 
 

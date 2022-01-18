@@ -15,7 +15,6 @@ import com.zhuinden.simplestackextensions.fragmentsktx.backstack
 import com.zhuinden.simplestackextensions.servicesktx.add
 import com.zhuinden.simplestackextensions.servicesktx.lookup
 import ir.kazemcodes.infinity.core.domain.models.Book
-import ir.kazemcodes.infinity.core.domain.models.Chapter
 import ir.kazemcodes.infinity.core.domain.repository.LocalBookRepository
 import ir.kazemcodes.infinity.core.domain.repository.LocalChapterRepository
 import ir.kazemcodes.infinity.core.domain.repository.RemoteRepository
@@ -243,10 +242,10 @@ class ReaderScreenFragment() : ComposeFragment() {
 
 @Parcelize
 data class ReaderScreenKey(
-    val book: Book,
-    val chapterIndex: Int,
-    val chapter: Chapter,
+    val bookName: String,
     val sourceName: String,
+    val chapterName: String,
+    val chapterIndex: Int,
 ) : FragmentKey() {
 
     override fun instantiateFragment(): Fragment = ReaderScreenFragment()
@@ -256,8 +255,8 @@ data class ReaderScreenKey(
             add(ReaderScreenViewModel(
                 preferencesUseCase = lookup<PreferencesUseCase>(),
                 source = lookup<SourceMapper>().mappingSourceNameToSource(sourceName),
-                book = book,
-                chapter = chapter,
+                bookName = bookName,
+                chapterName = chapterName,
                 chapterIndex = chapterIndex,
                 localBookRepository = lookup<LocalBookRepository>(),
                 remoteRepository = lookup<RemoteRepository>(),

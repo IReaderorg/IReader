@@ -11,8 +11,8 @@ import ir.kazemcodes.infinity.core.presentation.theme.BackgroundColor
 data class ReaderScreenState(
     val isLoading: Boolean = false,
     val isLoaded: Boolean = false,
-    val book: Book,
-    val chapter: Chapter,
+    val book: Book = Book.create(),
+    val chapter: Chapter = Chapter.create(),
     val chapters: List<Chapter> = emptyList(),
     val drawerChapters : List<Chapter> = emptyList(),
     val isReversed : Boolean = false,
