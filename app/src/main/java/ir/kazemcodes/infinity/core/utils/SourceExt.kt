@@ -1,9 +1,9 @@
 package ir.kazemcodes.infinity.core.utils
 
-import android.content.Context
 import android.webkit.WebView
 import ir.kazemcodes.infinity.core.data.network.models.Source
 import ir.kazemcodes.infinity.feature_sources.sources.Extensions
+import ir.kazemcodes.infinity.feature_sources.sources.models.FetchType
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.jsoup.nodes.Document
@@ -47,7 +47,6 @@ fun getUrlWithoutDomain(orig: String): String {
     }
 }
 
-class SourceMapper(private val context: Context) {
 
     fun mappingSourceNameToSource(apiName: String): Source {
         val extensions: Extensions by injectLazy()
@@ -60,7 +59,18 @@ class SourceMapper(private val context: Context) {
         }
         return source
     }
+fun mappingFetcherTypeWithIndex(index: Int): FetchType {
+    return when(index) {
+        FetchType.Latest.index -> FetchType.Latest
+        FetchType.Popular.index -> FetchType.Popular
+        FetchType.Search.index -> FetchType.Search
+        FetchType.Detail.index -> FetchType.Detail
+        FetchType.Chapter.index -> FetchType.Chapter
+        FetchType.Content.index -> FetchType.Content
+        else -> FetchType.Latest
+    }
 }
+
 
 fun String.getHtml(): String {
     return this.replace("\\<.*?>", "")

@@ -218,5 +218,14 @@ interface Fetcher {
     val nextPageValue : String?
 }
 
+sealed class FetchType(val index:Int) {
+    object Latest : FetchType(0)
+    object Popular : FetchType(1)
+    object Search : FetchType(2)
+    object Detail : FetchType(3)
+    object Content : FetchType(4)
+    object Chapter : FetchType(5)
+}
+
 
 

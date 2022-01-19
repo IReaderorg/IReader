@@ -12,7 +12,6 @@ import ir.kazemcodes.infinity.core.domain.repository.LocalBookRepository
 import ir.kazemcodes.infinity.core.domain.repository.LocalChapterRepository
 import ir.kazemcodes.infinity.core.domain.repository.RemoteRepository
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.PreferencesUseCase
-import ir.kazemcodes.infinity.core.utils.SourceMapper
 import ir.kazemcodes.infinity.feature_activity.domain.notification.Notifications
 import ir.kazemcodes.infinity.feature_sources.sources.Extensions
 import ir.kazemcodes.infinity.feature_sources.sources.utils.NetworkHelper
@@ -71,7 +70,6 @@ class MyApplication : Application(), Configuration.Provider {
 
         globalServices = GlobalServices.builder()
             .add(preferencesUseCase)
-            .add(SourceMapper(this))
             .add(extensions)
             .add(webView)
             .add(okHttpClient)

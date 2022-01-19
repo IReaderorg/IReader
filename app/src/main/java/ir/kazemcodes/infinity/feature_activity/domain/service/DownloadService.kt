@@ -13,7 +13,7 @@ import dagger.assisted.AssistedInject
 import ir.kazemcodes.infinity.R
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.repository.Repository
-import ir.kazemcodes.infinity.core.utils.SourceMapper
+import ir.kazemcodes.infinity.core.utils.mappingSourceNameToSource
 import ir.kazemcodes.infinity.feature_activity.domain.notification.Notifications
 import ir.kazemcodes.infinity.feature_activity.domain.notification.Notifications.CHANNEL_DOWNLOADER_PROGRESS
 import kotlinx.coroutines.Dispatchers
@@ -65,7 +65,7 @@ class DownloadService @AssistedInject constructor(
             try {
                 repository.remoteRepository.downloadChapter(
                     book = book ?: Book.create(),
-                    source = SourceMapper(context = applicationContext).mappingSourceNameToSource(source),
+                    source = mappingSourceNameToSource(source),
                     chapters = chapters?: emptyList(),
                     factory = {
                         WebView(it).apply { settings.javaScriptEnabled = true }

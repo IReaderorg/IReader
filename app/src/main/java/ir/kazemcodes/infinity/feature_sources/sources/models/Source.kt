@@ -2,6 +2,7 @@ package ir.kazemcodes.infinity.core.data.network.models
 
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
+import org.jsoup.nodes.Document
 
 
 interface Source {
@@ -73,6 +74,12 @@ interface Source {
      */
     suspend fun fetchChapters(book: Book, page: Int): ChaptersPage
 
+    fun popularParse(document: Document, page: Int = 0, isWebViewMode : Boolean =false) :BooksPage
+    fun latestParse(document: Document, page: Int = 0,isWebViewMode : Boolean =false): BooksPage
+    fun detailParse(document: Document,isWebViewMode : Boolean =false): BookPage
+    fun chaptersParse(document: Document,isWebViewMode : Boolean =false): ChaptersPage
+    fun searchParse(document: Document, page: Int = 0,isWebViewMode : Boolean =false): BooksPage
+    fun contentFromElementParse(document: Document, isWebViewMode : Boolean = false): ChapterPage
 
 }
 

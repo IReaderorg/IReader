@@ -34,6 +34,7 @@ import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarTit
 import ir.kazemcodes.infinity.feature_activity.presentation.WebViewKey
 import ir.kazemcodes.infinity.feature_reader.presentation.reader.components.MainBottomSettingComposable
 import ir.kazemcodes.infinity.feature_reader.presentation.reader.components.ReaderSettingComposable
+import ir.kazemcodes.infinity.feature_sources.sources.models.FetchType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -82,7 +83,7 @@ fun ReadingScreen(
                             onClick = { viewModel.getReadingContentRemotely() })
                         TopAppBarActionButton(imageVector = Icons.Default.Language,
                             title = "WebView",
-                            onClick = { backStack.goTo(WebViewKey(url = viewModel.state.value.chapter.link)) })
+                            onClick = { backStack.goTo(WebViewKey(url = viewModel.state.value.chapter.link, sourceName = viewModel.state.value.source.name, fetchType = FetchType.Content.index)) })
                     }
                 )
             } else if (!state.isLoaded) {
@@ -92,7 +93,7 @@ fun ReadingScreen(
                     actions = {
                         TopAppBarActionButton(imageVector = Icons.Default.Language,
                             title = "WebView",
-                            onClick = { backStack.goTo(WebViewKey(url = viewModel.state.value.chapter.link)) })
+                            onClick = { backStack.goTo(WebViewKey(url = viewModel.state.value.chapter.link, sourceName = viewModel.state.value.source.name, fetchType = FetchType.Content.index))})
                     },
                     navigationIcon = {
                         TopAppBarBackButton(backStack = backStack)

@@ -3,6 +3,7 @@ package ir.kazemcodes.infinity.feature_activity.presentation
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.view.WindowManager
+import android.webkit.WebView
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -12,7 +13,6 @@ import com.google.accompanist.insets.ProvideWindowInsets
 import com.zhuinden.simplestack.Backstack
 import com.zhuinden.simplestack.ServiceBinder
 import com.zhuinden.simplestackcomposeintegration.core.BackstackProvider
-import com.zhuinden.simplestackcomposeintegration.services.rememberService
 import com.zhuinden.simplestackextensions.fragmentsktx.backstack
 import com.zhuinden.simplestackextensions.servicesktx.add
 import com.zhuinden.simplestackextensions.servicesktx.lookup
@@ -22,8 +22,9 @@ import ir.kazemcodes.infinity.core.domain.repository.LocalChapterRepository
 import ir.kazemcodes.infinity.core.domain.repository.RemoteRepository
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.core.presentation.theme.InfinityTheme
-import ir.kazemcodes.infinity.core.utils.SourceMapper
 import ir.kazemcodes.infinity.core.utils.findAppCompatAcivity
+import ir.kazemcodes.infinity.core.utils.mappingFetcherTypeWithIndex
+import ir.kazemcodes.infinity.core.utils.mappingSourceNameToSource
 import ir.kazemcodes.infinity.feature_activity.core.ComposeFragment
 import ir.kazemcodes.infinity.feature_activity.core.FragmentKey
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.BookDetailScreen
@@ -41,7 +42,7 @@ import ir.kazemcodes.infinity.feature_settings.presentation.setting.dns.DnsOverH
 import ir.kazemcodes.infinity.feature_settings.presentation.setting.downloader.DownloaderScreen
 import ir.kazemcodes.infinity.feature_settings.presentation.setting.extension_creator.ExtensionCreatorScreen
 import ir.kazemcodes.infinity.feature_settings.presentation.webview.WebPageScreen
-import ir.kazemcodes.infinity.feature_settings.presentation.webview.WebViewViewModel
+import ir.kazemcodes.infinity.feature_settings.presentation.webview.WebViewPageModel
 import ir.kazemcodes.infinity.feature_sources.presentation.extension.ExtensionScreen
 import kotlinx.parcelize.Parcelize
 
@@ -101,7 +102,7 @@ data class BrowserScreenKey(val sourceName: String, val exploreType: Int) :
             add(
                 BrowseViewModel(
                     preferencesUseCase = lookup<PreferencesUseCase>(),
-                    source = lookup<SourceMapper>().mappingSourceNameToSource(sourceName),
+                    source = mappingSourceNameToSource(sourceName),
                     exploreType = exploreType,
                     localBookRepository = lookup<LocalBookRepository>(),
                     remoteRepository = lookup<RemoteRepository>()
@@ -138,7 +139,7 @@ data class BookDetailKey(val book: Book, val sourceName: String, val isLocal: Bo
         with(serviceBinder) {
             add(
                 BookDetailViewModel(
-                    source = lookup<SourceMapper>().mappingSourceNameToSource(sourceName),
+                    source = mappingSourceNameToSource(sourceName),
                     book = book,
                     lookup<PreferencesUseCase>(),
                     isLocal = isLocal,
@@ -156,8 +157,8 @@ class WebViewFragment() : ComposeFragment() {
     override fun FragmentComposable(backstack: Backstack) {
         BackstackProvider(backstack = backstack) {
             InfinityTheme() {
-                val viewModel = rememberService<WebViewViewModel>()
-                WebPageScreen(viewModel.state.value.url)
+
+                WebPageScreen()
 
             }
 
@@ -166,14 +167,19 @@ class WebViewFragment() : ComposeFragment() {
 }
 
 @Parcelize
-data class WebViewKey(val url: String) : FragmentKey() {
+data class WebViewKey(val url: String, val sourceName: String, val fetchType: Int) : FragmentKey() {
 
     override fun instantiateFragment(): Fragment = WebViewFragment()
 
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
-            add<WebViewViewModel>(WebViewViewModel(
-                url
+            add<WebViewPageModel>(WebViewPageModel(
+                url,
+                webView = lookup<WebView>(),
+                source = mappingSourceNameToSource(sourceName),
+                fetcher = mappingFetcherTypeWithIndex(fetchType),
+                localChapterRepository = lookup<LocalChapterRepository>(),
+                localBookRepository = lookup<LocalBookRepository>()
             ))
         }
     }
@@ -204,7 +210,7 @@ data class ChapterDetailKey(
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
             add<ChapterDetailViewModel>(ChapterDetailViewModel(
-                source = lookup<SourceMapper>().mappingSourceNameToSource(sourceName),
+                source = mappingSourceNameToSource(sourceName),
                 book = book,
                 localChapterRepository = lookup<LocalChapterRepository>()
 
@@ -259,7 +265,7 @@ data class ReaderScreenKey(
         with(serviceBinder) {
             add(ReaderScreenViewModel(
                 preferencesUseCase = lookup<PreferencesUseCase>(),
-                source = lookup<SourceMapper>().mappingSourceNameToSource(sourceName),
+                source = mappingSourceNameToSource(sourceName),
                 bookName = bookName,
                 chapterName = chapterName,
                 chapterIndex = chapterIndex,

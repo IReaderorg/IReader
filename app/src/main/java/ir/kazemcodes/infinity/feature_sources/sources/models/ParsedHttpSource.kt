@@ -1,10 +1,12 @@
-package ir.kazemcodes.infinity.core.data.network.models
+package ir.kazemcodes.infinity.feature_sources.sources.models
 
+import ir.kazemcodes.infinity.core.data.network.models.BooksPage
+import ir.kazemcodes.infinity.core.data.network.models.ChapterPage
+import ir.kazemcodes.infinity.core.data.network.models.ChaptersPage
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.Constants.CLOUDFLARE_LOG
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.Constants.CLOUDFLARE_PROTECTION_ERROR
-import ir.kazemcodes.infinity.feature_sources.sources.models.HttpSource
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 

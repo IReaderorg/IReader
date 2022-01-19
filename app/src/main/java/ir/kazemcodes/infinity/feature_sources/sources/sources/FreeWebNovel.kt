@@ -4,7 +4,7 @@
 //import ir.kazemcodes.infinity.api_feature.network.GET
 //import ir.kazemcodes.infinity.core.data.network.models.BookPage
 //import ir.kazemcodes.infinity.core.data.network.models.ChapterPage
-//import ir.kazemcodes.infinity.core.data.network.models.ParsedHttpSource
+//import ir.kazemcodes.infinity.feature_sources.sources.models.ParsedHttpSource
 //import ir.kazemcodes.infinity.core.domain.models.Book
 //import ir.kazemcodes.infinity.core.domain.models.Chapter
 //import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.Constants

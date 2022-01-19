@@ -35,6 +35,7 @@ import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.components
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.components.CardTileComposable
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.components.DotsFlashing
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.components.ExpandingText
+import ir.kazemcodes.infinity.feature_sources.sources.models.FetchType
 
 
 @Composable
@@ -121,7 +122,7 @@ fun BookDetailScreenLoadedComposable(
                     }
                     /** ERROR: This may cause error later: mismatch between baseurl and book link**/
                     IconButton(onClick = {
-                        backStack.goTo(WebViewKey(source.baseUrl + getUrlWithoutDomain(book.link)))
+                        backStack.goTo(WebViewKey(source.baseUrl + getUrlWithoutDomain(book.link), sourceName = source.name, fetchType = FetchType.Detail.index))
                     }) {
                         Icon(
                             imageVector = Icons.Default.Language,

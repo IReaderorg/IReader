@@ -252,7 +252,7 @@ abstract class HttpSource() : Source {
         return popularParse(response.asJsoup(), page)
     }
 
-    abstract fun popularParse(document: Document, page: Int,isWebViewMode : Boolean =false): BooksPage
+    abstract override fun popularParse(document: Document, page: Int, isWebViewMode : Boolean): BooksPage
 
 
     /**
@@ -269,7 +269,7 @@ abstract class HttpSource() : Source {
      *
      * @param response the response from the site.
      */
-    abstract fun latestParse(document: Document, page: Int,isWebViewMode : Boolean =false): BooksPage
+    abstract override fun latestParse(document: Document, page: Int, isWebViewMode : Boolean): BooksPage
 
 
     /**
@@ -286,7 +286,7 @@ abstract class HttpSource() : Source {
      *
      * @param document the parsed document.
      */
-    abstract fun detailParse(document: Document,isWebViewMode : Boolean =false): BookPage
+    abstract override fun detailParse(document: Document, isWebViewMode : Boolean): BookPage
 
 
     /**
@@ -298,7 +298,7 @@ abstract class HttpSource() : Source {
         return contentFromElementParse(response.asJsoup())
     }
 
-    abstract fun contentFromElementParse(document: Document, isWebViewMode : Boolean =false): ChapterPage
+    abstract override fun contentFromElementParse(document: Document, isWebViewMode : Boolean): ChapterPage
 
 
     /**
@@ -306,7 +306,7 @@ abstract class HttpSource() : Source {
      *
      * @param response the response from the site.
      */
-    abstract fun chaptersParse(document: Document,isWebViewMode : Boolean =false): ChaptersPage
+    abstract override fun chaptersParse(document: Document, isWebViewMode : Boolean): ChaptersPage
 
     fun chapterListParse(response: Response,isWebViewMode : Boolean =false): ChaptersPage {
         return chaptersParse(response.asJsoup())
@@ -321,7 +321,7 @@ abstract class HttpSource() : Source {
         return searchParse(response.asJsoup(), page = page)
     }
 
-    abstract fun searchParse(document: Document, page: Int,isWebViewMode : Boolean =false): BooksPage
+    abstract override fun searchParse(document: Document, page: Int, isWebViewMode : Boolean): BooksPage
 
 
 

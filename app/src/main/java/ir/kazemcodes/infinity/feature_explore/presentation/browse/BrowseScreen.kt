@@ -23,6 +23,7 @@ import ir.kazemcodes.infinity.core.presentation.reusable_composable.*
 import ir.kazemcodes.infinity.feature_activity.presentation.WebViewKey
 import ir.kazemcodes.infinity.feature_library.presentation.components.LayoutComposable
 import ir.kazemcodes.infinity.feature_library.presentation.components.RadioButtonWithTitleComposable
+import ir.kazemcodes.infinity.feature_sources.sources.models.FetchType
 
 
 @Composable
@@ -78,8 +79,7 @@ fun BrowserScreen() {
                         imageVector = Icons.Default.Language,
                         title = "WebView",
                         onClick = {
-                            backStack.goTo(WebViewKey(source.baseUrl))
-
+                            backStack.goTo(WebViewKey(source.baseUrl, sourceName = source.name, fetchType = FetchType.Latest.index))
                         },
                     )
                     TopAppBarActionButton(

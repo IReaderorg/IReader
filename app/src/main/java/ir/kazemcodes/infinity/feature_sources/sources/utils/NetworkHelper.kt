@@ -3,6 +3,7 @@ package ir.kazemcodes.infinity.feature_sources.sources.utils
 import android.annotation.SuppressLint
 import android.content.Context
 import android.view.ViewGroup
+import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import ir.kazemcodes.infinity.core.data.network.models.*
 import ir.kazemcodes.infinity.core.data.network.utils.AndroidCookieJar
@@ -21,6 +22,9 @@ import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.util.concurrent.TimeUnit
+
+
+
 
 
 class NetworkHelper(private val context: Context) {
@@ -84,6 +88,8 @@ class NetworkHelper(private val context: Context) {
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT
         )
+        val jInterface = MyJavaScriptInterface()
+        webView.addJavascriptInterface(jInterface, "HtmlViewer")
         if (webView.url != url) {
             webView.loadUrl(url)
         }
@@ -126,6 +132,12 @@ class NetworkHelper(private val context: Context) {
         //Timber.e(docs.toString())
         return docs
     }
-
+    class MyJavaScriptInterface {
+        var html: String? = null
+        @JavascriptInterface
+        fun showHTML(_html: String?) {
+            html = _html
+        }
+    }
 }
 
