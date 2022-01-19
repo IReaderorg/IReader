@@ -17,3 +17,35 @@ class ReadOrientationUseCase(
         return repository.preferencesHelper.orientation.get()
     }
 }
+class SaveFiltersUseCase(
+    private val repository: Repository,
+) {
+    operator fun invoke(value: Int) {
+        repository.preferencesHelper.filterLibraryScreen.set(value)
+    }
+}
+
+class ReadFilterUseCase(
+    private val repository: Repository,
+) {
+    operator fun invoke(): Int {
+        return repository.preferencesHelper.filterLibraryScreen.get()
+    }
+}
+
+class SaveSortersUseCase(
+    private val repository: Repository,
+) {
+    operator fun invoke(value: Int) {
+        repository.preferencesHelper.sortLibraryScreen.set(value)
+    }
+}
+
+class ReadSortersUseCase(
+    private val repository: Repository,
+) {
+    operator fun invoke(): Int {
+        return repository.preferencesHelper.sortLibraryScreen.get()
+    }
+}
+

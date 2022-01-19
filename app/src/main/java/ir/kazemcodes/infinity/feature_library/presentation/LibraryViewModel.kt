@@ -10,6 +10,7 @@ import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.repository.LocalBookRepository
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.core.presentation.layouts.DisplayMode
+import ir.kazemcodes.infinity.feature_library.presentation.components.FilterType
 import ir.kazemcodes.infinity.feature_library.presentation.components.LibraryEvents
 import ir.kazemcodes.infinity.feature_library.presentation.components.SortType
 import kotlinx.coroutines.*
@@ -32,7 +33,7 @@ class LibraryViewModel(
 
     fun getBooks() {
         coroutineScope.launch(Dispatchers.IO) {
-            localBookRepository.getBooks(state.value.sortType,state.value.isSortAcs).cachedIn(coroutineScope)
+            localBookRepository.getBooks(state.value.sortType,state.value.isSortAcs, unreadFilter = state.value.unreadFilter).cachedIn(coroutineScope)
                 .collect { snapshot ->
                     _books.value = snapshot.map { bookEntity -> bookEntity.toBook() }
                 }
@@ -91,8 +92,32 @@ class LibraryViewModel(
     }
 
     private fun readLayoutType() {
-        _state.value =
-            state.value.copy(layout = preferencesUseCase.readLibraryLayoutUseCase().layout)
+
+
+        val sortType = when(preferencesUseCase.readSortersUseCase()) {
+            0 -> {
+                SortType.DateAdded
+            }
+            1 -> {
+                SortType.Alphabetically
+            }
+            2 -> {
+                SortType.LastRead
+            }
+            else -> {
+                SortType.TotalChapter
+            }
+        }
+        val filterType = when(preferencesUseCase.readFilterUseCase()) {
+            0 -> {
+                FilterType.Disable
+            }
+            else -> {
+                FilterType.Unread
+            }
+        }
+        _state.value = state.value.copy(layout = preferencesUseCase.readLibraryLayoutUseCase().layout, sortType = sortType, unreadFilter = filterType)
+
     }
 
 
@@ -109,9 +134,15 @@ class LibraryViewModel(
         if (state.value.sortType == sortType) {
             _state.value = _state.value.copy(isSortAcs = !state.value.isSortAcs)
         }
+        preferencesUseCase.saveSortersUseCase(state.value.sortType.index)
         getBooks()
     }
+    fun enableUnreadFilter(filterType: FilterType) {
+       _state.value = state.value.copy(unreadFilter = filterType)
+        preferencesUseCase.saveFiltersUseCase(state.value.unreadFilter.index)
+        getBooks()
 
+    }
 
     override fun onServiceActive() {
 

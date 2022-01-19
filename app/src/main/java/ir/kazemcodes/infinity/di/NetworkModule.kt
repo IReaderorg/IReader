@@ -47,7 +47,11 @@ class NetworkModule {
             readOrientationUseCase = ReadOrientationUseCase(repository),
             saveOrientationUseCase = SaveOrientationUseCase(repository),
             readParagraphIndentUseCase = ReadParagraphIndentUseCase(repository),
-            saveParagraphIndentUseCase = SaveParagraphIndentUseCase(repository)
+            saveParagraphIndentUseCase = SaveParagraphIndentUseCase(repository),
+            readFilterUseCase = ReadFilterUseCase(repository),
+            saveFiltersUseCase = SaveFiltersUseCase(repository),
+            readSortersUseCase = ReadSortersUseCase(repository),
+            saveSortersUseCase = SaveSortersUseCase(repository)
         )
     }
     @Singleton

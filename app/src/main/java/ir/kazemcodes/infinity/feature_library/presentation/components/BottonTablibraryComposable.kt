@@ -18,7 +18,6 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.pagerTabIndicatorOffset
-import ir.kazemcodes.infinity.core.presentation.components.TitleText
 import ir.kazemcodes.infinity.core.presentation.layouts.layouts
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.MidTextComposable
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarTitle
@@ -57,7 +56,10 @@ fun Tabs(tabs: List<TabItem>, pagerState: PagerState) {
         tabs.forEachIndexed { index, tab ->
             LeadingIconTab(
                 icon = { },
-                text = { TopAppBarTitle(title = tab.title, color = MaterialTheme.colors.onBackground) },
+                text = {
+                    TopAppBarTitle(title = tab.title,
+                        color = MaterialTheme.colors.onBackground)
+                },
                 selected = pagerState.currentPage == index,
                 onClick = {
                     scope.launch {
@@ -74,13 +76,17 @@ fun FilterScreen(viewModel: LibraryViewModel) {
     Column(Modifier
         .fillMaxSize()
         .background(MaterialTheme.colors.background)
-        .padding(12.dp),
+        .padding(horizontal = 12.dp, vertical = 16.dp),
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Top) {
-        CheckBoxWithText("Unread", false) {}
-        CheckBoxWithText("Sort", false) {}
-        CheckBoxWithText("Display", false) {}
-
+        CheckBoxWithText("Unread",
+            viewModel.state.value.unreadFilter.index == FilterType.Unread.index) {
+            if (viewModel.state.value.unreadFilter == FilterType.Unread) {
+                viewModel.enableUnreadFilter(FilterType.Disable)
+            } else {
+                viewModel.enableUnreadFilter(FilterType.Unread)
+            }
+        }
     }
 }
 
@@ -90,9 +96,7 @@ fun DisplayScreen(viewModel: LibraryViewModel) {
         Modifier
             .fillMaxSize()
             .background(MaterialTheme.colors.background)
-            .padding(12.dp)
     ) {
-        TitleText(text = "Display")
         layouts.forEach { layout ->
             RadioButtonWithTitleComposable(
                 text = layout.title,
@@ -105,12 +109,16 @@ fun DisplayScreen(viewModel: LibraryViewModel) {
     }
 }
 
-sealed class SortType(val name:String, val index:Int) {
-    object DateAdded : SortType("Date Added",0)
-    object Alphabetically : SortType("Alphabetically",1)
-    object LastRead : SortType("Last Read",2)
-    object Download : SortType("Download",3)
-    object TotalChapter : SortType("TotalChapter",4)
+sealed class SortType(val name: String, val index: Int) {
+    object DateAdded : SortType("Date Added", 0)
+    object Alphabetically : SortType("Alphabetically", 1)
+    object LastRead : SortType("Last Read", 2)
+    object TotalChapter : SortType("TotalChapter", 3)
+}
+
+sealed class FilterType(val name: String, val index: Int) {
+    object Disable : FilterType("Disable", 0)
+    object Unread : FilterType("Unread", 1)
 }
 
 @Composable
@@ -119,7 +127,6 @@ fun SortScreen(viewModel: LibraryViewModel) {
         SortType.DateAdded,
         SortType.Alphabetically,
         SortType.LastRead,
-        SortType.Download,
         SortType.TotalChapter,
     )
     Column(
@@ -134,18 +141,19 @@ fun SortScreen(viewModel: LibraryViewModel) {
             .padding(12.dp),
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Top) {
-            items.forEach {item ->
+            items.forEach { item ->
 
-                IconWithText( item.name,if(!viewModel.state.value.isSortAcs) Icons.Default.ArrowUpward else  Icons.Default.ArrowDownward,viewModel.state.value.sortType == item, onClick = {
-                    viewModel.changeSortIndex(item)
-                })
+                IconWithText(item.name,
+                    if (!viewModel.state.value.isSortAcs) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
+                    viewModel.state.value.sortType == item,
+                    onClick = {
+                        viewModel.changeSortIndex(item)
+                    })
                 Spacer(modifier = Modifier.height(8.dp))
             }
         }
     }
 }
-
-
 
 
 @ExperimentalPagerApi
@@ -166,14 +174,20 @@ fun CheckBoxWithText(title: String, isChecked: Boolean, onCheckedChange: (Boolea
         MidTextComposable(title = title)
     }
 }
+
 @Composable
-fun IconWithText(title: String, icon: ImageVector, isEnable: Boolean, onClick: () -> Unit,) {
-    Row(modifier= Modifier
-        .clickable { onClick() }
-        .padding(8.dp)
-        .fillMaxWidth(),horizontalArrangement = Arrangement.Start,
-        verticalAlignment = Alignment.CenterVertically,) {
-        Icon(imageVector = icon, contentDescription = "$title icon", tint = if (isEnable) MaterialTheme.colors.iconColor else Color.Transparent)
+fun IconWithText(title: String, icon: ImageVector, isEnable: Boolean, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .clickable { onClick() }
+            .padding(8.dp)
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.Start,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(imageVector = icon,
+            contentDescription = "$title icon",
+            tint = if (isEnable) MaterialTheme.colors.iconColor else Color.Transparent)
         Spacer(modifier = Modifier.width(8.dp))
         MidTextComposable(title = title)
     }

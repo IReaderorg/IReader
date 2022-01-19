@@ -26,20 +26,49 @@ interface LibraryBookDao {
 
 
 
-    @Query("SELECT * FROM book_table WHERE inLibrary = 1 ORDER BY CASE WHEN :isAsc = 1 THEN bookName END ASC, CASE WHEN :isAsc = 0 THEN bookName END DESC")
-    fun getAllLocalBooksForPagingSortedByAlphabetically(isAsc:Boolean): PagingSource<Int,BookEntity>
+    @Query("""SELECT * FROM book_table WHERE inLibrary = 1
+        ORDER BY 
+        CASE WHEN :isAsc = 1 AND :sortByAbs = 1 THEN bookName END ASC,
+        CASE WHEN :isAsc = 0 AND :sortByAbs = 1 THEN  bookName END DESC,
+        CASE WHEN :isAsc = 1 AND :sortByDateAdded = 1 THEN bookName END ASC,
+        CASE WHEN :isAsc = 0 AND :sortByDateAdded = 1 THEN  bookName END DESC,
+        CASE WHEN :isAsc = 1 AND :sortByLastRead = 1 THEN bookName END ASC,
+        CASE WHEN :isAsc = 0 AND :sortByLastRead = 1 THEN  bookName END DESC,
+        CASE WHEN :isAsc = 1 AND :sortByDownloads = 1 THEN bookName END ASC,
+        CASE WHEN :isAsc = 0 AND :sortByDownloads = 1 THEN  bookName END DESC,
+        CASE WHEN :isAsc = 1 AND :sortByTotalChapter = 1 THEN bookName END ASC,
+        CASE WHEN :isAsc = 0 AND :sortByTotalChapter = 1 THEN  bookName END DESC
+""")
+    fun getAllLocalBooksForPagingSortedBySort(
+        sortByAbs: Boolean =false,
+        sortByDateAdded: Boolean =false,
+        sortByLastRead:Boolean = false,
+        sortByDownloads:Boolean = false,
+        sortByTotalChapter:Boolean = false,
+        isAsc: Boolean = false,
+    ): PagingSource<Int,BookEntity>
 
-    @Query("SELECT * FROM book_table WHERE inLibrary = 1 ORDER BY CASE WHEN :isAsc = 1 THEN dataAdded END ASC , CASE WHEN :isAsc = 0 THEN dataAdded END DESC")
-    fun getAllLocalBooksForPagingSortedByDateAdded(isAsc:Boolean): PagingSource<Int,BookEntity>
-
-    @Query("SELECT * FROM book_table WHERE inLibrary = 1 ORDER BY CASE WHEN :isAsc = 1 THEN lastRead END ASC , CASE WHEN :isAsc = 0 THEN lastRead END DESC")
-    fun getAllLocalBooksForPagingSortedByLastRead(isAsc:Boolean): PagingSource<Int,BookEntity>
-
-    @Query("SELECT * FROM book_table WHERE inLibrary = 1 ORDER BY CASE WHEN :isAsc = 1 THEN download END ASC , CASE WHEN :isAsc = 0 THEN download END DESC")
-    fun getAllLocalBooksForPagingSortedByDownloads(isAsc:Boolean): PagingSource<Int,BookEntity>
-
-    @Query("SELECT * FROM book_table WHERE inLibrary = 1 ORDER BY CASE WHEN :isAsc = 1 THEN totalChapters END ASC,CASE WHEN :isAsc = 0 THEN totalChapters END DESC")
-    fun getAllLocalBooksForPagingSortedByTotalChapter(isAsc:Boolean): PagingSource<Int,BookEntity>
+    @Query("""SELECT * FROM book_table WHERE inLibrary = 1 AND unread = 1
+        ORDER BY 
+        CASE WHEN :isAsc = 1 AND :sortByAbs = 1 THEN bookName END ASC,
+        CASE WHEN :isAsc = 0 AND :sortByAbs = 1 THEN  bookName END DESC,
+        CASE WHEN :isAsc = 1 AND :sortByDateAdded = 1 THEN bookName END ASC,
+        CASE WHEN :isAsc = 0 AND :sortByDateAdded = 1 THEN  bookName END DESC,
+        CASE WHEN :isAsc = 1 AND :sortByLastRead = 1 THEN bookName END ASC,
+        CASE WHEN :isAsc = 0 AND :sortByLastRead = 1 THEN  bookName END DESC,
+        CASE WHEN :isAsc = 1 AND :sortByDownloads = 1 THEN bookName END ASC,
+        CASE WHEN :isAsc = 0 AND :sortByDownloads = 1 THEN  bookName END DESC,
+        CASE WHEN :isAsc = 1 AND :sortByTotalChapter = 1 THEN bookName END ASC,
+        CASE WHEN :isAsc = 0 AND :sortByTotalChapter = 1 THEN  bookName END DESC
+""")
+    fun getAllLocalBooksForPagingSortedBySortAndFilter(
+        sortByAbs: Boolean =false,
+        sortByDateAdded: Boolean =false,
+        sortByLastRead:Boolean = false,
+        sortByDownloads:Boolean = false,
+        sortByTotalChapter:Boolean = false,
+        isAsc: Boolean = false,
+    ): PagingSource<Int,BookEntity>
 
     @Query("SELECT * FROM book_table")
     fun getAllBooks(): Flow<List<BookEntity>?>
@@ -71,4 +100,4 @@ interface LibraryBookDao {
 
 }
 
-data class InLibraryUpdate(val id: String, val inLibrary:Boolean, val totalChapters:Int)
+data class InLibraryUpdate(val id: String, val inLibrary:Boolean, val totalChapters:Int, val lastRead:Long, val unread: Boolean)

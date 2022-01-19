@@ -8,6 +8,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import com.zhuinden.simplestack.ScopedServices
 import ir.kazemcodes.infinity.core.data.network.models.Source
+import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
 import ir.kazemcodes.infinity.core.domain.models.FontType
 import ir.kazemcodes.infinity.core.domain.repository.LocalBookRepository
@@ -51,6 +52,7 @@ class ReaderScreenViewModel(
         getContent(chapter = state.value.chapter)
         readPreferences()
         getLocalChapters()
+        getLocalBookByName()
     }
 
 
@@ -184,6 +186,7 @@ class ReaderScreenViewModel(
                                         error = "",
                                         isLoaded = true,
                                     )
+
                                 toggleLastReadAndUpdateChapterContent(state.value.chapter)
                             }
                         }
@@ -204,7 +207,25 @@ class ReaderScreenViewModel(
                     }
                 }.launchIn(coroutineScope)
     }
-
+    @Suppress()
+    private fun getLocalBookByName() {
+        localBookRepository.getLocalBookByName(state.value.book.bookName).onEach { result ->
+            when (result) {
+                is Resource.Success -> {
+                    if (result.data != null && result.data != Book.create()) {
+                        _state.value = state.value.copy(
+                            book = result.data,
+                        )
+                        localBookRepository.updateLocalBook(book = result.data.copy(lastRead = System.currentTimeMillis(), unread = if (result.data.unread) false else true))
+                    }
+                }
+                is Resource.Error -> {
+                }
+                is Resource.Loading -> {
+                }
+            }
+        }.launchIn(coroutineScope)
+    }
 
     private fun toggleLastReadAndUpdateChapterContent(chapter: Chapter) {
         coroutineScope.launch(Dispatchers.IO) {

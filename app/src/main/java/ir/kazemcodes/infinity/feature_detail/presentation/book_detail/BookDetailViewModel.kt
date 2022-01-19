@@ -115,7 +115,10 @@ class BookDetailViewModel(
                                 loaded = true
                             )
                             getLastChapter()
-                            localBookRepository.updateLocalBook(book = book.copy(totalChapters = chapterState.value.chapters.size))
+                            if (book.totalChapters != result.data.size) {
+                                localBookRepository.updateLocalBook(book = book.copy(totalChapters = chapterState.value.chapters.size))
+
+                            }
                         } else {
                             getRemoteChapterDetail()
                         }

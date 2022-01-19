@@ -55,7 +55,7 @@ fun MidTextComposable(
         modifier = modifier,
         text = title,
         color = color ?: MaterialTheme.colors.onBackground,
-        style = style ?: MaterialTheme.typography.subtitle1,
+        style = style ?: MaterialTheme.typography.subtitle2,
         fontWeight = fontWeight ?: FontWeight.SemiBold,
         overflow = overflow ?: TextOverflow.Ellipsis,
         textAlign = TextAlign.Center,

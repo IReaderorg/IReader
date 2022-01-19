@@ -21,6 +21,8 @@ class PreferencesHelper @Inject constructor(
         const val SAVED_PARAGRAPH_DISTANCE = "paragraph_distance"
         const val SAVED_PARAGRAPH_INDENT= "paragraph_indent"
         const val SAVED_ORIENTATION = "orientation_reader"
+        const val SORT_LIBRARY_SCREEN = "sort_library_screen"
+        const val FILTER_LIBRARY_SCREEN = "filter_library_screen"
 
         /** Setting Pref**/
         const val SAVED_DOH_KEY = "SAVED_DOH_KEY"
@@ -42,6 +44,8 @@ class PreferencesHelper @Inject constructor(
     val paragraphDistance = flowPrefs.getInt(SAVED_PARAGRAPH_DISTANCE, 2)
     val orientation = flowPrefs.getInt(SAVED_ORIENTATION, 0)
     val paragraphIndent = flowPrefs.getInt(SAVED_PARAGRAPH_INDENT, 8)
+    val sortLibraryScreen = flowPrefs.getInt(SORT_LIBRARY_SCREEN, 0)
+    val filterLibraryScreen = flowPrefs.getInt(FILTER_LIBRARY_SCREEN, 0)
 
     fun setFontScale(fontSize: Int) {
         readerFontScale.set(fontSize)

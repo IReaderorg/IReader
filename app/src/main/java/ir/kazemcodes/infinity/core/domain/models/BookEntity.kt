@@ -25,6 +25,7 @@ data class BookEntity(
     val download:Boolean =false,
     val lastRead:Long = 0,
     val totalChapters:Int = 0,
+    val unread:Boolean
 ) {
 
 

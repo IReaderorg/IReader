@@ -23,4 +23,9 @@ data class PreferencesUseCase(
     val readParagraphIndentUseCase: ReadParagraphIndentUseCase,
     val saveOrientationUseCase: SaveOrientationUseCase,
     val readOrientationUseCase: ReadOrientationUseCase,
+    val readFilterUseCase: ReadFilterUseCase,
+    val saveFiltersUseCase: SaveFiltersUseCase,
+    val readSortersUseCase: ReadSortersUseCase,
+    val saveSortersUseCase: SaveSortersUseCase
+
 )

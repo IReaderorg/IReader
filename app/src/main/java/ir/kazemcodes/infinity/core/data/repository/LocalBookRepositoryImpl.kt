@@ -16,6 +16,7 @@ import ir.kazemcodes.infinity.core.utils.Resource
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.Constants
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.Constants.NO_BOOKS_ERROR
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.Constants.NO_BOOK_ERROR
+import ir.kazemcodes.infinity.feature_library.presentation.components.FilterType
 import ir.kazemcodes.infinity.feature_library.presentation.components.SortType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
@@ -32,33 +33,66 @@ class LocalBookRepositoryImpl(
     private val bookDatabase: BookDatabase,
 ) : LocalBookRepository {
 
-    override fun getBooks(sortType: SortType,isAsc: Boolean): Flow<PagingData<BookEntity>> {
+    override fun getBooks(
+        sortType: SortType,
+        isAsc: Boolean,
+        unreadFilter: FilterType,
+    ): Flow<PagingData<BookEntity>> {
         return Pager(
             config = PagingConfig(pageSize = Constants.DEFAULT_PAGE_SIZE,
                 maxSize = Constants.MAX_PAGE_SIZE, enablePlaceholders = true),
             pagingSourceFactory = {
-                getAllInLibraryForPagingBooks(sortType,isAsc)
+                getAllInLibraryForPagingBooks(sortType, isAsc, if (unreadFilter != FilterType.Disable) true else false)
             }
         ).flow
     }
 
 
-    override fun getAllInLibraryForPagingBooks(sortType : SortType,isAsc:Boolean): PagingSource<Int, BookEntity> {
-        return when(sortType) {
+    override fun getAllInLibraryForPagingBooks(
+        sortType: SortType,
+        isAsc: Boolean,
+        unreadFilter: Boolean,
+    ): PagingSource<Int, BookEntity> {
+        bookDao.getAllLocalBooksForPagingSortedBySort()
+        return when (sortType) {
             is SortType.Alphabetically -> {
-                bookDao.getAllLocalBooksForPagingSortedByAlphabetically(isAsc)
+                if (unreadFilter) {
+                    bookDao.getAllLocalBooksForPagingSortedBySortAndFilter(sortByAbs = true,
+                        isAsc = isAsc)
+                } else {
+                    bookDao.getAllLocalBooksForPagingSortedBySort(sortByAbs = true, isAsc = isAsc)
+
+                }
             }
             is SortType.DateAdded -> {
-                bookDao.getAllLocalBooksForPagingSortedByDateAdded(isAsc)
+                if (unreadFilter) {
+                    bookDao.getAllLocalBooksForPagingSortedBySortAndFilter(sortByDateAdded = true,
+                        isAsc = isAsc)
+                } else {
+                    bookDao.getAllLocalBooksForPagingSortedBySort(sortByDateAdded = true,
+                        isAsc = isAsc)
+
+                }
             }
             is SortType.LastRead -> {
-                bookDao.getAllLocalBooksForPagingSortedByLastRead(isAsc)
+                if (unreadFilter) {
+                    bookDao.getAllLocalBooksForPagingSortedBySortAndFilter(sortByLastRead = true,
+                        isAsc = isAsc)
+                } else {
+                    bookDao.getAllLocalBooksForPagingSortedBySort(sortByLastRead = true,
+                        isAsc = isAsc)
+
+                }
             }
             is SortType.TotalChapter -> {
-                bookDao.getAllLocalBooksForPagingSortedByTotalChapter(isAsc)
-            }
-            is SortType.Download -> {
-                bookDao.getAllLocalBooksForPagingSortedByDownloads(isAsc)
+                if (unreadFilter) {
+                    bookDao.getAllLocalBooksForPagingSortedBySortAndFilter(sortByTotalChapter = true,
+                        isAsc = isAsc)
+                } else {
+                    bookDao.getAllLocalBooksForPagingSortedBySort(sortByTotalChapter = true,
+                        isAsc = isAsc)
+
+                }
             }
         }
     }
@@ -134,7 +168,7 @@ class LocalBookRepositoryImpl(
     override fun searchInLibraryScreenBooks(query: String): Flow<PagingData<BookEntity>> {
         return Pager(
             config = PagingConfig(pageSize = Constants.DEFAULT_PAGE_SIZE,
-                maxSize = Constants.MAX_PAGE_SIZE,enablePlaceholders = true),
+                maxSize = Constants.MAX_PAGE_SIZE, enablePlaceholders = true),
             pagingSourceFactory = {
                 searchBooksByPaging(query)
             }
@@ -150,7 +184,8 @@ class LocalBookRepositoryImpl(
     }
 
     override suspend fun insertBook(book: Book) {
-        return bookDao.insertBook(book.toBookEntity().copy(dataAdded = System.currentTimeMillis()))
+        return bookDao.insertBook(book.toBookEntity()
+            .copy(dataAdded = System.currentTimeMillis()))
     }
 
     override suspend fun deleteBook(id: String) {
@@ -179,7 +214,8 @@ class LocalBookRepositoryImpl(
                 Timber.d("Timber: GetExploreBookByIdUseCase was Finished Successfully")
 
             } catch (e: Exception) {
-                emit(Resource.Error<Book>(message = e.localizedMessage?:Constants.NO_BOOK_ERROR))
+                emit(Resource.Error<Book>(message = e.localizedMessage
+                    ?: Constants.NO_BOOK_ERROR))
             }
         }
 
@@ -216,12 +252,18 @@ class LocalBookRepositoryImpl(
                 Timber.d("Timber: GetExploreBookByIdUseCase was Finished Successfully")
 
             } catch (e: Exception) {
-                emit(Resource.Error<Book>(message = e.localizedMessage ?:Constants.NO_BOOK_ERROR))
+                emit(Resource.Error<Book>(message = e.localizedMessage
+                    ?: Constants.NO_BOOK_ERROR))
             }
         }
 
     override suspend fun updateLocalBook(book: Book) {
-       bookDao.updateBook(InLibraryUpdate(book.id,book.inLibrary,book.totalChapters))
+        bookDao.updateBook(InLibraryUpdate(book.id,
+            book.inLibrary,
+            book.totalChapters,
+            book.lastRead,
+            unread = book.unread
+        ))
     }
 
 

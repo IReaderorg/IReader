@@ -3,6 +3,7 @@ package ir.kazemcodes.infinity.feature_library.presentation
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.presentation.layouts.DisplayMode
 import ir.kazemcodes.infinity.core.presentation.layouts.LayoutType
+import ir.kazemcodes.infinity.feature_library.presentation.components.FilterType
 import ir.kazemcodes.infinity.feature_library.presentation.components.SortType
 
 data class LibraryState(
@@ -15,5 +16,6 @@ data class LibraryState(
     val searchQuery: String = "",
     val sortType: SortType = SortType.LastRead,
     val isSortAcs: Boolean = false,
+    val unreadFilter:FilterType = FilterType.Disable
 )
 

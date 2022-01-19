@@ -17,9 +17,9 @@ fun RadioButtonWithTitleComposable(
 ) {
     Row(modifier = modifier
         .fillMaxWidth()
-        .padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+        .padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Start) {
         RadioButton(selected = selected, onClick = { onClick() })
-        Spacer(modifier = modifier.width(8.dp))
+        Spacer(modifier = modifier.width(2.dp))
         MidTextComposable(title = text)
     }
 }

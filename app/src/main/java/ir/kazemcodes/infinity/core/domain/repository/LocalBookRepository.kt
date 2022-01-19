@@ -9,12 +9,23 @@ import ir.kazemcodes.infinity.core.domain.models.BookEntity
 import ir.kazemcodes.infinity.core.domain.models.Chapter
 import ir.kazemcodes.infinity.core.domain.models.ChapterEntity
 import ir.kazemcodes.infinity.core.utils.Resource
+import ir.kazemcodes.infinity.feature_library.presentation.components.FilterType
 import ir.kazemcodes.infinity.feature_library.presentation.components.SortType
 import kotlinx.coroutines.flow.Flow
 
 interface LocalBookRepository {
-    fun getBooks(sortType: SortType,isAsc: Boolean): Flow<PagingData<BookEntity>>
-    fun getAllInLibraryForPagingBooks(sortType : SortType,isAsc:Boolean): PagingSource<Int, BookEntity>
+    fun getBooks(
+        sortType: SortType,
+        isAsc: Boolean,
+        unreadFilter: FilterType,
+    ): Flow<PagingData<BookEntity>>
+
+    fun getAllInLibraryForPagingBooks(
+        sortType: SortType,
+        isAsc: Boolean,
+        unreadFilter: Boolean,
+    ): PagingSource<Int, BookEntity>
+
     fun getAllBooks(): Flow<Resource<List<Book>>>
     fun getBooksById(id: String): Flow<Resource<Book>>
 
@@ -27,8 +38,6 @@ interface LocalBookRepository {
     suspend fun deleteAllBook()
 
 
-
-
     fun getAllExploreBook(): PagingSource<Int, ExploreBook>
 
     fun getExploreBookById(id: String): Flow<Resource<Book>>
@@ -38,7 +47,6 @@ interface LocalBookRepository {
     suspend fun deleteAllExploreBook()
 
     fun getBookById(bookId: String): Flow<Resource<Book>>
-
 
 
     /***************DETAIL SCREEN*************/
@@ -57,7 +65,12 @@ interface LocalChapterRepository {
         source: String,
     ): Flow<Resource<Chapter>>
 
-    suspend fun insertChapters(chapters: List<Chapter>, book : Book, inLibrary : Boolean, source : Source)
+    suspend fun insertChapters(
+        chapters: List<Chapter>,
+        book: Book,
+        inLibrary: Boolean,
+        source: Source,
+    )
 
     suspend fun deleteLastReadChapter(
         bookName: String,
@@ -99,14 +112,6 @@ interface LocalChapterRepository {
     suspend fun deleteNotInLibraryChapters()
 
     suspend fun deleteAllChapters()
-
-
-
-
-
-
-
-
 
 
 }
