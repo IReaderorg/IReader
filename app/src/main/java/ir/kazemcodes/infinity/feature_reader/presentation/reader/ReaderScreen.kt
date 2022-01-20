@@ -1,5 +1,6 @@
 package ir.kazemcodes.infinity.feature_reader.presentation.reader
 
+import android.webkit.WebView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -9,16 +10,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Autorenew
-import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.PublishedWithChanges
-import androidx.compose.material.icons.filled.Sort
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material.icons.filled.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -27,15 +24,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import com.zhuinden.simplestackcomposeintegration.services.rememberService
+import com.zhuinden.simplestackextensions.servicesktx.lookup
+import ir.kazemcodes.infinity.core.presentation.components.ISnackBarHost
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.ErrorTextWithEmojis
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarActionButton
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarBackButton
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarTitle
+import ir.kazemcodes.infinity.core.utils.UiEvent
+import ir.kazemcodes.infinity.core.utils.asString
 import ir.kazemcodes.infinity.feature_activity.presentation.WebViewKey
 import ir.kazemcodes.infinity.feature_reader.presentation.reader.components.MainBottomSettingComposable
 import ir.kazemcodes.infinity.feature_reader.presentation.reader.components.ReaderSettingComposable
 import ir.kazemcodes.infinity.feature_sources.sources.models.FetchType
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 
@@ -48,13 +50,28 @@ fun ReadingScreen(
     val scaffoldState = rememberScaffoldState(rememberDrawerState(DrawerValue.Closed))
     val modalBottomSheetState =
         rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Expanded)
-
     val scope = rememberCoroutineScope()
     val book = viewModel.state.value.book
     val backStack = LocalBackstack.current
     val state = viewModel.state.value
     val interactionSource = remember { MutableInteractionSource() }
+    val context = LocalContext.current
+    val webview = backStack.lookup<WebView>()
+    val isWebViewEnable by remember {
+        mutableStateOf(webview.originalUrl == viewModel.state.value.chapter.link)
+    }
 
+    LaunchedEffect(key1 = true) {
+        viewModel.eventFlow.collectLatest { event ->
+            when (event) {
+                is UiEvent.ShowSnackbar -> {
+                    scaffoldState.snackbarHostState.showSnackbar(
+                        event.uiText.asString(context)
+                    )
+                }
+            }
+        }
+    }
 
     Box(modifier = modifier.fillMaxSize()) {
         Scaffold(topBar = {
@@ -81,6 +98,9 @@ fun ReadingScreen(
                         TopAppBarActionButton(imageVector = Icons.Default.Autorenew,
                             title = "Refresh",
                             onClick = { viewModel.getReadingContentRemotely() })
+                        if (isWebViewEnable) {
+                        TopAppBarActionButton(imageVector = Icons.Default.TrackChanges, title = "Content Fetcher", onClick = { viewModel.getFromWebView() })
+                        }
                         TopAppBarActionButton(imageVector = Icons.Default.Language,
                             title = "WebView",
                             onClick = { backStack.goTo(WebViewKey(url = viewModel.state.value.chapter.link, sourceName = viewModel.state.value.source.name, fetchType = FetchType.Content.index)) })
@@ -94,6 +114,9 @@ fun ReadingScreen(
                         TopAppBarActionButton(imageVector = Icons.Default.Language,
                             title = "WebView",
                             onClick = { backStack.goTo(WebViewKey(url = viewModel.state.value.chapter.link, sourceName = viewModel.state.value.source.name, fetchType = FetchType.Content.index))})
+                        if (isWebViewEnable) {
+                            TopAppBarActionButton(imageVector = Icons.Default.TrackChanges, title = "Content Fetcher", onClick = { viewModel.getFromWebView() })
+                        }
                     },
                     navigationIcon = {
                         TopAppBarBackButton(backStack = backStack)
@@ -101,6 +124,7 @@ fun ReadingScreen(
             }
         },
             scaffoldState = scaffoldState,
+            snackbarHost = { ISnackBarHost(snackBarHostState = it)},
             bottomBar = {
                 if (!state.isReaderModeEnable && state.isLoaded) {
                     ModalBottomSheetLayout(

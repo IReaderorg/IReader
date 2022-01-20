@@ -12,6 +12,8 @@ data class ReaderScreenState(
     val isLoading: Boolean = false,
     val isLoaded: Boolean = false,
     val book: Book = Book.create(),
+    val isBookLoaded:Boolean = false,
+    val isChapterLoaded:Boolean = false,
     val chapter: Chapter = Chapter.create(),
     val chapters: List<Chapter> = emptyList(),
     val drawerChapters : List<Chapter> = emptyList(),

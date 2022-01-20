@@ -1,6 +1,7 @@
 package ir.kazemcodes.infinity.feature_detail.presentation.book_detail
 
 
+import android.webkit.WebView
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -10,8 +11,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,6 +23,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import com.zhuinden.simplestackcomposeintegration.services.rememberService
+import com.zhuinden.simplestackextensions.servicesktx.lookup
 import ir.kazemcodes.infinity.core.data.network.utils.toast
 import ir.kazemcodes.infinity.core.presentation.components.BookImageComposable
 import ir.kazemcodes.infinity.core.presentation.components.ISnackBarHost
@@ -109,6 +110,11 @@ fun BookDetailScreenLoadedComposable(
     val chapters = viewModel.chapterState.value.chapters
     val scaffoldState = rememberScaffoldState()
     val context = LocalContext.current
+    val webview = backStack.lookup<WebView>()
+    val isWebViewEnable by remember {
+        mutableStateOf(webview.originalUrl == viewModel.state.value.book.link)
+    }
+
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
@@ -132,13 +138,16 @@ fun BookDetailScreenLoadedComposable(
                 contentColor = MaterialTheme.colors.onBackground,
                 elevation = 0.dp,
                 actions = {
-                    IconButton(onClick = { viewModel.getFromWebView() }) {
-                        Icon(
-                            imageVector = Icons.Default.TrackChanges,
-                            contentDescription = "Get from webview",
-                            tint = MaterialTheme.colors.onBackground,
-                        )
+                    if (isWebViewEnable) {
+                        IconButton(onClick = { viewModel.getFromWebView() }) {
+                            Icon(
+                                imageVector = Icons.Default.TrackChanges,
+                                contentDescription = "Get from webview",
+                                tint = MaterialTheme.colors.onBackground,
+                            )
+                        }
                     }
+
                     IconButton(onClick = { viewModel.getRemoteChapterDetail() }) {
                         Icon(
                             imageVector = Icons.Default.Autorenew,

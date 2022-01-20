@@ -548,6 +548,61 @@ class AvailableSources(context: Context) {
             authorBookSelector = "div.author-content a"
         )
     )
+    val realLightWebNovel = SourceTower(
+        _name = "RealLightWebNovel",
+        _baseUrl = "https://readlightnovels.net",
+        _supportsSearch = true,
+        _supportsMostPopular = false,
+        _supportsLatest = true,
+        _lang = "en",
+        latest = Latest(
+            endpoint = "/latest/page/{page}",
+            selector = "div.row div.home-truyendecu",
+            nameSelector = "h3",
+            linkSelector = "a",
+            linkAtt = "href",
+            coverSelector = "img",
+            coverAtt = "src",
+            nextPageSelector = "ul.pagination>li:nth-child(6)>a",
+            nextPageValue = "Last"
+        ),
+        content = Content(
+            selector = "div.chapter-content",
+            pageTitleSelector = "a.chapter-title",
+            pageContentSelector = "p"
+        ),
+        chapters = Chapters(
+            isGetRequestType = false,
+            selector = "div.col-xs-12 ul.list-chapter li",
+            nameSelector = "span.chapter-text",
+            linkSelector = "a",
+            linkAtt = "href",
+            supportNextPagesList = true,
+            isChapterStatsFromFirst = true,
+            endpoint = "action=tw_ajax&type=pagination&id=390165&page={page}",
+            chaptersEndpointWithoutPage = ".html",
+        ),
+        detail = Detail(
+            nameSelector = "h2.single_title",
+            coverSelector = "div.book img",
+            coverAtt = "src",
+            descriptionSelector = "div.desc-text p",
+            categorySelector = "div.info>div:nth-child(2)",
+            authorBookSelector = "div.info>div:nth-child(1)>a"
+        ),
+        search = Search(
+            endpoint = "/page/{page}?s={query}",
+            selector = "div.row div.home-truyendecu",
+            nameSelector = "h3",
+            linkSelector = "a",
+            linkAtt = "href",
+            coverSelector = "img",
+            coverAtt = "src",
+            nextPageSelector = "ul.pagination>li:nth-child(6)>a",
+            nextPageValue = "Last"
+
+        )
+    )
 
     val sourcesList = listOf<Source>(
         freeWebNovel,
@@ -557,5 +612,6 @@ class AvailableSources(context: Context) {
         realwebnovel,
         wuxiaworld,
         mtlNation,
+        realLightWebNovel
     )
 }

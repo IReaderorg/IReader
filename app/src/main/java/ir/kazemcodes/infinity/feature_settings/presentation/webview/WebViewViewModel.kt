@@ -76,19 +76,44 @@ class WebViewPageModel(
         coroutineScope.launch {
             when (fetcher) {
                 FetchType.Detail -> {
-                    val book = source.detailParse(Jsoup.parse(webView.getHtml()))
-                    val chapters = source.chaptersParse(Jsoup.parse(webView.getHtml()))
-                    if (!chapters.chapters.isNullOrEmpty()) {
-                        _state.value = state.value.copy(book = book.book, chapters = chapters.chapters)
-                        getLocalBook(book.book)
-                        if (chapters.chapters.isNotEmpty()) {
-                            deleteChapterDetails()
-                            insertChaptersToLocal(chapters.chapters)
-                        }
+                    try {
                         _eventFlow.emit(UiEvent.ShowSnackbar(
-                            uiText = UiText.DynamicString("${book.book.bookName} was fetched with ${chapters.chapters.size} chapters")
+                            uiText = UiText.DynamicString("Trying to fetch...")
+                        ))
+                        val book = source.detailParse(Jsoup.parse(webView.getHtml()))
+                        val chapters = source.chaptersParse(Jsoup.parse(webView.getHtml()))
+                        if (!chapters.chapters.isNullOrEmpty()) {
+                            _state.value =
+                                state.value.copy(book = book.book)
+                            getLocalBook(book.book)
+                            getLocalChaptersByBookName(book.book.bookName)
+                            if (state.value.chapters.isNotEmpty() && chapters.chapters.isNotEmpty()) {
+                                val list = mutableListOf<Chapter>()
+                                val sum = state.value.chapters + chapters.chapters
+
+                                val uniqueList = sum.distinctBy {
+                                    it.title
+                                }.sortedBy { "s(\\d+)".toRegex().matchEntire(it.title)?.groups?.get(1)?.value?.toInt() }
+
+                                list.addAll(uniqueList)
+                                deleteChapterDetails()
+                                insertChaptersToLocal(uniqueList)
+                                _eventFlow.emit(UiEvent.ShowSnackbar(
+                                    uiText = UiText.DynamicString("${book.book.bookName} was fetched with ${chapters.chapters.size}  chapters")
+                                ))
+                            }
+
+                        } else {
+                            _eventFlow.emit(UiEvent.ShowSnackbar(
+                                uiText = UiText.DynamicString("Failed to to get the content")
+                            ))
+                        }
+                    }catch (e:Exception) {
+                        _eventFlow.emit(UiEvent.ShowSnackbar(
+                            uiText = UiText.DynamicString("Failed to to get the content")
                         ))
                     }
+
 
                 }
                 else -> {}
@@ -133,6 +158,27 @@ class WebViewPageModel(
                 }
             }
         }.launchIn(coroutineScope)
+    }
+
+    private fun getLocalChaptersByBookName(bookName: String) {
+        localChapterRepository.getChapterByName(bookName, source.name)
+            .onEach { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        if (!result.data.isNullOrEmpty()) {
+                            _state.value = state.value.copy(
+                                chapters = result.data,
+                            )
+                        }
+                    }
+                    is Resource.Error -> {
+
+                    }
+                    is Resource.Loading -> {
+
+                    }
+                }
+            }.launchIn(coroutineScope)
     }
 
     private fun getLocalBookByName(bookName: String) {

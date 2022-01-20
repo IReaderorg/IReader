@@ -18,8 +18,8 @@ import kotlinx.coroutines.flow.onEach
 class ChapterDetailViewModel(
     private val book: Book,
     private val source: Source,
-    private val localChapterRepository : LocalChapterRepository
-) :  ScopedServices.Registered {
+    private val localChapterRepository: LocalChapterRepository,
+) : ScopedServices.Registered {
 
     private val _state = mutableStateOf(ChapterDetailState(source = source, book = book))
     val state: State<ChapterDetailState> = _state
@@ -41,15 +41,16 @@ class ChapterDetailViewModel(
 
         }
     }
+
     private fun getLocalChapters() {
-        localChapterRepository.getChapterByName(bookName = book.bookName, source = source.name )
+        localChapterRepository.getChapterByName(bookName = book.bookName, source = source.name)
             .onEach { result ->
                 when (result) {
                     is Resource.Success -> {
                         if (!result.data.isNullOrEmpty()) {
                             _state.value = state.value.copy(
                                 chapters = result.data,
-                                localChapters = if (state.value.isReversed ) result.data.reversed() else result.data,
+                                localChapters = if (state.value.isReversed) result.data.reversed() else result.data,
                                 isLoading = false,
                                 error = "")
                         } else {
@@ -68,8 +69,8 @@ class ChapterDetailViewModel(
             }.launchIn(coroutineScope)
     }
 
-    fun getIndexOfChapter(index : Int) : Int {
-        return if (state.value.isReversed) ((state.value.localChapters.size - 1 ) - index) else index
+    fun getIndexOfChapter(index: Int): Int {
+        return if (state.value.isReversed) ((state.value.localChapters.size - 1) - index) else index
     }
 
     override fun onServiceUnregistered() {

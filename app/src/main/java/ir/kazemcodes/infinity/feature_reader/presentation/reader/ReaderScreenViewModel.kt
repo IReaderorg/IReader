@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.view.WindowManager
+import android.webkit.WebView
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import com.zhuinden.simplestack.ScopedServices
@@ -17,12 +18,14 @@ import ir.kazemcodes.infinity.core.domain.repository.RemoteRepository
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.core.presentation.theme.fonts
 import ir.kazemcodes.infinity.core.presentation.theme.readerScreenBackgroundColors
-import ir.kazemcodes.infinity.core.utils.Resource
-import ir.kazemcodes.infinity.core.utils.findAppCompatAcivity
-import ir.kazemcodes.infinity.core.utils.isNull
+import ir.kazemcodes.infinity.core.utils.*
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.jsoup.Jsoup
+import uy.kohesive.injekt.injectLazy
 
 
 class ReaderScreenViewModel(
@@ -39,6 +42,9 @@ class ReaderScreenViewModel(
         mutableStateOf(ReaderScreenState(source = source, currentChapterIndex = chapterIndex))
 
     val state: State<ReaderScreenState> = _state
+
+    private val _eventFlow = MutableSharedFlow<UiEvent>()
+    val eventFlow = _eventFlow.asSharedFlow()
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
@@ -121,6 +127,7 @@ class ReaderScreenViewModel(
                             _state.value = state.value.copy(
                                 chapters = result.data,
                                 drawerChapters = if (state.value.isReversed) result.data.reversed() else result.data,
+                                isChapterLoaded = true
                             )
                         }
                     }
@@ -173,6 +180,31 @@ class ReaderScreenViewModel(
             }.launchIn(coroutineScope)
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun getFromWebView() {
+        val webView by injectLazy<WebView>()
+        coroutineScope.launch {
+            _eventFlow.emit(UiEvent.ShowSnackbar(
+                uiText = UiText.DynamicString("Trying to fetch chapter's content")
+            ))
+
+            val chapter = source.contentFromElementParse(Jsoup.parse(webView.getHtml()))
+            if (!chapter.content.isNullOrEmpty() && state.value.isBookLoaded && state.value.isChapterLoaded && webView.originalUrl == state.value.chapter.link ) {
+                _state.value = state.value.copy(isLoading = false, error = "", chapter = state.value.chapter.copy(content = chapter.content))
+                toggleLastReadAndUpdateChapterContent(state.value.chapter.copy(content = chapter.content))
+
+                _eventFlow.emit(UiEvent.ShowSnackbar(
+                    uiText = UiText.DynamicString("${state.value.chapter.title} of ${state.value.chapter.bookName} was Fetched")
+                ))
+            } else {
+                _eventFlow.emit(UiEvent.ShowSnackbar(
+                    uiText = UiText.DynamicString("Failed to to get the content")
+                ))
+            }
+        }
+
+    }
+
     fun getReadingContentRemotely() {
             remoteRepository.getRemoteReadingContentUseCase(state.value.chapter, source = source)
                 .onEach { result ->
@@ -215,6 +247,7 @@ class ReaderScreenViewModel(
                     if (result.data != null && result.data != Book.create()) {
                         _state.value = state.value.copy(
                             book = result.data,
+                            isBookLoaded = true
                         )
                         localBookRepository.updateLocalBook(book = result.data.copy(lastRead = System.currentTimeMillis(), unread = if (result.data.unread) false else true))
                     }

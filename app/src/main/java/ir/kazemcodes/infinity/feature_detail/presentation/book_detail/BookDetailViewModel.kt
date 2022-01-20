@@ -230,6 +230,10 @@ class BookDetailViewModel(
                 _eventFlow.emit(UiEvent.ShowSnackbar(
                     uiText = UiText.DynamicString("${book.bookName} was fetched with ${chapters.chapters.size} chapters")
                 ))
+            } else {
+                _eventFlow.emit(UiEvent.ShowSnackbar(
+                    uiText = UiText.DynamicString("Failed to to get the content")
+                ))
             }
         }
 
