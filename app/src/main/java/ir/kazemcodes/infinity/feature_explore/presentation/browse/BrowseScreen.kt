@@ -6,8 +6,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -85,7 +85,7 @@ fun BrowserScreen() {
                         },
                     )
                     TopAppBarActionButton(
-                        imageVector = Icons.Default.Menu,
+                        imageVector = Icons.Default.GridView,
                         title = "Menu",
                         onClick = {
                             viewModel.onEvent(BrowseScreenEvents.ToggleMenuDropDown(true))

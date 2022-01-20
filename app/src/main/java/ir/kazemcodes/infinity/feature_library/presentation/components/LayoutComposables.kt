@@ -34,7 +34,6 @@ fun LayoutComposable(
                             sourceName = if (source?.name != null) source.name else book.source
                                 ?: "",
                             isLocal
-
                         )
                     )
                 }, scrollState = scrollState)

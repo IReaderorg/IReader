@@ -22,7 +22,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.jsoup.Jsoup
-import timber.log.Timber
 
 class WebViewPageModel(
     private val url: String,
@@ -76,48 +75,24 @@ class WebViewPageModel(
     fun fetchInfo() {
         coroutineScope.launch {
             when (fetcher) {
-                FetchType.Popular -> {
-                    val docs = source.popularParse(Jsoup.parse(webView.getHtml()))
-                    Timber.d("WebView: ${docs}")
-                }
-                FetchType.Latest -> {
-                    val docs = source.latestParse(Jsoup.parse(webView.getHtml()))
-                    Timber.d("WebView: ${docs}")
-                }
-                FetchType.Search -> {
-                    val docs = source.searchParse(Jsoup.parse(webView.getHtml()))
-                    Timber.d("WebView: ${docs}")
-                }
                 FetchType.Detail -> {
                     val book = source.detailParse(Jsoup.parse(webView.getHtml()))
                     val chapters = source.chaptersParse(Jsoup.parse(webView.getHtml()))
-                    _state.value = state.value.copy(book = book.book, chapters = chapters.chapters)
-                    getLocalBook(book.book)
-                    if (chapters.chapters.isNotEmpty()) {
-                        deleteChapterDetails()
-                        insertChaptersToLocal(chapters.chapters)
+                    if (!chapters.chapters.isNullOrEmpty()) {
+                        _state.value = state.value.copy(book = book.book, chapters = chapters.chapters)
+                        getLocalBook(book.book)
+                        if (chapters.chapters.isNotEmpty()) {
+                            deleteChapterDetails()
+                            insertChaptersToLocal(chapters.chapters)
+                        }
+                        _eventFlow.emit(UiEvent.ShowSnackbar(
+                            uiText = UiText.DynamicString("${book.book.bookName} was fetched with ${chapters.chapters.size} chapters")
+                        ))
                     }
-                    _eventFlow.emit(UiEvent.ShowSnackbar(
-                        uiText = UiText.DynamicString("${book.book.bookName} was fetched with ${chapters.chapters.size} chapters")
-                    ))
-
-                    Timber.d("WebView: ${chapters}")
 
                 }
-                FetchType.Content -> {
-                    val content = source.contentFromElementParse(Jsoup.parse(webView.getHtml()))
-                    localChapterRepository.updateChapter(state.value.chapter!!.toChapterEntity())
-                    _eventFlow.emit(UiEvent.ShowSnackbar(
-                        uiText = UiText.DynamicString("${state.value.book.bookName} content was fetched with ${content.content.size} letter")
-                    ))
-                }
-                FetchType.Chapter -> {
-                    val docs = source.chaptersParse(Jsoup.parse(webView.getHtml()))
-                    Timber.d("WebView: ${docs}")
-                }
+                else -> {}
             }
-            val docs = source?.detailParse(Jsoup.parse(webView.getHtml()))
-            Timber.d("WebView: ${docs}")
         }
 
 

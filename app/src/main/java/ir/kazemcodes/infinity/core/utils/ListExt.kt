@@ -8,3 +8,12 @@ fun <T> merge(first: List<T>, second: List<T>): List<T> {
         }
     }
 }
+
+fun Any.onCondition(condition: Boolean?,doThis: (item:Any) -> Unit) : Any {
+    if (condition == true) {
+
+        return doThis(this)
+    } else {
+        return this
+    }
+}

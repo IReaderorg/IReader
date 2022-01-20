@@ -578,7 +578,7 @@ data class SourceTower constructor(
                     this.chapters?.ajaxSelector), isWebViewMode = true)
         }
 
-        return chapters
+        return chapters.copy(if (this.chapters?.isChapterStatsFromFirst == true) chapters.chapters else chapters.chapters.reversed() )
     }
 
     /**

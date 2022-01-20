@@ -1,5 +1,6 @@
 package ir.kazemcodes.infinity.core.utils
 
+import android.annotation.SuppressLint
 import android.webkit.WebView
 import ir.kazemcodes.infinity.core.data.network.models.Source
 import ir.kazemcodes.infinity.feature_sources.sources.Extensions
@@ -12,8 +13,10 @@ import uy.kohesive.injekt.injectLazy
 import java.net.URI
 import java.net.URISyntaxException
 
+@SuppressLint("SetJavaScriptEnabled")
 @ExperimentalCoroutinesApi
 suspend fun WebView.getHtml(): String = suspendCancellableCoroutine { continuation ->
+    settings.javaScriptEnabled = true
     if (!settings.javaScriptEnabled)
         throw IllegalStateException("Javascript is disabled")
 

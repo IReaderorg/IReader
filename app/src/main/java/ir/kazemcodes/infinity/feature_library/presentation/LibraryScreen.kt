@@ -131,7 +131,7 @@ fun LibraryScreen() {
                             books = if (!state.inSearchMode) books else books,
                             layout = state.layout,
                             backStack = backstack,
-                            isLocal = false
+                            isLocal = true
                         )
                     }
                 }

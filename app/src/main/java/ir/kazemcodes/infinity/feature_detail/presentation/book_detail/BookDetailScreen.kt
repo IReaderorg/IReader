@@ -11,6 +11,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,10 +25,9 @@ import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import com.zhuinden.simplestackcomposeintegration.services.rememberService
 import ir.kazemcodes.infinity.core.data.network.utils.toast
 import ir.kazemcodes.infinity.core.presentation.components.BookImageComposable
+import ir.kazemcodes.infinity.core.presentation.components.ISnackBarHost
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.ErrorTextWithEmojis
-import ir.kazemcodes.infinity.core.utils.formatBasedOnDot
-import ir.kazemcodes.infinity.core.utils.formatList
-import ir.kazemcodes.infinity.core.utils.getUrlWithoutDomain
+import ir.kazemcodes.infinity.core.utils.*
 import ir.kazemcodes.infinity.feature_activity.presentation.ChapterDetailKey
 import ir.kazemcodes.infinity.feature_activity.presentation.ReaderScreenKey
 import ir.kazemcodes.infinity.feature_activity.presentation.WebViewKey
@@ -36,6 +36,7 @@ import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.components
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.components.DotsFlashing
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.components.ExpandingText
 import ir.kazemcodes.infinity.feature_sources.sources.models.FetchType
+import kotlinx.coroutines.flow.collectLatest
 
 
 @Composable
@@ -45,7 +46,7 @@ fun BookDetailScreen(
     val viewModel = rememberService<BookDetailViewModel>()
     val detailState = viewModel.state.value
     val backStack = LocalBackstack.current
-
+    
 
     Box(modifier = Modifier.fillMaxSize()) {
         if (viewModel.state.value.loaded) {
@@ -66,7 +67,12 @@ fun BookDetailScreen(
                             )
                         }
                     })
-            }) {
+            },
+                snackbarHost = {
+                    ISnackBarHost(it)
+                }
+
+                ) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     if (detailState.error.isNotBlank()) {
                         ErrorTextWithEmojis(error = detailState.error, modifier = Modifier
@@ -101,8 +107,21 @@ fun BookDetailScreenLoadedComposable(
     val inLibrary = viewModel.state.value.inLibrary
     val book = viewModel.state.value.book
     val chapters = viewModel.chapterState.value.chapters
+    val scaffoldState = rememberScaffoldState()
     val context = LocalContext.current
-    Scaffold(
+    LaunchedEffect(key1 = true) {
+        viewModel.eventFlow.collectLatest { event ->
+            when (event) {
+                is UiEvent.ShowSnackbar -> {
+                    scaffoldState.snackbarHostState.showSnackbar(
+                        event.uiText.asString(context)
+                    )
+                }
+            }
+        }
+    }
+
+        Scaffold(
         topBar = {
             TopAppBar(
                 title = {},
@@ -113,6 +132,13 @@ fun BookDetailScreenLoadedComposable(
                 contentColor = MaterialTheme.colors.onBackground,
                 elevation = 0.dp,
                 actions = {
+                    IconButton(onClick = { viewModel.getFromWebView() }) {
+                        Icon(
+                            imageVector = Icons.Default.TrackChanges,
+                            contentDescription = "Get from webview",
+                            tint = MaterialTheme.colors.onBackground,
+                        )
+                    }
                     IconButton(onClick = { viewModel.getRemoteChapterDetail() }) {
                         Icon(
                             imageVector = Icons.Default.Autorenew,
@@ -131,6 +157,7 @@ fun BookDetailScreenLoadedComposable(
                         )
                     }
 
+
                 },
                 navigationIcon = {
                     IconButton(onClick = { backStack.goBack() }) {
@@ -143,7 +170,8 @@ fun BookDetailScreenLoadedComposable(
 
                 }
             )
-        }, bottomBar = {
+        }, scaffoldState = scaffoldState, snackbarHost = { ISnackBarHost(snackBarHostState = it)},
+            bottomBar = {
             BottomAppBar(
                 modifier = modifier.fillMaxWidth(),
                 backgroundColor = MaterialTheme.colors.background,

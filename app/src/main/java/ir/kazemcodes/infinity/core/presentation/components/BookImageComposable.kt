@@ -1,6 +1,7 @@
 package ir.kazemcodes.infinity.core.presentation.components
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -22,6 +23,7 @@ fun BookImageComposable(
     modifier: Modifier = Modifier,
     alignment: Alignment = Alignment.TopCenter,
     contentScale: ContentScale = ContentScale.FillHeight,
+    iconBadge: (@Composable () -> Unit)? = null
 ) {
     val context = LocalContext.current
     val backstack = LocalBackstack.current
@@ -36,11 +38,17 @@ fun BookImageComposable(
         diskCachePolicy(CachePolicy.READ_ONLY)
 
     }
-    Image(
-        modifier = modifier,
-        painter = painter,
-        contentDescription = "image",
-        alignment = alignment,
-        contentScale = contentScale,
-    )
+    Box() {
+        Image(
+            modifier = modifier,
+            painter = painter,
+            contentDescription = "image",
+            alignment = alignment,
+            contentScale = contentScale,
+        )
+        if (iconBadge != null) {
+            iconBadge()
+        }
+    }
+
 }

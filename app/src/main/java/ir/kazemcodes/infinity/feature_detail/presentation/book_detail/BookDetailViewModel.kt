@@ -1,6 +1,7 @@
 package ir.kazemcodes.infinity.feature_detail.presentation.book_detail
 
 import android.content.Context
+import android.webkit.WebView
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.work.*
@@ -13,15 +14,18 @@ import ir.kazemcodes.infinity.core.domain.repository.LocalChapterRepository
 import ir.kazemcodes.infinity.core.domain.repository.RemoteRepository
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.core.utils.Resource
+import ir.kazemcodes.infinity.core.utils.UiEvent
+import ir.kazemcodes.infinity.core.utils.UiText
+import ir.kazemcodes.infinity.core.utils.getHtml
 import ir.kazemcodes.infinity.feature_activity.domain.service.DownloadService
 import ir.kazemcodes.infinity.feature_activity.domain.service.DownloadService.Companion.DOWNLOAD_BOOK_NAME
 import ir.kazemcodes.infinity.feature_activity.domain.service.DownloadService.Companion.DOWNLOAD_SERVICE_NAME
 import ir.kazemcodes.infinity.feature_activity.domain.service.DownloadService.Companion.DOWNLOAD_SOURCE_NAME
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.*
+import org.jsoup.Jsoup
 import timber.log.Timber
+import uy.kohesive.injekt.injectLazy
 
 class BookDetailViewModel(
     private val source: Source,
@@ -40,6 +44,10 @@ class BookDetailViewModel(
     lateinit var work: OneTimeWorkRequest
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+
+
+    private val _eventFlow = MutableSharedFlow<UiEvent>()
+    val eventFlow = _eventFlow.asSharedFlow()
 
     override fun onServiceRegistered() {
     }
@@ -202,6 +210,35 @@ class BookDetailViewModel(
             }.launchIn(coroutineScope)
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun getFromWebView() {
+        val webView by injectLazy<WebView>()
+        coroutineScope.launch {
+            _eventFlow.emit(UiEvent.ShowSnackbar(
+                uiText = UiText.DynamicString("Trying to fetch Details")
+            ))
+            val book = source.detailParse(Jsoup.parse(webView.getHtml())).book
+            val chapters = source.chaptersParse(Jsoup.parse(webView.getHtml()))
+            if (!chapters.chapters.isNullOrEmpty()) {
+                deleteChapterDetails()
+                insertChaptersToLocal(chapters.chapters)
+                insertBookDetailToLocal(state.value.book.copy(category = book.category,
+                    status = book.status,
+                    description = book.description,
+                    author = book.author,
+                    rating = book.rating))
+                _eventFlow.emit(UiEvent.ShowSnackbar(
+                    uiText = UiText.DynamicString("${book.bookName} was fetched with ${chapters.chapters.size} chapters")
+                ))
+            }
+        }
+
+    }
+    fun deleteChapterDetails() {
+        coroutineScope.launch(Dispatchers.IO) {
+            localChapterRepository.deleteChapters(state.value.book.bookName, source.name)
+        }
+    }
     private fun readLastReadBook() {
         val lastChapter = chapterState.value.chapters.findLast {
             it.lastRead
