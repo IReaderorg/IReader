@@ -35,6 +35,7 @@ Infinity is a free and open source applicaiton for Android.
 | -------- | ---------------------------------------------------------- | ------------------------------------------------------------ |
 | Library  | ![library_view_dark](screenshots/library-dark.jpeg)         | ![library_view_light](/screenshots/library-light.jpeg)         |
 | Book     | ![book_view_dark](screenshots/detail-dark.jpeg)               | ![book_view_light](screenshots/detail-light.jpeg)               |
+| Reader     | ![book_view_dark](screenshots/reader-dark.png)               | ![book_view_light](screenshots/reader-light.png)               |
 
 ## License
 
