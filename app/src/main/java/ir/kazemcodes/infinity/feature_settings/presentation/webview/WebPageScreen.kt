@@ -55,7 +55,7 @@ fun WebPageScreen() {
                         TopAppBarActionButton(imageVector = Icons.Default.TrackChanges,
                             title = "Menu",
                             onClick = {
-                                viewModel.fetchInfo()
+                                viewModel.getInfo()
                             })
                     }
                 },

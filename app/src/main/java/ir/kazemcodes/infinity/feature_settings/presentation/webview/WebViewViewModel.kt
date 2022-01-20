@@ -11,6 +11,7 @@ import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
 import ir.kazemcodes.infinity.core.domain.repository.LocalBookRepository
 import ir.kazemcodes.infinity.core.domain.repository.LocalChapterRepository
+import ir.kazemcodes.infinity.core.presentation.components.WebViewFetcher
 import ir.kazemcodes.infinity.core.utils.Resource
 import ir.kazemcodes.infinity.core.utils.UiEvent
 import ir.kazemcodes.infinity.core.utils.UiText
@@ -42,8 +43,15 @@ class WebViewPageModel(
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
+    val viewModelExt = WebViewFetcher(coroutineScope = coroutineScope,
+        source = source,
+        fetcher = fetcher,
+        localBookRepository = localBookRepository,
+        localChapterRepository = localChapterRepository,
+        url = url)
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
+
 
     fun onEvent(event: WebPageEvent) {
         when (event) {
@@ -71,6 +79,32 @@ class WebViewPageModel(
 
     }
 
+    fun getInfo() {
+        viewModelExt.fetchInfo().onEach { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        if (result.data != null) {
+                            _eventFlow.emit(UiEvent.ShowSnackbar(
+                                uiText =result.data
+                            ))
+                        }
+                    }
+                    is Resource.Error -> {
+                        _eventFlow.emit(UiEvent.ShowSnackbar(
+                            uiText = UiText.DynamicString(result.message.toString()) ?: UiText.DynamicString("Failed to to get the content")
+                        ))
+                    }
+                    is Resource.Loading -> {
+                        _eventFlow.emit(UiEvent.ShowSnackbar(
+                            uiText = UiText.DynamicString("Trying to fetch...")
+                        ))
+                    }
+                }
+            }.launchIn(coroutineScope)
+
+    }
+
+
     @OptIn(ExperimentalCoroutinesApi::class)
     fun fetchInfo() {
         coroutineScope.launch {
@@ -93,7 +127,10 @@ class WebViewPageModel(
 
                                 val uniqueList = sum.distinctBy {
                                     it.title
-                                }.sortedBy { "s(\\d+)".toRegex().matchEntire(it.title)?.groups?.get(1)?.value?.toInt() }
+                                }.sortedBy {
+                                    "s(\\d+)".toRegex()
+                                        .matchEntire(it.title)?.groups?.get(1)?.value?.toInt()
+                                }
 
                                 list.addAll(uniqueList)
                                 deleteChapterDetails()
@@ -108,7 +145,7 @@ class WebViewPageModel(
                                 uiText = UiText.DynamicString("Failed to to get the content")
                             ))
                         }
-                    }catch (e:Exception) {
+                    } catch (e: Exception) {
                         _eventFlow.emit(UiEvent.ShowSnackbar(
                             uiText = UiText.DynamicString("Failed to to get the content")
                         ))
@@ -122,6 +159,7 @@ class WebViewPageModel(
 
 
     }
+
 
     fun insertChaptersToLocal(chapters: List<Chapter>) {
         coroutineScope.launch(Dispatchers.IO) {
