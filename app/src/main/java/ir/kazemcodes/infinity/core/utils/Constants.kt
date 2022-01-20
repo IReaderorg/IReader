@@ -41,6 +41,8 @@ object Constants {
 
     const val CLOUDFLARE_PROTECTION_ERROR = "Cloudflare site protection is enable"
 
+    const val UNKNOWN_ERROR = "Unknown Error Happened"
+
 
 
 }

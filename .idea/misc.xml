@@ -3,6 +3,12 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/drawable/baseline_close_24.xml" value="0.27025641025641023" />
+        <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/drawable/baseline_info_20.xml" value="0.27025641025641023" />
+        <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/drawable/baseline_info_24.xml" value="0.27025641025641023" />
+        <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/drawable/baseline_refresh_24.xml" value="0.27025641025641023" />
+        <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/drawable/baseline_upgrade_24.xml" value="0.27025641025641023" />
+        <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/drawable/baseline_warning_24.xml" value="0.27025641025641023" />
         <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/drawable/ic_increase_text_size.xml" value="0.11574074074074074" />
         <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/drawable/ic_launcher_background.xml" value="0.11574074074074074" />
         <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/drawable/ic_placeholder.xml" value="0.11574074074074074" />

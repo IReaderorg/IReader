@@ -21,6 +21,7 @@ data class ExploreBook(
     val rating: Int = 0,
     val source: String? = null,
     val isExploreMode:Boolean = false,
+    val lastUpdated:Long = 0
 ) {
     fun toBook(): Book {
         return Book(

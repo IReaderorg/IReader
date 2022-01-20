@@ -5,6 +5,7 @@ import ir.kazemcodes.infinity.core.data.network.models.ChapterPage
 import ir.kazemcodes.infinity.core.data.network.models.ChaptersPage
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
+import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.Constants
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.Constants.CLOUDFLARE_LOG
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.Constants.CLOUDFLARE_PROTECTION_ERROR
 import org.jsoup.nodes.Document
@@ -123,6 +124,7 @@ abstract class ParsedHttpSource() : HttpSource() {
 
 
     override fun searchParse(document: Document, page: Int,isWebViewMode : Boolean): BooksPage {
+
         val isCloudflareEnable = document.body().allElements.text().contains(CLOUDFLARE_LOG)
 
         /**
@@ -138,7 +140,7 @@ abstract class ParsedHttpSource() : HttpSource() {
             document.select(selector).first()
         } != null
 
-        return BooksPage(books, hasNextPage)
+        return BooksPage(books, hasNextPage, errorMessage = if (isCloudflareEnable) Constants.CLOUDFLARE_PROTECTION_ERROR else "")
     }
 
     /****************************************************************************************************/

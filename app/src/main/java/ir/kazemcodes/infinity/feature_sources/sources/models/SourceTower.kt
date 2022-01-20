@@ -83,16 +83,31 @@ data class SourceTower constructor(
 
     /****************************REQUESTS**********************************************************/
 
-    override fun popularRequest(page: Int): Request =
-        GET("$baseUrl${
-            getUrlWithoutDomain(popular?.endpoint?.applyPageFormat(page) ?: "")
-        }")
+    override fun popularRequest(page: Int): Request {
+        return if (popular?.isGetRequestType == true) {
+            GET("$baseUrl${
+                getUrlWithoutDomain(popular?.endpoint?.applyPageFormat(page) ?: "")
+            }")
+        } else {
+            POST("$baseUrl${
+                getUrlWithoutDomain(popular?.endpoint?.applyPageFormat(page) ?: "")
+            }")
+        }
+    }
+
 
     override fun latestRequest(page: Int): Request {
-        return GET(
-            "$baseUrl${
+        return if (latest?.isGetRequestType == true) {
+            GET(
+                "$baseUrl${
+                    getUrlWithoutDomain(latest?.endpoint?.applyPageFormat(page) ?: "")
+                }")
+        } else {
+            POST("$baseUrl${
                 getUrlWithoutDomain(latest?.endpoint?.applyPageFormat(page) ?: "")
             }")
+        }
+
     }
 
     var nextChapterListLink: String = ""
@@ -109,7 +124,7 @@ data class SourceTower constructor(
         if (!chapters?.subStringSomethingAtEnd.isNullOrEmpty()) {
             url = book.link + chapters?.subStringSomethingAtEnd
         }
-        if (chapters?.isHtmlType == true) {
+        if (chapters?.isGetRequestType == true) {
             return GET(baseUrl + getUrlWithoutDomain(url))
         } else {
             return POST(baseUrl + getUrlWithoutDomain(url))
@@ -117,7 +132,7 @@ data class SourceTower constructor(
     }
 
     override fun searchRequest(page: Int, query: String): Request {
-        if (search?.isHtmlType == true) {
+        if (search?.isGetRequestType == true) {
             return GET("$baseUrl${
                 getUrlWithoutDomain(fetchSearchEndpoint?.replace(searchQueryFormat,
                     query) ?: "")
@@ -133,7 +148,11 @@ data class SourceTower constructor(
     }
 
     override fun contentRequest(chapter: Chapter): Request {
-        return GET(baseUrl + getUrlWithoutDomain(chapter.link), headers)
+        return if (chapters?.isGetRequestType == true) {
+            GET(baseUrl + getUrlWithoutDomain(chapter.link), headers)
+        } else {
+            POST(baseUrl + getUrlWithoutDomain(chapter.link), headers)
+        }
     }
     /****************************REQUESTS**********************************************************/
 
@@ -155,7 +174,7 @@ data class SourceTower constructor(
         book.link = baseUrl + getUrlWithoutDomain(selectorReturnerStringType(element,
             selectorLink,
             attLink).shouldSubstring(popular?.addBaseUrlToLink, baseUrl))
-        book.bookName = selectorReturnerStringType(element, selectorName, attName)
+        book.bookName = selectorReturnerStringType(element, selectorName, attName).formatHtmlText()
         book.coverLink = selectorReturnerStringType(element, selectorCover, attCover)
 
 
@@ -176,7 +195,7 @@ data class SourceTower constructor(
         book.link = baseUrl + getUrlWithoutDomain(selectorReturnerStringType(element,
             selectorLink,
             attLink).shouldSubstring(latest?.addBaseUrlToLink, baseUrl))
-        book.bookName = selectorReturnerStringType(element, selectorName, attName)
+        book.bookName = selectorReturnerStringType(element, selectorName, attName).formatHtmlText()
         book.coverLink = selectorReturnerStringType(element, selectorCover, attCover)
 
 
@@ -196,7 +215,7 @@ data class SourceTower constructor(
         chapter.link = baseUrl + getUrlWithoutDomain(selectorReturnerStringType(element,
             selectorLink,
             attLink).shouldSubstring(chapters?.addBaseUrlToLink, baseUrl))
-        chapter.title = selectorReturnerStringType(element, selectorName, attName)
+        chapter.title = selectorReturnerStringType(element, selectorName, attName).formatHtmlText()
         chapter.haveBeenRead = false
 
 
@@ -212,10 +231,8 @@ data class SourceTower constructor(
         val selectorCover = search?.coverSelector
         val attCover = search?.coverAtt
 
-        book.link = baseUrl + getUrlWithoutDomain(selectorReturnerStringType(element,
-            selectorLink,
-            attLink).shouldSubstring(search?.addBaseUrlToLink, baseUrl))
-        book.bookName = selectorReturnerStringType(element, selectorName, attName)
+        book.link = baseUrl + getUrlWithoutDomain(selectorReturnerStringType(element, selectorLink, attLink).shouldSubstring(search?.addBaseUrlToLink, baseUrl))
+        book.bookName = selectorReturnerStringType(element, selectorName, attName).formatHtmlText()
         book.coverLink = selectorReturnerStringType(element, selectorCover, attCover)
 
         return book
@@ -242,7 +259,7 @@ data class SourceTower constructor(
                 latestFromElement(element)
             })
         } else {
-            val crudeJson = Jsoup.parse(document.html()).text().trim()
+            val crudeJson = document.html()
             val json = JsonPath.parse(crudeJson)
             val selector = json?.read<List<Map<String, String>>>(this.latest?.selector ?: "")
             selector?.forEach { jsonObject ->
@@ -365,8 +382,8 @@ data class SourceTower constructor(
             val contentAtt = content.pageContentAtt
             val titleSelector = content.pageTitleSelector
             val titleAtt = content.pageTitleAtt
-            val title = selectorReturnerStringType(document, titleSelector, titleAtt)
-            val page = selectorReturnerListType(document, contentSelector, contentAtt)
+            val title = selectorReturnerStringType(document, titleSelector, titleAtt).formatHtmlText()
+            val page = selectorReturnerListType(document, contentSelector, contentAtt).map { it.formatHtmlText() }
             contentList.addAll(merge(listOf(title), page))
         } else {
             val crudeJson = Jsoup.parse(document.html()).text().trim()
@@ -399,20 +416,27 @@ data class SourceTower constructor(
              */
             books.addAll(document.select(searchSelector).map { element ->
                 searchFromElement(element)
-            }.filter {
-                it.bookName.isNotBlank()
             })
         } else {
-            val crudeJson = Jsoup.parse(document.html()).text().trim()
-            val json = JsonPath.parse(crudeJson)
-            val selector = json?.read<List<Map<String, String>>>(search?.selector ?: "")
-            selector?.forEach { jsonObject ->
-                books.add(searchBookFromJson(jsonObject))
-            }
+
+
+                val crudeJson = Jsoup.parse(document.html()).text().trim()
+                val json = JsonPath.parse(crudeJson)
+
+                val selector = json?.read<List<Map<String, String>>>(search?.selector ?: "")
+                selector?.forEach { jsonObject ->
+                    books.add(searchBookFromJson(jsonObject))
+                }
+
         }
         val hasNextPage = false
 
-        return BooksPage(books, hasNextPage, ajaxLoaded = ajaxLoaded)
+        return BooksPage(
+            books,
+            hasNextPage,
+            ajaxLoaded = ajaxLoaded,
+            errorMessage = if (isCloudflareEnable) Constants.CLOUDFLARE_PROTECTION_ERROR else "",
+        )
     }
 
     override fun popularParse(document: Document, page: Int, isWebViewMode: Boolean): BooksPage {
@@ -426,7 +450,11 @@ data class SourceTower constructor(
             document.select(selector).first()
         } != null
 
-        return BooksPage(books, hasNextPage)
+        return BooksPage(
+            books,
+            hasNextPage,
+            errorMessage = if (isCloudflareEnable) Constants.CLOUDFLARE_PROTECTION_ERROR else "",
+        )
     }
 
     /****************************PARSE FROM JSON**********************************/
@@ -434,7 +462,7 @@ data class SourceTower constructor(
         val chapter = Chapter.create()
         val mName = chapters?.nameSelector
         val mLink = chapters?.linkSelector
-        chapter.title = jsonObject[mName]?.replace("</strong>", "") ?: ""
+        chapter.title = jsonObject[mName]?.formatHtmlText() ?: ""
         chapter.link = jsonObject[mLink] ?: ""
         chapter.haveBeenRead = false
         return chapter
@@ -445,7 +473,7 @@ data class SourceTower constructor(
         val mName = search?.nameSelector
         val mLink = search?.linkSelector
         val mCover = search?.coverSelector
-        book.bookName = jsonObject[mName]?.replace("</strong>", "") ?: ""
+        book.bookName = jsonObject[mName]?.formatHtmlText() ?: ""
         book.link = jsonObject[mLink] ?: ""
         book.coverLink = jsonObject[mCover]
         return book
@@ -459,11 +487,11 @@ data class SourceTower constructor(
         val mAuthor = detail?.authorBookSelector
         val mCategory = detail?.categorySelector
 
-        book.bookName = jsonObject[mName]?.replace("</strong>", "") ?: ""
+        book.bookName = jsonObject[mName]?.formatHtmlText() ?: ""
         book.coverLink = jsonObject[mCover]
         book.description = listOf(jsonObject[mDescription] ?: "").map { it.formatHtmlText() }
-        book.author = jsonObject[mAuthor]
-        book.category = listOf(jsonObject[mCategory] ?: "")
+        book.author = jsonObject[mAuthor]?.formatHtmlText() ?:""
+        book.category = listOf(jsonObject[mCategory]?.formatHtmlText() ?: "")
 
 
         return book
@@ -471,31 +499,35 @@ data class SourceTower constructor(
 
     fun latestFromJson(jsonObject: Map<String, String>): Book {
         val book = Book.create()
-        val mName = search?.nameSelector
-        val mLink = search?.linkSelector
-        val mCover = search?.coverSelector
-        book.bookName = jsonObject[mName]?.replace("</strong>", "") ?: ""
+        val mName = latest?.nameSelector
+        val mLink = latest?.linkSelector
+        val mCover = latest?.coverSelector
+        val mId = latest?.idSelector
+        book.bookName = jsonObject[mName]?.formatHtmlText() ?: ""
         book.link = jsonObject[mLink] ?: ""
         book.coverLink = jsonObject[mCover]
+        book.id = jsonObject[mId]?:""
         return book
     }
 
     fun popularFromJson(jsonObject: Map<String, String>): Book {
         val book = Book.create()
-        val mName = search?.nameSelector
-        val mLink = search?.linkSelector
-        val mCover = search?.coverSelector
-        book.bookName = jsonObject[mName]?.replace("</strong>", "") ?: ""
+        val mName = popular?.nameSelector
+        val mLink = popular?.linkSelector
+        val mCover = popular?.coverSelector
+        book.bookName = jsonObject[mName]?.formatHtmlText() ?: ""
         book.link = jsonObject[mLink] ?: ""
         book.coverLink = jsonObject[mCover]
         return book
     }
 
     fun contentFromJson(jsonObject: Map<String, String>): Chapter {
+
         val chapter = Chapter.create()
+
         val mContent = content?.pageContentSelector
 
-        chapter.content = listOf(jsonObject[mContent]?.replace("</strong>", "") ?: "")
+        chapter.content = listOf(jsonObject[mContent]?.formatHtmlText()?: "")
 
         return chapter
     }
@@ -639,9 +671,7 @@ data class SourceTower constructor(
         var books = searchBookParse(request, page)
         if (books.errorMessage.isNotBlank() || request.code != 200 || !books.ajaxLoaded) {
             books =
-                searchParse(network.getHtmlFromWebView(baseUrl + fetchSearchEndpoint?.applySearchFormat(
-                    query,
-                    page)), page = page, isWebViewMode = true)
+                searchParse(network.getHtmlFromWebView(baseUrl + fetchSearchEndpoint?.applySearchFormat(query, page)), page = page, isWebViewMode = true)
         }
         return books
     }

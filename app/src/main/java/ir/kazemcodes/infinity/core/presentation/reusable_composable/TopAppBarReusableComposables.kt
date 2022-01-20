@@ -42,6 +42,7 @@ fun TopAppBarTitle(
         textAlign = TextAlign.Center,
     )
 }
+
 @Composable
 fun MidTextComposable(
     modifier: Modifier = Modifier,
@@ -50,6 +51,7 @@ fun MidTextComposable(
     style: TextStyle? = null,
     fontWeight: FontWeight? = null,
     overflow: TextOverflow? = null,
+    maxLine: Int = Int.MAX_VALUE,
 ) {
     Text(
         modifier = modifier,
@@ -59,6 +61,28 @@ fun MidTextComposable(
         fontWeight = fontWeight ?: FontWeight.SemiBold,
         overflow = overflow ?: TextOverflow.Ellipsis,
         textAlign = TextAlign.Center,
+        maxLines = maxLine
+    )
+}
+@Composable
+fun SmallTextComposable(
+    modifier: Modifier = Modifier,
+    title: String,
+    color: Color? = null,
+    style: TextStyle? = null,
+    fontWeight: FontWeight? = null,
+    overflow: TextOverflow? = null,
+    maxLine: Int = Int.MAX_VALUE,
+) {
+    Text(
+        modifier = modifier,
+        text = title,
+        color = color ?: MaterialTheme.colors.onBackground,
+        style = style ?: MaterialTheme.typography.caption,
+        fontWeight = fontWeight ?: FontWeight.SemiBold,
+        overflow = overflow ?: TextOverflow.Ellipsis,
+        textAlign = TextAlign.Center,
+        maxLines = maxLine
     )
 }
 

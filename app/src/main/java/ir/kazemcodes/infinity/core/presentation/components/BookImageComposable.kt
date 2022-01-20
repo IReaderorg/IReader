@@ -9,6 +9,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
+import coil.request.CachePolicy
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import com.zhuinden.simplestackextensions.servicesktx.lookup
 import ir.kazemcodes.infinity.R
@@ -31,6 +32,8 @@ fun BookImageComposable(
         crossfade(durationMillis = 700)
         placeholder(R.drawable.ic_no_image_placeholder)
         error(R.drawable.ic_no_image_placeholder)
+        memoryCachePolicy(CachePolicy.ENABLED)
+        diskCachePolicy(CachePolicy.READ_ONLY)
 
     }
     Image(

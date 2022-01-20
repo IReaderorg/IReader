@@ -26,6 +26,8 @@ data class Latest(
     override val nextPageSelector: String? = null,
     override val nextPageAtt: String? = null,
     override val nextPageValue: String? = null,
+    override val addToStringEnd: String? = null,
+    override val idSelector: String?=null,
     val linkSelector: String? = null,
     val linkAtt: String? = null,
     val nameSelector: String? = null,
@@ -34,6 +36,7 @@ data class Latest(
     val coverAtt: String? = null,
     val supportPageList: Boolean = false,
     val maxPageIndex: Int? = null,
+
 ) : Fetcher
 /**
  * @param endpoint the endpint of site: sample:"https://freewebnovel.com"
@@ -60,6 +63,8 @@ data class Popular(
     override val nextPageSelector: String? = null,
     override val nextPageAtt: String? = null,
     override val nextPageValue: String? = null,
+    override val addToStringEnd: String? = null,
+    override val idSelector: String?=null,
     val linkSelector: String? = null,
     val linkAtt: String? = null,
     val nameSelector: String? = null,
@@ -92,6 +97,8 @@ data class Detail(
     override val nextPageSelector: String? = null,
     override val nextPageAtt: String? = null,
     override val nextPageValue: String? = null,
+    override val addToStringEnd: String? = null,
+    override val idSelector: String?=null,
     val nameSelector: String? = null,
     val nameAtt: String? = null,
     val coverSelector: String? = null,
@@ -128,6 +135,8 @@ data class Search(
     override val nextPageSelector: String? = null,
     override val nextPageAtt: String? = null,
     override val nextPageValue: String? = null,
+    override val addToStringEnd: String? = null,
+    override val idSelector: String?=null,
     val linkSelector: String? = null,
     val linkAtt: String? = null,
     val linkSearchedSubString: Boolean = false,
@@ -161,6 +170,8 @@ data class Chapters(
     override val nextPageSelector: String? = null,
     override val nextPageAtt: String? = null,
     override val nextPageValue: String? = null,
+    override val addToStringEnd: String? = null,
+    override val idSelector: String?=null,
     val isDownloadable: Boolean = false,
     val chaptersEndpointWithoutPage: String? = null,
     val isChapterStatsFromFirst: Boolean? = null,
@@ -197,6 +208,8 @@ data class Content(
     override val nextPageSelector: String? = null,
     override val nextPageAtt: String? = null,
     override val nextPageValue: String? = null,
+    override val addToStringEnd: String? = null,
+    override val idSelector: String?=null,
     val pageTitleSelector: String? = null,
     val pageTitleAtt: String? = null,
     val pageContentSelector: String? = null,
@@ -212,6 +225,8 @@ interface Fetcher {
     val isGetRequestType: Boolean
     val selector: String?
     val addBaseUrlToLink: Boolean
+    val addToStringEnd : String?
+    val idSelector:String?
     val openInWebView: Boolean
     val nextPageSelector: String?
     val nextPageAtt: String?

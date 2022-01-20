@@ -106,20 +106,20 @@ class RemoteRepositoryImpl(
     override fun getRemoteBooksUseCase(
         source: Source,
         exploreType: ExploreType,
-        query: String?
-    ): Flow<PagingData<ExploreBook>> {
-        return Pager(
-            config = PagingConfig(pageSize = Constants.DEFAULT_PAGE_SIZE,
-                maxSize = Constants.MAX_PAGE_SIZE),
-            pagingSourceFactory = {
-                localBookRepository.getAllExploreBook()
-            }, remoteMediator = ExploreRemoteMediator(
-                source = source,
-                database = database,
-                exploreType = exploreType,
-                query = query
-            )
-        ).flow
+        query: String?,
+    ): Flow<PagingData<ExploreBook>>  {
+            return Pager(
+                config = PagingConfig(pageSize = Constants.DEFAULT_PAGE_SIZE,
+                    maxSize = Constants.MAX_PAGE_SIZE),
+                pagingSourceFactory = {
+                    localBookRepository.getAllExploreBook()
+                }, remoteMediator = ExploreRemoteMediator(
+                    source = source,
+                    database = database,
+                    exploreType = exploreType,
+                    query = query
+                ),
+            ).flow
     }
 
 
@@ -128,8 +128,8 @@ class RemoteRepositoryImpl(
         source: Source,
     ): Flow<Resource<List<Chapter>>> =
         flow {
-            emit(Resource.Loading())
             try {
+                emit(Resource.Loading())
                 Timber.d("Timber: GetRemoteChaptersUseCase was Called")
                 val chapters = mutableListOf<Chapter>()
                 var currentPage = 1
@@ -171,7 +171,9 @@ class RemoteRepositoryImpl(
             Timber.d("Timber: GetRemoteReadingContentUseCase was Called")
             val content = source.fetchContent(chapter)
 
-            if (content.content.joinToString().isBlank() || content.content.contains(Constants.CLOUDFLARE_LOG)) {
+            if (content.content.joinToString()
+                    .isBlank() || content.content.contains(Constants.CLOUDFLARE_LOG)
+            ) {
                 emit(Resource.Error<ChapterPage>(message = "Can't Get The Chapter Content."))
             } else {
                 Timber.d("Timber: GetRemoteReadingContentUseCase was Finished Successfully")

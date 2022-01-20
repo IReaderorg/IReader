@@ -35,7 +35,8 @@ data class Book(
     val download:Boolean =false,
     val lastRead:Long = 0,
     val totalChapters:Int = 0,
-    val unread:Boolean = true
+    val unread:Boolean = true,
+    val lastUpdated:Long = 0
 ) : Parcelable {
 
     companion object {
@@ -76,7 +77,8 @@ data class Book(
             lastRead = lastRead,
             download = download,
             totalChapters = totalChapters,
-            unread = unread
+            unread = unread,
+            lastUpdated = lastUpdated
         )
     }
     fun toExploreBook(): ExploreBook {
@@ -91,7 +93,8 @@ data class Book(
             category = category,
             source = source,
             id = id,
-            rating = rating
+            rating = rating,
+            lastUpdated = lastUpdated
         )
     }
 

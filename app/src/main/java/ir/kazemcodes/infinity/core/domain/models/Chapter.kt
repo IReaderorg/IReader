@@ -14,9 +14,11 @@ data class Chapter(
     var haveBeenRead: Boolean = false,
     var lastRead: Boolean = false,
     var source: String,
-    var inLibrary:Boolean=false,
+    var inLibrary: Boolean = false,
     var id: Int? = null,
 ) : Parcelable {
+
+
     companion object {
         fun create(): Chapter {
             return Chapter(
@@ -24,6 +26,7 @@ data class Chapter(
             )
         }
     }
+
 
     fun toChapterEntity(): ChapterEntity {
         return ChapterEntity(

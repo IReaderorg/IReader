@@ -16,7 +16,7 @@ interface LibraryBookDao {
     suspend fun getAllExploreBook(): List<ExploreBook?>
 
     @Query("SELECT * FROM explore_books_table WHERE id =:id")
-    fun getExploreBookById(id:String): Flow<ExploreBook?>
+    fun getExploreBookById(id: String): Flow<ExploreBook?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAllExploredBook(bookEntity: List<ExploreBook?>)
@@ -25,50 +25,52 @@ interface LibraryBookDao {
     fun deleteAllExploredBook()
 
 
-
     @Query("""SELECT * FROM book_table WHERE inLibrary = 1
         ORDER BY 
         CASE WHEN :isAsc = 1 AND :sortByAbs = 1 THEN bookName END ASC,
         CASE WHEN :isAsc = 0 AND :sortByAbs = 1 THEN  bookName END DESC,
-        CASE WHEN :isAsc = 1 AND :sortByDateAdded = 1 THEN bookName END ASC,
-        CASE WHEN :isAsc = 0 AND :sortByDateAdded = 1 THEN  bookName END DESC,
-        CASE WHEN :isAsc = 1 AND :sortByLastRead = 1 THEN bookName END ASC,
-        CASE WHEN :isAsc = 0 AND :sortByLastRead = 1 THEN  bookName END DESC,
-        CASE WHEN :isAsc = 1 AND :sortByDownloads = 1 THEN bookName END ASC,
-        CASE WHEN :isAsc = 0 AND :sortByDownloads = 1 THEN  bookName END DESC,
-        CASE WHEN :isAsc = 1 AND :sortByTotalChapter = 1 THEN bookName END ASC,
-        CASE WHEN :isAsc = 0 AND :sortByTotalChapter = 1 THEN  bookName END DESC
+        CASE WHEN :isAsc = 1 AND :sortByDateAdded = 1 THEN dataAdded END ASC,
+        CASE WHEN :isAsc = 0 AND :sortByDateAdded = 1 THEN  dataAdded END DESC,
+        CASE WHEN :isAsc = 1 AND :sortByLastRead = 1 THEN lastRead END ASC,
+        CASE WHEN :isAsc = 0 AND :sortByLastRead = 1 THEN  lastRead END DESC,
+        CASE WHEN :isAsc = 1 AND :sortByDownloads = 1 THEN download END ASC,
+        CASE WHEN :isAsc = 0 AND :sortByDownloads = 1 THEN  download END DESC,
+        CASE WHEN :isAsc = 1 AND :sortByTotalChapter = 1 THEN totalChapters END ASC,
+        CASE WHEN :isAsc = 0 AND :sortByTotalChapter = 1 THEN  totalChapters END DESC
 """)
     fun getAllLocalBooksForPagingSortedBySort(
-        sortByAbs: Boolean =false,
-        sortByDateAdded: Boolean =false,
-        sortByLastRead:Boolean = false,
-        sortByDownloads:Boolean = false,
-        sortByTotalChapter:Boolean = false,
+        sortByAbs: Boolean = false,
+        sortByDateAdded: Boolean = false,
+        sortByLastRead: Boolean = false,
+        sortByDownloads: Boolean = false,
+        sortByTotalChapter: Boolean = false,
         isAsc: Boolean = false,
-    ): PagingSource<Int,BookEntity>
+    ): PagingSource<Int, BookEntity>
+
+
 
     @Query("""SELECT * FROM book_table WHERE inLibrary = 1 AND unread = 1
         ORDER BY 
         CASE WHEN :isAsc = 1 AND :sortByAbs = 1 THEN bookName END ASC,
         CASE WHEN :isAsc = 0 AND :sortByAbs = 1 THEN  bookName END DESC,
-        CASE WHEN :isAsc = 1 AND :sortByDateAdded = 1 THEN bookName END ASC,
-        CASE WHEN :isAsc = 0 AND :sortByDateAdded = 1 THEN  bookName END DESC,
-        CASE WHEN :isAsc = 1 AND :sortByLastRead = 1 THEN bookName END ASC,
-        CASE WHEN :isAsc = 0 AND :sortByLastRead = 1 THEN  bookName END DESC,
-        CASE WHEN :isAsc = 1 AND :sortByDownloads = 1 THEN bookName END ASC,
-        CASE WHEN :isAsc = 0 AND :sortByDownloads = 1 THEN  bookName END DESC,
-        CASE WHEN :isAsc = 1 AND :sortByTotalChapter = 1 THEN bookName END ASC,
-        CASE WHEN :isAsc = 0 AND :sortByTotalChapter = 1 THEN  bookName END DESC
+        CASE WHEN :isAsc = 1 AND :sortByDateAdded = 1 THEN dataAdded END ASC,
+        CASE WHEN :isAsc = 0 AND :sortByDateAdded = 1 THEN  dataAdded END DESC,
+        CASE WHEN :isAsc = 1 AND :sortByLastRead = 1 THEN lastRead END ASC,
+        CASE WHEN :isAsc = 0 AND :sortByLastRead = 1 THEN  lastRead END DESC,
+        CASE WHEN :isAsc = 1 AND :sortByDownloads = 1 THEN download END ASC,
+        CASE WHEN :isAsc = 0 AND :sortByDownloads = 1 THEN  download END DESC,
+        CASE WHEN :isAsc = 1 AND :sortByTotalChapter = 1 THEN totalChapters END ASC,
+        CASE WHEN :isAsc = 0 AND :sortByTotalChapter = 1 THEN  totalChapters END DESC
 """)
     fun getAllLocalBooksForPagingSortedBySortAndFilter(
-        sortByAbs: Boolean =false,
-        sortByDateAdded: Boolean =false,
-        sortByLastRead:Boolean = false,
-        sortByDownloads:Boolean = false,
-        sortByTotalChapter:Boolean = false,
+        sortByAbs: Boolean = false,
+        sortByDateAdded: Boolean = false,
+        sortByLastRead: Boolean = false,
+        sortByDownloads: Boolean = false,
+        sortByTotalChapter: Boolean = false,
         isAsc: Boolean = false,
-    ): PagingSource<Int,BookEntity>
+    ): PagingSource<Int, BookEntity>
+
 
     @Query("SELECT * FROM book_table")
     fun getAllBooks(): Flow<List<BookEntity>?>
@@ -86,7 +88,7 @@ interface LibraryBookDao {
     suspend fun insertBook(bookEntity: BookEntity)
 
     @Query("SELECT * FROM book_table WHERE bookName LIKE'%' || :query || '%'")
-    fun searchBook(query:String): PagingSource<Int,BookEntity>
+    fun searchBook(query: String): PagingSource<Int, BookEntity>
 
     @Query("DELETE FROM book_table WHERE id = :bookId ")
     suspend fun deleteBook(bookId: String)
@@ -100,4 +102,10 @@ interface LibraryBookDao {
 
 }
 
-data class InLibraryUpdate(val id: String, val inLibrary:Boolean, val totalChapters:Int, val lastRead:Long, val unread: Boolean)
+data class InLibraryUpdate(
+    val id: String,
+    val inLibrary: Boolean,
+    val totalChapters: Int,
+    val lastRead: Long,
+    val unread: Boolean,
+)

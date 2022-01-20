@@ -526,8 +526,7 @@ class AvailableSources(context: Context) {
             coverAtt = "src",
             linkSelector = "div.c-image-hover a",
             linkAtt = "href",
-            nameSelector = "div.c-image-hover a",
-            nameAtt = "div.c-image-hover a"
+            nameSelector = "h3.h4 a",
         ),
         content = Content(
             selector = "div.c-blog-post",
@@ -535,7 +534,7 @@ class AvailableSources(context: Context) {
         ),
         chapters = Chapters(
             ajaxSelector = "a",
-            selector = "ul.main version-chap li.wp-manga-chapter",
+            selector = "ul.main li",
             nameSelector = "a",
             linkSelector = "a",
             linkAtt = "href",
@@ -557,6 +556,6 @@ class AvailableSources(context: Context) {
         mtl,
         realwebnovel,
         wuxiaworld,
-        mtlNation
+        mtlNation,
     )
 }

@@ -31,7 +31,7 @@ class BookDetailViewModel(
     private val localChapterRepository: LocalChapterRepository,
     private val remoteRepository: RemoteRepository,
     private val isLocal: Boolean,
-) : ScopedServices.Registered {
+) : ScopedServices.Registered,ScopedServices.Activated {
     private val _state = mutableStateOf<DetailState>(DetailState(source = source, book = book))
     val state: State<DetailState> = _state
 
@@ -42,7 +42,13 @@ class BookDetailViewModel(
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     override fun onServiceRegistered() {
+    }
+
+    override fun onServiceActive() {
         getLocalBookByName()
+    }
+
+    override fun onServiceInactive() {
 
     }
 
@@ -125,11 +131,6 @@ class BookDetailViewModel(
                     }
                     is Resource.Error -> {
                         getRemoteChapterDetail()
-                        _chapterState.value =
-                            chapterState.value.copy(
-                                error = result.message ?: "An Unknown Error Occurred",
-                                isLoading = false,
-                            )
                     }
                     is Resource.Loading -> {
                         _chapterState.value =
@@ -240,6 +241,7 @@ class BookDetailViewModel(
 
     fun insertChaptersToLocal(chapters: List<Chapter>) {
         coroutineScope.launch(Dispatchers.IO) {
+            localChapterRepository.deleteChapters(bookName = book.bookName, source = source.name)
             localChapterRepository.insertChapters(
                 chapters,
                 state.value.book,

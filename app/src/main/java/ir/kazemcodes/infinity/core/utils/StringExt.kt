@@ -4,7 +4,7 @@ import org.jsoup.Jsoup
 
 fun List<String>.formatBasedOnDot(): String {
 
-    return this.joinToString { it.trim().formatHtmlText() }.replace(".", ".\n")
+    return this.joinToString { it.trim().formatHtmlText() }
 }
 
 fun List<String>.formatList(): String {
@@ -38,8 +38,7 @@ fun String.replaceImageFormat(condition: Boolean): String {
 }
 
 fun String.formatHtmlText(): String {
-    val text = Jsoup.parse(this).text()
-    val b = this
+    val formated_text = this
         .replace("\\\\<.*?\\\\>","")
         .replace("<em>","")
         .replace("</em>","")
@@ -59,7 +58,7 @@ fun String.formatHtmlText(): String {
         .replace("\\\"", "\"")
         .replace("<hr />", "")
 
-    return text
+    return Jsoup.parse(this).wholeText()
 }
 
 fun String.applyPageFormat(page: Int): String {
@@ -69,3 +68,7 @@ fun String.applyPageFormat(page: Int): String {
 fun String.applySearchFormat(query: String, page: Int): String {
     return this.replace("{query}", query.toString()).replace("{page}",page.toString())
 }
+fun String.applyIdFormat(id: String, page: Int): String {
+    return this.replace("{id}", id.toString()).replace("{page}",page.toString())
+}
+

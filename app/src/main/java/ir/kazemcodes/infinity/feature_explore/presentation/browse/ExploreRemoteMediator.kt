@@ -11,6 +11,7 @@ import ir.kazemcodes.infinity.core.data.local.dao.RemoteKeys
 import ir.kazemcodes.infinity.core.data.network.models.Source
 import retrofit2.HttpException
 import java.io.IOException
+import javax.net.ssl.SSLHandshakeException
 
 @ExperimentalPagingApi
 class ExploreRemoteMediator(
@@ -23,10 +24,11 @@ class ExploreRemoteMediator(
     private val bookDao = database.libraryBookDao
     private val remoteKey = database.remoteKeysDao
 
+
     override suspend fun load(
         loadType: LoadType,
         state: PagingState<Int, ExploreBook>,
-    ): MediatorResult {
+    ): RemoteMediator.MediatorResult {
         return try {
             val currentPage = when (loadType) {
                 LoadType.REFRESH -> {
@@ -36,7 +38,7 @@ class ExploreRemoteMediator(
                 LoadType.PREPEND -> {
                     val remoteKeys = getRemoteKeyForFirstItem(state)
                     val prevPage = remoteKeys?.prevPage
-                        ?: return MediatorResult.Success(
+                        ?: return RemoteMediator.MediatorResult.Success(
                             endOfPaginationReached = remoteKeys != null
                         )
                     prevPage
@@ -44,7 +46,7 @@ class ExploreRemoteMediator(
                 LoadType.APPEND -> {
                     val remoteKeys = getRemoteKeyForLastItem(state)
                     val nextPage = remoteKeys?.nextPage
-                        ?: return MediatorResult.Success(
+                        ?: return RemoteMediator.MediatorResult.Success(
                             endOfPaginationReached = remoteKeys != null
                         )
                     nextPage
@@ -67,7 +69,6 @@ class ExploreRemoteMediator(
             val endOfPaginationReached = !response.hasNextPage
 
 
-
             val prevPage = if (currentPage == 1) null else currentPage - 1
             val nextPage = if (endOfPaginationReached) null else currentPage + 1
 
@@ -88,13 +89,19 @@ class ExploreRemoteMediator(
                     it.toExploreBook().copy(isExploreMode = true)
                 })
             }
-            MediatorResult.Success(endOfPaginationReached = endOfPaginationReached)
+            if (response.errorMessage.isNotBlank()) {
+                RemoteMediator.MediatorResult.Error(Exception(response.errorMessage))
+            } else {
+                RemoteMediator.MediatorResult.Success(endOfPaginationReached = endOfPaginationReached)
+            }
         } catch (e: IOException) {
-            return MediatorResult.Error(e)
+            return RemoteMediator.MediatorResult.Error(e)
         } catch (e: HttpException) {
-            return MediatorResult.Error(e)
+            return RemoteMediator.MediatorResult.Error(e)
+        } catch (e: SSLHandshakeException) {
+            return RemoteMediator.MediatorResult.Error(e)
         } catch (e: Exception) {
-            return MediatorResult.Error(e)
+            return RemoteMediator.MediatorResult.Error(e)
         }
     }
 

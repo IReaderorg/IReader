@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
+import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
@@ -26,6 +27,7 @@ import ir.kazemcodes.infinity.feature_library.presentation.components.RadioButto
 import ir.kazemcodes.infinity.feature_sources.sources.models.FetchType
 
 
+@ExperimentalPagingApi
 @Composable
 fun BrowserScreen() {
     val viewModel = rememberService<BrowseViewModel>()
@@ -137,8 +139,8 @@ fun BrowserScreen() {
                     isLocal = false
                 )
             }
-            if (books.loadState.source.refresh is LoadState.Error) {
-                ErrorTextWithEmojis(error = state.error, modifier = Modifier
+            if (books.loadState.refresh.endOfPaginationReached) {
+                ErrorTextWithEmojis(error = "Unable to get the data from source, please open it in WebView", modifier = Modifier
                     .fillMaxWidth()
                     .padding(20.dp)
                     .wrapContentSize(Alignment.Center)

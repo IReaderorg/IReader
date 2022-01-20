@@ -12,8 +12,11 @@ import ir.kazemcodes.infinity.core.data.repository.PreferencesHelper
 import ir.kazemcodes.infinity.core.domain.repository.Repository
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.*
 import ir.kazemcodes.infinity.feature_sources.sources.utils.NetworkHelper
+import ir.kazemcodes.infinity.feature_updater.ProgressListener
+import okhttp3.Call
 import okhttp3.CookieJar
 import okhttp3.OkHttpClient
+import okhttp3.Request
 import okhttp3.logging.HttpLoggingInterceptor
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
@@ -95,4 +98,16 @@ class NetworkModule {
     }
 
 
+}
+fun OkHttpClient.newCallWithProgress(request: Request, listener: ProgressListener): Call {
+    val progressClient = newBuilder()
+        .cache(null)
+        .addNetworkInterceptor { chain ->
+            val originalResponse = chain.proceed(chain.request())
+            originalResponse.newBuilder()
+                .build()
+        }
+        .build()
+
+    return progressClient.newCall(request)
 }

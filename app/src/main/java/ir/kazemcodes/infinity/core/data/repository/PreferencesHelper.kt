@@ -23,6 +23,7 @@ class PreferencesHelper @Inject constructor(
         const val SAVED_ORIENTATION = "orientation_reader"
         const val SORT_LIBRARY_SCREEN = "sort_library_screen"
         const val FILTER_LIBRARY_SCREEN = "filter_library_screen"
+        const val Last_UPDATE_CHECK = "last_update_check"
 
         /** Setting Pref**/
         const val SAVED_DOH_KEY = "SAVED_DOH_KEY"
@@ -46,6 +47,7 @@ class PreferencesHelper @Inject constructor(
     val paragraphIndent = flowPrefs.getInt(SAVED_PARAGRAPH_INDENT, 8)
     val sortLibraryScreen = flowPrefs.getInt(SORT_LIBRARY_SCREEN, 0)
     val filterLibraryScreen = flowPrefs.getInt(FILTER_LIBRARY_SCREEN, 0)
+    val lastUpdateCheck = flowPrefs.getLong(Last_UPDATE_CHECK, 0)
 
     fun setFontScale(fontSize: Int) {
         readerFontScale.set(fontSize)

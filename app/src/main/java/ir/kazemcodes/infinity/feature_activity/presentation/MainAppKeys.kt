@@ -9,6 +9,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.fragment.app.Fragment
+import androidx.paging.ExperimentalPagingApi
 import com.google.accompanist.insets.ProvideWindowInsets
 import com.zhuinden.simplestack.Backstack
 import com.zhuinden.simplestack.ServiceBinder
@@ -17,6 +18,7 @@ import com.zhuinden.simplestackextensions.fragmentsktx.backstack
 import com.zhuinden.simplestackextensions.servicesktx.add
 import com.zhuinden.simplestackextensions.servicesktx.lookup
 import ir.kazemcodes.infinity.core.domain.models.Book
+import ir.kazemcodes.infinity.core.domain.models.Chapter
 import ir.kazemcodes.infinity.core.domain.repository.LocalBookRepository
 import ir.kazemcodes.infinity.core.domain.repository.LocalChapterRepository
 import ir.kazemcodes.infinity.core.domain.repository.RemoteRepository
@@ -37,6 +39,7 @@ import ir.kazemcodes.infinity.feature_explore.presentation.browse.ExploreType
 import ir.kazemcodes.infinity.feature_library.presentation.LibraryViewModel
 import ir.kazemcodes.infinity.feature_reader.presentation.reader.ReaderScreenViewModel
 import ir.kazemcodes.infinity.feature_reader.presentation.reader.ReadingScreen
+import ir.kazemcodes.infinity.feature_settings.presentation.AboutSettingScreen
 import ir.kazemcodes.infinity.feature_settings.presentation.setting.SettingViewModel
 import ir.kazemcodes.infinity.feature_settings.presentation.setting.dns.DnsOverHttpScreen
 import ir.kazemcodes.infinity.feature_settings.presentation.setting.downloader.DownloaderScreen
@@ -78,6 +81,7 @@ data class MainScreenKey(val noArgument: String = "") : FragmentKey() {
 
 class BrowserScreenFragment() : ComposeFragment() {
 
+    @OptIn(ExperimentalPagingApi::class)
     @Composable
     override fun FragmentComposable(backstack: Backstack) {
 
@@ -157,17 +161,14 @@ class WebViewFragment() : ComposeFragment() {
     override fun FragmentComposable(backstack: Backstack) {
         BackstackProvider(backstack = backstack) {
             InfinityTheme() {
-
                 WebPageScreen()
-
             }
-
         }
     }
 }
 
 @Parcelize
-data class WebViewKey(val url: String, val sourceName: String, val fetchType: Int) : FragmentKey() {
+data class WebViewKey(val url: String, val sourceName: String, val fetchType: Int,val book: Book?=null,val chapter:Chapter?=null) : FragmentKey() {
 
     override fun instantiateFragment(): Fragment = WebViewFragment()
 
@@ -179,7 +180,9 @@ data class WebViewKey(val url: String, val sourceName: String, val fetchType: In
                 source = mappingSourceNameToSource(sourceName),
                 fetcher = mappingFetcherTypeWithIndex(fetchType),
                 localChapterRepository = lookup<LocalChapterRepository>(),
-                localBookRepository = lookup<LocalBookRepository>()
+                localBookRepository = lookup<LocalBookRepository>(),
+                bookName = book?.bookName,
+                chapterTitle = chapter?.title,
             ))
         }
     }
@@ -349,6 +352,29 @@ class DnsOverHttpScreenFragment() : ComposeFragment() {
 @Parcelize
 data class DnsOverHttpScreenKey(val noArgs: String = "") : FragmentKey() {
     override fun instantiateFragment(): Fragment = DnsOverHttpScreenFragment()
+    override fun bindServices(serviceBinder: ServiceBinder) {
+        with(serviceBinder) {
+            add(SettingViewModel(
+                preferencesUseCase = lookup<PreferencesUseCase>(),
+            ))
+        }
+    }
+}
+class AboutScreenFragment() : ComposeFragment() {
+    @Composable
+    override fun FragmentComposable(backstack: Backstack) {
+        BackstackProvider(backstack = backstack) {
+            InfinityTheme() {
+                AboutSettingScreen()
+            }
+        }
+    }
+}
+
+
+@Parcelize
+data class AboutScreenKey(val noArgs: String = "") : FragmentKey() {
+    override fun instantiateFragment(): Fragment = AboutScreenFragment()
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
             add(SettingViewModel(
