@@ -141,8 +141,8 @@ SourceCreator(
 | _baseUrl | the base url of source - need to be like : "https://freewebnovel.com" without "/" at end   |
 | _lang | the language of source - this name will shown inside app |
 | _supportsLatest| type 'true' if your app support getting latest novels  else 'false'|
-| _supportsSearch| type 'true' if your app support getting Most Popular novels else 'false' |
-| _supportsMostPopular| 'true' true if your app support getting Search novels else 'false'|
+| _supportsSearch| type 'true' if your app support getting Search novels else 'false' |
+| _supportsMostPopular| 'true' true if your app support getting Most Popular  novels else 'false'|
 
 NOTE : ALL Uneeded Parameter can be left empty. 
 ## Latest
