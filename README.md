@@ -1,6 +1,6 @@
-# Infinity
+# IReader
 
-Infinity is a free and open source applicaiton for Android.
+IReader is a free and open source applicaiton for Android.
 
 <br>
 
@@ -11,14 +11,8 @@ Infinity is a free and open source applicaiton for Android.
 ## Features :sparkles:
 
 - Access all the books available on the website
-- Support two source
+- Support 7 sources
 - Support the offline reading
-
-
-## Not Supported right now but working on it:
-
-- Creating and editing source in the applicaiton.
-- download manager(you can download the books but there isn't a good download manager yet).
 
 
 ## Release Page
@@ -35,6 +29,7 @@ Infinity is a free and open source applicaiton for Android.
 | -------- | ---------------------------------------------------------- | ------------------------------------------------------------ |
 | Library  | ![library_view_dark](screenshots/library-dark.jpeg)         | ![library_view_light](/screenshots/library-light.jpeg)         |
 | Book     | ![book_view_dark](screenshots/detail-dark.jpeg)               | ![book_view_light](screenshots/detail-light.jpeg)               |
+| Reader     | ![book_view_dark](screenshots/reader-dark.png)               | ![book_view_light](screenshots/reader-light.png)               |
 
 ## License
 

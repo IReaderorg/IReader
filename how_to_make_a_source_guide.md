@@ -1,6 +1,6 @@
 # Guide
 
-This is a guide about how to make a source, you can take a look at [samples](https://github.com/kazemcodes/Infinity/blob/master/app/src/main/java/ir/kazemcodes/infinity/sources/SourceList.kt), in order to understand how everything, work.
+This is a guide about how to make a source, you can take a look at [samples](https://github.com/kazemcodes/IReader/blob/master/app/src/main/java/ir/kazemcodes/infinity/feature_sources/sources/SourceList.kt), in order to understand how everything, work.
 
 The first thing, everyone should know, all unnecessary fields can be omitted, and you should not type them or you can set the value as “null”.
 You need to fill this field in order to have full source functionality:
@@ -141,8 +141,8 @@ SourceCreator(
 | _baseUrl | the base url of source - need to be like : "https://freewebnovel.com" without "/" at end   |
 | _lang | the language of source - this name will shown inside app |
 | _supportsLatest| type 'true' if your app support getting latest novels  else 'false'|
-| _supportsSearch| type 'true' if your app support getting Most Popular novels else 'false' |
-| _supportsMostPopular| 'true' true if your app support getting Search novels else 'false'|
+| _supportsSearch| type 'true' if your app support getting Search novels else 'false' |
+| _supportsMostPopular| 'true' true if your app support getting Most Popular  novels else 'false'|
 
 NOTE : ALL Uneeded Parameter can be left empty. 
 ## Latest
