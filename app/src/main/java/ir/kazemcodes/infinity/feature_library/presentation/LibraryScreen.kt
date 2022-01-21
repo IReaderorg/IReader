@@ -21,9 +21,11 @@ import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import com.zhuinden.simplestackcomposeintegration.services.rememberService
+import ir.kazemcodes.infinity.core.presentation.components.handlePagingResult
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.*
 import ir.kazemcodes.infinity.core.presentation.theme.Colour.topBarColor
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.Constants
+
 import ir.kazemcodes.infinity.feature_library.presentation.components.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -123,30 +125,22 @@ fun LibraryScreen() {
             },
             scaffoldState = bottomSheetScaffoldState
         ) {
-
-            Box(Modifier.fillMaxSize()) {
-                Box(modifier = Modifier.padding(bottom = 50.dp)) {
-                    AnimatedContent(books.loadState.refresh is LoadState.NotLoading) {
-                        LayoutComposable(
-                            books = if (!state.inSearchMode) books else books,
-                            layout = state.layout,
-                            backStack = backstack,
-                            isLocal = true
-                        )
-                    }
-                }
-                if (books.loadState.refresh is LoadState.Loading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
-                if (books.loadState.source.refresh is LoadState.NotLoading && books.loadState.append.endOfPaginationReached && books.itemCount < 1) {
-                    ErrorTextWithEmojis(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(20.dp)
-                            .align(Alignment.Center),
-                        error = "There is no book is Library"
+            val result = handlePagingResult(books=books, onEmptyResult = {
+                ErrorTextWithEmojis(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp)
+                        .align(Alignment.Center),
+                    error = "There is no book is Library, you can add books in the Explore screen"
+                )
+            })
+            if(result) {
+                AnimatedContent(books.loadState.refresh is LoadState.NotLoading) {
+                    LayoutComposable(
+                        books = if (!state.inSearchMode) books else books,
+                        layout = state.layout,
+                        backStack = backstack,
+                        isLocal = true
                     )
                 }
             }
@@ -169,14 +163,14 @@ fun BottomTabComposable(modifier: Modifier = Modifier, viewModel: LibraryViewMod
         sheetContent = {
             /** There is Some issue here were sheet content is not need , not sure why**/
             Column(modifier = modifier.fillMaxSize()) {
-                Tabs(tabs = tabs, pagerState = pagerState)
-                TabsContent(tabs = tabs, pagerState = pagerState)
+                Tabs(libraryTabs = tabs, pagerState = pagerState)
+                TabsContent(libraryTabs = tabs, pagerState = pagerState)
 
             }
         }, content = {
             Column(modifier = modifier.fillMaxSize()) {
-                Tabs(tabs = tabs, pagerState = pagerState)
-                TabsContent(tabs = tabs, pagerState = pagerState)
+                Tabs(libraryTabs = tabs, pagerState = pagerState)
+                TabsContent(libraryTabs = tabs, pagerState = pagerState)
             }
         })
 

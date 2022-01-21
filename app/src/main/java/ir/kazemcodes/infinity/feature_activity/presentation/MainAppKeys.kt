@@ -5,6 +5,7 @@ import android.content.pm.ActivityInfo
 import android.view.WindowManager
 import android.webkit.WebView
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
@@ -47,9 +48,11 @@ import ir.kazemcodes.infinity.feature_settings.presentation.setting.extension_cr
 import ir.kazemcodes.infinity.feature_settings.presentation.webview.WebPageScreen
 import ir.kazemcodes.infinity.feature_settings.presentation.webview.WebViewPageModel
 import ir.kazemcodes.infinity.feature_sources.presentation.extension.ExtensionScreen
+import ir.kazemcodes.infinity.feature_sources.presentation.extension.ExtensionViewModel
 import kotlinx.parcelize.Parcelize
 
 
+@ExperimentalMaterialApi
 class MainScreenFragment() : ComposeFragment() {
     @OptIn(ExperimentalAnimationApi::class)
     @Composable
@@ -72,9 +75,11 @@ data class MainScreenKey(val noArgument: String = "") : FragmentKey() {
         with(serviceBinder) {
             add(LibraryViewModel(lookup<LocalBookRepository>(), lookup<PreferencesUseCase>()))
             add(MainViewModel())
+            add(ExtensionViewModel())
         }
     }
 
+    @OptIn(ExperimentalMaterialApi::class)
     override fun instantiateFragment(): Fragment = MainScreenFragment()
 }
 
@@ -168,7 +173,13 @@ class WebViewFragment() : ComposeFragment() {
 }
 
 @Parcelize
-data class WebViewKey(val url: String, val sourceName: String, val fetchType: Int,val book: Book?=null,val chapter:Chapter?=null) : FragmentKey() {
+data class WebViewKey(
+    val url: String,
+    val sourceName: String,
+    val fetchType: Int,
+    val book: Book? = null,
+    val chapter: Chapter? = null,
+) : FragmentKey() {
 
     override fun instantiateFragment(): Fragment = WebViewFragment()
 
@@ -282,6 +293,7 @@ data class ReaderScreenKey(
 }
 
 class ExtensionScreenFragment() : ComposeFragment() {
+    @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun FragmentComposable(backstack: Backstack) {
         BackstackProvider(backstack = backstack) {
@@ -298,6 +310,8 @@ class ExtensionScreenFragment() : ComposeFragment() {
 @Parcelize
 data class ExtensionScreenKey(val noArgs: String = "") : FragmentKey() {
     override fun instantiateFragment(): Fragment = ExtensionScreenFragment()
+
+
 }
 
 class DownloadScreenFragment() : ComposeFragment() {
@@ -360,6 +374,7 @@ data class DnsOverHttpScreenKey(val noArgs: String = "") : FragmentKey() {
         }
     }
 }
+
 class AboutScreenFragment() : ComposeFragment() {
     @Composable
     override fun FragmentComposable(backstack: Backstack) {

@@ -1,22 +1,29 @@
 package ir.kazemcodes.infinity.feature_settings.presentation.webview
 
 import android.view.ViewGroup
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.TrackChanges
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import com.zhuinden.simplestackcomposeintegration.services.rememberService
 import ir.kazemcodes.infinity.core.data.network.utils.setDefaultSettings
-import ir.kazemcodes.infinity.core.presentation.reusable_composable.MidTextComposable
+import ir.kazemcodes.infinity.core.presentation.reusable_composable.MidSizeTextComposable
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarActionButton
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarBackButton
+import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarTitle
 import ir.kazemcodes.infinity.core.utils.UiEvent
 import ir.kazemcodes.infinity.core.utils.asString
 import ir.kazemcodes.infinity.feature_sources.sources.models.FetchType
@@ -31,6 +38,8 @@ fun WebPageScreen() {
     val urlToRender = viewModel.state.value.url
     val scaffoldState = rememberScaffoldState()
     val context = LocalContext.current
+
+
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
@@ -46,7 +55,7 @@ fun WebPageScreen() {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { MidTextComposable(title = urlToRender, overflow = TextOverflow.Ellipsis,) },
+                title = { MidSizeTextComposable(title = urlToRender, overflow = TextOverflow.Ellipsis,) },
                 navigationIcon = {
                     TopAppBarBackButton(backStack = backStack)
                 },
@@ -95,4 +104,28 @@ fun WebPageScreen() {
 
 
 }
+@Composable
+fun ScrollableAppBar(
+    title: String,
+    modifier: Modifier = Modifier,
+    navigationIcon: @Composable (() -> Unit)? = null,
+    background: Color = MaterialTheme.colors.primary,
+    scrollUpState: Boolean,
+) {
+    val position by animateFloatAsState(if (scrollUpState) -150f else 0f)
 
+    Surface(modifier = Modifier.graphicsLayer { translationY = (position) }, elevation = 8.dp) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+                .background(color = background),
+        )
+        Row(modifier = modifier.padding(start = 12.dp)) {
+            if (navigationIcon != null) {
+                navigationIcon()
+            }
+            TopAppBarTitle(title = title)
+        }
+    }
+}

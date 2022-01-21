@@ -37,6 +37,7 @@ class AvailableSources(context: Context) {
         _supportsLatest = false,
         _supportsMostPopular = false,
         _supportsSearch = false,
+        creator = "@Kazem",
         latest = Latest(
             endpoint = null,
             ajaxSelector = null,
@@ -162,6 +163,7 @@ class AvailableSources(context: Context) {
         _supportsLatest = true,
         _supportsMostPopular = true,
         _supportsSearch = true,
+        creator = "@Kazem",
         latest = Latest(
             endpoint = "/manga-2/page/{page}/?m_orderby=latest",
             selector = "div.page-item-detail",
@@ -218,6 +220,7 @@ class AvailableSources(context: Context) {
         _supportsLatest = true,
         _supportsSearch = true,
         _supportsMostPopular = true,
+        creator = "@Kazem",
         latest = Latest(
             endpoint = "/latest-release-novel/{page}/",
             selector = "div.ul-list1 div.li",
@@ -283,6 +286,7 @@ class AvailableSources(context: Context) {
         _supportsLatest = true,
         _supportsMostPopular = true,
         _supportsSearch = true,
+        creator = "@Kazem",
         latest = Latest(
             endpoint = "/novel-list/?orderby=date&order=desc&status=all&pg={page}",
             selector = "div.box",
@@ -346,6 +350,7 @@ class AvailableSources(context: Context) {
         _supportsMostPopular = true,
         _supportsSearch = true,
         _supportsLatest = true,
+        creator = "@Kazem",
         latest = Latest(
             endpoint = "/novel-list/page/{page}/",
             selector = "div.page-item-detail",
@@ -403,6 +408,7 @@ class AvailableSources(context: Context) {
         _baseUrl = "https://m.mylovenovel.com/",
         _supportsSearch = true,
         _supportsMostPopular = true,
+        creator = "@Kazem",
         latest = Latest(
             endpoint = "/lastupdate-{page}.html",
             selector = "ul.list li a",
@@ -462,6 +468,7 @@ class AvailableSources(context: Context) {
         _baseUrl = "https://www.koreanmtl.online/",
         _supportsSearch = false,
         _supportsMostPopular = false,
+        creator = "@Kazem",
         latest = Latest(
             endpoint = "/p/novels-listing.html",
             selector = "ul.a li.b",
@@ -501,6 +508,7 @@ class AvailableSources(context: Context) {
         _supportsSearch = true,
         _supportsMostPopular = true,
         _supportsLatest = true,
+        creator = "@Kazem",
         _lang = "en",
         latest = Latest(
             endpoint = "/novel/page/{page}/?m_orderby=latest",
@@ -554,6 +562,7 @@ class AvailableSources(context: Context) {
         _supportsSearch = true,
         _supportsMostPopular = false,
         _supportsLatest = true,
+        creator = "@Kazem",
         _lang = "en",
         latest = Latest(
             endpoint = "/latest/page/{page}",
@@ -603,6 +612,8 @@ class AvailableSources(context: Context) {
 
         )
     )
+
+
 
     val sourcesList = listOf<Source>(
         freeWebNovel,

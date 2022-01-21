@@ -12,7 +12,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
-import ir.kazemcodes.infinity.core.presentation.reusable_composable.MidTextComposable
+import ir.kazemcodes.infinity.core.presentation.reusable_composable.MidSizeTextComposable
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarBackButton
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarTitle
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.Constants
@@ -62,7 +62,7 @@ fun AboutSettingScreen(modifier: Modifier = Modifier) {
                         },
                     singleLineSecondaryText = false,
                     trailing = {
-                        MidTextComposable(title = it.subtitle,
+                        MidSizeTextComposable(title = it.subtitle,
                             color = MaterialTheme.colors.onBackground.copy(alpha = .4f))
                     },
                     text = {

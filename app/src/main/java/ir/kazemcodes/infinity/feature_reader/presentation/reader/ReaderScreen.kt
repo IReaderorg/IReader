@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
@@ -57,6 +58,9 @@ fun ReadingScreen(
     val interactionSource = remember { MutableInteractionSource() }
     val context = LocalContext.current
     val webview = backStack.lookup<WebView>()
+    val scrollState = rememberScrollState()
+    val verticalScrollState = rememberLazyListState(scrollState.value)
+
     val isWebViewEnable by remember {
         mutableStateOf(webview.originalUrl == viewModel.state.value.chapter.link)
     }
@@ -78,6 +82,7 @@ fun ReadingScreen(
             if (!state.isReaderModeEnable && state.isLoaded && modalBottomSheetState.targetValue ==  ModalBottomSheetValue.Expanded) {
                 TopAppBar(
                     title = {
+
                         Text(
                             text = viewModel.state.value.chapter.title,
                             color = MaterialTheme.colors.onBackground,
@@ -229,7 +234,6 @@ fun ReadingScreen(
             Box(
                 Modifier
                     .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
                     .clickable(interactionSource = interactionSource,
                         indication = null) {
                         viewModel.onEvent(ReaderEvent.ToggleReaderMode(!state.isReaderModeEnable))
@@ -250,9 +254,7 @@ fun ReadingScreen(
             ) {
                 if (state.chapter.isChapterNotEmpty()) {
                     Text(
-                        modifier = modifier
-                            .fillMaxWidth()
-                            .align(Alignment.TopStart),
+                        modifier = modifier.verticalScroll(scrollState),
                         text = state.chapter.content.joinToString("\n".repeat(state.distanceBetweenParagraphs)),
                         fontSize = viewModel.state.value.fontSize.sp,
                         fontFamily = viewModel.state.value.font.fontFamily,

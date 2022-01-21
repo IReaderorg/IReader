@@ -18,6 +18,7 @@ import ir.kazemcodes.infinity.feature_sources.presentation.extension.ExtensionSc
 
 
 
+@ExperimentalMaterialApi
 @OptIn(ExperimentalPagerApi::class)
 @ExperimentalAnimationApi
 @Composable

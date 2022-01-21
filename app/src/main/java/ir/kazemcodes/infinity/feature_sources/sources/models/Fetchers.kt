@@ -1,5 +1,9 @@
 package ir.kazemcodes.infinity.feature_sources.sources.models
 
+import android.os.Parcelable
+import com.squareup.moshi.JsonClass
+import kotlinx.parcelize.Parcelize
+
 
 /**
  * @param endpoint the endpint of site: sample:"https://freewebnovel.com"
@@ -15,6 +19,8 @@ package ir.kazemcodes.infinity.feature_sources.sources.models
  * @param nextPageSelector the css selector for the next page, it must contain a value, to let the app that next page exist.
  *
  */
+@Parcelize
+@JsonClass(generateAdapter = true)
 data class Latest(
     override val endpoint: String? = null,
     override val ajaxSelector: String? = null,
@@ -37,7 +43,7 @@ data class Latest(
     val supportPageList: Boolean = false,
     val maxPageIndex: Int? = null,
 
-) : Fetcher
+) : Fetcher,Parcelable
 /**
  * @param endpoint the endpint of site: sample:"https://freewebnovel.com"
  * @param ajaxSelector if the site is loaded by ajax, type the first item that is loaded by ajax.
@@ -52,6 +58,8 @@ data class Latest(
  * @param nextPageSelector the css selector for the next page, it must contain a value, to let the app that next page exist.
  *
  */
+@Parcelize
+@JsonClass(generateAdapter = true)
 data class Popular(
     override val endpoint: String? = null,
     override val ajaxSelector: String? = null,
@@ -71,7 +79,7 @@ data class Popular(
     val nameAtt: String? = null,
     val coverSelector: String? = null,
     val coverAtt: String? = null,
-) : Fetcher
+) : Fetcher,Parcelable
 /**
  * @param endpoint the endpint of site: sample:"/latest-release-novel/{page}/""
  * @param ajaxSelector if the site is loaded by ajax, type the first item that is loaded by ajax.
@@ -86,6 +94,8 @@ data class Popular(
  * @param nextPageSelector the css selector for the next page, it must contain a value, to let the app that next page exist.
  *
  */
+@Parcelize
+@JsonClass(generateAdapter = true)
 data class Detail(
     override val endpoint: String? = null,
     override val ajaxSelector: String? = null,
@@ -109,7 +119,7 @@ data class Detail(
     val authorBookAtt: String? = null,
     val categorySelector: String? = null,
     val categoryAtt: String? = null,
-) : Fetcher
+) : Fetcher,Parcelable
 /**
  * @param endpoint the endpint of site: sample:"https://freewebnovel.com"
  * @param ajaxSelector if the site is loaded by ajax, type the first item that is loaded by ajax.
@@ -124,6 +134,8 @@ data class Detail(
  * @param nextPageSelector the css selector for the next page, it must contain a value, to let the app that next page exist.
  *
  */
+@Parcelize
+@JsonClass(generateAdapter = true)
 data class Search(
     override val endpoint: String? = null,
     override val ajaxSelector: String? = null,
@@ -144,7 +156,7 @@ data class Search(
     val nameAtt: String? = null,
     val coverSelector: String? = null,
     val coverAtt: String? = null,
-) : Fetcher
+) : Fetcher,Parcelable
 /**
  * @param endpoint the endpint of site: sample:"https://freewebnovel.com"
  * @param ajaxSelector if the site is loaded by ajax, type the first item that is loaded by ajax.
@@ -159,6 +171,8 @@ data class Search(
  * @param nextPageSelector the css selector for the next page, it must contain a value, to let the app that next page exist.
  *
  */
+@Parcelize
+@JsonClass(generateAdapter = true)
 data class Chapters(
     override val endpoint: String? = null,
     override val ajaxSelector: String? = null,
@@ -181,7 +195,7 @@ data class Chapters(
     val linkAtt: String? = null,
     val supportNextPagesList: Boolean = false,
     val subStringSomethingAtEnd: String? = null,
-) : Fetcher
+) : Fetcher,Parcelable
 
 /**
  * @param endpoint the endpint of site: sample:"https://freewebnovel.com"
@@ -197,6 +211,8 @@ data class Chapters(
  * @param nextPageSelector the css selector for the next page, it must contain a value, to let the app that next page exist.
  *
  */
+@Parcelize
+@JsonClass(generateAdapter = true)
 data class Content(
     override val endpoint: String? = null,
     override val ajaxSelector: String? = null,
@@ -214,7 +230,7 @@ data class Content(
     val pageTitleAtt: String? = null,
     val pageContentSelector: String? = null,
     val pageContentAtt: String? = null,
-) : Fetcher
+) : Fetcher,Parcelable
 
 
 

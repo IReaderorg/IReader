@@ -1,7 +1,8 @@
 package ir.kazemcodes.infinity.feature_explore.presentation.browse
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -10,15 +11,13 @@ import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.unit.dp
 import androidx.paging.ExperimentalPagingApi
-import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import com.zhuinden.simplestackcomposeintegration.services.rememberService
+import ir.kazemcodes.infinity.core.presentation.components.handlePagingResult
 import ir.kazemcodes.infinity.core.presentation.layouts.layouts
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.*
 import ir.kazemcodes.infinity.feature_activity.presentation.WebViewKey
@@ -128,8 +127,11 @@ fun BrowserScreen() {
         }
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
+            val result = handlePagingResult(books=books, onEmptyResult = {
+                ErrorTextWithEmojis(error = "Sorry, the source failed to get any content.")
+            })
 
-            if (books.loadState.refresh is LoadState.NotLoading) {
+            if(result) {
                 LayoutComposable(
                     books = books,
                     layout = state.layout,
@@ -139,22 +141,9 @@ fun BrowserScreen() {
                     isLocal = false
                 )
             }
-            if (books.loadState.refresh.endOfPaginationReached) {
-                ErrorTextWithEmojis(error = "Unable to get the data from source, please open it in WebView", modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp)
-                    .wrapContentSize(Alignment.Center)
-                    .align(Alignment.Center))
-            }
-            if (books.loadState.refresh is LoadState.Loading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            }
         }
 
 
     }
 }
-
 

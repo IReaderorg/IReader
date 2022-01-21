@@ -32,6 +32,7 @@ class LocalBookRepositoryImpl(
     private val bookDatabase: BookDatabase,
 ) : LocalBookRepository {
 
+    @Suppress()
     override fun getBooks(
         sortType: SortType,
         isAsc: Boolean,
@@ -41,7 +42,7 @@ class LocalBookRepositoryImpl(
             config = PagingConfig(pageSize = Constants.DEFAULT_PAGE_SIZE,
                 maxSize = Constants.MAX_PAGE_SIZE, enablePlaceholders = true),
             pagingSourceFactory = {
-                getAllInLibraryForPagingBooks(sortType, isAsc, if (unreadFilter != FilterType.Disable) true else false)
+                getAllInLibraryForPagingBooks(sortType, isAsc, unreadFilter != FilterType.Disable)
             }
         ).flow
     }

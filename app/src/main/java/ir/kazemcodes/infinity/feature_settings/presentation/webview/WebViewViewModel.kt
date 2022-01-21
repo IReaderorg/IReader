@@ -15,14 +15,15 @@ import ir.kazemcodes.infinity.core.presentation.components.WebViewFetcher
 import ir.kazemcodes.infinity.core.utils.Resource
 import ir.kazemcodes.infinity.core.utils.UiEvent
 import ir.kazemcodes.infinity.core.utils.UiText
-import ir.kazemcodes.infinity.core.utils.getHtml
 import ir.kazemcodes.infinity.feature_sources.sources.models.FetchType
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import org.jsoup.Jsoup
+import kotlinx.coroutines.launch
 
 class WebViewPageModel(
     private val url: String,
@@ -101,62 +102,6 @@ class WebViewPageModel(
                     }
                 }
             }.launchIn(coroutineScope)
-
-    }
-
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    fun fetchInfo() {
-        coroutineScope.launch {
-            when (fetcher) {
-                FetchType.Detail -> {
-                    try {
-                        _eventFlow.emit(UiEvent.ShowSnackbar(
-                            uiText = UiText.DynamicString("Trying to fetch...")
-                        ))
-                        val book = source.detailParse(Jsoup.parse(webView.getHtml()))
-                        val chapters = source.chaptersParse(Jsoup.parse(webView.getHtml()))
-                        if (!chapters.chapters.isNullOrEmpty()) {
-                            _state.value =
-                                state.value.copy(book = book.book)
-                            getLocalBook(book.book)
-                            getLocalChaptersByBookName(book.book.bookName)
-                            if (state.value.chapters.isNotEmpty() && chapters.chapters.isNotEmpty()) {
-                                val list = mutableListOf<Chapter>()
-                                val sum = state.value.chapters + chapters.chapters
-
-                                val uniqueList = sum.distinctBy {
-                                    it.title
-                                }.sortedBy {
-                                    "s(\\d+)".toRegex()
-                                        .matchEntire(it.title)?.groups?.get(1)?.value?.toInt()
-                                }
-
-                                list.addAll(uniqueList)
-                                deleteChapterDetails()
-                                insertChaptersToLocal(uniqueList)
-                                _eventFlow.emit(UiEvent.ShowSnackbar(
-                                    uiText = UiText.DynamicString("${book.book.bookName} was fetched with ${chapters.chapters.size}  chapters")
-                                ))
-                            }
-
-                        } else {
-                            _eventFlow.emit(UiEvent.ShowSnackbar(
-                                uiText = UiText.DynamicString("Failed to to get the content")
-                            ))
-                        }
-                    } catch (e: Exception) {
-                        _eventFlow.emit(UiEvent.ShowSnackbar(
-                            uiText = UiText.DynamicString("Failed to to get the content")
-                        ))
-                    }
-
-
-                }
-                else -> {}
-            }
-        }
-
 
     }
 

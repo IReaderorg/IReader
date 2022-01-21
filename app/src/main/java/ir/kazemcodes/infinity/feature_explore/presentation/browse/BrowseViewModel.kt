@@ -42,6 +42,8 @@ class BrowseViewModel(
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
+    private var getBooksJob: Job? = null
+
     override fun onServiceRegistered() {
         getBooks()
         readLayoutType()
@@ -73,7 +75,8 @@ class BrowseViewModel(
     }
 
     fun getBooks(query: String?=null,type: ExploreType?=null) {
-        coroutineScope.launch(Dispatchers.IO) {
+        getBooksJob?.cancel()
+        getBooksJob = coroutineScope.launch(Dispatchers.IO) {
             remoteRepository.getRemoteBooksUseCase(source, type?:exploreType, query = query).cachedIn(coroutineScope)
                 .collect { snapshot ->
                     _books.value = snapshot.map { bookEntity -> bookEntity.toBook() }

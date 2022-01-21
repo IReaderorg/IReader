@@ -69,7 +69,7 @@ class WebViewFetcher(
                                 emit(Resource.Success<UiText.DynamicString>(UiText.DynamicString("${book.book.bookName} was fetched with ${chapters.chapters.size}  chapters")))
 
                             } else {
-                                emit(Resource.Error("I couldn't find any thing"))
+                                emit(Resource.Error("failed to get content try again in a few second"))
                             }
 
                         } else {

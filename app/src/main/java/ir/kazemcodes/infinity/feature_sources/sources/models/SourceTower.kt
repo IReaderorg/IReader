@@ -1,8 +1,10 @@
 package ir.kazemcodes.infinity.feature_sources.sources.models
 
+import android.os.Parcelable
 import android.util.Patterns
 import com.nfeld.jsonpathkt.JsonPath
 import com.nfeld.jsonpathkt.extension.read
+import com.squareup.moshi.JsonClass
 import ir.kazemcodes.infinity.api_feature.network.GET
 import ir.kazemcodes.infinity.api_feature.network.POST
 import ir.kazemcodes.infinity.core.data.network.models.*
@@ -10,6 +12,7 @@ import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
 import ir.kazemcodes.infinity.core.utils.*
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.Constants
+import kotlinx.parcelize.Parcelize
 import okhttp3.Headers
 import okhttp3.Request
 import okhttp3.Response
@@ -19,20 +22,23 @@ import org.jsoup.nodes.Element
 import ru.gildor.coroutines.okhttp.await
 
 
+@Parcelize
+@JsonClass(generateAdapter = true)
 data class SourceTower constructor(
     val _baseUrl: String,
-    private val _lang: String,
-    private val _name: String,
-    private val _supportsMostPopular: Boolean = false,
-    private val _supportsSearch: Boolean = false,
-    private val _supportsLatest: Boolean = false,
-    private val latest: Latest? = null,
-    private val popular: Popular? = null,
-    private val detail: Detail? = null,
-    private val search: Search? = null,
-    private val chapters: Chapters? = null,
-    private val content: Content? = null,
-) : ParsedHttpSource() {
+    val _lang: String,
+    val _name: String,
+    val creator: String,
+    val _supportsMostPopular: Boolean = false,
+    val _supportsSearch: Boolean = false,
+    val _supportsLatest: Boolean = false,
+    val latest: Latest? = null,
+    val popular: Popular? = null,
+    val detail: Detail? = null,
+    val search: Search? = null,
+    val chapters: Chapters? = null,
+    val content: Content? = null,
+) : ParsedHttpSource(),Parcelable {
 
     override val lang: String
         get() = _lang
@@ -277,7 +283,9 @@ data class SourceTower constructor(
         return BooksPage(books,
             hasNextPage,
             document.body().allElements.text(),
-            ajaxLoaded = ajaxLoaded)
+            ajaxLoaded = ajaxLoaded,
+            errorMessage = if (isCloudflareEnable) Constants.CLOUDFLARE_PROTECTION_ERROR else "",
+            )
     }
 
     override fun detailParse(document: Document, isWebViewMode: Boolean): BookPage {

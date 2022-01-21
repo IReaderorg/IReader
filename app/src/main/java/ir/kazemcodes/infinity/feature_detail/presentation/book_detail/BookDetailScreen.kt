@@ -21,10 +21,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.paging.PagingData
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import com.zhuinden.simplestackcomposeintegration.services.rememberService
 import com.zhuinden.simplestackextensions.servicesktx.lookup
 import ir.kazemcodes.infinity.core.data.network.utils.toast
+import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.presentation.components.BookImageComposable
 import ir.kazemcodes.infinity.core.presentation.components.ISnackBarHost
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.ErrorTextWithEmojis
@@ -37,6 +39,7 @@ import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.components
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.components.DotsFlashing
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.components.ExpandingText
 import ir.kazemcodes.infinity.feature_sources.sources.models.FetchType
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 
 
@@ -47,7 +50,9 @@ fun BookDetailScreen(
     val viewModel = rememberService<BookDetailViewModel>()
     val detailState = viewModel.state.value
     val backStack = LocalBackstack.current
-    
+
+
+
 
     Box(modifier = Modifier.fillMaxSize()) {
         if (viewModel.state.value.loaded) {
@@ -139,7 +144,7 @@ fun BookDetailScreenLoadedComposable(
                 elevation = 0.dp,
                 actions = {
                     if (isWebViewEnable) {
-                        IconButton(onClick = { viewModel.getFromWebView() }) {
+                        IconButton(onClick = { viewModel.getWebViewData() }) {
                             Icon(
                                 imageVector = Icons.Default.TrackChanges,
                                 contentDescription = "Get from webview",

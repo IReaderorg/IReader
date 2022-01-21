@@ -44,7 +44,7 @@ fun TopAppBarTitle(
 }
 
 @Composable
-fun MidTextComposable(
+fun MidSizeTextComposable(
     modifier: Modifier = Modifier,
     title: String,
     color: Color? = null,

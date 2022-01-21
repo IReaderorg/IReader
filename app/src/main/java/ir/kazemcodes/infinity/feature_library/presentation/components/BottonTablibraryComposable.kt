@@ -19,11 +19,12 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.pagerTabIndicatorOffset
 import ir.kazemcodes.infinity.core.presentation.layouts.layouts
-import ir.kazemcodes.infinity.core.presentation.reusable_composable.MidTextComposable
-import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarTitle
+import ir.kazemcodes.infinity.core.presentation.reusable_composable.MidSizeTextComposable
 import ir.kazemcodes.infinity.core.presentation.theme.Colour.contentColor
 import ir.kazemcodes.infinity.core.presentation.theme.Colour.iconColor
 import ir.kazemcodes.infinity.feature_library.presentation.LibraryViewModel
+import ir.kazemcodes.infinity.feature_sources.presentation.extension.ExtensionViewModel
+import ir.kazemcodes.infinity.feature_sources.presentation.extension.UserSourcesScreen
 import kotlinx.coroutines.launch
 
 typealias ComposableFun = @Composable () -> Unit
@@ -35,12 +36,18 @@ sealed class TabItem(var title: String, var screen: ComposableFun) {
     data class Sort(val viewModel: LibraryViewModel) : TabItem("Sort", { SortScreen(viewModel) })
     data class Display(val viewModel: LibraryViewModel) :
         TabItem("Display", { DisplayScreen(viewModel) })
+
+    data class Sources(val viewModel: ExtensionViewModel) :
+        TabItem("Sources", { UserSourcesScreen(viewModel = viewModel)})
+
+    data class CommunitySources(val viewModel: ExtensionViewModel) :
+        TabItem("Community Sources", { UserSourcesScreen(viewModel) })
 }
 
 @ExperimentalPagerApi
 @ExperimentalMaterialApi
 @Composable
-fun Tabs(tabs: List<TabItem>, pagerState: PagerState) {
+fun Tabs(libraryTabs: List<TabItem>, pagerState: PagerState) {
     val scope = rememberCoroutineScope()
     // OR ScrollableTabRow()
     TabRow(
@@ -50,14 +57,15 @@ fun Tabs(tabs: List<TabItem>, pagerState: PagerState) {
         indicator = { tabPositions ->
             TabRowDefaults.Indicator(
                 Modifier.pagerTabIndicatorOffset(pagerState, tabPositions),
-                color = MaterialTheme.colors.primary
+                color = MaterialTheme.colors.primary,
+
             )
         }) {
-        tabs.forEachIndexed { index, tab ->
+        libraryTabs.forEachIndexed { index, tab ->
             LeadingIconTab(
                 icon = { },
                 text = {
-                    TopAppBarTitle(title = tab.title,
+                    MidSizeTextComposable(title = tab.title,
                         color = MaterialTheme.colors.onBackground)
                 },
                 selected = pagerState.currentPage == index,
@@ -158,11 +166,11 @@ fun SortScreen(viewModel: LibraryViewModel) {
 
 @ExperimentalPagerApi
 @Composable
-fun TabsContent(tabs: List<TabItem>, pagerState: PagerState) {
+fun TabsContent(libraryTabs: List<TabItem>, pagerState: PagerState) {
     HorizontalPager(state = pagerState,
-        count = tabs.size,
+        count = libraryTabs.size,
         modifier = Modifier.fillMaxSize()) { page ->
-        tabs[pagerState.currentPage].screen()
+        libraryTabs[pagerState.currentPage].screen()
     }
 }
 
@@ -171,7 +179,7 @@ fun CheckBoxWithText(title: String, isChecked: Boolean, onCheckedChange: (Boolea
     Row(horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically) {
         Checkbox(checked = isChecked, onCheckedChange = onCheckedChange)
-        MidTextComposable(title = title)
+        MidSizeTextComposable(title = title)
     }
 }
 
@@ -189,6 +197,6 @@ fun IconWithText(title: String, icon: ImageVector, isEnable: Boolean, onClick: (
             contentDescription = "$title icon",
             tint = if (isEnable) MaterialTheme.colors.iconColor else Color.Transparent)
         Spacer(modifier = Modifier.width(8.dp))
-        MidTextComposable(title = title)
+        MidSizeTextComposable(title = title)
     }
 }

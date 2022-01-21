@@ -4,6 +4,7 @@ import android.content.Context
 import android.webkit.WebView
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.paging.PagingData
 import androidx.work.*
 import com.zhuinden.simplestack.ScopedServices
 import ir.kazemcodes.infinity.core.data.network.models.Source
@@ -13,6 +14,7 @@ import ir.kazemcodes.infinity.core.domain.repository.LocalBookRepository
 import ir.kazemcodes.infinity.core.domain.repository.LocalChapterRepository
 import ir.kazemcodes.infinity.core.domain.repository.RemoteRepository
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.PreferencesUseCase
+import ir.kazemcodes.infinity.core.presentation.components.WebViewFetcher
 import ir.kazemcodes.infinity.core.utils.Resource
 import ir.kazemcodes.infinity.core.utils.UiEvent
 import ir.kazemcodes.infinity.core.utils.UiText
@@ -21,6 +23,7 @@ import ir.kazemcodes.infinity.feature_activity.domain.service.DownloadService
 import ir.kazemcodes.infinity.feature_activity.domain.service.DownloadService.Companion.DOWNLOAD_BOOK_NAME
 import ir.kazemcodes.infinity.feature_activity.domain.service.DownloadService.Companion.DOWNLOAD_SERVICE_NAME
 import ir.kazemcodes.infinity.feature_activity.domain.service.DownloadService.Companion.DOWNLOAD_SOURCE_NAME
+import ir.kazemcodes.infinity.feature_sources.sources.models.FetchType
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import org.jsoup.Jsoup
@@ -43,8 +46,19 @@ class BookDetailViewModel(
     val chapterState: State<ChapterState> = _chapterState
     lateinit var work: OneTimeWorkRequest
 
+    private val _getChapters = MutableStateFlow<PagingData<Book>>(PagingData.empty())
+    val getPagingChapters= _getChapters
+
+
+
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
+    val viewModelExt = WebViewFetcher(coroutineScope = coroutineScope,
+        source = source,
+        fetcher = FetchType.Detail,
+        localBookRepository = localBookRepository,
+        localChapterRepository = localChapterRepository,
+        url = state.value.book.link)
 
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
@@ -208,6 +222,30 @@ class BookDetailViewModel(
                     }
                 }
             }.launchIn(coroutineScope)
+    }
+    fun getWebViewData() {
+        viewModelExt.fetchInfo().onEach { result ->
+            when (result) {
+                is Resource.Success -> {
+                    if (result.data != null) {
+                        _eventFlow.emit(UiEvent.ShowSnackbar(
+                            uiText =result.data
+                        ))
+                    }
+                }
+                is Resource.Error -> {
+                    _eventFlow.emit(UiEvent.ShowSnackbar(
+                        uiText = UiText.DynamicString(result.message.toString()) ?: UiText.DynamicString("Failed to to get the content")
+                    ))
+                }
+                is Resource.Loading -> {
+                    _eventFlow.emit(UiEvent.ShowSnackbar(
+                        uiText = UiText.DynamicString("Trying to fetch...")
+                    ))
+                }
+            }
+        }.launchIn(coroutineScope)
+
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)

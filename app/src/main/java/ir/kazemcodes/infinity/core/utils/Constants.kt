@@ -39,7 +39,7 @@ object Constants {
     const val NO_CHAPTER_ERROR = "There is No chapter with this name"
     const val NO_CHAPTERS_ERROR = "There are no chapters with this name"
 
-    const val CLOUDFLARE_PROTECTION_ERROR = "Cloudflare site protection is enable"
+    const val CLOUDFLARE_PROTECTION_ERROR = "Cloudflare site protection is enable, Please Open the WebView."
 
     const val UNKNOWN_ERROR = "Unknown Error Happened"
 

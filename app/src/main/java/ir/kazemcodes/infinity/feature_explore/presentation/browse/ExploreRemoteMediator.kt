@@ -11,6 +11,7 @@ import ir.kazemcodes.infinity.core.data.local.dao.RemoteKeys
 import ir.kazemcodes.infinity.core.data.network.models.Source
 import retrofit2.HttpException
 import java.io.IOException
+import java.net.UnknownHostException
 import javax.net.ssl.SSLHandshakeException
 
 @ExperimentalPagingApi
@@ -94,6 +95,8 @@ class ExploreRemoteMediator(
             } else {
                 RemoteMediator.MediatorResult.Success(endOfPaginationReached = endOfPaginationReached)
             }
+        } catch (e: UnknownHostException) {
+            return RemoteMediator.MediatorResult.Error(Exception("There is no internet available,please check your internet connection"))
         } catch (e: IOException) {
             return RemoteMediator.MediatorResult.Error(e)
         } catch (e: HttpException) {
