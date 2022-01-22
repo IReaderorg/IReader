@@ -4,7 +4,6 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import androidx.paging.map
 import com.zhuinden.simplestack.ScopedServices
 import ir.kazemcodes.infinity.core.data.network.models.BooksPage
 import ir.kazemcodes.infinity.core.data.network.models.Source
@@ -43,11 +42,12 @@ class BrowseViewModel(
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     private var getBooksJob: Job? = null
-
     override fun onServiceRegistered() {
         getBooks()
         readLayoutType()
     }
+
+
 
     fun getSource(): Source {
 
@@ -79,7 +79,7 @@ class BrowseViewModel(
         getBooksJob = coroutineScope.launch(Dispatchers.IO) {
             remoteRepository.getRemoteBooksUseCase(source, type?:exploreType, query = query).cachedIn(coroutineScope)
                 .collect { snapshot ->
-                    _books.value = snapshot.map { bookEntity -> bookEntity.toBook() }
+                    _books.value = snapshot
                 }
         }
     }
@@ -131,9 +131,9 @@ class BrowseViewModel(
         _state.value = state.value.copy(isMenuDropDownShown = isShown)
     }
 
-
     override fun onServiceUnregistered() {
         coroutineScope.cancel()
     }
+
 
 }

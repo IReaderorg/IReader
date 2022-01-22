@@ -9,8 +9,8 @@ import ir.kazemcodes.infinity.core.domain.models.Chapter
 import ir.kazemcodes.infinity.core.domain.models.SourceEntity
 
 @Database(
-    entities = [Book::class, Chapter::class,RemoteKeys::class, ExploreBook::class,SourceEntity::class],
-    version = 5,
+    entities = [Book::class, Chapter::class,RemoteKeys::class,SourceEntity::class],
+    version = 6,
     exportSchema = true,
 )
 @TypeConverters(DatabaseConverter::class)

@@ -1,32 +1,38 @@
 package ir.kazemcodes.infinity.feature_reader.presentation.reader
 
-import android.webkit.WebView
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Autorenew
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Sort
+import androidx.compose.material.icons.filled.TrackChanges
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.paging.LoadState
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.items
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import com.zhuinden.simplestackcomposeintegration.services.rememberService
-import com.zhuinden.simplestackextensions.servicesktx.lookup
+import ir.kazemcodes.infinity.core.presentation.components.ChapterListItemComposable
 import ir.kazemcodes.infinity.core.presentation.components.ISnackBarHost
+import ir.kazemcodes.infinity.core.presentation.components.handlePagingChapterResult
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.ErrorTextWithEmojis
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarActionButton
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarBackButton
@@ -42,27 +48,27 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 
+@ExperimentalAnimationApi
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ReadingScreen(
     modifier: Modifier = Modifier,
 ) {
     val viewModel = rememberService<ReaderScreenViewModel>()
+    val chapters = viewModel.chapters.collectAsLazyPagingItems()
     val scaffoldState = rememberScaffoldState(rememberDrawerState(DrawerValue.Closed))
     val modalBottomSheetState =
         rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Expanded)
     val scope = rememberCoroutineScope()
-    val book = viewModel.state.value.book
     val backStack = LocalBackstack.current
     val state = viewModel.state.value
     val interactionSource = remember { MutableInteractionSource() }
     val context = LocalContext.current
-    val webview = backStack.lookup<WebView>()
     val scrollState = rememberScrollState()
-    val verticalScrollState = rememberLazyListState(scrollState.value)
+
 
     val isWebViewEnable by remember {
-        mutableStateOf(webview.originalUrl == viewModel.state.value.chapter.link)
+        mutableStateOf(viewModel.webView.originalUrl == viewModel.state.value.chapter.link)
     }
 
     LaunchedEffect(key1 = true) {
@@ -79,7 +85,7 @@ fun ReadingScreen(
 
     Box(modifier = modifier.fillMaxSize()) {
         Scaffold(topBar = {
-            if (!state.isReaderModeEnable && state.isLoaded && modalBottomSheetState.targetValue ==  ModalBottomSheetValue.Expanded) {
+            if (!state.isReaderModeEnable && state.isLoaded && modalBottomSheetState.targetValue == ModalBottomSheetValue.Expanded) {
                 TopAppBar(
                     title = {
 
@@ -104,11 +110,17 @@ fun ReadingScreen(
                             title = "Refresh",
                             onClick = { viewModel.getReadingContentRemotely() })
                         if (isWebViewEnable) {
-                        TopAppBarActionButton(imageVector = Icons.Default.TrackChanges, title = "Content Fetcher", onClick = { viewModel.getFromWebView() })
+                            TopAppBarActionButton(imageVector = Icons.Default.TrackChanges,
+                                title = "Content Fetcher",
+                                onClick = { viewModel.getFromWebView() })
                         }
                         TopAppBarActionButton(imageVector = Icons.Default.Language,
                             title = "WebView",
-                            onClick = { backStack.goTo(WebViewKey(url = viewModel.state.value.chapter.link, sourceName = viewModel.state.value.source.name, fetchType = FetchType.Content.index)) })
+                            onClick = {
+                                backStack.goTo(WebViewKey(url = viewModel.state.value.chapter.link,
+                                    sourceName = viewModel.state.value.source.name,
+                                    fetchType = FetchType.Content.index))
+                            })
                     }
                 )
             } else if (!state.isLoaded) {
@@ -118,9 +130,19 @@ fun ReadingScreen(
                     actions = {
                         TopAppBarActionButton(imageVector = Icons.Default.Language,
                             title = "WebView",
-                            onClick = { backStack.goTo(WebViewKey(url = viewModel.state.value.chapter.link, sourceName = viewModel.state.value.source.name, fetchType = FetchType.Content.index))})
+                            onClick = {
+                                backStack.goTo(WebViewKey(
+                                    url = viewModel.state.value.chapter.link,
+                                    sourceName = viewModel.state.value.source.name,
+                                    fetchType = FetchType.Content.index,
+                                    bookName = viewModel.state.value.book.bookName,
+                                    chapterName = state.chapter.title
+                                ))
+                            })
                         if (isWebViewEnable) {
-                            TopAppBarActionButton(imageVector = Icons.Default.TrackChanges, title = "Content Fetcher", onClick = { viewModel.getFromWebView() })
+                            TopAppBarActionButton(imageVector = Icons.Default.TrackChanges,
+                                title = "Content Fetcher",
+                                onClick = { viewModel.getFromWebView() })
                         }
                     },
                     navigationIcon = {
@@ -129,7 +151,7 @@ fun ReadingScreen(
             }
         },
             scaffoldState = scaffoldState,
-            snackbarHost = { ISnackBarHost(snackBarHostState = it)},
+            snackbarHost = { ISnackBarHost(snackBarHostState = it) },
             bottomBar = {
                 if (!state.isReaderModeEnable && state.isLoaded) {
                     ModalBottomSheetLayout(
@@ -176,58 +198,43 @@ fun ReadingScreen(
                             title = "Reverse list icon",
                             onClick = {
                                 viewModel.reverseChapters()
+                                viewModel.getLocalChaptersByPaging()
                             })
                     }
 
                     Spacer(modifier = modifier.height(5.dp))
                     Divider(modifier = modifier.fillMaxWidth(), thickness = 1.dp)
-                    if (state.chapters.isNotEmpty()) {
-                        LazyColumn(modifier = Modifier.fillMaxSize()) {
-                            items(count = state.drawerChapters.size) { index ->
-                                Row(
-                                    modifier = modifier
-                                        .fillMaxWidth()
-                                        .padding(12.dp)
-                                        .height(40.dp)
-                                        .clickable {
-                                            viewModel.getContent(viewModel.state.value.chapters[viewModel.getIndexOfChapter(
-                                                index)])
-                                            viewModel.updateChapterSliderIndex(index = index)
 
-                                        },
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Text(
-                                        text = state.drawerChapters[index].title,
-                                        color = if (state.drawerChapters[index].haveBeenRead) MaterialTheme.colors.onBackground.copy(
-                                            alpha = .4f) else MaterialTheme.colors.onBackground,
-                                        style = MaterialTheme.typography.subtitle1,
-                                        fontWeight = FontWeight.SemiBold,
-                                        overflow = TextOverflow.Ellipsis,
-                                        modifier = Modifier.weight(7f)
-                                    )
-                                    Text(modifier = Modifier.weight(2f),
-                                        text = state.drawerChapters[index].dateUploaded ?: "",
-                                        fontStyle = FontStyle.Italic,
-                                        color = if (state.drawerChapters[index].haveBeenRead) MaterialTheme.colors.onBackground.copy(
-                                            alpha = .4f) else MaterialTheme.colors.onBackground,
-                                        fontWeight = FontWeight.SemiBold,
-                                        style = MaterialTheme.typography.caption
-                                    )
-                                    Spacer(modifier = modifier.width(20.dp))
-                                    Icon(
-                                        imageVector = Icons.Default.PublishedWithChanges,
-                                        contentDescription = "Cached",
-                                        tint = if (state.drawerChapters[index].content.joinToString(
-                                                " , ").length > 10
-                                        ) MaterialTheme.colors.onBackground else MaterialTheme.colors.background,
-                                    )
+                    val result = handlePagingChapterResult(books = chapters, onEmptyResult = {
+                        Box(modifier = modifier.fillMaxSize()) {
+                            ErrorTextWithEmojis(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(20.dp)
+                                    .align(Alignment.Center),
+                                error = "There is no book is Library, you can add books in the Explore screen"
+                            )
+                        }
+
+                    })
+                    if(result) {
+                        AnimatedContent(chapters.loadState.refresh is LoadState.NotLoading) {
+                            LazyColumn(modifier = Modifier.fillMaxSize()) {
+
+                                items(items = chapters) { chapter ->
+                                    if (chapter != null) {
+                                        ChapterListItemComposable(modifier = modifier,
+                                            chapter = chapter, goTo = {
+                                                viewModel.getContent(chapter)
+                                            })
+
+                                    }
                                 }
                             }
-
                         }
                     }
+
+
                 }
             }
         ) {
@@ -239,6 +246,7 @@ fun ReadingScreen(
                         viewModel.onEvent(ReaderEvent.ToggleReaderMode(!state.isReaderModeEnable))
                         if (state.isReaderModeEnable) {
                             scope.launch(Dispatchers.Main) {
+                                viewModel.getLocalChaptersByPaging()
                                 modalBottomSheetState.animateTo(ModalBottomSheetValue.Expanded)
                             }
                         } else {
@@ -252,7 +260,7 @@ fun ReadingScreen(
                     .padding(viewModel.state.value.paragraphsIndent.dp)
                     .wrapContentSize(Alignment.CenterStart)
             ) {
-                if (state.chapter.isChapterNotEmpty()) {
+                if (state.chapter.isChapterNotEmpty() && !state.isLoading) {
                     Text(
                         modifier = modifier.verticalScroll(scrollState),
                         text = state.chapter.content.joinToString("\n".repeat(state.distanceBetweenParagraphs)),
@@ -266,11 +274,13 @@ fun ReadingScreen(
             }
         }
         if (state.error.isNotBlank()) {
-            ErrorTextWithEmojis(error = state.error, modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp)
-                .wrapContentSize(Alignment.Center)
-                .align(Alignment.Center),
+            ErrorTextWithEmojis(
+                error = state.error,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp)
+                    .wrapContentSize(Alignment.Center)
+                    .align(Alignment.Center),
             )
         }
 

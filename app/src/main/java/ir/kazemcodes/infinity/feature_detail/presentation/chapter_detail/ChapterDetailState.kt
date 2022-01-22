@@ -9,7 +9,7 @@ data class ChapterDetailState(
     val isLoading: Boolean = false,
     val chapters: List<Chapter> = emptyList(),
     val book: Book,
-    val isReversed : Boolean = false,
+    val isAsc : Boolean = true,
     val error: String = "",
     val chapterOrderType: OrderType = OrderType.Ascending,
     val listOfLastReadChapter: List<LastReadChapter> = emptyList(),

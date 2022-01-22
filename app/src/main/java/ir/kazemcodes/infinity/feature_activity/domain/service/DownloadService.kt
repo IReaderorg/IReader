@@ -47,7 +47,7 @@ class DownloadService @AssistedInject constructor(
     override suspend fun doWork(): Result {
         val bookName = inputData.getString(DOWNLOAD_BOOK_NAME)!!
         val source = inputData.getString(DOWNLOAD_SOURCE_NAME)!!
-        val book = repository.localBookRepository.getBookById("1").first().data
+        val book = repository.localBookRepository.getBookById(1).first().data
         val chapters = repository.localChapterRepository.getChapterByName(bookName, source = source).first().data
 
         val notification = NotificationCompat.Builder(applicationContext,

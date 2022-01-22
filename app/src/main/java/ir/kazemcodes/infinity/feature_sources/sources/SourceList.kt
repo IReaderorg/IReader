@@ -206,7 +206,7 @@ class AvailableSources(context: Context) {
             categorySelector = "div.genres-content a",
         ),
         chapters = Chapters(
-            isChapterStatsFromFirst = true,
+            isChapterStatsFromFirst = false,
             selector = "li.wp-manga-chapter",
             linkSelector = "a",
             linkAtt = "href",
@@ -457,7 +457,8 @@ class AvailableSources(context: Context) {
             nameSelector = "a",
             linkSelector = "a",
             linkAtt = "href",
-            addBaseUrlToLink = true
+            addBaseUrlToLink = true,
+            isChapterStatsFromFirst = true,
         ),
         content = Content(
             pageTitleSelector = "h1.headline",
@@ -549,6 +550,7 @@ class AvailableSources(context: Context) {
             nameSelector = "a",
             linkSelector = "a",
             linkAtt = "href",
+            isChapterStatsFromFirst = false,
         ),
         detail = Detail(
             nameSelector = "div.post-title h1",
@@ -577,6 +579,7 @@ class AvailableSources(context: Context) {
             coverAtt = "src",
             nextPageSelector = "ul.pagination>li:nth-child(6)>a",
             nextPageValue = "Last"
+
         ),
         content = Content(
             selector = "div.chapter-content",

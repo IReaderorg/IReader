@@ -140,7 +140,7 @@ class BookDetailFragment : ComposeFragment() {
 }
 
 @Parcelize
-data class BookDetailKey(val bookName: String,val bookId:String, val sourceName: String) :
+data class BookDetailKey(val bookId:Int, val sourceName: String) :
     FragmentKey() {
 
     override fun instantiateFragment(): Fragment = BookDetailFragment()
@@ -150,9 +150,8 @@ data class BookDetailKey(val bookName: String,val bookId:String, val sourceName:
             add(
                 BookDetailViewModel(
                     source = mappingSourceNameToSource(sourceName),
-                    bookName = bookName,
                     bookId = bookId,
-                    lookup<PreferencesUseCase>(),
+                    preferencesUseCase = lookup<PreferencesUseCase>(),
                     localBookRepository = lookup<LocalBookRepository>(),
                     remoteRepository = lookup<RemoteRepository>(),
                     localChapterRepository = lookup<LocalChapterRepository>()
@@ -204,6 +203,8 @@ data class WebViewKey(
 class ChapterDetailFragment : ComposeFragment() {
 
 
+
+    @OptIn(ExperimentalAnimationApi::class)
     @Composable
     override fun FragmentComposable(backstack: Backstack) {
         BackstackProvider(backstack = backstack) {
@@ -235,6 +236,8 @@ data class ChapterDetailKey(
 }
 
 class ReaderScreenFragment : ComposeFragment() {
+
+    @OptIn(ExperimentalAnimationApi::class)
     @Composable
     override fun FragmentComposable(backstack: Backstack) {
         BackstackProvider(backstack = backstack) {
@@ -243,7 +246,6 @@ class ReaderScreenFragment : ComposeFragment() {
             }
         }
     }
-
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -255,12 +257,15 @@ class ReaderScreenFragment : ComposeFragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        val activity = context?.findAppCompatAcivity()!!
-        val window = activity.window
-        val layoutParams: WindowManager.LayoutParams = window.attributes
-        layoutParams.screenBrightness = -1f
-        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-        window.attributes = layoutParams
+        val activity = context?.findAppCompatAcivity()
+        if (activity !=null) {
+            val window = activity.window
+            val layoutParams: WindowManager.LayoutParams = window.attributes
+            layoutParams.screenBrightness = -1f
+            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+            window.attributes = layoutParams
+        }
+
     }
 
 
@@ -268,10 +273,9 @@ class ReaderScreenFragment : ComposeFragment() {
 
 @Parcelize
 data class ReaderScreenKey(
-    val bookName: String,
+    val bookId: Int,
     val sourceName: String,
-    val chapterName: String,
-    val chapterIndex: Int,
+    val chapterId: Int,
 ) : FragmentKey() {
 
     override fun instantiateFragment(): Fragment = ReaderScreenFragment()
@@ -281,12 +285,11 @@ data class ReaderScreenKey(
             add(ReaderScreenViewModel(
                 preferencesUseCase = lookup<PreferencesUseCase>(),
                 source = mappingSourceNameToSource(sourceName),
-                bookName = bookName,
-                chapterName = chapterName,
-                chapterIndex = chapterIndex,
+                bookId = bookId,
+                chapterId = chapterId,
                 localBookRepository = lookup<LocalBookRepository>(),
                 remoteRepository = lookup<RemoteRepository>(),
-                localChapterRepository = lookup<LocalChapterRepository>()
+                localChapterRepository = lookup<LocalChapterRepository>(),
             ))
         }
     }

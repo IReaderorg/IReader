@@ -3,7 +3,6 @@ package ir.kazemcodes.infinity.core.domain.repository
 import android.content.Context
 import android.webkit.WebView
 import androidx.paging.PagingData
-import ir.kazemcodes.infinity.core.data.local.ExploreBook
 import ir.kazemcodes.infinity.core.data.network.models.ChapterPage
 import ir.kazemcodes.infinity.core.data.network.models.Source
 import ir.kazemcodes.infinity.core.domain.models.Book
@@ -26,7 +25,7 @@ interface RemoteRepository {
         source: Source,
         exploreType: ExploreType,
         query:String?=null,
-    ): Flow<PagingData<ExploreBook>>
+    ): Flow<PagingData<Book>>
 
 
 

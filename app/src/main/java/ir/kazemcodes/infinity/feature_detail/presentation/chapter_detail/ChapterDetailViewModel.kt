@@ -2,15 +2,17 @@ package ir.kazemcodes.infinity.feature_detail.presentation.chapter_detail
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.zhuinden.simplestack.ScopedServices
 import ir.kazemcodes.infinity.core.data.network.models.Source
 import ir.kazemcodes.infinity.core.domain.models.Book
+import ir.kazemcodes.infinity.core.domain.models.Chapter
 import ir.kazemcodes.infinity.core.domain.repository.LocalChapterRepository
 import ir.kazemcodes.infinity.core.utils.Resource
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
@@ -24,9 +26,14 @@ class ChapterDetailViewModel(
     private val _state = mutableStateOf(ChapterDetailState(source = source, book = Book.create().copy(bookName = bookName)))
     val state: State<ChapterDetailState> = _state
 
+    private val _chapters = MutableStateFlow<PagingData<Chapter>>(PagingData.empty())
+    val chapters = _chapters
+
     override fun onServiceRegistered() {
         getLocalChapters()
+        getLocalChaptersByPaging()
     }
+
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
@@ -35,13 +42,21 @@ class ChapterDetailViewModel(
             is ChapterDetailEvent.ToggleOrder -> {
                 _state.value = state.value.copy(
                     localChapters = state.value.localChapters.reversed(),
-                    isReversed = !state.value.isReversed
+                    isAsc = !state.value.isAsc
                 )
+                getLocalChaptersByPaging()
             }
 
         }
     }
-
+    private fun getLocalChaptersByPaging() {
+        coroutineScope.launch(Dispatchers.IO) {
+            localChapterRepository.getLocalChaptersByPaging(bookName = bookName, source = source.name,isAsc=state.value.isAsc).cachedIn(coroutineScope)
+                .collect { snapshot ->
+                    _chapters.value = snapshot
+                }
+        }
+    }
     private fun getLocalChapters() {
         localChapterRepository.getChapterByName(bookName = bookName, source = source.name)
             .onEach { result ->
@@ -49,31 +64,25 @@ class ChapterDetailViewModel(
                     is Resource.Success -> {
                         if (!result.data.isNullOrEmpty()) {
                             _state.value = state.value.copy(
-                                chapters = result.data,
-                                localChapters = if (state.value.isReversed) result.data.reversed() else result.data,
-                                isLoading = false,
-                                error = "")
-                        } else {
-                            _state.value = state.value.copy(isLoading = false, error = "No Chapter")
+                                chapters = result.data)
                         }
                     }
                     is Resource.Error -> {
-                        _state.value =
-                            state.value.copy(error = result.message
-                                ?: "An Unknown Error Occurred", isLoading = false)
+
                     }
                     is Resource.Loading -> {
-                        _state.value = state.value.copy(isLoading = true, error = "")
                     }
                 }
             }.launchIn(coroutineScope)
     }
 
-    fun getIndexOfChapter(index: Int): Int {
-        return if (state.value.isReversed) ((state.value.localChapters.size - 1) - index) else index
+    fun getIndexOfChapter(chapter: Chapter): Int {
+        val ch = state.value.chapters.indexOf(chapter)
+        return if (ch != -1) ch else 0
     }
 
-    override fun onServiceUnregistered() {
+
+        override fun onServiceUnregistered() {
         coroutineScope.cancel()
     }
 }

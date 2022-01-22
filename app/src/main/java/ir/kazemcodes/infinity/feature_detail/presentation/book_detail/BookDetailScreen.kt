@@ -45,14 +45,13 @@ fun BookDetailScreen(
     modifier: Modifier = Modifier,
 ) {
     val viewModel = rememberService<BookDetailViewModel>()
-    val detailState = viewModel.state.value
     val backStack = LocalBackstack.current
 
 
 
 
     Box(modifier = Modifier.fillMaxSize()) {
-        if (!viewModel.state.value.isLoading) {
+        if (viewModel.state.value.isLoaded) {
             BookDetailScreenLoadedComposable(
                 modifier = modifier,
                 viewModel = viewModel
@@ -77,14 +76,14 @@ fun BookDetailScreen(
 
                 ) {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    if (detailState.error.isNotBlank()) {
-                        ErrorTextWithEmojis(error = detailState.error, modifier = Modifier
+                    if (viewModel.state.value.error.isNotBlank()) {
+                        ErrorTextWithEmojis(error = viewModel.state.value.error, modifier = Modifier
                             .fillMaxWidth()
                             .padding(20.dp)
                             .wrapContentSize(Alignment.Center)
                             .align(Alignment.Center))
                     }
-                    if (detailState.isLoading) {
+                    if (viewModel.state.value.isLoading) {
                         CircularProgressIndicator(
                             modifier = Modifier.align(Alignment.Center)
                         )
@@ -159,7 +158,7 @@ fun BookDetailScreenLoadedComposable(
                     }
                     /** ERROR: This may cause error later: mismatch between baseurl and book link**/
                     IconButton(onClick = {
-                        backStack.goTo(WebViewKey(source.baseUrl + getUrlWithoutDomain(book.link), sourceName = source.name, fetchType = FetchType.Detail.index))
+                        backStack.goTo(WebViewKey(source.baseUrl + getUrlWithoutDomain(book.link), sourceName = source.name, fetchType = FetchType.Detail.index, bookName = viewModel.state.value.book.bookName))
                     }) {
                         Icon(
                             imageVector = Icons.Default.Language,
@@ -217,18 +216,17 @@ fun BookDetailScreenLoadedComposable(
                             if (viewModel.chapterState.value.lastChapter != null) {
                                 backStack.goTo(
                                     ReaderScreenKey(
-                                        chapterIndex = chapters.indexOf(viewModel.chapterState.value.lastChapter),
-                                        bookName = book.bookName,
+                                        bookId = book.id,
                                         sourceName = source.name,
-                                        chapterName = viewModel.chapterState.value.lastChapter!!.title,
-                                        ),
+                                        chapterId = viewModel.chapterState.value.lastChapter!!.chapterId,
+
+                                    ),
                                 )
                             } else if (viewModel.chapterState.value.chapters.isNotEmpty()) {
                                 backStack.goTo(ReaderScreenKey(
-                                    chapterIndex = 0,
-                                    bookName = book.bookName,
+                                    bookId = book.id,
                                     sourceName = source.name,
-                                    chapterName = viewModel.chapterState.value.chapters.first().title,
+                                    chapterId = viewModel.chapterState.value.chapters.first().chapterId,
                                 ))
                             } else {
                                 context.toast("No Chapter is Avialable")

@@ -16,8 +16,7 @@ data class ReaderScreenState(
     val isChapterLoaded:Boolean = false,
     val chapter: Chapter = Chapter.create(),
     val chapters: List<Chapter> = emptyList(),
-    val drawerChapters : List<Chapter> = emptyList(),
-    val isReversed : Boolean = false,
+    val isAsc : Boolean = true,
     val error: String = "",
     val fontSize: Int = 18,
     val font: FontType = FontType.Poppins,
@@ -33,6 +32,7 @@ data class ReaderScreenState(
     val backgroundColor: Color = BackgroundColor.Black.color,
     val textColor: Color = BackgroundColor.Black.onTextColor,
     val orientation: Orientation = Orientation.Portrait,
+    val isWebViewEnable : Boolean = false
 )
 
 sealed class Orientation(val index : Int){

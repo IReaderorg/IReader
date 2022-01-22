@@ -6,9 +6,9 @@ import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
 import ir.kazemcodes.infinity.core.data.local.BookDatabase
-import ir.kazemcodes.infinity.core.data.local.ExploreBook
 import ir.kazemcodes.infinity.core.data.local.dao.RemoteKeys
 import ir.kazemcodes.infinity.core.data.network.models.Source
+import ir.kazemcodes.infinity.core.domain.models.Book
 import retrofit2.HttpException
 import java.io.IOException
 import java.net.UnknownHostException
@@ -20,15 +20,14 @@ class ExploreRemoteMediator(
     private val database: BookDatabase,
     private val exploreType: ExploreType,
     private val query: String? = null,
-) : RemoteMediator<Int, ExploreBook>() {
+) : RemoteMediator<Int, Book>() {
 
-    private val bookDao = database.libraryBookDao
     private val remoteKey = database.remoteKeysDao
 
 
     override suspend fun load(
         loadType: LoadType,
-        state: PagingState<Int, ExploreBook>,
+        state: PagingState<Int, Book>,
     ): RemoteMediator.MediatorResult {
         return try {
             val currentPage = when (loadType) {
@@ -75,19 +74,19 @@ class ExploreRemoteMediator(
 
             database.withTransaction {
                 if (loadType == LoadType.REFRESH) {
-                    bookDao.deleteAllExploredBook()
+                    remoteKey.deleteAllExploredBook()
                     remoteKey.deleteAllRemoteKeys()
                 }
                 val keys = response.books.map { book ->
                     RemoteKeys(
-                        id = book.id,
+                        id = book.bookName,
                         prevPage = prevPage,
                         nextPage = nextPage
                     )
                 }
                 remoteKey.addAllRemoteKeys(remoteKeys = keys)
-                bookDao.insertAllExploredBook(response.books.map {
-                    it.toExploreBook().copy(isExploreMode = true)
+                remoteKey.insertAllExploredBook(response.books.map {
+                    it.copy(isExploreMode = true)
                 })
             }
             if (response.errorMessage.isNotBlank()) {
@@ -109,30 +108,30 @@ class ExploreRemoteMediator(
     }
 
     private suspend fun getRemoteKeyClosestToCurrentPosition(
-        state: PagingState<Int, ExploreBook>,
+        state: PagingState<Int, Book>,
     ): RemoteKeys? {
         return state.anchorPosition?.let { position ->
-            state.closestItemToPosition(position)?.id?.let { id ->
-                remoteKey.getRemoteKeys(id = id)
+            state.closestItemToPosition(position)?.bookName?.let { bookName ->
+                remoteKey.getRemoteKeys(id = bookName)
             }
         }
     }
 
     private suspend fun getRemoteKeyForFirstItem(
-        state: PagingState<Int, ExploreBook>,
+        state: PagingState<Int, Book>,
     ): RemoteKeys? {
         return state.pages.firstOrNull { it.data.isNotEmpty() }?.data?.firstOrNull()
             ?.let { book ->
-                remoteKey.getRemoteKeys(id = book.id)
+                remoteKey.getRemoteKeys(id = book.bookName)
             }
     }
 
     private suspend fun getRemoteKeyForLastItem(
-        state: PagingState<Int, ExploreBook>,
+        state: PagingState<Int, Book>,
     ): RemoteKeys? {
         return state.pages.lastOrNull { it.data.isNotEmpty() }?.data?.lastOrNull()
             ?.let { book ->
-                remoteKey.getRemoteKeys(id = book.id)
+                remoteKey.getRemoteKeys(id = book.bookName)
             }
     }
 

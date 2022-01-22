@@ -31,7 +31,7 @@ fun ChaptersSliderComposable(
             style = MaterialTheme.typography.subtitle2,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
-            )
+        )
         Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             IconButton(modifier = modifier.weight(1f),
                 onClick = {
@@ -52,6 +52,7 @@ fun ChaptersSliderComposable(
                 },
                 onValueChangeFinished = {
                     context.toast(chapters[viewModel.state.value.currentChapterIndex].title)
+                    viewModel.updateChapterSliderIndex(currentIndex - 1)
                     viewModel.getContent(chapters[viewModel.state.value.currentChapterIndex])
                 },
                 valueRange = 0f..(chapters.size - 1).toFloat(),
@@ -66,8 +67,8 @@ fun ChaptersSliderComposable(
             )
             IconButton(modifier = modifier.weight(1f), onClick = {
                 if (currentIndex < (chapters.size - 1)) {
-                    viewModel.getContent(chapters[currentIndex + 1])
                     viewModel.updateChapterSliderIndex(currentIndex + 1)
+                    viewModel.getContent(chapters[currentIndex + 1])
                 } else {
                     context.toast("This is last chapter")
                 }

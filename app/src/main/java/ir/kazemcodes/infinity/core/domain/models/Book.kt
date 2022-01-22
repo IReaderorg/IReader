@@ -2,15 +2,13 @@ package ir.kazemcodes.infinity.core.domain.models
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import ir.kazemcodes.infinity.core.data.local.ExploreBook
-import ir.kazemcodes.infinity.core.utils.getRandomString
 import ir.kazemcodes.infinity.core.utils.Constants.BOOK_TABLE
 import kotlinx.serialization.Serializable
 
 @Serializable
 @Entity(tableName = BOOK_TABLE)
 data class Book(
-    @PrimaryKey(autoGenerate = false) var id: String,
+    @PrimaryKey(autoGenerate = true) var id: Int = 0,
     var link: String,
     var bookName: String,
     var coverLink: String? = null,
@@ -28,7 +26,7 @@ data class Book(
     var lastRead:Long = 0,
     var totalChapters:Int = 0,
     var unread:Boolean = true,
-    var lastUpdated:Long = 0
+    var lastUpdated:Long =-1
 ) {
 
 
@@ -38,7 +36,7 @@ data class Book(
         const val COMPLETED = 2
         const val LICENSED = 3
         fun create(): Book {
-            return Book(bookName = "", link = "", id = getRandomString(6))
+            return Book(bookName = "", link = "")
         }
     }
 
@@ -74,21 +72,21 @@ data class Book(
             lastUpdated = lastUpdated
         )
     }
-    fun toExploreBook(): ExploreBook {
-        return ExploreBook(
-            bookName = bookName,
-            link = link,
-            coverLink = coverLink,
-            translator = translator,
-            author = author,
-            status = status,
-            description = description,
-            category = category,
-            source = source,
-            id = id,
-            rating = rating,
-            lastUpdated = lastUpdated
-        )
-    }
+//    fun toExploreBook(): ExploreBook {
+//        return ExploreBook(
+//            bookName = bookName,
+//            link = link,
+//            coverLink = coverLink,
+//            translator = translator,
+//            author = author,
+//            status = status,
+//            description = description,
+//            category = category,
+//            source = source,
+//            rating = rating,
+//            lastUpdated = lastUpdated,
+//            id=0
+//        )
+//    }
 
 }

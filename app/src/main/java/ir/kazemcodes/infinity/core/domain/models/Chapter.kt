@@ -9,6 +9,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 @Entity(tableName = CHAPTER_TABLE)
 data class Chapter(
+    @PrimaryKey(autoGenerate = true) val chapterId: Int = 0,
     var bookName: String? = null,
     var link: String,
     var title: String,
@@ -18,7 +19,6 @@ data class Chapter(
     var lastRead: Boolean = false,
     var source: String,
     var inLibrary:Boolean=false,
-    @PrimaryKey val chapterId: Int? = null,
 ) {
 
     companion object {

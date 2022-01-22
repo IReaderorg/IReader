@@ -7,8 +7,8 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import ir.kazemcodes.infinity.core.data.local.BookDatabase
-import ir.kazemcodes.infinity.core.data.local.ExploreBook
 import ir.kazemcodes.infinity.core.data.local.dao.LibraryBookDao
+import ir.kazemcodes.infinity.core.data.local.dao.RemoteKeysDao
 import ir.kazemcodes.infinity.core.data.network.models.ChapterPage
 import ir.kazemcodes.infinity.core.data.network.models.Source
 import ir.kazemcodes.infinity.core.domain.models.Book
@@ -28,6 +28,7 @@ import java.io.IOException
 
 class RemoteRepositoryImpl(
     private val bookDao: LibraryBookDao,
+    private val remoteKeysDao: RemoteKeysDao,
     private val localBookRepository: LocalBookRepository,
     private val database: BookDatabase,
 ) : RemoteRepository {
@@ -107,12 +108,12 @@ class RemoteRepositoryImpl(
         source: Source,
         exploreType: ExploreType,
         query: String?,
-    ): Flow<PagingData<ExploreBook>>  {
+    ): Flow<PagingData<Book>>  {
             return Pager(
                 config = PagingConfig(pageSize = Constants.DEFAULT_PAGE_SIZE,
                     maxSize = Constants.MAX_PAGE_SIZE),
                 pagingSourceFactory = {
-                    localBookRepository.getAllExploreBook()
+                    remoteKeysDao.getAllExploreBookByPaging()
                 }, remoteMediator = ExploreRemoteMediator(
                     source = source,
                     database = database,

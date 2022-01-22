@@ -524,7 +524,6 @@ data class SourceTower constructor(
         book.bookName = jsonObject[mName]?.formatHtmlText() ?: ""
         book.link = jsonObject[mLink] ?: ""
         book.coverLink = jsonObject[mCover]
-        book.id = jsonObject[mId]?:""
         return book
     }
 

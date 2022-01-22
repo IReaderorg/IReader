@@ -280,7 +280,7 @@ data class Chapters(
     @ColumnInfo(name = "chapters_chaptersEndpointWithoutPage")
     val chaptersEndpointWithoutPage: String? = null,
     @ColumnInfo(name = "chapters_isChapterStatsFromFirst")
-    val isChapterStatsFromFirst: Boolean? = null,
+    val isChapterStatsFromFirst: Boolean = true,
     @ColumnInfo(name = "chapters_linkSelector")
     val linkSelector: String? = null,
     @ColumnInfo(name = "chapters_linkAtt")

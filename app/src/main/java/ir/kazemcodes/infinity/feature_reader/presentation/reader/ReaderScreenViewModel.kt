@@ -1,5 +1,6 @@
 package ir.kazemcodes.infinity.feature_reader.presentation.reader
 
+
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.ActivityInfo
@@ -7,6 +8,8 @@ import android.view.WindowManager
 import android.webkit.WebView
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.zhuinden.simplestack.ScopedServices
 import ir.kazemcodes.infinity.core.data.network.models.Source
 import ir.kazemcodes.infinity.core.domain.models.Book
@@ -20,10 +23,7 @@ import ir.kazemcodes.infinity.core.presentation.theme.fonts
 import ir.kazemcodes.infinity.core.presentation.theme.readerScreenBackgroundColors
 import ir.kazemcodes.infinity.core.utils.*
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.*
 import org.jsoup.Jsoup
 import uy.kohesive.injekt.injectLazy
 
@@ -31,34 +31,39 @@ import uy.kohesive.injekt.injectLazy
 class ReaderScreenViewModel(
     private val preferencesUseCase: PreferencesUseCase,
     private val source: Source,
-    private val bookName: String,
-    private val chapterName: String,
-    private val chapterIndex: Int,
+    private val bookId: Int,
+    private val chapterId: Int,
     private val remoteRepository: RemoteRepository,
     private val localBookRepository: LocalBookRepository,
     private val localChapterRepository: LocalChapterRepository,
 ) : ScopedServices.Registered {
     private val _state =
-        mutableStateOf(ReaderScreenState(source = source, currentChapterIndex = chapterIndex))
+        mutableStateOf(ReaderScreenState(source = source, currentChapterIndex = 0))
 
     val state: State<ReaderScreenState> = _state
 
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
 
+    private val _chapters = MutableStateFlow<PagingData<Chapter>>(PagingData.empty())
+    val chapters = _chapters
+
+
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    val webView by injectLazy<WebView>()
 
     override fun onServiceRegistered() {
         val initState = state.value
         _state.value = state.value.copy(
-            book = initState.book.copy(bookName = bookName),
-            chapter = initState.chapter.copy(title = chapterName, bookName = bookName),
+            book = initState.book.copy(id = bookId),
+            chapter = initState.chapter.copy(chapterId = chapterId),
             source = source
         )
         getContent(chapter = state.value.chapter)
         readPreferences()
         getLocalChapters()
         getLocalBookByName()
+        getLocalChaptersByPaging()
     }
 
 
@@ -81,9 +86,6 @@ class ReaderScreenViewModel(
             }
             is ReaderEvent.ChangeFont -> {
                 saveFont(event.fontType)
-            }
-            is ReaderEvent.GetContent -> {
-                getContent(event.chapter)
             }
             is ReaderEvent.ToggleReaderMode -> {
                 toggleReaderMode(event.enable)
@@ -113,9 +115,6 @@ class ReaderScreenViewModel(
     fun getContent(chapter: Chapter) {
         _state.value = state.value.copy(chapter = chapter)
         getReadingContentLocally()
-        if (state.value.book.inLibrary) {
-            toggleLastReadAndUpdateChapterContent(chapter)
-        }
     }
 
     private fun getLocalChapters() {
@@ -126,7 +125,6 @@ class ReaderScreenViewModel(
                         if (!result.data.isNullOrEmpty()) {
                             _state.value = state.value.copy(
                                 chapters = result.data,
-                                drawerChapters = if (state.value.isReversed) result.data.reversed() else result.data,
                                 isChapterLoaded = true
                             )
                         }
@@ -140,7 +138,7 @@ class ReaderScreenViewModel(
     }
 
     private fun getReadingContentLocally() {
-        localChapterRepository.getChapterByChapter(bookName = state.value.chapter.bookName ?: "",
+        localChapterRepository.getChapterByName(bookName = state.value.chapter.bookName ?: "",
             source = source.name,
             chapterTitle = state.value.chapter.title)
             .onEach { result ->
@@ -206,38 +204,38 @@ class ReaderScreenViewModel(
     }
 
     fun getReadingContentRemotely() {
-            remoteRepository.getRemoteReadingContentUseCase(state.value.chapter, source = source)
-                .onEach { result ->
-                    when (result) {
-                        is Resource.Success -> {
-                            if (result.data != null) {
-                                _state.value = state.value
-                                    .copy(
-                                        chapter = state.value.chapter.copy(content = result.data.content),
-                                        isLoading = false,
-                                        error = "",
-                                        isLoaded = true,
-                                    )
-
-                                toggleLastReadAndUpdateChapterContent(state.value.chapter)
-                            }
-                        }
-                        is Resource.Error -> {
-                            _state.value =
-                                state.value.copy(
-                                    error = result.message ?: "An Unknown Error Occurred",
+        remoteRepository.getRemoteReadingContentUseCase(state.value.chapter, source = source)
+            .onEach { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        if (result.data != null) {
+                            _state.value = state.value
+                                .copy(
+                                    chapter = state.value.chapter.copy(content = result.data.content),
                                     isLoading = false,
-                                    isLoaded = false,
+                                    error = "",
+                                    isLoaded = true,
                                 )
-                        }
-                        is Resource.Loading -> {
-                            _state.value = state.value.copy(
-                                isLoading = true, error = "",
-                                isLoaded = false,
-                            )
+
+                            toggleLastReadAndUpdateChapterContent(state.value.chapter)
                         }
                     }
-                }.launchIn(coroutineScope)
+                    is Resource.Error -> {
+                        _state.value =
+                            state.value.copy(
+                                error = result.message ?: "An Unknown Error Occurred",
+                                isLoading = false,
+                                isLoaded = false,
+                            )
+                    }
+                    is Resource.Loading -> {
+                        _state.value = state.value.copy(
+                            isLoading = true, error = "",
+                            isLoaded = false,
+                        )
+                    }
+                }
+            }.launchIn(coroutineScope)
     }
     @Suppress()
     private fun getLocalBookByName() {
@@ -271,8 +269,16 @@ class ReaderScreenViewModel(
     }
 
     fun reverseChapters() {
-        _state.value = state.value.copy(isReversed = !state.value.isReversed,
-            drawerChapters = state.value.drawerChapters.reversed())
+        _state.value = state.value.copy(isAsc = !state.value.isAsc)
+    }
+
+    fun getLocalChaptersByPaging() {
+        coroutineScope.launch(Dispatchers.IO) {
+            localChapterRepository.getLocalChapterByPaging(state.value.chapter.title,state.value.book.bookName,state.value.source.name).cachedIn(coroutineScope).collect { snapshot ->
+                _chapters.value = snapshot
+            }
+        }
+
     }
 
 
@@ -423,18 +429,21 @@ class ReaderScreenViewModel(
      * need a index, there is no need to confuse the index because the list reversed
      */
     fun updateChapterSliderIndex(index: Int) {
-        _state.value = state.value.copy(currentChapterIndex = getIndexOfChapter(index))
+        if (index > 0 && index < state.value.chapters.size) {
+            _state.value = state.value.copy(chapter = state.value.chapters[index])
+        }
     }
 
     /**
      * get the index pf chapter based on the reversed state
      */
-    fun getIndexOfChapter(index: Int): Int {
-        return if (state.value.isReversed) ((state.value.drawerChapters.size - 1) - index) else index
+    fun getCurrentIndexOfChapter(chapter: Chapter) {
+        val index = if (state.value.chapters.indexOf(chapter) != -1) state.value.chapters.indexOf(chapter) else 0
+        _state.value = state.value.copy(currentChapterIndex = index)
     }
+
 
     override fun onServiceUnregistered() {
         coroutineScope.cancel()
     }
 }
-

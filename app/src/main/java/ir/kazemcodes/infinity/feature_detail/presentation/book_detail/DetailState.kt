@@ -8,5 +8,6 @@ data class DetailState(
     val book: Book = Book.create(),
     val inLibrary : Boolean = false,
     val isLoading: Boolean = false,
+    val isLoaded : Boolean = false,
     val error: String = "",
     )

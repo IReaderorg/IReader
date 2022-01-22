@@ -1,5 +1,6 @@
 package ir.kazemcodes.infinity.core.data.local.dao
 
+import androidx.paging.PagingSource
 import androidx.room.*
 import ir.kazemcodes.infinity.core.domain.models.Chapter
 import kotlinx.coroutines.flow.Flow
@@ -55,6 +56,13 @@ interface LibraryChapterDao {
     @Query("SELECT * FROM chapter_table WHERE bookName= :bookName AND source = :source")
     fun getChapters(bookName: String, source: String): Flow<List<Chapter>?>
 
+    @Query("""SELECT * FROM chapter_table WHERE bookName= :bookName AND source = :source ORDER BY 
+        CASE WHEN :isAsc = 1 THEN chapterId END ASC,
+        CASE WHEN :isAsc = 0 THEN  chapterId END DESC""")
+    fun getChaptersByPaging(bookName: String, source: String,isAsc:Boolean): PagingSource<Int,Chapter>
+
+
+
     @Query("SELECT * FROM chapter_table")
     fun getAllChapters(): Flow<List<Chapter>?>
 
@@ -65,6 +73,13 @@ interface LibraryChapterDao {
         bookName: String,
         source: String,
     ): Flow<Chapter?>
+
+    @Query("SELECT * FROM chapter_table WHERE title = :chapterTitle AND bookName = :bookName AND source = :source AND content Not Null Limit 1")
+    fun getChapterByChapterNamePaging(
+        chapterTitle: String,
+        bookName: String,
+        source: String,
+    ): PagingSource<Int,Chapter>
 
     @Query("DELETE FROM chapter_table WHERE bookName = :bookName AND source = :source")
     fun deleteLocalChaptersByName(bookName: String, source: String)

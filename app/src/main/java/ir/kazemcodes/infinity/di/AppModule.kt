@@ -11,6 +11,7 @@ import dagger.hilt.components.SingletonComponent
 import ir.kazemcodes.infinity.core.data.local.BookDatabase
 import ir.kazemcodes.infinity.core.data.local.dao.LibraryBookDao
 import ir.kazemcodes.infinity.core.data.local.dao.LibraryChapterDao
+import ir.kazemcodes.infinity.core.data.local.dao.RemoteKeysDao
 import ir.kazemcodes.infinity.core.data.local.dao.SourceTowerDao
 import ir.kazemcodes.infinity.core.data.repository.*
 import ir.kazemcodes.infinity.core.domain.repository.*
@@ -52,8 +53,9 @@ class AppModule {
         libraryBookDao: LibraryBookDao,
         libraryChapterDao: LibraryChapterDao,
         database: BookDatabase,
+        remoteKeysDao: RemoteKeysDao
     ): LocalBookRepository {
-        return LocalBookRepositoryImpl(libraryBookDao, libraryChapterDao,database)
+        return LocalBookRepositoryImpl(libraryBookDao, libraryChapterDao,database, remoteKeysDao = remoteKeysDao)
     }
     @Provides
     @Singleton
@@ -72,8 +74,9 @@ class AppModule {
         libraryBookDao: LibraryBookDao,
         localBookRepository: LocalBookRepository,
         database: BookDatabase,
+        keysDao: RemoteKeysDao
     ): RemoteRepository {
-        return RemoteRepositoryImpl(libraryBookDao, localBookRepository, database)
+        return RemoteRepositoryImpl(bookDao = libraryBookDao, localBookRepository =  localBookRepository, database =  database, remoteKeysDao = keysDao)
     }
 
     @Provides

@@ -2,7 +2,6 @@ package ir.kazemcodes.infinity.core.domain.repository
 
 import androidx.paging.PagingData
 import androidx.paging.PagingSource
-import ir.kazemcodes.infinity.core.data.local.ExploreBook
 import ir.kazemcodes.infinity.core.data.network.models.Source
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
@@ -12,6 +11,9 @@ import ir.kazemcodes.infinity.feature_library.presentation.components.SortType
 import kotlinx.coroutines.flow.Flow
 
 interface LocalBookRepository {
+
+    fun getBookById(id: Int) : Flow<Resource<Book>>
+
     fun getLocalBooks(
         sortType: SortType,
         isAsc: Boolean,
@@ -25,39 +27,38 @@ interface LocalBookRepository {
     ): PagingSource<Int, Book>
 
     fun getAllLocalBooks(): Flow<Resource<List<Book>>>
-    fun getLocalBooksById(id: String): Flow<Resource<Book>>
+    fun getLocalBooksById(id: Int): Flow<Resource<Book>>
 
     fun getLocalBookByName(bookName: String,sourceName:String): Flow<Resource<Book?>>
     fun searchInLibraryScreenBooks(query: String): Flow<PagingData<Book>>
     fun searchBooksByPaging(query: String): PagingSource<Int, Book>
     fun deleteChapters()
     suspend fun insertBook(book: Book)
-    suspend fun deleteBook(id: String)
     suspend fun deleteAllBook()
 
 
-    fun getAllExploreBook(): PagingSource<Int, ExploreBook>
+    fun getAllExploreBook(): PagingSource<Int, Book>
 
-    fun getExploreBookById(id: String): Flow<Resource<Book>>
+    fun getExploreBookById(id: Int): Flow<Resource<Book>>
 
-    suspend fun insertAllExploreBook(bookEntity: List<ExploreBook>)
+    suspend fun insertAllExploreBook(bookEntity: List<Book>)
 
     suspend fun deleteAllExploreBook()
 
-    fun getBookById(bookId: String): Flow<Resource<Book>>
 
 
     /***************DETAIL SCREEN*************/
     suspend fun updateLocalBook(book: Book)
 
 
+    suspend fun deleteBook(id: Int)
 }
 
 interface LocalChapterRepository {
 
     fun getAllChapter(): Flow<Resource<List<Chapter>>>
 
-    fun getChapterByChapter(
+    fun getChapterByName(
         chapterTitle: String,
         bookName: String,
         source: String,
@@ -104,6 +105,16 @@ interface LocalChapterRepository {
 
     fun getChapterByName(bookName: String, source: String): Flow<Resource<List<Chapter>>>
 
+
+    fun getLocalChaptersByPaging(
+        bookName: String, source: String,isAsc: Boolean
+    ): Flow<PagingData<Chapter>>
+
+    fun getLocalChapterByPaging(
+        chapterTitle: String,
+        bookName: String,
+        source: String,
+    ): Flow<PagingData<Chapter>>
 
     suspend fun deleteChapters(bookName: String, source: String)
 

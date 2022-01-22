@@ -16,14 +16,11 @@ import ir.kazemcodes.infinity.core.utils.Resource
 import ir.kazemcodes.infinity.core.utils.UiEvent
 import ir.kazemcodes.infinity.core.utils.UiText
 import ir.kazemcodes.infinity.feature_sources.sources.models.FetchType
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 
 class WebViewPageModel(
     private val url: String,
@@ -44,12 +41,15 @@ class WebViewPageModel(
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
-    val viewModelExt = WebViewFetcher(coroutineScope = coroutineScope,
+    val viewModelExt = WebViewFetcher(
+        coroutineScope = coroutineScope,
         source = source,
         fetcher = fetcher,
         localBookRepository = localBookRepository,
         localChapterRepository = localChapterRepository,
-        url = url)
+        url = url,
+        webView = webView
+    )
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
 
@@ -69,19 +69,15 @@ class WebViewPageModel(
     override fun onServiceRegistered() {
         if (bookName != null) {
             getLocalBookByName(bookName = bookName)
-
         }
         if (bookName != null && chapterTitle != null) {
             getLocalChapterByName(bookName, chapterTitle)
         }
     }
 
-    override fun onServiceUnregistered() {
-
-    }
 
     fun getInfo() {
-        viewModelExt.fetchInfo().onEach { result ->
+        viewModelExt.fetchInfo(state.value.book,state.value.chapters).onEach { result ->
                 when (result) {
                     is Resource.Success -> {
                         if (result.data != null) {
@@ -186,7 +182,7 @@ class WebViewPageModel(
     }
 
     private fun getLocalChapterByName(bookName: String, chapterTitle: String) {
-        localChapterRepository.getChapterByChapter(chapterTitle = chapterTitle,
+        localChapterRepository.getChapterByName(chapterTitle = chapterTitle,
             bookName = bookName,
             source = source.name).onEach { result ->
             when (result) {
@@ -219,6 +215,10 @@ class WebViewPageModel(
             localChapterRepository.deleteChapters(state.value.book.bookName, source.name)
         }
     }
+    override fun onServiceUnregistered() {
+        coroutineScope.cancel()
+    }
+
 }
 
 data class WebViewPageState(
