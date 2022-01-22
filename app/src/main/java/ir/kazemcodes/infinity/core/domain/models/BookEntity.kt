@@ -51,4 +51,5 @@ data class BookEntity(
             lastUpdated = lastUpdated
         )
     }
+
 }

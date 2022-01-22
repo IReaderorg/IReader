@@ -1,5 +1,8 @@
 package ir.kazemcodes.infinity.feature_sources.presentation.extension
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
@@ -9,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
@@ -19,7 +23,9 @@ import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarAct
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarTitle
 import ir.kazemcodes.infinity.feature_activity.presentation.ExtensionCreatorScreenKey
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.Constants.DEFAULT_ELEVATION
-import ir.kazemcodes.infinity.feature_sources.presentation.extension.composables.MainExtensionScreen
+import ir.kazemcodes.infinity.feature_library.presentation.components.TabItem
+import ir.kazemcodes.infinity.feature_library.presentation.components.Tabs
+import ir.kazemcodes.infinity.feature_library.presentation.components.TabsContent
 import ir.kazemcodes.infinity.feature_sources.sources.Extensions
 
 
@@ -53,7 +59,13 @@ fun ExtensionScreen(modifier: Modifier = Modifier) {
             )
         }
     ) {
-        MainExtensionScreen(viewModel = viewModel, pagerState = pageState)
+        val tabs = listOf<TabItem>(TabItem.Sources(viewModel), TabItem.CommunitySources(viewModel))
+        Column(modifier = modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top) {
+            Tabs(libraryTabs = tabs, pagerState = pageState)
+            TabsContent(libraryTabs = tabs, pagerState = pageState)
+        }
     }
 }
 

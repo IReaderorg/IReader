@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.collect
 class LibraryViewModel(
     private val localBookRepository: LocalBookRepository,
     private val preferencesUseCase: PreferencesUseCase,
-) : ScopedServices.Activated, ScopedServices.Registered {
+) :  ScopedServices.Registered {
 
     private val _state = mutableStateOf(LibraryState())
     val state: State<LibraryState> = _state
@@ -144,14 +144,7 @@ class LibraryViewModel(
 
     }
 
-    override fun onServiceActive() {
 
-        //deleteNotInLibraryChapters()
-    }
-
-    override fun onServiceInactive() {
-
-    }
 
 
 }

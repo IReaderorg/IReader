@@ -132,9 +132,6 @@ class BrowseViewModel(
     }
 
 
-
-
-
     override fun onServiceUnregistered() {
         coroutineScope.cancel()
     }

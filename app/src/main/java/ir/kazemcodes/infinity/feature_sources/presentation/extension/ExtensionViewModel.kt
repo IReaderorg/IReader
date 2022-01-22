@@ -73,4 +73,5 @@ class ExtensionViewModel(private val localSourceRepository: LocalSourceRepositor
 
 data class ExtensionScreenState(
     val sources: List<Source> = emptyList(),
+    val communitySources : List<Source> = emptyList()
 )

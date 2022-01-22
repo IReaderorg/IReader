@@ -26,12 +26,13 @@ import com.zhuinden.simplestack.Backstack
 
 @Composable
 fun TopAppBarTitle(
+    modifier: Modifier = Modifier,
     title: String,
     color: Color? = null,
     style: TextStyle? = null,
     fontWeight: FontWeight? = null,
     overflow: TextOverflow? = null,
-    modifier: Modifier = Modifier,
+    align: TextAlign? = null
 ) {
     Text(
         modifier = modifier,
@@ -40,7 +41,7 @@ fun TopAppBarTitle(
         style = style ?: MaterialTheme.typography.subtitle1,
         fontWeight = fontWeight ?: FontWeight.Bold,
         overflow = overflow ?: TextOverflow.Ellipsis,
-        textAlign = TextAlign.Center,
+        textAlign = align?:TextAlign.Start,
     )
 }
 
@@ -53,6 +54,7 @@ fun MidSizeTextComposable(
     fontWeight: FontWeight? = null,
     overflow: TextOverflow? = null,
     maxLine: Int = Int.MAX_VALUE,
+    align: TextAlign? = null
 ) {
     Text(
         modifier = modifier,
@@ -61,7 +63,7 @@ fun MidSizeTextComposable(
         style = style ?: MaterialTheme.typography.subtitle2,
         fontWeight = fontWeight ?: FontWeight.SemiBold,
         overflow = overflow ?: TextOverflow.Ellipsis,
-        textAlign = TextAlign.Center,
+        textAlign = align?:TextAlign.Start,
         maxLines = maxLine
     )
 }
@@ -74,6 +76,7 @@ fun SmallTextComposable(
     fontWeight: FontWeight? = null,
     overflow: TextOverflow? = null,
     maxLine: Int = Int.MAX_VALUE,
+    align: TextAlign? = null
 ) {
     Text(
         modifier = modifier,
@@ -82,7 +85,7 @@ fun SmallTextComposable(
         style = style ?: MaterialTheme.typography.caption,
         fontWeight = fontWeight ?: FontWeight.SemiBold,
         overflow = overflow ?: TextOverflow.Ellipsis,
-        textAlign = TextAlign.Center,
+        textAlign = align?:TextAlign.Start,
         maxLines = maxLine
     )
 }
@@ -95,16 +98,19 @@ fun SuperSmallTextComposable(
     fontWeight: FontWeight? = null,
     overflow: TextOverflow? = null,
     maxLine: Int = Int.MAX_VALUE,
+    align: TextAlign? = null,
+
 ) {
     Text(
         modifier = modifier,
         text = title,
-        color = color ?: MaterialTheme.colors.onBackground.copy(alpha = .4f),
+        color = color ?: MaterialTheme.colors.onBackground,
         style = style ?: MaterialTheme.typography.caption,
         fontWeight = fontWeight ?: FontWeight.Normal,
         fontSize = 12.sp,
         overflow = overflow ?: TextOverflow.Ellipsis,
-        maxLines = maxLine
+        maxLines = maxLine,
+        textAlign = align?:TextAlign.Start,
     )
 }
 

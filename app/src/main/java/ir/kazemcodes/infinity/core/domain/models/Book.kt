@@ -10,6 +10,7 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class Book(
     var id: String = getRandomString(6),
+
     var link: String,
 
     var bookName: String,

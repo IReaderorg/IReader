@@ -39,9 +39,9 @@ fun AboutSettingScreen(modifier: Modifier = Modifier) {
     }) {
         val list = listOf<AboutTile>(
             AboutTile.Version,
+            AboutTile.WhatsNew,
             AboutTile.Discord,
             AboutTile.Github,
-
             )
 
 
@@ -61,12 +61,14 @@ fun AboutSettingScreen(modifier: Modifier = Modifier) {
                             context.startActivity(it.intent)
                         },
                     singleLineSecondaryText = false,
-                    trailing = {
-                        MidSizeTextComposable(title = it.subtitle,
-                            color = MaterialTheme.colors.onBackground.copy(alpha = .4f))
+                    secondaryText = {
+                        MidSizeTextComposable(modifier
+                            .fillMaxWidth()
+                            .align(Alignment.Start),title = it.subtitle,
+                            color = MaterialTheme.colors.onBackground)
                     },
                     text = {
-                        TopAppBarTitle(title = it.title)
+                        TopAppBarTitle(modifier=modifier.fillMaxWidth().align(Alignment.Start) ,title = it.title)
                     },
                 )
                 Divider(modifier = modifier.fillMaxWidth(),
@@ -78,7 +80,8 @@ fun AboutSettingScreen(modifier: Modifier = Modifier) {
 }
 
 sealed class AboutTile(val title: String, val subtitle: String,val intent: Intent) {
-    object Version : AboutTile("Version", "0.1.5 BETA",Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/kazemcodes/Infinity/releases")))
+    object Version : AboutTile("Version", "0.1.6 BETA",Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/kazemcodes/Infinity/releases")))
+    object WhatsNew : AboutTile("Whats New", "Check the Update",Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/kazemcodes/IReader/releases/latest")))
     object Discord : AboutTile("Discord", "https://discord.gg/HBU6zD8c5v",Intent(Intent.ACTION_VIEW, Uri.parse("https://discord.gg/HBU6zD8c5v")))
-    object Github : AboutTile("Github", "https://github.com/kazemcodes/Infinity",Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/kazemcodes/Infinity")))
+    object Github : AboutTile("Github", "https://github.com/kazemcodes/IReader",Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/kazemcodes/Infinity")))
 }

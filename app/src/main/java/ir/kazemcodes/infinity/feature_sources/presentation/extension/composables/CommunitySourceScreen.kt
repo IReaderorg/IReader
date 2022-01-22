@@ -9,9 +9,10 @@ import ir.kazemcodes.infinity.feature_sources.presentation.extension.ExtensionVi
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun UserSourcesScreen(viewModel: ExtensionViewModel) {
+fun CommunitySourceScreen(viewModel: ExtensionViewModel) {
     val scrollState = rememberLazyListState()
-    val sources = viewModel.state.value.sources
+    val sources = viewModel.state.value.communitySources
     val backstack = LocalBackstack.current
     SourceList(sources = sources,scrollState=scrollState)
 }
+

@@ -5,6 +5,7 @@ import ir.kazemcodes.infinity.feature_settings.presentation.setting.extension_cr
 import ir.kazemcodes.infinity.feature_settings.presentation.setting.extension_creator.ExtensionCreatorTab
 import ir.kazemcodes.infinity.feature_settings.presentation.setting.extension_creator.ExtensionCreatorViewModel
 import ir.kazemcodes.infinity.feature_sources.presentation.extension.ExtensionViewModel
+import ir.kazemcodes.infinity.feature_sources.presentation.extension.composables.CommunitySourceScreen
 import ir.kazemcodes.infinity.feature_sources.presentation.extension.composables.UserSourcesScreen
 
 sealed class TabItem(var title: String, var screen: ComposableFun) {
@@ -19,7 +20,7 @@ sealed class TabItem(var title: String, var screen: ComposableFun) {
         TabItem("Sources", { UserSourcesScreen(viewModel = viewModel)})
 
     data class CommunitySources(val viewModel: ExtensionViewModel) :
-        TabItem("Community Sources", { UserSourcesScreen(viewModel) })
+        TabItem("Community Sources", { CommunitySourceScreen(viewModel) })
     data class ExtensionCreator(val viewModel: ExtensionCreatorViewModel) :
         TabItem("Creator", { ExtensionCreatorTab(viewModel) })
     data class ExtensionCreatorLog(val viewModel: ExtensionCreatorViewModel) :
