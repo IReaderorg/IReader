@@ -92,7 +92,7 @@ class WebViewPageModel(
                     }
                     is Resource.Error -> {
                         _eventFlow.emit(UiEvent.ShowSnackbar(
-                            uiText = UiText.DynamicString(result.message.toString()) ?: UiText.DynamicString("Failed to to get the content")
+                            uiText = UiText.DynamicString(result.message.toString())
                         ))
                     }
                     is Resource.Loading -> {

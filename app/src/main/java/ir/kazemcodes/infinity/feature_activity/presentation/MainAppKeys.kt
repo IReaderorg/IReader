@@ -18,8 +18,6 @@ import com.zhuinden.simplestackcomposeintegration.core.BackstackProvider
 import com.zhuinden.simplestackextensions.fragmentsktx.backstack
 import com.zhuinden.simplestackextensions.servicesktx.add
 import com.zhuinden.simplestackextensions.servicesktx.lookup
-import ir.kazemcodes.infinity.core.domain.models.Book
-import ir.kazemcodes.infinity.core.domain.models.Chapter
 import ir.kazemcodes.infinity.core.domain.repository.LocalBookRepository
 import ir.kazemcodes.infinity.core.domain.repository.LocalChapterRepository
 import ir.kazemcodes.infinity.core.domain.repository.LocalSourceRepository
@@ -56,12 +54,12 @@ import kotlinx.parcelize.Parcelize
 
 
 @ExperimentalMaterialApi
-class MainScreenFragment() : ComposeFragment() {
+class MainScreenFragment : ComposeFragment() {
     @OptIn(ExperimentalAnimationApi::class)
     @Composable
     override fun FragmentComposable(backstack: Backstack) {
         BackstackProvider(backstack = backstack) {
-            InfinityTheme() {
+            InfinityTheme {
                 Surface(color = MaterialTheme.colors.background) {
                     MainScreen()
                 }
@@ -87,14 +85,14 @@ data class MainScreenKey(val noArgument: String = "") : FragmentKey() {
 }
 
 
-class BrowserScreenFragment() : ComposeFragment() {
+class BrowserScreenFragment : ComposeFragment() {
 
     @OptIn(ExperimentalPagingApi::class)
     @Composable
     override fun FragmentComposable(backstack: Backstack) {
 
         BackstackProvider(backstack = backstack) {
-            InfinityTheme() {
+            InfinityTheme {
                 BrowserScreen()
             }
         }
@@ -127,13 +125,13 @@ data class BrowserScreenKey(val sourceName: String, val exploreType: Int) :
 
 }
 
-class BookDetailFragment() : ComposeFragment() {
+class BookDetailFragment : ComposeFragment() {
 
     @Composable
     override fun FragmentComposable(backstack: Backstack) {
         BackstackProvider(backstack = backstack) {
-            InfinityTheme() {
-                ProvideWindowInsets() {
+            InfinityTheme {
+                ProvideWindowInsets {
                     BookDetailScreen()
                 }
             }
@@ -142,7 +140,7 @@ class BookDetailFragment() : ComposeFragment() {
 }
 
 @Parcelize
-data class BookDetailKey(val book: Book, val sourceName: String, val isLocal: Boolean) :
+data class BookDetailKey(val bookName: String,val bookId:String, val sourceName: String) :
     FragmentKey() {
 
     override fun instantiateFragment(): Fragment = BookDetailFragment()
@@ -152,9 +150,9 @@ data class BookDetailKey(val book: Book, val sourceName: String, val isLocal: Bo
             add(
                 BookDetailViewModel(
                     source = mappingSourceNameToSource(sourceName),
-                    book = book,
+                    bookName = bookName,
+                    bookId = bookId,
                     lookup<PreferencesUseCase>(),
-                    isLocal = isLocal,
                     localBookRepository = lookup<LocalBookRepository>(),
                     remoteRepository = lookup<RemoteRepository>(),
                     localChapterRepository = lookup<LocalChapterRepository>()
@@ -164,11 +162,11 @@ data class BookDetailKey(val book: Book, val sourceName: String, val isLocal: Bo
     }
 }
 
-class WebViewFragment() : ComposeFragment() {
+class WebViewFragment : ComposeFragment() {
     @Composable
     override fun FragmentComposable(backstack: Backstack) {
         BackstackProvider(backstack = backstack) {
-            InfinityTheme() {
+            InfinityTheme {
                 WebPageScreen()
             }
         }
@@ -180,8 +178,8 @@ data class WebViewKey(
     val url: String,
     val sourceName: String,
     val fetchType: Int,
-    val book: Book? = null,
-    val chapter: Chapter? = null,
+    val bookName :  String?=null,
+    val chapterName: String? = null,
 ) : FragmentKey() {
 
     override fun instantiateFragment(): Fragment = WebViewFragment()
@@ -195,21 +193,21 @@ data class WebViewKey(
                 fetcher = mappingFetcherTypeWithIndex(fetchType),
                 localChapterRepository = lookup<LocalChapterRepository>(),
                 localBookRepository = lookup<LocalBookRepository>(),
-                bookName = book?.bookName,
-                chapterTitle = chapter?.title,
+                bookName = bookName,
+                chapterTitle = chapterName,
             ))
         }
     }
 
 }
 
-class ChapterDetailFragment() : ComposeFragment() {
+class ChapterDetailFragment : ComposeFragment() {
 
 
     @Composable
     override fun FragmentComposable(backstack: Backstack) {
         BackstackProvider(backstack = backstack) {
-            InfinityTheme() {
+            InfinityTheme {
                 ChapterDetailScreen()
             }
         }
@@ -220,7 +218,7 @@ class ChapterDetailFragment() : ComposeFragment() {
 
 @Parcelize
 data class ChapterDetailKey(
-    val book: Book,
+    val bookName :  String,
     val sourceName: String,
 ) : FragmentKey() {
     override fun instantiateFragment(): Fragment = ChapterDetailFragment()
@@ -228,7 +226,7 @@ data class ChapterDetailKey(
         with(serviceBinder) {
             add<ChapterDetailViewModel>(ChapterDetailViewModel(
                 source = mappingSourceNameToSource(sourceName),
-                book = book,
+                bookName = bookName,
                 localChapterRepository = lookup<LocalChapterRepository>()
 
             ))
@@ -236,11 +234,11 @@ data class ChapterDetailKey(
     }
 }
 
-class ReaderScreenFragment() : ComposeFragment() {
+class ReaderScreenFragment : ComposeFragment() {
     @Composable
     override fun FragmentComposable(backstack: Backstack) {
         BackstackProvider(backstack = backstack) {
-            InfinityTheme() {
+            InfinityTheme {
                 ReadingScreen()
             }
         }
@@ -295,12 +293,12 @@ data class ReaderScreenKey(
 
 }
 
-class ExtensionScreenFragment() : ComposeFragment() {
+class ExtensionScreenFragment : ComposeFragment() {
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun FragmentComposable(backstack: Backstack) {
         BackstackProvider(backstack = backstack) {
-            InfinityTheme() {
+            InfinityTheme {
                 ExtensionScreen()
 
             }
@@ -317,11 +315,11 @@ data class ExtensionScreenKey(val noArgs: String = "") : FragmentKey() {
 
 }
 
-class DownloadScreenFragment() : ComposeFragment() {
+class DownloadScreenFragment : ComposeFragment() {
     @Composable
     override fun FragmentComposable(backstack: Backstack) {
         BackstackProvider(backstack = backstack) {
-            InfinityTheme() {
+            InfinityTheme {
                 DownloaderScreen()
             }
         }
@@ -334,12 +332,12 @@ data class DownloadScreenKey(val noArgs: String = "") : FragmentKey() {
     override fun instantiateFragment(): Fragment = DownloadScreenFragment()
 }
 
-class ExtensionCreatorScreenFragment() : ComposeFragment() {
+class ExtensionCreatorScreenFragment : ComposeFragment() {
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun FragmentComposable(backstack: Backstack) {
         BackstackProvider(backstack = backstack) {
-            InfinityTheme() {
+            InfinityTheme {
                 ExtensionCreatorScreen()
 
             }
@@ -364,11 +362,11 @@ data class ExtensionCreatorScreenKey(val noArgs: String = "") : FragmentKey() {
     }
 }
 
-class DnsOverHttpScreenFragment() : ComposeFragment() {
+class DnsOverHttpScreenFragment : ComposeFragment() {
     @Composable
     override fun FragmentComposable(backstack: Backstack) {
         BackstackProvider(backstack = backstack) {
-            InfinityTheme() {
+            InfinityTheme {
                 DnsOverHttpScreen()
             }
         }
@@ -388,11 +386,11 @@ data class DnsOverHttpScreenKey(val noArgs: String = "") : FragmentKey() {
     }
 }
 
-class AboutScreenFragment() : ComposeFragment() {
+class AboutScreenFragment : ComposeFragment() {
     @Composable
     override fun FragmentComposable(backstack: Backstack) {
         BackstackProvider(backstack = backstack) {
-            InfinityTheme() {
+            InfinityTheme {
                 AboutSettingScreen()
             }
         }

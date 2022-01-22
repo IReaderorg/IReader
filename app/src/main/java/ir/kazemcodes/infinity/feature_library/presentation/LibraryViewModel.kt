@@ -4,7 +4,6 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import androidx.paging.map
 import com.zhuinden.simplestack.ScopedServices
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.repository.LocalBookRepository
@@ -33,9 +32,9 @@ class LibraryViewModel(
 
     fun getBooks() {
         coroutineScope.launch(Dispatchers.IO) {
-            localBookRepository.getBooks(state.value.sortType,state.value.isSortAcs, unreadFilter = state.value.unreadFilter).cachedIn(coroutineScope)
+            localBookRepository.getLocalBooks(state.value.sortType,state.value.isSortAcs, unreadFilter = state.value.unreadFilter).cachedIn(coroutineScope)
                 .collect { snapshot ->
-                    _books.value = snapshot.map { bookEntity -> bookEntity.toBook() }
+                    _books.value = snapshot
                 }
         }
     }
@@ -49,7 +48,7 @@ class LibraryViewModel(
         coroutineScope.launch(Dispatchers.IO) {
             localBookRepository.searchInLibraryScreenBooks(query).cachedIn(coroutineScope)
                 .collect { snapshot ->
-                    _books.value = snapshot.map { bookEntity -> bookEntity.toBook() }
+                    _books.value = snapshot
                 }
         }
     }

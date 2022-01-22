@@ -55,7 +55,7 @@ class WebViewFetcher(
                             emit(Resource.Error("looking for it in database"))
                             if (state.value.chapters != null && chapters.chapters.isNotEmpty()) {
                                 val list = mutableListOf<Chapter>()
-                                val sum = state.value.chapters!! + chapters.chapters
+                                val sum : List<Chapter> = state.value.chapters!! + chapters.chapters
 
                                 val uniqueList = sum.distinctBy {
                                     it.title

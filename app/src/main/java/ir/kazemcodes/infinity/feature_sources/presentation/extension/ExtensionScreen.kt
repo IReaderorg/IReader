@@ -21,8 +21,8 @@ import com.zhuinden.simplestackcomposeintegration.services.rememberService
 import com.zhuinden.simplestackextensions.servicesktx.lookup
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarActionButton
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarTitle
+import ir.kazemcodes.infinity.core.utils.Constants.DEFAULT_ELEVATION
 import ir.kazemcodes.infinity.feature_activity.presentation.ExtensionCreatorScreenKey
-import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.Constants.DEFAULT_ELEVATION
 import ir.kazemcodes.infinity.feature_library.presentation.components.TabItem
 import ir.kazemcodes.infinity.feature_library.presentation.components.Tabs
 import ir.kazemcodes.infinity.feature_library.presentation.components.TabsContent

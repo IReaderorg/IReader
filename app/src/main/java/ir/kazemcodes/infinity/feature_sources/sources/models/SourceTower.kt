@@ -11,7 +11,6 @@ import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
 import ir.kazemcodes.infinity.core.domain.models.SourceEntity
 import ir.kazemcodes.infinity.core.utils.*
-import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.Constants
 import kotlinx.serialization.Serializable
 import okhttp3.Headers
 import okhttp3.Request
@@ -103,7 +102,7 @@ data class SourceTower constructor(
     override fun popularRequest(page: Int): Request {
         return if (popular?.isGetRequestType == true) {
             GET("$baseUrl${
-                getUrlWithoutDomain(popular?.endpoint?.applyPageFormat(page) ?: "")
+                getUrlWithoutDomain(popular.endpoint?.applyPageFormat(page) ?: "")
             }")
         } else {
             POST("$baseUrl${
@@ -117,7 +116,7 @@ data class SourceTower constructor(
         return if (latest?.isGetRequestType == true) {
             GET(
                 "$baseUrl${
-                    getUrlWithoutDomain(latest?.endpoint?.applyPageFormat(page) ?: "")
+                    getUrlWithoutDomain(latest.endpoint?.applyPageFormat(page) ?: "")
                 }")
         } else {
             POST("$baseUrl${
@@ -558,8 +557,7 @@ data class SourceTower constructor(
         if (chapters?.supportNextPagesList == true) {
             val docs = selectorReturnerStringType(document,
                 chapters.nextPageSelector,
-                chapters.nextPageAtt).shouldSubstring(chapters.addBaseUrlToLink
-                ?: false,
+                chapters.nextPageAtt).shouldSubstring(chapters.addBaseUrlToLink,
                 baseUrl,
                 ::getUrlWithoutDomain)
             val condition =

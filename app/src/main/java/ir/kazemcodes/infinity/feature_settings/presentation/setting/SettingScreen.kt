@@ -18,12 +18,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarTitle
+import ir.kazemcodes.infinity.core.utils.Constants
 import ir.kazemcodes.infinity.feature_activity.core.FragmentKey
 import ir.kazemcodes.infinity.feature_activity.presentation.AboutScreenKey
 import ir.kazemcodes.infinity.feature_activity.presentation.DnsOverHttpScreenKey
 import ir.kazemcodes.infinity.feature_activity.presentation.DownloadScreenKey
 import ir.kazemcodes.infinity.feature_activity.presentation.ExtensionCreatorScreenKey
-import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.Constants
 
 @Composable
 fun SettingScreen(modifier: Modifier = Modifier) {

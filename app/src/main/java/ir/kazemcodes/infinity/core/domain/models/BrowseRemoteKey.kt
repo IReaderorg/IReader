@@ -2,7 +2,7 @@ package ir.kazemcodes.infinity.core.domain.models
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.Constants.ImageKeyTable
+import ir.kazemcodes.infinity.core.utils.Constants.ImageKeyTable
 
 @Entity(tableName = ImageKeyTable)
 data class BrowseRemoteKey(

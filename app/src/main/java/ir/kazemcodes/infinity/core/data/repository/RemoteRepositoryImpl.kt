@@ -15,8 +15,8 @@ import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
 import ir.kazemcodes.infinity.core.domain.repository.LocalBookRepository
 import ir.kazemcodes.infinity.core.domain.repository.RemoteRepository
+import ir.kazemcodes.infinity.core.utils.Constants
 import ir.kazemcodes.infinity.core.utils.Resource
-import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.Constants
 import ir.kazemcodes.infinity.feature_explore.presentation.browse.ExploreRemoteMediator
 import ir.kazemcodes.infinity.feature_explore.presentation.browse.ExploreType
 import kotlinx.coroutines.flow.Flow

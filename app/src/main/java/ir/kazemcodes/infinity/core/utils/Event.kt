@@ -1,7 +1,6 @@
 package ir.kazemcodes.infinity.core.utils
 
 import androidx.annotation.StringRes
-import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.Constants
 
 abstract class Event
 

@@ -1,7 +1,7 @@
 package ir.kazemcodes.infinity.core.data.local.dao
 
 import androidx.room.*
-import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.Constants
+import ir.kazemcodes.infinity.core.utils.Constants
 
 @Dao
 interface RemoteKeysDao {

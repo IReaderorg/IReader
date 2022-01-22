@@ -27,19 +27,19 @@ import ir.kazemcodes.infinity.feature_sources.sources.models.FetchType
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import org.jsoup.Jsoup
-import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 
 class BookDetailViewModel(
     private val source: Source,
-    private val book: Book,
+    private val bookName: String,
+    private val bookId: String,
     private val preferencesUseCase: PreferencesUseCase,
     private val localBookRepository: LocalBookRepository,
     private val localChapterRepository: LocalChapterRepository,
     private val remoteRepository: RemoteRepository,
-    private val isLocal: Boolean,
-) : ScopedServices.Registered,ScopedServices.Activated {
-    private val _state = mutableStateOf<DetailState>(DetailState(source = source, book = book))
+) : ScopedServices.Registered, ScopedServices.Activated {
+    private val _state = mutableStateOf<DetailState>(DetailState(source = source,
+        book = Book.create().copy(bookName = bookName, id = bookId)))
     val state: State<DetailState> = _state
 
     private val _chapterState = mutableStateOf<ChapterState>(ChapterState())
@@ -47,8 +47,7 @@ class BookDetailViewModel(
     lateinit var work: OneTimeWorkRequest
 
     private val _getChapters = MutableStateFlow<PagingData<Book>>(PagingData.empty())
-    val getPagingChapters= _getChapters
-
+    val getPagingChapters = _getChapters
 
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -67,7 +66,7 @@ class BookDetailViewModel(
     }
 
     override fun onServiceActive() {
-        getLocalBookByName()
+        getLocalExploreBookById()
     }
 
     override fun onServiceInactive() {
@@ -79,8 +78,8 @@ class BookDetailViewModel(
         work = OneTimeWorkRequestBuilder<DownloadService>().apply {
             setInputData(
                 Data.Builder().apply {
-                    putString(DOWNLOAD_BOOK_NAME, book.bookName)
-                    putString(DOWNLOAD_SOURCE_NAME, book.source)
+                    putString(DOWNLOAD_BOOK_NAME, state.value.book.bookName)
+                    putString(DOWNLOAD_SOURCE_NAME, state.value.book.source)
                 }.build()
             )
         }.build()
@@ -89,44 +88,55 @@ class BookDetailViewModel(
         )
     }
 
-
-    private fun getLocalBookByName() {
-        localBookRepository.getLocalBookByName(state.value.book.bookName, sourceName = source.name).onEach { result ->
+    private fun getLocalExploreBookById() {
+        localBookRepository.getExploreBookById(state.value.book.id).onEach { result ->
             when (result) {
                 is Resource.Success -> {
-                    if (result.data != null && result.data != Book.create()) {
+                    if (result.data != null) {
                         _state.value = state.value.copy(
                             book = result.data,
-                            error = "",
-                            isLoading = false,
-                            loaded = true
                         )
-                        getLocalChaptersByBookName()
-                        if (result.data.inLibrary && !state.value.inLibrary) {
-                            toggleInLibrary(true)
-                        }
-                    } else {
-                        if (!state.value.loaded) {
-                            getRemoteBookDetail()
-                        }
+                        getRemoteBookDetail()
+                        getRemoteChapterDetail()
                     }
                 }
                 is Resource.Error -> {
-                    _state.value =
-                        state.value.copy(
-                            error = result.message ?: "An Unknown Error Occurred",
-                            isLoading = false,
-                        )
-                    getRemoteBookDetail()
-
-
+                    getLocalBookByName()
+                    getLocalChaptersByBookName()
                 }
                 is Resource.Loading -> {
-                    _state.value =
-                        state.value.copy(isLoading = true, error = "")
+                    _state.value = state.value.copy(isLoading = true, error = "")
                 }
             }
         }.launchIn(coroutineScope)
+    }
+
+
+    private fun getLocalBookByName() {
+        localBookRepository.getLocalBookByName(bookName, sourceName = source.name)
+            .onEach { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        if (result.data != null) {
+                            _state.value = state.value.copy(
+                                book = result.data,
+                                error = "",
+                                isLoading = false,
+                            )
+                            getLocalChaptersByBookName()
+                            if (result.data.inLibrary && !state.value.inLibrary) {
+                                toggleInLibrary(true)
+                            }
+                        }
+                    }
+                    is Resource.Error -> {
+                        getRemoteBookDetail()
+                    }
+                    is Resource.Loading -> {
+                        _state.value = state.value.copy(isLoading = true, error = "")
+                    }
+                }
+            }.launchIn(coroutineScope)
     }
 
 
@@ -135,7 +145,7 @@ class BookDetailViewModel(
             .onEach { result ->
                 when (result) {
                     is Resource.Success -> {
-                        if (!result.data.isNullOrEmpty()) {
+                        if (result.data != null) {
                             _chapterState.value = chapterState.value.copy(
                                 chapters = result.data,
                                 error = "",
@@ -143,12 +153,11 @@ class BookDetailViewModel(
                                 loaded = true
                             )
                             getLastChapter()
-                            if (book.totalChapters != result.data.size) {
-                                localBookRepository.updateLocalBook(book = book.copy(totalChapters = chapterState.value.chapters.size))
+                            if (state.value.book.totalChapters != result.data.size) {
+                                localBookRepository.updateLocalBook(book = state.value.book.copy(
+                                    totalChapters = chapterState.value.chapters.size))
 
                             }
-                        } else {
-                            getRemoteChapterDetail()
                         }
                     }
                     is Resource.Error -> {
@@ -173,7 +182,6 @@ class BookDetailViewModel(
                                 book = result.data,
                                 isLoading = false,
                                 error = "",
-                                loaded = true
                             )
                             insertBookDetailToLocal(result.data)
                         }
@@ -198,7 +206,7 @@ class BookDetailViewModel(
             .onEach { result ->
                 when (result) {
                     is Resource.Success -> {
-                        if (result.data != null && result.data.isNotEmpty()) {
+                        if (result.data != null) {
                             _chapterState.value = chapterState.value.copy(
                                 chapters = result.data,
                                 isLoading = false,
@@ -223,19 +231,20 @@ class BookDetailViewModel(
                 }
             }.launchIn(coroutineScope)
     }
+
     fun getWebViewData() {
         viewModelExt.fetchInfo().onEach { result ->
             when (result) {
                 is Resource.Success -> {
                     if (result.data != null) {
                         _eventFlow.emit(UiEvent.ShowSnackbar(
-                            uiText =result.data
+                            uiText = result.data
                         ))
                     }
                 }
                 is Resource.Error -> {
                     _eventFlow.emit(UiEvent.ShowSnackbar(
-                        uiText = UiText.DynamicString(result.message.toString()) ?: UiText.DynamicString("Failed to to get the content")
+                        uiText = UiText.DynamicString(result.message.toString())
                     ))
                 }
                 is Resource.Loading -> {
@@ -276,11 +285,13 @@ class BookDetailViewModel(
         }
 
     }
+
     fun deleteChapterDetails() {
         coroutineScope.launch(Dispatchers.IO) {
             localChapterRepository.deleteChapters(state.value.book.bookName, source.name)
         }
     }
+
     private fun readLastReadBook() {
         val lastChapter = chapterState.value.chapters.findLast {
             it.lastRead
@@ -320,7 +331,8 @@ class BookDetailViewModel(
 
     fun insertChaptersToLocal(chapters: List<Chapter>) {
         coroutineScope.launch(Dispatchers.IO) {
-            localChapterRepository.deleteChapters(bookName = book.bookName, source = source.name)
+            localChapterRepository.deleteChapters(bookName = state.value.book.bookName,
+                source = source.name)
             localChapterRepository.insertChapters(
                 chapters,
                 state.value.book,
@@ -354,9 +366,7 @@ class BookDetailViewModel(
 
 
     override fun onServiceUnregistered() {
-        Timber.e("UnRegister")
         coroutineScope.cancel()
-        _state.value = state.value.copy(loaded = false)
     }
 
 

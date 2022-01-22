@@ -13,7 +13,4 @@ class RepositoryImpl @Inject constructor(
     override val preferencesHelper: PreferencesHelper,
     override val remoteRepository: RemoteRepository,
     override val database: BookDatabase
-) : Repository {
-
-
-}
+) : Repository

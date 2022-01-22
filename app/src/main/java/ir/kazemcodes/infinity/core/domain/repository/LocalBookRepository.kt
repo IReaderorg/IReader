@@ -5,33 +5,31 @@ import androidx.paging.PagingSource
 import ir.kazemcodes.infinity.core.data.local.ExploreBook
 import ir.kazemcodes.infinity.core.data.network.models.Source
 import ir.kazemcodes.infinity.core.domain.models.Book
-import ir.kazemcodes.infinity.core.domain.models.BookEntity
 import ir.kazemcodes.infinity.core.domain.models.Chapter
-import ir.kazemcodes.infinity.core.domain.models.ChapterEntity
 import ir.kazemcodes.infinity.core.utils.Resource
 import ir.kazemcodes.infinity.feature_library.presentation.components.FilterType
 import ir.kazemcodes.infinity.feature_library.presentation.components.SortType
 import kotlinx.coroutines.flow.Flow
 
 interface LocalBookRepository {
-    fun getBooks(
+    fun getLocalBooks(
         sortType: SortType,
         isAsc: Boolean,
         unreadFilter: FilterType,
-    ): Flow<PagingData<BookEntity>>
+    ): Flow<PagingData<Book>>
 
     fun getAllInLibraryForPagingBooks(
         sortType: SortType,
         isAsc: Boolean,
         unreadFilter: Boolean,
-    ): PagingSource<Int, BookEntity>
+    ): PagingSource<Int, Book>
 
-    fun getAllBooks(): Flow<Resource<List<Book>>>
-    fun getBooksById(id: String): Flow<Resource<Book>>
+    fun getAllLocalBooks(): Flow<Resource<List<Book>>>
+    fun getLocalBooksById(id: String): Flow<Resource<Book>>
 
     fun getLocalBookByName(bookName: String,sourceName:String): Flow<Resource<Book?>>
-    fun searchInLibraryScreenBooks(query: String): Flow<PagingData<BookEntity>>
-    fun searchBooksByPaging(query: String): PagingSource<Int, BookEntity>
+    fun searchInLibraryScreenBooks(query: String): Flow<PagingData<Book>>
+    fun searchBooksByPaging(query: String): PagingSource<Int, Book>
     fun deleteChapters()
     suspend fun insertBook(book: Book)
     suspend fun deleteBook(id: String)
@@ -94,7 +92,7 @@ interface LocalChapterRepository {
         source: String,
     )
 
-    suspend fun updateChapter(chapterEntity: ChapterEntity)
+    suspend fun updateChapter(chapter: Chapter)
 
     suspend fun updateChapters(chapters: List<Chapter>)
 

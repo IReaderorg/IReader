@@ -249,7 +249,7 @@ class ReaderScreenViewModel(
                             book = result.data,
                             isBookLoaded = true
                         )
-                        localBookRepository.updateLocalBook(book = result.data.copy(lastRead = System.currentTimeMillis(), unread = if (result.data.unread) false else true))
+                        localBookRepository.updateLocalBook(book = result.data.copy(lastRead = System.currentTimeMillis(), unread = !result.data.unread))
                     }
                 }
                 is Resource.Error -> {
@@ -262,7 +262,7 @@ class ReaderScreenViewModel(
 
     private fun toggleLastReadAndUpdateChapterContent(chapter: Chapter) {
         coroutineScope.launch(Dispatchers.IO) {
-            localChapterRepository.updateChapter(state.value.chapter.toChapterEntity())
+            localChapterRepository.updateChapter(state.value.chapter)
             localChapterRepository.deleteLastReadChapter(state.value.book.bookName, source.name)
             localChapterRepository.setLastReadChapter(state.value.book.bookName,
                 chapter.title,

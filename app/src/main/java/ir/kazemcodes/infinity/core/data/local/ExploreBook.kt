@@ -3,7 +3,7 @@ package ir.kazemcodes.infinity.core.data.local
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import ir.kazemcodes.infinity.core.domain.models.Book
-import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.Constants
+import ir.kazemcodes.infinity.core.utils.Constants
 import kotlinx.serialization.Serializable
 
 @Serializable

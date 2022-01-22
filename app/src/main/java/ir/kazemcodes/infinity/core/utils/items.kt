@@ -7,7 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.paging.compose.LazyPagingItems
 
 @ExperimentalFoundationApi
-public fun <T: Any> LazyGridScope.items(
+fun <T: Any> LazyGridScope.items(
     lazyPagingItems: LazyPagingItems<T>,
     itemContent: @Composable LazyItemScope.(value: T?) -> Unit
 ) {

@@ -15,7 +15,7 @@ import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.MidSizeTextComposable
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarBackButton
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarTitle
-import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.Constants
+import ir.kazemcodes.infinity.core.utils.Constants
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable

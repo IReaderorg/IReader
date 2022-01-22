@@ -16,12 +16,12 @@ import kotlinx.coroutines.flow.onEach
 
 
 class ChapterDetailViewModel(
-    private val book: Book,
+    private val bookName: String,
     private val source: Source,
     private val localChapterRepository: LocalChapterRepository,
 ) : ScopedServices.Registered {
 
-    private val _state = mutableStateOf(ChapterDetailState(source = source, book = book))
+    private val _state = mutableStateOf(ChapterDetailState(source = source, book = Book.create().copy(bookName = bookName)))
     val state: State<ChapterDetailState> = _state
 
     override fun onServiceRegistered() {
@@ -43,7 +43,7 @@ class ChapterDetailViewModel(
     }
 
     private fun getLocalChapters() {
-        localChapterRepository.getChapterByName(bookName = book.bookName, source = source.name)
+        localChapterRepository.getChapterByName(bookName = bookName, source = source.name)
             .onEach { result ->
                 when (result) {
                     is Resource.Success -> {

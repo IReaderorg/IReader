@@ -4,12 +4,12 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import ir.kazemcodes.infinity.core.data.local.dao.*
-import ir.kazemcodes.infinity.core.domain.models.BookEntity
-import ir.kazemcodes.infinity.core.domain.models.ChapterEntity
+import ir.kazemcodes.infinity.core.domain.models.Book
+import ir.kazemcodes.infinity.core.domain.models.Chapter
 import ir.kazemcodes.infinity.core.domain.models.SourceEntity
 
 @Database(
-    entities = [BookEntity::class, ChapterEntity::class,RemoteKeys::class, ExploreBook::class,SourceEntity::class],
+    entities = [Book::class, Chapter::class,RemoteKeys::class, ExploreBook::class,SourceEntity::class],
     version = 5,
     exportSchema = true,
 )

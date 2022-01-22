@@ -12,7 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.DEFAULT
+import ir.kazemcodes.infinity.core.utils.DEFAULT
 import ir.kazemcodes.infinity.feature_reader.presentation.reader.ReaderEvent
 import ir.kazemcodes.infinity.feature_reader.presentation.reader.ReaderScreenViewModel
 

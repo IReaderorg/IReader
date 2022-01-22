@@ -19,7 +19,7 @@ import java.util.*
 /**
  * A simple implementation for sources from a website.
  */
-abstract class HttpSource() : Source {
+abstract class HttpSource : Source {
 
 
 

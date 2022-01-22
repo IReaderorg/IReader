@@ -7,7 +7,7 @@
 //import ir.kazemcodes.infinity.core.data.network.models.ChapterPage
 //import ir.kazemcodes.infinity.feature_sources.sources.models.ParsedHttpSource
 //import ir.kazemcodes.infinity.core.domain.models.Book
-//import ir.kazemcodes.infinity.core.domain.models.Chapter
+//import ir.kazemcodes.infinity.core.domain.repository.Chapter
 //import okhttp3.Headers
 //import okhttp3.OkHttpClient
 //import okhttp3.Request

@@ -1,44 +1,36 @@
 package ir.kazemcodes.infinity.core.domain.models
 
-import android.os.Parcelable
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import ir.kazemcodes.infinity.core.data.local.ExploreBook
 import ir.kazemcodes.infinity.core.utils.getRandomString
-import kotlinx.parcelize.Parcelize
+import ir.kazemcodes.infinity.core.utils.Constants.BOOK_TABLE
+import kotlinx.serialization.Serializable
 
-
-
-@Parcelize
+@Serializable
+@Entity(tableName = BOOK_TABLE)
 data class Book(
-    var id: String = getRandomString(6),
-
+    @PrimaryKey(autoGenerate = false) var id: String,
     var link: String,
-
     var bookName: String,
-
-    var coverLink: String? = "",
-
-    var source: String? = null,
-
-    var author: String? = "",
-
-    var translator: String? = "",
-
+    var coverLink: String? = null,
     var description: List<String> = emptyList(),
-
+    var author: String? = null,
+    var translator: String? = null,
     var category: List<String> = emptyList(),
-
-    var status: Int = 0,
-
+    var status: Int = -1,
     var rating: Int = 0,
-
+    var source: String? = null,
+    var isExploreMode:Boolean = false,
     var inLibrary: Boolean = false,
-    val dataAdded: Long = 0,
-    val download:Boolean =false,
-    val lastRead:Long = 0,
-    val totalChapters:Int = 0,
-    val unread:Boolean = true,
-    val lastUpdated:Long = 0
-) : Parcelable {
+    var dataAdded: Long = 0,
+    var download:Boolean =false,
+    var lastRead:Long = 0,
+    var totalChapters:Int = 0,
+    var unread:Boolean = true,
+    var lastUpdated:Long = 0
+) {
+
 
     companion object {
         const val UNKNOWN = 0
@@ -46,7 +38,7 @@ data class Book(
         const val COMPLETED = 2
         const val LICENSED = 3
         fun create(): Book {
-            return Book(bookName = "", link = "")
+            return Book(bookName = "", link = "", id = getRandomString(6))
         }
     }
 
@@ -60,8 +52,8 @@ data class Book(
         }
     }
 
-    fun toBookEntity(): BookEntity {
-        return BookEntity(
+    fun toBookEntity(): Book {
+        return Book(
             bookName = bookName,
             link = link,
             coverLink = coverLink,
@@ -100,67 +92,3 @@ data class Book(
     }
 
 }
-//interface Book {
-//
-//    var url: String
-//
-//    var title: String
-//
-//    var author: String?
-//
-//    var translator: String?
-//
-//    var description: String?
-//
-//    var genre: String?
-//
-//    var status: Int
-//
-//    var thumbnail: Any?
-//
-//    var initialized: Boolean
-//
-//
-//
-//
-//    fun copyFrom(other: Book)  {
-//        if (other.author != null) {
-//            author = other.author
-//        }
-//
-//        if (other.translator != null) {
-//            translator = other.translator
-//        }
-//
-//        if (other.description != null) {
-//            description = other.description
-//        }
-//
-//        if (other.genre != null) {
-//            genre = other.genre
-//        }
-//
-//        if (other.thumbnail != null) {
-//            thumbnail = other.thumbnail
-//        }
-//
-//        status = other.status
-//
-//        if (!initialized) {
-//            initialized = other.initialized
-//        }
-//    }
-//
-//
-//
-//    companion object {
-//        const val UNKNOWN = 0
-//        const val ONGOING = 1
-//        const val COMPLETED = 2
-//        const val LICENSED = 3
-//
-//        fun create(): Book {
-//            return BookImp()
-//        }
-//    }
-//}

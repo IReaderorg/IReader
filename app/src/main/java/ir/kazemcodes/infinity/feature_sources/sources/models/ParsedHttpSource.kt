@@ -5,13 +5,13 @@ import ir.kazemcodes.infinity.core.data.network.models.ChapterPage
 import ir.kazemcodes.infinity.core.data.network.models.ChaptersPage
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
-import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.Constants
-import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.Constants.CLOUDFLARE_LOG
-import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.Constants.CLOUDFLARE_PROTECTION_ERROR
+import ir.kazemcodes.infinity.core.utils.Constants
+import ir.kazemcodes.infinity.core.utils.Constants.CLOUDFLARE_LOG
+import ir.kazemcodes.infinity.core.utils.Constants.CLOUDFLARE_PROTECTION_ERROR
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 
-abstract class ParsedHttpSource() : HttpSource() {
+abstract class ParsedHttpSource : HttpSource() {
 
     /****************************************************************************************************/
     /**
@@ -136,7 +136,7 @@ abstract class ParsedHttpSource() : HttpSource() {
         }.filter {
             it.bookName.isNotBlank()
         }
-        val hasNextPage = searchBookNextPageSelector?.let { selector ->
+        val hasNextPage = searchBookNextPageSelector.let { selector ->
             document.select(selector).first()
         } != null
 

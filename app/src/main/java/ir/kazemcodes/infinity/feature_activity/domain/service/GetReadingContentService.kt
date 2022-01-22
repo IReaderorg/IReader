@@ -1,3 +1,0 @@
-package ir.kazemcodes.infinity.feature_activity.domain.service
-
-class GetReadingContentService

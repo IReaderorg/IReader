@@ -1,9 +1,9 @@
 package ir.kazemcodes.infinity.feature_detail.presentation.chapter_detail
 
 import ir.kazemcodes.infinity.core.data.network.models.Source
-import ir.kazemcodes.infinity.core.domain.models.LastReadChapter
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
+import ir.kazemcodes.infinity.core.domain.models.LastReadChapter
 
 data class ChapterDetailState(
     val isLoading: Boolean = false,

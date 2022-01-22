@@ -3,7 +3,7 @@ package ir.kazemcodes.infinity.core.data.local.dao
 import androidx.paging.PagingSource
 import androidx.room.*
 import ir.kazemcodes.infinity.core.data.local.ExploreBook
-import ir.kazemcodes.infinity.core.domain.models.BookEntity
+import ir.kazemcodes.infinity.core.domain.models.Book
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -45,7 +45,7 @@ interface LibraryBookDao {
         sortByDownloads: Boolean = false,
         sortByTotalChapter: Boolean = false,
         isAsc: Boolean = false,
-    ): PagingSource<Int, BookEntity>
+    ): PagingSource<Int, Book>
 
     @Query("""SELECT * FROM book_table WHERE inLibrary = 1
         ORDER BY 
@@ -67,7 +67,7 @@ interface LibraryBookDao {
         sortByDownloads: Boolean = false,
         sortByTotalChapter: Boolean = false,
         isAsc: Boolean = false,
-    ): List<BookEntity>
+    ): List<Book>
 
 
 
@@ -91,26 +91,26 @@ interface LibraryBookDao {
         sortByDownloads: Boolean = false,
         sortByTotalChapter: Boolean = false,
         isAsc: Boolean = false,
-    ): PagingSource<Int, BookEntity>
+    ): PagingSource<Int, Book>
 
 
     @Query("SELECT * FROM book_table")
-    fun getAllBooks(): Flow<List<BookEntity>?>
+    fun getAllBooks(): Flow<List<Book>?>
 
     @Query("SELECT * FROM book_table WHERE id = :bookId")
-    fun getLocalBook(bookId: String): Flow<List<BookEntity>?>
+    fun getLocalBook(bookId: String): Flow<List<Book>?>
 
     @Query("SELECT * FROM book_table WHERE id = :bookId Limit 1")
-    fun getBookById(bookId: String): Flow<BookEntity?>
+    fun getBookById(bookId: String): Flow<Book?>
 
     @Query("SELECT * FROM book_table WHERE bookName = :bookName AND source = :sourceName Limit 1")
-    fun getBookByName(bookName: String,sourceName:String): Flow<BookEntity?>
+    fun getBookByName(bookName: String,sourceName:String): Flow<Book?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertBook(bookEntity: BookEntity)
+    suspend fun insertBook(book: Book)
 
     @Query("SELECT * FROM book_table WHERE bookName LIKE'%' || :query || '%'")
-    fun searchBook(query: String): PagingSource<Int, BookEntity>
+    fun searchBook(query: String): PagingSource<Int, Book>
 
     @Query("DELETE FROM book_table WHERE id = :bookId ")
     suspend fun deleteBook(bookId: String)
@@ -118,7 +118,7 @@ interface LibraryBookDao {
     @Query("DELETE FROM book_table")
     suspend fun deleteAllBook()
 
-    @Update(entity = BookEntity::class, onConflict = OnConflictStrategy.REPLACE)
+    @Update(entity = Book::class, onConflict = OnConflictStrategy.REPLACE)
     suspend fun updateBook(inLibraryUpdate: InLibraryUpdate)
 
 

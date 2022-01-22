@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import ir.kazemcodes.infinity.core.utils.moshi
-import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.Constants
+import ir.kazemcodes.infinity.core.utils.Constants
 import ir.kazemcodes.infinity.feature_sources.sources.models.*
 import kotlinx.serialization.Serializable
 

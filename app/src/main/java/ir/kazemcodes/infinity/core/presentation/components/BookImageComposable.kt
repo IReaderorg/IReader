@@ -38,7 +38,7 @@ fun BookImageComposable(
         diskCachePolicy(CachePolicy.READ_ONLY)
 
     }
-    Box() {
+    Box {
         Image(
             modifier = modifier,
             painter = painter,

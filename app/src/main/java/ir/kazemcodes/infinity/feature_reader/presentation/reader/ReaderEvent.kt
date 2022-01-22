@@ -1,8 +1,8 @@
 package ir.kazemcodes.infinity.feature_reader.presentation.reader
 
 import android.content.Context
-import ir.kazemcodes.infinity.core.domain.models.FontType
 import ir.kazemcodes.infinity.core.domain.models.Chapter
+import ir.kazemcodes.infinity.core.domain.models.FontType
 
 sealed class ReaderEvent {
     data class ChangeBrightness(val brightness: Float,val context: Context) : ReaderEvent()

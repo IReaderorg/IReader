@@ -9,5 +9,4 @@ data class DetailState(
     val inLibrary : Boolean = false,
     val isLoading: Boolean = false,
     val error: String = "",
-    val loaded: Boolean = false,
     )

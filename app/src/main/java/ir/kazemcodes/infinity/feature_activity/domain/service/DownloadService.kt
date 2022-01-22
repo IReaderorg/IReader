@@ -72,7 +72,7 @@ class DownloadService @AssistedInject constructor(
                     }
                 ).flowOn(Dispatchers.Main)
                     .collectIndexed { index, chapter ->
-                        repository.localChapterRepository.updateChapter(chapter.toChapterEntity())
+                        repository.localChapterRepository.updateChapter(chapter)
                         notification.setContentText(chapter.title.toString())
                         notification.setProgress(chapters?.size ?: 0 , index, false)
                         notify(NOTIFICATION_ID, notification.build())
