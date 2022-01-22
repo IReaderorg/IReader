@@ -15,6 +15,8 @@ interface Source {
 
     val baseUrl: String
 
+    val creator: String
+
 
     val supportsLatest: Boolean
 

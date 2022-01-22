@@ -97,7 +97,7 @@ class WebViewFetcher(
     }
 
     private fun getLocalBook(book: Book) {
-        localBookRepository.getLocalBookByName(state.value.book.bookName).onEach { result ->
+        localBookRepository.getLocalBookByName(state.value.book.bookName, sourceName = source.name).onEach { result ->
             when (result) {
                 is Resource.Success -> {
                     if (result.data != null && result.data != Book.create()) {
@@ -144,7 +144,7 @@ class WebViewFetcher(
     }
 
     private fun getLocalBookByName(bookName: String) {
-        localBookRepository.getLocalBookByName(bookName).onEach { result ->
+        localBookRepository.getLocalBookByName(bookName,source.name).onEach { result ->
             when (result) {
                 is Resource.Success -> {
                     if (result.data != null && result.data != Book.create()) {

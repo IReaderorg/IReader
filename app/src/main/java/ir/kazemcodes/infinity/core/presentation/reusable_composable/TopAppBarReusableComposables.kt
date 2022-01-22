@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
 import com.zhuinden.simplestack.Backstack
 
 @Composable
@@ -82,6 +83,27 @@ fun SmallTextComposable(
         fontWeight = fontWeight ?: FontWeight.SemiBold,
         overflow = overflow ?: TextOverflow.Ellipsis,
         textAlign = TextAlign.Center,
+        maxLines = maxLine
+    )
+}
+@Composable
+fun SuperSmallTextComposable(
+    modifier: Modifier = Modifier,
+    title: String,
+    color: Color? = null,
+    style: TextStyle? = null,
+    fontWeight: FontWeight? = null,
+    overflow: TextOverflow? = null,
+    maxLine: Int = Int.MAX_VALUE,
+) {
+    Text(
+        modifier = modifier,
+        text = title,
+        color = color ?: MaterialTheme.colors.onBackground.copy(alpha = .4f),
+        style = style ?: MaterialTheme.typography.caption,
+        fontWeight = fontWeight ?: FontWeight.Normal,
+        fontSize = 12.sp,
+        overflow = overflow ?: TextOverflow.Ellipsis,
         maxLines = maxLine
     )
 }

@@ -5,10 +5,13 @@ import ir.kazemcodes.infinity.core.data.network.models.Source
 import ir.kazemcodes.infinity.feature_sources.sources.models.*
 
 
-class Extensions(context: Context) {
+class Extensions(
+    private val context: Context,
+    ) {
+
+
+
     private val sources = mutableListOf<Source>(
-        //FreeWebNovel(context),
-        // WuxiaWorldApi(context),
     )
 
     fun getSources(): List<Source> {
@@ -31,12 +34,12 @@ class Extensions(context: Context) {
 class AvailableSources(context: Context) {
 
     val baseSample = SourceTower(
-        _name = "",
-        _baseUrl = "",
-        _lang = "",
-        _supportsLatest = false,
-        _supportsMostPopular = false,
-        _supportsSearch = false,
+        name = "",
+        baseUrl = "",
+        lang = "",
+        supportsLatest = false,
+        supportsMostPopular = false,
+        supportSearch = false,
         creator = "@Kazem",
         latest = Latest(
             endpoint = null,
@@ -48,7 +51,7 @@ class AvailableSources(context: Context) {
             openInWebView = false,
             nextPageSelector = null,
             nextPageAtt = null,
-            nextPageValue =null ,
+            nextPageValue = null,
             linkSelector = null,
             linkAtt = null,
             nameSelector = null,
@@ -66,7 +69,7 @@ class AvailableSources(context: Context) {
             selector = null,
             addBaseUrlToLink = false,
             openInWebView = false,
-            nextPageSelector =null ,
+            nextPageSelector = null,
             nextPageAtt = null,
             nextPageValue = null,
             linkSelector = null,
@@ -157,12 +160,12 @@ class AvailableSources(context: Context) {
 
 
     val realwebnovel = SourceTower(
-        _baseUrl = "https://readwebnovels.net",
-        _lang = "en",
-        _name = "RealWebNovel",
-        _supportsLatest = true,
-        _supportsMostPopular = true,
-        _supportsSearch = true,
+        baseUrl = "https://readwebnovels.net",
+        lang = "en",
+        name = "RealWebNovel",
+        supportsLatest = true,
+        supportsMostPopular = true,
+        supportSearch = true,
         creator = "@Kazem",
         latest = Latest(
             endpoint = "/manga-2/page/{page}/?m_orderby=latest",
@@ -214,12 +217,12 @@ class AvailableSources(context: Context) {
         )
     )
     val freeWebNovel = SourceTower(
-        _name = "FreeWebNovel",
-        _lang = "en",
-        _baseUrl = "https://freewebnovel.com",
-        _supportsLatest = true,
-        _supportsSearch = true,
-        _supportsMostPopular = true,
+        name = "FreeWebNovel",
+        lang = "en",
+        baseUrl = "https://freewebnovel.com",
+        supportsLatest = true,
+        supportSearch = true,
+        supportsMostPopular = true,
         creator = "@Kazem",
         latest = Latest(
             endpoint = "/latest-release-novel/{page}/",
@@ -280,12 +283,12 @@ class AvailableSources(context: Context) {
     )
 
     val mtl = SourceTower(
-        _lang = "en",
-        _name = "MtlNovel",
-        _baseUrl = "https://www.mtlnovel.com",
-        _supportsLatest = true,
-        _supportsMostPopular = true,
-        _supportsSearch = true,
+        lang = "en",
+        name = "MtlNovel",
+        baseUrl = "https://www.mtlnovel.com",
+        supportsLatest = true,
+        supportsMostPopular = true,
+        supportSearch = true,
         creator = "@Kazem",
         latest = Latest(
             endpoint = "/novel-list/?orderby=date&order=desc&status=all&pg={page}",
@@ -344,12 +347,12 @@ class AvailableSources(context: Context) {
 
     )
     val wuxiaworld = SourceTower(
-        _name = "Wuxiaworld",
-        _lang = "en",
-        _baseUrl = "https://wuxiaworld.site",
-        _supportsMostPopular = true,
-        _supportsSearch = true,
-        _supportsLatest = true,
+        name = "Wuxiaworld",
+        lang = "en",
+        baseUrl = "https://wuxiaworld.site",
+        supportsMostPopular = true,
+        supportSearch = true,
+        supportsLatest = true,
         creator = "@Kazem",
         latest = Latest(
             endpoint = "/novel-list/page/{page}/",
@@ -402,12 +405,12 @@ class AvailableSources(context: Context) {
         )
     )
     val myLoveNovel = SourceTower(
-        _name = "MyLoveNovel",
-        _lang = "en",
-        _supportsLatest = true,
-        _baseUrl = "https://m.mylovenovel.com/",
-        _supportsSearch = true,
-        _supportsMostPopular = true,
+        name = "MyLoveNovel",
+        lang = "en",
+        supportsLatest = true,
+        baseUrl = "https://m.mylovenovel.com/",
+        supportSearch = true,
+        supportsMostPopular = true,
         creator = "@Kazem",
         latest = Latest(
             endpoint = "/lastupdate-{page}.html",
@@ -462,12 +465,12 @@ class AvailableSources(context: Context) {
         )
     )
     val koreanMtl = SourceTower(
-        _name = "KoreanMtl.Online",
-        _lang = "en",
-        _supportsLatest = true,
-        _baseUrl = "https://www.koreanmtl.online/",
-        _supportsSearch = false,
-        _supportsMostPopular = false,
+        name = "KoreanMtl.Online",
+        lang = "en",
+        supportsLatest = true,
+        baseUrl = "https://www.koreanmtl.online/",
+        supportSearch = false,
+        supportsMostPopular = false,
         creator = "@Kazem",
         latest = Latest(
             endpoint = "/p/novels-listing.html",
@@ -503,13 +506,13 @@ class AvailableSources(context: Context) {
     )
 
     val mtlNation = SourceTower(
-        _name = "MtlNation",
-        _baseUrl = "https://mtlnation.com/",
-        _supportsSearch = true,
-        _supportsMostPopular = true,
-        _supportsLatest = true,
+        name = "MtlNation",
+        baseUrl = "https://mtlnation.com/",
+        supportSearch = true,
+        supportsMostPopular = true,
+        supportsLatest = true,
         creator = "@Kazem",
-        _lang = "en",
+        lang = "en",
         latest = Latest(
             endpoint = "/novel/page/{page}/?m_orderby=latest",
             selector = "div.page-item-detail",
@@ -557,13 +560,13 @@ class AvailableSources(context: Context) {
         )
     )
     val realLightWebNovel = SourceTower(
-        _name = "RealLightWebNovel",
-        _baseUrl = "https://readlightnovels.net",
-        _supportsSearch = true,
-        _supportsMostPopular = false,
-        _supportsLatest = true,
+        name = "RealLightWebNovel",
+        baseUrl = "https://readlightnovels.net",
+        supportSearch = true,
+        supportsMostPopular = false,
+        supportsLatest = true,
         creator = "@Kazem",
-        _lang = "en",
+        lang = "en",
         latest = Latest(
             endpoint = "/latest/page/{page}",
             selector = "div.row div.home-truyendecu",
@@ -612,7 +615,6 @@ class AvailableSources(context: Context) {
 
         )
     )
-
 
 
     val sourcesList = listOf<Source>(

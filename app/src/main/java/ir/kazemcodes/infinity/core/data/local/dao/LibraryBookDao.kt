@@ -103,8 +103,8 @@ interface LibraryBookDao {
     @Query("SELECT * FROM book_table WHERE id = :bookId Limit 1")
     fun getBookById(bookId: String): Flow<BookEntity?>
 
-    @Query("SELECT * FROM book_table WHERE bookName = :bookName Limit 1")
-    fun getBookByName(bookName: String): Flow<BookEntity?>
+    @Query("SELECT * FROM book_table WHERE bookName = :bookName AND source = :sourceName Limit 1")
+    fun getBookByName(bookName: String,sourceName:String): Flow<BookEntity?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertBook(bookEntity: BookEntity)

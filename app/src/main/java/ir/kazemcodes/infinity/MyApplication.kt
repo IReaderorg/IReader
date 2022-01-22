@@ -10,6 +10,7 @@ import com.zhuinden.simplestackextensions.servicesktx.add
 import dagger.hilt.android.HiltAndroidApp
 import ir.kazemcodes.infinity.core.domain.repository.LocalBookRepository
 import ir.kazemcodes.infinity.core.domain.repository.LocalChapterRepository
+import ir.kazemcodes.infinity.core.domain.repository.LocalSourceRepository
 import ir.kazemcodes.infinity.core.domain.repository.RemoteRepository
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.feature_activity.domain.notification.Notifications
@@ -53,6 +54,10 @@ class MyApplication : Application(), Configuration.Provider {
 
     @Inject lateinit var remoteRepository: RemoteRepository
 
+    @Inject lateinit var localSourceRepository: LocalSourceRepository
+
+
+
 
     private var mFirebaseAnalytics: FirebaseAnalytics? = null
     override fun onCreate() {
@@ -76,6 +81,7 @@ class MyApplication : Application(), Configuration.Provider {
             .add(localBookRepository)
             .add(remoteRepository)
             .add(localChapterRepository)
+            .add(localSourceRepository)
             .build()
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this)
         setupNotificationChannels()

@@ -19,4 +19,5 @@ class DatabaseConverter {
         return stringList.joinToString(separator = "$%&$")
     }
 
+
 }

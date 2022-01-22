@@ -147,10 +147,10 @@ class LocalBookRepositoryImpl(
         }
     }
 
-    override fun getLocalBookByName(bookName: String): Flow<Resource<Book?>> = flow {
+    override fun getLocalBookByName(bookName: String,sourceName:String): Flow<Resource<Book?>> = flow {
         try {
             emit(Resource.Loading())
-            bookDao.getBookByName(bookName).first { book ->
+            bookDao.getBookByName(bookName, sourceName = sourceName).first { book ->
                 if (book != null) {
                     emit(Resource.Success(data = book.toBook()))
                     return@first true

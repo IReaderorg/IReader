@@ -22,6 +22,7 @@ import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
 import ir.kazemcodes.infinity.core.domain.repository.LocalBookRepository
 import ir.kazemcodes.infinity.core.domain.repository.LocalChapterRepository
+import ir.kazemcodes.infinity.core.domain.repository.LocalSourceRepository
 import ir.kazemcodes.infinity.core.domain.repository.RemoteRepository
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.core.presentation.theme.InfinityTheme
@@ -45,10 +46,12 @@ import ir.kazemcodes.infinity.feature_settings.presentation.setting.SettingViewM
 import ir.kazemcodes.infinity.feature_settings.presentation.setting.dns.DnsOverHttpScreen
 import ir.kazemcodes.infinity.feature_settings.presentation.setting.downloader.DownloaderScreen
 import ir.kazemcodes.infinity.feature_settings.presentation.setting.extension_creator.ExtensionCreatorScreen
+import ir.kazemcodes.infinity.feature_settings.presentation.setting.extension_creator.ExtensionCreatorViewModel
 import ir.kazemcodes.infinity.feature_settings.presentation.webview.WebPageScreen
 import ir.kazemcodes.infinity.feature_settings.presentation.webview.WebViewPageModel
 import ir.kazemcodes.infinity.feature_sources.presentation.extension.ExtensionScreen
 import ir.kazemcodes.infinity.feature_sources.presentation.extension.ExtensionViewModel
+import ir.kazemcodes.infinity.feature_sources.sources.Extensions
 import kotlinx.parcelize.Parcelize
 
 
@@ -75,7 +78,7 @@ data class MainScreenKey(val noArgument: String = "") : FragmentKey() {
         with(serviceBinder) {
             add(LibraryViewModel(lookup<LocalBookRepository>(), lookup<PreferencesUseCase>()))
             add(MainViewModel())
-            add(ExtensionViewModel())
+            add(ExtensionViewModel(lookup<LocalSourceRepository>(),lookup<Extensions>()))
         }
     }
 
@@ -332,6 +335,7 @@ data class DownloadScreenKey(val noArgs: String = "") : FragmentKey() {
 }
 
 class ExtensionCreatorScreenFragment() : ComposeFragment() {
+    @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun FragmentComposable(backstack: Backstack) {
         BackstackProvider(backstack = backstack) {
@@ -349,6 +353,15 @@ class ExtensionCreatorScreenFragment() : ComposeFragment() {
 data class ExtensionCreatorScreenKey(val noArgs: String = "") : FragmentKey() {
 
     override fun instantiateFragment(): Fragment = ExtensionCreatorScreenFragment()
+
+    override fun bindServices(serviceBinder: ServiceBinder) {
+        with(serviceBinder) {
+            add(ExtensionCreatorViewModel(
+
+                backstack.lookup<LocalSourceRepository>()
+            ))
+        }
+    }
 }
 
 class DnsOverHttpScreenFragment() : ComposeFragment() {

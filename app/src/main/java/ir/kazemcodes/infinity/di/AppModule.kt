@@ -11,11 +11,9 @@ import dagger.hilt.components.SingletonComponent
 import ir.kazemcodes.infinity.core.data.local.BookDatabase
 import ir.kazemcodes.infinity.core.data.local.dao.LibraryBookDao
 import ir.kazemcodes.infinity.core.data.local.dao.LibraryChapterDao
+import ir.kazemcodes.infinity.core.data.local.dao.SourceTowerDao
 import ir.kazemcodes.infinity.core.data.repository.*
-import ir.kazemcodes.infinity.core.domain.repository.LocalBookRepository
-import ir.kazemcodes.infinity.core.domain.repository.LocalChapterRepository
-import ir.kazemcodes.infinity.core.domain.repository.RemoteRepository
-import ir.kazemcodes.infinity.core.domain.repository.Repository
+import ir.kazemcodes.infinity.core.domain.repository.*
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
@@ -56,6 +54,16 @@ class AppModule {
         database: BookDatabase,
     ): LocalBookRepository {
         return LocalBookRepositoryImpl(libraryBookDao, libraryChapterDao,database)
+    }
+    @Provides
+    @Singleton
+    fun provideSourceDao( database: BookDatabase,) : SourceTowerDao {
+        return database.sourceTowerDao
+    }
+    @Provides
+    @Singleton
+    fun provideLocalSourceRepository(sourceTowerDao: SourceTowerDao) : LocalSourceRepository {
+        return LocalSourceRepositoryImpl(sourceTowerDao)
     }
 
     @Provides

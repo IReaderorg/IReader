@@ -28,21 +28,19 @@ class MainActivity : AppCompatActivity(), SimpleStateChanger.NavigationHandler {
 
     private lateinit var fragmentStateChanger: FragmentStateChanger
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)
 
-        val source = AvailableSources(context = this).realLightWebNovel
+        val source = AvailableSources(context = this).myLoveNovel
         val moshi: Moshi = moshi
         val jsonAdapter: JsonAdapter<SourceTower> = moshi.adapter<SourceTower>(SourceTower::class.java)
 
-        val json: String = """{"_baseUrl":"https://readlightnovels.net","_lang":"en","_name":"RealLightWebNovel","creator":"@Kazem","_supportsMostPopular":false,"_supportsSearch":true,"_supportsLatest":true,"latest":{"endpoint":"/latest/page/{page}","isGetRequestType":true,"isHtmlType":true,"selector":"div.row div.home-truyendecu","addBaseUrlToLink":false,"openInWebView":false,"nextPageSelector":"ul.pagination>li:nth-child(6)>a","nextPageValue":"Last","linkSelector":"a","linkAtt":"href","nameSelector":"h3","coverSelector":"img","coverAtt":"src","supportPageList":false},"detail":{"isGetRequestType":true,"isHtmlType":true,"addBaseUrlToLink":false,"openInWebView":false,"nameSelector":"h2.single_title","coverSelector":"div.book img","coverAtt":"src","descriptionSelector":"div.desc-text p","authorBookSelector":"div.info>div:nth-child(1)>a","categorySelector":"div.info>div:nth-child(2)"},"search":{"endpoint":"/page/{page}?s={query}","isGetRequestType":true,"isHtmlType":true,"selector":"div.row div.home-truyendecu","addBaseUrlToLink":false,"openInWebView":false,"nextPageSelector":"ul.pagination>li:nth-child(6)>a","nextPageValue":"Last","linkSelector":"a","linkAtt":"href","linkSearchedSubString":false,"nameSelector":"h3","coverSelector":"img","coverAtt":"src"},"chapters":{"endpoint":"action=tw_ajax&type=pagination&id=390165&page={page}","isGetRequestType":false,"isHtmlType":true,"selector":"div.col-xs-12 ul.list-chapter li","addBaseUrlToLink":false,"openInWebView":false,"isDownloadable":false,"chaptersEndpointWithoutPage":".html","isChapterStatsFromFirst":true,"nameSelector":"span.chapter-text","linkSelector":"a","linkAtt":"href","supportNextPagesList":true},"content":{"isHtmlType":true,"isGetRequestType":true,"addBaseUrlToLink":false,"openInWebView":false,"selector":"div.chapter-content","pageTitleSelector":"a.chapter-title","pageContentSelector":"p"},"nextChapterListLink":""}
-"""
-        val sourcea = jsonAdapter.fromJson(json)
+        Timber.e(jsonAdapter.toJson(source))
 
-        if (sourcea != null) {
-            Timber.e(sourcea._baseUrl)
-        }
+
+
 
         val app = application as MyApplication
         val globalServices = app.globalServices
