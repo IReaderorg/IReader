@@ -7,10 +7,13 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import ir.kazemcodes.infinity.core.data.local.BookDatabase
 import ir.kazemcodes.infinity.core.data.network.utils.MemoryCookieJar
 import ir.kazemcodes.infinity.core.data.repository.PreferencesHelper
+import ir.kazemcodes.infinity.core.domain.repository.RemoteRepository
 import ir.kazemcodes.infinity.core.domain.repository.Repository
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.*
+import ir.kazemcodes.infinity.core.domain.use_cases.remote.*
 import ir.kazemcodes.infinity.feature_sources.sources.utils.NetworkHelper
 import ir.kazemcodes.infinity.feature_updater.ProgressListener
 import okhttp3.Call
@@ -95,6 +98,17 @@ class NetworkModule {
     @Provides
     fun providesWebView(context: Context): WebView {
         return WebView(context)
+    }
+
+    @Singleton
+    @Provides
+    fun providesRemoteUseCase(remoteRepository: RemoteRepository,database: BookDatabase): RemoteUseCases {
+        return RemoteUseCases(
+            getRemoteBooksByRemoteMediator = GetRemoteBooksByRemoteMediator(remoteRepository,database),
+            getBookDetail = GetBookDetail(remoteRepository),
+            getRemoteChapters = GetRemoteChapters(remoteRepository),
+            getRemoteReadingContent = GetRemoteReadingContent(remoteRepository)
+        )
     }
 
 

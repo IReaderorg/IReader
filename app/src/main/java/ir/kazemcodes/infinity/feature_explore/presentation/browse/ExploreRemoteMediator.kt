@@ -6,9 +6,9 @@ import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
 import ir.kazemcodes.infinity.core.data.local.BookDatabase
-import ir.kazemcodes.infinity.core.data.local.dao.RemoteKeys
 import ir.kazemcodes.infinity.core.data.network.models.Source
 import ir.kazemcodes.infinity.core.domain.models.Book
+import ir.kazemcodes.infinity.core.domain.models.RemoteKeys
 import retrofit2.HttpException
 import java.io.IOException
 import java.net.UnknownHostException

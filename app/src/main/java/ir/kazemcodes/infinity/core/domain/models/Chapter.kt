@@ -11,6 +11,7 @@ import kotlinx.serialization.Serializable
 data class Chapter(
     @PrimaryKey(autoGenerate = true) val chapterId: Int = 0,
     var bookName: String? = null,
+    var bookId : Int,
     var link: String,
     var title: String,
     var dateUploaded: String? = null,
@@ -24,7 +25,7 @@ data class Chapter(
     companion object {
         fun create(): Chapter {
             return Chapter(
-                link = "", title = "", source = ""
+                link = "", title = "", source = "", bookId = 0
             )
         }
     }

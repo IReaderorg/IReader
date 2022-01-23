@@ -12,7 +12,12 @@ import ir.kazemcodes.infinity.core.domain.repository.LocalBookRepository
 import ir.kazemcodes.infinity.core.domain.repository.LocalChapterRepository
 import ir.kazemcodes.infinity.core.domain.repository.LocalSourceRepository
 import ir.kazemcodes.infinity.core.domain.repository.RemoteRepository
+import ir.kazemcodes.infinity.core.domain.use_cases.local.DeleteUseCase
+import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalGetBookUseCases
+import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalGetChapterUseCase
+import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalInsertUseCases
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.PreferencesUseCase
+import ir.kazemcodes.infinity.core.domain.use_cases.remote.RemoteUseCases
 import ir.kazemcodes.infinity.feature_activity.domain.notification.Notifications
 import ir.kazemcodes.infinity.feature_sources.sources.Extensions
 import ir.kazemcodes.infinity.feature_sources.sources.utils.NetworkHelper
@@ -56,6 +61,17 @@ class MyApplication : Application(), Configuration.Provider {
 
     @Inject lateinit var localSourceRepository: LocalSourceRepository
 
+    @Inject lateinit var getBookUseCases: LocalGetBookUseCases
+
+    @Inject lateinit var getChapterUseCases: LocalGetBookUseCases
+    @Inject lateinit var localGetChapterUseCase: LocalGetChapterUseCase
+
+    @Inject lateinit var deleteUseCase: DeleteUseCase
+
+    @Inject lateinit var insertUseCases: LocalInsertUseCases
+
+    @Inject lateinit var remoteUseCases: RemoteUseCases
+
 
 
 
@@ -82,6 +98,12 @@ class MyApplication : Application(), Configuration.Provider {
             .add(remoteRepository)
             .add(localChapterRepository)
             .add(localSourceRepository)
+            .add(deleteUseCase)
+            .add(insertUseCases)
+            .add(getBookUseCases)
+            .add(getChapterUseCases)
+            .add(remoteUseCases)
+            .add(localGetChapterUseCase)
             .build()
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this)
         setupNotificationChannels()

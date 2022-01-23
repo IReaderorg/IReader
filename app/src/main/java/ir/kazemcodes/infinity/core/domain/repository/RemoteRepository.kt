@@ -2,7 +2,8 @@ package ir.kazemcodes.infinity.core.domain.repository
 
 import android.content.Context
 import android.webkit.WebView
-import androidx.paging.PagingData
+import androidx.paging.PagingSource
+import ir.kazemcodes.infinity.core.data.network.models.BookPage
 import ir.kazemcodes.infinity.core.data.network.models.ChapterPage
 import ir.kazemcodes.infinity.core.data.network.models.Source
 import ir.kazemcodes.infinity.core.domain.models.Book
@@ -14,25 +15,18 @@ import kotlinx.coroutines.flow.Flow
 interface RemoteRepository {
 
 
-    fun getRemoteBookDetail(
+    suspend fun getRemoteBookDetail(
         book: Book,
         source: Source,
-    ): Flow<Resource<Book>>
+    ): BookPage
 
-    fun getRemoteMostPopularBooksUseCase(page: Int, source: Source): Flow<Resource<List<Book>>>
 
-    fun getRemoteBooksUseCase(
+    fun getAllExploreBookByPaging(
         source: Source,
         exploreType: ExploreType,
         query:String?=null,
-    ): Flow<PagingData<Book>>
+    ): PagingSource<Int, Book>
 
-
-
-    fun getRemoteChaptersUseCase(
-        book: Book,
-        source: Source,
-    ): Flow<Resource<List<Chapter>>>
 
     fun getRemoteReadingContentUseCase(chapter: Chapter, source: Source): Flow<Resource<ChapterPage>>
 

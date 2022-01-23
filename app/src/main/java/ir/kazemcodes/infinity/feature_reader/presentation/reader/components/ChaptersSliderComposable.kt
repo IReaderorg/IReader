@@ -36,7 +36,7 @@ fun ChaptersSliderComposable(
             IconButton(modifier = modifier.weight(1f),
                 onClick = {
                     if (currentIndex > 0) {
-                        viewModel.getContent(chapters[currentIndex - 1])
+                        viewModel.getChapter(chapters[currentIndex - 1])
                         viewModel.updateChapterSliderIndex(currentIndex - 1)
                     } else context.toast("This is first chapter")
                 }) {
@@ -53,7 +53,7 @@ fun ChaptersSliderComposable(
                 onValueChangeFinished = {
                     context.toast(chapters[viewModel.state.value.currentChapterIndex].title)
                     viewModel.updateChapterSliderIndex(currentIndex - 1)
-                    viewModel.getContent(chapters[viewModel.state.value.currentChapterIndex])
+                    viewModel.getChapter(chapters[viewModel.state.value.currentChapterIndex])
                 },
                 valueRange = 0f..(chapters.size - 1).toFloat(),
                 colors = SliderDefaults.colors(
@@ -66,9 +66,9 @@ fun ChaptersSliderComposable(
                 )
             )
             IconButton(modifier = modifier.weight(1f), onClick = {
-                if (currentIndex < (chapters.size - 1)) {
+                if (currentIndex < (chapters.size -1 )) {
                     viewModel.updateChapterSliderIndex(currentIndex + 1)
-                    viewModel.getContent(chapters[currentIndex + 1])
+                    viewModel.getChapter(chapters[currentIndex + 1])
                 } else {
                     context.toast("This is last chapter")
                 }

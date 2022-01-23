@@ -4,32 +4,28 @@ import android.webkit.WebView
 import ir.kazemcodes.infinity.core.data.network.models.Source
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
-import ir.kazemcodes.infinity.core.domain.repository.LocalBookRepository
-import ir.kazemcodes.infinity.core.domain.repository.LocalChapterRepository
+import ir.kazemcodes.infinity.core.domain.use_cases.local.DeleteUseCase
+import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalInsertUseCases
 import ir.kazemcodes.infinity.core.utils.Resource
 import ir.kazemcodes.infinity.core.utils.UiText
 import ir.kazemcodes.infinity.core.utils.getHtml
 import ir.kazemcodes.infinity.feature_sources.sources.models.FetchType
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.launch
 import org.jsoup.Jsoup
 
 class WebViewFetcher(
-    private val coroutineScope: CoroutineScope,
-    private val localChapterRepository: LocalChapterRepository,
-    private val localBookRepository: LocalBookRepository,
     private val url: String,
     private val fetcher: FetchType,
     private val source: Source,
     private val webView: WebView,
+    private val insertUseCases: LocalInsertUseCases,
+    private val deleteUseCase: DeleteUseCase,
 ) {
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun fetchInfo(
+    suspend fun fetchInfo(
         localBook: Book? = null, localChapters: List<Chapter>? = null,
     ): Flow<Resource<UiText.DynamicString>> = flow {
         emit(Resource.Loading())
@@ -49,10 +45,9 @@ class WebViewFetcher(
                             }
 
                             list.addAll(uniqueList)
-                            coroutineScope.launch(Dispatchers.IO) {
-                                deleteChapterDetails(book = localBook)
-                                insertChaptersToLocal(book = localBook,uniqueList)
-                            }
+                            deleteChapterDetails(book = localBook)
+                            insertChaptersToLocal(book = localBook, uniqueList)
+
                             emit(Resource.Success<UiText.DynamicString>(UiText.DynamicString("${book.book.bookName} was fetched with ${chapters.chapters.size}  chapters")))
 
                         } else {
@@ -80,28 +75,20 @@ class WebViewFetcher(
         }
     }
 
-    fun insertChaptersToLocal(book: Book, chapters: List<Chapter>) {
-        coroutineScope.launch(Dispatchers.IO) {
-            localChapterRepository.insertChapters(
+    suspend fun  insertChaptersToLocal(book: Book, chapters: List<Chapter>) {
+
+        insertUseCases.insertChapters(
                 chapters,
-                book,
-                source = source,
-                inLibrary = book.inLibrary
             )
-        }
     }
 
 
-    fun insertBookDetailToLocal(book: Book) {
-        coroutineScope.launch(Dispatchers.IO) {
-            localBookRepository.insertBook(book)
-        }
+   suspend fun insertBookDetailToLocal(book: Book) {
+            insertUseCases.insertBook(book)
     }
 
-    fun deleteChapterDetails(book: Book) {
-        coroutineScope.launch(Dispatchers.IO) {
-            localChapterRepository.deleteChapters(book.bookName, source.name)
-        }
+    suspend fun deleteChapterDetails(book: Book) {
+            deleteUseCase.deleteChaptersByBookId(bookId = book.id)
     }
 
 }

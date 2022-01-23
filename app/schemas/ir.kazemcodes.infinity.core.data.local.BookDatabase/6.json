@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 6,
-    "identityHash": "175fc1b12391d3fb79491d487447aa0c",
+    "identityHash": "ace44b66d9b0b7f871464339e12c142a",
     "entities": [
       {
         "tableName": "book_table",
@@ -134,7 +134,7 @@
       },
       {
         "tableName": "chapter_table",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`chapterId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `bookName` TEXT, `link` TEXT NOT NULL, `title` TEXT NOT NULL, `dateUploaded` TEXT, `content` TEXT NOT NULL, `haveBeenRead` INTEGER NOT NULL, `lastRead` INTEGER NOT NULL, `source` TEXT NOT NULL, `inLibrary` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`chapterId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `bookName` TEXT, `bookId` INTEGER NOT NULL, `link` TEXT NOT NULL, `title` TEXT NOT NULL, `dateUploaded` TEXT, `content` TEXT NOT NULL, `haveBeenRead` INTEGER NOT NULL, `lastRead` INTEGER NOT NULL, `source` TEXT NOT NULL, `inLibrary` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "chapterId",
@@ -147,6 +147,12 @@
             "columnName": "bookName",
             "affinity": "TEXT",
             "notNull": false
+          },
+          {
+            "fieldPath": "bookId",
+            "columnName": "bookId",
+            "affinity": "INTEGER",
+            "notNull": true
           },
           {
             "fieldPath": "link",
@@ -994,7 +1000,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '175fc1b12391d3fb79491d487447aa0c')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ace44b66d9b0b7f871464339e12c142a')"
     ]
   }
 }

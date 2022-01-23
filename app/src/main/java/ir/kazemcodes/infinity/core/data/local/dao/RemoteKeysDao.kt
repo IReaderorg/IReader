@@ -1,13 +1,25 @@
 package ir.kazemcodes.infinity.core.data.local.dao
 
 import androidx.paging.PagingSource
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
 import ir.kazemcodes.infinity.core.domain.models.Book
-import ir.kazemcodes.infinity.core.utils.Constants
+import ir.kazemcodes.infinity.core.domain.models.RemoteKeys
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface RemoteKeysDao {
+
+    @Query("SELECT * FROM book_table WHERE id =:id AND isExploreMode = 1")
+    fun getExploreBookById(id: Int): Flow<Book?>
+
+    @Query("SELECT * FROM book_table WHERE isExploreMode = 1")
+    fun getAllExploreBookByPaging(): PagingSource<Int, Book>
+
+    @Query("SELECT * FROM book_table WHERE isExploreMode = 1")
+    fun getAllExploreBook(): List<Book>?
 
     @Query("SELECT * FROM page_key_table WHERE id =:id")
     suspend fun getRemoteKeys(id: String): RemoteKeys
@@ -18,27 +30,15 @@ interface RemoteKeysDao {
     @Query("DELETE FROM page_key_table")
     suspend fun deleteAllRemoteKeys()
 
-    @Query("SELECT * FROM book_table WHERE isExploreMode = 1")
-    fun getAllExploreBookByPaging(): PagingSource<Int, Book>
-
-    @Query("SELECT * FROM book_table WHERE isExploreMode = 1")
-    suspend fun getAllExploreBook(): List<Book?>
-
-    @Query("SELECT * FROM book_table WHERE id =:id AND isExploreMode = 1")
-    fun getExploreBookById(id: Int): Flow<Book?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertAllExploredBook(bookEntity: List<Book>)
+    suspend fun insertAllExploredBook(bookEntity: List<Book>)
 
     @Query("DELETE FROM book_table WHERE isExploreMode = 1")
-    fun deleteAllExploredBook()
+    suspend fun deleteAllExploredBook()
+
+    @Query("UPDATE book_table SET isExploreMode = 0 WHERE isExploreMode = 1 AND inLibrary = 1")
+    suspend fun turnExploreModeOff()
 
 }
 
-@Entity(tableName = Constants.PAGE_KET_TABLE)
-data class RemoteKeys(
-    @PrimaryKey(autoGenerate = false)
-    val id: String,
-    val prevPage: Int?,
-    val nextPage: Int?
-)

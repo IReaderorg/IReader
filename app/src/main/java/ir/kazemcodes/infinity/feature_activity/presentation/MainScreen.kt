@@ -59,7 +59,6 @@ fun MainScreen(modifier: Modifier = Modifier) {
             }
         }
     ) {
-
         Crossfade(targetState = currentScreen) { screen ->
             when (screen) {
                 is BottomNavigationScreen.Library -> LibraryScreen()

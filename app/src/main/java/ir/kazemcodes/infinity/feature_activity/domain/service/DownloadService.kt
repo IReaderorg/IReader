@@ -1,5 +1,6 @@
 package ir.kazemcodes.infinity.feature_activity.domain.service
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.webkit.WebView
 import androidx.core.app.NotificationCompat
@@ -44,11 +45,13 @@ class DownloadService @AssistedInject constructor(
     }
 
 
+    @SuppressLint("SetJavaScriptEnabled")
     override suspend fun doWork(): Result {
-        val bookName = inputData.getString(DOWNLOAD_BOOK_NAME)!!
+        val bookId = inputData.getInt(DOWNLOAD_BOOK_NAME,0)
         val source = inputData.getString(DOWNLOAD_SOURCE_NAME)!!
         val book = repository.localBookRepository.getBookById(1).first().data
-        val chapters = repository.localChapterRepository.getChapterByName(bookName, source = source).first().data
+
+        val chapters = repository.localChapterRepository.getChaptersByBookId(bookId = bookId).first()
 
         val notification = NotificationCompat.Builder(applicationContext,
             Notifications.CHANNEL_DOWNLOADER_PROGRESS)
@@ -72,7 +75,7 @@ class DownloadService @AssistedInject constructor(
                     }
                 ).flowOn(Dispatchers.Main)
                     .collectIndexed { index, chapter ->
-                        repository.localChapterRepository.updateChapter(chapter)
+                        repository.localChapterRepository.insertChapter(chapter)
                         notification.setContentText(chapter.title.toString())
                         notification.setProgress(chapters?.size ?: 0 , index, false)
                         notify(NOTIFICATION_ID, notification.build())

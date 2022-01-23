@@ -15,10 +15,12 @@ import ir.kazemcodes.infinity.core.data.network.models.Source
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
 import ir.kazemcodes.infinity.core.domain.models.FontType
-import ir.kazemcodes.infinity.core.domain.repository.LocalBookRepository
-import ir.kazemcodes.infinity.core.domain.repository.LocalChapterRepository
-import ir.kazemcodes.infinity.core.domain.repository.RemoteRepository
+import ir.kazemcodes.infinity.core.domain.use_cases.local.DeleteUseCase
+import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalGetBookUseCases
+import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalGetChapterUseCase
+import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalInsertUseCases
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.PreferencesUseCase
+import ir.kazemcodes.infinity.core.domain.use_cases.remote.RemoteUseCases
 import ir.kazemcodes.infinity.core.presentation.theme.fonts
 import ir.kazemcodes.infinity.core.presentation.theme.readerScreenBackgroundColors
 import ir.kazemcodes.infinity.core.utils.*
@@ -33,9 +35,11 @@ class ReaderScreenViewModel(
     private val source: Source,
     private val bookId: Int,
     private val chapterId: Int,
-    private val remoteRepository: RemoteRepository,
-    private val localBookRepository: LocalBookRepository,
-    private val localChapterRepository: LocalChapterRepository,
+    private val getBookUseCases: LocalGetBookUseCases,
+    private val getChapterUseCase: LocalGetChapterUseCase,
+    private val remoteUseCases: RemoteUseCases,
+    private val insertUseCases: LocalInsertUseCases,
+    private val deleteUseCase: DeleteUseCase
 ) : ScopedServices.Registered {
     private val _state =
         mutableStateOf(ReaderScreenState(source = source, currentChapterIndex = 0))
@@ -59,11 +63,11 @@ class ReaderScreenViewModel(
             chapter = initState.chapter.copy(chapterId = chapterId),
             source = source
         )
-        getContent(chapter = state.value.chapter)
-        readPreferences()
-        getLocalChapters()
-        getLocalBookByName()
+        getChapter(state.value.chapter)
+        getChapters()
         getLocalChaptersByPaging()
+        readPreferences()
+        getLocalBookByName()
     }
 
 
@@ -112,13 +116,8 @@ class ReaderScreenViewModel(
         }
     }
 
-    fun getContent(chapter: Chapter) {
-        _state.value = state.value.copy(chapter = chapter)
-        getReadingContentLocally()
-    }
-
-    private fun getLocalChapters() {
-        localChapterRepository.getChapterByName(bookName = state.value.book.bookName, source.name)
+    private fun getChapters() {
+        getChapterUseCase.getChaptersByBookId(bookId = bookId)
             .onEach { result ->
                 when (result) {
                     is Resource.Success -> {
@@ -127,6 +126,7 @@ class ReaderScreenViewModel(
                                 chapters = result.data,
                                 isChapterLoaded = true
                             )
+                            _state.value = state.value.copy(currentChapterIndex = result.data.indexOf(state.value.chapter))
                         }
                     }
                     is Resource.Error -> {
@@ -137,14 +137,13 @@ class ReaderScreenViewModel(
             }.launchIn(coroutineScope)
     }
 
-    private fun getReadingContentLocally() {
-        localChapterRepository.getChapterByName(bookName = state.value.chapter.bookName ?: "",
-            source = source.name,
-            chapterTitle = state.value.chapter.title)
+    fun getChapter(chapter: Chapter) {
+        _state.value = state.value.copy(chapter = chapter)
+        getChapterUseCase.getOneChapterById(chapterId = chapter.chapterId)
             .onEach { result ->
                 when (result) {
                     is Resource.Success -> {
-                        if (result.data != null ) {
+                        if (result.data != null) {
                             _state.value = state.value.copy(
                                 chapter = result.data,
                                 isLoading = false,
@@ -152,19 +151,19 @@ class ReaderScreenViewModel(
                                 error = ""
                             )
                             toggleLastReadAndUpdateChapterContent(state.value.chapter)
-                            if (state.value.chapter.content.joinToString().isBlank() ) {
+                            if (state.value.chapter.content.joinToString().isBlank()) {
                                 getReadingContentRemotely()
                             }
                         }
                     }
                     is Resource.Error -> {
-                        getReadingContentRemotely()
                         _state.value =
                             state.value.copy(
                                 error = result.message ?: "An Unknown Error Occurred",
                                 isLoading = false,
                                 isLoaded = false,
                             )
+                        getReadingContentRemotely()
                     }
                     is Resource.Loading -> {
                         _state.value = state.value.copy(
@@ -187,8 +186,10 @@ class ReaderScreenViewModel(
             ))
 
             val chapter = source.contentFromElementParse(Jsoup.parse(webView.getHtml()))
-            if (!chapter.content.isNullOrEmpty() && state.value.isBookLoaded && state.value.isChapterLoaded && webView.originalUrl == state.value.chapter.link ) {
-                _state.value = state.value.copy(isLoading = false, error = "", chapter = state.value.chapter.copy(content = chapter.content))
+            if (!chapter.content.isNullOrEmpty() && state.value.isBookLoaded && state.value.isChapterLoaded && webView.originalUrl == state.value.chapter.link) {
+                _state.value = state.value.copy(isLoading = false,
+                    error = "",
+                    chapter = state.value.chapter.copy(content = chapter.content))
                 toggleLastReadAndUpdateChapterContent(state.value.chapter.copy(content = chapter.content))
 
                 _eventFlow.emit(UiEvent.ShowSnackbar(
@@ -204,7 +205,7 @@ class ReaderScreenViewModel(
     }
 
     fun getReadingContentRemotely() {
-        remoteRepository.getRemoteReadingContentUseCase(state.value.chapter, source = source)
+        remoteUseCases.getRemoteReadingContent(state.value.chapter, source = source)
             .onEach { result ->
                 when (result) {
                     is Resource.Success -> {
@@ -216,8 +217,7 @@ class ReaderScreenViewModel(
                                     error = "",
                                     isLoaded = true,
                                 )
-
-                            toggleLastReadAndUpdateChapterContent(state.value.chapter)
+                            toggleLastReadAndUpdateChapterContent(state.value.chapter.copy(haveBeenRead = true))
                         }
                     }
                     is Resource.Error -> {
@@ -237,9 +237,10 @@ class ReaderScreenViewModel(
                 }
             }.launchIn(coroutineScope)
     }
+
     @Suppress()
     private fun getLocalBookByName() {
-        localBookRepository.getLocalBookByName(state.value.book.bookName, sourceName = source.name).onEach { result ->
+        getBookUseCases.getBookById(id = bookId).onEach { result ->
             when (result) {
                 is Resource.Success -> {
                     if (result.data != null && result.data != Book.create()) {
@@ -247,7 +248,8 @@ class ReaderScreenViewModel(
                             book = result.data,
                             isBookLoaded = true
                         )
-                        localBookRepository.updateLocalBook(book = result.data.copy(lastRead = System.currentTimeMillis(), unread = !result.data.unread))
+                        insertUseCases.insertBook(book = result.data.copy(lastRead = System.currentTimeMillis(),
+                            unread = !result.data.unread))
                     }
                 }
                 is Resource.Error -> {
@@ -260,11 +262,8 @@ class ReaderScreenViewModel(
 
     private fun toggleLastReadAndUpdateChapterContent(chapter: Chapter) {
         coroutineScope.launch(Dispatchers.IO) {
-            localChapterRepository.updateChapter(state.value.chapter)
-            localChapterRepository.deleteLastReadChapter(state.value.book.bookName, source.name)
-            localChapterRepository.setLastReadChapter(state.value.book.bookName,
-                chapter.title,
-                source = source.name)
+            deleteUseCase.deleteChapterByChapter(chapter)
+            insertUseCases.insertChapter(chapter.copy(haveBeenRead = true, lastRead = true))
         }
     }
 
@@ -274,7 +273,8 @@ class ReaderScreenViewModel(
 
     fun getLocalChaptersByPaging() {
         coroutineScope.launch(Dispatchers.IO) {
-            localChapterRepository.getLocalChapterByPaging(state.value.chapter.title,state.value.book.bookName,state.value.source.name).cachedIn(coroutineScope).collect { snapshot ->
+            getChapterUseCase.getLocalChaptersByPaging(bookId = bookId,
+                isAsc = state.value.isAsc).cachedIn(coroutineScope).collect { snapshot ->
                 _chapters.value = snapshot
             }
         }
@@ -429,16 +429,15 @@ class ReaderScreenViewModel(
      * need a index, there is no need to confuse the index because the list reversed
      */
     fun updateChapterSliderIndex(index: Int) {
-        if (index > 0 && index < state.value.chapters.size) {
-            _state.value = state.value.copy(chapter = state.value.chapters[index])
-        }
+            _state.value = state.value.copy(currentChapterIndex = index)
     }
 
     /**
      * get the index pf chapter based on the reversed state
      */
     fun getCurrentIndexOfChapter(chapter: Chapter) {
-        val index = if (state.value.chapters.indexOf(chapter) != -1) state.value.chapters.indexOf(chapter) else 0
+        val index =
+            if (state.value.chapters.indexOf(chapter) != -1) state.value.chapters.indexOf(chapter) else 0
         _state.value = state.value.copy(currentChapterIndex = index)
     }
 

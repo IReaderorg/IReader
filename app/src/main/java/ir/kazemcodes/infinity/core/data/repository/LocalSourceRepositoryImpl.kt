@@ -34,8 +34,8 @@ class LocalSourceRepositoryImpl(private val sourceTowerDao: SourceTowerDao) :
         sourceTowerDao.deleteAllSources()
     }
 
-    override suspend fun deleteSource(source: SourceTower) {
-        sourceTowerDao.deleteSource(source.toSourceEntity())
+    override suspend fun deleteSource(sourceEntity: SourceTower) {
+        sourceTowerDao.deleteSource(sourceEntity.toSourceEntity())
     }
 
     override suspend fun addSource(sources: SourceTower) {

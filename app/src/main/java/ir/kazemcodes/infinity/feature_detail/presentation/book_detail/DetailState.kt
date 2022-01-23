@@ -10,4 +10,5 @@ data class DetailState(
     val isLoading: Boolean = false,
     val isLoaded : Boolean = false,
     val error: String = "",
+    val isExploreMode: Boolean = false
     )

@@ -13,6 +13,26 @@ import ir.kazemcodes.infinity.core.data.local.BookDatabase
 import ir.kazemcodes.infinity.core.data.local.dao.LibraryBookDao
 import ir.kazemcodes.infinity.core.data.local.dao.LibraryChapterDao
 import ir.kazemcodes.infinity.core.data.local.dao.RemoteKeysDao
+import ir.kazemcodes.infinity.core.domain.repository.LocalBookRepository
+import ir.kazemcodes.infinity.core.domain.repository.LocalChapterRepository
+import ir.kazemcodes.infinity.core.domain.use_cases.local.DeleteUseCase
+import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalGetBookUseCases
+import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalGetChapterUseCase
+import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalInsertUseCases
+import ir.kazemcodes.infinity.core.domain.use_cases.local.book_usecases.*
+import ir.kazemcodes.infinity.core.domain.use_cases.local.chapter_usecases.GetChaptersByBookId
+import ir.kazemcodes.infinity.core.domain.use_cases.local.chapter_usecases.GetLastReadChapter
+import ir.kazemcodes.infinity.core.domain.use_cases.local.chapter_usecases.GetLocalChaptersByPaging
+import ir.kazemcodes.infinity.core.domain.use_cases.local.chapter_usecases.GetOneChapterById
+import ir.kazemcodes.infinity.core.domain.use_cases.local.delete_usecases.book.*
+import ir.kazemcodes.infinity.core.domain.use_cases.local.delete_usecases.chapter.DeleteAllChapters
+import ir.kazemcodes.infinity.core.domain.use_cases.local.delete_usecases.chapter.DeleteChapterByChapter
+import ir.kazemcodes.infinity.core.domain.use_cases.local.delete_usecases.chapter.DeleteChaptersByBookId
+import ir.kazemcodes.infinity.core.domain.use_cases.local.delete_usecases.chapter.DeleteNotInLibraryChapters
+import ir.kazemcodes.infinity.core.domain.use_cases.local.insert_usecases.InsertBook
+import ir.kazemcodes.infinity.core.domain.use_cases.local.insert_usecases.InsertBooks
+import ir.kazemcodes.infinity.core.domain.use_cases.local.insert_usecases.InsertChapter
+import ir.kazemcodes.infinity.core.domain.use_cases.local.insert_usecases.InsertChapters
 import ir.kazemcodes.infinity.core.utils.Constants
 import ir.kazemcodes.infinity.feature_sources.sources.Extensions
 import javax.inject.Singleton
@@ -61,5 +81,68 @@ class LocalModule {
     @Provides
     fun providesExtensions(context: Context): Extensions {
         return Extensions(context)
+    }
+
+    @Singleton
+    @Provides
+    fun providesDeleteUseCase(
+        localBookRepository: LocalBookRepository,
+        localChapterRepository: LocalChapterRepository,
+    ): DeleteUseCase {
+        return DeleteUseCase(
+            deleteAllBook = DeleteAllBooks(localBookRepository),
+            deleteAllExploreBook = DeleteAllExploreBook(localBookRepository),
+            deleteBookById = DeleteBookById(localBookRepository),
+            deleteInLibraryBook = DeleteInLibraryBook(localBookRepository),
+            setExploreModeOffForInLibraryBooks = SetExploreModeOffForInLibraryBooks(localBookRepository),
+            deleteChapterByChapter = DeleteChapterByChapter(localChapterRepository),
+            deleteChaptersByBookId = DeleteChaptersByBookId(localChapterRepository),
+            deleteNotInLibraryChapters = DeleteNotInLibraryChapters(localChapterRepository),
+            deleteAllChapters = DeleteAllChapters(localChapterRepository),
+        )
+    }
+
+    @Singleton
+    @Provides
+    fun providesInsertUseCase(
+        localBookRepository: LocalBookRepository,
+        localChapterRepository: LocalChapterRepository,
+    ): LocalInsertUseCases {
+        return LocalInsertUseCases(
+           insertBook = InsertBook(localBookRepository),
+            insertBooks = InsertBooks(localBookRepository),
+            insertChapter = InsertChapter(localChapterRepository),
+            insertChapters = InsertChapters(localChapterRepository),
+        )
+    }
+
+    @Singleton
+    @Provides
+    fun providesGetBookUseCase(
+        localBookRepository: LocalBookRepository,
+    ): LocalGetBookUseCases {
+        return LocalGetBookUseCases(
+            getAllInLibraryBooks = GetAllInLibraryBooks(localBookRepository),
+            getAllExploredBookPagingSource = GetAllExploredBookPagingSource(localBookRepository),
+            getAllInLibraryPagingSource = GetAllInLibraryPagingSource(localBookRepository),
+            getBookById = GetBookById(localBookRepository),
+            getBooksByQueryByPagination = GetBooksByQueryByPagination(localBookRepository),
+            getBooksByQueryPagingSource = GetBooksByQueryPagingSource(localBookRepository),
+            GetInLibraryBooksPagingData = GetInLibraryBooksPagingData(localBookRepository),
+            getAllExploredBookPagingData = GetAllExploredBookPagingData(localBookRepository = localBookRepository)
+        )
+    }
+
+    @Singleton
+    @Provides
+    fun providesGetChapterUseCase(
+        localChapterRepository: LocalChapterRepository,
+    ): LocalGetChapterUseCase {
+        return LocalGetChapterUseCase(
+            getOneChapterById = GetOneChapterById(localChapterRepository),
+            getChaptersByBookId = GetChaptersByBookId(localChapterRepository),
+            getLastReadChapter = GetLastReadChapter(localChapterRepository),
+            getLocalChaptersByPaging = GetLocalChaptersByPaging(localChapterRepository = localChapterRepository),
+        )
     }
 }

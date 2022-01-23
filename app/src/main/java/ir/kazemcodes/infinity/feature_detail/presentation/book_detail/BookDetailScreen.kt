@@ -106,8 +106,7 @@ fun BookDetailScreenLoadedComposable(
 ) {
     val source = viewModel.state.value.source
     val backStack = LocalBackstack.current
-    val inLibrary = viewModel.state.value.inLibrary
-    val book = viewModel.state.value.book
+    val state = viewModel.state.value
     val chapters = viewModel.chapterState.value.chapters
     val scaffoldState = rememberScaffoldState()
     val context = LocalContext.current
@@ -149,7 +148,7 @@ fun BookDetailScreenLoadedComposable(
                         }
                     }
 
-                    IconButton(onClick = { viewModel.getRemoteChapterDetail() }) {
+                    IconButton(onClick = { viewModel.getRemoteChapterDetail(state.book) }) {
                         Icon(
                             imageVector = Icons.Default.Autorenew,
                             contentDescription = "Refresh",
@@ -158,7 +157,12 @@ fun BookDetailScreenLoadedComposable(
                     }
                     /** ERROR: This may cause error later: mismatch between baseurl and book link**/
                     IconButton(onClick = {
-                        backStack.goTo(WebViewKey(source.baseUrl + getUrlWithoutDomain(book.link), sourceName = source.name, fetchType = FetchType.Detail.index, bookName = viewModel.state.value.book.bookName))
+                        backStack.goTo(WebViewKey(
+                            source.baseUrl + getUrlWithoutDomain(state.book.link),
+                            sourceName = source.name,
+                            fetchType = FetchType.Detail.index,
+                            bookId = viewModel.state.value.book.id
+                        ))
                     }) {
                         Icon(
                             imageVector = Icons.Default.Language,
@@ -197,10 +201,10 @@ fun BookDetailScreenLoadedComposable(
 
                 ) {
                     ButtonWithIconAndText(
-                        text = if (!inLibrary) "Add to Library" else "Added To Library",
-                        imageVector = if (!inLibrary) Icons.Default.AddCircleOutline else Icons.Default.Check,
+                        text = if (!state.inLibrary) "Add to Library" else "Added To Library",
+                        imageVector = if (!state.inLibrary) Icons.Default.AddCircleOutline else Icons.Default.Check,
                         onClick = {
-                            if (!inLibrary) {
+                            if (!state.inLibrary) {
                                 viewModel.toggleInLibrary(true)
                             } else {
                                 viewModel.toggleInLibrary(false)
@@ -216,7 +220,7 @@ fun BookDetailScreenLoadedComposable(
                             if (viewModel.chapterState.value.lastChapter != null) {
                                 backStack.goTo(
                                     ReaderScreenKey(
-                                        bookId = book.id,
+                                        bookId = state.book.id,
                                         sourceName = source.name,
                                         chapterId = viewModel.chapterState.value.lastChapter!!.chapterId,
 
@@ -224,12 +228,12 @@ fun BookDetailScreenLoadedComposable(
                                 )
                             } else if (viewModel.chapterState.value.chapters.isNotEmpty()) {
                                 backStack.goTo(ReaderScreenKey(
-                                    bookId = book.id,
+                                    bookId = state.book.id,
                                     sourceName = source.name,
                                     chapterId = viewModel.chapterState.value.chapters.first().chapterId,
                                 ))
                             } else {
-                                context.toast("No Chapter is Avialable")
+                                context.toast("No Chapter is Available")
                             }
                         }
                     )
@@ -260,7 +264,7 @@ fun BookDetailScreenLoadedComposable(
                 ) {
                     /** Book Image **/
                     BookImageComposable(
-                        image = book.coverLink ?: "",
+                        image = state.book.coverLink ?: "",
                         modifier = modifier
                             .width(120.dp)
                             .height(180.dp)
@@ -272,42 +276,42 @@ fun BookDetailScreenLoadedComposable(
                     /** Book Info **/
                     Column {
                         Text(
-                            text = book.bookName,
+                            text = state.book.bookName,
                             style = MaterialTheme.typography.h6,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colors.onBackground,
                             overflow = TextOverflow.Ellipsis
                         )
-                        if (!book.author.isNullOrBlank()) {
+                        if (!state.book.author.isNullOrBlank()) {
                             Text(
-                                text = "Author: ${book.author}",
+                                text = "Author: ${state.book.author}",
                                 style = MaterialTheme.typography.subtitle2,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colors.onBackground.copy(alpha = .5f),
                                 overflow = TextOverflow.Ellipsis
                             )
                         }
-                        if (!book.translator.isNullOrBlank()) {
+                        if (!state.book.translator.isNullOrBlank()) {
                             Text(
-                                text = "Translator: ${book.translator}",
+                                text = "Translator: ${state.book.translator}",
                                 style = MaterialTheme.typography.subtitle2,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colors.onBackground.copy(alpha = .5f),
                                 overflow = TextOverflow.Ellipsis
                             )
                         }
-                        if (book.status != -1) {
+                        if (state.book.status != -1) {
                             Text(
-                                text = "Status: ${book.getStatusByName()}",
+                                text = "Status: ${state.book.getStatusByName()}",
                                 style = MaterialTheme.typography.subtitle2,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colors.onBackground.copy(alpha = .5f),
                                 overflow = TextOverflow.Ellipsis
                             )
                         }
-                        if (book.rating != 0) {
+                        if (state.book.rating != 0) {
                             Text(
-                                text = "Rating: ${"⭐".repeat(if (book.rating in 1..4) book.rating else 5)}",
+                                text = "Rating: ${"⭐".repeat(if (state.book.rating in 1..4) state.book.rating else 5)}",
                                 style = MaterialTheme.typography.subtitle2,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colors.onBackground.copy(alpha = .5f),
@@ -315,15 +319,15 @@ fun BookDetailScreenLoadedComposable(
                             )
                         }
                         Text(
-                            text = "Source: ${book.source}",
+                            text = "Source: ${state.book.source}",
                             color = MaterialTheme.colors.onBackground.copy(alpha = .5f),
                             fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.subtitle2,
                             overflow = TextOverflow.Ellipsis
                         )
-                        if (!book.category.isNullOrEmpty()) {
+                        if (!state.book.category.isNullOrEmpty()) {
                             Text(
-                                text = "Genre: ${book.category.formatList()}",
+                                text = "Genre: ${state.book.category.formatList()}",
                                 color = MaterialTheme.colors.onBackground.copy(alpha = .5f),
                                 fontWeight = FontWeight.Bold,
                                 style = MaterialTheme.typography.subtitle2,
@@ -347,7 +351,7 @@ fun BookDetailScreenLoadedComposable(
                 color = MaterialTheme.colors.onBackground,
                 style = MaterialTheme.typography.h6,
             )
-            ExpandingText(text = book.description.formatBasedOnDot())
+            ExpandingText(text = state.book.description.formatBasedOnDot())
             Divider(
                 modifier = modifier
                     .fillMaxWidth()
@@ -357,7 +361,7 @@ fun BookDetailScreenLoadedComposable(
             CardTileComposable(
                 modifier = modifier.clickable {
                     backStack.goTo(ChapterDetailKey(
-                        bookName = book.bookName,
+                        bookId = state.book.id,
                         sourceName = source.name
                     ))
                 },

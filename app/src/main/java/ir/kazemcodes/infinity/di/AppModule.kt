@@ -71,12 +71,9 @@ class AppModule {
     @Provides
     @Singleton
     fun providesRemoteBookRepository(
-        libraryBookDao: LibraryBookDao,
-        localBookRepository: LocalBookRepository,
-        database: BookDatabase,
         keysDao: RemoteKeysDao
     ): RemoteRepository {
-        return RemoteRepositoryImpl(bookDao = libraryBookDao, localBookRepository =  localBookRepository, database =  database, remoteKeysDao = keysDao)
+        return RemoteRepositoryImpl(remoteKeysDao = keysDao)
     }
 
     @Provides

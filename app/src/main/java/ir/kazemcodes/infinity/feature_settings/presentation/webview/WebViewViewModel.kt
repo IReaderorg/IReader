@@ -9,8 +9,10 @@ import ir.kazemcodes.infinity.core.data.network.models.Source
 import ir.kazemcodes.infinity.core.data.network.utils.toast
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
-import ir.kazemcodes.infinity.core.domain.repository.LocalBookRepository
-import ir.kazemcodes.infinity.core.domain.repository.LocalChapterRepository
+import ir.kazemcodes.infinity.core.domain.use_cases.local.DeleteUseCase
+import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalGetBookUseCases
+import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalGetChapterUseCase
+import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalInsertUseCases
 import ir.kazemcodes.infinity.core.presentation.components.WebViewFetcher
 import ir.kazemcodes.infinity.core.utils.Resource
 import ir.kazemcodes.infinity.core.utils.UiEvent
@@ -24,13 +26,15 @@ import kotlinx.coroutines.flow.onEach
 
 class WebViewPageModel(
     private val url: String,
-    private val bookName: String? = null,
+    private val bookId: Int? = null,
     private val source: Source,
-    private val chapterTitle: String? = null,
+    private val chapterId: Int? = null,
     private val fetcher: FetchType,
     private val webView: WebView,
-    private val localBookRepository: LocalBookRepository,
-    private val localChapterRepository: LocalChapterRepository,
+    private val insetUseCases: LocalInsertUseCases,
+    private val deleteUseCase: DeleteUseCase,
+    private val getBookUseCases: LocalGetBookUseCases,
+    private val getChapterUseCase: LocalGetChapterUseCase,
 ) : ScopedServices.Registered {
 
     private val _state =
@@ -42,13 +46,12 @@ class WebViewPageModel(
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     val viewModelExt = WebViewFetcher(
-        coroutineScope = coroutineScope,
         source = source,
         fetcher = fetcher,
-        localBookRepository = localBookRepository,
-        localChapterRepository = localChapterRepository,
         url = url,
-        webView = webView
+        webView = webView,
+        insertUseCases = insetUseCases,
+        deleteUseCase = deleteUseCase
     )
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
@@ -67,17 +70,18 @@ class WebViewPageModel(
     }
 
     override fun onServiceRegistered() {
-        if (bookName != null) {
-            getLocalBookByName(bookName = bookName)
+        if (bookId != null) {
+            getBookById(bookId = bookId)
         }
-        if (bookName != null && chapterTitle != null) {
-            getLocalChapterByName(bookName, chapterTitle)
+        if (bookId != null && chapterId != null) {
+            getLocalChapterByName(chapterId)
         }
     }
 
 
     fun getInfo() {
-        viewModelExt.fetchInfo(state.value.book,state.value.chapters).onEach { result ->
+        coroutineScope.launch {
+            viewModelExt.fetchInfo(state.value.book,state.value.chapters).onEach { result ->
                 when (result) {
                     is Resource.Success -> {
                         if (result.data != null) {
@@ -97,24 +101,22 @@ class WebViewPageModel(
                         ))
                     }
                 }
-            }.launchIn(coroutineScope)
+            }
+        }
 
     }
 
 
     fun insertChaptersToLocal(chapters: List<Chapter>) {
         coroutineScope.launch(Dispatchers.IO) {
-            localChapterRepository.insertChapters(
-                chapters,
-                state.value.book,
-                source = source,
-                inLibrary = state.value.book.inLibrary
+            insetUseCases.insertChapters(
+                chapters
             )
         }
     }
 
     private fun getLocalBook(book: Book) {
-        localBookRepository.getLocalBookByName(state.value.book.bookName, sourceName = source.name).onEach { result ->
+        getBookUseCases.getBookById(state.value.book.id).onEach { result ->
             when (result) {
                 is Resource.Success -> {
                     if (result.data != null && result.data != Book.create()) {
@@ -139,8 +141,8 @@ class WebViewPageModel(
         }.launchIn(coroutineScope)
     }
 
-    private fun getLocalChaptersByBookName(bookName: String) {
-        localChapterRepository.getChapterByName(bookName, source.name)
+    private fun getLocalChaptersByBookName(bookId: Int) {
+        getChapterUseCase.getChaptersByBookId(bookId = bookId)
             .onEach { result ->
                 when (result) {
                     is Resource.Success -> {
@@ -160,8 +162,8 @@ class WebViewPageModel(
             }.launchIn(coroutineScope)
     }
 
-    private fun getLocalBookByName(bookName: String) {
-        localBookRepository.getLocalBookByName(bookName,source.name).onEach { result ->
+    private fun getBookById(bookId: Int) {
+        getBookUseCases.getBookById(id = bookId).onEach { result ->
             when (result) {
                 is Resource.Success -> {
                     if (result.data != null && result.data != Book.create()) {
@@ -181,10 +183,8 @@ class WebViewPageModel(
         }.launchIn(coroutineScope)
     }
 
-    private fun getLocalChapterByName(bookName: String, chapterTitle: String) {
-        localChapterRepository.getChapterByName(chapterTitle = chapterTitle,
-            bookName = bookName,
-            source = source.name).onEach { result ->
+    private fun getLocalChapterByName(chapterId: Int) {
+        getChapterUseCase.getOneChapterById(chapterId).onEach { result ->
             when (result) {
                 is Resource.Success -> {
                     if (result.data != null) {
@@ -206,13 +206,15 @@ class WebViewPageModel(
 
     fun insertBookDetailToLocal(book: Book) {
         coroutineScope.launch(Dispatchers.IO) {
-            localBookRepository.insertBook(book)
+            insetUseCases.insertBook(book)
         }
     }
 
     fun deleteChapterDetails() {
         coroutineScope.launch(Dispatchers.IO) {
-            localChapterRepository.deleteChapters(state.value.book.bookName, source.name)
+            if (bookId != null) {
+                deleteUseCase.deleteChaptersByBookId(bookId)
+            }
         }
     }
     override fun onServiceUnregistered() {

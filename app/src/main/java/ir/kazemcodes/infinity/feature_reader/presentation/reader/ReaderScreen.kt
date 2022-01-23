@@ -135,8 +135,8 @@ fun ReadingScreen(
                                     url = viewModel.state.value.chapter.link,
                                     sourceName = viewModel.state.value.source.name,
                                     fetchType = FetchType.Content.index,
-                                    bookName = viewModel.state.value.book.bookName,
-                                    chapterName = state.chapter.title
+                                    bookId = state.chapter.bookId,
+                                    chapterId = state.chapter.chapterId
                                 ))
                             })
                         if (isWebViewEnable) {
@@ -225,7 +225,7 @@ fun ReadingScreen(
                                     if (chapter != null) {
                                         ChapterListItemComposable(modifier = modifier,
                                             chapter = chapter, goTo = {
-                                                viewModel.getContent(chapter)
+                                                viewModel.getChapter(chapter)
                                             })
 
                                     }

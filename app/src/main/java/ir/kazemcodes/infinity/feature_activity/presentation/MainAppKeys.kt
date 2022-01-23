@@ -18,11 +18,13 @@ import com.zhuinden.simplestackcomposeintegration.core.BackstackProvider
 import com.zhuinden.simplestackextensions.fragmentsktx.backstack
 import com.zhuinden.simplestackextensions.servicesktx.add
 import com.zhuinden.simplestackextensions.servicesktx.lookup
-import ir.kazemcodes.infinity.core.domain.repository.LocalBookRepository
-import ir.kazemcodes.infinity.core.domain.repository.LocalChapterRepository
 import ir.kazemcodes.infinity.core.domain.repository.LocalSourceRepository
-import ir.kazemcodes.infinity.core.domain.repository.RemoteRepository
+import ir.kazemcodes.infinity.core.domain.use_cases.local.DeleteUseCase
+import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalGetBookUseCases
+import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalGetChapterUseCase
+import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalInsertUseCases
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.PreferencesUseCase
+import ir.kazemcodes.infinity.core.domain.use_cases.remote.RemoteUseCases
 import ir.kazemcodes.infinity.core.presentation.theme.InfinityTheme
 import ir.kazemcodes.infinity.core.utils.findAppCompatAcivity
 import ir.kazemcodes.infinity.core.utils.mappingFetcherTypeWithIndex
@@ -74,9 +76,13 @@ class MainScreenFragment : ComposeFragment() {
 data class MainScreenKey(val noArgument: String = "") : FragmentKey() {
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
-            add(LibraryViewModel(lookup<LocalBookRepository>(), lookup<PreferencesUseCase>()))
-            add(MainViewModel())
-            add(ExtensionViewModel(lookup<LocalSourceRepository>(),lookup<Extensions>()))
+            add(LibraryViewModel(
+                localGetBookUseCases = lookup<LocalGetBookUseCases>(),
+                deleteUseCase = lookup<DeleteUseCase>(),
+                preferencesUseCase = lookup<PreferencesUseCase>()
+            ))
+            add(MainViewModel(lookup<DeleteUseCase>()))
+            add(ExtensionViewModel(lookup<LocalSourceRepository>(), lookup<Extensions>()))
         }
     }
 
@@ -114,9 +120,8 @@ data class BrowserScreenKey(val sourceName: String, val exploreType: Int) :
                     preferencesUseCase = lookup<PreferencesUseCase>(),
                     source = mappingSourceNameToSource(sourceName),
                     exploreType = exploreType,
-                    localBookRepository = lookup<LocalBookRepository>(),
-                    remoteRepository = lookup<RemoteRepository>()
-
+                    remoteUseCases = lookup<RemoteUseCases>(),
+                    deleteUseCase = lookup<DeleteUseCase>()
                 ),
             )
         }
@@ -140,7 +145,7 @@ class BookDetailFragment : ComposeFragment() {
 }
 
 @Parcelize
-data class BookDetailKey(val bookId:Int, val sourceName: String) :
+data class BookDetailKey(val bookId: Int, val sourceName: String) :
     FragmentKey() {
 
     override fun instantiateFragment(): Fragment = BookDetailFragment()
@@ -152,9 +157,11 @@ data class BookDetailKey(val bookId:Int, val sourceName: String) :
                     source = mappingSourceNameToSource(sourceName),
                     bookId = bookId,
                     preferencesUseCase = lookup<PreferencesUseCase>(),
-                    localBookRepository = lookup<LocalBookRepository>(),
-                    remoteRepository = lookup<RemoteRepository>(),
-                    localChapterRepository = lookup<LocalChapterRepository>()
+                    remoteUseCases = lookup<RemoteUseCases>(),
+                    deleteUseCase = lookup<DeleteUseCase>(),
+                    getBookUseCases = lookup<LocalGetBookUseCases>(),
+                    getChapterUseCase = lookup<LocalGetChapterUseCase>(),
+                    localInsertUseCases = lookup<LocalInsertUseCases>(),
                 ),
             )
         }
@@ -177,8 +184,8 @@ data class WebViewKey(
     val url: String,
     val sourceName: String,
     val fetchType: Int,
-    val bookName :  String?=null,
-    val chapterName: String? = null,
+    val bookId: Int? = null,
+    val chapterId: Int? = null,
 ) : FragmentKey() {
 
     override fun instantiateFragment(): Fragment = WebViewFragment()
@@ -190,10 +197,12 @@ data class WebViewKey(
                 webView = lookup<WebView>(),
                 source = mappingSourceNameToSource(sourceName),
                 fetcher = mappingFetcherTypeWithIndex(fetchType),
-                localChapterRepository = lookup<LocalChapterRepository>(),
-                localBookRepository = lookup<LocalBookRepository>(),
-                bookName = bookName,
-                chapterTitle = chapterName,
+                bookId = bookId,
+                chapterId = chapterId,
+                deleteUseCase = lookup<DeleteUseCase>(),
+                getBookUseCases = lookup<LocalGetBookUseCases>(),
+                getChapterUseCase = lookup<LocalGetChapterUseCase>(),
+                insetUseCases = lookup<LocalInsertUseCases>(),
             ))
         }
     }
@@ -201,7 +210,6 @@ data class WebViewKey(
 }
 
 class ChapterDetailFragment : ComposeFragment() {
-
 
 
     @OptIn(ExperimentalAnimationApi::class)
@@ -219,7 +227,7 @@ class ChapterDetailFragment : ComposeFragment() {
 
 @Parcelize
 data class ChapterDetailKey(
-    val bookName :  String,
+    val bookId: Int,
     val sourceName: String,
 ) : FragmentKey() {
     override fun instantiateFragment(): Fragment = ChapterDetailFragment()
@@ -227,10 +235,10 @@ data class ChapterDetailKey(
         with(serviceBinder) {
             add<ChapterDetailViewModel>(ChapterDetailViewModel(
                 source = mappingSourceNameToSource(sourceName),
-                bookName = bookName,
-                localChapterRepository = lookup<LocalChapterRepository>()
-
-            ))
+                bookId = bookId,
+                getChapterUseCase = lookup<LocalGetChapterUseCase>(),
+            )
+            )
         }
     }
 }
@@ -258,7 +266,7 @@ class ReaderScreenFragment : ComposeFragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         val activity = context?.findAppCompatAcivity()
-        if (activity !=null) {
+        if (activity != null) {
             val window = activity.window
             val layoutParams: WindowManager.LayoutParams = window.attributes
             layoutParams.screenBrightness = -1f
@@ -287,9 +295,11 @@ data class ReaderScreenKey(
                 source = mappingSourceNameToSource(sourceName),
                 bookId = bookId,
                 chapterId = chapterId,
-                localBookRepository = lookup<LocalBookRepository>(),
-                remoteRepository = lookup<RemoteRepository>(),
-                localChapterRepository = lookup<LocalChapterRepository>(),
+                deleteUseCase = lookup<DeleteUseCase>(),
+                getBookUseCases = lookup<LocalGetBookUseCases>(),
+                getChapterUseCase = lookup<LocalGetChapterUseCase>(),
+                insertUseCases = lookup<LocalInsertUseCases>(),
+                remoteUseCases = lookup<RemoteUseCases>(),
             ))
         }
     }

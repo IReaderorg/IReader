@@ -6,7 +6,8 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.zhuinden.simplestack.ScopedServices
 import ir.kazemcodes.infinity.core.domain.models.Book
-import ir.kazemcodes.infinity.core.domain.repository.LocalBookRepository
+import ir.kazemcodes.infinity.core.domain.use_cases.local.DeleteUseCase
+import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalGetBookUseCases
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.core.presentation.layouts.DisplayMode
 import ir.kazemcodes.infinity.feature_library.presentation.components.FilterType
@@ -18,9 +19,10 @@ import kotlinx.coroutines.flow.collect
 
 
 class LibraryViewModel(
-    private val localBookRepository: LocalBookRepository,
+    private val localGetBookUseCases: LocalGetBookUseCases,
+    private val deleteUseCase: DeleteUseCase,
     private val preferencesUseCase: PreferencesUseCase,
-) :  ScopedServices.Registered {
+) : ScopedServices.Registered {
 
     private val _state = mutableStateOf(LibraryState())
     val state: State<LibraryState> = _state
@@ -30,9 +32,15 @@ class LibraryViewModel(
     private val _books = MutableStateFlow<PagingData<Book>>(PagingData.empty())
     val book = _books
 
-    fun getBooks() {
+    /**
+     * Get All Books By Paging
+     */
+    private fun getBooks() {
         coroutineScope.launch(Dispatchers.IO) {
-            localBookRepository.getLocalBooks(state.value.sortType,state.value.isSortAcs, unreadFilter = state.value.unreadFilter).cachedIn(coroutineScope)
+            localGetBookUseCases.GetInLibraryBooksPagingData(
+                sortType = state.value.sortType,
+                isAsc = state.value.isSortAcs,
+                unreadFilter = state.value.unreadFilter).cachedIn(coroutineScope)
                 .collect { snapshot ->
                     _books.value = snapshot
                 }
@@ -40,21 +48,25 @@ class LibraryViewModel(
     }
 
     override fun onServiceRegistered() {
+        deleteNotInLibraryChapters()
         getBooks()
-
         readLayoutType()
     }
+
+
     fun searchBook(query: String) {
         coroutineScope.launch(Dispatchers.IO) {
-            localBookRepository.searchInLibraryScreenBooks(query).cachedIn(coroutineScope)
+            localGetBookUseCases.getBooksByQueryByPagination(query).cachedIn(coroutineScope)
                 .collect { snapshot ->
                     _books.value = snapshot
                 }
         }
     }
+
     override fun onServiceUnregistered() {
         coroutineScope.cancel()
     }
+
 
     fun onEvent(event: LibraryEvents) {
         when (event) {
@@ -63,6 +75,8 @@ class LibraryViewModel(
             }
             is LibraryEvents.ToggleSearchMode -> {
                 toggleSearchMode(event.inSearchMode)
+                getLibraryDataIfSearchModeIsOff(event.inSearchMode?:false)
+
             }
             is LibraryEvents.UpdateSearchInput -> {
                 updateSearchInput(event.query)
@@ -71,16 +85,14 @@ class LibraryViewModel(
 
     }
 
+
+
     private fun updateSearchInput(query: String) {
         _state.value = state.value.copy(searchQuery = query)
     }
 
     private fun toggleSearchMode(inSearchMode: Boolean? = null) {
         _state.value = state.value.copy(inSearchMode = inSearchMode ?: !state.value.inSearchMode)
-        if (inSearchMode == false) {
-            _state.value = state.value.copy(searchedBook = emptyList(), searchQuery = "")
-            getBooks()
-        }
     }
 
 
@@ -93,7 +105,7 @@ class LibraryViewModel(
     private fun readLayoutType() {
 
 
-        val sortType = when(preferencesUseCase.readSortersUseCase()) {
+        val sortType = when (preferencesUseCase.readSortersUseCase()) {
             0 -> {
                 SortType.DateAdded
             }
@@ -107,7 +119,7 @@ class LibraryViewModel(
                 SortType.TotalChapter
             }
         }
-        val filterType = when(preferencesUseCase.readFilterUseCase()) {
+        val filterType = when (preferencesUseCase.readFilterUseCase()) {
             0 -> {
                 FilterType.Disable
             }
@@ -115,16 +127,17 @@ class LibraryViewModel(
                 FilterType.Unread
             }
         }
-        _state.value = state.value.copy(layout = preferencesUseCase.readLibraryLayoutUseCase().layout, sortType = sortType, unreadFilter = filterType)
+        _state.value =
+            state.value.copy(layout = preferencesUseCase.readLibraryLayoutUseCase().layout,
+                sortType = sortType,
+                unreadFilter = filterType)
 
     }
 
 
-    
-
     private fun deleteNotInLibraryChapters() {
         coroutineScope.launch(Dispatchers.IO) {
-            localBookRepository.deleteChapters()
+            deleteUseCase.deleteInLibraryBook()
         }
     }
 
@@ -136,14 +149,19 @@ class LibraryViewModel(
         preferencesUseCase.saveSortersUseCase(state.value.sortType.index)
         getBooks()
     }
+
     fun enableUnreadFilter(filterType: FilterType) {
-       _state.value = state.value.copy(unreadFilter = filterType)
+        _state.value = state.value.copy(unreadFilter = filterType)
         preferencesUseCase.saveFiltersUseCase(state.value.unreadFilter.index)
         getBooks()
 
     }
-
-
+    private fun getLibraryDataIfSearchModeIsOff(inSearchMode:Boolean) {
+        if (!inSearchMode) {
+            _state.value = state.value.copy(searchedBook = emptyList(), searchQuery = "")
+            getBooks()
+        }
+    }
 
 
 }
