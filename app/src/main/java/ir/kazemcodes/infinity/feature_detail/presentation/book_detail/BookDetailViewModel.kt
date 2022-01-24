@@ -9,13 +9,13 @@ import com.zhuinden.simplestack.ScopedServices
 import ir.kazemcodes.infinity.core.data.network.models.Source
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
+import ir.kazemcodes.infinity.core.domain.use_cases.fetchers.FetchUseCase
 import ir.kazemcodes.infinity.core.domain.use_cases.local.DeleteUseCase
 import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalGetBookUseCases
 import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalGetChapterUseCase
 import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalInsertUseCases
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.core.domain.use_cases.remote.RemoteUseCases
-import ir.kazemcodes.infinity.core.presentation.components.WebViewFetcher
 import ir.kazemcodes.infinity.core.utils.Resource
 import ir.kazemcodes.infinity.core.utils.UiEvent
 import ir.kazemcodes.infinity.core.utils.UiText
@@ -24,10 +24,10 @@ import ir.kazemcodes.infinity.feature_activity.domain.service.DownloadService
 import ir.kazemcodes.infinity.feature_activity.domain.service.DownloadService.Companion.DOWNLOAD_BOOK_NAME
 import ir.kazemcodes.infinity.feature_activity.domain.service.DownloadService.Companion.DOWNLOAD_SERVICE_NAME
 import ir.kazemcodes.infinity.feature_activity.domain.service.DownloadService.Companion.DOWNLOAD_SOURCE_NAME
-import ir.kazemcodes.infinity.feature_sources.sources.models.FetchType
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import org.jsoup.Jsoup
+import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 
 class BookDetailViewModel(
@@ -39,6 +39,7 @@ class BookDetailViewModel(
     private val getBookUseCases: LocalGetBookUseCases,
     private val remoteUseCases: RemoteUseCases,
     private val deleteUseCase: DeleteUseCase,
+    private val fetchUseCase: FetchUseCase
 ) : ScopedServices.Registered, ScopedServices.Activated {
     private val _state = mutableStateOf<DetailState>(DetailState(source = source,
         book = Book.create().copy(id = bookId)))
@@ -53,14 +54,6 @@ class BookDetailViewModel(
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
-    val viewModelExt = WebViewFetcher(
-        source = source,
-        fetcher = FetchType.Detail,
-        url = state.value.book.link,
-        webView = webView,
-        deleteUseCase = deleteUseCase,
-        insertUseCases = localInsertUseCases
-    )
 
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
@@ -107,6 +100,7 @@ class BookDetailViewModel(
                                 isExploreMode = result.data.isExploreMode
                             )
                             if (result.data.isExploreMode) {
+
                                 getRemoteBookDetail(state.value.book)
                                 getRemoteChapterDetail(state.value.book)
                             }
@@ -224,23 +218,37 @@ class BookDetailViewModel(
             }.launchIn(coroutineScope)
     }
 
+    @ExperimentalCoroutinesApi
     fun getWebViewData() {
+        Timber.e("Step One")
         coroutineScope.launch {
-            viewModelExt.fetchInfo(state.value.book, chapterState.value.chapters).onEach { result ->
+            val pageSource = webView.getHtml()
+            fetchUseCase.fetchBookDetailAndChapterDetailFromWebView(
+                deleteUseCase = deleteUseCase,
+                insertUseCases = localInsertUseCases,
+                localBook = state.value.book,
+                localChapters = chapterState.value.chapters,
+                source = source,
+                pageSource = pageSource
+            ).collect { result ->
                 when (result) {
                     is Resource.Success -> {
+                        Timber.e("Step two")
                         if (result.data != null) {
+                            Timber.e("Step three")
                             _eventFlow.emit(UiEvent.ShowSnackbar(
                                 uiText = result.data
                             ))
                         }
                     }
                     is Resource.Error -> {
+                        Timber.e("Step four")
                         _eventFlow.emit(UiEvent.ShowSnackbar(
                             uiText = UiText.DynamicString(result.message.toString())
                         ))
                     }
                     is Resource.Loading -> {
+                        Timber.e("Step five")
                         _eventFlow.emit(UiEvent.ShowSnackbar(
                             uiText = UiText.DynamicString("Trying to fetch...")
                         ))

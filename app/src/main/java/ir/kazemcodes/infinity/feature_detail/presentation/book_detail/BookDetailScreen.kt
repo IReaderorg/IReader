@@ -68,7 +68,25 @@ fun BookDetailScreen(
                                 tint = MaterialTheme.colors.onBackground,
                             )
                         }
-                    })
+                    },
+                    actions = {
+                        IconButton(onClick = {
+                            backStack.goTo(WebViewKey(
+                                viewModel.state.value.source.baseUrl + getUrlWithoutDomain(viewModel.state.value.book.link),
+                                sourceName = viewModel.state.value.source.name,
+                                fetchType = FetchType.Detail.index,
+                                bookId = viewModel.state.value.book.id
+                            ))
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.Language,
+                                contentDescription = "WebView",
+                                tint = MaterialTheme.colors.onBackground,
+                            )
+                        }
+                    }
+                )
+
             },
                 snackbarHost = {
                     ISnackBarHost(it)

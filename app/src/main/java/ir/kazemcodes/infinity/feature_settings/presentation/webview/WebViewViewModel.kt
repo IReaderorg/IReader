@@ -9,20 +9,18 @@ import ir.kazemcodes.infinity.core.data.network.models.Source
 import ir.kazemcodes.infinity.core.data.network.utils.toast
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
+import ir.kazemcodes.infinity.core.domain.use_cases.fetchers.FetchUseCase
 import ir.kazemcodes.infinity.core.domain.use_cases.local.DeleteUseCase
 import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalGetBookUseCases
 import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalGetChapterUseCase
 import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalInsertUseCases
-import ir.kazemcodes.infinity.core.presentation.components.WebViewFetcher
 import ir.kazemcodes.infinity.core.utils.Resource
 import ir.kazemcodes.infinity.core.utils.UiEvent
 import ir.kazemcodes.infinity.core.utils.UiText
+import ir.kazemcodes.infinity.core.utils.getHtml
 import ir.kazemcodes.infinity.feature_sources.sources.models.FetchType
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.*
 
 class WebViewPageModel(
     private val url: String,
@@ -35,6 +33,7 @@ class WebViewPageModel(
     private val deleteUseCase: DeleteUseCase,
     private val getBookUseCases: LocalGetBookUseCases,
     private val getChapterUseCase: LocalGetChapterUseCase,
+    private val fetcherUseCase: FetchUseCase,
 ) : ScopedServices.Registered {
 
     private val _state =
@@ -45,14 +44,6 @@ class WebViewPageModel(
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
-    val viewModelExt = WebViewFetcher(
-        source = source,
-        fetcher = fetcher,
-        url = url,
-        webView = webView,
-        insertUseCases = insetUseCases,
-        deleteUseCase = deleteUseCase
-    )
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
 
@@ -79,14 +70,22 @@ class WebViewPageModel(
     }
 
 
+    @ExperimentalCoroutinesApi
     fun getInfo() {
-        coroutineScope.launch {
-            viewModelExt.fetchInfo(state.value.book,state.value.chapters).onEach { result ->
+        coroutineScope.launch(Dispatchers.Main) {
+            fetcherUseCase.fetchBookDetailAndChapterDetailFromWebView(
+                localBook = state.value.book,
+                localChapters = state.value.chapters,
+                source = source,
+                insertUseCases = insetUseCases,
+                deleteUseCase = deleteUseCase,
+                pageSource = webView.getHtml()
+            ).collect { result ->
                 when (result) {
                     is Resource.Success -> {
                         if (result.data != null) {
                             _eventFlow.emit(UiEvent.ShowSnackbar(
-                                uiText =result.data
+                                uiText = result.data
                             ))
                         }
                     }
@@ -103,6 +102,7 @@ class WebViewPageModel(
                 }
             }
         }
+
 
     }
 
@@ -217,6 +217,7 @@ class WebViewPageModel(
             }
         }
     }
+
     override fun onServiceUnregistered() {
         coroutineScope.cancel()
     }

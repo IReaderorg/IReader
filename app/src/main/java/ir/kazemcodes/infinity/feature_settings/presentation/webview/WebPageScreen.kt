@@ -27,9 +27,11 @@ import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarTit
 import ir.kazemcodes.infinity.core.utils.UiEvent
 import ir.kazemcodes.infinity.core.utils.asString
 import ir.kazemcodes.infinity.feature_sources.sources.models.FetchType
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collectLatest
 
 
+@ExperimentalCoroutinesApi
 @Composable
 fun WebPageScreen() {
     val backStack = LocalBackstack.current
@@ -48,6 +50,7 @@ fun WebPageScreen() {
                         event.uiText.asString(context)
                     )
                 }
+                else -> {}
             }
         }
 

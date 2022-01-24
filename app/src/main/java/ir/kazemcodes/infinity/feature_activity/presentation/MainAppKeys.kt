@@ -19,6 +19,7 @@ import com.zhuinden.simplestackextensions.fragmentsktx.backstack
 import com.zhuinden.simplestackextensions.servicesktx.add
 import com.zhuinden.simplestackextensions.servicesktx.lookup
 import ir.kazemcodes.infinity.core.domain.repository.LocalSourceRepository
+import ir.kazemcodes.infinity.core.domain.use_cases.fetchers.FetchUseCase
 import ir.kazemcodes.infinity.core.domain.use_cases.local.DeleteUseCase
 import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalGetBookUseCases
 import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalGetChapterUseCase
@@ -162,6 +163,7 @@ data class BookDetailKey(val bookId: Int, val sourceName: String) :
                     getBookUseCases = lookup<LocalGetBookUseCases>(),
                     getChapterUseCase = lookup<LocalGetChapterUseCase>(),
                     localInsertUseCases = lookup<LocalInsertUseCases>(),
+                    fetchUseCase = lookup<FetchUseCase>()
                 ),
             )
         }
@@ -203,6 +205,7 @@ data class WebViewKey(
                 getBookUseCases = lookup<LocalGetBookUseCases>(),
                 getChapterUseCase = lookup<LocalGetChapterUseCase>(),
                 insetUseCases = lookup<LocalInsertUseCases>(),
+                fetcherUseCase = lookup<FetchUseCase>()
             ))
         }
     }

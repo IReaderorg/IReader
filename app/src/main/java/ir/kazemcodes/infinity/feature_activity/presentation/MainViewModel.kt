@@ -8,9 +8,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import timber.log.Timber
 
-class MainViewModel(private val deleteUseCase: DeleteUseCase) : ScopedServices.Activated {
+class MainViewModel(private val deleteUseCase: DeleteUseCase) : ScopedServices.Registered {
 
     private val _state = mutableStateOf(MainScreenState())
     val state = _state
@@ -24,13 +23,11 @@ class MainViewModel(private val deleteUseCase: DeleteUseCase) : ScopedServices.A
 
         }
     }
-    override fun onServiceActive() {
-        Timber.e("Register")
+    override fun onServiceRegistered() {
         setExploreModeOffForInLibraryBooks()
     }
 
-    override fun onServiceInactive() {
-
+    override fun onServiceUnregistered() {
     }
     private fun setExploreModeOffForInLibraryBooks() {
         coroutineScope.launch(Dispatchers.IO) {

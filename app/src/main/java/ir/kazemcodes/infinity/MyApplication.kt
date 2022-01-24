@@ -12,6 +12,7 @@ import ir.kazemcodes.infinity.core.domain.repository.LocalBookRepository
 import ir.kazemcodes.infinity.core.domain.repository.LocalChapterRepository
 import ir.kazemcodes.infinity.core.domain.repository.LocalSourceRepository
 import ir.kazemcodes.infinity.core.domain.repository.RemoteRepository
+import ir.kazemcodes.infinity.core.domain.use_cases.fetchers.FetchUseCase
 import ir.kazemcodes.infinity.core.domain.use_cases.local.DeleteUseCase
 import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalGetBookUseCases
 import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalGetChapterUseCase
@@ -72,6 +73,8 @@ class MyApplication : Application(), Configuration.Provider {
 
     @Inject lateinit var remoteUseCases: RemoteUseCases
 
+    @Inject lateinit var fetcherUseCase : FetchUseCase
+
 
 
 
@@ -104,6 +107,7 @@ class MyApplication : Application(), Configuration.Provider {
             .add(getChapterUseCases)
             .add(remoteUseCases)
             .add(localGetChapterUseCase)
+            .add(fetcherUseCase)
             .build()
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this)
         setupNotificationChannels()
