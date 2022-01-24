@@ -1,12 +1,12 @@
 {
   "formatVersion": 1,
   "database": {
-    "version": 6,
-    "identityHash": "b0e3189736f82a19a06563d318cb161a",
+    "version": 7,
+    "identityHash": "75811099c3b1dad57f698421a6bc8e15",
     "entities": [
       {
         "tableName": "book_table",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `link` TEXT NOT NULL, `bookName` TEXT NOT NULL, `coverLink` TEXT, `description` TEXT NOT NULL, `author` TEXT, `translator` TEXT, `category` TEXT NOT NULL, `status` INTEGER NOT NULL, `rating` INTEGER NOT NULL, `source` TEXT, `isExploreMode` INTEGER NOT NULL, `inLibrary` INTEGER NOT NULL, `dataAdded` INTEGER NOT NULL, `download` INTEGER NOT NULL, `lastRead` INTEGER NOT NULL, `totalChapters` INTEGER NOT NULL, `unread` INTEGER NOT NULL, `lastUpdated` INTEGER NOT NULL, `completed` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `link` TEXT NOT NULL, `bookName` TEXT NOT NULL, `coverLink` TEXT, `description` TEXT NOT NULL, `author` TEXT, `translator` TEXT, `category` TEXT NOT NULL, `status` INTEGER NOT NULL, `rating` INTEGER NOT NULL, `source` TEXT, `isExploreMode` INTEGER NOT NULL, `inLibrary` INTEGER NOT NULL, `dataAdded` INTEGER NOT NULL, `download` INTEGER NOT NULL, `lastRead` INTEGER NOT NULL, `totalChapters` INTEGER NOT NULL, `unread` INTEGER NOT NULL, `lastUpdated` INTEGER NOT NULL, `completed` INTEGER NOT NULL, `reverseChapters` INTEGER NOT NULL, `type` INTEGER NOT NULL, `lastChecked` INTEGER NOT NULL, `latestChapter` INTEGER NOT NULL, `dataFetched` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -127,6 +127,36 @@
             "columnName": "completed",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "reverseChapters",
+            "columnName": "reverseChapters",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastChecked",
+            "columnName": "lastChecked",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "latestChapter",
+            "columnName": "latestChapter",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataFetched",
+            "columnName": "dataFetched",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -140,7 +170,7 @@
       },
       {
         "tableName": "chapter_table",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`chapterId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `bookName` TEXT, `bookId` INTEGER NOT NULL, `link` TEXT NOT NULL, `title` TEXT NOT NULL, `dateUploaded` TEXT, `content` TEXT NOT NULL, `haveBeenRead` INTEGER NOT NULL, `lastRead` INTEGER NOT NULL, `source` TEXT NOT NULL, `inLibrary` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`chapterId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `bookName` TEXT, `bookId` INTEGER NOT NULL, `link` TEXT NOT NULL, `title` TEXT NOT NULL, `dateUploaded` TEXT, `dateAdded` INTEGER, `content` TEXT NOT NULL, `haveBeenRead` INTEGER NOT NULL, `lastRead` INTEGER NOT NULL, `source` TEXT NOT NULL, `inLibrary` INTEGER NOT NULL, `bookmarked` INTEGER NOT NULL, `downloaded` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "chapterId",
@@ -179,6 +209,12 @@
             "notNull": false
           },
           {
+            "fieldPath": "dateAdded",
+            "columnName": "dateAdded",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
             "fieldPath": "content",
             "columnName": "content",
             "affinity": "TEXT",
@@ -205,6 +241,18 @@
           {
             "fieldPath": "inLibrary",
             "columnName": "inLibrary",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bookmarked",
+            "columnName": "bookmarked",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "downloaded",
+            "columnName": "downloaded",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -1006,7 +1054,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b0e3189736f82a19a06563d318cb161a')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '75811099c3b1dad57f698421a6bc8e15')"
     ]
   }
 }

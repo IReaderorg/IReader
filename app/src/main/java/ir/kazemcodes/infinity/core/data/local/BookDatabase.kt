@@ -14,7 +14,7 @@ import ir.kazemcodes.infinity.core.domain.models.SourceEntity
 
 @Database(
     entities = [Book::class, Chapter::class, RemoteKeys::class,SourceEntity::class],
-    version = 6,
+    version = 7,
     exportSchema = true,
 )
 @TypeConverters(DatabaseConverter::class)
@@ -24,6 +24,7 @@ abstract class BookDatabase : RoomDatabase() {
     abstract val libraryChapterDao: LibraryChapterDao
     abstract val remoteKeysDao : RemoteKeysDao
     abstract val sourceTowerDao : SourceTowerDao
+
 
 
     companion object {

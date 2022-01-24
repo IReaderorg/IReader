@@ -36,8 +36,8 @@ fun ChaptersSliderComposable(
             IconButton(modifier = modifier.weight(1f),
                 onClick = {
                     if (currentIndex > 0) {
-                        viewModel.getChapter(chapters[currentIndex - 1])
                         viewModel.updateChapterSliderIndex(currentIndex - 1)
+                        viewModel.getChapter(chapters[currentIndex - 1 ])
                     } else context.toast("This is first chapter")
                 }) {
                 Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Previous Chapter")
@@ -52,7 +52,7 @@ fun ChaptersSliderComposable(
                 },
                 onValueChangeFinished = {
                     context.toast(chapters[viewModel.state.value.currentChapterIndex].title)
-                    viewModel.updateChapterSliderIndex(currentIndex - 1)
+                    viewModel.updateChapterSliderIndex(currentIndex)
                     viewModel.getChapter(chapters[viewModel.state.value.currentChapterIndex])
                 },
                 valueRange = 0f..(chapters.size - 1).toFloat(),

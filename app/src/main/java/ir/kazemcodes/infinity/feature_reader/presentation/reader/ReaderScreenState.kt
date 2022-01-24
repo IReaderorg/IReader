@@ -28,11 +28,15 @@ data class ReaderScreenState(
     val distanceBetweenParagraphs: Int = 2,
     val paragraphsIndent: Int = 8,
     val lineHeight: Int = 25,
-    val currentChapterIndex: Int,
+    val currentChapterIndex: Int = 0,
     val backgroundColor: Color = BackgroundColor.Black.color,
     val textColor: Color = BackgroundColor.Black.onTextColor,
     val orientation: Orientation = Orientation.Portrait,
-    val isWebViewEnable : Boolean = false
+    val isWebViewEnable : Boolean = false,
+)
+data class ReaderScreenChapterState(
+    val chapterListById : List<Int> = emptyList(),
+    val currentChapterId : Int = 0
 )
 
 sealed class Orientation(val index : Int){

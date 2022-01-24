@@ -11,9 +11,11 @@ import androidx.compose.ui.platform.LocalContext
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import coil.request.CachePolicy
+import coil.util.CoilUtils
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import com.zhuinden.simplestackextensions.servicesktx.lookup
 import ir.kazemcodes.infinity.R
+import okhttp3.Headers
 import okhttp3.OkHttpClient
 
 @OptIn(ExperimentalCoilApi::class)
@@ -23,7 +25,8 @@ fun BookImageComposable(
     modifier: Modifier = Modifier,
     alignment: Alignment = Alignment.TopCenter,
     contentScale: ContentScale = ContentScale.FillHeight,
-    iconBadge: (@Composable () -> Unit)? = null
+    iconBadge: (@Composable () -> Unit)? = null,
+    headers: Headers?=null
 ) {
     val context = LocalContext.current
     val backstack = LocalBackstack.current
@@ -36,6 +39,13 @@ fun BookImageComposable(
         error(R.drawable.ic_no_image_placeholder)
         memoryCachePolicy(CachePolicy.ENABLED)
         diskCachePolicy(CachePolicy.READ_ONLY)
+        addHeader("cache-control", "max-age")
+        if (headers != null) {
+            headers(headers)
+        }
+        okHttpClient.newBuilder()
+            .cache(CoilUtils.createDefaultCache(context))
+            .build()
 
     }
     Box {

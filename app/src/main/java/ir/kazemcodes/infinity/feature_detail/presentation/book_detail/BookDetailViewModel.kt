@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.work.*
 import com.zhuinden.simplestack.ScopedServices
 import ir.kazemcodes.infinity.core.data.network.models.Source
+import ir.kazemcodes.infinity.core.data.network.utils.launchIO
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
 import ir.kazemcodes.infinity.core.domain.use_cases.fetchers.FetchUseCase
@@ -25,7 +26,9 @@ import ir.kazemcodes.infinity.feature_activity.domain.service.DownloadService.Co
 import ir.kazemcodes.infinity.feature_activity.domain.service.DownloadService.Companion.DOWNLOAD_SERVICE_NAME
 import ir.kazemcodes.infinity.feature_activity.domain.service.DownloadService.Companion.DOWNLOAD_SOURCE_NAME
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.collect
 import org.jsoup.Jsoup
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
@@ -39,7 +42,7 @@ class BookDetailViewModel(
     private val getBookUseCases: LocalGetBookUseCases,
     private val remoteUseCases: RemoteUseCases,
     private val deleteUseCase: DeleteUseCase,
-    private val fetchUseCase: FetchUseCase
+    private val fetchUseCase: FetchUseCase,
 ) : ScopedServices.Registered, ScopedServices.Activated {
     private val _state = mutableStateOf<DetailState>(DetailState(source = source,
         book = Book.create().copy(id = bookId)))
@@ -59,6 +62,7 @@ class BookDetailViewModel(
     val eventFlow = _eventFlow.asSharedFlow()
 
     override fun onServiceRegistered() {
+
     }
 
     override fun onServiceActive() {
@@ -66,7 +70,7 @@ class BookDetailViewModel(
     }
 
     override fun onServiceInactive() {
-        coroutineScope.cancel()
+
     }
 
 
@@ -86,150 +90,177 @@ class BookDetailViewModel(
 
 
     private fun getLocalBookById() {
-        getBookUseCases.getBookById(id = bookId)
-            .onEach { result ->
-                when (result) {
-                    is Resource.Success -> {
-                        if (result.data != null) {
-                            _state.value = state.value.copy(
-                                book = result.data,
-                                error = "",
-                                isLoading = false,
-                                isLoaded = true,
-                                inLibrary = result.data.inLibrary,
-                                isExploreMode = result.data.isExploreMode
-                            )
-                            if (result.data.isExploreMode) {
+        coroutineScope.launch(Dispatchers.IO) {
+            getBookUseCases.getBookById(id = bookId)
+                .collect { result ->
+                    when (result) {
+                        is Resource.Success -> {
+                            if (result.data != null) {
+                                _state.value = state.value.copy(
+                                    book = result.data,
+                                    error = "",
+                                    isLoading = false,
+                                    isLoaded = true,
+                                    inLibrary = result.data.inLibrary,
+                                    isExploreMode = result.data.isExploreMode
+                                )
+                                getLocalChaptersByBookId()
+                                if (state.value.isExploreMode) {
+                                    _state.value = state.value.copy(isExploreMode = false)
+                                    getRemoteBookDetail(state.value.book)
+                                    getRemoteChapterDetail(state.value.book)
+                                }
+                            } else {
+                                _state.value = state.value.copy(
+                                    error = "",
+                                    isLoading = false,
+                                    isLoaded = true,
 
-                                getRemoteBookDetail(state.value.book)
-                                getRemoteChapterDetail(state.value.book)
+                                    )
                             }
-                            getLocalChaptersByBookId()
+                        }
+                        is Resource.Error -> {
+                            _state.value =
+                                state.value.copy(isLoading = false, error = "can't find the book.")
+                        }
+                        is Resource.Loading -> {
+                            _state.value = state.value.copy(isLoading = true, error = "")
                         }
                     }
-                    is Resource.Error -> {
-                        _state.value =
-                            state.value.copy(isLoading = false, error = "can't find the book.")
-                    }
-                    is Resource.Loading -> {
-                        _state.value = state.value.copy(isLoading = true, error = "")
-                    }
                 }
-            }.launchIn(coroutineScope)
+        }
     }
 
 
     private fun getLocalChaptersByBookId() {
-        getChapterUseCase.getChaptersByBookId(bookId)
-            .onEach { result ->
-                when (result) {
-                    is Resource.Success -> {
-                        if (result.data != null) {
-                            _chapterState.value = chapterState.value.copy(
-                                chapters = result.data,
-                                error = "",
-                                isLoading = false,
-                                loaded = true
-                            )
-                            getLastChapter()
-                            if (state.value.book.totalChapters != result.data.size) {
-                                insertBookDetailToLocal(state.value.book.copy(
-                                    totalChapters = chapterState.value.chapters.size))
+        coroutineScope.launchIO {
+            getChapterUseCase.getChaptersByBookId(bookId)
+                .collect() { result ->
+                    when (result) {
+                        is Resource.Success -> {
+                            if (result.data != null) {
+                                _chapterState.value = chapterState.value.copy(
+                                    chapters = result.data,
+                                    error = "",
+                                    isLoading = false,
+                                    loaded = true
+                                )
+                                getLastChapter()
+                                if (state.value.book.totalChapters != result.data.size) {
+                                    insertBookDetailToLocal(state.value.book.copy(
+                                        totalChapters = chapterState.value.chapters.size))
+                                }
+                            } else {
+                                _chapterState.value = chapterState.value.copy(
+                                    error = "",
+                                    isLoading = false,
+                                    loaded = true
+                                )
                             }
                         }
-                    }
-                    is Resource.Error -> {
-                        getRemoteChapterDetail(book = state.value.book)
-                    }
-                    is Resource.Loading -> {
-                        _chapterState.value =
-                            chapterState.value.copy(isLoading = true, error = "")
+                        is Resource.Error -> {
+                            getRemoteChapterDetail(book = state.value.book)
+                        }
+                        is Resource.Loading -> {
+                            _chapterState.value =
+                                chapterState.value.copy(isLoading = true, error = "")
+                        }
                     }
                 }
-            }.launchIn(coroutineScope)
+        }
     }
 
 
     private fun getRemoteBookDetail(book: Book) {
-        remoteUseCases.getBookDetail(book = book, source = source)
-            .onEach { result ->
-                when (result) {
-                    is Resource.Success -> {
-                        if (result.data != null) {
-                            /**
-                             * isExploreMode is needed for inserting because,
-                             * the explore screen get a snpashot of explore books
-                             * so the inserted book need to have an id and a explore mode.
-                             * note: explore mode will toggle off when the user goes back to
-                             * main screen
-                             */
-                            _state.value = state.value.copy(
-                                book = result.data.copy(id = bookId, isExploreMode = state.value.isExploreMode,),
-                                isLoading = false,
-                                error = "",
-                                isLoaded = true,
-                            )
-                            insertBookDetailToLocal(state.value.book)
+        coroutineScope.launch {
+            remoteUseCases.getBookDetail(book = book, source = source)
+                .collect { result ->
+                    when (result) {
+                        is Resource.Success -> {
+                            if (result.data != null) {
+                                /**
+                                 * isExploreMode is needed for inserting because,
+                                 * the explore screen get a snpashot of explore books
+                                 * so the inserted book need to have an id and a explore mode.
+                                 * note: explore mode will toggle off when the user goes back to
+                                 * main screen
+                                 */
+                                _state.value = state.value.copy(
+                                    book = result.data.copy(
+                                        id = bookId,
+                                        isExploreMode = state.value.isExploreMode,
+                                    ),
+                                    isLoading = false,
+                                    error = "",
+                                    isLoaded = true,
+                                )
+                                    insertBookDetailToLocal(state.value.book.copy(dataAdded = System.currentTimeMillis()))
+
+                            }
+                        }
+                        is Resource.Error -> {
+                            _state.value =
+                                state.value.copy(
+                                    error = result.message ?: "An Unknown Error Occurred",
+                                    isLoading = false,
+                                )
+                        }
+                        is Resource.Loading -> {
+                            _state.value =
+                                state.value.copy(isLoading = true, error = "", isLoaded = false)
                         }
                     }
-                    is Resource.Error -> {
-                        _state.value =
-                            state.value.copy(
-                                error = result.message ?: "An Unknown Error Occurred",
-                                isLoading = false,
-                            )
-                    }
-                    is Resource.Loading -> {
-                        _state.value =
-                            state.value.copy(isLoading = true, error = "", isLoaded = false)
-                    }
                 }
-            }.launchIn(coroutineScope)
+        }
     }
 
     fun getRemoteChapterDetail(book: Book) {
-        remoteUseCases.getRemoteChapters(book = book, source = source)
-            .onEach { result ->
-                when (result) {
-                    is Resource.Success -> {
-                        if (result.data != null) {
+        coroutineScope.launch {
+            remoteUseCases.getRemoteChapters(book = book, source = source)
+                .collect { result ->
+                    when (result) {
+                        is Resource.Success -> {
+                            if (result.data != null) {
+                                _chapterState.value = chapterState.value.copy(
+                                    chapters = result.data.map {
+                                        it.copy(bookId = bookId,
+                                            bookName = state.value.book.bookName)
+                                    },
+                                    isLoading = false,
+                                    error = "",
+                                )
+                                insertChaptersToLocal(chapterState.value.chapters)
+                            }
+                        }
+                        is Resource.Error -> {
+                            _chapterState.value =
+                                chapterState.value.copy(
+                                    error = result.message ?: "An Unknown Error Occurred",
+                                    isLoading = false,
+                                )
+                        }
+                        is Resource.Loading -> {
                             _chapterState.value = chapterState.value.copy(
-                                chapters = result.data.map { it.copy(bookId = bookId, bookName = state.value.book.bookName) },
-                                isLoading = false,
-                                error = "",
+                                isLoading = true,
+                                error = ""
                             )
-                            insertChaptersToLocal(chapterState.value.chapters)
                         }
                     }
-                    is Resource.Error -> {
-                        _chapterState.value =
-                            chapterState.value.copy(
-                                error = result.message ?: "An Unknown Error Occurred",
-                                isLoading = false,
-                            )
-                    }
-                    is Resource.Loading -> {
-                        _chapterState.value = chapterState.value.copy(
-                            isLoading = true,
-                            error = ""
-                        )
-                    }
                 }
-            }.launchIn(coroutineScope)
+        }
     }
 
     @ExperimentalCoroutinesApi
     fun getWebViewData() {
         Timber.e("Step One")
         coroutineScope.launch {
-            val pageSource = webView.getHtml()
             fetchUseCase.fetchBookDetailAndChapterDetailFromWebView(
                 deleteUseCase = deleteUseCase,
                 insertUseCases = localInsertUseCases,
                 localBook = state.value.book,
                 localChapters = chapterState.value.chapters,
                 source = source,
-                pageSource = pageSource
+                pageSource = webView.getHtml()
             ).collect { result ->
                 when (result) {
                     is Resource.Success -> {
@@ -320,7 +351,9 @@ class BookDetailViewModel(
         coroutineScope.launch(Dispatchers.IO) {
             if (add) {
                 insertBookDetailToLocal(book
-                    ?: state.value.book.copy(id = bookId,inLibrary = true, dataAdded = System.currentTimeMillis()))
+                    ?: state.value.book.copy(id = bookId,
+                        inLibrary = true,
+                        dataAdded = System.currentTimeMillis()))
                 updateChaptersEntity(true)
             } else {
                 insertBookDetailToLocal((book
@@ -329,6 +362,7 @@ class BookDetailViewModel(
             }
         }
     }
+
     fun updateInLibrary(isIn: Boolean) {
         _state.value = state.value.copy(inLibrary = isIn)
     }

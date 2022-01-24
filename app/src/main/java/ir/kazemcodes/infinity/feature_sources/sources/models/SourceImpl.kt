@@ -39,7 +39,7 @@ abstract class Source : Source {
     /**
      * Headers used for requests.
      */
-    val headers: Headers by lazy { headersBuilder().build() }
+    override val headers: Headers by lazy { headersBuilder().build() }
 
     /**
      * Default network client for doing requests.

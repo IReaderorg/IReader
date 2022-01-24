@@ -25,6 +25,7 @@ class GetChaptersByBookId(private val localChapterRepository: LocalChapterReposi
                 if (chapters != null) {
                     emit(Resource.Success<List<Chapter>>(data = chapters))
                     true
+
                 } else {
                     emit(Resource.Error<List<Chapter>>(message = Constants.NO_CHAPTERS_ERROR))
                     true

@@ -15,11 +15,15 @@ data class Chapter(
     var link: String,
     var title: String,
     var dateUploaded: String? = null,
+    var dateAdded: Long? = null,
     var content: List<String> = emptyList(),
     var haveBeenRead: Boolean = false,
     var lastRead: Boolean = false,
     var source: String,
     var inLibrary:Boolean=false,
+    var bookmarked : Boolean = false,
+    var downloaded : Boolean = false,
+
 ) {
 
     companion object {

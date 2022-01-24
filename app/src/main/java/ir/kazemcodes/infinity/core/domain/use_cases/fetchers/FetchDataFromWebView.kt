@@ -43,7 +43,7 @@ class FetchBookDetailAndChapterDetailFromWebView {
                                 inLibrary = localBook.inLibrary,
                             ) })
 
-                            emit(Resource.Success<UiText.DynamicString>(UiText.DynamicString("${bookFromPageSource.book.bookName} was fetched with ${(uniqueList.size) - chaptersFromPageSource.chapters.size} new  chapters")))
+                            emit(Resource.Success<UiText.DynamicString>(UiText.DynamicString("${bookFromPageSource.book.bookName} was fetched with ${chaptersFromPageSource.chapters.size}   chapters")))
 
                         } else {
                             if (chaptersFromPageSource.chapters.isNotEmpty()) {

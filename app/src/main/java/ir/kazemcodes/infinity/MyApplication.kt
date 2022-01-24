@@ -77,7 +77,6 @@ class MyApplication : Application(), Configuration.Provider {
 
 
 
-
     private var mFirebaseAnalytics: FirebaseAnalytics? = null
     override fun onCreate() {
         super.onCreate()

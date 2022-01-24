@@ -6,6 +6,7 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.zhuinden.simplestack.ScopedServices
 import ir.kazemcodes.infinity.core.data.network.models.Source
+import ir.kazemcodes.infinity.core.data.network.utils.launchIO
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
 import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalGetChapterUseCase
@@ -13,8 +14,6 @@ import ir.kazemcodes.infinity.core.utils.Resource
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 
 
 class ChapterDetailViewModel(
@@ -58,22 +57,24 @@ class ChapterDetailViewModel(
         }
     }
     private fun getLocalChapters() {
-        getChapterUseCase.getChaptersByBookId(bookId = bookId)
-            .onEach { result ->
-                when (result) {
-                    is Resource.Success -> {
-                        if (result.data != null) {
-                            _state.value = state.value.copy(
-                                chapters = result.data)
+        coroutineScope.launchIO {
+            getChapterUseCase.getChaptersByBookId(bookId = bookId)
+                .collect { result ->
+                    when (result) {
+                        is Resource.Success -> {
+                            if (result.data != null) {
+                                _state.value = state.value.copy(
+                                    chapters = result.data)
+                            }
+                        }
+                        is Resource.Error -> {
+
+                        }
+                        is Resource.Loading -> {
                         }
                     }
-                    is Resource.Error -> {
-
-                    }
-                    is Resource.Loading -> {
-                    }
                 }
-            }.launchIn(coroutineScope)
+        }
     }
 
     fun getIndexOfChapter(chapter: Chapter): Int {

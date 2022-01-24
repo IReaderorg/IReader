@@ -66,6 +66,8 @@ fun ReadingScreen(
     val context = LocalContext.current
     val scrollState = rememberScrollState()
 
+    //viewModel.updateChapters(chapters.itemSnapshotList.items)
+
 
     val isWebViewEnable by remember {
         mutableStateOf(viewModel.webView.originalUrl == viewModel.state.value.chapter.link)

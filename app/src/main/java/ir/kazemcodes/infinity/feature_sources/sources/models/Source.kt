@@ -2,6 +2,7 @@ package ir.kazemcodes.infinity.core.data.network.models
 
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
+import okhttp3.Headers
 import org.jsoup.nodes.Document
 
 
@@ -30,6 +31,7 @@ interface Source {
     val supportContentAppView: Boolean
 
 
+    val headers: Headers
     /**
      * Returns a page with a list of latest books updates and weather is has next page or not.
      *

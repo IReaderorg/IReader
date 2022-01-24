@@ -10,7 +10,7 @@ import ir.kazemcodes.infinity.core.domain.repository.LocalBookRepository
 import ir.kazemcodes.infinity.core.utils.Resource
 import ir.kazemcodes.infinity.feature_library.presentation.components.SortType
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import timber.log.Timber
 
@@ -27,13 +27,11 @@ class LocalBookRepositoryImpl(
         Timber.d("Timber: GetExploreBookByIdUseCase was Called")
         emit(Resource.Loading())
         bookDao.getBookById(bookId = id)
-            .first { book ->
+            .collect { book ->
                 if (book != null) {
                     emit(Resource.Success<Book>(data = book))
-                    return@first true
                 } else {
                     emit(Resource.Error<Book>(message = "Empty Data."))
-                    return@first false
                 }
             }
         Timber.d("Timber: GetExploreBookByIdUseCase was Finished Successfully")

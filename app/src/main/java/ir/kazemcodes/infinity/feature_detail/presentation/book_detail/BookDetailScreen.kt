@@ -48,8 +48,6 @@ fun BookDetailScreen(
     val backStack = LocalBackstack.current
 
 
-
-
     Box(modifier = Modifier.fillMaxSize()) {
         if (viewModel.state.value.isLoaded) {
             BookDetailScreenLoadedComposable(
@@ -260,7 +258,7 @@ fun BookDetailScreenLoadedComposable(
                         text = "Download",
                         imageVector = Icons.Default.FileDownload,
                         onClick = {
-                            context.toast("Not Supported")
+                            context.toast("Not available yet.")
                             //viewModel.startDownloadService(context)
                         }
                     )
@@ -289,6 +287,7 @@ fun BookDetailScreenLoadedComposable(
                             .clip(RoundedCornerShape(4.dp))
                             .border(2.dp, MaterialTheme.colors.onBackground.copy(alpha = .1f)),
                         contentScale = ContentScale.Crop,
+                        headers = viewModel.state.value.source.headers
                     )
                     Spacer(modifier = modifier.width(8.dp))
                     /** Book Info **/

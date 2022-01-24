@@ -43,7 +43,7 @@ abstract class HttpSource : Source {
     /**
      * Headers used for requests.
      */
-    val headers: Headers by lazy { headersBuilder().build() }
+    override val headers: Headers by lazy { headersBuilder().build() }
 
     /**
      * Id of the source. By default it uses a generated id using the first 16 characters (64 bits)

@@ -93,7 +93,7 @@ fun SettingsItem(
                 indication = null) { backstack.goTo(DestinationScreenKey) },
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(imageVector = imageVector, contentDescription = "$title icon")
+        Icon(imageVector = imageVector, contentDescription = "$title icon", tint = MaterialTheme.colors.primary)
         Spacer(modifier = modifier.width(20.dp))
         Text(
             text = title,
