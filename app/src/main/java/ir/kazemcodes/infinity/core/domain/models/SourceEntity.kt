@@ -5,8 +5,8 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
-import ir.kazemcodes.infinity.core.utils.moshi
 import ir.kazemcodes.infinity.core.utils.Constants
+import ir.kazemcodes.infinity.core.utils.moshi
 import ir.kazemcodes.infinity.feature_sources.sources.models.*
 import kotlinx.serialization.Serializable
 
@@ -14,25 +14,29 @@ import kotlinx.serialization.Serializable
 @Serializable
 @Entity(tableName = Constants.SOURCE_TABLE)
 data class SourceEntity(
-    val baseUrl: String,
-    val lang: String,
-    val name: String,
-    val creator: String,
-    val supportsMostPopular: Boolean = false,
-    val supportSearch: Boolean = false,
-    val supportsLatest: Boolean = false,
+    var baseUrl: String,
+    var lang: String,
+    var name: String,
+    var creator: String,
+    var supportsMostPopular: Boolean = false,
+    var supportSearch: Boolean = false,
+    var supportsLatest: Boolean = false,
+    var imageIcon : String = "",
+    var dateAdded : Long = 0,
+    var dateChanged : Long = 0,
+    var customSource : Boolean = false,
     @Embedded
-    val latest: Latest? = null,
+    var latest: Latest? = null,
     @Embedded
-    val popular: Popular? = null,
+    var popular: Popular? = null,
     @Embedded
-    val detail: Detail? = null,
+    var detail: Detail? = null,
     @Embedded
-    val search: Search? = null,
+    var search: Search? = null,
     @Embedded
-    val chapters: Chapters? = null,
+    var chapters: Chapters? = null,
     @Embedded
-    val content: Content? = null,
+    var content: Content? = null,
     @PrimaryKey(autoGenerate = true) val id: Int? = null,
 ) {
     fun toSource(): SourceTower {

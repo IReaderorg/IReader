@@ -23,6 +23,7 @@ data class Chapter(
     var inLibrary:Boolean=false,
     var bookmarked : Boolean = false,
     var downloaded : Boolean = false,
+    var scrollPosition : Int = 0,
 
 ) {
 

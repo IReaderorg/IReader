@@ -7,6 +7,7 @@ import ir.kazemcodes.infinity.core.domain.use_cases.local.DeleteUseCase
 import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalInsertUseCases
 import ir.kazemcodes.infinity.core.utils.Resource
 import ir.kazemcodes.infinity.core.utils.UiText
+import ir.kazemcodes.infinity.core.utils.removeSameItemsFromList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.jsoup.Jsoup
@@ -28,14 +29,10 @@ class FetchBookDetailAndChapterDetailFromWebView {
                     if (!chaptersFromPageSource.chapters.isNullOrEmpty()) {
                         emit(Resource.Error<UiText.DynamicString> ("trying"))
                         if (localChapters != null && chaptersFromPageSource.chapters.isNotEmpty() && localBook?.bookName?.isNotBlank() == true) {
-                            val list = mutableListOf<Chapter>()
-                            val sum: List<Chapter> = localChapters + chaptersFromPageSource.chapters
 
-                            val uniqueList = sum.distinctBy {
+                            val uniqueList = removeSameItemsFromList(oldList = localChapters, newList = chaptersFromPageSource.chapters, differentiateBy = {
                                 it.title
-                            }
-
-                            list.addAll(uniqueList)
+                            })
                             deleteUseCase.deleteChaptersByBookId(bookId = localBook.id)
                             insertUseCases.insertChapters(uniqueList.map { it.copy(
                                 bookId = localBook.id,

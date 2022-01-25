@@ -62,6 +62,7 @@ class WebViewPageModel(
 
     override fun onServiceRegistered() {
         if (bookId != null) {
+            getLocalChaptersByBookName(bookId)
             getBookById(bookId = bookId)
         }
         if (bookId != null && chapterId != null) {

@@ -17,10 +17,7 @@ import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalGetChapterUseCase
 import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalInsertUseCases
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.core.domain.use_cases.remote.RemoteUseCases
-import ir.kazemcodes.infinity.core.utils.Resource
-import ir.kazemcodes.infinity.core.utils.UiEvent
-import ir.kazemcodes.infinity.core.utils.UiText
-import ir.kazemcodes.infinity.core.utils.getHtml
+import ir.kazemcodes.infinity.core.utils.*
 import ir.kazemcodes.infinity.feature_activity.domain.service.DownloadService
 import ir.kazemcodes.infinity.feature_activity.domain.service.DownloadService.Companion.DOWNLOAD_BOOK_NAME
 import ir.kazemcodes.infinity.feature_activity.domain.service.DownloadService.Companion.DOWNLOAD_SERVICE_NAME
@@ -29,7 +26,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.collect
-import org.jsoup.Jsoup
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 
@@ -221,6 +217,23 @@ class BookDetailViewModel(
                     when (result) {
                         is Resource.Success -> {
                             if (result.data != null) {
+//                                                            val list = mutableListOf<Chapter>()
+//                            val sum: List<Chapter> = chapterState.value.chapters + result.data.map {
+//                                it.copy(bookId = bookId,
+//                                    bookName = state.value.book.bookName)
+//                            }
+//
+//                            val uniqueList = sum.distinctBy {
+//                                it.title
+//                            }
+
+//                            list.addAll(uniqueList)
+                                val uniqueList = removeSameItemsFromList(chapterState.value.chapters, result.data.map {
+                                    it.copy(bookId = bookId,
+                                        bookName = state.value.book.bookName)
+                                }) {
+                                    it.title
+                                }
                                 _chapterState.value = chapterState.value.copy(
                                     chapters = result.data.map {
                                         it.copy(bookId = bookId,
@@ -229,7 +242,8 @@ class BookDetailViewModel(
                                     isLoading = false,
                                     error = "",
                                 )
-                                insertChaptersToLocal(chapterState.value.chapters)
+                                deleteUseCase.deleteChaptersByBookId(bookId)
+                                insertChaptersToLocal(uniqueList)
                             }
                         }
                         is Resource.Error -> {
@@ -289,34 +303,6 @@ class BookDetailViewModel(
         }
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    fun getFromWebView() {
-        val webView by injectLazy<WebView>()
-        coroutineScope.launch {
-            _eventFlow.emit(UiEvent.ShowSnackbar(
-                uiText = UiText.DynamicString("Trying to fetch Details")
-            ))
-            val book = source.detailParse(Jsoup.parse(webView.getHtml())).book
-            val chapters = source.chaptersParse(Jsoup.parse(webView.getHtml()))
-            if (!chapters.chapters.isNullOrEmpty()) {
-                deleteChapterDetails()
-                insertChaptersToLocal(chapters.chapters)
-                insertBookDetailToLocal(state.value.book.copy(category = book.category,
-                    status = book.status,
-                    description = book.description,
-                    author = book.author,
-                    rating = book.rating))
-                _eventFlow.emit(UiEvent.ShowSnackbar(
-                    uiText = UiText.DynamicString("${book.bookName} was fetched with ${chapters.chapters.size} chapters")
-                ))
-            } else {
-                _eventFlow.emit(UiEvent.ShowSnackbar(
-                    uiText = UiText.DynamicString("Failed to to get the content")
-                ))
-            }
-        }
-
-    }
 
     fun deleteChapterDetails() {
         coroutineScope.launch(Dispatchers.IO) {

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 7,
-    "identityHash": "75811099c3b1dad57f698421a6bc8e15",
+    "identityHash": "8773d7ddee783ec259a49c2c03998c56",
     "entities": [
       {
         "tableName": "book_table",
@@ -170,7 +170,7 @@
       },
       {
         "tableName": "chapter_table",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`chapterId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `bookName` TEXT, `bookId` INTEGER NOT NULL, `link` TEXT NOT NULL, `title` TEXT NOT NULL, `dateUploaded` TEXT, `dateAdded` INTEGER, `content` TEXT NOT NULL, `haveBeenRead` INTEGER NOT NULL, `lastRead` INTEGER NOT NULL, `source` TEXT NOT NULL, `inLibrary` INTEGER NOT NULL, `bookmarked` INTEGER NOT NULL, `downloaded` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`chapterId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `bookName` TEXT, `bookId` INTEGER NOT NULL, `link` TEXT NOT NULL, `title` TEXT NOT NULL, `dateUploaded` TEXT, `dateAdded` INTEGER, `content` TEXT NOT NULL, `haveBeenRead` INTEGER NOT NULL, `lastRead` INTEGER NOT NULL, `source` TEXT NOT NULL, `inLibrary` INTEGER NOT NULL, `bookmarked` INTEGER NOT NULL, `downloaded` INTEGER NOT NULL, `scrollPosition` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "chapterId",
@@ -255,6 +255,12 @@
             "columnName": "downloaded",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "scrollPosition",
+            "columnName": "scrollPosition",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -300,7 +306,7 @@
       },
       {
         "tableName": "source_table",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`baseUrl` TEXT NOT NULL, `lang` TEXT NOT NULL, `name` TEXT NOT NULL, `creator` TEXT NOT NULL, `supportsMostPopular` INTEGER NOT NULL, `supportSearch` INTEGER NOT NULL, `supportsLatest` INTEGER NOT NULL, `id` INTEGER PRIMARY KEY AUTOINCREMENT, `latest_endpoint` TEXT, `latest_ajaxSelector` TEXT, `latest_isGetRequestType` INTEGER, `latest_isHtmlType` INTEGER, `latest_selector` TEXT, `latest_addBaseUrlToLink` INTEGER, `latest_openInWebView` INTEGER, `latest_nextPageSelector` TEXT, `latest_nextPageAtt` TEXT, `latest_nextPageValue` TEXT, `latest_addToStringEnd` TEXT, `latest_idSelector` TEXT, `latest_linkSelector` TEXT, `latest_linkAtt` TEXT, `latest_nameSelector` TEXT, `latest_nameAtt` TEXT, `latest_coverSelector` TEXT, `latest_coverAtt` TEXT, `latest_supportPageList` INTEGER, `latest_maxPageIndex` INTEGER, `popular_endpoint` TEXT, `popular_ajaxSelector` TEXT, `popular_isGetRequestType` INTEGER, `popular_isHtmlType` INTEGER, `popular_selector` TEXT, `popular_addBaseUrlToLink` INTEGER, `popular_openInWebView` INTEGER, `popular_nextPageSelector` TEXT, `popular_nextPageAtt` TEXT, `popular_nextPageValue` TEXT, `popular_addToStringEnd` TEXT, `popular_idSelector` TEXT, `popular_linkSelector` TEXT, `popular_linkAtt` TEXT, `popular_nameSelector` TEXT, `popular_nameAtt` TEXT, `popular_coverSelector` TEXT, `popular_coverAtt` TEXT, `detail_endpoint` TEXT, `detail_ajaxSelector` TEXT, `detail_isGetRequestType` INTEGER, `detail_isHtmlType` INTEGER, `detail_selector` TEXT, `detail_addBaseUrlToLink` INTEGER, `detail_openInWebView` INTEGER, `detail_nextPageSelector` TEXT, `detail_nextPageAtt` TEXT, `detail_nextPageValue` TEXT, `detail_addToStringEnd` TEXT, `detail_idSelector` TEXT, `detail_nameSelector` TEXT, `detail_nameAtt` TEXT, `detail_coverSelector` TEXT, `detail_coverAtt` TEXT, `detail_descriptionSelector` TEXT, `detail_descriptionBookAtt` TEXT, `detail_authorBookSelector` TEXT, `detail_authorBookAtt` TEXT, `detail_categorySelector` TEXT, `detail_categoryAtt` TEXT, `search_endpoint` TEXT, `search_ajaxSelector` TEXT, `search_isGetRequestType` INTEGER, `search_isHtmlType` INTEGER, `search_selector` TEXT, `search_addBaseUrlToLink` INTEGER, `search_openInWebView` INTEGER, `search_nextPageSelector` TEXT, `search_nextPageAtt` TEXT, `search_nextPageValue` TEXT, `search_addToStringEnd` TEXT, `search_idSelector` TEXT, `search_linkSelector` TEXT, `search_linkAtt` TEXT, `search_nameSelector` TEXT, `search_nameAtt` TEXT, `search_coverSelector` TEXT, `search_coverAtt` TEXT, `chapters_endpoint` TEXT, `chapters_ajaxSelector` TEXT, `chapters_isGetRequestType` INTEGER, `chapters_isHtmlType` INTEGER, `chapters_selector` TEXT, `chapters_addBaseUrlToLink` INTEGER, `chapters_openInWebView` INTEGER, `chapters_nextPageSelector` TEXT, `chapters_nextPageAtt` TEXT, `chapters_nextPageValue` TEXT, `chapters_addToStringEnd` TEXT, `chapters_idSelector` TEXT, `chapters_isDownloadable` INTEGER, `chapters_chaptersEndpointWithoutPage` TEXT, `chapters_isChapterStatsFromFirst` INTEGER, `chapters_linkSelector` TEXT, `chapters_linkAtt` TEXT, `chapters_nameSelector` TEXT, `chapters_nameAtt` TEXT, `chapters_supportNextPagesList` INTEGER, `chapters_subStringSomethingAtEnd` TEXT, `content_endpoint` TEXT, `content_ajaxSelector` TEXT, `content_isGetRequestType` INTEGER, `content_isHtmlType` INTEGER, `content_selector` TEXT, `content_addBaseUrlToLink` INTEGER, `content_openInWebView` INTEGER, `content_nextPageSelector` TEXT, `content_nextPageAtt` TEXT, `content_nextPageValue` TEXT, `content_addToStringEnd` TEXT, `content_idSelector` TEXT, `content_pageTitleSelector` TEXT, `content_pageTitleAtt` TEXT, `content_pageContentSelector` TEXT, `content_pageContentAtt` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`baseUrl` TEXT NOT NULL, `lang` TEXT NOT NULL, `name` TEXT NOT NULL, `creator` TEXT NOT NULL, `supportsMostPopular` INTEGER NOT NULL, `supportSearch` INTEGER NOT NULL, `supportsLatest` INTEGER NOT NULL, `imageIcon` TEXT NOT NULL, `dateAdded` INTEGER NOT NULL, `dateChanged` INTEGER NOT NULL, `customSource` INTEGER NOT NULL, `id` INTEGER PRIMARY KEY AUTOINCREMENT, `latest_endpoint` TEXT, `latest_ajaxSelector` TEXT, `latest_isGetRequestType` INTEGER, `latest_isHtmlType` INTEGER, `latest_selector` TEXT, `latest_addBaseUrlToLink` INTEGER, `latest_openInWebView` INTEGER, `latest_nextPageSelector` TEXT, `latest_nextPageAtt` TEXT, `latest_nextPageValue` TEXT, `latest_addToStringEnd` TEXT, `latest_idSelector` TEXT, `latest_linkSelector` TEXT, `latest_linkAtt` TEXT, `latest_nameSelector` TEXT, `latest_nameAtt` TEXT, `latest_coverSelector` TEXT, `latest_coverAtt` TEXT, `latest_supportPageList` INTEGER, `latest_maxPageIndex` INTEGER, `popular_endpoint` TEXT, `popular_ajaxSelector` TEXT, `popular_isGetRequestType` INTEGER, `popular_isHtmlType` INTEGER, `popular_selector` TEXT, `popular_addBaseUrlToLink` INTEGER, `popular_openInWebView` INTEGER, `popular_nextPageSelector` TEXT, `popular_nextPageAtt` TEXT, `popular_nextPageValue` TEXT, `popular_addToStringEnd` TEXT, `popular_idSelector` TEXT, `popular_linkSelector` TEXT, `popular_linkAtt` TEXT, `popular_nameSelector` TEXT, `popular_nameAtt` TEXT, `popular_coverSelector` TEXT, `popular_coverAtt` TEXT, `detail_endpoint` TEXT, `detail_ajaxSelector` TEXT, `detail_isGetRequestType` INTEGER, `detail_isHtmlType` INTEGER, `detail_selector` TEXT, `detail_addBaseUrlToLink` INTEGER, `detail_openInWebView` INTEGER, `detail_nextPageSelector` TEXT, `detail_nextPageAtt` TEXT, `detail_nextPageValue` TEXT, `detail_addToStringEnd` TEXT, `detail_idSelector` TEXT, `detail_nameSelector` TEXT, `detail_nameAtt` TEXT, `detail_coverSelector` TEXT, `detail_coverAtt` TEXT, `detail_descriptionSelector` TEXT, `detail_descriptionBookAtt` TEXT, `detail_authorBookSelector` TEXT, `detail_authorBookAtt` TEXT, `detail_categorySelector` TEXT, `detail_categoryAtt` TEXT, `search_endpoint` TEXT, `search_ajaxSelector` TEXT, `search_isGetRequestType` INTEGER, `search_isHtmlType` INTEGER, `search_selector` TEXT, `search_addBaseUrlToLink` INTEGER, `search_openInWebView` INTEGER, `search_nextPageSelector` TEXT, `search_nextPageAtt` TEXT, `search_nextPageValue` TEXT, `search_addToStringEnd` TEXT, `search_idSelector` TEXT, `search_linkSelector` TEXT, `search_linkAtt` TEXT, `search_nameSelector` TEXT, `search_nameAtt` TEXT, `search_coverSelector` TEXT, `search_coverAtt` TEXT, `chapters_endpoint` TEXT, `chapters_ajaxSelector` TEXT, `chapters_isGetRequestType` INTEGER, `chapters_isHtmlType` INTEGER, `chapters_selector` TEXT, `chapters_addBaseUrlToLink` INTEGER, `chapters_openInWebView` INTEGER, `chapters_nextPageSelector` TEXT, `chapters_nextPageAtt` TEXT, `chapters_nextPageValue` TEXT, `chapters_addToStringEnd` TEXT, `chapters_idSelector` TEXT, `chapters_isDownloadable` INTEGER, `chapters_chaptersEndpointWithoutPage` TEXT, `chapters_isChapterStatsFromFirst` INTEGER, `chapters_linkSelector` TEXT, `chapters_linkAtt` TEXT, `chapters_nameSelector` TEXT, `chapters_nameAtt` TEXT, `chapters_supportNextPagesList` INTEGER, `chapters_subStringSomethingAtEnd` TEXT, `content_endpoint` TEXT, `content_ajaxSelector` TEXT, `content_isGetRequestType` INTEGER, `content_isHtmlType` INTEGER, `content_selector` TEXT, `content_addBaseUrlToLink` INTEGER, `content_openInWebView` INTEGER, `content_nextPageSelector` TEXT, `content_nextPageAtt` TEXT, `content_nextPageValue` TEXT, `content_addToStringEnd` TEXT, `content_idSelector` TEXT, `content_pageTitleSelector` TEXT, `content_pageTitleAtt` TEXT, `content_pageContentSelector` TEXT, `content_pageContentAtt` TEXT)",
         "fields": [
           {
             "fieldPath": "baseUrl",
@@ -341,6 +347,30 @@
           {
             "fieldPath": "supportsLatest",
             "columnName": "supportsLatest",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "imageIcon",
+            "columnName": "imageIcon",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dateAdded",
+            "columnName": "dateAdded",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dateChanged",
+            "columnName": "dateChanged",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "customSource",
+            "columnName": "customSource",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -1054,7 +1084,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '75811099c3b1dad57f698421a6bc8e15')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8773d7ddee783ec259a49c2c03998c56')"
     ]
   }
 }

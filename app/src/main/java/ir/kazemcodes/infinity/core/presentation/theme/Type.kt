@@ -33,8 +33,9 @@ val fonts = listOf<FontType>(
 val readerScreenBackgroundColors = listOf<BackgroundColor>(
     BackgroundColor.Black,
     BackgroundColor.White,
-    BackgroundColor.Gray88,
     BackgroundColor.GrayishBlack,
+    BackgroundColor.CloudColor,
+    BackgroundColor.Gray88,
     BackgroundColor.CornflowerBlue,
     BackgroundColor.NewCar,
     BackgroundColor.AntiqueWhite,
@@ -49,7 +50,8 @@ val readerScreenBackgroundColors = listOf<BackgroundColor>(
 sealed class BackgroundColor(val color: Color,val onTextColor : Color,val index: Int) {
     object Black : BackgroundColor(Color(0xff000000),Color(0xffffffff),0)
     object White : BackgroundColor(Color(0xffffffff),Color(0xff000000),1)
-    object GrayishBlack : BackgroundColor(Color(0xff262626),Color(0xFFE9E9E9),3)
+    object GrayishBlack : BackgroundColor(Color(0xff262626),Color(0xFFE9E9E9),2)
+    object CloudColor : BackgroundColor(Color(0xFF405A61),Color(0xFFFFFFFF),3)
     object Gray88 : BackgroundColor(Color(248,249,250),Color(51, 51, 51),4)
     object CornflowerBlue : BackgroundColor(Color(150, 173, 252),Color(0xff000000),5)
     object NewCar : BackgroundColor(Color(219, 225, 241),Color(0xff000000),6)

@@ -5,13 +5,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Loop
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import ir.kazemcodes.infinity.feature_reader.presentation.reader.ReaderScreenViewModel
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarActionButton
+import ir.kazemcodes.infinity.feature_reader.presentation.reader.ReaderScreenViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -27,6 +28,9 @@ fun MainBottomSettingComposable(
     Row(modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically) {
+        TopAppBarActionButton(imageVector = Icons.Default.Loop,
+            title = "Reverse Chapter List",
+            onClick = {  /** viewModel.reverseChapter() **/  })
         TopAppBarActionButton(imageVector = Icons.Default.Menu,
             title = "Chapter List Drawer",
             onClick = { scope.launch(Dispatchers.Main) { scaffoldState.drawerState.open() } })

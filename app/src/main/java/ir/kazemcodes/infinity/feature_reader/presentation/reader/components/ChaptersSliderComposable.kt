@@ -24,9 +24,10 @@ fun ChaptersSliderComposable(
 ) {
     val context = LocalContext.current
     val currentIndex = viewModel.state.value.currentChapterIndex
+    val currentChapter = viewModel.getCurrentChapterByIndex()
     val chapters = viewModel.state.value.chapters
     Column(modifier = modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(text = viewModel.state.value.chapters[currentIndex].title,
+        Text(text = currentChapter.title,
             color = MaterialTheme.colors.onBackground,
             style = MaterialTheme.typography.subtitle2,
             maxLines = 1,
@@ -37,7 +38,7 @@ fun ChaptersSliderComposable(
                 onClick = {
                     if (currentIndex > 0) {
                         viewModel.updateChapterSliderIndex(currentIndex - 1)
-                        viewModel.getChapter(chapters[currentIndex - 1 ])
+                        viewModel.getChapter(viewModel.getCurrentChapterByIndex())
                     } else context.toast("This is first chapter")
                 }) {
                 Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Previous Chapter")
@@ -68,7 +69,7 @@ fun ChaptersSliderComposable(
             IconButton(modifier = modifier.weight(1f), onClick = {
                 if (currentIndex < (chapters.size -1 )) {
                     viewModel.updateChapterSliderIndex(currentIndex + 1)
-                    viewModel.getChapter(chapters[currentIndex + 1])
+                    viewModel.getChapter(viewModel.getCurrentChapterByIndex())
                 } else {
                     context.toast("This is last chapter")
                 }

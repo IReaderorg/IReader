@@ -33,11 +33,9 @@ data class ReaderScreenState(
     val textColor: Color = BackgroundColor.Black.onTextColor,
     val orientation: Orientation = Orientation.Portrait,
     val isWebViewEnable : Boolean = false,
+    val isChaptersReversed : Boolean = false
 )
-data class ReaderScreenChapterState(
-    val chapterListById : List<Int> = emptyList(),
-    val currentChapterId : Int = 0
-)
+
 
 sealed class Orientation(val index : Int){
     object Portrait : Orientation(0)

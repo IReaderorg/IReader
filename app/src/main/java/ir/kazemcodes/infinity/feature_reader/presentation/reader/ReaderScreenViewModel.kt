@@ -39,13 +39,10 @@ class ReaderScreenViewModel(
     private val getChapterUseCase: LocalGetChapterUseCase,
     private val remoteUseCases: RemoteUseCases,
     private val insertUseCases: LocalInsertUseCases,
-    private val deleteUseCase: DeleteUseCase
+    private val deleteUseCase: DeleteUseCase,
 ) : ScopedServices.Registered {
     private val _state = mutableStateOf(ReaderScreenState(source = source))
     val state: State<ReaderScreenState> = _state
-
-    private val _chapterState = mutableStateOf(ReaderScreenChapterState())
-    val chapterState: State<ReaderScreenChapterState> = _chapterState
 
 
     private val _eventFlow = MutableSharedFlow<UiEvent>()
@@ -119,66 +116,66 @@ class ReaderScreenViewModel(
     }
 
     private fun getChapters() {
-            getChapterUseCase.getChaptersByBookId(bookId = bookId)
-                .onEach { result ->
-                    when (result) {
-                        is Resource.Success -> {
-                            if (result.data !=null && result.data.isNotEmpty()) {
-                                _state.value = state.value.copy(
-                                    chapters = result.data,
-                                    isChapterLoaded = true
-                                )
-                                _state.value = state.value.copy(currentChapterIndex = result.data.indexOfFirst { state.value.chapter.chapterId == it.chapterId })
-                            }
-                        }
-                        is Resource.Error -> {
-                        }
-                        is Resource.Loading -> {
+        getChapterUseCase.getChaptersByBookId(bookId = bookId)
+            .onEach { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        if (result.data != null) {
+                            _state.value = state.value.copy(
+                                chapters = result.data,
+                                isChapterLoaded = true
+                            )
+                            _state.value =
+                                state.value.copy(currentChapterIndex = result.data.indexOfFirst { state.value.chapter.chapterId == it.chapterId })
                         }
                     }
-                }.launchIn(coroutineScope)
+                    is Resource.Error -> {
+                    }
+                    is Resource.Loading -> {
+                    }
+                }
+            }.launchIn(coroutineScope)
     }
 
     fun getChapter(chapter: Chapter) {
         _state.value = state.value.copy(chapter = chapter)
-            getChapterUseCase.getOneChapterById(chapterId = chapter.chapterId)
-                .onEach { result ->
-                    when (result) {
-                        is Resource.Success -> {
-                            if (result.data != null) {
-                                _chapterState.value = chapterState.value.copy(currentChapterId = result.data.chapterId)
-                                _state.value = state.value.copy(
-                                    chapter = result.data,
-                                    isLoading = false,
-                                    isLoaded = true,
-                                    error = ""
-                                )
-                                getChapters()
-                                toggleLastReadAndUpdateChapterContent(state.value.chapter)
-                                if (state.value.chapter.content.joinToString().isBlank()) {
-                                    getReadingContentRemotely()
-                                }
+        getChapterUseCase.getOneChapterById(chapterId = chapter.chapterId)
+            .onEach { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        if (result.data != null) {
+                            _state.value = state.value.copy(
+                                chapter = result.data,
+                                isLoading = false,
+                                isLoaded = true,
+                                error = ""
+                            )
+                            getChapters()
+                            toggleLastReadAndUpdateChapterContent(state.value.chapter)
+                            if (state.value.chapter.content.joinToString().isBlank()) {
+                                getReadingContentRemotely()
                             }
                         }
-                        is Resource.Error -> {
-                            _state.value =
-                                state.value.copy(
-                                    error = result.message ?: "An Unknown Error Occurred",
-                                    isLoading = false,
-                                    isLoaded = false,
-                                )
-                            getReadingContentRemotely()
-                        }
-                        is Resource.Loading -> {
-                            _state.value = state.value.copy(
-                                isLoading = true,
-                                error = "",
+                    }
+                    is Resource.Error -> {
+                        _state.value =
+                            state.value.copy(
+                                error = result.message ?: "An Unknown Error Occurred",
+                                isLoading = false,
                                 isLoaded = false,
                             )
-                        }
+                        getReadingContentRemotely()
                     }
+                    is Resource.Loading -> {
+                        _state.value = state.value.copy(
+                            isLoading = true,
+                            error = "",
+                            isLoaded = false,
+                        )
+                    }
+                }
 
-                }.launchIn(coroutineScope)
+            }.launchIn(coroutineScope)
 
     }
 
@@ -222,7 +219,8 @@ class ReaderScreenViewModel(
                                     error = "",
                                     isLoaded = true,
                                 )
-                            toggleLastReadAndUpdateChapterContent(state.value.chapter.copy(haveBeenRead = true))
+                            toggleLastReadAndUpdateChapterContent(state.value.chapter.copy(
+                                haveBeenRead = true))
                         }
                     }
                     is Resource.Error -> {
@@ -246,24 +244,31 @@ class ReaderScreenViewModel(
     @Suppress()
     private fun getLocalBookByName() {
 
-            getBookUseCases.getBookById(id = bookId).onEach { result ->
-                when (result) {
-                    is Resource.Success -> {
-                        if (result.data != null && result.data != Book.create()) {
+        getBookUseCases.getBookById(id = bookId).onEach { result ->
+            when (result) {
+                is Resource.Success -> {
+                    if (result.data != null && result.data != Book.create()) {
+                        _state.value = state.value.copy(
+                            book = result.data,
+                            isBookLoaded = true,
+                            isChaptersReversed = result.data.reverseChapters
+                        )
+                        insertUseCases.insertBook(book = result.data.copy(lastRead = System.currentTimeMillis(),
+                            unread = !result.data.unread))
+                        if (result.data.reverseChapters && state.value.isChaptersReversed != result.data.reverseChapters) {
                             _state.value = state.value.copy(
-                                book = result.data,
-                                isBookLoaded = true
+                                chapters = state.value.chapters.reversed(),
                             )
-                            insertUseCases.insertBook(book = result.data.copy(lastRead = System.currentTimeMillis(),
-                                unread = !result.data.unread))
+                            updateChapterSliderIndex(state.value.chapters.indexOfFirst { state.value.chapter.chapterId == it.chapterId })
                         }
                     }
-                    is Resource.Error -> {
-                    }
-                    is Resource.Loading -> {
-                    }
                 }
-            }.launchIn(coroutineScope)
+                is Resource.Error -> {
+                }
+                is Resource.Loading -> {
+                }
+            }
+        }.launchIn(coroutineScope)
 
     }
 
@@ -441,16 +446,39 @@ class ReaderScreenViewModel(
      * need a index, there is no need to confuse the index because the list reversed
      */
     fun updateChapterSliderIndex(index: Int) {
-            _state.value = state.value.copy(currentChapterIndex = index)
+        _state.value = state.value.copy(currentChapterIndex = index)
     }
 
     /**
      * get the index pf chapter based on the reversed state
      */
-    fun getCurrentIndexOfChapter(chapter: Chapter) {
-        val index =
-            if (state.value.chapters.indexOf(chapter) != -1) state.value.chapters.indexOf(chapter) else 0
-        _state.value = state.value.copy(currentChapterIndex = index)
+    fun getCurrentIndexOfChapter(chapter: Chapter): Int {
+        return if (state.value.chapters.indexOf(chapter) != -1) state.value.chapters.indexOf(chapter) else 0
+    }
+
+    private fun getCurrentIndex(): Int {
+        val index = if (state.value.currentChapterIndex < 0) {
+            0
+        } else if (state.value.currentChapterIndex > state.value.chapters.size - 1) {
+            state.value.chapters.size - 1
+        } else {
+            state.value.currentChapterIndex
+        }
+        return index
+    }
+
+    fun getCurrentChapterByIndex(): Chapter {
+        return state.value.chapters[getCurrentIndex()]
+    }
+
+    fun reverseChapter() {
+        //_state.value = state.value.copy(chapters = state.value.chapters.reversed(), currentChapterIndex = getCurrentIndex())
+        _state.value = state.value.copy(isChaptersReversed = !state.value.isChaptersReversed)
+        coroutineScope.launch(Dispatchers.IO) {
+            insertUseCases.insertBook(state.value.book.copy(reverseChapters = !state.value.book.reverseChapters))
+        }
+        // updateChapterSliderIndex(getCurrentIndexOfChapter(state.value.chapter))
+        //getChapter(state.value.chapter)
     }
 
 
