@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 7,
-    "identityHash": "8773d7ddee783ec259a49c2c03998c56",
+    "identityHash": "657ef63edbf2c459d43e63e64e22a19e",
     "entities": [
       {
         "tableName": "book_table",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `link` TEXT NOT NULL, `bookName` TEXT NOT NULL, `coverLink` TEXT, `description` TEXT NOT NULL, `author` TEXT, `translator` TEXT, `category` TEXT NOT NULL, `status` INTEGER NOT NULL, `rating` INTEGER NOT NULL, `source` TEXT, `isExploreMode` INTEGER NOT NULL, `inLibrary` INTEGER NOT NULL, `dataAdded` INTEGER NOT NULL, `download` INTEGER NOT NULL, `lastRead` INTEGER NOT NULL, `totalChapters` INTEGER NOT NULL, `unread` INTEGER NOT NULL, `lastUpdated` INTEGER NOT NULL, `completed` INTEGER NOT NULL, `reverseChapters` INTEGER NOT NULL, `type` INTEGER NOT NULL, `lastChecked` INTEGER NOT NULL, `latestChapter` INTEGER NOT NULL, `dataFetched` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `link` TEXT NOT NULL, `bookName` TEXT NOT NULL, `coverLink` TEXT, `description` TEXT NOT NULL, `author` TEXT, `translator` TEXT, `category` TEXT NOT NULL, `status` INTEGER NOT NULL, `rating` INTEGER NOT NULL, `source` TEXT, `isExploreMode` INTEGER NOT NULL, `inLibrary` INTEGER NOT NULL, `dataAdded` INTEGER NOT NULL, `download` INTEGER NOT NULL, `lastRead` INTEGER NOT NULL, `totalChapters` INTEGER NOT NULL, `unread` INTEGER NOT NULL, `lastUpdated` INTEGER NOT NULL, `completed` INTEGER NOT NULL, `areChaptersReversed` INTEGER NOT NULL, `type` INTEGER NOT NULL, `lastChecked` INTEGER NOT NULL, `latestChapter` INTEGER NOT NULL, `dataFetched` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -129,8 +129,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "reverseChapters",
-            "columnName": "reverseChapters",
+            "fieldPath": "areChaptersReversed",
+            "columnName": "areChaptersReversed",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -1084,7 +1084,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8773d7ddee783ec259a49c2c03998c56')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '657ef63edbf2c459d43e63e64e22a19e')"
     ]
   }
 }

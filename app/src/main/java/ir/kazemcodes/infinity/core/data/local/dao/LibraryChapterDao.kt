@@ -15,8 +15,11 @@ interface LibraryChapterDao {
     ): Flow<Chapter?>
 
 
-    @Query("SELECT * FROM chapter_table WHERE bookId= :bookId")
-    fun getChaptersByBookId(bookId: Int): Flow<List<Chapter>?>
+    @Query("""SELECT * FROM chapter_table WHERE bookId= :bookId ORDER BY
+        CASE WHEN :isAsc = 1 THEN chapterId END ASC,
+        CASE WHEN :isAsc = 0 THEN  chapterId END DESC
+    """)
+    fun getChaptersByBookId(bookId: Int, isAsc:Boolean): Flow<List<Chapter>?>
 
     @Query("""SELECT * FROM chapter_table WHERE bookId = :bookId ORDER BY 
         CASE WHEN :isAsc = 1 THEN chapterId END ASC,
@@ -47,6 +50,9 @@ interface LibraryChapterDao {
 
     @Query("DELETE FROM chapter_table WHERE bookId = :bookId")
     suspend fun deleteChaptersById(bookId: Int)
+
+    @Delete
+    suspend fun deleteChaptersById(chapters: List<Chapter>)
 
     @Delete
     suspend fun deleteChapter(chapter: Chapter)

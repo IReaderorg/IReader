@@ -10,3 +10,4 @@ class DeleteNotInLibraryChapters(private val localChapterRepository: LocalChapte
         return localChapterRepository.deleteNotInLibraryChapters()
     }
 }
+

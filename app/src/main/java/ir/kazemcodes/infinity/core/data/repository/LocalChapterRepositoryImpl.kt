@@ -13,7 +13,7 @@ class LocalChapterRepositoryImpl @Inject constructor(private val daoLibrary: Lib
 
 
     override fun getLocalChaptersByPaging(
-        bookId: Int, isAsc: Boolean,
+        bookId: Int, isAsc: Boolean
     ): PagingSource<Int, Chapter> {
         return daoLibrary.getChaptersForPaging(bookId = bookId, isAsc = isAsc)
 
@@ -23,8 +23,8 @@ class LocalChapterRepositoryImpl @Inject constructor(private val daoLibrary: Lib
        return daoLibrary.getChapterById(chapterId = chapterId)
     }
 
-    override fun getChaptersByBookId(bookId: Int): Flow<List<Chapter>?> {
-      return  daoLibrary.getChaptersByBookId(bookId = bookId)
+    override fun getChaptersByBookId(bookId: Int, isAsc:Boolean): Flow<List<Chapter>?> {
+      return  daoLibrary.getChaptersByBookId(bookId = bookId, isAsc =isAsc )
     }
 
 
@@ -47,6 +47,10 @@ class LocalChapterRepositoryImpl @Inject constructor(private val daoLibrary: Lib
 
     override suspend fun deleteChaptersByBookId(bookId: Int) {
         return daoLibrary.deleteChaptersById(bookId)
+    }
+
+    override suspend fun deleteChapters(chapters: List<Chapter>) {
+        return daoLibrary.deleteChaptersById(chapters)
     }
 
     override suspend fun deleteChapterByChapter(chapter: Chapter) {

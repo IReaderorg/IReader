@@ -25,10 +25,7 @@ import ir.kazemcodes.infinity.core.domain.use_cases.local.chapter_usecases.GetLa
 import ir.kazemcodes.infinity.core.domain.use_cases.local.chapter_usecases.GetLocalChaptersByPaging
 import ir.kazemcodes.infinity.core.domain.use_cases.local.chapter_usecases.GetOneChapterById
 import ir.kazemcodes.infinity.core.domain.use_cases.local.delete_usecases.book.*
-import ir.kazemcodes.infinity.core.domain.use_cases.local.delete_usecases.chapter.DeleteAllChapters
-import ir.kazemcodes.infinity.core.domain.use_cases.local.delete_usecases.chapter.DeleteChapterByChapter
-import ir.kazemcodes.infinity.core.domain.use_cases.local.delete_usecases.chapter.DeleteChaptersByBookId
-import ir.kazemcodes.infinity.core.domain.use_cases.local.delete_usecases.chapter.DeleteNotInLibraryChapters
+import ir.kazemcodes.infinity.core.domain.use_cases.local.delete_usecases.chapter.*
 import ir.kazemcodes.infinity.core.domain.use_cases.local.insert_usecases.InsertBook
 import ir.kazemcodes.infinity.core.domain.use_cases.local.insert_usecases.InsertBooks
 import ir.kazemcodes.infinity.core.domain.use_cases.local.insert_usecases.InsertChapter
@@ -99,6 +96,7 @@ class LocalModule {
             deleteChaptersByBookId = DeleteChaptersByBookId(localChapterRepository),
             deleteNotInLibraryChapters = DeleteNotInLibraryChapters(localChapterRepository),
             deleteAllChapters = DeleteAllChapters(localChapterRepository),
+            deleteChapters = DeleteChapters(localChapterRepository = localChapterRepository)
         )
     }
 

@@ -1,20 +1,19 @@
 package ir.kazemcodes.infinity.core.domain.repository
 
-import androidx.paging.PagingData
 import androidx.paging.PagingSource
 import ir.kazemcodes.infinity.core.domain.models.Chapter
-import ir.kazemcodes.infinity.core.utils.Resource
 import kotlinx.coroutines.flow.Flow
 
 interface LocalChapterRepository {
 
 
     fun getOneChapterById(
-        chapterId: Int,
+        chapterId: Int
     ): Flow<Chapter?>
 
     fun getChaptersByBookId(
         bookId: Int,
+        isAsc:Boolean
     ): Flow<List<Chapter>?>
 
 
@@ -36,6 +35,8 @@ interface LocalChapterRepository {
     suspend fun deleteChaptersByBookId(
         bookId: Int,
     )
+    suspend fun deleteChapters(chapters: List<Chapter>)
+
     suspend fun deleteChapterByChapter(
        chapter: Chapter
     )

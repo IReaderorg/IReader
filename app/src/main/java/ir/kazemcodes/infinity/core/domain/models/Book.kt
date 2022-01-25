@@ -28,11 +28,11 @@ data class Book(
     var unread:Boolean = true,
     var lastUpdated:Long =-1,
     var completed:Boolean = false,
-    var reverseChapters: Boolean = false,
+    var areChaptersReversed: Boolean = true,
     var type: Int = -1,
     var lastChecked : Long = 0,
     var latestChapter : Long = 0,
-    var dataFetched : Long = 0 ,
+    var dataFetched : Long = 0,
 ) {
     companion object {
         const val UNKNOWN = 0

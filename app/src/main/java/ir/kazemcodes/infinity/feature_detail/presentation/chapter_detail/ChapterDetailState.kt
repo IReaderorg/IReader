@@ -14,5 +14,6 @@ data class ChapterDetailState(
     val chapterOrderType: OrderType = OrderType.Ascending,
     val listOfLastReadChapter: List<LastReadChapter> = emptyList(),
     val localChapters : List<Chapter> = emptyList(),
-    val source:Source
+    val source:Source,
+    val reverse : Boolean = false
 )

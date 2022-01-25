@@ -12,6 +12,7 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.zhuinden.simplestack.ScopedServices
 import ir.kazemcodes.infinity.core.data.network.models.Source
+import ir.kazemcodes.infinity.core.data.network.utils.launchIO
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
 import ir.kazemcodes.infinity.core.domain.models.FontType
@@ -29,7 +30,12 @@ import kotlinx.coroutines.flow.*
 import org.jsoup.Jsoup
 import uy.kohesive.injekt.injectLazy
 
-
+/**
+ * the order of this screen is
+ * first we need to get the book from room then
+ * we use the areReversedChapter to understanding the order of
+ * chapters for chapterList slider then get Chapters using pagination for chapter drawer.
+ */
 class ReaderScreenViewModel(
     private val preferencesUseCase: PreferencesUseCase,
     private val source: Source,
@@ -62,11 +68,11 @@ class ReaderScreenViewModel(
             chapter = initState.chapter.copy(chapterId = chapterId),
             source = source
         )
+        getLocalBookByName()
+        getChapters()
         getChapter(state.value.chapter)
-
         getLocalChaptersByPaging()
         readPreferences()
-        getLocalBookByName()
     }
 
 
@@ -116,25 +122,29 @@ class ReaderScreenViewModel(
     }
 
     private fun getChapters() {
-        getChapterUseCase.getChaptersByBookId(bookId = bookId)
-            .onEach { result ->
-                when (result) {
-                    is Resource.Success -> {
-                        if (result.data != null) {
-                            _state.value = state.value.copy(
-                                chapters = result.data,
-                                isChapterLoaded = true
-                            )
-                            _state.value =
-                                state.value.copy(currentChapterIndex = result.data.indexOfFirst { state.value.chapter.chapterId == it.chapterId })
+        coroutineScope.launchIO {
+            getChapterUseCase.getChaptersByBookId(bookId = bookId,
+                isAsc = state.value.book.areChaptersReversed)
+                .collect { result ->
+                    when (result) {
+                        is Resource.Success -> {
+                            if (result.data != null) {
+                                _state.value = state.value.copy(
+                                    chapters = result.data,
+                                    isChapterLoaded = true,
+                                )
+                                _state.value =
+                                    state.value.copy(currentChapterIndex = result.data.indexOfFirst { state.value.chapter.chapterId == it.chapterId })
+                            }
+                        }
+                        is Resource.Error -> {
+                        }
+                        is Resource.Loading -> {
                         }
                     }
-                    is Resource.Error -> {
-                    }
-                    is Resource.Loading -> {
-                    }
                 }
-            }.launchIn(coroutineScope)
+        }
+
     }
 
     fun getChapter(chapter: Chapter) {
@@ -150,8 +160,7 @@ class ReaderScreenViewModel(
                                 isLoaded = true,
                                 error = ""
                             )
-                            getChapters()
-                            toggleLastReadAndUpdateChapterContent(state.value.chapter)
+                            toggleLastReadAndUpdateChapterContent(result.data)
                             if (state.value.chapter.content.joinToString().isBlank()) {
                                 getReadingContentRemotely()
                             }
@@ -244,31 +253,32 @@ class ReaderScreenViewModel(
     @Suppress()
     private fun getLocalBookByName() {
 
-        getBookUseCases.getBookById(id = bookId).onEach { result ->
-            when (result) {
-                is Resource.Success -> {
-                    if (result.data != null && result.data != Book.create()) {
-                        _state.value = state.value.copy(
-                            book = result.data,
-                            isBookLoaded = true,
-                            isChaptersReversed = result.data.reverseChapters
-                        )
-                        insertUseCases.insertBook(book = result.data.copy(lastRead = System.currentTimeMillis(),
-                            unread = !result.data.unread))
-                        if (result.data.reverseChapters && state.value.isChaptersReversed != result.data.reverseChapters) {
+        coroutineScope.launchIO {
+            getBookUseCases.getBookById(id = bookId).first { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        if (result.data != null && result.data != Book.create()) {
                             _state.value = state.value.copy(
-                                chapters = state.value.chapters.reversed(),
+                                book = result.data,
+                                isBookLoaded = true,
+                                isChaptersReversed = result.data.areChaptersReversed
                             )
-                            updateChapterSliderIndex(state.value.chapters.indexOfFirst { state.value.chapter.chapterId == it.chapterId })
+                            insertUseCases.insertBook(book = result.data.copy(lastRead = System.currentTimeMillis(),
+                                unread = !result.data.unread))
+                            true
+                        } else {
+                            false
                         }
                     }
-                }
-                is Resource.Error -> {
-                }
-                is Resource.Loading -> {
+                    is Resource.Error -> {
+                        false
+                    }
+                    is Resource.Loading -> {
+                        false
+                    }
                 }
             }
-        }.launchIn(coroutineScope)
+        }
 
     }
 
@@ -290,8 +300,8 @@ class ReaderScreenViewModel(
 
     fun getLocalChaptersByPaging() {
         coroutineScope.launch(Dispatchers.IO) {
-            getChapterUseCase.getLocalChaptersByPaging(bookId = bookId,
-                isAsc = state.value.isAsc).cachedIn(coroutineScope).collect { snapshot ->
+            getChapterUseCase.getLocalChaptersByPaging(bookId = bookId, isAsc = state.value.isAsc)
+                .cachedIn(coroutineScope).collect { snapshot ->
                 _chapters.value = snapshot
             }
         }
@@ -453,32 +463,43 @@ class ReaderScreenViewModel(
      * get the index pf chapter based on the reversed state
      */
     fun getCurrentIndexOfChapter(chapter: Chapter): Int {
-        return if (state.value.chapters.indexOf(chapter) != -1) state.value.chapters.indexOf(chapter) else 0
+        val chaptersById : List<Int> = state.value.chapters.map { it.chapterId }
+        return if (chaptersById.indexOf(chapter.chapterId) != -1) chaptersById.indexOf(chapter.chapterId) else 0
     }
 
     private fun getCurrentIndex(): Int {
-        val index = if (state.value.currentChapterIndex < 0) {
+       return if (state.value.currentChapterIndex < 0) {
             0
-        } else if (state.value.currentChapterIndex > state.value.chapters.size - 1) {
-            state.value.chapters.size - 1
+        } else if (state.value.currentChapterIndex > (state.value.chapters.lastIndex)) {
+            state.value.chapters.lastIndex
+        } else if (state.value.currentChapterIndex == -1) {
+            0
         } else {
-            state.value.currentChapterIndex
+           state.value.currentChapterIndex
         }
-        return index
     }
 
     fun getCurrentChapterByIndex(): Chapter {
         return state.value.chapters[getCurrentIndex()]
     }
 
-    fun reverseChapter() {
-        //_state.value = state.value.copy(chapters = state.value.chapters.reversed(), currentChapterIndex = getCurrentIndex())
-        _state.value = state.value.copy(isChaptersReversed = !state.value.isChaptersReversed)
-        coroutineScope.launch(Dispatchers.IO) {
-            insertUseCases.insertBook(state.value.book.copy(reverseChapters = !state.value.book.reverseChapters))
+    fun reverseSlider() {
+        if (!state.value.isChapterReversingInProgress) {
+            _state.value =
+                state.value.copy(book = state.value.book.copy(areChaptersReversed = !state.value.book.areChaptersReversed),
+                    isChapterReversingInProgress = true)
+
+            coroutineScope.launch(Dispatchers.IO) {
+                _eventFlow.emit(UiEvent.ShowSnackbar(UiText.DynamicString("Reversing Chapters...")))
+                insertUseCases.insertBook(state.value.book.copy(areChaptersReversed = state.value.book.areChaptersReversed))
+                _eventFlow.emit(UiEvent.ShowSnackbar(UiText.DynamicString("Chapters were reversed")))
+            }
+            updateChapterSliderIndex(getCurrentIndexOfChapter(state.value.chapter))
+            getChapters()
+            getChapter(state.value.chapter)
+            _state.value = state.value.copy(isChapterReversingInProgress = false)
         }
-        // updateChapterSliderIndex(getCurrentIndexOfChapter(state.value.chapter))
-        //getChapter(state.value.chapter)
+
     }
 
 

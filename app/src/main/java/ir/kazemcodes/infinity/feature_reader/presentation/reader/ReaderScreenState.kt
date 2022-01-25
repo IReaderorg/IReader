@@ -33,7 +33,8 @@ data class ReaderScreenState(
     val textColor: Color = BackgroundColor.Black.onTextColor,
     val orientation: Orientation = Orientation.Portrait,
     val isWebViewEnable : Boolean = false,
-    val isChaptersReversed : Boolean = false
+    val isChaptersReversed : Boolean = false,
+    val isChapterReversingInProgress: Boolean = false
 )
 
 

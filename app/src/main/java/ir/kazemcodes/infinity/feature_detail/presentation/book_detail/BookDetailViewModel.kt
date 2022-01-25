@@ -130,7 +130,7 @@ class BookDetailViewModel(
 
     private fun getLocalChaptersByBookId() {
         coroutineScope.launchIO {
-            getChapterUseCase.getChaptersByBookId(bookId)
+            getChapterUseCase.getChaptersByBookId(bookId = bookId, isAsc = state.value.book.areChaptersReversed)
                 .collect() { result ->
                     when (result) {
                         is Resource.Success -> {

@@ -9,7 +9,9 @@ import ir.kazemcodes.infinity.core.data.network.models.Source
 import ir.kazemcodes.infinity.core.data.network.utils.launchIO
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
+import ir.kazemcodes.infinity.core.domain.use_cases.local.DeleteUseCase
 import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalGetChapterUseCase
+import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalInsertUseCases
 import ir.kazemcodes.infinity.core.utils.Resource
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,9 +22,12 @@ class ChapterDetailViewModel(
     private val bookId: Int,
     private val source: Source,
     private val getChapterUseCase: LocalGetChapterUseCase,
+    private val insertUseCases: LocalInsertUseCases,
+    private val deleteUseCase: DeleteUseCase,
 ) : ScopedServices.Registered {
 
-    private val _state = mutableStateOf(ChapterDetailState(source = source, book = Book.create().copy(id = bookId)))
+    private val _state =
+        mutableStateOf(ChapterDetailState(source = source, book = Book.create().copy(id = bookId)))
     val state: State<ChapterDetailState> = _state
 
     private val _chapters = MutableStateFlow<PagingData<Chapter>>(PagingData.empty())
@@ -48,17 +53,20 @@ class ChapterDetailViewModel(
 
         }
     }
+
     private fun getLocalChaptersByPaging() {
         coroutineScope.launch(Dispatchers.IO) {
-            getChapterUseCase.getLocalChaptersByPaging(bookId = bookId,isAsc=state.value.isAsc).cachedIn(coroutineScope)
+            getChapterUseCase.getLocalChaptersByPaging(bookId = bookId, isAsc = state.value.isAsc)
+                .cachedIn(coroutineScope)
                 .collect { snapshot ->
                     _chapters.value = snapshot
                 }
         }
     }
+
     private fun getLocalChapters() {
         coroutineScope.launchIO {
-            getChapterUseCase.getChaptersByBookId(bookId = bookId)
+            getChapterUseCase.getChaptersByBookId(bookId = bookId,isAsc =state.value.isAsc)
                 .collect { result ->
                     when (result) {
                         is Resource.Success -> {
@@ -83,7 +91,7 @@ class ChapterDetailViewModel(
     }
 
 
-        override fun onServiceUnregistered() {
+    override fun onServiceUnregistered() {
         coroutineScope.cancel()
     }
 }

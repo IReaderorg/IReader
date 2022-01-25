@@ -240,6 +240,8 @@ data class ChapterDetailKey(
                 source = mappingSourceNameToSource(sourceName),
                 bookId = bookId,
                 getChapterUseCase = lookup<LocalGetChapterUseCase>(),
+                deleteUseCase = lookup<DeleteUseCase>(),
+                insertUseCases = lookup<LocalInsertUseCases>(),
             )
             )
         }

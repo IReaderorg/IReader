@@ -1,10 +1,7 @@
 package ir.kazemcodes.infinity.core.domain.use_cases.local
 
 import ir.kazemcodes.infinity.core.domain.use_cases.local.delete_usecases.book.*
-import ir.kazemcodes.infinity.core.domain.use_cases.local.delete_usecases.chapter.DeleteAllChapters
-import ir.kazemcodes.infinity.core.domain.use_cases.local.delete_usecases.chapter.DeleteChapterByChapter
-import ir.kazemcodes.infinity.core.domain.use_cases.local.delete_usecases.chapter.DeleteChaptersByBookId
-import ir.kazemcodes.infinity.core.domain.use_cases.local.delete_usecases.chapter.DeleteNotInLibraryChapters
+import ir.kazemcodes.infinity.core.domain.use_cases.local.delete_usecases.chapter.*
 
 data class DeleteUseCase(
     val deleteInLibraryBook: DeleteInLibraryBook,
@@ -15,7 +12,8 @@ data class DeleteUseCase(
     val deleteChaptersByBookId: DeleteChaptersByBookId,
     val deleteAllChapters: DeleteAllChapters,
     val deleteNotInLibraryChapters: DeleteNotInLibraryChapters,
-    val deleteChapterByChapter: DeleteChapterByChapter
+    val deleteChapterByChapter: DeleteChapterByChapter,
+    val deleteChapters: DeleteChapters
 )
 
 

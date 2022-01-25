@@ -51,7 +51,7 @@ class DownloadService @AssistedInject constructor(
         val source = inputData.getString(DOWNLOAD_SOURCE_NAME)!!
         val book = repository.localBookRepository.getBookById(1).first().data
 
-        val chapters = repository.localChapterRepository.getChaptersByBookId(bookId = bookId).first()
+        val chapters = repository.localChapterRepository.getChaptersByBookId(bookId = bookId, isAsc = true).first()
 
         val notification = NotificationCompat.Builder(applicationContext,
             Notifications.CHANNEL_DOWNLOADER_PROGRESS)

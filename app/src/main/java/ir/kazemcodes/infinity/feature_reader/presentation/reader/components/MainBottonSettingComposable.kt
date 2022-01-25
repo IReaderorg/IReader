@@ -28,9 +28,7 @@ fun MainBottomSettingComposable(
     Row(modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically) {
-        TopAppBarActionButton(imageVector = Icons.Default.Loop,
-            title = "Reverse Chapter List",
-            onClick = {  /** viewModel.reverseChapter() **/  })
+
         TopAppBarActionButton(imageVector = Icons.Default.Menu,
             title = "Chapter List Drawer",
             onClick = { scope.launch(Dispatchers.Main) { scaffoldState.drawerState.open() } })

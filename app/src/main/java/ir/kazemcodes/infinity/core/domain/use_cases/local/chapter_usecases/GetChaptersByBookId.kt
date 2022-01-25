@@ -18,10 +18,11 @@ import kotlinx.coroutines.flow.flow
 class GetChaptersByBookId(private val localChapterRepository: LocalChapterRepository) {
     operator fun invoke(
         bookId: Int,
+        isAsc: Boolean? = null
     ): Flow<Resource<List<Chapter>>> = flow {
         try {
             emit(Resource.Loading())
-            localChapterRepository.getChaptersByBookId(bookId = bookId).first { chapters ->
+            localChapterRepository.getChaptersByBookId(bookId = bookId,isAsc?:true).first { chapters ->
                 if (chapters != null) {
                     emit(Resource.Success<List<Chapter>>(data = chapters))
                     true
@@ -32,8 +33,7 @@ class GetChaptersByBookId(private val localChapterRepository: LocalChapterReposi
                 }
             }
         } catch (e: Exception) {
-            emit(Resource.Error<List<Chapter>>(message = e.localizedMessage
-                ?: Constants.NO_CHAPTER_ERROR))
+            emit(Resource.Error<List<Chapter>>(message = e.localizedMessage ?: Constants.NO_CHAPTER_ERROR))
         }
     }
 }
@@ -42,7 +42,7 @@ class GetChaptersByBookId(private val localChapterRepository: LocalChapterReposi
 class GetLocalChaptersByPaging(private val localChapterRepository: LocalChapterRepository) {
     operator fun invoke(
         bookId: Int,
-        isAsc : Boolean
+        isAsc : Boolean,
     ): Flow<PagingData<Chapter>> {
         return Pager(
             config = PagingConfig(pageSize = Constants.DEFAULT_BIG_PAGE_SIZE,

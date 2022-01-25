@@ -77,6 +77,7 @@ fun ChapterDetailScreen(
                             contentDescription = "Sort Icon"
                         )
                     }
+
                 },
                 navigationIcon = {
                     IconButton(onClick = { backStack.goBack() }) {

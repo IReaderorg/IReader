@@ -11,10 +11,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Autorenew
-import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.Sort
-import androidx.compose.material.icons.filled.TrackChanges
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -196,12 +193,18 @@ fun ReadingScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         modifier = modifier.fillMaxWidth()) {
                         TopAppBarTitle(title = "Content", modifier = modifier.padding(start = 8.dp))
-                        TopAppBarActionButton(imageVector = Icons.Default.Sort,
-                            title = "Reverse list icon",
-                            onClick = {
-                                viewModel.reverseChapters()
-                                viewModel.getLocalChaptersByPaging()
-                            })
+                        Row() {
+                            TopAppBarActionButton(imageVector = Icons.Default.SettingsBackupRestore,
+                                title = "Reverse Chapter List",
+                                onClick = {    viewModel.reverseSlider()  })
+
+                            TopAppBarActionButton(imageVector = Icons.Default.Sort,
+                                title = "Reverse list icon",
+                                onClick = {
+                                    viewModel.reverseChapters()
+                                    viewModel.getLocalChaptersByPaging()
+                                })
+                        }
                     }
 
                     Spacer(modifier = modifier.height(5.dp))
@@ -222,14 +225,13 @@ fun ReadingScreen(
                     if(result) {
                         AnimatedContent(chapters.loadState.refresh is LoadState.NotLoading) {
                             LazyColumn(modifier = Modifier.fillMaxSize()) {
-
                                 items(items = chapters) { chapter ->
                                     if (chapter != null) {
                                         ChapterListItemComposable(modifier = modifier,
                                             chapter = chapter, goTo = {
                                                 viewModel.getChapter(chapter)
+                                                viewModel.updateChapterSliderIndex(viewModel.getCurrentIndexOfChapter(chapter))
                                             })
-
                                     }
                                 }
                             }

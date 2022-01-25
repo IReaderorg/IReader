@@ -67,7 +67,7 @@ fun ChaptersSliderComposable(
                 )
             )
             IconButton(modifier = modifier.weight(1f), onClick = {
-                if (currentIndex < (chapters.size -1 )) {
+                if (currentIndex < chapters.lastIndex) {
                     viewModel.updateChapterSliderIndex(currentIndex + 1)
                     viewModel.getChapter(viewModel.getCurrentChapterByIndex())
                 } else {
