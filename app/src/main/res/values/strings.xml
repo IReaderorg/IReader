@@ -4,6 +4,7 @@
 
     <!-- IReader-->
     <string name="no_data_found_error">No Data was Found.</string>
+    <string name="error_unknown">An Unknown Error Happened.</string>
 
 
 
@@ -817,7 +818,4 @@
     <string name="channel_ext_updates">Extension updates</string>
     <string name="channel_crash_logs">Crash logs</string>
 
-    <!-- S Pen actions -->
-    <string name="spen_previous_page">Previous page</string>
-    <string name="spen_next_page">Next page</string>
 </resources>

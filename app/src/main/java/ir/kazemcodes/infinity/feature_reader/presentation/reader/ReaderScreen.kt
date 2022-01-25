@@ -75,7 +75,7 @@ fun ReadingScreen(
             when (event) {
                 is UiEvent.ShowSnackbar -> {
                     scaffoldState.snackbarHostState.showSnackbar(
-                        event.uiText.asString(context)
+                        event.uiText
                     )
                 }
             }

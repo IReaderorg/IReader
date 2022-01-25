@@ -5,6 +5,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
@@ -49,6 +50,9 @@ fun InfinityTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composab
             color = colors.background
         )
         rememberSystemUiController.setStatusBarColor(color = colors.background)
+    }
+    CompositionLocalProvider(LocalSpacing provides Spacing()) {
+        
     }
 
     MaterialTheme(

@@ -139,8 +139,6 @@ class ReaderScreenViewModel(
                         }
                         is Resource.Error -> {
                         }
-                        is Resource.Loading -> {
-                        }
                     }
                 }
         }
@@ -149,6 +147,11 @@ class ReaderScreenViewModel(
 
     fun getChapter(chapter: Chapter) {
         _state.value = state.value.copy(chapter = chapter)
+        _state.value = state.value.copy(
+            isLoading = true,
+            error = UiText.noError(),
+            isLoaded = false,
+        )
         getChapterUseCase.getOneChapterById(chapterId = chapter.chapterId)
             .onEach { result ->
                 when (result) {
@@ -158,7 +161,7 @@ class ReaderScreenViewModel(
                                 chapter = result.data,
                                 isLoading = false,
                                 isLoaded = true,
-                                error = ""
+                                error = UiText.noError()
                             )
                             toggleLastReadAndUpdateChapterContent(result.data)
                             if (state.value.chapter.content.joinToString().isBlank()) {
@@ -169,18 +172,11 @@ class ReaderScreenViewModel(
                     is Resource.Error -> {
                         _state.value =
                             state.value.copy(
-                                error = result.message ?: "An Unknown Error Occurred",
                                 isLoading = false,
                                 isLoaded = false,
                             )
+                        _eventFlow.emit(UiEvent.ShowSnackbar(result.uiText?: UiText.unknownError().asString()))
                         getReadingContentRemotely()
-                    }
-                    is Resource.Loading -> {
-                        _state.value = state.value.copy(
-                            isLoading = true,
-                            error = "",
-                            isLoaded = false,
-                        )
                     }
                 }
 
@@ -193,22 +189,22 @@ class ReaderScreenViewModel(
         val webView by injectLazy<WebView>()
         coroutineScope.launch {
             _eventFlow.emit(UiEvent.ShowSnackbar(
-                uiText = UiText.DynamicString("Trying to fetch chapter's content")
+                uiText = UiText.DynamicString("Trying to fetch chapter's content").asString()
             ))
 
             val chapter = source.contentFromElementParse(Jsoup.parse(webView.getHtml()))
             if (!chapter.content.isNullOrEmpty() && state.value.isBookLoaded && state.value.isChapterLoaded && webView.originalUrl == state.value.chapter.link) {
                 _state.value = state.value.copy(isLoading = false,
-                    error = "",
+                    error = UiText.noError(),
                     chapter = state.value.chapter.copy(content = chapter.content))
                 toggleLastReadAndUpdateChapterContent(state.value.chapter.copy(content = chapter.content))
 
                 _eventFlow.emit(UiEvent.ShowSnackbar(
-                    uiText = UiText.DynamicString("${state.value.chapter.title} of ${state.value.chapter.bookName} was Fetched")
+                    uiText = UiText.DynamicString("${state.value.chapter.title} of ${state.value.chapter.bookName} was Fetched").asString()
                 ))
             } else {
                 _eventFlow.emit(UiEvent.ShowSnackbar(
-                    uiText = UiText.DynamicString("Failed to to get the content")
+                    uiText = UiText.DynamicString("Failed to to get the content").asString()
                 ))
             }
         }
@@ -216,6 +212,11 @@ class ReaderScreenViewModel(
     }
 
     fun getReadingContentRemotely() {
+        _state.value = state.value.copy(
+            isLoading = true,
+            error = UiText.noError(),
+            isLoaded = false,
+        )
         remoteUseCases.getRemoteReadingContent(state.value.chapter, source = source)
             .onEach { result ->
                 when (result) {
@@ -225,7 +226,7 @@ class ReaderScreenViewModel(
                                 .copy(
                                     chapter = state.value.chapter.copy(content = result.data.content),
                                     isLoading = false,
-                                    error = "",
+                                    error = UiText.noError(),
                                     isLoaded = true,
                                 )
                             toggleLastReadAndUpdateChapterContent(state.value.chapter.copy(
@@ -235,16 +236,10 @@ class ReaderScreenViewModel(
                     is Resource.Error -> {
                         _state.value =
                             state.value.copy(
-                                error = result.message ?: "An Unknown Error Occurred",
                                 isLoading = false,
                                 isLoaded = false,
                             )
-                    }
-                    is Resource.Loading -> {
-                        _state.value = state.value.copy(
-                            isLoading = true, error = "",
-                            isLoaded = false,
-                        )
+                        _eventFlow.emit(UiEvent.ShowSnackbar(result.uiText?: UiText.unknownError().asString()))
                     }
                 }
             }.launchIn(coroutineScope)
@@ -271,9 +266,6 @@ class ReaderScreenViewModel(
                         }
                     }
                     is Resource.Error -> {
-                        false
-                    }
-                    is Resource.Loading -> {
                         false
                     }
                 }
@@ -490,17 +482,17 @@ class ReaderScreenViewModel(
                     isChapterReversingInProgress = true)
 
             coroutineScope.launch(Dispatchers.IO) {
-                _eventFlow.emit(UiEvent.ShowSnackbar(UiText.DynamicString("Reversing Chapters...")))
+                _eventFlow.emit(UiEvent.ShowSnackbar(UiText.DynamicString("Reversing Chapters...").asString()))
                 insertUseCases.insertBook(state.value.book.copy(areChaptersReversed = state.value.book.areChaptersReversed))
-                _eventFlow.emit(UiEvent.ShowSnackbar(UiText.DynamicString("Chapters were reversed")))
+                _eventFlow.emit(UiEvent.ShowSnackbar(UiText.DynamicString("Chapters were reversed").asString()))
             }
             updateChapterSliderIndex(getCurrentIndexOfChapter(state.value.chapter))
             getChapters()
-            getChapter(state.value.chapter)
             _state.value = state.value.copy(isChapterReversingInProgress = false)
         }
 
     }
+
 
 
     override fun onServiceUnregistered() {

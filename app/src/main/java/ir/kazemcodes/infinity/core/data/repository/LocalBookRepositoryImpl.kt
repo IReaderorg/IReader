@@ -8,6 +8,7 @@ import ir.kazemcodes.infinity.core.data.local.dao.RemoteKeysDao
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.repository.LocalBookRepository
 import ir.kazemcodes.infinity.core.utils.Resource
+import ir.kazemcodes.infinity.core.utils.UiText
 import ir.kazemcodes.infinity.feature_library.presentation.components.SortType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
@@ -25,13 +26,12 @@ class LocalBookRepositoryImpl(
 
     override fun getBookById(id: Int): Flow<Resource<Book>> = flow {
         Timber.d("Timber: GetExploreBookByIdUseCase was Called")
-        emit(Resource.Loading())
         bookDao.getBookById(bookId = id)
             .collect { book ->
                 if (book != null) {
                     emit(Resource.Success<Book>(data = book))
                 } else {
-                    emit(Resource.Error<Book>(message = "Empty Data."))
+                    emit(Resource.Error<Book>(uiText = UiText.noBook()))
                 }
             }
         Timber.d("Timber: GetExploreBookByIdUseCase was Finished Successfully")

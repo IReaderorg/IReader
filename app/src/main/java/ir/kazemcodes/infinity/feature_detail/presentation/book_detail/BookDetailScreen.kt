@@ -28,7 +28,10 @@ import ir.kazemcodes.infinity.core.data.network.utils.toast
 import ir.kazemcodes.infinity.core.presentation.components.BookImageComposable
 import ir.kazemcodes.infinity.core.presentation.components.ISnackBarHost
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.ErrorTextWithEmojis
-import ir.kazemcodes.infinity.core.utils.*
+import ir.kazemcodes.infinity.core.utils.UiEvent
+import ir.kazemcodes.infinity.core.utils.formatBasedOnDot
+import ir.kazemcodes.infinity.core.utils.formatList
+import ir.kazemcodes.infinity.core.utils.getUrlWithoutDomain
 import ir.kazemcodes.infinity.feature_activity.presentation.ChapterDetailKey
 import ir.kazemcodes.infinity.feature_activity.presentation.ReaderScreenKey
 import ir.kazemcodes.infinity.feature_activity.presentation.WebViewKey
@@ -136,7 +139,7 @@ fun BookDetailScreenLoadedComposable(
             when (event) {
                 is UiEvent.ShowSnackbar -> {
                     scaffoldState.snackbarHostState.showSnackbar(
-                        event.uiText.asString(context)
+                        event.uiText
                     )
                 }
             }

@@ -25,7 +25,6 @@ import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarAct
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarBackButton
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarTitle
 import ir.kazemcodes.infinity.core.utils.UiEvent
-import ir.kazemcodes.infinity.core.utils.asString
 import ir.kazemcodes.infinity.feature_sources.sources.models.FetchType
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collectLatest
@@ -47,7 +46,7 @@ fun WebPageScreen() {
             when (event) {
                 is UiEvent.ShowSnackbar -> {
                     scaffoldState.snackbarHostState.showSnackbar(
-                        event.uiText.asString(context)
+                        event.uiText
                     )
                 }
                 else -> {}

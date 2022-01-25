@@ -3,10 +3,13 @@ package ir.kazemcodes.infinity.core.domain.use_cases.local.chapter_usecases
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
 import ir.kazemcodes.infinity.core.domain.repository.LocalChapterRepository
 import ir.kazemcodes.infinity.core.utils.Constants
 import ir.kazemcodes.infinity.core.utils.Resource
+import ir.kazemcodes.infinity.core.utils.UiText
+import ir.kazemcodes.infinity.core.utils.asString
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
@@ -21,19 +24,20 @@ class GetChaptersByBookId(private val localChapterRepository: LocalChapterReposi
         isAsc: Boolean? = null
     ): Flow<Resource<List<Chapter>>> = flow {
         try {
-            emit(Resource.Loading())
             localChapterRepository.getChaptersByBookId(bookId = bookId,isAsc?:true).first { chapters ->
                 if (chapters != null) {
                     emit(Resource.Success<List<Chapter>>(data = chapters))
                     true
 
                 } else {
-                    emit(Resource.Error<List<Chapter>>(message = Constants.NO_CHAPTERS_ERROR))
+                    emit(Resource.Error<List<Chapter>>(uiText = UiText.cantGetChapterError()))
                     true
                 }
             }
         } catch (e: Exception) {
-            emit(Resource.Error<List<Chapter>>(message = e.localizedMessage ?: Constants.NO_CHAPTER_ERROR))
+            Resource.Error<Resource<List<Book>>>(
+                uiText = UiText.DynamicString(e.localizedMessage ?: Constants.UNKNOWN_ERROR).asString()
+            )
         }
     }
 }

@@ -14,10 +14,7 @@ import ir.kazemcodes.infinity.core.domain.use_cases.local.DeleteUseCase
 import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalGetBookUseCases
 import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalGetChapterUseCase
 import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalInsertUseCases
-import ir.kazemcodes.infinity.core.utils.Resource
-import ir.kazemcodes.infinity.core.utils.UiEvent
-import ir.kazemcodes.infinity.core.utils.UiText
-import ir.kazemcodes.infinity.core.utils.getHtml
+import ir.kazemcodes.infinity.core.utils.*
 import ir.kazemcodes.infinity.feature_sources.sources.models.FetchType
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -74,6 +71,9 @@ class WebViewPageModel(
     @ExperimentalCoroutinesApi
     fun getInfo() {
         coroutineScope.launch(Dispatchers.Main) {
+            _eventFlow.emit(UiEvent.ShowSnackbar(
+                uiText = UiText.DynamicString("Trying to fetch...").asString()
+            ))
             fetcherUseCase.fetchBookDetailAndChapterDetailFromWebView(
                 localBook = state.value.book,
                 localChapters = state.value.chapters,
@@ -86,18 +86,13 @@ class WebViewPageModel(
                     is Resource.Success -> {
                         if (result.data != null) {
                             _eventFlow.emit(UiEvent.ShowSnackbar(
-                                uiText = result.data
+                                uiText = result.data.asString()
                             ))
                         }
                     }
                     is Resource.Error -> {
                         _eventFlow.emit(UiEvent.ShowSnackbar(
-                            uiText = UiText.DynamicString(result.message.toString())
-                        ))
-                    }
-                    is Resource.Loading -> {
-                        _eventFlow.emit(UiEvent.ShowSnackbar(
-                            uiText = UiText.DynamicString("Trying to fetch...")
+                            uiText = UiText.DynamicString(result.uiText?:UiText.unknownError().asString()).asString()
                         ))
                     }
                 }
@@ -135,9 +130,6 @@ class WebViewPageModel(
                 is Resource.Error -> {
 
                 }
-                is Resource.Loading -> {
-
-                }
             }
         }.launchIn(coroutineScope)
     }
@@ -154,9 +146,6 @@ class WebViewPageModel(
                         }
                     }
                     is Resource.Error -> {
-
-                    }
-                    is Resource.Loading -> {
 
                     }
                 }
@@ -177,9 +166,6 @@ class WebViewPageModel(
                 is Resource.Error -> {
 
                 }
-                is Resource.Loading -> {
-
-                }
             }
         }.launchIn(coroutineScope)
     }
@@ -196,9 +182,6 @@ class WebViewPageModel(
                     }
                 }
                 is Resource.Error -> {
-
-                }
-                is Resource.Loading -> {
 
                 }
             }

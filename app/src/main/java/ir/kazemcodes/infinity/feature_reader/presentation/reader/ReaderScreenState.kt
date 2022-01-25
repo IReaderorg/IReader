@@ -7,6 +7,7 @@ import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
 import ir.kazemcodes.infinity.core.domain.models.FontType
 import ir.kazemcodes.infinity.core.presentation.theme.BackgroundColor
+import ir.kazemcodes.infinity.core.utils.UiText
 
 data class ReaderScreenState(
     val isLoading: Boolean = false,
@@ -17,7 +18,7 @@ data class ReaderScreenState(
     val chapter: Chapter = Chapter.create(),
     val chapters: List<Chapter> = emptyList(),
     val isAsc : Boolean = true,
-    val error: String = "",
+    val error: String = UiText.noError(),
     val fontSize: Int = 18,
     val font: FontType = FontType.Poppins,
     val brightness: Float = 0.5f,

@@ -13,6 +13,8 @@ import ir.kazemcodes.infinity.core.domain.models.Chapter
 import ir.kazemcodes.infinity.core.domain.repository.RemoteRepository
 import ir.kazemcodes.infinity.core.utils.Constants
 import ir.kazemcodes.infinity.core.utils.Resource
+import ir.kazemcodes.infinity.core.utils.UiText
+import ir.kazemcodes.infinity.core.utils.asString
 import ir.kazemcodes.infinity.feature_explore.presentation.browse.ExploreType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -45,14 +47,13 @@ class RemoteRepositoryImpl(
         source: Source,
     ): Flow<Resource<ChapterPage>> = flow<Resource<ChapterPage>> {
         try {
-            emit(Resource.Loading())
             Timber.d("Timber: GetRemoteReadingContentUseCase was Called")
             val content = source.fetchContent(chapter)
 
             if (content.content.joinToString()
                     .isBlank() || content.content.contains(Constants.CLOUDFLARE_LOG)
             ) {
-                emit(Resource.Error<ChapterPage>(message = "Can't Get The Chapter Content."))
+                emit(Resource.Error<ChapterPage>(uiText = UiText.DynamicString("Can't Get The Chapter Content.").asString()))
             } else {
                 Timber.d("Timber: GetRemoteReadingContentUseCase was Finished Successfully")
                 emit(Resource.Success<ChapterPage>(content))
@@ -60,14 +61,11 @@ class RemoteRepositoryImpl(
             }
 
         } catch (e: HttpException) {
-            emit(Resource.Error<ChapterPage>(message = e.localizedMessage
-                ?: "An Unexpected Error Occurred."))
+            emit(Resource.Error<ChapterPage>(uiText = UiText.exceptionError(e)))
         } catch (e: IOException) {
-            emit(Resource.Error<ChapterPage>(message = e.localizedMessage
-                ?: "Couldn't Read Server, Check Your Internet Connection."))
+            emit(Resource.Error<ChapterPage>(uiText = UiText.noInternetError()))
         } catch (e: Exception) {
-            emit(Resource.Error<ChapterPage>(message = e.localizedMessage
-                ?: "An Unexpected Error Occurred"))
+            emit(Resource.Error<ChapterPage>(uiText = UiText.exceptionError(e)))
         }
     }
 

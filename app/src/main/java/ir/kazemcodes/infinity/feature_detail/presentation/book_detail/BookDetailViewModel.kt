@@ -87,6 +87,7 @@ class BookDetailViewModel(
 
     private fun getLocalBookById() {
         coroutineScope.launch(Dispatchers.IO) {
+            _state.value = state.value.copy(isLoading = true, error = UiText.noError())
             getBookUseCases.getBookById(id = bookId)
                 .collect { result ->
                     when (result) {
@@ -94,7 +95,7 @@ class BookDetailViewModel(
                             if (result.data != null) {
                                 _state.value = state.value.copy(
                                     book = result.data,
-                                    error = "",
+                                    error = UiText.noError(),
                                     isLoading = false,
                                     isLoaded = true,
                                     inLibrary = result.data.inLibrary,
@@ -108,7 +109,7 @@ class BookDetailViewModel(
                                 }
                             } else {
                                 _state.value = state.value.copy(
-                                    error = "",
+                                    error = UiText.noError(),
                                     isLoading = false,
                                     isLoaded = true,
 
@@ -117,10 +118,8 @@ class BookDetailViewModel(
                         }
                         is Resource.Error -> {
                             _state.value =
-                                state.value.copy(isLoading = false, error = "can't find the book.")
-                        }
-                        is Resource.Loading -> {
-                            _state.value = state.value.copy(isLoading = true, error = "")
+                                state.value.copy(isLoading = false)
+                            _eventFlow.emit(UiEvent.ShowSnackbar(result.uiText?: UiText.unknownError().asString()))
                         }
                     }
                 }
@@ -130,6 +129,8 @@ class BookDetailViewModel(
 
     private fun getLocalChaptersByBookId() {
         coroutineScope.launchIO {
+            _chapterState.value =
+                chapterState.value.copy(isLoading = true, error = "")
             getChapterUseCase.getChaptersByBookId(bookId = bookId, isAsc = state.value.book.areChaptersReversed)
                 .collect() { result ->
                     when (result) {
@@ -157,10 +158,6 @@ class BookDetailViewModel(
                         is Resource.Error -> {
                             getRemoteChapterDetail(book = state.value.book)
                         }
-                        is Resource.Loading -> {
-                            _chapterState.value =
-                                chapterState.value.copy(isLoading = true, error = "")
-                        }
                     }
                 }
         }
@@ -169,6 +166,8 @@ class BookDetailViewModel(
 
     private fun getRemoteBookDetail(book: Book) {
         coroutineScope.launch {
+            _state.value =
+                state.value.copy(isLoading = true, error = UiText.noError(), isLoaded = false)
             remoteUseCases.getBookDetail(book = book, source = source)
                 .collect { result ->
                     when (result) {
@@ -187,7 +186,7 @@ class BookDetailViewModel(
                                         isExploreMode = state.value.isExploreMode,
                                     ),
                                     isLoading = false,
-                                    error = "",
+                                    error = UiText.noError(),
                                     isLoaded = true,
                                 )
                                     insertBookDetailToLocal(state.value.book.copy(dataAdded = System.currentTimeMillis()))
@@ -197,13 +196,13 @@ class BookDetailViewModel(
                         is Resource.Error -> {
                             _state.value =
                                 state.value.copy(
-                                    error = result.message ?: "An Unknown Error Occurred",
                                     isLoading = false,
                                 )
-                        }
-                        is Resource.Loading -> {
-                            _state.value =
-                                state.value.copy(isLoading = true, error = "", isLoaded = false)
+                            _eventFlow.emit(
+                                UiEvent.ShowSnackbar(
+                                    uiText = result.uiText ?: UiText.unknownError().asString()
+                                )
+                            )
                         }
                     }
                 }
@@ -212,22 +211,15 @@ class BookDetailViewModel(
 
     fun getRemoteChapterDetail(book: Book) {
         coroutineScope.launch {
+            _chapterState.value = chapterState.value.copy(
+                isLoading = true,
+                error = ""
+            )
             remoteUseCases.getRemoteChapters(book = book, source = source)
                 .collect { result ->
                     when (result) {
                         is Resource.Success -> {
                             if (result.data != null) {
-//                                                            val list = mutableListOf<Chapter>()
-//                            val sum: List<Chapter> = chapterState.value.chapters + result.data.map {
-//                                it.copy(bookId = bookId,
-//                                    bookName = state.value.book.bookName)
-//                            }
-//
-//                            val uniqueList = sum.distinctBy {
-//                                it.title
-//                            }
-
-//                            list.addAll(uniqueList)
                                 val uniqueList = removeSameItemsFromList(chapterState.value.chapters, result.data.map {
                                     it.copy(bookId = bookId,
                                         bookName = state.value.book.bookName)
@@ -249,14 +241,13 @@ class BookDetailViewModel(
                         is Resource.Error -> {
                             _chapterState.value =
                                 chapterState.value.copy(
-                                    error = result.message ?: "An Unknown Error Occurred",
                                     isLoading = false,
                                 )
-                        }
-                        is Resource.Loading -> {
-                            _chapterState.value = chapterState.value.copy(
-                                isLoading = true,
-                                error = ""
+
+                            _eventFlow.emit(
+                                UiEvent.ShowSnackbar(
+                                    uiText = result.uiText ?: UiText.unknownError().asString()
+                                )
                             )
                         }
                     }
@@ -268,6 +259,9 @@ class BookDetailViewModel(
     fun getWebViewData() {
         Timber.e("Step One")
         coroutineScope.launch {
+            _eventFlow.emit(UiEvent.ShowSnackbar(
+                uiText = UiText.DynamicString("Trying to fetch...").asString()
+            ))
             fetchUseCase.fetchBookDetailAndChapterDetailFromWebView(
                 deleteUseCase = deleteUseCase,
                 insertUseCases = localInsertUseCases,
@@ -282,20 +276,14 @@ class BookDetailViewModel(
                         if (result.data != null) {
                             Timber.e("Step three")
                             _eventFlow.emit(UiEvent.ShowSnackbar(
-                                uiText = result.data
+                                uiText = result.data.asString()
                             ))
                         }
                     }
                     is Resource.Error -> {
                         Timber.e("Step four")
                         _eventFlow.emit(UiEvent.ShowSnackbar(
-                            uiText = UiText.DynamicString(result.message.toString())
-                        ))
-                    }
-                    is Resource.Loading -> {
-                        Timber.e("Step five")
-                        _eventFlow.emit(UiEvent.ShowSnackbar(
-                            uiText = UiText.DynamicString("Trying to fetch...")
+                            uiText = result.uiText?: UiText.unknownError().asString()
                         ))
                     }
                 }
@@ -373,8 +361,6 @@ class BookDetailViewModel(
                             }
                         }
                         is Resource.Error -> {
-                        }
-                        is Resource.Loading -> {
                         }
                     }
                 }

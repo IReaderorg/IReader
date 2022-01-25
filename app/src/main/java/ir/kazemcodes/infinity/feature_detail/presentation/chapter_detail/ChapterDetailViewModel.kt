@@ -78,8 +78,6 @@ class ChapterDetailViewModel(
                         is Resource.Error -> {
 
                         }
-                        is Resource.Loading -> {
-                        }
                     }
                 }
         }

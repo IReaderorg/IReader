@@ -22,7 +22,7 @@ fun handlePagingResult(
     onEmptyResult:@Composable () -> Unit,
     onErrorResult:@Composable (error:String) -> Unit = {error ->
         Box(modifier=modifier) {
-            ErrorTextWithEmojis(error =error, modifier = modifier
+            ErrorTextWithEmojis(error =error.toString(), modifier = modifier
                 .fillMaxWidth()
                 .padding(20.dp)
                 .wrapContentSize(Alignment.Center)
@@ -44,7 +44,7 @@ fun handlePagingResult(
                 false
             }
             error != null -> {
-                onErrorResult(error.error.localizedMessage?: UiText.unknownError())
+                onErrorResult(UiText.exceptionError(error.error))
                 false
             }
             books.itemCount < 1 -> {
@@ -57,18 +57,18 @@ fun handlePagingResult(
 }
 @Composable
 fun handlePagingChapterResult(
-    modifier: Modifier =Modifier,
+    modifier: Modifier = Modifier,
     books: LazyPagingItems<Chapter>,
-    onEmptyResult:@Composable () -> Unit,
-    onErrorResult:@Composable (error:String) -> Unit = {error ->
-        Box(modifier=modifier) {
-            ErrorTextWithEmojis(error =error, modifier = modifier
+    onEmptyResult: @Composable () -> Unit,
+    onErrorResult: @Composable (error: String) -> Unit = { error ->
+        Box(modifier = modifier) {
+            ErrorTextWithEmojis(error = error, modifier = modifier
                 .fillMaxWidth()
                 .padding(20.dp)
                 .wrapContentSize(Alignment.Center)
                 .align(Alignment.Center))
         }
-    }
+    },
 ): Boolean {
     books.apply {
         val error = when {
@@ -84,7 +84,7 @@ fun handlePagingChapterResult(
                 false
             }
             error != null -> {
-                onErrorResult(error.error.localizedMessage?: UiText.unknownError())
+                onErrorResult(UiText.exceptionError(error.error))
                 false
             }
             books.itemCount < 1 -> {

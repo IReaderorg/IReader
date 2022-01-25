@@ -5,6 +5,8 @@ import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
 import ir.kazemcodes.infinity.core.domain.repository.RemoteRepository
 import ir.kazemcodes.infinity.core.utils.Resource
+import ir.kazemcodes.infinity.core.utils.UiText
+import ir.kazemcodes.infinity.core.utils.asString
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.jsoup.select.Selector
@@ -16,7 +18,6 @@ class GetRemoteChapters(private val remoteRepository: RemoteRepository) {
     operator fun invoke(book: Book, source: Source): Flow<Resource<List<Chapter>>> =
         flow {
             try {
-                emit(Resource.Loading())
                 Timber.d("Timber: GetRemoteChaptersUseCase was Called")
                 val chapters = mutableListOf<Chapter>()
                 var currentPage = 1
@@ -36,16 +37,15 @@ class GetRemoteChapters(private val remoteRepository: RemoteRepository) {
             } catch (e: HttpException) {
                 emit(
                     Resource.Error<List<Chapter>>(
-                        message = e.localizedMessage ?: "An Unexpected Error Occurred."
+                      uiText = UiText.exceptionError(e)
                     )
                 )
             } catch (e: IOException) {
-                emit(Resource.Error<List<Chapter>>(message = "Couldn't Read Remote Server, Check Your Internet Connection."))
+                emit(Resource.Error<List<Chapter>>(uiText = UiText.DynamicString("Couldn't Read Remote Server, Check Your Internet Connection.").asString()))
             } catch (e: Selector.SelectorParseException) {
-                emit(Resource.Error<List<Chapter>>(message = "Source is not working."))
+                emit(Resource.Error<List<Chapter>>(uiText = UiText.DynamicString("Source is not working.").asString()))
             } catch (e: Exception) {
-                emit(Resource.Error<List<Chapter>>(message = e.localizedMessage
-                    ?: "An Unexpected Error Occurred"))
+                emit(Resource.Error<List<Chapter>>(uiText = UiText.exceptionError(e)))
             }
         }
 }

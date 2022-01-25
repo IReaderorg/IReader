@@ -56,9 +56,6 @@ class ExtensionViewModel(private val localSourceRepository: LocalSourceRepositor
                     is Resource.Error -> {
 
                     }
-                    is Resource.Loading -> {
-
-                    }
 
 
                 }

@@ -4,7 +4,10 @@ import com.bumptech.glide.load.HttpException
 import ir.kazemcodes.infinity.core.data.network.models.Source
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.repository.RemoteRepository
+import ir.kazemcodes.infinity.core.utils.Constants
 import ir.kazemcodes.infinity.core.utils.Resource
+import ir.kazemcodes.infinity.core.utils.UiText
+import ir.kazemcodes.infinity.core.utils.asString
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import timber.log.Timber
@@ -12,7 +15,6 @@ import java.io.IOException
 
 class GetBookDetail(private val remoteRepository: RemoteRepository) {
     operator fun invoke(book: Book, source: Source): Flow<Resource<Book>> = flow {
-        emit(Resource.Loading())
         try {
             Timber.d("Timber: Remote Book Detail for ${book.bookName} Was called")
             val bookDetail = remoteRepository.getRemoteBookDetail(book = book, source = source)
@@ -25,17 +27,17 @@ class GetBookDetail(private val remoteRepository: RemoteRepository) {
         } catch (e: HttpException) {
             emit(
                 Resource.Error<Book>(
-                    message = e.localizedMessage ?: "An Unexpected Error Occurred."
+                    uiText = UiText.noBook()
                 )
             )
 
         } catch (e: IOException) {
-            emit(Resource.Error<Book>(message = "Couldn't Read Server, Check Your Internet Connection."))
+            Resource.Error<Resource<List<Book>>>(
+                uiText = UiText.noInternetError()
+            )
         } catch (e: Exception) {
-            emit(
-                Resource.Error<Book>(
-                    message = e.localizedMessage ?: "An Unexpected Error Occurred."
-                )
+            Resource.Error<Resource<List<Book>>>(
+                uiText = UiText.DynamicString(e.localizedMessage ?: Constants.UNKNOWN_ERROR).asString()
             )
         }
     }

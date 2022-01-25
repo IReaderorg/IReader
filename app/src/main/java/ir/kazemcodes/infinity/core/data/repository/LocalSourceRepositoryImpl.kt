@@ -12,12 +12,11 @@ class LocalSourceRepositoryImpl(private val sourceTowerDao: SourceTowerDao) :
     LocalSourceRepository {
     override fun getSources(): Flow<Resource<List<SourceTower>>> = flow {
         try {
-            emit(Resource.Loading())
             val result = sourceTowerDao.getSources().map { it.toSource() }
             emit(Resource.Success(result))
 
         } catch (e: Exception) {
-            emit(Resource.Error(e.localizedMessage?:UiText.unknownError()))
+            emit(Resource.Error(uiText = UiText.exceptionError(e)))
         }
 
     }
