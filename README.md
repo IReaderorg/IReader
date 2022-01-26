@@ -21,7 +21,7 @@ IReader is a free and open source applicaiton for Android.
 
 ## Contribution
 
-# Adding a new Source
+### Adding a new Source
 - You can take a look at [here](https://github.com/kazemcodes/Infinity/blob/master/how_to_make_a_source_guide.md), to understand how to create a source for this applicaiton 
 
 
