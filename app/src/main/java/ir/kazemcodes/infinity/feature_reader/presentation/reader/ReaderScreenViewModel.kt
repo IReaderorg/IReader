@@ -13,6 +13,7 @@ import androidx.paging.cachedIn
 import com.zhuinden.simplestack.ScopedServices
 import ir.kazemcodes.infinity.core.data.network.models.Source
 import ir.kazemcodes.infinity.core.data.network.utils.launchIO
+import ir.kazemcodes.infinity.core.data.network.utils.launchUI
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
 import ir.kazemcodes.infinity.core.domain.models.FontType
@@ -87,6 +88,7 @@ class ReaderScreenViewModel(
 
     fun onEvent(event: ReaderEvent) {
         when (event) {
+
             is ReaderEvent.ChangeBrightness -> {
                 saveBrightness(event.brightness, event.context)
             }
@@ -175,7 +177,8 @@ class ReaderScreenViewModel(
                                 isLoading = false,
                                 isLoaded = false,
                             )
-                        _eventFlow.emit(UiEvent.ShowSnackbar(result.uiText?: UiText.unknownError().asString()))
+                        _eventFlow.emit(UiEvent.ShowSnackbar(result.uiText ?: UiText.unknownError()
+                            .asString()))
                         getReadingContentRemotely()
                     }
                 }
@@ -200,7 +203,8 @@ class ReaderScreenViewModel(
                 toggleLastReadAndUpdateChapterContent(state.value.chapter.copy(content = chapter.content))
 
                 _eventFlow.emit(UiEvent.ShowSnackbar(
-                    uiText = UiText.DynamicString("${state.value.chapter.title} of ${state.value.chapter.bookName} was Fetched").asString()
+                    uiText = UiText.DynamicString("${state.value.chapter.title} of ${state.value.chapter.bookName} was Fetched")
+                        .asString()
                 ))
             } else {
                 _eventFlow.emit(UiEvent.ShowSnackbar(
@@ -239,7 +243,8 @@ class ReaderScreenViewModel(
                                 isLoading = false,
                                 isLoaded = false,
                             )
-                        _eventFlow.emit(UiEvent.ShowSnackbar(result.uiText?: UiText.unknownError().asString()))
+                        _eventFlow.emit(UiEvent.ShowSnackbar(result.uiText ?: UiText.unknownError()
+                            .asString()))
                     }
                 }
             }.launchIn(coroutineScope)
@@ -294,8 +299,8 @@ class ReaderScreenViewModel(
         coroutineScope.launch(Dispatchers.IO) {
             getChapterUseCase.getLocalChaptersByPaging(bookId = bookId, isAsc = state.value.isAsc)
                 .cachedIn(coroutineScope).collect { snapshot ->
-                _chapters.value = snapshot
-            }
+                    _chapters.value = snapshot
+                }
         }
 
     }
@@ -455,19 +460,19 @@ class ReaderScreenViewModel(
      * get the index pf chapter based on the reversed state
      */
     fun getCurrentIndexOfChapter(chapter: Chapter): Int {
-        val chaptersById : List<Int> = state.value.chapters.map { it.chapterId }
+        val chaptersById: List<Int> = state.value.chapters.map { it.chapterId }
         return if (chaptersById.indexOf(chapter.chapterId) != -1) chaptersById.indexOf(chapter.chapterId) else 0
     }
 
     private fun getCurrentIndex(): Int {
-       return if (state.value.currentChapterIndex < 0) {
+        return if (state.value.currentChapterIndex < 0) {
             0
         } else if (state.value.currentChapterIndex > (state.value.chapters.lastIndex)) {
             state.value.chapters.lastIndex
         } else if (state.value.currentChapterIndex == -1) {
             0
         } else {
-           state.value.currentChapterIndex
+            state.value.currentChapterIndex
         }
     }
 
@@ -482,9 +487,11 @@ class ReaderScreenViewModel(
                     isChapterReversingInProgress = true)
 
             coroutineScope.launch(Dispatchers.IO) {
-                _eventFlow.emit(UiEvent.ShowSnackbar(UiText.DynamicString("Reversing Chapters...").asString()))
+                _eventFlow.emit(UiEvent.ShowSnackbar(UiText.DynamicString("Reversing Chapters...")
+                    .asString()))
                 insertUseCases.insertBook(state.value.book.copy(areChaptersReversed = state.value.book.areChaptersReversed))
-                _eventFlow.emit(UiEvent.ShowSnackbar(UiText.DynamicString("Chapters were reversed").asString()))
+                _eventFlow.emit(UiEvent.ShowSnackbar(UiText.DynamicString("Chapters were reversed")
+                    .asString()))
             }
             updateChapterSliderIndex(getCurrentIndexOfChapter(state.value.chapter))
             getChapters()
@@ -493,6 +500,12 @@ class ReaderScreenViewModel(
 
     }
 
+    fun showSnackBar(message: String) {
+        coroutineScope.launchUI {
+            _eventFlow.emit(UiEvent.ShowSnackbar(UiText.DynamicString(message).asString()))
+
+        }
+    }
 
 
     override fun onServiceUnregistered() {

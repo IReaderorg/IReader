@@ -13,7 +13,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
-import ir.kazemcodes.infinity.core.data.network.utils.toast
 import ir.kazemcodes.infinity.feature_reader.presentation.reader.ReaderScreenViewModel
 
 
@@ -39,7 +38,9 @@ fun ChaptersSliderComposable(
                     if (currentIndex > 0) {
                         viewModel.updateChapterSliderIndex(currentIndex - 1)
                         viewModel.getChapter(viewModel.getCurrentChapterByIndex())
-                    } else context.toast("This is first chapter")
+                    } else {
+                        viewModel.showSnackBar("This is first chapter")
+                    }
                 }) {
                 Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Previous Chapter")
             }
@@ -52,7 +53,7 @@ fun ChaptersSliderComposable(
                     viewModel.updateChapterSliderIndex(it.toInt())
                 },
                 onValueChangeFinished = {
-                    context.toast(chapters[viewModel.state.value.currentChapterIndex].title)
+                    viewModel.showSnackBar(chapters[viewModel.state.value.currentChapterIndex].title)
                     viewModel.updateChapterSliderIndex(currentIndex)
                     viewModel.getChapter(chapters[viewModel.state.value.currentChapterIndex])
                 },
@@ -71,7 +72,7 @@ fun ChaptersSliderComposable(
                     viewModel.updateChapterSliderIndex(currentIndex + 1)
                     viewModel.getChapter(viewModel.getCurrentChapterByIndex())
                 } else {
-                    context.toast("This is last chapter")
+                    viewModel.showSnackBar("This is last chapter")
                 }
 
             }) {

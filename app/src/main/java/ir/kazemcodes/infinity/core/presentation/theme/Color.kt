@@ -15,6 +15,9 @@ object Colour {
     val blue_600 = Color(0xFF2196f3)
     val blue_700 = Color(0xFF2196f3)
 
+    val blue_accent = Color(0xFF2979FF)
+
+
 
     val light_blue_a_200 = Color(0xFF40c4ff)
 
@@ -47,6 +50,10 @@ object Colour {
     val Colors.iconColor
         @Composable
         get() = if (isLight) blue_500 else blue_500
+
+    val Colors.scrollingThumbColor
+        @Composable
+        get() = if (isLight) blue_accent else blue_accent
 
 
 }

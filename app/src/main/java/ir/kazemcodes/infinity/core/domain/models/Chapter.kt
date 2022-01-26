@@ -24,7 +24,6 @@ data class Chapter(
     var bookmarked : Boolean = false,
     var downloaded : Boolean = false,
     var scrollPosition : Int = 0,
-
 ) {
 
     companion object {

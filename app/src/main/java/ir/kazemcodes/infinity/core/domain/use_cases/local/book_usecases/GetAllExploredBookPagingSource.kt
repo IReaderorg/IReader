@@ -20,7 +20,7 @@ class GetAllExploredBookPagingData(private val localBookRepository: LocalBookRep
     operator fun invoke(
     ): Flow<PagingData<Book>> {
         return Pager(
-            config = PagingConfig(pageSize = Constants.DEFAULT_BIG_PAGE_SIZE,
+            config = PagingConfig(pageSize = Constants.DEFAULT_PAGE_SIZE,
                 maxSize = Constants.MAX_PAGE_SIZE, enablePlaceholders = true),
             pagingSourceFactory = {
                 localBookRepository.getAllExploreBookPagingSource()

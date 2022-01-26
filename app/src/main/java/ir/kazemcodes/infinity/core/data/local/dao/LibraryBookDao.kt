@@ -92,7 +92,7 @@ interface LibraryBookDao {
     @Query("SELECT * FROM book_table WHERE id = :bookId Limit 1")
     fun getBookById(bookId: Int): Flow<Book?>
 
-    @Query("SELECT * FROM book_table WHERE bookName LIKE'%' || :query || '%'")
+    @Query("SELECT * FROM book_table WHERE bookName LIKE '%' || :query || '%' AND inLibrary = 1")
     fun searchBook(query: String): PagingSource<Int, Book>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

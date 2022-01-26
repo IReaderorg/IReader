@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.Flow
 class GetBooksByQueryByPagination(private val localBookRepository: LocalBookRepository) {
     operator fun invoke(query: String): Flow<PagingData<Book>> {
         return Pager(
-            config = PagingConfig(pageSize = Constants.DEFAULT_BIG_PAGE_SIZE,
+            config = PagingConfig(pageSize = Constants.DEFAULT_PAGE_SIZE,
                 maxSize = Constants.MAX_PAGE_SIZE, enablePlaceholders = true),
             pagingSourceFactory = {
                 localBookRepository.getBooksByQueryPagingSource(query)

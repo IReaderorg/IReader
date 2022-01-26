@@ -7,8 +7,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -34,8 +32,12 @@ import ir.kazemcodes.infinity.core.presentation.reusable_composable.ErrorTextWit
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarActionButton
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarBackButton
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarTitle
+import ir.kazemcodes.infinity.core.presentation.theme.Colour.scrollingThumbColor
 import ir.kazemcodes.infinity.core.utils.UiEvent
-import ir.kazemcodes.infinity.core.utils.asString
+import ir.kazemcodes.infinity.core.utils.scroll.Carousel
+import ir.kazemcodes.infinity.core.utils.scroll.CarouselDefaults
+import ir.kazemcodes.infinity.core.utils.scroll.rememberCarouselScrollState
+import ir.kazemcodes.infinity.core.utils.scroll.verticalScroll
 import ir.kazemcodes.infinity.feature_activity.presentation.WebViewKey
 import ir.kazemcodes.infinity.feature_reader.presentation.reader.components.MainBottomSettingComposable
 import ir.kazemcodes.infinity.feature_reader.presentation.reader.components.ReaderSettingComposable
@@ -61,7 +63,8 @@ fun ReadingScreen(
     val state = viewModel.state.value
     val interactionSource = remember { MutableInteractionSource() }
     val context = LocalContext.current
-    val scrollState = rememberScrollState()
+    val scrollState = rememberCarouselScrollState()
+
 
     //viewModel.updateChapters(chapters.itemSnapshotList.items)
 
@@ -69,6 +72,8 @@ fun ReadingScreen(
     val isWebViewEnable by remember {
         mutableStateOf(viewModel.webView.originalUrl == viewModel.state.value.chapter.link)
     }
+
+
 
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
@@ -78,6 +83,7 @@ fun ReadingScreen(
                         event.uiText
                     )
                 }
+                else -> {}
             }
         }
     }
@@ -196,7 +202,7 @@ fun ReadingScreen(
                         Row() {
                             TopAppBarActionButton(imageVector = Icons.Default.SettingsBackupRestore,
                                 title = "Reverse Chapter List",
-                                onClick = {    viewModel.reverseSlider()  })
+                                onClick = { viewModel.reverseSlider() })
 
                             TopAppBarActionButton(imageVector = Icons.Default.Sort,
                                 title = "Reverse list icon",
@@ -222,7 +228,7 @@ fun ReadingScreen(
                         }
 
                     })
-                    if(result) {
+                    if (result) {
                         AnimatedContent(chapters.loadState.refresh is LoadState.NotLoading) {
                             LazyColumn(modifier = Modifier.fillMaxSize()) {
                                 items(items = chapters) { chapter ->
@@ -230,7 +236,8 @@ fun ReadingScreen(
                                         ChapterListItemComposable(modifier = modifier,
                                             chapter = chapter, goTo = {
                                                 viewModel.getChapter(chapter)
-                                                viewModel.updateChapterSliderIndex(viewModel.getCurrentIndexOfChapter(chapter))
+                                                viewModel.updateChapterSliderIndex(viewModel.getCurrentIndexOfChapter(
+                                                    chapter))
                                             })
                                     }
                                 }
@@ -265,15 +272,34 @@ fun ReadingScreen(
                     .wrapContentSize(Alignment.CenterStart)
             ) {
                 if (state.chapter.isChapterNotEmpty() && !state.isLoading) {
-                    Text(
-                        modifier = modifier.verticalScroll(scrollState),
-                        text = state.chapter.content.joinToString("\n".repeat(state.distanceBetweenParagraphs)),
-                        fontSize = viewModel.state.value.fontSize.sp,
-                        fontFamily = viewModel.state.value.font.fontFamily,
-                        textAlign = TextAlign.Start,
-                        color = state.textColor,
-                        lineHeight = state.lineHeight.sp
-                    )
+                    Row(modifier = modifier.fillMaxSize()) {
+                        Text(
+                            modifier = modifier
+                                .verticalScroll(scrollState)
+                                .weight(1f),
+                            text = state.chapter.content.joinToString("\n".repeat(state.distanceBetweenParagraphs)),
+                            fontSize = viewModel.state.value.fontSize.sp,
+                            fontFamily = viewModel.state.value.font.fontFamily,
+                            textAlign = TextAlign.Start,
+                            color = state.textColor,
+                            lineHeight = state.lineHeight.sp
+                        )
+                        Carousel(
+                            state = scrollState,
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .weight(.02f)
+                                .padding(start = 6.dp),
+                            colors = CarouselDefaults.colors(
+                                thumbColor = MaterialTheme.colors.scrollingThumbColor,
+                                scrollingThumbColor = MaterialTheme.colors.scrollingThumbColor,
+                                backgroundColor = viewModel.state.value.backgroundColor,
+                                scrollingBackgroundColor = viewModel.state.value.backgroundColor
+                            )
+
+                        )
+                    }
+
                 }
             }
         }
