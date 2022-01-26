@@ -46,6 +46,8 @@ data class Latest(
     override val addToStringEnd: String? = null,
     @ColumnInfo(name = "latest_idSelector")
     override val idSelector: String?=null,
+    @ColumnInfo(name = "latest_addBaseurlToCoverLink")
+    override val addBaseurlToCoverLink: Boolean = false,
     @ColumnInfo(name = "latest_linkSelector")
     val linkSelector: String? = null,
     @ColumnInfo(name = "latest_linkAtt")
@@ -105,6 +107,8 @@ data class Popular(
     override val addToStringEnd: String? = null,
     @ColumnInfo(name = "popular_idSelector")
     override val idSelector: String?=null,
+    @ColumnInfo(name = "popular_addBaseurlToCoverLink")
+    override val addBaseurlToCoverLink: Boolean = false,
     @ColumnInfo(name = "popular_linkSelector")
     val linkSelector: String? = null,
     @ColumnInfo(name = "popular_linkAtt")
@@ -159,6 +163,8 @@ data class Detail(
     override val addToStringEnd: String? = null,
     @ColumnInfo(name = "detail_idSelector")
     override val idSelector: String?=null,
+    @ColumnInfo(name = "detail_addBaseurlToCoverLink")
+    override val addBaseurlToCoverLink: Boolean = false,
     @ColumnInfo(name = "detail_nameSelector")
     val nameSelector: String? = null,
     @ColumnInfo(name = "detail_nameAtt")
@@ -221,6 +227,8 @@ data class Search(
     override val addToStringEnd: String? = null,
     @ColumnInfo(name = "search_idSelector")
     override val idSelector: String?=null,
+    @ColumnInfo(name = "search_addBaseurlToCoverLink")
+    override val addBaseurlToCoverLink: Boolean = false,
     @ColumnInfo(name = "search_linkSelector")
     val linkSelector: String? = null,
     @ColumnInfo(name = "search_linkAtt")
@@ -275,6 +283,8 @@ data class Chapters(
     override val addToStringEnd: String? = null,
     @ColumnInfo(name = "chapters_idSelector")
     override val idSelector: String?=null,
+    @ColumnInfo(name = "chapter_addBaseurlToCoverLink")
+    override val addBaseurlToCoverLink: Boolean = false,
     @ColumnInfo(name = "chapters_isDownloadable")
     val isDownloadable: Boolean = false,
     @ColumnInfo(name = "chapters_chaptersEndpointWithoutPage")
@@ -336,6 +346,8 @@ data class Content(
     override val addToStringEnd: String? = null,
     @ColumnInfo(name = "content_idSelector")
     override val idSelector: String?=null,
+    @ColumnInfo(name = "content_addBaseurlToCoverLink")
+    override val addBaseurlToCoverLink: Boolean = false,
     @ColumnInfo(name = "content_pageTitleSelector")
     val pageTitleSelector: String? = null,
     @ColumnInfo(name = "content_pageTitleAtt")
@@ -344,6 +356,7 @@ data class Content(
     val pageContentSelector: String? = null,
     @ColumnInfo(name = "content_pageContentAtt")
     val pageContentAtt: String? = null,
+
 ) : Fetcher
 
 
@@ -361,6 +374,7 @@ interface Fetcher {
     val nextPageSelector: String?
     val nextPageAtt: String?
     val nextPageValue : String?
+    val addBaseurlToCoverLink : Boolean?
 }
 
 sealed class FetchType(val index:Int) {

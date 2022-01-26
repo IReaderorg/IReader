@@ -22,9 +22,9 @@ import ir.kazemcodes.infinity.feature_explore.presentation.browse.ExploreType
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun SourceList(sources : List<Source>, scrollState : LazyListState) {
+fun SourceList(modifier: Modifier = Modifier,sources : List<Source>, scrollState : LazyListState) {
     val backstack = LocalBackstack.current
-    LazyColumn(modifier = Modifier
+    LazyColumn(modifier = modifier
         .fillMaxSize(),
         state = scrollState,
         verticalArrangement = Arrangement.Top,

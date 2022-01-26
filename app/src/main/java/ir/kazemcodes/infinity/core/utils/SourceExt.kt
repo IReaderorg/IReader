@@ -84,11 +84,11 @@ fun selectorReturnerStringType(
     selector: String? = null,
     att: String? = null,
 ): String {
-    if (selector.isNullOrEmpty() && !att.isNullOrEmpty()) {
+    if (selector.isNullOrBlank() && !att.isNullOrBlank()) {
         return document.attr(att)
-    } else if (!selector.isNullOrEmpty() && att.isNullOrEmpty()) {
+    } else if (!selector.isNullOrBlank() && att.isNullOrBlank()) {
         return document.select(selector).text()
-    } else if (!selector.isNullOrEmpty() && !att.isNullOrEmpty()) {
+    } else if (!selector.isNullOrBlank() && !att.isNullOrBlank()) {
         return document.select(selector).attr(att)
     } else {
         return ""
@@ -100,11 +100,11 @@ fun selectorReturnerStringType(
     selector: String? = null,
     att: String? = null,
 ): String {
-    if (selector.isNullOrEmpty() && !att.isNullOrEmpty()) {
+    if (selector.isNullOrBlank() && !att.isNullOrBlank()) {
         return element.attr(att)
-    } else if (!selector.isNullOrEmpty() && att.isNullOrEmpty()) {
+    } else if (!selector.isNullOrBlank() && att.isNullOrBlank()) {
         return element.select(selector).text().formatHtmlText()
-    } else if (!selector.isNullOrEmpty() && !att.isNullOrEmpty()) {
+    } else if (!selector.isNullOrBlank() && !att.isNullOrBlank()) {
         return element.select(selector).attr(att)
     } else {
         return ""
@@ -116,11 +116,11 @@ fun selectorReturnerListType(
     selector: String? = null,
     att: String? = null,
 ): List<String> {
-    if (selector.isNullOrEmpty() && !att.isNullOrEmpty()) {
+    if (selector.isNullOrBlank() && !att.isNullOrBlank()) {
         return listOf(element.attr(att))
-    } else if (!selector.isNullOrEmpty() && att.isNullOrEmpty()) {
+    } else if (!selector.isNullOrBlank() && att.isNullOrBlank()) {
         return element.select(selector).eachText()
-    } else if (!selector.isNullOrEmpty() && !att.isNullOrEmpty()) {
+    } else if (!selector.isNullOrBlank() && !att.isNullOrBlank()) {
         return listOf(element.select(selector).attr(att))
     } else {
         return emptyList()
@@ -132,13 +132,13 @@ fun selectorReturnerListType(
     selector: String? = null,
     att: String? = null,
 ): List<String> {
-    if (selector.isNullOrEmpty() && !att.isNullOrEmpty()) {
+    if (selector.isNullOrBlank() && !att.isNullOrBlank()) {
         return listOf(document.attr(att))
-    } else if (!selector.isNullOrEmpty() && att.isNullOrEmpty()) {
+    } else if (!selector.isNullOrBlank() && att.isNullOrBlank()) {
         return document.select(selector).map {
             it.html().formatHtmlText()
         }
-    } else if (!selector.isNullOrEmpty() && !att.isNullOrEmpty()) {
+    } else if (!selector.isNullOrBlank() && !att.isNullOrBlank()) {
         return listOf(document.select(selector).attr(att))
     } else {
         return emptyList()

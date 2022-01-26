@@ -1,6 +1,5 @@
 package ir.kazemcodes.infinity.feature_settings.presentation.setting.extension_creator
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
@@ -30,7 +29,6 @@ import com.zhuinden.simplestackcomposeintegration.services.rememberService
 import ir.kazemcodes.infinity.core.domain.repository.LocalSourceRepository
 import ir.kazemcodes.infinity.core.presentation.components.ISnackBarHost
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.MidSizeTextComposable
-import ir.kazemcodes.infinity.core.presentation.reusable_composable.SmallTextComposable
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarActionButton
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarBackButton
 import ir.kazemcodes.infinity.core.utils.UiEvent
@@ -83,8 +81,8 @@ fun ExtensionCreatorScreen(modifier: Modifier = Modifier) {
                 TopAppBarBackButton(backStack = backStack)
             },
             actions = {
-                SmallTextComposable(title = "Format",
-                    modifier = modifier.clickable { viewModel.formatJson() })
+//                SmallTextComposable(title = "Format",
+//                    modifier = modifier.clickable { viewModel.formatJson() })
                 TopAppBarActionButton(imageVector = Icons.Default.Add,
                     title = "Adding Sources Button",
                     onClick = { viewModel.convertJsonToSource() })

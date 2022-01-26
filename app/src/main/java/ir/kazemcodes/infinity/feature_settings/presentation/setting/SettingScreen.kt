@@ -33,7 +33,7 @@ fun SettingScreen(modifier: Modifier = Modifier) {
         SettingItems.DnsOverHttp,
         SettingItems.About,
     )
-    Box(modifier.fillMaxSize()) {
+    Box(modifier.fillMaxSize().padding(bottom = 50.dp)) {
         Scaffold(modifier = Modifier.fillMaxSize(), topBar = {
             TopAppBar(
                 title = {

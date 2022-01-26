@@ -60,7 +60,8 @@ fun ExtensionScreen(modifier: Modifier = Modifier) {
         }
     ) {
         val tabs = listOf<TabItem>(TabItem.Sources(viewModel), TabItem.CommunitySources(viewModel))
-        Column(modifier = modifier.fillMaxSize(),
+        Column(modifier = modifier
+            .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top) {
             Tabs(libraryTabs = tabs, pagerState = pageState)

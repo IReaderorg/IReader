@@ -33,14 +33,11 @@ class MainActivity : AppCompatActivity(), SimpleStateChanger.NavigationHandler {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)
 
-        val source = AvailableSources(context = this).myLoveNovel
+        val source = AvailableSources(context = this).realLightWebNovel
         val moshi: Moshi = moshi
         val jsonAdapter: JsonAdapter<SourceTower> = moshi.adapter<SourceTower>(SourceTower::class.java)
 
         Timber.e(jsonAdapter.toJson(source))
-
-
-
 
         val app = application as MyApplication
         val globalServices = app.globalServices

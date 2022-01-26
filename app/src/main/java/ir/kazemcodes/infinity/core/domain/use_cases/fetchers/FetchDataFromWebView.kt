@@ -32,8 +32,10 @@ class FetchBookDetailAndChapterDetailFromWebView {
                             val uniqueList = removeSameItemsFromList(oldList = localChapters, newList = chaptersFromPageSource.chapters, differentiateBy = {
                                 it.title
                             })
+
+
                             deleteUseCase.deleteChaptersByBookId(bookId = localBook.id)
-                            insertUseCases.insertChapters(uniqueList.map { it.copy(
+                            insertUseCases.insertChapters(chaptersFromPageSource.chapters.map { it.copy(
                                 bookId = localBook.id,
                                 bookName = localBook.bookName,
                                 inLibrary = localBook.inLibrary,

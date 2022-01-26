@@ -31,6 +31,7 @@ data class SourceTower constructor(
     override val supportsMostPopular: Boolean = false,
     override val supportSearch: Boolean = false,
     override val supportsLatest: Boolean = false,
+    val creatorNote : String?=null,
     val latest: Latest? = null,
     val popular: Popular? = null,
     val detail: Detail? = null,
@@ -191,7 +192,8 @@ data class SourceTower constructor(
             selectorLink,
             attLink).shouldSubstring(popular?.addBaseUrlToLink, baseUrl))
         book.bookName = selectorReturnerStringType(element, selectorName, attName).formatHtmlText()
-        book.coverLink = selectorReturnerStringType(element, selectorCover, attCover)
+        book.coverLink = selectorReturnerStringType(element, selectorCover, attCover).shouldSubstring(popular?.addBaseurlToCoverLink, baseUrl)
+
 
 
         return book
@@ -212,10 +214,10 @@ data class SourceTower constructor(
             selectorLink,
             attLink).shouldSubstring(latest?.addBaseUrlToLink, baseUrl))
         book.bookName = selectorReturnerStringType(element, selectorName, attName).formatHtmlText()
-        book.coverLink = selectorReturnerStringType(element, selectorCover, attCover)
+        book.coverLink = selectorReturnerStringType(element, selectorCover, attCover).shouldSubstring(latest?.addBaseurlToCoverLink, baseUrl)
 
 
-        //Timber.e("Timber: SourceCreator" + book.coverLink)
+            //Timber.e("Timber: SourceCreator" + book.coverLink)
 
         return book
     }
@@ -235,6 +237,8 @@ data class SourceTower constructor(
         chapter.haveBeenRead = false
 
 
+
+
         return chapter
     }
 
@@ -249,7 +253,8 @@ data class SourceTower constructor(
 
         book.link = baseUrl + getUrlWithoutDomain(selectorReturnerStringType(element, selectorLink, attLink).shouldSubstring(search?.addBaseUrlToLink, baseUrl))
         book.bookName = selectorReturnerStringType(element, selectorName, attName).formatHtmlText()
-        book.coverLink = selectorReturnerStringType(element, selectorCover, attCover)
+        book.coverLink = selectorReturnerStringType(element, selectorCover, attCover).shouldSubstring(search?.addBaseurlToCoverLink, baseUrl)
+
 
         return book
     }

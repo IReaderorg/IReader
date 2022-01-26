@@ -60,6 +60,8 @@ class AvailableSources(context: Context) {
             coverAtt = null,
             supportPageList = false,
             maxPageIndex = null,
+            addToStringEnd = null,
+            idSelector = null,
         ),
         popular = Popular(
             endpoint = null,
@@ -78,6 +80,9 @@ class AvailableSources(context: Context) {
             nameAtt = null,
             coverSelector = null,
             coverAtt = null,
+            addToStringEnd = null,
+            idSelector = null,
+
         ),
         search = Search(
             endpoint = null,
@@ -96,6 +101,8 @@ class AvailableSources(context: Context) {
             nameAtt = null,
             coverSelector = null,
             coverAtt = null,
+            addToStringEnd = null,
+            idSelector = null,
         ),
         detail = Detail(
             endpoint = null,
@@ -118,6 +125,9 @@ class AvailableSources(context: Context) {
             authorBookAtt = null,
             categorySelector = null,
             categoryAtt = null,
+            addToStringEnd = null,
+            idSelector = null,
+
         ),
         chapters = Chapters(
             endpoint = null,
@@ -138,7 +148,10 @@ class AvailableSources(context: Context) {
             chaptersEndpointWithoutPage = null,
             isChapterStatsFromFirst = true,
             isDownloadable = false,
-            subStringSomethingAtEnd = null
+            subStringSomethingAtEnd = null,
+            addToStringEnd = null,
+            idSelector = null,
+
         ),
         content = Content(
             endpoint = null,
@@ -155,6 +168,8 @@ class AvailableSources(context: Context) {
             pageTitleAtt = null,
             pageTitleSelector = null,
             pageContentAtt = null,
+            addToStringEnd = null,
+            idSelector = null,
         ),
     )
 
@@ -347,7 +362,7 @@ class AvailableSources(context: Context) {
 
     )
     val wuxiaworld = SourceTower(
-        name = "Wuxiaworld",
+        name = "Wuxiaworld.Site",
         lang = "en",
         baseUrl = "https://wuxiaworld.site",
         supportsMostPopular = true,
@@ -618,6 +633,84 @@ class AvailableSources(context: Context) {
 
         )
     )
+    val wuxiaworldsiteco = SourceTower(
+        name = "Wuxiaworldsite.co",
+        baseUrl = "https://wuxiaworldsite.co",
+        supportSearch = true,
+        supportsMostPopular = true,
+        supportsLatest = true,
+        creator = "@Kazem",
+        lang = "en",
+        latest = Latest(
+            isGetRequestType = false,
+            endpoint = "/my-library?page={page}&keyword=&count=6&genres_include=",
+            selector = "div.one_item",
+            nameSelector = "a",
+            nameAtt = "title",
+            linkSelector = "a",
+            linkAtt = "href",
+            addBaseUrlToLink = true,
+            coverSelector = "img",
+            coverAtt = "src",
+            nextPageSelector = "div.paging_section > div > span:nth-child(4)",
+            nextPageValue = ">|",
+            addBaseurlToCoverLink = true
+
+        ),
+        popular = Popular(
+            isGetRequestType = false,
+            endpoint = "/power-ranking?page={page}&keyword=&count=18&genres_include=&limit=18&order_type=DESC&order_by=real_time",
+            selector = "div.one_item",
+            nameSelector = "a",
+            nameAtt = "title",
+            linkSelector = "a",
+            linkAtt = "href",
+            addBaseUrlToLink = true,
+            coverSelector = "img",
+            coverAtt = "src",
+            nextPageSelector = "no-more-page",
+            addBaseurlToCoverLink = true
+        ),
+        content = Content(
+            selector = "div.content-story",
+            pageTitleSelector = "a.chapter-title",
+            pageContentSelector = "p:not(:first-child)"
+        ),
+        chapters = Chapters(
+            selector = "div.chapter_wrapper a",
+            nameSelector = "a",
+            linkSelector = "a",
+            linkAtt = "href",
+            addBaseUrlToLink = true,
+            isChapterStatsFromFirst = true,
+            addBaseurlToCoverLink = true
+        ),
+        detail = Detail(
+            nameSelector = "h1.heading_read",
+            coverSelector = "div.img-read img",
+            coverAtt = "src",
+            descriptionSelector = "div.story-introduction-content p",
+            categorySelector = "div.content-reading div.d-flex a",
+            categoryAtt = "title",
+            authorBookSelector = "div.content-reading i",
+            addBaseurlToCoverLink = true
+        ),
+        search = Search(
+            isGetRequestType = false,
+            endpoint = "/search/{query}?page={page}&keyword={query}&count=18&genres_include=&limit=18&order_type=DESC&order_by=real_time",
+            selector = "div.content_game div.item",
+            nameSelector = "a",
+            nameAtt = "title",
+            linkSelector = "a",
+            linkAtt = "href",
+            coverSelector = "img",
+            coverAtt = "src",
+            nextPageSelector = "div.paging_section > div > span:nth-child(5)",
+            nextPageValue = ">|",
+            addBaseurlToCoverLink = true
+
+        )
+    )
 
 
     val sourcesList = listOf<Source>(
@@ -628,6 +721,7 @@ class AvailableSources(context: Context) {
         realwebnovel,
         wuxiaworld,
         mtlNation,
-        realLightWebNovel
+        realLightWebNovel,
+        wuxiaworldsiteco
     )
 }

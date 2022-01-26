@@ -236,6 +236,7 @@ class BookDetailViewModel(
                                 )
                                 deleteUseCase.deleteChaptersByBookId(bookId)
                                 insertChaptersToLocal(uniqueList)
+                                getLocalChaptersByBookId()
                             }
                         }
                         is Resource.Error -> {
@@ -278,6 +279,7 @@ class BookDetailViewModel(
                             _eventFlow.emit(UiEvent.ShowSnackbar(
                                 uiText = result.data.asString()
                             ))
+                            getLocalChaptersByBookId()
                         }
                     }
                     is Resource.Error -> {
