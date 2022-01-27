@@ -396,9 +396,9 @@ class AvailableSources(context: Context) {
             linkAtt = "href",
         ), content = Content(
             ajaxSelector = "div.reading-content div.text-left p:nth-child(3)",
-            selector = "div.read-container div.reading-content h3,p",
-            pageTitleSelector = "div.text-left>h3",
-            pageContentSelector = "div.text-left>p",
+            selector = "div.read-container h3,p",
+            pageTitleSelector = "div.text-left h3",
+            pageContentSelector = "div.text-left p",
         ),
         popular = Popular(
             endpoint = "/novel-list/page/{page}/?m_orderby=views",

@@ -35,7 +35,7 @@ class FetchBookDetailAndChapterDetailFromWebView {
 
 
                             deleteUseCase.deleteChaptersByBookId(bookId = localBook.id)
-                            insertUseCases.insertChapters(chaptersFromPageSource.chapters.map { it.copy(
+                            insertUseCases.insertChapters(uniqueList.map { it.copy(
                                 bookId = localBook.id,
                                 bookName = localBook.bookName,
                                 inLibrary = localBook.inLibrary,

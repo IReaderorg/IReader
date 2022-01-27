@@ -70,8 +70,7 @@ class ReaderScreenViewModel(
             source = source
         )
         getLocalBookByName()
-        getChapters()
-        getChapter(state.value.chapter)
+
         getLocalChaptersByPaging()
         readPreferences()
     }
@@ -206,6 +205,10 @@ class ReaderScreenViewModel(
                     uiText = UiText.DynamicString("${state.value.chapter.title} of ${state.value.chapter.bookName} was Fetched")
                         .asString()
                 ))
+                if (state.value.chapter.content.size > 10) {
+                    _state.value = state.value.copy(isLoaded = true)
+                }
+                _state.value = state.value
             } else {
                 _eventFlow.emit(UiEvent.ShowSnackbar(
                     uiText = UiText.DynamicString("Failed to to get the content").asString()
@@ -252,7 +255,6 @@ class ReaderScreenViewModel(
 
     @Suppress()
     private fun getLocalBookByName() {
-
         coroutineScope.launchIO {
             getBookUseCases.getBookById(id = bookId).first { result ->
                 when (result) {
@@ -265,6 +267,8 @@ class ReaderScreenViewModel(
                             )
                             insertUseCases.insertBook(book = result.data.copy(lastRead = System.currentTimeMillis(),
                                 unread = !result.data.unread))
+                            getChapters()
+                            getChapter(state.value.chapter)
                             true
                         } else {
                             false
@@ -477,7 +481,11 @@ class ReaderScreenViewModel(
     }
 
     fun getCurrentChapterByIndex(): Chapter {
-        return state.value.chapters[getCurrentIndex()]
+        return try {
+            state.value.chapters[getCurrentIndex()]
+        }catch (e:Exception) {
+            state.value.chapters[0]
+        }
     }
 
     fun reverseSlider() {

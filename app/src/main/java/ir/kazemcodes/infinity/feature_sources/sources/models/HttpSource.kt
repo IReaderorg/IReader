@@ -6,10 +6,10 @@ import ir.kazemcodes.infinity.core.data.network.models.*
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
 import ir.kazemcodes.infinity.core.utils.asJsoup
+import ir.kazemcodes.infinity.core.utils.call
 import ir.kazemcodes.infinity.feature_sources.sources.utils.NetworkHelper
 import okhttp3.*
 import org.jsoup.nodes.Document
-import ru.gildor.coroutines.okhttp.await
 import uy.kohesive.injekt.injectLazy
 import java.net.URI
 import java.net.URISyntaxException
@@ -116,7 +116,7 @@ abstract class HttpSource : Source {
      * @param page the page number to retrieve.
      */
     override suspend fun fetchPopular(page: Int): BooksPage {
-        val request = client.newCall(popularRequest(page)).await()
+        val request = client.call(popularRequest(page))
         request.close()
         return popularParse( request, page = page)
     }
@@ -127,7 +127,7 @@ abstract class HttpSource : Source {
      * @param page the page number to retrieve.
      */
     override suspend fun fetchLatest(page: Int): BooksPage {
-        val request =client.newCall(latestRequest(page)).await()
+        val request =client.call(latestRequest(page))
         request.close()
         return latestParse(request, page = page)
     }
@@ -139,7 +139,7 @@ abstract class HttpSource : Source {
      * @param page the page number to retrieve.
      */
     override suspend fun fetchBook(book: Book): BookPage {
-        val request = client.newCall(detailsRequest(book)).await()
+        val request = client.call(detailsRequest(book))
         request.close()
         return detailParse(request)
     }
@@ -152,7 +152,7 @@ abstract class HttpSource : Source {
      * @param book the chapters to retrieve.
      */
     override suspend fun fetchChapters(book: Book, page: Int): ChaptersPage {
-        val request = client.newCall(chaptersRequest(book, page)).await()
+        val request = client.call(chaptersRequest(book, page))
         request.close()
         return chapterListParse(request)
     }
@@ -164,7 +164,7 @@ abstract class HttpSource : Source {
      * @param page the page number to retrieve.
      */
     override suspend fun fetchContent(chapter: Chapter): ChapterPage {
-        val request = client.newCall(contentRequest(chapter)).await()
+        val request = client.call(contentRequest(chapter))
         request.close()
         return pageContentParse( request)
     }
@@ -177,7 +177,7 @@ abstract class HttpSource : Source {
      * @param query the search query to retrieve.
      */
     override suspend fun fetchSearch(page: Int, query: String): BooksPage {
-        val request = client.newCall(searchRequest(page, query)).await()
+        val request = client.call(searchRequest(page, query))
         request.close()
         return searchBookParse(request, page)
     }

@@ -2,6 +2,7 @@ package ir.kazemcodes.infinity.di
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.os.FileUtils
 import android.webkit.WebView
 import dagger.Module
 import dagger.Provides
@@ -17,7 +18,6 @@ import ir.kazemcodes.infinity.core.domain.use_cases.fetchers.FetchUseCase
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.*
 import ir.kazemcodes.infinity.core.domain.use_cases.remote.*
 import ir.kazemcodes.infinity.feature_sources.sources.utils.NetworkHelper
-import ir.kazemcodes.infinity.feature_updater.ProgressListener
 import okhttp3.Call
 import okhttp3.CookieJar
 import okhttp3.OkHttpClient
@@ -122,7 +122,7 @@ class NetworkModule {
 
 
 }
-fun OkHttpClient.newCallWithProgress(request: Request, listener: ProgressListener): Call {
+fun OkHttpClient.newCallWithProgress(request: Request, listener: FileUtils.ProgressListener): Call {
     val progressClient = newBuilder()
         .cache(null)
         .addNetworkInterceptor { chain ->

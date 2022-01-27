@@ -18,7 +18,7 @@ import okhttp3.Response
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
-import ru.gildor.coroutines.okhttp.await
+
 
 
 @Serializable
@@ -591,7 +591,7 @@ data class SourceTower constructor(
      * Fetchers
      */
     override suspend fun fetchChapters(book: Book, page: Int): ChaptersPage {
-        val request = client.newCall(chaptersRequest(book, page)).await()
+        val request = client.call(chaptersRequest(book, page))
         var chapters = chapterListParse(request)
         if (chapters.errorMessage.isNotBlank() || request.code != 200 || !chapters.ajaxLoaded) {
             chapters =
@@ -608,7 +608,7 @@ data class SourceTower constructor(
      * @param page the page number to retrieve.
      */
     override suspend fun fetchPopular(page: Int): BooksPage {
-        val request = client.newCall(popularRequest(page)).await()
+        val request = client.call(popularRequest(page))
         var books = popularParse(request, page = page)
         if (books.errorMessage.isNotBlank() || request.code != 200 || !books.ajaxLoaded) {
             books =
@@ -632,7 +632,7 @@ data class SourceTower constructor(
     }
 
     override suspend fun fetchLatest(page: Int): BooksPage {
-        val request = client.newCall(latestRequest(page)).await()
+        val request = client.call(latestRequest(page))
         var books = latestParse(request, page = page)
         if (books.errorMessage.isNotBlank() || request.code != 200 || !books.ajaxLoaded) {
             books =
@@ -650,8 +650,8 @@ data class SourceTower constructor(
      * @param page the page number to retrieve.
      */
     override suspend fun fetchBook(book: Book): BookPage {
-        val request = client.newCall(detailsRequest(book)).await()
-        var completebook = detailParse(client.newCall(detailsRequest(book)).await())
+        val request = client.call(detailsRequest(book))
+        var completebook = detailParse(client.call(detailsRequest(book)))
         if (completebook.errorMessage.isNotBlank() || request.code != 200 || !completebook.ajaxLoaded) {
             completebook =
                 detailParse(network.getHtmlFromWebView(baseUrl + getUrlWithoutDomain(book.link)),
@@ -668,7 +668,7 @@ data class SourceTower constructor(
      * @param page the page number to retrieve.
      */
     override suspend fun fetchContent(chapter: Chapter): ChapterPage {
-        val request = client.newCall(contentRequest(chapter)).await()
+        val request = client.call(contentRequest(chapter))
         var content = pageContentParse(request)
 
         if (content.errorMessage.isNotBlank() || request.code != 200 || !content.ajaxLoaded) {
@@ -688,7 +688,7 @@ data class SourceTower constructor(
      * @param query the search query to retrieve.
      */
     override suspend fun fetchSearch(page: Int, query: String): BooksPage {
-        val request = client.newCall(searchRequest(page, query)).await()
+        val request = client.call(searchRequest(page, query))
         var books = searchBookParse(request, page)
         if (books.errorMessage.isNotBlank() || request.code != 200 || !books.ajaxLoaded) {
             books =

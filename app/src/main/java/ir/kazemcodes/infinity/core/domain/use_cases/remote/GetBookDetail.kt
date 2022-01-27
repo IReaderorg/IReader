@@ -1,6 +1,5 @@
 package ir.kazemcodes.infinity.core.domain.use_cases.remote
 
-import com.bumptech.glide.load.HttpException
 import ir.kazemcodes.infinity.core.data.network.models.Source
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.repository.RemoteRepository
@@ -10,6 +9,7 @@ import ir.kazemcodes.infinity.core.utils.UiText
 import ir.kazemcodes.infinity.core.utils.asString
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import retrofit2.HttpException
 import timber.log.Timber
 import java.io.IOException
 

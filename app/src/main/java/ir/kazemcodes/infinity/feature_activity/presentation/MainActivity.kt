@@ -50,6 +50,8 @@ class MainActivity : AppCompatActivity(), SimpleStateChanger.NavigationHandler {
             .setScopedServices(DefaultServiceProvider())
             .setGlobalServices(globalServices)
             .install(this, androidContentFrame, History.of(MainScreenKey()))
+
+        
     }
 
     override fun onBackPressed() {

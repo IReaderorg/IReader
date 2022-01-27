@@ -88,7 +88,6 @@ fun ReadingScreen(
         }
     }
 
-    Box(modifier = modifier.fillMaxSize()) {
         Scaffold(topBar = {
             if (!state.isReaderModeEnable && state.isLoaded && modalBottomSheetState.targetValue == ModalBottomSheetValue.Expanded) {
                 TopAppBar(
@@ -271,6 +270,9 @@ fun ReadingScreen(
                     .padding(viewModel.state.value.paragraphsIndent.dp)
                     .wrapContentSize(Alignment.CenterStart)
             ) {
+                Box(modifier = modifier.fillMaxSize()) {
+
+
                 if (state.chapter.isChapterNotEmpty() && !state.isLoading) {
                     Row(modifier = modifier.fillMaxSize()) {
                         Text(
@@ -301,27 +303,30 @@ fun ReadingScreen(
                     }
 
                 }
+
+                if (state.error.isNotBlank()) {
+                    ErrorTextWithEmojis(
+                        error = state.error,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp)
+                            .wrapContentSize(Alignment.Center)
+                            .align(Alignment.Center),
+                    )
+                }
+
+                if (viewModel.state.value.isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center),
+                        color = MaterialTheme.colors.primary
+                    )
+                }
+                }
             }
         }
-        if (state.error.isNotBlank()) {
-            ErrorTextWithEmojis(
-                error = state.error,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp)
-                    .wrapContentSize(Alignment.Center)
-                    .align(Alignment.Center),
-            )
-        }
 
-        if (viewModel.state.value.isLoading) {
-            CircularProgressIndicator(
-                modifier = Modifier.align(Alignment.Center),
-                color = MaterialTheme.colors.primary
-            )
-        }
 
-    }
+
 }
 
 
