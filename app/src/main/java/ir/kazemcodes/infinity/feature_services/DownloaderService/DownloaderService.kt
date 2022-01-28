@@ -106,7 +106,7 @@ class DownloadService @AssistedInject constructor(
                     ID_DOWNLOAD_CHAPTER_ERROR,
                     NotificationCompat.Builder(applicationContext,
                         Notifications.CHANNEL_DOWNLOADER_ERROR).apply {
-                        setContentTitle("Download of ${book.bookName} was cancelled.")
+                        setContentTitle("Download of ${book.bookName} was canceled.")
                         setSubText("Download was cancelled")
                         setSmallIcon(R.drawable.ic_downloading)
                         priority = NotificationCompat.PRIORITY_DEFAULT

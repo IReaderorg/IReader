@@ -13,7 +13,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import ir.kazemcodes.infinity.BuildConfig
 import ir.kazemcodes.infinity.R
-import ir.kazemcodes.infinity.core.domain.use_cases.preferences.PreferencesUseCase
+import ir.kazemcodes.infinity.core.domain.use_cases.preferences.reader_preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.feature_activity.domain.notification.Notifications.CHANNEL_APP_UPDATE
 import ir.kazemcodes.infinity.feature_activity.domain.notification.Notifications.ID_APP_UPDATER
 import ir.kazemcodes.infinity.feature_services.flags

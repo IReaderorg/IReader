@@ -1,5 +1,7 @@
-package ir.kazemcodes.infinity.core.domain.use_cases.preferences
+package ir.kazemcodes.infinity.core.domain.use_cases.preferences.reader_preferences
 
+import ir.kazemcodes.infinity.core.domain.use_cases.preferences.apperance.ReadNightModePreferences
+import ir.kazemcodes.infinity.core.domain.use_cases.preferences.apperance.SaveNightModePreferences
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.services.ReadLastUpdateTime
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.services.SetLastUpdateTime
 
@@ -31,6 +33,8 @@ data class PreferencesUseCase(
     val readSortersUseCase: ReadSortersUseCase,
     val saveSortersUseCase: SaveSortersUseCase,
     val readLastUpdateTime: ReadLastUpdateTime,
-    val setLastUpdateTime: SetLastUpdateTime
+    val setLastUpdateTime: SetLastUpdateTime,
+    val readNightModePreferences: ReadNightModePreferences,
+    val saveNightModePreferences: SaveNightModePreferences
 
 )

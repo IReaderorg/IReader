@@ -11,7 +11,7 @@ import ir.kazemcodes.infinity.core.data.network.utils.UserAgentInterceptor
 import ir.kazemcodes.infinity.core.data.network.utils.WebViewClientCompat
 import ir.kazemcodes.infinity.core.data.network.utils.intercepter.CloudflareInterceptor
 import ir.kazemcodes.infinity.core.data.network.utils.setDefaultSettings
-import ir.kazemcodes.infinity.core.domain.use_cases.preferences.PreferencesUseCase
+import ir.kazemcodes.infinity.core.domain.use_cases.preferences.reader_preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.core.utils.getHtml
 import kotlinx.coroutines.*
 import okhttp3.Cache

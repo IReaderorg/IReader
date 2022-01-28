@@ -24,7 +24,7 @@ import ir.kazemcodes.infinity.core.domain.use_cases.local.DeleteUseCase
 import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalGetBookUseCases
 import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalGetChapterUseCase
 import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalInsertUseCases
-import ir.kazemcodes.infinity.core.domain.use_cases.preferences.PreferencesUseCase
+import ir.kazemcodes.infinity.core.domain.use_cases.preferences.reader_preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.core.domain.use_cases.remote.RemoteUseCases
 import ir.kazemcodes.infinity.core.presentation.theme.InfinityTheme
 import ir.kazemcodes.infinity.core.utils.findAppCompatAcivity
@@ -42,6 +42,7 @@ import ir.kazemcodes.infinity.feature_library.presentation.LibraryViewModel
 import ir.kazemcodes.infinity.feature_reader.presentation.reader.ReaderScreenViewModel
 import ir.kazemcodes.infinity.feature_reader.presentation.reader.ReadingScreen
 import ir.kazemcodes.infinity.feature_settings.presentation.AboutSettingScreen
+import ir.kazemcodes.infinity.feature_settings.presentation.appearance.AppearanceSettingScreen
 import ir.kazemcodes.infinity.feature_settings.presentation.setting.SettingViewModel
 import ir.kazemcodes.infinity.feature_settings.presentation.setting.dns.DnsOverHttpScreen
 import ir.kazemcodes.infinity.feature_settings.presentation.setting.downloader.DownloaderScreen
@@ -374,6 +375,33 @@ data class ExtensionCreatorScreenKey(val noArgs: String = "") : FragmentKey() {
             add(ExtensionCreatorViewModel(
 
                 backstack.lookup<LocalSourceRepository>()
+            ))
+        }
+    }
+}
+class AppearanceSettingScreenFragment : ComposeFragment() {
+    @OptIn(ExperimentalMaterialApi::class)
+    @Composable
+    override fun FragmentComposable(backstack: Backstack) {
+        BackstackProvider(backstack = backstack) {
+            InfinityTheme {
+                AppearanceSettingScreen()
+
+            }
+
+        }
+    }
+}
+
+@Parcelize
+data class AppearanceSettingScreenKey(val noArgs: String = "") : FragmentKey() {
+
+    override fun instantiateFragment(): Fragment = AppearanceSettingScreenFragment()
+
+    override fun bindServices(serviceBinder: ServiceBinder) {
+        with(serviceBinder) {
+            add(SettingViewModel(
+                preferencesUseCase = lookup<PreferencesUseCase>(),
             ))
         }
     }

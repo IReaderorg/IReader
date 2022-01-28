@@ -14,9 +14,11 @@ import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.scopes.ActivityScoped
 import ir.kazemcodes.infinity.MyApplication
 import ir.kazemcodes.infinity.R
+import ir.kazemcodes.infinity.core.domain.use_cases.preferences.reader_preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.feature_activity.core.FragmentStateChanger
 import ir.kazemcodes.infinity.feature_services.DownloaderService.DownloadService
 import ir.kazemcodes.infinity.feature_services.updater_service.UpdateService
+import javax.inject.Inject
 
 
 @AndroidEntryPoint
@@ -25,16 +27,11 @@ class MainActivity : AppCompatActivity(), SimpleStateChanger.NavigationHandler {
 
     private lateinit var fragmentStateChanger: FragmentStateChanger
     private val updateRequest = OneTimeWorkRequestBuilder<UpdateService>().build()
+    @Inject lateinit var preferencesUseCase: PreferencesUseCase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)
-
-//        val source = AvailableSources(context = this).realLightWebNovel
-//        val moshi: Moshi = moshi
-//        val jsonAdapter: JsonAdapter<SourceTower> = moshi.adapter<SourceTower>(SourceTower::class.java)
-//
-//        Timber.e(jsonAdapter.toJson(source))
 
         val app = application as MyApplication
         val globalServices = app.globalServices
@@ -53,6 +50,7 @@ class MainActivity : AppCompatActivity(), SimpleStateChanger.NavigationHandler {
         manager.cancelUniqueWork(DownloadService.DOWNLOADER_SERVICE_NAME)
         
         manager.enqueue(updateRequest)
+
         
     }
 

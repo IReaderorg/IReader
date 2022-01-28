@@ -1,4 +1,4 @@
-package ir.kazemcodes.infinity.core.domain.use_cases.preferences
+package ir.kazemcodes.infinity.core.domain.use_cases.preferences.reader_preferences
 
 import ir.kazemcodes.infinity.core.domain.repository.Repository
 import ir.kazemcodes.infinity.core.presentation.layouts.DisplayMode

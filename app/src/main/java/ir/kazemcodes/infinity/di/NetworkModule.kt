@@ -15,7 +15,9 @@ import ir.kazemcodes.infinity.core.domain.repository.RemoteRepository
 import ir.kazemcodes.infinity.core.domain.repository.Repository
 import ir.kazemcodes.infinity.core.domain.use_cases.fetchers.FetchBookDetailAndChapterDetailFromWebView
 import ir.kazemcodes.infinity.core.domain.use_cases.fetchers.FetchUseCase
-import ir.kazemcodes.infinity.core.domain.use_cases.preferences.*
+import ir.kazemcodes.infinity.core.domain.use_cases.preferences.apperance.ReadNightModePreferences
+import ir.kazemcodes.infinity.core.domain.use_cases.preferences.apperance.SaveNightModePreferences
+import ir.kazemcodes.infinity.core.domain.use_cases.preferences.reader_preferences.*
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.services.ReadLastUpdateTime
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.services.SetLastUpdateTime
 import ir.kazemcodes.infinity.core.domain.use_cases.remote.*
@@ -63,7 +65,9 @@ class NetworkModule {
             readSortersUseCase = ReadSortersUseCase(repository),
             saveSortersUseCase = SaveSortersUseCase(repository),
             readLastUpdateTime = ReadLastUpdateTime(repository),
-            setLastUpdateTime = SetLastUpdateTime(repository)
+            setLastUpdateTime = SetLastUpdateTime(repository),
+            readNightModePreferences = ReadNightModePreferences(repository),
+            saveNightModePreferences = SaveNightModePreferences(repository)
         )
     }
     @Singleton

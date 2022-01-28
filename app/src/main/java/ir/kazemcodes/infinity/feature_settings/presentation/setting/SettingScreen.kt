@@ -5,10 +5,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Dns
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.Extension
-import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -20,16 +17,14 @@ import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarTitle
 import ir.kazemcodes.infinity.core.utils.Constants
 import ir.kazemcodes.infinity.feature_activity.core.FragmentKey
-import ir.kazemcodes.infinity.feature_activity.presentation.AboutScreenKey
-import ir.kazemcodes.infinity.feature_activity.presentation.DnsOverHttpScreenKey
-import ir.kazemcodes.infinity.feature_activity.presentation.DownloadScreenKey
-import ir.kazemcodes.infinity.feature_activity.presentation.ExtensionCreatorScreenKey
+import ir.kazemcodes.infinity.feature_activity.presentation.*
 
 @Composable
 fun SettingScreen(modifier: Modifier = Modifier) {
     val settingItems = listOf(
         //SettingItems.Downloads,
         //SettingItems.ExtensionCreator,
+        SettingItems.Appearance,
         SettingItems.DnsOverHttp,
         SettingItems.About,
     )
@@ -69,8 +64,8 @@ sealed class SettingItems(
     val DestinationScreenKey: FragmentKey,
 ) {
     object Downloads : SettingItems("Downloads", Icons.Default.Download, DownloadScreenKey())
-    object ExtensionCreator :
-        SettingItems("ExtensionCreator", Icons.Default.Extension, ExtensionCreatorScreenKey())
+    object ExtensionCreator : SettingItems("ExtensionCreator", Icons.Default.Extension, ExtensionCreatorScreenKey())
+    object Appearance : SettingItems("Appearance", Icons.Default.Palette, AppearanceSettingScreenKey())
     object DnsOverHttp : SettingItems("DnsOverHttp", Icons.Default.Dns, DnsOverHttpScreenKey())
     object About : SettingItems("About", Icons.Default.Info, AboutScreenKey())
 }
