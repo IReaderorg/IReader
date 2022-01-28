@@ -11,8 +11,9 @@ IReader is a free and open source applicaiton for Android.
 ## Features :sparkles:
 
 - Access all the books available on the website
-- Support 8 sources
+- Support 9 sources
 - Support the offline reading
+- Support Downloading the Novels.
 
 
 ## Release Page
