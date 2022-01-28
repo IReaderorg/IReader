@@ -18,12 +18,13 @@ import okhttp3.Response
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
-
+import kotlin.random.Random
 
 
 @Serializable
 @JsonClass(generateAdapter = true)
 data class SourceTower constructor(
+    override val sourceId: Long = Random.nextLong(),
     override val baseUrl: String,
     override val lang: String,
     override val name: String,
@@ -31,7 +32,9 @@ data class SourceTower constructor(
     override val supportsMostPopular: Boolean = false,
     override val supportSearch: Boolean = false,
     override val supportsLatest: Boolean = false,
+    val iconLink:String = "",
     val creatorNote : String?=null,
+    val customSource: Boolean = false,
     val latest: Latest? = null,
     val popular: Popular? = null,
     val detail: Detail? = null,
@@ -42,6 +45,7 @@ data class SourceTower constructor(
 
     fun toSourceEntity() : SourceEntity {
         return SourceEntity(
+            sourceId = sourceId,
             baseUrl = baseUrl,
             lang = lang,
             name = name,
@@ -55,6 +59,12 @@ data class SourceTower constructor(
             search = search,
             chapters = chapters,
             content = content,
+            creatorNote = creatorNote,
+            customSource = customSource,
+            dateAdded = System.currentTimeMillis(),
+            dateChanged = System.currentTimeMillis(),
+            imageIcon = iconLink
+
         )
     }
 
@@ -345,7 +355,7 @@ data class SourceTower constructor(
                 book = detailFromJson(jsonObject)
             }
         }
-        book.source = name
+        book.sourceId = sourceId
 
 
         return BookPage(book,

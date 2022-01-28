@@ -13,7 +13,7 @@ interface LocalChapterRepository {
 
     fun getChaptersByBookId(
         bookId: Int,
-        isAsc:Boolean
+        isAsc:Boolean = true
     ): Flow<List<Chapter>?>
 
 

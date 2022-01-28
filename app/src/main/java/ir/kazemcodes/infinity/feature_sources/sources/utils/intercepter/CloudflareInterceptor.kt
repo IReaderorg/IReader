@@ -8,8 +8,8 @@ import android.webkit.WebView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import ir.kazemcodes.infinity.R
-import ir.kazemcodes.infinity.feature_sources.sources.models.HttpSource
 import ir.kazemcodes.infinity.core.data.network.utils.*
+import ir.kazemcodes.infinity.feature_sources.sources.models.HttpSource
 import ir.kazemcodes.infinity.feature_sources.sources.utils.NetworkHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -19,19 +19,20 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.Response
-import uy.kohesive.injekt.injectLazy
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import java.io.IOException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
-class CloudflareInterceptor(private val context: Context) : Interceptor {
+class CloudflareInterceptor(private val context: Context) : Interceptor,KoinComponent {
 
     private val executor = ContextCompat.getMainExecutor(context)
 
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
-    private val networkHelper: NetworkHelper by injectLazy()
+    private val networkHelper: NetworkHelper by inject()
 
 
     /**

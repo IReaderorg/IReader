@@ -16,6 +16,8 @@ import ir.kazemcodes.infinity.core.domain.repository.Repository
 import ir.kazemcodes.infinity.core.domain.use_cases.fetchers.FetchBookDetailAndChapterDetailFromWebView
 import ir.kazemcodes.infinity.core.domain.use_cases.fetchers.FetchUseCase
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.*
+import ir.kazemcodes.infinity.core.domain.use_cases.preferences.services.ReadLastUpdateTime
+import ir.kazemcodes.infinity.core.domain.use_cases.preferences.services.SetLastUpdateTime
 import ir.kazemcodes.infinity.core.domain.use_cases.remote.*
 import ir.kazemcodes.infinity.feature_sources.sources.utils.NetworkHelper
 import okhttp3.Call
@@ -59,7 +61,9 @@ class NetworkModule {
             readFilterUseCase = ReadFilterUseCase(repository),
             saveFiltersUseCase = SaveFiltersUseCase(repository),
             readSortersUseCase = ReadSortersUseCase(repository),
-            saveSortersUseCase = SaveSortersUseCase(repository)
+            saveSortersUseCase = SaveSortersUseCase(repository),
+            readLastUpdateTime = ReadLastUpdateTime(repository),
+            setLastUpdateTime = SetLastUpdateTime(repository)
         )
     }
     @Singleton

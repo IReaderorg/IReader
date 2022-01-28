@@ -2,9 +2,8 @@ package ir.kazemcodes.infinity.feature_activity.presentation
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.Moshi
 import com.zhuinden.simplestack.History
 import com.zhuinden.simplestack.SimpleStateChanger
 import com.zhuinden.simplestack.StateChange
@@ -15,11 +14,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.scopes.ActivityScoped
 import ir.kazemcodes.infinity.MyApplication
 import ir.kazemcodes.infinity.R
-import ir.kazemcodes.infinity.core.utils.moshi
 import ir.kazemcodes.infinity.feature_activity.core.FragmentStateChanger
-import ir.kazemcodes.infinity.feature_sources.sources.AvailableSources
-import ir.kazemcodes.infinity.feature_sources.sources.models.SourceTower
-import timber.log.Timber
+import ir.kazemcodes.infinity.feature_services.updater_service.UpdateService
 
 
 @AndroidEntryPoint
@@ -27,17 +23,17 @@ import timber.log.Timber
 class MainActivity : AppCompatActivity(), SimpleStateChanger.NavigationHandler {
 
     private lateinit var fragmentStateChanger: FragmentStateChanger
-
+    private val updateRequest = OneTimeWorkRequestBuilder<UpdateService>().build()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)
 
-        val source = AvailableSources(context = this).realLightWebNovel
-        val moshi: Moshi = moshi
-        val jsonAdapter: JsonAdapter<SourceTower> = moshi.adapter<SourceTower>(SourceTower::class.java)
-
-        Timber.e(jsonAdapter.toJson(source))
+//        val source = AvailableSources(context = this).realLightWebNovel
+//        val moshi: Moshi = moshi
+//        val jsonAdapter: JsonAdapter<SourceTower> = moshi.adapter<SourceTower>(SourceTower::class.java)
+//
+//        Timber.e(jsonAdapter.toJson(source))
 
         val app = application as MyApplication
         val globalServices = app.globalServices
@@ -51,6 +47,10 @@ class MainActivity : AppCompatActivity(), SimpleStateChanger.NavigationHandler {
             .setGlobalServices(globalServices)
             .install(this, androidContentFrame, History.of(MainScreenKey()))
 
+
+        val manager = WorkManager.getInstance(applicationContext)
+        
+        manager.enqueue(updateRequest)
         
     }
 
@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity(), SimpleStateChanger.NavigationHandler {
         const val SHORTCUT_RECENTLY_READ = "ir.kazemcodes.Infinity.SHOW_RECENTLY_READ"
         const val SHORTCUT_CATALOGUES = "ir.kazemcodes.Infinity.SHOW_CATALOGUES"
         const val SHORTCUT_DOWNLOADS = "ir.kazemcodes.Infinity.SHOW_DOWNLOADS"
-        const val SHORTCUT_MANGA = "ir.kazemcodes.Infinity.SHOW_MANGA"
+        const val SHORTCUT_BOOK = "ir.kazemcodes.Infinity.SHOW_BOOK"
         const val SHORTCUT_EXTENSIONS = "ir.kazemcodes.Infinity.EXTENSIONS"
 
         const val INTENT_SEARCH = "ir.kazemcodes.Infinity.SEARCH"
@@ -85,14 +85,6 @@ class MainActivity : AppCompatActivity(), SimpleStateChanger.NavigationHandler {
         super.onDestroy()
     }
 
-    /**
-     * I created this in order to support the full power of kodein, because i use
-     * simple stack i can't use the kodein compose directly
-     * **/
-//    @Composable
-//    fun Main(content: @Composable () -> Unit) = withDI(di) {
-//        content()
-//    }
     override fun onNavigationEvent(stateChange: StateChange) {
         fragmentStateChanger.handleStateChange(stateChange)
     }

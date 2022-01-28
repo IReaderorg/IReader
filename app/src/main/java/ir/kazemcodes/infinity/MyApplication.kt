@@ -23,11 +23,9 @@ import ir.kazemcodes.infinity.feature_activity.domain.notification.Notifications
 import ir.kazemcodes.infinity.feature_sources.sources.Extensions
 import ir.kazemcodes.infinity.feature_sources.sources.utils.NetworkHelper
 import okhttp3.OkHttpClient
+import org.koin.core.context.startKoin
+import org.koin.dsl.module
 import timber.log.Timber
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.InjektModule
-import uy.kohesive.injekt.api.InjektRegistrar
-import uy.kohesive.injekt.api.addSingletonFactory
 import javax.inject.Inject
 
 
@@ -83,13 +81,18 @@ class MyApplication : Application(), Configuration.Provider {
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
         }
-        Injekt.importModule(AppModule(
-            app = this,
-            preferencesUseCase = preferencesUseCase,
-            extensions = extensions,
-            networkHelper = networkHelper,
-            webView = webView
-        ))
+
+        val appModule = module {
+            single<NetworkHelper> { networkHelper }
+            single<WebView> { webView }
+            single<Extensions> { extensions }
+            single<PreferencesUseCase> { preferencesUseCase }
+
+        }
+
+        startKoin{
+            modules(appModule)
+        }
 
         globalServices = GlobalServices.builder()
             .add(preferencesUseCase)
@@ -126,24 +129,6 @@ class MyApplication : Application(), Configuration.Provider {
         Configuration.Builder()
             .setWorkerFactory(workerFactory)
             .build()
-
-}
-
-class AppModule(
-    private val app: Application,
-    private val preferencesUseCase: PreferencesUseCase,
-    private val networkHelper: NetworkHelper,
-    private val extensions: Extensions,
-    private val webView: WebView,
-
-) : InjektModule {
-    override fun InjektRegistrar.registerInjectables() {
-        addSingletonFactory { networkHelper }
-        addSingletonFactory { webView }
-
-        addSingletonFactory { extensions }
-        addSingletonFactory { preferencesUseCase }
-    }
 
 }
 

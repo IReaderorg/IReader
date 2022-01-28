@@ -2,14 +2,11 @@ package ir.kazemcodes.infinity.core.utils
 
 import android.annotation.SuppressLint
 import android.webkit.WebView
-import ir.kazemcodes.infinity.core.data.network.models.Source
-import ir.kazemcodes.infinity.feature_sources.sources.Extensions
 import ir.kazemcodes.infinity.feature_sources.sources.models.FetchType
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
-import uy.kohesive.injekt.injectLazy
 import java.net.URI
 import java.net.URISyntaxException
 
@@ -51,17 +48,7 @@ fun getUrlWithoutDomain(orig: String): String {
 }
 
 
-    fun mappingSourceNameToSource(apiName: String): Source {
-        val extensions: Extensions by injectLazy()
-        val sources = extensions.getSources()
-        var source = extensions.getSources()[0]
-        sources.forEach { apiItem ->
-            if (apiItem.name == apiName) {
-                source = apiItem
-            }
-        }
-        return source
-    }
+
 fun mappingFetcherTypeWithIndex(index: Int): FetchType {
     return when(index) {
         FetchType.Latest.index -> FetchType.Latest

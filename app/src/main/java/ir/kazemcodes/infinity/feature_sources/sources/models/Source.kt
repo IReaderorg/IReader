@@ -8,7 +8,7 @@ import org.jsoup.nodes.Document
 
 interface Source {
 
-    val id: Long
+    val sourceId: Long
 
     val lang: String
 

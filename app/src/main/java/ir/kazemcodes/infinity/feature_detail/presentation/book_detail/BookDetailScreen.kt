@@ -74,7 +74,7 @@ fun BookDetailScreen(
                         IconButton(onClick = {
                             backStack.goTo(WebViewKey(
                                 viewModel.state.value.source.baseUrl + getUrlWithoutDomain(viewModel.state.value.book.link),
-                                sourceName = viewModel.state.value.source.name,
+                                sourceId = viewModel.state.value.source.sourceId,
                                 fetchType = FetchType.Detail.index,
                                 bookId = viewModel.state.value.book.id
                             ))
@@ -178,7 +178,7 @@ fun BookDetailScreenLoadedComposable(
                     IconButton(onClick = {
                         backStack.goTo(WebViewKey(
                             source.baseUrl + getUrlWithoutDomain(state.book.link),
-                            sourceName = source.name,
+                            sourceId = source.sourceId,
                             fetchType = FetchType.Detail.index,
                             bookId = viewModel.state.value.book.id
                         ))
@@ -240,7 +240,7 @@ fun BookDetailScreenLoadedComposable(
                                 backStack.goTo(
                                     ReaderScreenKey(
                                         bookId = state.book.id,
-                                        sourceName = source.name,
+                                        sourceId = source.sourceId,
                                         chapterId = viewModel.chapterState.value.lastChapter!!.chapterId,
 
                                     ),
@@ -248,7 +248,7 @@ fun BookDetailScreenLoadedComposable(
                             } else if (viewModel.chapterState.value.chapters.isNotEmpty()) {
                                 backStack.goTo(ReaderScreenKey(
                                     bookId = state.book.id,
-                                    sourceName = source.name,
+                                    sourceId = source.sourceId,
                                     chapterId = viewModel.chapterState.value.chapters.first().chapterId,
                                 ))
                             } else {
@@ -339,7 +339,7 @@ fun BookDetailScreenLoadedComposable(
                             )
                         }
                         Text(
-                            text = "Source: ${state.book.source}",
+                            text = "Source: ${state.source.name}",
                             color = MaterialTheme.colors.onBackground.copy(alpha = .5f),
                             fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.subtitle2,
@@ -382,7 +382,7 @@ fun BookDetailScreenLoadedComposable(
                 modifier = modifier.clickable {
                     backStack.goTo(ChapterDetailKey(
                         bookId = state.book.id,
-                        sourceName = source.name
+                        sourceId = source.sourceId
                     ))
                 },
                 title = "Contents",

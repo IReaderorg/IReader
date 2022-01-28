@@ -46,6 +46,9 @@ object Constants {
 
     const val UNKNOWN_ERROR = "Unknown Error Happened"
 
+    const val repo_url = "/repos/kazemcodes/IReader/releases/latest"
+    const val github_api_url = "https://api.github.com"
+
 
 
 }

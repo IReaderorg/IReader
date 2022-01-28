@@ -18,8 +18,9 @@ import okhttp3.Cache
 import okhttp3.OkHttpClient
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import timber.log.Timber
-import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.util.concurrent.TimeUnit
 
@@ -27,10 +28,10 @@ import java.util.concurrent.TimeUnit
 
 
 
-class NetworkHelper(private val context: Context) {
+class NetworkHelper(private val context: Context): KoinComponent {
 
 
-    val preferencesUseCase: PreferencesUseCase by injectLazy()
+    val preferencesUseCase: PreferencesUseCase by inject()
 
     val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
@@ -40,7 +41,7 @@ class NetworkHelper(private val context: Context) {
 
     val cookieManager = AndroidCookieJar()
 
-    val webView: WebView by injectLazy()
+    val webView: WebView by inject()
 
     private val baseClientBuilder: OkHttpClient.Builder
         get() {

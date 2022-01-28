@@ -18,13 +18,14 @@ data class SourceEntity(
     var lang: String,
     var name: String,
     var creator: String,
+    var creatorNote: String?=null,
     var supportsMostPopular: Boolean = false,
     var supportSearch: Boolean = false,
     var supportsLatest: Boolean = false,
-    var imageIcon : String = "",
-    var dateAdded : Long = 0,
-    var dateChanged : Long = 0,
-    var customSource : Boolean = false,
+    var imageIcon: String = "",
+    var dateAdded: Long = 0,
+    var dateChanged: Long = 0,
+    var customSource: Boolean = false,
     @Embedded
     var latest: Latest? = null,
     @Embedded
@@ -37,13 +38,14 @@ data class SourceEntity(
     var chapters: Chapters? = null,
     @Embedded
     var content: Content? = null,
-    @PrimaryKey(autoGenerate = true) val id: Int? = null,
+    @PrimaryKey(autoGenerate = true) val sourceId: Long = 0,
 ) {
     fun toSource(): SourceTower {
         val moshi: Moshi = moshi
         val jsonAdapter: JsonAdapter<SourceTower> =
             moshi.adapter<SourceTower>(SourceTower::class.java)
         return SourceTower(
+            sourceId = sourceId,
             baseUrl = baseUrl,
             lang = lang,
             name = name,
@@ -57,6 +59,7 @@ data class SourceEntity(
             search = search,
             chapters = chapters,
             content = content,
-            )
+            creatorNote = creatorNote
+        )
     }
 }

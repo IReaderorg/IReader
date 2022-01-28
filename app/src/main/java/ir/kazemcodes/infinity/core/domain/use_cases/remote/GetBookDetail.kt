@@ -23,7 +23,7 @@ class GetBookDetail(private val remoteRepository: RemoteRepository) {
             emit(Resource.Success<Book>(bookDetail.book.copy(bookName = book.bookName,
                 link = book.link,
                 coverLink = book.coverLink,
-                source = source.name)))
+                sourceId = source.sourceId)))
         } catch (e: HttpException) {
             emit(
                 Resource.Error<Book>(

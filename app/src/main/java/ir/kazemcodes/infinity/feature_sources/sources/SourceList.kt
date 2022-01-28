@@ -9,6 +9,16 @@ class Extensions(
     private val context: Context,
     ) {
 
+    fun mappingSourceNameToSource(id: Long): Source {
+        val sources = getSources()
+        var source = getSources()[0]
+        sources.forEach { currentSource ->
+            if (currentSource.sourceId == id) {
+                source = currentSource
+            }
+        }
+        return source
+    }
 
 
     private val sources = mutableListOf<Source>(
@@ -24,14 +34,14 @@ class Extensions(
 
     init {
 
-        AvailableSources(context).sourcesList.forEach { source ->
+        AvailableSources().sourcesList.forEach { source ->
             addSource(source)
         }
 
     }
 }
 
-class AvailableSources(context: Context) {
+class AvailableSources() {
 
     val baseSample = SourceTower(
         name = "",

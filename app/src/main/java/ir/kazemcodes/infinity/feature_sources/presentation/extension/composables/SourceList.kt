@@ -38,14 +38,16 @@ fun SourceList(modifier: Modifier = Modifier,sources : List<Source>, scrollState
                             color = MaterialTheme.colors.primary,
                             style = MaterialTheme.typography.subtitle2,
                             modifier = Modifier.clickable {
-                                backstack.goTo(BrowserScreenKey(sourceName = sources[index].name,
+                                backstack.goTo(
+                                    BrowserScreenKey(
+                                        sourceId = sources[index].sourceId,
                                     exploreType = ExploreType.Popular.mode))
                             })
                     }
                 },
                 secondaryText = { SuperSmallTextComposable(title = "Created by ${sources[index].creator}", color = MaterialTheme.colors.onBackground.copy(alpha = .4f)) },
                 modifier = Modifier.clickable {
-                    backstack.goTo(BrowserScreenKey(sources[index].name,
+                    backstack.goTo(BrowserScreenKey(sourceId = sources[index].sourceId,
                         exploreType = ExploreType.Latest.mode))
                 })
         }

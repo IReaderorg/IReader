@@ -14,7 +14,7 @@ import ir.kazemcodes.infinity.core.domain.models.SourceEntity
 
 @Database(
     entities = [Book::class, Chapter::class, RemoteKeys::class,SourceEntity::class],
-    version = 7,
+    version = 8,
     exportSchema = true,
 )
 @TypeConverters(DatabaseConverter::class)

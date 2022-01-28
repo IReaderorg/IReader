@@ -1,5 +1,8 @@
 package ir.kazemcodes.infinity.core.domain.use_cases.preferences
 
+import ir.kazemcodes.infinity.core.domain.use_cases.preferences.services.ReadLastUpdateTime
+import ir.kazemcodes.infinity.core.domain.use_cases.preferences.services.SetLastUpdateTime
+
 data class PreferencesUseCase(
     val readSelectedFontStateUseCase: ReadSelectedFontStateUseCase,
     val saveSelectedFontStateUseCase: SaveSelectedFontStateUseCase,
@@ -26,6 +29,8 @@ data class PreferencesUseCase(
     val readFilterUseCase: ReadFilterUseCase,
     val saveFiltersUseCase: SaveFiltersUseCase,
     val readSortersUseCase: ReadSortersUseCase,
-    val saveSortersUseCase: SaveSortersUseCase
+    val saveSortersUseCase: SaveSortersUseCase,
+    val readLastUpdateTime: ReadLastUpdateTime,
+    val setLastUpdateTime: SetLastUpdateTime
 
 )

@@ -10,7 +10,8 @@ import ir.kazemcodes.infinity.core.utils.call
 import ir.kazemcodes.infinity.feature_sources.sources.utils.NetworkHelper
 import okhttp3.*
 import org.jsoup.nodes.Document
-import uy.kohesive.injekt.injectLazy
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import java.net.URI
 import java.net.URISyntaxException
 import java.security.MessageDigest
@@ -19,11 +20,12 @@ import java.util.*
 /**
  * A simple implementation for sources from a website.
  */
-abstract class HttpSource : Source {
+abstract class HttpSource : Source,KoinComponent {
 
 
 
-    protected val network: NetworkHelper by injectLazy<NetworkHelper>()
+    protected val network: NetworkHelper by inject<NetworkHelper>()
+
 
 
     /**
@@ -37,7 +39,7 @@ abstract class HttpSource : Source {
     open val client: OkHttpClient
         get() = network.client
 
-    val webView : WebView by injectLazy()
+    val webView : WebView by inject<WebView>()
 
 
     /**
@@ -50,12 +52,11 @@ abstract class HttpSource : Source {
      * of the MD5 of the string: source name/language/versionId
      * Note the generated id sets the sign bit to 0.
      */
-    override val id by lazy {
+    override val sourceId by lazy {
         val key = "${name.lowercase()}/$lang/$versionId"
         val bytes = MessageDigest.getInstance("MD5").digest(key.toByteArray())
         (0..7).map { bytes[it].toLong() and 0xff shl 8 * (7 - it) }
             .reduce(Long::or) and Long.MAX_VALUE
-
     }
 
 

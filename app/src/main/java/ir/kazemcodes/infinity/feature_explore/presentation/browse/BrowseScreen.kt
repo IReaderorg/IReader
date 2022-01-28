@@ -80,7 +80,7 @@ fun BrowserScreen() {
                         imageVector = Icons.Default.Language,
                         title = "WebView",
                         onClick = {
-                            backStack.goTo(WebViewKey(source.baseUrl, sourceName = source.name, fetchType = FetchType.Latest.index))
+                            backStack.goTo(WebViewKey(source.baseUrl, sourceId = source.sourceId, fetchType = FetchType.Latest.index))
                         },
                     )
                     TopAppBarActionButton(

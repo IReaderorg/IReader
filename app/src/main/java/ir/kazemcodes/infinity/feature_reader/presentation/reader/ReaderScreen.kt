@@ -122,7 +122,7 @@ fun ReadingScreen(
                             title = "WebView",
                             onClick = {
                                 backStack.goTo(WebViewKey(url = viewModel.state.value.chapter.link,
-                                    sourceName = viewModel.state.value.source.name,
+                                    sourceId = viewModel.state.value.source.sourceId,
                                     fetchType = FetchType.Content.index))
                             })
                     }
@@ -137,7 +137,7 @@ fun ReadingScreen(
                             onClick = {
                                 backStack.goTo(WebViewKey(
                                     url = viewModel.state.value.chapter.link,
-                                    sourceName = viewModel.state.value.source.name,
+                                    sourceId = viewModel.state.value.source.sourceId,
                                     fetchType = FetchType.Content.index,
                                     bookId = state.chapter.bookId,
                                     chapterId = state.chapter.chapterId

@@ -21,13 +21,15 @@ import ir.kazemcodes.infinity.core.utils.*
 import ir.kazemcodes.infinity.feature_activity.domain.service.DownloadService
 import ir.kazemcodes.infinity.feature_activity.domain.service.DownloadService.Companion.DOWNLOAD_BOOK_NAME
 import ir.kazemcodes.infinity.feature_activity.domain.service.DownloadService.Companion.DOWNLOAD_SERVICE_NAME
-import ir.kazemcodes.infinity.feature_activity.domain.service.DownloadService.Companion.DOWNLOAD_SOURCE_NAME
+import ir.kazemcodes.infinity.feature_activity.domain.service.DownloadService.Companion.DOWNLOAD_SOURCE_ID
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.collect
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import timber.log.Timber
-import uy.kohesive.injekt.injectLazy
+
 
 class BookDetailViewModel(
     private val source: Source,
@@ -39,7 +41,7 @@ class BookDetailViewModel(
     private val remoteUseCases: RemoteUseCases,
     private val deleteUseCase: DeleteUseCase,
     private val fetchUseCase: FetchUseCase,
-) : ScopedServices.Registered, ScopedServices.Activated {
+) : ScopedServices.Registered, ScopedServices.Activated,KoinComponent {
     private val _state = mutableStateOf<DetailState>(DetailState(source = source,
         book = Book.create().copy(id = bookId)))
     val state: State<DetailState> = _state
@@ -48,7 +50,7 @@ class BookDetailViewModel(
     val chapterState: State<ChapterState> = _chapterState
     lateinit var work: OneTimeWorkRequest
 
-    val webView by injectLazy<WebView>()
+    val webView :  WebView by inject<WebView>()
 
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -75,7 +77,7 @@ class BookDetailViewModel(
             setInputData(
                 Data.Builder().apply {
                     putString(DOWNLOAD_BOOK_NAME, state.value.book.bookName)
-                    putString(DOWNLOAD_SOURCE_NAME, state.value.book.source)
+                    putLong(DOWNLOAD_SOURCE_ID, state.value.book.sourceId)
                 }.build()
             )
         }.build()

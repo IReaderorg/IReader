@@ -59,13 +59,15 @@ fun ExpandingText(modifier: Modifier = Modifier, text: String) {
             modifier = modifier
                 .animateContentSize(),
             fontWeight = FontWeight.W400, color = MaterialTheme.colors.onBackground,
-            textAlign = TextAlign.Start
+            textAlign = TextAlign.Start,
         )
-        Icon(
-            imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-            contentDescription = "Expand Icon",
-            tint = MaterialTheme.colors.onBackground
-        )
+        if (textLayoutResultState.value?.lineCount?:0 > (MINIMIZED_MAX_LINES - 1)) {
+            Icon(
+                imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                contentDescription = "Expand Icon",
+                tint = MaterialTheme.colors.onBackground
+            )
+        }
     }
 
 }

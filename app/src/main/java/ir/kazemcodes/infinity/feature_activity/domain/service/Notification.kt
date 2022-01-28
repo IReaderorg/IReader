@@ -13,7 +13,7 @@ import coil.transform.CircleCropTransformation
 data class Channel(
     val name: String,
     val id: String,
-    val importance: Int = NotificationManager.IMPORTANCE_HIGH,
+    val importance: Int = NotificationManager.IMPORTANCE_DEFAULT,
 )
 
 fun createChannel(context: Context, channel: Channel) {

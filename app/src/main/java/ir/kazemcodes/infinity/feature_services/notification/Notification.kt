@@ -163,9 +163,6 @@ object Notifications {
                 buildNotificationChannel(CHANNEL_CRASH_LOGS, IMPORTANCE_HIGH) {
                     setName(context.getString(R.string.channel_crash_logs))
                 },
-                buildNotificationChannel(CHANNEL_INCOGNITO_MODE, IMPORTANCE_LOW) {
-                    setName(context.getString(R.string.pref_incognito_mode))
-                },
                 buildNotificationChannel(CHANNEL_APP_UPDATE, IMPORTANCE_DEFAULT) {
                     setGroup(GROUP_APK_UPDATES)
                     setName(context.getString(R.string.channel_app_updates))

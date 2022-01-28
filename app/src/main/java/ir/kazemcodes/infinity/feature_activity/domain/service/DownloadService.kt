@@ -14,9 +14,9 @@ import dagger.assisted.AssistedInject
 import ir.kazemcodes.infinity.R
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.repository.Repository
-import ir.kazemcodes.infinity.core.utils.mappingSourceNameToSource
 import ir.kazemcodes.infinity.feature_activity.domain.notification.Notifications
 import ir.kazemcodes.infinity.feature_activity.domain.notification.Notifications.CHANNEL_DOWNLOADER_PROGRESS
+import ir.kazemcodes.infinity.feature_sources.sources.Extensions
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectIndexed
 import kotlinx.coroutines.flow.first
@@ -30,6 +30,7 @@ class DownloadService @AssistedInject constructor(
     @Assisted context: Context,
     @Assisted params: WorkerParameters,
     private val repository: Repository,
+    private val extensions: Extensions
 ) : CoroutineWorker(context, params) {
 
     companion object {
@@ -38,7 +39,7 @@ class DownloadService @AssistedInject constructor(
         const val NOTIFICATION_ID = 1
 
         const val DOWNLOAD_BOOK_NAME = "DOWNLOAD_BOOK_NAME"
-        const val DOWNLOAD_SOURCE_NAME = "DOWNLOAD_SOURCE_NAME"
+        const val DOWNLOAD_SOURCE_ID = "DOWNLOAD_SOURCE_ID"
 
         const val DOWNLOADED_CHAPTER = "DOWNLOADED_CHAPTER"
 
@@ -48,7 +49,7 @@ class DownloadService @AssistedInject constructor(
     @SuppressLint("SetJavaScriptEnabled")
     override suspend fun doWork(): Result {
         val bookId = inputData.getInt(DOWNLOAD_BOOK_NAME,0)
-        val source = inputData.getString(DOWNLOAD_SOURCE_NAME)!!
+        val sourceId = inputData.getLong(DOWNLOAD_SOURCE_ID, 0 )
         val book = repository.localBookRepository.getBookById(1).first().data
 
         val chapters = repository.localChapterRepository.getChaptersByBookId(bookId = bookId, isAsc = true).first()
@@ -68,7 +69,7 @@ class DownloadService @AssistedInject constructor(
             try {
                 repository.remoteRepository.downloadChapter(
                     book = book ?: Book.create(),
-                    source = mappingSourceNameToSource(source),
+                    source = extensions.mappingSourceNameToSource(sourceId),
                     chapters = chapters?: emptyList(),
                     factory = {
                         WebView(it).apply { settings.javaScriptEnabled = true }

@@ -29,7 +29,6 @@ import ir.kazemcodes.infinity.core.domain.use_cases.remote.RemoteUseCases
 import ir.kazemcodes.infinity.core.presentation.theme.InfinityTheme
 import ir.kazemcodes.infinity.core.utils.findAppCompatAcivity
 import ir.kazemcodes.infinity.core.utils.mappingFetcherTypeWithIndex
-import ir.kazemcodes.infinity.core.utils.mappingSourceNameToSource
 import ir.kazemcodes.infinity.feature_activity.core.ComposeFragment
 import ir.kazemcodes.infinity.feature_activity.core.FragmentKey
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.BookDetailScreen
@@ -107,7 +106,7 @@ class BrowserScreenFragment : ComposeFragment() {
 }
 
 @Parcelize
-data class BrowserScreenKey(val sourceName: String, val exploreType: Int) :
+data class BrowserScreenKey(val sourceId: Long, val exploreType: Int) :
     FragmentKey() {
     override fun instantiateFragment(): Fragment = BrowserScreenFragment()
     override fun bindServices(serviceBinder: ServiceBinder) {
@@ -119,7 +118,7 @@ data class BrowserScreenKey(val sourceName: String, val exploreType: Int) :
             add(
                 BrowseViewModel(
                     preferencesUseCase = lookup<PreferencesUseCase>(),
-                    source = mappingSourceNameToSource(sourceName),
+                    source = lookup<Extensions>().mappingSourceNameToSource(sourceId),
                     exploreType = exploreType,
                     remoteUseCases = lookup<RemoteUseCases>(),
                     deleteUseCase = lookup<DeleteUseCase>()
@@ -146,7 +145,7 @@ class BookDetailFragment : ComposeFragment() {
 }
 
 @Parcelize
-data class BookDetailKey(val bookId: Int, val sourceName: String) :
+data class BookDetailKey(val bookId: Int, val sourceId: Long,) :
     FragmentKey() {
 
     override fun instantiateFragment(): Fragment = BookDetailFragment()
@@ -155,7 +154,7 @@ data class BookDetailKey(val bookId: Int, val sourceName: String) :
         with(serviceBinder) {
             add(
                 BookDetailViewModel(
-                    source = mappingSourceNameToSource(sourceName),
+                    source = lookup<Extensions>().mappingSourceNameToSource(sourceId),
                     bookId = bookId,
                     preferencesUseCase = lookup<PreferencesUseCase>(),
                     remoteUseCases = lookup<RemoteUseCases>(),
@@ -184,7 +183,7 @@ class WebViewFragment : ComposeFragment() {
 @Parcelize
 data class WebViewKey(
     val url: String,
-    val sourceName: String,
+    val sourceId: Long,
     val fetchType: Int,
     val bookId: Int? = null,
     val chapterId: Int? = null,
@@ -197,7 +196,7 @@ data class WebViewKey(
             add<WebViewPageModel>(WebViewPageModel(
                 url,
                 webView = lookup<WebView>(),
-                source = mappingSourceNameToSource(sourceName),
+                source = lookup<Extensions>().mappingSourceNameToSource(sourceId),
                 fetcher = mappingFetcherTypeWithIndex(fetchType),
                 bookId = bookId,
                 chapterId = chapterId,
@@ -231,13 +230,13 @@ class ChapterDetailFragment : ComposeFragment() {
 @Parcelize
 data class ChapterDetailKey(
     val bookId: Int,
-    val sourceName: String,
+    val sourceId: Long,
 ) : FragmentKey() {
     override fun instantiateFragment(): Fragment = ChapterDetailFragment()
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
             add<ChapterDetailViewModel>(ChapterDetailViewModel(
-                source = mappingSourceNameToSource(sourceName),
+                source = lookup<Extensions>().mappingSourceNameToSource(sourceId),
                 bookId = bookId,
                 getChapterUseCase = lookup<LocalGetChapterUseCase>(),
                 deleteUseCase = lookup<DeleteUseCase>(),
@@ -287,7 +286,7 @@ class ReaderScreenFragment : ComposeFragment() {
 @Parcelize
 data class ReaderScreenKey(
     val bookId: Int,
-    val sourceName: String,
+    val sourceId: Long,
     val chapterId: Int,
 ) : FragmentKey() {
 
@@ -297,7 +296,7 @@ data class ReaderScreenKey(
         with(serviceBinder) {
             add(ReaderScreenViewModel(
                 preferencesUseCase = lookup<PreferencesUseCase>(),
-                source = mappingSourceNameToSource(sourceName),
+                source =lookup<Extensions>().mappingSourceNameToSource(sourceId),
                 bookId = bookId,
                 chapterId = chapterId,
                 deleteUseCase = lookup<DeleteUseCase>(),

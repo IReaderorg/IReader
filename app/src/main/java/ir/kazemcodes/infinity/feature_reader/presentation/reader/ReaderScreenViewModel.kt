@@ -29,7 +29,9 @@ import ir.kazemcodes.infinity.core.utils.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import org.jsoup.Jsoup
-import uy.kohesive.injekt.injectLazy
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+
 
 /**
  * the order of this screen is
@@ -47,7 +49,7 @@ class ReaderScreenViewModel(
     private val remoteUseCases: RemoteUseCases,
     private val insertUseCases: LocalInsertUseCases,
     private val deleteUseCase: DeleteUseCase,
-) : ScopedServices.Registered {
+) : ScopedServices.Registered , KoinComponent{
     private val _state = mutableStateOf(ReaderScreenState(source = source))
     val state: State<ReaderScreenState> = _state
 
@@ -60,7 +62,7 @@ class ReaderScreenViewModel(
 
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
-    val webView by injectLazy<WebView>()
+    val webView by inject<WebView>()
 
     override fun onServiceRegistered() {
         val initState = state.value
@@ -188,7 +190,7 @@ class ReaderScreenViewModel(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getFromWebView() {
-        val webView by injectLazy<WebView>()
+        val webView by inject<WebView>()
         coroutineScope.launch {
             _eventFlow.emit(UiEvent.ShowSnackbar(
                 uiText = UiText.DynamicString("Trying to fetch chapter's content").asString()

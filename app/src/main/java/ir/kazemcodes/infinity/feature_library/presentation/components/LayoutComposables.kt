@@ -30,8 +30,8 @@ fun LayoutComposable(
                 onClick = { book ->
                     backStack.goTo(
                         BookDetailKey(
-                            sourceName = if (source?.name != null) source.name else book.source
-                                ?: "",
+                            sourceId = if (source?.sourceId != null) source.sourceId else book.sourceId
+                                ?: 0,
                             bookId = book.id
                         )
                     )
@@ -41,8 +41,8 @@ fun LayoutComposable(
             LinearListDisplay(books = books, onClick = { book ->
                 backStack.goTo(
                     BookDetailKey(
-                        sourceName = if (source?.name != null) source.name else book.source
-                            ?: "",
+                        sourceId = if (source?.sourceId != null) source.sourceId else book.sourceId
+                            ?: 0,
                         bookId = book.id
                     )
                 )
@@ -54,8 +54,8 @@ fun LayoutComposable(
                 onClick = { book ->
                     backStack.goTo(
                         BookDetailKey(
-                            sourceName = if (source?.name != null) source.name else book.source
-                                ?: "",
+                            sourceId = if (source?.sourceId != null) source.sourceId else book.sourceId
+                                ?: 0,
                             bookId = book.id
                         )
                     )

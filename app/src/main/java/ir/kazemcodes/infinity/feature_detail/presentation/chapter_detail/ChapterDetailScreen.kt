@@ -113,7 +113,7 @@ fun ChapterDetailScreen(
                                         backStack.goTo(
                                             ReaderScreenKey(
                                                 bookId = book.id,
-                                                sourceName = viewModel.state.value.source.name,
+                                                sourceId = viewModel.state.value.source.sourceId,
                                                 chapterId = chapter.chapterId,
                                             )
                                         )
