@@ -185,6 +185,7 @@ class AvailableSources() {
 
 
     val realwebnovel = SourceTower(
+        sourceId = 16615641,
         baseUrl = "https://readwebnovels.net",
         lang = "en",
         name = "RealWebNovel",
@@ -242,6 +243,7 @@ class AvailableSources() {
         )
     )
     val freeWebNovel = SourceTower(
+        sourceId = 48607989,
         name = "FreeWebNovel",
         lang = "en",
         baseUrl = "https://freewebnovel.com",
@@ -308,6 +310,7 @@ class AvailableSources() {
     )
 
     val mtl = SourceTower(
+        sourceId = 638830,
         lang = "en",
         name = "MtlNovel",
         baseUrl = "https://www.mtlnovel.com",
@@ -372,6 +375,7 @@ class AvailableSources() {
 
     )
     val wuxiaworld = SourceTower(
+        sourceId = 24791917,
         name = "Wuxiaworld.Site",
         lang = "en",
         baseUrl = "https://wuxiaworld.site",
@@ -430,6 +434,7 @@ class AvailableSources() {
         )
     )
     val myLoveNovel = SourceTower(
+        sourceId = 43670368,
         name = "MyLoveNovel",
         lang = "en",
         supportsLatest = true,
@@ -491,6 +496,7 @@ class AvailableSources() {
         )
     )
     val koreanMtl = SourceTower(
+        sourceId = 19789884,
         name = "KoreanMtl.Online",
         lang = "en",
         supportsLatest = true,
@@ -532,6 +538,7 @@ class AvailableSources() {
     )
 
     val mtlNation = SourceTower(
+        sourceId = 26150742,
         name = "MtlNation",
         baseUrl = "https://mtlnation.com/",
         supportSearch = true,
@@ -587,6 +594,7 @@ class AvailableSources() {
         )
     )
     val realLightWebNovel = SourceTower(
+        sourceId = 33567369,
         name = "RealLightWebNovel",
         baseUrl = "https://readlightnovels.net",
         supportSearch = true,
@@ -644,6 +652,7 @@ class AvailableSources() {
         )
     )
     val wuxiaworldsiteco = SourceTower(
+        sourceId = 2033459,
         name = "Wuxiaworldsite.co",
         baseUrl = "https://wuxiaworldsite.co",
         supportSearch = true,

@@ -11,7 +11,7 @@ import ir.kazemcodes.infinity.core.utils.Resource
 import ir.kazemcodes.infinity.core.utils.UiText
 import ir.kazemcodes.infinity.feature_library.presentation.components.SortType
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import timber.log.Timber
 
@@ -27,11 +27,13 @@ class LocalBookRepositoryImpl(
     override fun getBookById(id: Int): Flow<Resource<Book>> = flow {
         Timber.d("Timber: GetExploreBookByIdUseCase was Called")
         bookDao.getBookById(bookId = id)
-            .collect { book ->
+            .first { book ->
                 if (book != null) {
                     emit(Resource.Success<Book>(data = book))
+                    true
                 } else {
                     emit(Resource.Error<Book>(uiText = UiText.noBook()))
+                    true
                 }
             }
         Timber.d("Timber: GetExploreBookByIdUseCase was Finished Successfully")

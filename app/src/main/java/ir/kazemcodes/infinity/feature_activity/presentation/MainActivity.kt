@@ -15,6 +15,7 @@ import dagger.hilt.android.scopes.ActivityScoped
 import ir.kazemcodes.infinity.MyApplication
 import ir.kazemcodes.infinity.R
 import ir.kazemcodes.infinity.feature_activity.core.FragmentStateChanger
+import ir.kazemcodes.infinity.feature_services.DownloaderService.DownloadService
 import ir.kazemcodes.infinity.feature_services.updater_service.UpdateService
 
 
@@ -49,6 +50,7 @@ class MainActivity : AppCompatActivity(), SimpleStateChanger.NavigationHandler {
 
 
         val manager = WorkManager.getInstance(applicationContext)
+        manager.cancelUniqueWork(DownloadService.DOWNLOADER_SERVICE_NAME)
         
         manager.enqueue(updateRequest)
         

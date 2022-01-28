@@ -61,7 +61,7 @@ fun ExpandingText(modifier: Modifier = Modifier, text: String) {
             fontWeight = FontWeight.W400, color = MaterialTheme.colors.onBackground,
             textAlign = TextAlign.Start,
         )
-        if (textLayoutResultState.value?.lineCount?:0 > (MINIMIZED_MAX_LINES - 1)) {
+        if (finalText.takeLast(3) == "...") {
             Icon(
                 imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
                 contentDescription = "Expand Icon",

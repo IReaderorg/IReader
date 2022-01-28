@@ -41,7 +41,7 @@ class BookDetailViewModel(
     private val remoteUseCases: RemoteUseCases,
     private val deleteUseCase: DeleteUseCase,
     private val fetchUseCase: FetchUseCase,
-) : ScopedServices.Registered, ScopedServices.Activated,KoinComponent {
+) : ScopedServices.Registered, ScopedServices.Activated, KoinComponent {
     private val _state = mutableStateOf<DetailState>(DetailState(source = source,
         book = Book.create().copy(id = bookId)))
     val state: State<DetailState> = _state
@@ -50,7 +50,7 @@ class BookDetailViewModel(
     val chapterState: State<ChapterState> = _chapterState
     lateinit var work: OneTimeWorkRequest
 
-    val webView :  WebView by inject<WebView>()
+    val webView: WebView by inject<WebView>()
 
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -103,12 +103,12 @@ class BookDetailViewModel(
                                     inLibrary = result.data.inLibrary,
                                     isExploreMode = result.data.isExploreMode
                                 )
-                                getLocalChaptersByBookId()
                                 if (state.value.isExploreMode) {
                                     _state.value = state.value.copy(isExploreMode = false)
                                     getRemoteBookDetail(state.value.book)
                                     getRemoteChapterDetail(state.value.book)
                                 }
+                                getLocalChaptersByBookId()
                             } else {
                                 _state.value = state.value.copy(
                                     error = UiText.noError(),
@@ -121,7 +121,8 @@ class BookDetailViewModel(
                         is Resource.Error -> {
                             _state.value =
                                 state.value.copy(isLoading = false)
-                            _eventFlow.emit(UiEvent.ShowSnackbar(result.uiText?: UiText.unknownError().asString()))
+                            _eventFlow.emit(UiEvent.ShowSnackbar(result.uiText
+                                ?: UiText.unknownError().asString()))
                         }
                     }
                 }
@@ -133,17 +134,25 @@ class BookDetailViewModel(
         coroutineScope.launchIO {
             _chapterState.value =
                 chapterState.value.copy(isLoading = true, error = "")
-            getChapterUseCase.getChaptersByBookId(bookId = bookId, isAsc = state.value.book.areChaptersReversed)
+            getChapterUseCase.getChaptersByBookId(bookId = bookId,
+                isAsc = state.value.book.areChaptersReversed)
                 .collect() { result ->
                     when (result) {
                         is Resource.Success -> {
                             if (result.data != null) {
                                 _chapterState.value = chapterState.value.copy(
-                                    chapters = result.data,
                                     error = "",
                                     isLoading = false,
                                     loaded = true
                                 )
+                                if (result.data.isNotEmpty()) {
+                                    _chapterState.value = chapterState.value.copy(
+                                        chapters = result.data,
+                                        error = "",
+                                        isLoading = false,
+                                        loaded = true
+                                    )
+                                }
                                 getLastChapter()
                                 if (state.value.book.totalChapters != result.data.size) {
                                     insertBookDetailToLocal(state.value.book.copy(
@@ -191,7 +200,7 @@ class BookDetailViewModel(
                                     error = UiText.noError(),
                                     isLoaded = true,
                                 )
-                                    insertBookDetailToLocal(state.value.book.copy(dataAdded = System.currentTimeMillis()))
+                                insertBookDetailToLocal(state.value.book.copy(dataAdded = System.currentTimeMillis()))
 
                             }
                         }
@@ -222,12 +231,14 @@ class BookDetailViewModel(
                     when (result) {
                         is Resource.Success -> {
                             if (result.data != null) {
-                                val uniqueList = removeSameItemsFromList(chapterState.value.chapters, result.data.map {
-                                    it.copy(bookId = bookId,
-                                        bookName = state.value.book.bookName)
-                                }) {
-                                    it.title
-                                }
+                                val uniqueList =
+                                    removeSameItemsFromList(chapterState.value.chapters,
+                                        result.data.map {
+                                            it.copy(bookId = bookId,
+                                                bookName = state.value.book.bookName)
+                                        }) {
+                                        it.title
+                                    }
                                 _chapterState.value = chapterState.value.copy(
                                     chapters = result.data.map {
                                         it.copy(bookId = bookId,
@@ -287,7 +298,7 @@ class BookDetailViewModel(
                     is Resource.Error -> {
                         Timber.e("Step four")
                         _eventFlow.emit(UiEvent.ShowSnackbar(
-                            uiText = result.uiText?: UiText.unknownError().asString()
+                            uiText = result.uiText ?: UiText.unknownError().asString()
                         ))
                     }
                 }
