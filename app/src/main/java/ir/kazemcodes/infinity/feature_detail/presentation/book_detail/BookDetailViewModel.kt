@@ -18,10 +18,10 @@ import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalInsertUseCases
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.core.domain.use_cases.remote.RemoteUseCases
 import ir.kazemcodes.infinity.core.utils.*
-import ir.kazemcodes.infinity.feature_activity.domain.service.DownloadService
-import ir.kazemcodes.infinity.feature_activity.domain.service.DownloadService.Companion.DOWNLOAD_BOOK_NAME
-import ir.kazemcodes.infinity.feature_activity.domain.service.DownloadService.Companion.DOWNLOAD_SERVICE_NAME
-import ir.kazemcodes.infinity.feature_activity.domain.service.DownloadService.Companion.DOWNLOAD_SOURCE_ID
+import ir.kazemcodes.infinity.feature_services.DownloaderService.DownloadService
+import ir.kazemcodes.infinity.feature_services.DownloaderService.DownloadService.Companion.DOWNLOADER_BOOK_ID
+import ir.kazemcodes.infinity.feature_services.DownloaderService.DownloadService.Companion.DOWNLOADER_SERVICE_NAME
+import ir.kazemcodes.infinity.feature_services.DownloaderService.DownloadService.Companion.DOWNLOADER_SOURCE_ID
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -76,13 +76,13 @@ class BookDetailViewModel(
         work = OneTimeWorkRequestBuilder<DownloadService>().apply {
             setInputData(
                 Data.Builder().apply {
-                    putString(DOWNLOAD_BOOK_NAME, state.value.book.bookName)
-                    putLong(DOWNLOAD_SOURCE_ID, state.value.book.sourceId)
+                    putInt(DOWNLOADER_BOOK_ID, state.value.book.id)
+                    putLong(DOWNLOADER_SOURCE_ID, state.value.book.sourceId)
                 }.build()
             )
         }.build()
         WorkManager.getInstance(context).enqueueUniqueWork(
-            DOWNLOAD_SERVICE_NAME, ExistingWorkPolicy.REPLACE, work
+            DOWNLOADER_SERVICE_NAME, ExistingWorkPolicy.REPLACE, work
         )
     }
 

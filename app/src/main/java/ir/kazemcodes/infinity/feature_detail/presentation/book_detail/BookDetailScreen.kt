@@ -261,8 +261,8 @@ fun BookDetailScreenLoadedComposable(
                         text = "Download",
                         imageVector = Icons.Default.FileDownload,
                         onClick = {
-                            context.toast("Not available yet.")
-                            //viewModel.startDownloadService(context)
+                            //context.toast("Not available yet.")
+                            viewModel.startDownloadService(context)
                         }
                     )
                 }

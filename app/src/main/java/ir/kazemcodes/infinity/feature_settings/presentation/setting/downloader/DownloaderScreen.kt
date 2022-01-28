@@ -12,7 +12,7 @@ import androidx.work.WorkManager
 import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
 import ir.kazemcodes.infinity.core.data.network.utils.toast
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.NotImplementedText
-import ir.kazemcodes.infinity.feature_activity.domain.service.DownloadService
+import ir.kazemcodes.infinity.feature_services.DownloaderService.DownloadService
 
 @Composable
 fun DownloaderScreen() {
@@ -34,7 +34,7 @@ fun DownloaderScreen() {
                 IconButton(
                     onClick = {
                         WorkManager.getInstance(context)
-                            .cancelUniqueWork(DownloadService.DOWNLOAD_SERVICE_NAME)
+                            .cancelUniqueWork(DownloadService.DOWNLOADER_SERVICE_NAME)
                         context.toast("Downloads were Stopped Successfully")
                     },
                 ) {

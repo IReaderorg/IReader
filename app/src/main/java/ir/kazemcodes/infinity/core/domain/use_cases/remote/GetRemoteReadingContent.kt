@@ -23,8 +23,7 @@ class GetRemoteReadingContent(private val remoteRepository: RemoteRepository) {
             Timber.d("Timber: GetRemoteReadingContentUseCase was Called")
             val content = source.fetchContent(chapter)
 
-            if (content.content.joinToString()
-                    .isBlank() || content.content.contains(Constants.CLOUDFLARE_LOG)
+            if (content.content.joinToString().isBlank() || content.content.contains(Constants.CLOUDFLARE_LOG)
             ) {
                 emit(Resource.Error<ChapterPage>(uiText = UiText.DynamicString("Can't Get The Chapter Content.").asString()))
             } else {
