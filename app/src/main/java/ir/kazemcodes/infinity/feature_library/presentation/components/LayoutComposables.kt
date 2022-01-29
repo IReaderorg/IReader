@@ -1,25 +1,30 @@
 package ir.kazemcodes.infinity.feature_library.presentation.components
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.lazy.LazyGridState
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.navigation.NavController
 import androidx.paging.compose.LazyPagingItems
-import com.zhuinden.simplestack.Backstack
 import ir.kazemcodes.infinity.core.data.network.models.Source
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.presentation.layouts.CompactGridLayoutComposable
 import ir.kazemcodes.infinity.core.presentation.layouts.GridLayoutComposable
 import ir.kazemcodes.infinity.core.presentation.layouts.LayoutType
 import ir.kazemcodes.infinity.core.presentation.layouts.LinearListDisplay
-import ir.kazemcodes.infinity.feature_activity.presentation.BookDetailKey
+import ir.kazemcodes.infinity.feature_activity.presentation.Screen
 
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun LayoutComposable(
-    backStack : Backstack,
+    navController: NavController,
     books: LazyPagingItems<Book>,
     layout: LayoutType,
     scrollState: LazyListState = rememberLazyListState(),
+    gridState: LazyGridState = rememberLazyGridState(),
     source: Source? = null,
     isLocal:Boolean
 ) {
@@ -28,23 +33,15 @@ fun LayoutComposable(
         is LayoutType.GridLayout -> {
             GridLayoutComposable(books = books,
                 onClick = { book ->
-                    backStack.goTo(
-                        BookDetailKey(
-                            sourceId = if (source?.sourceId != null) source.sourceId else book.sourceId
-                                ?: 0,
-                            bookId = book.id
-                        )
+                    navController.navigate(
+                        route = Screen.BookDetail.passArgs(sourceId = if (source?.sourceId != null) source.sourceId else book.sourceId , bookId = book.id)
                     )
-                }, scrollState = scrollState)
+                }, scrollState = gridState)
         }
         is LayoutType.ListLayout -> {
             LinearListDisplay(books = books, onClick = { book ->
-                backStack.goTo(
-                    BookDetailKey(
-                        sourceId = if (source?.sourceId != null) source.sourceId else book.sourceId
-                            ?: 0,
-                        bookId = book.id
-                    )
+                navController.navigate(
+                    route = Screen.BookDetail.passArgs(sourceId = if (source?.sourceId != null) source.sourceId else book.sourceId , bookId = book.id)
                 )
             }, scrollState = scrollState)
         }
@@ -52,14 +49,10 @@ fun LayoutComposable(
             CompactGridLayoutComposable(
                 books = books,
                 onClick = { book ->
-                    backStack.goTo(
-                        BookDetailKey(
-                            sourceId = if (source?.sourceId != null) source.sourceId else book.sourceId
-                                ?: 0,
-                            bookId = book.id
-                        )
+                    navController.navigate(
+                        route = Screen.BookDetail.passArgs(sourceId = if (source?.sourceId != null) source.sourceId else book.sourceId , bookId = book.id)
                     )
-                }, scrollState = scrollState)
+                }, scrollState = gridState)
         }
     }
 }

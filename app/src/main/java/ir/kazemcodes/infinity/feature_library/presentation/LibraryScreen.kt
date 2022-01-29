@@ -17,12 +17,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
-import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
-import com.zhuinden.simplestackcomposeintegration.services.rememberService
 import ir.kazemcodes.infinity.core.presentation.components.handlePagingResult
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.*
 import ir.kazemcodes.infinity.core.presentation.theme.Colour.topBarColor
@@ -35,12 +36,14 @@ import kotlinx.coroutines.launch
 
 @ExperimentalPagerApi
 @ExperimentalAnimationApi
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
-fun LibraryScreen() {
+fun LibraryScreen(
+    modifier: Modifier = Modifier,
+    navController: NavController = rememberNavController(),
+    viewModel: LibraryViewModel = hiltViewModel(),
+) {
 
-    val backstack = LocalBackstack.current
-    val viewModel = rememberService<LibraryViewModel>()
 
     val state = viewModel.state.value
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState()
@@ -108,7 +111,7 @@ fun LibraryScreen() {
                     },
                     navigationIcon = if (state.inSearchMode) {
                         {
-                            TopAppBarBackButton(backStack = backstack,
+                            TopAppBarBackButton(navController = navController,
                                 onClick = {
                                     viewModel.onEvent(LibraryEvents.ToggleSearchMode(false))
                                 })
@@ -118,11 +121,13 @@ fun LibraryScreen() {
                 )
             },
             sheetContent = {
-                BottomTabComposable(viewModel = viewModel, pagerState = pagerState, scope = coroutineScope)
+                BottomTabComposable(viewModel = viewModel, pagerState = pagerState, scope = coroutineScope,navController=navController)
             },
             scaffoldState = bottomSheetScaffoldState
         ) {
-            Box(modifier = Modifier.fillMaxSize().padding(bottom = 50.dp)) {
+            Box(modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 50.dp)) {
                 val result = handlePagingResult(books=books, onEmptyResult = {
                     ErrorTextWithEmojis(
                         modifier = Modifier
@@ -137,7 +142,7 @@ fun LibraryScreen() {
                         LayoutComposable(
                             books = if (!state.inSearchMode) books else books,
                             layout = state.layout,
-                            backStack = backstack,
+                            navController = navController,
                             isLocal = true,
                         )
                     }

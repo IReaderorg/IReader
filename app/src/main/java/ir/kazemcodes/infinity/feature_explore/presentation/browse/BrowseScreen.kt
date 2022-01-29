@@ -1,5 +1,6 @@
 package ir.kazemcodes.infinity.feature_explore.presentation.browse
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,27 +14,32 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
-import com.zhuinden.simplestackcomposeintegration.services.rememberService
 import ir.kazemcodes.infinity.core.presentation.components.handlePagingResult
 import ir.kazemcodes.infinity.core.presentation.layouts.layouts
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.*
-import ir.kazemcodes.infinity.feature_activity.presentation.WebViewKey
+import ir.kazemcodes.infinity.feature_activity.presentation.Screen
 import ir.kazemcodes.infinity.feature_library.presentation.components.LayoutComposable
 import ir.kazemcodes.infinity.feature_library.presentation.components.RadioButtonWithTitleComposable
 import ir.kazemcodes.infinity.feature_sources.sources.models.FetchType
 
 
+@OptIn(ExperimentalFoundationApi::class)
 @ExperimentalPagingApi
 @Composable
-fun BrowserScreen() {
-    val viewModel = rememberService<BrowseViewModel>()
+fun ExploreScreen(
+    modifier: Modifier = Modifier,
+    navController: NavController = rememberNavController(),
+    viewModel: BrowseViewModel = hiltViewModel(),
+) {
     val scrollState = rememberLazyListState()
     val state = viewModel.state.value
-    val backStack = LocalBackstack.current
-    val source = viewModel.getSource()
+
+    val source = viewModel.state.value.source
     val focusManager = LocalFocusManager.current
 
     val books = viewModel.books.collectAsLazyPagingItems()
@@ -50,7 +56,9 @@ fun BrowserScreen() {
                                 viewModel.onEvent(BrowseScreenEvents.UpdateSearchInput(it))
                             },
                             onSearch = {
-                               viewModel.getBooks(state.searchQuery,ExploreType.Search)
+                                viewModel.getBooks(
+                                    query = state.searchQuery,
+                                    type = ExploreType.Search, )
                                 focusManager.clearFocus()
                             },
                             isSearchModeEnable = state.searchQuery.isNotBlank())
@@ -66,7 +74,7 @@ fun BrowserScreen() {
                             title = "Close",
                             onClick = { viewModel.onEvent(BrowseScreenEvents.ToggleSearchMode()) },
                         )
-                    } else if (source.supportSearch){
+                    } else if (source.supportSearch) {
                         TopAppBarActionButton(
                             imageVector = Icons.Default.Search,
                             title = "Search",
@@ -80,7 +88,14 @@ fun BrowserScreen() {
                         imageVector = Icons.Default.Language,
                         title = "WebView",
                         onClick = {
-                            backStack.goTo(WebViewKey(source.baseUrl, sourceId = source.sourceId, fetchType = FetchType.Latest.index))
+                            //TODO change bookId AND url
+                            navController.navigate(
+                                Screen.WebPage.passArgs(
+                                    sourceId = source.sourceId,
+                                    fetchType = FetchType.Latest.index,
+                                    url = source.baseUrl
+                                )
+                            )
                         },
                     )
                     TopAppBarActionButton(
@@ -120,24 +135,24 @@ fun BrowserScreen() {
 
                 },
                 navigationIcon = {
-                    TopAppBarBackButton(backStack = backStack)
+                    TopAppBarBackButton(navController = navController)
 
                 }
             )
         }
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            val result = handlePagingResult(books=books, onEmptyResult = {
+            val result = handlePagingResult(books = books, onEmptyResult = {
                 ErrorTextWithEmojis(error = "Sorry, the source failed to get any content.")
             })
 
-            if(result) {
+            if (result) {
                 LayoutComposable(
                     books = books,
                     layout = state.layout,
                     scrollState = scrollState,
                     source = source,
-                    backStack = backStack,
+                    navController = navController,
                     isLocal = false
                 )
             }

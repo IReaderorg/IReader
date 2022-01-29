@@ -17,8 +17,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
-import com.zhuinden.simplestackcomposeintegration.services.rememberService
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import ir.kazemcodes.infinity.core.data.network.utils.setDefaultSettings
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.MidSizeTextComposable
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarActionButton
@@ -32,9 +33,11 @@ import kotlinx.coroutines.flow.collectLatest
 
 @ExperimentalCoroutinesApi
 @Composable
-fun WebPageScreen() {
-    val backStack = LocalBackstack.current
-    val viewModel = rememberService<WebViewPageModel>()
+fun WebPageScreen(
+    modifier: Modifier = Modifier,
+    navController: NavController = rememberNavController(),
+    viewModel: WebViewPageModel = hiltViewModel(),
+) {
     val webView = viewModel.state.value.webView
     val urlToRender = viewModel.state.value.url
     val scaffoldState = rememberScaffoldState()
@@ -59,7 +62,7 @@ fun WebPageScreen() {
             TopAppBar(
                 title = { MidSizeTextComposable(title = urlToRender, overflow = TextOverflow.Ellipsis,) },
                 navigationIcon = {
-                    TopAppBarBackButton(backStack = backStack)
+                    TopAppBarBackButton(navController = navController)
                 },
                 actions = {
                     if (viewModel.state.value.fetcher == FetchType.Detail) {

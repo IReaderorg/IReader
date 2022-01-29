@@ -2,44 +2,64 @@ package ir.kazemcodes.infinity.feature_detail.presentation.chapter_detail
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.zhuinden.simplestack.ScopedServices
-import ir.kazemcodes.infinity.core.data.network.models.Source
+import dagger.hilt.android.lifecycle.HiltViewModel
 import ir.kazemcodes.infinity.core.data.network.utils.launchIO
-import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
 import ir.kazemcodes.infinity.core.domain.use_cases.local.DeleteUseCase
 import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalGetChapterUseCase
 import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalInsertUseCases
 import ir.kazemcodes.infinity.core.utils.Resource
-import kotlinx.coroutines.*
+import ir.kazemcodes.infinity.feature_activity.presentation.NavigationArgs
+import ir.kazemcodes.infinity.feature_sources.sources.Extensions
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 
-class ChapterDetailViewModel(
-    private val bookId: Int,
-    private val source: Source,
+@HiltViewModel
+class ChapterDetailViewModel @Inject constructor(
     private val getChapterUseCase: LocalGetChapterUseCase,
     private val insertUseCases: LocalInsertUseCases,
     private val deleteUseCase: DeleteUseCase,
-) : ScopedServices.Registered {
+    private val savedStateHandle: SavedStateHandle,
+    extensions: Extensions
+) : ViewModel() {
 
     private val _state =
-        mutableStateOf(ChapterDetailState(source = source, book = Book.create().copy(id = bookId)))
+        mutableStateOf(ChapterDetailState(source = extensions.mappingSourceNameToSource(0)))
     val state: State<ChapterDetailState> = _state
 
     private val _chapters = MutableStateFlow<PagingData<Chapter>>(PagingData.empty())
     val chapters = _chapters
 
-    override fun onServiceRegistered() {
-        getLocalChapters()
-        getLocalChaptersByPaging()
+    init {
+        val sourceId = savedStateHandle.get<Long>(NavigationArgs.sourceId.name)
+        val bookId = savedStateHandle.get<Int>(NavigationArgs.bookId.name)
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                sourceId?.let { _state.value = state.value.copy(source = extensions.mappingSourceNameToSource(it)) }
+                bookId?.let { _state.value = state.value.copy(book = state.value.book.copy(id = it)) }
+                getLocalChapters()
+                getLocalChaptersByPaging()
+
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    sourceId?.let { _state.value = state.value.copy(source = extensions.mappingSourceNameToSource(it)) }
+                    bookId?.let { _state.value = state.value.copy(book = state.value.book.copy(id = it)) }
+                    getLocalChapters()
+                    getLocalChaptersByPaging()
+                }
+            }
+        }
     }
-
-
-    private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     fun onEvent(event: ChapterDetailEvent) {
         when (event) {
@@ -55,9 +75,9 @@ class ChapterDetailViewModel(
     }
 
     private fun getLocalChaptersByPaging() {
-        coroutineScope.launch(Dispatchers.IO) {
-            getChapterUseCase.getLocalChaptersByPaging(bookId = bookId, isAsc = state.value.isAsc)
-                .cachedIn(coroutineScope)
+        viewModelScope.launch(Dispatchers.IO) {
+            getChapterUseCase.getLocalChaptersByPaging(bookId = state.value.book.id, isAsc = state.value.isAsc)
+                .cachedIn(viewModelScope)
                 .collect { snapshot ->
                     _chapters.value = snapshot
                 }
@@ -65,8 +85,8 @@ class ChapterDetailViewModel(
     }
 
     private fun getLocalChapters() {
-        coroutineScope.launchIO {
-            getChapterUseCase.getChaptersByBookId(bookId = bookId,isAsc =state.value.isAsc)
+        viewModelScope.launchIO {
+            getChapterUseCase.getChaptersByBookId(bookId = state.value.book.id,isAsc =state.value.isAsc)
                 .collect { result ->
                     when (result) {
                         is Resource.Success -> {
@@ -88,9 +108,9 @@ class ChapterDetailViewModel(
         return if (ch != -1) ch else 0
     }
 
-
-    override fun onServiceUnregistered() {
-        coroutineScope.cancel()
+    override fun onCleared() {
+        super.onCleared()
     }
+
 }
 

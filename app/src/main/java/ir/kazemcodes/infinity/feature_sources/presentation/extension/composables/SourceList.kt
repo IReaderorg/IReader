@@ -13,17 +13,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
+import androidx.navigation.NavController
 import ir.kazemcodes.infinity.R
 import ir.kazemcodes.infinity.core.data.network.models.Source
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.SuperSmallTextComposable
-import ir.kazemcodes.infinity.feature_activity.presentation.BrowserScreenKey
+import ir.kazemcodes.infinity.feature_activity.presentation.Screen
 import ir.kazemcodes.infinity.feature_explore.presentation.browse.ExploreType
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun SourceList(modifier: Modifier = Modifier,sources : List<Source>, scrollState : LazyListState) {
-    val backstack = LocalBackstack.current
+fun SourceList(
+    modifier: Modifier = Modifier,
+    sources: List<Source>,
+    scrollState: LazyListState,
+    navController: NavController,
+) {
+
     LazyColumn(modifier = modifier
         .fillMaxSize(),
         state = scrollState,
@@ -38,19 +43,24 @@ fun SourceList(modifier: Modifier = Modifier,sources : List<Source>, scrollState
                             color = MaterialTheme.colors.primary,
                             style = MaterialTheme.typography.subtitle2,
                             modifier = Modifier.clickable {
-                                backstack.goTo(
-                                    BrowserScreenKey(
-                                        sourceId = sources[index].sourceId,
-                                    exploreType = ExploreType.Popular.mode))
+                                navController.navigate(Screen.Explore.passArgs(
+                                    sourceId = sources[index].sourceId,
+                                    exploreType = ExploreType.Popular.mode
+                                ))
                             })
                     }
                 },
-                secondaryText = { SuperSmallTextComposable(title = "Created by ${sources[index].creator}", color = MaterialTheme.colors.onBackground.copy(alpha = .4f)) },
+                secondaryText = {
+                    SuperSmallTextComposable(title = "Created by ${sources[index].creator}",
+                        color = MaterialTheme.colors.onBackground.copy(alpha = .4f))
+                },
                 modifier = Modifier.clickable {
-                    backstack.goTo(BrowserScreenKey(sourceId = sources[index].sourceId,
-                        exploreType = ExploreType.Latest.mode))
+                    navController.navigate(Screen.Explore.passArgs(
+                        sourceId = sources[index].sourceId,
+                        exploreType = ExploreType.Latest.mode
+                    ))
                 })
         }
+
     }
-    
 }

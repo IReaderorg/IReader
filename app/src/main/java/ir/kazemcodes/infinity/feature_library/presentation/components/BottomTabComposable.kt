@@ -9,6 +9,7 @@ import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.PagerState
 import ir.kazemcodes.infinity.feature_library.presentation.LibraryViewModel
@@ -17,8 +18,14 @@ import kotlinx.coroutines.CoroutineScope
 @ExperimentalMaterialApi
 @ExperimentalPagerApi
 @Composable
-fun BottomTabComposable(modifier: Modifier = Modifier, viewModel: LibraryViewModel, pagerState: PagerState, scope: CoroutineScope) {
-    val tabs = listOf(TabItem.Filter(viewModel = viewModel), TabItem.Sort(viewModel), TabItem.Display(viewModel = viewModel))
+fun BottomTabComposable(
+    modifier: Modifier = Modifier,
+    viewModel: LibraryViewModel,
+    pagerState: PagerState,
+    scope: CoroutineScope,
+    navController: NavController
+) {
+    val tabs = listOf(TabItem.Filter(viewModel = viewModel), TabItem.Sort(viewModel,navController), TabItem.Display(viewModel = viewModel))
 
     ModalBottomSheetLayout(sheetBackgroundColor = MaterialTheme.colors.background,
         modifier = Modifier.height(500.dp),

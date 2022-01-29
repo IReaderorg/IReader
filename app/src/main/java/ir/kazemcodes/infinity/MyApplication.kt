@@ -5,8 +5,6 @@ import android.webkit.WebView
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import com.google.firebase.analytics.FirebaseAnalytics
-import com.zhuinden.simplestack.GlobalServices
-import com.zhuinden.simplestackextensions.servicesktx.add
 import dagger.hilt.android.HiltAndroidApp
 import ir.kazemcodes.infinity.core.domain.repository.LocalBookRepository
 import ir.kazemcodes.infinity.core.domain.repository.LocalChapterRepository
@@ -31,9 +29,6 @@ import javax.inject.Inject
 
 @HiltAndroidApp
 class MyApplication : Application(), Configuration.Provider {
-
-    lateinit var globalServices: GlobalServices
-        private set
 
 
     @Inject
@@ -87,6 +82,7 @@ class MyApplication : Application(), Configuration.Provider {
             single<WebView> { webView }
             single<Extensions> { extensions }
             single<PreferencesUseCase> { preferencesUseCase }
+            single<OkHttpClient> { okHttpClient }
 
         }
 
@@ -94,23 +90,6 @@ class MyApplication : Application(), Configuration.Provider {
             modules(appModule)
         }
 
-        globalServices = GlobalServices.builder()
-            .add(preferencesUseCase)
-            .add(extensions)
-            .add(webView)
-            .add(okHttpClient)
-            .add(localBookRepository)
-            .add(remoteRepository)
-            .add(localChapterRepository)
-            .add(localSourceRepository)
-            .add(deleteUseCase)
-            .add(insertUseCases)
-            .add(getBookUseCases)
-            .add(getChapterUseCases)
-            .add(remoteUseCases)
-            .add(localGetChapterUseCase)
-            .add(fetcherUseCase)
-            .build()
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this)
         setupNotificationChannels()
 

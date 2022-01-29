@@ -3,7 +3,6 @@ package ir.kazemcodes.infinity.core.presentation.components
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -12,11 +11,10 @@ import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import coil.request.CachePolicy
 import coil.util.CoilUtils
-import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
-import com.zhuinden.simplestackextensions.servicesktx.lookup
 import ir.kazemcodes.infinity.R
 import okhttp3.Headers
 import okhttp3.OkHttpClient
+import org.koin.androidx.compose.get
 
 @OptIn(ExperimentalCoilApi::class)
 @Composable
@@ -26,13 +24,10 @@ fun BookImageComposable(
     alignment: Alignment = Alignment.TopCenter,
     contentScale: ContentScale = ContentScale.FillHeight,
     iconBadge: (@Composable () -> Unit)? = null,
-    headers: Headers?=null
+    headers: Headers?=null,
 ) {
     val context = LocalContext.current
-    val backstack = LocalBackstack.current
-    val okHttpClient = remember {
-        backstack.lookup<OkHttpClient>()
-    }
+    val okHttpClient : OkHttpClient = get()
     val painter = rememberImagePainter(data = image) {
         crossfade(durationMillis = 700)
         placeholder(R.drawable.ic_no_image_placeholder)

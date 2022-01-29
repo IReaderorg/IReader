@@ -8,10 +8,12 @@ import android.view.WindowManager
 import android.webkit.WebView
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.zhuinden.simplestack.ScopedServices
-import ir.kazemcodes.infinity.core.data.network.models.Source
+import dagger.hilt.android.lifecycle.HiltViewModel
 import ir.kazemcodes.infinity.core.data.network.utils.launchIO
 import ir.kazemcodes.infinity.core.data.network.utils.launchUI
 import ir.kazemcodes.infinity.core.domain.models.Book
@@ -26,11 +28,14 @@ import ir.kazemcodes.infinity.core.domain.use_cases.remote.RemoteUseCases
 import ir.kazemcodes.infinity.core.presentation.theme.fonts
 import ir.kazemcodes.infinity.core.presentation.theme.readerScreenBackgroundColors
 import ir.kazemcodes.infinity.core.utils.*
+import ir.kazemcodes.infinity.feature_activity.presentation.NavigationArgs
+import ir.kazemcodes.infinity.feature_sources.sources.Extensions
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import org.jsoup.Jsoup
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import javax.inject.Inject
 
 
 /**
@@ -39,18 +44,18 @@ import org.koin.core.component.inject
  * we use the areReversedChapter to understanding the order of
  * chapters for chapterList slider then get Chapters using pagination for chapter drawer.
  */
-class ReaderScreenViewModel(
+@HiltViewModel
+class ReaderScreenViewModel @Inject constructor(
     private val preferencesUseCase: PreferencesUseCase,
-    private val source: Source,
-    private val bookId: Int,
-    private val chapterId: Int,
     private val getBookUseCases: LocalGetBookUseCases,
     private val getChapterUseCase: LocalGetChapterUseCase,
     private val remoteUseCases: RemoteUseCases,
     private val insertUseCases: LocalInsertUseCases,
     private val deleteUseCase: DeleteUseCase,
-) : ScopedServices.Registered , KoinComponent{
-    private val _state = mutableStateOf(ReaderScreenState(source = source))
+    private val savedStateHandle: SavedStateHandle,
+    private val extensions: Extensions
+) : ViewModel(), KoinComponent{
+    private val _state = mutableStateOf(ReaderScreenState(source =  extensions.mappingSourceNameToSource(0)))
     val state: State<ReaderScreenState> = _state
 
 
@@ -64,18 +69,36 @@ class ReaderScreenViewModel(
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     val webView by inject<WebView>()
 
-    override fun onServiceRegistered() {
-        val initState = state.value
-        _state.value = state.value.copy(
-            book = initState.book.copy(id = bookId),
-            chapter = initState.chapter.copy(chapterId = chapterId),
-            source = source
-        )
-        getLocalBookByName()
+    init {
+        val sourceId = savedStateHandle.get<Long>(NavigationArgs.sourceId.name)
+        val chapterId = savedStateHandle.get<Int>(NavigationArgs.chapterId.name)
+        val bookId = savedStateHandle.get<Int>(NavigationArgs.bookId.name)
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                sourceId?.let {  _state.value = state.value.copy(source =  extensions.mappingSourceNameToSource(it)) }
+                bookId?.let {  _state.value = state.value.copy(book = state.value.book.copy(id = it)) }
+                chapterId?.let {  _state.value = state.value.copy(chapter = state.value.chapter.copy(chapterId = it)) }
+                getLocalBookByName()
 
-        getLocalChaptersByPaging()
-        readPreferences()
+                getLocalChaptersByPaging()
+                readPreferences()
+
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    sourceId?.let {  _state.value = state.value.copy(source =  extensions.mappingSourceNameToSource(it)) }
+                    bookId?.let {  _state.value = state.value.copy(book = state.value.book.copy(id = it)) }
+                    chapterId?.let {  _state.value = state.value.copy(chapter = state.value.chapter.copy(chapterId = it)) }
+                    getLocalBookByName()
+
+                    getLocalChaptersByPaging()
+                    readPreferences()
+                }
+            }
+        }
+
+
     }
+
 
 
     private fun readPreferences() {
@@ -126,7 +149,7 @@ class ReaderScreenViewModel(
 
     private fun getChapters() {
         coroutineScope.launchIO {
-            getChapterUseCase.getChaptersByBookId(bookId = bookId,
+            getChapterUseCase.getChaptersByBookId(bookId = state.value.book.id,
                 isAsc = state.value.book.areChaptersReversed)
                 .collect { result ->
                     when (result) {
@@ -196,7 +219,7 @@ class ReaderScreenViewModel(
                 uiText = UiText.DynamicString("Trying to fetch chapter's content").asString()
             ))
 
-            val chapter = source.contentFromElementParse(Jsoup.parse(webView.getHtml()))
+            val chapter = state.value.source.contentFromElementParse(Jsoup.parse(webView.getHtml()))
             if (!chapter.content.isNullOrEmpty() && state.value.isBookLoaded && state.value.isChapterLoaded && webView.originalUrl == state.value.chapter.link) {
                 _state.value = state.value.copy(isLoading = false,
                     error = UiText.noError(),
@@ -226,7 +249,7 @@ class ReaderScreenViewModel(
             error = UiText.noError(),
             isLoaded = false,
         )
-        remoteUseCases.getRemoteReadingContent(state.value.chapter, source = source)
+        remoteUseCases.getRemoteReadingContent(state.value.chapter, source = state.value.source)
             .onEach { result ->
                 when (result) {
                     is Resource.Success -> {
@@ -258,7 +281,7 @@ class ReaderScreenViewModel(
     @Suppress()
     private fun getLocalBookByName() {
         coroutineScope.launchIO {
-            getBookUseCases.getBookById(id = bookId).first { result ->
+            getBookUseCases.getBookById(id = state.value.book.id).first { result ->
                 when (result) {
                     is Resource.Success -> {
                         if (result.data != null && result.data != Book.create()) {
@@ -303,7 +326,7 @@ class ReaderScreenViewModel(
 
     fun getLocalChaptersByPaging() {
         coroutineScope.launch(Dispatchers.IO) {
-            getChapterUseCase.getLocalChaptersByPaging(bookId = bookId, isAsc = state.value.isAsc)
+            getChapterUseCase.getLocalChaptersByPaging(bookId = state.value.book.id, isAsc = state.value.isAsc)
                 .cachedIn(coroutineScope).collect { snapshot ->
                     _chapters.value = snapshot
                 }
@@ -518,7 +541,9 @@ class ReaderScreenViewModel(
     }
 
 
-    override fun onServiceUnregistered() {
+    override fun onCleared() {
         coroutineScope.cancel()
+        super.onCleared()
     }
+
 }

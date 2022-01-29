@@ -1,7 +1,6 @@
 package ir.kazemcodes.infinity.feature_detail.presentation.book_detail
 
 
-import android.webkit.WebView
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -21,20 +20,19 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
-import com.zhuinden.simplestackcomposeintegration.services.rememberService
-import com.zhuinden.simplestackextensions.servicesktx.lookup
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import ir.kazemcodes.infinity.core.data.network.utils.toast
 import ir.kazemcodes.infinity.core.presentation.components.BookImageComposable
 import ir.kazemcodes.infinity.core.presentation.components.ISnackBarHost
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.ErrorTextWithEmojis
+import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarBackButton
 import ir.kazemcodes.infinity.core.utils.UiEvent
 import ir.kazemcodes.infinity.core.utils.formatBasedOnDot
 import ir.kazemcodes.infinity.core.utils.formatList
 import ir.kazemcodes.infinity.core.utils.getUrlWithoutDomain
-import ir.kazemcodes.infinity.feature_activity.presentation.ChapterDetailKey
-import ir.kazemcodes.infinity.feature_activity.presentation.ReaderScreenKey
-import ir.kazemcodes.infinity.feature_activity.presentation.WebViewKey
+import ir.kazemcodes.infinity.feature_activity.presentation.Screen
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.components.ButtonWithIconAndText
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.components.CardTileComposable
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.components.DotsFlashing
@@ -46,34 +44,30 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 fun BookDetailScreen(
     modifier: Modifier = Modifier,
+    navController: NavController = rememberNavController(),
+    viewModel: BookDetailViewModel = hiltViewModel(),
 ) {
-    val viewModel = rememberService<BookDetailViewModel>()
-    val backStack = LocalBackstack.current
 
 
     Box(modifier = Modifier.fillMaxSize()) {
         if (viewModel.state.value.isLoaded) {
             BookDetailScreenLoadedComposable(
                 modifier = modifier,
-                viewModel = viewModel
+                viewModel = viewModel,
+                navController = navController
             )
         } else {
             Scaffold(modifier = Modifier.fillMaxSize(), topBar = {
                 TopAppBar(title = {},
                     backgroundColor = MaterialTheme.colors.background,
                     navigationIcon = {
-                        IconButton(onClick = { backStack.goBack() }) {
-                            Icon(
-                                imageVector = Icons.Default.ArrowBack,
-                                contentDescription = "ArrowBack",
-                                tint = MaterialTheme.colors.onBackground,
-                            )
-                        }
+                        TopAppBarBackButton(navController = navController)
                     },
                     actions = {
                         IconButton(onClick = {
-                            backStack.goTo(WebViewKey(
-                                viewModel.state.value.source.baseUrl + getUrlWithoutDomain(viewModel.state.value.book.link),
+                            navController.navigate(Screen.WebPage.passArgs(
+                                url = viewModel.state.value.source.baseUrl + getUrlWithoutDomain(
+                                    viewModel.state.value.book.link),
                                 sourceId = viewModel.state.value.source.sourceId,
                                 fetchType = FetchType.Detail.index,
                                 bookId = viewModel.state.value.book.id
@@ -93,7 +87,7 @@ fun BookDetailScreen(
                     ISnackBarHost(it)
                 }
 
-                ) {
+            ) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     if (viewModel.state.value.error.isNotBlank()) {
                         ErrorTextWithEmojis(error = viewModel.state.value.error, modifier = Modifier
@@ -122,14 +116,14 @@ fun BookDetailScreen(
 fun BookDetailScreenLoadedComposable(
     modifier: Modifier = Modifier,
     viewModel: BookDetailViewModel,
+    navController: NavController,
 ) {
     val source = viewModel.state.value.source
-    val backStack = LocalBackstack.current
     val state = viewModel.state.value
     val chapters = viewModel.chapterState.value.chapters
     val scaffoldState = rememberScaffoldState()
     val context = LocalContext.current
-    val webview = backStack.lookup<WebView>()
+    val webview = viewModel.webView
     val isWebViewEnable by remember {
         mutableStateOf(webview.originalUrl == viewModel.state.value.book.link)
     }
@@ -146,7 +140,7 @@ fun BookDetailScreenLoadedComposable(
         }
     }
 
-        Scaffold(
+    Scaffold(
         topBar = {
             TopAppBar(
                 title = {},
@@ -176,9 +170,10 @@ fun BookDetailScreenLoadedComposable(
                     }
                     /** ERROR: This may cause error later: mismatch between baseurl and book link**/
                     IconButton(onClick = {
-                        backStack.goTo(WebViewKey(
-                            source.baseUrl + getUrlWithoutDomain(state.book.link),
-                            sourceId = source.sourceId,
+                        navController.navigate(
+                            Screen.WebPage.passArgs(
+                            url = viewModel.state.value.source.baseUrl + getUrlWithoutDomain(viewModel.state.value.book.link),
+                            sourceId = viewModel.state.value.source.sourceId,
                             fetchType = FetchType.Detail.index,
                             bookId = viewModel.state.value.book.id
                         ))
@@ -193,18 +188,12 @@ fun BookDetailScreenLoadedComposable(
 
                 },
                 navigationIcon = {
-                    IconButton(onClick = { backStack.goBack() }) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "back Button",
-                            tint = MaterialTheme.colors.onBackground
-                        )
-                    }
+                    TopAppBarBackButton(navController = navController)
 
                 }
             )
-        }, scaffoldState = scaffoldState, snackbarHost = { ISnackBarHost(snackBarHostState = it)},
-            bottomBar = {
+        }, scaffoldState = scaffoldState, snackbarHost = { ISnackBarHost(snackBarHostState = it) },
+        bottomBar = {
             BottomAppBar(
                 modifier = modifier.fillMaxWidth(),
                 backgroundColor = MaterialTheme.colors.background,
@@ -237,16 +226,13 @@ fun BookDetailScreenLoadedComposable(
                         imageVector = Icons.Default.AutoStories,
                         onClick = {
                             if (viewModel.chapterState.value.lastChapter != null) {
-                                backStack.goTo(
-                                    ReaderScreenKey(
-                                        bookId = state.book.id,
-                                        sourceId = source.sourceId,
-                                        chapterId = viewModel.chapterState.value.lastChapter!!.chapterId,
-
-                                    ),
-                                )
+                                navController.navigate(Screen.ReaderScreen.passArgs(
+                                    bookId = state.book.id,
+                                    sourceId = source.sourceId,
+                                    chapterId = viewModel.chapterState.value.lastChapter!!.chapterId,
+                                ))
                             } else if (viewModel.chapterState.value.chapters.isNotEmpty()) {
-                                backStack.goTo(ReaderScreenKey(
+                                navController.navigate(Screen.ReaderScreen.passArgs(
                                     bookId = state.book.id,
                                     sourceId = source.sourceId,
                                     chapterId = viewModel.chapterState.value.chapters.first().chapterId,
@@ -380,10 +366,10 @@ fun BookDetailScreenLoadedComposable(
             /** Chapter Content **/
             CardTileComposable(
                 modifier = modifier.clickable {
-                    backStack.goTo(ChapterDetailKey(
-                        bookId = state.book.id,
-                        sourceId = source.sourceId
-                    ))
+                    navController.navigate(
+                        Screen.ChapterDetail.passArgs(bookId = state.book.id,
+                            sourceId = source.sourceId))
+
                 },
                 title = "Contents",
                 subtitle = "${chapters.size} Chapters",

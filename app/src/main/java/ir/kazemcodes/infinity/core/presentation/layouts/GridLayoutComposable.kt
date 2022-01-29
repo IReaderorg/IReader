@@ -6,9 +6,9 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.GridCells
-import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.LazyGridState
 import androidx.compose.foundation.lazy.LazyVerticalGrid
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -35,14 +35,13 @@ fun GridLayoutComposable(
     modifier: Modifier = Modifier,
     books: LazyPagingItems<Book>,
     onClick: (book: Book) -> Unit,
-    scrollState: LazyListState = rememberLazyListState(),
+    scrollState: LazyGridState = rememberLazyGridState(),
 ) {
     LazyVerticalGrid(
         state = scrollState,
         modifier = modifier.fillMaxSize(),
         cells = GridCells.Fixed(3),
         content = {
-
             items(lazyPagingItems = books) { book ->
                 if (book !=null)  {
                     Box(

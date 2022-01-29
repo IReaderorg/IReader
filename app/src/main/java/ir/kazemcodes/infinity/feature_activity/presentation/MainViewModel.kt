@@ -1,15 +1,18 @@
 package ir.kazemcodes.infinity.feature_activity.presentation
 
 import androidx.compose.runtime.mutableStateOf
-import com.zhuinden.simplestack.ScopedServices
+import androidx.lifecycle.ViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 import ir.kazemcodes.infinity.core.domain.use_cases.local.DeleteUseCase
 import ir.kazemcodes.infinity.feature_activity.domain.models.BottomNavigationScreen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class MainViewModel(private val deleteUseCase: DeleteUseCase) : ScopedServices.Registered {
+@HiltViewModel
+class MainViewModel @Inject constructor(private val deleteUseCase: DeleteUseCase) : ViewModel() {
 
     private val _state = mutableStateOf(MainScreenState())
     val state = _state
@@ -23,11 +26,8 @@ class MainViewModel(private val deleteUseCase: DeleteUseCase) : ScopedServices.R
 
         }
     }
-    override fun onServiceRegistered() {
+    init {
         setExploreModeOffForInLibraryBooks()
-    }
-
-    override fun onServiceUnregistered() {
     }
     private fun setExploreModeOffForInLibraryBooks() {
         coroutineScope.launch(Dispatchers.IO) {

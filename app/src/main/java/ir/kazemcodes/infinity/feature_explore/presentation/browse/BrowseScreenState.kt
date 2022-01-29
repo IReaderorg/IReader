@@ -1,6 +1,7 @@
 package ir.kazemcodes.infinity.feature_explore.presentation.browse
 
 import ir.kazemcodes.infinity.core.data.network.models.BooksPage
+import ir.kazemcodes.infinity.core.data.network.models.Source
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.presentation.layouts.LayoutType
 
@@ -16,6 +17,8 @@ data class BrowseScreenState(
     val searchQuery: String = "",
     val searchedBook: BooksPage = BooksPage(),
     val isLatestUpdateMode: Boolean = true,
-    val hasNextPage : Boolean = true
+    val hasNextPage : Boolean = true,
+    val exploreType: ExploreType = ExploreType.Latest,
+    val source: Source
 )
 

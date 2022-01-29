@@ -2,7 +2,8 @@ package ir.kazemcodes.infinity.feature_sources.presentation.extension
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import com.zhuinden.simplestack.ScopedServices
+import androidx.lifecycle.ViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 import ir.kazemcodes.infinity.core.data.network.models.Source
 import ir.kazemcodes.infinity.core.domain.repository.LocalSourceRepository
 import ir.kazemcodes.infinity.core.utils.Resource
@@ -16,9 +17,11 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ExtensionViewModel(private val localSourceRepository: LocalSourceRepository,private val extensions: Extensions) :
-    ScopedServices.Registered {
+@HiltViewModel
+class ExtensionViewModel @Inject constructor(private val localSourceRepository: LocalSourceRepository,private val extensions: Extensions) :
+    ViewModel() {
 
     private val _state =
         mutableStateOf(ExtensionScreenState())
@@ -29,12 +32,10 @@ class ExtensionViewModel(private val localSourceRepository: LocalSourceRepositor
     val eventFlow = _eventFlow.asSharedFlow()
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
-    override fun onServiceRegistered() {
+    init {
         getSources()
     }
 
-    override fun onServiceUnregistered() {
-    }
 
     fun updateSource(sources: List<Source>) {
         _state.value = state.value.copy(sources = sources)
@@ -47,7 +48,7 @@ class ExtensionViewModel(private val localSourceRepository: LocalSourceRepositor
                     is Resource.Success -> {
                         if (result.data != null) {
                             _state.value =
-                                state.value.copy(sources = result.data)
+                                state.value.copy(sources = result.data + extensions.getSources())
                             result.data.forEach {
                                 extensions.addSource(it)
                             }

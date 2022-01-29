@@ -13,14 +13,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarTitle
 import ir.kazemcodes.infinity.core.utils.Constants
-import ir.kazemcodes.infinity.feature_activity.core.FragmentKey
-import ir.kazemcodes.infinity.feature_activity.presentation.*
+import ir.kazemcodes.infinity.feature_activity.presentation.Screen
 
 @Composable
-fun SettingScreen(modifier: Modifier = Modifier) {
+fun SettingScreen(modifier: Modifier = Modifier, navController: NavController = rememberNavController()) {
     val settingItems = listOf(
         //SettingItems.Downloads,
         //SettingItems.ExtensionCreator,
@@ -28,7 +28,9 @@ fun SettingScreen(modifier: Modifier = Modifier) {
         SettingItems.DnsOverHttp,
         SettingItems.About,
     )
-    Box(modifier.fillMaxSize().padding(bottom = 50.dp)) {
+    Box(modifier
+        .fillMaxSize()
+        .padding(bottom = 50.dp)) {
         Scaffold(modifier = Modifier.fillMaxSize(), topBar = {
             TopAppBar(
                 title = {
@@ -48,7 +50,10 @@ fun SettingScreen(modifier: Modifier = Modifier) {
                 settingItems.forEach { item ->
                     SettingsItem(title = item.title,
                         imageVector = item.icon,
-                        DestinationScreenKey = item.DestinationScreenKey)
+                        destinationScreenRoute = item.route,
+                        navController = navController
+
+                    )
                 }
 
             }
@@ -61,13 +66,19 @@ fun SettingScreen(modifier: Modifier = Modifier) {
 sealed class SettingItems(
     val title: String,
     val icon: ImageVector,
-    val DestinationScreenKey: FragmentKey,
+    val route: String,
 ) {
-    object Downloads : SettingItems("Downloads", Icons.Default.Download, DownloadScreenKey())
-    object ExtensionCreator : SettingItems("ExtensionCreator", Icons.Default.Extension, ExtensionCreatorScreenKey())
-    object Appearance : SettingItems("Appearance", Icons.Default.Palette, AppearanceSettingScreenKey())
-    object DnsOverHttp : SettingItems("DnsOverHttp", Icons.Default.Dns, DnsOverHttpScreenKey())
-    object About : SettingItems("About", Icons.Default.Info, AboutScreenKey())
+    object Downloads : SettingItems("Downloads", Icons.Default.Download, Screen.Downloader.route)
+    object ExtensionCreator :
+        SettingItems("ExtensionCreator", Icons.Default.Extension, Screen.ExtensionCreator.route)
+
+    object Appearance :
+        SettingItems("Appearance", Icons.Default.Palette, Screen.AppearanceSetting.route)
+
+    object DnsOverHttp :
+        SettingItems("DnsOverHttp", Icons.Default.Dns, Screen.DnsOverHttpSetting.route)
+
+    object About : SettingItems("About", Icons.Default.Info, Screen.AboutSetting.route)
 }
 
 @Composable
@@ -75,9 +86,9 @@ fun SettingsItem(
     modifier: Modifier = Modifier,
     title: String,
     imageVector: ImageVector,
-    DestinationScreenKey: FragmentKey,
+    navController: NavController = rememberNavController(),
+    destinationScreenRoute: String,
 ) {
-    val backstack = LocalBackstack.current
     val interactionSource = remember { MutableInteractionSource() }
     Row(
         modifier = modifier
@@ -85,10 +96,12 @@ fun SettingsItem(
             .padding(16.dp)
             .height(50.dp)
             .clickable(interactionSource = interactionSource,
-                indication = null) { backstack.goTo(DestinationScreenKey) },
+                indication = null) { navController.navigate(destinationScreenRoute) },
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(imageVector = imageVector, contentDescription = "$title icon", tint = MaterialTheme.colors.primary)
+        Icon(imageVector = imageVector,
+            contentDescription = "$title icon",
+            tint = MaterialTheme.colors.primary)
         Spacer(modifier = modifier.width(20.dp))
         Text(
             text = title,

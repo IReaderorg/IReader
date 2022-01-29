@@ -10,8 +10,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
-import com.zhuinden.simplestackcomposeintegration.services.rememberService
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import ir.kazemcodes.infinity.core.data.network.utils.toast
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.apperance.NightMode
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.reader_preferences.PreferencesUseCase
@@ -24,9 +24,13 @@ import org.koin.androidx.compose.get
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun AppearanceSettingScreen(modifier: Modifier = Modifier) {
+fun AppearanceSettingScreen(
+    modifier: Modifier = Modifier,
+    viewModel: SettingViewModel = hiltViewModel(),
+    navController: NavController,
+) {
 
-    val viewModel = rememberService<SettingViewModel>()
+
     val openDialog = viewModel.state.value.dialogState
     val pref = get<PreferencesUseCase>()
     val context = LocalContext.current
@@ -43,7 +47,7 @@ fun AppearanceSettingScreen(modifier: Modifier = Modifier) {
                 contentColor = MaterialTheme.colors.onBackground,
                 elevation = Constants.DEFAULT_ELEVATION,
                 navigationIcon = {
-                    TopAppBarBackButton(backStack = LocalBackstack.current)
+                    TopAppBarBackButton(navController = navController)
                 }
             )
         }

@@ -1,21 +1,16 @@
 package ir.kazemcodes.infinity.feature_activity.presentation
 
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import com.zhuinden.simplestack.History
-import com.zhuinden.simplestack.SimpleStateChanger
-import com.zhuinden.simplestack.StateChange
-import com.zhuinden.simplestack.navigator.Navigator
-import com.zhuinden.simplestackextensions.navigatorktx.androidContentFrame
-import com.zhuinden.simplestackextensions.services.DefaultServiceProvider
+import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.scopes.ActivityScoped
-import ir.kazemcodes.infinity.MyApplication
-import ir.kazemcodes.infinity.R
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.reader_preferences.PreferencesUseCase
-import ir.kazemcodes.infinity.feature_activity.core.FragmentStateChanger
+import ir.kazemcodes.infinity.core.presentation.theme.InfinityTheme
 import ir.kazemcodes.infinity.feature_services.DownloaderService.DownloadService
 import ir.kazemcodes.infinity.feature_services.updater_service.UpdateService
 import javax.inject.Inject
@@ -23,41 +18,26 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 @ActivityScoped
-class MainActivity : AppCompatActivity(), SimpleStateChanger.NavigationHandler {
+class MainActivity : ComponentActivity() {
 
-    private lateinit var fragmentStateChanger: FragmentStateChanger
     private val updateRequest = OneTimeWorkRequestBuilder<UpdateService>().build()
     @Inject lateinit var preferencesUseCase: PreferencesUseCase
 
+    @OptIn(ExperimentalAnimationApi::class,
+        androidx.compose.material.ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.main_activity)
-
-        val app = application as MyApplication
-        val globalServices = app.globalServices
-
-
-        fragmentStateChanger = FragmentStateChanger(supportFragmentManager, R.id.container)
-
-        Navigator.configure()
-            .setStateChanger(SimpleStateChanger(this))
-            .setScopedServices(DefaultServiceProvider())
-            .setGlobalServices(globalServices)
-            .install(this, androidContentFrame, History.of(MainScreenKey()))
-
+        setContent {
+            val navController = rememberAnimatedNavController()
+            InfinityTheme {
+                SetupNavHost(navController = navController)
+            }
+        }
 
         val manager = WorkManager.getInstance(applicationContext)
         manager.cancelUniqueWork(DownloadService.DOWNLOADER_SERVICE_NAME)
         
         manager.enqueue(updateRequest)
-
-        
-    }
-
-    override fun onBackPressed() {
-        if (!Navigator.onBackPressed(this)) {
-            super.onBackPressed()
-        }
     }
 
     companion object {
@@ -83,10 +63,6 @@ class MainActivity : AppCompatActivity(), SimpleStateChanger.NavigationHandler {
     override fun onDestroy() {
         WorkManager.getInstance(this).cancelAllWork()
         super.onDestroy()
-    }
-
-    override fun onNavigationEvent(stateChange: StateChange) {
-        fragmentStateChanger.handleStateChange(stateChange)
     }
 
 

@@ -2,9 +2,11 @@ package ir.kazemcodes.infinity.feature_library.presentation
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.zhuinden.simplestack.ScopedServices
+import dagger.hilt.android.lifecycle.HiltViewModel
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.use_cases.local.DeleteUseCase
 import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalGetBookUseCases
@@ -13,21 +15,24 @@ import ir.kazemcodes.infinity.core.presentation.layouts.DisplayMode
 import ir.kazemcodes.infinity.feature_library.presentation.components.FilterType
 import ir.kazemcodes.infinity.feature_library.presentation.components.LibraryEvents
 import ir.kazemcodes.infinity.feature_library.presentation.components.SortType
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 
-class LibraryViewModel(
+@HiltViewModel
+class LibraryViewModel @Inject constructor(
     private val localGetBookUseCases: LocalGetBookUseCases,
     private val deleteUseCase: DeleteUseCase,
     private val preferencesUseCase: PreferencesUseCase,
-) : ScopedServices.Registered {
+) : ViewModel() {
 
     private val _state = mutableStateOf(LibraryState())
     val state: State<LibraryState> = _state
 
-    private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     private val _books = MutableStateFlow<PagingData<Book>>(PagingData.empty())
     val book = _books
@@ -36,18 +41,18 @@ class LibraryViewModel(
      * Get All Books By Paging
      */
     private fun getBooks() {
-        coroutineScope.launch(Dispatchers.IO) {
-            localGetBookUseCases.GetInLibraryBooksPagingData(
-                sortType = state.value.sortType,
-                isAsc = state.value.isSortAcs,
-                unreadFilter = state.value.unreadFilter).cachedIn(coroutineScope)
-                .collect { snapshot ->
-                    _books.value = snapshot
-                }
+        viewModelScope.launch {
+                localGetBookUseCases.GetInLibraryBooksPagingData(
+                    sortType = state.value.sortType,
+                    isAsc = state.value.isSortAcs,
+                    unreadFilter = state.value.unreadFilter).cachedIn(viewModelScope)
+                    .collect { snapshot ->
+                        _books.value = snapshot
+                    }
         }
     }
 
-    override fun onServiceRegistered() {
+    init {
         deleteNotInLibraryChapters()
         getBooks()
         readLayoutType()
@@ -55,18 +60,19 @@ class LibraryViewModel(
 
 
     fun searchBook(query: String) {
-        coroutineScope.launch(Dispatchers.IO) {
-            localGetBookUseCases.getBooksByQueryByPagination(query).cachedIn(coroutineScope)
+        viewModelScope.launch(Dispatchers.IO) {
+            localGetBookUseCases.getBooksByQueryByPagination(query).cachedIn(viewModelScope)
                 .collect { snapshot ->
                     _books.value = snapshot
                 }
         }
     }
 
-    override fun onServiceUnregistered() {
-        coroutineScope.cancel()
-    }
 
+    override fun onCleared() {
+        viewModelScope.cancel()
+        super.onCleared()
+    }
 
     fun onEvent(event: LibraryEvents) {
         when (event) {
@@ -75,7 +81,7 @@ class LibraryViewModel(
             }
             is LibraryEvents.ToggleSearchMode -> {
                 toggleSearchMode(event.inSearchMode)
-                getLibraryDataIfSearchModeIsOff(event.inSearchMode?:false)
+                getLibraryDataIfSearchModeIsOff(event.inSearchMode ?: false)
 
             }
             is LibraryEvents.UpdateSearchInput -> {
@@ -84,7 +90,6 @@ class LibraryViewModel(
         }
 
     }
-
 
 
     private fun updateSearchInput(query: String) {
@@ -136,7 +141,7 @@ class LibraryViewModel(
 
 
     private fun deleteNotInLibraryChapters() {
-        coroutineScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO) {
             deleteUseCase.deleteInLibraryBook()
         }
     }
@@ -156,7 +161,8 @@ class LibraryViewModel(
         getBooks()
 
     }
-    private fun getLibraryDataIfSearchModeIsOff(inSearchMode:Boolean) {
+
+    private fun getLibraryDataIfSearchModeIsOff(inSearchMode: Boolean) {
         if (!inSearchMode) {
             _state.value = state.value.copy(searchedBook = emptyList(), searchQuery = "")
             getBooks()

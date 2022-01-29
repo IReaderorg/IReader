@@ -10,8 +10,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
-import com.zhuinden.simplestackcomposeintegration.services.rememberService
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import ir.kazemcodes.infinity.core.data.network.models.dnsOverHttps
 import ir.kazemcodes.infinity.core.data.network.utils.toast
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarBackButton
@@ -21,9 +22,12 @@ import ir.kazemcodes.infinity.feature_library.presentation.components.RadioButto
 import ir.kazemcodes.infinity.feature_settings.presentation.setting.SettingViewModel
 
 @Composable
-fun DnsOverHttpScreen() {
-    val backStack = LocalBackstack.current
-    val viewModel = rememberService<SettingViewModel>()
+fun DnsOverHttpScreen(
+    modifier: Modifier = Modifier,
+    navController: NavController = rememberNavController(),
+    viewModel: SettingViewModel = hiltViewModel(),
+) {
+
     val context = LocalContext.current
 
     Scaffold(
@@ -36,7 +40,7 @@ fun DnsOverHttpScreen() {
                 backgroundColor = MaterialTheme.colors.background,
                 contentColor = MaterialTheme.colors.onBackground,
                 elevation = Constants.DEFAULT_ELEVATION,
-                navigationIcon = { TopAppBarBackButton(backStack = backStack) }
+                navigationIcon = { TopAppBarBackButton(navController = navController) }
             )
         },
     ) {

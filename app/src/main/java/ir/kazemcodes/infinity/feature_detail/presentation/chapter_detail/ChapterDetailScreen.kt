@@ -29,17 +29,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
-import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
-import com.zhuinden.simplestackcomposeintegration.services.rememberService
 import ir.kazemcodes.infinity.core.presentation.components.CenterTopAppBar
 import ir.kazemcodes.infinity.core.presentation.components.handlePagingChapterResult
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.ErrorTextWithEmojis
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarTitle
 import ir.kazemcodes.infinity.core.utils.Constants
-import ir.kazemcodes.infinity.feature_activity.presentation.ReaderScreenKey
+import ir.kazemcodes.infinity.feature_activity.presentation.Screen
 
 
 @ExperimentalAnimationApi
@@ -47,12 +48,12 @@ import ir.kazemcodes.infinity.feature_activity.presentation.ReaderScreenKey
 @Composable
 fun ChapterDetailScreen(
     modifier: Modifier = Modifier,
+    viewModel: ChapterDetailViewModel = hiltViewModel(),
+    navController: NavController = rememberNavController(),
 ) {
 
-    val viewModel = rememberService<ChapterDetailViewModel>()
     val chapters = viewModel.chapters.collectAsLazyPagingItems()
     val book = viewModel.state.value.book
-    val backStack = LocalBackstack.current
     val state = viewModel.state.value
 
 
@@ -80,7 +81,7 @@ fun ChapterDetailScreen(
 
                 },
                 navigationIcon = {
-                    IconButton(onClick = { backStack.goBack() }) {
+                    IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Back Icon"
@@ -110,13 +111,11 @@ fun ChapterDetailScreen(
                             if (chapter != null) {
                                 ListItem(
                                     modifier = modifier.clickable {
-                                        backStack.goTo(
-                                            ReaderScreenKey(
-                                                bookId = book.id,
-                                                sourceId = viewModel.state.value.source.sourceId,
-                                                chapterId = chapter.chapterId,
-                                            )
-                                        )
+                                        navController.navigate(Screen.ReaderScreen.passArgs(
+                                            bookId = book.id,
+                                            sourceId = viewModel.state.value.source.sourceId,
+                                            chapterId = chapter.chapterId,
+                                        ))
                                     },
                                     text = {                             Text(
                                         text =chapter.title,

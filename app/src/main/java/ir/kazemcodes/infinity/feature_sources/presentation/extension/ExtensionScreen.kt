@@ -11,36 +11,34 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
-import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
-import com.zhuinden.simplestackcomposeintegration.services.rememberService
-import com.zhuinden.simplestackextensions.servicesktx.lookup
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarActionButton
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarTitle
 import ir.kazemcodes.infinity.core.utils.Constants.DEFAULT_ELEVATION
-import ir.kazemcodes.infinity.feature_activity.presentation.ExtensionCreatorScreenKey
+import ir.kazemcodes.infinity.feature_activity.presentation.Screen
 import ir.kazemcodes.infinity.feature_library.presentation.components.TabItem
 import ir.kazemcodes.infinity.feature_library.presentation.components.Tabs
 import ir.kazemcodes.infinity.feature_library.presentation.components.TabsContent
-import ir.kazemcodes.infinity.feature_sources.sources.Extensions
 
 
 @ExperimentalMaterialApi
 @OptIn(ExperimentalPagerApi::class)
 @Composable
-fun ExtensionScreen(modifier: Modifier = Modifier) {
-    val backstack = LocalBackstack.current
-    val extensions: Extensions = remember {
-        backstack.lookup<Extensions>()
-    }
-    val viewModel = rememberService<ExtensionViewModel>()
+fun ExtensionScreen(
+    modifier: Modifier = Modifier,
+    navController: NavController = rememberNavController(),
+    viewModel: ExtensionViewModel = hiltViewModel(),
+) {
+
     val pageState = rememberPagerState()
 
-    val sources = extensions.getSources()
+    val sources = viewModel.state.value.sources
     viewModel.updateSource(sources)
 
     Scaffold(
@@ -54,12 +52,16 @@ fun ExtensionScreen(modifier: Modifier = Modifier) {
                 contentColor = MaterialTheme.colors.onBackground,
                 elevation = DEFAULT_ELEVATION,
                 actions = {
-                    TopAppBarActionButton(imageVector = Icons.Default.Add, title = "Adding Sources Button", onClick = { backstack.goTo(ExtensionCreatorScreenKey()) })
+                    TopAppBarActionButton(
+                        imageVector = Icons.Default.Add,
+                        title = "Adding Sources Button",
+                        onClick = { navController.navigate(Screen.ExtensionCreator.route) }
+                    )
                 }
             )
         }
     ) {
-        val tabs = listOf<TabItem>(TabItem.Sources(viewModel), TabItem.CommunitySources(viewModel))
+        val tabs = listOf<TabItem>(TabItem.Sources(viewModel,navController), TabItem.CommunitySources(viewModel,navController))
         Column(modifier = modifier
             .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,

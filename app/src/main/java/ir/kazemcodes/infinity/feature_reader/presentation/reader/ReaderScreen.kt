@@ -20,11 +20,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
-import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
-import com.zhuinden.simplestackcomposeintegration.services.rememberService
+
 import ir.kazemcodes.infinity.core.presentation.components.ChapterListItemComposable
 import ir.kazemcodes.infinity.core.presentation.components.ISnackBarHost
 import ir.kazemcodes.infinity.core.presentation.components.handlePagingChapterResult
@@ -38,7 +40,7 @@ import ir.kazemcodes.infinity.core.utils.scroll.Carousel
 import ir.kazemcodes.infinity.core.utils.scroll.CarouselDefaults
 import ir.kazemcodes.infinity.core.utils.scroll.rememberCarouselScrollState
 import ir.kazemcodes.infinity.core.utils.scroll.verticalScroll
-import ir.kazemcodes.infinity.feature_activity.presentation.WebViewKey
+import ir.kazemcodes.infinity.feature_activity.presentation.Screen
 import ir.kazemcodes.infinity.feature_reader.presentation.reader.components.MainBottomSettingComposable
 import ir.kazemcodes.infinity.feature_reader.presentation.reader.components.ReaderSettingComposable
 import ir.kazemcodes.infinity.feature_sources.sources.models.FetchType
@@ -52,14 +54,16 @@ import kotlinx.coroutines.launch
 @Composable
 fun ReadingScreen(
     modifier: Modifier = Modifier,
+    navController: NavController= rememberNavController(),
+    viewModel: ReaderScreenViewModel = hiltViewModel(),
 ) {
-    val viewModel = rememberService<ReaderScreenViewModel>()
+
     val chapters = viewModel.chapters.collectAsLazyPagingItems()
     val scaffoldState = rememberScaffoldState(rememberDrawerState(DrawerValue.Closed))
     val modalBottomSheetState =
         rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Expanded)
     val scope = rememberCoroutineScope()
-    val backStack = LocalBackstack.current
+
     val state = viewModel.state.value
     val interactionSource = remember { MutableInteractionSource() }
     val context = LocalContext.current
@@ -107,7 +111,7 @@ fun ReadingScreen(
                     contentColor = MaterialTheme.colors.onBackground,
                     elevation = 8.dp,
                     navigationIcon = {
-                        TopAppBarBackButton(backStack = backStack)
+                        TopAppBarBackButton(navController = navController)
                     },
                     actions = {
                         TopAppBarActionButton(imageVector = Icons.Default.Autorenew,
@@ -121,9 +125,13 @@ fun ReadingScreen(
                         TopAppBarActionButton(imageVector = Icons.Default.Language,
                             title = "WebView",
                             onClick = {
-                                backStack.goTo(WebViewKey(url = viewModel.state.value.chapter.link,
+                                //TODO fix this part
+                                navController.navigate(Screen.WebPage.passArgs(
+                                    url = viewModel.state.value.chapter.link,
                                     sourceId = viewModel.state.value.source.sourceId,
-                                    fetchType = FetchType.Content.index))
+                                    fetchType = FetchType.Content.index,
+                                    )
+                                )
                             })
                     }
                 )
@@ -135,7 +143,7 @@ fun ReadingScreen(
                         TopAppBarActionButton(imageVector = Icons.Default.Language,
                             title = "WebView",
                             onClick = {
-                                backStack.goTo(WebViewKey(
+                                navController.navigate(Screen.WebPage.passArgs(
                                     url = viewModel.state.value.chapter.link,
                                     sourceId = viewModel.state.value.source.sourceId,
                                     fetchType = FetchType.Content.index,
@@ -150,7 +158,7 @@ fun ReadingScreen(
                         }
                     },
                     navigationIcon = {
-                        TopAppBarBackButton(backStack = backStack)
+                        TopAppBarBackButton(navController = navController)
                     })
             }
         },

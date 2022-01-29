@@ -2,10 +2,13 @@ package ir.kazemcodes.infinity.feature_explore.presentation.browse
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.zhuinden.simplestack.ScopedServices
+import dagger.hilt.android.lifecycle.HiltViewModel
 import ir.kazemcodes.infinity.core.data.network.models.BooksPage
 import ir.kazemcodes.infinity.core.data.network.models.Source
 import ir.kazemcodes.infinity.core.domain.models.Book
@@ -13,9 +16,15 @@ import ir.kazemcodes.infinity.core.domain.use_cases.local.DeleteUseCase
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.reader_preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.core.domain.use_cases.remote.RemoteUseCases
 import ir.kazemcodes.infinity.core.presentation.layouts.DisplayMode
-import kotlinx.coroutines.*
+import ir.kazemcodes.infinity.feature_activity.presentation.NavigationArgs
+import ir.kazemcodes.infinity.feature_sources.sources.Extensions
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 
 sealed class ExploreType(val mode: Int) {
@@ -24,35 +33,64 @@ sealed class ExploreType(val mode: Int) {
     object Search : ExploreType(1)
 }
 
-class BrowseViewModel(
+@HiltViewModel
+class BrowseViewModel @Inject constructor(
     private val preferencesUseCase: PreferencesUseCase,
-    private val source: Source,
-    private val exploreType: ExploreType,
     private val remoteUseCases: RemoteUseCases,
-    private val deleteUseCase: DeleteUseCase
-) : ScopedServices.Registered {
+    private val deleteUseCase: DeleteUseCase,
+    private val extensions: Extensions,
+    savedStateHandle: SavedStateHandle,
+) : ViewModel() {
 
-    private val _state = mutableStateOf<BrowseScreenState>(BrowseScreenState())
+    lateinit var source : Source
 
+
+    init {
+        val exploreId = savedStateHandle.get<Int>(NavigationArgs.exploreType.name)
+        val sourceId = savedStateHandle.get<Long>(NavigationArgs.sourceId.name)
+        source = sourceId?.let { extensions.mappingSourceNameToSource(it) }!!
+
+        viewModelScope.launch(Dispatchers.IO) {
+            if (exploreId != null) {
+                viewModelScope.launch(Dispatchers.IO) {
+                    try {
+                        _state.value = state.value.copy(source = source)
+                        val exploreType = when (exploreId) {
+                            0 -> ExploreType.Latest
+                            else -> ExploreType.Popular
+                        }
+                        _state.value = state.value.copy(exploreType = exploreType)
+                        getBooks()
+                        readLayoutType()
+                    } catch (e: Exception) {
+                        withContext(Dispatchers.Main) {
+                            _state.value = state.value.copy(source = source)
+                            val exploreType = when (exploreId) {
+                                0 -> ExploreType.Latest
+                                else -> ExploreType.Popular
+                            }
+                            _state.value = state.value.copy(exploreType = exploreType)
+                            getBooks()
+                            readLayoutType()
+                        }
+                    }
+                }
+
+            }
+        }
+
+
+    }
+    private val _state = mutableStateOf<BrowseScreenState>(BrowseScreenState(source = source))
     val state: State<BrowseScreenState> = _state
 
 
     private val _books = MutableStateFlow<PagingData<Book>>(PagingData.empty())
     val books = _books
 
-    private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     private var getBooksJob: Job? = null
-    override fun onServiceRegistered() {
-        getBooks()
-        readLayoutType()
-    }
 
-
-
-    fun getSource(): Source {
-        return source
-    }
 
     fun onEvent(event: BrowseScreenEvents) {
         when (event) {
@@ -76,10 +114,12 @@ class BrowseViewModel(
 
 
     @OptIn(ExperimentalPagingApi::class)
-    fun getBooks(query: String?=null, type: ExploreType?=null) {
+    fun getBooks(query: String? = null, type: ExploreType? = null) {
         getBooksJob?.cancel()
-        getBooksJob = coroutineScope.launch(Dispatchers.IO) {
-            remoteUseCases.getRemoteBooksByRemoteMediator(source, type?:exploreType, query = query).cachedIn(coroutineScope)
+        getBooksJob = viewModelScope.launch {
+            remoteUseCases.getRemoteBooksByRemoteMediator(state.value.source,
+                type ?: state.value.exploreType,
+                query = query).cachedIn(viewModelScope)
                 .collect { snapshot ->
                     _books.value = snapshot
                 }
@@ -100,7 +140,8 @@ class BrowseViewModel(
     }
 
     private fun toggleSearchMode(inSearchMode: Boolean? = null) {
-        _state.value = state.value.copy(isSearchModeEnable = inSearchMode ?: !state.value.isSearchModeEnable)
+        _state.value =
+            state.value.copy(isSearchModeEnable = inSearchMode ?: !state.value.isSearchModeEnable)
         if (inSearchMode == false) {
             exitSearchedMode()
             getBooks()
@@ -133,11 +174,13 @@ class BrowseViewModel(
         _state.value = state.value.copy(isMenuDropDownShown = isShown)
     }
 
-    override fun onServiceUnregistered() {
-        coroutineScope.cancel()
+    override fun onCleared() {
+        super.onCleared()
     }
+
+
     private fun setExploreModeOffForInLibraryBooks() {
-        coroutineScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO) {
             deleteUseCase.setExploreModeOffForInLibraryBooks()
         }
     }

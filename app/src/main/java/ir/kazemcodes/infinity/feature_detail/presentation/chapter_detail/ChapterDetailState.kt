@@ -8,7 +8,7 @@ import ir.kazemcodes.infinity.core.domain.models.LastReadChapter
 data class ChapterDetailState(
     val isLoading: Boolean = false,
     val chapters: List<Chapter> = emptyList(),
-    val book: Book,
+    val book: Book = Book.create(),
     val isAsc : Boolean = true,
     val error: String = "",
     val chapterOrderType: OrderType = OrderType.Ascending,

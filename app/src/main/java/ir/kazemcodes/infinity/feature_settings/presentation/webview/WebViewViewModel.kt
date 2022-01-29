@@ -4,7 +4,10 @@ import android.content.Context
 import android.webkit.WebView
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import com.zhuinden.simplestack.ScopedServices
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import ir.kazemcodes.infinity.core.data.network.models.Source
 import ir.kazemcodes.infinity.core.data.network.utils.toast
 import ir.kazemcodes.infinity.core.domain.models.Book
@@ -15,28 +18,80 @@ import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalGetBookUseCases
 import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalGetChapterUseCase
 import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalInsertUseCases
 import ir.kazemcodes.infinity.core.utils.*
+import ir.kazemcodes.infinity.feature_activity.presentation.NavigationArgs
+import ir.kazemcodes.infinity.feature_sources.sources.Extensions
 import ir.kazemcodes.infinity.feature_sources.sources.models.FetchType
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import java.net.URLDecoder
+import java.nio.charset.StandardCharsets
+import javax.inject.Inject
 
-class WebViewPageModel(
-    private val url: String,
-    private val bookId: Int? = null,
-    private val source: Source,
-    private val chapterId: Int? = null,
-    private val fetcher: FetchType,
-    private val webView: WebView,
+@HiltViewModel
+class WebViewPageModel @Inject constructor(
     private val insetUseCases: LocalInsertUseCases,
     private val deleteUseCase: DeleteUseCase,
     private val getBookUseCases: LocalGetBookUseCases,
     private val getChapterUseCase: LocalGetChapterUseCase,
     private val fetcherUseCase: FetchUseCase,
-) : ScopedServices.Registered {
+    private val webView: WebView,
+    private val savedStateHandle: SavedStateHandle,
+    private val extensions: Extensions,
+) : ViewModel() {
+
+
+    init {
+        val sourceId = savedStateHandle.get<Long>(NavigationArgs.sourceId.name)
+        val chapterId = savedStateHandle.get<Int>(NavigationArgs.chapterId.name)
+        val bookId = savedStateHandle.get<Int>(NavigationArgs.bookId.name)
+        val url = URLDecoder.decode(savedStateHandle.get<String>(NavigationArgs.url.name),StandardCharsets.UTF_8.name())
+        val fetcher = savedStateHandle.get<Int>(NavigationArgs.fetchType.name)
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                _state.value = state.value.copy(url=url)
+                sourceId?.let {
+                    _state.value = state.value.copy(source = extensions.mappingSourceNameToSource(it))
+                }
+                bookId?.let { _state.value = state.value.copy(book = state.value.book.copy(id = it)) }
+                chapterId?.let {
+                    _state.value = state.value.copy(chapter = state.value.chapter?.copy(chapterId = it))
+                }
+                if (bookId != null) {
+                    getLocalChaptersByBookName(bookId)
+                    getBookById(bookId = bookId)
+                }
+                if (bookId != null && chapterId != null) {
+                    getLocalChapterByName(chapterId)
+                }
+
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    _state.value = state.value.copy(url=url)
+                    sourceId?.let {
+                        _state.value = state.value.copy(source = extensions.mappingSourceNameToSource(it))
+                    }
+                    bookId?.let { _state.value = state.value.copy(book = state.value.book.copy(id = it)) }
+                    chapterId?.let {
+                        _state.value = state.value.copy(chapter = state.value.chapter?.copy(chapterId = it))
+                    }
+                    if (bookId != null) {
+                        getLocalChaptersByBookName(bookId)
+                        getBookById(bookId = bookId)
+                    }
+                    if (bookId != null && chapterId != null) {
+                        getLocalChapterByName(chapterId)
+                    }
+                }
+            }
+        }
+
+
+
+    }
 
     private val _state =
         mutableStateOf<WebViewPageState>(WebViewPageState(webView = webView,
-            url = url,
-            fetcher = fetcher))
+            source = extensions.mappingSourceNameToSource(0)))
     val state: State<WebViewPageState> = _state
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -57,16 +112,6 @@ class WebViewPageModel(
         context.toast("Event is Occured")
     }
 
-    override fun onServiceRegistered() {
-        if (bookId != null) {
-            getLocalChaptersByBookName(bookId)
-            getBookById(bookId = bookId)
-        }
-        if (bookId != null && chapterId != null) {
-            getLocalChapterByName(chapterId)
-        }
-    }
-
 
     @ExperimentalCoroutinesApi
     fun getInfo() {
@@ -77,7 +122,7 @@ class WebViewPageModel(
             fetcherUseCase.fetchBookDetailAndChapterDetailFromWebView(
                 localBook = state.value.book,
                 localChapters = state.value.chapters,
-                source = source,
+                source = state.value.source,
                 insertUseCases = insetUseCases,
                 deleteUseCase = deleteUseCase,
                 pageSource = webView.getHtml()
@@ -92,7 +137,8 @@ class WebViewPageModel(
                     }
                     is Resource.Error -> {
                         _eventFlow.emit(UiEvent.ShowSnackbar(
-                            uiText = UiText.DynamicString(result.uiText?:UiText.unknownError().asString()).asString()
+                            uiText = UiText.DynamicString(result.uiText ?: UiText.unknownError()
+                                .asString()).asString()
                         ))
                     }
                 }
@@ -196,24 +242,26 @@ class WebViewPageModel(
 
     fun deleteChapterDetails() {
         coroutineScope.launch(Dispatchers.IO) {
-            if (bookId != null) {
-                deleteUseCase.deleteChaptersByBookId(bookId)
+            if (state.value.book.id != 0) {
+                deleteUseCase.deleteChaptersByBookId(state.value.book.id)
             }
         }
     }
 
-    override fun onServiceUnregistered() {
+    override fun onCleared() {
         coroutineScope.cancel()
+        super.onCleared()
     }
 
 }
 
 data class WebViewPageState(
     val webView: WebView,
-    val url: String,
+    val url: String = "",
     val book: Book = Book.create(),
     val books: List<Book> = emptyList<Book>(),
     val chapters: List<Chapter> = emptyList<Chapter>(),
     val chapter: Chapter? = null,
-    val fetcher: FetchType,
+    val fetcher: FetchType = FetchType.Latest,
+    val source: Source,
 )

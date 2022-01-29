@@ -11,7 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import com.zhuinden.simplestackcomposeintegration.core.LocalBackstack
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.MidSizeTextComposable
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarBackButton
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarTitle
@@ -19,7 +20,10 @@ import ir.kazemcodes.infinity.core.utils.Constants
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun AboutSettingScreen(modifier: Modifier = Modifier) {
+fun AboutSettingScreen(
+    modifier: Modifier = Modifier,
+    navController: NavController = rememberNavController(),
+) {
 
     val intent = Intent(Intent.ACTION_VIEW, Uri.parse("http://www.google.com"))
     val context = LocalContext.current
@@ -33,7 +37,7 @@ fun AboutSettingScreen(modifier: Modifier = Modifier) {
             contentColor = MaterialTheme.colors.onBackground,
             elevation = Constants.DEFAULT_ELEVATION,
             navigationIcon = {
-                TopAppBarBackButton(backStack = LocalBackstack.current)
+                TopAppBarBackButton(navController = navController)
             }
         )
     }) {
@@ -68,7 +72,9 @@ fun AboutSettingScreen(modifier: Modifier = Modifier) {
                             color = MaterialTheme.colors.onBackground)
                     },
                     text = {
-                        TopAppBarTitle(modifier=modifier.fillMaxWidth().align(Alignment.Start) ,title = it.title)
+                        TopAppBarTitle(modifier= modifier
+                            .fillMaxWidth()
+                            .align(Alignment.Start) ,title = it.title)
                     },
                 )
                 Divider(modifier = modifier.fillMaxWidth(),

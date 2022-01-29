@@ -22,7 +22,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
-import com.zhuinden.simplestack.Backstack
+import androidx.navigation.NavController
 
 @Composable
 fun TopAppBarTitle(
@@ -137,9 +137,9 @@ fun TopAppBarActionButton(
 }
 
 @Composable
-fun TopAppBarBackButton(backStack: Backstack, onClick: (() -> Unit?)? = null) {
+fun TopAppBarBackButton(navController: NavController, onClick: (() -> Unit?)? = null) {
     IconButton(onClick = {
-        backStack.goBack()
+        navController.popBackStack()
         if (onClick != null) {
             onClick()
         }

@@ -4,8 +4,11 @@ import android.content.Context
 import android.webkit.WebView
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.work.*
-import com.zhuinden.simplestack.ScopedServices
+import dagger.hilt.android.lifecycle.HiltViewModel
 import ir.kazemcodes.infinity.core.data.network.models.Source
 import ir.kazemcodes.infinity.core.data.network.utils.launchIO
 import ir.kazemcodes.infinity.core.domain.models.Book
@@ -18,22 +21,28 @@ import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalInsertUseCases
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.reader_preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.core.domain.use_cases.remote.RemoteUseCases
 import ir.kazemcodes.infinity.core.utils.*
+import ir.kazemcodes.infinity.feature_activity.presentation.NavigationArgs.bookId
+import ir.kazemcodes.infinity.feature_activity.presentation.NavigationArgs.sourceId
 import ir.kazemcodes.infinity.feature_services.DownloaderService.DownloadService
 import ir.kazemcodes.infinity.feature_services.DownloaderService.DownloadService.Companion.DOWNLOADER_BOOK_ID
 import ir.kazemcodes.infinity.feature_services.DownloaderService.DownloadService.Companion.DOWNLOADER_SERVICE_NAME
 import ir.kazemcodes.infinity.feature_services.DownloaderService.DownloadService.Companion.DOWNLOADER_SOURCE_ID
-import kotlinx.coroutines.*
+import ir.kazemcodes.infinity.feature_sources.sources.Extensions
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
+import javax.inject.Inject
 
 
-class BookDetailViewModel(
-    private val source: Source,
-    private val bookId: Int,
+@HiltViewModel
+class BookDetailViewModel @Inject constructor(
     private val preferencesUseCase: PreferencesUseCase,
     private val localInsertUseCases: LocalInsertUseCases,
     private val getChapterUseCase: LocalGetChapterUseCase,
@@ -41,9 +50,35 @@ class BookDetailViewModel(
     private val remoteUseCases: RemoteUseCases,
     private val deleteUseCase: DeleteUseCase,
     private val fetchUseCase: FetchUseCase,
-) : ScopedServices.Registered, ScopedServices.Activated, KoinComponent {
-    private val _state = mutableStateOf<DetailState>(DetailState(source = source,
-        book = Book.create().copy(id = bookId)))
+    private val savedStateHandle: SavedStateHandle,
+    private val extensions: Extensions
+) : ViewModel(), KoinComponent {
+
+    lateinit var source : Source
+    init {
+        val bookId = savedStateHandle.get<Int>(bookId.name)
+        val sourceId = savedStateHandle.get<Long>(sourceId.name)
+        source = sourceId?.let { extensions.mappingSourceNameToSource(it) }!!
+        if (bookId != null) {
+            viewModelScope.launch(Dispatchers.IO) {
+                try {
+                    source = extensions.mappingSourceNameToSource(sourceId)
+                    _state.value = state.value.copy(source =source )
+                    _state.value = state.value.copy(book = state.value.book.copy(id = bookId))
+                    getLocalBookById()
+
+                } catch (e: Exception) {
+                    withContext(Dispatchers.Main) {
+                        _state.value = state.value.copy(source =source)
+                        _state.value = state.value.copy(book = state.value.book.copy(id = bookId))
+                        getLocalBookById()
+                    }
+                }
+            }
+        }
+    }
+
+    private val _state = mutableStateOf<DetailState>(DetailState(source=source))
     val state: State<DetailState> = _state
 
     private val _chapterState = mutableStateOf<ChapterState>(ChapterState())
@@ -53,23 +88,12 @@ class BookDetailViewModel(
     val webView: WebView by inject<WebView>()
 
 
-    private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
-
 
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
 
-    override fun onServiceRegistered() {
 
-    }
 
-    override fun onServiceActive() {
-        getLocalBookById()
-    }
-
-    override fun onServiceInactive() {
-
-    }
 
 
     fun startDownloadService(context: Context) {
@@ -88,9 +112,9 @@ class BookDetailViewModel(
 
 
     private fun getLocalBookById() {
-        coroutineScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO) {
             _state.value = state.value.copy(isLoading = true, error = UiText.noError())
-            getBookUseCases.getBookById(id = bookId)
+            getBookUseCases.getBookById(id = state.value.book.id)
                 .collect { result ->
                     when (result) {
                         is Resource.Success -> {
@@ -131,10 +155,10 @@ class BookDetailViewModel(
 
 
     private fun getLocalChaptersByBookId() {
-        coroutineScope.launchIO {
+        viewModelScope.launchIO {
             _chapterState.value =
                 chapterState.value.copy(isLoading = true, error = "")
-            getChapterUseCase.getChaptersByBookId(bookId = bookId,
+            getChapterUseCase.getChaptersByBookId(bookId = state.value.book.id,
                 isAsc = state.value.book.areChaptersReversed)
                 .collect() { result ->
                     when (result) {
@@ -176,10 +200,10 @@ class BookDetailViewModel(
 
 
     private fun getRemoteBookDetail(book: Book) {
-        coroutineScope.launch {
+        viewModelScope.launch {
             _state.value =
                 state.value.copy(isLoading = true, error = UiText.noError(), isLoaded = false)
-            remoteUseCases.getBookDetail(book = book, source = source)
+            remoteUseCases.getBookDetail(book = book, source = state.value.source)
                 .collect { result ->
                     when (result) {
                         is Resource.Success -> {
@@ -193,7 +217,7 @@ class BookDetailViewModel(
                                  */
                                 _state.value = state.value.copy(
                                     book = result.data.copy(
-                                        id = bookId,
+                                        id = state.value.book.id,
                                         isExploreMode = state.value.isExploreMode,
                                     ),
                                     isLoading = false,
@@ -221,12 +245,12 @@ class BookDetailViewModel(
     }
 
     fun getRemoteChapterDetail(book: Book) {
-        coroutineScope.launch {
+        viewModelScope.launch {
             _chapterState.value = chapterState.value.copy(
                 isLoading = true,
                 error = ""
             )
-            remoteUseCases.getRemoteChapters(book = book, source = source)
+            remoteUseCases.getRemoteChapters(book = book, source = state.value.source)
                 .collect { result ->
                     when (result) {
                         is Resource.Success -> {
@@ -234,20 +258,20 @@ class BookDetailViewModel(
                                 val uniqueList =
                                     removeSameItemsFromList(chapterState.value.chapters,
                                         result.data.map {
-                                            it.copy(bookId = bookId,
+                                            it.copy(bookId = state.value.book.id,
                                                 bookName = state.value.book.bookName)
                                         }) {
                                         it.title
                                     }
                                 _chapterState.value = chapterState.value.copy(
                                     chapters = result.data.map {
-                                        it.copy(bookId = bookId,
+                                        it.copy(bookId = state.value.book.id,
                                             bookName = state.value.book.bookName)
                                     },
                                     isLoading = false,
                                     error = "",
                                 )
-                                deleteUseCase.deleteChaptersByBookId(bookId)
+                                deleteUseCase.deleteChaptersByBookId(state.value.book.id)
                                 insertChaptersToLocal(uniqueList)
                                 getLocalChaptersByBookId()
                             }
@@ -272,7 +296,7 @@ class BookDetailViewModel(
     @ExperimentalCoroutinesApi
     fun getWebViewData() {
         Timber.e("Step One")
-        coroutineScope.launch {
+        viewModelScope.launch {
             _eventFlow.emit(UiEvent.ShowSnackbar(
                 uiText = UiText.DynamicString("Trying to fetch...").asString()
             ))
@@ -281,7 +305,7 @@ class BookDetailViewModel(
                 insertUseCases = localInsertUseCases,
                 localBook = state.value.book,
                 localChapters = chapterState.value.chapters,
-                source = source,
+                source = state.value.source,
                 pageSource = webView.getHtml()
             ).collect { result ->
                 when (result) {
@@ -308,8 +332,8 @@ class BookDetailViewModel(
 
 
     fun deleteChapterDetails() {
-        coroutineScope.launch(Dispatchers.IO) {
-            deleteUseCase.deleteChaptersByBookId(bookId)
+        viewModelScope.launch(Dispatchers.IO) {
+            deleteUseCase.deleteChaptersByBookId(state.value.book.id)
         }
     }
 
@@ -322,31 +346,31 @@ class BookDetailViewModel(
     }
 
     fun insertBookDetailToLocal(book: Book) {
-        coroutineScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO) {
             localInsertUseCases.insertBook(book)
         }
     }
 
     fun updateChaptersEntity(inLibrary: Boolean) {
-        coroutineScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO) {
             localInsertUseCases.insertChapters(chapterState.value.chapters.map {
-                it.copy(inLibrary = inLibrary, bookId = bookId)
+                it.copy(inLibrary = inLibrary, bookId = state.value.book.id)
             })
         }
     }
 
     fun toggleInLibrary(add: Boolean, book: Book? = null) {
         _state.value = state.value.copy(inLibrary = add)
-        coroutineScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO) {
             if (add) {
                 insertBookDetailToLocal(book
-                    ?: state.value.book.copy(id = bookId,
+                    ?: state.value.book.copy(id = state.value.book.id,
                         inLibrary = true,
                         dataAdded = System.currentTimeMillis()))
                 updateChaptersEntity(true)
             } else {
                 insertBookDetailToLocal((book
-                    ?: state.value.book).copy(id = bookId, inLibrary = false))
+                    ?: state.value.book).copy(id = state.value.book.id, inLibrary = false))
                 updateChaptersEntity(false)
             }
         }
@@ -357,15 +381,15 @@ class BookDetailViewModel(
     }
 
     fun insertChaptersToLocal(chapters: List<Chapter>) {
-        coroutineScope.launch(Dispatchers.IO) {
-            deleteUseCase.deleteChaptersByBookId(bookId = bookId)
-            localInsertUseCases.insertChapters(chapters.map { it.copy(bookId = bookId) })
+        viewModelScope.launch(Dispatchers.IO) {
+            deleteUseCase.deleteChaptersByBookId(bookId = state.value.book.id)
+            localInsertUseCases.insertChapters(chapters.map { it.copy(bookId = state.value.book.id) })
         }
     }
 
     private fun getLastChapter() {
-        coroutineScope.launch(Dispatchers.IO) {
-            getChapterUseCase.getLastReadChapter(bookId)
+        viewModelScope.launch(Dispatchers.IO) {
+            getChapterUseCase.getLastReadChapter(state.value.book.id)
                 .collect { result ->
                     when (result) {
                         is Resource.Success -> {
@@ -382,11 +406,5 @@ class BookDetailViewModel(
         }
 
     }
-
-
-    override fun onServiceUnregistered() {
-        coroutineScope.cancel()
-    }
-
 
 }
