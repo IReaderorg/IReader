@@ -10,6 +10,7 @@ import ir.kazemcodes.infinity.core.presentation.theme.BackgroundColor
 import ir.kazemcodes.infinity.core.utils.UiText
 
 data class ReaderScreenState(
+    val enable :Boolean = true,
     val isLoading: Boolean = false,
     val isLoaded: Boolean = false,
     val book: Book = Book.create(),

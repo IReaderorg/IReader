@@ -24,6 +24,7 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -55,9 +56,7 @@ fun ChapterDetailScreen(
     val chapters = viewModel.chapters.collectAsLazyPagingItems()
     val book = viewModel.state.value.book
     val state = viewModel.state.value
-
-
-
+    val context = LocalContext.current
 
     Scaffold(
         topBar = {
@@ -149,72 +148,6 @@ fun ChapterDetailScreen(
                     }
                 }
             }
-
-
-//                    items(count = state.localChapters.size) { index ->
-//
-//                        Row(
-//                            modifier = modifier
-//                                .fillMaxWidth()
-//                                .padding(12.dp)
-//                                .height(40.dp)
-//                                .clickable {
-//                                    backStack.goTo(
-//                                        ReaderScreenKey(
-//                                            bookName = book.bookName,
-//                                            chapterIndex = viewModel.getIndexOfChapter(index),
-//                                            sourceName = viewModel.state.value.source.name,
-//                                            chapterName = state.localChapters[index].title,
-//                                        )
-//                                    )
-//                                },
-//                            verticalAlignment = CenterVertically,
-//                            horizontalArrangement = Arrangement.SpaceBetween
-//                        ) {
-//                            Text(
-//                                text = state.localChapters[index].title,
-//                                color = if (state.localChapters[index].haveBeenRead) MaterialTheme.colors.onBackground.copy(
-//                                    alpha = .4f) else MaterialTheme.colors.onBackground,
-//                                style = MaterialTheme.typography.subtitle1,
-//                                fontWeight = FontWeight.SemiBold,
-//                                overflow = TextOverflow.Ellipsis,
-//                                modifier = Modifier.weight(7f)
-//                            )
-//                            Text(modifier = Modifier.weight(2f),
-//                                text = state.localChapters[index].dateUploaded ?: "",
-//                                fontStyle = FontStyle.Italic,
-//                                color = if (state.localChapters[index].haveBeenRead) MaterialTheme.colors.onBackground.copy(
-//                                    alpha = .4f) else MaterialTheme.colors.onBackground,
-//                                fontWeight = FontWeight.SemiBold,
-//                                style = MaterialTheme.typography.caption
-//                            )
-//                            Spacer(modifier = modifier.width(20.dp))
-//                            Icon(
-//                                imageVector = Icons.Default.PublishedWithChanges,
-//                                contentDescription = "Cached",
-//                                tint = if (state.localChapters[index].content.joinToString(" , ").length > 10) MaterialTheme.colors.onBackground else MaterialTheme.colors.background,
-//                            )
-//                        }
-//                    }
-
-//                    }
-//                }
-//            }
-
-
-//
-//            if (viewModel.state.value.error.isNotBlank()) {
-//                ErrorTextWithEmojis(error = state.error, modifier = Modifier
-//                    .fillMaxWidth()
-//                    .padding(20.dp)
-//                    .wrapContentSize(Alignment.Center)
-//                    .align(Alignment.Center))
-//            }
-//            if (viewModel.state.value.isLoading) {
-//                CircularProgressIndicator(
-//                    modifier = Modifier.align(Alignment.Center)
-//                )
-//            }
         }
     }
 }

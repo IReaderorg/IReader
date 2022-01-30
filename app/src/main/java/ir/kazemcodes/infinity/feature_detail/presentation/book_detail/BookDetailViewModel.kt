@@ -9,8 +9,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.*
 import dagger.hilt.android.lifecycle.HiltViewModel
-import ir.kazemcodes.infinity.core.data.network.models.Source
-import ir.kazemcodes.infinity.core.data.network.utils.launchIO
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
 import ir.kazemcodes.infinity.core.domain.use_cases.fetchers.FetchUseCase
@@ -34,7 +32,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
@@ -51,34 +48,10 @@ class BookDetailViewModel @Inject constructor(
     private val deleteUseCase: DeleteUseCase,
     private val fetchUseCase: FetchUseCase,
     private val savedStateHandle: SavedStateHandle,
-    private val extensions: Extensions
+    private val extensions: Extensions,
 ) : ViewModel(), KoinComponent {
 
-    lateinit var source : Source
-    init {
-        val bookId = savedStateHandle.get<Int>(bookId.name)
-        val sourceId = savedStateHandle.get<Long>(sourceId.name)
-        source = sourceId?.let { extensions.mappingSourceNameToSource(it) }!!
-        if (bookId != null) {
-            viewModelScope.launch(Dispatchers.IO) {
-                try {
-                    source = extensions.mappingSourceNameToSource(sourceId)
-                    _state.value = state.value.copy(source =source )
-                    _state.value = state.value.copy(book = state.value.book.copy(id = bookId))
-                    getLocalBookById()
-
-                } catch (e: Exception) {
-                    withContext(Dispatchers.Main) {
-                        _state.value = state.value.copy(source =source)
-                        _state.value = state.value.copy(book = state.value.book.copy(id = bookId))
-                        getLocalBookById()
-                    }
-                }
-            }
-        }
-    }
-
-    private val _state = mutableStateOf<DetailState>(DetailState(source=source))
+    private val _state = mutableStateOf<DetailState>(DetailState())
     val state: State<DetailState> = _state
 
     private val _chapterState = mutableStateOf<ChapterState>(ChapterState())
@@ -88,9 +61,17 @@ class BookDetailViewModel @Inject constructor(
     val webView: WebView by inject<WebView>()
 
 
-
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
+
+    init {
+        val bookId = savedStateHandle.get<Int>(bookId.name)!!
+        val sourceId = savedStateHandle.get<Long>(sourceId.name)
+        val source = sourceId?.let { extensions.mappingSourceNameToSource(it) }!!
+        _state.value = state.value.copy(source = source)
+        _state.value = state.value.copy(book = state.value.book.copy(id = bookId))
+        getLocalBookById()
+    }
 
 
 
@@ -112,8 +93,8 @@ class BookDetailViewModel @Inject constructor(
 
 
     private fun getLocalBookById() {
-        viewModelScope.launch(Dispatchers.IO) {
-            _state.value = state.value.copy(isLoading = true, error = UiText.noError())
+        _state.value = state.value.copy(isLoading = true, error = UiText.noError())
+        viewModelScope.launch {
             getBookUseCases.getBookById(id = state.value.book.id)
                 .collect { result ->
                     when (result) {
@@ -155,7 +136,7 @@ class BookDetailViewModel @Inject constructor(
 
 
     private fun getLocalChaptersByBookId() {
-        viewModelScope.launchIO {
+        viewModelScope.launch {
             _chapterState.value =
                 chapterState.value.copy(isLoading = true, error = "")
             getChapterUseCase.getChaptersByBookId(bookId = state.value.book.id,

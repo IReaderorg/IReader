@@ -49,6 +49,9 @@ fun BookDetailScreen(
 ) {
 
 
+    val context = LocalContext.current
+
+    
     Box(modifier = Modifier.fillMaxSize()) {
         if (viewModel.state.value.isLoaded) {
             BookDetailScreenLoadedComposable(

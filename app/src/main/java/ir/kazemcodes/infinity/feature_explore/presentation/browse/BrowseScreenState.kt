@@ -4,6 +4,7 @@ import ir.kazemcodes.infinity.core.data.network.models.BooksPage
 import ir.kazemcodes.infinity.core.data.network.models.Source
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.presentation.layouts.LayoutType
+import ir.kazemcodes.infinity.feature_sources.sources.models.SourceTower
 
 data class BrowseScreenState(
     val isLoading: Boolean = false,
@@ -19,6 +20,6 @@ data class BrowseScreenState(
     val isLatestUpdateMode: Boolean = true,
     val hasNextPage : Boolean = true,
     val exploreType: ExploreType = ExploreType.Latest,
-    val source: Source
+    val source: Source = SourceTower.create()
 )
 

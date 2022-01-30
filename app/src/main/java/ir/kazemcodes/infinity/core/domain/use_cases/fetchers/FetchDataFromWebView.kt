@@ -15,51 +15,55 @@ import org.jsoup.Jsoup
 class FetchBookDetailAndChapterDetailFromWebView {
 
     operator fun invoke(
-        pageSource:String,
+        pageSource: String,
         localChapters: List<Chapter>? = null,
-        localBook : Book?=null,
+        localBook: Book? = null,
         source: Source,
         insertUseCases: LocalInsertUseCases,
         deleteUseCase: DeleteUseCase,
     ): Flow<Resource<UiText.DynamicString>> = flow {
-                try {
-                    val bookFromPageSource = source.detailParse(Jsoup.parse(pageSource))
-                    val chaptersFromPageSource = source.chaptersParse(Jsoup.parse(pageSource))
-                    if (!chaptersFromPageSource.chapters.isNullOrEmpty()) {
-                        emit(Resource.Error<UiText.DynamicString> (UiText.trying()))
-                        if (localChapters != null && chaptersFromPageSource.chapters.isNotEmpty() && localBook?.bookName?.isNotBlank() == true) {
+        try {
+            val bookFromPageSource = source.detailParse(Jsoup.parse(pageSource))
+            val chaptersFromPageSource = source.chaptersParse(Jsoup.parse(pageSource))
+            if (!chaptersFromPageSource.chapters.isNullOrEmpty()) {
+                emit(Resource.Error<UiText.DynamicString>(UiText.trying()))
+                if (localChapters != null && chaptersFromPageSource.chapters.isNotEmpty() && localBook?.bookName?.isNotBlank() == true) {
 
-                            val uniqueList = removeSameItemsFromList(oldList = localChapters, newList = chaptersFromPageSource.chapters, differentiateBy = {
-                                it.title
-                            })
+                    val uniqueList = removeSameItemsFromList(oldList = localChapters,
+                        newList = chaptersFromPageSource.chapters,
+                        differentiateBy = {
+                            it.title
+                        })
 
 
-                            deleteUseCase.deleteChaptersByBookId(bookId = localBook.id)
-                            insertUseCases.insertChapters(uniqueList.map { it.copy(
-                                bookId = localBook.id,
-                                bookName = localBook.bookName,
-                                inLibrary = localBook.inLibrary,
-                            ) })
+                    deleteUseCase.deleteChaptersByBookId(bookId = localBook.id)
+                    insertUseCases.insertChapters(uniqueList.map {
+                        it.copy(
+                            bookId = localBook.id,
+                            bookName = localBook.bookName,
+                            inLibrary = localBook.inLibrary,
+                        )
+                    })
 
-                            emit(Resource.Success<UiText.DynamicString>(UiText.DynamicString("${bookFromPageSource.book.bookName} was fetched with ${chaptersFromPageSource.chapters.size}   chapters")))
+                    emit(Resource.Success<UiText.DynamicString>(UiText.DynamicString("${bookFromPageSource.book.bookName} was fetched with ${chaptersFromPageSource.chapters.size}   chapters")))
 
-                        } else {
-                            if (chaptersFromPageSource.chapters.isNotEmpty()) {
-                                emit(Resource.Error<UiText.DynamicString>(UiText.failedGetContent()))
-
-                            }
-                            if (localChapters == null) {
-                                emit(Resource.Error<UiText.DynamicString> (UiText.tryAgainLater()))
-
-                            }
-                        }
-
-                    } else {
-                        emit(Resource.Error(UiText.failedGetContent()))
+                } else {
+                    if (chaptersFromPageSource.chapters.isNotEmpty()) {
+                        emit(Resource.Error<UiText.DynamicString>(UiText.failedGetContent()))
 
                     }
-                } catch (e: Exception) {
-                    emit(Resource.Error(UiText.failedGetContent()))
+                    if (localChapters == null) {
+                        emit(Resource.Error<UiText.DynamicString>(UiText.tryAgainLater()))
+
+                    }
                 }
+
+            } else {
+                emit(Resource.Error(UiText.failedGetContent()))
+
+            }
+        } catch (e: Exception) {
+            emit(Resource.Error(UiText.failedGetContent()))
+        }
     }
 }

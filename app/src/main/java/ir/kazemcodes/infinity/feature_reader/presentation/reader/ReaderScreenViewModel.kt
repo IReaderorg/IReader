@@ -14,7 +14,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import dagger.hilt.android.lifecycle.HiltViewModel
-import ir.kazemcodes.infinity.core.data.network.utils.launchIO
+import dagger.hilt.android.qualifiers.ApplicationContext
 import ir.kazemcodes.infinity.core.data.network.utils.launchUI
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
@@ -30,8 +30,10 @@ import ir.kazemcodes.infinity.core.presentation.theme.readerScreenBackgroundColo
 import ir.kazemcodes.infinity.core.utils.*
 import ir.kazemcodes.infinity.feature_activity.presentation.NavigationArgs
 import ir.kazemcodes.infinity.feature_sources.sources.Extensions
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import org.jsoup.Jsoup
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -44,6 +46,7 @@ import javax.inject.Inject
  * we use the areReversedChapter to understanding the order of
  * chapters for chapterList slider then get Chapters using pagination for chapter drawer.
  */
+@SuppressLint("StaticFieldLeak")
 @HiltViewModel
 class ReaderScreenViewModel @Inject constructor(
     private val preferencesUseCase: PreferencesUseCase,
@@ -53,52 +56,41 @@ class ReaderScreenViewModel @Inject constructor(
     private val insertUseCases: LocalInsertUseCases,
     private val deleteUseCase: DeleteUseCase,
     private val savedStateHandle: SavedStateHandle,
-    private val extensions: Extensions
-) : ViewModel(), KoinComponent{
-    private val _state = mutableStateOf(ReaderScreenState(source =  extensions.mappingSourceNameToSource(0)))
+    private val extensions: Extensions,
+    @ApplicationContext private val context: Context,
+) : ViewModel(), KoinComponent {
+    private val _state =
+        mutableStateOf(ReaderScreenState(source = extensions.mappingSourceNameToSource(0)))
     val state: State<ReaderScreenState> = _state
 
 
-    private val _eventFlow = MutableSharedFlow<UiEvent>()
+    private val _eventFlow = MutableSharedFlow<Event>()
     val eventFlow = _eventFlow.asSharedFlow()
 
     private val _chapters = MutableStateFlow<PagingData<Chapter>>(PagingData.empty())
     val chapters = _chapters
 
-
-    private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     val webView by inject<WebView>()
 
     init {
         val sourceId = savedStateHandle.get<Long>(NavigationArgs.sourceId.name)
         val chapterId = savedStateHandle.get<Int>(NavigationArgs.chapterId.name)
         val bookId = savedStateHandle.get<Int>(NavigationArgs.bookId.name)
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                sourceId?.let {  _state.value = state.value.copy(source =  extensions.mappingSourceNameToSource(it)) }
-                bookId?.let {  _state.value = state.value.copy(book = state.value.book.copy(id = it)) }
-                chapterId?.let {  _state.value = state.value.copy(chapter = state.value.chapter.copy(chapterId = it)) }
-                getLocalBookByName()
-
-                getLocalChaptersByPaging()
-                readPreferences()
-
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    sourceId?.let {  _state.value = state.value.copy(source =  extensions.mappingSourceNameToSource(it)) }
-                    bookId?.let {  _state.value = state.value.copy(book = state.value.book.copy(id = it)) }
-                    chapterId?.let {  _state.value = state.value.copy(chapter = state.value.chapter.copy(chapterId = it)) }
-                    getLocalBookByName()
-
-                    getLocalChaptersByPaging()
-                    readPreferences()
-                }
-            }
+        sourceId?.let {
+            _state.value =
+                state.value.copy(source = extensions.mappingSourceNameToSource(it))
         }
-
-
+        bookId?.let {
+            _state.value = state.value.copy(book = state.value.book.copy(id = it))
+        }
+        chapterId?.let {
+            _state.value =
+                state.value.copy(chapter = state.value.chapter.copy(chapterId = it))
+        }
+        getLocalBookByName()
+        getLocalChaptersByPaging()
+        readPreferences()
     }
-
 
 
     private fun readPreferences() {
@@ -148,7 +140,7 @@ class ReaderScreenViewModel @Inject constructor(
     }
 
     private fun getChapters() {
-        coroutineScope.launchIO {
+        viewModelScope.launch {
             getChapterUseCase.getChaptersByBookId(bookId = state.value.book.id,
                 isAsc = state.value.book.areChaptersReversed)
                 .collect { result ->
@@ -207,14 +199,14 @@ class ReaderScreenViewModel @Inject constructor(
                     }
                 }
 
-            }.launchIn(coroutineScope)
+            }.launchIn(viewModelScope)
 
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getFromWebView() {
         val webView by inject<WebView>()
-        coroutineScope.launch {
+        viewModelScope.launch {
             _eventFlow.emit(UiEvent.ShowSnackbar(
                 uiText = UiText.DynamicString("Trying to fetch chapter's content").asString()
             ))
@@ -275,12 +267,12 @@ class ReaderScreenViewModel @Inject constructor(
                             .asString()))
                     }
                 }
-            }.launchIn(coroutineScope)
+            }.launchIn(viewModelScope)
     }
 
     @Suppress()
     private fun getLocalBookByName() {
-        coroutineScope.launchIO {
+        viewModelScope.launch {
             getBookUseCases.getBookById(id = state.value.book.id).first { result ->
                 when (result) {
                     is Resource.Success -> {
@@ -309,7 +301,7 @@ class ReaderScreenViewModel @Inject constructor(
     }
 
     private fun toggleLastReadAndUpdateChapterContent(chapter: Chapter) {
-        coroutineScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO) {
             deleteUseCase.deleteChapterByChapter(chapter)
             state.value.chapters.filter {
                 it.lastRead
@@ -325,9 +317,10 @@ class ReaderScreenViewModel @Inject constructor(
     }
 
     fun getLocalChaptersByPaging() {
-        coroutineScope.launch(Dispatchers.IO) {
-            getChapterUseCase.getLocalChaptersByPaging(bookId = state.value.book.id, isAsc = state.value.isAsc)
-                .cachedIn(coroutineScope).collect { snapshot ->
+        viewModelScope.launch {
+            getChapterUseCase.getLocalChaptersByPaging(bookId = state.value.book.id,
+                isAsc = state.value.isAsc)
+                .cachedIn(viewModelScope).collect { snapshot ->
                     _chapters.value = snapshot
                 }
         }
@@ -341,7 +334,7 @@ class ReaderScreenViewModel @Inject constructor(
 
     fun readBrightness(context: Context) {
         val brightness = preferencesUseCase.readBrightnessStateUseCase()
-        val activity = context.findAppCompatAcivity()!!
+        val activity = context.findComponentActivity()!!
         val window = activity.window
         val layoutParams: WindowManager.LayoutParams = window.attributes
         layoutParams.screenBrightness = brightness
@@ -376,7 +369,7 @@ class ReaderScreenViewModel @Inject constructor(
 
     @SuppressLint("SourceLockedOrientationActivity")
     fun readOrientation(context: Context) {
-        val activity = context.findAppCompatAcivity()!!
+        val activity = context.findComponentActivity()!!
         when (preferencesUseCase.readOrientationUseCase()) {
             0 -> {
                 activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
@@ -398,7 +391,7 @@ class ReaderScreenViewModel @Inject constructor(
 
     @SuppressLint("SourceLockedOrientationActivity")
     fun saveOrientation(context: Context) {
-        val activity = context.findAppCompatAcivity()!!
+        val activity = context.findComponentActivity()!!
         when (state.value.orientation) {
             is Orientation.Landscape -> {
                 activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
@@ -467,7 +460,7 @@ class ReaderScreenViewModel @Inject constructor(
     }
 
     private fun saveBrightness(brightness: Float, context: Context) {
-        val activity = context.findAppCompatAcivity()!!
+        val activity = context.findComponentActivity()!!
         val window = activity.window
         _state.value = state.value.copy(brightness = brightness)
         val layoutParams: WindowManager.LayoutParams = window.attributes
@@ -508,7 +501,7 @@ class ReaderScreenViewModel @Inject constructor(
     fun getCurrentChapterByIndex(): Chapter {
         return try {
             state.value.chapters[getCurrentIndex()]
-        }catch (e:Exception) {
+        } catch (e: Exception) {
             state.value.chapters[0]
         }
     }
@@ -519,7 +512,7 @@ class ReaderScreenViewModel @Inject constructor(
                 state.value.copy(book = state.value.book.copy(areChaptersReversed = !state.value.book.areChaptersReversed),
                     isChapterReversingInProgress = true)
 
-            coroutineScope.launch(Dispatchers.IO) {
+            viewModelScope.launch(Dispatchers.IO) {
                 _eventFlow.emit(UiEvent.ShowSnackbar(UiText.DynamicString("Reversing Chapters...")
                     .asString()))
                 insertUseCases.insertBook(state.value.book.copy(areChaptersReversed = state.value.book.areChaptersReversed))
@@ -534,15 +527,26 @@ class ReaderScreenViewModel @Inject constructor(
     }
 
     fun showSnackBar(message: String) {
-        coroutineScope.launchUI {
+        viewModelScope.launchUI {
             _eventFlow.emit(UiEvent.ShowSnackbar(UiText.DynamicString(message).asString()))
 
         }
     }
 
 
+    fun restoreSetting(context: Context) {
+        val activity = context.findComponentActivity()!!
+        val window = activity.window
+        val layoutParams: WindowManager.LayoutParams = window.attributes
+        layoutParams.screenBrightness = -1f
+        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        window.attributes = layoutParams
+
+    }
+
+
     override fun onCleared() {
-        coroutineScope.cancel()
+        _state.value = state.value.copy(enable = false)
         super.onCleared()
     }
 

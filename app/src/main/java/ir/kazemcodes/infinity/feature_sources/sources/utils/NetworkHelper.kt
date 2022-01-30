@@ -25,9 +25,6 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 
 
-
-
-
 class NetworkHelper(private val context: Context): KoinComponent {
 
 

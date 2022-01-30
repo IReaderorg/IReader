@@ -38,11 +38,10 @@ fun WebPageScreen(
     navController: NavController = rememberNavController(),
     viewModel: WebViewPageModel = hiltViewModel(),
 ) {
-    val webView = viewModel.state.value.webView
     val urlToRender = viewModel.state.value.url
     val scaffoldState = rememberScaffoldState()
     val context = LocalContext.current
-
+    val webView = viewModel.state.value.webView
 
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
@@ -60,7 +59,8 @@ fun WebPageScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { MidSizeTextComposable(title = urlToRender, overflow = TextOverflow.Ellipsis,) },
+                title = { MidSizeTextComposable(title = urlToRender,
+                    overflow = TextOverflow.Ellipsis) },
                 navigationIcon = {
                     TopAppBarBackButton(navController = navController)
                 },

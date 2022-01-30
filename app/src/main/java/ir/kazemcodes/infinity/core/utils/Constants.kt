@@ -49,6 +49,8 @@ object Constants {
     const val repo_url = "/repos/kazemcodes/IReader/releases/latest"
     const val github_api_url = "https://api.github.com"
 
+    const val NULL_VALUE = -1
+
 
 
 }

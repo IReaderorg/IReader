@@ -43,6 +43,13 @@ data class SourceTower constructor(
     val content: Content? = null,
 ) : ParsedHttpSource() {
 
+    companion object {
+        fun create() : Source {
+            return SourceTower(0,"","","","")
+        }
+    }
+
+
     fun toSourceEntity() : SourceEntity {
         return SourceEntity(
             sourceId = sourceId,

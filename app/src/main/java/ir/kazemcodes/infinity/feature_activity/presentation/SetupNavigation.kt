@@ -9,6 +9,7 @@ import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
+import ir.kazemcodes.infinity.core.utils.Constants
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.BookDetailScreen
 import ir.kazemcodes.infinity.feature_detail.presentation.chapter_detail.ChapterDetailScreen
 import ir.kazemcodes.infinity.feature_explore.presentation.browse.ExploreScreen
@@ -91,11 +92,11 @@ fun SetupNavHost(navController: NavHostController) {
                 NavigationArgs.fetchType,
                 navArgument("bookId") {
                     type = NavType.IntType
-                    defaultValue = -100
+                    defaultValue = Constants.NULL_VALUE
                 },
                 navArgument("chapterId") {
                     type = NavType.IntType
-                    defaultValue = -100
+                    defaultValue = Constants.NULL_VALUE
                 },
                 navArgument("url") {
                     type = NavType.StringType
@@ -186,7 +187,7 @@ sealed class Screen(val route: String) {
             bookId: Int? = null,
             chapterId: Int? = null,
         ): String {
-            return "web_page_route/$fetchType/$sourceId?chapterId=${chapterId?:-300}&bookId=${bookId?:-300}&url=${URLEncoder.encode(url, StandardCharsets.UTF_8.name())}"
+            return "web_page_route/$fetchType/$sourceId?chapterId=${chapterId?:Constants.NULL_VALUE}&bookId=${bookId?:Constants.NULL_VALUE}&url=${URLEncoder.encode(url, StandardCharsets.UTF_8.name())}"
         }
     }
 

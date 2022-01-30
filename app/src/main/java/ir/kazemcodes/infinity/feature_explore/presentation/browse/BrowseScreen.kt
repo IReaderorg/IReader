@@ -34,7 +34,7 @@ import ir.kazemcodes.infinity.feature_sources.sources.models.FetchType
 fun ExploreScreen(
     modifier: Modifier = Modifier,
     navController: NavController = rememberNavController(),
-    viewModel: BrowseViewModel = hiltViewModel(),
+    viewModel: ExploreViewModel = hiltViewModel(),
 ) {
     val scrollState = rememberLazyListState()
     val state = viewModel.state.value

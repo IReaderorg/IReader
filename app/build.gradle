@@ -200,6 +200,7 @@ dependencies {
 // Jetpack Compose
     implementation "io.insert-koin:koin-androidx-compose:$koin_version"
 
+
 }
 
 kapt {
