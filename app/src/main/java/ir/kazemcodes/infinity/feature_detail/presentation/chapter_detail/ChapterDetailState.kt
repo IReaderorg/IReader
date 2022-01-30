@@ -15,5 +15,6 @@ data class ChapterDetailState(
     val listOfLastReadChapter: List<LastReadChapter> = emptyList(),
     val localChapters : List<Chapter> = emptyList(),
     val source:Source,
-    val reverse : Boolean = false
+    val reverse : Boolean = false,
+    val currentScrollPosition : Int = 0
 )

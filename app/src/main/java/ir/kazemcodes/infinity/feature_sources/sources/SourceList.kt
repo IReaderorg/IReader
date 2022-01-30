@@ -192,6 +192,7 @@ class AvailableSources() {
         supportsLatest = true,
         supportsMostPopular = true,
         supportSearch = true,
+        iconUrl = "https://readwebnovels.net/wp-content/uploads/2020/01/book1.png",
         creator = "@Kazem",
         latest = Latest(
             endpoint = "/manga-2/page/{page}/?m_orderby=latest",
@@ -250,6 +251,7 @@ class AvailableSources() {
         supportsLatest = true,
         supportSearch = true,
         supportsMostPopular = true,
+        iconUrl = "https://freewebnovel.com/static/freewebnovel/images/logo.png",
         creator = "@Kazem",
         latest = Latest(
             endpoint = "/latest-release-novel/{page}/",
@@ -317,6 +319,7 @@ class AvailableSources() {
         supportsLatest = true,
         supportsMostPopular = true,
         supportSearch = true,
+        iconUrl = "https://www.mtlnovel.net/themes/mtlnovel/images/mtlnovel-32.png",
         creator = "@Kazem",
         latest = Latest(
             endpoint = "/novel-list/?orderby=date&order=desc&status=all&pg={page}",
@@ -382,6 +385,7 @@ class AvailableSources() {
         supportsMostPopular = true,
         supportSearch = true,
         supportsLatest = true,
+        iconUrl = "https://wuxiaworld.site/wp-content/uploads/2019/02/WuxiaWorld-e1567126455773.png",
         creator = "@Kazem",
         latest = Latest(
             endpoint = "/novel-list/page/{page}/",
@@ -441,6 +445,7 @@ class AvailableSources() {
         baseUrl = "https://m.mylovenovel.com/",
         supportSearch = true,
         supportsMostPopular = true,
+        iconUrl = "https://www.mylovenovel.com/statics/9txs/images/logo.png",
         creator = "@Kazem",
         latest = Latest(
             endpoint = "/lastupdate-{page}.html",
@@ -503,6 +508,7 @@ class AvailableSources() {
         baseUrl = "https://www.koreanmtl.online/",
         supportSearch = false,
         supportsMostPopular = false,
+        iconUrl = "https://www.koreanmtl.online/favicon.ico",
         creator = "@Kazem",
         latest = Latest(
             endpoint = "/p/novels-listing.html",
@@ -546,6 +552,7 @@ class AvailableSources() {
         supportsLatest = true,
         creator = "@Kazem",
         lang = "en",
+        iconUrl = "https://mtlnation.com/wp-content/uploads/2017/10/mtlnation-logo-style-2.png",
         latest = Latest(
             endpoint = "/novel/page/{page}/?m_orderby=latest",
             selector = "div.page-item-detail",
@@ -601,6 +608,7 @@ class AvailableSources() {
         supportsMostPopular = false,
         supportsLatest = true,
         creator = "@Kazem",
+        iconUrl = "https://readlightnovels.net/wp-content/uploads/2020/01/rln-logo-ret.png",
         lang = "en",
         latest = Latest(
             endpoint = "/latest/page/{page}",
@@ -660,6 +668,7 @@ class AvailableSources() {
         supportsLatest = true,
         creator = "@Kazem",
         lang = "en",
+        iconUrl = "https://wuxiaworldsite.co/manga_data/image/options/logo-wuxia-world.png",
         latest = Latest(
             isGetRequestType = false,
             endpoint = "/my-library?page={page}&keyword=&count=6&genres_include=",

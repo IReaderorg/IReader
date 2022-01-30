@@ -70,6 +70,8 @@ class BookDetailViewModel @Inject constructor(
         val source = sourceId?.let { extensions.mappingSourceNameToSource(it) }!!
         _state.value = state.value.copy(source = source)
         _state.value = state.value.copy(book = state.value.book.copy(id = bookId))
+        _state.value = state.value.copy(isLoading = true)
+        _chapterState.value = chapterState.value.copy(isLoading = true)
         getLocalBookById()
     }
 
@@ -119,7 +121,6 @@ class BookDetailViewModel @Inject constructor(
                                     error = UiText.noError(),
                                     isLoading = false,
                                     isLoaded = true,
-
                                     )
                             }
                         }
@@ -163,12 +164,6 @@ class BookDetailViewModel @Inject constructor(
                                     insertBookDetailToLocal(state.value.book.copy(
                                         totalChapters = chapterState.value.chapters.size))
                                 }
-                            } else {
-                                _chapterState.value = chapterState.value.copy(
-                                    error = "",
-                                    isLoading = false,
-                                    loaded = true
-                                )
                             }
                         }
                         is Resource.Error -> {
@@ -229,7 +224,8 @@ class BookDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _chapterState.value = chapterState.value.copy(
                 isLoading = true,
-                error = ""
+                error = "",
+                loaded = false
             )
             remoteUseCases.getRemoteChapters(book = book, source = state.value.source)
                 .collect { result ->

@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -67,6 +68,7 @@ fun ReadingScreen(
     val interactionSource = remember { MutableInteractionSource() }
     val context = LocalContext.current
     val scrollState = rememberCarouselScrollState()
+    val drawerScrollState = rememberLazyListState()
 
     val isWebViewEnable by remember {
         mutableStateOf(viewModel.webView.originalUrl == viewModel.state.value.chapter.link)
@@ -236,7 +238,7 @@ fun ReadingScreen(
                 })
                 if (result) {
                     AnimatedContent(chapters.loadState.refresh is LoadState.NotLoading) {
-                        LazyColumn(modifier = Modifier.fillMaxSize()) {
+                        LazyColumn(modifier = Modifier.fillMaxSize(),state = drawerScrollState) {
                             items(items = chapters) { chapter ->
                                 if (chapter != null) {
                                     ChapterListItemComposable(modifier = modifier,

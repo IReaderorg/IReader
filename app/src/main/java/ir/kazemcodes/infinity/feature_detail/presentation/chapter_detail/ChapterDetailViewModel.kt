@@ -87,6 +87,9 @@ class ChapterDetailViewModel @Inject constructor(
                 }
         }
     }
+    fun updateScrollPosition(value : Int) {
+        _state.value = state.value.copy(currentScrollPosition = value)
+    }
 
     fun getIndexOfChapter(chapter: Chapter): Int {
         val ch = state.value.chapters.indexOf(chapter)

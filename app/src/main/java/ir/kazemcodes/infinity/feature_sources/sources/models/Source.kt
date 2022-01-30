@@ -18,6 +18,8 @@ interface Source {
 
     val creator: String
 
+    val iconUrl: String
+
 
     val supportsLatest: Boolean
 

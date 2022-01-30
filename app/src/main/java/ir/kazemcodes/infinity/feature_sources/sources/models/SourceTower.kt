@@ -32,7 +32,7 @@ data class SourceTower constructor(
     override val supportsMostPopular: Boolean = false,
     override val supportSearch: Boolean = false,
     override val supportsLatest: Boolean = false,
-    val iconLink:String = "",
+    override val iconUrl: String = "",
     val creatorNote : String?=null,
     val customSource: Boolean = false,
     val latest: Latest? = null,
@@ -70,8 +70,7 @@ data class SourceTower constructor(
             customSource = customSource,
             dateAdded = System.currentTimeMillis(),
             dateChanged = System.currentTimeMillis(),
-            imageIcon = iconLink
-
+            imageIcon = iconUrl
         )
     }
 

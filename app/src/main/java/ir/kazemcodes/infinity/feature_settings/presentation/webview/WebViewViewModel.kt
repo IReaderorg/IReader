@@ -24,7 +24,6 @@ import ir.kazemcodes.infinity.feature_sources.sources.Extensions
 import ir.kazemcodes.infinity.feature_sources.sources.models.FetchType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.net.URLDecoder
@@ -54,9 +53,14 @@ class WebViewPageModel @Inject constructor(
         val sourceId = savedStateHandle.get<Long>(NavigationArgs.sourceId.name)
         val chapterId = savedStateHandle.get<Int>(NavigationArgs.chapterId.name)
         val bookId = savedStateHandle.get<Int>(NavigationArgs.bookId.name)
-        val url = URLDecoder.decode(savedStateHandle.get<String>(NavigationArgs.url.name),StandardCharsets.UTF_8.name())
+        val url = URLDecoder.decode(savedStateHandle.get<String>(NavigationArgs.url.name),
+            StandardCharsets.UTF_8.name())
         val fetcher = savedStateHandle.get<Int>(NavigationArgs.fetchType.name)
-        _state.value = state.value.copy(url=url)
+
+        if (fetcher != null) {
+            _state.value = state.value.copy(fetcher = mapFetcher(fetcher))
+        }
+        _state.value = state.value.copy(url = url)
         sourceId?.let {
             _state.value = state.value.copy(source = extensions.mappingSourceNameToSource(it))
         }
@@ -64,12 +68,25 @@ class WebViewPageModel @Inject constructor(
         chapterId?.let {
             _state.value = state.value.copy(chapter = state.value.chapter?.copy(chapterId = it))
         }
-        if (bookId != null && bookId != Constants.NULL_VALUE ) {
+        if (bookId != null && bookId != Constants.NULL_VALUE) {
             getLocalChaptersByBookName(bookId)
             getBookById(bookId = bookId)
         }
         if (bookId != null && chapterId != null && bookId != Constants.NULL_VALUE && chapterId != Constants.NULL_VALUE) {
             getLocalChapterByName(chapterId)
+        }
+
+    }
+
+    fun mapFetcher(fetcher: Int): FetchType {
+        return when (fetcher) {
+            FetchType.Detail.index -> FetchType.Detail
+            FetchType.Content.index -> FetchType.Content
+            FetchType.Search.index -> FetchType.Search
+            FetchType.Latest.index -> FetchType.Latest
+            FetchType.Popular.index -> FetchType.Popular
+            FetchType.Chapter.index -> FetchType.Chapter
+            else -> FetchType.Search
         }
     }
 
@@ -224,12 +241,6 @@ class WebViewPageModel @Inject constructor(
             }
         }
     }
-
-    override fun onCleared() {
-        viewModelScope.cancel()
-        super.onCleared()
-    }
-
 }
 
 data class WebViewPageState(

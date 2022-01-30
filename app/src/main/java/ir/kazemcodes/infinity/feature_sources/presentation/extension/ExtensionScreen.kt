@@ -1,8 +1,5 @@
 package ir.kazemcodes.infinity.feature_sources.presentation.extension
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
@@ -11,7 +8,6 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -23,8 +19,7 @@ import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarTit
 import ir.kazemcodes.infinity.core.utils.Constants.DEFAULT_ELEVATION
 import ir.kazemcodes.infinity.feature_activity.presentation.Screen
 import ir.kazemcodes.infinity.feature_library.presentation.components.TabItem
-import ir.kazemcodes.infinity.feature_library.presentation.components.Tabs
-import ir.kazemcodes.infinity.feature_library.presentation.components.TabsContent
+import ir.kazemcodes.infinity.feature_sources.presentation.extension.composables.UserSourcesScreen
 
 
 @ExperimentalMaterialApi
@@ -61,14 +56,15 @@ fun ExtensionScreen(
             )
         }
     ) {
+        UserSourcesScreen(viewModel, navController)
         val tabs = listOf<TabItem>(TabItem.Sources(viewModel,navController), TabItem.CommunitySources(viewModel,navController))
-        Column(modifier = modifier
-            .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top) {
-            Tabs(libraryTabs = tabs, pagerState = pageState)
-            TabsContent(libraryTabs = tabs, pagerState = pageState)
-        }
+//        Column(modifier = modifier
+//            .fillMaxSize(),
+//            horizontalAlignment = Alignment.CenterHorizontally,
+//            verticalArrangement = Arrangement.Top) {
+//            Tabs(libraryTabs = tabs, pagerState = pageState)
+//            TabsContent(libraryTabs = tabs, pagerState = pageState)
+//        }
     }
 }
 

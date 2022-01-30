@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -55,6 +56,7 @@ fun ChapterDetailScreen(
 
     val chapters = viewModel.chapters.collectAsLazyPagingItems()
     val book = viewModel.state.value.book
+    val scrollState = rememberLazyListState()
     val state = viewModel.state.value
     val context = LocalContext.current
 
@@ -104,7 +106,7 @@ fun ChapterDetailScreen(
             if (result) {
                 AnimatedContent(chapters.loadState.refresh is LoadState.NotLoading) {
                     LazyColumn(modifier = Modifier
-                        .fillMaxSize() ){
+                        .fillMaxSize() ,state = scrollState){
 
                         items(items=chapters) { chapter ->
                             if (chapter != null) {
