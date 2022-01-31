@@ -18,16 +18,16 @@ class ReadNightModePreferences(
 ) {
     operator fun invoke(): Flow<NightMode>  = flow {
         when (repository.preferencesHelper.nightModeKey.get()) {
-            -1 -> emit(NightMode.FollowSystem)
-            1 -> emit(NightMode.Enable)
-            0 -> emit(NightMode.Disable)
+            NightMode.FollowSystem.mode -> emit(NightMode.FollowSystem)
+            NightMode.Enable.mode -> emit(NightMode.Enable)
+            NightMode.Disable.mode -> emit(NightMode.Disable)
             else -> emit(NightMode.Disable)
         }
     }
 }
 
 sealed class NightMode(val mode: Int) {
-    object FollowSystem : NightMode(-1)
+    object FollowSystem : NightMode(0)
     object Enable : NightMode(1)
-    object Disable : NightMode(0)
+    object Disable : NightMode(2)
 }

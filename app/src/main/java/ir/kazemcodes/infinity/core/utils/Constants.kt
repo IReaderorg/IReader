@@ -34,7 +34,7 @@ object Constants {
     const val MAX_BIG_PAGE_SIZE = 450
 
 
-
+    const val ARG_HIDE_BOTTOM_BAR = "ARG_HIDE_BOTTOM_BAR"
 
 
     const val NO_BOOKS_ERROR = "There is no book"

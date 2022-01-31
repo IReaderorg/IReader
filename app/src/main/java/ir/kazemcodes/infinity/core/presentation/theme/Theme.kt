@@ -7,11 +7,7 @@ import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.collectAsState
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import ir.kazemcodes.infinity.core.domain.use_cases.preferences.apperance.NightMode
-import ir.kazemcodes.infinity.core.domain.use_cases.preferences.reader_preferences.PreferencesUseCase
-import org.koin.androidx.compose.get
 
 private val DarkColorPalette = darkColors(
     primary = Colour.blue_200,
@@ -42,26 +38,14 @@ private val LightColorPalette = lightColors(
 )
 
 @Composable
-fun InfinityTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable() () -> Unit) {
-
-    val pref = get<PreferencesUseCase>()
-
-    val state = pref.readNightModePreferences().collectAsState(initial = NightMode.FollowSystem)
-
-    val colors = when (state.value) {
-        is NightMode.Enable -> {
-            DarkColorPalette
-        }
-        is NightMode.Disable -> {
-            LightColorPalette
-        }
-        is NightMode.FollowSystem -> {
-            if (darkTheme) {
-                DarkColorPalette
-            } else {
-                LightColorPalette
-            }
-        }
+fun InfinityTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    content: @Composable() () -> Unit,
+) {
+    val colors = if (darkTheme) {
+        DarkColorPalette
+    } else {
+        LightColorPalette
     }
     val rememberSystemUiController = rememberSystemUiController()
     SideEffect {
@@ -71,7 +55,7 @@ fun InfinityTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composab
         rememberSystemUiController.setStatusBarColor(color = colors.background)
     }
     CompositionLocalProvider(LocalSpacing provides Spacing()) {
-        
+
     }
 
     MaterialTheme(

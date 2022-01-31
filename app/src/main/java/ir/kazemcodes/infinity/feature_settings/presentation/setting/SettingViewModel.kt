@@ -4,6 +4,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import ir.kazemcodes.infinity.core.domain.use_cases.preferences.apperance.NightMode
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.reader_preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.core.utils.UiEvent
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -20,7 +21,6 @@ class SettingViewModel @Inject constructor(private val preferencesUseCase: Prefe
     val eventFlow = _eventFlow.asSharedFlow()
 
 
-
     fun setDohPrfUpdate(prefCode: Int) {
         _state.value = state.value.copy(doh = prefCode)
         preferencesUseCase.saveDohPrefUseCase(prefCode)
@@ -32,13 +32,12 @@ class SettingViewModel @Inject constructor(private val preferencesUseCase: Prefe
                 doh = preferencesUseCase.readDohPrefUseCase()
             )
     }
+    fun saveNightModePreferences(mode: NightMode) {
+        preferencesUseCase.saveNightModePreferences(mode)
+    }
 
     init {
         readDohPref()
     }
 
-
-    fun toggleDialog(enable : Boolean?= null) {
-        _state.value = state.value.copy(dialogState = enable?:!state.value.dialogState)
-    }
 }

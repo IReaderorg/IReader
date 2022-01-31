@@ -53,25 +53,30 @@ class AppModule {
         libraryBookDao: LibraryBookDao,
         libraryChapterDao: LibraryChapterDao,
         database: BookDatabase,
-        remoteKeysDao: RemoteKeysDao
+        remoteKeysDao: RemoteKeysDao,
     ): LocalBookRepository {
-        return LocalBookRepositoryImpl(libraryBookDao, libraryChapterDao,database, remoteKeysDao = remoteKeysDao)
+        return LocalBookRepositoryImpl(libraryBookDao,
+            libraryChapterDao,
+            database,
+            remoteKeysDao = remoteKeysDao)
     }
+
     @Provides
     @Singleton
-    fun provideSourceDao( database: BookDatabase,) : SourceTowerDao {
+    fun provideSourceDao(database: BookDatabase): SourceTowerDao {
         return database.sourceTowerDao
     }
+
     @Provides
     @Singleton
-    fun provideLocalSourceRepository(sourceTowerDao: SourceTowerDao) : LocalSourceRepository {
+    fun provideLocalSourceRepository(sourceTowerDao: SourceTowerDao): LocalSourceRepository {
         return LocalSourceRepositoryImpl(sourceTowerDao)
     }
 
     @Provides
     @Singleton
     fun providesRemoteBookRepository(
-        keysDao: RemoteKeysDao
+        keysDao: RemoteKeysDao,
     ): RemoteRepository {
         return RemoteRepositoryImpl(remoteKeysDao = keysDao)
     }
@@ -89,4 +94,5 @@ class AppModule {
             .add(KotlinJsonAdapterFactory())
             .build()
     }
+
 }
