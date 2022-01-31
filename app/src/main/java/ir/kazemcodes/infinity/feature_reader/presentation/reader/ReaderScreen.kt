@@ -124,7 +124,7 @@ fun ReadingScreen(
                             title = "Content Fetcher",
                             onClick = { viewModel.getFromWebView() })
                     }
-                    TopAppBarActionButton(imageVector = Icons.Default.Language,
+                    TopAppBarActionButton(imageVector = Icons.Default.Public,
                         title = "WebView",
                         onClick = {
                             navController.navigate(Screen.WebPage.passArgs(
@@ -141,7 +141,7 @@ fun ReadingScreen(
                 elevation = 0.dp,
                 backgroundColor = Color.Transparent,
                 actions = {
-                    TopAppBarActionButton(imageVector = Icons.Default.Language,
+                    TopAppBarActionButton(imageVector = Icons.Default.Public,
                         title = "WebView",
                         onClick = {
                             navController.navigate(Screen.WebPage.passArgs(

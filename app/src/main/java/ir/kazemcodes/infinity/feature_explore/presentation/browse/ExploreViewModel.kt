@@ -41,8 +41,8 @@ class ExploreViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
-    private val _state : MutableState<BrowseScreenState> = mutableStateOf<BrowseScreenState>(BrowseScreenState())
-    val state: State<BrowseScreenState> = _state
+    private val _state : MutableState<ExploreScreenState> = mutableStateOf<ExploreScreenState>(ExploreScreenState())
+    val state: State<ExploreScreenState> = _state
 
     init {
         val exploreId = savedStateHandle.get<Int>(NavigationArgs.exploreType.name)
@@ -65,21 +65,21 @@ class ExploreViewModel @Inject constructor(
     private var getBooksJob: Job? = null
 
 
-    fun onEvent(event: BrowseScreenEvents) {
+    fun onEvent(event: ExploreScreenEvents) {
         when (event) {
-            is BrowseScreenEvents.UpdatePage -> {
+            is ExploreScreenEvents.UpdatePage -> {
                 updatePage(event.page)
             }
-            is BrowseScreenEvents.UpdateLayoutType -> {
+            is ExploreScreenEvents.UpdateLayoutType -> {
                 updateLayoutType(event.layoutType)
             }
-            is BrowseScreenEvents.ToggleMenuDropDown -> {
+            is ExploreScreenEvents.ToggleMenuDropDown -> {
                 toggleMenuDropDown(isShown = event.isShown)
             }
-            is BrowseScreenEvents.ToggleSearchMode -> {
+            is ExploreScreenEvents.ToggleSearchMode -> {
                 toggleSearchMode(event.inSearchMode)
             }
-            is BrowseScreenEvents.UpdateSearchInput -> {
+            is ExploreScreenEvents.UpdateSearchInput -> {
                 updateSearchInput(event.query)
             }
         }

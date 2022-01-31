@@ -6,7 +6,7 @@ import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.presentation.layouts.LayoutType
 import ir.kazemcodes.infinity.feature_sources.sources.models.SourceTower
 
-data class BrowseScreenState(
+data class ExploreScreenState(
     val isLoading: Boolean = false,
     val books: List<Book> = emptyList(),
     val error: String = "",

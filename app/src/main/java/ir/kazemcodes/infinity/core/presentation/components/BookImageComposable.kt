@@ -3,17 +3,21 @@ package ir.kazemcodes.infinity.core.presentation.components
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import coil.ImageLoader
 import coil.annotation.ExperimentalCoilApi
+import coil.compose.LocalImageLoader
 import coil.compose.rememberImagePainter
 import coil.request.CachePolicy
 import coil.util.CoilUtils
 import ir.kazemcodes.infinity.R
 import okhttp3.Headers
 import okhttp3.OkHttpClient
+import okhttp3.internal.addHeaderLenient
 import org.koin.androidx.compose.get
 
 @OptIn(ExperimentalCoilApi::class)
@@ -63,26 +67,42 @@ fun CircleImageComposable(
     headers: Headers? = null,
 ) {
     val context = LocalContext.current
-    val okHttpClient: OkHttpClient = get()
-    val painter = rememberImagePainter(data = image) {
-        crossfade(durationMillis = 700)
-        placeholder(R.drawable.ic_wallpaper)
-        error(R.drawable.ic_wallpaper)
-        memoryCachePolicy(CachePolicy.ENABLED)
-        diskCachePolicy(CachePolicy.READ_ONLY)
-        addHeader("cache-control", "max-age")
-        if (headers != null) {
-            headers(headers)
+    // Get
+    val imageLoader = LocalImageLoader.current
+
+// Set
+    CompositionLocalProvider(LocalImageLoader provides ImageLoader(context)) {
+        imageLoader.newBuilder().apply {
+            crossfade(durationMillis = 700)
+            placeholder(R.drawable.ic_wallpaper)
+            error(R.drawable.ic_wallpaper)
+            memoryCachePolicy(CachePolicy.ENABLED)
+            addHeaderLenient(Headers.Builder(),"cache-control", "max-age")
+//            if (headers != null) {
+//                addHeaderLenient(headers,"")
+//            }
         }
-        okHttpClient.newBuilder()
-            .cache(CoilUtils.createDefaultCache(context))
-            .build()
+
     }
-    Image(
-        modifier = modifier,
-        contentScale = contentScale,
-        painter = painter,
-        contentDescription = "an image",
-        alignment = alignment
-    )
+//    val okHttpClient: OkHttpClient = get()
+//    val painter = rememberImagePainter(data = image) {
+//        crossfade(durationMillis = 700)
+//        placeholder(R.drawable.ic_wallpaper)
+//        error(R.drawable.ic_wallpaper)
+//        memoryCachePolicy(CachePolicy.ENABLED)
+//        addHeader("cache-control", "max-age")
+//        if (headers != null) {
+//            headers(headers)
+//        }
+//        okHttpClient.newBuilder()
+//            .cache(CoilUtils.createDefaultCache(context))
+//            .build()
+//    }
+//    Image(
+//        modifier = modifier,
+//        contentScale = contentScale,
+//        painter = painter,
+//        contentDescription = "an image",
+//        alignment = alignment
+//    )
 }

@@ -77,7 +77,7 @@ fun BookDetailScreen(
                             ))
                         }) {
                             Icon(
-                                imageVector = Icons.Default.Language,
+                                imageVector = Icons.Default.Public,
                                 contentDescription = "WebView",
                                 tint = MaterialTheme.colors.onBackground,
                             )
@@ -182,7 +182,7 @@ fun BookDetailScreenLoadedComposable(
                         ))
                     }) {
                         Icon(
-                            imageVector = Icons.Default.Language,
+                            imageVector = Icons.Default.Public,
                             contentDescription = "WebView",
                             tint = MaterialTheme.colors.onBackground,
                         )
