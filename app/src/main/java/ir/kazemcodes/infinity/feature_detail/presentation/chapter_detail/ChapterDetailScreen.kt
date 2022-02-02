@@ -41,8 +41,8 @@ import ir.kazemcodes.infinity.core.presentation.components.CenterTopAppBar
 import ir.kazemcodes.infinity.core.presentation.components.handlePagingChapterResult
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.ErrorTextWithEmojis
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarTitle
+import ir.kazemcodes.infinity.core.ui.ReaderScreenSpec
 import ir.kazemcodes.infinity.core.utils.Constants
-import ir.kazemcodes.infinity.feature_activity.presentation.Screen
 
 
 @ExperimentalAnimationApi
@@ -112,7 +112,7 @@ fun ChapterDetailScreen(
                             if (chapter != null) {
                                 ListItem(
                                     modifier = modifier.clickable {
-                                        navController.navigate(Screen.ReaderScreen.passArgs(
+                                        navController.navigate(ReaderScreenSpec.buildRoute(
                                             bookId = book.id,
                                             sourceId = viewModel.state.value.source.sourceId,
                                             chapterId = chapter.chapterId,

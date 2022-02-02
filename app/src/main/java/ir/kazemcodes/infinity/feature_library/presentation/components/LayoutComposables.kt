@@ -14,7 +14,7 @@ import ir.kazemcodes.infinity.core.presentation.layouts.CompactGridLayoutComposa
 import ir.kazemcodes.infinity.core.presentation.layouts.GridLayoutComposable
 import ir.kazemcodes.infinity.core.presentation.layouts.LayoutType
 import ir.kazemcodes.infinity.core.presentation.layouts.LinearListDisplay
-import ir.kazemcodes.infinity.feature_activity.presentation.Screen
+import ir.kazemcodes.infinity.core.ui.BookDetailScreenSpec
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -34,14 +34,14 @@ fun LayoutComposable(
             GridLayoutComposable(books = books,
                 onClick = { book ->
                     navController.navigate(
-                        route = Screen.BookDetail.passArgs(sourceId = if (source?.sourceId != null) source.sourceId else book.sourceId , bookId = book.id)
+                        route = BookDetailScreenSpec.buildRoute(sourceId = if (source?.sourceId != null) source.sourceId else book.sourceId , bookId = book.id)
                     )
                 }, scrollState = gridState)
         }
         is LayoutType.ListLayout -> {
             LinearListDisplay(books = books, onClick = { book ->
                 navController.navigate(
-                    route = Screen.BookDetail.passArgs(sourceId = if (source?.sourceId != null) source.sourceId else book.sourceId , bookId = book.id)
+                    route = BookDetailScreenSpec.buildRoute(sourceId = if (source?.sourceId != null) source.sourceId else book.sourceId , bookId = book.id)
                 )
             }, scrollState = scrollState)
         }
@@ -50,7 +50,7 @@ fun LayoutComposable(
                 books = books,
                 onClick = { book ->
                     navController.navigate(
-                        route = Screen.BookDetail.passArgs(sourceId = if (source?.sourceId != null) source.sourceId else book.sourceId , bookId = book.id)
+                        route = BookDetailScreenSpec.buildRoute(sourceId = if (source?.sourceId != null) source.sourceId else book.sourceId , bookId = book.id)
                     )
                 }, scrollState = gridState)
         }

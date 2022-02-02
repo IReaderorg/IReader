@@ -80,9 +80,3 @@ fun ExtensionCreatorScreen(
         }
     }
 }
-
-
-
-
-
-

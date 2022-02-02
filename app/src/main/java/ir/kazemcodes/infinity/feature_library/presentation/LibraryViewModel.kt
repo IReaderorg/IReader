@@ -1,5 +1,7 @@
 package ir.kazemcodes.infinity.feature_library.presentation
 
+import androidx.compose.material.BottomSheetValue
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -18,17 +20,20 @@ import ir.kazemcodes.infinity.feature_library.presentation.components.SortType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-
+@OptIn(ExperimentalMaterialApi::class)
 @HiltViewModel
 class LibraryViewModel @Inject constructor(
     private val localGetBookUseCases: LocalGetBookUseCases,
     private val deleteUseCase: DeleteUseCase,
     private val preferencesUseCase: PreferencesUseCase,
 ) : ViewModel() {
+
+
+    private val _bottomSheetState = mutableStateOf(BottomSheetValue.Collapsed)
+    val bottomSheetState = _bottomSheetState
 
     private val _state = mutableStateOf(LibraryState())
     val state: State<LibraryState> = _state
@@ -105,6 +110,9 @@ class LibraryViewModel @Inject constructor(
         preferencesUseCase.saveLibraryLayoutUseCase(layoutType.layoutIndex)
         _state.value = state.value.copy(layout = layoutType.layout)
 
+    }
+    fun updateBottomSheetState(bottomSheetValue: BottomSheetValue) {
+        _bottomSheetState.value = bottomSheetValue
     }
 
     private fun readLayoutType() {

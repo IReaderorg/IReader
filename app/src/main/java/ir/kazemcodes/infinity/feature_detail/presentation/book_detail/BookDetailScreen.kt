@@ -28,11 +28,14 @@ import ir.kazemcodes.infinity.core.presentation.components.BookImageComposable
 import ir.kazemcodes.infinity.core.presentation.components.ISnackBarHost
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.ErrorTextWithEmojis
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarBackButton
+import ir.kazemcodes.infinity.core.ui.ChapterScreenSpec
+import ir.kazemcodes.infinity.core.ui.ReaderScreenSpec
+import ir.kazemcodes.infinity.core.ui.WebViewScreenSpec
 import ir.kazemcodes.infinity.core.utils.UiEvent
 import ir.kazemcodes.infinity.core.utils.formatBasedOnDot
 import ir.kazemcodes.infinity.core.utils.formatList
 import ir.kazemcodes.infinity.core.utils.getUrlWithoutDomain
-import ir.kazemcodes.infinity.feature_activity.presentation.Screen
+
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.components.ButtonWithIconAndText
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.components.CardTileComposable
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.components.DotsFlashing
@@ -51,7 +54,7 @@ fun BookDetailScreen(
 
     val context = LocalContext.current
 
-    
+
     Box(modifier = Modifier.fillMaxSize()) {
         if (viewModel.state.value.isLoaded) {
             BookDetailScreenLoadedComposable(
@@ -68,7 +71,7 @@ fun BookDetailScreen(
                     },
                     actions = {
                         IconButton(onClick = {
-                            navController.navigate(Screen.WebPage.passArgs(
+                            navController.navigate(WebViewScreenSpec.buildRoute(
                                 url = viewModel.state.value.source.baseUrl + getUrlWithoutDomain(
                                     viewModel.state.value.book.link),
                                 sourceId = viewModel.state.value.source.sourceId,
@@ -171,15 +174,17 @@ fun BookDetailScreenLoadedComposable(
                             tint = MaterialTheme.colors.onBackground,
                         )
                     }
-                    /** ERROR: This may cause error later: mismatch between baseurl and book link**/
+                    /** TODO: This may cause error later: mismatch between baseurl and book link**/
                     IconButton(onClick = {
                         navController.navigate(
-                            Screen.WebPage.passArgs(
-                            url = viewModel.state.value.source.baseUrl + getUrlWithoutDomain(viewModel.state.value.book.link),
-                            sourceId = viewModel.state.value.source.sourceId,
-                            fetchType = FetchType.Detail.index,
-                            bookId = viewModel.state.value.book.id
-                        ))
+                            WebViewScreenSpec.buildRoute(
+                                url = viewModel.state.value.source.baseUrl + getUrlWithoutDomain(
+                                    viewModel.state.value.book.link),
+                                sourceId = viewModel.state.value.source.sourceId,
+                                fetchType = FetchType.Detail.index,
+                                bookId = viewModel.state.value.book.id
+                            )
+                        )
                     }) {
                         Icon(
                             imageVector = Icons.Default.Public,
@@ -229,13 +234,13 @@ fun BookDetailScreenLoadedComposable(
                         imageVector = Icons.Default.AutoStories,
                         onClick = {
                             if (viewModel.chapterState.value.lastChapter != null) {
-                                navController.navigate(Screen.ReaderScreen.passArgs(
+                                navController.navigate(ReaderScreenSpec.buildRoute(
                                     bookId = state.book.id,
                                     sourceId = source.sourceId,
                                     chapterId = viewModel.chapterState.value.lastChapter!!.chapterId,
                                 ))
                             } else if (viewModel.chapterState.value.chapters.isNotEmpty()) {
-                                navController.navigate(Screen.ReaderScreen.passArgs(
+                                navController.navigate(ReaderScreenSpec.buildRoute(
                                     bookId = state.book.id,
                                     sourceId = source.sourceId,
                                     chapterId = viewModel.chapterState.value.chapters.first().chapterId,
@@ -369,8 +374,7 @@ fun BookDetailScreenLoadedComposable(
             /** Chapter Content **/
             CardTileComposable(
                 modifier = modifier.clickable {
-                    navController.navigate(
-                        Screen.ChapterDetail.passArgs(bookId = state.book.id,
+                    navController.navigate(ChapterScreenSpec.buildRoute(bookId = state.book.id,
                             sourceId = source.sourceId))
 
                 },

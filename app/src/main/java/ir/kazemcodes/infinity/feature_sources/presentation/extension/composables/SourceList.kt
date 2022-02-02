@@ -22,7 +22,7 @@ import ir.kazemcodes.infinity.R
 import ir.kazemcodes.infinity.core.data.network.models.Source
 import ir.kazemcodes.infinity.core.presentation.components.BookImageComposable
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.SuperSmallTextComposable
-import ir.kazemcodes.infinity.feature_activity.presentation.Screen
+import ir.kazemcodes.infinity.core.ui.ExploreScreenSpec
 import ir.kazemcodes.infinity.feature_explore.presentation.browse.ExploreType
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -67,7 +67,7 @@ fun SourceList(
             ListItem(
                 modifier = Modifier
                     .clickable {
-                        navController.navigate(Screen.Explore.passArgs(
+                        navController.navigate(ExploreScreenSpec.buildRoute(
                             sourceId = sources[index].sourceId,
                             exploreType = ExploreType.Latest.mode
                         ))
@@ -80,7 +80,7 @@ fun SourceList(
                             color = MaterialTheme.colors.primary,
                             style = MaterialTheme.typography.subtitle2,
                             modifier = Modifier.clickable {
-                                navController.navigate(Screen.Explore.passArgs(
+                                navController.navigate(ExploreScreenSpec.buildRoute(
                                     sourceId = sources[index].sourceId,
                                     exploreType = ExploreType.Popular.mode
                                 ))

@@ -18,13 +18,16 @@ import ir.kazemcodes.infinity.core.domain.use_cases.local.DeleteUseCase
 import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalGetBookUseCases
 import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalGetChapterUseCase
 import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalInsertUseCases
+import ir.kazemcodes.infinity.core.ui.NavigationArgs
 import ir.kazemcodes.infinity.core.utils.*
-import ir.kazemcodes.infinity.feature_activity.presentation.NavigationArgs
 import ir.kazemcodes.infinity.feature_sources.sources.Extensions
 import ir.kazemcodes.infinity.feature_sources.sources.models.FetchType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
@@ -57,17 +60,16 @@ class WebViewPageModel @Inject constructor(
             StandardCharsets.UTF_8.name())
         val fetcher = savedStateHandle.get<Int>(NavigationArgs.fetchType.name)
 
+        if (sourceId != null && chapterId != null && bookId != null) {
+            _state.value = state.value.copy(source = extensions.mappingSourceNameToSource(sourceId))
+            _state.value = state.value.copy(book = state.value.book.copy(id = bookId))
+            _state.value = state.value.copy(chapter = state.value.chapter?.copy(chapterId = chapterId))
+        }
         if (fetcher != null) {
             _state.value = state.value.copy(fetcher = mapFetcher(fetcher))
         }
         _state.value = state.value.copy(url = url)
-        sourceId?.let {
-            _state.value = state.value.copy(source = extensions.mappingSourceNameToSource(it))
-        }
-        bookId?.let { _state.value = state.value.copy(book = state.value.book.copy(id = it)) }
-        chapterId?.let {
-            _state.value = state.value.copy(chapter = state.value.chapter?.copy(chapterId = it))
-        }
+
         if (bookId != null && bookId != Constants.NULL_VALUE) {
             getLocalChaptersByBookName(bookId)
             getBookById(bookId = bookId)

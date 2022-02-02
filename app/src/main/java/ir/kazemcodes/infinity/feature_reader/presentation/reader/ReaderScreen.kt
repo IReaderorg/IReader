@@ -35,12 +35,13 @@ import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarAct
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarBackButton
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarTitle
 import ir.kazemcodes.infinity.core.presentation.theme.Colour.scrollingThumbColor
+import ir.kazemcodes.infinity.core.ui.WebViewScreenSpec
 import ir.kazemcodes.infinity.core.utils.UiEvent
 import ir.kazemcodes.infinity.core.utils.scroll.Carousel
 import ir.kazemcodes.infinity.core.utils.scroll.CarouselDefaults
 import ir.kazemcodes.infinity.core.utils.scroll.rememberCarouselScrollState
 import ir.kazemcodes.infinity.core.utils.scroll.verticalScroll
-import ir.kazemcodes.infinity.feature_activity.presentation.Screen
+
 import ir.kazemcodes.infinity.feature_reader.presentation.reader.components.MainBottomSettingComposable
 import ir.kazemcodes.infinity.feature_reader.presentation.reader.components.ReaderSettingComposable
 import ir.kazemcodes.infinity.feature_sources.sources.models.FetchType
@@ -69,12 +70,13 @@ fun ReadingScreen(
     val context = LocalContext.current
     val scrollState = rememberCarouselScrollState()
     val drawerScrollState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
 
     val isWebViewEnable by remember {
         mutableStateOf(viewModel.webView.originalUrl == viewModel.state.value.chapter.link)
     }
 
-    DisposableEffect(key1 = true ) {
+    DisposableEffect(key1 = true) {
         onDispose {
             viewModel.restoreSetting(context)
         }
@@ -127,7 +129,7 @@ fun ReadingScreen(
                     TopAppBarActionButton(imageVector = Icons.Default.Public,
                         title = "WebView",
                         onClick = {
-                            navController.navigate(Screen.WebPage.passArgs(
+                            navController.navigate(WebViewScreenSpec.buildRoute(
                                 url = viewModel.state.value.chapter.link,
                                 sourceId = viewModel.state.value.source.sourceId,
                                 fetchType = FetchType.Content.index,
@@ -144,7 +146,7 @@ fun ReadingScreen(
                     TopAppBarActionButton(imageVector = Icons.Default.Public,
                         title = "WebView",
                         onClick = {
-                            navController.navigate(Screen.WebPage.passArgs(
+                            navController.navigate(WebViewScreenSpec.buildRoute(
                                 url = viewModel.state.value.chapter.link,
                                 sourceId = viewModel.state.value.source.sourceId,
                                 fetchType = FetchType.Content.index,
@@ -183,7 +185,7 @@ fun ReadingScreen(
                             if (viewModel.state.value.isMainBottomModeEnable) {
                                 MainBottomSettingComposable(viewModel = viewModel,
                                     scope = scope,
-                                    scaffoldState = scaffoldState)
+                                    scaffoldState = scaffoldState, scrollState = scrollState)
                             }
                             if (viewModel.state.value.isSettingModeEnable) {
                                 ReaderSettingComposable(viewModel = viewModel)
@@ -238,12 +240,16 @@ fun ReadingScreen(
                 })
                 if (result) {
                     AnimatedContent(chapters.loadState.refresh is LoadState.NotLoading) {
-                        LazyColumn(modifier = Modifier.fillMaxSize(),state = drawerScrollState) {
+                        LazyColumn(modifier = Modifier.fillMaxSize(), state = drawerScrollState) {
                             items(items = chapters) { chapter ->
                                 if (chapter != null) {
                                     ChapterListItemComposable(modifier = modifier,
                                         chapter = chapter, goTo = {
                                             viewModel.getChapter(chapter)
+                                            coroutineScope.launch {
+
+                                                scrollState.scrollTo(0)
+                                            }
                                             viewModel.updateChapterSliderIndex(viewModel.getCurrentIndexOfChapter(
                                                 chapter))
                                         })

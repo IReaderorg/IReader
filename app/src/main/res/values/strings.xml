@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name" translatable="false">IReader</string>
+    <string name="library_screen_label">Library</string>
+    <string name="explore_screen_label">Explore</string>
+    <string name="setting_screen_label">Setting</string>
+
+
 
     <!-- IReader-->
     <string name="no_data_found_error">No Data was Found.</string>

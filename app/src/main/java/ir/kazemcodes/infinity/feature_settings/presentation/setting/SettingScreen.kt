@@ -16,8 +16,10 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarTitle
+import ir.kazemcodes.infinity.core.ui.AboutInfoScreenSpec
+import ir.kazemcodes.infinity.core.ui.AppearanceScreenSpec
+import ir.kazemcodes.infinity.core.ui.DnsOverHttpSettingSpec
 import ir.kazemcodes.infinity.core.utils.Constants
-import ir.kazemcodes.infinity.feature_activity.presentation.Screen
 
 @Composable
 fun SettingScreen(modifier: Modifier = Modifier, navController: NavController = rememberNavController()) {
@@ -63,22 +65,23 @@ fun SettingScreen(modifier: Modifier = Modifier, navController: NavController = 
 
 }
 
+
 sealed class SettingItems(
     val title: String,
     val icon: ImageVector,
     val route: String,
 ) {
-    object Downloads : SettingItems("Downloads", Icons.Default.Download, Screen.Downloader.route)
+    object Downloads : SettingItems("Downloads", Icons.Default.Download, AppearanceScreenSpec.navHostRoute)
     object ExtensionCreator :
-        SettingItems("ExtensionCreator", Icons.Default.Extension, Screen.ExtensionCreator.route)
+        SettingItems("ExtensionCreator", Icons.Default.Extension, AppearanceScreenSpec.navHostRoute)
 
     object Appearance :
-        SettingItems("Appearance", Icons.Default.Palette, Screen.AppearanceSetting.route)
+        SettingItems("Appearance", Icons.Default.Palette, AppearanceScreenSpec.navHostRoute)
 
     object DnsOverHttp :
-        SettingItems("DnsOverHttp", Icons.Default.Dns, Screen.DnsOverHttpSetting.route)
+        SettingItems("DnsOverHttp", Icons.Default.Dns, DnsOverHttpSettingSpec.navHostRoute)
 
-    object About : SettingItems("About", Icons.Default.Info, Screen.AboutSetting.route)
+    object About : SettingItems("About", Icons.Default.Info, AboutInfoScreenSpec.navHostRoute)
 }
 
 @Composable
@@ -86,7 +89,7 @@ fun SettingsItem(
     modifier: Modifier = Modifier,
     title: String,
     imageVector: ImageVector,
-    navController: NavController = rememberNavController(),
+    navController: NavController,
     destinationScreenRoute: String,
 ) {
     val interactionSource = remember { MutableInteractionSource() }

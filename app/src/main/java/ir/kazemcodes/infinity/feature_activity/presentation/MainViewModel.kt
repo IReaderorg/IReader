@@ -7,9 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import ir.kazemcodes.infinity.core.domain.use_cases.local.DeleteUseCase
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.apperance.NightMode
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.reader_preferences.PreferencesUseCase
-import ir.kazemcodes.infinity.feature_activity.domain.models.BottomNavigationScreen
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -36,14 +34,7 @@ class MainViewModel @Inject constructor(
         }
 
     }
-
-    fun onEvent(event: MainScreenEvent) {
-        when (event) {
-            is MainScreenEvent.NavigateTo -> {
-                _state.value = state.value.copy(currentScreen = event.screen)
-            }
-        }
-    }
+    
 
     init {
         setExploreModeOffForInLibraryBooks()
@@ -62,7 +53,6 @@ class MainViewModel @Inject constructor(
 }
 
 data class MainScreenState(
-    val currentScreen: BottomNavigationScreen = BottomNavigationScreen.Library,
     val theme : NightMode = NightMode.FollowSystem
 )
 

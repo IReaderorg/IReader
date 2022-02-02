@@ -41,7 +41,8 @@ class MainActivity : ComponentActivity() {
             preferencesUseCase.readNightModePreferences().collectAsState(initial = NightMode.FollowSystem)
             InfinityTheme() {
                 Surface(color = MaterialTheme.colors.background) {
-                    SetupNavHost(navController = navController)
+//                    SetupNavHost(navController = navController)
+                    ScreenContent()
                 }
             }
             val manager = WorkManager.getInstance(applicationContext)

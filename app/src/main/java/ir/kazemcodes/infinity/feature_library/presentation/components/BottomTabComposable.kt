@@ -23,25 +23,30 @@ fun BottomTabComposable(
     viewModel: LibraryViewModel,
     pagerState: PagerState,
     scope: CoroutineScope,
-    navController: NavController
+    navController: NavController,
 ) {
-    val tabs = listOf(TabItem.Filter(viewModel = viewModel), TabItem.Sort(viewModel,navController), TabItem.Display(viewModel = viewModel))
+        val tabs = listOf(TabItem.Filter(viewModel = viewModel),
+            TabItem.Sort(viewModel, navController),
+            TabItem.Display(viewModel = viewModel))
 
-    ModalBottomSheetLayout(sheetBackgroundColor = MaterialTheme.colors.background,
-        modifier = Modifier.height(500.dp),
-        sheetContent = {
-            /** There is Some issue here were sheet content is not need , not sure why**/
-            Column(modifier = modifier.fillMaxSize()) {
-                Tabs(libraryTabs = tabs, pagerState = pagerState)
-                TabsContent(libraryTabs = tabs, pagerState = pagerState)
+        ModalBottomSheetLayout(sheetBackgroundColor = MaterialTheme.colors.background,
+            modifier = Modifier.height(500.dp),
+            sheetContent = {
+                /** There is Some issue here were sheet content is not need , not sure why**/
+                Column(modifier = modifier.fillMaxSize()) {
+                    Tabs(libraryTabs = tabs, pagerState = pagerState)
+                    TabsContent(libraryTabs = tabs, pagerState = pagerState)
 
-            }
-        }, content = {
-            Column(modifier = modifier.fillMaxSize()) {
-                Tabs(libraryTabs = tabs, pagerState = pagerState)
-                TabsContent(libraryTabs = tabs, pagerState = pagerState)
-            }
-        })
+                }
+            }, content = {
+                Column(modifier = modifier.fillMaxSize()) {
+                    Tabs(libraryTabs = tabs, pagerState = pagerState)
+                    TabsContent(libraryTabs = tabs, pagerState = pagerState)
+                }
+            },
+        )
+
+
 
 }
 

@@ -12,11 +12,10 @@ import ir.kazemcodes.infinity.core.domain.models.Chapter
 import ir.kazemcodes.infinity.core.domain.use_cases.local.DeleteUseCase
 import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalGetChapterUseCase
 import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalInsertUseCases
+import ir.kazemcodes.infinity.core.ui.NavigationArgs
 import ir.kazemcodes.infinity.core.utils.Resource
-import ir.kazemcodes.infinity.feature_activity.presentation.NavigationArgs
 import ir.kazemcodes.infinity.feature_sources.sources.Extensions
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 

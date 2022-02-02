@@ -1,5 +1,6 @@
 package ir.kazemcodes.infinity.feature_sources.presentation.extension
 
+
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
@@ -16,8 +17,8 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarActionButton
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarTitle
+import ir.kazemcodes.infinity.core.ui.WebViewScreenSpec
 import ir.kazemcodes.infinity.core.utils.Constants.DEFAULT_ELEVATION
-import ir.kazemcodes.infinity.feature_activity.presentation.Screen
 import ir.kazemcodes.infinity.feature_library.presentation.components.TabItem
 import ir.kazemcodes.infinity.feature_sources.presentation.extension.composables.UserSourcesScreen
 
@@ -50,7 +51,7 @@ fun ExtensionScreen(
                     TopAppBarActionButton(
                         imageVector = Icons.Default.Add,
                         title = "Adding Sources Button",
-                        onClick = { navController.navigate(Screen.ExtensionCreator.route) }
+                        onClick = {   navController.navigate(WebViewScreenSpec.navHostRoute) }
                     )
                 }
             )
@@ -67,6 +68,5 @@ fun ExtensionScreen(
 //        }
     }
 }
-
 
 

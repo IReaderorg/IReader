@@ -20,7 +20,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import ir.kazemcodes.infinity.core.presentation.components.handlePagingResult
 import ir.kazemcodes.infinity.core.presentation.layouts.layouts
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.*
-import ir.kazemcodes.infinity.feature_activity.presentation.Screen
+import ir.kazemcodes.infinity.core.ui.WebViewScreenSpec
 import ir.kazemcodes.infinity.feature_library.presentation.components.LayoutComposable
 import ir.kazemcodes.infinity.feature_library.presentation.components.RadioButtonWithTitleComposable
 import ir.kazemcodes.infinity.feature_sources.sources.models.FetchType
@@ -88,8 +88,7 @@ fun ExploreScreen(
                         imageVector = Icons.Default.Public,
                         title = "WebView",
                         onClick = {
-                            navController.navigate(
-                                Screen.WebPage.passArgs(
+                            navController.navigate(WebViewScreenSpec.buildRoute(
                                     sourceId = source.sourceId,
                                     fetchType = FetchType.Latest.index,
                                     url = source.baseUrl
@@ -177,8 +176,7 @@ fun ExploreScreen(
                             TopAppBarActionButton(imageVector = Icons.Default.Public,
                                 title = "Open in WebView",
                                 onClick = {
-                                    navController.navigate(
-                                        Screen.WebPage.passArgs(
+                                    navController.navigate(WebViewScreenSpec.buildRoute(
                                             sourceId = source.sourceId,
                                             fetchType = FetchType.Latest.index,
                                             url = source.baseUrl

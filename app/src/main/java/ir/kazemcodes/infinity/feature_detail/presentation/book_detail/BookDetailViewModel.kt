@@ -18,9 +18,9 @@ import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalGetChapterUseCase
 import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalInsertUseCases
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.reader_preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.core.domain.use_cases.remote.RemoteUseCases
+import ir.kazemcodes.infinity.core.ui.NavigationArgs.bookId
+import ir.kazemcodes.infinity.core.ui.NavigationArgs.sourceId
 import ir.kazemcodes.infinity.core.utils.*
-import ir.kazemcodes.infinity.feature_activity.presentation.NavigationArgs.bookId
-import ir.kazemcodes.infinity.feature_activity.presentation.NavigationArgs.sourceId
 import ir.kazemcodes.infinity.feature_services.DownloaderService.DownloadService
 import ir.kazemcodes.infinity.feature_services.DownloaderService.DownloadService.Companion.DOWNLOADER_BOOK_ID
 import ir.kazemcodes.infinity.feature_services.DownloaderService.DownloadService.Companion.DOWNLOADER_SERVICE_NAME
@@ -30,7 +30,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -65,14 +64,16 @@ class BookDetailViewModel @Inject constructor(
     val eventFlow = _eventFlow.asSharedFlow()
 
     init {
-        val bookId = savedStateHandle.get<Int>(bookId.name)!!
+        val bookId = savedStateHandle.get<Int>(bookId.name)
         val sourceId = savedStateHandle.get<Long>(sourceId.name)
-        val source = sourceId?.let { extensions.mappingSourceNameToSource(it) }!!
-        _state.value = state.value.copy(source = source)
-        _state.value = state.value.copy(book = state.value.book.copy(id = bookId))
-        _state.value = state.value.copy(isLoading = true)
-        _chapterState.value = chapterState.value.copy(isLoading = true)
-        getLocalBookById()
+        if (bookId != null && sourceId !=null) {
+        val source = extensions.mappingSourceNameToSource(sourceId)
+            _state.value = state.value.copy(source = source)
+            _state.value = state.value.copy(book = state.value.book.copy(id = bookId))
+            _state.value = state.value.copy(isLoading = true)
+            _chapterState.value = chapterState.value.copy(isLoading = true)
+            getLocalBookById()
+        }
     }
 
 

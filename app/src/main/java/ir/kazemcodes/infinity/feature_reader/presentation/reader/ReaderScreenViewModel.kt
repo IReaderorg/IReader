@@ -27,8 +27,8 @@ import ir.kazemcodes.infinity.core.domain.use_cases.preferences.reader_preferenc
 import ir.kazemcodes.infinity.core.domain.use_cases.remote.RemoteUseCases
 import ir.kazemcodes.infinity.core.presentation.theme.fonts
 import ir.kazemcodes.infinity.core.presentation.theme.readerScreenBackgroundColors
+import ir.kazemcodes.infinity.core.ui.NavigationArgs
 import ir.kazemcodes.infinity.core.utils.*
-import ir.kazemcodes.infinity.feature_activity.presentation.NavigationArgs
 import ir.kazemcodes.infinity.feature_sources.sources.Extensions
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -76,20 +76,16 @@ class ReaderScreenViewModel @Inject constructor(
         val sourceId = savedStateHandle.get<Long>(NavigationArgs.sourceId.name)
         val chapterId = savedStateHandle.get<Int>(NavigationArgs.chapterId.name)
         val bookId = savedStateHandle.get<Int>(NavigationArgs.bookId.name)
-        sourceId?.let {
+        if (bookId != null && chapterId != null && sourceId != null) {
             _state.value =
-                state.value.copy(source = extensions.mappingSourceNameToSource(it))
-        }
-        bookId?.let {
-            _state.value = state.value.copy(book = state.value.book.copy(id = it))
-        }
-        chapterId?.let {
+                state.value.copy(source = extensions.mappingSourceNameToSource(sourceId))
+            _state.value = state.value.copy(book = state.value.book.copy(id = bookId))
             _state.value =
-                state.value.copy(chapter = state.value.chapter.copy(chapterId = it))
+                state.value.copy(chapter = state.value.chapter.copy(chapterId = chapterId))
+            getLocalBookByName()
+            getLocalChaptersByPaging()
+            readPreferences()
         }
-        getLocalBookByName()
-        getLocalChaptersByPaging()
-        readPreferences()
     }
 
 

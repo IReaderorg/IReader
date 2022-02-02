@@ -46,7 +46,7 @@ fun AboutSettingScreen(
             AboutTile.WhatsNew,
             AboutTile.Discord,
             AboutTile.Github,
-            )
+        )
 
 
         Column(

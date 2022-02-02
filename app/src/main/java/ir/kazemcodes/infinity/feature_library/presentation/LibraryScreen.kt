@@ -1,5 +1,6 @@
 package ir.kazemcodes.infinity.feature_library.presentation
 
+
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Box
@@ -46,14 +47,24 @@ fun LibraryScreen(
 
 
     val state = viewModel.state.value
-    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState()
+
     val coroutineScope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
 
     val books = viewModel.book.collectAsLazyPagingItems()
     val pagerState = rememberPagerState()
+    val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
 
-        BottomSheetScaffold(
+
+
+    ModalBottomSheetLayout(sheetContent = {
+        BottomTabComposable(
+            viewModel = viewModel,
+            pagerState = pagerState,
+            navController = navController,
+            scope = coroutineScope)
+    }, sheetState = sheetState) {
+        Scaffold(
             topBar = {
                 TopAppBar(
                     title = {
@@ -90,10 +101,10 @@ fun LibraryScreen(
                             title = "Filter",
                             onClick = {
                                 coroutineScope.launch {
-                                    if (bottomSheetScaffoldState.bottomSheetState.isCollapsed) {
-                                        bottomSheetScaffoldState.bottomSheetState.expand()
+                                    if (sheetState.isVisible) {
+                                        sheetState.hide()
                                     } else {
-                                        bottomSheetScaffoldState.bottomSheetState.collapse()
+                                        sheetState.show()
                                     }
                                 }
                             },
@@ -120,15 +131,11 @@ fun LibraryScreen(
 
                 )
             },
-            sheetContent = {
-                BottomTabComposable(viewModel = viewModel, pagerState = pagerState, scope = coroutineScope,navController=navController)
-            },
-            scaffoldState = bottomSheetScaffoldState
         ) {
             Box(modifier = Modifier
                 .fillMaxSize()
                 .padding(bottom = 50.dp)) {
-                val result = handlePagingResult(books=books, onEmptyResult = {
+                val result = handlePagingResult(books = books, onEmptyResult = {
                     ErrorTextWithEmojis(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -137,7 +144,7 @@ fun LibraryScreen(
                         error = "There is no book is Library, you can add books in the Explore screen"
                     )
                 })
-                if(result) {
+                if (result) {
                     AnimatedContent(books.loadState.refresh is LoadState.NotLoading) {
                         LayoutComposable(
                             books = if (!state.inSearchMode) books else books,
@@ -150,10 +157,12 @@ fun LibraryScreen(
             }
 
         }
+    }
 
 
 
 }
+
 
 
 
