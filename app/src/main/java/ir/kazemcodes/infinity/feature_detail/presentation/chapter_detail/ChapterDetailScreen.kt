@@ -5,10 +5,7 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -18,6 +15,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.PublishedWithChanges
 import androidx.compose.material.icons.filled.Sort
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,6 +38,7 @@ import androidx.paging.compose.items
 import ir.kazemcodes.infinity.core.presentation.components.CenterTopAppBar
 import ir.kazemcodes.infinity.core.presentation.components.handlePagingChapterResult
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.ErrorTextWithEmojis
+import ir.kazemcodes.infinity.core.presentation.reusable_composable.MidSizeTextComposable
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarTitle
 import ir.kazemcodes.infinity.core.ui.ReaderScreenSpec
 import ir.kazemcodes.infinity.core.utils.Constants
@@ -60,9 +59,13 @@ fun ChapterDetailScreen(
     val state = viewModel.state.value
     val context = LocalContext.current
 
+
+    LaunchedEffect(key1 = true ) {
+        viewModel.getLocalBookById()
+    }
+
     Scaffold(
         topBar = {
-
             CenterTopAppBar(title = {
                 TopAppBarTitle(title = "Content")
             },
@@ -90,6 +93,22 @@ fun ChapterDetailScreen(
                     }
                 }
             )
+        },
+        drawerGesturesEnabled = true,
+        drawerBackgroundColor = MaterialTheme.colors.background,
+        drawerContent = {
+            Column(modifier = modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Top) {
+                Spacer(modifier = modifier.height(5.dp))
+                TopAppBarTitle(title = "Advance Setting")
+
+                Spacer(modifier = modifier.height(5.dp))
+                Divider(modifier = modifier.fillMaxWidth(), thickness = 1.dp)
+                TextButton(onClick = {viewModel.reverseChapterInDB()}) {
+                    MidSizeTextComposable(title ="Reverse Chapters in DB")
+                }
+            }
         }
     ) {
         Box(modifier.fillMaxSize()) {

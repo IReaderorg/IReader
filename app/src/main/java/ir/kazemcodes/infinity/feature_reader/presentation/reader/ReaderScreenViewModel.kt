@@ -30,10 +30,8 @@ import ir.kazemcodes.infinity.core.presentation.theme.readerScreenBackgroundColo
 import ir.kazemcodes.infinity.core.ui.NavigationArgs
 import ir.kazemcodes.infinity.core.utils.*
 import ir.kazemcodes.infinity.feature_sources.sources.Extensions
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import org.jsoup.Jsoup
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -82,7 +80,7 @@ class ReaderScreenViewModel @Inject constructor(
             _state.value = state.value.copy(book = state.value.book.copy(id = bookId))
             _state.value =
                 state.value.copy(chapter = state.value.chapter.copy(chapterId = chapterId))
-            getLocalBookByName()
+            getLocalBookById()
             getLocalChaptersByPaging()
             readPreferences()
         }
@@ -266,8 +264,8 @@ class ReaderScreenViewModel @Inject constructor(
             }.launchIn(viewModelScope)
     }
 
-    @Suppress()
-    private fun getLocalBookByName() {
+
+    private fun getLocalBookById() {
         viewModelScope.launch {
             getBookUseCases.getBookById(id = state.value.book.id).first { result ->
                 when (result) {
@@ -276,12 +274,16 @@ class ReaderScreenViewModel @Inject constructor(
                             _state.value = state.value.copy(
                                 book = result.data,
                                 isBookLoaded = true,
-                                isChaptersReversed = result.data.areChaptersReversed
+                                isChaptersReversed = result.data.areChaptersReversed,
+                                isAsc = result.data.areChaptersReversed
                             )
-                            insertUseCases.insertBook(book = result.data.copy(lastRead = System.currentTimeMillis(),
-                                unread = !result.data.unread))
+                            withContext(Dispatchers.IO) {
+                                insertUseCases.insertBook(book = result.data.copy(lastRead = System.currentTimeMillis(),
+                                    unread = !result.data.unread))
+                            }
                             getChapters()
                             getChapter(state.value.chapter)
+                            getLocalChaptersByPaging()
                             true
                         } else {
                             false
@@ -297,14 +299,19 @@ class ReaderScreenViewModel @Inject constructor(
     }
 
     private fun toggleLastReadAndUpdateChapterContent(chapter: Chapter) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             deleteUseCase.deleteChapterByChapter(chapter)
             state.value.chapters.filter {
                 it.lastRead
             }.forEach {
-                insertUseCases.insertChapter(it.copy(lastRead = false))
+                withContext(Dispatchers.IO) {
+
+                    insertUseCases.insertChapter(it.copy(lastRead = false))
+                }
             }
-            insertUseCases.insertChapter(chapter.copy(haveBeenRead = true, lastRead = true))
+            withContext(Dispatchers.IO) {
+                insertUseCases.insertChapter(chapter.copy(haveBeenRead = true, lastRead = true))
+            }
         }
     }
 
@@ -312,8 +319,10 @@ class ReaderScreenViewModel @Inject constructor(
         _state.value = state.value.copy(isAsc = !state.value.isAsc)
     }
 
+    var getChapterJob : Job? = null
     fun getLocalChaptersByPaging() {
-        viewModelScope.launch {
+        getChapterJob?.cancel()
+        getChapterJob = viewModelScope.launch {
             getChapterUseCase.getLocalChaptersByPaging(bookId = state.value.book.id,
                 isAsc = state.value.isAsc)
                 .cachedIn(viewModelScope).collect { snapshot ->
@@ -505,8 +514,11 @@ class ReaderScreenViewModel @Inject constructor(
     fun reverseSlider() {
         if (!state.value.isChapterReversingInProgress) {
             _state.value =
-                state.value.copy(book = state.value.book.copy(areChaptersReversed = !state.value.book.areChaptersReversed),
-                    isChapterReversingInProgress = true)
+                state.value.copy(
+                    book = state.value.book.copy(areChaptersReversed = !state.value.book.areChaptersReversed),
+                    isChapterReversingInProgress = true,
+                    isAsc = !state.value.isAsc
+                    )
 
             viewModelScope.launch(Dispatchers.IO) {
                 _eventFlow.emit(UiEvent.ShowSnackbar(UiText.DynamicString("Reversing Chapters...")
@@ -517,6 +529,7 @@ class ReaderScreenViewModel @Inject constructor(
             }
             updateChapterSliderIndex(getCurrentIndexOfChapter(state.value.chapter))
             getChapters()
+            getLocalChaptersByPaging()
             _state.value = state.value.copy(isChapterReversingInProgress = false)
         }
 

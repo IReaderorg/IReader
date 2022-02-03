@@ -22,7 +22,8 @@ data class Book(
     var isExploreMode:Boolean = false,
     var inLibrary: Boolean = false,
     var dataAdded: Long = 0,
-    var download:Boolean =false,
+    var isDownloaded:Boolean =false,
+    var beingDownloaded:Boolean =false,
     var lastRead:Long = 0,
     var totalChapters:Int = 0,
     var unread:Boolean = true,
@@ -53,44 +54,5 @@ data class Book(
             else -> "UNKNOWN"
         }
     }
-
-    fun toBookEntity(): Book {
-        return Book(
-            bookName = bookName,
-            link = link,
-            coverLink = coverLink,
-            translator = translator,
-            author = author,
-            status = status,
-            description = description,
-            category = category,
-            sourceId = sourceId,
-            id = id,
-            rating = rating,
-            inLibrary = inLibrary,
-            dataAdded = dataAdded,
-            lastRead = lastRead,
-            download = download,
-            totalChapters = totalChapters,
-            unread = unread,
-            lastUpdated = lastUpdated
-        )
-    }
-//    fun toExploreBook(): ExploreBook {
-//        return ExploreBook(
-//            bookName = bookName,
-//            link = link,
-//            coverLink = coverLink,
-//            translator = translator,
-//            author = author,
-//            status = status,
-//            description = description,
-//            category = category,
-//            source = source,
-//            rating = rating,
-//            lastUpdated = lastUpdated,
-//            id=0
-//        )
-//    }
 
 }

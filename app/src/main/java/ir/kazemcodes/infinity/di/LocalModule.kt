@@ -127,7 +127,8 @@ class LocalModule {
             getBooksByQueryByPagination = GetBooksByQueryByPagination(localBookRepository),
             getBooksByQueryPagingSource = GetBooksByQueryPagingSource(localBookRepository),
             GetInLibraryBooksPagingData = GetInLibraryBooksPagingData(localBookRepository),
-            getAllExploredBookPagingData = GetAllExploredBookPagingData(localBookRepository = localBookRepository)
+            getAllExploredBookPagingData = GetAllExploredBookPagingData(localBookRepository = localBookRepository),
+            getAllInDownloadsPagingData = GetAllInDownloadsPagingData(localBookRepository = localBookRepository)
         )
     }
 

@@ -79,7 +79,7 @@ fun AppearanceSettingScreen(
                         TextButton(onClick = {
                             viewModel.saveNightModePreferences(NightMode.Enable)
                             openDialog.value = false
-                            context.toast("Setting was Applied. return to main screen to apply this setting to the app")
+                            context.toast("Setting was Applied. Please relaunch the app")
 
                         }) {
                             MidSizeTextComposable(modifier = modifier.fillMaxWidth(),
@@ -90,7 +90,7 @@ fun AppearanceSettingScreen(
                         TextButton(onClick = {
                             viewModel.saveNightModePreferences(NightMode.Disable)
                             openDialog.value = false
-                            context.toast("Setting was Applied. return to main screen to apply this setting to the app")
+                            context.toast("Setting was Applied. Please relaunch the app")
                         }) {
                             MidSizeTextComposable(modifier = modifier.fillMaxWidth(),
                                 title = "Off",
@@ -99,7 +99,7 @@ fun AppearanceSettingScreen(
                         TextButton(onClick = {
                             viewModel.saveNightModePreferences(NightMode.FollowSystem)
                             openDialog.value = false
-                            context.toast("Setting was Applied. return to main screen to apply this setting to the app")
+                            context.toast("Setting was Applied. Please relaunch the app")
                         }) {
                             MidSizeTextComposable(modifier = modifier.fillMaxWidth(),
                                 title = "Follow System",

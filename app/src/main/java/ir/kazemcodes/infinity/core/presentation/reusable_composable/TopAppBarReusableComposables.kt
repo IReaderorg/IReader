@@ -70,7 +70,7 @@ fun MidSizeTextComposable(
 @Composable
 fun SmallTextComposable(
     modifier: Modifier = Modifier,
-    title: String,
+    text: String,
     color: Color? = null,
     style: TextStyle? = null,
     fontWeight: FontWeight? = null,
@@ -80,7 +80,7 @@ fun SmallTextComposable(
 ) {
     Text(
         modifier = modifier,
-        text = title,
+        text = text,
         color = color ?: MaterialTheme.colors.onBackground,
         style = style ?: MaterialTheme.typography.caption,
         fontWeight = fontWeight ?: FontWeight.SemiBold,

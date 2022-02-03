@@ -166,7 +166,7 @@ fun ExploreScreen(
                             TopAppBarActionButton(imageVector = Icons.Default.Refresh,
                                 title = "Retry",
                                 onClick = { viewModel.getBooks() })
-                            SmallTextComposable(title = "Retry")
+                            SmallTextComposable(text = "Retry")
                         }
                         Column(Modifier
                             .weight(.5f)
@@ -183,7 +183,7 @@ fun ExploreScreen(
                                         )
                                     )
                                 })
-                            SmallTextComposable(title = "Open in WebView")
+                            SmallTextComposable(text = "Open in WebView")
                         }
 
                     }

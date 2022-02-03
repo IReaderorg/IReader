@@ -21,6 +21,9 @@ val sourceSansPro = FontFamily(
     Font(R.font.source_sans_pro_bold_700, weight = FontWeight.Bold),
     Font(R.font.source_sans_pro_900, weight = FontWeight.ExtraBold),
 )
+val supermercadoOne = FontFamily(
+    Font(R.font.supermercado_one_regular, weight = FontWeight.Normal),
+)
 
 // Set of Material typography styles to start with
 val Typography = Typography(
@@ -29,6 +32,7 @@ val Typography = Typography(
 val fonts = listOf<FontType>(
     FontType.Poppins,
     FontType.SourceSansPro,
+    FontType.SupermercadoOne
 )
 val readerScreenBackgroundColors = listOf<BackgroundColor>(
     BackgroundColor.Black,

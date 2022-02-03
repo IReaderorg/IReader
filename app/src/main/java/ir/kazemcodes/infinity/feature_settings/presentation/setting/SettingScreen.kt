@@ -5,7 +5,10 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Dns
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -19,13 +22,13 @@ import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarTit
 import ir.kazemcodes.infinity.core.ui.AboutInfoScreenSpec
 import ir.kazemcodes.infinity.core.ui.AppearanceScreenSpec
 import ir.kazemcodes.infinity.core.ui.DnsOverHttpSettingSpec
+import ir.kazemcodes.infinity.core.ui.DownloaderScreenSpec
 import ir.kazemcodes.infinity.core.utils.Constants
 
 @Composable
 fun SettingScreen(modifier: Modifier = Modifier, navController: NavController = rememberNavController()) {
     val settingItems = listOf(
-        //SettingItems.Downloads,
-        //SettingItems.ExtensionCreator,
+        SettingItems.Downloads,
         SettingItems.Appearance,
         SettingItems.DnsOverHttp,
         SettingItems.About,
@@ -71,16 +74,11 @@ sealed class SettingItems(
     val icon: ImageVector,
     val route: String,
 ) {
-    object Downloads : SettingItems("Downloads", Icons.Default.Download, AppearanceScreenSpec.navHostRoute)
-    object ExtensionCreator :
-        SettingItems("ExtensionCreator", Icons.Default.Extension, AppearanceScreenSpec.navHostRoute)
-
+    object Downloads : SettingItems("Downloads", Icons.Default.Download, DownloaderScreenSpec.navHostRoute)
     object Appearance :
         SettingItems("Appearance", Icons.Default.Palette, AppearanceScreenSpec.navHostRoute)
-
     object DnsOverHttp :
         SettingItems("DnsOverHttp", Icons.Default.Dns, DnsOverHttpSettingSpec.navHostRoute)
-
     object About : SettingItems("About", Icons.Default.Info, AboutInfoScreenSpec.navHostRoute)
 }
 

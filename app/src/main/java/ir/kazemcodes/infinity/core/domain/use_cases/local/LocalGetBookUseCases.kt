@@ -10,7 +10,8 @@ data class LocalGetBookUseCases(
     val getBooksByQueryByPagination: GetBooksByQueryByPagination,
     val getBooksByQueryPagingSource: GetBooksByQueryPagingSource,
     val getAllExploredBookPagingSource: GetAllExploredBookPagingSource,
-    val getAllExploredBookPagingData: GetAllExploredBookPagingData
+    val getAllExploredBookPagingData: GetAllExploredBookPagingData,
+    val getAllInDownloadsPagingData: GetAllInDownloadsPagingData
 )
 
 

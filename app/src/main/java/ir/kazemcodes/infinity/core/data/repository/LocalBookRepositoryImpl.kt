@@ -89,6 +89,55 @@ class LocalBookRepositoryImpl(
         }
     }
 
+    override fun getAllInDownloadPagingSource(
+        sortType: SortType,
+        isAsc: Boolean,
+        unreadFilter: Boolean,
+    ): PagingSource<Int, Book> {
+        return when (sortType) {
+            is SortType.Alphabetically -> {
+                if (unreadFilter) {
+                    bookDao.getAllInDownloads(sortByAbs = true,
+                        isAsc = isAsc)
+                } else {
+                    bookDao.getAllInDownloads(sortByAbs = true, isAsc = isAsc)
+
+                }
+            }
+            is SortType.DateAdded -> {
+                if (unreadFilter) {
+                    bookDao.getAllInDownloads(sortByDateAdded = true,
+                        isAsc = isAsc)
+                } else {
+                    bookDao.getAllInDownloads(sortByDateAdded = true,
+                        isAsc = isAsc)
+
+                }
+            }
+            is SortType.LastRead -> {
+                if (unreadFilter) {
+                    bookDao.getAllInDownloads(sortByLastRead = true,
+                        isAsc = isAsc)
+                } else {
+                    bookDao.getAllInDownloads(sortByLastRead = true,
+                        isAsc = isAsc)
+
+                }
+            }
+            is SortType.TotalChapter -> {
+                if (unreadFilter) {
+                    bookDao.getAllInDownloads(sortByTotalChapter = true,
+                        isAsc = isAsc)
+                } else {
+                    bookDao.getAllInDownloads(sortByTotalChapter = true,
+                        isAsc = isAsc)
+
+                }
+            }
+        }
+
+    }
+
     override fun getAllInLibraryBooks(): Flow<List<Book>?> {
         return bookDao.getAllInLibraryBooks()
     }

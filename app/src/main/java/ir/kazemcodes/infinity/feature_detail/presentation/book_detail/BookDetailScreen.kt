@@ -35,7 +35,6 @@ import ir.kazemcodes.infinity.core.utils.UiEvent
 import ir.kazemcodes.infinity.core.utils.formatBasedOnDot
 import ir.kazemcodes.infinity.core.utils.formatList
 import ir.kazemcodes.infinity.core.utils.getUrlWithoutDomain
-
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.components.ButtonWithIconAndText
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.components.CardTileComposable
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.components.DotsFlashing
@@ -135,6 +134,7 @@ fun BookDetailScreenLoadedComposable(
     }
 
     LaunchedEffect(key1 = true) {
+        viewModel.getLocalBookById()
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
                 is UiEvent.ShowSnackbar -> {

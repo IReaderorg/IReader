@@ -3,10 +3,7 @@ package ir.kazemcodes.infinity.feature_library.presentation
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -57,12 +54,17 @@ fun LibraryScreen(
 
 
 
-    ModalBottomSheetLayout(sheetContent = {
-        BottomTabComposable(
-            viewModel = viewModel,
-            pagerState = pagerState,
-            navController = navController,
-            scope = coroutineScope)
+    ModalBottomSheetLayout(
+        sheetContent = {
+            if (sheetState.isVisible) {
+                BottomTabComposable(
+                    viewModel = viewModel,
+                    pagerState = pagerState,
+                    navController = navController,
+                    scope = coroutineScope)
+            } else {
+                Box(modifier = Modifier.height(1.dp))
+            }
     }, sheetState = sheetState) {
         Scaffold(
             topBar = {

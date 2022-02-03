@@ -80,6 +80,7 @@ class BookDetailViewModel @Inject constructor(
 
 
 
+
     fun startDownloadService(context: Context) {
         work = OneTimeWorkRequestBuilder<DownloadService>().apply {
             setInputData(
@@ -88,14 +89,16 @@ class BookDetailViewModel @Inject constructor(
                     putLong(DOWNLOADER_SOURCE_ID, state.value.book.sourceId)
                 }.build()
             )
+            addTag(DOWNLOADER_SERVICE_NAME)
         }.build()
         WorkManager.getInstance(context).enqueueUniqueWork(
-            DOWNLOADER_SERVICE_NAME, ExistingWorkPolicy.REPLACE, work
+            DOWNLOADER_SERVICE_NAME.plus(state.value.book.id+state.value.book.sourceId), ExistingWorkPolicy.REPLACE, work
         )
+
     }
 
 
-    private fun getLocalBookById() {
+    fun getLocalBookById() {
         _state.value = state.value.copy(isLoading = true, error = UiText.noError())
         viewModelScope.launch {
             getBookUseCases.getBookById(id = state.value.book.id)

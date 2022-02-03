@@ -26,6 +26,12 @@ interface LocalBookRepository {
         unreadFilter: Boolean,
     ): PagingSource<Int, Book>
 
+    fun getAllInDownloadPagingSource(
+        sortType: SortType,
+        isAsc: Boolean,
+        unreadFilter: Boolean,
+    ): PagingSource<Int, Book>
+
 
     fun getAllExploreBookPagingSource(): PagingSource<Int, Book>
 

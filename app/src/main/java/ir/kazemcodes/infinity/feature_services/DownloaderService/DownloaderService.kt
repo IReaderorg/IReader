@@ -26,6 +26,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectIndexed
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 
 
@@ -45,6 +46,8 @@ class DownloadService @AssistedInject constructor(
         const val DOWNLOADER_SOURCE_ID = "sourceId"
     }
 
+
+
     override suspend fun doWork(): Result {
 
 
@@ -57,9 +60,17 @@ class DownloadService @AssistedInject constructor(
             )
         }
         val book = bookResource.data!!
+
         val source = extensions.mappingSourceNameToSource(sourceId)
 
         val chapters = chapterRepo.getChaptersByBookId(bookId).first() ?: emptyList()
+        val localBook = bookRepo.getBookById(bookId).first().data
+
+        withContext(Dispatchers.IO) {
+            insertUseCases.insertBook(book = book.copy(isDownloaded = true, beingDownloaded = true))
+        }
+
+
         val cancelDownloadIntent = WorkManager.getInstance(applicationContext)
             .createCancelPendingIntent(id)
 
@@ -70,6 +81,7 @@ class DownloadService @AssistedInject constructor(
                 setOnlyAlertOnce(true)
                 priority = NotificationCompat.PRIORITY_LOW
                 setAutoCancel(false)
+                setOngoing(true)
                 addAction(R.drawable.baseline_close_24, "Cancel", cancelDownloadIntent)
             }
 
@@ -98,9 +110,9 @@ class DownloadService @AssistedInject constructor(
                         Timber.d("getNotifications: Successfully to downloaded ${book.bookName} chapter ${chapter.title}")
                         delay(2000)
                     }
-
                 }
-            } catch (e : CancellationException) {
+            } catch (e: CancellationException) {
+
                 Timber.e("getNotifications:Download of ${book.bookName} was cancelled.")
                 notify(
                     ID_DOWNLOAD_CHAPTER_ERROR,
@@ -114,8 +126,10 @@ class DownloadService @AssistedInject constructor(
                 )
                 builder.setProgress(0, 0, false)
                 cancel(ID_DOWNLOAD_CHAPTER_PROGRESS)
+
                 return Result.failure()
             } catch (e: Exception) {
+
                 Timber.e("getNotifications: Failed to download ${book.bookName}")
                 notify(
                     ID_DOWNLOAD_CHAPTER_ERROR,
@@ -129,25 +143,30 @@ class DownloadService @AssistedInject constructor(
                 )
                 builder.setProgress(0, 0, false)
                 cancel(ID_DOWNLOAD_CHAPTER_PROGRESS)
+
                 return Result.failure()
             }
 
-        builder.setProgress(0, 0, false)
-        cancel(ID_DOWNLOAD_CHAPTER_PROGRESS)
+            builder.setProgress(0, 0, false)
+            cancel(ID_DOWNLOAD_CHAPTER_PROGRESS)
 
-        notify(
-            ID_DOWNLOAD_CHAPTER_COMPLETE,
-            NotificationCompat.Builder(applicationContext,
-                Notifications.CHANNEL_DOWNLOADER_COMPLETE).apply {
-                setContentTitle("${book.bookName} downloaded")
-                setSmallIcon(R.drawable.ic_downloading)
-                priority = NotificationCompat.PRIORITY_DEFAULT
-                setSubText("It was Downloaded Successfully")
-            }.build()
-        )
+            notify(
+                ID_DOWNLOAD_CHAPTER_COMPLETE,
+                NotificationCompat.Builder(applicationContext,
+                    Notifications.CHANNEL_DOWNLOADER_COMPLETE).apply {
+                    setContentTitle("${book.bookName} downloaded")
+                    setSmallIcon(R.drawable.ic_downloading)
+                    priority = NotificationCompat.PRIORITY_DEFAULT
+                    setSubText("It was Downloaded Successfully")
+                }.build()
+            )
+        }
+
+        withContext(Dispatchers.IO) {
+            insertUseCases.insertBook(book = book.copy(beingDownloaded = false))
+        }
+
+        return Result.success()
     }
-
-    return Result.success()
-}
 
 }

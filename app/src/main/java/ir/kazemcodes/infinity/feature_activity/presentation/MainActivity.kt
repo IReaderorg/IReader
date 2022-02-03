@@ -46,7 +46,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
             val manager = WorkManager.getInstance(applicationContext)
-            manager.cancelUniqueWork(DownloadService.DOWNLOADER_SERVICE_NAME)
+            manager.cancelAllWorkByTag(DownloadService.DOWNLOADER_SERVICE_NAME)
 
             manager.enqueue(updateRequest)
         }
