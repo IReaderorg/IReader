@@ -50,6 +50,7 @@ object Constants {
     const val github_api_url = "https://api.github.com"
 
     const val NULL_VALUE = -1
+    const val LAST_CHAPTER = -2
 
 
 }

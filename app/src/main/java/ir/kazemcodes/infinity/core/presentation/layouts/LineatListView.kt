@@ -59,6 +59,8 @@ fun LinearListDisplay(
     books: LazyPagingItems<Book>,
     onClick: (book: Book) -> Unit,
     scrollState: LazyListState = rememberLazyListState(),
+    onLastReadChapterClick: (book : Book) -> Unit,
+    isLocal : Boolean
 ) {
     LazyColumn(modifier = Modifier.fillMaxSize(), state = scrollState) {
         items(items = books) { book ->

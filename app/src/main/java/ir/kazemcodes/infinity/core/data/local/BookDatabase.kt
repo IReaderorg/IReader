@@ -3,6 +3,8 @@ package ir.kazemcodes.infinity.core.data.local
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import ir.kazemcodes.infinity.core.data.local.dao.LibraryBookDao
 import ir.kazemcodes.infinity.core.data.local.dao.LibraryChapterDao
 import ir.kazemcodes.infinity.core.data.local.dao.RemoteKeysDao
@@ -16,6 +18,7 @@ import ir.kazemcodes.infinity.core.domain.models.SourceEntity
     entities = [Book::class, Chapter::class, RemoteKeys::class,SourceEntity::class],
     version = 9,
     exportSchema = true,
+
 )
 @TypeConverters(DatabaseConverter::class)
 
@@ -31,4 +34,10 @@ abstract class BookDatabase : RoomDatabase() {
         const val DATABASE_NAME = "infinity_db"
     }
 
+}
+val MIGRATION_8_9 = object : Migration(8, 9) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        database.execSQL("ALTER TABLE book_table ADD COLUMN beingDownloaded INTEGER NOT NULL DEFAULT 0")
+        database.execSQL("ALTER TABLE book_table RENAME COLUMN download TO isDownloaded")
+    }
 }

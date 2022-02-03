@@ -1,17 +1,19 @@
 package ir.kazemcodes.infinity.core.presentation.layouts
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyGridState
 import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.lazy.rememberLazyGridState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ImportContacts
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.presentation.components.BookImageComposable
+import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarActionButton
 import ir.kazemcodes.infinity.core.utils.items
 
 
@@ -36,6 +39,8 @@ fun CompactGridLayoutComposable(
     books: LazyPagingItems<Book>,
     onClick: (book: Book) -> Unit,
     scrollState: LazyGridState = rememberLazyGridState(),
+    onLastReadChapterClick: (book: Book) -> Unit,
+    isLocal: Boolean,
 ) {
     LazyVerticalGrid(
         state = scrollState,
@@ -56,9 +61,11 @@ fun CompactGridLayoutComposable(
                                 .height(250.dp)
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(4.dp))
-                                .border(2.dp, MaterialTheme.colors.onBackground.copy(alpha = .1f)),
+                                .border(2.dp,
+                                    MaterialTheme.colors.onBackground.copy(alpha = .1f)),
                             image = book.coverLink ?: "",
                         )
+
                         Box(
                             Modifier
                                 .fillMaxWidth()
@@ -84,6 +91,32 @@ fun CompactGridLayoutComposable(
                                 color = Color.White
                             )
                         }
+                        if (book.totalChapters > 1 && isLocal) {
+                            Box() {
+                                OutlinedButton(onClick = { /*TODO*/ },
+                                    modifier= Modifier.size(50.dp).padding(5.dp),
+                                    shape = CircleShape,
+                                    border= BorderStroke(1.dp, MaterialTheme.colors.background.copy(alpha = .4f)),
+                                    contentPadding = PaddingValues(0.dp),  //avoid the little icon
+                                    colors = ButtonDefaults.outlinedButtonColors(
+                                        contentColor = MaterialTheme.colors.background,
+                                        backgroundColor = MaterialTheme.colors.onBackground.copy(
+                                            alpha = .5f)
+                                    )
+                                ) {
+                                    TopAppBarActionButton(
+                                        imageVector = Icons.Default.ImportContacts,
+                                        title = "Open last chapter",
+                                        onClick = {
+                                            onLastReadChapterClick(book)
+                                        },
+                                        tint = MaterialTheme.colors.background
+                                    )
+                                }
+
+                            }
+                        }
+
 
                     }
                 }

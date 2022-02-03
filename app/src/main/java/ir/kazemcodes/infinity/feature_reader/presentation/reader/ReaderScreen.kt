@@ -41,7 +41,6 @@ import ir.kazemcodes.infinity.core.utils.scroll.Carousel
 import ir.kazemcodes.infinity.core.utils.scroll.CarouselDefaults
 import ir.kazemcodes.infinity.core.utils.scroll.rememberCarouselScrollState
 import ir.kazemcodes.infinity.core.utils.scroll.verticalScroll
-
 import ir.kazemcodes.infinity.feature_reader.presentation.reader.components.MainBottomSettingComposable
 import ir.kazemcodes.infinity.feature_reader.presentation.reader.components.ReaderSettingComposable
 import ir.kazemcodes.infinity.feature_sources.sources.models.FetchType
@@ -172,6 +171,7 @@ fun ReadingScreen(
                 ModalBottomSheetLayout(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .height(IntrinsicSize.Max)
                         .height(if (viewModel.state.value.isMainBottomModeEnable) 130.dp else 320.dp),
                     sheetBackgroundColor = MaterialTheme.colors.background,
                     sheetElevation = 8.dp,
@@ -287,20 +287,23 @@ fun ReadingScreen(
         ) {
             Box(modifier = modifier.fillMaxSize()) {
 
-
                 if (state.chapter.isChapterNotEmpty() && !state.isLoading) {
                     Row(modifier = modifier.fillMaxSize()) {
+
                         Text(
                             modifier = modifier
                                 .verticalScroll(scrollState)
                                 .weight(1f),
-                            text = state.chapter.content.map { it.trimStart() }.joinToString("\n".repeat(state.distanceBetweenParagraphs)),
+                            text = state.chapter.content.map { it.trimStart() }
+                                .joinToString("\n".repeat(state.distanceBetweenParagraphs)),
                             fontSize = viewModel.state.value.fontSize.sp,
                             fontFamily = viewModel.state.value.font.fontFamily,
                             textAlign = TextAlign.Start,
                             color = state.textColor,
                             lineHeight = state.lineHeight.sp,
                         )
+
+
                         Carousel(
                             state = scrollState,
                             modifier = Modifier

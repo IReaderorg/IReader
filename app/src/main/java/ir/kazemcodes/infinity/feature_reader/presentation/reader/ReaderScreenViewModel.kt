@@ -114,6 +114,41 @@ class ReaderScreenViewModel @Inject constructor(
         }
     }
 
+    private fun getLastChapter() {
+        viewModelScope.launch(Dispatchers.IO) {
+            getChapterUseCase.getLastReadChapter(state.value.book.id)
+                .collect { result ->
+                    when (result) {
+                        is Resource.Success -> {
+                            if (result.data != null) {
+                                _state.value = state.value.copy(
+                                    chapter = result.data,
+                                    isLoading = false,
+                                    isLoaded = true,
+                                    error = UiText.noError(),
+                                    scrollPosition = result.data.scrollPosition
+                                )
+                                toggleLastReadAndUpdateChapterContent(result.data)
+                                if (state.value.chapter.content.joinToString().isBlank()) {
+                                    getReadingContentRemotely()
+                                }
+                            }
+                        }
+                        is Resource.Error -> {
+                            _state.value =
+                                state.value.copy(
+                                    isLoading = false,
+                                    isLoaded = false,
+                                )
+                            _eventFlow.emit(UiEvent.ShowSnackbar(result.uiText ?: UiText.unknownError()
+                                .asString()))
+                            getReadingContentRemotely()
+                        }
+                    }
+                }
+        }
+
+    }
 
     private fun toggleReaderMode(enable: Boolean? = null) {
         _state.value =
@@ -283,7 +318,11 @@ class ReaderScreenViewModel @Inject constructor(
                                     unread = !result.data.unread))
                             }
                             getChapters()
-                            getChapter(state.value.chapter)
+                            if (state.value.chapter.chapterId != Constants.LAST_CHAPTER) {
+                                getChapter(state.value.chapter)
+                            } else {
+                                getLastChapter()
+                            }
                             getLocalChaptersByPaging()
                             true
                         } else {
@@ -320,7 +359,7 @@ class ReaderScreenViewModel @Inject constructor(
         _state.value = state.value.copy(isAsc = !state.value.isAsc)
     }
 
-    var getChapterJob : Job? = null
+    var getChapterJob: Job? = null
     fun getLocalChaptersByPaging() {
         getChapterJob?.cancel()
         getChapterJob = viewModelScope.launch {
@@ -519,7 +558,7 @@ class ReaderScreenViewModel @Inject constructor(
                     book = state.value.book.copy(areChaptersReversed = !state.value.book.areChaptersReversed),
                     isChapterReversingInProgress = true,
                     isAsc = !state.value.isAsc
-                    )
+                )
 
             viewModelScope.launch(Dispatchers.IO) {
                 _eventFlow.emit(UiEvent.ShowSnackbar(UiText.DynamicString("Reversing Chapters...")

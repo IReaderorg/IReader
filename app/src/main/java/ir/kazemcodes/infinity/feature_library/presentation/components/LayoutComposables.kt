@@ -15,6 +15,8 @@ import ir.kazemcodes.infinity.core.presentation.layouts.GridLayoutComposable
 import ir.kazemcodes.infinity.core.presentation.layouts.LayoutType
 import ir.kazemcodes.infinity.core.presentation.layouts.LinearListDisplay
 import ir.kazemcodes.infinity.core.ui.BookDetailScreenSpec
+import ir.kazemcodes.infinity.core.ui.ReaderScreenSpec
+import ir.kazemcodes.infinity.core.utils.Constants
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -26,7 +28,7 @@ fun LayoutComposable(
     scrollState: LazyListState = rememberLazyListState(),
     gridState: LazyGridState = rememberLazyGridState(),
     source: Source? = null,
-    isLocal:Boolean
+    isLocal: Boolean,
 ) {
 
     when (layout) {
@@ -34,25 +36,59 @@ fun LayoutComposable(
             GridLayoutComposable(books = books,
                 onClick = { book ->
                     navController.navigate(
-                        route = BookDetailScreenSpec.buildRoute(sourceId = if (source?.sourceId != null) source.sourceId else book.sourceId , bookId = book.id)
+                        route = BookDetailScreenSpec.buildRoute(sourceId = if (source?.sourceId != null) source.sourceId else book.sourceId,
+                            bookId = book.id)
                     )
-                }, scrollState = gridState)
+                }, scrollState = gridState,
+                onLastReadChapterClick = { book ->
+                    navController.navigate(
+                        ReaderScreenSpec.buildRoute(
+                            bookId = book.id,
+                            sourceId = book.sourceId,
+                            chapterId = Constants.LAST_CHAPTER
+                        )
+                    )
+                },
+                isLocal = isLocal)
         }
         is LayoutType.ListLayout -> {
             LinearListDisplay(books = books, onClick = { book ->
                 navController.navigate(
-                    route = BookDetailScreenSpec.buildRoute(sourceId = if (source?.sourceId != null) source.sourceId else book.sourceId , bookId = book.id)
+                    route = BookDetailScreenSpec.buildRoute(sourceId = if (source?.sourceId != null) source.sourceId else book.sourceId,
+                        bookId = book.id)
                 )
-            }, scrollState = scrollState)
+            }, scrollState = scrollState,
+                onLastReadChapterClick = { book ->
+                    navController.navigate(
+                        ReaderScreenSpec.buildRoute(
+                            bookId = book.id,
+                            sourceId = book.sourceId,
+                            chapterId = Constants.LAST_CHAPTER
+                        )
+                    )
+                },
+                isLocal = isLocal)
         }
         is LayoutType.CompactGrid -> {
             CompactGridLayoutComposable(
                 books = books,
                 onClick = { book ->
                     navController.navigate(
-                        route = BookDetailScreenSpec.buildRoute(sourceId = if (source?.sourceId != null) source.sourceId else book.sourceId , bookId = book.id)
+                        route = BookDetailScreenSpec.buildRoute(sourceId = if (source?.sourceId != null) source.sourceId else book.sourceId,
+                            bookId = book.id)
                     )
-                }, scrollState = gridState)
+                }, scrollState = gridState,
+                onLastReadChapterClick = { book ->
+                    navController.navigate(
+                        ReaderScreenSpec.buildRoute(
+                            bookId = book.id,
+                            sourceId = book.sourceId,
+                            chapterId = Constants.LAST_CHAPTER
+                        )
+                    )
+                },
+                isLocal = isLocal
+            )
         }
     }
 }

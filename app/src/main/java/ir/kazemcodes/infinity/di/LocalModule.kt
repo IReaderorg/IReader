@@ -4,12 +4,14 @@ import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.room.Room
+
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import ir.kazemcodes.infinity.core.data.local.BookDatabase
+import ir.kazemcodes.infinity.core.data.local.MIGRATION_8_9
 import ir.kazemcodes.infinity.core.data.local.dao.LibraryBookDao
 import ir.kazemcodes.infinity.core.data.local.dao.LibraryChapterDao
 import ir.kazemcodes.infinity.core.data.local.dao.RemoteKeysDao
@@ -45,6 +47,7 @@ class LocalModule {
             BookDatabase::class.java,
             BookDatabase.DATABASE_NAME
         )
+            .addMigrations(MIGRATION_8_9)
             .fallbackToDestructiveMigration()
             .build()
     }

@@ -100,7 +100,7 @@ fun DownloaderScreen(
             items(items = books) { book ->
                 if (book != null) {
                     Card(
-                        modifier = Modifier.padding(8.dp),
+                        modifier = Modifier.padding(vertical = 8.dp),
                         backgroundColor = MaterialTheme.colors.background,
                         contentColor = MaterialTheme.colors.onBackground,
                         elevation = 8.dp,

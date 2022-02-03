@@ -53,8 +53,7 @@ fun LibraryScreen(
 
     val books = viewModel.book.collectAsLazyPagingItems()
     val pagerState = rememberPagerState()
-    val bottomSheetState =
-        rememberBottomSheetScaffoldState(bottomSheetState = BottomSheetState(initialValue = BottomSheetValue.Collapsed))
+    val bottomSheetState = rememberBottomSheetScaffoldState()
 
 
 
@@ -141,8 +140,7 @@ fun LibraryScreen(
         scaffoldState = bottomSheetState
     ) {
         Box(modifier = Modifier
-            .fillMaxSize()
-            .padding(bottom = 50.dp)) {
+            .fillMaxSize()) {
             val result = handlePagingResult(books = books, onEmptyResult = {
                 ErrorTextWithEmojis(
                     modifier = Modifier

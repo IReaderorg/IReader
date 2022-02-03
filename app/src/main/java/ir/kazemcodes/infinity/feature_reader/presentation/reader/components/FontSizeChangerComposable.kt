@@ -1,8 +1,6 @@
 package ir.kazemcodes.infinity.feature_reader.presentation.reader.components
 
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -18,10 +16,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ir.kazemcodes.infinity.R
+import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarActionButton
 import ir.kazemcodes.infinity.feature_reader.presentation.reader.FontSizeEvent
 import ir.kazemcodes.infinity.feature_reader.presentation.reader.ReaderEvent
 import ir.kazemcodes.infinity.feature_reader.presentation.reader.ReaderScreenViewModel
-import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarActionButton
 
 @Composable
 fun FontSizeChangerComposable(
@@ -103,7 +101,7 @@ fun ParagraphDistanceComposable(modifier: Modifier = Modifier, viewModel: Reader
 
 @Composable
 fun IndentChangerComposable(modifier: Modifier = Modifier, viewModel: ReaderScreenViewModel) {
-    Row(verticalAlignment = Alignment.CenterVertically
+    Row(modifier = Modifier.fillMaxWidth(),verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Start
     ) {
         Spacer(modifier = modifier.width(5.dp))
         Text(

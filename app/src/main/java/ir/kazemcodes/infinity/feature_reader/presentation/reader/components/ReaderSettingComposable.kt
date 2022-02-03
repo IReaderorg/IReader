@@ -1,6 +1,8 @@
 package ir.kazemcodes.infinity.feature_reader.presentation.reader.components
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -14,38 +16,29 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ir.kazemcodes.infinity.feature_reader.presentation.reader.ReaderScreenViewModel
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarActionButton
+import ir.kazemcodes.infinity.feature_reader.presentation.reader.ReaderScreenViewModel
 
 @Composable
 fun ReaderSettingComposable(modifier: Modifier = Modifier, viewModel: ReaderScreenViewModel) {
     val context = LocalContext.current
-
+    val scrollState = rememberScrollState()
     Column(
         modifier = modifier
             .fillMaxSize()
             .padding(4.dp)
+            .verticalScroll(scrollState)
     ) {
         BrightnessSliderComposable(viewModel = viewModel)
         Spacer(modifier = Modifier.height(12.dp))
         ReaderBackgroundComposable(viewModel = viewModel)
         Spacer(modifier = Modifier.height(12.dp))
         /** Font indent and font menu **/
-        Row(modifier = modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically) {
-            IndentChangerComposable(viewModel = viewModel)
-            Divider(
-                color = MaterialTheme.colors.onBackground.copy(alpha = .2f),
-                modifier = Modifier
-                    .height(20.dp)
-                    .width(1.dp)
-            )
-            Spacer(modifier = modifier.width(35.dp))
-            FontMenuComposable(
-                viewModel = viewModel
-            )
-        }
+        FontMenuComposable(
+            viewModel = viewModel
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        IndentChangerComposable(viewModel = viewModel)
         Spacer(modifier = Modifier.height(12.dp))
         Row(modifier = modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,

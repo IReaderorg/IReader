@@ -17,8 +17,8 @@ android {
         applicationId "ir.kazemcodes.infinityreader"
         minSdk 23
         targetSdk 31
-        versionCode 7
-        versionName "0.1.7"
+        versionCode 8
+        versionName "0.1.8"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -200,6 +200,8 @@ dependencies {
     implementation "io.insert-koin:koin-androidx-navigation:$koin_version"
 // Jetpack Compose
     implementation "io.insert-koin:koin-androidx-compose:$koin_version"
+
+    implementation "com.google.accompanist:accompanist-webview:0.24.1-alpha"
 
 
 }
