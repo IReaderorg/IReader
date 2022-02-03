@@ -42,17 +42,20 @@ fun InfinityTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable() () -> Unit,
 ) {
+
     val colors = if (darkTheme) {
         DarkColorPalette
     } else {
         LightColorPalette
     }
-    val rememberSystemUiController = rememberSystemUiController()
+
+    val systemUiController = rememberSystemUiController()
     SideEffect {
-        rememberSystemUiController.setSystemBarsColor(
-            color = colors.background
+        systemUiController.setStatusBarColor(
+            color = colors.background,
+            darkIcons = !darkTheme
         )
-        rememberSystemUiController.setStatusBarColor(color = colors.background)
+
     }
     CompositionLocalProvider(LocalSpacing provides Spacing()) {
 

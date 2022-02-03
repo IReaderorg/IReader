@@ -36,7 +36,8 @@ data class ReaderScreenState(
     val orientation: Orientation = Orientation.Portrait,
     val isWebViewEnable : Boolean = false,
     val isChaptersReversed : Boolean = false,
-    val isChapterReversingInProgress: Boolean = false
+    val isChapterReversingInProgress: Boolean = false,
+    val scrollPosition: Int = 0,
 )
 
 

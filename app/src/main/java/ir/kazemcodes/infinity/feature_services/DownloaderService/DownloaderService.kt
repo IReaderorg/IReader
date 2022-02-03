@@ -1,8 +1,11 @@
 package ir.kazemcodes.infinity.feature_services.DownloaderService
 
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.net.toUri
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkManager
@@ -19,6 +22,8 @@ import ir.kazemcodes.infinity.feature_activity.domain.notification.Notifications
 import ir.kazemcodes.infinity.feature_activity.domain.notification.Notifications.ID_DOWNLOAD_CHAPTER_COMPLETE
 import ir.kazemcodes.infinity.feature_activity.domain.notification.Notifications.ID_DOWNLOAD_CHAPTER_ERROR
 import ir.kazemcodes.infinity.feature_activity.domain.notification.Notifications.ID_DOWNLOAD_CHAPTER_PROGRESS
+import ir.kazemcodes.infinity.feature_activity.presentation.MainActivity
+import ir.kazemcodes.infinity.feature_services.flags
 import ir.kazemcodes.infinity.feature_sources.sources.Extensions
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -74,6 +79,16 @@ class DownloadService @AssistedInject constructor(
         val cancelDownloadIntent = WorkManager.getInstance(applicationContext)
             .createCancelPendingIntent(id)
 
+
+        val openDetailIntent = Intent(
+            Intent.ACTION_VIEW,
+            "https://www.ireader.com/downloader_route".toUri(),
+            applicationContext,
+            MainActivity::class.java
+        )
+        val openDetailPendingIntent = PendingIntent.getActivity(
+            applicationContext, 0, openDetailIntent, flags
+        )
         val builder =
             NotificationCompat.Builder(applicationContext, CHANNEL_DOWNLOADER_PROGRESS).apply {
                 setContentTitle("Downloading ${book.bookName}")
@@ -83,6 +98,7 @@ class DownloadService @AssistedInject constructor(
                 setAutoCancel(false)
                 setOngoing(true)
                 addAction(R.drawable.baseline_close_24, "Cancel", cancelDownloadIntent)
+                setContentIntent(openDetailPendingIntent)
             }
 
 

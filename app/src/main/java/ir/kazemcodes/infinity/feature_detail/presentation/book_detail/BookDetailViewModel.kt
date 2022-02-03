@@ -112,7 +112,7 @@ class BookDetailViewModel @Inject constructor(
                                     isLoading = false,
                                     isLoaded = true,
                                     inLibrary = result.data.inLibrary,
-                                    isExploreMode = result.data.isExploreMode
+                                    isExploreMode = result.data.isExploreMode,
                                 )
                                 if (state.value.isExploreMode) {
                                     _state.value = state.value.copy(isExploreMode = false)

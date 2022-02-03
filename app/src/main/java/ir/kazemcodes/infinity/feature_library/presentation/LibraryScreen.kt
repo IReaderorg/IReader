@@ -3,7 +3,10 @@ package ir.kazemcodes.infinity.feature_library.presentation
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -50,117 +53,118 @@ fun LibraryScreen(
 
     val books = viewModel.book.collectAsLazyPagingItems()
     val pagerState = rememberPagerState()
-    val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
+    val bottomSheetState =
+        rememberBottomSheetScaffoldState(bottomSheetState = BottomSheetState(initialValue = BottomSheetValue.Collapsed))
 
 
 
-    ModalBottomSheetLayout(
+
+    BottomSheetScaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    if (!state.inSearchMode) {
+                        TopAppBarTitle(title = "Library")
+                    } else {
+                        TopAppBarSearch(query = state.searchQuery,
+                            onValueChange = {
+                                viewModel.onEvent(LibraryEvents.UpdateSearchInput(it))
+                            },
+                            onSearch = {
+                                viewModel.searchBook(state.searchQuery)
+                                focusManager.clearFocus()
+                            },
+                            isSearchModeEnable = state.searchQuery.isNotBlank())
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                backgroundColor = MaterialTheme.colors.topBarColor,
+                contentColor = MaterialTheme.colors.onBackground,
+                elevation = Constants.DEFAULT_ELEVATION,
+                actions = {
+                    if (state.inSearchMode) {
+                        TopAppBarActionButton(
+                            imageVector = Icons.Default.Close,
+                            title = "Close",
+                            onClick = {
+                                viewModel.onEvent(LibraryEvents.ToggleSearchMode(false))
+                            },
+                        )
+                    }
+                    TopAppBarActionButton(
+                        imageVector = Icons.Default.Sort,
+                        title = "Filter",
+                        onClick = {
+                            coroutineScope.launch {
+                                if (bottomSheetState.bottomSheetState.isExpanded) {
+                                    bottomSheetState.bottomSheetState.collapse()
+                                } else {
+                                    bottomSheetState.bottomSheetState.expand()
+                                }
+                            }
+                        },
+                    )
+                    TopAppBarActionButton(
+                        imageVector = Icons.Default.Search,
+                        title = "Search",
+                        onClick = {
+                            viewModel.onEvent(LibraryEvents.ToggleSearchMode())
+
+                        },
+                    )
+
+
+                },
+                navigationIcon = if (state.inSearchMode) {
+                    {
+                        TopAppBarBackButton(navController = navController,
+                            onClick = {
+                                viewModel.onEvent(LibraryEvents.ToggleSearchMode(false))
+                            })
+                    }
+                } else null
+
+            )
+        },
+        sheetPeekHeight = (-1).dp,
         sheetContent = {
-            if (sheetState.isVisible) {
+            if (bottomSheetState.bottomSheetState.isExpanded) {
                 BottomTabComposable(
                     viewModel = viewModel,
                     pagerState = pagerState,
                     navController = navController,
                     scope = coroutineScope)
-            } else {
-                Box(modifier = Modifier.height(1.dp))
             }
-    }, sheetState = sheetState) {
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = {
-                        if (!state.inSearchMode) {
-                            TopAppBarTitle(title = "Library")
-                        } else {
-                            TopAppBarSearch(query = state.searchQuery,
-                                onValueChange = {
-                                    viewModel.onEvent(LibraryEvents.UpdateSearchInput(it))
-                                },
-                                onSearch = {
-                                    viewModel.searchBook(state.searchQuery)
-                                    focusManager.clearFocus()
-                                },
-                                isSearchModeEnable = state.searchQuery.isNotBlank())
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    backgroundColor = MaterialTheme.colors.topBarColor,
-                    contentColor = MaterialTheme.colors.onBackground,
-                    elevation = Constants.DEFAULT_ELEVATION,
-                    actions = {
-                        if (state.inSearchMode) {
-                            TopAppBarActionButton(
-                                imageVector = Icons.Default.Close,
-                                title = "Close",
-                                onClick = {
-                                    viewModel.onEvent(LibraryEvents.ToggleSearchMode(false))
-                                },
-                            )
-                        }
-                        TopAppBarActionButton(
-                            imageVector = Icons.Default.Sort,
-                            title = "Filter",
-                            onClick = {
-                                coroutineScope.launch {
-                                    if (sheetState.isVisible) {
-                                        sheetState.hide()
-                                    } else {
-                                        sheetState.show()
-                                    }
-                                }
-                            },
-                        )
-                        TopAppBarActionButton(
-                            imageVector = Icons.Default.Search,
-                            title = "Search",
-                            onClick = {
-                                viewModel.onEvent(LibraryEvents.ToggleSearchMode())
-
-                            },
-                        )
 
 
-                    },
-                    navigationIcon = if (state.inSearchMode) {
-                        {
-                            TopAppBarBackButton(navController = navController,
-                                onClick = {
-                                    viewModel.onEvent(LibraryEvents.ToggleSearchMode(false))
-                                })
-                        }
-                    } else null
-
+        },
+        scaffoldState = bottomSheetState
+    ) {
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .padding(bottom = 50.dp)) {
+            val result = handlePagingResult(books = books, onEmptyResult = {
+                ErrorTextWithEmojis(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp)
+                        .align(Alignment.Center),
+                    error = "There is no book is Library, you can add books in the Explore screen"
                 )
-            },
-        ) {
-            Box(modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = 50.dp)) {
-                val result = handlePagingResult(books = books, onEmptyResult = {
-                    ErrorTextWithEmojis(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(20.dp)
-                            .align(Alignment.Center),
-                        error = "There is no book is Library, you can add books in the Explore screen"
+            })
+            if (result) {
+                AnimatedContent(books.loadState.refresh is LoadState.NotLoading) {
+                    LayoutComposable(
+                        books = if (!state.inSearchMode) books else books,
+                        layout = state.layout,
+                        navController = navController,
+                        isLocal = true,
                     )
-                })
-                if (result) {
-                    AnimatedContent(books.loadState.refresh is LoadState.NotLoading) {
-                        LayoutComposable(
-                            books = if (!state.inSearchMode) books else books,
-                            layout = state.layout,
-                            navController = navController,
-                            isLocal = true,
-                        )
-                    }
                 }
             }
-
         }
-    }
 
+    }
 
 
 }

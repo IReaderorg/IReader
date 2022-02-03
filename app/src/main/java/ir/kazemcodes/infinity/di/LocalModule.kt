@@ -74,6 +74,7 @@ class LocalModule {
         return context.getSharedPreferences(Constants.SHARED_PREF_NAME, Context.MODE_PRIVATE)
     }
 
+
     @Singleton
     @Provides
     fun providesExtensions(context: Context): Extensions {

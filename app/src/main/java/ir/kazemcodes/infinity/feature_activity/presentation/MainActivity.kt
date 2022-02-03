@@ -7,14 +7,11 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.scopes.ActivityScoped
-import ir.kazemcodes.infinity.core.domain.use_cases.preferences.apperance.NightMode
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.reader_preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.core.presentation.theme.InfinityTheme
 import ir.kazemcodes.infinity.feature_services.DownloaderService.DownloadService
@@ -30,21 +27,27 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var preferencesUseCase: PreferencesUseCase
-
+    @Inject lateinit var themeSetting: ThemeSetting
 
     @OptIn(ExperimentalAnimationApi::class,
         androidx.compose.material.ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
-            val navController = rememberAnimatedNavController()
-            preferencesUseCase.readNightModePreferences().collectAsState(initial = NightMode.FollowSystem)
-            InfinityTheme() {
+            val theme = themeSetting.themeStream.collectAsState()
+            val useDarkColors = when (theme.value) {
+                AppTheme.MODE_AUTO -> isSystemInDarkTheme()
+                AppTheme.MODE_DAY -> false
+                AppTheme.MODE_NIGHT -> true
+            }
+
+            InfinityTheme(useDarkColors) {
                 Surface(color = MaterialTheme.colors.background) {
-//                    SetupNavHost(navController = navController)
                     ScreenContent()
                 }
             }
+
             val manager = WorkManager.getInstance(applicationContext)
             manager.cancelAllWorkByTag(DownloadService.DOWNLOADER_SERVICE_NAME)
 
@@ -53,6 +56,7 @@ class MainActivity : ComponentActivity() {
     }
 
     companion object {
+
         // Splash screen
         private const val SPLASH_MIN_DURATION = 500 // ms
         private const val SPLASH_MAX_DURATION = 5000 // ms
@@ -78,20 +82,5 @@ class MainActivity : ComponentActivity() {
     }
 
 
-}
-
-@Composable
-fun HandleTheme(mode: NightMode): Boolean {
-    return when (mode) {
-        is NightMode.Enable -> {
-            true
-        }
-        is NightMode.Disable -> {
-            false
-        }
-        is NightMode.FollowSystem -> {
-            isSystemInDarkTheme()
-        }
-    }
 }
 

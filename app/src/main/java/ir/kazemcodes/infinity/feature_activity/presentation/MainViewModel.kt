@@ -1,12 +1,12 @@
 package ir.kazemcodes.infinity.feature_activity.presentation
 
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import ir.kazemcodes.infinity.core.domain.use_cases.local.DeleteUseCase
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.apperance.NightMode
-import ir.kazemcodes.infinity.core.domain.use_cases.preferences.reader_preferences.PreferencesUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -14,31 +14,32 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val deleteUseCase: DeleteUseCase,
-    private val preferencesUseCase: PreferencesUseCase,
+    private val themeSetting: ThemeSetting,
 ) : ViewModel() {
 
     private val _state = mutableStateOf(MainScreenState())
     val state = _state
 
-    val theme = preferencesUseCase.readNightModePreferences()
 
     fun saveTheme(mode: NightMode) {
-        preferencesUseCase.saveNightModePreferences(mode = mode)
-    }
-
-    private fun getTheme() {
-        viewModelScope.launch {
-            preferencesUseCase.readNightModePreferences().collect { result ->
-                    _state.value = state.value.copy(theme = result)
+        when (mode) {
+            is NightMode.FollowSystem -> {
+                _state.value =
+                    state.value.copy(darkMode = AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES)
+            }
+            is NightMode.Enable -> {
+                _state.value = state.value.copy(darkMode = true)
+            }
+            is NightMode.Disable -> {
+                _state.value = state.value.copy(darkMode = false)
             }
         }
 
     }
-    
+
 
     init {
         setExploreModeOffForInLibraryBooks()
-        getTheme()
     }
 
     private fun setExploreModeOffForInLibraryBooks() {
@@ -47,12 +48,12 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun saveNightModePreferences(mode: NightMode) {
-        preferencesUseCase.saveNightModePreferences(mode)
+    fun saveNightModePreferences(mode: AppTheme) {
+        themeSetting.theme = mode
     }
 }
 
 data class MainScreenState(
-    val theme : NightMode = NightMode.FollowSystem
+    val darkMode: Boolean = true,
 )
 

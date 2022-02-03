@@ -29,6 +29,11 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <intent-filter>
+                <data
+                    android:host="www.ireader.com"
+                    android:scheme="https" />
+            </intent-filter>
         </activity>
 
         <provider

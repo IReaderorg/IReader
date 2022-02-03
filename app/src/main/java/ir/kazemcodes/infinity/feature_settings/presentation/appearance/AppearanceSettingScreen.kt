@@ -14,22 +14,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import ir.kazemcodes.infinity.core.data.network.utils.toast
-import ir.kazemcodes.infinity.core.domain.use_cases.preferences.apperance.NightMode
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.MidSizeTextComposable
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarBackButton
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarTitle
 import ir.kazemcodes.infinity.core.utils.Constants
+import ir.kazemcodes.infinity.feature_activity.presentation.AppTheme
 import ir.kazemcodes.infinity.feature_activity.presentation.MainViewModel
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AppearanceSettingScreen(
     modifier: Modifier = Modifier,
-    viewModel: MainViewModel = hiltViewModel(),
     navController: NavController,
+    viewModel: MainViewModel = hiltViewModel(),
 ) {
-
 
     val openDialog = remember {
         mutableStateOf(false)
@@ -57,7 +55,9 @@ fun AppearanceSettingScreen(
             openDialog.value = true
         }) {
             Row() {
-                Icon(imageVector = Icons.Default.ModeNight, contentDescription = "Night Mode", tint = MaterialTheme.colors.primary)
+                Icon(imageVector = Icons.Default.ModeNight,
+                    contentDescription = "Night Mode",
+                    tint = MaterialTheme.colors.primary)
                 Spacer(modifier = Modifier.width(16.dp))
                 MidSizeTextComposable(title = "Dark Mode")
             }
@@ -76,34 +76,20 @@ fun AppearanceSettingScreen(
                     Column(modifier
                         .fillMaxWidth()
                         .padding(16.dp)) {
-                        TextButton(onClick = {
-                            viewModel.saveNightModePreferences(NightMode.Enable)
-                            openDialog.value = false
-                            context.toast("Setting was Applied. Please relaunch the app")
-
-                        }) {
-                            MidSizeTextComposable(modifier = modifier.fillMaxWidth(),
-                                title = "On",
-                                align = TextAlign.Start)
-
-                        }
-                        TextButton(onClick = {
-                            viewModel.saveNightModePreferences(NightMode.Disable)
-                            openDialog.value = false
-                            context.toast("Setting was Applied. Please relaunch the app")
-                        }) {
-                            MidSizeTextComposable(modifier = modifier.fillMaxWidth(),
-                                title = "Off",
-                                align = TextAlign.Start)
-                        }
-                        TextButton(onClick = {
-                            viewModel.saveNightModePreferences(NightMode.FollowSystem)
-                            openDialog.value = false
-                            context.toast("Setting was Applied. Please relaunch the app")
-                        }) {
-                            MidSizeTextComposable(modifier = modifier.fillMaxWidth(),
-                                title = "Follow System",
-                                align = TextAlign.Start)
+                        val items = listOf(
+                            AppearanceItems.Day,
+                            AppearanceItems.Night,
+                            AppearanceItems.Auto,
+                        )
+                        items.forEach {item ->
+                            TextButton(onClick = {
+                                viewModel.saveNightModePreferences(item.appTheme)
+                                openDialog.value = false
+                            }) {
+                                MidSizeTextComposable(modifier = modifier.fillMaxWidth(),
+                                    title = item.text,
+                                    align = TextAlign.Start)
+                            }
                         }
                     }
                 },
@@ -113,6 +99,11 @@ fun AppearanceSettingScreen(
         }
 
 
-
     }
+}
+
+sealed class AppearanceItems(val text: String,val appTheme: AppTheme) {
+    object Day : AppearanceItems("Off",AppTheme.MODE_DAY)
+    object Night : AppearanceItems("On",AppTheme.MODE_NIGHT)
+    object Auto : AppearanceItems("Auto",AppTheme.MODE_AUTO)
 }

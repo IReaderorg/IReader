@@ -294,12 +294,12 @@ fun ReadingScreen(
                             modifier = modifier
                                 .verticalScroll(scrollState)
                                 .weight(1f),
-                            text = state.chapter.content.joinToString("\n".repeat(state.distanceBetweenParagraphs)),
+                            text = state.chapter.content.map { it.trimStart() }.joinToString("\n".repeat(state.distanceBetweenParagraphs)),
                             fontSize = viewModel.state.value.fontSize.sp,
                             fontFamily = viewModel.state.value.font.fontFamily,
                             textAlign = TextAlign.Start,
                             color = state.textColor,
-                            lineHeight = state.lineHeight.sp
+                            lineHeight = state.lineHeight.sp,
                         )
                         Carousel(
                             state = scrollState,

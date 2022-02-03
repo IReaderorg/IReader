@@ -173,7 +173,8 @@ class ReaderScreenViewModel @Inject constructor(
                                 chapter = result.data,
                                 isLoading = false,
                                 isLoaded = true,
-                                error = UiText.noError()
+                                error = UiText.noError(),
+                                scrollPosition = result.data.scrollPosition
                             )
                             toggleLastReadAndUpdateChapterContent(result.data)
                             if (state.value.chapter.content.joinToString().isBlank()) {
@@ -275,7 +276,7 @@ class ReaderScreenViewModel @Inject constructor(
                                 book = result.data,
                                 isBookLoaded = true,
                                 isChaptersReversed = result.data.areChaptersReversed,
-                                isAsc = result.data.areChaptersReversed
+                                isAsc = result.data.areChaptersReversed,
                             )
                             withContext(Dispatchers.IO) {
                                 insertUseCases.insertBook(book = result.data.copy(lastRead = System.currentTimeMillis(),
