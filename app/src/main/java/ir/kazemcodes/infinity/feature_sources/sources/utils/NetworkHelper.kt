@@ -8,7 +8,6 @@ import android.webkit.WebView
 import ir.kazemcodes.infinity.core.data.network.models.*
 import ir.kazemcodes.infinity.core.data.network.utils.AndroidCookieJar
 import ir.kazemcodes.infinity.core.data.network.utils.UserAgentInterceptor
-import ir.kazemcodes.infinity.core.data.network.utils.WebViewClientCompat
 import ir.kazemcodes.infinity.core.data.network.utils.intercepter.CloudflareInterceptor
 import ir.kazemcodes.infinity.core.data.network.utils.setDefaultSettings
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.reader_preferences.PreferencesUseCase
@@ -96,6 +95,11 @@ class NetworkHelper(private val context: Context): KoinComponent {
         var docs: Document = Document("No Data was Found")
         var isLoadUp: Boolean = false
         webView.webViewClient = object : WebViewClientCompat() {
+
+            override fun shouldOverrideUrlCompat(view: WebView, url: String): Boolean {
+                return false
+            }
+
             override fun onPageFinished(view: WebView, url: String) {
                 coroutineScope.launch(Dispatchers.Main) {
                     docs = Jsoup.parse(webView.getHtml())

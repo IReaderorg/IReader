@@ -13,7 +13,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.ImportContacts
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -48,6 +47,7 @@ fun GridLayoutComposable(
         modifier = modifier.fillMaxSize(),
         cells = GridCells.Fixed(3),
         content = {
+
             items(lazyPagingItems = books) { book ->
                 if (book !=null)  {
                     Box(
@@ -89,7 +89,10 @@ fun GridLayoutComposable(
                                 color = Color.White
                             )
                         }
-                        if (book.totalChapters > 1 && isLocal) {
+                        /**
+                         * Only show if the latest chapter exist.
+                         */
+                        if (book.totalChapters > 1 && isLocal && book.lastRead != 0L) {
                             Box() {
                                 OutlinedButton(onClick = { /*TODO*/ },
                                     modifier= Modifier.size(50.dp).padding(5.dp),

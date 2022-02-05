@@ -66,8 +66,8 @@ class BookDetailViewModel @Inject constructor(
     init {
         val bookId = savedStateHandle.get<Int>(bookId.name)
         val sourceId = savedStateHandle.get<Long>(sourceId.name)
-        if (bookId != null && sourceId !=null) {
-        val source = extensions.mappingSourceNameToSource(sourceId)
+        if (bookId != null && sourceId != null) {
+            val source = extensions.mappingSourceNameToSource(sourceId)
             _state.value = state.value.copy(source = source)
             _state.value = state.value.copy(book = state.value.book.copy(id = bookId))
             _state.value = state.value.copy(isLoading = true)
@@ -75,10 +75,6 @@ class BookDetailViewModel @Inject constructor(
             getLocalBookById()
         }
     }
-
-
-
-
 
 
     fun startDownloadService(context: Context) {
@@ -92,7 +88,9 @@ class BookDetailViewModel @Inject constructor(
             addTag(DOWNLOADER_SERVICE_NAME)
         }.build()
         WorkManager.getInstance(context).enqueueUniqueWork(
-            DOWNLOADER_SERVICE_NAME.plus(state.value.book.id+state.value.book.sourceId), ExistingWorkPolicy.REPLACE, work
+            DOWNLOADER_SERVICE_NAME.plus(state.value.book.id + state.value.book.sourceId),
+            ExistingWorkPolicy.REPLACE,
+            work
         )
 
     }
@@ -114,8 +112,7 @@ class BookDetailViewModel @Inject constructor(
                                     inLibrary = result.data.inLibrary,
                                     isExploreMode = result.data.isExploreMode,
                                 )
-                                if (state.value.isExploreMode) {
-                                    _state.value = state.value.copy(isExploreMode = false)
+                                if (state.value.isExploreMode && !state.value.isRemoteLoaded) {
                                     getRemoteBookDetail(state.value.book)
                                     getRemoteChapterDetail(state.value.book)
                                 }
@@ -125,7 +122,7 @@ class BookDetailViewModel @Inject constructor(
                                     error = UiText.noError(),
                                     isLoading = false,
                                     isLoaded = true,
-                                    )
+                                )
                             }
                         }
                         is Resource.Error -> {
@@ -163,7 +160,6 @@ class BookDetailViewModel @Inject constructor(
                                         loaded = true
                                     )
                                 }
-                                getLastChapter()
                                 if (state.value.book.totalChapters != result.data.size) {
                                     insertBookDetailToLocal(state.value.book.copy(
                                         totalChapters = chapterState.value.chapters.size))
@@ -203,6 +199,7 @@ class BookDetailViewModel @Inject constructor(
                                     isLoading = false,
                                     error = UiText.noError(),
                                     isLoaded = true,
+                                    isRemoteLoaded = true
                                 )
                                 insertBookDetailToLocal(state.value.book.copy(dataAdded = System.currentTimeMillis()))
 
@@ -312,20 +309,6 @@ class BookDetailViewModel @Inject constructor(
     }
 
 
-    fun deleteChapterDetails() {
-        viewModelScope.launch(Dispatchers.IO) {
-            deleteUseCase.deleteChaptersByBookId(state.value.book.id)
-        }
-    }
-
-    private fun readLastReadBook() {
-        val lastChapter = chapterState.value.chapters.findLast {
-            it.lastRead
-        }
-        _chapterState.value = chapterState.value.copy(lastChapter = lastChapter
-            ?: chapterState.value.chapters.first())
-    }
-
     fun insertBookDetailToLocal(book: Book) {
         viewModelScope.launch(Dispatchers.IO) {
             localInsertUseCases.insertBook(book)
@@ -344,48 +327,28 @@ class BookDetailViewModel @Inject constructor(
         _state.value = state.value.copy(inLibrary = add)
         viewModelScope.launch(Dispatchers.IO) {
             if (add) {
-                insertBookDetailToLocal(book
-                    ?: state.value.book.copy(id = state.value.book.id,
-                        inLibrary = true,
-                        dataAdded = System.currentTimeMillis()))
+                insertBookDetailToLocal(
+                    book
+                        ?: state.value.book.copy(id = state.value.book.id,
+                            inLibrary = true,
+                            dataAdded = System.currentTimeMillis()),
+                )
                 updateChaptersEntity(true)
             } else {
-                insertBookDetailToLocal((book
+                insertBookDetailToLocal((
+                        book
                     ?: state.value.book).copy(id = state.value.book.id, inLibrary = false))
                 updateChaptersEntity(false)
             }
         }
     }
 
-    fun updateInLibrary(isIn: Boolean) {
-        _state.value = state.value.copy(inLibrary = isIn)
-    }
 
     fun insertChaptersToLocal(chapters: List<Chapter>) {
         viewModelScope.launch(Dispatchers.IO) {
             deleteUseCase.deleteChaptersByBookId(bookId = state.value.book.id)
             localInsertUseCases.insertChapters(chapters.map { it.copy(bookId = state.value.book.id) })
         }
-    }
-
-    private fun getLastChapter() {
-        viewModelScope.launch(Dispatchers.IO) {
-            getChapterUseCase.getLastReadChapter(state.value.book.id)
-                .collect { result ->
-                    when (result) {
-                        is Resource.Success -> {
-                            if (result.data != null) {
-                                _chapterState.value = chapterState.value.copy(
-                                    lastChapter = result.data,
-                                )
-                            }
-                        }
-                        is Resource.Error -> {
-                        }
-                    }
-                }
-        }
-
     }
 
 }

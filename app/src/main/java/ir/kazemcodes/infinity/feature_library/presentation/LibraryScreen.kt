@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Sort
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,6 +57,9 @@ fun LibraryScreen(
     val bottomSheetState = rememberBottomSheetScaffoldState()
 
 
+    LaunchedEffect(key1 = true ) {
+        viewModel.setExploreModeOffForInLibraryBooks()
+    }
 
 
     BottomSheetScaffold(

@@ -6,8 +6,6 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.TopAppBar
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -15,9 +13,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
-import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarActionButton
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarTitle
-import ir.kazemcodes.infinity.core.ui.WebViewScreenSpec
 import ir.kazemcodes.infinity.core.utils.Constants.DEFAULT_ELEVATION
 import ir.kazemcodes.infinity.feature_library.presentation.components.TabItem
 import ir.kazemcodes.infinity.feature_sources.presentation.extension.composables.UserSourcesScreen
@@ -47,13 +43,6 @@ fun ExtensionScreen(
                 backgroundColor = MaterialTheme.colors.background,
                 contentColor = MaterialTheme.colors.onBackground,
                 elevation = DEFAULT_ELEVATION,
-                actions = {
-                    TopAppBarActionButton(
-                        imageVector = Icons.Default.Add,
-                        title = "Adding Sources Button",
-                        onClick = {   navController.navigate(WebViewScreenSpec.navHostRoute) }
-                    )
-                }
             )
         }
     ) {

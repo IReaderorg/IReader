@@ -1,11 +1,8 @@
 package ir.kazemcodes.infinity.feature_services.DownloaderService
 
-import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.net.toUri
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkManager
@@ -22,8 +19,7 @@ import ir.kazemcodes.infinity.feature_activity.domain.notification.Notifications
 import ir.kazemcodes.infinity.feature_activity.domain.notification.Notifications.ID_DOWNLOAD_CHAPTER_COMPLETE
 import ir.kazemcodes.infinity.feature_activity.domain.notification.Notifications.ID_DOWNLOAD_CHAPTER_ERROR
 import ir.kazemcodes.infinity.feature_activity.domain.notification.Notifications.ID_DOWNLOAD_CHAPTER_PROGRESS
-import ir.kazemcodes.infinity.feature_activity.presentation.MainActivity
-import ir.kazemcodes.infinity.feature_services.flags
+import ir.kazemcodes.infinity.feature_services.notification.DefaultNotificationHelper
 import ir.kazemcodes.infinity.feature_sources.sources.Extensions
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -44,6 +40,7 @@ class DownloadService @AssistedInject constructor(
     private val remoteUseCases: RemoteUseCases,
     private val extensions: Extensions,
     private val insertUseCases: LocalInsertUseCases,
+    private val defaultNotificationHelper: DefaultNotificationHelper
 ) : CoroutineWorker(context, params) {
     companion object {
         const val DOWNLOADER_SERVICE_NAME = "DOWNLOAD_SERVICE"
@@ -80,25 +77,17 @@ class DownloadService @AssistedInject constructor(
             .createCancelPendingIntent(id)
 
 
-        val openDetailIntent = Intent(
-            Intent.ACTION_VIEW,
-            "https://www.ireader.com/downloader_route".toUri(),
-            applicationContext,
-            MainActivity::class.java
-        )
-        val openDetailPendingIntent = PendingIntent.getActivity(
-            applicationContext, 0, openDetailIntent, flags
-        )
+
         val builder =
             NotificationCompat.Builder(applicationContext, CHANNEL_DOWNLOADER_PROGRESS).apply {
                 setContentTitle("Downloading ${book.bookName}")
                 setSmallIcon(R.drawable.ic_downloading)
                 setOnlyAlertOnce(true)
                 priority = NotificationCompat.PRIORITY_LOW
-                setAutoCancel(false)
+                setAutoCancel(true)
                 setOngoing(true)
                 addAction(R.drawable.baseline_close_24, "Cancel", cancelDownloadIntent)
-                setContentIntent(openDetailPendingIntent)
+                setContentIntent(defaultNotificationHelper.openDownloadsPendingIntent)
             }
 
 
@@ -138,6 +127,8 @@ class DownloadService @AssistedInject constructor(
                         setSubText("Download was cancelled")
                         setSmallIcon(R.drawable.ic_downloading)
                         priority = NotificationCompat.PRIORITY_DEFAULT
+                        setAutoCancel(true)
+                        setContentIntent(defaultNotificationHelper.openBookDetailPendingIntent(bookId, sourceId))
                     }.build()
                 )
                 builder.setProgress(0, 0, false)
@@ -155,6 +146,8 @@ class DownloadService @AssistedInject constructor(
                         setSubText(e.localizedMessage)
                         setSmallIcon(R.drawable.ic_downloading)
                         priority = NotificationCompat.PRIORITY_DEFAULT
+                        setAutoCancel(true)
+                        setContentIntent(defaultNotificationHelper.openBookDetailPendingIntent(bookId, sourceId))
                     }.build()
                 )
                 builder.setProgress(0, 0, false)
@@ -174,6 +167,8 @@ class DownloadService @AssistedInject constructor(
                     setSmallIcon(R.drawable.ic_downloading)
                     priority = NotificationCompat.PRIORITY_DEFAULT
                     setSubText("It was Downloaded Successfully")
+                    setAutoCancel(true)
+                    setContentIntent(defaultNotificationHelper.openBookDetailPendingIntent(bookId, sourceId))
                 }.build()
             )
         }

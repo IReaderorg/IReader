@@ -1,4 +1,4 @@
-package ir.kazemcodes.infinity.core.data.network.utils
+package ir.kazemcodes.infinity.feature_sources.sources.utils
 
 import android.annotation.TargetApi
 import android.os.Build

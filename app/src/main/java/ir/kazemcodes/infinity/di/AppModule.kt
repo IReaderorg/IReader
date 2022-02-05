@@ -15,6 +15,7 @@ import ir.kazemcodes.infinity.core.data.local.dao.RemoteKeysDao
 import ir.kazemcodes.infinity.core.data.local.dao.SourceTowerDao
 import ir.kazemcodes.infinity.core.data.repository.*
 import ir.kazemcodes.infinity.core.domain.repository.*
+import ir.kazemcodes.infinity.feature_services.notification.DefaultNotificationHelper
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
@@ -93,6 +94,12 @@ class AppModule {
         return Moshi.Builder()
             .add(KotlinJsonAdapterFactory())
             .build()
+    }
+
+    @Singleton
+    @Provides
+    fun provideNotificationHelper(@ApplicationContext context: Context) : DefaultNotificationHelper {
+        return DefaultNotificationHelper(context)
     }
 
 }

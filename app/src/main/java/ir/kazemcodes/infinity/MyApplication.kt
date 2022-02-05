@@ -32,11 +32,12 @@ class MyApplication : Application(), Configuration.Provider {
 
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
+
     @Inject
     lateinit var networkHelper: NetworkHelper
 
-    @Inject lateinit var okHttpClient: OkHttpClient
-
+    @Inject
+    lateinit var okHttpClient: OkHttpClient
 
 
     private var mFirebaseAnalytics: FirebaseAnalytics? = null
@@ -45,6 +46,8 @@ class MyApplication : Application(), Configuration.Provider {
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
         }
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this)
+
 
         val appModule = module {
             single<NetworkHelper> { networkHelper }
@@ -54,14 +57,13 @@ class MyApplication : Application(), Configuration.Provider {
             single<OkHttpClient> { okHttpClient }
         }
 
-        startKoin{
+
+        startKoin {
             modules(appModule)
         }
 
-        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this)
+
         setupNotificationChannels()
-
-
     }
 
     private fun setupNotificationChannels() {

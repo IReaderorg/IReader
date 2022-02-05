@@ -58,6 +58,7 @@ class LibraryViewModel @Inject constructor(
     }
 
     init {
+        setExploreModeOffForInLibraryBooks()
         deleteNotInLibraryChapters()
         getBooks()
         readLayoutType()
@@ -174,6 +175,11 @@ class LibraryViewModel @Inject constructor(
         if (!inSearchMode) {
             _state.value = state.value.copy(searchedBook = emptyList(), searchQuery = "")
             getBooks()
+        }
+    }
+    fun setExploreModeOffForInLibraryBooks() {
+        viewModelScope.launch(Dispatchers.IO) {
+            deleteUseCase.setExploreModeOffForInLibraryBooks()
         }
     }
 

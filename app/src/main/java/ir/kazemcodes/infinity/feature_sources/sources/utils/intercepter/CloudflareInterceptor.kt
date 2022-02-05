@@ -11,6 +11,7 @@ import ir.kazemcodes.infinity.R
 import ir.kazemcodes.infinity.core.data.network.utils.*
 import ir.kazemcodes.infinity.feature_sources.sources.models.HttpSource
 import ir.kazemcodes.infinity.feature_sources.sources.utils.NetworkHelper
+import ir.kazemcodes.infinity.feature_sources.sources.utils.WebViewClientCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

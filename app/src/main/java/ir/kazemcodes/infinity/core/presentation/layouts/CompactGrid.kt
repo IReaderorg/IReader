@@ -91,7 +91,7 @@ fun CompactGridLayoutComposable(
                                 color = Color.White
                             )
                         }
-                        if (book.totalChapters > 1 && isLocal) {
+                        if (book.totalChapters > 1 && isLocal && book.lastRead != 0L) {
                             Box() {
                                 OutlinedButton(onClick = { /*TODO*/ },
                                     modifier= Modifier.size(50.dp).padding(5.dp),

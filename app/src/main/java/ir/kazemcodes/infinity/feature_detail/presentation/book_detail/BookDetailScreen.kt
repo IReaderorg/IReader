@@ -31,10 +31,7 @@ import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarBac
 import ir.kazemcodes.infinity.core.ui.ChapterScreenSpec
 import ir.kazemcodes.infinity.core.ui.ReaderScreenSpec
 import ir.kazemcodes.infinity.core.ui.WebViewScreenSpec
-import ir.kazemcodes.infinity.core.utils.UiEvent
-import ir.kazemcodes.infinity.core.utils.formatBasedOnDot
-import ir.kazemcodes.infinity.core.utils.formatList
-import ir.kazemcodes.infinity.core.utils.getUrlWithoutDomain
+import ir.kazemcodes.infinity.core.utils.*
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.components.ButtonWithIconAndText
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.components.CardTileComposable
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.components.DotsFlashing
@@ -228,16 +225,14 @@ fun BookDetailScreenLoadedComposable(
                         },
                     )
                     ButtonWithIconAndText(
-                        text = if (viewModel.chapterState.value.lastChapter != viewModel.chapterState.value.chapters.getOrNull(
-                                0)
-                        ) "Continue Reading" else "Read",
+                        text = if (state.book.lastRead != 0L) "Continue Reading" else "Read",
                         imageVector = Icons.Default.AutoStories,
                         onClick = {
-                            if (viewModel.chapterState.value.lastChapter != null) {
+                            if (state.book.lastRead != 0L) {
                                 navController.navigate(ReaderScreenSpec.buildRoute(
                                     bookId = state.book.id,
                                     sourceId = source.sourceId,
-                                    chapterId = viewModel.chapterState.value.lastChapter!!.chapterId,
+                                    chapterId = Constants.LAST_CHAPTER,
                                 ))
                             } else if (viewModel.chapterState.value.chapters.isNotEmpty()) {
                                 navController.navigate(ReaderScreenSpec.buildRoute(

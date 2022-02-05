@@ -12,5 +12,7 @@ data class DetailState(
     val isLoading: Boolean = false,
     val isLoaded : Boolean = false,
     val error: String = UiText.noError(),
-    val isExploreMode: Boolean = false
+    val isExploreMode: Boolean = false,
+    val isRemoteLoaded: Boolean = false,
+
     )

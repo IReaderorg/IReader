@@ -3,9 +3,7 @@ package ir.kazemcodes.infinity.core.ui
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NamedNavArgument
-import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavController
+import androidx.navigation.*
 import com.google.accompanist.pager.ExperimentalPagerApi
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.BookDetailScreen
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.BookDetailViewModel
@@ -24,6 +22,13 @@ object BookDetailScreenSpec : ScreenSpec {
             NavigationArgs.sourceId,
         )
 
+    override val deepLinks: List<NavDeepLink> = listOf(
+        navDeepLink {
+            uriPattern = "https://www.ireader.com/book_detail_route/{bookId}/{sourceId}"
+            NavigationArgs.bookId
+            NavigationArgs.sourceId
+        }
+    )
 
     @OptIn(ExperimentalPagerApi::class, androidx.compose.animation.ExperimentalAnimationApi::class,
         androidx.compose.material.ExperimentalMaterialApi::class)

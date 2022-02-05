@@ -1,6 +1,7 @@
 package ir.kazemcodes.infinity.feature_settings.presentation.webview
 
 import android.view.ViewGroup
+import android.webkit.WebView
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -27,6 +28,7 @@ import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarBac
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarTitle
 import ir.kazemcodes.infinity.core.utils.UiEvent
 import ir.kazemcodes.infinity.feature_sources.sources.models.FetchType
+import ir.kazemcodes.infinity.feature_sources.sources.utils.WebViewClientCompat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collectLatest
 
@@ -59,8 +61,10 @@ fun WebPageScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { MidSizeTextComposable(title = urlToRender,
-                    overflow = TextOverflow.Ellipsis) },
+                title = {
+                    MidSizeTextComposable(title = urlToRender,
+                        overflow = TextOverflow.Ellipsis)
+                },
                 navigationIcon = {
                     TopAppBarBackButton(navController = navController)
                 },
@@ -97,6 +101,11 @@ fun WebPageScreen(
                     ViewGroup.LayoutParams.MATCH_PARENT
                 )
                 setDefaultSettings()
+                webViewClient = object : WebViewClientCompat() {
+                    override fun shouldOverrideUrlCompat(view: WebView, url: String): Boolean {
+                        return false
+                    }
+                }
             }
 
             webView
@@ -109,6 +118,7 @@ fun WebPageScreen(
 
 
 }
+
 @Composable
 fun ScrollableAppBar(
     title: String,

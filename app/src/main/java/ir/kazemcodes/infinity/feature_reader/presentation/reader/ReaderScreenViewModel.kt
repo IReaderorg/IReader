@@ -345,7 +345,6 @@ class ReaderScreenViewModel @Inject constructor(
                 it.lastRead
             }.forEach {
                 withContext(Dispatchers.IO) {
-
                     insertUseCases.insertChapter(it.copy(lastRead = false))
                 }
             }

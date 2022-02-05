@@ -89,10 +89,10 @@ fun ExploreScreen(
                         title = "WebView",
                         onClick = {
                             navController.navigate(WebViewScreenSpec.buildRoute(
-                                    sourceId = source.sourceId,
-                                    fetchType = FetchType.Latest.index,
-                                    url = source.baseUrl
-                                )
+                                sourceId = source.sourceId,
+                                fetchType = FetchType.Latest.index,
+                                url = source.baseUrl
+                            )
                             )
                         },
                     )
@@ -141,10 +141,60 @@ fun ExploreScreen(
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             val result = handlePagingResult(books = books, onEmptyResult = {
-                ErrorTextWithEmojis(error = "Sorry, the source failed to get any content.")
+                Column(
+                    modifier = modifier
+                        .fillMaxSize()
+                        .align(Alignment.Center)
+                        .padding(bottom = 30.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    ErrorTextWithEmojis(error = "Sorry, the source failed to get any content.",
+                        modifier = Modifier
+                            .padding(20.dp))
+                    Row(Modifier
+                        .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(Modifier
+                            .weight(.5f)
+                            .wrapContentSize(Alignment.Center),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            TopAppBarActionButton(imageVector = Icons.Default.Refresh,
+                                title = "Retry",
+                                onClick = { viewModel.getBooks() })
+                            SmallTextComposable(text = "Retry")
+                        }
+                        Column(Modifier
+                            .weight(.5f)
+                            .wrapContentSize(Alignment.Center),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            TopAppBarActionButton(imageVector = Icons.Default.Public,
+                                title = "Open in WebView",
+                                onClick = {
+                                    navController.navigate(WebViewScreenSpec.buildRoute(
+                                        sourceId = source.sourceId,
+                                        fetchType = FetchType.Latest.index,
+                                        url = source.baseUrl
+                                    )
+                                    )
+                                })
+                            SmallTextComposable(text = "Open in WebView")
+                        }
+
+                    }
+
+                }
+
             }, onErrorResult = { error ->
                 Column(
-                    modifier = modifier.fillMaxSize().align(Alignment.Center).padding(bottom = 30.dp),
+                    modifier = modifier
+                        .fillMaxSize()
+                        .align(Alignment.Center)
+                        .padding(bottom = 30.dp),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
@@ -177,10 +227,10 @@ fun ExploreScreen(
                                 title = "Open in WebView",
                                 onClick = {
                                     navController.navigate(WebViewScreenSpec.buildRoute(
-                                            sourceId = source.sourceId,
-                                            fetchType = FetchType.Latest.index,
-                                            url = source.baseUrl
-                                        )
+                                        sourceId = source.sourceId,
+                                        fetchType = FetchType.Latest.index,
+                                        url = source.baseUrl
+                                    )
                                     )
                                 })
                             SmallTextComposable(text = "Open in WebView")
