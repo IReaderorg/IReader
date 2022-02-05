@@ -94,7 +94,7 @@ class LocalModule {
             deleteAllBook = DeleteAllBooks(localBookRepository),
             deleteAllExploreBook = DeleteAllExploreBook(localBookRepository),
             deleteBookById = DeleteBookById(localBookRepository),
-            deleteInLibraryBook = DeleteInLibraryBook(localBookRepository),
+            deleteNotInLibraryBook = DeleteNotInLibraryBook(localBookRepository),
             setExploreModeOffForInLibraryBooks = SetExploreModeOffForInLibraryBooks(localBookRepository),
             deleteChapterByChapter = DeleteChapterByChapter(localChapterRepository),
             deleteChaptersByBookId = DeleteChaptersByBookId(localChapterRepository),

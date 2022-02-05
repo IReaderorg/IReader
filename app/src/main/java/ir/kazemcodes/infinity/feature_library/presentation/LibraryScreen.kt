@@ -7,8 +7,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.rememberLazyGridState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Sort
@@ -27,7 +30,10 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
 import ir.kazemcodes.infinity.core.presentation.components.handlePagingResult
-import ir.kazemcodes.infinity.core.presentation.reusable_composable.*
+import ir.kazemcodes.infinity.core.presentation.reusable_composable.ErrorTextWithEmojis
+import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarActionButton
+import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarSearch
+import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarTitle
 import ir.kazemcodes.infinity.core.presentation.theme.Colour.topBarColor
 import ir.kazemcodes.infinity.core.utils.Constants
 import ir.kazemcodes.infinity.feature_library.presentation.components.BottomTabComposable
@@ -56,8 +62,10 @@ fun LibraryScreen(
     val pagerState = rememberPagerState()
     val bottomSheetState = rememberBottomSheetScaffoldState()
 
+    val gridState= rememberLazyGridState()
+    val lazyListState= rememberLazyListState()
 
-    LaunchedEffect(key1 = true ) {
+    LaunchedEffect(key1 = true) {
         viewModel.setExploreModeOffForInLibraryBooks()
     }
 
@@ -118,12 +126,11 @@ fun LibraryScreen(
 
 
                 },
-                navigationIcon = if (state.inSearchMode) {
-                    {
-                        TopAppBarBackButton(navController = navController,
-                            onClick = {
-                                viewModel.onEvent(LibraryEvents.ToggleSearchMode(false))
-                            })
+                navigationIcon = if (state.inSearchMode) { {
+                        TopAppBarActionButton(imageVector = Icons.Default.ArrowBack,
+                            title = "Toggle search mode off",
+                            onClick = { viewModel.onEvent(LibraryEvents.ToggleSearchMode(false)) })
+
                     }
                 } else null
 
@@ -161,6 +168,8 @@ fun LibraryScreen(
                         layout = state.layout,
                         navController = navController,
                         isLocal = true,
+                        gridState = gridState,
+                        scrollState =  lazyListState
                     )
                 }
             }

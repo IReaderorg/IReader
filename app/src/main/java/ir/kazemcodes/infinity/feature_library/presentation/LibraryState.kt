@@ -16,6 +16,7 @@ data class LibraryState(
     val searchQuery: String = "",
     val sortType: SortType = SortType.LastRead,
     val isSortAcs: Boolean = false,
-    val unreadFilter:FilterType = FilterType.Disable
+    val unreadFilter:FilterType = FilterType.Disable,
+    val currentScrollState : Int = 0
 )
 

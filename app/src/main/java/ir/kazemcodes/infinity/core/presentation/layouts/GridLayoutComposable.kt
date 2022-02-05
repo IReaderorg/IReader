@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyGridState
 import androidx.compose.foundation.lazy.LazyVerticalGrid
-import androidx.compose.foundation.lazy.rememberLazyGridState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ButtonDefaults
@@ -38,7 +37,7 @@ fun GridLayoutComposable(
     modifier: Modifier = Modifier,
     books: LazyPagingItems<Book>,
     onClick: (book: Book) -> Unit,
-    scrollState: LazyGridState = rememberLazyGridState(),
+    scrollState: LazyGridState,
     onLastReadChapterClick: (book : Book) -> Unit,
     isLocal : Boolean
 ) {
@@ -47,7 +46,6 @@ fun GridLayoutComposable(
         modifier = modifier.fillMaxSize(),
         cells = GridCells.Fixed(3),
         content = {
-
             items(lazyPagingItems = books) { book ->
                 if (book !=null)  {
                     Box(

@@ -3,8 +3,6 @@ package ir.kazemcodes.infinity.feature_library.presentation.components
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.lazy.LazyGridState
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.rememberLazyGridState
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 import androidx.paging.compose.LazyPagingItems
@@ -25,8 +23,8 @@ fun LayoutComposable(
     navController: NavController,
     books: LazyPagingItems<Book>,
     layout: LayoutType,
-    scrollState: LazyListState = rememberLazyListState(),
-    gridState: LazyGridState = rememberLazyGridState(),
+    scrollState: LazyListState,
+    gridState: LazyGridState,
     source: Source? = null,
     isLocal: Boolean,
 ) {

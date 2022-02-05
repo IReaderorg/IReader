@@ -1,6 +1,5 @@
 package ir.kazemcodes.infinity.feature_library.presentation
 
-import androidx.compose.material.BottomSheetValue
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -29,11 +28,8 @@ class LibraryViewModel @Inject constructor(
     private val localGetBookUseCases: LocalGetBookUseCases,
     private val deleteUseCase: DeleteUseCase,
     private val preferencesUseCase: PreferencesUseCase,
-) : ViewModel() {
+) : ViewModel(), LibraryScreenActions {
 
-
-    private val _bottomSheetState = mutableStateOf(BottomSheetValue.Collapsed)
-    val bottomSheetState = _bottomSheetState
 
     private val _state = mutableStateOf(LibraryState())
     val state: State<LibraryState> = _state
@@ -42,30 +38,29 @@ class LibraryViewModel @Inject constructor(
     private val _books = MutableStateFlow<PagingData<Book>>(PagingData.empty())
     val book = _books
 
-    /**
-     * Get All Books By Paging
-     */
-    private fun getBooks() {
-        viewModelScope.launch {
-                localGetBookUseCases.GetInLibraryBooksPagingData(
-                    sortType = state.value.sortType,
-                    isAsc = state.value.isSortAcs,
-                    unreadFilter = state.value.unreadFilter).cachedIn(viewModelScope)
-                    .collect { snapshot ->
-                        _books.value = snapshot
-                    }
-        }
-    }
-
     init {
         setExploreModeOffForInLibraryBooks()
         deleteNotInLibraryChapters()
-        getBooks()
+        getLibraryBooks()
         readLayoutType()
     }
 
+    /**
+     * Get All Books By Paging
+     */
+    override fun getLibraryBooks() {
+        viewModelScope.launch {
+            localGetBookUseCases.GetInLibraryBooksPagingData(
+                sortType = state.value.sortType,
+                isAsc = state.value.isSortAcs,
+                unreadFilter = state.value.unreadFilter).cachedIn(viewModelScope)
+                .collect { snapshot ->
+                    _books.value = snapshot
+                }
+        }
+    }
 
-    fun searchBook(query: String) {
+    override fun searchBook(query: String) {
         viewModelScope.launch(Dispatchers.IO) {
             localGetBookUseCases.getBooksByQueryByPagination(query).cachedIn(viewModelScope)
                 .collect { snapshot ->
@@ -98,49 +93,24 @@ class LibraryViewModel @Inject constructor(
     }
 
 
-    private fun updateSearchInput(query: String) {
+    override fun updateSearchInput(query: String) {
         _state.value = state.value.copy(searchQuery = query)
     }
 
-    private fun toggleSearchMode(inSearchMode: Boolean? = null) {
+    override fun toggleSearchMode(inSearchMode: Boolean?) {
         _state.value = state.value.copy(inSearchMode = inSearchMode ?: !state.value.inSearchMode)
     }
 
 
-    private fun updateLayoutType(layoutType: DisplayMode) {
+    override fun updateLayoutType(layoutType: DisplayMode) {
         preferencesUseCase.saveLibraryLayoutUseCase(layoutType.layoutIndex)
         _state.value = state.value.copy(layout = layoutType.layout)
-
-    }
-    fun updateBottomSheetState(bottomSheetValue: BottomSheetValue) {
-        _bottomSheetState.value = bottomSheetValue
     }
 
-    private fun readLayoutType() {
 
-
-        val sortType = when (preferencesUseCase.readSortersUseCase()) {
-            0 -> {
-                SortType.DateAdded
-            }
-            1 -> {
-                SortType.Alphabetically
-            }
-            2 -> {
-                SortType.LastRead
-            }
-            else -> {
-                SortType.TotalChapter
-            }
-        }
-        val filterType = when (preferencesUseCase.readFilterUseCase()) {
-            0 -> {
-                FilterType.Disable
-            }
-            else -> {
-                FilterType.Unread
-            }
-        }
+    override fun readLayoutType() {
+        val sortType = preferencesUseCase.readSortersUseCase()
+        val filterType = preferencesUseCase.readFilterUseCase()
         _state.value =
             state.value.copy(layout = preferencesUseCase.readLibraryLayoutUseCase().layout,
                 sortType = sortType,
@@ -149,35 +119,34 @@ class LibraryViewModel @Inject constructor(
     }
 
 
-    private fun deleteNotInLibraryChapters() {
+    override fun deleteNotInLibraryChapters() {
         viewModelScope.launch(Dispatchers.IO) {
-            deleteUseCase.deleteInLibraryBook()
+            deleteUseCase.deleteNotInLibraryBook()
         }
     }
 
-    fun changeSortIndex(sortType: SortType) {
+    override fun changeSortIndex(sortType: SortType) {
         _state.value = state.value.copy(sortType = sortType)
         if (state.value.sortType == sortType) {
             _state.value = _state.value.copy(isSortAcs = !state.value.isSortAcs)
         }
         preferencesUseCase.saveSortersUseCase(state.value.sortType.index)
-        getBooks()
+        getLibraryBooks()
     }
 
-    fun enableUnreadFilter(filterType: FilterType) {
+    override fun enableUnreadFilter(filterType: FilterType) {
         _state.value = state.value.copy(unreadFilter = filterType)
         preferencesUseCase.saveFiltersUseCase(state.value.unreadFilter.index)
-        getBooks()
-
+        getLibraryBooks()
     }
 
-    private fun getLibraryDataIfSearchModeIsOff(inSearchMode: Boolean) {
-        if (!inSearchMode) {
-            _state.value = state.value.copy(searchedBook = emptyList(), searchQuery = "")
-            getBooks()
-        }
+    override fun getLibraryDataIfSearchModeIsOff(inSearchMode: Boolean) {
+        if (inSearchMode) return
+        _state.value = state.value.copy(searchedBook = emptyList(), searchQuery = "")
+        getLibraryBooks()
     }
-    fun setExploreModeOffForInLibraryBooks() {
+
+    override fun setExploreModeOffForInLibraryBooks() {
         viewModelScope.launch(Dispatchers.IO) {
             deleteUseCase.setExploreModeOffForInLibraryBooks()
         }

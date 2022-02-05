@@ -5,7 +5,7 @@ import ir.kazemcodes.infinity.core.domain.repository.LocalBookRepository
 /**
  * Delete All Books that are in library
  */
-class DeleteInLibraryBook(private val localBookRepository: LocalBookRepository) {
+class DeleteNotInLibraryBook(private val localBookRepository: LocalBookRepository) {
     suspend operator fun invoke() {
         return localBookRepository.deleteNotInLibraryChapters()
     }

@@ -3,6 +3,7 @@ package ir.kazemcodes.infinity.feature_explore.presentation.browse
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -41,7 +42,8 @@ fun ExploreScreen(
     val focusManager = LocalFocusManager.current
 
     val books = viewModel.books.collectAsLazyPagingItems()
-
+    val gridState= rememberLazyGridState()
+    val lazyListState= rememberLazyListState()
 
     Scaffold(
         topBar = {
@@ -248,7 +250,8 @@ fun ExploreScreen(
                     scrollState = scrollState,
                     source = source,
                     navController = navController,
-                    isLocal = false
+                    isLocal = false,
+                    gridState = gridState,
                 )
             }
         }
