@@ -1,12 +1,12 @@
 package ir.kazemcodes.infinity.core.domain.use_cases.remote
 
+import ir.kazemcodes.infinity.R
 import ir.kazemcodes.infinity.core.data.network.models.Source
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
 import ir.kazemcodes.infinity.core.domain.repository.RemoteRepository
 import ir.kazemcodes.infinity.core.utils.Resource
 import ir.kazemcodes.infinity.core.utils.UiText
-import ir.kazemcodes.infinity.core.utils.asString
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.jsoup.select.Selector
@@ -37,15 +37,15 @@ class GetRemoteChapters(private val remoteRepository: RemoteRepository) {
             } catch (e: HttpException) {
                 emit(
                     Resource.Error<List<Chapter>>(
-                      uiText = UiText.exceptionError(e)
+                      uiText = UiText.ExceptionString(e)
                     )
                 )
             } catch (e: IOException) {
-                emit(Resource.Error<List<Chapter>>(uiText = UiText.DynamicString("Couldn't Read Remote Server, Check Your Internet Connection.").asString()))
+                emit(Resource.Error<List<Chapter>>(uiText = UiText.StringResource(R.string.noInternetError)))
             } catch (e: Selector.SelectorParseException) {
-                emit(Resource.Error<List<Chapter>>(uiText = UiText.DynamicString("Source is not working.").asString()))
+                emit(Resource.Error<List<Chapter>>(uiText = UiText.StringResource(R.string.cant_get_content)))
             } catch (e: Exception) {
-                emit(Resource.Error<List<Chapter>>(uiText = UiText.exceptionError(e)))
+                emit(Resource.Error<List<Chapter>>(uiText =  UiText.ExceptionString(e)))
             }
         }
 }

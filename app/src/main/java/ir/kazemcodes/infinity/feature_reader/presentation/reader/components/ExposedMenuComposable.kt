@@ -16,9 +16,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ir.kazemcodes.infinity.core.presentation.theme.fonts
 import ir.kazemcodes.infinity.feature_reader.presentation.reader.ReaderEvent
 import ir.kazemcodes.infinity.feature_reader.presentation.reader.ReaderScreenViewModel
-import ir.kazemcodes.infinity.core.presentation.theme.fonts
 
 
 @Composable
@@ -52,7 +52,7 @@ fun FontMenuComposable(
                 .padding(8.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text(text = viewModel.state.value.font.fontName)
+            Text(text = viewModel.prefState.font.fontName)
             DropdownMenu(
                 modifier = Modifier.background(MaterialTheme.colors.background
                 ),

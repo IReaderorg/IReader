@@ -11,7 +11,7 @@ data class DetailState(
     val inLibrary : Boolean = false,
     val isLocalLoading: Boolean = false,
     val isLocalLoaded : Boolean = false,
-    val error: String = UiText.noError(),
+    val error: UiText = UiText.DynamicString(""),
     val isExploreMode: Boolean = false,
     val isRemoteLoaded: Boolean = false,
     val isRemoteLoading: Boolean = false

@@ -8,6 +8,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import ir.kazemcodes.infinity.R
 import ir.kazemcodes.infinity.core.data.network.models.Source
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
@@ -85,7 +86,7 @@ class WebViewPageModel @Inject constructor(
     fun getInfo() {
         viewModelScope.launch {
             _eventFlow.emit(UiEvent.ShowSnackbar(
-                uiText = UiText.DynamicString("Trying to fetch...").asString()
+                uiText = UiText.StringResource(R.string.trying_to_fetch)
             ))
             fetcherUseCase.fetchBookDetailAndChapterDetailFromWebView(
                 localBook = state.value.book,
@@ -99,14 +100,14 @@ class WebViewPageModel @Inject constructor(
                     is Resource.Success -> {
                         if (result.data != null) {
                             _eventFlow.emit(UiEvent.ShowSnackbar(
-                                uiText = result.data.asString()
+                                uiText = result.data
                             ))
                         }
                     }
                     is Resource.Error -> {
                         _eventFlow.emit(UiEvent.ShowSnackbar(
-                            uiText = UiText.DynamicString(result.uiText ?: UiText.unknownError()
-                                .asString()).asString()
+
+                            uiText = result.uiText ?: UiText.StringResource(R.string.error_unknown)
                         ))
                     }
                 }

@@ -32,7 +32,7 @@ fun BrightnessSliderComposable(
                 imageVector = Icons.Default.LightMode,
                 contentDescription = "less brightness")
             Slider(
-                viewModel.state.value.brightness,
+                viewModel.prefState.brightness,
                 onValueChange = { viewModel.onEvent(ReaderEvent.ChangeBrightness(it,context)) },
                 modifier = Modifier
                     .fillMaxWidth()

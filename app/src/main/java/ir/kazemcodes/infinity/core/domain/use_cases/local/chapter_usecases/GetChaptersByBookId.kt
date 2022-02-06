@@ -3,13 +3,13 @@ package ir.kazemcodes.infinity.core.domain.use_cases.local.chapter_usecases
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import ir.kazemcodes.infinity.R
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
 import ir.kazemcodes.infinity.core.domain.repository.LocalChapterRepository
 import ir.kazemcodes.infinity.core.utils.Constants
 import ir.kazemcodes.infinity.core.utils.Resource
 import ir.kazemcodes.infinity.core.utils.UiText
-import ir.kazemcodes.infinity.core.utils.asString
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
@@ -30,13 +30,13 @@ class GetChaptersByBookId(private val localChapterRepository: LocalChapterReposi
                     true
 
                 } else {
-                    emit(Resource.Error<List<Chapter>>(uiText = UiText.cantGetChapterError()))
+                    emit(Resource.Error<List<Chapter>>(uiText = UiText.StringResource(R.string.cant_get_content)))
                     true
                 }
             }
         } catch (e: Exception) {
             Resource.Error<Resource<List<Book>>>(
-                uiText = UiText.DynamicString(e.localizedMessage ?: Constants.UNKNOWN_ERROR).asString()
+                uiText = UiText.ExceptionString(e)
             )
         }
     }

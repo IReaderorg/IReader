@@ -1,12 +1,11 @@
 package ir.kazemcodes.infinity.core.domain.use_cases.local.chapter_usecases
 
+import ir.kazemcodes.infinity.R
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
 import ir.kazemcodes.infinity.core.domain.repository.LocalChapterRepository
-import ir.kazemcodes.infinity.core.utils.Constants
 import ir.kazemcodes.infinity.core.utils.Resource
 import ir.kazemcodes.infinity.core.utils.UiText
-import ir.kazemcodes.infinity.core.utils.asString
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
@@ -25,14 +24,14 @@ class GetOneChapterById(private val localChapterRepository: LocalChapterReposito
                     emit(Resource.Success<Chapter>(data = chapters))
                     true
                 } else {
-                    emit(Resource.Error<Chapter>(uiText = UiText.noChapter()))
+                    emit(Resource.Error<Chapter>(uiText = UiText.StringResource(R.string.no_chapter_found_error)))
                     true
                 }
 
             }
         } catch (e: Exception) {
             Resource.Error<Resource<List<Book>>>(
-                uiText = UiText.DynamicString(e.localizedMessage ?: Constants.UNKNOWN_ERROR).asString()
+                uiText =  UiText.ExceptionString(e)
             )
         }
     }

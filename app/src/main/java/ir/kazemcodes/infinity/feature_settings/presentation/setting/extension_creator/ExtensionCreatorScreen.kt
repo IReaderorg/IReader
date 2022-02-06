@@ -43,7 +43,7 @@ fun ExtensionCreatorScreen(
             when (event) {
                 is UiEvent.ShowSnackbar -> {
                     scaffoldState.snackbarHostState.showSnackbar(
-                        event.uiText
+                        event.uiText.asString(context)
                     )
                 }
             }

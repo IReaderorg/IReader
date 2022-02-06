@@ -1,12 +1,11 @@
 package ir.kazemcodes.infinity.core.domain.use_cases.local.book_usecases
 
 
+import ir.kazemcodes.infinity.R
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.repository.LocalBookRepository
-import ir.kazemcodes.infinity.core.utils.Constants.UNKNOWN_ERROR
 import ir.kazemcodes.infinity.core.utils.Resource
 import ir.kazemcodes.infinity.core.utils.UiText
-import ir.kazemcodes.infinity.core.utils.asString
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
@@ -26,22 +25,22 @@ class GetAllInLibraryBooks(private val localBookRepository: LocalBookRepository)
                     true
                 } else {
                     Resource.Error<Resource<List<Book>>>(
-                        uiText = UiText.noBook(),
+                        uiText = UiText.StringResource(R.string.no_book_found_error),
                     )
                     true
                 }
             }
         } catch (e: IOException) {
             Resource.Error<Resource<List<Book>>>(
-                uiText = UiText.DynamicString(e.localizedMessage ?: UNKNOWN_ERROR).asString()
+                uiText = UiText.ExceptionString(e)
             )
         } catch (e: HttpException) {
             Resource.Error<Resource<List<Book>>>(
-                uiText = UiText.DynamicString(e.localizedMessage ?: UNKNOWN_ERROR).asString()
+                uiText = UiText.ExceptionString(e)
             )
         } catch (e: Exception) {
             Resource.Error<Resource<List<Book>>>(
-                uiText = UiText.DynamicString(e.localizedMessage ?: UNKNOWN_ERROR).asString()
+                uiText = UiText.ExceptionString(e)
             )
         }
 

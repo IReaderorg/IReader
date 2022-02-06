@@ -1,6 +1,7 @@
 package ir.kazemcodes.infinity.core.data.repository
 
 import androidx.paging.PagingSource
+import ir.kazemcodes.infinity.R
 import ir.kazemcodes.infinity.core.data.local.BookDatabase
 import ir.kazemcodes.infinity.core.data.local.dao.LibraryBookDao
 import ir.kazemcodes.infinity.core.data.local.dao.LibraryChapterDao
@@ -32,7 +33,7 @@ class LocalBookRepositoryImpl(
                     emit(Resource.Success<Book>(data = book))
                     true
                 } else {
-                    emit(Resource.Error<Book>(uiText = UiText.noBook()))
+                    emit(Resource.Error<Book>(uiText = UiText.StringResource(R.string.no_error)))
                     true
                 }
             }

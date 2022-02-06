@@ -33,7 +33,7 @@ import timber.log.Timber
 
 @HiltWorker
 class DownloadService @AssistedInject constructor(
-    @Assisted context: Context,
+    @Assisted private val  context: Context,
     @Assisted params: WorkerParameters,
     private val bookRepo: LocalBookRepository,
     private val chapterRepo: LocalChapterRepository,
@@ -56,7 +56,7 @@ class DownloadService @AssistedInject constructor(
         val bookId = inputData.getInt("book_id", 0)
         val sourceId = inputData.getLong("sourceId", 0)
         val bookResource = bookRepo.getBookById(bookId).first()
-        if (bookResource.uiText?.isNotBlank() == true) {
+        if (bookResource.uiText?.asString(context = context)?.isNotBlank() == true) {
             throw IllegalArgumentException(
                 "Invalid bookId as argument: $bookId"
             )
@@ -103,8 +103,8 @@ class DownloadService @AssistedInject constructor(
                                 if (chapterPage.data != null) {
                                     insertUseCases.insertChapter(chapter = chapter.copy(content = chapterPage.data.content))
                                 }
-                                if (chapterPage.uiText?.isNotBlank() == true) {
-                                    throw Exception(chapterPage.uiText)
+                                if (chapterPage.uiText?.asString(context)?.isNotBlank() == true) {
+                                    throw Exception(chapterPage.uiText.asString(context))
                                 }
                                 builder.setContentText(chapter.title)
                                 builder.setSubText(index.toString())

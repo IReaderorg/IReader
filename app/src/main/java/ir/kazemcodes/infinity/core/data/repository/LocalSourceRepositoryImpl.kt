@@ -16,7 +16,7 @@ class LocalSourceRepositoryImpl(private val sourceTowerDao: SourceTowerDao) :
             emit(Resource.Success(result))
 
         } catch (e: Exception) {
-            emit(Resource.Error(uiText = UiText.exceptionError(e)))
+            emit(Resource.Error(uiText = UiText.ExceptionString(e)))
         }
 
     }

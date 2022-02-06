@@ -11,7 +11,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import ir.kazemcodes.infinity.core.domain.repository.LocalSourceRepository
 import ir.kazemcodes.infinity.core.utils.UiEvent
 import ir.kazemcodes.infinity.core.utils.UiText
-import ir.kazemcodes.infinity.core.utils.asString
 import ir.kazemcodes.infinity.core.utils.moshi
 import ir.kazemcodes.infinity.feature_sources.sources.models.SourceTower
 import kotlinx.coroutines.Dispatchers
@@ -26,8 +25,6 @@ class ExtensionCreatorViewModel @Inject constructor(private val localSourceRepos
    
     private val _state =
         mutableStateOf(ExtensionCreatorState())
-
-
     val state: State<ExtensionCreatorState> = _state
 
     private val _eventFlow = MutableSharedFlow<UiEvent>()
@@ -62,20 +59,20 @@ class ExtensionCreatorViewModel @Inject constructor(private val localSourceRepos
                 if (source != null) {
                     localSourceRepository.addSource(source)
                 }
-                _eventFlow.emit(UiEvent.ShowSnackbar(UiText.DynamicString("Successfully Added To Extensions").asString()))
+                _eventFlow.emit(UiEvent.ShowSnackbar(UiText.DynamicString("Successfully Added To Extensions")))
 
             } catch (e: JsonEncodingException) {
                 _state.value =
                     state.value.copy(errorMessage = state.value.errorMessage.plus("\n\n ERROR: Json Format Was Wrong"))
-                _eventFlow.emit(UiEvent.ShowSnackbar(UiText.DynamicString("ERROR: Json Format Was Wrong").asString()))
+                _eventFlow.emit(UiEvent.ShowSnackbar(UiText.DynamicString("ERROR: Json Format Was Wrong")))
             } catch (e: EOFException) {
                 _state.value =
                     state.value.copy(errorMessage = state.value.errorMessage.plus("\n\n ERROR: The TextField is Empty."))
-                _eventFlow.emit(UiEvent.ShowSnackbar(UiText.DynamicString("ERROR: The TextField is Empty.").asString()))
+                _eventFlow.emit(UiEvent.ShowSnackbar(UiText.DynamicString("ERROR: The TextField is Empty.")))
             } catch (e: Exception) {
                 _state.value =
                     state.value.copy(errorMessage = state.value.errorMessage.plus("\n\n ${e}"))
-                _eventFlow.emit(UiEvent.ShowSnackbar(UiText.DynamicString("ERROR: ${e.localizedMessage}.").asString()))
+                _eventFlow.emit(UiEvent.ShowSnackbar(UiText.DynamicString("ERROR: ${e.localizedMessage}.")))
 
             }
         }
@@ -102,15 +99,15 @@ class ExtensionCreatorViewModel @Inject constructor(private val localSourceRepos
             } catch (e: JsonEncodingException) {
                 _state.value =
                     state.value.copy(errorMessage = state.value.errorMessage.plus("\n\n ERROR: Json Format Was Wrong"))
-                _eventFlow.emit(UiEvent.ShowSnackbar(UiText.DynamicString("ERROR: Json Format Was Wrong").asString()))
+                _eventFlow.emit(UiEvent.ShowSnackbar(UiText.DynamicString("ERROR: Json Format Was Wrong")))
             } catch (e: EOFException) {
                 _state.value =
                     state.value.copy(errorMessage = state.value.errorMessage.plus("\n\n ERROR: The TextField is Empty."))
-                _eventFlow.emit(UiEvent.ShowSnackbar(UiText.DynamicString("ERROR: The TextField is Empty.").asString()))
+                _eventFlow.emit(UiEvent.ShowSnackbar(UiText.DynamicString("ERROR: The TextField is Empty.")))
             } catch (e: Exception) {
                 _state.value =
                     state.value.copy(errorMessage = state.value.errorMessage.plus("\n\n ${e}"))
-                _eventFlow.emit(UiEvent.ShowSnackbar(UiText.DynamicString("ERROR: ${e.localizedMessage}.").asString()))
+                _eventFlow.emit(UiEvent.ShowSnackbar(UiText.DynamicString("ERROR: ${e.localizedMessage}.")))
 
             }
         }

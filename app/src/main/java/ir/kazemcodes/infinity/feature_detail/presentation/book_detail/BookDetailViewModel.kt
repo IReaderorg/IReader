@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.*
 import dagger.hilt.android.lifecycle.HiltViewModel
+import ir.kazemcodes.infinity.R
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
 import ir.kazemcodes.infinity.core.domain.use_cases.fetchers.FetchUseCase
@@ -47,7 +48,7 @@ class BookDetailViewModel @Inject constructor(
     private val deleteUseCase: DeleteUseCase,
     private val fetchUseCase: FetchUseCase,
     savedStateHandle: SavedStateHandle,
-    extensions: Extensions
+    extensions: Extensions,
 ) : ViewModel(), KoinComponent {
 
     var state by mutableStateOf(DetailState())
@@ -79,21 +80,19 @@ class BookDetailViewModel @Inject constructor(
 
 
     fun getLocalBookById(bookId: Int) {
-        state = state.copy(isLocalLoading = true, error = UiText.noError())
-
+        toggleLocalBookLoading(true)
+        clearBookError()
         getBookUseCases.getBookById(id = bookId)
             .onEach { result ->
                 when (result) {
                     is Resource.Success -> {
                         if (result.data != null) {
-                            state = state.copy(
-                                book = result.data,
-                                error = UiText.noError(),
-                                isLocalLoading = false,
-                                isLocalLoaded = true,
-                                inLibrary = result.data.inLibrary,
-                                isExploreMode = result.data.isExploreMode,
-                            )
+                            toggleLocalBookLoading(false)
+                            clearBookError()
+                            setBook(result.data)
+                            toggleInLibrary(result.data.inLibrary)
+                            isLocalBookLoaded(true)
+                            setExploreMode(result.data.isExploreMode)
                             if (state.isExploreMode && !state.isRemoteLoaded) {
                                 getRemoteBookDetail(state.book)
                                 getRemoteChapterDetail(state.book)
@@ -102,9 +101,9 @@ class BookDetailViewModel @Inject constructor(
                         }
                     }
                     is Resource.Error -> {
-                        state = state.copy(isLocalLoading = false)
-                        _eventFlow.emit(UiEvent.ShowSnackbar(result.uiText
-                            ?: UiText.unknownError().asString()))
+                        toggleLocalBookLoading(false)
+                        showSnackBar(result.uiText)
+                        _eventFlow.emit(UiEvent.ShowSnackbar(result.uiText ?: UiText.DynamicString("")))
                     }
                 }
             }.launchIn(viewModelScope)
@@ -113,148 +112,122 @@ class BookDetailViewModel @Inject constructor(
 
 
     private fun getLocalChaptersByBookId(bookId: Int) {
-        chapterState = chapterState.copy(isLocalLoading = true, error = "")
+        clearChapterError()
+        toggleLocalChapterLoading(true)
+        getChapterUseCase.getChaptersByBookId(
+            bookId = bookId,
+            isAsc = true)
+            .onEach { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        if (result.data != null) {
+                            toggleLocalChapterLoading(false)
+                            clearChapterError()
+                            toggleAreChaptersLoaded(true)
+                            if (result.data.isNotEmpty()) {
+                                setChapters(result.data)
+                                toggleAreChaptersLoaded(true)
+                            }
 
-            getChapterUseCase.getChaptersByBookId(
-                bookId = bookId,
-                isAsc = true)
-                .onEach { result ->
-                    when (result) {
-                        is Resource.Success -> {
-                            if (result.data != null) {
-                                chapterState = chapterState.copy(
-                                    error = "",
-                                    isLocalLoading = false,
-                                    loaded = true
-                                )
-                                if (result.data.isNotEmpty()) {
-                                    chapterState = chapterState.copy(
-                                        chapters = result.data,
-                                        error = "",
-                                        isLocalLoading = false,
-                                        loaded = true
-                                    )
-                                }
-
-                                if (state.book.totalChapters != result.data.size) {
-                                    insertBookDetailToLocal(state.book.copy(
-                                        totalChapters = chapterState.chapters.size))
-                                }
+                            if (state.book.totalChapters != result.data.size) {
+                                insertBookDetailToLocal(state.book.copy(
+                                    totalChapters = chapterState.chapters.size))
                             }
                         }
-                        is Resource.Error -> {
-                            chapterState = chapterState.copy(
-                                isLocalLoading = false,
-                            )
-                            getRemoteChapterDetail(book = state.book)
-                        }
                     }
-                }.launchIn(viewModelScope)
+                    is Resource.Error -> {
+                        toggleLocalChapterLoading(false)
+                        getRemoteChapterDetail(book = state.book)
+                    }
+                }
+            }.launchIn(viewModelScope)
     }
 
 
     private fun getRemoteBookDetail(book: Book) {
-        state = state.copy(isRemoteLoading = true, error = UiText.noError(), isLocalLoaded = false)
-            remoteUseCases.getBookDetail(book = book, source = state.source)
-                .onEach { result ->
-                    when (result) {
-                        is Resource.Success -> {
-                            if (result.data != null) {
-                                /**
-                                 * isExploreMode is needed for inserting because,
-                                 * the explore screen get a snapshot of explore books
-                                 * so the inserted book need to have an id and a explore mode.
-                                 * note: explore mode will toggle off when the user goes back to
-                                 * main screen
-                                 */
-                                state = state.copy(
-                                    book = result.data.copy(
-                                        id = state.book.id,
-                                        isExploreMode = state.isExploreMode,
-                                        dataAdded = System.currentTimeMillis()
-                                    ),
-                                    isRemoteLoading = false,
-                                    error = UiText.noError(),
-                                    isLocalLoaded = true,
-                                    isRemoteLoaded = true
-                                )
-                                insertBookDetailToLocal(state.book)
-
-                            }
-                        }
-                        is Resource.Error -> {
-                            state =
-                                state.copy(
-                                    isRemoteLoading = false,
-                                )
-                            _eventFlow.emit(
-                                UiEvent.ShowSnackbar(
-                                    uiText = result.uiText ?: UiText.unknownError().asString()
+        toggleRemoteBookLoading(true)
+        clearBookError()
+        isLocalBookLoaded(false)
+        remoteUseCases.getBookDetail(book = book, source = state.source)
+            .onEach { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        if (result.data != null) {
+                            /**
+                             * isExploreMode is needed for inserting because,
+                             * the explore screen get a snapshot of explore books
+                             * so the inserted book need to have an id and a explore mode.
+                             * note: explore mode will toggle off when the user goes back to
+                             * main screen
+                             */
+                            setBook(
+                                book = result.data.copy(
+                                    id = state.book.id,
+                                    isExploreMode = state.isExploreMode,
+                                    dataAdded = System.currentTimeMillis()
                                 )
                             )
+                            toggleRemoteBookLoading(false)
+                            clearBookError()
+                            isLocalBookLoaded(true)
+                            isRemoteBookLoaded(true)
+                            insertBookDetailToLocal(state.book)
                         }
                     }
-                }.launchIn(viewModelScope)
+                    is Resource.Error -> {
+                        toggleRemoteBookLoading(false)
+                        showSnackBar(result.uiText)
+                    }
+                }
+            }.launchIn(viewModelScope)
 
     }
 
     fun getRemoteChapterDetail(book: Book) {
-        chapterState = chapterState.copy(
-            isRemoteLoading = true,
-            error = "",
-            loaded = false
-        )
-
-            remoteUseCases.getRemoteChapters(book = book, source = state.source)
-                .onEach { result ->
-                    when (result) {
-                        is Resource.Success -> {
-                            if (result.data != null) {
-                                val uniqueList =
-                                    removeSameItemsFromList(chapterState.chapters,
-                                        result.data.map {
-                                            it.copy(
-                                                bookId = book.id,
-                                                bookName = book.bookName)
-                                        }) {
-                                        it.title
-                                    }
-                                chapterState = chapterState.copy(
-                                    chapters = result.data.map {
-                                        it.copy(bookId = state.book.id,
-                                            bookName = state.book.bookName)
-                                    },
-                                    isRemoteLoading = false,
-                                    error = "",
-                                )
-                                deleteUseCase.deleteChaptersByBookId(state.book.id)
-                                insertChaptersToLocal(uniqueList)
-                                getLocalChaptersByBookId(bookId = state.book.id)
-                            }
-                        }
-                        is Resource.Error -> {
-                            chapterState =
-                                chapterState.copy(
-                                    isRemoteLoading = false,
-                                )
-
-                            _eventFlow.emit(
-                                UiEvent.ShowSnackbar(
-                                    uiText = result.uiText ?: UiText.unknownError().asString()
-                                )
-                            )
+        toggleRemoteChaptersLoading(true)
+        clearChapterError()
+        toggleAreChaptersLoaded(false)
+        remoteUseCases.getRemoteChapters(book = book, source = state.source)
+            .onEach { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        if (result.data != null) {
+                            val uniqueList =
+                                removeSameItemsFromList(chapterState.chapters,
+                                    result.data.map {
+                                        it.copy(
+                                            bookId = book.id,
+                                            bookName = book.bookName)
+                                    }) {
+                                    it.title
+                                }
+                            setChapters(chapters = uniqueList)
+                            toggleRemoteChaptersLoading(false)
+                            clearChapterError()
+//                            chapterState = chapterState.copy(
+////                                chapters = result.data.map {
+////                                    it.copy(bookId = state.book.id,
+////                                        bookName = state.book.bookName)
+////                                },
+//                            )
+                            deleteUseCase.deleteChaptersByBookId(state.book.id)
+                            insertChaptersToLocal(uniqueList)
+                            getLocalChaptersByBookId(bookId = state.book.id)
                         }
                     }
-                }.launchIn(viewModelScope)
+                    is Resource.Error -> {
+                        toggleRemoteChaptersLoading(false)
+                        showSnackBar(result.uiText)
+                    }
+                }
+            }.launchIn(viewModelScope)
 
     }
 
     @ExperimentalCoroutinesApi
     fun getWebViewData() {
         viewModelScope.launch {
-            _eventFlow.emit(UiEvent.ShowSnackbar(
-                uiText = UiText.DynamicString("Trying to fetch...").asString()
-            ))
+            showSnackBar(UiText.StringResource(R.string.trying_to_fetch))
             fetchUseCase.fetchBookDetailAndChapterDetailFromWebView(
                 deleteUseCase = deleteUseCase,
                 insertUseCases = localInsertUseCases,
@@ -266,18 +239,14 @@ class BookDetailViewModel @Inject constructor(
                 when (result) {
                     is Resource.Success -> {
                         if (result.data != null) {
-                            _eventFlow.emit(UiEvent.ShowSnackbar(
-                                uiText = result.data.asString()
-                            ))
-                            state = state.copy(isRemoteLoading = false)
-                            chapterState = chapterState.copy(isRemoteLoading = false)
+                            showSnackBar(UiText.DynamicString(result.data.text))
+                            toggleRemoteBookLoading(false)
+                            toggleRemoteChaptersLoading(false)
                             getLocalChaptersByBookId(bookId = state.book.id)
                         }
                     }
                     is Resource.Error -> {
-                        _eventFlow.emit(UiEvent.ShowSnackbar(
-                            uiText = result.uiText ?: UiText.unknownError().asString()
-                        ))
+                        showSnackBar(result.uiText)
                     }
                 }
             }.launchIn(viewModelScope)
@@ -343,4 +312,57 @@ class BookDetailViewModel @Inject constructor(
             work
         )
     }
+    /************************************************************/
+    suspend fun showSnackBar(message: UiText?) {
+        _eventFlow.emit(
+            UiEvent.ShowSnackbar(
+                uiText = message ?: UiText.StringResource(R.string.error_unknown)
+            )
+        )
+    }
+
+    private fun toggleLocalChapterLoading(isLoading: Boolean) {
+        chapterState = chapterState.copy(isLocalLoading = isLoading)
+    }
+    private fun clearChapterError() {
+        chapterState = chapterState.copy(error = UiText.DynamicString(""))
+    }
+    private fun toggleAreChaptersLoaded(loaded : Boolean) {
+        chapterState = chapterState.copy(loaded = loaded)
+    }
+    private fun setChapters(chapters: List<Chapter>) {
+        chapterState = chapterState.copy(chapters = chapters)
+    }
+    private fun toggleRemoteChaptersLoading(isLoading: Boolean) {
+        chapterState = chapterState.copy(isLocalLoading = isLoading)
+    }
+    /********************************************************/
+    private fun isLocalBookLoaded(loaded : Boolean) {
+        state = state.copy(isLocalLoaded = loaded)
+    }
+    private fun isRemoteBookLoaded(loaded : Boolean) {
+        state = state.copy(isRemoteLoaded = loaded)
+    }
+    private fun setExploreMode(isEnable: Boolean) {
+        state = state.copy(isExploreMode = isEnable)
+    }
+    private fun toggleLocalBookLoading(isLoading: Boolean) {
+        state = state.copy(isLocalLoading = isLoading)
+    }
+    private fun toggleRemoteBookLoading(isLoading: Boolean) {
+        state = state.copy(isRemoteLoading = isLoading)
+    }
+    private fun toggleInLibrary(enable: Boolean) {
+        state = state.copy(inLibrary = enable)
+    }
+
+    private fun setBook(book: Book) {
+        state = state.copy(book = book)
+    }
+
+    private fun clearBookError() {
+        state = state.copy(error = UiText.DynamicString(""))
+    }
+
+
 }

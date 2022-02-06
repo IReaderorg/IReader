@@ -72,8 +72,8 @@ fun BookDetailScreen(
 
             ) {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    if (viewModel.state.error.isNotBlank()) {
-                        ErrorTextWithEmojis(error = viewModel.state.error, modifier = Modifier
+                    if (viewModel.state.error.asString(context).isNotBlank()) {
+                        ErrorTextWithEmojis(error = viewModel.state.error.asString(context), modifier = Modifier
                             .fillMaxWidth()
                             .padding(20.dp)
                             .wrapContentSize(Alignment.Center)

@@ -10,6 +10,7 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import dagger.hilt.android.lifecycle.HiltViewModel
+import ir.kazemcodes.infinity.R
 import ir.kazemcodes.infinity.core.data.network.models.BooksPage
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.use_cases.local.DeleteUseCase
@@ -17,6 +18,7 @@ import ir.kazemcodes.infinity.core.domain.use_cases.preferences.reader_preferenc
 import ir.kazemcodes.infinity.core.domain.use_cases.remote.RemoteUseCases
 import ir.kazemcodes.infinity.core.presentation.layouts.DisplayMode
 import ir.kazemcodes.infinity.core.ui.NavigationArgs
+import ir.kazemcodes.infinity.core.utils.UiText
 import ir.kazemcodes.infinity.feature_sources.sources.Extensions
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -108,7 +110,7 @@ class ExploreViewModel @Inject constructor(
             searchedBook = BooksPage(),
             searchQuery = "",
             isLoading = false,
-            error = "")
+            error = UiText.StringResource(R.string.no_error))
     }
 
     private fun saveLayoutType(layoutType: DisplayMode) {

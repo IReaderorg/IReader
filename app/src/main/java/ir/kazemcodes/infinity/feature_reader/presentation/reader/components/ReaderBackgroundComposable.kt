@@ -16,8 +16,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import ir.kazemcodes.infinity.feature_reader.presentation.reader.ReaderScreenViewModel
 import ir.kazemcodes.infinity.core.presentation.theme.readerScreenBackgroundColors
+import ir.kazemcodes.infinity.feature_reader.presentation.reader.ReaderScreenViewModel
 
 @Composable
 fun ReaderBackgroundComposable(modifier: Modifier = Modifier, viewModel: ReaderScreenViewModel) {
@@ -40,7 +40,7 @@ fun ReaderBackgroundComposable(modifier: Modifier = Modifier, viewModel: ReaderS
                     .clickable { viewModel.changeBackgroundColor(index) },
                     contentAlignment = Alignment.Center
                 ) {
-                    if (viewModel.state.value.backgroundColor == readerScreenBackgroundColors[index].color) {
+                    if (viewModel.prefState.backgroundColor == readerScreenBackgroundColors[index].color) {
                         Icon(imageVector = Icons.Default.Check,
                             contentDescription = "color selected",
                             tint = MaterialTheme.colors.primary)

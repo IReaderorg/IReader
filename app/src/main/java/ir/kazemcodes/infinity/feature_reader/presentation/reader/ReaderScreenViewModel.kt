@@ -6,16 +6,16 @@ import android.content.Context
 import android.content.pm.ActivityInfo
 import android.view.WindowManager
 import android.webkit.WebView
-import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
-import ir.kazemcodes.infinity.core.data.network.utils.launchUI
+import ir.kazemcodes.infinity.R
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
 import ir.kazemcodes.infinity.core.domain.models.FontType
@@ -30,8 +30,11 @@ import ir.kazemcodes.infinity.core.presentation.theme.readerScreenBackgroundColo
 import ir.kazemcodes.infinity.core.ui.NavigationArgs
 import ir.kazemcodes.infinity.core.utils.*
 import ir.kazemcodes.infinity.feature_sources.sources.Extensions
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import org.jsoup.Jsoup
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -53,13 +56,15 @@ class ReaderScreenViewModel @Inject constructor(
     private val remoteUseCases: RemoteUseCases,
     private val insertUseCases: LocalInsertUseCases,
     private val deleteUseCase: DeleteUseCase,
-    private val savedStateHandle: SavedStateHandle,
-    private val extensions: Extensions,
-    @ApplicationContext private val context: Context,
+    savedStateHandle: SavedStateHandle,
+    extensions: Extensions,
 ) : ViewModel(), KoinComponent {
-    private val _state =
-        mutableStateOf(ReaderScreenState(source = extensions.mappingSourceNameToSource(0)))
-    val state: State<ReaderScreenState> = _state
+
+
+    var state by mutableStateOf(ReaderScreenState(source = extensions.mappingSourceNameToSource(0)))
+        private set
+    var prefState by mutableStateOf(ReaderScreenPreferencesState())
+        private set
 
 
     private val _eventFlow = MutableSharedFlow<Event>()
@@ -75,11 +80,9 @@ class ReaderScreenViewModel @Inject constructor(
         val chapterId = savedStateHandle.get<Int>(NavigationArgs.chapterId.name)
         val bookId = savedStateHandle.get<Int>(NavigationArgs.bookId.name)
         if (bookId != null && chapterId != null && sourceId != null) {
-            _state.value =
-                state.value.copy(source = extensions.mappingSourceNameToSource(sourceId))
-            _state.value = state.value.copy(book = state.value.book.copy(id = bookId))
-            _state.value =
-                state.value.copy(chapter = state.value.chapter.copy(chapterId = chapterId))
+            state = state.copy(source = extensions.mappingSourceNameToSource(sourceId))
+            state = state.copy(book = state.book.copy(id = bookId))
+            state = state.copy(chapter = state.chapter.copy(chapterId = chapterId))
             getLocalBookById()
             getLocalChaptersByPaging()
             readPreferences()
@@ -114,115 +117,86 @@ class ReaderScreenViewModel @Inject constructor(
     }
 
     private fun getLastChapter() {
-            getChapterUseCase.getLastReadChapter(state.value.book.id)
-                .onEach { result ->
-                    when (result) {
-                        is Resource.Success -> {
-                            if (result.data != null) {
-                                _state.value = state.value.copy(
-                                    chapter = result.data,
-                                    isLoading = false,
-                                    isLoaded = true,
-                                    error = UiText.noError(),
-                                    scrollPosition = result.data.scrollPosition
-                                )
-                                toggleLastReadAndUpdateChapterContent(result.data)
-                                if (state.value.chapter.content.joinToString().isBlank()) {
-                                    getReadingContentRemotely()
-                                }
+        getChapterUseCase.getLastReadChapter(state.book.id)
+            .onEach { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        if (result.data != null) {
+                            clearError()
+                            toggleLocalLoading(false)
+                            toggleLocalLoaded(true)
+                            setChapter(result.data)
+                            setScrollPosition(result.data.scrollPosition)
+                            toggleLastReadAndUpdateChapterContent(result.data)
+                            if (state.chapter.content.joinToString().isBlank()) {
+                                getReadingContentRemotely()
                             }
                         }
-                        is Resource.Error -> {
-                            _state.value =
-                                state.value.copy(
-                                    isLoading = false,
-                                    isLoaded = false,
-                                )
-                            _eventFlow.emit(UiEvent.ShowSnackbar(result.uiText ?: UiText.unknownError()
-                                .asString()))
-                            getReadingContentRemotely()
-                        }
                     }
-                }.launchIn(viewModelScope)
+                    is Resource.Error -> {
+                        toggleLocalLoading(false)
+                        toggleLocalLoaded(false)
+                        showSnackBar(result.uiText)
+                        getReadingContentRemotely()
+                    }
+                }
+            }.launchIn(viewModelScope)
 
 
     }
 
-    private fun toggleReaderMode(enable: Boolean? = null) {
-        _state.value =
-            state.value.copy(isReaderModeEnable = enable ?: !state.value.isReaderModeEnable,
-                isMainBottomModeEnable = true,
-                isSettingModeEnable = false)
-    }
-
-    fun toggleSettingMode(enable: Boolean, returnToMain: Boolean? = null) {
-        if (returnToMain.isNull()) {
-            _state.value =
-                state.value.copy(isSettingModeEnable = enable, isMainBottomModeEnable = false)
-
-        } else {
-            _state.value =
-                state.value.copy(isSettingModeEnable = false, isMainBottomModeEnable = true)
-        }
-    }
 
     private fun getChapters() {
 
-            getChapterUseCase.getChaptersByBookId(bookId = state.value.book.id,
-                isAsc = state.value.book.areChaptersReversed)
-                .onEach { result ->
-                    when (result) {
-                        is Resource.Success -> {
-                            if (result.data != null) {
-                                _state.value = state.value.copy(
-                                    chapters = result.data,
-                                    isChapterLoaded = true,
-                                )
-                                _state.value =
-                                    state.value.copy(currentChapterIndex = result.data.indexOfFirst { state.value.chapter.chapterId == it.chapterId })
-                            }
-                        }
-                        is Resource.Error -> {
+        getChapterUseCase.getChaptersByBookId(bookId = state.book.id,
+            isAsc = state.book.areChaptersReversed)
+            .onEach { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        if (result.data != null) {
+                            state = state.copy(
+                                chapters = result.data,
+                                isChapterLoaded = true,
+                            )
+                            state =
+                                state.copy(currentChapterIndex = result.data.indexOfFirst { state.chapter.chapterId == it.chapterId })
                         }
                     }
-                }.launchIn(viewModelScope)
+                    is Resource.Error -> {
+                    }
+                }
+            }.launchIn(viewModelScope)
 
 
     }
 
     fun getChapter(chapter: Chapter) {
-        _state.value = state.value.copy(chapter = chapter)
-        _state.value = state.value.copy(
-            isLoading = true,
-            error = UiText.noError(),
-            isLoaded = false,
+        state = state.copy(chapter = chapter)
+        clearError()
+        state = state.copy(
+            isLocalLoading = true,
+            isLocalLoaded = false,
         )
         getChapterUseCase.getOneChapterById(chapterId = chapter.chapterId)
             .onEach { result ->
                 when (result) {
                     is Resource.Success -> {
                         if (result.data != null) {
-                            _state.value = state.value.copy(
-                                chapter = result.data,
-                                isLoading = false,
-                                isLoaded = true,
-                                error = UiText.noError(),
-                                scrollPosition = result.data.scrollPosition
-                            )
+                            clearError()
+                            setScrollPosition(result.data.scrollPosition)
+                            toggleLocalLoading(false)
+                            toggleLocalLoaded(true)
+                            setChapter(result.data)
                             toggleLastReadAndUpdateChapterContent(result.data)
-                            if (state.value.chapter.content.joinToString().isBlank()) {
+                            if (state.chapter.content.joinToString().isBlank()) {
                                 getReadingContentRemotely()
                             }
                         }
                     }
                     is Resource.Error -> {
-                        _state.value =
-                            state.value.copy(
-                                isLoading = false,
-                                isLoaded = false,
-                            )
-                        _eventFlow.emit(UiEvent.ShowSnackbar(result.uiText ?: UiText.unknownError()
-                            .asString()))
+                        toggleLocalLoading(false)
+                        toggleLocalLoaded(false)
+                        showSnackBar(result.uiText)
                         getReadingContentRemotely()
                     }
                 }
@@ -235,64 +209,54 @@ class ReaderScreenViewModel @Inject constructor(
     fun getFromWebView() {
         val webView by inject<WebView>()
         viewModelScope.launch {
-            _eventFlow.emit(UiEvent.ShowSnackbar(
-                uiText = UiText.DynamicString("Trying to fetch chapter's content").asString()
-            ))
-
-            val chapter = state.value.source.contentFromElementParse(Jsoup.parse(webView.getHtml()))
-            if (!chapter.content.isNullOrEmpty() && state.value.isBookLoaded && state.value.isChapterLoaded && webView.originalUrl == state.value.chapter.link) {
-                _state.value = state.value.copy(isLoading = false,
-                    error = UiText.noError(),
-                    chapter = state.value.chapter.copy(content = chapter.content))
-                toggleLastReadAndUpdateChapterContent(state.value.chapter.copy(content = chapter.content))
-
-                _eventFlow.emit(UiEvent.ShowSnackbar(
-                    uiText = UiText.DynamicString("${state.value.chapter.title} of ${state.value.chapter.bookName} was Fetched")
-                        .asString()
-                ))
-                if (state.value.chapter.content.size > 10) {
-                    _state.value = state.value.copy(isLoaded = true)
+            showSnackBar(UiText.StringResource(R.string.trying_to_fetch_chapters_content))
+            val chapter = state.source.contentFromElementParse(Jsoup.parse(webView.getHtml()))
+            if (!chapter.content.isNullOrEmpty() && state.isBookLoaded && state.isChapterLoaded && webView.originalUrl == state.chapter.link) {
+                clearError()
+                state = state.copy(isLocalLoading = false,
+                    chapter = state.chapter.copy(content = chapter.content))
+                toggleLastReadAndUpdateChapterContent(state.chapter.copy(content = chapter.content))
+                showSnackBar(UiText.DynamicString("${state.chapter.title} of ${state.chapter.bookName} was Fetched"))
+                if (state.chapter.content.size > 10) {
+                    state = state.copy(isLocalLoaded = true)
                 }
-                _state.value = state.value
+                state = state
             } else {
-                _eventFlow.emit(UiEvent.ShowSnackbar(
-                    uiText = UiText.DynamicString("Failed to to get the content").asString()
-                ))
+                showSnackBar(UiText.DynamicString("Failed to to get the content"))
             }
         }
 
     }
 
     fun getReadingContentRemotely() {
-        _state.value = state.value.copy(
-            isLoading = true,
-            error = UiText.noError(),
-            isLoaded = false,
+        clearError()
+        state = state.copy(
+            isLocalLoading = true,
+            isLocalLoaded = false,
         )
-        remoteUseCases.getRemoteReadingContent(state.value.chapter, source = state.value.source)
+        remoteUseCases.getRemoteReadingContent(state.chapter, source = state.source)
             .onEach { result ->
                 when (result) {
                     is Resource.Success -> {
                         if (result.data != null) {
-                            _state.value = state.value
+                            clearError()
+                            state = state
                                 .copy(
-                                    chapter = state.value.chapter.copy(content = result.data.content),
-                                    isLoading = false,
-                                    error = UiText.noError(),
-                                    isLoaded = true,
+                                    chapter = state.chapter.copy(content = result.data.content),
+                                    isLocalLoading = false,
+                                    isLocalLoaded = true,
                                 )
-                            toggleLastReadAndUpdateChapterContent(state.value.chapter.copy(
+                            toggleLastReadAndUpdateChapterContent(state.chapter.copy(
                                 haveBeenRead = true))
                         }
                     }
                     is Resource.Error -> {
-                        _state.value =
-                            state.value.copy(
-                                isLoading = false,
-                                isLoaded = false,
+                        state =
+                            state.copy(
+                                isLocalLoading = false,
+                                isLocalLoaded = false,
                             )
-                        _eventFlow.emit(UiEvent.ShowSnackbar(result.uiText ?: UiText.unknownError()
-                            .asString()))
+                        showSnackBar(result.uiText)
                     }
                 }
             }.launchIn(viewModelScope)
@@ -301,23 +265,20 @@ class ReaderScreenViewModel @Inject constructor(
 
     private fun getLocalBookById() {
         viewModelScope.launch {
-            getBookUseCases.getBookById(id = state.value.book.id).first { result ->
+            getBookUseCases.getBookById(id = state.book.id).first { result ->
                 when (result) {
                     is Resource.Success -> {
                         if (result.data != null && result.data != Book.create()) {
-                            _state.value = state.value.copy(
-                                book = result.data,
-                                isBookLoaded = true,
-                                isChaptersReversed = result.data.areChaptersReversed,
-                                isAsc = result.data.areChaptersReversed,
-                            )
-                            withContext(Dispatchers.IO) {
-                                insertUseCases.insertBook(book = result.data.copy(lastRead = System.currentTimeMillis(),
-                                    unread = !result.data.unread))
-                            }
+                            setBook(result.data)
+                            toggleBookLoaded(true)
+                            toggleIsChaptersReversed(result.data.areChaptersReversed)
+                            toggleIsAsc(result.data.areChaptersReversed)
+                            insertBook(result.data.copy(
+                                lastRead = System.currentTimeMillis(),
+                                unread = !result.data.unread))
                             getChapters()
-                            if (state.value.chapter.chapterId != Constants.LAST_CHAPTER) {
-                                getChapter(state.value.chapter)
+                            if (state.chapter.chapterId != Constants.LAST_CHAPTER) {
+                                getChapter(state.chapter)
                             } else {
                                 getLastChapter()
                             }
@@ -339,29 +300,25 @@ class ReaderScreenViewModel @Inject constructor(
     private fun toggleLastReadAndUpdateChapterContent(chapter: Chapter) {
         viewModelScope.launch {
             deleteUseCase.deleteChapterByChapter(chapter)
-            state.value.chapters.filter {
+            state.chapters.filter {
                 it.lastRead
             }.forEach {
-                withContext(Dispatchers.IO) {
-                    insertUseCases.insertChapter(it.copy(lastRead = false))
-                }
+                insertChapter(it.copy(lastRead = false))
             }
-            withContext(Dispatchers.IO) {
-                insertUseCases.insertChapter(chapter.copy(haveBeenRead = true, lastRead = true))
-            }
+            insertChapter(chapter.copy(haveBeenRead = true, lastRead = true))
         }
     }
 
     fun reverseChapters() {
-        _state.value = state.value.copy(isAsc = !state.value.isAsc)
+        toggleIsAsc(!prefState.isAsc)
     }
 
     var getChapterJob: Job? = null
     fun getLocalChaptersByPaging() {
         getChapterJob?.cancel()
         getChapterJob = viewModelScope.launch {
-            getChapterUseCase.getLocalChaptersByPaging(bookId = state.value.book.id,
-                isAsc = state.value.isAsc)
+            getChapterUseCase.getLocalChaptersByPaging(bookId = state.book.id,
+                isAsc = prefState.isAsc)
                 .cachedIn(viewModelScope).collect { snapshot ->
                     _chapters.value = snapshot
                 }
@@ -371,7 +328,7 @@ class ReaderScreenViewModel @Inject constructor(
 
 
     private fun readSelectedFontState() {
-        _state.value = state.value.copy(font = preferencesUseCase.readSelectedFontStateUseCase())
+        prefState = prefState.copy(font = preferencesUseCase.readSelectedFontStateUseCase())
     }
 
     fun readBrightness(context: Context) {
@@ -381,31 +338,31 @@ class ReaderScreenViewModel @Inject constructor(
         val layoutParams: WindowManager.LayoutParams = window.attributes
         layoutParams.screenBrightness = brightness
         window.attributes = layoutParams
-        _state.value = state.value.copy(brightness = brightness)
+        prefState = prefState.copy(brightness = brightness)
     }
 
     private fun readFontSize() {
-        _state.value = state.value.copy(fontSize = preferencesUseCase.readFontSizeStateUseCase())
+        prefState = prefState.copy(fontSize = preferencesUseCase.readFontSizeStateUseCase())
     }
 
     private fun readParagraphDistance() {
-        _state.value =
-            state.value.copy(distanceBetweenParagraphs = preferencesUseCase.readParagraphDistanceUseCase())
+        prefState =
+            prefState.copy(distanceBetweenParagraphs = preferencesUseCase.readParagraphDistanceUseCase())
     }
 
     private fun readParagraphIndent() {
-        _state.value =
-            state.value.copy(paragraphsIndent = preferencesUseCase.readParagraphIndentUseCase())
+        prefState =
+            prefState.copy(paragraphsIndent = preferencesUseCase.readParagraphIndentUseCase())
     }
 
     private fun readFontHeight() {
-        _state.value = state.value.copy(lineHeight = preferencesUseCase.readFontHeightUseCase())
+        prefState = prefState.copy(lineHeight = preferencesUseCase.readFontHeightUseCase())
     }
 
     private fun readBackgroundColor() {
         val color = readerScreenBackgroundColors[preferencesUseCase.getBackgroundColorUseCase()]
-        _state.value =
-            state.value.copy(backgroundColor = color.color, textColor = color.onTextColor)
+        prefState =
+            prefState.copy(backgroundColor = color.color, textColor = color.onTextColor)
     }
 
 
@@ -415,96 +372,96 @@ class ReaderScreenViewModel @Inject constructor(
         when (preferencesUseCase.readOrientationUseCase()) {
             0 -> {
                 activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-                _state.value = state.value.copy(orientation = Orientation.Portrait)
+                prefState = prefState.copy(orientation = Orientation.Portrait)
             }
             1 -> {
                 activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-                _state.value = state.value.copy(orientation = Orientation.Landscape)
+                prefState = prefState.copy(orientation = Orientation.Landscape)
             }
         }
     }
 
     fun changeBackgroundColor(colorIndex: Int) {
         val color = readerScreenBackgroundColors[colorIndex]
-        _state.value =
-            state.value.copy(backgroundColor = color.color, textColor = color.onTextColor)
+        prefState =
+            prefState.copy(backgroundColor = color.color, textColor = color.onTextColor)
         preferencesUseCase.setBackgroundColorUseCase(colorIndex)
     }
 
     @SuppressLint("SourceLockedOrientationActivity")
     fun saveOrientation(context: Context) {
         val activity = context.findComponentActivity()!!
-        when (state.value.orientation) {
+        when (prefState.orientation) {
             is Orientation.Landscape -> {
                 activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-                _state.value = state.value.copy(orientation = Orientation.Portrait)
+                prefState = prefState.copy(orientation = Orientation.Portrait)
                 preferencesUseCase.saveOrientationUseCase(Orientation.Portrait.index)
             }
             is Orientation.Portrait -> {
                 activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-                _state.value = state.value.copy(orientation = Orientation.Landscape)
+                prefState = prefState.copy(orientation = Orientation.Landscape)
                 preferencesUseCase.saveOrientationUseCase(Orientation.Landscape.index)
             }
         }
     }
 
     fun saveFontHeight(isIncreased: Boolean) {
-        val currentFontHeight = state.value.lineHeight
+        val currentFontHeight = prefState.lineHeight
         if (isIncreased) {
             preferencesUseCase.saveFontHeightUseCase(currentFontHeight + 1)
-            _state.value = state.value.copy(lineHeight = currentFontHeight + 1)
+            prefState = prefState.copy(lineHeight = currentFontHeight + 1)
 
         } else if (currentFontHeight > 20 && !isIncreased) {
             preferencesUseCase.saveFontHeightUseCase(currentFontHeight - 1)
-            _state.value = state.value.copy(lineHeight = currentFontHeight - 1)
+            prefState = prefState.copy(lineHeight = currentFontHeight - 1)
         }
     }
 
     fun saveParagraphDistance(isIncreased: Boolean) {
-        val currentDistance = state.value.distanceBetweenParagraphs
+        val currentDistance = prefState.distanceBetweenParagraphs
         if (isIncreased) {
             preferencesUseCase.saveParagraphDistanceUseCase(currentDistance + 1)
-            _state.value = state.value.copy(distanceBetweenParagraphs = currentDistance + 1)
+            prefState = prefState.copy(distanceBetweenParagraphs = currentDistance + 1)
 
         } else if (currentDistance > 1 && !isIncreased) {
             preferencesUseCase.saveParagraphDistanceUseCase(currentDistance - 1)
-            _state.value = state.value.copy(distanceBetweenParagraphs = currentDistance - 1)
+            prefState = prefState.copy(distanceBetweenParagraphs = currentDistance - 1)
         }
     }
 
     fun saveParagraphIndent(isIncreased: Boolean) {
-        val paragraphsIndent = state.value.paragraphsIndent
+        val paragraphsIndent = prefState.paragraphsIndent
         if (isIncreased) {
             preferencesUseCase.saveParagraphIndentUseCase(paragraphsIndent + 1)
-            _state.value = state.value.copy(paragraphsIndent = paragraphsIndent + 1)
+            prefState = prefState.copy(paragraphsIndent = paragraphsIndent + 1)
 
         } else if (paragraphsIndent > 1 && !isIncreased) {
             preferencesUseCase.saveParagraphIndentUseCase(paragraphsIndent - 1)
-            _state.value = state.value.copy(paragraphsIndent = paragraphsIndent - 1)
+            prefState = prefState.copy(paragraphsIndent = paragraphsIndent - 1)
         }
     }
 
     private fun saveFontSize(event: FontSizeEvent) {
         if (event == FontSizeEvent.Increase) {
-            _state.value = state.value.copy(fontSize = state.value.fontSize + 1)
-            preferencesUseCase.saveFontSizeStateUseCase(state.value.fontSize)
+            prefState = prefState.copy(fontSize = prefState.fontSize + 1)
+            preferencesUseCase.saveFontSizeStateUseCase(prefState.fontSize)
         } else {
-            if (state.value.fontSize > 0) {
-                _state.value = state.value.copy(fontSize = state.value.fontSize - 1)
-                preferencesUseCase.saveFontSizeStateUseCase(state.value.fontSize)
+            if (prefState.fontSize > 0) {
+                prefState = prefState.copy(fontSize = prefState.fontSize - 1)
+                preferencesUseCase.saveFontSizeStateUseCase(prefState.fontSize)
             }
         }
     }
 
     private fun saveFont(fontType: FontType) {
-        _state.value = state.value.copy(font = fontType)
+        prefState = prefState.copy(font = fontType)
         preferencesUseCase.saveSelectedFontStateUseCase(fonts.indexOf(fontType))
     }
 
     private fun saveBrightness(brightness: Float, context: Context) {
         val activity = context.findComponentActivity()!!
         val window = activity.window
-        _state.value = state.value.copy(brightness = brightness)
+        prefState = prefState.copy(brightness = brightness)
         val layoutParams: WindowManager.LayoutParams = window.attributes
         layoutParams.screenBrightness = brightness
         window.attributes = layoutParams
@@ -517,68 +474,58 @@ class ReaderScreenViewModel @Inject constructor(
      * need a index, there is no need to confuse the index because the list reversed
      */
     fun updateChapterSliderIndex(index: Int) {
-        _state.value = state.value.copy(currentChapterIndex = index)
+        state = state.copy(currentChapterIndex = index)
     }
 
     /**
      * get the index pf chapter based on the reversed state
      */
     fun getCurrentIndexOfChapter(chapter: Chapter): Int {
-        val chaptersById: List<Int> = state.value.chapters.map { it.chapterId }
+        val chaptersById: List<Int> = state.chapters.map { it.chapterId }
         return if (chaptersById.indexOf(chapter.chapterId) != -1) chaptersById.indexOf(chapter.chapterId) else 0
     }
 
     private fun getCurrentIndex(): Int {
-        return if (state.value.currentChapterIndex < 0) {
+        return if (state.currentChapterIndex < 0) {
             0
-        } else if (state.value.currentChapterIndex > (state.value.chapters.lastIndex)) {
-            state.value.chapters.lastIndex
-        } else if (state.value.currentChapterIndex == -1) {
+        } else if (state.currentChapterIndex > (state.chapters.lastIndex)) {
+            state.chapters.lastIndex
+        } else if (state.currentChapterIndex == -1) {
             0
         } else {
-            state.value.currentChapterIndex
+            state.currentChapterIndex
         }
     }
 
     fun getCurrentChapterByIndex(): Chapter {
         return try {
-            state.value.chapters[getCurrentIndex()]
+            state.chapters[getCurrentIndex()]
         } catch (e: Exception) {
-            state.value.chapters[0]
+            state.chapters[0]
         }
     }
 
     fun reverseSlider() {
-        if (!state.value.isChapterReversingInProgress) {
-            _state.value =
-                state.value.copy(
-                    book = state.value.book.copy(areChaptersReversed = !state.value.book.areChaptersReversed),
+        if (!prefState.isChapterReversingInProgress) {
+            setBook(state.book.copy(areChaptersReversed = !state.book.areChaptersReversed))
+            prefState =
+                prefState.copy(
                     isChapterReversingInProgress = true,
-                    isAsc = !state.value.isAsc
+                    isAsc = !prefState.isAsc
                 )
 
             viewModelScope.launch(Dispatchers.IO) {
-                _eventFlow.emit(UiEvent.ShowSnackbar(UiText.DynamicString("Reversing Chapters...")
-                    .asString()))
-                insertUseCases.insertBook(state.value.book.copy(areChaptersReversed = state.value.book.areChaptersReversed))
-                _eventFlow.emit(UiEvent.ShowSnackbar(UiText.DynamicString("Chapters were reversed")
-                    .asString()))
+                showSnackBar(UiText.DynamicString("Reversing Chapters..."))
+                insertUseCases.insertBook(state.book.copy(areChaptersReversed = state.book.areChaptersReversed))
+                showSnackBar(UiText.DynamicString("Chapters were reversed"))
             }
-            updateChapterSliderIndex(getCurrentIndexOfChapter(state.value.chapter))
+            updateChapterSliderIndex(getCurrentIndexOfChapter(state.chapter))
             getChapters()
             getLocalChaptersByPaging()
-            _state.value = state.value.copy(isChapterReversingInProgress = false)
+            prefState = prefState.copy(isChapterReversingInProgress = false)
         }
 
     }
-
-    fun showSnackBar(message: String) {
-        viewModelScope.launchUI {
-            _eventFlow.emit(UiEvent.ShowSnackbar(UiText.DynamicString(message).asString()))
-
-        }
-    }
-
 
     fun restoreSetting(context: Context) {
         val activity = context.findComponentActivity()!!
@@ -592,8 +539,95 @@ class ReaderScreenViewModel @Inject constructor(
 
 
     override fun onCleared() {
-        _state.value = state.value.copy(enable = false)
+        state = state.copy(enable = false)
         super.onCleared()
     }
 
+    private fun toggleReaderMode(enable: Boolean? = null) {
+        state = state.copy(isReaderModeEnable = enable ?: !state.isReaderModeEnable,
+            isMainBottomModeEnable = true,
+            isSettingModeEnable = false)
+    }
+
+    fun toggleSettingMode(enable: Boolean, returnToMain: Boolean? = null) {
+        if (returnToMain.isNull()) {
+            state =
+                state.copy(isSettingModeEnable = enable, isMainBottomModeEnable = false)
+
+        } else {
+            state =
+                state.copy(isSettingModeEnable = false, isMainBottomModeEnable = true)
+        }
+    }
+
+    fun insertBook(book: Book) {
+        viewModelScope.launch(Dispatchers.IO) {
+            insertUseCases.insertBook(book)
+        }
+    }
+
+    fun insertChapter(chapter: Chapter) {
+        viewModelScope.launch(Dispatchers.IO) {
+            insertUseCases.insertChapter(chapter)
+        }
+    }
+
+    suspend fun showSnackBar(message: UiText?) {
+        _eventFlow.emit(
+            UiEvent.ShowSnackbar(
+                uiText = message ?: UiText.StringResource(R.string.error_unknown)
+            )
+        )
+    }
+
+    private fun setScrollPosition(position: Int) {
+        prefState = prefState.copy(scrollPosition = position)
+    }
+
+    private fun toggleIsAsc(isAsc: Boolean) {
+        prefState = prefState.copy(isAsc = isAsc)
+    }
+
+    private fun toggleIsChaptersReversed(value: Boolean) {
+        prefState = prefState.copy(isChaptersReversed = value)
+    }
+
+
+    /********************************************************/
+    private fun setChapters(chapters: List<Chapter>) {
+        state = state.copy(chapters = chapters)
+    }
+
+    private fun setChapter(chapter: Chapter) {
+        state = state.copy(chapter = chapter)
+    }
+
+    /********************************************************/
+    private fun toggleBookLoaded(loaded: Boolean) {
+        state = state.copy(isBookLoaded = loaded)
+    }
+
+    private fun toggleLocalLoaded(loaded: Boolean) {
+        state = state.copy(isLocalLoaded = loaded)
+    }
+
+    private fun toggleRemoteLoaded(loaded: Boolean) {
+        state = state.copy(isRemoteLoaded = loaded)
+    }
+
+    private fun toggleLocalLoading(isLoading: Boolean) {
+        state = state.copy(isLocalLoading = isLoading)
+    }
+
+    private fun toggleRemoteLoading(isLoading: Boolean) {
+        state = state.copy(isRemoteLoading = isLoading)
+    }
+
+    private fun setBook(book: Book) {
+        state = state.copy(book = book)
+    }
+
+    private fun clearError() {
+        state = state.copy(error = UiText.StringResource(R.string.no_error))
+    }
 }

@@ -1,12 +1,11 @@
 package ir.kazemcodes.infinity.core.domain.use_cases.remote
 
+import ir.kazemcodes.infinity.R
 import ir.kazemcodes.infinity.core.data.network.models.Source
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.repository.RemoteRepository
-import ir.kazemcodes.infinity.core.utils.Constants
 import ir.kazemcodes.infinity.core.utils.Resource
 import ir.kazemcodes.infinity.core.utils.UiText
-import ir.kazemcodes.infinity.core.utils.asString
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import retrofit2.HttpException
@@ -27,17 +26,17 @@ class GetBookDetail(private val remoteRepository: RemoteRepository) {
         } catch (e: HttpException) {
             emit(
                 Resource.Error<Book>(
-                    uiText = UiText.noBook()
+                    uiText = UiText.StringResource(R.string.no_book_found_error)
                 )
             )
 
         } catch (e: IOException) {
             Resource.Error<Resource<List<Book>>>(
-                uiText = UiText.noInternetError()
+                uiText = UiText.StringResource(R.string.noInternetError)
             )
         } catch (e: Exception) {
             Resource.Error<Resource<List<Book>>>(
-                uiText = UiText.DynamicString(e.localizedMessage ?: Constants.UNKNOWN_ERROR).asString()
+                uiText =  UiText.ExceptionString(e)
             )
         }
     }

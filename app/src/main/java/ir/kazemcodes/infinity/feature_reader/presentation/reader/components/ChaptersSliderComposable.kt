@@ -14,6 +14,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
+import ir.kazemcodes.infinity.R
+import ir.kazemcodes.infinity.core.utils.UiText
 import ir.kazemcodes.infinity.core.utils.scroll.CarouselScrollState
 import ir.kazemcodes.infinity.feature_reader.presentation.reader.ReaderScreenViewModel
 import kotlinx.coroutines.launch
@@ -23,12 +25,12 @@ import kotlinx.coroutines.launch
 fun ChaptersSliderComposable(
     modifier: Modifier = Modifier,
     viewModel: ReaderScreenViewModel,
-    scrollState: CarouselScrollState
+    scrollState: CarouselScrollState,
 ) {
     val context = LocalContext.current
-    val currentIndex = viewModel.state.value.currentChapterIndex
+    val currentIndex = viewModel.state.currentChapterIndex
     val currentChapter = viewModel.getCurrentChapterByIndex()
-    val chapters = viewModel.state.value.chapters
+    val chapters = viewModel.state.chapters
     val coroutineScope = rememberCoroutineScope()
     Column(modifier = modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         Text(text = currentChapter.title,
@@ -47,7 +49,10 @@ fun ChaptersSliderComposable(
                             scrollState.scrollTo(0)
                         }
                     } else {
-                        viewModel.showSnackBar("This is first chapter")
+                        coroutineScope.launch {
+
+                            viewModel.showSnackBar(UiText.StringResource(R.string.this_is_first_chapter))
+                        }
                     }
 
                 }) {
@@ -57,14 +62,16 @@ fun ChaptersSliderComposable(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(6f),
-                value = viewModel.state.value.currentChapterIndex.toFloat(),
+                value = viewModel.state.currentChapterIndex.toFloat(),
                 onValueChange = {
                     viewModel.updateChapterSliderIndex(it.toInt())
                 },
                 onValueChangeFinished = {
-                    viewModel.showSnackBar(chapters[viewModel.state.value.currentChapterIndex].title)
+                    coroutineScope.launch {
+                        viewModel.showSnackBar(UiText.DynamicString(chapters[viewModel.state.currentChapterIndex].title))
+                    }
                     viewModel.updateChapterSliderIndex(currentIndex)
-                    viewModel.getChapter(chapters[viewModel.state.value.currentChapterIndex])
+                    viewModel.getChapter(chapters[viewModel.state.currentChapterIndex])
                     coroutineScope.launch {
                         scrollState.scrollTo(0)
                     }
@@ -87,7 +94,10 @@ fun ChaptersSliderComposable(
                         scrollState.scrollTo(0)
                     }
                 } else {
-                    viewModel.showSnackBar("This is last chapter")
+                    coroutineScope.launch {
+                        viewModel.showSnackBar(UiText.StringResource(R.string.this_is_last_chapter))
+
+                    }
                 }
 
             }) {

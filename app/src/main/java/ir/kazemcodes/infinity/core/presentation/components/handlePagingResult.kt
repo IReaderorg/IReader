@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
@@ -30,6 +31,7 @@ fun handlePagingResult(
         }
     }
 ): Boolean {
+    val context = LocalContext.current
     books.apply {
         val error = when {
             loadState.refresh is LoadState.Error -> loadState.refresh as LoadState.Error
@@ -44,7 +46,7 @@ fun handlePagingResult(
                 false
             }
             error != null -> {
-                onErrorResult(UiText.exceptionError(error.error))
+                onErrorResult(UiText.ExceptionString(error.error).asString(context =context ))
                 false
             }
             books.itemCount < 1 -> {
@@ -70,6 +72,7 @@ fun handlePagingChapterResult(
         }
     },
 ): Boolean {
+    val context = LocalContext.current
     books.apply {
         val error = when {
             loadState.refresh is LoadState.Error -> loadState.refresh as LoadState.Error
@@ -84,7 +87,7 @@ fun handlePagingChapterResult(
                 false
             }
             error != null -> {
-                onErrorResult(UiText.exceptionError(error.error))
+                onErrorResult(UiText.ExceptionString(error.error).asString(context = context))
                 false
             }
             books.itemCount < 1 -> {

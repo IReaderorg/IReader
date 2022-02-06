@@ -1,5 +1,6 @@
 package ir.kazemcodes.infinity.core.domain.use_cases.fetchers
 
+import ir.kazemcodes.infinity.R
 import ir.kazemcodes.infinity.core.data.network.models.Source
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
@@ -26,7 +27,7 @@ class FetchBookDetailAndChapterDetailFromWebView {
             val bookFromPageSource = source.detailParse(Jsoup.parse(pageSource))
             val chaptersFromPageSource = source.chaptersParse(Jsoup.parse(pageSource))
             if (!chaptersFromPageSource.chapters.isNullOrEmpty()) {
-                emit(Resource.Error<UiText.DynamicString>(UiText.trying()))
+                emit(Resource.Error<UiText.DynamicString>(UiText.StringResource(R.string.trying_to_fetch)))
                 if (localChapters != null && chaptersFromPageSource.chapters.isNotEmpty() && localBook?.bookName?.isNotBlank() == true) {
 
                     val uniqueList = removeSameItemsFromList(oldList = localChapters,
@@ -49,21 +50,21 @@ class FetchBookDetailAndChapterDetailFromWebView {
 
                 } else {
                     if (chaptersFromPageSource.chapters.isNotEmpty()) {
-                        emit(Resource.Error<UiText.DynamicString>(UiText.failedGetContent()))
+                        emit(Resource.Error<UiText.DynamicString>(UiText.StringResource(R.string.failed_to_get_content)))
 
                     }
                     if (localChapters == null) {
-                        emit(Resource.Error<UiText.DynamicString>(UiText.tryAgainLater()))
+                        emit(Resource.Error<UiText.DynamicString>(UiText.StringResource(R.string.trying_in_few_second)))
 
                     }
                 }
 
             } else {
-                emit(Resource.Error(UiText.failedGetContent()))
+                emit(Resource.Error(UiText.StringResource(R.string.failed_to_get_content)))
 
             }
         } catch (e: Exception) {
-            emit(Resource.Error(UiText.failedGetContent()))
+            emit(Resource.Error(UiText.StringResource(R.string.failed_to_get_content)))
         }
     }
 }

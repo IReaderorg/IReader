@@ -4,6 +4,7 @@ import android.content.Context
 import android.webkit.WebView
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.PagingSource
+import ir.kazemcodes.infinity.R
 import ir.kazemcodes.infinity.core.data.local.dao.RemoteKeysDao
 import ir.kazemcodes.infinity.core.data.network.models.BookPage
 import ir.kazemcodes.infinity.core.data.network.models.ChapterPage
@@ -14,7 +15,6 @@ import ir.kazemcodes.infinity.core.domain.repository.RemoteRepository
 import ir.kazemcodes.infinity.core.utils.Constants
 import ir.kazemcodes.infinity.core.utils.Resource
 import ir.kazemcodes.infinity.core.utils.UiText
-import ir.kazemcodes.infinity.core.utils.asString
 import ir.kazemcodes.infinity.feature_explore.presentation.browse.ExploreType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -53,7 +53,7 @@ class RemoteRepositoryImpl(
             if (content.content.joinToString()
                     .isBlank() || content.content.contains(Constants.CLOUDFLARE_LOG)
             ) {
-                emit(Resource.Error<ChapterPage>(uiText = UiText.DynamicString("Can't Get The Chapter Content.").asString()))
+                emit(Resource.Error<ChapterPage>(uiText = UiText.StringResource(R.string.cant_get_content)))
             } else {
                 Timber.d("Timber: GetRemoteReadingContentUseCase was Finished Successfully")
                 emit(Resource.Success<ChapterPage>(content))
@@ -61,11 +61,11 @@ class RemoteRepositoryImpl(
             }
 
         } catch (e: HttpException) {
-            emit(Resource.Error<ChapterPage>(uiText = UiText.exceptionError(e)))
+            emit(Resource.Error<ChapterPage>(uiText = UiText.ExceptionString(e)))
         } catch (e: IOException) {
-            emit(Resource.Error<ChapterPage>(uiText = UiText.noInternetError()))
+            emit(Resource.Error<ChapterPage>(uiText = UiText.StringResource(R.string.noInternetError)))
         } catch (e: Exception) {
-            emit(Resource.Error<ChapterPage>(uiText = UiText.exceptionError(e)))
+            emit(Resource.Error<ChapterPage>(uiText = UiText.ExceptionString(e)))
         }
     }
 

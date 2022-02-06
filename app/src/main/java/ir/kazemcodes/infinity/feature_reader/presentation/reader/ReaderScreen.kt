@@ -63,7 +63,8 @@ fun ReadingScreen(
         rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Expanded)
     val scope = rememberCoroutineScope()
 
-    val state = viewModel.state.value
+    val state = viewModel.state
+    val prefState = viewModel.prefState
     val interactionSource = remember { MutableInteractionSource() }
     val context = LocalContext.current
     val scrollState = rememberCarouselScrollState()
@@ -71,7 +72,7 @@ fun ReadingScreen(
     val coroutineScope = rememberCoroutineScope()
 
     val isWebViewEnable by remember {
-        mutableStateOf(viewModel.webView.originalUrl == viewModel.state.value.chapter.link)
+        mutableStateOf(viewModel.webView.originalUrl == viewModel.state.chapter.link)
     }
 
     DisposableEffect(key1 = true) {
@@ -87,7 +88,7 @@ fun ReadingScreen(
             when (event) {
                 is UiEvent.ShowSnackbar -> {
                     scaffoldState.snackbarHostState.showSnackbar(
-                        event.uiText
+                        event.uiText.asString(context)
                     )
                 }
             }
@@ -95,12 +96,12 @@ fun ReadingScreen(
     }
 
     Scaffold(topBar = {
-        if (!state.isReaderModeEnable && state.isLoaded && modalBottomSheetState.targetValue == ModalBottomSheetValue.Expanded) {
+        if (!state.isReaderModeEnable && state.isLocalLoaded && modalBottomSheetState.targetValue == ModalBottomSheetValue.Expanded) {
             TopAppBar(
                 title = {
 
                     Text(
-                        text = viewModel.state.value.chapter.title,
+                        text = viewModel. state.chapter.title,
                         color = MaterialTheme.colors.onBackground,
                         style = MaterialTheme.typography.subtitle1,
                         fontWeight = FontWeight.Bold,
@@ -128,15 +129,15 @@ fun ReadingScreen(
                         title = "WebView",
                         onClick = {
                             navController.navigate(WebViewScreenSpec.buildRoute(
-                                url = viewModel.state.value.chapter.link,
-                                sourceId = viewModel.state.value.source.sourceId,
+                                url = viewModel. state.chapter.link,
+                                sourceId = viewModel. state.source.sourceId,
                                 fetchType = FetchType.Content.index,
                             )
                             )
                         })
                 }
             )
-        } else if (!state.isLoaded) {
+        } else if (!state.isLocalLoaded) {
             TopAppBar(title = {},
                 elevation = 0.dp,
                 backgroundColor = Color.Transparent,
@@ -145,8 +146,8 @@ fun ReadingScreen(
                         title = "WebView",
                         onClick = {
                             navController.navigate(WebViewScreenSpec.buildRoute(
-                                url = viewModel.state.value.chapter.link,
-                                sourceId = viewModel.state.value.source.sourceId,
+                                url = viewModel. state.chapter.link,
+                                sourceId = viewModel. state.source.sourceId,
                                 fetchType = FetchType.Content.index,
                                 bookId = state.chapter.bookId,
                                 chapterId = state.chapter.chapterId
@@ -166,12 +167,12 @@ fun ReadingScreen(
         scaffoldState = scaffoldState,
         snackbarHost = { ISnackBarHost(snackBarHostState = it) },
         bottomBar = {
-            if (!state.isReaderModeEnable && state.isLoaded) {
+            if (!state.isReaderModeEnable && state.isLocalLoaded) {
                 ModalBottomSheetLayout(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(IntrinsicSize.Max)
-                        .height(if (viewModel.state.value.isMainBottomModeEnable) 130.dp else 320.dp),
+                        .height(if (viewModel. state.isMainBottomModeEnable) 130.dp else 320.dp),
                     sheetBackgroundColor = MaterialTheme.colors.background,
                     sheetElevation = 8.dp,
                     sheetState = modalBottomSheetState,
@@ -181,12 +182,12 @@ fun ReadingScreen(
                                 color = MaterialTheme.colors.onBackground.copy(alpha = .2f),
                                 thickness = 1.dp)
                             Spacer(modifier = modifier.height(15.dp))
-                            if (viewModel.state.value.isMainBottomModeEnable) {
+                            if (viewModel. state.isMainBottomModeEnable) {
                                 MainBottomSettingComposable(viewModel = viewModel,
                                     scope = scope,
                                     scaffoldState = scaffoldState, scrollState = scrollState)
                             }
-                            if (viewModel.state.value.isSettingModeEnable) {
+                            if (viewModel. state.isSettingModeEnable) {
                                 ReaderSettingComposable(viewModel = viewModel)
                             }
 
@@ -280,13 +281,13 @@ fun ReadingScreen(
                     }
 
                 }
-                .background(viewModel.state.value.backgroundColor)
-                .padding(viewModel.state.value.paragraphsIndent.dp)
+                .background(viewModel. prefState.backgroundColor)
+                .padding(viewModel. prefState.paragraphsIndent.dp)
                 .wrapContentSize(Alignment.CenterStart)
         ) {
             Box(modifier = modifier.fillMaxSize()) {
 
-                if (state.chapter.isChapterNotEmpty() && !state.isLoading) {
+                if (state.chapter.isChapterNotEmpty() && !state.isLocalLoading) {
                     Row(modifier = modifier.fillMaxSize()) {
 
                         Text(
@@ -294,12 +295,12 @@ fun ReadingScreen(
                                 .verticalScroll(scrollState)
                                 .weight(1f),
                             text = state.chapter.content.map { it.trimStart() }
-                                .joinToString("\n".repeat(state.distanceBetweenParagraphs)),
-                            fontSize = viewModel.state.value.fontSize.sp,
-                            fontFamily = viewModel.state.value.font.fontFamily,
+                                .joinToString("\n".repeat(prefState.distanceBetweenParagraphs)),
+                            fontSize = viewModel. prefState.fontSize.sp,
+                            fontFamily = viewModel. prefState.font.fontFamily,
                             textAlign = TextAlign.Start,
-                            color = state.textColor,
-                            lineHeight = state.lineHeight.sp,
+                            color = prefState.textColor,
+                            lineHeight = prefState.lineHeight.sp,
                         )
 
 
@@ -312,8 +313,8 @@ fun ReadingScreen(
                             colors = CarouselDefaults.colors(
                                 thumbColor = MaterialTheme.colors.scrollingThumbColor,
                                 scrollingThumbColor = MaterialTheme.colors.scrollingThumbColor,
-                                backgroundColor = viewModel.state.value.backgroundColor,
-                                scrollingBackgroundColor = viewModel.state.value.backgroundColor
+                                backgroundColor = viewModel. prefState.backgroundColor,
+                                scrollingBackgroundColor = viewModel. prefState.backgroundColor
                             )
 
                         )
@@ -321,9 +322,9 @@ fun ReadingScreen(
 
                 }
 
-                if (state.error.isNotBlank()) {
+                if (state.error.asString(context).isNotBlank()) {
                     ErrorTextWithEmojis(
-                        error = state.error,
+                        error = state.error.asString(context),
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(20.dp)
@@ -332,7 +333,7 @@ fun ReadingScreen(
                     )
                 }
 
-                if (viewModel.state.value.isLoading) {
+                if (viewModel. state.isLocalLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier.align(Alignment.Center),
                         color = MaterialTheme.colors.primary

@@ -27,6 +27,7 @@ import ir.kazemcodes.infinity.core.presentation.reusable_composable.MidSizeTextC
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarActionButton
 import ir.kazemcodes.infinity.core.ui.BookDetailScreenSpec
 import ir.kazemcodes.infinity.core.utils.UiEvent
+import ir.kazemcodes.infinity.core.utils.UiText
 import ir.kazemcodes.infinity.feature_services.DownloaderService.DownloadService
 import kotlinx.coroutines.flow.collectLatest
 
@@ -37,13 +38,14 @@ fun DownloaderScreen(
     navController: NavController = rememberNavController(),
     viewModel: DownloaderViewModel = hiltViewModel(),
 ) {
+    val context = LocalContext.current
     val scaffoldState = rememberScaffoldState()
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
                 is UiEvent.ShowSnackbar -> {
                     scaffoldState.snackbarHostState.showSnackbar(
-                        event.uiText
+                        event.uiText.asString(context = context)
                     )
                 }
             }
@@ -52,7 +54,6 @@ fun DownloaderScreen(
     val books = viewModel.book.collectAsLazyPagingItems()
     val chapters = viewModel.chapters.collectAsLazyPagingItems()
     viewModel.updateChapters(chapters.itemSnapshotList.items)
-    val context = LocalContext.current
     Scaffold(
         topBar = {
             TopAppBar(
@@ -124,7 +125,7 @@ fun DownloaderScreen(
                                             viewModel.stopDownloads(context = context,
                                                 book.id,
                                                 book.sourceId)
-                                            viewModel.showSnackBar("The Download of ${book.bookName} was stopped")
+                                            viewModel.showSnackBar(UiText.DynamicString("The Download of ${book.bookName} was stopped"))
                                         })
                                 } else {
                                     TopAppBarActionButton(imageVector = Icons.Default.PlayArrow,
@@ -133,7 +134,7 @@ fun DownloaderScreen(
                                             viewModel.startDownloadService(context = context,
                                                 book.id,
                                                 book.sourceId)
-                                            viewModel.showSnackBar("The Download of ${book.bookName} was Started")
+                                            viewModel.showSnackBar(UiText.DynamicString("The Download of ${book.bookName} was Started"))
                                         })
                                 }
 

@@ -19,20 +19,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import ir.kazemcodes.infinity.core.data.network.utils.toast
+import ir.kazemcodes.infinity.R
 import ir.kazemcodes.infinity.core.presentation.components.BookImageComposable
 import ir.kazemcodes.infinity.core.presentation.components.ISnackBarHost
 import ir.kazemcodes.infinity.core.ui.ChapterScreenSpec
 import ir.kazemcodes.infinity.core.ui.ReaderScreenSpec
-import ir.kazemcodes.infinity.core.utils.Constants
-import ir.kazemcodes.infinity.core.utils.UiEvent
-import ir.kazemcodes.infinity.core.utils.formatBasedOnDot
-import ir.kazemcodes.infinity.core.utils.formatList
+import ir.kazemcodes.infinity.core.utils.*
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.components.ButtonWithIconAndText
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.components.CardTileComposable
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.components.DotsFlashing
 import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.components.ExpandingText
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 
 @Composable
@@ -51,13 +49,15 @@ fun BookDetailScreenLoadedComposable(
         mutableStateOf(webview.originalUrl == viewModel.state.book.link)
     }
 
+    val scope = rememberCoroutineScope()
+
     LaunchedEffect(key1 = true) {
         viewModel.getLocalBookById(state.book.id)
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
                 is UiEvent.ShowSnackbar -> {
                     scaffoldState.snackbarHostState.showSnackbar(
-                        event.uiText
+                        event.uiText.asString(context)
                     )
                 }
             }
@@ -113,7 +113,9 @@ fun BookDetailScreenLoadedComposable(
                                     chapterId = viewModel.chapterState.chapters.first().chapterId,
                                 ))
                             } else {
-                                context.toast("No Chapter is Available")
+                                scope.launch {
+                                    viewModel.showSnackBar(UiText.StringResource(R.string.no_chapter_is_available))
+                                }
                             }
                         }
                     )
@@ -122,7 +124,6 @@ fun BookDetailScreenLoadedComposable(
                         text = "Download",
                         imageVector = Icons.Default.FileDownload,
                         onClick = {
-                            //context.toast("Not available yet.")
                             viewModel.startDownloadService(context)
                         }
                     )

@@ -16,6 +16,7 @@ import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalGetChapterUseCase
 import ir.kazemcodes.infinity.core.domain.use_cases.local.LocalInsertUseCases
 import ir.kazemcodes.infinity.core.utils.Constants
 import ir.kazemcodes.infinity.core.utils.UiEvent
+import ir.kazemcodes.infinity.core.utils.UiText
 import ir.kazemcodes.infinity.feature_library.presentation.components.SortType
 import ir.kazemcodes.infinity.feature_services.DownloaderService.DownloadService
 import kotlinx.coroutines.Job
@@ -48,9 +49,8 @@ class DownloaderViewModel @Inject constructor(
         getLocalChaptersByPaging()
     }
 
-    fun showSnackBar(text: String) {
+    fun showSnackBar(text: UiText) {
         viewModelScope.launch {
-
             _eventFlow.emit(UiEvent.ShowSnackbar(text))
         }
     }
