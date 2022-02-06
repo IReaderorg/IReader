@@ -15,7 +15,6 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.compose.collectAsLazyPagingItems
 import ir.kazemcodes.infinity.core.presentation.components.handlePagingResult
@@ -32,7 +31,7 @@ import ir.kazemcodes.infinity.feature_sources.sources.models.FetchType
 @Composable
 fun ExploreScreen(
     modifier: Modifier = Modifier,
-    navController: NavController = rememberNavController(),
+    navController: NavController,
     viewModel: ExploreViewModel = hiltViewModel(),
 ) {
     val scrollState = rememberLazyListState()
@@ -54,7 +53,7 @@ fun ExploreScreen(
                     } else {
                         TopAppBarSearch(query = state.searchQuery,
                             onValueChange = {
-                                viewModel.onEvent(ExploreScreenEvents.UpdateSearchInput(it))
+                                viewModel.onEvent(ExploreScreenEvents.OnQueryChange(it))
                             },
                             onSearch = {
                                 viewModel.getBooks(
@@ -74,15 +73,14 @@ fun ExploreScreen(
                         TopAppBarActionButton(
                             imageVector = Icons.Default.Close,
                             title = "Close",
-                            onClick = { viewModel.onEvent(ExploreScreenEvents.ToggleSearchMode()) },
+                            onClick = { viewModel.onEvent(ExploreScreenEvents.ToggleSearchMode(false)) },
                         )
                     } else if (source.supportSearch) {
                         TopAppBarActionButton(
                             imageVector = Icons.Default.Search,
                             title = "Search",
                             onClick = {
-                                viewModel.onEvent(ExploreScreenEvents.ToggleSearchMode())
-
+                                viewModel.onEvent(ExploreScreenEvents.ToggleSearchMode(true))
                             },
                         )
                     }
@@ -114,7 +112,7 @@ fun ExploreScreen(
                     ) {
                         layouts.forEach { layout ->
                             DropdownMenuItem(onClick = {
-                                viewModel.onEvent(ExploreScreenEvents.UpdateLayoutType(
+                                viewModel.onEvent(ExploreScreenEvents.OnLayoutTypeChnage(
                                     layoutType = layout))
                                 viewModel.onEvent(ExploreScreenEvents.ToggleMenuDropDown(false))
                             }) {
@@ -122,7 +120,7 @@ fun ExploreScreen(
                                     text = layout.title,
                                     selected = viewModel.state.value.layout == layout.layout,
                                     onClick = {
-                                        viewModel.onEvent(ExploreScreenEvents.UpdateLayoutType(
+                                        viewModel.onEvent(ExploreScreenEvents.OnLayoutTypeChnage(
                                             layoutType = layout))
                                         viewModel.onEvent(ExploreScreenEvents.ToggleMenuDropDown(
                                             false))

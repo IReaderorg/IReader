@@ -21,15 +21,14 @@ import ir.kazemcodes.infinity.feature_sources.sources.Extensions
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
-sealed class ExploreType(val mode: Int) {
+sealed class ExploreType(val id: Int) {
     object Latest : ExploreType(0)
     object Popular : ExploreType(1)
-    object Search : ExploreType(1)
+    object Search : ExploreType(2)
 }
 
 @HiltViewModel
@@ -41,7 +40,7 @@ class ExploreViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
-    private val _state : MutableState<ExploreScreenState> = mutableStateOf<ExploreScreenState>(ExploreScreenState())
+    private val _state: MutableState<ExploreScreenState> = mutableStateOf<ExploreScreenState>(ExploreScreenState())
     val state: State<ExploreScreenState> = _state
 
     init {
@@ -49,11 +48,9 @@ class ExploreViewModel @Inject constructor(
         val sourceId = savedStateHandle.get<Long>(NavigationArgs.sourceId.name)
         val source = sourceId?.let { extensions.mappingSourceNameToSource(it) }!!
         _state.value = state.value.copy(source = source)
-        val exploreType = when (exploreId) {
-            0 -> ExploreType.Latest
-            else -> ExploreType.Popular
+        if (exploreId != null) {
+            _state.value = state.value.copy(exploreType = exploreTypeMapper(exploreId))
         }
-        _state.value = state.value.copy(exploreType = exploreType)
         getBooks()
         readLayoutType()
     }
@@ -62,16 +59,10 @@ class ExploreViewModel @Inject constructor(
     val books = _books
 
 
-    private var getBooksJob: Job? = null
-
-
     fun onEvent(event: ExploreScreenEvents) {
         when (event) {
-            is ExploreScreenEvents.UpdatePage -> {
-                updatePage(event.page)
-            }
-            is ExploreScreenEvents.UpdateLayoutType -> {
-                updateLayoutType(event.layoutType)
+            is ExploreScreenEvents.OnLayoutTypeChnage -> {
+                saveLayoutType(event.layoutType)
             }
             is ExploreScreenEvents.ToggleMenuDropDown -> {
                 toggleMenuDropDown(isShown = event.isShown)
@@ -79,13 +70,13 @@ class ExploreViewModel @Inject constructor(
             is ExploreScreenEvents.ToggleSearchMode -> {
                 toggleSearchMode(event.inSearchMode)
             }
-            is ExploreScreenEvents.UpdateSearchInput -> {
-                updateSearchInput(event.query)
+            is ExploreScreenEvents.OnQueryChange -> {
+                onQueryChange(event.query)
             }
         }
     }
 
-
+    private var getBooksJob: Job? = null
     @OptIn(ExperimentalPagingApi::class)
     fun getBooks(query: String? = null, type: ExploreType? = null) {
         getBooksJob?.cancel()
@@ -99,61 +90,39 @@ class ExploreViewModel @Inject constructor(
         }
     }
 
-
-    private fun updatePage(page: Int) {
-        if (!state.value.isSearchModeEnable) {
-            _state.value = state.value.copy(page = page)
-        } else {
-            _state.value = state.value.copy(searchPage = page)
-        }
-    }
-
-    private fun updateSearchInput(query: String) {
+    private fun onQueryChange(query: String) {
         _state.value = state.value.copy(searchQuery = query)
     }
 
-    private fun toggleSearchMode(inSearchMode: Boolean? = null) {
+    private fun toggleSearchMode(inSearchMode: Boolean) {
         _state.value =
-            state.value.copy(isSearchModeEnable = inSearchMode ?: !state.value.isSearchModeEnable)
-        if (inSearchMode == false) {
+            state.value.copy(isSearchModeEnable = inSearchMode)
+        if (!inSearchMode) {
             exitSearchedMode()
             getBooks()
         }
     }
 
     private fun exitSearchedMode() {
-        _state.value = state.value.copy(searchedBook = BooksPage(),
+        _state.value = state.value.copy(
+            searchedBook = BooksPage(),
             searchQuery = "",
-            page = 1,
             isLoading = false,
             error = "")
     }
 
-    private fun updateLayoutType(layoutType: DisplayMode) {
+    private fun saveLayoutType(layoutType: DisplayMode) {
         _state.value = state.value.copy(layout = layoutType.layout)
-
         preferencesUseCase.saveBrowseLayoutUseCase(layoutType.layoutIndex)
-
     }
 
     private fun readLayoutType() {
         _state.value =
             state.value.copy(layout = preferencesUseCase.readBrowseLayoutUseCase().layout)
-
-
     }
 
     private fun toggleMenuDropDown(isShown: Boolean) {
         _state.value = state.value.copy(isMenuDropDownShown = isShown)
     }
-
-
-
-    private fun setExploreModeOffForInLibraryBooks() {
-        viewModelScope.launch(Dispatchers.IO) {
-            deleteUseCase.setExploreModeOffForInLibraryBooks()
-        }
-    }
-
 
 }

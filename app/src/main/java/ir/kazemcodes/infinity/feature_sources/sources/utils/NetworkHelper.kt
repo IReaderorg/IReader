@@ -101,7 +101,7 @@ class NetworkHelper(private val context: Context): KoinComponent {
             }
 
             override fun onPageFinished(view: WebView, url: String) {
-                coroutineScope.launch(Dispatchers.Main) {
+                coroutineScope.launch {
                     docs = Jsoup.parse(webView.getHtml())
                     if (ajaxSelector != null) {
                         while (docs.select(ajaxSelector).text().isEmpty()) {

@@ -12,17 +12,21 @@
         android:name="ir.kazemcodes.infinity.MyApplication"
         android:screenOrientation="fullSensor"
         android:configChanges="orientation|screenSize"
-        android:allowBackup="false"
+        android:hardwareAccelerated="true"
+        android:allowBackup="true"
+        android:fullBackupOnly="true"
+        android:hasFragileUserData="true"
+        android:requestLegacyExternalStorage="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="true"
         android:supportsRtl="true"
+        android:largeHeap="true"
         android:theme="@style/Theme.Infinity">
         <activity
             android:name="ir.kazemcodes.infinity.feature_activity.presentation.MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
             android:theme="@style/Theme.Infinity.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

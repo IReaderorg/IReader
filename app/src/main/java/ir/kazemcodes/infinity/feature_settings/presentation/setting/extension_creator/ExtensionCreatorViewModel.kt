@@ -3,6 +3,7 @@ package ir.kazemcodes.infinity.feature_settings.presentation.setting.extension_c
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonEncodingException
 import com.squareup.moshi.Moshi
@@ -13,9 +14,7 @@ import ir.kazemcodes.infinity.core.utils.UiText
 import ir.kazemcodes.infinity.core.utils.asString
 import ir.kazemcodes.infinity.core.utils.moshi
 import ir.kazemcodes.infinity.feature_sources.sources.models.SourceTower
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
@@ -24,7 +23,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ExtensionCreatorViewModel @Inject constructor(private val localSourceRepository: LocalSourceRepository) : ViewModel() {
-    private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+   
     private val _state =
         mutableStateOf(ExtensionCreatorState())
 
@@ -40,7 +39,7 @@ class ExtensionCreatorViewModel @Inject constructor(private val localSourceRepos
     }
 
     fun convertJsonToSource() {
-        coroutineScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
 
                 val json = state.value.extensionFieldValue
@@ -83,7 +82,7 @@ class ExtensionCreatorViewModel @Inject constructor(private val localSourceRepos
     }
 
     fun formatJson() {
-        coroutineScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
 
                 val json = state.value.extensionFieldValue

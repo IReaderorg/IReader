@@ -1,8 +1,9 @@
 package ir.kazemcodes.infinity.feature_library.presentation
 
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
@@ -17,7 +18,6 @@ import ir.kazemcodes.infinity.feature_library.presentation.components.FilterType
 import ir.kazemcodes.infinity.feature_library.presentation.components.LibraryEvents
 import ir.kazemcodes.infinity.feature_library.presentation.components.SortType
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -28,12 +28,10 @@ class LibraryViewModel @Inject constructor(
     private val localGetBookUseCases: LocalGetBookUseCases,
     private val deleteUseCase: DeleteUseCase,
     private val preferencesUseCase: PreferencesUseCase,
-) : ViewModel(), LibraryScreenActions {
+) : ViewModel() {
 
-
-    private val _state = mutableStateOf(LibraryState())
-    val state: State<LibraryState> = _state
-
+    var state by mutableStateOf(LibraryScreenState())
+        private set
 
     private val _books = MutableStateFlow<PagingData<Book>>(PagingData.empty())
     val book = _books
@@ -42,115 +40,124 @@ class LibraryViewModel @Inject constructor(
         setExploreModeOffForInLibraryBooks()
         deleteNotInLibraryChapters()
         getLibraryBooks()
-        readLayoutType()
+        readLayoutTypeAndFilterTypeAndSortType()
     }
 
-    /**
-     * Get All Books By Paging
-     */
-    override fun getLibraryBooks() {
-        viewModelScope.launch {
-            localGetBookUseCases.GetInLibraryBooksPagingData(
-                sortType = state.value.sortType,
-                isAsc = state.value.isSortAcs,
-                unreadFilter = state.value.unreadFilter).cachedIn(viewModelScope)
-                .collect { snapshot ->
-                    _books.value = snapshot
-                }
-        }
-    }
-
-    override fun searchBook(query: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            localGetBookUseCases.getBooksByQueryByPagination(query).cachedIn(viewModelScope)
-                .collect { snapshot ->
-                    _books.value = snapshot
-                }
-        }
-    }
-
-
-    override fun onCleared() {
-        viewModelScope.cancel()
-        super.onCleared()
-    }
 
     fun onEvent(event: LibraryEvents) {
         when (event) {
-            is LibraryEvents.UpdateLayoutType -> {
-                updateLayoutType(event.layoutType)
+            is LibraryEvents.OnLayoutTypeChange -> {
+                onLayoutTypeChange(event.layoutType)
             }
             is LibraryEvents.ToggleSearchMode -> {
                 toggleSearchMode(event.inSearchMode)
-                getLibraryDataIfSearchModeIsOff(event.inSearchMode ?: false)
-
+                getLibraryDataIfSearchModeIsOff()
             }
             is LibraryEvents.UpdateSearchInput -> {
-                updateSearchInput(event.query)
+                onQueryChange(event.query)
+            }
+            is LibraryEvents.SearchBook -> {
+                searchBook(event.query)
+            }
+            is LibraryEvents.EnableFilter -> {
+                when (event.filterType) {
+                    is FilterType.Unread -> {
+                        enableUnreadFilter(event.filterType)
+                    }
+                    else -> {
+
+                    }
+                }
             }
         }
 
     }
 
-
-    override fun updateSearchInput(query: String) {
-        _state.value = state.value.copy(searchQuery = query)
+    private fun getLibraryBooks() {
+        viewModelScope.launch {
+            localGetBookUseCases.GetInLibraryBooksPagingData(
+                sortType = state.sortType,
+                isAsc = state.isSortAcs,
+                unreadFilter = state.unreadFilter)
+                .cachedIn(viewModelScope)
+                .collect { snapshot ->
+                    _books.value = snapshot
+                }
+        }
     }
 
-    override fun toggleSearchMode(inSearchMode: Boolean?) {
-        _state.value = state.value.copy(inSearchMode = inSearchMode ?: !state.value.inSearchMode)
+    private fun searchBook(query: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            localGetBookUseCases.getBooksByQueryByPagination(query)
+                .cachedIn(viewModelScope)
+                .collect { snapshot ->
+                    _books.value = snapshot
+                }
+        }
+    }
+
+    private fun onQueryChange(query: String) {
+        state = state.copy(searchQuery = query)
+    }
+
+    private fun toggleSearchMode(inSearchMode: Boolean) {
+        state = state.copy(inSearchMode = inSearchMode)
     }
 
 
-    override fun updateLayoutType(layoutType: DisplayMode) {
+    private fun onLayoutTypeChange(layoutType: DisplayMode) {
         preferencesUseCase.saveLibraryLayoutUseCase(layoutType.layoutIndex)
-        _state.value = state.value.copy(layout = layoutType.layout)
+        state = state.copy(layout = layoutType.layout)
     }
 
 
-    override fun readLayoutType() {
+    private fun readLayoutTypeAndFilterTypeAndSortType() {
         val sortType = preferencesUseCase.readSortersUseCase()
         val filterType = preferencesUseCase.readFilterUseCase()
-        _state.value =
-            state.value.copy(layout = preferencesUseCase.readLibraryLayoutUseCase().layout,
-                sortType = sortType,
-                unreadFilter = filterType)
-
+        val layoutType = preferencesUseCase.readLibraryLayoutUseCase().layout
+        state = state.copy(layout = layoutType,
+            sortType = sortType,
+            unreadFilter = filterType)
     }
 
-
-    override fun deleteNotInLibraryChapters() {
+    /**
+     * This line deletes chapters from book that are downloaded from book
+     * but the books weren't added to the library
+     */
+    private fun deleteNotInLibraryChapters() {
         viewModelScope.launch(Dispatchers.IO) {
             deleteUseCase.deleteNotInLibraryBook()
         }
     }
 
-    override fun changeSortIndex(sortType: SortType) {
-        _state.value = state.value.copy(sortType = sortType)
-        if (state.value.sortType == sortType) {
-            _state.value = _state.value.copy(isSortAcs = !state.value.isSortAcs)
+    fun changeSortIndex(sortType: SortType) {
+        state = state.copy(sortType = sortType)
+        if (state.sortType == sortType) {
+            state = state.copy(isSortAcs = !state.isSortAcs)
         }
-        preferencesUseCase.saveSortersUseCase(state.value.sortType.index)
+        saveSortType(sortType)
         getLibraryBooks()
     }
 
-    override fun enableUnreadFilter(filterType: FilterType) {
-        _state.value = state.value.copy(unreadFilter = filterType)
-        preferencesUseCase.saveFiltersUseCase(state.value.unreadFilter.index)
+    private fun saveSortType(sortType: SortType) {
+        preferencesUseCase.saveSortersUseCase(sortType.index)
+    }
+
+    fun enableUnreadFilter(filterType: FilterType) {
+        state = state.copy(unreadFilter = filterType)
+        preferencesUseCase.saveFiltersUseCase(state.unreadFilter.index)
         getLibraryBooks()
     }
 
-    override fun getLibraryDataIfSearchModeIsOff(inSearchMode: Boolean) {
-        if (inSearchMode) return
-        _state.value = state.value.copy(searchedBook = emptyList(), searchQuery = "")
+    private fun getLibraryDataIfSearchModeIsOff() {
+        if (state.inSearchMode) return
+        state = state.copy(searchedBook = emptyList(), searchQuery = "")
         getLibraryBooks()
     }
 
-    override fun setExploreModeOffForInLibraryBooks() {
+    fun setExploreModeOffForInLibraryBooks() {
         viewModelScope.launch(Dispatchers.IO) {
             deleteUseCase.setExploreModeOffForInLibraryBooks()
         }
     }
-
-
 }

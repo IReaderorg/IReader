@@ -54,14 +54,14 @@ fun ChapterDetailScreen(
 ) {
 
     val chapters = viewModel.chapters.collectAsLazyPagingItems()
-    val book = viewModel.state.value.book
+    val book = viewModel.state.book
     val scrollState = rememberLazyListState()
-    val state = viewModel.state.value
+    val state = viewModel.state
     val context = LocalContext.current
 
 
     LaunchedEffect(key1 = true ) {
-        viewModel.getLocalBookById()
+        viewModel.getLocalBookById(state.book.id)
     }
 
     Scaffold(
@@ -133,7 +133,7 @@ fun ChapterDetailScreen(
                                     modifier = modifier.clickable {
                                         navController.navigate(ReaderScreenSpec.buildRoute(
                                             bookId = book.id,
-                                            sourceId = viewModel.state.value.source.sourceId,
+                                            sourceId = viewModel.state.source.sourceId,
                                             chapterId = chapter.chapterId,
                                         ))
                                     },

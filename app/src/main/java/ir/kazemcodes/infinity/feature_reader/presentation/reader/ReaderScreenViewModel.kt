@@ -98,7 +98,6 @@ class ReaderScreenViewModel @Inject constructor(
 
     fun onEvent(event: ReaderEvent) {
         when (event) {
-
             is ReaderEvent.ChangeBrightness -> {
                 saveBrightness(event.brightness, event.context)
             }
@@ -115,9 +114,8 @@ class ReaderScreenViewModel @Inject constructor(
     }
 
     private fun getLastChapter() {
-        viewModelScope.launch(Dispatchers.IO) {
             getChapterUseCase.getLastReadChapter(state.value.book.id)
-                .collect { result ->
+                .onEach { result ->
                     when (result) {
                         is Resource.Success -> {
                             if (result.data != null) {
@@ -145,8 +143,8 @@ class ReaderScreenViewModel @Inject constructor(
                             getReadingContentRemotely()
                         }
                     }
-                }
-        }
+                }.launchIn(viewModelScope)
+
 
     }
 
@@ -169,10 +167,10 @@ class ReaderScreenViewModel @Inject constructor(
     }
 
     private fun getChapters() {
-        viewModelScope.launch {
+
             getChapterUseCase.getChaptersByBookId(bookId = state.value.book.id,
                 isAsc = state.value.book.areChaptersReversed)
-                .collect { result ->
+                .onEach { result ->
                     when (result) {
                         is Resource.Success -> {
                             if (result.data != null) {
@@ -187,8 +185,8 @@ class ReaderScreenViewModel @Inject constructor(
                         is Resource.Error -> {
                         }
                     }
-                }
-        }
+                }.launchIn(viewModelScope)
+
 
     }
 
@@ -586,7 +584,7 @@ class ReaderScreenViewModel @Inject constructor(
         val activity = context.findComponentActivity()!!
         val window = activity.window
         val layoutParams: WindowManager.LayoutParams = window.attributes
-        layoutParams.screenBrightness = -1f
+        layoutParams.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
         activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
         window.attributes = layoutParams
 

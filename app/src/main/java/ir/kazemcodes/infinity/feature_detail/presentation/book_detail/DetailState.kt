@@ -9,10 +9,10 @@ data class DetailState(
     val source: Source = SourceTower.create(),
     val book: Book = Book.create(),
     val inLibrary : Boolean = false,
-    val isLoading: Boolean = false,
-    val isLoaded : Boolean = false,
+    val isLocalLoading: Boolean = false,
+    val isLocalLoaded : Boolean = false,
     val error: String = UiText.noError(),
     val isExploreMode: Boolean = false,
     val isRemoteLoaded: Boolean = false,
-
+    val isRemoteLoading: Boolean = false
     )

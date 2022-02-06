@@ -1,6 +1,5 @@
 package ir.kazemcodes.infinity.feature_reader.presentation.reader.components
 
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,7 +14,6 @@ import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarAct
 import ir.kazemcodes.infinity.core.utils.scroll.CarouselScrollState
 import ir.kazemcodes.infinity.feature_reader.presentation.reader.ReaderScreenViewModel
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
@@ -32,7 +30,7 @@ fun MainBottomSettingComposable(
         verticalAlignment = Alignment.CenterVertically) {
         TopAppBarActionButton(imageVector = Icons.Default.Menu,
             title = "Chapter List Drawer",
-            onClick = { scope.launch(Dispatchers.Main) { scaffoldState.drawerState.open() } })
+            onClick = { scope.launch { scaffoldState.drawerState.open() } })
         TopAppBarActionButton(imageVector = Icons.Default.Settings,
             title = "Setting Drawer",
             onClick = { viewModel.toggleSettingMode(true) })

@@ -1,11 +1,12 @@
 package ir.kazemcodes.infinity.feature_library.presentation
 
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.BottomSheetScaffoldState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Sort
@@ -14,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.navigation.NavController
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarActionButton
-import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarBackButton
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarSearch
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarTitle
 import ir.kazemcodes.infinity.core.presentation.theme.Colour.topBarColor
@@ -29,9 +29,9 @@ fun LibraryScreenTopBar(
     navController: NavController,
     viewModel: LibraryViewModel,
     coroutineScope: CoroutineScope,
-    modalBottomSheetState: ModalBottomSheetState
+    bottomSheetState: BottomSheetScaffoldState
 ) {
-    val state = viewModel.state.value
+    val state = viewModel.state
     val focusManager = LocalFocusManager.current
     TopAppBar(
         title = {
@@ -41,9 +41,10 @@ fun LibraryScreenTopBar(
                 TopAppBarSearch(query = state.searchQuery,
                     onValueChange = {
                         viewModel.onEvent(LibraryEvents.UpdateSearchInput(it))
+                        viewModel.onEvent(LibraryEvents.SearchBook(state.searchQuery))
                     },
                     onSearch = {
-                        viewModel.searchBook(state.searchQuery)
+                        viewModel.onEvent(LibraryEvents.SearchBook(state.searchQuery))
                         focusManager.clearFocus()
                     },
                     isSearchModeEnable = state.searchQuery.isNotBlank())
@@ -68,13 +69,10 @@ fun LibraryScreenTopBar(
                 title = "Filter",
                 onClick = {
                     coroutineScope.launch {
-                        if (!modalBottomSheetState.isVisible) {
-                          modalBottomSheetState.show()
-                            //bottomSheetScaffoldState.bottomSheetState.expand()
+                        if (bottomSheetState.bottomSheetState.isExpanded) {
+                            bottomSheetState.bottomSheetState.collapse()
                         } else {
-                            modalBottomSheetState.hide()
-                            //viewModel.bottomSheetState.value = BottomSheetValue.Collapsed
-                            //bottomSheetScaffoldState.bottomSheetState.collapse()
+                            bottomSheetState.bottomSheetState.expand()
                         }
                     }
                 },
@@ -83,20 +81,18 @@ fun LibraryScreenTopBar(
                 imageVector = Icons.Default.Search,
                 title = "Search",
                 onClick = {
-                    viewModel.onEvent(LibraryEvents.ToggleSearchMode())
-
+                    viewModel.onEvent(LibraryEvents.ToggleSearchMode(true))
                 },
             )
 
 
         },
-        navigationIcon = if (state.inSearchMode) {
-            {
-                TopAppBarBackButton(navController = navController,
-                    onClick = {
-                        viewModel.onEvent(LibraryEvents.ToggleSearchMode(false))
-                    })
-            }
+        navigationIcon = if (state.inSearchMode) { {
+            TopAppBarActionButton(imageVector = Icons.Default.ArrowBack,
+                title = "Toggle search mode off",
+                onClick = { viewModel.onEvent(LibraryEvents.ToggleSearchMode(false)) })
+
+        }
         } else null
 
     )

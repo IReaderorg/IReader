@@ -1,7 +1,6 @@
 package ir.kazemcodes.infinity.feature_settings.presentation.webview
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.webkit.WebView
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -10,7 +9,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import ir.kazemcodes.infinity.core.data.network.models.Source
-import ir.kazemcodes.infinity.core.data.network.utils.toast
 import ir.kazemcodes.infinity.core.domain.models.Book
 import ir.kazemcodes.infinity.core.domain.models.Chapter
 import ir.kazemcodes.infinity.core.domain.use_cases.fetchers.FetchUseCase
@@ -79,34 +77,8 @@ class WebViewPageModel @Inject constructor(
         }
 
     }
-
-    fun mapFetcher(fetcher: Int): FetchType {
-        return when (fetcher) {
-            FetchType.Detail.index -> FetchType.Detail
-            FetchType.Content.index -> FetchType.Content
-            FetchType.Search.index -> FetchType.Search
-            FetchType.Latest.index -> FetchType.Latest
-            FetchType.Popular.index -> FetchType.Popular
-            FetchType.Chapter.index -> FetchType.Chapter
-            else -> FetchType.Search
-        }
-    }
-
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
-
-
-    fun onEvent(event: WebPageEvent) {
-        when (event) {
-            is WebPageEvent.OnFetched -> {
-                showToast(event.context)
-            }
-        }
-    }
-
-    fun showToast(context: Context) {
-        context.toast("Event is Occured")
-    }
 
 
     @ExperimentalCoroutinesApi
@@ -144,37 +116,6 @@ class WebViewPageModel @Inject constructor(
 
     }
 
-
-    fun insertChaptersToLocal(chapters: List<Chapter>) {
-        viewModelScope.launch(Dispatchers.IO) {
-            insetUseCases.insertChapters(
-                chapters
-            )
-        }
-    }
-
-    private fun getLocalBook(book: Book) {
-        getBookUseCases.getBookById(state.value.book.id).onEach { result ->
-            when (result) {
-                is Resource.Success -> {
-                    if (result.data != null && result.data != Book.create()) {
-                        _state.value = state.value.copy(
-                            book = result.data,
-                        )
-                        insertBookDetailToLocal(result.data.copy(category = book.category,
-                            status = book.status,
-                            description = book.description,
-                            author = book.author,
-                            rating = book.rating))
-                        //insertChaptersToLocal(state.value.chapters)
-                    }
-                }
-                is Resource.Error -> {
-
-                }
-            }
-        }.launchIn(viewModelScope)
-    }
 
     private fun getLocalChaptersByBookName(bookId: Int) {
         getChapterUseCase.getChaptersByBookId(bookId = bookId)
@@ -236,13 +177,6 @@ class WebViewPageModel @Inject constructor(
         }
     }
 
-    fun deleteChapterDetails() {
-        viewModelScope.launch(Dispatchers.IO) {
-            if (state.value.book.id != 0) {
-                deleteUseCase.deleteChaptersByBookId(state.value.book.id)
-            }
-        }
-    }
 }
 
 data class WebViewPageState(

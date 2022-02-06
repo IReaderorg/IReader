@@ -44,7 +44,6 @@ import ir.kazemcodes.infinity.core.utils.scroll.verticalScroll
 import ir.kazemcodes.infinity.feature_reader.presentation.reader.components.MainBottomSettingComposable
 import ir.kazemcodes.infinity.feature_reader.presentation.reader.components.ReaderSettingComposable
 import ir.kazemcodes.infinity.feature_sources.sources.models.FetchType
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -270,12 +269,12 @@ fun ReadingScreen(
                     indication = null) {
                     viewModel.onEvent(ReaderEvent.ToggleReaderMode(!state.isReaderModeEnable))
                     if (state.isReaderModeEnable) {
-                        scope.launch(Dispatchers.Main) {
+                        scope.launch {
                             viewModel.getLocalChaptersByPaging()
                             modalBottomSheetState.animateTo(ModalBottomSheetValue.Expanded)
                         }
                     } else {
-                        scope.launch(Dispatchers.Main) {
+                        scope.launch {
                             modalBottomSheetState.animateTo(ModalBottomSheetValue.Hidden)
                         }
                     }

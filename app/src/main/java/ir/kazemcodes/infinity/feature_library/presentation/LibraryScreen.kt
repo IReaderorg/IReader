@@ -9,18 +9,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Sort
+import androidx.compose.material.BottomSheetScaffold
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -31,15 +27,8 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
 import ir.kazemcodes.infinity.core.presentation.components.handlePagingResult
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.ErrorTextWithEmojis
-import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarActionButton
-import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarSearch
-import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarTitle
-import ir.kazemcodes.infinity.core.presentation.theme.Colour.topBarColor
-import ir.kazemcodes.infinity.core.utils.Constants
 import ir.kazemcodes.infinity.feature_library.presentation.components.BottomTabComposable
 import ir.kazemcodes.infinity.feature_library.presentation.components.LayoutComposable
-import ir.kazemcodes.infinity.feature_library.presentation.components.LibraryEvents
-import kotlinx.coroutines.launch
 
 
 @ExperimentalPagerApi
@@ -53,88 +42,27 @@ fun LibraryScreen(
 ) {
 
 
-    val state = viewModel.state.value
+    val state = viewModel.state
 
     val coroutineScope = rememberCoroutineScope()
-    val focusManager = LocalFocusManager.current
 
     val books = viewModel.book.collectAsLazyPagingItems()
     val pagerState = rememberPagerState()
     val bottomSheetState = rememberBottomSheetScaffoldState()
 
-    val gridState= rememberLazyGridState()
-    val lazyListState= rememberLazyListState()
+    val gridState = rememberLazyGridState()
+    val lazyListState = rememberLazyListState()
 
     LaunchedEffect(key1 = true) {
         viewModel.setExploreModeOffForInLibraryBooks()
     }
 
-
     BottomSheetScaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    if (!state.inSearchMode) {
-                        TopAppBarTitle(title = "Library")
-                    } else {
-                        TopAppBarSearch(query = state.searchQuery,
-                            onValueChange = {
-                                viewModel.onEvent(LibraryEvents.UpdateSearchInput(it))
-                            },
-                            onSearch = {
-                                viewModel.searchBook(state.searchQuery)
-                                focusManager.clearFocus()
-                            },
-                            isSearchModeEnable = state.searchQuery.isNotBlank())
-                    }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                backgroundColor = MaterialTheme.colors.topBarColor,
-                contentColor = MaterialTheme.colors.onBackground,
-                elevation = Constants.DEFAULT_ELEVATION,
-                actions = {
-                    if (state.inSearchMode) {
-                        TopAppBarActionButton(
-                            imageVector = Icons.Default.Close,
-                            title = "Close",
-                            onClick = {
-                                viewModel.onEvent(LibraryEvents.ToggleSearchMode(false))
-                            },
-                        )
-                    }
-                    TopAppBarActionButton(
-                        imageVector = Icons.Default.Sort,
-                        title = "Filter",
-                        onClick = {
-                            coroutineScope.launch {
-                                if (bottomSheetState.bottomSheetState.isExpanded) {
-                                    bottomSheetState.bottomSheetState.collapse()
-                                } else {
-                                    bottomSheetState.bottomSheetState.expand()
-                                }
-                            }
-                        },
-                    )
-                    TopAppBarActionButton(
-                        imageVector = Icons.Default.Search,
-                        title = "Search",
-                        onClick = {
-                            viewModel.onEvent(LibraryEvents.ToggleSearchMode())
-
-                        },
-                    )
-
-
-                },
-                navigationIcon = if (state.inSearchMode) { {
-                        TopAppBarActionButton(imageVector = Icons.Default.ArrowBack,
-                            title = "Toggle search mode off",
-                            onClick = { viewModel.onEvent(LibraryEvents.ToggleSearchMode(false)) })
-
-                    }
-                } else null
-
-            )
+            LibraryScreenTopBar(navController = navController,
+                viewModel = viewModel,
+                coroutineScope = coroutineScope,
+                bottomSheetState = bottomSheetState)
         },
         sheetPeekHeight = (-1).dp,
         sheetContent = {
@@ -145,8 +73,6 @@ fun LibraryScreen(
                     navController = navController,
                     scope = coroutineScope)
             }
-
-
         },
         scaffoldState = bottomSheetState
     ) {
@@ -169,7 +95,7 @@ fun LibraryScreen(
                         navController = navController,
                         isLocal = true,
                         gridState = gridState,
-                        scrollState =  lazyListState
+                        scrollState = lazyListState
                     )
                 }
             }

@@ -20,7 +20,7 @@ class GetRemoteBooksByRemoteMediator(private val remoteRepository: RemoteReposit
         exploreType: ExploreType,
         query: String?,
     ): Flow<PagingData<Book>> {
-        return return Pager(
+        return Pager(
             config = PagingConfig(pageSize = Constants.DEFAULT_PAGE_SIZE,
                 maxSize = Constants.MAX_PAGE_SIZE),
             pagingSourceFactory = {

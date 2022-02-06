@@ -55,6 +55,14 @@ fun InfinityTheme(
             color = colors.background,
             darkIcons = !darkTheme
         )
+        systemUiController.setNavigationBarColor(
+            color = colors.background,
+            darkIcons = !darkTheme
+        )
+        systemUiController.setSystemBarsColor(
+            color = colors.background,
+            darkIcons = !darkTheme
+        )
 
     }
     CompositionLocalProvider(LocalSpacing provides Spacing()) {

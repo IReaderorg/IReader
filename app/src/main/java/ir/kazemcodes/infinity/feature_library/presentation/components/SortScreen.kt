@@ -36,8 +36,8 @@ fun SortScreen(viewModel: LibraryViewModel) {
             items.forEach { item ->
 
                 IconWithText(item.name,
-                    if (!viewModel.state.value.isSortAcs) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
-                    viewModel.state.value.sortType == item,
+                    if (!viewModel.state.isSortAcs) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
+                    viewModel.state.sortType == item,
                     onClick = {
                         viewModel.changeSortIndex(item)
                     })

@@ -69,7 +69,7 @@ fun SourceList(
                     .clickable {
                         navController.navigate(ExploreScreenSpec.buildRoute(
                             sourceId = sources[index].sourceId,
-                            exploreType = ExploreType.Latest.mode
+                            exploreType = ExploreType.Latest.id
                         ))
                     }
                     .height(60.dp),
@@ -82,7 +82,7 @@ fun SourceList(
                             modifier = Modifier.clickable {
                                 navController.navigate(ExploreScreenSpec.buildRoute(
                                     sourceId = sources[index].sourceId,
-                                    exploreType = ExploreType.Popular.mode
+                                    exploreType = ExploreType.Popular.id
                                 ))
                             })
                     }

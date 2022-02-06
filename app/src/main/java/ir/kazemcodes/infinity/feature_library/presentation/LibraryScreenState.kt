@@ -6,7 +6,7 @@ import ir.kazemcodes.infinity.core.presentation.layouts.LayoutType
 import ir.kazemcodes.infinity.feature_library.presentation.components.FilterType
 import ir.kazemcodes.infinity.feature_library.presentation.components.SortType
 
-data class LibraryState(
+data class LibraryScreenState(
     val isLoading: Boolean = false,
     val books: List<Book> = emptyList(),
     val searchedBook: List<Book> = emptyList(),

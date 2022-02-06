@@ -12,9 +12,6 @@ import ir.kazemcodes.infinity.core.data.network.utils.*
 import ir.kazemcodes.infinity.feature_sources.sources.models.HttpSource
 import ir.kazemcodes.infinity.feature_sources.sources.utils.NetworkHelper
 import ir.kazemcodes.infinity.feature_sources.sources.utils.WebViewClientCompat
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import okhttp3.Cookie
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.Interceptor
@@ -31,7 +28,6 @@ class CloudflareInterceptor(private val context: Context) : Interceptor,KoinComp
     private val executor = ContextCompat.getMainExecutor(context)
 
 
-    private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     private val networkHelper: NetworkHelper by inject()
 

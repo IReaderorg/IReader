@@ -4,7 +4,6 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import ir.kazemcodes.infinity.core.domain.use_cases.preferences.apperance.NightMode
 import ir.kazemcodes.infinity.core.domain.use_cases.preferences.reader_preferences.PreferencesUseCase
 import ir.kazemcodes.infinity.core.utils.UiEvent
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -31,9 +30,6 @@ class SettingViewModel @Inject constructor(private val preferencesUseCase: Prefe
             .copy(
                 doh = preferencesUseCase.readDohPrefUseCase()
             )
-    }
-    fun saveNightModePreferences(mode: NightMode) {
-        preferencesUseCase.saveNightModePreferences(mode)
     }
 
     init {
