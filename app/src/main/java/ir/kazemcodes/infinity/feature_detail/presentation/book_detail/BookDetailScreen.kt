@@ -18,6 +18,7 @@ import ir.kazemcodes.infinity.core.presentation.reusable_composable.ErrorTextWit
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarBackButton
 import ir.kazemcodes.infinity.core.ui.WebViewScreenSpec
 import ir.kazemcodes.infinity.core.utils.getUrlWithoutDomain
+import ir.kazemcodes.infinity.feature_detail.presentation.book_detail.components.TransparentStatusBar
 import ir.kazemcodes.infinity.feature_sources.sources.models.FetchType
 
 
@@ -32,65 +33,69 @@ fun BookDetailScreen(
     val context = LocalContext.current
 
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        if (viewModel.state.isLocalLoaded) {
-            BookDetailScreenLoadedComposable(
-                modifier = modifier,
-                viewModel = viewModel,
-                navController = navController
-            )
-        } else {
-            Scaffold(modifier = Modifier.fillMaxSize(), topBar = {
-                TopAppBar(title = {},
-                    backgroundColor = MaterialTheme.colors.background,
-                    navigationIcon = {
-                        TopAppBarBackButton(navController = navController)
-                    },
-                    actions = {
-                        IconButton(onClick = {
-                            navController.navigate(WebViewScreenSpec.buildRoute(
-                                url = viewModel.state.source.baseUrl + getUrlWithoutDomain(
-                                    viewModel.state.book.link),
-                                sourceId = viewModel.state.source.sourceId,
-                                fetchType = FetchType.Detail.index,
-                                bookId = viewModel.state.book.id
-                            ))
-                        }) {
-                            Icon(
-                                imageVector = Icons.Default.Public,
-                                contentDescription = "WebView",
-                                tint = MaterialTheme.colors.onBackground,
+
+    TransparentStatusBar {
+        Box(modifier = Modifier.fillMaxSize()) {
+            if (viewModel.state.isLocalLoaded) {
+
+                BookDetailScreenLoadedComposable(
+                    modifier = modifier,
+                    viewModel = viewModel,
+                    navController = navController
+                )
+            } else {
+                Scaffold(modifier = Modifier.fillMaxSize(), topBar = {
+                    TopAppBar(title = {},
+                        backgroundColor = MaterialTheme.colors.background,
+                        navigationIcon = {
+                            TopAppBarBackButton(navController = navController)
+                        },
+                        actions = {
+                            IconButton(onClick = {
+                                navController.navigate(WebViewScreenSpec.buildRoute(
+                                    url = viewModel.state.source.baseUrl + getUrlWithoutDomain(
+                                        viewModel.state.book.link),
+                                    sourceId = viewModel.state.source.sourceId,
+                                    fetchType = FetchType.Detail.index,
+                                    bookId = viewModel.state.book.id
+                                ))
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.Public,
+                                    contentDescription = "WebView",
+                                    tint = MaterialTheme.colors.onBackground,
+                                )
+                            }
+                        }
+                    )
+
+                },
+                    snackbarHost = {
+                        ISnackBarHost(it)
+                    }
+
+                ) {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        if (viewModel.state.error.asString(context).isNotBlank()) {
+                            ErrorTextWithEmojis(error = viewModel.state.error.asString(context),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(20.dp)
+                                    .wrapContentSize(Alignment.Center)
+                                    .align(Alignment.Center))
+                        }
+                        if (viewModel.state.isLocalLoading || viewModel.state.isRemoteLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.align(Alignment.Center)
                             )
                         }
                     }
-                )
-
-            },
-                snackbarHost = {
-                    ISnackBarHost(it)
-                }
-
-            ) {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    if (viewModel.state.error.asString(context).isNotBlank()) {
-                        ErrorTextWithEmojis(error = viewModel.state.error.asString(context), modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(20.dp)
-                            .wrapContentSize(Alignment.Center)
-                            .align(Alignment.Center))
-                    }
-                    if (viewModel.state.isLocalLoading || viewModel.state.isRemoteLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.align(Alignment.Center)
-                        )
-                    }
                 }
             }
+
+
         }
-
-
     }
-
 
 }
 

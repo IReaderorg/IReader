@@ -48,20 +48,25 @@ fun InfinityTheme(
     } else {
         LightColorPalette
     }
-
+    val isDark = isSystemInDarkTheme()
+    val useDarkIcon = MaterialTheme.colors.isLight || !isDark
     val systemUiController = rememberSystemUiController()
     SideEffect {
         systemUiController.setStatusBarColor(
             color = colors.background,
-            darkIcons = !darkTheme
+            darkIcons = useDarkIcon
         )
         systemUiController.setNavigationBarColor(
             color = colors.background,
-            darkIcons = !darkTheme
+            darkIcons = useDarkIcon
         )
         systemUiController.setSystemBarsColor(
             color = colors.background,
-            darkIcons = !darkTheme
+            darkIcons = useDarkIcon
+        )
+        systemUiController.setSystemBarsColor(
+            color = colors.background,
+            darkIcons = useDarkIcon
         )
 
     }

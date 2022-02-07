@@ -291,7 +291,7 @@ data class SourceTower constructor(
         }
 
         val books = mutableListOf<Book>()
-        if (this.latest?.isHtmlType == true) {
+        if (this.latest?.isHtmlType == true && latest.selector != null) {
             books.addAll(document.select(latest.selector).map { element ->
                 latestFromElement(element)
             })
@@ -608,14 +608,14 @@ data class SourceTower constructor(
      */
     override suspend fun fetchChapters(book: Book, page: Int): ChaptersPage {
         val request = client.call(chaptersRequest(book, page))
-        request.close()
+
         var chapters = chapterListParse(request)
         if (chapters.errorMessage.isNotBlank() || request.code != 200 || !chapters.ajaxLoaded) {
             chapters =
                 chaptersParse(network.getHtmlFromWebView(baseUrl + getUrlWithoutDomain(book.link),
                     this.chapters?.ajaxSelector), isWebViewMode = true)
         }
-
+        request.close()
         return chapters.copy(if (this.chapters?.isChapterStatsFromFirst == true) chapters.chapters else chapters.chapters.reversed() )
     }
 
@@ -626,13 +626,13 @@ data class SourceTower constructor(
      */
     override suspend fun fetchPopular(page: Int): BooksPage {
         val request = client.call(popularRequest(page))
-        request.close()
         var books = popularParse(request, page = page)
         if (books.errorMessage.isNotBlank() || request.code != 200 || !books.ajaxLoaded) {
             books =
                 popularParse(document = network.getHtmlFromWebView(baseUrl + fetchPopularEndpoint?.applyPageFormat(
                     page)), page = page, isWebViewMode = true)
         }
+        request.close()
         return books
     }
 
@@ -651,7 +651,6 @@ data class SourceTower constructor(
 
     override suspend fun fetchLatest(page: Int): BooksPage {
         val request = client.call(latestRequest(page))
-        request.close()
         var books = latestParse(request, page = page)
         if (books.errorMessage.isNotBlank() || request.code != 200 || !books.ajaxLoaded) {
             books =
@@ -659,6 +658,7 @@ data class SourceTower constructor(
                     page)), page = page, isWebViewMode = true)
         }
 
+        request.close()
         return books
     }
 
@@ -670,12 +670,12 @@ data class SourceTower constructor(
      */
     override suspend fun fetchBook(book: Book): BookPage {
         val request = client.call(detailsRequest(book))
-        request.close()
         var completebook = detailParse(client.call(detailsRequest(book)))
         if (completebook.errorMessage.isNotBlank() || request.code != 200 || !completebook.ajaxLoaded) {
             completebook = detailParse(network.getHtmlFromWebView(baseUrl + getUrlWithoutDomain(book.link)),
                     isWebViewMode = true)
         }
+        request.close()
         return completebook
     }
 
@@ -688,7 +688,6 @@ data class SourceTower constructor(
      */
     override suspend fun fetchContent(chapter: Chapter): ChapterPage {
         val request = client.call(contentRequest(chapter))
-        request.close()
         var content = pageContentParse(request)
 
         if (content.errorMessage.isNotBlank() || request.code != 200 || !content.ajaxLoaded) {
@@ -697,6 +696,7 @@ data class SourceTower constructor(
                     chapter.link)),
                     isWebViewMode = true)
         }
+        request.close()
         return content
     }
 
@@ -709,12 +709,12 @@ data class SourceTower constructor(
      */
     override suspend fun fetchSearch(page: Int, query: String): BooksPage {
         val request = client.call(searchRequest(page, query))
-        request.close()
         var books = searchBookParse(request, page)
         if (books.errorMessage.isNotBlank() || request.code != 200 || !books.ajaxLoaded) {
             books =
                 searchParse(network.getHtmlFromWebView(baseUrl + fetchSearchEndpoint?.applySearchFormat(query, page)), page = page, isWebViewMode = true)
         }
+        request.close()
         return books
     }
 

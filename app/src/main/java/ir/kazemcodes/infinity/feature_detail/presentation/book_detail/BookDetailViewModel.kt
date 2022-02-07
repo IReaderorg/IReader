@@ -77,7 +77,14 @@ class BookDetailViewModel @Inject constructor(
             getLocalBookById(state.book.id)
         }
     }
+    fun onEvent(event: BookDetailEvent) {
+        when (event) {
+            is BookDetailEvent.ToggleSummary -> {
+               toggleSummary()
+            }
 
+        }
+    }
 
     fun getLocalBookById(bookId: Int) {
         toggleLocalBookLoading(true)
@@ -311,6 +318,10 @@ class BookDetailViewModel @Inject constructor(
             ExistingWorkPolicy.REPLACE,
             work
         )
+    }
+
+    private fun toggleSummary() {
+        state = state.copy(isSummaryExpanded = !state.isSummaryExpanded)
     }
     /************************************************************/
     suspend fun showSnackBar(message: UiText?) {

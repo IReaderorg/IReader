@@ -186,6 +186,8 @@ dependencies {
     implementation(Accompanist.pagerIndicator)
     implementation(Accompanist.insets)
     implementation(Accompanist.navAnimation)
+    implementation(Accompanist.flowlayout)
+    implementation(Accompanist.navMaterial)
 
 
     implementation(Kotlin.jsonSerialization)

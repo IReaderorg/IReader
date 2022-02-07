@@ -16,5 +16,6 @@
     <color name="black_800">#FF121212</color>
     <color name="black_900">#FF000000</color>
     <color name="accent_blue">#00a2ed</color>
+    <color name="transparent">#00000000</color>
 
 </resources>

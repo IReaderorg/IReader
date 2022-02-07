@@ -33,7 +33,6 @@ class MainActivity : ComponentActivity() {
         androidx.compose.material.ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setContent {
             val theme = themeSetting.themeStream.collectAsState()
             val useDarkColors = when (theme.value) {

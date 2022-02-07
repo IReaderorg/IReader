@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Theme.Infinity" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    <style name="Theme.Infinity" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/blue_500</item>
         <item name="colorPrimaryVariant">@color/blue_700</item>
@@ -15,6 +15,9 @@
 
         <item name="colorOnBackground">@color/black_900</item>
         <item name="colorOnSurface">@color/black_900</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="colorPrimaryDark" tools:targetApi="23">@color/black_900</item>
+        <item name="android:windowLightStatusBar">true</item>
         <!-- Status bar color. -->
 <!--        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>-->
         <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
@@ -24,9 +27,10 @@
     <style name="Theme.Infinity.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+        <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
     </style>
 
-    <style name="Theme.Infinity.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="Theme.Infinity.AppBarOverlay" parent="ThemeOverlay.AppCompat.DayNight.ActionBar" />
 
     <style name="Theme.Infinity.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>

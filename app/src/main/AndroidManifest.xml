@@ -23,7 +23,7 @@
         android:usesCleartextTraffic="true"
         android:supportsRtl="true"
         android:largeHeap="true"
-        android:theme="@style/Theme.Infinity">
+        android:theme="@style/Theme.AppCompat.NoActionBar">
         <activity
             android:name="ir.kazemcodes.infinity.feature_activity.presentation.MainActivity"
             android:exported="true"
