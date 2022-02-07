@@ -334,7 +334,7 @@ class BookDetailViewModel @Inject constructor(
         chapterState = chapterState.copy(chapters = chapters)
     }
     private fun toggleRemoteChaptersLoading(isLoading: Boolean) {
-        chapterState = chapterState.copy(isLocalLoading = isLoading)
+        chapterState = chapterState.copy(isRemoteLoading = isLoading)
     }
     /********************************************************/
     private fun isLocalBookLoaded(loaded : Boolean) {

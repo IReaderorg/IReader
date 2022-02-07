@@ -5,7 +5,6 @@ data class RemoteUseCases(
     val getRemoteReadingContent: GetRemoteReadingContent,
     val getRemoteBooksByRemoteMediator: GetRemoteBooksByRemoteMediator,
     val getRemoteChapters: GetRemoteChapters
-
     )
 
 

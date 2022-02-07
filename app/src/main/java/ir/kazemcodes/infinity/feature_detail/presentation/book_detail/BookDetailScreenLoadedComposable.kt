@@ -79,13 +79,13 @@ fun BookDetailScreenLoadedComposable(
             ) {
                 Row(
                     modifier = modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp),
+                        .fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceAround,
                     verticalAlignment = Alignment.CenterVertically
 
                 ) {
                     ButtonWithIconAndText(
+                        modifier = Modifier.weight(1F),
                         text = if (!state.inLibrary) "Add to Library" else "Added To Library",
                         imageVector = if (!state.inLibrary) Icons.Default.AddCircleOutline else Icons.Default.Check,
                         onClick = {
@@ -97,6 +97,7 @@ fun BookDetailScreenLoadedComposable(
                         },
                     )
                     ButtonWithIconAndText(
+                        modifier = Modifier.weight(1F),
                         text = if (state.book.lastRead != 0L) "Continue Reading" else "Read",
                         imageVector = Icons.Default.AutoStories,
                         onClick = {
@@ -121,6 +122,7 @@ fun BookDetailScreenLoadedComposable(
                     )
 
                     ButtonWithIconAndText(
+                        modifier = Modifier.weight(1F),
                         text = "Download",
                         imageVector = Icons.Default.FileDownload,
                         onClick = {

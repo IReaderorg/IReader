@@ -105,7 +105,7 @@ fun ChapterDetailScreen(
 
                 Spacer(modifier = modifier.height(5.dp))
                 Divider(modifier = modifier.fillMaxWidth(), thickness = 1.dp)
-                TextButton(onClick = {viewModel.reverseChapterInDB()}) {
+                TextButton(modifier = Modifier.fillMaxWidth(),onClick = {viewModel.reverseChapterInDB()}) {
                     MidSizeTextComposable(title ="Reverse Chapters in DB")
                 }
             }

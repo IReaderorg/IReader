@@ -18,7 +18,7 @@ android {
         applicationId "ir.kazemcodes.infinityreader"
         minSdk 23
         targetSdk 31
-        versionCode 10
+        versionCode 11
         versionName "0.1.10"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

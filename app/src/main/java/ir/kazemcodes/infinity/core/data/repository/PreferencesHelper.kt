@@ -53,7 +53,7 @@ class PreferencesHelper @Inject constructor(
     val filterLibraryScreen = flowPrefs.getInt(FILTER_LIBRARY_SCREEN, 0)
     val lastUpdateCheck = flowPrefs.getLong(Last_UPDATE_CHECK, 0)
 
-    val nightModeKey = flowPrefs.getInt(NIGHT_MODE_KEY, -1)
+    val nightModeKey = flowPrefs.getInt(NIGHT_MODE_KEY, 0)
 
     fun setFontScale(fontSize: Int) {
         readerFontScale.set(fontSize)

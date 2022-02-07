@@ -13,6 +13,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import ir.kazemcodes.infinity.BuildConfig
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.MidSizeTextComposable
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarBackButton
 import ir.kazemcodes.infinity.core.presentation.reusable_composable.TopAppBarTitle
@@ -42,7 +43,7 @@ fun AboutSettingScreen(
         )
     }) {
         val list = listOf<AboutTile>(
-            //AboutTile.Version,
+            AboutTile.Version,
             AboutTile.WhatsNew,
             AboutTile.Discord,
             AboutTile.Github,
@@ -86,7 +87,7 @@ fun AboutSettingScreen(
 }
 
 sealed class AboutTile(val title: String, val subtitle: String,val intent: Intent) {
-    object Version : AboutTile("Version", "0.1.9 BETA",Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/kazemcodes/Infinity/releases")))
+    object Version : AboutTile("Version", BuildConfig.VERSION_NAME + " Beta",Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/kazemcodes/Infinity/releases")))
     object WhatsNew : AboutTile("Whats New", "Check the Update",Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/kazemcodes/IReader/releases/latest")))
     object Discord : AboutTile("Discord", "https://discord.gg/HBU6zD8c5v",Intent(Intent.ACTION_VIEW, Uri.parse("https://discord.gg/HBU6zD8c5v")))
     object Github : AboutTile("Github", "https://github.com/kazemcodes/IReader",Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/kazemcodes/Infinity")))
