@@ -1,5 +1,6 @@
 object Datastore {
-    const val datastore = "org.jsoup:jsoup:1.14.3"
+    const val datastore = "androidx.datastore:datastore-preferences:1.0.0"
+    const val core = "androidx.datastore:datastore-preferences-core:1.0.0"
 }
 
 object FlowPreferences {

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="blue_200">#FF90CAF9</color>
+    <color name="blue_500">#FF2196f3</color>
+    <color name="blue_600">#FF2196f3</color>
+    <color name="blue_700">#FF2196f3</color>
+
+
+    <color name="light_blue_a_200">#FF40c4ff</color>
+    <color name="light_blue_a_400">#FF00b0ff</color>
+
+
+    <color name="red_200">#FFcf6679</color>
+    <color name="red_600">#FFb00020</color>
+    <color name="white_50">#FFffffff</color>
+    <color name="black_800">#FF121212</color>
+    <color name="black_900">#FF000000</color>
+    <color name="accent_blue">#00a2ed</color>
+    <color name="transparent">#00000000</color>
+
+</resources>

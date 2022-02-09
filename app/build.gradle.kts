@@ -1,4 +1,3 @@
-
 import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
@@ -10,7 +9,7 @@ plugins {
     id("dagger.hilt.android.plugin")
     id("kotlin-parcelize")
     id("com.google.gms.google-services")
-    id("kotlinx-serialization")
+    kotlin("plugin.serialization")
     id("com.google.firebase.crashlytics")
 }
 
@@ -24,13 +23,13 @@ android {
         versionCode = ProjectConfig.versionCode
         versionName = ProjectConfig.versionName
 
-        testInstrumentationRunner  = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
-            useSupportLibrary =  true
+            useSupportLibrary = true
         }
         kapt {
             arguments {
-                arg("room.schemaLocation","$projectDir/schemas")
+                arg("room.schemaLocation", "$projectDir/schemas")
             }
         }
     }
@@ -58,17 +57,15 @@ android {
     }
     packagingOptions {
         resources.excludes.addAll(listOf(
-            "META-INF/DEPENDENCIES",
             "LICENSE.txt",
             "META-INF/LICENSE",
             "META-INF/LICENSE.txt",
             "META-INF/README.md",
-            "META-INF/*.kotlin_module",
-            "META-INF/*.version",
             "META-INF/AL2.0",
             "META-INF/LGPL2.1",
-            "**/attach_hotspot_windows.dll1",
+            "**/attach_hotspot_windows.dll",
             "META-INF/licenses/ASM",
+            "META-INF/gradle/incremental.annotation.processors"
         ))
 
     }
@@ -84,6 +81,13 @@ android {
 }
 
 dependencies {
+    implementation(project(Modules.coreUi))
+    implementation(project(Modules.data))
+    implementation(project(Modules.domain))
+    implementation(project(Modules.core))
+    implementation(project(Modules.presentation))
+
+
     implementation(AndroidX.coreKtx)
     implementation(AndroidX.appCompat)
     implementation(AndroidX.webkit)
@@ -98,18 +102,29 @@ dependencies {
     /** Compose **/
     implementation(Compose.compiler)
     implementation(Compose.foundation)
-    implementation(Compose.activityCompose)
+//    implementation(Compose.activityCompose)
     implementation(Compose.ui)
     implementation(Compose.material)
-    implementation(Compose.uiToolingPreview)
-    implementation(Compose.viewModelCompose)
-    implementation(Compose.icons)
-    implementation(Compose.icons)
-    implementation(Compose.animations)
+//    implementation(Compose.uiToolingPreview)
+//    implementation(Compose.viewModelCompose)
+//    implementation(Compose.icons)
+//    implementation(Compose.animations)
     implementation(Compose.navigation)
     implementation(Compose.hiltNavigationCompose)
-    androidTestImplementation(Compose.testing)
-    debugImplementation(Compose.composeTooling)
+//    androidTestImplementation(Compose.testing)
+//    debugImplementation(Compose.composeTooling)
+//    implementation(Compose.paging)
+
+//    /** Accompanist **/
+//    implementation(Accompanist.systemUiController)
+//    implementation(Accompanist.webView)
+//    implementation(Accompanist.swipeRefresh)
+//    implementation(Accompanist.pager)
+//    implementation(Accompanist.pagerIndicator)
+    implementation(Accompanist.insets)
+//    implementation(Accompanist.navAnimation)
+//    implementation(Accompanist.flowlayout)
+//    implementation(Accompanist.navMaterial)
 
 
     /** LifeCycle **/
@@ -124,7 +139,6 @@ dependencies {
     implementation(Firebase.crashlytics)
 
 
-
     /** Coroutine **/
     implementation(Coroutines.core)
     implementation(Coroutines.android)
@@ -134,7 +148,6 @@ dependencies {
 
     /** Hilt **/
     implementation(DaggerHilt.hiltAndroid)
-
     kapt(DaggerHilt.hiltAndroidCompiler)
     kapt(DaggerHilt.hiltCompiler)
     implementation(DaggerHilt.worker)
@@ -149,22 +162,23 @@ dependencies {
     /** Coil **/
     implementation(Coil.coilCompose)
 
-    /** JSoup **/
-    implementation(Jsoup.jsoup)
+//    /** JSoup **/
+//    implementation(Jsoup.jsoup)
 
-    /** DataStore **/
-    implementation(Datastore.datastore)
+//    /** DataStore **/
+//    implementation(Datastore.datastore)
+//    implementation(Datastore.core)
 
-    /** Retrofit **/
-    implementation(Retrofit.retrofit)
-    implementation(Retrofit.moshiConverter)
+//    /** Retrofit **/
+//    implementation(Retrofit.retrofit)
+//    implementation(Retrofit.moshiConverter)
 
-
-    /** Gson **/
-    implementation(Gson.gson)
-    implementation(Gson.gsonConvertor)
-
-
+//
+//    /** Gson **/
+//    implementation(Gson.gson)
+//    implementation(Gson.gsonConvertor)
+//
+//
     /** Moshi **/
     implementation(Moshi.moshi)
     kapt(Moshi.moshiCodegen)
@@ -173,36 +187,24 @@ dependencies {
     /** Timber **/
     implementation(Timber.timber)
 
-    /** Network Client - OkHttp**/
+//    /** Network Client - OkHttp**/
     implementation(OkHttp.okHttp3)
     implementation(OkHttp.okHttp3Interceptor)
-    implementation(OkHttp.okhttp3_doh)
-    implementation(OkHttp.okio)
+//    implementation(OkHttp.okhttp3_doh)
+//    implementation(OkHttp.okio)
 
-    /** Accompanist **/
-    implementation(Accompanist.systemUiController)
-    implementation(Accompanist.swipeRefresh)
-    implementation(Accompanist.pager)
-    implementation(Accompanist.pagerIndicator)
-    implementation(Accompanist.insets)
-    implementation(Accompanist.navAnimation)
-    implementation(Accompanist.flowlayout)
-    implementation(Accompanist.navMaterial)
-
-
-    implementation(Kotlin.jsonSerialization)
-    implementation(jsonpathkt.jsonpathkt)
-
+//    implementation(Jsonpathkt.jsonpathkt)
     implementation(FlowPreferences.flowPreferences)
 
-    // Paging 3.0
-    implementation(Pager.pager)
+
+//    implementation(Kotlin.jsonSerialization)
+
 
     implementation(Koin.koinWorkManager)
     implementation(Koin.koinNavigation)
     implementation(Koin.koinCompose)
 
-    implementation(Accompanist.webView)
+
 
 
 }

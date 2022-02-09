@@ -1,16 +1,8 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
-//    ext {
-//        compose_version = '1.2.0-alpha02'
-//        kotlin_version = '1.6.10'
-//        okhttp_version = '4.9.1'
-//        moshi_version = '1.13.0'
-//        lifecycle_version = "2.4.0"
-//        work_version = "2.7.1"
-//        accompanist_version = "0.22.0-rc"
-//        accompanist_swiperefresh_version = "0.24.1-alpha"
-//        koin_version= "3.1.5"
-//    }
+
+    val compose_version by extra("1.2.0-alpha02")
+
     repositories {
         google()
         mavenCentral()
@@ -23,6 +15,7 @@ buildscript {
         classpath(Build.googleGsmService)
         classpath(Build.kotlinSerialization)
         classpath(Build.firebaseCrashlytics)
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.10")
 
     }
 }

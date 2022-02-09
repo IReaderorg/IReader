@@ -2,30 +2,29 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
 
-    package="ir.kazemcodes.infinity">
+    package="org.ireader.infinity">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
-
+    <uses-permission android:name="android.permission.INTERNET" />
 
 
     <application
-        android:name="ir.kazemcodes.infinity.MyApplication"
-        android:screenOrientation="fullSensor"
-        android:configChanges="orientation|screenSize"
-        android:hardwareAccelerated="true"
+        android:name="org.ireader.infinity.MyApplication"
         android:allowBackup="true"
+        android:configChanges="orientation|screenSize"
         android:fullBackupOnly="true"
+        android:hardwareAccelerated="true"
         android:hasFragileUserData="true"
-        android:requestLegacyExternalStorage="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher"
-        android:usesCleartextTraffic="true"
-        android:supportsRtl="true"
         android:largeHeap="true"
-        android:theme="@style/Theme.AppCompat.NoActionBar">
+        android:requestLegacyExternalStorage="true"
+        android:roundIcon="@mipmap/ic_launcher"
+        android:screenOrientation="fullSensor"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Infinity"
+        android:usesCleartextTraffic="true">
         <activity
-            android:name="ir.kazemcodes.infinity.feature_activity.presentation.MainActivity"
+            android:name="org.ireader.infinity.presentation.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.Infinity.NoActionBar">
             <intent-filter>

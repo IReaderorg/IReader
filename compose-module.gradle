@@ -1,0 +1,100 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
+apply plugin: 'kotlin-parcelize'
+apply plugin: 'kotlinx-serialization'
+
+android {
+    compileSdk ProjectConfig.compileSdk
+
+    defaultConfig {
+        minSdk ProjectConfig.minSdk
+        targetSdk ProjectConfig.targetSdk
+        versionCode ProjectConfig.versionCode
+        versionName ProjectConfig.versionName
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+    buildFeatures {
+        compose true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion Compose.composeCompilerVersion
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+dependencies {
+
+
+    /** Compose **/
+    implementation(Compose.compiler)
+    implementation(Compose.foundation)
+    implementation(Compose.activityCompose)
+    implementation(Compose.ui)
+    implementation(Compose.material)
+    implementation(Compose.uiToolingPreview)
+    implementation(Compose.viewModelCompose)
+    implementation(Compose.icons)
+    implementation(Compose.icons)
+    implementation(Compose.animations)
+    implementation(Compose.navigation)
+    implementation(Compose.hiltNavigationCompose)
+    androidTestImplementation(Compose.testing)
+    debugImplementation(Compose.composeTooling)
+    implementation(Compose.paging)
+
+    implementation Timber.timber
+
+    /** Hilt **/
+    implementation(DaggerHilt.hiltAndroid)
+    kapt(DaggerHilt.hiltAndroidCompiler)
+    kapt(DaggerHilt.hiltCompiler)
+
+
+    /** Accompanist **/
+    implementation(Accompanist.systemUiController)
+    implementation(Accompanist.swipeRefresh)
+    implementation(Accompanist.pager)
+    implementation(Accompanist.pagerIndicator)
+    implementation(Accompanist.insets)
+    implementation(Accompanist.navAnimation)
+    implementation(Accompanist.flowlayout)
+    implementation(Accompanist.navMaterial)
+
+    /** LifeCycle **/
+    implementation(LifeCycle.runtimeKtx)
+    implementation(LifeCycle.viewModel)
+
+    testImplementation Testing.junit4
+    testImplementation Testing.junitAndroidExt
+    testImplementation Testing.truth
+    testImplementation Testing.coroutines
+    testImplementation Testing.turbine
+    testImplementation Testing.composeUiTest
+    testImplementation Testing.mockk
+    testImplementation Testing.mockWebServer
+
+    androidTestImplementation Testing.junit4
+    androidTestImplementation Testing.junitAndroidExt
+    androidTestImplementation Testing.truth
+    androidTestImplementation Testing.coroutines
+    androidTestImplementation Testing.turbine
+    androidTestImplementation Testing.composeUiTest
+    androidTestImplementation Testing.mockk
+    androidTestImplementation Testing.mockWebServer
+    androidTestImplementation Testing.hiltTesting
+}
