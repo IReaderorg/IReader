@@ -2,7 +2,7 @@ package org.ireader.infinity.core.domain.use_cases.local.book_usecases
 
 import androidx.paging.PagingSource
 import org.ireader.domain.models.entities.Book
-import org.ireader.infinity.core.domain.repository.LocalBookRepository
+import org.ireader.domain.repository.LocalBookRepository
 
 class GetBooksByQueryPagingSource(private val localBookRepository: LocalBookRepository) {
     operator fun invoke(

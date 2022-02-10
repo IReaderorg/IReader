@@ -94,6 +94,7 @@ dependencies {
     implementation(AndroidX.browser)
     implementation(AndroidX.material)
     implementation(AndroidX.activity)
+    implementation(AndroidX.appStartUpRuntime)
 
     testImplementation(Testing.junit4)
     androidTestImplementation(Testing.extJunit)

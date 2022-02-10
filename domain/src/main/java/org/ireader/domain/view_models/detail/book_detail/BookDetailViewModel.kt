@@ -1,5 +1,6 @@
 package org.ireader.domain.view_models.detail.book_detail
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.webkit.WebView
 import androidx.compose.runtime.getValue
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.ireader.core.R
 import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
@@ -32,14 +34,14 @@ import org.ireader.domain.source.Extensions
 import org.ireader.domain.use_cases.fetchers.FetchUseCase
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.utils.Resource
+import org.ireader.domain.view_models.base_view_model.asState
 import org.ireader.infinity.core.domain.use_cases.local.DeleteUseCase
 import org.ireader.infinity.core.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.use_cases.remote.RemoteUseCases
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import timber.log.Timber
 import javax.inject.Inject
 
-
+@SuppressLint("StaticFieldLeak")
 @HiltViewModel
 class BookDetailViewModel @Inject constructor(
     private val localInsertUseCases: LocalInsertUseCases,
@@ -48,24 +50,32 @@ class BookDetailViewModel @Inject constructor(
     private val remoteUseCases: RemoteUseCases,
     private val deleteUseCase: DeleteUseCase,
     private val fetchUseCase: FetchUseCase,
+    private val hiltWebView: WebView,
     savedStateHandle: SavedStateHandle,
     extensions: Extensions,
-) : ViewModel(), KoinComponent {
+) : ViewModel() {
 
     var state by mutableStateOf(DetailState())
+        private set
+
+    var isRefreshing by mutableStateOf(false)
+        private set
+
+    var expandedSummary by mutableStateOf(false)
         private set
 
     var chapterState by mutableStateOf(ChapterState())
         private set
 
+
     lateinit var work: OneTimeWorkRequest
 
-    val webView: WebView by inject()
+    val webView: WebView = hiltWebView
 
 
     private val _eventFlow = MutableSharedFlow<UiEvent>()
-    val eventFlow = _eventFlow.asSharedFlow()
 
+    val eventFlow = _eventFlow.asSharedFlow()
     init {
         val bookId = savedStateHandle.get<Int>("bookId")
         val sourceId = savedStateHandle.get<Long>("sourceId")
@@ -79,14 +89,50 @@ class BookDetailViewModel @Inject constructor(
         }
     }
 
+    val book by getBookUseCases.getBookByIdDirectly(id = state.book.id).onEach(::onBookUpdate)
+        .asState(null, viewModelScope)
+
+    fun onBookUpdate(book: Book?) {
+        if (book != null && state.source != null) {
+            viewModelScope.launch {
+                updateBook(metadata = state.isExploreMode, chapters = state.isExploreMode)
+            }
+        }
+    }
+
+    fun updateBook(
+        metadata: Boolean = false,
+        chapters: Boolean = false,
+    ) {
+        val book = book ?: return
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                isRefreshing = true
+                try {
+                    if (chapters) {
+                        getRemoteChapterDetail(book)
+                    }
+                    if (metadata) {
+                        getRemoteBookDetail(book)
+                    }
+                } catch (e: Throwable) {
+                    Timber.e(e, "Error while refreshing Book")
+                }
+                state = state.copy(isExploreMode = false)
+                isRefreshing = false
+            }
+        }
+    }
+
     fun onEvent(event: BookDetailEvent) {
         when (event) {
             is BookDetailEvent.ToggleSummary -> {
-                toggleSummary()
+                toggleExpandedSummary()
             }
 
         }
     }
+
 
     fun getLocalBookById(bookId: Int) {
         toggleLocalBookLoading(true)
@@ -308,14 +354,14 @@ class BookDetailViewModel @Inject constructor(
 
     fun startDownloadService(context: Context) {
         work = OneTimeWorkRequestBuilder<DownloadService>().apply {
-                setInputData(
-                    Data.Builder().apply {
-                        putInt(DOWNLOADER_BOOK_ID, state.book.id)
-                        putLong(DOWNLOADER_SOURCE_ID, state.book.sourceId)
-                    }.build()
-                )
-                addTag(DOWNLOADER_SERVICE_NAME)
-            }.build()
+            setInputData(
+                Data.Builder().apply {
+                    putInt(DOWNLOADER_BOOK_ID, state.book.id)
+                    putLong(DOWNLOADER_SOURCE_ID, state.book.sourceId)
+                }.build()
+            )
+            addTag(DOWNLOADER_SERVICE_NAME)
+        }.build()
         WorkManager.getInstance(context).enqueueUniqueWork(
             DOWNLOADER_SERVICE_NAME.plus(state.book.id + state.book.sourceId),
             ExistingWorkPolicy.REPLACE,
@@ -323,8 +369,8 @@ class BookDetailViewModel @Inject constructor(
         )
     }
 
-    private fun toggleSummary() {
-        state = state.copy(isSummaryExpanded = !state.isSummaryExpanded)
+    fun toggleExpandedSummary() {
+        expandedSummary = !expandedSummary
     }
 
     /************************************************************/
@@ -391,3 +437,5 @@ class BookDetailViewModel @Inject constructor(
 
 
 }
+
+

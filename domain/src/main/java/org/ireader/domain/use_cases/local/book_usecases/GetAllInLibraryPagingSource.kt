@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import org.ireader.core.utils.Constants
 import org.ireader.domain.models.SortType
 import org.ireader.domain.models.entities.Book
-import org.ireader.infinity.core.domain.repository.LocalBookRepository
+import org.ireader.domain.repository.LocalBookRepository
 
 
 class GetAllInLibraryPagingSource(private val localBookRepository: LocalBookRepository) {

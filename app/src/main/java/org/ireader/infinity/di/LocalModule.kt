@@ -15,16 +15,13 @@ import org.ireader.domain.local.dao.LibraryBookDao
 import org.ireader.domain.local.dao.LibraryChapterDao
 import org.ireader.domain.local.dao.RemoteKeysDao
 import org.ireader.domain.local.dao.SourceTowerDao
+import org.ireader.domain.repository.LocalBookRepository
 import org.ireader.domain.repository.LocalChapterRepository
 import org.ireader.domain.source.Extensions
 import org.ireader.domain.use_cases.local.LocalGetBookUseCases
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
-import org.ireader.domain.use_cases.local.book_usecases.GetAllInDownloadsPagingData
-import org.ireader.domain.use_cases.local.book_usecases.GetAllInLibraryBooks
-import org.ireader.domain.use_cases.local.book_usecases.GetAllInLibraryPagingSource
-import org.ireader.domain.use_cases.local.book_usecases.GetBookById
+import org.ireader.domain.use_cases.local.book_usecases.*
 import org.ireader.domain.use_cases.local.chapter_usecases.GetLastReadChapter
-import org.ireader.infinity.core.domain.repository.LocalBookRepository
 import org.ireader.infinity.core.domain.use_cases.local.DeleteUseCase
 import org.ireader.infinity.core.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.infinity.core.domain.use_cases.local.book_usecases.*
@@ -149,7 +146,8 @@ class LocalModule {
             GetInLibraryBooksPagingData = GetInLibraryBooksPagingData(localBookRepository),
             getAllExploredBookPagingData = GetAllExploredBookPagingData(localBookRepository = localBookRepository),
             getAllInDownloadsPagingData = GetAllInDownloadsPagingData(
-                localBookRepository = localBookRepository)
+                localBookRepository = localBookRepository),
+            getBookByIdDirectly = GetBookByIdDirectly(localBookRepository)
         )
     }
 

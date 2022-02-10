@@ -15,20 +15,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import org.ireader.core.utils.getUrlWithoutDomain
-import org.ireader.domain.models.source.FetchType
-import org.ireader.domain.view_models.detail.book_detail.BookDetailViewModel
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
-import org.ireader.presentation.ui.WebViewScreenSpec
 
 @Composable
 fun BookDetailTopAppBar(
     modifier: Modifier = Modifier,
     isWebViewEnable: Boolean,
-    viewModel: BookDetailViewModel,
     navController: NavController,
+    onWebView: () -> Unit,
+    onRefresh: () -> Unit,
+    onFetch: () -> Unit,
 ) {
-    val state = viewModel.state
     TopAppBar(
         title = {},
         modifier = modifier
@@ -39,7 +36,9 @@ fun BookDetailTopAppBar(
         elevation = 0.dp,
         actions = {
             if (isWebViewEnable) {
-                IconButton(onClick = { viewModel.getWebViewData() }) {
+                IconButton(onClick = {
+                    onFetch()
+                }) {
                     Icon(
                         imageVector = Icons.Default.TrackChanges,
                         contentDescription = "Get from webview",
@@ -48,7 +47,9 @@ fun BookDetailTopAppBar(
                 }
             }
 
-            IconButton(onClick = { viewModel.getRemoteChapterDetail(state.book) }) {
+            IconButton(onClick = {
+                onRefresh()
+            }) {
                 Icon(
                     imageVector = Icons.Default.Autorenew,
                     contentDescription = "Refresh",
@@ -56,15 +57,7 @@ fun BookDetailTopAppBar(
                 )
             }
             IconButton(onClick = {
-                navController.navigate(
-                    WebViewScreenSpec.buildRoute(
-                        url = viewModel.state.source.baseUrl + getUrlWithoutDomain(
-                            viewModel.state.book.link),
-                        sourceId = viewModel.state.source.sourceId,
-                        fetchType = FetchType.DetailFetchType.index,
-                        bookId = viewModel.state.book.id
-                    )
-                )
+                onWebView()
             }) {
                 Icon(
                     imageVector = Icons.Default.Public,
@@ -72,12 +65,9 @@ fun BookDetailTopAppBar(
                     tint = MaterialTheme.colors.onBackground,
                 )
             }
-
-
         },
         navigationIcon = {
             TopAppBarBackButton(navController = navController)
-
         }
     )
 }

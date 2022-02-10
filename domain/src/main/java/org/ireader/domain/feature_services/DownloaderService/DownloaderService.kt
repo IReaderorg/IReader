@@ -23,9 +23,9 @@ import org.ireader.domain.feature_services.notification.Notifications.CHANNEL_DO
 import org.ireader.domain.feature_services.notification.Notifications.ID_DOWNLOAD_CHAPTER_COMPLETE
 import org.ireader.domain.feature_services.notification.Notifications.ID_DOWNLOAD_CHAPTER_ERROR
 import org.ireader.domain.feature_services.notification.Notifications.ID_DOWNLOAD_CHAPTER_PROGRESS
+import org.ireader.domain.repository.LocalBookRepository
 import org.ireader.domain.repository.LocalChapterRepository
 import org.ireader.domain.source.Extensions
-import org.ireader.infinity.core.domain.repository.LocalBookRepository
 import org.ireader.infinity.core.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.use_cases.remote.RemoteUseCases
 import timber.log.Timber

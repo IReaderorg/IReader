@@ -15,11 +15,7 @@ import org.ireader.domain.local.dao.LibraryBookDao
 import org.ireader.domain.local.dao.LibraryChapterDao
 import org.ireader.domain.local.dao.RemoteKeysDao
 import org.ireader.domain.local.dao.SourceTowerDao
-import org.ireader.domain.repository.LocalChapterRepository
-import org.ireader.domain.repository.LocalSourceRepository
-import org.ireader.domain.repository.PreferencesHelper
-import org.ireader.domain.repository.Repository
-import org.ireader.infinity.core.domain.repository.LocalBookRepository
+import org.ireader.domain.repository.*
 import org.ireader.infinity.core.domain.repository.RemoteRepository
 import javax.inject.Singleton
 

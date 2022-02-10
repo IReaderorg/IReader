@@ -9,4 +9,5 @@ object AndroidX {
     const val browser = "androidx.browser:browser:1.4.0"
     const val material = "com.google.android.material:material:1.5.0"
     const val activity = "androidx.activity:activity-ktx:1.4.0"
+    const val appStartUpRuntime = "androidx.startup:startup-runtime:1.1.1"
 }

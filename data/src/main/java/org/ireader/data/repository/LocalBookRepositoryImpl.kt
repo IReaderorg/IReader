@@ -12,8 +12,8 @@ import org.ireader.domain.local.dao.LibraryChapterDao
 import org.ireader.domain.local.dao.RemoteKeysDao
 import org.ireader.domain.models.SortType
 import org.ireader.domain.models.entities.Book
+import org.ireader.domain.repository.LocalBookRepository
 import org.ireader.domain.utils.Resource
-import org.ireader.infinity.core.domain.repository.LocalBookRepository
 import timber.log.Timber
 
 class LocalBookRepositoryImpl(
@@ -39,6 +39,20 @@ class LocalBookRepositoryImpl(
             }
         Timber.d("Timber: GetExploreBookByIdUseCase was Finished Successfully")
 
+    }
+
+    override fun getBookByIdDirectly(id: Int): Flow<Book?> = flow {
+        bookDao.getBookById(bookId = id)
+            .first { book ->
+                if (book != null) {
+                    emit(book)
+                    true
+                } else {
+                    emit(null)
+                    true
+                }
+            }
+        Timber.d("Timber: GetExploreBookByIdUseCase was Finished Successfully")
     }
 
     override fun getAllInLibraryPagingSource(

@@ -1,6 +1,10 @@
 package org.ireader.presentation.feature_detail.presentation.book_detail.components
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -13,15 +17,19 @@ fun CardTileComposable(
     title: String = "",
     subtitle: String = "",
     trailing: @Composable RowScope.() -> Unit,
+    onClick: () -> Unit,
 ) {
-    Column(verticalArrangement = Arrangement.Center) {
+    Column(verticalArrangement = Arrangement.Center, modifier = modifier.clickable {
+        onClick()
+    }) {
         Text(
+            modifier = modifier,
             text = title,
             style = MaterialTheme.typography.h6,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colors.onBackground
         )
-        Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        Row(modifier = modifier, horizontalArrangement = Arrangement.SpaceBetween) {
             Text(
                 text = subtitle, color = MaterialTheme.colors.onBackground,
                 style = MaterialTheme.typography.subtitle2

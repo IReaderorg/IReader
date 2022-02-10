@@ -7,8 +7,8 @@ import kotlinx.coroutines.flow.flow
 import org.ireader.core.utils.UiText
 import org.ireader.domain.R
 import org.ireader.domain.models.entities.Book
+import org.ireader.domain.repository.LocalBookRepository
 import org.ireader.domain.utils.Resource
-import org.ireader.infinity.core.domain.repository.LocalBookRepository
 import retrofit2.HttpException
 import java.io.IOException
 

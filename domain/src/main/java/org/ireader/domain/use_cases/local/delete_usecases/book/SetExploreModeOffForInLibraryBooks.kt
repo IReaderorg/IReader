@@ -1,6 +1,6 @@
 package org.ireader.infinity.core.domain.use_cases.local.delete_usecases.book
 
-import org.ireader.infinity.core.domain.repository.LocalBookRepository
+import org.ireader.domain.repository.LocalBookRepository
 
 /**
  * Delete All books that have the parameter exploremode true and library true

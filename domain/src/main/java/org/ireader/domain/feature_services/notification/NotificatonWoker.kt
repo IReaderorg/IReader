@@ -18,8 +18,8 @@ import kotlinx.coroutines.flow.flowOn
 import org.ireader.domain.R
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
+import org.ireader.domain.repository.LocalBookRepository
 import org.ireader.domain.repository.LocalChapterRepository
-import org.ireader.infinity.core.domain.repository.LocalBookRepository
 import org.ireader.infinity.feature_services.flags
 import timber.log.Timber
 

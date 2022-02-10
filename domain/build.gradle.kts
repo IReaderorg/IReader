@@ -10,6 +10,7 @@ dependencies {
     "implementation"(project(Modules.source))
 
     "implementation"(Compose.ui)
+    "implementation"(Compose.runtime)
     "implementation"(Compose.navigation)
     "implementation"(Worker.runtimeKtx)
     "implementation"(DaggerHilt.worker)
@@ -40,5 +41,7 @@ dependencies {
     "implementation"(Compose.paging)
     "implementation"(Jsoup.jsoup)
     "implementation"(Jsonpathkt.jsonpathkt)
+    "implementation"(Datastore.datastore)
+    "implementation"(Datastore.preferenceKtx)
 
 }

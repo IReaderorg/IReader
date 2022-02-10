@@ -1,4 +1,4 @@
-package org.ireader.infinity.core.domain.repository
+package org.ireader.domain.repository
 
 import androidx.paging.PagingSource
 import kotlinx.coroutines.flow.Flow
@@ -12,6 +12,8 @@ interface LocalBookRepository {
     /** Local GetUseCase**/
 
     fun getBookById(id: Int): Flow<Resource<Book>>
+
+    fun getBookByIdDirectly(id: Int): Flow<Book?>
 
     fun getAllInLibraryBooks(): Flow<List<Book>?>
 

@@ -15,6 +15,4 @@ data class DetailState(
     val isExploreMode: Boolean = false,
     val isRemoteLoaded: Boolean = false,
     val isRemoteLoading: Boolean = false,
-    val isSummaryExpanded: Boolean = false,
-
     )

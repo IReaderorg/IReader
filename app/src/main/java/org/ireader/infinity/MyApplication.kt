@@ -1,10 +1,14 @@
 package org.ireader.infinity
 
 import android.app.Application
+import android.content.Context
 import android.webkit.WebView
 import androidx.hilt.work.HiltWorkerFactory
+import androidx.startup.Initializer
 import androidx.work.Configuration
+import androidx.work.WorkManager
 import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import dagger.hilt.android.HiltAndroidApp
 import okhttp3.OkHttpClient
 import org.ireader.domain.feature_services.notification.Notifications
@@ -46,7 +50,7 @@ class MyApplication : Application(), Configuration.Provider {
             Timber.plant(Timber.DebugTree())
         }
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this)
-
+        FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG)
 
         val appModule = module {
             single<NetworkHelper> { networkHelper }
@@ -60,8 +64,6 @@ class MyApplication : Application(), Configuration.Provider {
         startKoin {
             modules(appModule)
         }
-
-
         setupNotificationChannels()
     }
 
@@ -78,7 +80,19 @@ class MyApplication : Application(), Configuration.Provider {
             .setWorkerFactory(workerFactory)
             .build()
 
+
 }
 
+class WorkManagerInitializer : Initializer<WorkManager> {
+    override fun create(context: Context): WorkManager {
+        val configuration = Configuration.Builder().build()
+        WorkManager.initialize(context, configuration)
+        return WorkManager.getInstance(context)
+    }
+
+    override fun dependencies(): List<Class<out Initializer<*>>> {
+        return emptyList()
+    }
+}
 
 
