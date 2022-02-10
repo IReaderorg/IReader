@@ -81,8 +81,8 @@ class ReaderScreenViewModel @Inject constructor(
             state = state.copy(source = extensions.mappingSourceNameToSource(sourceId))
             state = state.copy(book = state.book.copy(id = bookId))
             state = state.copy(chapter = state.chapter.copy(chapterId = chapterId))
-            getLocalBookById()
             getLocalChaptersByPaging()
+            getLocalBookById()
             readPreferences()
         }
     }
@@ -134,7 +134,7 @@ class ReaderScreenViewModel @Inject constructor(
                     is Resource.Error -> {
                         toggleLocalLoading(false)
                         toggleLocalLoaded(false)
-                        showSnackBar(result.uiText)
+//                        showSnackBar(result.uiText)
                         getReadingContentRemotely()
                     }
                 }
@@ -145,7 +145,6 @@ class ReaderScreenViewModel @Inject constructor(
 
 
     private fun getChapters() {
-
         getChapterUseCase.getChaptersByBookId(bookId = state.book.id,
             isAsc = state.book.areChaptersReversed)
             .onEach { result ->
@@ -158,6 +157,9 @@ class ReaderScreenViewModel @Inject constructor(
                             )
                             state =
                                 state.copy(currentChapterIndex = result.data.indexOfFirst { state.chapter.chapterId == it.chapterId })
+                            if (state.chapter.chapterId == Constants.LAST_CHAPTER && state.chapters.isNotEmpty()) {
+                                getChapter(state.chapters.first())
+                            }
                         }
                     }
                     is Resource.Error -> {

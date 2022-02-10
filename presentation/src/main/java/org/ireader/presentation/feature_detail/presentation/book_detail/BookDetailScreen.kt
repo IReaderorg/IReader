@@ -102,7 +102,7 @@ fun BookDetailScreen(
                         },
                         isRead = state.book.lastRead != 0L,
                         onRead = {
-                            if (state.book.lastRead != 0L) {
+                            if (state.book.lastRead != 0L && viewModel.chapterState.chapters.isNotEmpty()) {
                                 navController.navigate(ReaderScreenSpec.buildRoute(
                                     bookId = state.book.id,
                                     sourceId = source.sourceId,

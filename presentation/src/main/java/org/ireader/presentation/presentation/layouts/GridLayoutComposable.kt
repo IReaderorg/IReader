@@ -35,8 +35,8 @@ fun GridLayoutComposable(
     books: LazyPagingItems<Book>,
     onClick: (book: Book) -> Unit,
     scrollState: LazyGridState,
-    onLastReadChapterClick: (book: Book) -> Unit,
     isLocal: Boolean,
+    goToLatestChapter: (book: Book) -> Unit,
 ) {
     LazyVerticalGrid(
         state = scrollState,
@@ -89,7 +89,7 @@ fun GridLayoutComposable(
                          * Only show if the latest chapter exist.
                          */
                         if (book.totalChapters > 1 && isLocal && book.lastRead != 0L) {
-                            GoToLastReadComposable(onClick = { onLastReadChapterClick(book) })
+                            GoToLastReadComposable(onClick = { goToLatestChapter(book) })
                         }
 
                     }

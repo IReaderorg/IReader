@@ -98,7 +98,7 @@ fun ReadingScreen(
     }
 
     Scaffold(topBar = {
-        if (!state.isReaderModeEnable && state.isLocalLoaded && modalBottomSheetState.targetValue == ModalBottomSheetValue.Expanded) {
+        if (!state.isReaderModeEnable && state.isLocalLoaded && modalBottomSheetState.targetValue == ModalBottomSheetValue.Expanded && state.chapters.isNotEmpty()) {
             TopAppBar(
                 title = {
 
@@ -144,21 +144,23 @@ fun ReadingScreen(
                 elevation = 0.dp,
                 backgroundColor = Color.Transparent,
                 actions = {
-                    TopAppBarActionButton(imageVector = Icons.Default.Public,
-                        title = "WebView",
-                        onClick = {
-                            navController.navigate(WebViewScreenSpec.buildRoute(
-                                url = viewModel.state.chapter.link,
-                                sourceId = viewModel.state.source.sourceId,
-                                fetchType = FetchType.ContentFetchType.index,
-                                bookId = state.chapter.bookId,
-                                chapterId = state.chapter.chapterId
-                            ))
-                        })
-                    if (isWebViewEnable) {
-                        TopAppBarActionButton(imageVector = Icons.Default.TrackChanges,
-                            title = "Content Fetcher",
-                            onClick = { viewModel.getFromWebView() })
+                    if (state.chapters.isNotEmpty()) {
+                        TopAppBarActionButton(imageVector = Icons.Default.Public,
+                            title = "WebView",
+                            onClick = {
+                                navController.navigate(WebViewScreenSpec.buildRoute(
+                                    url = viewModel.state.chapter.link,
+                                    sourceId = viewModel.state.source.sourceId,
+                                    fetchType = FetchType.ContentFetchType.index,
+                                    bookId = state.chapter.bookId,
+                                    chapterId = state.chapter.chapterId
+                                ))
+                            })
+                        if (isWebViewEnable) {
+                            TopAppBarActionButton(imageVector = Icons.Default.TrackChanges,
+                                title = "Content Fetcher",
+                                onClick = { viewModel.getFromWebView() })
+                        }
                     }
                 },
                 navigationIcon = {
@@ -169,7 +171,7 @@ fun ReadingScreen(
         scaffoldState = scaffoldState,
         snackbarHost = { ISnackBarHost(snackBarHostState = it) },
         bottomBar = {
-            if (!state.isReaderModeEnable && state.isLocalLoaded) {
+            if (!state.isReaderModeEnable && state.isLocalLoaded && state.chapters.isNotEmpty()) {
                 ModalBottomSheetLayout(
                     modifier = Modifier
                         .fillMaxWidth()

@@ -22,11 +22,13 @@ import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
+import org.ireader.core.utils.Constants
 import org.ireader.domain.view_models.library.LibraryViewModel
 import org.ireader.presentation.feature_library.presentation.components.BottomTabComposable
 import org.ireader.presentation.feature_library.presentation.components.LayoutComposable
 import org.ireader.presentation.presentation.components.handlePagingResult
 import org.ireader.presentation.presentation.reusable_composable.ErrorTextWithEmojis
+import org.ireader.presentation.ui.ReaderScreenSpec
 
 
 @ExperimentalPagerApi
@@ -93,7 +95,16 @@ fun LibraryScreen(
                             navController = navController,
                             isLocal = true,
                             gridState = gridState,
-                            scrollState = lazyListState
+                            scrollState = lazyListState,
+                            goToLatestChapter = { book ->
+                                navController.navigate(
+                                    ReaderScreenSpec.buildRoute(
+                                        bookId = book.id,
+                                        sourceId = book.sourceId,
+                                        chapterId = Constants.LAST_CHAPTER
+                                    )
+                                )
+                            }
                         )
                     }
                 }

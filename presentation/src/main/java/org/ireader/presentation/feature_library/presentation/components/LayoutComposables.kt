@@ -6,7 +6,6 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 import androidx.paging.compose.LazyPagingItems
-import org.ireader.core.utils.Constants
 import org.ireader.domain.models.LayoutType
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.source.Source
@@ -14,7 +13,6 @@ import org.ireader.presentation.presentation.layouts.CompactGridLayoutComposable
 import org.ireader.presentation.presentation.layouts.GridLayoutComposable
 import org.ireader.presentation.presentation.layouts.LinearListDisplay
 import org.ireader.presentation.ui.BookDetailScreenSpec
-import org.ireader.presentation.ui.ReaderScreenSpec
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -27,6 +25,7 @@ fun LayoutComposable(
     gridState: LazyGridState,
     source: Source? = null,
     isLocal: Boolean,
+    goToLatestChapter: (book: Book) -> Unit = {},
 ) {
 
     when (layout) {
@@ -38,16 +37,8 @@ fun LayoutComposable(
                             bookId = book.id)
                     )
                 }, scrollState = gridState,
-                onLastReadChapterClick = { book ->
-                    navController.navigate(
-                        ReaderScreenSpec.buildRoute(
-                            bookId = book.id,
-                            sourceId = book.sourceId,
-                            chapterId = Constants.LAST_CHAPTER
-                        )
-                    )
-                },
-                isLocal = isLocal)
+                isLocal = isLocal,
+                goToLatestChapter = { goToLatestChapter(it) })
         }
         is LayoutType.ListLayout -> {
             LinearListDisplay(books = books, onClick = { book ->
@@ -56,16 +47,8 @@ fun LayoutComposable(
                         bookId = book.id)
                 )
             }, scrollState = scrollState,
-                onLastReadChapterClick = { book ->
-                    navController.navigate(
-                        ReaderScreenSpec.buildRoute(
-                            bookId = book.id,
-                            sourceId = book.sourceId,
-                            chapterId = Constants.LAST_CHAPTER
-                        )
-                    )
-                },
-                isLocal = isLocal)
+                isLocal = isLocal,
+                goToLatestChapter = { goToLatestChapter(it) })
         }
         is LayoutType.CompactGrid -> {
             CompactGridLayoutComposable(
@@ -76,17 +59,9 @@ fun LayoutComposable(
                             bookId = book.id)
                     )
                 }, scrollState = gridState,
-                onLastReadChapterClick = { book ->
-                    navController.navigate(
-                        ReaderScreenSpec.buildRoute(
-                            bookId = book.id,
-                            sourceId = book.sourceId,
-                            chapterId = Constants.LAST_CHAPTER
-                        )
-                    )
-                },
-                isLocal = isLocal
-            )
+                isLocal = isLocal,
+                goToLatestChapter = { goToLatestChapter(it) })
+
         }
     }
 }

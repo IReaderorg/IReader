@@ -36,8 +36,8 @@ fun CompactGridLayoutComposable(
     books: LazyPagingItems<Book>,
     onClick: (book: Book) -> Unit,
     scrollState: LazyGridState = rememberLazyGridState(),
-    onLastReadChapterClick: (book: Book) -> Unit,
     isLocal: Boolean,
+    goToLatestChapter: (book: Book) -> Unit,
 ) {
     LazyVerticalGrid(
         state = scrollState,
@@ -89,7 +89,7 @@ fun CompactGridLayoutComposable(
                             )
                         }
                         if (book.totalChapters > 1 && isLocal && book.lastRead != 0L) {
-                            GoToLastReadComposable(onClick = { onLastReadChapterClick(book) })
+                            GoToLastReadComposable(onClick = { goToLatestChapter(book) })
                         }
 
 
