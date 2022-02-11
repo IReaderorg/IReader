@@ -8,6 +8,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import org.ireader.core.prefs.AndroidPreferenceStore
+import org.ireader.core.prefs.PreferenceStore
 import org.ireader.core.utils.Constants
 import org.ireader.domain.local.BookDatabase
 import org.ireader.domain.local.MIGRATION_8_9
@@ -18,6 +20,8 @@ import org.ireader.domain.local.dao.SourceTowerDao
 import org.ireader.domain.repository.LocalBookRepository
 import org.ireader.domain.repository.LocalChapterRepository
 import org.ireader.domain.source.Extensions
+import org.ireader.domain.ui.AppPreferences
+import org.ireader.domain.ui.UiPreferences
 import org.ireader.domain.use_cases.local.LocalGetBookUseCases
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.book_usecases.*
@@ -44,7 +48,7 @@ class LocalModule {
     @Provides
     @Singleton
     fun provideBookDatabase(
-        @ApplicationContext appContext: Context
+        @ApplicationContext appContext: Context,
     ): BookDatabase {
         return Room.databaseBuilder(
             appContext,
@@ -162,5 +166,27 @@ class LocalModule {
             getLastReadChapter = GetLastReadChapter(localChapterRepository),
             getLocalChaptersByPaging = GetLocalChaptersByPaging(localChapterRepository = localChapterRepository),
         )
+    }
+
+    @Provides
+    @Singleton
+    fun providePreferences(
+        preferences: PreferenceStore,
+    ): AppPreferences {
+        return AppPreferences(preferences)
+    }
+
+    @Provides
+    @Singleton
+    fun provideUiPreferences(
+        preferences: PreferenceStore,
+    ): UiPreferences {
+        return UiPreferences(preferences)
+    }
+
+    @Provides
+    @Singleton
+    fun providePreferencesStore(@ApplicationContext context: Context): PreferenceStore {
+        return AndroidPreferenceStore(context = context, "ui")
     }
 }

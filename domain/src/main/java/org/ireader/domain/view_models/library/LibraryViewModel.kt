@@ -16,6 +16,7 @@ import org.ireader.domain.models.DisplayMode
 import org.ireader.domain.models.FilterType
 import org.ireader.domain.models.SortType
 import org.ireader.domain.models.entities.Book
+import org.ireader.domain.use_cases.preferences.reader_preferences.PreferencesUseCase
 import org.ireader.infinity.core.domain.use_cases.local.DeleteUseCase
 import javax.inject.Inject
 
@@ -24,7 +25,7 @@ import javax.inject.Inject
 class LibraryViewModel @Inject constructor(
     private val localGetBookUseCases: org.ireader.domain.use_cases.local.LocalGetBookUseCases,
     private val deleteUseCase: DeleteUseCase,
-    private val preferencesUseCase: org.ireader.domain.use_cases.preferences.reader_preferences.PreferencesUseCase,
+    private val preferencesUseCase: PreferencesUseCase,
 ) : ViewModel() {
 
     var state by mutableStateOf(LibraryScreenState())

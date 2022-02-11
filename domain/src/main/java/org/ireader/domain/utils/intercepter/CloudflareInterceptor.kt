@@ -7,6 +7,9 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import okhttp3.Cookie
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.Interceptor
@@ -14,10 +17,10 @@ import okhttp3.Request
 import okhttp3.Response
 import org.ireader.domain.source.HttpSource
 import org.ireader.domain.source.NetworkHelper
+import org.ireader.domain.utils.launchUI
 import org.ireader.domain.utils.toast
 import org.ireader.infinity.core.data.network.utils.WebViewUtil
 import org.ireader.infinity.core.data.network.utils.isOutdated
-import org.ireader.infinity.core.data.network.utils.launchUI
 import org.ireader.infinity.core.data.network.utils.setDefaultSettings
 import org.ireader.infinity.feature_sources.sources.utils.WebViewClientCompat
 import org.ireader.source.R
@@ -33,7 +36,7 @@ class CloudflareInterceptor(private val context: Context) : Interceptor, KoinCom
 
 
     private val networkHelper: NetworkHelper by inject()
-
+    val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     /**
      * When this is called, it initializes the WebView if it wasn't already. We use this to avoid
@@ -55,7 +58,7 @@ class CloudflareInterceptor(private val context: Context) : Interceptor, KoinCom
         val originalRequest = chain.request()
 
         if (!WebViewUtil.supportsWebView(context)) {
-            launchUI {
+            scope.launchUI {
                 context.toast(R.string.information_webview_required,
                     Toast.LENGTH_LONG)
             }

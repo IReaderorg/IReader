@@ -16,9 +16,6 @@ dependencies {
     "implementation"(Jsoup.jsoup)
     "implementation"(OkHttp.okHttp3Interceptor)
 
-    "implementation"(FlowPreferences.flowPreferences)
-
-
     /** Coroutine **/
     "implementation"(Coroutines.core)
     "implementation"(Coroutines.android)

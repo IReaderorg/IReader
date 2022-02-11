@@ -1,12 +1,9 @@
 package org.ireader.infinity
 
 import android.app.Application
-import android.content.Context
 import android.webkit.WebView
 import androidx.hilt.work.HiltWorkerFactory
-import androidx.startup.Initializer
 import androidx.work.Configuration
-import androidx.work.WorkManager
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import dagger.hilt.android.HiltAndroidApp
@@ -60,7 +57,6 @@ class MyApplication : Application(), Configuration.Provider {
             single<OkHttpClient> { okHttpClient }
         }
 
-
         startKoin {
             modules(appModule)
         }
@@ -75,7 +71,7 @@ class MyApplication : Application(), Configuration.Provider {
         }
     }
 
-    override fun getWorkManagerConfiguration(): Configuration =
+    override fun getWorkManagerConfiguration() =
         Configuration.Builder()
             .setWorkerFactory(workerFactory)
             .build()
@@ -83,16 +79,5 @@ class MyApplication : Application(), Configuration.Provider {
 
 }
 
-class WorkManagerInitializer : Initializer<WorkManager> {
-    override fun create(context: Context): WorkManager {
-        val configuration = Configuration.Builder().build()
-        WorkManager.initialize(context, configuration)
-        return WorkManager.getInstance(context)
-    }
-
-    override fun dependencies(): List<Class<out Initializer<*>>> {
-        return emptyList()
-    }
-}
 
 

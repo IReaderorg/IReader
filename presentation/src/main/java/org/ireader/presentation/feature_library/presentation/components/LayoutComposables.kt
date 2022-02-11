@@ -28,9 +28,11 @@ fun LayoutComposable(
     goToLatestChapter: (book: Book) -> Unit = {},
 ) {
 
+    //TODO: Add an item change position animation
     when (layout) {
         is LayoutType.GridLayout -> {
-            GridLayoutComposable(books = books,
+            GridLayoutComposable(
+                books = books,
                 onClick = { book ->
                     navController.navigate(
                         route = BookDetailScreenSpec.buildRoute(sourceId = if (source?.sourceId != null) source.sourceId else book.sourceId,

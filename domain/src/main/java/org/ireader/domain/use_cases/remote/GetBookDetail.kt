@@ -1,4 +1,4 @@
-package org.ireader.infinity.core.domain.use_cases.remote
+package org.ireader.domain.use_cases.remote
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow

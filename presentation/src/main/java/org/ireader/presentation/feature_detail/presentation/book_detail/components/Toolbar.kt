@@ -12,7 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.insets.statusBarsPadding
-import org.ireader.presentation.presentation.components.AppColors
+import org.ireader.core_ui.theme.AppColors
 import org.ireader.presentation.presentation.components.NoElevationOverlay
 
 

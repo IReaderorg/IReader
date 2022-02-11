@@ -8,10 +8,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import org.ireader.core.R
+import org.ireader.core.utils.UiText
 import org.ireader.domain.view_models.reader.ReaderScreenViewModel
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
 import org.ireader.presentation.utils.scroll.CarouselScrollState
@@ -24,7 +27,56 @@ fun MainBottomSettingComposable(
     scaffoldState: ScaffoldState,
     scrollState: CarouselScrollState,
 ) {
-    ChaptersSliderComposable(viewModel = viewModel, scrollState = scrollState)
+    val coroutineScope = rememberCoroutineScope()
+    val currentIndex = viewModel.state.currentChapterIndex
+    //val currentChapter = viewModel.getCurrentChapterByIndex()
+    val chapters = viewModel.state.chapters
+    ChaptersSliderComposable(
+        scrollState = scrollState,
+        onNext = {
+            if (currentIndex < chapters.lastIndex) {
+                viewModel.updateChapterSliderIndex(currentIndex + 1)
+                viewModel.getChapter(viewModel.getCurrentChapterByIndex())
+                coroutineScope.launch {
+                    scrollState.scrollTo(0)
+                }
+            } else {
+                coroutineScope.launch {
+                    viewModel.showSnackBar(UiText.StringResource(R.string.this_is_last_chapter))
+
+                }
+            }
+        },
+        onPrev = {
+            if (currentIndex > 0) {
+                viewModel.updateChapterSliderIndex(currentIndex - 1)
+                viewModel.getChapter(viewModel.getCurrentChapterByIndex())
+                coroutineScope.launch {
+                    scrollState.scrollTo(0)
+                }
+            } else {
+                coroutineScope.launch {
+                    viewModel.showSnackBar(UiText.StringResource(org.ireader.core.R.string.this_is_first_chapter))
+                }
+            }
+        },
+        onSliderDragFinished = {
+            coroutineScope.launch {
+                viewModel.showSnackBar(UiText.DynamicString(chapters[viewModel.state.currentChapterIndex].title))
+            }
+            viewModel.updateChapterSliderIndex(currentIndex)
+            viewModel.getChapter(chapters[viewModel.state.currentChapterIndex])
+            coroutineScope.launch {
+                scrollState.scrollTo(0)
+            }
+        },
+        onSliderChange = {
+            viewModel.updateChapterSliderIndex(it.toInt())
+        },
+        chapters = viewModel.state.chapters,
+        currentChapter = viewModel.state.chapter,
+        currentChapterIndex = viewModel.state.currentChapterIndex
+    )
     Row(modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically) {

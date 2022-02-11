@@ -14,8 +14,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import org.ireader.core.prefs.AppTheme
 import org.ireader.core.utils.Constants
+import org.ireader.core_ui.theme.ThemeMode
 import org.ireader.domain.view_models.settings.apperance.MainViewModel
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
@@ -102,8 +102,8 @@ fun AppearanceSettingScreen(
     }
 }
 
-sealed class AppearanceItems(val text: String, val appTheme: AppTheme) {
-    object Day : AppearanceItems("Off", AppTheme.MODE_DAY)
-    object Night : AppearanceItems("On", AppTheme.MODE_NIGHT)
-    object Auto : AppearanceItems("Auto", AppTheme.MODE_AUTO)
+sealed class AppearanceItems(val text: String, val appTheme: ThemeMode) {
+    object Day : AppearanceItems("Off", ThemeMode.Light)
+    object Night : AppearanceItems("On", ThemeMode.Dark)
+    object Auto : AppearanceItems("Auto", ThemeMode.System)
 }

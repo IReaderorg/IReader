@@ -7,23 +7,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.*
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.ireader.core.R
 import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
 import org.ireader.core.utils.getHtml
 import org.ireader.core.utils.removeSameItemsFromList
+import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.feature_services.DownloaderService.DownloadService
 import org.ireader.domain.feature_services.DownloaderService.DownloadService.Companion.DOWNLOADER_BOOK_ID
 import org.ireader.domain.feature_services.DownloaderService.DownloadService.Companion.DOWNLOADER_SERVICE_NAME
@@ -41,6 +38,10 @@ import org.ireader.use_cases.remote.RemoteUseCases
 import timber.log.Timber
 import javax.inject.Inject
 
+
+/**
+ * need to change this to BaseViewModel later
+ */
 @SuppressLint("StaticFieldLeak")
 @HiltViewModel
 class BookDetailViewModel @Inject constructor(
@@ -53,7 +54,7 @@ class BookDetailViewModel @Inject constructor(
     private val hiltWebView: WebView,
     savedStateHandle: SavedStateHandle,
     extensions: Extensions,
-) : ViewModel() {
+) : BaseViewModel() {
 
     var state by mutableStateOf(DetailState())
         private set
@@ -67,6 +68,10 @@ class BookDetailViewModel @Inject constructor(
     var chapterState by mutableStateOf(ChapterState())
         private set
 
+    var getFromWebViewJob: Job? = null
+    var getBookDetailJob: Job? = null
+    var getChapterDetailJob: Job? = null
+
 
     lateinit var work: OneTimeWorkRequest
 
@@ -76,6 +81,7 @@ class BookDetailViewModel @Inject constructor(
     private val _eventFlow = MutableSharedFlow<UiEvent>()
 
     val eventFlow = _eventFlow.asSharedFlow()
+
     init {
         val bookId = savedStateHandle.get<Int>("bookId")
         val sourceId = savedStateHandle.get<Long>("sourceId")
@@ -204,7 +210,8 @@ class BookDetailViewModel @Inject constructor(
         toggleRemoteBookLoading(true)
         clearBookError()
         isLocalBookLoaded(false)
-        remoteUseCases.getBookDetail(book = book, source = state.source)
+        getBookDetailJob?.cancel()
+        getBookDetailJob = remoteUseCases.getBookDetail(book = book, source = state.source)
             .onEach { result ->
                 when (result) {
                     is Resource.Success -> {
@@ -243,7 +250,8 @@ class BookDetailViewModel @Inject constructor(
         toggleRemoteChaptersLoading(true)
         clearChapterError()
         toggleAreChaptersLoaded(false)
-        remoteUseCases.getRemoteChapters(book = book, source = state.source)
+        getChapterDetailJob?.cancel()
+        getChapterDetailJob = remoteUseCases.getRemoteChapters(book = book, source = state.source)
             .onEach { result ->
                 when (result) {
                     is Resource.Success -> {
@@ -282,7 +290,8 @@ class BookDetailViewModel @Inject constructor(
 
     @ExperimentalCoroutinesApi
     fun getWebViewData() {
-        viewModelScope.launch {
+        getFromWebViewJob?.cancel()
+        getFromWebViewJob = viewModelScope.launch {
             showSnackBar(UiText.StringResource(org.ireader.core.R.string.trying_to_fetch))
             fetchUseCase.fetchBookDetailAndChapterDetailFromWebView(
                 deleteUseCase = deleteUseCase,
@@ -435,7 +444,10 @@ class BookDetailViewModel @Inject constructor(
         state = state.copy(error = UiText.DynamicString(""))
     }
 
-
+    override fun onDestroy() {
+        getBookDetailJob?.cancel()
+        super.onDestroy()
+    }
 }
 
 

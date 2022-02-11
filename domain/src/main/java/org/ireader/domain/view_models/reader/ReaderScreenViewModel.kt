@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.ireader.core.utils.*
 import org.ireader.core_ui.theme.FontType
+import org.ireader.core_ui.theme.OrientationMode
 import org.ireader.core_ui.theme.fonts
 import org.ireader.core_ui.theme.readerScreenBackgroundColors
 import org.ireader.domain.R
@@ -73,6 +74,7 @@ class ReaderScreenViewModel @Inject constructor(
 
     val webView: WebView = _webView
 
+
     init {
         val sourceId = savedStateHandle.get<Long>(NavigationArgs.sourceId.name)
         val chapterId = savedStateHandle.get<Int>(NavigationArgs.chapterId.name)
@@ -86,7 +88,6 @@ class ReaderScreenViewModel @Inject constructor(
             readPreferences()
         }
     }
-
 
     private fun readPreferences() {
         readSelectedFontState()
@@ -207,23 +208,27 @@ class ReaderScreenViewModel @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getFromWebView() {
-        viewModelScope.launch {
-            showSnackBar(UiText.StringResource(R.string.trying_to_fetch_chapters_content))
-            val chapter = state.source.contentFromElementParse(Jsoup.parse(webView.getHtml()))
-            if (!chapter.content.isNullOrEmpty() && state.isBookLoaded && state.isChapterLoaded && webView.originalUrl == state.chapter.link) {
-                clearError()
-                state = state.copy(isLocalLoading = false,
-                    chapter = state.chapter.copy(content = chapter.content))
-                toggleLastReadAndUpdateChapterContent(state.chapter.copy(content = chapter.content))
-                showSnackBar(UiText.DynamicString("${state.chapter.title} of ${state.chapter.bookName} was Fetched"))
-                if (state.chapter.content.size > 10) {
-                    state = state.copy(isLocalLoaded = true)
+        try {
+            viewModelScope.launch {
+                showSnackBar(UiText.StringResource(R.string.trying_to_fetch_chapters_content))
+                val chapter = state.source.contentFromElementParse(Jsoup.parse(webView.getHtml()))
+                if (!chapter.content.isNullOrEmpty() && state.isBookLoaded && state.isChapterLoaded && webView.originalUrl == state.chapter.link) {
+                    clearError()
+                    state = state.copy(isLocalLoading = false,
+                        chapter = state.chapter.copy(content = chapter.content))
+                    toggleLastReadAndUpdateChapterContent(state.chapter.copy(content = chapter.content))
+                    showSnackBar(UiText.DynamicString("${state.chapter.title} of ${state.chapter.bookName} was Fetched"))
+                    if (state.chapter.content.size > 10) {
+                        state = state.copy(isLocalLoaded = true)
+                    }
+                    state = state
+                } else {
+                    showSnackBar(UiText.DynamicString("Failed to to get the content"))
                 }
-                state = state
-            } else {
-                showSnackBar(UiText.DynamicString("Failed to to get the content"))
             }
+        } catch (e: Exception) {
         }
+
 
     }
 
@@ -369,11 +374,11 @@ class ReaderScreenViewModel @Inject constructor(
     fun readOrientation(context: Context) {
         val activity = context.findComponentActivity()!!
         when (preferencesUseCase.readOrientationUseCase()) {
-            0 -> {
+            OrientationMode.Portrait -> {
                 activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                 prefState = prefState.copy(orientation = Orientation.Portrait)
             }
-            1 -> {
+            OrientationMode.Landscape -> {
                 activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
                 prefState = prefState.copy(orientation = Orientation.Landscape)
             }
@@ -394,12 +399,12 @@ class ReaderScreenViewModel @Inject constructor(
             is Orientation.Landscape -> {
                 activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                 prefState = prefState.copy(orientation = Orientation.Portrait)
-                preferencesUseCase.saveOrientationUseCase(Orientation.Portrait.index)
+                preferencesUseCase.saveOrientationUseCase(OrientationMode.Portrait)
             }
             is Orientation.Portrait -> {
                 activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
                 prefState = prefState.copy(orientation = Orientation.Landscape)
-                preferencesUseCase.saveOrientationUseCase(Orientation.Landscape.index)
+                preferencesUseCase.saveOrientationUseCase(OrientationMode.Landscape)
             }
         }
     }
@@ -539,6 +544,7 @@ class ReaderScreenViewModel @Inject constructor(
 
     override fun onCleared() {
         state = state.copy(enable = false)
+        getChapterJob?.cancel()
         super.onCleared()
     }
 

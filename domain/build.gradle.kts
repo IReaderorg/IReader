@@ -12,6 +12,7 @@ dependencies {
     "implementation"(Compose.ui)
     "implementation"(Compose.runtime)
     "implementation"(Compose.navigation)
+    "implementation"(Compose.material)
     "implementation"(Worker.runtimeKtx)
     "implementation"(DaggerHilt.worker)
     "implementation"(Coil.coilCompose)
@@ -21,9 +22,6 @@ dependencies {
     "kapt"(Room.roomCompiler)
     "implementation"(Room.roomKtx)
     "implementation"(Room.roomPaging)
-
-    "implementation"(FlowPreferences.flowPreferences)
-
 
     /** Coroutine **/
     "implementation"(Coroutines.core)
@@ -42,6 +40,5 @@ dependencies {
     "implementation"(Jsoup.jsoup)
     "implementation"(Jsonpathkt.jsonpathkt)
     "implementation"(Datastore.datastore)
-    "implementation"(Datastore.preferenceKtx)
 
 }

@@ -144,7 +144,6 @@ fun BookDetailScreen(
                      */
                     LazyColumn(state = scrollState) {
                         item {
-
                             BookDetailScreenLoadedComposable(
                                 navController = navController,
                                 onWebView = {

@@ -1,21 +1,11 @@
 package org.ireader.core_ui.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.graphics.Color
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import org.ireader.core.utils.DeviceUtil.isMiui
 import org.ireader.core_ui.ui.Colour
-import org.ireader.infinity.core.presentation.theme.LocalSpacing
-import org.ireader.infinity.core.presentation.theme.Shapes
-import org.ireader.infinity.core.presentation.theme.Spacing
 
-private val DarkColorPalette = darkColors(
+
+val DarkColorPalette = darkColors(
     primary = Colour.blue_200,
     primaryVariant = Colour.blue_600,
     onPrimary = Colour.black_900,
@@ -28,8 +18,7 @@ private val DarkColorPalette = darkColors(
     error = Colour.red_600,
     onError = Colour.black_900,
 )
-
-private val LightColorPalette = lightColors(
+val LightColorPalette = lightColors(
     primary = Colour.blue_500,
     primaryVariant = Colour.blue_700,
     onPrimary = Colour.white_50,
@@ -43,54 +32,54 @@ private val LightColorPalette = lightColors(
     onError = Colour.white_50,
 )
 
-@Composable
-fun InfinityTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable() () -> Unit,
-) {
-    val colors = if (darkTheme) {
-        DarkColorPalette
-    } else {
-        LightColorPalette
-    }
-    val useDarkIcon = MaterialTheme.colors.isLight
-    val systemUiController = rememberSystemUiController()
-    val transparentStatusBar = LocalTransparentStatusBar.current.enabled
-    if (!isMiui) {
-        SideEffect {
-
-            if (transparentStatusBar) {
-                systemUiController.setSystemBarsColor(
-                    color = Color.Transparent,
-                    darkIcons = useDarkIcon,
-                )
-            } else {
-                systemUiController.setSystemBarsColor(
-                    color = colors.background,
-                    darkIcons = !darkTheme,
-                )
-            }
-
-            systemUiController.setStatusBarColor(
-                color = colors.background,
-                darkIcons = !darkTheme,
-            )
-            systemUiController.setNavigationBarColor(
-                color = colors.background,
-                darkIcons = !darkTheme
-            )
-        }
-
-
-    }
-    CompositionLocalProvider(LocalSpacing provides Spacing()) {
-
-    }
-
-    MaterialTheme(
-        colors = colors,
-        typography = Typography,
-        shapes = Shapes,
-        content = content
-    )
-}
+//@Composable
+//fun InfinityTheme(
+//    darkTheme: Boolean = isSystemInDarkTheme(),
+//    content: @Composable() () -> Unit,
+//) {
+//    val vm : AppThemeViewModel = hiltViewModel()
+//    val colors = if (darkTheme) {
+//        DarkColorPalette
+//    } else {
+//        LightColorPalette
+//    }
+//    val useDarkIcon = MaterialTheme.colors.isLight
+//    val systemUiController = rememberSystemUiController()
+//    val transparentStatusBar = LocalTransparentStatusBar.current.enabled
+//    if (!isMiui) {
+//        SideEffect {
+//            if (transparentStatusBar) {
+//                systemUiController.setSystemBarsColor(
+//                    color = Color.Transparent,
+//                    darkIcons = useDarkIcon,
+//                )
+//            } else {
+//                systemUiController.setSystemBarsColor(
+//                    color = colors.background,
+//                    darkIcons = !darkTheme,
+//                )
+//            }
+//
+//            systemUiController.setStatusBarColor(
+//                color = colors.background,
+//                darkIcons = !darkTheme,
+//            )
+//            systemUiController.setNavigationBarColor(
+//                color = colors.background,
+//                darkIcons = !darkTheme
+//            )
+//        }
+//
+//
+//    }
+//    CompositionLocalProvider(LocalSpacing provides Spacing()) {
+//
+//    }
+//
+//    MaterialTheme(
+//        colors = colors,
+//        typography = Typography,
+//        shapes = Shapes,
+//        content = content
+//    )
+//}

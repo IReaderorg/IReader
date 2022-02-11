@@ -1,36 +1,36 @@
-package org.ireader.infinity.core.domain.use_cases.preferences.reader_preferences
+package org.ireader.domain.use_cases.preferences.reader_preferences
 
-import org.ireader.domain.repository.Repository
+import org.ireader.domain.ui.AppPreferences
 
 
 class SaveParagraphDistanceUseCase(
-    private val repository: Repository,
+    private val appPreferences: AppPreferences,
 ) {
     operator fun invoke(paragraphDistance: Int) {
-        repository.preferencesHelper.paragraphDistance.set(paragraphDistance)
+        appPreferences.paragraphDistance().set(paragraphDistance)
     }
 }
 
 class ReadParagraphDistanceUseCase(
-    private val repository: Repository,
+    private val appPreferences: AppPreferences,
 ) {
     operator fun invoke(): Int {
-        return repository.preferencesHelper.paragraphDistance.get()
+        return appPreferences.paragraphDistance().get()
     }
 }
 
 class SaveParagraphIndentUseCase(
-    private val repository: Repository,
+    private val appPreferences: AppPreferences,
 ) {
     operator fun invoke(paragraphIndent: Int) {
-        repository.preferencesHelper.paragraphIndent.set(paragraphIndent)
+        appPreferences.paragraphIndent().set(paragraphIndent)
     }
 }
 
 class ReadParagraphIndentUseCase(
-    private val repository: Repository,
+    private val appPreferences: AppPreferences,
 ) {
     operator fun invoke(): Int {
-        return repository.preferencesHelper.paragraphIndent.get()
+        return appPreferences.paragraphIndent().get()
     }
 }

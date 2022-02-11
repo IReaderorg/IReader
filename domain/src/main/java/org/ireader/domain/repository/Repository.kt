@@ -9,8 +9,6 @@ interface Repository {
 
     val localChapterRepository: LocalChapterRepository
 
-    val preferencesHelper: PreferencesHelper
-
     val remoteRepository: RemoteRepository
     val database: BookDatabase
 }

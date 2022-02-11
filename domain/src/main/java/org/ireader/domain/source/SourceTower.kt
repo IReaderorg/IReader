@@ -402,8 +402,10 @@ data class SourceTower constructor(
 
         val hasNext = hasNextChaptersParse(document)
 
-
-        return ChaptersPage(chapters,
+        val mChapters =
+            if (this.chapters?.isChapterStatsFromFirst == true) chapters else chapters.reversed()
+        return ChaptersPage(
+            mChapters,
             hasNext,
             errorMessage = if (isCloudflareEnable) Constants.CLOUDFLARE_PROTECTION_ERROR else "",
             ajaxLoaded = ajaxLoaded)
@@ -623,7 +625,7 @@ data class SourceTower constructor(
                     this.chapters?.ajaxSelector), isWebViewMode = true)
         }
         request.close()
-        return chapters.copy(if (this.chapters?.isChapterStatsFromFirst == true) chapters.chapters else chapters.chapters.reversed())
+        return chapters.copy(chapters = chapters.chapters)
     }
 
     /**
@@ -659,7 +661,7 @@ data class SourceTower constructor(
     override suspend fun fetchLatest(page: Int): BooksPage {
         val request = client.call(latestRequest(page))
         var books = latestParse(request, page = page)
-        if (books.errorMessage.isNotBlank() || !request.isSuccessful|| !books.ajaxLoaded) {
+        if (books.errorMessage.isNotBlank() || !request.isSuccessful || !books.ajaxLoaded) {
             books =
                 latestParse(network.getHtmlFromWebView(baseUrl + fetchLatestEndpoint?.applyPageFormat(
                     page)), page = page, isWebViewMode = true)

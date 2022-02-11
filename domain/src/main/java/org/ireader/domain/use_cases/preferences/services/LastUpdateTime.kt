@@ -1,19 +1,19 @@
-package org.ireader.infinity.core.domain.use_cases.preferences.services
+package org.ireader.domain.use_cases.preferences.services
 
-import org.ireader.domain.repository.Repository
+import org.ireader.domain.ui.AppPreferences
 
 class SetLastUpdateTime(
-    private val repository: Repository,
+    private val appPreferences: AppPreferences,
 ) {
     operator fun invoke(time: Long) {
-        repository.preferencesHelper.lastUpdateCheck.set(time)
+        appPreferences.lastUpdateCheck().set(time)
     }
 }
 
 class ReadLastUpdateTime(
-    private val repository: Repository,
+    private val appPreferences: AppPreferences,
 ) {
     operator fun invoke(): Long {
-        return repository.preferencesHelper.lastUpdateCheck.get()
+        return appPreferences.lastUpdateCheck().get()
     }
 }

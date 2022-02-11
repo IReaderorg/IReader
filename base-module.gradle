@@ -5,7 +5,9 @@ apply plugin: 'kotlin-parcelize'
 apply plugin: 'kotlinx-serialization'
 
 android {
+
     compileSdk ProjectConfig.compileSdk
+
 
     defaultConfig {
         minSdk ProjectConfig.minSdk
@@ -28,6 +30,17 @@ android {
     }
     kotlinOptions {
         jvmTarget = '1.8'
+    }
+    kapt {
+        arguments {
+            arg("room.schemaLocation", "$projectDir/schemas")
+        }
+    }
+    buildFeatures {
+        compose true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion Compose.composeCompilerVersion
     }
 }
 

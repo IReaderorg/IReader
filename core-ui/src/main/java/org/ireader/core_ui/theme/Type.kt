@@ -5,7 +5,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import org.ireader.core_ui.R
+import org.ireader.core.R
 
 // Set of Material typography styles to start with
 val poppins = FontFamily(

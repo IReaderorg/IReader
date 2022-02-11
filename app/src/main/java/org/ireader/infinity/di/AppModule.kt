@@ -15,7 +15,10 @@ import org.ireader.domain.local.dao.LibraryBookDao
 import org.ireader.domain.local.dao.LibraryChapterDao
 import org.ireader.domain.local.dao.RemoteKeysDao
 import org.ireader.domain.local.dao.SourceTowerDao
-import org.ireader.domain.repository.*
+import org.ireader.domain.repository.LocalBookRepository
+import org.ireader.domain.repository.LocalChapterRepository
+import org.ireader.domain.repository.LocalSourceRepository
+import org.ireader.domain.repository.Repository
 import org.ireader.infinity.core.domain.repository.RemoteRepository
 import javax.inject.Singleton
 
@@ -30,14 +33,12 @@ class AppModule {
         localChapterRepository: LocalChapterRepository,
         localBookRepository: LocalBookRepository,
         remoteRepository: RemoteRepository,
-        preferencesHelper: PreferencesHelper,
         bookDatabase: BookDatabase,
     ): Repository {
         return RepositoryImpl(
             localChapterRepository = localChapterRepository,
             localBookRepository = localBookRepository,
             remoteRepository = remoteRepository,
-            preferencesHelper = preferencesHelper,
             database = bookDatabase
         )
     }

@@ -1,10 +1,9 @@
 package org.ireader.domain.use_cases.preferences.reader_preferences
 
+import org.ireader.domain.use_cases.preferences.services.ReadLastUpdateTime
+import org.ireader.domain.use_cases.preferences.services.SetLastUpdateTime
 import org.ireader.infinity.core.domain.use_cases.preferences.apperance.ReadNightModePreferences
 import org.ireader.infinity.core.domain.use_cases.preferences.apperance.SaveNightModePreferences
-import org.ireader.infinity.core.domain.use_cases.preferences.reader_preferences.*
-import org.ireader.infinity.core.domain.use_cases.preferences.services.ReadLastUpdateTime
-import org.ireader.infinity.core.domain.use_cases.preferences.services.SetLastUpdateTime
 
 data class PreferencesUseCase(
     val readSelectedFontStateUseCase: ReadSelectedFontStateUseCase,
@@ -37,5 +36,4 @@ data class PreferencesUseCase(
     val setLastUpdateTime: SetLastUpdateTime,
     val readNightModePreferences: ReadNightModePreferences,
     val saveNightModePreferences: SaveNightModePreferences,
-
-    )
+)

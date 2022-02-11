@@ -95,6 +95,7 @@ class NetworkHelper(private val context: Context) : KoinComponent {
 
         var docs: Document = Document("No Data was Found")
         var isLoadUp: Boolean = false
+        val maxDelay = 120000
         webView.webViewClient = object : WebViewClientCompat() {
 
             override fun shouldOverrideUrlCompat(view: WebView, url: String): Boolean {
@@ -107,6 +108,7 @@ class NetworkHelper(private val context: Context) : KoinComponent {
                     if (ajaxSelector != null) {
                         while (docs.select(ajaxSelector).text().isEmpty()) {
                             docs = Jsoup.parse(webView.getHtml())
+                            delay(200)
                         }
                         isLoadUp = true
                     } else {
@@ -124,15 +126,13 @@ class NetworkHelper(private val context: Context) : KoinComponent {
             ) {
                 isLoadUp = true
                 Timber.e("WebView: Not shown")
-//                throw  Exception("The Page was not Loaded")
             }
         }
+
         docs = Jsoup.parse(webView.getHtml())
         while (!isLoadUp) {
             delay(200)
         }
-
-        //Timber.e(docs.toString())
         return docs
     }
 

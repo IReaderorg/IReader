@@ -1,3 +1,4 @@
+
 import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
@@ -33,7 +34,9 @@ android {
             }
         }
     }
-
+    lint {
+        baseline = file("lint-baseline.xml")
+    }
 
     buildTypes {
         named("release") {
@@ -103,13 +106,13 @@ dependencies {
     /** Compose **/
     implementation(Compose.compiler)
     implementation(Compose.foundation)
-//    implementation(Compose.activityCompose)
+    implementation(Compose.activityCompose)
     implementation(Compose.ui)
     implementation(Compose.material)
-//    implementation(Compose.uiToolingPreview)
-//    implementation(Compose.viewModelCompose)
-//    implementation(Compose.icons)
-//    implementation(Compose.animations)
+    implementation(Compose.uiToolingPreview)
+    implementation(Compose.viewModelCompose)
+    implementation(Compose.icons)
+    implementation(Compose.animations)
     implementation(Compose.navigation)
     implementation(Compose.hiltNavigationCompose)
 //    androidTestImplementation(Compose.testing)
@@ -117,15 +120,15 @@ dependencies {
 //    implementation(Compose.paging)
 
 //    /** Accompanist **/
-//    implementation(Accompanist.systemUiController)
-//    implementation(Accompanist.webView)
-//    implementation(Accompanist.swipeRefresh)
-//    implementation(Accompanist.pager)
-//    implementation(Accompanist.pagerIndicator)
+    implementation(Accompanist.systemUiController)
+    implementation(Accompanist.webView)
+    implementation(Accompanist.swipeRefresh)
+    implementation(Accompanist.pager)
+    implementation(Accompanist.pagerIndicator)
     implementation(Accompanist.insets)
-//    implementation(Accompanist.navAnimation)
-//    implementation(Accompanist.flowlayout)
-//    implementation(Accompanist.navMaterial)
+    implementation(Accompanist.navAnimation)
+    implementation(Accompanist.flowlayout)
+    implementation(Accompanist.navMaterial)
 
 
     /** LifeCycle **/
@@ -195,7 +198,6 @@ dependencies {
 //    implementation(OkHttp.okio)
 
 //    implementation(Jsonpathkt.jsonpathkt)
-    implementation(FlowPreferences.flowPreferences)
 
 
 //    implementation(Kotlin.jsonSerialization)

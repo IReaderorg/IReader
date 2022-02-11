@@ -30,6 +30,7 @@ import androidx.paging.compose.items
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.ireader.core.utils.UiEvent
+import org.ireader.core.utils.UiText
 import org.ireader.core_ui.ui.Colour.scrollingThumbColor
 import org.ireader.domain.models.source.FetchType
 import org.ireader.domain.view_models.reader.ReaderEvent
@@ -98,7 +99,7 @@ fun ReadingScreen(
     }
 
     Scaffold(topBar = {
-        if (!state.isReaderModeEnable && state.isLocalLoaded && modalBottomSheetState.targetValue == ModalBottomSheetValue.Expanded && state.chapters.isNotEmpty()) {
+        if (!state.isReaderModeEnable && state.isLocalLoaded && modalBottomSheetState.targetValue == ModalBottomSheetValue.Expanded) {
             TopAppBar(
                 title = {
 
@@ -130,12 +131,19 @@ fun ReadingScreen(
                     TopAppBarActionButton(imageVector = Icons.Default.Public,
                         title = "WebView",
                         onClick = {
-                            navController.navigate(WebViewScreenSpec.buildRoute(
-                                url = viewModel.state.chapter.link,
-                                sourceId = viewModel.state.source.sourceId,
-                                fetchType = FetchType.ContentFetchType.index,
-                            )
-                            )
+                            try {
+                                navController.navigate(WebViewScreenSpec.buildRoute(
+                                    url = viewModel.state.chapter.link,
+                                    sourceId = viewModel.state.source.sourceId,
+                                    fetchType = FetchType.ContentFetchType.index,
+                                )
+                                )
+                            } catch (e: Exception) {
+                                scope.launch {
+                                    viewModel.showSnackBar(UiText.ExceptionString(e))
+                                }
+                            }
+
                         })
                 }
             )
@@ -144,10 +152,10 @@ fun ReadingScreen(
                 elevation = 0.dp,
                 backgroundColor = Color.Transparent,
                 actions = {
-                    if (state.chapters.isNotEmpty()) {
-                        TopAppBarActionButton(imageVector = Icons.Default.Public,
-                            title = "WebView",
-                            onClick = {
+                    TopAppBarActionButton(imageVector = Icons.Default.Public,
+                        title = "WebView",
+                        onClick = {
+                            try {
                                 navController.navigate(WebViewScreenSpec.buildRoute(
                                     url = viewModel.state.chapter.link,
                                     sourceId = viewModel.state.source.sourceId,
@@ -155,12 +163,18 @@ fun ReadingScreen(
                                     bookId = state.chapter.bookId,
                                     chapterId = state.chapter.chapterId
                                 ))
-                            })
-                        if (isWebViewEnable) {
-                            TopAppBarActionButton(imageVector = Icons.Default.TrackChanges,
-                                title = "Content Fetcher",
-                                onClick = { viewModel.getFromWebView() })
-                        }
+
+                            } catch (e: Exception) {
+                                scope.launch {
+                                    viewModel.showSnackBar(UiText.ExceptionString(e))
+                                }
+                            }
+
+                        })
+                    if (isWebViewEnable) {
+                        TopAppBarActionButton(imageVector = Icons.Default.TrackChanges,
+                            title = "Content Fetcher",
+                            onClick = { viewModel.getFromWebView() })
                     }
                 },
                 navigationIcon = {
@@ -171,7 +185,7 @@ fun ReadingScreen(
         scaffoldState = scaffoldState,
         snackbarHost = { ISnackBarHost(snackBarHostState = it) },
         bottomBar = {
-            if (!state.isReaderModeEnable && state.isLocalLoaded && state.chapters.isNotEmpty()) {
+            if (!state.isReaderModeEnable && state.isLocalLoaded) {
                 ModalBottomSheetLayout(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -187,9 +201,11 @@ fun ReadingScreen(
                                 thickness = 1.dp)
                             Spacer(modifier = modifier.height(15.dp))
                             if (viewModel.state.isMainBottomModeEnable) {
-                                MainBottomSettingComposable(viewModel = viewModel,
+                                MainBottomSettingComposable(
+                                    viewModel = viewModel,
                                     scope = scope,
-                                    scaffoldState = scaffoldState, scrollState = scrollState)
+                                    scaffoldState = scaffoldState, scrollState = scrollState,
+                                )
                             }
                             if (viewModel.state.isSettingModeEnable) {
                                 ReaderSettingComposable(viewModel = viewModel)

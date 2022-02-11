@@ -1,11 +1,19 @@
-package org.ireader.infinity.core.domain.use_cases.preferences.reader_preferences
+package org.ireader.domain.use_cases.preferences.reader_preferences
 
-import org.ireader.domain.repository.Repository
+import org.ireader.domain.ui.AppPreferences
 
 class ReadFontSizeStateUseCase(
-    private val repository: Repository,
+    private val appPreferences: AppPreferences,
 ) {
     operator fun invoke(): Int {
-        return repository.preferencesHelper.readerFontScale.get()
+        return appPreferences.fontSize().get()
+    }
+}
+
+class SaveFontSizeStateUseCase(
+    private val appPreferences: AppPreferences,
+) {
+    operator fun invoke(fontSize: Int) {
+        appPreferences.fontSize().set(fontSize)
     }
 }
