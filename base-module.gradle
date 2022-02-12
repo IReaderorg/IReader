@@ -12,9 +12,8 @@ android {
     defaultConfig {
         minSdk ProjectConfig.minSdk
         targetSdk ProjectConfig.targetSdk
-        versionCode ProjectConfig.versionCode
-        versionName ProjectConfig.versionName
-
+        versionCode ProjectConfig.ConfigVersionCode
+        versionName ProjectConfig.ConfigVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
@@ -31,19 +30,14 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
-    kapt {
-        arguments {
-            arg("room.schemaLocation", "$projectDir/schemas")
-        }
-    }
     buildFeatures {
         compose true
     }
     composeOptions {
+
         kotlinCompilerExtensionVersion Compose.composeCompilerVersion
     }
 }
-
 dependencies {
     implementation(AndroidX.coreKtx)
     implementation(AndroidX.appCompat)
@@ -52,18 +46,19 @@ dependencies {
     implementation(AndroidX.material)
     implementation(AndroidX.activity)
 
-    implementation Kotlin.jsonSerialization
+    implementation(Kotlin.jsonSerialization)
 
 
-    kapt DaggerHilt.hiltCompiler
-    implementation DaggerHilt.hiltAndroid
+    kapt(DaggerHilt.hiltCompiler)
+    implementation(DaggerHilt.hiltAndroid)
     implementation(DaggerHilt.hiltAndroidCompiler)
-    implementation Koin.koinCompose
-    implementation Timber.timber
+    implementation(Koin.koinCompose)
+    implementation(Timber.timber)
 
     /** LifeCycle **/
     implementation(LifeCycle.runtimeKtx)
     implementation(LifeCycle.viewModel)
+
 
     testImplementation Testing.junit4
     testImplementation Testing.junitAndroidExt
@@ -74,6 +69,7 @@ dependencies {
     testImplementation Testing.mockk
     testImplementation Testing.mockWebServer
 
+
     androidTestImplementation Testing.junit4
     androidTestImplementation Testing.junitAndroidExt
     androidTestImplementation Testing.truth
@@ -83,4 +79,10 @@ dependencies {
     androidTestImplementation Testing.mockk
     androidTestImplementation Testing.mockWebServer
     androidTestImplementation Testing.hiltTesting
+    // Instrumented Unit Tests
+    androidTestImplementation "junit:junit:4.13"
+    androidTestImplementation "com.linkedin.dexmaker:dexmaker-mockito:2.12.1"
+    androidTestImplementation "androidx.arch.core:core-testing:2.1.0"
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    androidTestImplementation "org.mockito:mockito-core:2.21.0"
 }

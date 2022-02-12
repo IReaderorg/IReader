@@ -6,8 +6,8 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
+import org.ireader.domain.models.RemoteKeys
 import org.ireader.domain.models.entities.Book
-import org.ireader.infinity.core.domain.models.RemoteKeys
 
 @Dao
 interface RemoteKeysDao {

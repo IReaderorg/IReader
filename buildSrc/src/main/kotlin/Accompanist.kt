@@ -1,5 +1,5 @@
 object Accompanist {
-    private const val version = "0.24.1-alpha"
+    private const val version = "0.24.2-alpha"
     private const val accompanist_version = "0.22.0-rc"
     private const val accompanistSwipeRefreshVersion = "0.24.1-alpha"
     const val webView = "com.google.accompanist:accompanist-webview:0.24.1-alpha"

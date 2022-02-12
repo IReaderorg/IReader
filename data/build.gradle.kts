@@ -23,5 +23,6 @@ dependencies {
     /** Retrofit **/
     "implementation"(Retrofit.retrofit)
     "implementation"(Retrofit.moshiConverter)
+    "implementation"(Testing.truth)
 
 }

@@ -7,9 +7,9 @@ import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
 import org.ireader.domain.local.BookDatabase
 import org.ireader.domain.models.ExploreType
+import org.ireader.domain.models.RemoteKeys
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.source.Source
-import org.ireader.infinity.core.domain.models.RemoteKeys
 import retrofit2.HttpException
 import java.io.IOException
 import java.net.UnknownHostException

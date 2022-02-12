@@ -2,9 +2,6 @@ package org.ireader.presentation.feature_library.presentation.components
 
 import androidx.navigation.NavController
 import org.ireader.domain.view_models.library.LibraryViewModel
-import org.ireader.presentation.feature_settings.presentation.setting.extension_creator.ExtensionCreatorLogTab
-import org.ireader.presentation.feature_settings.presentation.setting.extension_creator.ExtensionCreatorTab
-import org.ireader.presentation.feature_settings.presentation.setting.extension_creator.ExtensionCreatorViewModel
 import org.ireader.presentation.feature_sources.presentation.extension.ExtensionViewModel
 import org.ireader.presentation.feature_sources.presentation.extension.composables.CommunitySourceScreen
 import org.ireader.presentation.feature_sources.presentation.extension.composables.UserSourcesScreen
@@ -32,10 +29,4 @@ sealed class TabItem(
     ) :
         TabItem("Community Sources",
             { CommunitySourceScreen(viewModel, navController = navController) })
-
-    data class ExtensionCreator(val viewModel: ExtensionCreatorViewModel) :
-        TabItem("Creator", { ExtensionCreatorTab(viewModel) })
-
-    data class ExtensionCreatorLog(val viewModel: ExtensionCreatorViewModel) :
-        TabItem("Log", { ExtensionCreatorLogTab(viewModel) })
 }

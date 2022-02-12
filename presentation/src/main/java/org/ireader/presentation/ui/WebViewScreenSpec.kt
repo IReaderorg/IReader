@@ -5,7 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.*
 import com.google.accompanist.pager.ExperimentalPagerApi
 import org.ireader.core.utils.Constants
-import org.ireader.domain.view_models.NavigationArgs
+import org.ireader.domain.ui.NavigationArgs
 import org.ireader.presentation.feature_settings.presentation.webview.WebPageScreen
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets

@@ -1,7 +1,6 @@
 package org.ireader.infinity.di
 
 import android.content.Context
-import android.content.SharedPreferences
 import androidx.room.Room
 import dagger.Module
 import dagger.Provides
@@ -10,13 +9,11 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import org.ireader.core.prefs.AndroidPreferenceStore
 import org.ireader.core.prefs.PreferenceStore
-import org.ireader.core.utils.Constants
 import org.ireader.domain.local.BookDatabase
 import org.ireader.domain.local.MIGRATION_8_9
 import org.ireader.domain.local.dao.LibraryBookDao
 import org.ireader.domain.local.dao.LibraryChapterDao
 import org.ireader.domain.local.dao.RemoteKeysDao
-import org.ireader.domain.local.dao.SourceTowerDao
 import org.ireader.domain.repository.LocalBookRepository
 import org.ireader.domain.repository.LocalChapterRepository
 import org.ireader.domain.source.Extensions
@@ -66,11 +63,6 @@ class LocalModule {
         return db.libraryBookDao
     }
 
-    @Provides
-    @Singleton
-    fun provideSourceDao(database: BookDatabase): SourceTowerDao {
-        return database.sourceTowerDao
-    }
 
     @Provides
     @Singleton
@@ -82,13 +74,6 @@ class LocalModule {
     @Singleton
     fun provideRemoteKeyDao(db: BookDatabase): RemoteKeysDao {
         return db.remoteKeysDao
-    }
-
-
-    @Singleton
-    @Provides
-    fun providesPreferences(@ApplicationContext context: Context): SharedPreferences {
-        return context.getSharedPreferences(Constants.SHARED_PREF_NAME, Context.MODE_PRIVATE)
     }
 
 

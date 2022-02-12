@@ -1,4 +1,4 @@
-package org.ireader.infinity.core.presentation.theme
+package org.ireader.core_ui.theme
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Shapes

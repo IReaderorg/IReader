@@ -80,8 +80,8 @@ val themes = listOf(
         error = Colour.red_600,
         onError = Colour.white_50,
     ), ExtraColors(
-        bars = Color.Black,
-        onBars = Color.White
+        bars = Color.White,
+        onBars = Color.Black
     )
     )
 )

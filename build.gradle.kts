@@ -7,6 +7,9 @@ buildscript {
         google()
         mavenCentral()
         jcenter()
+        maven {
+            url = uri("https://plugins.gradle.org/m2/")
+        }
     }
     dependencies {
         classpath(Build.androidBuildTools)
@@ -16,6 +19,7 @@ buildscript {
         classpath(Build.kotlinSerialization)
         classpath(Build.firebaseCrashlytics)
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.10")
+        classpath("com.github.ben-manes:gradle-versions-plugin:0.42.0")
 
     }
 }

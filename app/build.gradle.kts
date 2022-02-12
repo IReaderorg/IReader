@@ -12,6 +12,7 @@ plugins {
     id("com.google.gms.google-services")
     kotlin("plugin.serialization")
     id("com.google.firebase.crashlytics")
+    id("com.github.ben-manes.versions")
 }
 
 
@@ -21,17 +22,11 @@ android {
         applicationId = ProjectConfig.applicationId
         minSdk = ProjectConfig.minSdk
         targetSdk = ProjectConfig.targetSdk
-        versionCode = ProjectConfig.versionCode
-        versionName = ProjectConfig.versionName
-
+        versionCode = ProjectConfig.ConfigVersionCode
+        versionName = ProjectConfig.ConfigVersionName
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
-        }
-        kapt {
-            arguments {
-                arg("room.schemaLocation", "$projectDir/schemas")
-            }
         }
     }
     lint {
@@ -72,16 +67,13 @@ android {
         ))
 
     }
-    tasks {
-        withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-            kotlinOptions.freeCompilerArgs += "-opt-in=org.mylibrary.OptInAnnotation"
-            kotlinOptions {
-                jvmTarget = "1.8"
-            }
-        }
-    }
-
 }
+tasks {
+    withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+        kotlinOptions.freeCompilerArgs += "-opt-in=org.mylibrary.OptInAnnotation"
+    }
+}
+
 
 dependencies {
     implementation(project(Modules.coreUi))
@@ -89,7 +81,6 @@ dependencies {
     implementation(project(Modules.domain))
     implementation(project(Modules.core))
     implementation(project(Modules.presentation))
-
 
     implementation(AndroidX.coreKtx)
     implementation(AndroidX.appCompat)
@@ -206,8 +197,6 @@ dependencies {
     implementation(Koin.koinWorkManager)
     implementation(Koin.koinNavigation)
     implementation(Koin.koinCompose)
-
-
 
 
 }

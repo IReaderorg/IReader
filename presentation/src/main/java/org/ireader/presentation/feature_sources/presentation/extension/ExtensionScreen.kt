@@ -30,9 +30,6 @@ fun ExtensionScreen(
 
     val pageState = rememberPagerState()
 
-    val sources = viewModel.state.value.sources
-    viewModel.updateSource(sources)
-
     Scaffold(
         topBar = {
             TopAppBar(

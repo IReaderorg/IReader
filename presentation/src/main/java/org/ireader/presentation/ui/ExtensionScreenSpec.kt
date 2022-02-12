@@ -10,7 +10,7 @@ import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.paging.ExperimentalPagingApi
-import org.ireader.domain.view_models.NavigationArgs
+import org.ireader.domain.ui.NavigationArgs
 import org.ireader.presentation.R
 import org.ireader.presentation.feature_sources.presentation.extension.ExtensionScreen
 import org.ireader.presentation.feature_sources.presentation.extension.ExtensionViewModel

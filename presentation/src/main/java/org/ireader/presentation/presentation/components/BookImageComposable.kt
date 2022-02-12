@@ -33,6 +33,7 @@ fun BookImageComposable(
 ) {
     val context = LocalContext.current
     val okHttpClient: OkHttpClient = get()
+
     val painter = rememberImagePainter(data = image) {
         crossfade(durationMillis = 700)
         placeholder(placeholder)

@@ -8,16 +8,17 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import org.ireader.data.repository.*
+import org.ireader.data.repository.LocalBookRepositoryImpl
+import org.ireader.data.repository.LocalChapterRepositoryImpl
+import org.ireader.data.repository.RemoteRepositoryImpl
+import org.ireader.data.repository.RepositoryImpl
 import org.ireader.domain.feature_services.notification.DefaultNotificationHelper
 import org.ireader.domain.local.BookDatabase
 import org.ireader.domain.local.dao.LibraryBookDao
 import org.ireader.domain.local.dao.LibraryChapterDao
 import org.ireader.domain.local.dao.RemoteKeysDao
-import org.ireader.domain.local.dao.SourceTowerDao
 import org.ireader.domain.repository.LocalBookRepository
 import org.ireader.domain.repository.LocalChapterRepository
-import org.ireader.domain.repository.LocalSourceRepository
 import org.ireader.domain.repository.Repository
 import org.ireader.infinity.core.domain.repository.RemoteRepository
 import javax.inject.Singleton
@@ -64,13 +65,6 @@ class AppModule {
             remoteKeysDao = remoteKeysDao)
     }
 
-
-    @Provides
-    @Singleton
-    fun provideLocalSourceRepository(sourceTowerDao: SourceTowerDao): LocalSourceRepository {
-        return LocalSourceRepositoryImpl(sourceTowerDao)
-    }
-
     @Provides
     @Singleton
     fun providesRemoteBookRepository(
@@ -91,6 +85,5 @@ class AppModule {
     fun provideNotificationHelper(@ApplicationContext context: Context) : DefaultNotificationHelper {
         return DefaultNotificationHelper(context)
     }
-
 
 }

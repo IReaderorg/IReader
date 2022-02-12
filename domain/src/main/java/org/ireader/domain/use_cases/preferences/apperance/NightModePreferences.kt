@@ -1,33 +1,23 @@
-package org.ireader.infinity.core.domain.use_cases.preferences.apperance
+package org.ireader.domain.use_cases.preferences.apperance
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import org.ireader.domain.ui.AppPreferences
+import org.ireader.core_ui.theme.ThemeMode
+import org.ireader.domain.ui.UiPreferences
 
 
 class SaveNightModePreferences(
-    private val appPreferences: AppPreferences,
+    private val uiPreferences: UiPreferences,
 ) {
-    operator fun invoke(mode: NightMode) {
-        //  appPreferences.themeMode().set(mode.mode)
+    operator fun invoke(mode: ThemeMode) {
+        uiPreferences.themeMode().set(mode)
     }
 }
 
 class ReadNightModePreferences(
-    private val appPreferences: AppPreferences,
+    private val uiPreferences: UiPreferences,
 ) {
-    operator fun invoke(): Flow<NightMode> = flow {
-//        when (appPreferences.themeMode().get()) {
-//            NightMode.FollowSystem.mode -> emit(NightMode.FollowSystem)
-//            NightMode.Enable.mode -> emit(NightMode.Enable)
-//            NightMode.Disable.mode -> emit(NightMode.Disable)
-//            else -> emit(NightMode.Disable)
-//        }
+    operator fun invoke(): Flow<ThemeMode> = flow {
+        emit(uiPreferences.themeMode().get())
     }
-}
-
-sealed class NightMode(val mode: Int) {
-    object FollowSystem : NightMode(0)
-    object Enable : NightMode(1)
-    object Disable : NightMode(2)
 }

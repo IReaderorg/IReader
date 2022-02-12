@@ -16,8 +16,11 @@ import org.ireader.data.repository.NetworkPreferences
 import org.ireader.domain.local.BookDatabase
 import org.ireader.domain.source.NetworkHelper
 import org.ireader.domain.ui.AppPreferences
+import org.ireader.domain.ui.UiPreferences
 import org.ireader.domain.use_cases.fetchers.FetchBookDetailAndChapterDetailFromWebView
 import org.ireader.domain.use_cases.fetchers.FetchUseCase
+import org.ireader.domain.use_cases.preferences.apperance.ReadNightModePreferences
+import org.ireader.domain.use_cases.preferences.apperance.SaveNightModePreferences
 import org.ireader.domain.use_cases.preferences.reader_preferences.*
 import org.ireader.domain.use_cases.preferences.services.ReadLastUpdateTime
 import org.ireader.domain.use_cases.preferences.services.SetLastUpdateTime
@@ -25,8 +28,6 @@ import org.ireader.domain.use_cases.remote.GetBookDetail
 import org.ireader.domain.use_cases.remote.GetRemoteBooksByRemoteMediator
 import org.ireader.infinity.core.data.network.utils.MemoryCookieJar
 import org.ireader.infinity.core.domain.repository.RemoteRepository
-import org.ireader.infinity.core.domain.use_cases.preferences.apperance.ReadNightModePreferences
-import org.ireader.infinity.core.domain.use_cases.preferences.apperance.SaveNightModePreferences
 import org.ireader.infinity.core.domain.use_cases.remote.GetRemoteChapters
 import org.ireader.infinity.core.domain.use_cases.remote.GetRemoteReadingContent
 import org.ireader.use_cases.remote.RemoteUseCases
@@ -41,6 +42,7 @@ class NetworkModule {
     @Singleton
     fun provideDataStoreUseCase(
         appPreferences: AppPreferences,
+        uiPreferences: UiPreferences,
     ): PreferencesUseCase {
         return PreferencesUseCase(
             readSelectedFontStateUseCase = ReadSelectedFontStateUseCase(appPreferences),
@@ -71,8 +73,8 @@ class NetworkModule {
             saveSortersUseCase = SaveSortersUseCase(appPreferences),
             readLastUpdateTime = ReadLastUpdateTime(appPreferences),
             setLastUpdateTime = SetLastUpdateTime(appPreferences),
-            readNightModePreferences = ReadNightModePreferences(appPreferences),
-            saveNightModePreferences = SaveNightModePreferences(appPreferences)
+            readNightModePreferences = ReadNightModePreferences(uiPreferences),
+            saveNightModePreferences = SaveNightModePreferences(uiPreferences)
         )
     }
 

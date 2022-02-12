@@ -10,9 +10,8 @@ android {
     defaultConfig {
         minSdk ProjectConfig.minSdk
         targetSdk ProjectConfig.targetSdk
-        versionCode ProjectConfig.versionCode
-        versionName ProjectConfig.versionName
-
+        versionCode ProjectConfig.ConfigVersionCode
+        versionName ProjectConfig.ConfigVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
@@ -38,14 +37,13 @@ android {
 }
 
 dependencies {
-
-
     /** Compose **/
     implementation(Compose.compiler)
     implementation(Compose.foundation)
     implementation(Compose.activityCompose)
     implementation(Compose.ui)
     implementation(Compose.material)
+
     implementation(Compose.uiToolingPreview)
     implementation(Compose.viewModelCompose)
     implementation(Compose.icons)
@@ -55,6 +53,7 @@ dependencies {
     implementation(Compose.hiltNavigationCompose)
     androidTestImplementation(Compose.testing)
     debugImplementation(Compose.composeTooling)
+    debugImplementation(Compose.ui_test_manifest)
     implementation(Compose.paging)
 
     implementation Timber.timber
@@ -87,6 +86,7 @@ dependencies {
     testImplementation Testing.composeUiTest
     testImplementation Testing.mockk
     testImplementation Testing.mockWebServer
+    testImplementation Testing.mockkAndroid
 
     androidTestImplementation Testing.junit4
     androidTestImplementation Testing.junitAndroidExt
@@ -96,5 +96,6 @@ dependencies {
     androidTestImplementation Testing.composeUiTest
     androidTestImplementation Testing.mockk
     androidTestImplementation Testing.mockWebServer
+    androidTestImplementation Testing.mockkAndroid
     androidTestImplementation Testing.hiltTesting
 }

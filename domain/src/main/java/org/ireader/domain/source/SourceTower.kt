@@ -3,7 +3,6 @@ package org.ireader.domain.source
 import android.util.Patterns
 import com.nfeld.jsonpathkt.JsonPath
 import com.nfeld.jsonpathkt.extension.read
-import com.squareup.moshi.JsonClass
 import kotlinx.serialization.Serializable
 import okhttp3.Headers
 import okhttp3.Request
@@ -20,7 +19,6 @@ import kotlin.random.Random
 
 
 @Serializable
-@JsonClass(generateAdapter = true)
 data class SourceTower constructor(
     override val sourceId: Long = Random.nextLong(),
     override val baseUrl: String,
@@ -45,31 +43,6 @@ data class SourceTower constructor(
         fun create(): Source {
             return SourceTower(0, "", "", "", "")
         }
-    }
-
-
-    fun toSourceEntity(): SourceEntity {
-        return SourceEntity(
-            sourceId = sourceId,
-            baseUrl = baseUrl,
-            lang = lang,
-            name = name,
-            creator = creator,
-            supportsMostPopular = supportsMostPopular,
-            supportSearch = supportSearch,
-            supportsLatest = supportsLatest,
-            latest = latest,
-            popular = popular,
-            detail = detail,
-            search = search,
-            chapters = chapters,
-            content = content,
-            creatorNote = creatorNote,
-            customSource = customSource,
-            dateAdded = System.currentTimeMillis(),
-            dateChanged = System.currentTimeMillis(),
-            imageIcon = iconUrl
-        )
     }
 
 
@@ -299,12 +272,16 @@ data class SourceTower constructor(
                 latestFromElement(element)
             })
         } else {
-            val crudeJson = document.html()
-            val json = JsonPath.parse(crudeJson)
-            val selector = json?.read<List<Map<String, String>>>(this.latest?.selector ?: "")
-            selector?.forEach { jsonObject ->
-                books.add(latestFromJson(jsonObject))
+            try {
+                val crudeJson = document.html()
+                val json = JsonPath.parse(crudeJson)
+                val selector = json?.read<List<Map<String, String>>>(this.latest?.selector ?: "")
+                selector?.forEach { jsonObject ->
+                    books.add(latestFromJson(jsonObject))
+                }
+            } catch (e: Exception) {
             }
+
         }
 
         val hasNextPage = latestUpdatesNextPageSelector?.let { selector ->
@@ -358,12 +335,16 @@ data class SourceTower constructor(
                 attDescription).map { it.formatHtmlText() }
             book.category = selectorReturnerListType(document, selectorCategory, attCategory)
         } else {
-            val crudeJson = Jsoup.parse(document.html()).text().trim()
-            val json = JsonPath.parse(crudeJson)
-            val selector = json?.read<List<Map<String, String>>>(this.detail?.selector ?: "")
-            selector?.forEach { jsonObject ->
-                book = detailFromJson(jsonObject)
+            try {
+                val crudeJson = Jsoup.parse(document.html()).text().trim()
+                val json = JsonPath.parse(crudeJson)
+                val selector = json?.read<List<Map<String, String>>>(this.detail?.selector ?: "")
+                selector?.forEach { jsonObject ->
+                    book = detailFromJson(jsonObject)
+                }
+            } catch (e: Exception) {
             }
+
         }
         book.sourceId = sourceId
 
@@ -392,12 +373,16 @@ data class SourceTower constructor(
 
             chapters.addAll(document.select(chaptersSelector).map { chapterFromElement(it) })
         } else {
-            val crudeJson = Jsoup.parse(document.html()).text().trim()
-            val json = JsonPath.parse(crudeJson)
-            val selector = json?.read<List<Map<String, String>>>(this.chapters?.selector ?: "")
-            selector?.forEach { jsonObject ->
-                chapters.add(chapterListFromJson(jsonObject))
+            try {
+                val crudeJson = Jsoup.parse(document.html()).text().trim()
+                val json = JsonPath.parse(crudeJson)
+                val selector = json?.read<List<Map<String, String>>>(this.chapters?.selector ?: "")
+                selector?.forEach { jsonObject ->
+                    chapters.add(chapterListFromJson(jsonObject))
+                }
+            } catch (e: Exception) {
             }
+
         }
 
         val hasNext = hasNextChaptersParse(document)
@@ -434,12 +419,16 @@ data class SourceTower constructor(
                 contentAtt).map { it.formatHtmlText() }
             contentList.addAll(merge(listOf(title), page))
         } else {
-            val crudeJson = Jsoup.parse(document.html()).text().trim()
-            val json = JsonPath.parse(crudeJson)
-            val selector = json?.read<List<Map<String, String>>>(this.chapters?.selector ?: "")
-            selector?.forEach { jsonObject ->
-                contentList.addAll(contentFromJson(jsonObject).content)
+            try {
+                val crudeJson = Jsoup.parse(document.html()).text().trim()
+                val json = JsonPath.parse(crudeJson)
+                val selector = json?.read<List<Map<String, String>>>(this.chapters?.selector ?: "")
+                selector?.forEach { jsonObject ->
+                    contentList.addAll(contentFromJson(jsonObject).content)
+                }
+            } catch (e: Exception) {
             }
+
         }
         return ChapterPage(contentList,
             errorMessage = if (isCloudflareEnable) Constants.CLOUDFLARE_PROTECTION_ERROR else "",
@@ -466,15 +455,17 @@ data class SourceTower constructor(
                 searchFromElement(element)
             })
         } else {
+            try {
+                val crudeJson = Jsoup.parse(document.html()).text().trim()
+                val json = JsonPath.parse(crudeJson)
 
-
-            val crudeJson = Jsoup.parse(document.html()).text().trim()
-            val json = JsonPath.parse(crudeJson)
-
-            val selector = json?.read<List<Map<String, String>>>(search?.selector ?: "")
-            selector?.forEach { jsonObject ->
-                books.add(searchBookFromJson(jsonObject))
+                val selector = json?.read<List<Map<String, String>>>(search?.selector ?: "")
+                selector?.forEach { jsonObject ->
+                    books.add(searchBookFromJson(jsonObject))
+                }
+            } catch (e: Exception) {
             }
+
 
         }
         val hasNextPage = false

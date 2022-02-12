@@ -6,7 +6,7 @@ import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import com.google.accompanist.pager.ExperimentalPagerApi
-import org.ireader.domain.view_models.NavigationArgs
+import org.ireader.domain.ui.NavigationArgs
 import org.ireader.presentation.feature_detail.presentation.chapter_detail.ChapterDetailScreen
 
 object ChapterScreenSpec : ScreenSpec {

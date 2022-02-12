@@ -1,33 +1,37 @@
 package org.ireader.domain.local
 
-import androidx.room.Database
-import androidx.room.RoomDatabase
-import androidx.room.TypeConverters
+import androidx.room.*
+import androidx.room.migration.AutoMigrationSpec
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import org.ireader.core.utils.Constants
 import org.ireader.domain.local.dao.LibraryBookDao
 import org.ireader.domain.local.dao.LibraryChapterDao
 import org.ireader.domain.local.dao.RemoteKeysDao
-import org.ireader.domain.local.dao.SourceTowerDao
+import org.ireader.domain.models.RemoteKeys
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
-import org.ireader.domain.models.source.SourceEntity
-import org.ireader.infinity.core.domain.models.RemoteKeys
 
 @Database(
-    entities = [Book::class, Chapter::class, RemoteKeys::class, SourceEntity::class],
-    version = 9,
+    entities = [Book::class, Chapter::class, RemoteKeys::class],
+    version = 10,
     exportSchema = true,
-
-    )
+    autoMigrations = [
+        AutoMigration(
+            from = 9,
+            to = 10,
+            spec = BookDatabase.MIGRATION9TO10::class
+        )
+    ]
+)
 @TypeConverters(DatabaseConverter::class)
 abstract class BookDatabase : RoomDatabase() {
     abstract val libraryBookDao: LibraryBookDao
     abstract val libraryChapterDao: LibraryChapterDao
     abstract val remoteKeysDao: RemoteKeysDao
-    abstract val sourceTowerDao: SourceTowerDao
 
-
+    @DeleteTable(tableName = Constants.SOURCE_TABLE)
+    class MIGRATION9TO10 : AutoMigrationSpec
     companion object {
         const val DATABASE_NAME = "infinity_db"
     }

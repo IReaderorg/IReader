@@ -1,9 +1,7 @@
 apply {
     from("$rootDir/base-module.gradle")
-
 }
 dependencies {
-
     "implementation"(Room.roomRuntime)
     "implementation"(Compose.ui)
     "implementation"(Retrofit.retrofit)

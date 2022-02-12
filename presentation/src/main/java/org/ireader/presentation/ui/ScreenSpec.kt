@@ -21,7 +21,6 @@ sealed interface ScreenSpec {
             DnsOverHttpSettingSpec,
             BookDetailScreenSpec,
             DownloaderScreenSpec,
-            ExtensionCreatorSpec,
             ChapterScreenSpec,
             ReaderScreenSpec,
             WebViewScreenSpec,

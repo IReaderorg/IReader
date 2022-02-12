@@ -3,7 +3,6 @@ package org.ireader.presentation.feature_library.presentation
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.BottomSheetScaffoldState
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -17,7 +16,7 @@ import androidx.navigation.NavController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.ireader.core.utils.Constants
-import org.ireader.core_ui.ui.Colour.topBarColor
+import org.ireader.core_ui.theme.AppColors
 import org.ireader.domain.view_models.library.LibraryEvents
 import org.ireader.domain.view_models.library.LibraryViewModel
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
@@ -52,8 +51,8 @@ fun LibraryScreenTopBar(
             }
         },
         modifier = Modifier.fillMaxWidth(),
-        backgroundColor = MaterialTheme.colors.topBarColor,
-        contentColor = MaterialTheme.colors.onBackground,
+        backgroundColor = AppColors.current.bars,
+        contentColor = AppColors.current.onBars,
         elevation = Constants.DEFAULT_ELEVATION,
         actions = {
             if (state.inSearchMode) {

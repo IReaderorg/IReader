@@ -65,7 +65,6 @@ fun AppColors(
         colors = materialColors,
         typography = typography,
         shapes = shape,
-
         ) {
         CompositionLocalProvider(
             LocalAppColors provides rememberedAppColors,

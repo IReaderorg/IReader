@@ -25,10 +25,10 @@ import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.source.FetchType
 import org.ireader.domain.models.source.Source
 import org.ireader.domain.source.Extensions
+import org.ireader.domain.ui.NavigationArgs
 import org.ireader.domain.use_cases.fetchers.FetchUseCase
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.utils.Resource
-import org.ireader.domain.view_models.NavigationArgs
 import org.ireader.domain.view_models.settings.webview.mapFetcher
 import org.ireader.infinity.core.domain.use_cases.local.DeleteUseCase
 import org.ireader.infinity.core.domain.use_cases.local.LocalInsertUseCases

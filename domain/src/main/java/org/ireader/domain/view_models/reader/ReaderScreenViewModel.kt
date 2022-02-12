@@ -29,9 +29,9 @@ import org.ireader.domain.R
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.source.Extensions
+import org.ireader.domain.ui.NavigationArgs
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.utils.Resource
-import org.ireader.domain.view_models.NavigationArgs
 import org.ireader.infinity.core.domain.use_cases.local.DeleteUseCase
 import org.ireader.infinity.core.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.use_cases.remote.RemoteUseCases
