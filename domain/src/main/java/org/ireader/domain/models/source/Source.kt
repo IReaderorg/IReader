@@ -64,7 +64,7 @@ interface Source {
      *
      * @param chapter the chapter that it contents is going to be retrieve.
      */
-    suspend fun fetchContent(chapter: Chapter): ChapterPage
+    suspend fun fetchContent(chapter: Chapter): ContentPage
 
 
     /**
@@ -72,21 +72,21 @@ interface Source {
      *
      * @param book a book that contain need to be contain a bookName and a link
      */
-    suspend fun fetchBook(book: Book): BookPage
+    suspend fun fetchBook(book: Book): Book
 
     /**
      * Returns a list of chapter.
      *
      * @param book a book that contain need to be contain a bookName and a link
      */
-    suspend fun fetchChapters(book: org.ireader.domain.models.entities.Book, page: Int): ChaptersPage
+    suspend fun fetchChapters(book: Book, page: Int): ChaptersPage
 
-    fun popularParse(document: Document, page: Int = 0, isWebViewMode: Boolean = false): BooksPage
-    fun latestParse(document: Document, page: Int = 0, isWebViewMode: Boolean = false): BooksPage
-    fun detailParse(document: Document, isWebViewMode: Boolean = false): BookPage
-    fun chaptersParse(document: Document, isWebViewMode: Boolean = false): ChaptersPage
-    fun searchParse(document: Document, page: Int = 0, isWebViewMode: Boolean = false): BooksPage
-    fun contentFromElementParse(document: Document, isWebViewMode: Boolean = false): ChapterPage
+    fun popularParse(document: Document, page: Int = 0): BooksPage
+    fun latestParse(document: Document, page: Int = 0): BooksPage
+    fun detailParse(document: Document): Book
+    fun chaptersParse(document: Document): ChaptersPage
+    fun searchParse(document: Document, page: Int = 0): BooksPage
+    fun contentFromElementParse(document: Document): ContentPage
 
 }
 

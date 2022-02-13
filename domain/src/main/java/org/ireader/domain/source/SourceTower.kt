@@ -11,6 +11,7 @@ import org.ireader.core.utils.*
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.source.*
+import org.ireader.domain.utils.asJsoup
 import org.ireader.infinity.core.data.network.models.*
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -162,8 +163,6 @@ data class SourceTower constructor(
 
 
     override fun popularFromElement(element: Element): Book {
-        val book: Book = Book.create()
-
         val selectorLink = popular?.linkSelector
         val attLink = popular?.linkAtt
         val selectorName = popular?.nameSelector
@@ -172,22 +171,21 @@ data class SourceTower constructor(
         val attCover = popular?.coverAtt
 
 
-        book.link = baseUrl + getUrlWithoutDomain(selectorReturnerStringType(element,
+        val link = baseUrl + getUrlWithoutDomain(selectorReturnerStringType(element,
             selectorLink,
             attLink).shouldSubstring(popular?.addBaseUrlToLink, baseUrl))
-        book.bookName = selectorReturnerStringType(element, selectorName, attName).formatHtmlText()
-        book.coverLink = selectorReturnerStringType(element,
+        val title = selectorReturnerStringType(element, selectorName, attName).formatHtmlText()
+        val cover = selectorReturnerStringType(element,
             selectorCover,
             attCover).shouldSubstring(popular?.addBaseurlToCoverLink, baseUrl)
 
 
 
-        return book
+        return Book(link = link, title = title, cover = cover, sourceId = sourceId)
     }
 
 
     override fun latestFromElement(element: Element): Book {
-        val book: Book = Book.create()
 
         val selectorLink = latest?.linkSelector
         val attLink = latest?.linkAtt
@@ -196,42 +194,38 @@ data class SourceTower constructor(
         val selectorCover = latest?.coverSelector
         val attCover = latest?.coverAtt
 
-        book.link = baseUrl + getUrlWithoutDomain(selectorReturnerStringType(element,
+        val link = baseUrl + getUrlWithoutDomain(selectorReturnerStringType(element,
             selectorLink,
             attLink).shouldSubstring(latest?.addBaseUrlToLink, baseUrl))
-        book.bookName = selectorReturnerStringType(element, selectorName, attName).formatHtmlText()
-        book.coverLink = selectorReturnerStringType(element,
+        val title = selectorReturnerStringType(element, selectorName, attName).formatHtmlText()
+        val cover = selectorReturnerStringType(element,
             selectorCover,
             attCover).shouldSubstring(latest?.addBaseurlToCoverLink, baseUrl)
 
 
-        //Timber.e("Timber: SourceCreator" + book.coverLink)
+        //Timber.e("Timber: SourceCreator" + val coverLink)
 
-        return book
+        return Book(link = link, title = title, cover = cover, sourceId = sourceId)
     }
 
     override fun chapterFromElement(element: Element): Chapter {
-        val chapter = Chapter.create()
 
         val selectorLink = chapters?.linkSelector
         val attLink = chapters?.linkAtt
         val selectorName = chapters?.nameSelector
         val attName = chapters?.nameAtt
 
-        chapter.link = baseUrl + getUrlWithoutDomain(selectorReturnerStringType(element,
+        val link = baseUrl + getUrlWithoutDomain(selectorReturnerStringType(element,
             selectorLink,
             attLink).shouldSubstring(chapters?.addBaseUrlToLink, baseUrl))
-        chapter.title = selectorReturnerStringType(element, selectorName, attName).formatHtmlText()
-        chapter.haveBeenRead = false
+        val title = selectorReturnerStringType(element, selectorName, attName).formatHtmlText()
 
 
 
-
-        return chapter
+        return Chapter(link = link, title = title)
     }
 
     override fun searchFromElement(element: Element): Book {
-        val book: Book = Book.create()
         val selectorLink = search?.linkSelector
         val attLink = search?.linkAtt
         val selectorName = search?.nameSelector
@@ -239,32 +233,25 @@ data class SourceTower constructor(
         val selectorCover = search?.coverSelector
         val attCover = search?.coverAtt
 
-        book.link = baseUrl + getUrlWithoutDomain(selectorReturnerStringType(element,
+        val link = baseUrl + getUrlWithoutDomain(selectorReturnerStringType(element,
             selectorLink,
             attLink).shouldSubstring(search?.addBaseUrlToLink, baseUrl))
-        book.bookName = selectorReturnerStringType(element, selectorName, attName).formatHtmlText()
-        book.coverLink = selectorReturnerStringType(element,
+        val title = selectorReturnerStringType(element, selectorName, attName).formatHtmlText()
+        val cover = selectorReturnerStringType(element,
             selectorCover,
             attCover).shouldSubstring(search?.addBaseurlToCoverLink, baseUrl)
 
 
-        return book
+        return Book(link = link, title = title, cover = cover, sourceId = sourceId)
     }
 
     /****************************PARSE FROM ELEMENTS***********************************************/
 
     /****************************PARSE*************************************************************/
 
-    override fun latestParse(document: Document, page: Int, isWebViewMode: Boolean): BooksPage {
+    override fun latestParse(document: Document, page: Int): BooksPage {
         val isCloudflareEnable =
             document.body().allElements.text().contains(Constants.CLOUDFLARE_LOG)
-
-        val ajaxLoaded: Boolean = if (isWebViewMode) {
-            latest?.ajaxSelector.isNull() || (selectorReturnerStringType(document,
-                latest?.ajaxSelector).isNotEmpty() && latest?.ajaxSelector.isNotNull())
-        } else {
-            true
-        }
 
         val books = mutableListOf<Book>()
         if (this.latest?.isHtmlType == true && latest.selector != null) {
@@ -292,25 +279,15 @@ data class SourceTower constructor(
         }
 
         return BooksPage(
-            books,
-            hasNextPage,
-            document.body().allElements.text(),
-            ajaxLoaded = ajaxLoaded,
-            errorMessage = if (isCloudflareEnable) Constants.CLOUDFLARE_PROTECTION_ERROR else "",
+            books = books,
+            hasNextPage = hasNextPage,
         )
     }
 
-    override fun detailParse(document: Document, isWebViewMode: Boolean): BookPage {
+    override fun detailParse(document: Document): Book {
         val isCloudflareEnable =
             document.body().allElements.text().contains(Constants.CLOUDFLARE_LOG)
 
-        val ajaxLoaded: Boolean = if (isWebViewMode) {
-            detail?.ajaxSelector.isNull() || (selectorReturnerStringType(document,
-                detail?.ajaxSelector).isNotEmpty() && detail?.ajaxSelector.isNotNull())
-        } else {
-            true
-        }
-        var book = Book.create()
         if (this.detail?.isHtmlType == true) {
             val selectorBookName = detail.nameSelector
             val attBookName = detail.nameAtt
@@ -324,53 +301,45 @@ data class SourceTower constructor(
             val attCategory = detail.categoryAtt
 
 
-
-            book.bookName = selectorReturnerStringType(document, selectorBookName, attAuthor)
-            book.coverLink = selectorReturnerStringType(document,
+            val title = selectorReturnerStringType(document, selectorBookName, attAuthor)
+            val coverLink = selectorReturnerStringType(document,
                 coverSelector,
                 coverAtt).replace("render_isfalse", "")
-            book.author = selectorReturnerStringType(document, selectorAuthor, attBookName)
-            book.description = selectorReturnerListType(document,
+            val author = selectorReturnerStringType(document, selectorAuthor, attBookName)
+            val description = selectorReturnerListType(document,
                 selectorDescription,
-                attDescription).map { it.formatHtmlText() }
-            book.category = selectorReturnerListType(document, selectorCategory, attCategory)
+                attDescription).map { it.formatHtmlText() }.joinToString()
+            val category = selectorReturnerListType(document, selectorCategory, attCategory)
+            return Book(title = title,
+                cover = coverLink,
+                author = author,
+                description = description,
+                genres = category,
+                sourceId = sourceId,
+                link = "")
         } else {
-            try {
-                val crudeJson = Jsoup.parse(document.html()).text().trim()
-                val json = JsonPath.parse(crudeJson)
-                val selector = json?.read<List<Map<String, String>>>(this.detail?.selector ?: "")
-                selector?.forEach { jsonObject ->
-                    book = detailFromJson(jsonObject)
-                }
-            } catch (e: Exception) {
+            val crudeJson = Jsoup.parse(document.html()).text().trim()
+            val json = JsonPath.parse(crudeJson)
+            val selector = json?.read<List<Map<String, String>>>(this.detail?.selector ?: "")
+            var book = Book(sourceId = sourceId, title = "", link = "")
+            selector?.forEach { jsonObject ->
+                book = detailFromJson(jsonObject)
             }
 
+            return book
         }
-        book.sourceId = sourceId
 
 
-        return BookPage(book,
-            errorMessage = if (isCloudflareEnable) Constants.CLOUDFLARE_PROTECTION_ERROR else "",
-            ajaxLoaded = ajaxLoaded)
     }
 
 
-    override fun chaptersParse(document: Document, isWebViewMode: Boolean): ChaptersPage {
+    override fun chaptersParse(document: Document): ChaptersPage {
         val isCloudflareEnable =
             document.body().allElements.text().contains(Constants.CLOUDFLARE_LOG)
 
 
-        val ajaxLoaded = if (isWebViewMode) {
-            chapters?.ajaxSelector.isNull() || (selectorReturnerStringType(document,
-                chapters?.ajaxSelector).isNotEmpty() && chapters?.ajaxSelector.isNotNull())
-        } else {
-            true
-        }
-
-
         val chapters = mutableListOf<Chapter>()
         if (this.chapters?.isHtmlType == true) {
-
             chapters.addAll(document.select(chaptersSelector).map { chapterFromElement(it) })
         } else {
             try {
@@ -389,23 +358,16 @@ data class SourceTower constructor(
 
         val mChapters =
             if (this.chapters?.isChapterStatsFromFirst == true) chapters else chapters.reversed()
+
         return ChaptersPage(
             mChapters,
-            hasNext,
-            errorMessage = if (isCloudflareEnable) Constants.CLOUDFLARE_PROTECTION_ERROR else "",
-            ajaxLoaded = ajaxLoaded)
+            hasNext)
     }
 
-    override fun contentFromElementParse(document: Document, isWebViewMode: Boolean): ChapterPage {
+    override fun contentFromElementParse(document: Document): ContentPage {
         val isCloudflareEnable =
             document.body().allElements.text().contains(Constants.CLOUDFLARE_LOG)
 
-        val ajaxLoaded: Boolean = if (isWebViewMode) {
-            content?.ajaxSelector.isNull() || (selectorReturnerStringType(document,
-                content?.ajaxSelector).isNotEmpty() && content?.ajaxSelector.isNotNull())
-        } else {
-            true
-        }
         val contentList: MutableList<String> = mutableListOf()
         if (content?.isHtmlType == true) {
             val contentSelector = content.pageContentSelector
@@ -428,22 +390,14 @@ data class SourceTower constructor(
                 }
             } catch (e: Exception) {
             }
-
         }
-        return ChapterPage(contentList,
-            errorMessage = if (isCloudflareEnable) Constants.CLOUDFLARE_PROTECTION_ERROR else "",
-            ajaxLoaded = ajaxLoaded)
+
+        return ContentPage(contentList)
     }
 
-    override fun searchParse(document: Document, page: Int, isWebViewMode: Boolean): BooksPage {
+    override fun searchParse(document: Document, page: Int): BooksPage {
         val isCloudflareEnable =
             document.body().allElements.text().contains(Constants.CLOUDFLARE_LOG)
-        val ajaxLoaded: Boolean = if (isWebViewMode) {
-            search?.ajaxSelector.isNull() || (selectorReturnerStringType(document,
-                search?.ajaxSelector).isNotEmpty() && search?.ajaxSelector.isNotNull())
-        } else {
-            true
-        }
         var books = mutableListOf<Book>()
 
         if (search?.isHtmlType == true) {
@@ -470,15 +424,14 @@ data class SourceTower constructor(
         }
         val hasNextPage = false
 
+
         return BooksPage(
             books,
             hasNextPage,
-            ajaxLoaded = ajaxLoaded,
-            errorMessage = if (isCloudflareEnable) Constants.CLOUDFLARE_PROTECTION_ERROR else "",
         )
     }
 
-    override fun popularParse(document: Document, page: Int, isWebViewMode: Boolean): BooksPage {
+    override fun popularParse(document: Document, page: Int): BooksPage {
         val isCloudflareEnable =
             document.body().allElements.text().contains(Constants.CLOUDFLARE_LOG)
         val books = document.select(popularSelector).map { element ->
@@ -492,88 +445,104 @@ data class SourceTower constructor(
         return BooksPage(
             books,
             hasNextPage,
-            errorMessage = if (isCloudflareEnable) Constants.CLOUDFLARE_PROTECTION_ERROR else "",
         )
     }
 
     /****************************PARSE FROM JSON**********************************/
     fun chapterListFromJson(jsonObject: Map<String, String>): Chapter {
-        val chapter = Chapter.create()
+
         val mName = chapters?.nameSelector
         val mLink = chapters?.linkSelector
-        chapter.title = jsonObject[mName]?.formatHtmlText() ?: ""
-        chapter.link = jsonObject[mLink] ?: ""
-        chapter.haveBeenRead = false
-        return chapter
+        val title = jsonObject[mName]?.formatHtmlText() ?: ""
+        val link = jsonObject[mLink] ?: ""
+
+        return Chapter(title = title, link = link)
     }
 
     fun searchBookFromJson(jsonObject: Map<String, String>): Book {
-        val book = Book.create()
+
         val mName = search?.nameSelector
         val mLink = search?.linkSelector
         val mCover = search?.coverSelector
-        book.bookName = jsonObject[mName]?.formatHtmlText() ?: ""
-        book.link = jsonObject[mLink] ?: ""
-        book.coverLink = jsonObject[mCover]
-        return book
+        val title = jsonObject[mName]?.formatHtmlText() ?: ""
+        val link = jsonObject[mLink] ?: ""
+        val coverLink = jsonObject[mCover]
+        return Book(title = title, link = link, cover = coverLink ?: "", sourceId = sourceId)
     }
 
     fun detailFromJson(jsonObject: Map<String, String>): Book {
-        val book = Book.create()
+
         val mName = detail?.nameSelector
         val mCover = detail?.coverSelector
         val mDescription = detail?.descriptionSelector
         val mAuthor = detail?.authorBookSelector
         val mCategory = detail?.categorySelector
 
-        book.bookName = jsonObject[mName]?.formatHtmlText() ?: ""
-        book.coverLink = jsonObject[mCover]
-        book.description = listOf(jsonObject[mDescription] ?: "").map { it.formatHtmlText() }
-        book.author = jsonObject[mAuthor]?.formatHtmlText() ?: ""
-        book.category = listOf(jsonObject[mCategory]?.formatHtmlText() ?: "")
+        val title = jsonObject[mName]?.formatHtmlText() ?: ""
+        val coverLink = jsonObject[mCover]
+        val description = jsonObject[mDescription]?.formatHtmlText() ?: ""
+        val author = jsonObject[mAuthor]?.formatHtmlText() ?: ""
+        val category = listOf(jsonObject[mCategory]?.formatHtmlText() ?: "")
 
-
-        return book
+        return Book(
+            title = title,
+            description = description,
+            author = author,
+            genres = category,
+            cover = coverLink ?: "",
+            link = "",
+            sourceId = sourceId
+        )
     }
 
     fun latestFromJson(jsonObject: Map<String, String>): Book {
-        val book = Book.create()
+
         val mName = latest?.nameSelector
         val mLink = latest?.linkSelector
         val mCover = latest?.coverSelector
         val mId = latest?.idSelector
-        book.bookName = jsonObject[mName]?.formatHtmlText() ?: ""
-        book.link = jsonObject[mLink] ?: ""
-        book.coverLink = jsonObject[mCover]
-        return book
+        val title = jsonObject[mName]?.formatHtmlText() ?: ""
+        val link = jsonObject[mLink] ?: ""
+        val coverLink = jsonObject[mCover]
+        return Book(
+            title = title,
+            link = link,
+            cover = coverLink ?: "",
+            sourceId = sourceId
+        )
     }
 
     fun popularFromJson(jsonObject: Map<String, String>): Book {
-        val book = Book.create()
         val mName = popular?.nameSelector
         val mLink = popular?.linkSelector
         val mCover = popular?.coverSelector
-        book.bookName = jsonObject[mName]?.formatHtmlText() ?: ""
-        book.link = jsonObject[mLink] ?: ""
-        book.coverLink = jsonObject[mCover]
-        return book
+        val title = jsonObject[mName]?.formatHtmlText() ?: ""
+        val link = jsonObject[mLink] ?: ""
+        val coverLink = jsonObject[mCover]
+        return Book(
+            title = title,
+            link = link,
+            cover = coverLink ?: "",
+            sourceId = sourceId
+        )
     }
 
     fun contentFromJson(jsonObject: Map<String, String>): Chapter {
-
-        val chapter = Chapter.create()
-
         val mContent = content?.pageContentSelector
 
-        chapter.content = listOf(jsonObject[mContent]?.formatHtmlText() ?: "")
+        val content = listOf(jsonObject[mContent]?.formatHtmlText() ?: "")
 
-        return chapter
+        return Chapter(
+            link = "",
+            title = "",
+            content = content
+        )
     }
 
     /****************************PARSE FROM JSON**********************************/
 
 
-    override fun hasNextChaptersParse(document: Document, isWebViewMode: Boolean): Boolean {
+    override fun hasNextChaptersParse(document: Document): Boolean {
         if (chapters?.supportNextPagesList == true) {
             val docs = selectorReturnerStringType(document,
                 chapters.nextPageSelector,
@@ -610,13 +579,13 @@ data class SourceTower constructor(
         val request = client.call(chaptersRequest(book, page))
 
         var chapters = chapterListParse(request)
-        if (chapters.errorMessage.isNotBlank() || !request.isSuccessful || !chapters.ajaxLoaded) {
+        if (!request.isSuccessful) {
             chapters =
                 chaptersParse(network.getHtmlFromWebView(baseUrl + getUrlWithoutDomain(book.link),
-                    this.chapters?.ajaxSelector), isWebViewMode = true)
+                    this.chapters?.ajaxSelector))
         }
         request.close()
-        return chapters.copy(chapters = chapters.chapters)
+        return chapters.copy(chapters = chapters.chapters, hasNextPage = chapters.hasNextPage)
     }
 
     /**
@@ -627,10 +596,10 @@ data class SourceTower constructor(
     override suspend fun fetchPopular(page: Int): BooksPage {
         val request = client.call(popularRequest(page))
         var books = popularParse(request, page = page)
-        if (books.errorMessage.isNotBlank() || !request.isSuccessful || !books.ajaxLoaded) {
+        if (!request.isSuccessful) {
             books =
                 popularParse(document = network.getHtmlFromWebView(baseUrl + fetchPopularEndpoint?.applyPageFormat(
-                    page)), page = page, isWebViewMode = true)
+                    page)), page = page)
         }
         request.close()
         return books
@@ -644,7 +613,6 @@ data class SourceTower constructor(
     private fun popularParse(
         response: Response,
         page: Int,
-        isWebViewMode: Boolean = false,
     ): BooksPage {
         return popularParse(response.asJsoup(), page)
     }
@@ -652,10 +620,10 @@ data class SourceTower constructor(
     override suspend fun fetchLatest(page: Int): BooksPage {
         val request = client.call(latestRequest(page))
         var books = latestParse(request, page = page)
-        if (books.errorMessage.isNotBlank() || !request.isSuccessful || !books.ajaxLoaded) {
+        if (!request.isSuccessful) {
             books =
                 latestParse(network.getHtmlFromWebView(baseUrl + fetchLatestEndpoint?.applyPageFormat(
-                    page)), page = page, isWebViewMode = true)
+                    page)), page = page)
         }
 
         request.close()
@@ -668,13 +636,12 @@ data class SourceTower constructor(
      *
      * @param page the page number to retrieve.
      */
-    override suspend fun fetchBook(book: Book): BookPage {
+    override suspend fun fetchBook(book: Book): Book {
         val request = client.call(detailsRequest(book))
         var completebook = detailParse(client.call(detailsRequest(book)))
-        if (completebook.errorMessage.isNotBlank() || !request.isSuccessful || !completebook.ajaxLoaded) {
+        if (!request.isSuccessful) {
             completebook =
-                detailParse(network.getHtmlFromWebView(baseUrl + getUrlWithoutDomain(book.link)),
-                    isWebViewMode = true)
+                detailParse(network.getHtmlFromWebView(baseUrl + getUrlWithoutDomain(book.link)))
         }
         request.close()
         return completebook
@@ -687,15 +654,16 @@ data class SourceTower constructor(
      *
      * @param page the page number to retrieve.
      */
-    override suspend fun fetchContent(chapter: Chapter): ChapterPage {
+    override suspend fun fetchContent(chapter: Chapter): ContentPage {
         val request = client.call(contentRequest(chapter))
         var content = pageContentParse(request)
 
-        if (content.errorMessage.isNotBlank() || !request.isSuccessful || !content.ajaxLoaded) {
+        if (!request.isSuccessful) {
             content =
-                contentFromElementParse(network.getHtmlFromWebView(baseUrl + getUrlWithoutDomain(
-                    chapter.link)),
-                    isWebViewMode = true)
+                contentFromElementParse(
+                    network.getHtmlFromWebView(baseUrl + getUrlWithoutDomain(
+                        chapter.link)),
+                )
         }
         request.close()
         return content
@@ -711,11 +679,11 @@ data class SourceTower constructor(
     override suspend fun fetchSearch(page: Int, query: String): BooksPage {
         val request = client.call(searchRequest(page, query))
         var books = searchBookParse(request, page)
-        if (books.errorMessage.isNotBlank() || !request.isSuccessful || !books.ajaxLoaded) {
+        if (!request.isSuccessful) {
             books =
                 searchParse(network.getHtmlFromWebView(baseUrl + fetchSearchEndpoint?.applySearchFormat(
                     query,
-                    page)), page = page, isWebViewMode = true)
+                    page)), page = page)
         }
         request.close()
         return books

@@ -4,8 +4,6 @@ import androidx.paging.PagingSource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
-import org.ireader.core.utils.UiText
-import org.ireader.data.R
 import org.ireader.domain.local.BookDatabase
 import org.ireader.domain.local.dao.LibraryBookDao
 import org.ireader.domain.local.dao.LibraryChapterDao
@@ -13,7 +11,6 @@ import org.ireader.domain.local.dao.RemoteKeysDao
 import org.ireader.domain.models.SortType
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.repository.LocalBookRepository
-import org.ireader.domain.utils.Resource
 import timber.log.Timber
 
 class LocalBookRepositoryImpl(
@@ -25,23 +22,8 @@ class LocalBookRepositoryImpl(
 
     /*****GET********************************/
 
-    override fun getBookById(id: Int): Flow<Resource<Book>> = flow {
+    override fun getBookById(id: Long): Flow<Book?> = flow {
         Timber.d("Timber: GetExploreBookByIdUseCase was Called")
-        bookDao.getBookById(bookId = id)
-            .first { book ->
-                if (book != null) {
-                    emit(Resource.Success<Book>(data = book))
-                    true
-                } else {
-                    emit(Resource.Error<Book>(uiText = UiText.StringResource(R.string.no_error)))
-                    true
-                }
-            }
-        Timber.d("Timber: GetExploreBookByIdUseCase was Finished Successfully")
-
-    }
-
-    override fun getBookByIdDirectly(id: Int): Flow<Book?> = flow {
         bookDao.getBookById(bookId = id)
             .first { book ->
                 if (book != null) {
@@ -53,7 +35,9 @@ class LocalBookRepositoryImpl(
                 }
             }
         Timber.d("Timber: GetExploreBookByIdUseCase was Finished Successfully")
+
     }
+
 
     override fun getAllInLibraryPagingSource(
         sortType: SortType,
@@ -63,13 +47,10 @@ class LocalBookRepositoryImpl(
         bookDao.getAllLocalBooksForPagingSortedBySort()
         return when (sortType) {
             is SortType.Alphabetically -> {
-                if (unreadFilter) {
-                    bookDao.getAllLocalBooksForPagingSortedBySortAndFilter(sortByAbs = true,
-                        isAsc = isAsc)
-                } else {
-                    bookDao.getAllLocalBooksForPagingSortedBySort(sortByAbs = true, isAsc = isAsc)
+                bookDao.getAllLocalBooksForPagingSortedBySort(sortByAbs = true,
+                    isAsc = isAsc,
+                    unread = unreadFilter)
 
-                }
             }
             is SortType.DateAdded -> {
                 if (unreadFilter) {
@@ -93,67 +74,18 @@ class LocalBookRepositoryImpl(
             }
             is SortType.TotalChapter -> {
                 if (unreadFilter) {
-                    bookDao.getAllLocalBooksForPagingSortedBySortAndFilter(sortByTotalChapter = true,
-                        isAsc = isAsc)
+                    bookDao.getAllLocalBooksForPagingSortedBySortAndFilter(isAsc = isAsc,
+                        sortByTotalDownload = true)
                 } else {
-                    bookDao.getAllLocalBooksForPagingSortedBySort(sortByTotalChapter = true,
-                        isAsc = isAsc)
+                    bookDao.getAllLocalBooksForPagingSortedBySort(isAsc = isAsc,
+                        sortByTotalDownload = true)
 
                 }
             }
         }
     }
 
-    override fun getAllInDownloadPagingSource(
-        sortType: SortType,
-        isAsc: Boolean,
-        unreadFilter: Boolean,
-    ): PagingSource<Int, Book> {
-        return when (sortType) {
-            is SortType.Alphabetically -> {
-                if (unreadFilter) {
-                    bookDao.getAllInDownloads(sortByAbs = true,
-                        isAsc = isAsc)
-                } else {
-                    bookDao.getAllInDownloads(sortByAbs = true, isAsc = isAsc)
-
-                }
-            }
-            is SortType.DateAdded -> {
-                if (unreadFilter) {
-                    bookDao.getAllInDownloads(sortByDateAdded = true,
-                        isAsc = isAsc)
-                } else {
-                    bookDao.getAllInDownloads(sortByDateAdded = true,
-                        isAsc = isAsc)
-
-                }
-            }
-            is SortType.LastRead -> {
-                if (unreadFilter) {
-                    bookDao.getAllInDownloads(sortByLastRead = true,
-                        isAsc = isAsc)
-                } else {
-                    bookDao.getAllInDownloads(sortByLastRead = true,
-                        isAsc = isAsc)
-
-                }
-            }
-            is SortType.TotalChapter -> {
-                if (unreadFilter) {
-                    bookDao.getAllInDownloads(sortByTotalChapter = true,
-                        isAsc = isAsc)
-                } else {
-                    bookDao.getAllInDownloads(sortByTotalChapter = true,
-                        isAsc = isAsc)
-
-                }
-            }
-        }
-
-    }
-
-    override fun getAllInLibraryBooks(): Flow<List<Book>?> {
+    override fun getAllInLibraryBooks(): Flow<List<Book>> {
         return bookDao.getAllInLibraryBooks()
     }
 
@@ -176,7 +108,7 @@ class LocalBookRepositoryImpl(
     }
 
 
-    override suspend fun deleteBookById(id: Int) {
+    override suspend fun deleteBookById(id: Long) {
         return bookDao.deleteBook(bookId = id)
     }
 

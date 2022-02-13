@@ -1,4 +1,4 @@
-package org.ireader.infinity.core.domain.use_cases.local.insert_usecases
+package org.ireader.domain.use_cases.local.insert_usecases
 
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.repository.LocalChapterRepository

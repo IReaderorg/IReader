@@ -116,16 +116,17 @@ fun DownloaderScreen(
 
                     ) {
                         ListItem(
-                            text = { MidSizeTextComposable(title = book.bookName) },
+                            text = { MidSizeTextComposable(title = book.title) },
                             trailing = {
-                                if (book.beingDownloaded) {
+                                //TODO need to create something for this
+                                if (true) {
                                     TopAppBarActionButton(imageVector = Icons.Default.StopCircle,
                                         title = "StopDownloads",
                                         onClick = {
                                             viewModel.stopDownloads(context = context,
                                                 book.id,
                                                 book.sourceId)
-                                            viewModel.showSnackBar(UiText.DynamicString("The Download of ${book.bookName} was stopped"))
+                                            viewModel.showSnackBar(UiText.DynamicString("The Download of ${book.title} was stopped"))
                                         })
                                 } else {
                                     TopAppBarActionButton(imageVector = Icons.Default.PlayArrow,
@@ -134,7 +135,7 @@ fun DownloaderScreen(
                                             viewModel.startDownloadService(context = context,
                                                 book.id,
                                                 book.sourceId)
-                                            viewModel.showSnackBar(UiText.DynamicString("The Download of ${book.bookName} was Started"))
+                                            viewModel.showSnackBar(UiText.DynamicString("The Download of ${book.title} was Started"))
                                         })
                                 }
 

@@ -6,7 +6,7 @@ dependencies {
     "implementation"(project(Modules.source))
     "implementation"(project(Modules.core))
     "implementation"(project(Modules.domain))
-
+    "implementation"(Kotlin.dateTime)
     "implementation"(Room.roomRuntime)
     "kapt"(Room.roomCompiler)
     "implementation"(Room.roomKtx)

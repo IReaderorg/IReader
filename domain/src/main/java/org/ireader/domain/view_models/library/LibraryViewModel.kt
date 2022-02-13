@@ -16,8 +16,8 @@ import org.ireader.domain.models.DisplayMode
 import org.ireader.domain.models.FilterType
 import org.ireader.domain.models.SortType
 import org.ireader.domain.models.entities.Book
+import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.preferences.reader_preferences.PreferencesUseCase
-import org.ireader.infinity.core.domain.use_cases.local.DeleteUseCase
 import javax.inject.Inject
 
 
@@ -35,7 +35,6 @@ class LibraryViewModel @Inject constructor(
     val book = _books
 
     init {
-        setExploreModeOffForInLibraryBooks()
         deleteNotInLibraryChapters()
         getLibraryBooks()
         readLayoutTypeAndFilterTypeAndSortType()
@@ -151,11 +150,5 @@ class LibraryViewModel @Inject constructor(
         if (state.inSearchMode) return
         state = state.copy(searchedBook = emptyList(), searchQuery = "")
         getLibraryBooks()
-    }
-
-    fun setExploreModeOffForInLibraryBooks() {
-        viewModelScope.launch(Dispatchers.IO) {
-            deleteUseCase.setExploreModeOffForInLibraryBooks()
-        }
     }
 }

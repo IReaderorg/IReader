@@ -10,7 +10,6 @@ import androidx.compose.material.BottomSheetScaffold
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,10 +51,6 @@ fun LibraryScreen(
 
     val gridState = rememberLazyGridState()
     val lazyListState = rememberLazyListState()
-
-    LaunchedEffect(key1 = true) {
-        viewModel.setExploreModeOffForInLibraryBooks()
-    }
 
     BottomSheetScaffold(
         sheetPeekHeight = (-1).dp,

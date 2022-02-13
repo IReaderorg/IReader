@@ -15,7 +15,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectIndexed
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.withContext
 import org.ireader.core.R
 import org.ireader.domain.feature_services.notification.DefaultNotificationHelper
 import org.ireader.domain.feature_services.notification.Notifications
@@ -26,8 +25,8 @@ import org.ireader.domain.feature_services.notification.Notifications.ID_DOWNLOA
 import org.ireader.domain.repository.LocalBookRepository
 import org.ireader.domain.repository.LocalChapterRepository
 import org.ireader.domain.source.Extensions
-import org.ireader.infinity.core.domain.use_cases.local.LocalInsertUseCases
-import org.ireader.use_cases.remote.RemoteUseCases
+import org.ireader.domain.use_cases.local.LocalInsertUseCases
+import org.ireader.domain.use_cases.remote.RemoteUseCases
 import timber.log.Timber
 
 
@@ -52,25 +51,16 @@ class DownloadService @AssistedInject constructor(
     override suspend fun doWork(): Result {
 
 
-        val bookId = inputData.getInt("book_id", 0)
+        val bookId = inputData.getLong("book_id", 0)
         val sourceId = inputData.getLong("sourceId", 0)
         val bookResource = bookRepo.getBookById(bookId).first()
-        if (bookResource.uiText?.asString(context = context)?.isNotBlank() == true) {
-            throw IllegalArgumentException(
+            ?: throw IllegalArgumentException(
                 "Invalid bookId as argument: $bookId"
             )
-        }
-        val book = bookResource.data!!
 
         val source = extensions.mappingSourceNameToSource(sourceId)
 
-        val chapters = chapterRepo.getChaptersByBookId(bookId).first() ?: emptyList()
-        val localBook = bookRepo.getBookById(bookId).first().data
-
-        withContext(Dispatchers.IO) {
-            insertUseCases.insertBook(book = book.copy(isDownloaded = true, beingDownloaded = true))
-        }
-
+        val chapters = chapterRepo.getChaptersByBookId(bookId).first()
 
         val cancelDownloadIntent = WorkManager.getInstance(applicationContext)
             .createCancelPendingIntent(id)
@@ -78,7 +68,7 @@ class DownloadService @AssistedInject constructor(
 
         val builder =
             NotificationCompat.Builder(applicationContext, CHANNEL_DOWNLOADER_PROGRESS).apply {
-                setContentTitle("Downloading ${book.bookName}")
+                setContentTitle("Downloading ${bookResource.title}")
                 setSmallIcon(R.drawable.ic_downloading)
                 setOnlyAlertOnce(true)
                 priority = NotificationCompat.PRIORITY_LOW
@@ -110,18 +100,18 @@ class DownloadService @AssistedInject constructor(
 
                                 notify(ID_DOWNLOAD_CHAPTER_PROGRESS, builder.build())
                             }
-                        Timber.d("getNotifications: Successfully to downloaded ${book.bookName} chapter ${chapter.title}")
+                        Timber.d("getNotifications: Successfully to downloaded ${bookResource.title} chapter ${chapter.title}")
                         delay(2000)
                     }
                 }
             } catch (e: CancellationException) {
 
-                Timber.e("getNotifications:Download of ${book.bookName} was cancelled.")
+                Timber.e("getNotifications:Download of ${bookResource.title} was cancelled.")
                 notify(
                     ID_DOWNLOAD_CHAPTER_ERROR,
                     NotificationCompat.Builder(applicationContext,
                         Notifications.CHANNEL_DOWNLOADER_ERROR).apply {
-                        setContentTitle("Download of ${book.bookName} was canceled.")
+                        setContentTitle("Download of ${bookResource.title} was canceled.")
                         setSubText("Download was cancelled")
                         setSmallIcon(R.drawable.ic_downloading)
                         priority = NotificationCompat.PRIORITY_DEFAULT
@@ -137,12 +127,12 @@ class DownloadService @AssistedInject constructor(
                 return Result.failure()
             } catch (e: Exception) {
 
-                Timber.e("getNotifications: Failed to download ${book.bookName}")
+                Timber.e("getNotifications: Failed to download ${bookResource.title}")
                 notify(
                     ID_DOWNLOAD_CHAPTER_ERROR,
                     NotificationCompat.Builder(applicationContext,
                         Notifications.CHANNEL_DOWNLOADER_ERROR).apply {
-                        setContentTitle("Failed to download ${book.bookName}")
+                        setContentTitle("Failed to download ${bookResource.title}")
                         setSubText(e.localizedMessage)
                         setSmallIcon(R.drawable.ic_downloading)
                         priority = NotificationCompat.PRIORITY_DEFAULT
@@ -165,7 +155,7 @@ class DownloadService @AssistedInject constructor(
                 ID_DOWNLOAD_CHAPTER_COMPLETE,
                 NotificationCompat.Builder(applicationContext,
                     Notifications.CHANNEL_DOWNLOADER_COMPLETE).apply {
-                    setContentTitle("${book.bookName} downloaded")
+                    setContentTitle("${bookResource.title} downloaded")
                     setSmallIcon(R.drawable.ic_downloading)
                     priority = NotificationCompat.PRIORITY_DEFAULT
                     setSubText("It was Downloaded Successfully")
@@ -175,11 +165,7 @@ class DownloadService @AssistedInject constructor(
                 }.build()
             )
         }
-
-        withContext(Dispatchers.IO) {
-            insertUseCases.insertBook(book = book.copy(beingDownloaded = false))
-        }
-
+        //TODO create a viewmodel that store the download preccess
         return Result.success()
     }
 

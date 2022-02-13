@@ -161,7 +161,7 @@ fun ReadingScreen(
                                     sourceId = viewModel.state.source.sourceId,
                                     fetchType = FetchType.ContentFetchType.index,
                                     bookId = state.chapter.bookId,
-                                    chapterId = state.chapter.chapterId
+                                    chapterId = state.chapter.id
                                 ))
 
                             } catch (e: Exception) {

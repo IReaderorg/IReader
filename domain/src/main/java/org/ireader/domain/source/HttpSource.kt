@@ -2,11 +2,11 @@ package org.ireader.domain.source
 
 import android.webkit.WebView
 import okhttp3.*
-import org.ireader.core.utils.asJsoup
 import org.ireader.core.utils.call
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.source.*
+import org.ireader.domain.utils.asJsoup
 import org.ireader.infinity.core.data.network.models.*
 import org.jsoup.nodes.Document
 import org.koin.core.component.KoinComponent
@@ -136,7 +136,7 @@ abstract class HttpSource : Source, KoinComponent {
      *
      * @param page the page number to retrieve.
      */
-    override suspend fun fetchBook(book: Book): BookPage {
+    override suspend fun fetchBook(book: Book): Book {
         val request = client.call(detailsRequest(book))
         request.close()
         return detailParse(request)
@@ -161,7 +161,7 @@ abstract class HttpSource : Source, KoinComponent {
      *
      * @param page the page number to retrieve.
      */
-    override suspend fun fetchContent(chapter: Chapter): ChapterPage {
+    override suspend fun fetchContent(chapter: Chapter): ContentPage {
         val request = client.call(contentRequest(chapter))
         request.close()
         return pageContentParse(request)
@@ -247,7 +247,6 @@ abstract class HttpSource : Source, KoinComponent {
     private fun popularParse(
         response: Response,
         page: Int,
-        isWebViewMode: Boolean = false,
     ): BooksPage {
         return popularParse(response.asJsoup(), page)
     }
@@ -255,7 +254,6 @@ abstract class HttpSource : Source, KoinComponent {
     abstract override fun popularParse(
         document: Document,
         page: Int,
-        isWebViewMode: Boolean,
     ): BooksPage
 
 
@@ -264,7 +262,7 @@ abstract class HttpSource : Source, KoinComponent {
      *
      * @param response the response from the site.
      */
-    fun latestParse(response: Response, page: Int, isWebViewMode: Boolean = false): BooksPage {
+    fun latestParse(response: Response, page: Int): BooksPage {
         return latestParse(response.asJsoup(), page = page)
     }
 
@@ -276,7 +274,6 @@ abstract class HttpSource : Source, KoinComponent {
     abstract override fun latestParse(
         document: Document,
         page: Int,
-        isWebViewMode: Boolean,
     ): BooksPage
 
 
@@ -285,7 +282,7 @@ abstract class HttpSource : Source, KoinComponent {
      *
      * @param response the response from the site.
      */
-    fun detailParse(response: Response, isWebViewMode: Boolean = false): BookPage {
+    fun detailParse(response: Response): Book {
         return detailParse(response.asJsoup())
     }
 
@@ -294,7 +291,7 @@ abstract class HttpSource : Source, KoinComponent {
      *
      * @param document the parsed document.
      */
-    abstract override fun detailParse(document: Document, isWebViewMode: Boolean): BookPage
+    abstract override fun detailParse(document: Document): Book
 
 
     /**
@@ -302,14 +299,13 @@ abstract class HttpSource : Source, KoinComponent {
      *
      * @param response the response from the site.
      */
-    fun pageContentParse(response: Response, isWebViewMode: Boolean = false): ChapterPage {
+    fun pageContentParse(response: Response): ContentPage {
         return contentFromElementParse(response.asJsoup())
     }
 
     abstract override fun contentFromElementParse(
         document: Document,
-        isWebViewMode: Boolean,
-    ): ChapterPage
+    ): ContentPage
 
 
     /**
@@ -317,9 +313,9 @@ abstract class HttpSource : Source, KoinComponent {
      *
      * @param response the response from the site.
      */
-    abstract override fun chaptersParse(document: Document, isWebViewMode: Boolean): ChaptersPage
+    abstract override fun chaptersParse(document: Document): ChaptersPage
 
-    fun chapterListParse(response: Response, isWebViewMode: Boolean = false): ChaptersPage {
+    fun chapterListParse(response: Response): ChaptersPage {
         return chaptersParse(response.asJsoup())
     }
 
@@ -328,14 +324,13 @@ abstract class HttpSource : Source, KoinComponent {
      *
      * @param response the response from the site.
      */
-    fun searchBookParse(response: Response, page: Int, isWebViewMode: Boolean = false): BooksPage {
+    fun searchBookParse(response: Response, page: Int): BooksPage {
         return searchParse(response.asJsoup(), page = page)
     }
 
     abstract override fun searchParse(
         document: Document,
         page: Int,
-        isWebViewMode: Boolean,
     ): BooksPage
 
 

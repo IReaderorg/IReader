@@ -3,8 +3,8 @@ package org.ireader.data.repository
 import org.ireader.domain.local.BookDatabase
 import org.ireader.domain.repository.LocalBookRepository
 import org.ireader.domain.repository.LocalChapterRepository
+import org.ireader.domain.repository.RemoteRepository
 import org.ireader.domain.repository.Repository
-import org.ireader.infinity.core.domain.repository.RemoteRepository
 import javax.inject.Inject
 
 class RepositoryImpl @Inject constructor(

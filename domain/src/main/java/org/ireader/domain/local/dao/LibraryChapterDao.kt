@@ -9,25 +9,25 @@ import org.ireader.domain.models.entities.Chapter
 @Dao
 interface LibraryChapterDao {
 
-    @Query("SELECT * FROM chapter_table WHERE chapterId = :chapterId Limit 1")
+    @Query("SELECT * FROM chapter_table WHERE id = :chapterId Limit 1")
     fun getChapterById(
-        chapterId: Int,
+        chapterId: Long,
     ): Flow<Chapter?>
 
 
     @Query("""SELECT * FROM chapter_table WHERE bookId= :bookId ORDER BY
-        CASE WHEN :isAsc = 1 THEN chapterId END ASC,
-        CASE WHEN :isAsc = 0 THEN  chapterId END DESC
+        CASE WHEN :isAsc = 1 THEN id END ASC,
+        CASE WHEN :isAsc = 0 THEN  id END DESC
     """)
-    fun getChaptersByBookId(bookId: Int, isAsc: Boolean): Flow<List<Chapter>?>
+    fun getChaptersByBookId(bookId: Long, isAsc: Boolean): Flow<List<Chapter>>
 
     @Query("""SELECT * FROM chapter_table WHERE bookId = :bookId ORDER BY 
-        CASE WHEN :isAsc = 1 THEN chapterId END ASC,
-        CASE WHEN :isAsc = 0 THEN  chapterId END DESC""")
-    fun getChaptersForPaging(bookId: Int, isAsc: Boolean): PagingSource<Int, Chapter>
+        CASE WHEN :isAsc = 1 THEN id END ASC,
+        CASE WHEN :isAsc = 0 THEN  id END DESC""")
+    fun getChaptersForPaging(bookId: Long, isAsc: Boolean): PagingSource<Int, Chapter>
 
 
-    @Query("SELECT * FROM chapter_table WHERE chapterId = :chapterId AND bookId = :bookId Limit 1")
+    @Query("SELECT * FROM chapter_table WHERE id = :chapterId AND bookId = :bookId Limit 1")
     fun getOneChapterForPaging(
         chapterId: Int,
         bookId: Int,
@@ -35,7 +35,7 @@ interface LibraryChapterDao {
 
 
     @Query("SELECT * from chapter_table WHERE bookId = :bookId AND lastRead = 1 LIMIT 1")
-    fun getLastReadChapter(bookId: Int): Flow<Chapter?>
+    fun getLastReadChapter(bookId: Long): Flow<Chapter?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertChapters(chapters: List<Chapter>)
@@ -45,7 +45,7 @@ interface LibraryChapterDao {
 
 
     @Query("DELETE FROM chapter_table WHERE bookId = :bookId")
-    suspend fun deleteChaptersById(bookId: Int)
+    suspend fun deleteChaptersById(bookId: Long)
 
     @Delete
     suspend fun deleteChaptersById(chapters: List<Chapter>)

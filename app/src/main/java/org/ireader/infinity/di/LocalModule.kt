@@ -19,22 +19,22 @@ import org.ireader.domain.repository.LocalChapterRepository
 import org.ireader.domain.source.Extensions
 import org.ireader.domain.ui.AppPreferences
 import org.ireader.domain.ui.UiPreferences
+import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetBookUseCases
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
+import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.local.book_usecases.*
+import org.ireader.domain.use_cases.local.chapter_usecases.GetChaptersByBookId
 import org.ireader.domain.use_cases.local.chapter_usecases.GetLastReadChapter
-import org.ireader.infinity.core.domain.use_cases.local.DeleteUseCase
-import org.ireader.infinity.core.domain.use_cases.local.LocalInsertUseCases
-import org.ireader.infinity.core.domain.use_cases.local.book_usecases.*
-import org.ireader.infinity.core.domain.use_cases.local.chapter_usecases.GetChaptersByBookId
-import org.ireader.infinity.core.domain.use_cases.local.chapter_usecases.GetLocalChaptersByPaging
-import org.ireader.infinity.core.domain.use_cases.local.chapter_usecases.GetOneChapterById
-import org.ireader.infinity.core.domain.use_cases.local.delete_usecases.book.*
-import org.ireader.infinity.core.domain.use_cases.local.delete_usecases.chapter.*
-import org.ireader.infinity.core.domain.use_cases.local.insert_usecases.InsertBook
-import org.ireader.infinity.core.domain.use_cases.local.insert_usecases.InsertBooks
-import org.ireader.infinity.core.domain.use_cases.local.insert_usecases.InsertChapter
-import org.ireader.infinity.core.domain.use_cases.local.insert_usecases.InsertChapters
+import org.ireader.domain.use_cases.local.chapter_usecases.GetLocalChaptersByPaging
+import org.ireader.domain.use_cases.local.chapter_usecases.GetOneChapterById
+import org.ireader.domain.use_cases.local.delete_usecases.book.*
+import org.ireader.domain.use_cases.local.delete_usecases.chapter.*
+import org.ireader.domain.use_cases.local.insert_usecases.InsertBook
+import org.ireader.domain.use_cases.local.insert_usecases.InsertBooks
+import org.ireader.domain.use_cases.local.insert_usecases.InsertChapter
+import org.ireader.domain.use_cases.local.insert_usecases.InsertChapters
+import org.ireader.infinity.core.domain.use_cases.local.book_usecases.GetBooksByQueryPagingSource
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
@@ -94,13 +94,12 @@ class LocalModule {
             deleteAllExploreBook = DeleteAllExploreBook(localBookRepository),
             deleteBookById = DeleteBookById(localBookRepository),
             deleteNotInLibraryBook = DeleteNotInLibraryBook(localBookRepository),
-            setExploreModeOffForInLibraryBooks = SetExploreModeOffForInLibraryBooks(
-                localBookRepository),
             deleteChapterByChapter = DeleteChapterByChapter(localChapterRepository),
             deleteChaptersByBookId = DeleteChaptersByBookId(localChapterRepository),
             deleteNotInLibraryChapters = DeleteNotInLibraryChapters(localChapterRepository),
             deleteAllChapters = DeleteAllChapters(localChapterRepository),
-            deleteChapters = DeleteChapters(localChapterRepository = localChapterRepository)
+            deleteChapters = DeleteChapters(localChapterRepository = localChapterRepository),
+            setExploreModeOffForInLibraryBooks = SetOffExploreMode(localBookRepository)
         )
     }
 
@@ -134,9 +133,6 @@ class LocalModule {
             getBooksByQueryPagingSource = GetBooksByQueryPagingSource(localBookRepository),
             GetInLibraryBooksPagingData = GetInLibraryBooksPagingData(localBookRepository),
             getAllExploredBookPagingData = GetAllExploredBookPagingData(localBookRepository = localBookRepository),
-            getAllInDownloadsPagingData = GetAllInDownloadsPagingData(
-                localBookRepository = localBookRepository),
-            getBookByIdDirectly = GetBookByIdDirectly(localBookRepository)
         )
     }
 

@@ -38,8 +38,6 @@ fun BookImageComposable(
         crossfade(durationMillis = 700)
         placeholder(placeholder)
         error(placeholder)
-        memoryCachePolicy(CachePolicy.ENABLED)
-        diskCachePolicy(CachePolicy.READ_ONLY)
         addHeader("cache-control", "max-age")
         if (headers != null) {
             headers(headers)

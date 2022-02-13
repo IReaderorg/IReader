@@ -1,12 +1,11 @@
 package org.ireader.domain.source
 
 import org.ireader.core.utils.Constants.CLOUDFLARE_LOG
-import org.ireader.core.utils.Constants.CLOUDFLARE_PROTECTION_ERROR
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.source.BooksPage
-import org.ireader.domain.models.source.ChapterPage
 import org.ireader.domain.models.source.ChaptersPage
+import org.ireader.domain.models.source.ContentPage
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 
@@ -56,7 +55,7 @@ abstract class ParsedHttpSource : HttpSource() {
      */
     protected abstract val popularBookNextPageSelector: String?
 
-    override fun popularParse(document: Document, page: Int, isWebViewMode: Boolean): BooksPage {
+    override fun popularParse(document: Document, page: Int): BooksPage {
         val books = document.select(popularSelector).map { element ->
             popularFromElement(element)
         }
@@ -78,7 +77,7 @@ abstract class ParsedHttpSource : HttpSource() {
      * there's no next page.
      */
     protected abstract val latestUpdatesNextPageSelector: String?
-    override fun latestParse(document: Document, page: Int, isWebViewMode: Boolean): BooksPage {
+    override fun latestParse(document: Document, page: Int): BooksPage {
 
         val books = document.select(latestSelector).map { element ->
             latestFromElement(element)
@@ -88,7 +87,7 @@ abstract class ParsedHttpSource : HttpSource() {
             document.select(selector).first()
         } != null
 
-        return BooksPage(books, hasNextPage, document.body().allElements.text())
+        return BooksPage(books, hasNextPage)
     }
 
     /**
@@ -102,7 +101,7 @@ abstract class ParsedHttpSource : HttpSource() {
      */
     protected abstract val hasNextChapterSelector: String
 
-    override fun chaptersParse(document: Document, isWebViewMode: Boolean): ChaptersPage {
+    override fun chaptersParse(document: Document): ChaptersPage {
 
         val isCloudflareEnable = document.body().allElements.text().contains(CLOUDFLARE_LOG)
 
@@ -111,16 +110,15 @@ abstract class ParsedHttpSource : HttpSource() {
         val hasNext = hasNextChaptersParse(document)
 
         return ChaptersPage(chapters,
-            hasNext,
-            errorMessage = if (isCloudflareEnable) CLOUDFLARE_PROTECTION_ERROR else "")
+            hasNext)
+
     }
 
-    abstract fun hasNextChaptersParse(document: Document, isWebViewMode: Boolean = false): Boolean
+    abstract fun hasNextChaptersParse(document: Document): Boolean
 
     abstract override fun contentFromElementParse(
         document: Document,
-        isWebViewMode: Boolean,
-    ): ChapterPage
+    ): ContentPage
 
     /**
      * Returns the Jsoup selector that returns a list of [Element] corresponding to each manga.
@@ -130,7 +128,7 @@ abstract class ParsedHttpSource : HttpSource() {
     protected abstract val searchBookNextPageSelector: String
 
 
-    override fun searchParse(document: Document, page: Int, isWebViewMode: Boolean): BooksPage {
+    override fun searchParse(document: Document, page: Int): BooksPage {
 
         val isCloudflareEnable = document.body().allElements.text().contains(CLOUDFLARE_LOG)
 
@@ -141,15 +139,14 @@ abstract class ParsedHttpSource : HttpSource() {
         val books = document.select(searchSelector).map { element ->
             searchFromElement(element)
         }.filter {
-            it.bookName.isNotBlank()
+            it.title.isNotBlank()
         }
         val hasNextPage = searchBookNextPageSelector.let { selector ->
             document.select(selector).first()
         } != null
 
         return BooksPage(books,
-            hasNextPage,
-            errorMessage = if (isCloudflareEnable) CLOUDFLARE_PROTECTION_ERROR else "")
+            hasNextPage)
     }
 
     /****************************************************************************************************/

@@ -44,6 +44,7 @@ fun ExploreScreen(
     val focusManager = LocalFocusManager.current
 
     val books = viewModel.books.collectAsLazyPagingItems()
+
     val gridState = rememberLazyGridState()
     val lazyListState = rememberLazyListState()
 

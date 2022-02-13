@@ -535,6 +535,7 @@ class AvailableSources {
             nameSelector = "a",
             linkSelector = "a",
             linkAtt = "href",
+            isChapterStatsFromFirst = false
         ),
         content = Content(
             pageTitleSelector = "h1",

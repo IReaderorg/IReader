@@ -27,11 +27,11 @@ import org.ireader.domain.models.source.Source
 import org.ireader.domain.source.Extensions
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.domain.use_cases.fetchers.FetchUseCase
+import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
+import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.utils.Resource
 import org.ireader.domain.view_models.settings.webview.mapFetcher
-import org.ireader.infinity.core.domain.use_cases.local.DeleteUseCase
-import org.ireader.infinity.core.domain.use_cases.local.LocalInsertUseCases
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 import javax.inject.Inject
@@ -57,8 +57,8 @@ class WebViewPageModel @Inject constructor(
 
     init {
         val sourceId = savedStateHandle.get<Long>(NavigationArgs.sourceId.name)
-        val chapterId = savedStateHandle.get<Int>(NavigationArgs.chapterId.name)
-        val bookId = savedStateHandle.get<Int>(NavigationArgs.bookId.name)
+        val bookId = savedStateHandle.get<Long>(NavigationArgs.bookId.name)
+        val chapterId = savedStateHandle.get<Long>(NavigationArgs.chapterId.name)
         val url = URLDecoder.decode(savedStateHandle.get<String>(NavigationArgs.url.name),
             StandardCharsets.UTF_8.name())
         val fetcher = savedStateHandle.get<Int>(NavigationArgs.fetchType.name)
@@ -67,7 +67,7 @@ class WebViewPageModel @Inject constructor(
             _state.value = state.value.copy(source = extensions.mappingSourceNameToSource(sourceId))
             _state.value = state.value.copy(book = state.value.book.copy(id = bookId))
             _state.value =
-                state.value.copy(chapter = state.value.chapter?.copy(chapterId = chapterId))
+                state.value.copy(chapter = state.value.chapter?.copy(id = chapterId))
         }
         if (fetcher != null) {
             _state.value = state.value.copy(fetcher = mapFetcher(fetcher))
@@ -124,43 +124,28 @@ class WebViewPageModel @Inject constructor(
     }
 
 
-    private fun getLocalChaptersByBookName(bookId: Int) {
+    private fun getLocalChaptersByBookName(bookId: Long) {
         getChapterUseCase.getChaptersByBookId(bookId = bookId)
-            .onEach { result ->
-                when (result) {
-                    is Resource.Success -> {
-                        if (!result.data.isNullOrEmpty()) {
-                            _state.value = state.value.copy(
-                                chapters = result.data,
-                            )
-                        }
-                    }
-                    is Resource.Error -> {
-
-                    }
+            .onEach { chapters ->
+                if (chapters.isNotEmpty()) {
+                    _state.value = state.value.copy(
+                        chapters = chapters,
+                    )
                 }
             }.launchIn(viewModelScope)
     }
 
-    private fun getBookById(bookId: Int) {
-        getBookUseCases.getBookById(id = bookId).onEach { result ->
-            when (result) {
-                is Resource.Success -> {
-                    if (result.data != null && result.data != Book.create()) {
-                        _state.value = state.value.copy(
-                            book = result.data,
-                        )
-                        //insertChaptersToLocal(state.value.chapters)
-                    }
-                }
-                is Resource.Error -> {
-
-                }
+    private fun getBookById(bookId: Long) {
+        getBookUseCases.getBookById(id = bookId).onEach { book ->
+            if (book != null) {
+                _state.value = state.value.copy(
+                    book = book,
+                )
             }
         }.launchIn(viewModelScope)
     }
 
-    private fun getLocalChapterByName(chapterId: Int) {
+    private fun getLocalChapterByName(chapterId: Long) {
         getChapterUseCase.getOneChapterById(chapterId).onEach { result ->
             when (result) {
                 is Resource.Success -> {
@@ -189,7 +174,7 @@ class WebViewPageModel @Inject constructor(
 data class WebViewPageState(
     val webView: WebView,
     val url: String = "",
-    val book: Book = Book.create(),
+    val book: Book = Book(title = "", sourceId = 0L, link = ""),
     val books: List<Book> = emptyList<Book>(),
     val chapters: List<Chapter> = emptyList<Chapter>(),
     val chapter: Chapter? = null,

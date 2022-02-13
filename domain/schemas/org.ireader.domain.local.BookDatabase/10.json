@@ -2,69 +2,15 @@
   "formatVersion": 1,
   "database": {
     "version": 10,
-    "identityHash": "97351186a3bc8469124b819d7ed71861",
+    "identityHash": "0845d558e38edc94fc59b6cfb3f55997",
     "entities": [
       {
         "tableName": "book_table",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `link` TEXT NOT NULL, `bookName` TEXT NOT NULL, `coverLink` TEXT, `description` TEXT NOT NULL, `author` TEXT, `translator` TEXT, `category` TEXT NOT NULL, `status` INTEGER NOT NULL, `rating` INTEGER NOT NULL, `sourceId` INTEGER NOT NULL, `isExploreMode` INTEGER NOT NULL, `inLibrary` INTEGER NOT NULL, `dataAdded` INTEGER NOT NULL, `isDownloaded` INTEGER NOT NULL, `beingDownloaded` INTEGER NOT NULL, `lastRead` INTEGER NOT NULL, `totalChapters` INTEGER NOT NULL, `unread` INTEGER NOT NULL, `lastUpdated` INTEGER NOT NULL, `completed` INTEGER NOT NULL, `areChaptersReversed` INTEGER NOT NULL, `type` INTEGER NOT NULL, `lastChecked` INTEGER NOT NULL, `latestChapter` INTEGER NOT NULL, `dataFetched` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `sourceId` INTEGER NOT NULL, `link` TEXT NOT NULL, `title` TEXT NOT NULL, `translator` TEXT NOT NULL, `author` TEXT NOT NULL, `description` TEXT NOT NULL, `genres` TEXT NOT NULL, `status` INTEGER NOT NULL, `cover` TEXT NOT NULL, `customCover` TEXT NOT NULL, `exploreMode` INTEGER NOT NULL, `inLibrary` INTEGER NOT NULL, `rating` INTEGER NOT NULL, `lastUpdated` INTEGER NOT NULL, `lastRead` INTEGER NOT NULL, `dataAdded` INTEGER NOT NULL, `viewer` INTEGER NOT NULL, `flags` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
             "columnName": "id",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "link",
-            "columnName": "link",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "bookName",
-            "columnName": "bookName",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "coverLink",
-            "columnName": "coverLink",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "description",
-            "columnName": "description",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "author",
-            "columnName": "author",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "translator",
-            "columnName": "translator",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "category",
-            "columnName": "category",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "status",
-            "columnName": "status",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "rating",
-            "columnName": "rating",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -75,8 +21,62 @@
             "notNull": true
           },
           {
-            "fieldPath": "isExploreMode",
-            "columnName": "isExploreMode",
+            "fieldPath": "link",
+            "columnName": "link",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "translator",
+            "columnName": "translator",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "author",
+            "columnName": "author",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "genres",
+            "columnName": "genres",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cover",
+            "columnName": "cover",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "customCover",
+            "columnName": "customCover",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "exploreMode",
+            "columnName": "exploreMode",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -87,38 +87,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "dataAdded",
-            "columnName": "dataAdded",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "isDownloaded",
-            "columnName": "isDownloaded",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "beingDownloaded",
-            "columnName": "beingDownloaded",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "lastRead",
-            "columnName": "lastRead",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "totalChapters",
-            "columnName": "totalChapters",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "unread",
-            "columnName": "unread",
+            "fieldPath": "rating",
+            "columnName": "rating",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -129,38 +99,26 @@
             "notNull": true
           },
           {
-            "fieldPath": "completed",
-            "columnName": "completed",
+            "fieldPath": "lastRead",
+            "columnName": "lastRead",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "areChaptersReversed",
-            "columnName": "areChaptersReversed",
+            "fieldPath": "dataAdded",
+            "columnName": "dataAdded",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "type",
-            "columnName": "type",
+            "fieldPath": "viewer",
+            "columnName": "viewer",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "lastChecked",
-            "columnName": "lastChecked",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "latestChapter",
-            "columnName": "latestChapter",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "dataFetched",
-            "columnName": "dataFetched",
+            "fieldPath": "flags",
+            "columnName": "flags",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -176,19 +134,13 @@
       },
       {
         "tableName": "chapter_table",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`chapterId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `bookName` TEXT, `bookId` INTEGER NOT NULL, `link` TEXT NOT NULL, `title` TEXT NOT NULL, `dateUploaded` TEXT, `dateAdded` INTEGER, `content` TEXT NOT NULL, `haveBeenRead` INTEGER NOT NULL, `lastRead` INTEGER NOT NULL, `source` TEXT NOT NULL, `inLibrary` INTEGER NOT NULL, `bookmarked` INTEGER NOT NULL, `downloaded` INTEGER NOT NULL, `scrollPosition` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `bookId` INTEGER NOT NULL, `link` TEXT NOT NULL, `title` TEXT NOT NULL, `inLibrary` INTEGER NOT NULL, `haveBeenRead` INTEGER NOT NULL, `bookmark` INTEGER NOT NULL, `progress` INTEGER NOT NULL, `dateUploaded` INTEGER NOT NULL, `dateFetch` INTEGER NOT NULL, `content` TEXT NOT NULL, `lastRead` INTEGER NOT NULL, `number` REAL NOT NULL, `translator` TEXT NOT NULL)",
         "fields": [
           {
-            "fieldPath": "chapterId",
-            "columnName": "chapterId",
+            "fieldPath": "id",
+            "columnName": "id",
             "affinity": "INTEGER",
             "notNull": true
-          },
-          {
-            "fieldPath": "bookName",
-            "columnName": "bookName",
-            "affinity": "TEXT",
-            "notNull": false
           },
           {
             "fieldPath": "bookId",
@@ -209,21 +161,9 @@
             "notNull": true
           },
           {
-            "fieldPath": "dateUploaded",
-            "columnName": "dateUploaded",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "dateAdded",
-            "columnName": "dateAdded",
+            "fieldPath": "inLibrary",
+            "columnName": "inLibrary",
             "affinity": "INTEGER",
-            "notNull": false
-          },
-          {
-            "fieldPath": "content",
-            "columnName": "content",
-            "affinity": "TEXT",
             "notNull": true
           },
           {
@@ -233,45 +173,57 @@
             "notNull": true
           },
           {
+            "fieldPath": "bookmark",
+            "columnName": "bookmark",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "progress",
+            "columnName": "progress",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dateUploaded",
+            "columnName": "dateUploaded",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dateFetch",
+            "columnName": "dateFetch",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "content",
+            "columnName": "content",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
             "fieldPath": "lastRead",
             "columnName": "lastRead",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "source",
-            "columnName": "source",
+            "fieldPath": "number",
+            "columnName": "number",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "translator",
+            "columnName": "translator",
             "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "inLibrary",
-            "columnName": "inLibrary",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "bookmarked",
-            "columnName": "bookmarked",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "downloaded",
-            "columnName": "downloaded",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "scrollPosition",
-            "columnName": "scrollPosition",
-            "affinity": "INTEGER",
             "notNull": true
           }
         ],
         "primaryKey": {
           "columnNames": [
-            "chapterId"
+            "id"
           ],
           "autoGenerate": true
         },
@@ -309,12 +261,92 @@
         },
         "indices": [],
         "foreignKeys": []
+      },
+      {
+        "tableName": "download_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `chapterId` INTEGER NOT NULL, `bookId` INTEGER NOT NULL, `sourceId` INTEGER NOT NULL, `priority` INTEGER NOT NULL, `totalChapter` INTEGER NOT NULL, `progress` INTEGER NOT NULL, `bookName` TEXT NOT NULL, `chapterKey` TEXT NOT NULL, `chapterName` TEXT NOT NULL, `translator` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "chapterId",
+            "columnName": "chapterId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bookId",
+            "columnName": "bookId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sourceId",
+            "columnName": "sourceId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "priority",
+            "columnName": "priority",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "totalChapter",
+            "columnName": "totalChapter",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "progress",
+            "columnName": "progress",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bookName",
+            "columnName": "bookName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "chapterKey",
+            "columnName": "chapterKey",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "chapterName",
+            "columnName": "chapterName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "translator",
+            "columnName": "translator",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '97351186a3bc8469124b819d7ed71861')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0845d558e38edc94fc59b6cfb3f55997')"
     ]
   }
 }

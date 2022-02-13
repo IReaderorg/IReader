@@ -10,7 +10,7 @@ import org.ireader.domain.local.BookDatabase
 import org.ireader.domain.models.ExploreType
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.source.Source
-import org.ireader.infinity.core.domain.repository.RemoteRepository
+import org.ireader.domain.repository.RemoteRepository
 
 class GetRemoteBooksByRemoteMediator(
     private val remoteRepository: RemoteRepository,

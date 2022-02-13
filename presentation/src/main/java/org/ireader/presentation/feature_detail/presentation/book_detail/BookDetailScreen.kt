@@ -112,7 +112,7 @@ fun BookDetailScreen(
                                 navController.navigate(ReaderScreenSpec.buildRoute(
                                     bookId = state.book.id,
                                     sourceId = source.sourceId,
-                                    chapterId = viewModel.chapterState.chapters.first().chapterId,
+                                    chapterId = viewModel.chapterState.chapters.first().id,
                                 ))
                             } else {
                                 scope.launch {

@@ -66,8 +66,8 @@ fun LinearListDisplay(
         items(items = books) { book ->
             if (book != null) {
                 LinearBookItem(
-                    title = book.bookName,
-                    img_thumbnail = book.coverLink ?: "",
+                    title = book.title,
+                    img_thumbnail = book.cover,
                     modifier = Modifier.clickable {
                         onClick(book)
                     }

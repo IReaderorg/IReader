@@ -14,6 +14,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import org.ireader.core.prefs.PreferenceStore
 import org.ireader.data.repository.NetworkPreferences
 import org.ireader.domain.local.BookDatabase
+import org.ireader.domain.repository.RemoteRepository
 import org.ireader.domain.source.NetworkHelper
 import org.ireader.domain.ui.AppPreferences
 import org.ireader.domain.ui.UiPreferences
@@ -24,13 +25,8 @@ import org.ireader.domain.use_cases.preferences.apperance.SaveNightModePreferenc
 import org.ireader.domain.use_cases.preferences.reader_preferences.*
 import org.ireader.domain.use_cases.preferences.services.ReadLastUpdateTime
 import org.ireader.domain.use_cases.preferences.services.SetLastUpdateTime
-import org.ireader.domain.use_cases.remote.GetBookDetail
-import org.ireader.domain.use_cases.remote.GetRemoteBooksByRemoteMediator
-import org.ireader.infinity.core.data.network.utils.MemoryCookieJar
-import org.ireader.infinity.core.domain.repository.RemoteRepository
-import org.ireader.infinity.core.domain.use_cases.remote.GetRemoteChapters
-import org.ireader.infinity.core.domain.use_cases.remote.GetRemoteReadingContent
-import org.ireader.use_cases.remote.RemoteUseCases
+import org.ireader.domain.use_cases.remote.*
+import org.ireader.domain.utils.MemoryCookieJar
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 

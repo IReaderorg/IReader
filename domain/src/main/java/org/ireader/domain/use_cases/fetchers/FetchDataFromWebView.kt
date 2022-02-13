@@ -8,9 +8,9 @@ import org.ireader.domain.R
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.source.Source
+import org.ireader.domain.use_cases.local.DeleteUseCase
+import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.utils.Resource
-import org.ireader.infinity.core.domain.use_cases.local.DeleteUseCase
-import org.ireader.infinity.core.domain.use_cases.local.LocalInsertUseCases
 import org.jsoup.Jsoup
 
 class FetchBookDetailAndChapterDetailFromWebView {
@@ -28,25 +28,20 @@ class FetchBookDetailAndChapterDetailFromWebView {
             val chaptersFromPageSource = source.chaptersParse(Jsoup.parse(pageSource))
             if (!chaptersFromPageSource.chapters.isNullOrEmpty()) {
                 emit(Resource.Error<UiText.DynamicString>(UiText.StringResource(R.string.trying_to_fetch)))
-                if (localChapters != null && chaptersFromPageSource.chapters.isNotEmpty() && localBook?.bookName?.isNotBlank() == true) {
-
+                if (localChapters != null && chaptersFromPageSource.chapters.isNotEmpty() && localBook?.title?.isNotBlank() == true) {
                     val uniqueList = removeSameItemsFromList(oldList = localChapters,
                         newList = chaptersFromPageSource.chapters,
                         differentiateBy = {
                             it.title
                         })
-
-
                     deleteUseCase.deleteChaptersByBookId(bookId = localBook.id)
                     insertUseCases.insertChapters(uniqueList.map {
                         it.copy(
                             bookId = localBook.id,
-                            bookName = localBook.bookName,
-                            inLibrary = localBook.inLibrary,
                         )
                     })
 
-                    emit(Resource.Success<UiText.DynamicString>(UiText.DynamicString("${bookFromPageSource.book.bookName} was fetched with ${chaptersFromPageSource.chapters.size}   chapters")))
+                    emit(Resource.Success<UiText.DynamicString>(UiText.DynamicString("${bookFromPageSource.title} was fetched with ${chaptersFromPageSource.chapters.size}   chapters")))
 
                 } else {
                     if (chaptersFromPageSource.chapters.isNotEmpty()) {

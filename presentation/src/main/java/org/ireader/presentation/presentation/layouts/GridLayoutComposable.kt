@@ -58,7 +58,7 @@ fun GridLayoutComposable(
                                 .clip(RoundedCornerShape(4.dp))
                                 .border(2.5.dp,
                                     MaterialTheme.colors.onBackground.copy(alpha = .1f)),
-                            image = book.coverLink ?: "",
+                            image = book.cover,
                         )
                         Box(
                             Modifier
@@ -77,7 +77,7 @@ fun GridLayoutComposable(
                                 modifier = modifier
                                     .align(Alignment.BottomCenter)
                                     .padding(bottom = 8.dp),
-                                text = book.bookName,
+                                text = book.title,
                                 style = MaterialTheme.typography.caption,
                                 fontWeight = FontWeight.Bold,
                                 overflow = TextOverflow.Ellipsis,
@@ -88,7 +88,7 @@ fun GridLayoutComposable(
                         /**
                          * Only show if the latest chapter exist.
                          */
-                        if (book.totalChapters > 1 && isLocal && book.lastRead != 0L) {
+                        if (book.lastUpdated > 1 && isLocal && book.lastRead != 0L) {
                             GoToLastReadComposable(onClick = { goToLatestChapter(book) })
                         }
 

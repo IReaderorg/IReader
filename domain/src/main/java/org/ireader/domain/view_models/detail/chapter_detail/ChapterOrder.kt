@@ -1,4 +1,4 @@
-package org.ireader.presentation.feature_detail.presentation.chapter_detail
+package org.ireader.domain.view_models.detail.chapter_detail
 
 sealed class OrderType {
     object Ascending : OrderType()

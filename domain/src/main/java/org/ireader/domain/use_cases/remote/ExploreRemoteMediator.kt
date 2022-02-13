@@ -5,6 +5,7 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
+import kotlinx.datetime.Clock
 import org.ireader.domain.local.BookDatabase
 import org.ireader.domain.models.ExploreType
 import org.ireader.domain.models.RemoteKeys
@@ -25,12 +26,17 @@ class ExploreRemoteMediator(
 
     private val remoteKey = database.remoteKeysDao
 
+    var init = true
 
     override suspend fun load(
         loadType: LoadType,
         state: PagingState<Int, Book>,
     ): RemoteMediator.MediatorResult {
         return try {
+            if (init) {
+                init = false
+                database.remoteKeysDao.turnExploreModeOff()
+            }
             val currentPage = when (loadType) {
                 LoadType.REFRESH -> {
                     val remoteKeys = getRemoteKeyClosestToCurrentPosition(state)
@@ -80,21 +86,20 @@ class ExploreRemoteMediator(
                 }
                 val keys = response.books.map { book ->
                     RemoteKeys(
-                        id = book.bookName,
+                        id = book.title,
                         prevPage = prevPage,
                         nextPage = nextPage
                     )
                 }
                 remoteKey.addAllRemoteKeys(remoteKeys = keys)
                 remoteKey.insertAllExploredBook(response.books.map {
-                    it.copy(isExploreMode = true)
+                    it.copy(
+                        dataAdded = Clock.System.now().toEpochMilliseconds(),
+                        exploreMode = true
+                    )
                 })
             }
-            if (response.errorMessage.isNotBlank()) {
-                RemoteMediator.MediatorResult.Error(Exception(response.errorMessage))
-            } else {
-                RemoteMediator.MediatorResult.Success(endOfPaginationReached = endOfPaginationReached)
-            }
+            RemoteMediator.MediatorResult.Success(endOfPaginationReached = endOfPaginationReached)
         } catch (e: UnknownHostException) {
             return RemoteMediator.MediatorResult.Error(Exception("There is no internet available,please check your internet connection"))
         } catch (e: IOException) {
@@ -112,7 +117,7 @@ class ExploreRemoteMediator(
         state: PagingState<Int, Book>,
     ): RemoteKeys? {
         return state.anchorPosition?.let { position ->
-            state.closestItemToPosition(position)?.bookName?.let { bookName ->
+            state.closestItemToPosition(position)?.title?.let { bookName ->
                 remoteKey.getRemoteKeys(id = bookName)
             }
         }
@@ -123,7 +128,7 @@ class ExploreRemoteMediator(
     ): RemoteKeys? {
         return state.pages.firstOrNull { it.data.isNotEmpty() }?.data?.firstOrNull()
             ?.let { book ->
-                remoteKey.getRemoteKeys(id = book.bookName)
+                remoteKey.getRemoteKeys(id = book.title)
             }
     }
 
@@ -132,7 +137,7 @@ class ExploreRemoteMediator(
     ): RemoteKeys? {
         return state.pages.lastOrNull { it.data.isNotEmpty() }?.data?.lastOrNull()
             ?.let { book ->
-                remoteKey.getRemoteKeys(id = book.bookName)
+                remoteKey.getRemoteKeys(id = book.title)
             }
     }
 

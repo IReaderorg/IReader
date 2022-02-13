@@ -19,11 +19,11 @@ object WebViewScreenSpec : ScreenSpec {
         NavigationArgs.sourceId,
         NavigationArgs.fetchType,
         navArgument("bookId") {
-            type = NavType.IntType
+            type = NavType.LongType
             defaultValue = Constants.NULL_VALUE
         },
         navArgument("chapterId") {
-            type = NavType.IntType
+            type = NavType.LongType
             defaultValue = Constants.NULL_VALUE
         },
         navArgument("url") {
@@ -36,8 +36,8 @@ object WebViewScreenSpec : ScreenSpec {
         sourceId: Long,
         fetchType: Int,
         url: String? = null,
-        bookId: Int? = null,
-        chapterId: Int? = null,
+        bookId: Long? = null,
+        chapterId: Long? = null,
     ): String {
         return "web_page_route/$fetchType/$sourceId/${chapterId ?: Constants.NULL_VALUE}/${bookId ?: Constants.NULL_VALUE}/${
             URLEncoder.encode(url,

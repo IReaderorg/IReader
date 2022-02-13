@@ -13,7 +13,7 @@ object BookDetailScreenSpec : ScreenSpec {
 
     override val navHostRoute: String = "book_detail_route/{bookId}/{sourceId}"
 
-    fun buildRoute(sourceId: Long, bookId: Int): String {
+    fun buildRoute(sourceId: Long, bookId: Long): String {
         return "book_detail_route/$bookId/$sourceId"
     }
 

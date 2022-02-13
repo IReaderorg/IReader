@@ -16,7 +16,7 @@ import org.ireader.domain.utils.Resource
  */
 class GetLastReadChapter(private val localChapterRepository: LocalChapterRepository) {
     operator fun invoke(
-        bookId: Int,
+        bookId: Long,
     ): Flow<Resource<Chapter>> =
         flow {
             try {

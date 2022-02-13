@@ -30,11 +30,11 @@ import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.source.Extensions
 import org.ireader.domain.ui.NavigationArgs
+import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
+import org.ireader.domain.use_cases.local.LocalInsertUseCases
+import org.ireader.domain.use_cases.remote.RemoteUseCases
 import org.ireader.domain.utils.Resource
-import org.ireader.infinity.core.domain.use_cases.local.DeleteUseCase
-import org.ireader.infinity.core.domain.use_cases.local.LocalInsertUseCases
-import org.ireader.use_cases.remote.RemoteUseCases
 import org.jsoup.Jsoup
 import javax.inject.Inject
 
@@ -77,12 +77,12 @@ class ReaderScreenViewModel @Inject constructor(
 
     init {
         val sourceId = savedStateHandle.get<Long>(NavigationArgs.sourceId.name)
-        val chapterId = savedStateHandle.get<Int>(NavigationArgs.chapterId.name)
-        val bookId = savedStateHandle.get<Int>(NavigationArgs.bookId.name)
+        val chapterId = savedStateHandle.get<Long>(NavigationArgs.chapterId.name)
+        val bookId = savedStateHandle.get<Long>(NavigationArgs.bookId.name)
         if (bookId != null && chapterId != null && sourceId != null) {
             state = state.copy(source = extensions.mappingSourceNameToSource(sourceId))
             state = state.copy(book = state.book.copy(id = bookId))
-            state = state.copy(chapter = state.chapter.copy(chapterId = chapterId))
+            state = state.copy(chapter = state.chapter.copy(id = chapterId))
             getLocalChaptersByPaging()
             getLocalBookById()
             readPreferences()
@@ -125,7 +125,7 @@ class ReaderScreenViewModel @Inject constructor(
                             toggleLocalLoading(false)
                             toggleLocalLoaded(true)
                             setChapter(result.data)
-                            setScrollPosition(result.data.scrollPosition)
+                            setScrollPosition(result.data.progress)
                             toggleLastReadAndUpdateChapterContent(result.data)
                             if (state.chapter.content.joinToString().isBlank()) {
                                 getReadingContentRemotely()
@@ -146,24 +146,17 @@ class ReaderScreenViewModel @Inject constructor(
 
 
     private fun getChapters() {
-        getChapterUseCase.getChaptersByBookId(bookId = state.book.id,
-            isAsc = state.book.areChaptersReversed)
-            .onEach { result ->
-                when (result) {
-                    is Resource.Success -> {
-                        if (result.data != null) {
-                            state = state.copy(
-                                chapters = result.data,
-                                isChapterLoaded = true,
-                            )
-                            state =
-                                state.copy(currentChapterIndex = result.data.indexOfFirst { state.chapter.chapterId == it.chapterId })
-                            if (state.chapter.chapterId == Constants.LAST_CHAPTER && state.chapters.isNotEmpty()) {
-                                getChapter(state.chapters.first())
-                            }
-                        }
-                    }
-                    is Resource.Error -> {
+        getChapterUseCase.getChaptersByBookId(bookId = state.book.id)
+            .onEach { chapters ->
+                if (chapters.isNotEmpty()) {
+                    state = state.copy(
+                        chapters = chapters,
+                        isChapterLoaded = true,
+                    )
+                    state =
+                        state.copy(currentChapterIndex = chapters.indexOfFirst { state.chapter.id == it.id })
+                    if (state.chapter.id == Constants.LAST_CHAPTER && state.chapters.isNotEmpty()) {
+                        getChapter(state.chapters.first())
                     }
                 }
             }.launchIn(viewModelScope)
@@ -178,13 +171,13 @@ class ReaderScreenViewModel @Inject constructor(
             isLocalLoading = true,
             isLocalLoaded = false,
         )
-        getChapterUseCase.getOneChapterById(chapterId = chapter.chapterId)
+        getChapterUseCase.getOneChapterById(chapterId = chapter.id)
             .onEach { result ->
                 when (result) {
                     is Resource.Success -> {
                         if (result.data != null) {
                             clearError()
-                            setScrollPosition(result.data.scrollPosition)
+                            setScrollPosition(result.data.progress)
                             toggleLocalLoading(false)
                             toggleLocalLoaded(true)
                             setChapter(result.data)
@@ -217,7 +210,7 @@ class ReaderScreenViewModel @Inject constructor(
                     state = state.copy(isLocalLoading = false,
                         chapter = state.chapter.copy(content = chapter.content))
                     toggleLastReadAndUpdateChapterContent(state.chapter.copy(content = chapter.content))
-                    showSnackBar(UiText.DynamicString("${state.chapter.title} of ${state.chapter.bookName} was Fetched"))
+                    showSnackBar(UiText.DynamicString("${state.chapter.title} of ${state.chapter.title} was Fetched"))
                     if (state.chapter.content.size > 10) {
                         state = state.copy(isLocalLoaded = true)
                     }
@@ -269,32 +262,22 @@ class ReaderScreenViewModel @Inject constructor(
 
     private fun getLocalBookById() {
         viewModelScope.launch {
-            getBookUseCases.getBookById(id = state.book.id).first { result ->
-                when (result) {
-                    is Resource.Success -> {
-                        if (result.data != null && result.data != Book.create()) {
-                            setBook(result.data)
-                            toggleBookLoaded(true)
-                            toggleIsChaptersReversed(result.data.areChaptersReversed)
-                            toggleIsAsc(result.data.areChaptersReversed)
-                            insertBook(result.data.copy(
-                                lastRead = System.currentTimeMillis(),
-                                unread = !result.data.unread))
-                            getChapters()
-                            if (state.chapter.chapterId != Constants.LAST_CHAPTER) {
-                                getChapter(state.chapter)
-                            } else {
-                                getLastChapter()
-                            }
-                            getLocalChaptersByPaging()
-                            true
-                        } else {
-                            false
-                        }
+            getBookUseCases.getBookById(id = state.book.id).first { book ->
+                if (book != null) {
+                    setBook(book)
+                    toggleBookLoaded(true)
+                    insertBook(book.copy(
+                        lastRead = System.currentTimeMillis()))
+                    getChapters()
+                    if (state.chapter.id != Constants.LAST_CHAPTER) {
+                        getChapter(state.chapter)
+                    } else {
+                        getLastChapter()
                     }
-                    is Resource.Error -> {
-                        false
-                    }
+                    getLocalChaptersByPaging()
+                    true
+                } else {
+                    false
                 }
             }
         }
@@ -485,8 +468,8 @@ class ReaderScreenViewModel @Inject constructor(
      * get the index pf chapter based on the reversed state
      */
     fun getCurrentIndexOfChapter(chapter: Chapter): Int {
-        val chaptersById: List<Int> = state.chapters.map { it.chapterId }
-        return if (chaptersById.indexOf(chapter.chapterId) != -1) chaptersById.indexOf(chapter.chapterId) else 0
+        val chaptersById: List<Int> = state.chapters.map { it.id.toInt() }
+        return if (chaptersById.indexOf(chapter.id.toInt()) != -1) chaptersById.indexOf(chapter.id.toInt()) else 0
     }
 
     private fun getCurrentIndex(): Int {
@@ -511,18 +494,10 @@ class ReaderScreenViewModel @Inject constructor(
 
     fun reverseSlider() {
         if (!prefState.isChapterReversingInProgress) {
-            setBook(state.book.copy(areChaptersReversed = !state.book.areChaptersReversed))
             prefState =
                 prefState.copy(
-                    isChapterReversingInProgress = true,
                     isAsc = !prefState.isAsc
                 )
-
-            viewModelScope.launch(Dispatchers.IO) {
-                showSnackBar(UiText.DynamicString("Reversing Chapters..."))
-                insertUseCases.insertBook(state.book.copy(areChaptersReversed = state.book.areChaptersReversed))
-                showSnackBar(UiText.DynamicString("Chapters were reversed"))
-            }
             updateChapterSliderIndex(getCurrentIndexOfChapter(state.chapter))
             getChapters()
             getLocalChaptersByPaging()

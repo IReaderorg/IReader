@@ -60,7 +60,7 @@ fun CompactGridLayoutComposable(
                                 .clip(RoundedCornerShape(4.dp))
                                 .border(2.dp,
                                     MaterialTheme.colors.onBackground.copy(alpha = .1f)),
-                            image = book.coverLink ?: "",
+                            image = book.cover,
                         )
 
                         Box(
@@ -80,7 +80,7 @@ fun CompactGridLayoutComposable(
                                 modifier = modifier
                                     .align(Alignment.BottomCenter)
                                     .padding(bottom = 8.dp),
-                                text = book.bookName,
+                                text = book.title,
                                 style = MaterialTheme.typography.caption,
                                 fontWeight = FontWeight.Bold,
                                 overflow = TextOverflow.Ellipsis,
@@ -88,7 +88,8 @@ fun CompactGridLayoutComposable(
                                 color = Color.White
                             )
                         }
-                        if (book.totalChapters > 1 && isLocal && book.lastRead != 0L) {
+                        //TODO need to fix this bug
+                        if (book.lastUpdated > 1 && isLocal && book.lastRead != 0L) {
                             GoToLastReadComposable(onClick = { goToLatestChapter(book) })
                         }
 

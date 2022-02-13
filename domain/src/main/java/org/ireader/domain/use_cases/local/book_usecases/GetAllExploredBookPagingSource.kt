@@ -1,4 +1,4 @@
-package org.ireader.infinity.core.domain.use_cases.local.book_usecases
+package org.ireader.domain.use_cases.local.book_usecases
 
 import androidx.paging.Pager
 import androidx.paging.PagingConfig

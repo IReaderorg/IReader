@@ -1,4 +1,4 @@
-package org.ireader.infinity.core.domain.use_cases.local.delete_usecases.book
+package org.ireader.domain.use_cases.local.delete_usecases.book
 
 import org.ireader.domain.repository.LocalBookRepository
 
@@ -8,5 +8,14 @@ import org.ireader.domain.repository.LocalBookRepository
 class DeleteAllExploreBook(private val localBookRepository: LocalBookRepository) {
     suspend operator fun invoke() {
         return localBookRepository.deleteAllExploreBook()
+    }
+}
+
+/**
+ * Delete All Books That are paged in Explore Screen
+ */
+class SetOffExploreMode(private val localBookRepository: LocalBookRepository) {
+    suspend operator fun invoke() {
+        return localBookRepository.setExploreModeOffForInLibraryBooks()
     }
 }

@@ -1,4 +1,4 @@
-package org.ireader.core.utils
+package org.ireader.domain.utils
 
 import okhttp3.Response
 import org.jsoup.Jsoup

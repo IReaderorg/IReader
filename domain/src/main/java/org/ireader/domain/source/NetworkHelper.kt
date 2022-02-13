@@ -10,9 +10,9 @@ import okhttp3.Cache
 import okhttp3.OkHttpClient
 import org.ireader.core.utils.getHtml
 import org.ireader.domain.use_cases.preferences.reader_preferences.PreferencesUseCase
+import org.ireader.domain.utils.AndroidCookieJar
 import org.ireader.domain.utils.intercepter.CloudflareInterceptor
 import org.ireader.infinity.core.data.network.models.*
-import org.ireader.infinity.core.data.network.utils.AndroidCookieJar
 import org.ireader.infinity.core.data.network.utils.UserAgentInterceptor
 import org.ireader.infinity.core.data.network.utils.setDefaultSettings
 import org.ireader.infinity.feature_sources.sources.utils.WebViewClientCompat

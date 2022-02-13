@@ -18,7 +18,7 @@ import org.ireader.presentation.presentation.components.BookImageComposable
 fun BookImageInfoComposable(modifier: Modifier = Modifier, bookDetail: Book) {
     Row {
         BookImageComposable(
-            image = bookDetail.coverLink ?: "",
+            image = bookDetail.cover,
             modifier = Modifier
                 .height(180.dp)
                 .width(150.dp)
@@ -28,7 +28,7 @@ fun BookImageInfoComposable(modifier: Modifier = Modifier, bookDetail: Book) {
         Spacer(modifier = modifier.height(8.dp))
         Column {
             Text(
-                text = bookDetail.bookName,
+                text = bookDetail.title,
                 style = MaterialTheme.typography.h4.copy(
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 24.sp
@@ -37,7 +37,7 @@ fun BookImageInfoComposable(modifier: Modifier = Modifier, bookDetail: Book) {
             )
             Spacer(modifier = modifier.height(8.dp))
             Text(
-                text = "Author: ${bookDetail.author ?: "Unknown"}",
+                text = "Author: ${bookDetail.author}",
                 style = MaterialTheme.typography.h4.copy(
                     fontWeight = FontWeight.W400,
                     fontSize = 16.sp
@@ -46,7 +46,7 @@ fun BookImageInfoComposable(modifier: Modifier = Modifier, bookDetail: Book) {
             )
             Spacer(modifier = modifier.height(8.dp))
             Text(
-                text = "Translator: ${bookDetail.translator ?: "Unknown"}",
+                text = "Translator: ${bookDetail.translator}",
                 style = MaterialTheme.typography.h4.copy(
                     fontWeight = FontWeight.W400,
                     fontSize = 16.sp

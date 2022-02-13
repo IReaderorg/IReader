@@ -137,7 +137,7 @@ fun ChapterDetailScreen(
                                         navController.navigate(ReaderScreenSpec.buildRoute(
                                             bookId = book.id,
                                             sourceId = viewModel.state.source.sourceId,
-                                            chapterId = chapter.chapterId,
+                                            chapterId = chapter.id,
                                         ))
                                     },
                                     text = {
@@ -159,7 +159,7 @@ fun ChapterDetailScreen(
                                     },
                                     secondaryText = {
                                         Text(
-                                            text = chapter.dateUploaded ?: "",
+                                            text = chapter.dateUploaded.toString(),
                                             fontStyle = FontStyle.Italic,
                                             color = if (chapter.haveBeenRead) MaterialTheme.colors.onBackground.copy(
                                                 alpha = .4f) else MaterialTheme.colors.onBackground,

@@ -44,20 +44,20 @@ class NotificationWorker @AssistedInject constructor(
         )
         getNotifications().collect {
             with(NotificationManagerCompat.from(applicationContext)) {
-                notify(it.id, it.createNotification())
+                notify(it.book.id.toInt(), it.createNotification())
             }
         }
         return Result.success()
     }
 
     private fun getNotifications() = flow {
-        val books = bookRepo.getAllInLibraryBooks().first() ?: emptyList()
+        val books = bookRepo.getAllInLibraryBooks().first()
 
         progressNotification(books) { book ->
             try {
-                val lastGroup = chaptersRepo.getChaptersByBookId(book.id).first() ?: emptyList()
+                val lastGroup = chaptersRepo.getChaptersByBookId(book.id).first()
                 val refreshedGroups =
-                    chaptersRepo.getChaptersByBookId(book.id, true).first() ?: emptyList()
+                    chaptersRepo.getChaptersByBookId(book.id, true).first()
                 val updateCount = refreshedGroups.lastChapter() - lastGroup.lastChapter()
                 if (updateCount > 0)
                     emit(
@@ -72,7 +72,7 @@ class NotificationWorker @AssistedInject constructor(
     }.flowOn(Dispatchers.IO)
 
     private fun List<Chapter>.lastChapter(): Int {
-        return maxByOrNull { it.chapterId }?.chapterId?.toInt() ?: 0
+        return maxByOrNull { it.id }?.id?.toInt() ?: 0
     }
 
     private suspend fun progressNotification(
@@ -92,7 +92,7 @@ class NotificationWorker @AssistedInject constructor(
 
             books.onEachIndexed { counter, book ->
                 builder.apply {
-                    setContentText(book.bookName)
+                    setContentText(book.title)
                     setProgress(books.size, counter, false)
                     notify(notificationId, build())
                 }
@@ -112,23 +112,22 @@ class NotificationWorker @AssistedInject constructor(
         val updateCount: Int,
     ) {
 
-        private val lastChapter = chapters.maxByOrNull { it.chapterId }!!
+        private val lastChapter = chapters.maxByOrNull { it.id }!!
         private val text = "$updateCount new chapter${if (updateCount > 1) "s" else ""} available"
 
         private val groupKey = "com.ubadahj.qidianunderground.CHAPTER_UPDATES"
 
-        val id: Int = book.id
 
         suspend fun createNotification(): Notification =
             NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_infinity)
-                .setContentTitle(book.bookName)
+                .setContentTitle(book.title)
                 .setContentText(text)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setContentIntent(createIntent(lastChapter))
                 .addAction(R.drawable.ic_add, "Open Book", createIntent())
                 .setAutoCancel(true)
-                .setLargeIcon(context, book.coverLink)
+                .setLargeIcon(context, book.cover)
                 .setGroup(groupKey)
                 .build()
 

@@ -19,8 +19,8 @@ import org.ireader.domain.local.dao.LibraryChapterDao
 import org.ireader.domain.local.dao.RemoteKeysDao
 import org.ireader.domain.repository.LocalBookRepository
 import org.ireader.domain.repository.LocalChapterRepository
+import org.ireader.domain.repository.RemoteRepository
 import org.ireader.domain.repository.Repository
-import org.ireader.infinity.core.domain.repository.RemoteRepository
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)

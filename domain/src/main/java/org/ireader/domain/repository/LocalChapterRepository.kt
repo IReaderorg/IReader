@@ -8,16 +8,16 @@ interface LocalChapterRepository {
 
 
     fun getOneChapterById(
-        chapterId: Int,
+        chapterId: Long,
     ): Flow<Chapter?>
 
     fun getChaptersByBookId(
-        bookId: Int,
+        bookId: Long,
         isAsc: Boolean = true,
-    ): Flow<List<Chapter>?>
+    ): Flow<List<Chapter>>
 
 
-    fun getLastReadChapter(bookId: Int): Flow<Chapter?>
+    fun getLastReadChapter(bookId: Long): Flow<Chapter?>
 
 
     suspend fun insertChapter(chapter: Chapter)
@@ -28,12 +28,12 @@ interface LocalChapterRepository {
 
 
     fun getLocalChaptersByPaging(
-        bookId: Int, isAsc: Boolean,
+        bookId: Long, isAsc: Boolean,
     ): PagingSource<Int, Chapter>
 
 
     suspend fun deleteChaptersByBookId(
-        bookId: Int,
+        bookId: Long,
     )
 
     suspend fun deleteChapters(chapters: List<Chapter>)

@@ -36,7 +36,7 @@ class LibraryBookDaoTest {
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun insertBook() = runTest {
-        val book = Book(bookName = "Test", link = "https://example.com")
+        val book = Book(title = "Test", link = "https://example.com", sourceId = 1)
         dao.insertBook(book = book)
         val allBooks = dao.getAllInLibraryBooks().first()
         if (allBooks != null) {

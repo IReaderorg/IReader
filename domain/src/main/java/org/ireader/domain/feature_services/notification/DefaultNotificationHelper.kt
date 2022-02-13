@@ -24,7 +24,7 @@ class DefaultNotificationHelper @Inject constructor(
     }
 
     fun openBookDetailIntent(
-        bookId: Int,
+        bookId: Long,
         sourceId: Long,
     ): Intent {
         return Intent(
@@ -36,7 +36,7 @@ class DefaultNotificationHelper @Inject constructor(
     }
 
     fun openBookDetailPendingIntent(
-        bookId: Int,
+        bookId: Long,
         sourceId: Long,
     ): PendingIntent {
         return PendingIntent.getActivity(

@@ -23,7 +23,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
-import org.ireader.core.utils.formatHtmlText
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.source.Source
 import org.ireader.presentation.feature_detail.presentation.book_detail.components.BookSummary
@@ -53,7 +52,7 @@ fun BookDetailScreenLoadedComposable(
 
             Image(
                 painter = rememberImagePainter(
-                    data = book.coverLink ?: "",
+                    data = book.cover,
                     builder = {
                         listener(onSuccess = { _, _ ->
                             imageLoaded = true
@@ -104,7 +103,7 @@ fun BookDetailScreenLoadedComposable(
                 /** Book Image **/
                 /** Book Image **/
                 BookImageComposable(
-                    image = book.coverLink ?: "",
+                    image = book.cover,
                     modifier = modifier
                         .padding(8.dp)
                         .weight(0.40f)
@@ -123,7 +122,7 @@ fun BookDetailScreenLoadedComposable(
                         .align(Alignment.Bottom)
                 ) {
                     Text(
-                        text = book.bookName,
+                        text = book.title,
                         style = MaterialTheme.typography.h6,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colors.onBackground,
@@ -206,8 +205,8 @@ fun BookDetailScreenLoadedComposable(
         Spacer(modifier = Modifier.height(8.dp))
         BookSummary(
             onClickToggle = { onSummaryExpand() },
-            description = book.description.joinToString().formatHtmlText(),
-            genres = book.category,
+            description = book.description,
+            genres = book.genres,
             expandedSummary = isSummaryExpanded
         )
         Divider(

@@ -19,11 +19,10 @@ import org.ireader.core.utils.Constants
 import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
 import org.ireader.domain.feature_services.DownloaderService.DownloadService
-import org.ireader.domain.models.SortType
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
-import org.ireader.infinity.core.domain.use_cases.local.LocalInsertUseCases
+import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import javax.inject.Inject
 
 @HiltViewModel
@@ -58,20 +57,14 @@ class DownloaderViewModel @Inject constructor(
     private fun getLocalChaptersByPaging() {
         getBooksJob?.cancel()
         getBooksJob = viewModelScope.launch {
-            getBookUseCases.getAllInDownloadsPagingData(
-                isAsc = true,
-                sortType = SortType.Alphabetically,
-                unreadFilter = false
-            ).cachedIn(viewModelScope)
-                .collect { snapshot ->
-                    _books.value = snapshot
-                }
+            //TODO need to recreate a func for this
+
         }
     }
 
-    fun startDownloadService(context: Context, bookId: Int, sourceId: Long) {
+    fun startDownloadService(context: Context, bookId: Long, sourceId: Long) {
         viewModelScope.launch {
-            val book = getBookUseCases.getBookById(bookId).first().data
+            val book = getBookUseCases.getBookById(bookId).first()
             if (book != null) {
                 getChapters(book)
             }
@@ -81,7 +74,7 @@ class DownloaderViewModel @Inject constructor(
             OneTimeWorkRequestBuilder<DownloadService>().apply {
                 setInputData(
                     Data.Builder().apply {
-                        putInt(DownloadService.DOWNLOADER_BOOK_ID,
+                        putLong(DownloadService.DOWNLOADER_BOOK_ID,
                             bookId)
                         putLong(DownloadService.DOWNLOADER_SOURCE_ID,
                             sourceId)
@@ -98,12 +91,12 @@ class DownloaderViewModel @Inject constructor(
 
     }
 
-    fun stopDownloads(context: Context, bookId: Int, sourceId: Long) {
+    fun stopDownloads(context: Context, bookId: Long, sourceId: Long) {
         work =
             OneTimeWorkRequestBuilder<DownloadService>().apply {
                 setInputData(
                     Data.Builder().apply {
-                        putInt(DownloadService.DOWNLOADER_BOOK_ID,
+                        putLong(DownloadService.DOWNLOADER_BOOK_ID,
                             bookId)
                         putLong(DownloadService.DOWNLOADER_SOURCE_ID,
                             sourceId)
@@ -114,16 +107,6 @@ class DownloaderViewModel @Inject constructor(
             DownloadService.DOWNLOADER_SERVICE_NAME.plus(
                 bookId + sourceId)
         )
-
-        viewModelScope.launch {
-            val book = getBookUseCases.getBookById(bookId).first().data
-            if (book != null) {
-
-                insertUseCases.insertBook(book.copy(beingDownloaded = false))
-            }
-
-        }
-
     }
 
     fun getChapters(book: Book) {
@@ -156,6 +139,6 @@ class DownloaderViewModel @Inject constructor(
 data class DownloaderState(
     val totalChapter: Int = 0,
     val progress: Float = 0f,
-    val downloadBookId: Int = Constants.NULL_VALUE,
+    val downloadBookId: Long = Constants.NULL_VALUE,
     val chapters: List<Chapter> = emptyList(),
 )

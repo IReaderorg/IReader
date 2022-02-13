@@ -18,10 +18,9 @@ import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.source.Extensions
 import org.ireader.domain.ui.NavigationArgs
+import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
-import org.ireader.domain.utils.Resource
-import org.ireader.infinity.core.domain.use_cases.local.DeleteUseCase
-import org.ireader.infinity.core.domain.use_cases.local.LocalInsertUseCases
+import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import javax.inject.Inject
 
 
@@ -43,7 +42,7 @@ class ChapterDetailViewModel @Inject constructor(
 
     init {
         val sourceId = savedStateHandle.get<Long>(NavigationArgs.sourceId.name)
-        val bookId = savedStateHandle.get<Int>(NavigationArgs.bookId.name)
+        val bookId = savedStateHandle.get<Long>(NavigationArgs.bookId.name)
         if (bookId != null && sourceId != null) {
             state = state.copy(source = extensions.mappingSourceNameToSource(sourceId))
             state = state.copy(book = state.book.copy(id = bookId))
@@ -66,7 +65,6 @@ class ChapterDetailViewModel @Inject constructor(
 
     fun reverseChapterInDB() {
         state = state.copy(
-            book = state.book.copy(areChaptersReversed = !state.book.areChaptersReversed),
             isAsc = !state.isAsc)
         getLocalChaptersByPaging(bookId = state.book.id, isAsc = state.isAsc)
         /**
@@ -77,25 +75,17 @@ class ChapterDetailViewModel @Inject constructor(
 
     }
 
-    fun getLocalBookById(id: Int) {
+    fun getLocalBookById(id: Long) {
         viewModelScope.launch {
-            getBookUseCases.getBookById(id = id).first { result ->
-                when (result) {
-                    is Resource.Success -> {
-                        if (result.data != null && result.data != Book.create()) {
-                            state = state.copy(
-                                book = result.data,
-                                isAsc = result.data.areChaptersReversed
-                            )
-                            getLocalChaptersByPaging(bookId = state.book.id, isAsc = state.isAsc)
-                            true
-                        } else {
-                            false
-                        }
-                    }
-                    is Resource.Error -> {
-                        false
-                    }
+            getBookUseCases.getBookById(id = id).first { book ->
+                if (book != null) {
+                    state = state.copy(
+                        book = book,
+                    )
+                    getLocalChaptersByPaging(bookId = state.book.id, isAsc = state.isAsc)
+                    true
+                } else {
+                    false
                 }
             }
         }
@@ -103,7 +93,7 @@ class ChapterDetailViewModel @Inject constructor(
     }
 
     private var getChapterJob: Job? = null
-    private fun getLocalChaptersByPaging(bookId: Int, isAsc: Boolean) {
+    private fun getLocalChaptersByPaging(bookId: Long, isAsc: Boolean) {
         getChapterJob?.cancel()
         getChapterJob = viewModelScope.launch {
             getChapterUseCase.getLocalChaptersByPaging(

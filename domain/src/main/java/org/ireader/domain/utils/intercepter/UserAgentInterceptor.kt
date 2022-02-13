@@ -1,4 +1,4 @@
-package org.ireader.infinity.core.data.network.utils.intercepter
+package org.ireader.domain.utils.intercepter
 
 import okhttp3.Interceptor
 import okhttp3.Response

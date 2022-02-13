@@ -38,7 +38,7 @@ fun ChapterListItemComposable(modifier: Modifier = Modifier, chapter: Chapter, g
         },
         secondaryText = {
             Text(
-                text = chapter.dateUploaded ?: "",
+                text = chapter.dateUploaded.toString(),
                 fontStyle = FontStyle.Italic,
                 color = if (chapter.haveBeenRead) MaterialTheme.colors.onBackground.copy(
                     alpha = .4f) else MaterialTheme.colors.onBackground,

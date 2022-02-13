@@ -19,7 +19,7 @@ object Constants {
     const val ImageKeyTable = "images_key_table"
     const val BOOK_TABLE = "book_table"
     const val CHAPTER_TABLE = "chapter_table"
-    const val SOURCE_TABLE = "source_table"
+    const val DOWNLOAD_TABLE = "download_table"
 
     const val LIBRARY_BOOK_TABLE = "library_books_table"
     const val LIBRARY_CHAPTER_TABLE = "library_chapters_table"
@@ -50,8 +50,8 @@ object Constants {
     const val repo_url = "/repos/kazemcodes/IReader/releases/latest"
     const val github_api_url = "https://api.github.com"
 
-    const val NULL_VALUE = -1
-    const val LAST_CHAPTER = -2
+    const val NULL_VALUE = -1L
+    const val LAST_CHAPTER = -2L
 
 
 }

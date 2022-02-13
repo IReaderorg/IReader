@@ -1,4 +1,4 @@
-package org.ireader.infinity.core.domain.use_cases.local.chapter_usecases
+package org.ireader.domain.use_cases.local.chapter_usecases
 
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
@@ -7,12 +7,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import org.ireader.core.utils.Constants
-import org.ireader.core.utils.UiText
-import org.ireader.domain.R
-import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.repository.LocalChapterRepository
-import org.ireader.domain.utils.Resource
 
 /**
  * get all Chapter using a bookId
@@ -20,25 +16,16 @@ import org.ireader.domain.utils.Resource
  */
 class GetChaptersByBookId(private val localChapterRepository: LocalChapterRepository) {
     operator fun invoke(
-        bookId: Int,
-        isAsc: Boolean? = null,
-    ): Flow<Resource<List<Chapter>>> = flow {
+        bookId: Long,
+        isAsc: Boolean = true,
+    ): Flow<List<Chapter>> = flow {
         try {
-            localChapterRepository.getChaptersByBookId(bookId = bookId, isAsc ?: true)
+            localChapterRepository.getChaptersByBookId(bookId = bookId, isAsc)
                 .first { chapters ->
-                    if (chapters != null) {
-                        emit(Resource.Success<List<Chapter>>(data = chapters))
-                        true
-
-                    } else {
-                        emit(Resource.Error<List<Chapter>>(uiText = UiText.StringResource(R.string.cant_get_content)))
-                        true
-                    }
+                    emit(chapters)
+                    true
                 }
         } catch (e: Exception) {
-            Resource.Error<Resource<List<Book>>>(
-                uiText = UiText.ExceptionString(e)
-            )
         }
     }
 }
@@ -46,7 +33,7 @@ class GetChaptersByBookId(private val localChapterRepository: LocalChapterReposi
 
 class GetLocalChaptersByPaging(private val localChapterRepository: LocalChapterRepository) {
     operator fun invoke(
-        bookId: Int,
+        bookId: Long,
         isAsc: Boolean,
     ): Flow<PagingData<Chapter>> {
         return Pager(

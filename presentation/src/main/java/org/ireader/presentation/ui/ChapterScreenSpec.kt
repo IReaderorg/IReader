@@ -19,7 +19,7 @@ object ChapterScreenSpec : ScreenSpec {
     )
 
     fun buildRoute(
-        bookId: Int,
+        bookId: Long,
         sourceId: Long,
     ): String {
         return "chapter_detail_route/$bookId/$sourceId"

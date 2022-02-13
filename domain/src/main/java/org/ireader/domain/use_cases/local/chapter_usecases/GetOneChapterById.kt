@@ -1,4 +1,4 @@
-package org.ireader.infinity.core.domain.use_cases.local.chapter_usecases
+package org.ireader.domain.use_cases.local.chapter_usecases
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -16,7 +16,7 @@ import org.ireader.domain.utils.Resource
  */
 class GetOneChapterById(private val localChapterRepository: LocalChapterRepository) {
     operator fun invoke(
-        chapterId: Int,
+        chapterId: Long,
     ): Flow<Resource<Chapter>> = flow {
         try {
             localChapterRepository.getOneChapterById(chapterId = chapterId).first { chapters ->

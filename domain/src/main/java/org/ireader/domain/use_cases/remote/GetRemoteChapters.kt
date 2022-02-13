@@ -1,4 +1,4 @@
-package org.ireader.infinity.core.domain.use_cases.remote
+package org.ireader.domain.use_cases.remote
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -7,8 +7,8 @@ import org.ireader.domain.R
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.source.Source
+import org.ireader.domain.repository.RemoteRepository
 import org.ireader.domain.utils.Resource
-import org.ireader.infinity.core.domain.repository.RemoteRepository
 import org.jsoup.select.Selector
 import retrofit2.HttpException
 import timber.log.Timber
@@ -27,7 +27,10 @@ class GetRemoteChapters(private val remoteRepository: RemoteRepository) {
                 while (hasNextPage) {
                     Timber.d("Timber: GetRemoteChaptersUseCase was with pages $currentPage Called")
                     val chaptersPage = source.fetchChapters(book = book, page = currentPage)
-                    chapters.addAll(chaptersPage.chapters)
+                    chapters.addAll(chaptersPage.chapters.map {
+                        it.copy(bookId = book.id,
+                            inLibrary = book.inLibrary)
+                    })
                     hasNextPage = chaptersPage.hasNextPage
                     currentPage += 1
                 }
