@@ -14,7 +14,7 @@ data class Chapter(
     val link: String,
     val title: String,
     val inLibrary: Boolean = false,
-    val haveBeenRead: Boolean = false,
+    val read: Boolean = false,
     val bookmark: Boolean = false,
     val progress: Int = 0,
     val dateUploaded: Long = 0,

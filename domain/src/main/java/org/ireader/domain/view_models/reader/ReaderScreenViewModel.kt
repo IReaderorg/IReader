@@ -244,7 +244,7 @@ class ReaderScreenViewModel @Inject constructor(
                                     isLocalLoaded = true,
                                 )
                             toggleLastReadAndUpdateChapterContent(state.chapter.copy(
-                                haveBeenRead = true))
+                                read = true))
                         }
                     }
                     is Resource.Error -> {
@@ -292,7 +292,7 @@ class ReaderScreenViewModel @Inject constructor(
             }.forEach {
                 insertChapter(it.copy(lastRead = false))
             }
-            insertChapter(chapter.copy(haveBeenRead = true, lastRead = true))
+            insertChapter(chapter.copy(read = true, lastRead = true))
         }
     }
 

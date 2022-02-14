@@ -17,14 +17,11 @@ object Constants {
     const val KODEIN_MODULE = "kodein_module"
 
     const val ImageKeyTable = "images_key_table"
-    const val BOOK_TABLE = "book_table"
-    const val CHAPTER_TABLE = "chapter_table"
-    const val DOWNLOAD_TABLE = "download_table"
+    const val BOOK_TABLE = "library"
+    const val CHAPTER_TABLE = "chapter"
+    const val DOWNLOAD_TABLE = "download"
 
-    const val LIBRARY_BOOK_TABLE = "library_books_table"
-    const val LIBRARY_CHAPTER_TABLE = "library_chapters_table"
-
-    const val EXPLORE_BOOK_TABLE = "explore_books_table"
+    const val EXPLORE_BOOK_TABLE = "explore"
 
     const val PAGE_KET_TABLE = "page_key_table"
 

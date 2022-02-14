@@ -28,7 +28,10 @@ import org.ireader.domain.use_cases.local.chapter_usecases.GetChaptersByBookId
 import org.ireader.domain.use_cases.local.chapter_usecases.GetLastReadChapter
 import org.ireader.domain.use_cases.local.chapter_usecases.GetLocalChaptersByPaging
 import org.ireader.domain.use_cases.local.chapter_usecases.GetOneChapterById
-import org.ireader.domain.use_cases.local.delete_usecases.book.*
+import org.ireader.domain.use_cases.local.delete_usecases.book.DeleteAllBooks
+import org.ireader.domain.use_cases.local.delete_usecases.book.DeleteAllExploreBook
+import org.ireader.domain.use_cases.local.delete_usecases.book.DeleteBookById
+import org.ireader.domain.use_cases.local.delete_usecases.book.DeleteNotInLibraryBook
 import org.ireader.domain.use_cases.local.delete_usecases.chapter.*
 import org.ireader.domain.use_cases.local.insert_usecases.InsertBook
 import org.ireader.domain.use_cases.local.insert_usecases.InsertBooks
@@ -98,8 +101,7 @@ class LocalModule {
             deleteChaptersByBookId = DeleteChaptersByBookId(localChapterRepository),
             deleteNotInLibraryChapters = DeleteNotInLibraryChapters(localChapterRepository),
             deleteAllChapters = DeleteAllChapters(localChapterRepository),
-            deleteChapters = DeleteChapters(localChapterRepository = localChapterRepository),
-            setExploreModeOffForInLibraryBooks = SetOffExploreMode(localBookRepository)
+            deleteChapters = DeleteChapters(localChapterRepository = localChapterRepository)
         )
     }
 

@@ -39,10 +39,6 @@ interface LocalBookRepository {
 
     suspend fun deleteBookById(id: Long)
 
-    /**
-     * Remove the Unused ExploreMode Books from database.
-     */
-    suspend fun setExploreModeOffForInLibraryBooks()
 
     suspend fun deleteAllBooks()
 

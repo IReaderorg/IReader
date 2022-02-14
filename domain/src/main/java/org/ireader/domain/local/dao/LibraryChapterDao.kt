@@ -9,32 +9,32 @@ import org.ireader.domain.models.entities.Chapter
 @Dao
 interface LibraryChapterDao {
 
-    @Query("SELECT * FROM chapter_table WHERE id = :chapterId Limit 1")
+    @Query("SELECT * FROM chapter WHERE id = :chapterId Limit 1")
     fun getChapterById(
         chapterId: Long,
     ): Flow<Chapter?>
 
 
-    @Query("""SELECT * FROM chapter_table WHERE bookId= :bookId ORDER BY
+    @Query("""SELECT * FROM chapter WHERE bookId= :bookId ORDER BY
         CASE WHEN :isAsc = 1 THEN id END ASC,
         CASE WHEN :isAsc = 0 THEN  id END DESC
     """)
     fun getChaptersByBookId(bookId: Long, isAsc: Boolean): Flow<List<Chapter>>
 
-    @Query("""SELECT * FROM chapter_table WHERE bookId = :bookId ORDER BY 
+    @Query("""SELECT * FROM chapter WHERE bookId = :bookId ORDER BY 
         CASE WHEN :isAsc = 1 THEN id END ASC,
         CASE WHEN :isAsc = 0 THEN  id END DESC""")
     fun getChaptersForPaging(bookId: Long, isAsc: Boolean): PagingSource<Int, Chapter>
 
 
-    @Query("SELECT * FROM chapter_table WHERE id = :chapterId AND bookId = :bookId Limit 1")
+    @Query("SELECT * FROM chapter WHERE id = :chapterId AND bookId = :bookId Limit 1")
     fun getOneChapterForPaging(
         chapterId: Int,
         bookId: Int,
     ): PagingSource<Int, Chapter>
 
 
-    @Query("SELECT * from chapter_table WHERE bookId = :bookId AND lastRead = 1 LIMIT 1")
+    @Query("SELECT * from chapter WHERE bookId = :bookId AND lastRead = 1 LIMIT 1")
     fun getLastReadChapter(bookId: Long): Flow<Chapter?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -44,7 +44,7 @@ interface LibraryChapterDao {
     suspend fun insertChapter(chapter: Chapter)
 
 
-    @Query("DELETE FROM chapter_table WHERE bookId = :bookId")
+    @Query("DELETE FROM chapter WHERE bookId = :bookId")
     suspend fun deleteChaptersById(bookId: Long)
 
     @Delete
@@ -53,9 +53,9 @@ interface LibraryChapterDao {
     @Delete
     suspend fun deleteChapter(chapter: Chapter)
 
-    @Query("DELETE FROM chapter_table ")
+    @Query("DELETE FROM chapter ")
     suspend fun deleteAllChapters()
 
-    @Query("DELETE FROM chapter_table WHERE inLibrary = 0")
+    @Query("DELETE FROM chapter WHERE inLibrary = 0")
     suspend fun deleteNotInLibraryChapters()
 }

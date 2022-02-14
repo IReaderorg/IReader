@@ -204,7 +204,6 @@ class BookDetailViewModel @Inject constructor(
                                 book = result.data.copy(
                                     id = state.book.id,
                                     dataAdded = System.currentTimeMillis(),
-                                    exploreMode = state.book.exploreMode
                                 )
                             )
                             toggleRemoteBookLoading(false)
@@ -316,7 +315,6 @@ class BookDetailViewModel @Inject constructor(
                         ?: state.book.copy(id = state.book.id,
                             inLibrary = true,
                             dataAdded = System.currentTimeMillis(),
-                            exploreMode = state.book.exploreMode
                         ),
                 )
                 updateChaptersEntity(true)
@@ -326,7 +324,6 @@ class BookDetailViewModel @Inject constructor(
                             ?: state.book).copy(
                     id = state.book.id,
                     inLibrary = false,
-                    exploreMode = state.book.exploreMode
                 ))
                 updateChaptersEntity(false)
             }

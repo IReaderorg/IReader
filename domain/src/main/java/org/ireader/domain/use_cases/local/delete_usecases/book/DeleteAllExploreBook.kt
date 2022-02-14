@@ -10,12 +10,3 @@ class DeleteAllExploreBook(private val localBookRepository: LocalBookRepository)
         return localBookRepository.deleteAllExploreBook()
     }
 }
-
-/**
- * Delete All Books That are paged in Explore Screen
- */
-class SetOffExploreMode(private val localBookRepository: LocalBookRepository) {
-    suspend operator fun invoke() {
-        return localBookRepository.setExploreModeOffForInLibraryBooks()
-    }
-}

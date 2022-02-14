@@ -7,10 +7,10 @@ import org.ireader.domain.models.entities.SavedDownload
 @Dao
 interface DownloadDao {
 
-    @Query("SELECT * FROM download_table")
+    @Query("SELECT * FROM download")
     fun getAllDownloads(): Flow<List<SavedDownload>>
 
-    @Query("SELECT * FROM download_table WHERE bookId = :bookId")
+    @Query("SELECT * FROM download WHERE bookId = :bookId")
     fun getOneDownloads(bookId: Long): Flow<SavedDownload>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -24,10 +24,10 @@ interface DownloadDao {
     suspend fun deleteSavedDownload(savedDownload: SavedDownload)
 
 
-    @Query("DELETE FROM download_table WHERE bookId = :bookId ")
+    @Query("DELETE FROM download WHERE bookId = :bookId ")
     suspend fun deleteSavedDownloadByBookId(bookId: Long)
 
-    @Query("DELETE FROM download_table")
+    @Query("DELETE FROM download")
     suspend fun deleteAllSavedDownload()
 
 

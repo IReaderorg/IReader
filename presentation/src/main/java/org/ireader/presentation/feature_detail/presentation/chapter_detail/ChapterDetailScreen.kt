@@ -143,7 +143,7 @@ fun ChapterDetailScreen(
                                     text = {
                                         Text(
                                             text = chapter.title,
-                                            color = if (chapter.haveBeenRead) MaterialTheme.colors.onBackground.copy(
+                                            color = if (chapter.read) MaterialTheme.colors.onBackground.copy(
                                                 alpha = .4f) else MaterialTheme.colors.onBackground,
                                             style = MaterialTheme.typography.subtitle1,
                                             fontWeight = FontWeight.SemiBold,
@@ -159,9 +159,9 @@ fun ChapterDetailScreen(
                                     },
                                     secondaryText = {
                                         Text(
-                                            text = chapter.dateUploaded.toString(),
+                                            text = if (chapter.dateUploaded != 0L) chapter.dateUploaded.toString() else "",
                                             fontStyle = FontStyle.Italic,
-                                            color = if (chapter.haveBeenRead) MaterialTheme.colors.onBackground.copy(
+                                            color = if (chapter.read) MaterialTheme.colors.onBackground.copy(
                                                 alpha = .4f) else MaterialTheme.colors.onBackground,
                                             fontWeight = FontWeight.SemiBold,
                                             style = MaterialTheme.typography.caption

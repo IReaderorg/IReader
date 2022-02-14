@@ -8,6 +8,7 @@ import org.ireader.core.utils.Constants
 data class RemoteKeys(
     @PrimaryKey(autoGenerate = false)
     val id: String,
+    val sourceId: Long,
     val prevPage: Int?,
     val nextPage: Int?,
 )

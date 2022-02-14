@@ -25,18 +25,15 @@ class ExploreRemoteMediator(
 ) : RemoteMediator<Int, Book>() {
 
     private val remoteKey = database.remoteKeysDao
+    private val Localbook = database.libraryBookDao
 
-    var init = true
 
     override suspend fun load(
         loadType: LoadType,
         state: PagingState<Int, Book>,
     ): RemoteMediator.MediatorResult {
         return try {
-            if (init) {
-                init = false
-                database.remoteKeysDao.turnExploreModeOff()
-            }
+
             val currentPage = when (loadType) {
                 LoadType.REFRESH -> {
                     val remoteKeys = getRemoteKeyClosestToCurrentPosition(state)
@@ -88,14 +85,14 @@ class ExploreRemoteMediator(
                     RemoteKeys(
                         id = book.title,
                         prevPage = prevPage,
-                        nextPage = nextPage
+                        nextPage = nextPage,
+                        sourceId = source.sourceId
                     )
                 }
                 remoteKey.addAllRemoteKeys(remoteKeys = keys)
                 remoteKey.insertAllExploredBook(response.books.map {
                     it.copy(
                         dataAdded = Clock.System.now().toEpochMilliseconds(),
-                        exploreMode = true
                     )
                 })
             }

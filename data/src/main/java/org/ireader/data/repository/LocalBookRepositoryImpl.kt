@@ -49,38 +49,29 @@ class LocalBookRepositoryImpl(
             is SortType.Alphabetically -> {
                 bookDao.getAllLocalBooksForPagingSortedBySort(sortByAbs = true,
                     isAsc = isAsc,
-                    unread = unreadFilter)
+                    unread = unreadFilter
+                )
 
             }
             is SortType.DateAdded -> {
-                if (unreadFilter) {
-                    bookDao.getAllLocalBooksForPagingSortedBySortAndFilter(sortByDateAdded = true,
-                        isAsc = isAsc)
-                } else {
                     bookDao.getAllLocalBooksForPagingSortedBySort(sortByDateAdded = true,
-                        isAsc = isAsc)
-
-                }
+                        isAsc = isAsc,
+                        unread = unreadFilter
+                    )
             }
             is SortType.LastRead -> {
-                if (unreadFilter) {
-                    bookDao.getAllLocalBooksForPagingSortedBySortAndFilter(sortByLastRead = true,
-                        isAsc = isAsc)
-                } else {
-                    bookDao.getAllLocalBooksForPagingSortedBySort(sortByLastRead = true,
-                        isAsc = isAsc)
-
-                }
+                bookDao.getAllLocalBooksForPagingSortedBySort(
+                    sortByLastRead = true,
+                    isAsc = isAsc,
+                    unread = unreadFilter
+                )
             }
             is SortType.TotalChapter -> {
-                if (unreadFilter) {
-                    bookDao.getAllLocalBooksForPagingSortedBySortAndFilter(isAsc = isAsc,
-                        sortByTotalDownload = true)
-                } else {
-                    bookDao.getAllLocalBooksForPagingSortedBySort(isAsc = isAsc,
-                        sortByTotalDownload = true)
-
-                }
+                bookDao.getAllLocalBooksForPagingSortedBySort(
+                    isAsc = isAsc,
+                    sortByTotalDownload = true,
+                    unread = unreadFilter
+                )
             }
         }
     }
@@ -110,10 +101,6 @@ class LocalBookRepositoryImpl(
 
     override suspend fun deleteBookById(id: Long) {
         return bookDao.deleteBook(bookId = id)
-    }
-
-    override suspend fun setExploreModeOffForInLibraryBooks() {
-        return remoteKeysDao.turnExploreModeOff()
     }
 
     override suspend fun deleteAllBooks() {

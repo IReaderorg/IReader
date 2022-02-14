@@ -12,14 +12,14 @@ import org.ireader.domain.models.entities.Book
 @Dao
 interface RemoteKeysDao {
 
-    @Query("SELECT * FROM book_table WHERE id =:id")
+    @Query("SELECT * FROM library WHERE id =:id")
     fun getExploreBookById(id: Int): Flow<Book?>
 
-    @Query("SELECT * FROM book_table WHERE exploreMode = 1")
+    @Query("SELECT DISTINCT library.* FROM library JOIN  page_key_table ON library.title = page_key_table.id AND library.sourceId = page_key_table.sourceId GROUP BY  library.title ORDER BY id")
     fun getAllExploreBookByPaging(): PagingSource<Int, Book>
 
 
-    @Query("SELECT * FROM book_table WHERE exploreMode = 1")
+    @Query("SELECT DISTINCT library.* FROM library JOIN  page_key_table ON library.title = page_key_table.id AND library.sourceId = page_key_table.sourceId GROUP BY  library.title ORDER BY id")
     fun getAllExploreBook(): List<Book>?
 
     @Query("SELECT * FROM page_key_table WHERE id =:id")
@@ -35,11 +35,8 @@ interface RemoteKeysDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAllExploredBook(bookEntity: List<Book>)
 
-    @Query("DELETE FROM book_table WHERE inLibrary = 0")
+    @Query("DELETE FROM library WHERE inLibrary = 0")
     suspend fun deleteAllExploredBook()
-
-    @Query("UPDATE book_table SET exploreMode = 0 WHERE exploreMode = 1 AND inLibrary = 1")
-    suspend fun turnExploreModeOff()
 
 }
 
