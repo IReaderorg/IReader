@@ -59,7 +59,7 @@ fun AppearanceSettingScreen(
                     contentDescription = "Night Mode",
                     tint = MaterialTheme.colors.primary)
                 Spacer(modifier = Modifier.width(16.dp))
-                MidSizeTextComposable(title = "Dark Mode")
+                MidSizeTextComposable(text = "Dark Mode")
             }
 
         }
@@ -87,7 +87,7 @@ fun AppearanceSettingScreen(
                                 openDialog.value = false
                             }) {
                                 MidSizeTextComposable(modifier = modifier.fillMaxWidth(),
-                                    title = item.text,
+                                    text = item.text,
                                     align = TextAlign.Start)
                             }
                         }

@@ -9,16 +9,28 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import org.ireader.core.prefs.AndroidPreferenceStore
 import org.ireader.core.prefs.PreferenceStore
+import org.ireader.data.repository.DownloadRepositoryImpl
 import org.ireader.domain.local.BookDatabase
 import org.ireader.domain.local.MIGRATION_8_9
+import org.ireader.domain.local.dao.DownloadDao
 import org.ireader.domain.local.dao.LibraryBookDao
 import org.ireader.domain.local.dao.LibraryChapterDao
 import org.ireader.domain.local.dao.RemoteKeysDao
+import org.ireader.domain.repository.DownloadRepository
 import org.ireader.domain.repository.LocalBookRepository
 import org.ireader.domain.repository.LocalChapterRepository
 import org.ireader.domain.source.Extensions
 import org.ireader.domain.ui.AppPreferences
 import org.ireader.domain.ui.UiPreferences
+import org.ireader.domain.use_cases.download.DownloadUseCases
+import org.ireader.domain.use_cases.download.delete.DeleteAllSavedDownload
+import org.ireader.domain.use_cases.download.delete.DeleteSavedDownload
+import org.ireader.domain.use_cases.download.delete.DeleteSavedDownloadByBookId
+import org.ireader.domain.use_cases.download.get.GetAllDownloadsUseCase
+import org.ireader.domain.use_cases.download.get.GetAllDownloadsUseCaseByPaging
+import org.ireader.domain.use_cases.download.get.GetOneSavedDownload
+import org.ireader.domain.use_cases.download.insert.InsertDownload
+import org.ireader.domain.use_cases.download.insert.InsertDownloads
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetBookUseCases
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
@@ -104,6 +116,40 @@ class LocalModule {
             deleteChapters = DeleteChapters(localChapterRepository = localChapterRepository)
         )
     }
+
+    @Singleton
+    @Provides
+    fun provideDownloadUseCase(
+        downloadRepository: DownloadRepository,
+    ): DownloadUseCases {
+        return DownloadUseCases(
+            deleteAllSavedDownload = DeleteAllSavedDownload(downloadRepository),
+            deleteSavedDownload = DeleteSavedDownload(downloadRepository),
+            deleteSavedDownloadByBookId = DeleteSavedDownloadByBookId(downloadRepository),
+            getAllDownloadsUseCase = GetAllDownloadsUseCase(downloadRepository),
+            getOneSavedDownload = GetOneSavedDownload(downloadRepository),
+            insertDownload = InsertDownload(downloadRepository),
+            insertDownloads = InsertDownloads(downloadRepository),
+            getAllDownloadsUseCaseByPaging = GetAllDownloadsUseCaseByPaging(downloadRepository)
+        )
+    }
+
+    @Singleton
+    @Provides
+    fun provideDownloadRepository(
+        downloadDao: DownloadDao,
+    ): DownloadRepository {
+        return DownloadRepositoryImpl(downloadDao)
+    }
+
+    @Singleton
+    @Provides
+    fun provideDownloadDao(
+        database: BookDatabase,
+    ): DownloadDao {
+        return database.downloadDao
+    }
+
 
     @Singleton
     @Provides

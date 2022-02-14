@@ -80,7 +80,7 @@ private fun GenreChip(genre: String) {
         border = BorderStroke(1.dp, MaterialTheme.colors.onBackground.copy(alpha = .5f)),
         color = MaterialTheme.colors.background
     ) {
-        MidSizeTextComposable(title = genre,
+        MidSizeTextComposable(text = genre,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
     }
 }

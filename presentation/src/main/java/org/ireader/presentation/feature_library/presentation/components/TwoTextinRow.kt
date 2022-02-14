@@ -22,6 +22,6 @@ fun RadioButtonWithTitleComposable(
         horizontalArrangement = Arrangement.Start) {
         RadioButton(selected = selected, onClick = { onClick() })
         Spacer(modifier = modifier.width(2.dp))
-        MidSizeTextComposable(title = text)
+        MidSizeTextComposable(text = text)
     }
 }

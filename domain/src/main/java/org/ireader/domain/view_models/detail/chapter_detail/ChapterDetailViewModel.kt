@@ -64,15 +64,11 @@ class ChapterDetailViewModel @Inject constructor(
     }
 
     fun reverseChapterInDB() {
-        state = state.copy(
-            isAsc = !state.isAsc)
+        state = state.copy(isAsc = !state.isAsc)
         getLocalChaptersByPaging(bookId = state.book.id, isAsc = state.isAsc)
-        /**
-         * this line insert a book with a field ofu areChapterReversed
-         *  true
-         */
-        insertBook(state.book)
-
+        viewModelScope.launch(Dispatchers.IO) {
+            insertUseCases.insertChapters(state.chapters.reversed())
+        }
     }
 
     fun getLocalBookById(id: Long) {

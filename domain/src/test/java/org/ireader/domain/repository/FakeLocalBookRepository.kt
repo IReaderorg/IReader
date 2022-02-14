@@ -13,13 +13,13 @@ class FakeLocalBookRepository : LocalBookRepository {
     val books = mutableListOf<Book>()
 
 
-    override fun getBookById(id: Int): Flow<Book?> = flow {
+    override fun getBookById(id: Long): Flow<Book?> = flow {
         val result = books.find { it.id == id }
         emit(result)
     }
 
     override fun getAllInLibraryBooks(): Flow<List<Book>> = flow {
-        val result = books.filter { it.inLibrary == true }
+        val result = books.filter { it.inLibrary }
         emit(result)
     }
 
@@ -45,16 +45,20 @@ class FakeLocalBookRepository : LocalBookRepository {
         return FakeLibraryMediator(books.filter { it.inLibrary })
     }
 
-    override fun getAllInDownloadPagingSource(
+    fun getAllInDownloadPagingSource(
         sortType: SortType,
         isAsc: Boolean,
         unreadFilter: Boolean,
     ): PagingSource<Int, Book> {
+        //TODO need to write a text for this
         return FakeLibraryMediator(books.filter { it.inLibrary })
     }
 
     override fun getAllExploreBookPagingSource(): PagingSource<Int, Book> {
-        return FakeLibraryMediator(books.filter { it.isExploreMode })
+        //TODO need to write a text for this
+        return FakeLibraryMediator(books.distinctBy {
+            it.title
+        })
     }
 
     override suspend fun deleteNotInLibraryChapters() {
@@ -63,23 +67,20 @@ class FakeLocalBookRepository : LocalBookRepository {
     }
 
     override suspend fun deleteAllExploreBook() {
-        val b = books.filter { !it.isExploreMode }
+        //TODO need to write a text for this
+        val b = books.distinctBy {
+            it.title
+        }
         books.removeAll(b)
     }
 
-    override suspend fun deleteBookById(id: Int) {
-        val b = books.filter { it.id == id }
-        books.removeAll(b)
+    override suspend fun deleteBookById(id: Long) {
+        books.removeIf { it.id == id }
     }
 
-    override suspend fun setExploreModeOffForInLibraryBooks() {
-        books.forEach { if (it.isExploreMode) it.isExploreMode = false }
-    }
 
     override suspend fun deleteAllBooks() {
-        books.forEach {
-            books.remove(it)
-        }
+        books.clear()
     }
 
     override suspend fun insertBook(book: Book) {

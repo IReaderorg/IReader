@@ -43,6 +43,7 @@ dependencies {
     implementation(Compose.activityCompose)
     implementation(Compose.ui)
     implementation(Compose.material)
+    implementation(Compose.runtime)
 
     implementation(Compose.uiToolingPreview)
     implementation(Compose.viewModelCompose)

@@ -62,7 +62,7 @@ fun WebPageScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    MidSizeTextComposable(title = urlToRender,
+                    MidSizeTextComposable(text = urlToRender,
                         overflow = TextOverflow.Ellipsis)
                 },
                 navigationIcon = {

@@ -1,14 +1,16 @@
 package org.ireader.presentation.feature_settings.presentation.setting.downloader
 
 import android.content.Context
-import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.work.*
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,27 +23,30 @@ import org.ireader.core.utils.UiText
 import org.ireader.domain.feature_services.DownloaderService.DownloadService
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
+import org.ireader.domain.models.entities.SavedDownload
+import org.ireader.domain.use_cases.download.DownloadUseCases
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import javax.inject.Inject
+
 
 @HiltViewModel
 class DownloaderViewModel @Inject constructor(
     private val getBookUseCases: org.ireader.domain.use_cases.local.LocalGetBookUseCases,
     private val getChapterUseCase: LocalGetChapterUseCase,
     private val insertUseCases: LocalInsertUseCases,
+    private val downloadUseCases: DownloadUseCases,
+) : ViewModel() {
 
-    ) : ViewModel() {
-
-    private val _books = MutableStateFlow<PagingData<Book>>(PagingData.empty())
-    val book = _books
-    private val _chapters = MutableStateFlow<PagingData<Chapter>>(PagingData.empty())
-    val chapters = _chapters
+    var savedDownload = MutableStateFlow<PagingData<SavedDownload>>(PagingData.empty())
+        private set
+    var chapters = MutableStateFlow<PagingData<Chapter>>(PagingData.empty())
+        private set
     lateinit var work: OneTimeWorkRequest
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
-    private val _state = mutableStateOf<DownloaderState>(DownloaderState())
-    val state: State<DownloaderState> = _state
+    var state by mutableStateOf<DownloaderState>(DownloaderState())
+        private set
 
     init {
         getLocalChaptersByPaging()
@@ -53,11 +58,22 @@ class DownloaderViewModel @Inject constructor(
         }
     }
 
+    fun insertSavedDownload(savedDownload: SavedDownload) {
+        viewModelScope.launch(Dispatchers.IO) {
+            downloadUseCases.insertDownload(
+                savedDownload = savedDownload
+            )
+        }
+    }
+
+
     private var getBooksJob: Job? = null
     private fun getLocalChaptersByPaging() {
         getBooksJob?.cancel()
         getBooksJob = viewModelScope.launch {
-            //TODO need to recreate a func for this
+            downloadUseCases.getAllDownloadsUseCaseByPaging().cachedIn(viewModelScope).collect {
+                savedDownload.value = it
+            }
 
         }
     }
@@ -66,9 +82,8 @@ class DownloaderViewModel @Inject constructor(
         viewModelScope.launch {
             val book = getBookUseCases.getBookById(bookId).first()
             if (book != null) {
-                getChapters(book)
+                // getChapters(book)
             }
-
         }
         work =
             OneTimeWorkRequestBuilder<DownloadService>().apply {
@@ -103,7 +118,7 @@ class DownloaderViewModel @Inject constructor(
                     }.build()
                 )
             }.build()
-        val work = WorkManager.getInstance(context).cancelUniqueWork(
+        WorkManager.getInstance(context).cancelUniqueWork(
             DownloadService.DOWNLOADER_SERVICE_NAME.plus(
                 bookId + sourceId)
         )
@@ -114,14 +129,14 @@ class DownloaderViewModel @Inject constructor(
             getChapterUseCase.getLocalChaptersByPaging(bookId = book.id, isAsc = true)
                 .cachedIn(viewModelScope)
                 .collect { snapshot ->
-                    _chapters.value = snapshot
+                    chapters.value = snapshot
                     try {
-                        _state.value =
-                            state.value.copy(progress = ((state.value.chapters.filter {
-                                it.content.joinToString().isNotBlank()
-                            }
-                                .size * 100) / state.value.chapters.size).toFloat(),
-                                downloadBookId = book.id)
+//                        state =
+//                            state.copy(progress = ((state.chapters.filter {
+//                                it.content.joinToString().isNotBlank()
+//                            }
+//                                .size * 100) / state.chapters.size).toFloat(),
+//                                downloadBookId = book.id)
                     } catch (e: Exception) {
 
                     }
@@ -132,13 +147,22 @@ class DownloaderViewModel @Inject constructor(
     }
 
     fun updateChapters(chapters: List<Chapter>) {
-        _state.value = state.value.copy(chapters = chapters)
+        state = state.copy(chapters = chapters)
+    }
+
+    fun toggleExpandMenu(enable: Boolean = true) {
+        state = state.copy(isMenuExpanded = enable)
+    }
+
+    fun deleteAllDownloads() {
+        viewModelScope.launch(Dispatchers.IO) {
+            downloadUseCases.deleteAllSavedDownload()
+        }
     }
 }
 
 data class DownloaderState(
-    val totalChapter: Int = 0,
-    val progress: Float = 0f,
     val downloadBookId: Long = Constants.NULL_VALUE,
     val chapters: List<Chapter> = emptyList(),
+    val isMenuExpanded: Boolean = false,
 )

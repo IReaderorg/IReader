@@ -492,19 +492,7 @@ class ReaderScreenViewModel @Inject constructor(
         }
     }
 
-    fun reverseSlider() {
-        if (!prefState.isChapterReversingInProgress) {
-            prefState =
-                prefState.copy(
-                    isAsc = !prefState.isAsc
-                )
-            updateChapterSliderIndex(getCurrentIndexOfChapter(state.chapter))
-            getChapters()
-            getLocalChaptersByPaging()
-            prefState = prefState.copy(isChapterReversingInProgress = false)
-        }
 
-    }
 
     fun restoreSetting(context: Context) {
         val activity = context.findComponentActivity()!!

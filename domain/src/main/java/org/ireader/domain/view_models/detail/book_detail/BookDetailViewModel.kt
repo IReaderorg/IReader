@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import org.ireader.core.R
 import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
@@ -203,7 +204,9 @@ class BookDetailViewModel @Inject constructor(
                             setBook(
                                 book = result.data.copy(
                                     id = state.book.id,
-                                    dataAdded = System.currentTimeMillis(),
+                                    dataAdded = state.book.dataAdded,
+                                    inLibrary = state.book.inLibrary,
+                                    lastUpdated = Clock.System.now().toEpochMilliseconds(),
                                 )
                             )
                             toggleRemoteBookLoading(false)

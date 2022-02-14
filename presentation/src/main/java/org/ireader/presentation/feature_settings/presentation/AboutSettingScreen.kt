@@ -69,7 +69,7 @@ fun AboutSettingScreen(
                     secondaryText = {
                         MidSizeTextComposable(modifier
                             .fillMaxWidth()
-                            .align(Alignment.Start), title = it.subtitle,
+                            .align(Alignment.Start), text = it.subtitle,
                             color = MaterialTheme.colors.onBackground)
                     },
                     text = {

@@ -1,13 +1,12 @@
 package org.ireader.presentation.feature_settings.presentation.setting.downloader
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.FileDownloadOff
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.StopCircle
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
@@ -30,6 +29,7 @@ import org.ireader.presentation.presentation.components.ISnackBarHost
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
 import org.ireader.presentation.ui.BookDetailScreenSpec
+import timber.log.Timber
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -51,7 +51,8 @@ fun DownloaderScreen(
             }
         }
     }
-    val books = viewModel.book.collectAsLazyPagingItems()
+    val downloads = viewModel.savedDownload.collectAsLazyPagingItems()
+
     val chapters = viewModel.chapters.collectAsLazyPagingItems()
     viewModel.updateChapters(chapters.itemSnapshotList.items)
     Scaffold(
@@ -68,18 +69,33 @@ fun DownloaderScreen(
                 },
                 backgroundColor = MaterialTheme.colors.background,
                 actions = {
-                    IconButton(
+                    TopAppBarActionButton(
+                        imageVector = Icons.Default.FileDownloadOff,
+                        title = "Stop Download Icon",
                         onClick = {
                             WorkManager.getInstance(context)
                                 .cancelAllWorkByTag(DownloadService.DOWNLOADER_SERVICE_NAME)
                             context.toast("Downloads were Stopped Successfully")
                         },
+                    )
+                    TopAppBarActionButton(
+                        imageVector = Icons.Default.Menu,
+                        title = "Menu Icon",
+                        onClick = {
+                            viewModel.toggleExpandMenu(enable = true)
+                        },
+                    )
+                    DropdownMenu(
+                        modifier = Modifier.background(MaterialTheme.colors.background),
+                        expanded = viewModel.state.isMenuExpanded,
+                        onDismissRequest = { viewModel.toggleExpandMenu(false) },
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.FileDownloadOff,
-                            contentDescription = "Stop Download Icon",
-                            tint = MaterialTheme.colors.onBackground
-                        )
+                        DropdownMenuItem(onClick = {
+                            viewModel.toggleExpandMenu(false)
+                            viewModel.deleteAllDownloads()
+                        }) {
+                            MidSizeTextComposable(text = "Delete ALl Downloads")
+                        }
                     }
                 },
                 navigationIcon = {
@@ -90,7 +106,6 @@ fun DownloaderScreen(
                             tint = MaterialTheme.colors.onBackground,
                         )
                     }
-
                 }
             )
         },
@@ -98,8 +113,9 @@ fun DownloaderScreen(
         snackbarHost = { ISnackBarHost(snackBarHostState = it) },
     ) {
         LazyColumn {
-            items(items = books) { book ->
-                if (book != null) {
+            items(items = downloads) { download ->
+                if (download != null) {
+                    Timber.e(download.progress.toString())
                     Card(
                         modifier = Modifier.padding(vertical = 8.dp),
                         backgroundColor = MaterialTheme.colors.background,
@@ -108,44 +124,48 @@ fun DownloaderScreen(
                         onClick = {
                             navController.navigate(
                                 BookDetailScreenSpec.buildRoute(
-                                    sourceId = book.sourceId,
-                                    bookId = book.id
+                                    sourceId = download.sourceId,
+                                    bookId = download.id
                                 )
                             )
                         }
 
                     ) {
                         ListItem(
-                            text = { MidSizeTextComposable(title = book.title) },
+                            text = { MidSizeTextComposable(text = download.bookName) },
                             trailing = {
-                                //TODO need to create something for this
-                                if (true) {
+                                if (download.totalChapter == download.progress) {
+                                    Box {}
+                                } else if (download.priority != 0) {
                                     TopAppBarActionButton(imageVector = Icons.Default.StopCircle,
                                         title = "StopDownloads",
                                         onClick = {
                                             viewModel.stopDownloads(context = context,
-                                                book.id,
-                                                book.sourceId)
-                                            viewModel.showSnackBar(UiText.DynamicString("The Download of ${book.title} was stopped"))
+                                                download.id,
+                                                download.sourceId)
+                                            viewModel.showSnackBar(UiText.DynamicString("The Download of ${download.bookName} was stopped"))
+                                            viewModel.insertSavedDownload(download.copy(priority = 0))
                                         })
                                 } else {
+                                    if (download.progress == download.totalChapter) {
+                                        viewModel.showSnackBar(UiText.DynamicString("The Download of ${download.bookName} was stopped"))
+                                        viewModel.insertSavedDownload(download.copy(priority = 0))
+                                    }
                                     TopAppBarActionButton(imageVector = Icons.Default.PlayArrow,
                                         title = "Start Download",
                                         onClick = {
                                             viewModel.startDownloadService(context = context,
-                                                book.id,
-                                                book.sourceId)
-                                            viewModel.showSnackBar(UiText.DynamicString("The Download of ${book.title} was Started"))
+                                                download.id,
+                                                download.sourceId)
+                                            viewModel.showSnackBar(UiText.DynamicString("The Download of ${download.bookName} was Started"))
+                                            viewModel.insertSavedDownload(download.copy(priority = 1))
                                         })
                                 }
 
                             },
                             secondaryText = {
-                                if (book.id == viewModel.state.value.downloadBookId) {
-                                    LinearProgressIndicator(modifier = Modifier.padding(top = 8.dp),
-                                        progress = viewModel.state.value.progress / 100)
-                                }
-
+                                LinearProgressIndicator(modifier = Modifier.padding(top = 8.dp),
+                                    progress = ((download.progress * 100) / download.totalChapter).toFloat() / 100)
                             }
                         )
                     }
@@ -157,3 +177,4 @@ fun DownloaderScreen(
     }
 
 }
+

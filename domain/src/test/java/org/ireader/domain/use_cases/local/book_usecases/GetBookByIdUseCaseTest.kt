@@ -21,7 +21,7 @@ class GetBookByIdUseCaseTest {
         val booksToInsert = mutableListOf<Book>()
         ('a'..'z').forEachIndexed { index, c ->
             booksToInsert.add(Book(
-                id = index,
+                id = index.toLong(),
                 title = c.toString(),
                 link = c.toString(),
                 sourceId = 1
@@ -32,14 +32,14 @@ class GetBookByIdUseCaseTest {
 
     @Test
     fun `return books`() = runBlocking {
-        val id = 1
+        val id = 1L
         val result = getBooks(id).first()
         assertThat(result?.id == id).isTrue()
     }
 
     @Test
     fun `return nothing when there is no book with this id`() = runBlocking {
-        val id = 500
+        val id = 500L
         val result = getBooks(id).first()
         assertThat(result?.id == id).isFalse()
     }

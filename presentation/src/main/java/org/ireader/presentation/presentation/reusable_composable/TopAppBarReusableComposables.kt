@@ -48,7 +48,7 @@ fun TopAppBarTitle(
 @Composable
 fun MidSizeTextComposable(
     modifier: Modifier = Modifier,
-    title: String,
+    text: String,
     color: Color? = null,
     style: TextStyle? = null,
     fontWeight: FontWeight? = null,
@@ -58,7 +58,7 @@ fun MidSizeTextComposable(
 ) {
     Text(
         modifier = modifier,
-        text = title,
+        text = text,
         color = color ?: MaterialTheme.colors.onBackground,
         style = style ?: MaterialTheme.typography.subtitle2,
         fontWeight = fontWeight ?: FontWeight.SemiBold,

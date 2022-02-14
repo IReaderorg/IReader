@@ -13,7 +13,7 @@ fun CheckBoxWithText(title: String, isChecked: Boolean, onCheckedChange: (Boolea
     Row(horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically) {
         Checkbox(checked = isChecked, onCheckedChange = onCheckedChange)
-        MidSizeTextComposable(title = title)
+        MidSizeTextComposable(text = title)
     }
 }
 

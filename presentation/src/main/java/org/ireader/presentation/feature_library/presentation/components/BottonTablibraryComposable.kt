@@ -37,7 +37,7 @@ fun Tabs(libraryTabs: List<TabItem>, pagerState: PagerState) {
             LeadingIconTab(
                 icon = { },
                 text = {
-                    MidSizeTextComposable(title = tab.title,
+                    MidSizeTextComposable(text = tab.title,
                         color = MaterialTheme.colors.onBackground)
                 },
                 selected = pagerState.currentPage == index,

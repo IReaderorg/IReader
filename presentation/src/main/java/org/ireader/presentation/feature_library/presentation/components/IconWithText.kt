@@ -28,6 +28,6 @@ fun IconWithText(title: String, icon: ImageVector, isEnable: Boolean, onClick: (
             contentDescription = "$title icon",
             tint = if (isEnable) MaterialTheme.colors.iconColor else Color.Transparent)
         Spacer(modifier = Modifier.width(8.dp))
-        MidSizeTextComposable(title = title)
+        MidSizeTextComposable(text = title)
     }
 }

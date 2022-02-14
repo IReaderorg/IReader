@@ -15,6 +15,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectIndexed
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.withContext
 import org.ireader.core.R
 import org.ireader.domain.feature_services.notification.DefaultNotificationHelper
 import org.ireader.domain.feature_services.notification.Notifications
@@ -22,9 +23,11 @@ import org.ireader.domain.feature_services.notification.Notifications.CHANNEL_DO
 import org.ireader.domain.feature_services.notification.Notifications.ID_DOWNLOAD_CHAPTER_COMPLETE
 import org.ireader.domain.feature_services.notification.Notifications.ID_DOWNLOAD_CHAPTER_ERROR
 import org.ireader.domain.feature_services.notification.Notifications.ID_DOWNLOAD_CHAPTER_PROGRESS
+import org.ireader.domain.models.entities.SavedDownload
 import org.ireader.domain.repository.LocalBookRepository
 import org.ireader.domain.repository.LocalChapterRepository
 import org.ireader.domain.source.Extensions
+import org.ireader.domain.use_cases.download.DownloadUseCases
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import timber.log.Timber
@@ -40,6 +43,7 @@ class DownloadService @AssistedInject constructor(
     private val extensions: Extensions,
     private val insertUseCases: LocalInsertUseCases,
     private val defaultNotificationHelper: DefaultNotificationHelper,
+    private val downloadUseCases: DownloadUseCases,
 ) : CoroutineWorker(context, params) {
     companion object {
         const val DOWNLOADER_SERVICE_NAME = "DOWNLOAD_SERVICE"
@@ -48,6 +52,7 @@ class DownloadService @AssistedInject constructor(
     }
 
 
+    lateinit var savedDownload: SavedDownload
     override suspend fun doWork(): Result {
 
 
@@ -57,6 +62,19 @@ class DownloadService @AssistedInject constructor(
             ?: throw IllegalArgumentException(
                 "Invalid bookId as argument: $bookId"
             )
+        savedDownload = SavedDownload(
+            id = bookId,
+            bookId = bookId,
+            totalChapter = 100,
+            priority = 1,
+            chapterName = "",
+            chapterKey = "",
+            progress = 100,
+            translator = "",
+            chapterId = 0,
+            bookName = bookResource.title,
+            sourceId = bookResource.sourceId,
+        )
 
         val source = extensions.mappingSourceNameToSource(sourceId)
 
@@ -97,8 +115,23 @@ class DownloadService @AssistedInject constructor(
                                 builder.setContentText(chapter.title)
                                 builder.setSubText(index.toString())
                                 builder.setProgress(chapters.size, index, false)
-
+                                savedDownload = savedDownload.copy(
+                                    id = bookId,
+                                    bookId = bookId,
+                                    totalChapter = chapters.size,
+                                    priority = 1,
+                                    chapterName = chapter.title,
+                                    chapterKey = chapter.link,
+                                    progress = index,
+                                    translator = chapter.translator,
+                                    chapterId = chapter.id,
+                                    bookName = bookResource.title,
+                                    sourceId = bookResource.sourceId,
+                                )
                                 notify(ID_DOWNLOAD_CHAPTER_PROGRESS, builder.build())
+                                withContext(Dispatchers.IO) {
+                                    downloadUseCases.insertDownload(savedDownload.copy(priority = 1))
+                                }
                             }
                         Timber.d("getNotifications: Successfully to downloaded ${bookResource.title} chapter ${chapter.title}")
                         delay(2000)
@@ -122,11 +155,13 @@ class DownloadService @AssistedInject constructor(
                     }.build()
                 )
                 builder.setProgress(0, 0, false)
-                cancel(ID_DOWNLOAD_CHAPTER_PROGRESS)
 
+                cancel(ID_DOWNLOAD_CHAPTER_PROGRESS)
+                withContext(Dispatchers.IO) {
+                    downloadUseCases.insertDownload(savedDownload.copy(priority = 0))
+                }
                 return Result.failure()
             } catch (e: Exception) {
-
                 Timber.e("getNotifications: Failed to download ${bookResource.title}")
                 notify(
                     ID_DOWNLOAD_CHAPTER_ERROR,
@@ -144,13 +179,17 @@ class DownloadService @AssistedInject constructor(
                 )
                 builder.setProgress(0, 0, false)
                 cancel(ID_DOWNLOAD_CHAPTER_PROGRESS)
-
+                withContext(Dispatchers.IO) {
+                    downloadUseCases.insertDownload(savedDownload.copy(priority = 0))
+                }
                 return Result.failure()
             }
 
             builder.setProgress(0, 0, false)
             cancel(ID_DOWNLOAD_CHAPTER_PROGRESS)
-
+            withContext(Dispatchers.IO) {
+                downloadUseCases.insertDownload(savedDownload.copy(priority = 0))
+            }
             notify(
                 ID_DOWNLOAD_CHAPTER_COMPLETE,
                 NotificationCompat.Builder(applicationContext,
@@ -168,5 +207,6 @@ class DownloadService @AssistedInject constructor(
         //TODO create a viewmodel that store the download preccess
         return Result.success()
     }
+
 
 }

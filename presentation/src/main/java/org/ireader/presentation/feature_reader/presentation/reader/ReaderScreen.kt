@@ -10,7 +10,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Autorenew
+import androidx.compose.material.icons.filled.Public
+import androidx.compose.material.icons.filled.Sort
+import androidx.compose.material.icons.filled.TrackChanges
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -230,10 +233,6 @@ fun ReadingScreen(
                     modifier = modifier.fillMaxWidth()) {
                     TopAppBarTitle(title = "Content", modifier = modifier.padding(start = 8.dp))
                     Row {
-                        TopAppBarActionButton(imageVector = Icons.Default.SettingsBackupRestore,
-                            title = "Reverse Chapter List",
-                            onClick = { viewModel.reverseSlider() })
-
                         TopAppBarActionButton(imageVector = Icons.Default.Sort,
                             title = "Reverse list icon",
                             onClick = {
