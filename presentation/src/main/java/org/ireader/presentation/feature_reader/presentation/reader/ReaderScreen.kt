@@ -70,6 +70,7 @@ fun ReadingScreen(
     val scope = rememberCoroutineScope()
 
     val state = viewModel.state
+    val chapter = viewModel.state.chapter
     val prefState = viewModel.prefState
     val interactionSource = remember { MutableInteractionSource() }
     val context = LocalContext.current
@@ -77,9 +78,7 @@ fun ReadingScreen(
     val drawerScrollState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
 
-    val isWebViewEnable by remember {
-        mutableStateOf(viewModel.webView.originalUrl == viewModel.state.chapter.link)
-    }
+
 
     DisposableEffect(key1 = true) {
         onDispose {
@@ -101,13 +100,15 @@ fun ReadingScreen(
         }
     }
 
+    val isWebViewEnable by remember {
+        mutableStateOf(viewModel.webView.originalUrl == chapter?.link)
+    }
     Scaffold(topBar = {
         if (!state.isReaderModeEnable && state.isLocalLoaded && modalBottomSheetState.targetValue == ModalBottomSheetValue.Expanded) {
             TopAppBar(
                 title = {
-
                     Text(
-                        text = viewModel.state.chapter.title,
+                        text = chapter?.title ?: "",
                         color = MaterialTheme.colors.onBackground,
                         style = MaterialTheme.typography.subtitle1,
                         fontWeight = FontWeight.Bold,
@@ -136,7 +137,7 @@ fun ReadingScreen(
                         onClick = {
                             try {
                                 navController.navigate(WebViewScreenSpec.buildRoute(
-                                    url = viewModel.state.chapter.link,
+                                    url = chapter?.link ?: "",
                                     sourceId = viewModel.state.source.sourceId,
                                     fetchType = FetchType.ContentFetchType.index,
                                 )
@@ -158,21 +159,22 @@ fun ReadingScreen(
                     TopAppBarActionButton(imageVector = Icons.Default.Public,
                         title = "WebView",
                         onClick = {
-                            try {
-                                navController.navigate(WebViewScreenSpec.buildRoute(
-                                    url = viewModel.state.chapter.link,
-                                    sourceId = viewModel.state.source.sourceId,
-                                    fetchType = FetchType.ContentFetchType.index,
-                                    bookId = state.chapter.bookId,
-                                    chapterId = state.chapter.id
-                                ))
+                            if (chapter != null) {
+                                try {
+                                    navController.navigate(WebViewScreenSpec.buildRoute(
+                                        url = chapter.link,
+                                        sourceId = viewModel.state.source.sourceId,
+                                        fetchType = FetchType.ContentFetchType.index,
+                                        bookId = chapter.bookId,
+                                        chapterId = chapter.id
+                                    ))
 
-                            } catch (e: Exception) {
-                                scope.launch {
-                                    viewModel.showSnackBar(UiText.ExceptionString(e))
+                                } catch (e: Exception) {
+                                    scope.launch {
+                                        viewModel.showSnackBar(UiText.ExceptionString(e))
+                                    }
                                 }
                             }
-
                         })
                     if (isWebViewEnable) {
                         TopAppBarActionButton(imageVector = Icons.Default.TrackChanges,
@@ -188,7 +190,7 @@ fun ReadingScreen(
         scaffoldState = scaffoldState,
         snackbarHost = { ISnackBarHost(snackBarHostState = it) },
         bottomBar = {
-            if (!state.isReaderModeEnable && state.isLocalLoaded) {
+            if (!state.isReaderModeEnable && state.isLocalLoaded && chapter != null) {
                 ModalBottomSheetLayout(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -208,6 +210,7 @@ fun ReadingScreen(
                                     viewModel = viewModel,
                                     scope = scope,
                                     scaffoldState = scaffoldState, scrollState = scrollState,
+                                    chapter = chapter
                                 )
                             }
                             if (viewModel.state.isSettingModeEnable) {
@@ -236,8 +239,10 @@ fun ReadingScreen(
                         TopAppBarActionButton(imageVector = Icons.Default.Sort,
                             title = "Reverse list icon",
                             onClick = {
-                                viewModel.reverseChapters()
-                                viewModel.getLocalChaptersByPaging()
+                                if (chapter != null) {
+                                    viewModel.reverseChapters()
+                                    viewModel.getLocalChaptersByPaging(chapter.bookId)
+                                }
                             })
                     }
                 }
@@ -259,12 +264,13 @@ fun ReadingScreen(
                 })
                 if (result) {
                     AnimatedContent(chapters.loadState.refresh is LoadState.NotLoading) {
-                        LazyColumn(modifier = Modifier.fillMaxSize(), state = drawerScrollState) {
+                        LazyColumn(modifier = Modifier.fillMaxSize(),
+                            state = drawerScrollState) {
                             items(items = chapters) { chapter ->
                                 if (chapter != null) {
                                     ChapterListItemComposable(modifier = modifier,
                                         chapter = chapter, goTo = {
-                                            viewModel.getChapter(chapter)
+                                            viewModel.getChapter(chapter.id)
                                             coroutineScope.launch {
 
                                                 scrollState.scrollTo(0)
@@ -282,87 +288,88 @@ fun ReadingScreen(
             }
         }
     ) {
-        Box(
-            Modifier
-                .fillMaxSize()
-                .clickable(interactionSource = interactionSource,
-                    indication = null) {
-                    viewModel.onEvent(ReaderEvent.ToggleReaderMode(!state.isReaderModeEnable))
-                    if (state.isReaderModeEnable) {
-                        scope.launch {
-                            viewModel.getLocalChaptersByPaging()
-                            modalBottomSheetState.animateTo(ModalBottomSheetValue.Expanded)
+        if (chapter != null) {
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .clickable(interactionSource = interactionSource,
+                        indication = null) {
+                        viewModel.onEvent(ReaderEvent.ToggleReaderMode(!state.isReaderModeEnable))
+                        if (state.isReaderModeEnable) {
+                            scope.launch {
+                                viewModel.getLocalChaptersByPaging(chapter.bookId)
+                                modalBottomSheetState.animateTo(ModalBottomSheetValue.Expanded)
+                            }
+                        } else {
+                            scope.launch {
+                                modalBottomSheetState.animateTo(ModalBottomSheetValue.Hidden)
+                            }
                         }
-                    } else {
-                        scope.launch {
-                            modalBottomSheetState.animateTo(ModalBottomSheetValue.Hidden)
-                        }
+
                     }
+                    .background(viewModel.prefState.backgroundColor)
+                    .padding(viewModel.prefState.paragraphsIndent.dp)
+                    .wrapContentSize(Alignment.CenterStart)
+            ) {
+                Box(modifier = modifier.fillMaxSize()) {
 
-                }
-                .background(viewModel.prefState.backgroundColor)
-                .padding(viewModel.prefState.paragraphsIndent.dp)
-                .wrapContentSize(Alignment.CenterStart)
-        ) {
-            Box(modifier = modifier.fillMaxSize()) {
+                    if (chapter.isChapterNotEmpty() && !state.isLocalLoading) {
+                        Row(modifier = modifier.fillMaxSize()) {
 
-                if (state.chapter.isChapterNotEmpty() && !state.isLocalLoading) {
-                    Row(modifier = modifier.fillMaxSize()) {
-
-                        Text(
-                            modifier = modifier
-                                .verticalScroll(scrollState)
-                                .weight(1f),
-                            text = state.chapter.content.map { it.trimStart() }
-                                .joinToString("\n".repeat(prefState.distanceBetweenParagraphs)),
-                            fontSize = viewModel.prefState.fontSize.sp,
-                            fontFamily = viewModel.prefState.font.fontFamily,
-                            textAlign = TextAlign.Start,
-                            color = prefState.textColor,
-                            lineHeight = prefState.lineHeight.sp,
-                        )
-
-
-                        Carousel(
-                            state = scrollState,
-                            modifier = Modifier
-                                .fillMaxHeight()
-                                .weight(.02f)
-                                .padding(start = 6.dp),
-                            colors = CarouselDefaults.colors(
-                                thumbColor = MaterialTheme.colors.scrollingThumbColor,
-                                scrollingThumbColor = MaterialTheme.colors.scrollingThumbColor,
-                                backgroundColor = viewModel.prefState.backgroundColor,
-                                scrollingBackgroundColor = viewModel.prefState.backgroundColor
+                            Text(
+                                modifier = modifier
+                                    .verticalScroll(scrollState)
+                                    .weight(1f),
+                                text = chapter.content.map { it.trimStart() }
+                                    .joinToString("\n".repeat(prefState.distanceBetweenParagraphs)),
+                                fontSize = viewModel.prefState.fontSize.sp,
+                                fontFamily = viewModel.prefState.font.fontFamily,
+                                textAlign = TextAlign.Start,
+                                color = prefState.textColor,
+                                lineHeight = prefState.lineHeight.sp,
                             )
 
+
+                            Carousel(
+                                state = scrollState,
+                                modifier = Modifier
+                                    .fillMaxHeight()
+                                    .weight(.02f)
+                                    .padding(start = 6.dp),
+                                colors = CarouselDefaults.colors(
+                                    thumbColor = MaterialTheme.colors.scrollingThumbColor,
+                                    scrollingThumbColor = MaterialTheme.colors.scrollingThumbColor,
+                                    backgroundColor = viewModel.prefState.backgroundColor,
+                                    scrollingBackgroundColor = viewModel.prefState.backgroundColor
+                                )
+
+                            )
+                        }
+
+                    }
+
+                    if (state.error.asString(context).isNotBlank()) {
+                        ErrorTextWithEmojis(
+                            error = state.error.asString(context),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(20.dp)
+                                .wrapContentSize(Alignment.Center)
+                                .align(Alignment.Center),
                         )
                     }
 
-                }
-
-                if (state.error.asString(context).isNotBlank()) {
-                    ErrorTextWithEmojis(
-                        error = state.error.asString(context),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(20.dp)
-                            .wrapContentSize(Alignment.Center)
-                            .align(Alignment.Center),
-                    )
-                }
-
-                if (viewModel.state.isLocalLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center),
-                        color = MaterialTheme.colors.primary
-                    )
+                    if (viewModel.state.isLocalLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.align(Alignment.Center),
+                            color = MaterialTheme.colors.primary
+                        )
+                    }
                 }
             }
         }
     }
-
-
 }
+
 
 

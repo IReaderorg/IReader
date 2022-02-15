@@ -2,11 +2,9 @@ package org.ireader.presentation.ui
 
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.*
 import com.google.accompanist.pager.ExperimentalPagerApi
 import org.ireader.domain.ui.NavigationArgs
-import org.ireader.domain.view_models.detail.book_detail.BookDetailViewModel
 import org.ireader.presentation.feature_detail.presentation.book_detail.BookDetailScreen
 
 object BookDetailScreenSpec : ScreenSpec {
@@ -39,8 +37,8 @@ object BookDetailScreenSpec : ScreenSpec {
         navBackStackEntry: NavBackStackEntry,
         scaffoldState: ScaffoldState,
     ) {
-        val viewModel: BookDetailViewModel = hiltViewModel()
-        BookDetailScreen(navController = navController, viewModel = viewModel)
+
+        BookDetailScreen(navController = navController)
     }
 
 }

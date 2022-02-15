@@ -15,6 +15,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.ireader.core.R
 import org.ireader.core.utils.UiText
+import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.view_models.reader.ReaderScreenViewModel
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
 import org.ireader.presentation.utils.scroll.CarouselScrollState
@@ -26,6 +27,7 @@ fun MainBottomSettingComposable(
     scope: CoroutineScope,
     scaffoldState: ScaffoldState,
     scrollState: CarouselScrollState,
+    chapter: Chapter,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val currentIndex = viewModel.state.currentChapterIndex
@@ -36,7 +38,7 @@ fun MainBottomSettingComposable(
         onNext = {
             if (currentIndex < chapters.lastIndex) {
                 viewModel.updateChapterSliderIndex(currentIndex + 1)
-                viewModel.getChapter(viewModel.getCurrentChapterByIndex())
+                viewModel.getChapter(viewModel.getCurrentChapterByIndex().id)
                 coroutineScope.launch {
                     scrollState.scrollTo(0)
                 }
@@ -50,7 +52,7 @@ fun MainBottomSettingComposable(
         onPrev = {
             if (currentIndex > 0) {
                 viewModel.updateChapterSliderIndex(currentIndex - 1)
-                viewModel.getChapter(viewModel.getCurrentChapterByIndex())
+                viewModel.getChapter(viewModel.getCurrentChapterByIndex().id)
                 coroutineScope.launch {
                     scrollState.scrollTo(0)
                 }
@@ -65,7 +67,7 @@ fun MainBottomSettingComposable(
                 viewModel.showSnackBar(UiText.DynamicString(chapters[viewModel.state.currentChapterIndex].title))
             }
             viewModel.updateChapterSliderIndex(currentIndex)
-            viewModel.getChapter(chapters[viewModel.state.currentChapterIndex])
+            viewModel.getChapter(chapters[viewModel.state.currentChapterIndex].id)
             coroutineScope.launch {
                 scrollState.scrollTo(0)
             }
@@ -74,7 +76,7 @@ fun MainBottomSettingComposable(
             viewModel.updateChapterSliderIndex(it.toInt())
         },
         chapters = viewModel.state.chapters,
-        currentChapter = viewModel.state.chapter,
+        currentChapter = chapter,
         currentChapterIndex = viewModel.state.currentChapterIndex
     )
     Row(modifier = modifier.fillMaxWidth(),

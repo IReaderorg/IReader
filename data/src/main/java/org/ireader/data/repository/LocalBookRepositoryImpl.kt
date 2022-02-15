@@ -54,10 +54,10 @@ class LocalBookRepositoryImpl(
 
             }
             is SortType.DateAdded -> {
-                    bookDao.getAllLocalBooksForPagingSortedBySort(sortByDateAdded = true,
-                        isAsc = isAsc,
-                        unread = unreadFilter
-                    )
+                bookDao.getAllLocalBooksForPagingSortedBySort(sortByDateAdded = true,
+                    isAsc = isAsc,
+                    unread = unreadFilter
+                )
             }
             is SortType.LastRead -> {
                 bookDao.getAllLocalBooksForPagingSortedBySort(
@@ -76,8 +76,40 @@ class LocalBookRepositoryImpl(
         }
     }
 
-    override fun getAllInLibraryBooks(): Flow<List<Book>> {
-        return bookDao.getAllInLibraryBooks()
+    override fun getAllInLibraryBooks(
+        sortType: SortType,
+        isAsc: Boolean,
+        unreadFilter: Boolean,
+    ): Flow<List<Book>> {
+        return when (sortType) {
+            is SortType.Alphabetically -> {
+                bookDao.getAllInLibraryBooks(sortByAbs = true,
+                    isAsc = isAsc,
+                    unread = unreadFilter
+                )
+
+            }
+            is SortType.DateAdded -> {
+                bookDao.getAllInLibraryBooks(sortByDateAdded = true,
+                    isAsc = isAsc,
+                    unread = unreadFilter
+                )
+            }
+            is SortType.LastRead -> {
+                bookDao.getAllInLibraryBooks(
+                    sortByLastRead = true,
+                    isAsc = isAsc,
+                    unread = unreadFilter
+                )
+            }
+            is SortType.TotalChapter -> {
+                bookDao.getAllInLibraryBooks(
+                    isAsc = isAsc,
+                    sortByTotalDownload = true,
+                    unread = unreadFilter
+                )
+            }
+        }
     }
 
     override fun getBooksByQueryByPagingSource(query: String):

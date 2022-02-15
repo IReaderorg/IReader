@@ -10,7 +10,7 @@ import org.ireader.domain.models.entities.Chapter
 interface LibraryChapterDao {
 
     @Query("SELECT * FROM chapter WHERE id = :chapterId Limit 1")
-    fun getChapterById(
+    fun findChapterById(
         chapterId: Long,
     ): Flow<Chapter?>
 
@@ -19,7 +19,7 @@ interface LibraryChapterDao {
         CASE WHEN :isAsc = 1 THEN id END ASC,
         CASE WHEN :isAsc = 0 THEN  id END DESC
     """)
-    fun getChaptersByBookId(bookId: Long, isAsc: Boolean): Flow<List<Chapter>>
+    fun findChaptersByBookId(bookId: Long, isAsc: Boolean): Flow<List<Chapter>>
 
     @Query("""SELECT * FROM chapter WHERE bookId = :bookId ORDER BY 
         CASE WHEN :isAsc = 1 THEN id END ASC,
@@ -35,7 +35,13 @@ interface LibraryChapterDao {
 
 
     @Query("SELECT * from chapter WHERE bookId = :bookId AND lastRead = 1 LIMIT 1")
-    fun getLastReadChapter(bookId: Long): Flow<Chapter?>
+    fun findLastReadChapter(bookId: Long): Flow<Chapter?>
+
+    @Query("SELECT * from chapter WHERE bookId = :bookId LIMIT 1")
+    fun findFirstChapter(bookId: Long): Flow<Chapter?>
+
+    @Query("UPDATE chapter SET lastRead = 0 WHERE bookId = :bookId")
+    suspend fun setLastReadToFalse(bookId: Long)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertChapters(chapters: List<Chapter>)

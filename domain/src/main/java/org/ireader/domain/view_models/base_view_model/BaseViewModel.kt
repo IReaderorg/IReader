@@ -2,19 +2,21 @@ package org.ireader.domain.view_models.base_view_model
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import org.ireader.core.prefs.Preference
 import org.ireader.core_ui.ui.PreferenceMutableState
 
 
-abstract class BaseViewModel {
+abstract class BaseViewModel : ViewModel() {
 
     protected val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     private val activeScope = MutableStateFlow<CoroutineScope?>(null)
 
     open fun onDestroy() {
+        scope.cancel()
     }
 
     fun <T> Preference<T>.asState() = PreferenceMutableState(this, scope)

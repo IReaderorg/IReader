@@ -8,8 +8,33 @@ import org.ireader.domain.models.entities.Book
 @Dao
 interface LibraryBookDao {
 
+    //TODO improve the performance of this later
     @RewriteQueriesToDropUnusedColumns
-    @Query("""SELECT  library.*,page_key_table.*,COUNT(DISTINCT chapter.id) AS total_chapter
+    @Query("""SELECT  library.*,COUNT(DISTINCT chapter.id) AS total_chapter
+        FROM  library
+        LEFT JOIN chapter ON library.id = chapter.bookId  
+        GROUP BY library.id
+        HAVING library.favorite = 1 AND NOT (CASE WHEN :unread= 1 THEN SUM(chapter.read != 0) ELSE 0 END)
+        ORDER BY 
+        CASE WHEN :isAsc = 1 AND :sortByAbs = 1 THEN library.title END ASC,
+        CASE WHEN :isAsc = 0 AND :sortByAbs = 1 THEN  library.title END DESC,
+        CASE WHEN :isAsc = 1 AND :sortByDateAdded = 1 THEN library.dataAdded END ASC,
+        CASE WHEN :isAsc = 0 AND :sortByDateAdded = 1 THEN  library.dataAdded END DESC,
+        CASE WHEN :isAsc = 1 AND :sortByLastRead = 1 THEN library.lastRead END ASC,
+        CASE WHEN :isAsc = 0 AND :sortByLastRead = 1 THEN  library.lastRead END DESC,
+        CASE WHEN :isAsc = 1 AND :sortByTotalDownload = 1 THEN  total_chapter END ASC,
+        CASE WHEN :isAsc = 0 AND :sortByTotalDownload = 1 THEN  total_chapter END DESC
+""")
+    fun getAllLocalBooksForPagingSortedBySort(
+        sortByAbs: Boolean = false,
+        sortByDateAdded: Boolean = false,
+        sortByLastRead: Boolean = false,
+        sortByTotalDownload: Boolean = false,
+        unread: Boolean = false,
+        isAsc: Boolean = false,
+    ): PagingSource<Int, Book>
+
+    @Query("""SELECT  library.*,COUNT(DISTINCT chapter.id) AS total_chapter
         FROM  library,page_key_table
         LEFT JOIN chapter ON library.id = chapter.bookId  
         GROUP BY library.id
@@ -21,22 +46,16 @@ interface LibraryBookDao {
         CASE WHEN :isAsc = 0 AND :sortByDateAdded = 1 THEN  library.dataAdded END DESC,
         CASE WHEN :isAsc = 1 AND :sortByLastRead = 1 THEN library.lastRead END ASC,
         CASE WHEN :isAsc = 0 AND :sortByLastRead = 1 THEN  library.lastRead END DESC,
-        CASE WHEN :isAsc = 1 AND :sortByTotalDownload = 1 THEN  COUNT(library.id = chapter.bookId) END ASC,
-        CASE WHEN :isAsc = 0 AND :sortByTotalDownload = 1 THEN  COUNT(library.id = chapter.bookId) END DESC,
-        CASE WHEN :isAsc = 1 AND :unread = 1 THEN  SUM(CASE WHEN chapter.read == 0 THEN 1 ELSE 0 END) = 0 END ASC,
-        CASE WHEN :isAsc = 0 AND :unread = 1 THEN  SUM(CASE WHEN chapter.read == 0 THEN 1 ELSE 0 END) = 0  END DESC
-""")
-    fun getAllLocalBooksForPagingSortedBySort(
+        CASE WHEN :isAsc = 1 AND :sortByTotalDownload = 1 THEN  total_chapter END ASC,
+        CASE WHEN :isAsc = 0 AND :sortByTotalDownload = 1 THEN  total_chapter END DESC""")
+    fun getAllInLibraryBooks(
         sortByAbs: Boolean = false,
         sortByDateAdded: Boolean = false,
         sortByLastRead: Boolean = false,
         sortByTotalDownload: Boolean = false,
         unread: Boolean = false,
         isAsc: Boolean = false,
-    ): PagingSource<Int, Book>
-
-    @Query("SELECT * FROM library WHERE favorite = 1")
-    fun getAllInLibraryBooks(): Flow<List<Book>>
+    ): Flow<List<Book>>
 
     @Query("SELECT * FROM library WHERE favorite = 1")
     suspend fun getAllInLibraryBooksForPaging(): List<Book>

@@ -12,7 +12,6 @@ import org.ireader.domain.models.source.Source
 import org.ireader.presentation.presentation.layouts.CompactGridLayoutComposable
 import org.ireader.presentation.presentation.layouts.GridLayoutComposable
 import org.ireader.presentation.presentation.layouts.LinearListDisplay
-import org.ireader.presentation.ui.BookDetailScreenSpec
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -20,6 +19,7 @@ import org.ireader.presentation.ui.BookDetailScreenSpec
 fun LayoutComposable(
     navController: NavController,
     books: LazyPagingItems<Book>,
+    onBookTap: (book: Book) -> Unit,
     layout: LayoutType,
     scrollState: LazyListState,
     gridState: LazyGridState,
@@ -34,20 +34,14 @@ fun LayoutComposable(
             GridLayoutComposable(
                 books = books,
                 onClick = { book ->
-                    navController.navigate(
-                        route = BookDetailScreenSpec.buildRoute(sourceId = if (source?.sourceId != null) source.sourceId else book.sourceId,
-                            bookId = book.id)
-                    )
+                    onBookTap(book)
                 }, scrollState = gridState,
                 isLocal = isLocal,
                 goToLatestChapter = { goToLatestChapter(it) })
         }
         is LayoutType.ListLayout -> {
             LinearListDisplay(books = books, onClick = { book ->
-                navController.navigate(
-                    route = BookDetailScreenSpec.buildRoute(sourceId = if (source?.sourceId != null) source.sourceId else book.sourceId,
-                        bookId = book.id)
-                )
+                onBookTap(book)
             }, scrollState = scrollState,
                 isLocal = isLocal,
                 goToLatestChapter = { goToLatestChapter(it) })
@@ -56,10 +50,7 @@ fun LayoutComposable(
             CompactGridLayoutComposable(
                 books = books,
                 onClick = { book ->
-                    navController.navigate(
-                        route = BookDetailScreenSpec.buildRoute(sourceId = if (source?.sourceId != null) source.sourceId else book.sourceId,
-                            bookId = book.id)
-                    )
+                    onBookTap(book)
                 }, scrollState = gridState,
                 isLocal = isLocal,
                 goToLatestChapter = { goToLatestChapter(it) })

@@ -15,9 +15,9 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import org.ireader.core.utils.Constants
 import org.ireader.domain.utils.toast
+import org.ireader.domain.view_models.settings.SettingViewModel
 import org.ireader.infinity.core.data.network.models.dnsOverHttps
 import org.ireader.presentation.feature_library.presentation.components.RadioButtonWithTitleComposable
-import org.ireader.presentation.feature_settings.presentation.setting.SettingViewModel
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
 

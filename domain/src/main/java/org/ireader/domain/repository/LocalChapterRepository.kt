@@ -19,6 +19,10 @@ interface LocalChapterRepository {
 
     fun findLastReadChapter(bookId: Long): Flow<Chapter?>
 
+    fun findFirstChapter(bookId: Long): Flow<Chapter?>
+
+    suspend fun setLastReadToFalse(bookId: Long)
+
 
     suspend fun insertChapter(chapter: Chapter)
 

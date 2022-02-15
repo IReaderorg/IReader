@@ -10,10 +10,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.ireader.core.utils.Constants
 import org.ireader.core.utils.UiEvent
@@ -79,7 +76,7 @@ class WebViewPageModel @Inject constructor(
             getBookById(bookId = bookId)
         }
         if (bookId != null && chapterId != null && bookId != Constants.NULL_VALUE && chapterId != Constants.NULL_VALUE) {
-            getLocalChapterByName(chapterId)
+            getLocalChapterById(chapterId)
         }
 
     }
@@ -145,22 +142,18 @@ class WebViewPageModel @Inject constructor(
         }.launchIn(viewModelScope)
     }
 
-    private fun getLocalChapterByName(chapterId: Long) {
-        getChapterUseCase.getOneChapterById(chapterId).onEach { result ->
-            when (result) {
-                is Resource.Success -> {
-                    if (result.data != null) {
-                        _state.value = state.value.copy(
-                            chapter = result.data,
-                        )
-                        //insertChaptersToLocal(state.value.chapters)
-                    }
+    private fun getLocalChapterById(chapterId: Long) {
+        viewModelScope.launch {
+            getChapterUseCase.getOneChapterById(chapterId).first { result ->
+                if (result != null) {
+                    _state.value = state.value.copy(
+                        chapter = result,
+                    )
+                    //insertChaptersToLocal(state.value.chapters)
                 }
-                is Resource.Error -> {
-
-                }
+                true
             }
-        }.launchIn(viewModelScope)
+        }
     }
 
     fun insertBookDetailToLocal(book: Book) {

@@ -1,4 +1,4 @@
-package org.ireader.presentation.feature_settings.presentation.setting
+package org.ireader.domain.view_models.settings
 
 data class SettingState(
     val doh: Int = 0,

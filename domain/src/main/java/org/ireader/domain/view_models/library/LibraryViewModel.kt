@@ -77,7 +77,7 @@ class LibraryViewModel @Inject constructor(
                 unreadFilter = state.unreadFilter)
                 .cachedIn(viewModelScope)
                 .collect { snapshot ->
-                    _books.value = snapshot
+                        _books.value = snapshot
                 }
         }
     }

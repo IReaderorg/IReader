@@ -26,6 +26,7 @@ import org.ireader.presentation.feature_library.presentation.components.LayoutCo
 import org.ireader.presentation.feature_library.presentation.components.RadioButtonWithTitleComposable
 import org.ireader.presentation.presentation.components.handlePagingResult
 import org.ireader.presentation.presentation.reusable_composable.*
+import org.ireader.presentation.ui.BookDetailScreenSpec
 import org.ireader.presentation.ui.WebViewScreenSpec
 
 
@@ -254,6 +255,12 @@ fun ExploreScreen(
                     navController = navController,
                     isLocal = false,
                     gridState = gridState,
+                    onBookTap = { book ->
+                        navController.navigate(
+                            route = BookDetailScreenSpec.buildRoute(sourceId = book.sourceId,
+                                bookId = book.id)
+                        )
+                    }
                 )
             }
         }

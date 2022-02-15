@@ -19,16 +19,24 @@ class LocalChapterRepositoryImpl @Inject constructor(private val daoLibrary: Lib
     }
 
     override fun findOneChapterById(chapterId: Long): Flow<Chapter?> {
-        return daoLibrary.getChapterById(chapterId = chapterId)
+        return daoLibrary.findChapterById(chapterId = chapterId)
     }
 
     override fun findChaptersByBookId(bookId: Long, isAsc: Boolean): Flow<List<Chapter>> {
-        return daoLibrary.getChaptersByBookId(bookId = bookId, isAsc = isAsc)
+        return daoLibrary.findChaptersByBookId(bookId = bookId, isAsc = isAsc)
     }
 
 
     override fun findLastReadChapter(bookId: Long): Flow<Chapter?> {
-        return daoLibrary.getLastReadChapter(bookId)
+        return daoLibrary.findLastReadChapter(bookId)
+    }
+
+    override fun findFirstChapter(bookId: Long): Flow<Chapter?> {
+        return daoLibrary.findFirstChapter(bookId)
+    }
+
+    override suspend fun setLastReadToFalse(bookId: Long) {
+        return daoLibrary.setLastReadToFalse(bookId)
     }
 
     /******************************Insert******************************/

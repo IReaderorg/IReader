@@ -36,10 +36,7 @@ import org.ireader.domain.use_cases.local.LocalGetBookUseCases
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.local.book_usecases.*
-import org.ireader.domain.use_cases.local.chapter_usecases.GetChaptersByBookId
-import org.ireader.domain.use_cases.local.chapter_usecases.GetLastReadChapter
-import org.ireader.domain.use_cases.local.chapter_usecases.GetLocalChaptersByPaging
-import org.ireader.domain.use_cases.local.chapter_usecases.GetOneChapterById
+import org.ireader.domain.use_cases.local.chapter_usecases.*
 import org.ireader.domain.use_cases.local.delete_usecases.book.DeleteAllBooks
 import org.ireader.domain.use_cases.local.delete_usecases.book.DeleteAllExploreBook
 import org.ireader.domain.use_cases.local.delete_usecases.book.DeleteBookById
@@ -162,6 +159,7 @@ class LocalModule {
             insertBooks = InsertBooks(localBookRepository),
             insertChapter = InsertChapter(localChapterRepository),
             insertChapters = InsertChapters(localChapterRepository),
+            setLastReadToFalse = SetLastReadToFalse(localChapterRepository)
         )
     }
 
@@ -193,7 +191,8 @@ class LocalModule {
             getOneChapterById = GetOneChapterById(localChapterRepository),
             getChaptersByBookId = GetChaptersByBookId(localChapterRepository),
             getLastReadChapter = GetLastReadChapter(localChapterRepository),
-            getLocalChaptersByPaging = GetLocalChaptersByPaging(localChapterRepository = localChapterRepository),
+            getLocalChaptersByPaging = GetLocalChaptersByPaging(localChapterRepository),
+            findFirstChapter = FindFirstChapter(localChapterRepository)
         )
     }
 

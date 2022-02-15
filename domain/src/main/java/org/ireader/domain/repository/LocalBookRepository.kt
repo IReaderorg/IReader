@@ -12,7 +12,11 @@ interface LocalBookRepository {
 
     fun getBookById(id: Long): Flow<Book?>
 
-    fun getAllInLibraryBooks(): Flow<List<Book>>
+    fun getAllInLibraryBooks(
+        sortType: SortType = SortType.LastRead,
+        isAsc: Boolean = false,
+        unreadFilter: Boolean = false,
+    ): Flow<List<Book>>
 
     fun getBooksByQueryByPagingSource(query: String): PagingSource<Int, Book>
 
@@ -24,7 +28,6 @@ interface LocalBookRepository {
         isAsc: Boolean,
         unreadFilter: Boolean,
     ): PagingSource<Int, Book>
-
 
 
     fun getAllExploreBookPagingSource(): PagingSource<Int, Book>

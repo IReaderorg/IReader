@@ -74,10 +74,10 @@ fun BookDetailScreen(
 
     val webview = viewModel.webView
     val scrollState = rememberLazyListState()
-    if (state.isLocalLoading || state.isRemoteLoading) {
+    if (state.isLocalLoading) {
         showLoading()
     }
-    if (book != null && state.isLocalLoaded) {
+    if (book != null) {
         val isWebViewEnable by remember {
             mutableStateOf(webview.originalUrl == book.link)
         }

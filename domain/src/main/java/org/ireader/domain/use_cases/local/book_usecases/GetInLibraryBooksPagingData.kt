@@ -9,6 +9,7 @@ import org.ireader.domain.models.FilterType
 import org.ireader.domain.models.SortType
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.repository.LocalBookRepository
+import org.ireader.domain.view_models.library.LibraryPagingSource
 
 /**
  * Get Books that are in library and explore mode is false.
@@ -23,9 +24,11 @@ class GetInLibraryBooksPagingData(private val localBookRepository: LocalBookRepo
             config = PagingConfig(pageSize = Constants.DEFAULT_PAGE_SIZE,
                 maxSize = Constants.MAX_PAGE_SIZE, enablePlaceholders = true),
             pagingSourceFactory = {
-                localBookRepository.getAllInLibraryPagingSource(sortType,
-                    isAsc,
-                    unreadFilter != FilterType.Disable)
+                LibraryPagingSource(localBookRepository, sortType = sortType, isAsc = isAsc,
+                    unreadFilter = unreadFilter == FilterType.Unread)
+//                localBookRepository.getAllInLibraryPagingSource(sortType,
+//                    isAsc,
+//                    unreadFilter != FilterType.Disable)
             }
         ).flow
     }

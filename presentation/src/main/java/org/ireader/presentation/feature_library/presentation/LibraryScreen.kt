@@ -27,6 +27,7 @@ import org.ireader.presentation.feature_library.presentation.components.BottomTa
 import org.ireader.presentation.feature_library.presentation.components.LayoutComposable
 import org.ireader.presentation.presentation.components.handlePagingResult
 import org.ireader.presentation.presentation.reusable_composable.ErrorTextWithEmojis
+import org.ireader.presentation.ui.BookDetailScreenSpec
 import org.ireader.presentation.ui.ReaderScreenSpec
 
 
@@ -98,6 +99,13 @@ fun LibraryScreen(
                                         sourceId = book.sourceId,
                                         chapterId = Constants.LAST_CHAPTER
                                     )
+                                )
+                            },
+                            onBookTap = { book ->
+                                navController.navigate(
+                                    route = BookDetailScreenSpec.buildRoute(
+                                        sourceId = book.sourceId,
+                                        bookId = book.id)
                                 )
                             }
                         )
