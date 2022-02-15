@@ -35,7 +35,7 @@ interface RemoteKeysDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAllExploredBook(bookEntity: List<Book>)
 
-    @Query("DELETE FROM library WHERE inLibrary = 0")
+    @Query("DELETE FROM library WHERE favorite = 0")
     suspend fun deleteAllExploredBook()
 
 }

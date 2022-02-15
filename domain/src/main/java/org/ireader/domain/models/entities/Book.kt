@@ -19,7 +19,6 @@ data class Book(
     val status: Int = 0,
     val cover: String = "",
     val customCover: String = "",
-    val inLibrary: Boolean = false,
     val favorite: Boolean = false,
     val rating: Int = 0,
     val lastUpdated: Long = 0,

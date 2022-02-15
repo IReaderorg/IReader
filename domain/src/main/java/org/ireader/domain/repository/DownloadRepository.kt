@@ -6,11 +6,11 @@ import org.ireader.domain.models.entities.SavedDownload
 
 interface DownloadRepository {
 
-    fun getAllDownloads(): Flow<List<SavedDownload>>
+    fun findAllDownloads(): Flow<List<SavedDownload>>
 
-    fun getAllDownloadsByPaging(): PagingSource<Int, SavedDownload>
+    fun findAllDownloadsByPaging(): PagingSource<Int, SavedDownload>
 
-    fun getOneSavedDownload(bookId: Long): Flow<SavedDownload?>
+    fun findOneSavedDownload(bookId: Long): Flow<SavedDownload?>
 
     suspend fun insertDownload(savedDownload: SavedDownload)
 

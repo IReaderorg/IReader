@@ -29,7 +29,7 @@ class GetRemoteChapters(private val remoteRepository: RemoteRepository) {
                     val chaptersPage = source.fetchChapters(book = book, page = currentPage)
                     chapters.addAll(chaptersPage.chapters.map {
                         it.copy(bookId = book.id,
-                            inLibrary = book.inLibrary)
+                            inLibrary = book.favorite)
                     })
                     hasNextPage = chaptersPage.hasNextPage
                     currentPage += 1

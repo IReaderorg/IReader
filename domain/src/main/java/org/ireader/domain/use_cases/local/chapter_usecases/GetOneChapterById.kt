@@ -19,7 +19,7 @@ class GetOneChapterById(private val localChapterRepository: LocalChapterReposito
         chapterId: Long,
     ): Flow<Resource<Chapter>> = flow {
         try {
-            localChapterRepository.getOneChapterById(chapterId = chapterId).first { chapters ->
+            localChapterRepository.findOneChapterById(chapterId = chapterId).first { chapters ->
                 if (chapters != null) {
                     emit(Resource.Success<Chapter>(data = chapters))
                     true

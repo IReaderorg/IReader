@@ -19,7 +19,7 @@ class FakeLocalBookRepository : LocalBookRepository {
     }
 
     override fun getAllInLibraryBooks(): Flow<List<Book>> = flow {
-        val result = books.filter { it.inLibrary }
+        val result = books.filter { it.favorite }
         emit(result)
     }
 
@@ -42,7 +42,7 @@ class FakeLocalBookRepository : LocalBookRepository {
         isAsc: Boolean,
         unreadFilter: Boolean,
     ): PagingSource<Int, Book> {
-        return FakeLibraryMediator(books.filter { it.inLibrary })
+        return FakeLibraryMediator(books.filter { it.favorite })
     }
 
     fun getAllInDownloadPagingSource(
@@ -51,7 +51,7 @@ class FakeLocalBookRepository : LocalBookRepository {
         unreadFilter: Boolean,
     ): PagingSource<Int, Book> {
         //TODO need to write a text for this
-        return FakeLibraryMediator(books.filter { it.inLibrary })
+        return FakeLibraryMediator(books.filter { it.favorite })
     }
 
     override fun getAllExploreBookPagingSource(): PagingSource<Int, Book> {
@@ -62,7 +62,7 @@ class FakeLocalBookRepository : LocalBookRepository {
     }
 
     override suspend fun deleteNotInLibraryChapters() {
-        val b = books.filter { !it.inLibrary }
+        val b = books.filter { !it.favorite }
         books.removeAll(b)
     }
 

@@ -2,6 +2,7 @@ package org.ireader.presentation.feature_settings.presentation.setting.downloade
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
@@ -11,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -25,6 +27,7 @@ import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
 import org.ireader.domain.feature_services.DownloaderService.DownloadService
 import org.ireader.domain.utils.toast
+import org.ireader.presentation.R
 import org.ireader.presentation.presentation.components.ISnackBarHost
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
@@ -94,7 +97,7 @@ fun DownloaderScreen(
                             viewModel.toggleExpandMenu(false)
                             viewModel.deleteAllDownloads()
                         }) {
-                            MidSizeTextComposable(text = "Delete ALl Downloads")
+                            MidSizeTextComposable(text = stringResource(R.string.delete_all_downloads))
                         }
                     }
                 },
@@ -117,7 +120,7 @@ fun DownloaderScreen(
                 if (download != null) {
                     Timber.e(download.progress.toString())
                     Card(
-                        modifier = Modifier.padding(vertical = 8.dp),
+                        modifier = Modifier,
                         backgroundColor = MaterialTheme.colors.background,
                         contentColor = MaterialTheme.colors.onBackground,
                         elevation = 8.dp,
@@ -132,6 +135,7 @@ fun DownloaderScreen(
 
                     ) {
                         ListItem(
+                            modifier = Modifier.height(80.dp),
                             text = { MidSizeTextComposable(text = download.bookName) },
                             trailing = {
                                 if (download.totalChapter == download.progress) {

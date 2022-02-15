@@ -8,16 +8,16 @@ import org.ireader.domain.models.entities.SavedDownload
 class FakeDownloadRepository : DownloadRepository {
 
     val downloads = mutableListOf<SavedDownload>()
-    override fun getAllDownloads(): Flow<List<SavedDownload>> = flow {
+    override fun findAllDownloads(): Flow<List<SavedDownload>> = flow {
         val result = downloads
         emit(result)
     }
 
-    override fun getAllDownloadsByPaging(): PagingSource<Int, SavedDownload> {
+    override fun findAllDownloadsByPaging(): PagingSource<Int, SavedDownload> {
         TODO("Not yet implemented")
     }
 
-    override fun getOneSavedDownload(bookId: Long): Flow<SavedDownload?> = flow {
+    override fun findOneSavedDownload(bookId: Long): Flow<SavedDownload?> = flow {
         val result = downloads.find { it.bookId == bookId }
         emit(result)
     }

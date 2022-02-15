@@ -14,7 +14,7 @@ import java.io.IOException
 class GetOneSavedDownload(private val downloadRepository: DownloadRepository) {
     operator fun invoke(bookId: Long): Flow<SavedDownload?> = flow {
         try {
-            downloadRepository.getOneSavedDownload(bookId).first { downloads ->
+            downloadRepository.findOneSavedDownload(bookId).first { downloads ->
                 emit(downloads)
                 true
             }

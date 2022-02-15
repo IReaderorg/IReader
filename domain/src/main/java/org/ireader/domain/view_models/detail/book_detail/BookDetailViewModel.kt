@@ -90,10 +90,10 @@ class BookDetailViewModel @Inject constructor(
         if (bookId != null && sourceId != null) {
             val source = extensions.mappingSourceNameToSource(sourceId)
             state = state.copy(source = source)
-            state = state.copy(book = state.book.copy(id = bookId))
             state = state.copy(isLocalLoading = true)
             chapterState = chapterState.copy(isLocalLoading = true)
-            getLocalBookById(state.book.id)
+            getLocalBookById(bookId)
+            getLocalChaptersByBookId(bookId = bookId)
         }
     }
 
@@ -150,13 +150,12 @@ class BookDetailViewModel @Inject constructor(
                     toggleLocalBookLoading(false)
                     clearBookError()
                     setBook(book)
-                    toggleInLibrary(book.inLibrary)
-                    isLocalBookLoaded(true)
-                    if (state.book.lastUpdated < 1L && !state.isRemoteLoaded) {
-                        getRemoteBookDetail(state.book)
-                        getRemoteChapterDetail(state.book)
+                    toggleInLibrary(book.favorite)
+                    if (book.lastUpdated < 1L && !state.isRemoteLoaded) {
+                        getRemoteBookDetail(book)
+                        getRemoteChapterDetail(book)
                     }
-                    getLocalChaptersByBookId(bookId = bookId)
+                    isLocalBookLoaded(true)
                 } else {
                     toggleLocalBookLoading(false)
                     showSnackBar(UiText.StringResource(R.string.no_book_found_error))
@@ -193,19 +192,12 @@ class BookDetailViewModel @Inject constructor(
             .onEach { result ->
                 when (result) {
                     is Resource.Success -> {
-                        if (result.data != null) {
-                            /**
-                             * isExploreMode is needed for inserting because,
-                             * the explore screen get a snapshot of explore books
-                             * so the inserted book need to have an id and a explore mode.
-                             * note: explore mode will toggle off when the user goes back to
-                             * main screen
-                             */
+                        if (result.data != null && state.book != null) {
                             setBook(
                                 book = result.data.copy(
-                                    id = state.book.id,
-                                    dataAdded = state.book.dataAdded,
-                                    inLibrary = state.book.inLibrary,
+                                    id = book.id,
+                                    dataAdded = book.dataAdded,
+                                    favorite = book.favorite,
                                     lastUpdated = Clock.System.now().toEpochMilliseconds(),
                                 )
                             )
@@ -213,7 +205,7 @@ class BookDetailViewModel @Inject constructor(
                             clearBookError()
                             isLocalBookLoaded(true)
                             isRemoteBookLoaded(true)
-                            insertBookDetailToLocal(state.book)
+                            insertBookDetailToLocal(state.book!!)
                         }
                     }
                     is Resource.Error -> {
@@ -243,15 +235,9 @@ class BookDetailViewModel @Inject constructor(
                             setChapters(chapters = uniqueList)
                             toggleRemoteChaptersLoading(false)
                             clearChapterError()
-//                            chapterState = chapterState.copy(
-////                                chapters = result.data.map {
-////                                    it.copy(bookId = state.book.id,
-////                                        bookName = state.book.bookName)
-////                                },
-//                            )
-                            deleteUseCase.deleteChaptersByBookId(state.book.id)
-                            insertChaptersToLocal(uniqueList)
-                            getLocalChaptersByBookId(bookId = state.book.id)
+                            deleteUseCase.deleteChaptersByBookId(book.id)
+                            insertChaptersToLocal(uniqueList, book.id)
+                            getLocalChaptersByBookId(bookId = book.id)
                         }
                     }
                     is Resource.Error -> {
@@ -278,11 +264,11 @@ class BookDetailViewModel @Inject constructor(
             ).onEach { result ->
                 when (result) {
                     is Resource.Success -> {
-                        if (result.data != null) {
+                        if (result.data != null && state.book != null) {
                             showSnackBar(UiText.DynamicString(result.data.text))
                             toggleRemoteBookLoading(false)
                             toggleRemoteChaptersLoading(false)
-                            getLocalChaptersByBookId(bookId = state.book.id)
+                            getLocalChaptersByBookId(bookId = state.book!!.id)
                         }
                     }
                     is Resource.Error -> {
@@ -300,59 +286,58 @@ class BookDetailViewModel @Inject constructor(
         }
     }
 
-    private fun updateChaptersEntity(inLibrary: Boolean) {
+    private fun updateChaptersEntity(inLibrary: Boolean, bookId: Long) {
         viewModelScope.launch(Dispatchers.IO) {
-            deleteUseCase.deleteChaptersByBookId(state.book.id)
+            deleteUseCase.deleteChaptersByBookId(bookId)
             localInsertUseCases.insertChapters(chapterState.chapters.map {
-                it.copy(bookId = state.book.id, inLibrary = inLibrary)
+                it.copy(bookId = bookId, inLibrary = inLibrary)
             })
         }
     }
 
-    fun toggleInLibrary(add: Boolean, book: Book? = null) {
+    fun toggleInLibrary(add: Boolean, book: Book) {
         state = state.copy(inLibrary = add)
         viewModelScope.launch(Dispatchers.IO) {
             if (add) {
                 insertBookDetailToLocal(
-                    book
-                        ?: state.book.copy(id = state.book.id,
-                            inLibrary = true,
-                            dataAdded = System.currentTimeMillis(),
-                        ),
+                    book.copy(
+                        id = book.id,
+                        favorite = true,
+                        dataAdded = System.currentTimeMillis(),
+                    )
                 )
-                updateChaptersEntity(true)
+                updateChaptersEntity(true, book.id)
             } else {
                 insertBookDetailToLocal((
-                        book
-                            ?: state.book).copy(
-                    id = state.book.id,
-                    inLibrary = false,
-                ))
-                updateChaptersEntity(false)
+                        book.copy(
+                            id = book.id,
+                            favorite = false,
+                        )))
+                updateChaptersEntity(false, book.id)
             }
         }
     }
 
 
-    private fun insertChaptersToLocal(chapters: List<Chapter>) {
+    private fun insertChaptersToLocal(chapters: List<Chapter>, bookId: Long) {
         viewModelScope.launch(Dispatchers.IO) {
-            deleteUseCase.deleteChaptersByBookId(bookId = state.book.id)
-            localInsertUseCases.insertChapters(chapters.map { it.copy(bookId = state.book.id) })
+            deleteUseCase.deleteChaptersByBookId(bookId = bookId)
+            localInsertUseCases.insertChapters(chapters.map { it.copy(bookId = bookId) })
         }
     }
 
-    fun startDownloadService(context: Context) {
+    fun startDownloadService(context: Context, book: Book) {
         work = OneTimeWorkRequestBuilder<DownloadService>().apply {
             setInputData(
                 Data.Builder().apply {
-                    putLong(DOWNLOADER_BOOK_ID, state.book.id)
-                    putLong(DOWNLOADER_SOURCE_ID, state.book.sourceId)
+                    putLong(DOWNLOADER_BOOK_ID, book.id)
+                    putLong(DOWNLOADER_SOURCE_ID, book.sourceId)
                 }.build()
             )
             addTag(DOWNLOADER_SERVICE_NAME)
         }.build()
         WorkManager.getInstance(context).enqueueUniqueWork(
-            DOWNLOADER_SERVICE_NAME.plus(state.book.id + state.book.sourceId),
+            DOWNLOADER_SERVICE_NAME.plus(book.id + book.sourceId),
             ExistingWorkPolicy.REPLACE,
             work
         )

@@ -20,7 +20,7 @@ class GetChaptersByBookId(private val localChapterRepository: LocalChapterReposi
         isAsc: Boolean = true,
     ): Flow<List<Chapter>> = flow {
         try {
-            localChapterRepository.getChaptersByBookId(bookId = bookId, isAsc)
+            localChapterRepository.findChaptersByBookId(bookId = bookId, isAsc)
                 .first { chapters ->
                     emit(chapters)
                     true
@@ -40,7 +40,7 @@ class GetLocalChaptersByPaging(private val localChapterRepository: LocalChapterR
             config = PagingConfig(pageSize = Constants.DEFAULT_BIG_PAGE_SIZE,
                 maxSize = Constants.MAX_BIG_PAGE_SIZE, enablePlaceholders = true),
             pagingSourceFactory = {
-                localChapterRepository.getLocalChaptersByPaging(bookId = bookId, isAsc = isAsc)
+                localChapterRepository.findLocalChaptersByPaging(bookId = bookId, isAsc = isAsc)
             }
         ).flow
     }

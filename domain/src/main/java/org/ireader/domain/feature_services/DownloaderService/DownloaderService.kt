@@ -78,7 +78,7 @@ class DownloadService @AssistedInject constructor(
 
         val source = extensions.mappingSourceNameToSource(sourceId)
 
-        val chapters = chapterRepo.getChaptersByBookId(bookId).first()
+        val chapters = chapterRepo.findChaptersByBookId(bookId).first()
 
         val cancelDownloadIntent = WorkManager.getInstance(applicationContext)
             .createCancelPendingIntent(id)

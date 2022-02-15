@@ -7,7 +7,7 @@ import org.ireader.domain.source.SourceTower
 
 data class DetailState(
     val source: Source = SourceTower.create(),
-    val book: Book = Book(title = "", link = "", sourceId = 0L),
+    val book: Book? = null,
     val inLibrary: Boolean = false,
     val isLocalLoading: Boolean = false,
     val isLocalLoaded: Boolean = false,

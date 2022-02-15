@@ -67,7 +67,9 @@ fun BookSummaryDescription(
                     .layoutId("text"),
                 maxLines = if (!isExpanded) COLLAPSED_MAX_LINES else Int.MAX_VALUE,
                 onTextLayout = { result ->
-                    if (isExpandable == null) setIsExpandable(result.didOverflowHeight)
+                    if (isExpandable == null || isExpandable == false) {
+                        setIsExpandable(result.didOverflowHeight)
+                    }
                 },
             )
             if (isExpandable == true) {

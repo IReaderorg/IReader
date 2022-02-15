@@ -20,7 +20,7 @@ class GetLastReadChapter(private val localChapterRepository: LocalChapterReposit
     ): Flow<Resource<Chapter>> =
         flow {
             try {
-                localChapterRepository.getLastReadChapter(bookId).first { chapter ->
+                localChapterRepository.findLastReadChapter(bookId).first { chapter ->
                     if (chapter != null) {
                         emit(Resource.Success(data = chapter))
                         true

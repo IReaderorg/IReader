@@ -9,11 +9,11 @@ import org.ireader.domain.models.entities.Book
 interface LibraryBookDao {
 
     @RewriteQueriesToDropUnusedColumns
-    @Query("""SELECT  library.*,page_key_table.*,COUNT(chapter.id) AS unread
+    @Query("""SELECT  library.*,page_key_table.*,COUNT(DISTINCT chapter.id) AS total_chapter
         FROM  library,page_key_table
-        LEFT JOIN chapter ON library.id = chapter.bookId  AND chapter.read = 1
+        LEFT JOIN chapter ON library.id = chapter.bookId  
         GROUP BY library.id
-        HAVING library.inLibrary = 1 AND (CASE WHEN :unread = 1 THEN unread = 0 ELSE 1 END)
+        HAVING library.favorite = 1 AND NOT (CASE WHEN :unread= 1 THEN SUM(chapter.read != 0) ELSE 0 END)
         ORDER BY 
         CASE WHEN :isAsc = 1 AND :sortByAbs = 1 THEN library.title END ASC,
         CASE WHEN :isAsc = 0 AND :sortByAbs = 1 THEN  library.title END DESC,
@@ -35,10 +35,10 @@ interface LibraryBookDao {
         isAsc: Boolean = false,
     ): PagingSource<Int, Book>
 
-    @Query("SELECT * FROM library WHERE inLibrary = 1")
+    @Query("SELECT * FROM library WHERE favorite = 1")
     fun getAllInLibraryBooks(): Flow<List<Book>>
 
-    @Query("SELECT * FROM library WHERE inLibrary = 1")
+    @Query("SELECT * FROM library WHERE favorite = 1")
     suspend fun getAllInLibraryBooksForPaging(): List<Book>
 
     @Query("SELECT * FROM library WHERE id = :bookId")
@@ -47,7 +47,7 @@ interface LibraryBookDao {
     @Query("SELECT * FROM library WHERE id = :bookId Limit 1")
     fun getBookById(bookId: Long): Flow<Book?>
 
-    @Query("SELECT * FROM library WHERE title LIKE '%' || :query || '%' AND inLibrary = 1")
+    @Query("SELECT * FROM library WHERE title LIKE '%' || :query || '%' AND favorite = 1")
     fun searchBook(query: String): PagingSource<Int, Book>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

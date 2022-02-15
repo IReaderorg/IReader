@@ -35,7 +35,6 @@ class LibraryViewModel @Inject constructor(
     val book = _books
 
     init {
-        deleteNotInLibraryChapters()
         getLibraryBooks()
         readLayoutTypeAndFilterTypeAndSortType()
     }
@@ -115,16 +114,6 @@ class LibraryViewModel @Inject constructor(
         state = state.copy(layout = layoutType,
             sortType = sortType,
             unreadFilter = filterType)
-    }
-
-    /**
-     * This line deletes chapters from book that are downloaded from book
-     * but the books weren't added to the library
-     */
-    private fun deleteNotInLibraryChapters() {
-        viewModelScope.launch(Dispatchers.IO) {
-            deleteUseCase.deleteNotInLibraryBook()
-        }
     }
 
     fun changeSortIndex(sortType: SortType) {

@@ -14,7 +14,7 @@ import java.io.IOException
 class GetAllDownloadsUseCase(private val downloadRepository: DownloadRepository) {
     operator fun invoke(): Flow<List<SavedDownload>> = flow {
         try {
-            downloadRepository.getAllDownloads().first { downloads ->
+            downloadRepository.findAllDownloads().first { downloads ->
                 emit(downloads)
                 true
             }

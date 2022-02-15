@@ -47,10 +47,10 @@ fun BookDetailScreen(
     navController: NavController = rememberNavController(),
     viewModel: BookDetailViewModel = hiltViewModel(),
 ) {
+    val book = viewModel.state.book//viewModel.book
     val scaffoldState = rememberScaffoldState()
     val context = LocalContext.current
     LaunchedEffect(key1 = true) {
-        viewModel.getLocalBookById(viewModel.state.book.id)
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
                 is UiEvent.ShowSnackbar -> {
@@ -62,7 +62,7 @@ fun BookDetailScreen(
         }
     }
 
-    val book = viewModel.state.book//viewModel.book
+
     val scope = rememberCoroutineScope()
     val swipeRefreshState =
         rememberSwipeRefreshState(isRefreshing = viewModel.state.isLocalLoading || viewModel.state.isRemoteLoading)
@@ -74,14 +74,13 @@ fun BookDetailScreen(
 
     val webview = viewModel.webView
     val scrollState = rememberLazyListState()
-
-    val isWebViewEnable by remember {
-        mutableStateOf(webview.originalUrl == viewModel.state.book.link)
-    }
     if (state.isLocalLoading || state.isRemoteLoading) {
         showLoading()
     }
-    if (state.isLocalLoaded) {
+    if (book != null && state.isLocalLoaded) {
+        val isWebViewEnable by remember {
+            mutableStateOf(webview.originalUrl == book.link)
+        }
         TransparentStatusBar {
             Scaffold(
                 topBar = {},
@@ -91,26 +90,26 @@ fun BookDetailScreen(
                     BookDetailScreenBottomBar(
                         onToggleInLibrary = {
                             if (!state.inLibrary) {
-                                viewModel.toggleInLibrary(true)
+                                viewModel.toggleInLibrary(true, book = book)
                             } else {
-                                viewModel.toggleInLibrary(false)
+                                viewModel.toggleInLibrary(false, book)
                             }
                         },
                         isInLibrary = state.inLibrary,
                         onDownload = {
-                            viewModel.startDownloadService(context)
+                            viewModel.startDownloadService(context, book = book)
                         },
-                        isRead = state.book.lastRead != 0L,
+                        isRead = book.lastRead != 0L,
                         onRead = {
-                            if (state.book.lastRead != 0L && viewModel.chapterState.chapters.isNotEmpty()) {
+                            if (book.lastRead != 0L && viewModel.chapterState.chapters.isNotEmpty()) {
                                 navController.navigate(ReaderScreenSpec.buildRoute(
-                                    bookId = state.book.id,
+                                    bookId = book.id,
                                     sourceId = source.sourceId,
                                     chapterId = Constants.LAST_CHAPTER,
                                 ))
                             } else if (viewModel.chapterState.chapters.isNotEmpty()) {
                                 navController.navigate(ReaderScreenSpec.buildRoute(
-                                    bookId = state.book.id,
+                                    bookId = book.id,
                                     sourceId = source.sourceId,
                                     chapterId = viewModel.chapterState.chapters.first().id,
                                 ))
@@ -125,7 +124,7 @@ fun BookDetailScreen(
                 SwipeRefresh(
                     state = swipeRefreshState,
                     onRefresh = {
-                        viewModel.getRemoteChapterDetail(viewModel.state.book)
+                        viewModel.getRemoteChapterDetail(book)
                     },
                     indicator = { state, trigger ->
                         SwipeRefreshIndicator(
@@ -150,10 +149,10 @@ fun BookDetailScreen(
                                     navController.navigate(
                                         WebViewScreenSpec.buildRoute(
                                             url = viewModel.state.source.baseUrl + getUrlWithoutDomain(
-                                                viewModel.state.book.link),
+                                                book.link),
                                             sourceId = viewModel.state.source.sourceId,
                                             fetchType = FetchType.DetailFetchType.index,
-                                            bookId = viewModel.state.book.id
+                                            bookId = book.id
                                         )
                                     )
                                 },
@@ -161,8 +160,8 @@ fun BookDetailScreen(
                                     viewModel.onEvent(BookDetailEvent.ToggleSummary)
                                 },
                                 onRefresh = {
-                                    viewModel.getRemoteBookDetail(viewModel.state.book)
-                                    viewModel.getRemoteChapterDetail(viewModel.state.book)
+                                    viewModel.getRemoteBookDetail(book)
+                                    viewModel.getRemoteChapterDetail(book)
                                 },
                                 onFetch = {
                                     viewModel.getWebViewData()
@@ -180,7 +179,7 @@ fun BookDetailScreen(
                                     .padding(horizontal = 8.dp, vertical = 4.dp)
                                     .fillMaxWidth(),
                                 onClick = {
-                                    navController.navigate(ChapterScreenSpec.buildRoute(bookId = state.book.id,
+                                    navController.navigate(ChapterScreenSpec.buildRoute(bookId = book.id,
                                         sourceId = source.sourceId))
                                 },
                                 title = "Contents",

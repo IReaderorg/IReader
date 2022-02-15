@@ -7,17 +7,17 @@ import org.ireader.domain.models.entities.Chapter
 interface LocalChapterRepository {
 
 
-    fun getOneChapterById(
+    fun findOneChapterById(
         chapterId: Long,
     ): Flow<Chapter?>
 
-    fun getChaptersByBookId(
+    fun findChaptersByBookId(
         bookId: Long,
         isAsc: Boolean = true,
     ): Flow<List<Chapter>>
 
 
-    fun getLastReadChapter(bookId: Long): Flow<Chapter?>
+    fun findLastReadChapter(bookId: Long): Flow<Chapter?>
 
 
     suspend fun insertChapter(chapter: Chapter)
@@ -27,7 +27,7 @@ interface LocalChapterRepository {
     )
 
 
-    fun getLocalChaptersByPaging(
+    fun findLocalChaptersByPaging(
         bookId: Long, isAsc: Boolean,
     ): PagingSource<Int, Chapter>
 

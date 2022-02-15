@@ -10,12 +10,12 @@ import org.ireader.domain.repository.DownloadRepository
 
 class GetAllDownloadsUseCaseByPaging(private val downloadRepository: DownloadRepository) {
     operator fun invoke(): Flow<PagingData<SavedDownload>> {
-        val config = downloadRepository.getAllDownloadsByPaging()
+        val config = downloadRepository.findAllDownloadsByPaging()
         return Pager(
             config = PagingConfig(pageSize = Constants.DEFAULT_PAGE_SIZE,
                 maxSize = Constants.MAX_PAGE_SIZE, enablePlaceholders = true),
             pagingSourceFactory = {
-                downloadRepository.getAllDownloadsByPaging()
+                downloadRepository.findAllDownloadsByPaging()
             }
         ).flow
     }

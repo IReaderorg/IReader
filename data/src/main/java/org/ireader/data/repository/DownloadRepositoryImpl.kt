@@ -9,15 +9,15 @@ import org.ireader.domain.repository.DownloadRepository
 class DownloadRepositoryImpl(private val dao: DownloadDao) : DownloadRepository {
 
 
-    override fun getAllDownloads(): Flow<List<SavedDownload>> {
+    override fun findAllDownloads(): Flow<List<SavedDownload>> {
         return dao.getAllDownloads()
     }
 
-    override fun getAllDownloadsByPaging(): PagingSource<Int, SavedDownload> {
+    override fun findAllDownloadsByPaging(): PagingSource<Int, SavedDownload> {
         return dao.getAllDownloadsByPaging()
     }
 
-    override fun getOneSavedDownload(bookId: Long): Flow<SavedDownload?> {
+    override fun findOneSavedDownload(bookId: Long): Flow<SavedDownload?> {
         return dao.getOneDownloads(bookId)
     }
 

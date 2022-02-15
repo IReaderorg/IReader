@@ -46,6 +46,9 @@ fun BookDetailScreenLoadedComposable(
     val fadeInImage by animateFloatAsState(
         if (imageLoaded) 0.2f else 0f, tween(easing = LinearOutSlowInEasing)
     )
+    var isExpandable by remember {
+        mutableStateOf<Boolean?>(null)
+    }
 
     Box(Modifier.height(IntrinsicSize.Min)) {
         Box {
@@ -128,7 +131,7 @@ fun BookDetailScreenLoadedComposable(
                         color = MaterialTheme.colors.onBackground,
                         overflow = TextOverflow.Ellipsis
                     )
-                    if (!book.author.isNullOrBlank()) {
+                    if (book.author.isNotBlank()) {
                         Text(
                             text = "Author: ${book.author}",
                             style = MaterialTheme.typography.subtitle2,
@@ -137,7 +140,7 @@ fun BookDetailScreenLoadedComposable(
                             overflow = TextOverflow.Ellipsis
                         )
                     }
-                    if (!book.translator.isNullOrBlank()) {
+                    if (book.translator.isNotBlank()) {
                         Text(
                             text = "Translator: ${book.translator}",
                             style = MaterialTheme.typography.subtitle2,
@@ -207,7 +210,7 @@ fun BookDetailScreenLoadedComposable(
             onClickToggle = { onSummaryExpand() },
             description = book.description,
             genres = book.genres,
-            expandedSummary = isSummaryExpanded
+            expandedSummary = isSummaryExpanded,
         )
         Divider(
             modifier = modifier
