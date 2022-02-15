@@ -4,7 +4,6 @@ package org.ireader.domain.view_models.library
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
@@ -17,16 +16,19 @@ import org.ireader.domain.models.FilterType
 import org.ireader.domain.models.SortType
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.use_cases.local.DeleteUseCase
+import org.ireader.domain.use_cases.local.LocalGetBookUseCases
 import org.ireader.domain.use_cases.preferences.reader_preferences.PreferencesUseCase
+import org.ireader.domain.view_models.base_view_model.BaseViewModel
 import javax.inject.Inject
 
 
 @HiltViewModel
 class LibraryViewModel @Inject constructor(
-    private val localGetBookUseCases: org.ireader.domain.use_cases.local.LocalGetBookUseCases,
+    private val localGetBookUseCases: LocalGetBookUseCases,
     private val deleteUseCase: DeleteUseCase,
     private val preferencesUseCase: PreferencesUseCase,
-) : ViewModel() {
+) : BaseViewModel() {
+
 
     var state by mutableStateOf(LibraryScreenState())
         private set
@@ -69,6 +71,12 @@ class LibraryViewModel @Inject constructor(
 
     }
 
+    val books = localGetBookUseCases.GetInLibraryBooksPagingData(
+        state.sortType,
+        isAsc = state.isSortAcs,
+        unreadFilter = state.unreadFilter
+    ).launchWhenActive()
+
     private fun getLibraryBooks() {
         viewModelScope.launch {
             localGetBookUseCases.GetInLibraryBooksPagingData(
@@ -77,7 +85,7 @@ class LibraryViewModel @Inject constructor(
                 unreadFilter = state.unreadFilter)
                 .cachedIn(viewModelScope)
                 .collect { snapshot ->
-                        _books.value = snapshot
+                    _books.value = snapshot
                 }
         }
     }

@@ -9,9 +9,9 @@ import retrofit2.HttpException
 import java.io.IOException
 
 class DeleteSavedDownload(private val downloadRepository: DownloadRepository) {
-    suspend operator fun invoke(savedDownload: SavedDownload) {
+    suspend operator fun invoke(download: SavedDownload) {
         try {
-            downloadRepository.deleteSavedDownload(savedDownload)
+            downloadRepository.deleteSavedDownload(download)
         } catch (e: IOException) {
             Resource.Error<Resource<List<Book>>>(
                 uiText = UiText.ExceptionString(e)

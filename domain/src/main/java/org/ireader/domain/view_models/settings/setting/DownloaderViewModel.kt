@@ -58,10 +58,10 @@ class DownloaderViewModel @Inject constructor(
         }
     }
 
-    fun insertSavedDownload(savedDownload: SavedDownload) {
+    fun insertSavedDownload(download: SavedDownload) {
         viewModelScope.launch(Dispatchers.IO) {
             downloadUseCases.insertDownload(
-                savedDownload = savedDownload
+                download = download
             )
         }
     }

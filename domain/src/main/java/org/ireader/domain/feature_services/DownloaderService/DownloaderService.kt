@@ -62,8 +62,8 @@ class DownloadService @AssistedInject constructor(
             ?: throw IllegalArgumentException(
                 "Invalid bookId as argument: $bookId"
             )
+        //Faking
         savedDownload = SavedDownload(
-            id = bookId,
             bookId = bookId,
             totalChapter = 100,
             priority = 1,
@@ -116,7 +116,6 @@ class DownloadService @AssistedInject constructor(
                                 builder.setSubText(index.toString())
                                 builder.setProgress(chapters.size, index, false)
                                 savedDownload = savedDownload.copy(
-                                    id = bookId,
                                     bookId = bookId,
                                     totalChapter = chapters.size,
                                     priority = 1,

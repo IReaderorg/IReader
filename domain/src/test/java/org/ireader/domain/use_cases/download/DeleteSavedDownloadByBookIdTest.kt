@@ -22,7 +22,6 @@ class DeleteSavedDownloadByBookIdTest {
         val downloadsToInsert = mutableListOf<SavedDownload>()
         ('a'..'z').forEachIndexed { index, c ->
             downloadsToInsert.add(SavedDownload(
-                id = index.toLong(),
                 bookName = c.toString(),
                 bookId = index.toLong(),
                 sourceId = index.toLong(),

@@ -51,7 +51,7 @@ interface Source {
     suspend fun fetchPopular(page: Int): BooksPage
 
     /**
-     * Returns a page with a list of manga.
+     * Returns a page with a list of books.
      *
      * @param page the page number to retrieve.
      * @param query the search query.
@@ -60,7 +60,7 @@ interface Source {
 
 
     /**
-     * Returns a page with a list of latest manga updates and weather is has next page or not.
+     * Returns a page with a list of latest books updates and weather is has next page or not.
      *
      * @param chapter the chapter that it contents is going to be retrieve.
      */

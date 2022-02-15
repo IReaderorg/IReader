@@ -10,12 +10,19 @@ import org.ireader.domain.local.dao.LibraryBookDao
 import org.ireader.domain.local.dao.LibraryChapterDao
 import org.ireader.domain.local.dao.RemoteKeysDao
 import org.ireader.domain.models.RemoteKeys
-import org.ireader.domain.models.entities.Book
-import org.ireader.domain.models.entities.Chapter
-import org.ireader.domain.models.entities.SavedDownload
+import org.ireader.domain.models.entities.*
 
 @Database(
-    entities = [Book::class, Chapter::class, RemoteKeys::class, SavedDownload::class],
+    entities = [
+        Book::class,
+        CatalogRemote::class,
+        Category::class,
+        Chapter::class,
+        SavedDownload::class,
+        History::class,
+        Updates::class,
+        RemoteKeys::class,
+    ],
     version = 10,
     exportSchema = true,
 )

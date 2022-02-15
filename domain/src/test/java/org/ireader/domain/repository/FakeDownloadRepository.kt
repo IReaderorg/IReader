@@ -8,6 +8,7 @@ import org.ireader.domain.models.entities.SavedDownload
 class FakeDownloadRepository : DownloadRepository {
 
     val downloads = mutableListOf<SavedDownload>()
+
     override fun findAllDownloads(): Flow<List<SavedDownload>> = flow {
         val result = downloads
         emit(result)
@@ -17,7 +18,7 @@ class FakeDownloadRepository : DownloadRepository {
         TODO("Not yet implemented")
     }
 
-    override fun findOneSavedDownload(bookId: Long): Flow<SavedDownload?> = flow {
+    override fun findOneDownload(bookId: Long): Flow<SavedDownload?> = flow {
         val result = downloads.find { it.bookId == bookId }
         emit(result)
     }
@@ -26,19 +27,19 @@ class FakeDownloadRepository : DownloadRepository {
         downloads.add(savedDownload)
     }
 
-    override suspend fun insertDownloads(savedDownloads: List<SavedDownload>) {
-        downloads.addAll(savedDownloads)
+    override suspend fun insertDownloads(savedDownloadList: List<SavedDownload>) {
+        downloads.addAll(savedDownloadList)
     }
 
-    override suspend fun deleteSavedDownload(savedDownload: SavedDownload) {
-        downloads.removeIf { it.id == savedDownload.id }
+    override suspend fun deleteDownload(savedDownload: SavedDownload) {
+        downloads.removeIf { it.bookId == savedDownload.bookId }
     }
 
-    override suspend fun deleteSavedDownloadByBookId(bookId: Long) {
+    override suspend fun deleteDownloadByBookId(bookId: Long) {
         downloads.removeIf { it.bookId == bookId }
     }
 
-    override suspend fun deleteAllSavedDownload() {
+    override suspend fun deleteAllDownload() {
         downloads.clear()
     }
 }

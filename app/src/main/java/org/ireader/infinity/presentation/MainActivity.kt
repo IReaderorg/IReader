@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import dagger.hilt.android.AndroidEntryPoint
@@ -23,6 +24,7 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalAnimationApi::class,
         androidx.compose.material.ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         super.onCreate(savedInstanceState)
 
         setContent {

@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class CatalogRemote(
-    @PrimaryKey(autoGenerate = true)
+    @PrimaryKey(autoGenerate = false)
     val id: Long = 0,
     val name: String,
     val description: String,

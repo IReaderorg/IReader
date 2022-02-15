@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.ISplash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/white_50</item>
+        <item name="windowSplashScreenIconBackgroundColor">@color/white_50</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_light</item>
+
+        <item name="postSplashScreenTheme">@style/Theme.Infinity</item>
+    </style>
+</resources>

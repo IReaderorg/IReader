@@ -69,7 +69,6 @@ class LocalBookRepositoryImpl(
             is SortType.TotalChapter -> {
                 bookDao.getAllLocalBooksForPagingSortedBySort(
                     isAsc = isAsc,
-                    sortByTotalDownload = true,
                     unread = unreadFilter
                 )
             }
@@ -103,9 +102,8 @@ class LocalBookRepositoryImpl(
                 )
             }
             is SortType.TotalChapter -> {
-                bookDao.getAllInLibraryBooks(
+                bookDao.findLibraryBooksByTotalDownload(
                     isAsc = isAsc,
-                    sortByTotalDownload = true,
                     unread = unreadFilter
                 )
             }

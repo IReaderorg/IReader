@@ -3,16 +3,38 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.124" />
         <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/drawable/baseline_close_24.xml" value="0.27025641025641023" />
         <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/drawable/baseline_info_20.xml" value="0.27025641025641023" />
         <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/drawable/baseline_info_24.xml" value="0.27025641025641023" />
         <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/drawable/baseline_refresh_24.xml" value="0.27025641025641023" />
         <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/drawable/baseline_upgrade_24.xml" value="0.27025641025641023" />
         <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/drawable/baseline_warning_24.xml" value="0.27025641025641023" />
+        <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/drawable/bg_gradient.xml" value="0.1265" />
+        <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/drawable/ic_add.xml" value="0.1265" />
+        <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/drawable/ic_all_inclusive_black_24dp.xml" value="0.124" />
+        <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/drawable/ic_artboard___1.xml" value="0.124" />
+        <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/drawable/ic_books.xml" value="0.124" />
+        <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/drawable/ic_downloading.xml" value="0.124" />
         <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/drawable/ic_increase_text_size.xml" value="0.11574074074074074" />
+        <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/drawable/ic_infinity.xml" value="0.1" />
         <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/drawable/ic_launcher_background.xml" value="0.11574074074074074" />
+        <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/drawable/ic_no_image_placeholder.xml" value="0.124" />
         <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/drawable/ic_placeholder.xml" value="0.11574074074074074" />
+        <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/drawable/ic_spash.xml" value="0.1265" />
+        <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/drawable/ic_spash_night.xml" value="0.124" />
+        <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/drawable/ic_splash.xml" value="0.11200000000000002" />
+        <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/drawable/ic_splash_light.xml" value="0.124" />
+        <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/drawable/ic_splash_lightr.xml" value="0.124" />
+        <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/drawable/ic_splash_night.xml" value="0.124" />
+        <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/drawable/ic_wallpaper.xml" value="0.124" />
+        <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/drawable/splash_background.xml" value="0.1265" />
         <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/layout/main_activity.xml" value="0.2210144927536232" />
+        <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.124" />
+        <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/core/src/main/res/drawable/baseline_refresh_24.xml" value="0.1265" />
+        <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/core/src/main/res/drawable/ic_downloading.xml" value="0.124" />
+        <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/core/src/main/res/drawable/ic_wallpaper.xml" value="0.1265" />
+        <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/core/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.124" />
       </map>
     </option>
   </component>

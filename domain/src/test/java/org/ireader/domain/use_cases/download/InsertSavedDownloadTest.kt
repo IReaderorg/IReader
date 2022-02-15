@@ -8,7 +8,7 @@ import org.ireader.domain.use_cases.download.insert.InsertDownload
 import org.junit.Before
 import org.junit.Test
 
-class InsertDownloadTest {
+class InsertSavedDownloadTest {
 
     private lateinit var insertDownload: InsertDownload
     private lateinit var fakeRepository: FakeDownloadRepository
@@ -22,7 +22,6 @@ class InsertDownloadTest {
         val downloadsToInsert = mutableListOf<SavedDownload>()
         ('a'..'z').forEachIndexed { index, c ->
             downloadsToInsert.add(SavedDownload(
-                id = index.toLong(),
                 bookName = c.toString(),
                 bookId = index.toLong(),
                 sourceId = index.toLong(),
@@ -43,7 +42,6 @@ class InsertDownloadTest {
     @Test
     fun `add one download`() = runBlocking {
         val savedDownload = SavedDownload(
-            id = 1.toLong(),
             bookName = 'a'.toString(),
             bookId = 1.toLong(),
             sourceId = 1.toLong(),

@@ -3,15 +3,20 @@ package org.ireader.domain.view_models.base_view_model
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.*
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import org.ireader.core.prefs.Preference
 import org.ireader.core_ui.ui.PreferenceMutableState
 
 
 abstract class BaseViewModel : ViewModel() {
 
-    protected val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    protected val scope: CoroutineScope
+        get() = viewModelScope
 
     private val activeScope = MutableStateFlow<CoroutineScope?>(null)
 
@@ -49,6 +54,17 @@ abstract class BaseViewModel : ViewModel() {
             .filterNotNull()
             .onEach { launchIn(it) }
             .launchIn(scope)
+    }
+
+    fun <T> Flow<T>.launchWhenActive() = channelFlow<T> {
+        scope.launch {
+            activeScope
+            this@launchWhenActive.filterNotNull()
+                .first {
+                    send(it)
+                    true
+                }
+        }
     }
 
 }

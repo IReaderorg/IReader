@@ -11,7 +11,7 @@ interface DownloadDao {
     @Query("SELECT * FROM download")
     fun getAllDownloads(): Flow<List<SavedDownload>>
 
-    @Query("SELECT * FROM download")
+    @Query("SELECT * FROM  download")
     fun getAllDownloadsByPaging(): PagingSource<Int, SavedDownload>
 
     @Query("SELECT * FROM download WHERE bookId = :bookId")

@@ -21,12 +21,12 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:screenOrientation="fullSensor"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Infinity"
+        android:theme="@style/Theme.ISplash"
         android:usesCleartextTraffic="true">
         <activity
             android:name="org.ireader.infinity.presentation.MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.Infinity.NoActionBar">
+            android:theme="@style/Theme.ISplash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -1,11 +1,6 @@
-package org.ireader.domain.models.entities
+package org.ireader.domain.models.updates
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
-
-@Entity
 data class BookUpdates(
-    @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     val sourceId: Long? = null,
     val key: String? = null,

@@ -2,7 +2,7 @@ package org.ireader.domain.book.repository
 
 import kotlinx.coroutines.flow.Flow
 import org.ireader.domain.models.entities.Chapter
-import org.ireader.domain.models.entities.ChapterUpdate
+import org.ireader.domain.models.updates.ChapterUpdate
 
 interface ChapterRepository {
 

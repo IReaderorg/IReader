@@ -9,9 +9,9 @@ import retrofit2.HttpException
 import java.io.IOException
 
 class InsertDownload(private val downloadRepository: DownloadRepository) {
-    suspend operator fun invoke(savedDownload: SavedDownload) {
+    suspend operator fun invoke(download: SavedDownload) {
         try {
-            downloadRepository.insertDownload(savedDownload)
+            downloadRepository.insertDownload(download)
         } catch (e: IOException) {
             Resource.Error<Resource<List<Book>>>(
                 uiText = UiText.ExceptionString(e)

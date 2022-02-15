@@ -22,7 +22,6 @@ class GetOneSavedDownloadTest {
         val downloadsToInsert = mutableListOf<SavedDownload>()
         ('a'..'z').forEachIndexed { index, c ->
             downloadsToInsert.add(SavedDownload(
-                id = index.toLong(),
                 bookName = c.toString(),
                 bookId = index.toLong(),
                 sourceId = index.toLong(),
@@ -44,7 +43,7 @@ class GetOneSavedDownloadTest {
     fun `get one download`() = runBlocking {
         val id = 0L
         val res = getOneSavedDownload(id).first()
-        Truth.assertThat(res?.id == id).isTrue()
+        Truth.assertThat(res?.bookId == id).isTrue()
     }
 
 

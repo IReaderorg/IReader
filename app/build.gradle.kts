@@ -76,6 +76,7 @@ tasks {
 
 
 dependencies {
+    implementation("androidx.core:core-splashscreen:1.0.0-beta01")
     implementation(project(Modules.coreUi))
     implementation(project(Modules.data))
     implementation(project(Modules.domain))

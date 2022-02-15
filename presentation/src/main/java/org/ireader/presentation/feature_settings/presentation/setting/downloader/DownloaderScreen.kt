@@ -128,7 +128,7 @@ fun DownloaderScreen(
                             navController.navigate(
                                 BookDetailScreenSpec.buildRoute(
                                     sourceId = download.sourceId,
-                                    bookId = download.id
+                                    bookId = download.bookId
                                 )
                             )
                         }
@@ -145,7 +145,7 @@ fun DownloaderScreen(
                                         title = "StopDownloads",
                                         onClick = {
                                             viewModel.stopDownloads(context = context,
-                                                download.id,
+                                                download.bookId,
                                                 download.sourceId)
                                             viewModel.showSnackBar(UiText.DynamicString("The Download of ${download.bookName} was stopped"))
                                             viewModel.insertSavedDownload(download.copy(priority = 0))
@@ -159,7 +159,7 @@ fun DownloaderScreen(
                                         title = "Start Download",
                                         onClick = {
                                             viewModel.startDownloadService(context = context,
-                                                download.id,
+                                                download.bookId,
                                                 download.sourceId)
                                             viewModel.showSnackBar(UiText.DynamicString("The Download of ${download.bookName} was Started"))
                                             viewModel.insertSavedDownload(download.copy(priority = 1))
