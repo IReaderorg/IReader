@@ -11,9 +11,14 @@ import androidx.paging.cachedIn
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import org.ireader.core.R
+import org.ireader.core.utils.UiEvent
+import org.ireader.core.utils.UiText
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.source.Extensions
@@ -34,7 +39,10 @@ class ChapterDetailViewModel @Inject constructor(
     extensions: Extensions,
 ) : ViewModel() {
 
-    var state by mutableStateOf(ChapterDetailState(source = extensions.mappingSourceNameToSource(0)))
+    private val _eventFlow = MutableSharedFlow<UiEvent>()
+    val eventFlow = _eventFlow.asSharedFlow()
+
+    var state by mutableStateOf(ChapterDetailState())
         private set
 
     private val _chapters = MutableStateFlow<PagingData<Chapter>>(PagingData.empty())
@@ -44,9 +52,12 @@ class ChapterDetailViewModel @Inject constructor(
         val sourceId = savedStateHandle.get<Long>(NavigationArgs.sourceId.name)
         val bookId = savedStateHandle.get<Long>(NavigationArgs.bookId.name)
         if (bookId != null && sourceId != null) {
-            state = state.copy(source = extensions.mappingSourceNameToSource(sourceId))
             state = state.copy(book = state.book.copy(id = bookId))
             getLocalBookById(bookId)
+        } else {
+            viewModelScope.launch {
+                showSnackBar(UiText.StringResource(R.string.the_source_is_not_found))
+            }
         }
     }
 
@@ -107,6 +118,14 @@ class ChapterDetailViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             insertUseCases.insertBook(book)
         }
+    }
+
+    suspend fun showSnackBar(message: UiText?) {
+        _eventFlow.emit(
+            UiEvent.ShowSnackbar(
+                uiText = message ?: UiText.StringResource(R.string.error_unknown)
+            )
+        )
     }
 }
 

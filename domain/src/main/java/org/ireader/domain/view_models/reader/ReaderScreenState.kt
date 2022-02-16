@@ -11,8 +11,7 @@ import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.source.Source
 
 data class ReaderScreenState(
-    val isLocalLoading: Boolean = false,
-    val isRemoteLoading: Boolean = false,
+    val isLoading: Boolean = false,
     val isLocalLoaded: Boolean = false,
     val isRemoteLoaded: Boolean = false,
     val enable: Boolean = true,
@@ -23,7 +22,7 @@ data class ReaderScreenState(
     val chapter: Chapter? = null,
     val chapters: List<Chapter> = emptyList(),
     val error: UiText = UiText.StringResource(R.string.no_error),
-    val source: Source,
+    val source: Source? = null,
     val isReaderModeEnable: Boolean = true,
     val isSettingModeEnable: Boolean = false,
     val isMainBottomModeEnable: Boolean = true,

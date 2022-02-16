@@ -10,6 +10,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.work.*
 import dagger.hilt.android.lifecycle.HiltViewModel
+import isLoading.DetailState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -18,7 +19,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
 import org.ireader.core.R
 import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
@@ -31,6 +31,8 @@ import org.ireader.domain.feature_services.DownloaderService.DownloadService.Com
 import org.ireader.domain.feature_services.DownloaderService.DownloadService.Companion.DOWNLOADER_SOURCE_ID
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
+import org.ireader.domain.models.entities.updateBook
+import org.ireader.domain.models.source.Source
 import org.ireader.domain.source.Extensions
 import org.ireader.domain.use_cases.fetchers.FetchUseCase
 import org.ireader.domain.use_cases.local.DeleteUseCase
@@ -74,7 +76,6 @@ class BookDetailViewModel @Inject constructor(
     var getBookDetailJob: Job? = null
     var getChapterDetailJob: Job? = null
 
-
     lateinit var work: OneTimeWorkRequest
 
     val webView: WebView = hiltWebView
@@ -84,18 +85,35 @@ class BookDetailViewModel @Inject constructor(
 
     val eventFlow = _eventFlow.asSharedFlow()
 
+
     init {
         val bookId = savedStateHandle.get<Long>("bookId")
         val sourceId = savedStateHandle.get<Long>("sourceId")
         if (bookId != null && sourceId != null) {
             val source = extensions.mappingSourceNameToSource(sourceId)
-            state = state.copy(source = source)
-            state = state.copy(isLocalLoading = true)
-            chapterState = chapterState.copy(isLocalLoading = true)
-            getLocalBookById(bookId)
-            getLocalChaptersByBookId(bookId = bookId)
+            if (source != null) {
+                state = state.copy(source = source)
+                state = state.copy(isLoading = true)
+                chapterState = chapterState.copy(isLoading = true)
+                getLocalBookById(bookId, source)
+                getLocalChaptersByBookId(bookId = bookId)
+            } else {
+                viewModelScope.launch {
+                    showSnackBar(UiText.StringResource(R.string.the_source_is_not_found))
+                }
+            }
+        } else {
+            viewModelScope.launch {
+                showSnackBar(UiText.StringResource(R.string.something_is_wrong_with_this_book))
+            }
         }
     }
+//    val book = getBookUseCases.getBookById(savedStateHandle.get<Long>(NavigationArgs.bookId.name)!!)
+//        .onEach { book ->
+//            if (book != null) {
+//                state = state.copy(book = book)
+//            }
+//        }.launchWhenActive()
 
 //    val book by getBookUseCases.getBookById(id = state.book.id).onEach(::onBookUpdate)
 //        .asState(null, viewModelScope)
@@ -141,7 +159,7 @@ class BookDetailViewModel @Inject constructor(
     }
 
 
-    fun getLocalBookById(bookId: Long) {
+    fun getLocalBookById(bookId: Long, source: Source) {
         toggleLocalBookLoading(true)
         clearBookError()
         getBookUseCases.getBookById(id = bookId)
@@ -152,8 +170,8 @@ class BookDetailViewModel @Inject constructor(
                     setBook(book)
                     toggleInLibrary(book.favorite)
                     if (book.lastUpdated < 1L && !state.isRemoteLoaded) {
-                        getRemoteBookDetail(book)
-                        getRemoteChapterDetail(book)
+                        getRemoteBookDetail(book, source)
+                        getRemoteChapterDetail(book, source)
                     }
                     isLocalBookLoaded(true)
                 } else {
@@ -165,7 +183,7 @@ class BookDetailViewModel @Inject constructor(
     }
 
 
-    private fun getLocalChaptersByBookId(bookId: Long) {
+    fun getLocalChaptersByBookId(bookId: Long) {
         clearChapterError()
         toggleLocalChapterLoading(true)
         getChapterUseCase.getChaptersByBookId(
@@ -183,22 +201,20 @@ class BookDetailViewModel @Inject constructor(
     }
 
 
-    fun getRemoteBookDetail(book: Book) {
+    fun getRemoteBookDetail(book: Book, source: Source) {
         toggleRemoteBookLoading(true)
         clearBookError()
         isLocalBookLoaded(false)
         getBookDetailJob?.cancel()
-        getBookDetailJob = remoteUseCases.getBookDetail(book = book, source = state.source)
+        getBookDetailJob = remoteUseCases.getBookDetail(book = book, source = source)
             .onEach { result ->
                 when (result) {
                     is Resource.Success -> {
                         if (result.data != null && state.book != null) {
                             setBook(
-                                book = result.data.copy(
-                                    id = book.id,
-                                    dataAdded = book.dataAdded,
-                                    favorite = book.favorite,
-                                    lastUpdated = Clock.System.now().toEpochMilliseconds(),
+                                book = updateBook(
+                                    result.data,
+                                    book
                                 )
                             )
                             toggleRemoteBookLoading(false)
@@ -217,12 +233,12 @@ class BookDetailViewModel @Inject constructor(
 
     }
 
-    fun getRemoteChapterDetail(book: Book) {
+    fun getRemoteChapterDetail(book: Book, source: Source) {
         toggleRemoteChaptersLoading(true)
         clearChapterError()
         toggleAreChaptersLoaded(false)
         getChapterDetailJob?.cancel()
-        getChapterDetailJob = remoteUseCases.getRemoteChapters(book = book, source = state.source)
+        getChapterDetailJob = remoteUseCases.getRemoteChapters(book = book, source = source)
             .onEach { result ->
                 when (result) {
                     is Resource.Success -> {
@@ -250,7 +266,7 @@ class BookDetailViewModel @Inject constructor(
     }
 
     @ExperimentalCoroutinesApi
-    fun getWebViewData() {
+    fun getWebViewData(source: Source) {
         getFromWebViewJob?.cancel()
         getFromWebViewJob = viewModelScope.launch {
             showSnackBar(UiText.StringResource(org.ireader.core.R.string.trying_to_fetch))
@@ -259,7 +275,7 @@ class BookDetailViewModel @Inject constructor(
                 insertUseCases = localInsertUseCases,
                 localBook = state.book,
                 localChapters = chapterState.chapters,
-                source = state.source,
+                source = source,
                 pageSource = webView.getHtml()
             ).onEach { result ->
                 when (result) {
@@ -357,7 +373,7 @@ class BookDetailViewModel @Inject constructor(
     }
 
     private fun toggleLocalChapterLoading(isLoading: Boolean) {
-        chapterState = chapterState.copy(isLocalLoading = isLoading)
+        chapterState = chapterState.copy(isLoading = isLoading)
     }
 
     private fun clearChapterError() {
@@ -373,7 +389,7 @@ class BookDetailViewModel @Inject constructor(
     }
 
     private fun toggleRemoteChaptersLoading(isLoading: Boolean) {
-        chapterState = chapterState.copy(isRemoteLoading = isLoading)
+        chapterState = chapterState.copy(isLoading = isLoading)
     }
 
     /********************************************************/
@@ -386,11 +402,11 @@ class BookDetailViewModel @Inject constructor(
     }
 
     private fun toggleLocalBookLoading(isLoading: Boolean) {
-        state = state.copy(isLocalLoading = isLoading)
+        state = state.copy(isLoading = isLoading)
     }
 
     private fun toggleRemoteBookLoading(isLoading: Boolean) {
-        state = state.copy(isRemoteLoading = isLoading)
+        state = state.copy(isLoading = isLoading)
     }
 
     private fun toggleInLibrary(enable: Boolean) {

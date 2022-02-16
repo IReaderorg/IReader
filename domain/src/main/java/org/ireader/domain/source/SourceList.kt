@@ -8,15 +8,10 @@ class Extensions(
     private val context: Context,
 ) {
 
-    fun mappingSourceNameToSource(id: Long): Source {
+    fun mappingSourceNameToSource(id: Long): Source? {
         val sources = getSources()
-        var source = getSources()[0]
-        sources.forEach { currentSource ->
-            if (currentSource.sourceId == id) {
-                source = currentSource
-            }
-        }
-        return source
+
+        return sources.find { it.sourceId == id }
     }
 
 
@@ -535,7 +530,7 @@ class AvailableSources {
             nameSelector = "a",
             linkSelector = "a",
             linkAtt = "href",
-            isChapterStatsFromFirst = false
+            isChapterStatsFromFirst = true
         ),
         content = Content(
             pageTitleSelector = "h1",

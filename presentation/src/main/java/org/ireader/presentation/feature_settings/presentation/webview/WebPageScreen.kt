@@ -40,10 +40,11 @@ fun WebPageScreen(
     navController: NavController = rememberNavController(),
     viewModel: WebViewPageModel = hiltViewModel(),
 ) {
-    val urlToRender = viewModel.state.value.url
+    val urlToRender = viewModel.state.url
     val scaffoldState = rememberScaffoldState()
     val context = LocalContext.current
-    val webView = viewModel.state.value.webView
+    val webView = viewModel.state.webView
+    val source = viewModel.state.source
 
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
@@ -69,11 +70,11 @@ fun WebPageScreen(
                     TopAppBarBackButton(navController = navController)
                 },
                 actions = {
-                    if (viewModel.state.value.fetcher == FetchType.DetailFetchType) {
+                    if (viewModel.state.fetcher == FetchType.DetailFetchType && source != null) {
                         TopAppBarActionButton(imageVector = Icons.Default.TrackChanges,
                             title = "Menu",
                             onClick = {
-                                viewModel.getInfo()
+                                viewModel.getInfo(source = source)
                             })
                     }
                 },

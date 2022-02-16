@@ -62,6 +62,7 @@ fun ChapterDetailScreen(
     val context = LocalContext.current
 
 
+
     LaunchedEffect(key1 = true) {
         viewModel.getLocalBookById(state.book.id)
     }
@@ -136,7 +137,7 @@ fun ChapterDetailScreen(
                                     modifier = modifier.clickable {
                                         navController.navigate(ReaderScreenSpec.buildRoute(
                                             bookId = book.id,
-                                            sourceId = viewModel.state.source.sourceId,
+                                            sourceId = book.sourceId,
                                             chapterId = chapter.id,
                                         ))
                                     },

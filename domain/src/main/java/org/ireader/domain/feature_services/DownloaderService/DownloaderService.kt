@@ -103,7 +103,8 @@ class DownloadService @AssistedInject constructor(
             try {
                 chapters.forEachIndexed { index, chapter ->
                     if (chapter.content.joinToString().length < 10) {
-                        remoteUseCases.getRemoteReadingContent(chapter = chapter, source = source)
+                        //TODO check this later source!!
+                        remoteUseCases.getRemoteReadingContent(chapter = chapter, source = source!!)
                             .flowOn(Dispatchers.Main)
                             .collectIndexed { i, chapterPage ->
                                 if (chapterPage.data != null) {

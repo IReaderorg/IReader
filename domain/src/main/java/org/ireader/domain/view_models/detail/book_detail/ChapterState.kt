@@ -4,10 +4,15 @@ import org.ireader.core.utils.UiText
 import org.ireader.domain.models.entities.Chapter
 
 data class ChapterState(
-    val isLocalLoading: Boolean = false,
-    val isRemoteLoading: Boolean = false,
+    override val isLoading: Boolean = false,
+    override val error: UiText = UiText.DynamicString(""),
     val chapters: List<Chapter> = emptyList(),
-    val error: UiText = UiText.DynamicString(""),
     val loaded: Boolean = false,
     val chapterLoadingProgress: Float = 0f,
-)
+) : BaseState
+
+
+interface BaseState {
+    val isLoading: Boolean
+    val error: UiText
+}

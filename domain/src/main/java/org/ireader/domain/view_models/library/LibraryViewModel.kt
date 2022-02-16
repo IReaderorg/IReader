@@ -11,6 +11,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.models.DisplayMode
 import org.ireader.domain.models.FilterType
 import org.ireader.domain.models.SortType
@@ -18,7 +19,6 @@ import org.ireader.domain.models.entities.Book
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetBookUseCases
 import org.ireader.domain.use_cases.preferences.reader_preferences.PreferencesUseCase
-import org.ireader.domain.view_models.base_view_model.BaseViewModel
 import javax.inject.Inject
 
 
@@ -71,11 +71,6 @@ class LibraryViewModel @Inject constructor(
 
     }
 
-    val books = localGetBookUseCases.GetInLibraryBooksPagingData(
-        state.sortType,
-        isAsc = state.isSortAcs,
-        unreadFilter = state.unreadFilter
-    ).launchWhenActive()
 
     private fun getLibraryBooks() {
         viewModelScope.launch {

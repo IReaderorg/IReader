@@ -6,7 +6,6 @@ import org.ireader.domain.models.LayoutType
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.source.BooksPage
 import org.ireader.domain.models.source.Source
-import org.ireader.domain.source.SourceTower
 
 data class ExploreScreenState(
     val isLoading: Boolean = false,
@@ -22,6 +21,6 @@ data class ExploreScreenState(
     val isLatestUpdateMode: Boolean = true,
     val hasNextPage: Boolean = true,
     val exploreType: ExploreType = ExploreType.Latest,
-    val source: Source = SourceTower.create(),
+    val source: Source? = null,
 )
 

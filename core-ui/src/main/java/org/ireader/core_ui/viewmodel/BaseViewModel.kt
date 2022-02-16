@@ -55,6 +55,18 @@ abstract class BaseViewModel : androidx.lifecycle.ViewModel() {
             .launchIn(scope)
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun <T> Flow<T>.launchWhenActive() = channelFlow<T> {
+        scope.launch {
+            activeScope
+            this@launchWhenActive.filterNotNull()
+                .first {
+                    send(it)
+                    true
+                }
+        }
+    }
+
     internal fun setActive() {
         val currScope = activeScope.value
         if (currScope != null) return

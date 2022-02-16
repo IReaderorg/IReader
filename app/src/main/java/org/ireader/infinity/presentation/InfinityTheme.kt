@@ -8,6 +8,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import org.ireader.core.utils.DeviceUtil.isMiui
 import org.ireader.core_ui.theme.AppColors
 import org.ireader.core_ui.theme.LocalTransparentStatusBar
 import org.ireader.core_ui.theme.Shapes
@@ -27,6 +28,8 @@ fun InfinityTheme(
 
 
     LaunchedEffect(customColors.isBarLight, transparentStatusBar) {
+        //TODO miui is still not respond correctly to rememberSystemUiController
+        if (isMiui) return@LaunchedEffect
         val darkIcons =
             if (transparentStatusBar) materialColors.isLight else customColors.isBarLight
 
@@ -40,6 +43,7 @@ fun InfinityTheme(
     }
 
     LaunchedEffect(customColors.isBarLight) {
+        if (isMiui) return@LaunchedEffect
         val darkIcons =
             if (transparentStatusBar) materialColors.isLight else customColors.isBarLight
         systemUiController.setStatusBarColor(

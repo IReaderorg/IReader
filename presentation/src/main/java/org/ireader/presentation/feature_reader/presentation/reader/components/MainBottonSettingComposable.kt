@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 import org.ireader.core.R
 import org.ireader.core.utils.UiText
 import org.ireader.domain.models.entities.Chapter
+import org.ireader.domain.models.source.Source
 import org.ireader.domain.view_models.reader.ReaderScreenViewModel
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
 import org.ireader.presentation.utils.scroll.CarouselScrollState
@@ -28,6 +29,7 @@ fun MainBottomSettingComposable(
     scaffoldState: ScaffoldState,
     scrollState: CarouselScrollState,
     chapter: Chapter,
+    source: Source,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val currentIndex = viewModel.state.currentChapterIndex
@@ -38,7 +40,7 @@ fun MainBottomSettingComposable(
         onNext = {
             if (currentIndex < chapters.lastIndex) {
                 viewModel.updateChapterSliderIndex(currentIndex + 1)
-                viewModel.getChapter(viewModel.getCurrentChapterByIndex().id)
+                viewModel.getChapter(viewModel.getCurrentChapterByIndex().id, source = source)
                 coroutineScope.launch {
                     scrollState.scrollTo(0)
                 }
@@ -52,7 +54,7 @@ fun MainBottomSettingComposable(
         onPrev = {
             if (currentIndex > 0) {
                 viewModel.updateChapterSliderIndex(currentIndex - 1)
-                viewModel.getChapter(viewModel.getCurrentChapterByIndex().id)
+                viewModel.getChapter(viewModel.getCurrentChapterByIndex().id, source = source)
                 coroutineScope.launch {
                     scrollState.scrollTo(0)
                 }
@@ -67,7 +69,7 @@ fun MainBottomSettingComposable(
                 viewModel.showSnackBar(UiText.DynamicString(chapters[viewModel.state.currentChapterIndex].title))
             }
             viewModel.updateChapterSliderIndex(currentIndex)
-            viewModel.getChapter(chapters[viewModel.state.currentChapterIndex].id)
+            viewModel.getChapter(chapters[viewModel.state.currentChapterIndex].id, source = source)
             coroutineScope.launch {
                 scrollState.scrollTo(0)
             }

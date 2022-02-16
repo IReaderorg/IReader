@@ -3,7 +3,6 @@ package org.ireader.domain.view_models.detail.chapter_detail
 import org.ireader.domain.models.LastReadChapter
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
-import org.ireader.domain.models.source.Source
 
 data class ChapterDetailState(
     val isLoading: Boolean = false,
@@ -14,7 +13,6 @@ data class ChapterDetailState(
     val chapterOrderType: OrderType = OrderType.Ascending,
     val listOfLastReadChapter: List<LastReadChapter> = emptyList(),
     val localChapters: List<Chapter> = emptyList(),
-    val source: Source,
     val reverse: Boolean = false,
     val currentScrollPosition: Int = 0,
 )

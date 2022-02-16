@@ -14,7 +14,7 @@
     <string name="no_chapter_found_error">There is No chapter with this name.</string>
     <string name="something_is_wrong_with_this_chapter">Something is wrong with this chapter.</string>
     <string name="trying_in_few_second">Try again in a few second.</string>
-    <string name="failed_to_get_content">Failed to to get the content.</string>
+    <string name="failed_to_get_content">Failed to get the content.</string>
     <string name="noInternetError">Could\'t Read Server, Check Your Internet Connection.</string>
     <string name="no_chapter_is_available">No Chapter is Available.</string>
     <string name="no_data_found_error">No Data was Found.</string>
@@ -24,6 +24,8 @@
     <string name="trying_to_fetch">Trying to fetch…</string>
     <string name="this_is_first_chapter">This is the first chapter</string>
     <string name="this_is_last_chapter">This is the last chapter</string>
+    <string name="the_source_is_not_found">The Source was not found.</string>
+    <string name="something_is_wrong_with_this_book">Something is wrong with this book.</string>
 
     <!-- Download Notification -->
     <string name="download_notifier_downloader_title">Downloader</string>

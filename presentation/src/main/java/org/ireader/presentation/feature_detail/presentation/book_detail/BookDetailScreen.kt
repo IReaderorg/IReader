@@ -33,6 +33,7 @@ import org.ireader.presentation.R
 import org.ireader.presentation.feature_detail.presentation.book_detail.components.BookDetailScreenBottomBar
 import org.ireader.presentation.feature_detail.presentation.book_detail.components.CardTileComposable
 import org.ireader.presentation.feature_detail.presentation.book_detail.components.DotsFlashing
+import org.ireader.presentation.presentation.EmptyScreenComposable
 import org.ireader.presentation.presentation.components.ISnackBarHost
 import org.ireader.presentation.presentation.components.showLoading
 import org.ireader.presentation.ui.ChapterScreenSpec
@@ -47,6 +48,7 @@ fun BookDetailScreen(
     navController: NavController = rememberNavController(),
     viewModel: BookDetailViewModel = hiltViewModel(),
 ) {
+
     val book = viewModel.state.book//viewModel.book
     val scaffoldState = rememberScaffoldState()
     val context = LocalContext.current
@@ -65,7 +67,7 @@ fun BookDetailScreen(
 
     val scope = rememberCoroutineScope()
     val swipeRefreshState =
-        rememberSwipeRefreshState(isRefreshing = viewModel.state.isLocalLoading || viewModel.state.isRemoteLoading)
+        rememberSwipeRefreshState(isRefreshing = viewModel.state.isLoading)
 
     val source = viewModel.state.source
     val state = viewModel.state
@@ -74,10 +76,15 @@ fun BookDetailScreen(
 
     val webview = viewModel.webView
     val scrollState = rememberLazyListState()
-    if (state.isLocalLoading) {
+    if (state.isLoading) {
         showLoading()
     }
-    if (book != null) {
+    if (book != null && source != null) {
+        LaunchedEffect(key1 = true) {
+            viewModel.getLocalBookById(bookId = book.id, source = source)
+            viewModel.getLocalChaptersByBookId(bookId = book.id)
+        }
+
         val isWebViewEnable by remember {
             mutableStateOf(webview.originalUrl == book.link)
         }
@@ -101,13 +108,13 @@ fun BookDetailScreen(
                         },
                         isRead = book.lastRead != 0L,
                         onRead = {
-                            if (book.lastRead != 0L && viewModel.chapterState.chapters.isNotEmpty()) {
+                            if (book.lastRead != 0L && viewModel.chapterState.chapters.isNotEmpty() && source != null) {
                                 navController.navigate(ReaderScreenSpec.buildRoute(
                                     bookId = book.id,
                                     sourceId = source.sourceId,
                                     chapterId = Constants.LAST_CHAPTER,
                                 ))
-                            } else if (viewModel.chapterState.chapters.isNotEmpty()) {
+                            } else if (viewModel.chapterState.chapters.isNotEmpty() && source != null) {
                                 navController.navigate(ReaderScreenSpec.buildRoute(
                                     bookId = book.id,
                                     sourceId = source.sourceId,
@@ -124,7 +131,9 @@ fun BookDetailScreen(
                 SwipeRefresh(
                     state = swipeRefreshState,
                     onRefresh = {
-                        viewModel.getRemoteChapterDetail(book)
+                        source.let {
+                            viewModel.getRemoteChapterDetail(book, source)
+                        }
                     },
                     indicator = { state, trigger ->
                         SwipeRefreshIndicator(
@@ -146,25 +155,27 @@ fun BookDetailScreen(
                             BookDetailScreenLoadedComposable(
                                 navController = navController,
                                 onWebView = {
-                                    navController.navigate(
-                                        WebViewScreenSpec.buildRoute(
-                                            url = viewModel.state.source.baseUrl + getUrlWithoutDomain(
-                                                book.link),
-                                            sourceId = viewModel.state.source.sourceId,
-                                            fetchType = FetchType.DetailFetchType.index,
-                                            bookId = book.id
+                                    source.let {
+                                        navController.navigate(
+                                            WebViewScreenSpec.buildRoute(
+                                                url = source.baseUrl + getUrlWithoutDomain(
+                                                    book.link),
+                                                sourceId = source.sourceId,
+                                                fetchType = FetchType.DetailFetchType.index,
+                                                bookId = book.id
+                                            )
                                         )
-                                    )
+                                    }
                                 },
                                 onSummaryExpand = {
                                     viewModel.onEvent(BookDetailEvent.ToggleSummary)
                                 },
                                 onRefresh = {
-                                    viewModel.getRemoteBookDetail(book)
-                                    viewModel.getRemoteChapterDetail(book)
+                                    viewModel.getRemoteBookDetail(book, source = source)
+                                    viewModel.getRemoteChapterDetail(book, source)
                                 },
                                 onFetch = {
-                                    viewModel.getWebViewData()
+                                    viewModel.getWebViewData(source)
                                 },
                                 isSummaryExpanded = viewModel.expandedSummary,
                                 book = book,
@@ -191,7 +202,7 @@ fun BookDetailScreen(
                                             color = MaterialTheme.colors.onBackground,
                                             style = MaterialTheme.typography.subtitle2
                                         )
-                                        if (viewModel.chapterState.isLocalLoading || viewModel.chapterState.isRemoteLoading) {
+                                        if (viewModel.chapterState.isLoading || viewModel.chapterState.isLoading) {
                                             DotsFlashing()
                                         }
                                         Icon(
@@ -208,6 +219,9 @@ fun BookDetailScreen(
 
             }
         }
+    } else {
+        EmptyScreenComposable(navController = navController,
+            errorResId = R.string.something_is_wrong_with_this_book)
     }
 }
 
