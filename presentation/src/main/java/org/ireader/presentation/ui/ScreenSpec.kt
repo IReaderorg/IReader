@@ -44,6 +44,15 @@ sealed interface ScreenSpec {
 
     }
 
+    @Composable
+    fun IBottomBar(
+        navController: NavController,
+        navBackStackEntry: NavBackStackEntry,
+        scaffoldState: ScaffoldState,
+    ) {
+
+    }
+
 
     @Composable
     fun Content(

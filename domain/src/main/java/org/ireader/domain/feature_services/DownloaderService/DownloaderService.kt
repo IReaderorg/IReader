@@ -9,7 +9,6 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectIndexed
@@ -83,7 +82,6 @@ class DownloadService @AssistedInject constructor(
         val cancelDownloadIntent = WorkManager.getInstance(applicationContext)
             .createCancelPendingIntent(id)
 
-
         val builder =
             NotificationCompat.Builder(applicationContext, CHANNEL_DOWNLOADER_PROGRESS).apply {
                 setContentTitle("Downloading ${bookResource.title}")
@@ -137,38 +135,19 @@ class DownloadService @AssistedInject constructor(
                         delay(2000)
                     }
                 }
-            } catch (e: CancellationException) {
-
-                Timber.e("getNotifications:Download of ${bookResource.title} was cancelled.")
-                notify(
-                    ID_DOWNLOAD_CHAPTER_ERROR,
-                    NotificationCompat.Builder(applicationContext,
-                        Notifications.CHANNEL_DOWNLOADER_ERROR).apply {
-                        setContentTitle("Download of ${bookResource.title} was canceled.")
-                        setSubText("Download was cancelled")
-                        setSmallIcon(R.drawable.ic_downloading)
-                        priority = NotificationCompat.PRIORITY_DEFAULT
-                        setAutoCancel(true)
-                        setContentIntent(defaultNotificationHelper.openBookDetailPendingIntent(
-                            bookId,
-                            sourceId))
-                    }.build()
-                )
-                builder.setProgress(0, 0, false)
-
-                cancel(ID_DOWNLOAD_CHAPTER_PROGRESS)
-                withContext(Dispatchers.IO) {
-                    downloadUseCases.insertDownload(savedDownload.copy(priority = 0))
-                }
-                return Result.failure()
             } catch (e: Exception) {
                 Timber.e("getNotifications: Failed to download ${bookResource.title}")
                 notify(
                     ID_DOWNLOAD_CHAPTER_ERROR,
                     NotificationCompat.Builder(applicationContext,
                         Notifications.CHANNEL_DOWNLOADER_ERROR).apply {
-                        setContentTitle("Failed to download ${bookResource.title}")
-                        setSubText(e.localizedMessage)
+                        if (e.localizedMessage == "Job was cancelled") {
+                            setSubText("Download was cancelled")
+                            setContentTitle("Download of ${bookResource.title} was canceled.")
+                        } else {
+                            setContentTitle("Failed to download ${bookResource.title}")
+                            setSubText(e.localizedMessage)
+                        }
                         setSmallIcon(R.drawable.ic_downloading)
                         priority = NotificationCompat.PRIORITY_DEFAULT
                         setAutoCancel(true)
@@ -204,7 +183,7 @@ class DownloadService @AssistedInject constructor(
                 }.build()
             )
         }
-        //TODO create a viewmodel that store the download preccess
+
         return Result.success()
     }
 

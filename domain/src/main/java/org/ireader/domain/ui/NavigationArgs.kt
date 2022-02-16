@@ -7,15 +7,19 @@ import org.ireader.core.utils.Constants.ARG_HIDE_BOTTOM_BAR
 object NavigationArgs {
     val bookId = navArgument("bookId") {
         type = NavType.LongType
+        defaultValue = 0L
     }
     val sourceId = navArgument("sourceId") {
         type = NavType.LongType
+        defaultValue = 0L
     }
     val chapterId = navArgument("chapterId") {
         type = NavType.LongType
+        defaultValue = 0L
     }
     val exploreType = navArgument("exploreType") {
         type = NavType.IntType
+        defaultValue = 0
     }
     val url = navArgument("url") {
         type = NavType.StringType
@@ -23,6 +27,7 @@ object NavigationArgs {
     }
     val fetchType = navArgument("fetchType") {
         type = NavType.IntType
+        defaultValue = 0
     }
 
     val showBottomNav = navArgument(ARG_HIDE_BOTTOM_BAR) {

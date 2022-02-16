@@ -82,5 +82,8 @@ interface LibraryBookDao {
     @Query("DELETE FROM library")
     suspend fun deleteAllBook()
 
+    @Query("DELETE FROM library WHERE favorite = 0")
+    suspend fun deleteNotInLibraryBooks()
+
 }
 

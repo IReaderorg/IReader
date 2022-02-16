@@ -35,7 +35,7 @@ fun InfinityTheme(
 
 
         systemUiController.setSystemBarsColor(
-            color = if (transparentStatusBar) Color.Transparent else customColors.bars,
+            color = Color.Transparent,
             darkIcons = darkIcons,
             isNavigationBarContrastEnforced = false
         )

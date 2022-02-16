@@ -24,7 +24,7 @@ android {
         targetSdk = ProjectConfig.targetSdk
         versionCode = ProjectConfig.ConfigVersionCode
         versionName = ProjectConfig.ConfigVersionName
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "org.ireader.infinity.HiltTestRunner"
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -90,6 +90,7 @@ dependencies {
     implementation(AndroidX.material)
     implementation(AndroidX.activity)
     implementation(AndroidX.appStartUpRuntime)
+    implementation("androidx.test:runner:1.4.0")
 
     testImplementation(Testing.junit4)
     androidTestImplementation(Testing.extJunit)
@@ -107,9 +108,11 @@ dependencies {
     implementation(Compose.animations)
     implementation(Compose.navigation)
     implementation(Compose.hiltNavigationCompose)
-//    androidTestImplementation(Compose.testing)
-//    debugImplementation(Compose.composeTooling)
-//    implementation(Compose.paging)
+    debugImplementation(Compose.ui_test_manifest)
+    androidTestImplementation(Compose.testing)
+    androidTestImplementation(Compose.ui_test_manifest)
+    debugImplementation(Compose.composeTooling)
+
 
 //    /** Accompanist **/
     implementation(Accompanist.systemUiController)
@@ -145,8 +148,12 @@ dependencies {
     /** Hilt **/
     implementation(DaggerHilt.hiltAndroid)
     kapt(DaggerHilt.hiltAndroidCompiler)
+    kaptTest(DaggerHilt.hiltAndroidCompiler)
+    kaptAndroidTest(DaggerHilt.hiltAndroidCompiler)
     kapt(DaggerHilt.hiltCompiler)
     implementation(DaggerHilt.worker)
+    testImplementation(DaggerHilt.hiltAndroidTest)
+    androidTestImplementation(DaggerHilt.hiltAndroidTest)
 
 
     /** Room **/
@@ -158,22 +165,6 @@ dependencies {
     /** Coil **/
     implementation(Coil.coilCompose)
 
-//    /** JSoup **/
-//    implementation(Jsoup.jsoup)
-
-//    /** DataStore **/
-//    implementation(Datastore.datastore)
-//    implementation(Datastore.core)
-
-//    /** Retrofit **/
-//    implementation(Retrofit.retrofit)
-//    implementation(Retrofit.moshiConverter)
-
-//
-//    /** Gson **/
-//    implementation(Gson.gson)
-//    implementation(Gson.gsonConvertor)
-//
 //
     /** Moshi **/
     implementation(Moshi.moshi)
@@ -186,19 +177,37 @@ dependencies {
 //    /** Network Client - OkHttp**/
     implementation(OkHttp.okHttp3)
     implementation(OkHttp.okHttp3Interceptor)
-//    implementation(OkHttp.okhttp3_doh)
-//    implementation(OkHttp.okio)
 
-//    implementation(Jsonpathkt.jsonpathkt)
-
-
-//    implementation(Kotlin.jsonSerialization)
 
 
     implementation(Koin.koinWorkManager)
     implementation(Koin.koinNavigation)
     implementation(Koin.koinCompose)
 
+
+    testImplementation(Testing.junit4)
+    testImplementation(Testing.junitAndroidExt)
+    testImplementation(Testing.truth)
+    testImplementation(Testing.coroutines)
+    testImplementation(Testing.turbine)
+    testImplementation(Testing.composeUiTest)
+    testImplementation(Testing.mockk)
+    testImplementation(Testing.mockWebServer)
+
+
+    androidTestImplementation(Testing.junit4)
+    androidTestImplementation(Testing.junitAndroidExt)
+    androidTestImplementation(Testing.truth)
+    androidTestImplementation(Testing.coroutines)
+    androidTestImplementation(Testing.turbine)
+    androidTestImplementation(Testing.composeUiTest)
+    androidTestImplementation(Testing.mockk)
+    androidTestImplementation(Testing.mockWebServer)
+    androidTestImplementation(Testing.hiltTesting)
+    androidTestImplementation(Testing.testRunner)
+    // Instrumented Unit Tests
+    androidTestImplementation("androidx.arch.core:core-testing:2.1.0")
+    androidTestImplementation("androidx.test.ext:junit:1.1.3")
 
 }
 
@@ -231,4 +240,8 @@ fun runCommand(command: String): String {
     }
     return String(byteOut.toByteArray()).trim()
 }
-
+allprojects {
+    configurations.all {
+        resolutionStrategy.force("org.objenesis:objenesis:2.6")
+    }
+}

@@ -2,7 +2,6 @@ package org.ireader.domain.use_cases.remote
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.datetime.Clock
 import org.ireader.core.utils.UiText
 import org.ireader.domain.R
 import org.ireader.domain.models.entities.Book
@@ -16,7 +15,7 @@ import java.io.IOException
 class GetBookDetail(private val remoteRepository: RemoteRepository) {
     operator fun invoke(book: Book, source: Source): Flow<Resource<Book>> = flow {
         try {
-            val now = Clock.System.now().toEpochMilliseconds()
+            val now = System.currentTimeMillis()
             Timber.d("Timber: Remote Book Detail for ${book.title} Was called")
             val bookDetail = remoteRepository.getRemoteBookDetail(book = book, source = source)
 

@@ -9,8 +9,9 @@ import org.ireader.core.utils.Constants.CHAPTER_TABLE
 @Serializable
 @Entity(tableName = CHAPTER_TABLE)
 data class Chapter(
-    @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val bookId: Long = 0,
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0,
+    val bookId: Long,
     val link: String,
     val title: String,
     val inLibrary: Boolean = false,
@@ -20,7 +21,7 @@ data class Chapter(
     val dateUploaded: Long = 0,
     val dateFetch: Long = 0,
     val content: List<String> = emptyList(),
-    val lastRead: Boolean = false,
+    var lastRead: Boolean = false,
     val number: Float = -1f,
     val translator: String = "",
 ) {

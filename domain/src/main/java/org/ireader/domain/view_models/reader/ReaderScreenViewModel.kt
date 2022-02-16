@@ -76,7 +76,6 @@ class ReaderScreenViewModel @Inject constructor(
     val webView: WebView = _webView
 
 
-
     init {
         val sourceId = savedStateHandle.get<Long>(NavigationArgs.sourceId.name)
         val chapterId = savedStateHandle.get<Long>(NavigationArgs.chapterId.name)
@@ -128,11 +127,11 @@ class ReaderScreenViewModel @Inject constructor(
 
     private fun getLastChapter(bookId: Long, source: Source) {
         viewModelScope.launch {
-            getChapterUseCase.getLastReadChapter(bookId)
+            getChapterUseCase.findLastReadChapter(bookId)
                 .first { result ->
                     if (result != null) {
                         clearError()
-                        this@ReaderScreenViewModel.toggleLoading(false)
+                        toggleLoading(false)
                         toggleLocalLoaded(true)
                         setChapter(result)
                         setScrollPosition(result.progress)
@@ -142,22 +141,8 @@ class ReaderScreenViewModel @Inject constructor(
                             getReadingContentRemotely(source = source, chapter = chapter)
                         }
                     } else {
-                        this@ReaderScreenViewModel.toggleLoading(false)
+                        toggleLoading(false)
                         toggleLocalLoaded(false)
-//                        showSnackBar(result.uiText)
-                        findFirstChapter(bookId, source = source)
-                    }
-                    true
-                }
-        }
-    }
-
-    fun findFirstChapter(bookId: Long, source: Source) {
-        viewModelScope.launch {
-            getChapterUseCase.findFirstChapter(bookId)
-                .first { chapter ->
-                    if (chapter != null) {
-                        getChapter(chapter.id, source = source)
                     }
                     true
                 }
@@ -234,6 +219,9 @@ class ReaderScreenViewModel @Inject constructor(
                     showSnackBar(UiText.DynamicString("${state.chapter?.title} of ${state.chapter?.title} was Fetched"))
                     if (state.chapter?.content?.size ?: 0 > 10) {
                         state = state.copy(isLocalLoaded = true)
+                        if (localChapter != null) {
+                            getChapter(chapterId = localChapter.id, source)
+                        }
                     }
                     state = state
                 } else {
@@ -293,7 +281,7 @@ class ReaderScreenViewModel @Inject constructor(
                     insertBook(book.copy(
                         lastRead = System.currentTimeMillis()))
                     getChapters(book, source = source)
-                    if (chapterId != Constants.LAST_CHAPTER) {
+                    if (chapterId != Constants.LAST_CHAPTER && chapterId != Constants.NO_VALUE) {
                         getChapter(chapterId, source = source)
                     } else {
                         getLastChapter(bookId, source = source)
@@ -340,12 +328,14 @@ class ReaderScreenViewModel @Inject constructor(
 
     fun readBrightness(context: Context) {
         val brightness = preferencesUseCase.readBrightnessStateUseCase()
-        val activity = context.findComponentActivity()!!
-        val window = activity.window
-        val layoutParams: WindowManager.LayoutParams = window.attributes
-        layoutParams.screenBrightness = brightness
-        window.attributes = layoutParams
-        prefState = prefState.copy(brightness = brightness)
+        val activity = context.findComponentActivity()
+        if (activity != null) {
+            val window = activity.window
+            val layoutParams: WindowManager.LayoutParams = window.attributes
+            layoutParams.screenBrightness = brightness
+            window.attributes = layoutParams
+            prefState = prefState.copy(brightness = brightness)
+        }
     }
 
     private fun readFontSize() {
@@ -375,15 +365,17 @@ class ReaderScreenViewModel @Inject constructor(
 
     @SuppressLint("SourceLockedOrientationActivity")
     fun readOrientation(context: Context) {
-        val activity = context.findComponentActivity()!!
-        when (preferencesUseCase.readOrientationUseCase()) {
-            OrientationMode.Portrait -> {
-                activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-                prefState = prefState.copy(orientation = Orientation.Portrait)
-            }
-            OrientationMode.Landscape -> {
-                activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-                prefState = prefState.copy(orientation = Orientation.Landscape)
+        val activity = context.findComponentActivity()
+        if (activity != null) {
+            when (preferencesUseCase.readOrientationUseCase()) {
+                OrientationMode.Portrait -> {
+                    activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                    prefState = prefState.copy(orientation = Orientation.Portrait)
+                }
+                OrientationMode.Landscape -> {
+                    activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                    prefState = prefState.copy(orientation = Orientation.Landscape)
+                }
             }
         }
     }
@@ -397,17 +389,19 @@ class ReaderScreenViewModel @Inject constructor(
 
     @SuppressLint("SourceLockedOrientationActivity")
     fun saveOrientation(context: Context) {
-        val activity = context.findComponentActivity()!!
-        when (prefState.orientation) {
-            is Orientation.Landscape -> {
-                activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-                prefState = prefState.copy(orientation = Orientation.Portrait)
-                preferencesUseCase.saveOrientationUseCase(OrientationMode.Portrait)
-            }
-            is Orientation.Portrait -> {
-                activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-                prefState = prefState.copy(orientation = Orientation.Landscape)
-                preferencesUseCase.saveOrientationUseCase(OrientationMode.Landscape)
+        val activity = context.findComponentActivity()
+        if (activity != null) {
+            when (prefState.orientation) {
+                is Orientation.Landscape -> {
+                    activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                    prefState = prefState.copy(orientation = Orientation.Portrait)
+                    preferencesUseCase.saveOrientationUseCase(OrientationMode.Portrait)
+                }
+                is Orientation.Portrait -> {
+                    activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                    prefState = prefState.copy(orientation = Orientation.Landscape)
+                    preferencesUseCase.saveOrientationUseCase(OrientationMode.Landscape)
+                }
             }
         }
     }
@@ -466,14 +460,16 @@ class ReaderScreenViewModel @Inject constructor(
     }
 
     private fun saveBrightness(brightness: Float, context: Context) {
-        val activity = context.findComponentActivity()!!
-        val window = activity.window
-        prefState = prefState.copy(brightness = brightness)
-        val layoutParams: WindowManager.LayoutParams = window.attributes
-        layoutParams.screenBrightness = brightness
-        window.attributes = layoutParams
+        val activity = context.findComponentActivity()
+        if (activity != null) {
+            val window = activity.window
+            prefState = prefState.copy(brightness = brightness)
+            val layoutParams: WindowManager.LayoutParams = window.attributes
+            layoutParams.screenBrightness = brightness
+            window.attributes = layoutParams
 
-        preferencesUseCase.saveBrightnessStateUseCase(brightness)
+            preferencesUseCase.saveBrightnessStateUseCase(brightness)
+        }
     }
 
 
@@ -514,12 +510,15 @@ class ReaderScreenViewModel @Inject constructor(
 
 
     fun restoreSetting(context: Context) {
-        val activity = context.findComponentActivity()!!
-        val window = activity.window
-        val layoutParams: WindowManager.LayoutParams = window.attributes
-        layoutParams.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
-        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-        window.attributes = layoutParams
+        val activity = context.findComponentActivity()
+        if (activity != null) {
+            val window = activity.window
+            val layoutParams: WindowManager.LayoutParams = window.attributes
+            layoutParams.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
+            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+            window.attributes = layoutParams
+        }
+
 
     }
 

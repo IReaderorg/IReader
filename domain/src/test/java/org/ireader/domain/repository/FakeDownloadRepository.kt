@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.ireader.domain.models.entities.SavedDownload
 
-class FakeDownloadRepository : DownloadRepository {
+internal class FakeDownloadRepository : DownloadRepository {
 
     val downloads = mutableListOf<SavedDownload>()
 
@@ -15,13 +15,14 @@ class FakeDownloadRepository : DownloadRepository {
     }
 
     override fun findAllDownloadsByPaging(): PagingSource<Int, SavedDownload> {
-        TODO("Not yet implemented")
+        throw UnsupportedOperationException("unsupported")
     }
 
-    override fun findOneDownload(bookId: Long): Flow<SavedDownload?> = flow {
+    override fun findOneSavedDownload(bookId: Long): Flow<SavedDownload?> = flow {
         val result = downloads.find { it.bookId == bookId }
         emit(result)
     }
+
 
     override suspend fun insertDownload(savedDownload: SavedDownload) {
         downloads.add(savedDownload)
@@ -31,15 +32,15 @@ class FakeDownloadRepository : DownloadRepository {
         downloads.addAll(savedDownloadList)
     }
 
-    override suspend fun deleteDownload(savedDownload: SavedDownload) {
+    override suspend fun deleteSavedDownload(savedDownload: SavedDownload) {
         downloads.removeIf { it.bookId == savedDownload.bookId }
     }
 
-    override suspend fun deleteDownloadByBookId(bookId: Long) {
+    override suspend fun deleteSavedDownloadByBookId(bookId: Long) {
         downloads.removeIf { it.bookId == bookId }
     }
 
-    override suspend fun deleteAllDownload() {
+    override suspend fun deleteAllSavedDownload() {
         downloads.clear()
     }
 }

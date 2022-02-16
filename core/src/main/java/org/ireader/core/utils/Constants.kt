@@ -49,6 +49,7 @@ object Constants {
 
     const val NULL_VALUE = -1L
     const val LAST_CHAPTER = -2L
+    const val NO_VALUE = 0L
 
 
 }

@@ -3,6 +3,9 @@ package org.ireader.domain.source
 import android.util.Patterns
 import com.nfeld.jsonpathkt.JsonPath
 import com.nfeld.jsonpathkt.extension.read
+import ir.kazemcodes.infinity.core.utils.call
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import okhttp3.Headers
 import okhttp3.Request
@@ -134,13 +137,13 @@ data class SourceTower constructor(
     }
 
     override fun searchRequest(page: Int, query: String): Request {
-        if (search?.isGetRequestType == true) {
-            return org.ireader.domain.utils.GET("$baseUrl${
+        return if (search?.isGetRequestType == true) {
+            org.ireader.domain.utils.GET("$baseUrl${
                 getUrlWithoutDomain(fetchSearchEndpoint?.replace(searchQueryFormat,
                     query) ?: "")
             }")
         } else {
-            return org.ireader.domain.utils.POST(
+            org.ireader.domain.utils.POST(
                 "$baseUrl${
                     getUrlWithoutDomain(fetchSearchEndpoint?.replace(searchQueryFormat,
                         query) ?: "")
@@ -222,7 +225,7 @@ data class SourceTower constructor(
 
 
 
-        return Chapter(link = link, title = title)
+        return Chapter(link = link, title = title, bookId = 0)
     }
 
     override fun searchFromElement(element: Element): Book {
@@ -456,7 +459,7 @@ data class SourceTower constructor(
         val title = jsonObject[mName]?.formatHtmlText() ?: ""
         val link = jsonObject[mLink] ?: ""
 
-        return Chapter(title = title, link = link)
+        return Chapter(title = title, link = link, bookId = 0)
     }
 
     fun searchBookFromJson(jsonObject: Map<String, String>): Book {
@@ -535,7 +538,8 @@ data class SourceTower constructor(
         return Chapter(
             link = "",
             title = "",
-            content = content
+            content = content,
+            bookId = 0
         )
     }
 
@@ -576,16 +580,22 @@ data class SourceTower constructor(
      * Fetchers
      */
     override suspend fun fetchChapters(book: Book, page: Int): ChaptersPage {
-        val request = client.call(chaptersRequest(book, page))
+        return kotlin.runCatching {
+            return@runCatching withContext(Dispatchers.IO) {
+                val request = client.call(request = chaptersRequest(book, page))
+                //val request = client.call(chaptersRequest(book, page))
 
-        var chapters = chapterListParse(request)
-        if (!request.isSuccessful) {
-            chapters =
-                chaptersParse(network.getHtmlFromWebView(baseUrl + getUrlWithoutDomain(book.link),
-                    this.chapters?.ajaxSelector))
-        }
-        request.close()
-        return chapters.copy(chapters = chapters.chapters, hasNextPage = chapters.hasNextPage)
+                var chapters = chapterListParse(request)
+                if (!request.isSuccessful) {
+                    chapters =
+                        chaptersParse(network.getHtmlFromWebView(baseUrl + getUrlWithoutDomain(book.link),
+                            this@SourceTower.chapters?.ajaxSelector))
+                }
+
+                return@withContext chapters.copy(chapters = chapters.chapters,
+                    hasNextPage = chapters.hasNextPage)
+            }
+        }.getOrThrow()
     }
 
     /**
@@ -594,15 +604,22 @@ data class SourceTower constructor(
      * @param page the page number to retrieve.
      */
     override suspend fun fetchPopular(page: Int): BooksPage {
-        val request = client.call(popularRequest(page))
-        var books = popularParse(request, page = page)
-        if (!request.isSuccessful) {
-            books =
-                popularParse(document = network.getHtmlFromWebView(baseUrl + fetchPopularEndpoint?.applyPageFormat(
-                    page)), page = page)
-        }
-        request.close()
-        return books
+        return kotlin.runCatching {
+            withContext(Dispatchers.IO) {
+                val request = client.call(popularRequest(page))
+                //val request = client.call(popularRequest(page))
+                var books = popularParse(request, page = page)
+                if (!request.isSuccessful) {
+                    books =
+                        popularParse(document = network.getHtmlFromWebView(baseUrl + fetchPopularEndpoint?.applyPageFormat(
+                            page)), page = page)
+                }
+
+                return@withContext books
+            }
+        }.getOrThrow()
+
+
     }
 
     /**
@@ -618,16 +635,21 @@ data class SourceTower constructor(
     }
 
     override suspend fun fetchLatest(page: Int): BooksPage {
-        val request = client.call(latestRequest(page))
-        var books = latestParse(request, page = page)
-        if (!request.isSuccessful) {
-            books =
-                latestParse(network.getHtmlFromWebView(baseUrl + fetchLatestEndpoint?.applyPageFormat(
-                    page)), page = page)
-        }
+        return kotlin.runCatching {
+            return@runCatching withContext(Dispatchers.IO) {
+                val request = client.call(latestRequest(page))
+                //val request = client.call(latestRequest(page))
+                var books = latestParse(request, page = page)
+                if (!request.isSuccessful) {
+                    books =
+                        latestParse(network.getHtmlFromWebView(baseUrl + fetchLatestEndpoint?.applyPageFormat(
+                            page)), page = page)
+                }
 
-        request.close()
-        return books
+
+                return@withContext books
+            }
+        }.getOrThrow()
     }
 
     /**
@@ -637,14 +659,20 @@ data class SourceTower constructor(
      * @param page the page number to retrieve.
      */
     override suspend fun fetchBook(book: Book): Book {
-        val request = client.call(detailsRequest(book))
-        var completebook = detailParse(client.call(detailsRequest(book)))
-        if (!request.isSuccessful) {
-            completebook =
-                detailParse(network.getHtmlFromWebView(baseUrl + getUrlWithoutDomain(book.link)))
-        }
-        request.close()
-        return completebook
+        return kotlin.runCatching {
+            return@runCatching withContext(Dispatchers.IO) {
+                val request = client.call(detailsRequest(book))
+                //val request = client.call(detailsRequest(book))
+                var completebook = detailParse(client.call(detailsRequest(book)))
+                if (!request.isSuccessful) {
+                    completebook =
+                        detailParse(network.getHtmlFromWebView(baseUrl + getUrlWithoutDomain(book.link)))
+                }
+
+                return@withContext completebook
+            }
+        }.getOrThrow()
+
     }
 
 
@@ -655,18 +683,25 @@ data class SourceTower constructor(
      * @param page the page number to retrieve.
      */
     override suspend fun fetchContent(chapter: Chapter): ContentPage {
-        val request = client.call(contentRequest(chapter))
-        var content = pageContentParse(request)
+        return kotlin.runCatching {
+            return@runCatching withContext(Dispatchers.IO) {
+                val request = client.call(contentRequest(chapter))
+                //val request = client.call(contentRequest(chapter))
+                var content = pageContentParse(request)
 
-        if (!request.isSuccessful) {
-            content =
-                contentFromElementParse(
-                    network.getHtmlFromWebView(baseUrl + getUrlWithoutDomain(
-                        chapter.link)),
-                )
-        }
-        request.close()
-        return content
+                if (!request.isSuccessful) {
+                    content =
+                        contentFromElementParse(
+                            network.getHtmlFromWebView(baseUrl + getUrlWithoutDomain(
+                                chapter.link)),
+                        )
+                }
+
+                return@withContext content
+            }
+        }.getOrThrow()
+
+
     }
 
     /**
@@ -677,16 +712,23 @@ data class SourceTower constructor(
      * @param query the search query to retrieve.
      */
     override suspend fun fetchSearch(page: Int, query: String): BooksPage {
-        val request = client.call(searchRequest(page, query))
-        var books = searchBookParse(request, page)
-        if (!request.isSuccessful) {
-            books =
-                searchParse(network.getHtmlFromWebView(baseUrl + fetchSearchEndpoint?.applySearchFormat(
-                    query,
-                    page)), page = page)
-        }
-        request.close()
-        return books
+        return kotlin.runCatching {
+            return@runCatching withContext(Dispatchers.IO) {
+                val request = client.call(searchRequest(page, query))
+                //val request = client.call(searchRequest(page, query))
+                var books = searchBookParse(request, page)
+                if (!request.isSuccessful) {
+                    books =
+                        searchParse(network.getHtmlFromWebView(baseUrl + fetchSearchEndpoint?.applySearchFormat(
+                            query,
+                            page)), page = page)
+                }
+
+                return@withContext books
+            }
+        }.getOrThrow()
+
+
     }
 
 

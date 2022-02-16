@@ -108,46 +108,6 @@ class BookDetailViewModel @Inject constructor(
             }
         }
     }
-//    val book = getBookUseCases.getBookById(savedStateHandle.get<Long>(NavigationArgs.bookId.name)!!)
-//        .onEach { book ->
-//            if (book != null) {
-//                state = state.copy(book = book)
-//            }
-//        }.launchWhenActive()
-
-//    val book by getBookUseCases.getBookById(id = state.book.id).onEach(::onBookUpdate)
-//        .asState(null, viewModelScope)
-//
-//    fun onBookUpdate(book: Book?) {
-//        if (book != null && state.source != null) {
-//            viewModelScope.launch {
-//                updateBook(metadata = state.isLocalLoaded, chapters = state.isLocalLoaded)
-//            }
-//        }
-//    }
-
-//    fun updateBook(
-//        metadata: Boolean = false,
-//        chapters: Boolean = false,
-//    ) {
-//        val book = book ?: return
-//        viewModelScope.launch {
-//            withContext(Dispatchers.IO) {
-//                isRefreshing = true
-//                try {
-//                    if (chapters) {
-//                        getRemoteChapterDetail(book)
-//                    }
-//                    if (metadata) {
-//                        getRemoteBookDetail(book)
-//                    }
-//                } catch (e: Throwable) {
-//                    Timber.e(e, "Error while refreshing Book")
-//                }
-//                isRefreshing = false
-//            }
-//        }
-//    }
 
     fun onEvent(event: BookDetailEvent) {
         when (event) {
@@ -160,12 +120,12 @@ class BookDetailViewModel @Inject constructor(
 
 
     fun getLocalBookById(bookId: Long, source: Source) {
-        toggleLocalBookLoading(true)
+        this.toggleLoading(true)
         clearBookError()
         getBookUseCases.getBookById(id = bookId)
             .onEach { book ->
                 if (book != null) {
-                    toggleLocalBookLoading(false)
+                    this.toggleLoading(false)
                     clearBookError()
                     setBook(book)
                     toggleInLibrary(book.favorite)
@@ -175,7 +135,7 @@ class BookDetailViewModel @Inject constructor(
                     }
                     isLocalBookLoaded(true)
                 } else {
-                    toggleLocalBookLoading(false)
+                    this.toggleLoading(false)
                     showSnackBar(UiText.StringResource(R.string.no_book_found_error))
                 }
             }.launchIn(viewModelScope)
@@ -202,7 +162,7 @@ class BookDetailViewModel @Inject constructor(
 
 
     fun getRemoteBookDetail(book: Book, source: Source) {
-        toggleRemoteBookLoading(true)
+        this.toggleLoading(true)
         clearBookError()
         isLocalBookLoaded(false)
         getBookDetailJob?.cancel()
@@ -217,7 +177,7 @@ class BookDetailViewModel @Inject constructor(
                                     book
                                 )
                             )
-                            toggleRemoteBookLoading(false)
+                            this.toggleLoading(false)
                             clearBookError()
                             isLocalBookLoaded(true)
                             isRemoteBookLoaded(true)
@@ -225,7 +185,7 @@ class BookDetailViewModel @Inject constructor(
                         }
                     }
                     is Resource.Error -> {
-                        toggleRemoteBookLoading(false)
+                        this.toggleLoading(false)
                         showSnackBar(result.uiText)
                     }
                 }
@@ -282,7 +242,7 @@ class BookDetailViewModel @Inject constructor(
                     is Resource.Success -> {
                         if (result.data != null && state.book != null) {
                             showSnackBar(UiText.DynamicString(result.data.text))
-                            toggleRemoteBookLoading(false)
+                            this@BookDetailViewModel.toggleLoading(false)
                             toggleRemoteChaptersLoading(false)
                             getLocalChaptersByBookId(bookId = state.book!!.id)
                         }
@@ -401,13 +361,10 @@ class BookDetailViewModel @Inject constructor(
         state = state.copy(isRemoteLoaded = loaded)
     }
 
-    private fun toggleLocalBookLoading(isLoading: Boolean) {
+    private fun toggleLoading(isLoading: Boolean) {
         state = state.copy(isLoading = isLoading)
     }
 
-    private fun toggleRemoteBookLoading(isLoading: Boolean) {
-        state = state.copy(isLoading = isLoading)
-    }
 
     private fun toggleInLibrary(enable: Boolean) {
         state = state.copy(inLibrary = enable)

@@ -2,7 +2,6 @@ package org.ireader.domain.use_cases.fetchers
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.datetime.Clock
 import org.ireader.core.utils.UiText
 import org.ireader.core.utils.removeSameItemsFromList
 import org.ireader.domain.R
@@ -44,7 +43,7 @@ class FetchBookDetailAndChapterDetailFromWebView {
                         it.copy(
                             bookId = localBook.id,
                             inLibrary = localBook.favorite,
-                            dateFetch = Clock.System.now().toEpochMilliseconds(),
+                            dateFetch = System.currentTimeMillis(),
                         )
                     })
                     emit(Resource.Success<UiText.DynamicString>(UiText.DynamicString("${localBook.title} was fetched with ${chaptersFromPageSource.chapters.size}   chapters")))

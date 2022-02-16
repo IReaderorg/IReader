@@ -1,20 +1,17 @@
 package org.ireader.presentation.feature_settings.presentation.setting.downloader
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.StopCircle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -27,7 +24,6 @@ import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
 import org.ireader.domain.feature_services.DownloaderService.DownloadService
 import org.ireader.domain.utils.toast
-import org.ireader.presentation.R
 import org.ireader.presentation.presentation.components.ISnackBarHost
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
@@ -60,55 +56,18 @@ fun DownloaderScreen(
     viewModel.updateChapters(chapters.itemSnapshotList.items)
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "Downloads",
-                        color = MaterialTheme.colors.onBackground,
-                        style = MaterialTheme.typography.subtitle1,
-                        fontWeight = FontWeight.Bold,
-                        overflow = TextOverflow.Ellipsis
-                    )
+            DownloaderTopAppBar(
+                navController = navController,
+                onStopAllDownload = {
+                    WorkManager.getInstance(context)
+                        .cancelAllWorkByTag(DownloadService.DOWNLOADER_SERVICE_NAME)
+                    context.toast("Downloads were Stopped Successfully")
                 },
-                backgroundColor = MaterialTheme.colors.background,
-                actions = {
-                    TopAppBarActionButton(
-                        imageVector = Icons.Default.FileDownloadOff,
-                        title = "Stop Download Icon",
-                        onClick = {
-                            WorkManager.getInstance(context)
-                                .cancelAllWorkByTag(DownloadService.DOWNLOADER_SERVICE_NAME)
-                            context.toast("Downloads were Stopped Successfully")
-                        },
-                    )
-                    TopAppBarActionButton(
-                        imageVector = Icons.Default.Menu,
-                        title = "Menu Icon",
-                        onClick = {
-                            viewModel.toggleExpandMenu(enable = true)
-                        },
-                    )
-                    DropdownMenu(
-                        modifier = Modifier.background(MaterialTheme.colors.background),
-                        expanded = viewModel.state.isMenuExpanded,
-                        onDismissRequest = { viewModel.toggleExpandMenu(false) },
-                    ) {
-                        DropdownMenuItem(onClick = {
-                            viewModel.toggleExpandMenu(false)
-                            viewModel.deleteAllDownloads()
-                        }) {
-                            MidSizeTextComposable(text = stringResource(R.string.delete_all_downloads))
-                        }
-                    }
+                onMenuIcon = {
+                    viewModel.toggleExpandMenu(enable = true)
                 },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "ArrowBack Icon",
-                            tint = MaterialTheme.colors.onBackground,
-                        )
-                    }
+                onDeleteAllDownload = {
+                    viewModel.deleteAllDownloads()
                 }
             )
         },

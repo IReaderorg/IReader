@@ -47,7 +47,7 @@ dependencies {
     implementation(AndroidX.activity)
 
     implementation(Kotlin.jsonSerialization)
-
+    debugImplementation(Compose.ui_test_manifest)
 
     kapt(DaggerHilt.hiltCompiler)
     implementation(DaggerHilt.hiltAndroid)

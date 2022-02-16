@@ -5,7 +5,6 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
-import kotlinx.datetime.Clock
 import org.ireader.domain.local.BookDatabase
 import org.ireader.domain.models.ExploreType
 import org.ireader.domain.models.RemoteKeys
@@ -25,6 +24,8 @@ class ExploreRemoteMediator(
 ) : RemoteMediator<Int, Book>() {
 
     private val remoteKey = database.remoteKeysDao
+    private val chapterDao = database.libraryChapterDao
+    private val libraryDao = database.libraryBookDao
     private val Localbook = database.libraryBookDao
 
 
@@ -36,6 +37,8 @@ class ExploreRemoteMediator(
 
             val currentPage = when (loadType) {
                 LoadType.REFRESH -> {
+                    chapterDao.deleteNotInLibraryChapters()
+                    libraryDao.deleteNotInLibraryBooks()
                     val remoteKeys = getRemoteKeyClosestToCurrentPosition(state)
                     remoteKeys?.nextPage?.minus(1) ?: 1
                 }
@@ -89,10 +92,11 @@ class ExploreRemoteMediator(
                         sourceId = source.sourceId
                     )
                 }
+
                 remoteKey.addAllRemoteKeys(remoteKeys = keys)
                 remoteKey.insertAllExploredBook(response.books.map {
                     it.copy(
-                        dataAdded = Clock.System.now().toEpochMilliseconds(),
+                        dataAdded = System.currentTimeMillis(),
                     )
                 })
             }

@@ -1,6 +1,9 @@
 package org.ireader.presentation.feature_detail.presentation.book_detail
 
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -94,39 +97,45 @@ fun BookDetailScreen(
                 scaffoldState = scaffoldState,
                 snackbarHost = { ISnackBarHost(snackBarHostState = it) },
                 bottomBar = {
-                    BookDetailScreenBottomBar(
-                        onToggleInLibrary = {
-                            if (!state.inLibrary) {
-                                viewModel.toggleInLibrary(true, book = book)
-                            } else {
-                                viewModel.toggleInLibrary(false, book)
-                            }
-                        },
-                        isInLibrary = state.inLibrary,
-                        onDownload = {
-                            viewModel.startDownloadService(context, book = book)
-                        },
-                        isRead = book.lastRead != 0L,
-                        onRead = {
-                            if (book.lastRead != 0L && viewModel.chapterState.chapters.isNotEmpty() && source != null) {
-                                navController.navigate(ReaderScreenSpec.buildRoute(
-                                    bookId = book.id,
-                                    sourceId = source.sourceId,
-                                    chapterId = Constants.LAST_CHAPTER,
-                                ))
-                            } else if (viewModel.chapterState.chapters.isNotEmpty() && source != null) {
-                                navController.navigate(ReaderScreenSpec.buildRoute(
-                                    bookId = book.id,
-                                    sourceId = source.sourceId,
-                                    chapterId = viewModel.chapterState.chapters.first().id,
-                                ))
-                            } else {
-                                scope.launch {
-                                    viewModel.showSnackBar(UiText.StringResource(R.string.no_chapter_is_available))
+                    AnimatedVisibility(
+                        visible = true,
+                        enter = slideInVertically(initialOffsetY = { it }),
+                        exit = slideOutVertically(targetOffsetY = { it })
+                    ) {
+                        BookDetailScreenBottomBar(
+                            onToggleInLibrary = {
+                                if (!state.inLibrary) {
+                                    viewModel.toggleInLibrary(true, book = book)
+                                } else {
+                                    viewModel.toggleInLibrary(false, book)
+                                }
+                            },
+                            isInLibrary = state.inLibrary,
+                            onDownload = {
+                                viewModel.startDownloadService(context, book = book)
+                            },
+                            isRead = book.lastRead != 0L,
+                            onRead = {
+                                if (book.lastRead != 0L && viewModel.chapterState.chapters.isNotEmpty()) {
+                                    navController.navigate(ReaderScreenSpec.buildRoute(
+                                        bookId = book.id,
+                                        sourceId = source.sourceId,
+                                        chapterId = Constants.LAST_CHAPTER,
+                                    ))
+                                } else if (viewModel.chapterState.chapters.isNotEmpty()) {
+                                    navController.navigate(ReaderScreenSpec.buildRoute(
+                                        bookId = book.id,
+                                        sourceId = source.sourceId,
+                                        chapterId = viewModel.chapterState.chapters.first().id,
+                                    ))
+                                } else {
+                                    scope.launch {
+                                        viewModel.showSnackBar(UiText.StringResource(R.string.no_chapter_is_available))
+                                    }
                                 }
                             }
-                        }
-                    )
+                        )
+                    }
                 }) {
                 SwipeRefresh(
                     state = swipeRefreshState,
@@ -224,6 +233,7 @@ fun BookDetailScreen(
             errorResId = R.string.something_is_wrong_with_this_book)
     }
 }
+
 
 
 

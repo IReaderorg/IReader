@@ -15,6 +15,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import org.ireader.core.ProjectConfig
 import org.ireader.core.utils.Constants
+import org.ireader.domain.utils.toast
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
@@ -26,7 +27,6 @@ fun AboutSettingScreen(
     navController: NavController = rememberNavController(),
 ) {
 
-    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("http://www.google.com"))
     val context = LocalContext.current
     Scaffold(modifier = modifier.fillMaxSize(), topBar = {
         TopAppBar(
@@ -63,7 +63,11 @@ fun AboutSettingScreen(
                         .fillMaxWidth()
                         .align(Alignment.Start)
                         .clickable(role = Role.Button) {
-                            context.startActivity(it.intent)
+                            try {
+                                context.startActivity(it.intent)
+                            } catch (e: Exception) {
+                                context.toast("Something went wrong. you don't have the required app.")
+                            }
                         },
                     singleLineSecondaryText = false,
                     secondaryText = {

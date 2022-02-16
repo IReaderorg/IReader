@@ -54,10 +54,10 @@ dependencies {
     implementation(Compose.runtime)
     implementation(Compose.navigation)
     implementation(Compose.material)
+    debugImplementation(Compose.ui_test_manifest)
     implementation(Worker.runtimeKtx)
     implementation(DaggerHilt.worker)
     implementation(Coil.coilCompose)
-    implementation(Kotlin.dateTime)
 
     /** Room **/
     implementation(Room.roomRuntime)
@@ -223,8 +223,6 @@ fun DependencyHandler.addBaseDependencies() {
     androidTestImplementation(Testing.mockWebServer)
     androidTestImplementation(Testing.hiltTesting)
     // Instrumented Unit Tests
-    androidTestImplementation("junit:junit:4.13")
-    androidTestImplementation("com.linkedin.dexmaker:dexmaker-mockito:2.12.1")
     androidTestImplementation("androidx.arch.core:core-testing:2.1.0")
     androidTestImplementation("androidx.test.ext:junit:1.1.1")
     androidTestImplementation("org.mockito:mockito-core:2.21.0")

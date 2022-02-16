@@ -7,7 +7,7 @@ import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.ireader.domain.models.SortType
 import org.ireader.domain.models.entities.Book
 
-class FakeLocalBookRepository : LocalBookRepository {
+internal class FakeLocalBookRepository : LocalBookRepository {
 
 
     val books = mutableListOf<Book>()
@@ -18,19 +18,19 @@ class FakeLocalBookRepository : LocalBookRepository {
         emit(result)
     }
 
-    override fun getAllInLibraryBooks(): Flow<List<Book>> = flow {
+    override fun getAllInLibraryBooks(
+        sortType: SortType,
+        isAsc: Boolean,
+        unreadFilter: Boolean,
+    ): Flow<List<Book>> = flow {
         val result = books.filter { it.favorite }
         emit(result)
     }
 
+
     @OptIn(ExperimentalPagingApi::class)
     override fun getBooksByQueryByPagingSource(query: String): PagingSource<Int, Book> {
-        return FakeLibraryMediator(books.filter { it.title == query })
-
-//        Pager(
-//            config = PagingConfig(pageSize = Constants.DEFAULT_PAGE_SIZE),
-//            pagingSourceFactory = pagingSourceFactory
-//        ).flow
+        throw UnsupportedOperationException("unsupported")
     }
 
     override fun getBooksByQueryPagingSource(query: String): PagingSource<Int, Book> {
@@ -42,7 +42,7 @@ class FakeLocalBookRepository : LocalBookRepository {
         isAsc: Boolean,
         unreadFilter: Boolean,
     ): PagingSource<Int, Book> {
-        return FakeLibraryMediator(books.filter { it.favorite })
+        throw UnsupportedOperationException("unsupported")
     }
 
     fun getAllInDownloadPagingSource(
@@ -50,15 +50,11 @@ class FakeLocalBookRepository : LocalBookRepository {
         isAsc: Boolean,
         unreadFilter: Boolean,
     ): PagingSource<Int, Book> {
-        //TODO need to write a text for this
-        return FakeLibraryMediator(books.filter { it.favorite })
+        throw UnsupportedOperationException("unsupported")
     }
 
     override fun getAllExploreBookPagingSource(): PagingSource<Int, Book> {
-        //TODO need to write a text for this
-        return FakeLibraryMediator(books.distinctBy {
-            it.title
-        })
+        throw UnsupportedOperationException("unsupported")
     }
 
     override suspend fun deleteNotInLibraryChapters() {
@@ -67,7 +63,6 @@ class FakeLocalBookRepository : LocalBookRepository {
     }
 
     override suspend fun deleteAllExploreBook() {
-        //TODO need to write a text for this
         val b = books.distinctBy {
             it.title
         }

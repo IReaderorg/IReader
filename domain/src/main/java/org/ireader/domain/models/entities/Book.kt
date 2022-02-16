@@ -2,7 +2,6 @@ package org.ireader.domain.models.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import kotlinx.datetime.Clock
 import kotlinx.serialization.Serializable
 import org.ireader.core.utils.Constants.BOOK_TABLE
 
@@ -57,7 +56,7 @@ fun updateBook(newBook: Book, oldBook: Book): Book {
         link = oldBook.link,
         lastRead = oldBook.lastRead,
         dataAdded = oldBook.dataAdded,
-        lastUpdated = Clock.System.now().toEpochMilliseconds(),
+        lastUpdated = System.currentTimeMillis(),
         favorite = oldBook.favorite,
         title = newBook.title.ifBlank { oldBook.title },
         translator = newBook.translator.ifBlank { oldBook.translator },

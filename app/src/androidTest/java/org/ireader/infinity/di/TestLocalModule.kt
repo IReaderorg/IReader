@@ -11,7 +11,6 @@ import org.ireader.core.prefs.AndroidPreferenceStore
 import org.ireader.core.prefs.PreferenceStore
 import org.ireader.data.repository.DownloadRepositoryImpl
 import org.ireader.domain.local.BookDatabase
-import org.ireader.domain.local.MIGRATION_8_9
 import org.ireader.domain.local.dao.DownloadDao
 import org.ireader.domain.local.dao.LibraryBookDao
 import org.ireader.domain.local.dao.LibraryChapterDao
@@ -51,7 +50,7 @@ import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
 @Module
-class LocalModule {
+class TestLocalModule {
 
 
     @Provides
@@ -59,14 +58,10 @@ class LocalModule {
     fun provideBookDatabase(
         @ApplicationContext appContext: Context,
     ): BookDatabase {
-        return Room.databaseBuilder(
+        return Room.inMemoryDatabaseBuilder(
             appContext,
             BookDatabase::class.java,
-            BookDatabase.DATABASE_NAME
-        )
-            .addMigrations(MIGRATION_8_9)
-            .fallbackToDestructiveMigration()
-            .build()
+        ).build()
     }
 
     @Provides

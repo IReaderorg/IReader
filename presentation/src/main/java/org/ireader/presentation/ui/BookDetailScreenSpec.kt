@@ -29,6 +29,7 @@ object BookDetailScreenSpec : ScreenSpec {
         }
     )
 
+
     @OptIn(ExperimentalPagerApi::class, androidx.compose.animation.ExperimentalAnimationApi::class,
         androidx.compose.material.ExperimentalMaterialApi::class)
     @Composable

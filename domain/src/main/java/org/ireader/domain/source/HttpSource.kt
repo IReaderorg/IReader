@@ -1,8 +1,10 @@
 package org.ireader.domain.source
 
 import android.webkit.WebView
+import ir.kazemcodes.infinity.core.utils.call
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.*
-import org.ireader.core.utils.call
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.source.*
@@ -114,9 +116,13 @@ abstract class HttpSource : Source, KoinComponent {
      * @param page the page number to retrieve.
      */
     override suspend fun fetchPopular(page: Int): BooksPage {
-        val request = client.call(popularRequest(page))
-        request.close()
-        return popularParse(request, page = page)
+        return kotlin.runCatching {
+            return@runCatching withContext(Dispatchers.IO) {
+                val request = client.call(popularRequest(page))
+
+                return@withContext popularParse(request, page = page)
+            }
+        }.getOrThrow()
     }
 
     /**
@@ -125,9 +131,13 @@ abstract class HttpSource : Source, KoinComponent {
      * @param page the page number to retrieve.
      */
     override suspend fun fetchLatest(page: Int): BooksPage {
-        val request = client.call(latestRequest(page))
-        request.close()
-        return latestParse(request, page = page)
+        return kotlin.runCatching {
+            return@runCatching withContext(Dispatchers.IO) {
+                val request = client.call(latestRequest(page))
+
+                return@withContext latestParse(request, page = page)
+            }
+        }.getOrThrow()
     }
 
     /**
@@ -137,9 +147,13 @@ abstract class HttpSource : Source, KoinComponent {
      * @param page the page number to retrieve.
      */
     override suspend fun fetchBook(book: Book): Book {
-        val request = client.call(detailsRequest(book))
-        request.close()
-        return detailParse(request)
+        return kotlin.runCatching {
+            return@runCatching withContext(Dispatchers.IO) {
+                val request = client.call(detailsRequest(book))
+
+                return@withContext detailParse(request)
+            }
+        }.getOrThrow()
     }
 
     /**
@@ -150,9 +164,13 @@ abstract class HttpSource : Source, KoinComponent {
      * @param book the chapters to retrieve.
      */
     override suspend fun fetchChapters(book: Book, page: Int): ChaptersPage {
-        val request = client.call(chaptersRequest(book, page))
-        request.close()
-        return chapterListParse(request)
+        return kotlin.runCatching {
+            return@runCatching withContext(Dispatchers.IO) {
+                val request = client.call(chaptersRequest(book, page))
+
+                return@withContext chapterListParse(request)
+            }
+        }.getOrThrow()
     }
 
     /**
@@ -162,9 +180,13 @@ abstract class HttpSource : Source, KoinComponent {
      * @param page the page number to retrieve.
      */
     override suspend fun fetchContent(chapter: Chapter): ContentPage {
-        val request = client.call(contentRequest(chapter))
-        request.close()
-        return pageContentParse(request)
+        return kotlin.runCatching {
+            return@runCatching withContext(Dispatchers.IO) {
+                val request = client.call(contentRequest(chapter))
+
+                return@withContext pageContentParse(request)
+            }
+        }.getOrThrow()
     }
 
     /**
@@ -175,9 +197,13 @@ abstract class HttpSource : Source, KoinComponent {
      * @param query the search query to retrieve.
      */
     override suspend fun fetchSearch(page: Int, query: String): BooksPage {
-        val request = client.call(searchRequest(page, query))
-        request.close()
-        return searchBookParse(request, page)
+        return kotlin.runCatching {
+            return@runCatching withContext(Dispatchers.IO) {
+                val request = client.call(searchRequest(page, query))
+                return@withContext searchBookParse(request, page)
+            }
+        }.getOrThrow()
+
     }
 
 
