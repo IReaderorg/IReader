@@ -13,12 +13,9 @@ import coil.annotation.ExperimentalCoilApi
 import coil.compose.LocalImageLoader
 import coil.compose.rememberImagePainter
 import coil.request.CachePolicy
-import coil.util.CoilUtils
 import okhttp3.Headers
-import okhttp3.OkHttpClient
 import okhttp3.internal.addHeaderLenient
 import org.ireader.presentation.R
-import org.koin.androidx.compose.get
 
 @OptIn(ExperimentalCoilApi::class)
 @Composable
@@ -31,10 +28,8 @@ fun BookImageComposable(
     headers: Headers? = null,
     @DrawableRes placeholder: Int = R.drawable.ic_no_image_placeholder,
 ) {
-    val context = LocalContext.current
-    val okHttpClient: OkHttpClient = get()
 
-    val painter = rememberImagePainter(data = image) {
+    val painter = rememberImagePainter(data = image, imageLoader = LocalImageLoader.current) {
         crossfade(durationMillis = 700)
         placeholder(placeholder)
         error(placeholder)
@@ -42,16 +37,14 @@ fun BookImageComposable(
         if (headers != null) {
             headers(headers)
         }
-        okHttpClient.newBuilder()
-            .cache(CoilUtils.createDefaultCache(context))
-            .build()
     }
+
     Image(
         modifier = modifier,
         contentScale = contentScale,
         painter = painter,
         contentDescription = "an image",
-        alignment = alignment
+        alignment = alignment,
     )
 }
 
@@ -66,42 +59,16 @@ fun CircleImageComposable(
     headers: Headers? = null,
 ) {
     val context = LocalContext.current
-    // Get
-    val imageLoader = LocalImageLoader.current
 
-// Set
+
     CompositionLocalProvider(LocalImageLoader provides ImageLoader(context)) {
-        imageLoader.newBuilder().apply {
+        LocalImageLoader.current.newBuilder().apply {
             crossfade(durationMillis = 700)
             placeholder(R.drawable.ic_wallpaper)
             error(R.drawable.ic_wallpaper)
             memoryCachePolicy(CachePolicy.ENABLED)
             addHeaderLenient(Headers.Builder(), "cache-control", "max-age")
-//            if (headers != null) {
-//                addHeaderLenient(headers,"")
-//            }
         }
 
     }
-//    val okHttpClient: OkHttpClient = get()
-//    val painter = rememberImagePainter(data = image) {
-//        crossfade(durationMillis = 700)
-//        placeholder(R.drawable.ic_wallpaper)
-//        error(R.drawable.ic_wallpaper)
-//        memoryCachePolicy(CachePolicy.ENABLED)
-//        addHeader("cache-control", "max-age")
-//        if (headers != null) {
-//            headers(headers)
-//        }
-//        okHttpClient.newBuilder()
-//            .cache(CoilUtils.createDefaultCache(context))
-//            .build()
-//    }
-//    Image(
-//        modifier = modifier,
-//        contentScale = contentScale,
-//        painter = painter,
-//        contentDescription = "an image",
-//        alignment = alignment
-//    )
 }

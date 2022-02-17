@@ -1,26 +1,23 @@
 package org.ireader.domain.source.en.webnovel
 
-import ir.kazemcodes.infinity.core.utils.call
+import io.ktor.client.request.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.Headers
-import okhttp3.HttpUrl.Companion.toHttpUrl
-import okhttp3.Request
 import org.ireader.core.utils.merge
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.entities.Filter
 import org.ireader.domain.models.entities.FilterList
-import org.ireader.domain.models.source.ChaptersPage
-import org.ireader.domain.models.source.ContentPage
+import org.ireader.domain.source.Dependencies
 import org.ireader.domain.source.ParsedHttpSource
-import org.ireader.domain.utils.GET
+import org.ireader.source.models.BookInfo
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import java.text.SimpleDateFormat
 import java.util.*
 
-class Webnovel : ParsedHttpSource() {
+class Webnovel(deps: Dependencies) : ParsedHttpSource(deps) {
 
     override val name = "Webnovel.com"
     override val creator: String = "@Kazem"
@@ -33,7 +30,6 @@ class Webnovel : ParsedHttpSource() {
     override val supportsLatest = true
     override val supportsMostPopular: Boolean = true
     override val supportSearch: Boolean = true
-    override val supportContentAppView: Boolean = true
 
 
     override fun fetchLatestEndpoint(page: Int): String? =
@@ -58,37 +54,33 @@ class Webnovel : ParsedHttpSource() {
 
     override val headers: Headers = headersBuilder().build()
 
-    private fun getToken(): String {
-        return try {
-            client.cookieJar
-                .loadForRequest(baseUrl.toHttpUrl())
-                .first { it.name == "_csrfToken" }
-                .value
-        } catch (e: NoSuchElementException) {
-            getToken()
-        }
-    }
 
     // popular
-    override fun popularRequest(page: Int): Request {
-        return GET(fetchPopularEndpoint(page = page)!!, headers)
+    override fun popularRequest(page: Int): HttpRequestBuilder {
+        return HttpRequestBuilder().apply {
+            url(baseUrl + fetchPopularEndpoint(page = page)!!)
+        }
     }
 
     override fun popularSelector() = "a.g_thumb, div.j_bookList .g_book_item a:has(img)"
 
-    override fun popularFromElement(element: Element): Book {
+    override fun popularFromElement(element: Element): BookInfo {
         val url = element.attr("abs:href").substringAfter(baseUrl)
         val title = element.attr("title")
         val thumbnailUrl = element.select("img").attr("abs:src")
-        return Book(link = url, title = title, cover = thumbnailUrl, sourceId = sourceId)
+        return BookInfo(link = url, title = title, cover = thumbnailUrl)
     }
 
     override fun popularNextPageSelector() = "[rel=next]"
 
     // latest
 
-    override fun latestRequest(page: Int): Request =
-        GET(fetchLatestEndpoint(page)!!, headers)
+    override fun latestRequest(page: Int): HttpRequestBuilder {
+        return HttpRequestBuilder().apply {
+            url(baseUrl + fetchLatestEndpoint(page)!!)
+            headers { headers }
+        }
+    }
 
     override fun latestSelector(): String = popularSelector()
 
@@ -99,16 +91,15 @@ class Webnovel : ParsedHttpSource() {
 
 
     // search
-    override fun searchRequest(page: Int, query: String, filters: FilterList): Request {
+    override fun searchRequest(page: Int, query: String, filters: FilterList): HttpRequestBuilder {
         val filters = if (filters.isEmpty()) getFilterList() else filters
         val genre = filters.findInstance<GenreList>()?.toUriPart()
         val order = filters.findInstance<OrderByFilter>()?.toUriPart()
         val status = filters.findInstance<StatusFilter>()?.toUriPart()
 
         return when {
-            query.isNotEmpty() -> GET("$baseUrl/search?keywords=$query&type=1&pageIndex=$page",
-                headers)
-            else -> GET("$baseUrl/category/$genre" + "_comic_page1?&orderBy=$order&bookStatus=$status")
+            query.isNotEmpty() -> requestBuilder("$baseUrl/search?keywords=$query&type=1&pageIndex=$page")
+            else -> requestBuilder("$baseUrl/category/$genre" + "_comic_page1?&orderBy=$order&bookStatus=$status")
         }
     }
 
@@ -119,21 +110,24 @@ class Webnovel : ParsedHttpSource() {
     override fun searchNextPageSelector() = popularNextPageSelector()
 
     // manga details
-    override fun detailParse(document: Document): Book {
+    override fun detailParse(document: Document): BookInfo {
         val thumbnailUrl = document.select("i.g_thumb img:first-child").attr("abs:src")
         val title = document.select("h2").text()
         val description = document.select(".j_synopsis p").text()
 
-        return Book(title = title,
+        return BookInfo(
+            title = title,
             description = description,
             cover = thumbnailUrl,
-            sourceId = sourceId,
             link = "")
     }
 
     // chapters
-    override fun chaptersRequest(book: Book): Request {
-        return GET(baseUrl + book.link + "/catalog", headers)
+    override fun chaptersRequest(book: Book): HttpRequestBuilder {
+        return HttpRequestBuilder().apply {
+            url(baseUrl + book.link + "/catalog")
+            headers { headers }
+        }
     }
 
     override fun chaptersSelector() = ".volume-item li a"
@@ -154,35 +148,34 @@ class Webnovel : ParsedHttpSource() {
         return Chapter(title = name, dateUploaded = date_upload, link = link, bookId = 0)
     }
 
-    override suspend fun fetchChapters(book: Book, page: Int): ChaptersPage {
+    override suspend fun fetchChapters(book: Book): List<Chapter> {
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
 
-                val request = client.call(GET(baseUrl + book.link + "/catalog", headers))
+                val request = client.get<Document>(chaptersRequest(book = book))
 
-                return@withContext chapterListParse(request)
+                return@withContext chaptersParse(request)
             }
         }.getOrThrow()
     }
 
-    override fun chaptersParse(document: Document): ChaptersPage {
-        val chapterPage = ChaptersPage()
-        super.chaptersParse(document).chapters
+    override fun chaptersParse(document: Document): List<Chapter> {
+
+        val chapters = super.chaptersParse(document)
         //val chapters = document.select(chaptersSelector()).map { chapterFromElement(it) }
-        return chapterPage.copy(chapters = super.chaptersParse(document).chapters,
-            hasNextPage = false)
+        return chapters
     }
 
     override fun hasNextChaptersParse(document: Document): Boolean {
         return false
     }
 
-    override fun pageContentParse(document: Document): ContentPage {
+    override fun pageContentParse(document: Document): List<String> {
         val title: List<String> = listOf(document.select("div.cha-tit").text())
         val content: List<String> = document.select("div.cha-content  p").eachText()
         val final = merge(title, content)
 
-        return ContentPage(final)
+        return final
     }
 
     fun parseChapterDate(date: String): Long {

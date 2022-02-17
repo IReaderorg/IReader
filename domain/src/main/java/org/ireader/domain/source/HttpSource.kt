@@ -1,7 +1,7 @@
 package org.ireader.domain.source
 
-import android.webkit.WebView
-import ir.kazemcodes.infinity.core.utils.call
+import io.ktor.client.*
+import io.ktor.client.request.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.*
@@ -9,12 +9,10 @@ import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.entities.FilterList
 import org.ireader.domain.models.source.*
-import org.ireader.domain.utils.GET
 import org.ireader.domain.utils.asJsoup
 import org.ireader.infinity.core.data.network.models.*
+import org.ireader.source.models.BookInfo
 import org.jsoup.nodes.Document
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import java.net.URI
 import java.net.URISyntaxException
 import java.security.MessageDigest
@@ -23,7 +21,7 @@ import java.util.*
 /**
  * A simple implementation for sources from a website.
  */
-abstract class HttpSource : Source, KoinComponent {
+abstract class HttpSource(private val dependencies: Dependencies) : Source {
 
 
     /**
@@ -42,10 +40,8 @@ abstract class HttpSource : Source, KoinComponent {
     /**
      * Default network client for doing requests.
      */
-    open val client: OkHttpClient
-        get() = network.client
-
-    val webView: WebView by inject<WebView>()
+    open val client: HttpClient
+        get() = dependencies.httpClients.default
 
 
     /**
@@ -65,8 +61,6 @@ abstract class HttpSource : Source, KoinComponent {
             .reduce(Long::or) and Long.MAX_VALUE
     }
 
-
-    protected val network: NetworkHelper by inject()
 
     /**
      * Visible name of the source.
@@ -121,9 +115,9 @@ abstract class HttpSource : Source, KoinComponent {
     override suspend fun getPopular(page: Int): BooksPage {
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
-                val request = client.call(popularRequest(page))
+                val request = client.get<Document>(popularRequest(page))
 
-                return@withContext popularParse(request, page = page)
+                return@withContext popularParse(request)
             }
         }.getOrThrow()
     }
@@ -136,8 +130,8 @@ abstract class HttpSource : Source, KoinComponent {
     override suspend fun getLatest(page: Int): BooksPage {
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
-                val request = client.call(latestRequest(page))
-                return@withContext latestParse(request, page = page)
+                val request = client.get<Document>(latestRequest(page))
+                return@withContext latestParse(request)
             }
         }.getOrThrow()
     }
@@ -148,10 +142,10 @@ abstract class HttpSource : Source, KoinComponent {
      *
      * @param page the page number to retrieve.
      */
-    override suspend fun getDetails(book: Book): Book {
+    override suspend fun getDetails(book: Book): BookInfo {
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
-                val request = client.call(detailsRequest(book))
+                val request = client.get<Document>(detailsRequest(book))
 
                 return@withContext detailParse(request)
             }
@@ -165,12 +159,12 @@ abstract class HttpSource : Source, KoinComponent {
      * @param page the page number to retrieve.
      * @param book the chapters to retrieve.
      */
-    override suspend fun fetchChapters(book: Book, page: Int): ChaptersPage {
+    override suspend fun fetchChapters(book: Book): List<Chapter> {
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
-                val request = client.call(chaptersRequest(book, page))
+                val request = client.get<Document>(chaptersRequest(book))
 
-                return@withContext chapterListParse(request)
+                return@withContext chaptersParse(request)
             }
         }.getOrThrow()
     }
@@ -181,10 +175,10 @@ abstract class HttpSource : Source, KoinComponent {
      *
      * @param page the page number to retrieve.
      */
-    override suspend fun getContentList(chapter: Chapter): ContentPage {
+    override suspend fun getContentList(chapter: Chapter): List<String> {
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
-                val request = client.call(contentRequest(chapter))
+                val request = client.get<Document>(contentRequest(chapter))
 
                 return@withContext pageContentParse(request)
             }
@@ -201,8 +195,8 @@ abstract class HttpSource : Source, KoinComponent {
     override suspend fun getSearch(page: Int, query: String, filters: FilterList): BooksPage {
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
-                val request = client.call(searchRequest(page, query, filters))
-                return@withContext searchParse(request, page)
+                val request = client.get<Document>(searchRequest(page, query, filters))
+                return@withContext searchParse(request)
             }
         }.getOrThrow()
 
@@ -214,14 +208,14 @@ abstract class HttpSource : Source, KoinComponent {
      *
      * @param page the page number to retrieve.
      */
-    protected abstract fun popularRequest(page: Int): Request
+    protected abstract fun popularRequest(page: Int): HttpRequestBuilder
 
     /**
      * Returns the request for latest  Books given the page.
      *
      * @param page the page number to retrieve.
      */
-    protected abstract fun latestRequest(page: Int): Request
+    protected abstract fun latestRequest(page: Int): HttpRequestBuilder
 
 
     /**
@@ -230,8 +224,21 @@ abstract class HttpSource : Source, KoinComponent {
      *
      * @param book the Book to be updated.
      */
-    protected open fun detailsRequest(book: Book): Request {
-        return GET(baseUrl + book.link, headers)
+    protected open fun detailsRequest(book: Book): HttpRequestBuilder {
+        return HttpRequestBuilder().apply {
+            url(baseUrl + book.link)
+            headers { headers }
+        }
+    }
+
+    protected open fun requestBuilder(
+        url: String,
+        mHeaders: Headers = headers,
+    ): HttpRequestBuilder {
+        return HttpRequestBuilder().apply {
+            url(url)
+            headers { headers }
+        }
     }
 
     /**
@@ -240,12 +247,18 @@ abstract class HttpSource : Source, KoinComponent {
      *
      * @param book the Book to look for chapters.
      */
-    protected open fun chaptersRequest(book: Book): Request {
-        return GET(baseUrl + book.link, headers)
+    protected open fun chaptersRequest(book: Book): HttpRequestBuilder {
+        return HttpRequestBuilder().apply {
+            url(baseUrl + book.link)
+            headers { headers }
+        }
     }
 
-    protected open fun chaptersRequest(book: Book, page: Int): Request {
-        return GET(baseUrl + book.link, headers)
+    protected open fun chaptersRequest(book: Book, page: Int): HttpRequestBuilder {
+        return HttpRequestBuilder().apply {
+            url(baseUrl + book.link)
+            headers { headers }
+        }
     }
 
 
@@ -255,8 +268,11 @@ abstract class HttpSource : Source, KoinComponent {
      *
      * @param chapter the chapter whose page list has to be fetched.
      */
-    protected open fun contentRequest(chapter: Chapter): Request {
-        return GET(baseUrl + chapter.link, headers)
+    protected open fun contentRequest(chapter: Chapter): HttpRequestBuilder {
+        return HttpRequestBuilder().apply {
+            url(baseUrl + chapter.link)
+            headers { headers }
+        }
     }
 
     /**
@@ -264,7 +280,11 @@ abstract class HttpSource : Source, KoinComponent {
      *
      * @param page the page number to retrieve.
      */
-    protected abstract fun searchRequest(page: Int, query: String, filters: FilterList): Request
+    protected abstract fun searchRequest(
+        page: Int,
+        query: String,
+        filters: FilterList,
+    ): HttpRequestBuilder
 
     /****************************************************************************************************/
 
@@ -274,27 +294,11 @@ abstract class HttpSource : Source, KoinComponent {
      *
      * @param response the response from the site.
      */
-    private fun popularParse(
-        response: Response,
-        page: Int,
-    ): BooksPage {
-        return popularParse(response.asJsoup(), page)
-    }
-
     abstract override fun popularParse(
         document: Document,
-        page: Int,
     ): BooksPage
 
 
-    /**
-     * Parses the response from the site and returns a [BooksPage] object.
-     *
-     * @param response the response from the site.
-     */
-    fun latestParse(response: Response, page: Int): BooksPage {
-        return latestParse(response.asJsoup(), page = page)
-    }
 
     /**
      * Parses the document from the site and returns a [BooksPage] object.
@@ -303,25 +307,15 @@ abstract class HttpSource : Source, KoinComponent {
      */
     abstract override fun latestParse(
         document: Document,
-        page: Int,
     ): BooksPage
 
-
-    /**
-     * Parses the response from the site and returns the details of a book.
-     *
-     * @param response the response from the site.
-     */
-    fun detailParse(response: Response): Book {
-        return detailParse(response.asJsoup())
-    }
 
     /**
      * Returns the details of the Book from the given [document].
      *
      * @param document the parsed document.
      */
-    abstract override fun detailParse(document: Document): Book
+    abstract override fun detailParse(document: Document): BookInfo
 
 
     /**
@@ -329,13 +323,13 @@ abstract class HttpSource : Source, KoinComponent {
      *
      * @param response the response from the site.
      */
-    private fun pageContentParse(response: Response): ContentPage {
+    private fun pageContentParse(response: Response): List<String> {
         return pageContentParse(response.asJsoup())
     }
 
     abstract override fun pageContentParse(
         document: Document,
-    ): ContentPage
+    ): List<String>
 
 
     /**
@@ -343,24 +337,11 @@ abstract class HttpSource : Source, KoinComponent {
      *
      * @param response the response from the site.
      */
-    abstract override fun chaptersParse(document: Document): ChaptersPage
+    abstract override fun chaptersParse(document: Document): List<Chapter>
 
-    fun chapterListParse(response: Response): ChaptersPage {
-        return chaptersParse(response.asJsoup())
-    }
-
-    /**
-     * Parses the response from the site and returns a [BooksPage] object.
-     *
-     * @param response the response from the site.
-     */
-    private fun searchParse(response: Response, page: Int): BooksPage {
-        return searchParse(response.asJsoup(), page = page)
-    }
 
     abstract override fun searchParse(
         document: Document,
-        page: Int,
     ): BooksPage
 
 

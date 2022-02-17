@@ -1,15 +1,12 @@
+
 import okhttp3.Headers
-import okhttp3.OkHttpClient
 import org.ireader.domain.models.source.Source
-import org.ireader.domain.source.NetworkHelper
 import java.security.MessageDigest
 
 /**
  * A simple implementation for sources from a website.
  */
 abstract class Source : Source {
-
-    lateinit var network: NetworkHelper
 
 
     /**
@@ -41,11 +38,6 @@ abstract class Source : Source {
      */
     override val headers: Headers by lazy { headersBuilder().build() }
 
-    /**
-     * Default network client for doing requests.
-     */
-    open val client: OkHttpClient
-        get() = network.client
 
     /**
      * Headers builder for requests. Implementations can override this method for custom headers.

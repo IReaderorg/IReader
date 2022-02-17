@@ -9,7 +9,6 @@ dependencies {
     "implementation"(Compose.paging)
     "implementation"(Compose.icons)
     "implementation"(Compose.runtime)
-    "implementation"(Koin.koinCompose)
     "implementation"(Jsoup.jsoup)
     "implementation"(Worker.runtimeKtx)
     "implementation"(Room.roomRuntime)

@@ -15,6 +15,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
+import org.ireader.core.coil.CoilLoaderFactory
 import org.ireader.core_ui.theme.*
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.ui.UiPreferences
@@ -23,6 +24,7 @@ import javax.inject.Inject
 @HiltViewModel
 class AppThemeViewModel @Inject constructor(
     private val uiPreferences: UiPreferences,
+    coilLoaderFactory: CoilLoaderFactory,
 ) : BaseViewModel() {
     private val themeMode by uiPreferences.themeMode().asState()
     private val lightTheme by uiPreferences.lightTheme().asState()
@@ -30,7 +32,7 @@ class AppThemeViewModel @Inject constructor(
 
     private val baseThemeJob = SupervisorJob()
     private val baseThemeScope = CoroutineScope(baseThemeJob)
-
+    val coilLoader = coilLoaderFactory.create()
 
     @Composable
     fun getRippleTheme(): RippleTheme {

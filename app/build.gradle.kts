@@ -51,7 +51,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = Compose.composeCompilerVersion
+        kotlinCompilerExtensionVersion = Compose.composeVersion
     }
     packagingOptions {
         resources.excludes.addAll(listOf(
@@ -178,11 +178,6 @@ dependencies {
     implementation(OkHttp.okHttp3)
     implementation(OkHttp.okHttp3Interceptor)
 
-
-
-    implementation(Koin.koinWorkManager)
-    implementation(Koin.koinNavigation)
-    implementation(Koin.koinCompose)
 
 
     testImplementation(Testing.junit4)

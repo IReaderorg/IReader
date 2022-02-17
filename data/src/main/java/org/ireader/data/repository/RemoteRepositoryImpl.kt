@@ -11,10 +11,10 @@ import org.ireader.domain.local.dao.RemoteKeysDao
 import org.ireader.domain.models.ExploreType
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
-import org.ireader.domain.models.source.ContentPage
 import org.ireader.domain.models.source.Source
 import org.ireader.domain.repository.RemoteRepository
 import org.ireader.domain.utils.Resource
+import org.ireader.source.models.BookInfo
 import retrofit2.HttpException
 import timber.log.Timber
 import java.io.IOException
@@ -24,7 +24,7 @@ class RemoteRepositoryImpl(
 ) : RemoteRepository {
 
 
-    override suspend fun getRemoteBookDetail(book: Book, source: Source): Book {
+    override suspend fun getRemoteBookDetail(book: Book, source: Source): BookInfo {
         return source.getDetails(book)
     }
 
@@ -41,27 +41,27 @@ class RemoteRepositoryImpl(
     override fun getRemoteReadingContentUseCase(
         chapter: Chapter,
         source: Source,
-    ): Flow<Resource<ContentPage>> = flow<Resource<ContentPage>> {
+    ): Flow<Resource<List<String>>> = flow<Resource<List<String>>> {
         try {
             Timber.d("Timber: GetRemoteReadingContentUseCase was Called")
             val content = source.getContentList(chapter)
 
-            if (content.content.joinToString()
-                    .isBlank() || content.content.contains(Constants.CLOUDFLARE_LOG)
+            if (content.joinToString()
+                    .isBlank() || content.contains(Constants.CLOUDFLARE_LOG)
             ) {
-                emit(Resource.Error<ContentPage>(uiText = UiText.StringResource(R.string.cant_get_content)))
+                emit(Resource.Error<List<String>>(uiText = UiText.StringResource(R.string.cant_get_content)))
             } else {
                 Timber.d("Timber: GetRemoteReadingContentUseCase was Finished Successfully")
-                emit(Resource.Success<ContentPage>(content))
+                emit(Resource.Success<List<String>>(content))
 
             }
 
         } catch (e: HttpException) {
-            emit(Resource.Error<ContentPage>(uiText = UiText.ExceptionString(e)))
+            emit(Resource.Error<List<String>>(uiText = UiText.ExceptionString(e)))
         } catch (e: IOException) {
-            emit(Resource.Error<ContentPage>(uiText = UiText.StringResource(R.string.noInternetError)))
+            emit(Resource.Error<List<String>>(uiText = UiText.StringResource(R.string.noInternetError)))
         } catch (e: Exception) {
-            emit(Resource.Error<ContentPage>(uiText = UiText.ExceptionString(e)))
+            emit(Resource.Error<List<String>>(uiText = UiText.ExceptionString(e)))
         }
     }
 

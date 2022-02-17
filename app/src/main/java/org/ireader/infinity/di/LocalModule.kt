@@ -7,6 +7,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import org.ireader.core.okhttp.HttpClients
 import org.ireader.core.prefs.AndroidPreferenceStore
 import org.ireader.core.prefs.PreferenceStore
 import org.ireader.data.repository.DownloadRepositoryImpl
@@ -19,6 +20,7 @@ import org.ireader.domain.local.dao.RemoteKeysDao
 import org.ireader.domain.repository.DownloadRepository
 import org.ireader.domain.repository.LocalBookRepository
 import org.ireader.domain.repository.LocalChapterRepository
+import org.ireader.domain.source.Dependencies
 import org.ireader.domain.source.Extensions
 import org.ireader.domain.ui.AppPreferences
 import org.ireader.domain.ui.UiPreferences
@@ -91,8 +93,8 @@ class LocalModule {
 
     @Singleton
     @Provides
-    fun providesExtensions(@ApplicationContext context: Context): Extensions {
-        return Extensions(context)
+    fun providesExtensions(httpClients: HttpClients, preferences: PreferenceStore): Extensions {
+        return Extensions(Dependencies(httpClients = httpClients, preferences = preferences))
     }
 
     @Singleton

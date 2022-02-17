@@ -209,9 +209,9 @@ class ReaderScreenViewModel @Inject constructor(
             viewModelScope.launch {
                 showSnackBar(UiText.StringResource(R.string.trying_to_fetch_chapters_content))
                 val chapter = source.pageContentParse(Jsoup.parse(webView.getHtml()))
-                if (!chapter.content.isNullOrEmpty() && state.isBookLoaded && state.isChapterLoaded && webView.originalUrl == state.chapter?.link) {
+                if (!chapter.isNullOrEmpty() && state.isBookLoaded && state.isChapterLoaded && webView.originalUrl == state.chapter?.link) {
                     clearError()
-                    val localChapter = state.chapter?.copy(content = chapter.content)
+                    val localChapter = state.chapter?.copy(content = chapter)
                     this@ReaderScreenViewModel.toggleLoading(false)
                     if (localChapter != null) {
                         toggleLastReadAndUpdateChapterContent(localChapter)
@@ -247,7 +247,7 @@ class ReaderScreenViewModel @Inject constructor(
                         if (result.data != null) {
                             clearError()
                             val localChapter = state.copy(
-                                chapter = chapter.copy(content = result.data.content),
+                                chapter = chapter.copy(content = result.data),
                             )
                             this.toggleLoading(false)
                             toggleLocalLoaded(true)

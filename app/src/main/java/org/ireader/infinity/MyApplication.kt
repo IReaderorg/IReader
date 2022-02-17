@@ -10,10 +10,6 @@ import dagger.hilt.android.HiltAndroidApp
 import okhttp3.OkHttpClient
 import org.ireader.domain.feature_services.notification.Notifications
 import org.ireader.domain.source.Extensions
-import org.ireader.domain.source.NetworkHelper
-import org.koin.android.ext.koin.androidContext
-import org.koin.core.context.startKoin
-import org.koin.dsl.module
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -34,8 +30,6 @@ class MyApplication : Application(), Configuration.Provider {
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
 
-    @Inject
-    lateinit var networkHelper: NetworkHelper
 
     @Inject
     lateinit var okHttpClient: OkHttpClient
@@ -50,19 +44,6 @@ class MyApplication : Application(), Configuration.Provider {
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this)
         FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG)
 
-        val appModule = module {
-
-            single<NetworkHelper> { networkHelper }
-            single<WebView> { webView }
-            single<org.ireader.domain.use_cases.preferences.reader_preferences.PreferencesUseCase> { preferencesUseCase }
-            single<OkHttpClient> { okHttpClient }
-            single<Extensions> { extensions }
-        }
-
-        startKoin {
-            androidContext(androidContext = this@MyApplication)
-            modules(appModule)
-        }
         setupNotificationChannels()
     }
 

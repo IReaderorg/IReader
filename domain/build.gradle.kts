@@ -40,7 +40,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = Compose.composeCompilerVersion
+        kotlinCompilerExtensionVersion = Compose.composeVersion
     }
 }
 
@@ -195,7 +195,6 @@ fun DependencyHandler.addBaseDependencies() {
     kapt(DaggerHilt.hiltCompiler)
     implementation(DaggerHilt.hiltAndroid)
     implementation(DaggerHilt.hiltAndroidCompiler)
-    implementation(Koin.koinCompose)
     implementation(Timber.timber)
 
     /** LifeCycle **/
@@ -224,4 +223,5 @@ fun DependencyHandler.addBaseDependencies() {
     implementation(Ktor.core)
     implementation(Ktor.serialization)
     implementation(Ktor.okhttp)
+    implementation(Ktor.ktor_jsoup)
 }

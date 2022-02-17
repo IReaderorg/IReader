@@ -106,7 +106,7 @@ class DownloadService @AssistedInject constructor(
                             .flowOn(Dispatchers.Main)
                             .collectIndexed { i, chapterPage ->
                                 if (chapterPage.data != null) {
-                                    insertUseCases.insertChapter(chapter = chapter.copy(content = chapterPage.data.content))
+                                    insertUseCases.insertChapter(chapter = chapter.copy(content = chapterPage.data))
                                 }
                                 if (chapterPage.uiText?.asString(context)?.isNotBlank() == true) {
                                     throw Exception(chapterPage.uiText.asString(context))

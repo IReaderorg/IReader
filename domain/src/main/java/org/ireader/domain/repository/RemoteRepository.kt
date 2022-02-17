@@ -5,9 +5,9 @@ import kotlinx.coroutines.flow.Flow
 import org.ireader.domain.models.ExploreType
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
-import org.ireader.domain.models.source.ContentPage
 import org.ireader.domain.models.source.Source
 import org.ireader.domain.utils.Resource
+import org.ireader.source.models.BookInfo
 
 interface RemoteRepository {
 
@@ -15,7 +15,7 @@ interface RemoteRepository {
     suspend fun getRemoteBookDetail(
         book: Book,
         source: Source,
-    ): Book
+    ): BookInfo
 
 
     fun getAllExploreBookByPaging(
@@ -28,6 +28,6 @@ interface RemoteRepository {
     fun getRemoteReadingContentUseCase(
         chapter: Chapter,
         source: Source,
-    ): Flow<Resource<ContentPage>>
+    ): Flow<Resource<List<String>>>
 
 }

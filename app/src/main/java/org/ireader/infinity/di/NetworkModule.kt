@@ -15,7 +15,6 @@ import org.ireader.core.prefs.PreferenceStore
 import org.ireader.data.repository.NetworkPreferences
 import org.ireader.domain.local.BookDatabase
 import org.ireader.domain.repository.RemoteRepository
-import org.ireader.domain.source.NetworkHelper
 import org.ireader.domain.ui.AppPreferences
 import org.ireader.domain.ui.UiPreferences
 import org.ireader.domain.use_cases.fetchers.FetchBookDetailAndChapterDetailFromWebView
@@ -107,11 +106,6 @@ class NetworkModule {
             .build()
     }
 
-    @Singleton
-    @Provides
-    fun providesNetworkHelper(@ApplicationContext context: Context): NetworkHelper {
-        return NetworkHelper(context)
-    }
 
     @Singleton
     @Provides

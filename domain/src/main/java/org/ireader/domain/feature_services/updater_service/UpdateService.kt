@@ -17,9 +17,8 @@ import org.ireader.domain.feature_services.notification.Notifications.CHANNEL_AP
 import org.ireader.domain.feature_services.notification.Notifications.ID_APP_UPDATER
 import org.ireader.domain.feature_services.updater_service.models.Release
 import org.ireader.domain.feature_services.updater_service.models.Version
+import org.ireader.domain.use_cases.preferences.reader_preferences.PreferencesUseCase
 import org.ireader.infinity.feature_services.flags
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -27,10 +26,10 @@ import java.util.concurrent.TimeUnit
 class UpdateService @AssistedInject constructor(
     @Assisted private val context: Context,
     @Assisted params: WorkerParameters,
+    private val preferences: PreferencesUseCase,
     private val api: UpdateApi,
-) : CoroutineWorker(context, params), KoinComponent {
+) : CoroutineWorker(context, params) {
 
-    private val preferences: org.ireader.domain.use_cases.preferences.reader_preferences.PreferencesUseCase by inject()
 
     override suspend fun doWork(): Result {
 

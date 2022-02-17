@@ -1,12 +1,11 @@
 package org.ireader.domain.source
 
-import android.content.Context
 import org.ireader.domain.models.source.*
 import org.ireader.domain.source.en.webnovel.Webnovel
 
 
 class Extensions(
-    private val context: Context,
+    private val dependencies: Dependencies,
 ) {
 
     fun mappingSourceNameToSource(id: Long): Source? {
@@ -29,159 +28,20 @@ class Extensions(
 
     init {
 
-        AvailableSources().sourcesList.forEach { source ->
+        AvailableSources(dependencies = dependencies).sourcesList.forEach { source ->
             addSource(source)
         }
 
     }
 }
 
-class AvailableSources {
-
-    val baseSample = SourceTower(
-        name = "",
-        baseUrl = "",
-        lang = "",
-        supportsLatest = false,
-        supportsMostPopular = false,
-        supportSearch = false,
-        creator = "@Kazem",
-        latest = Latest(
-            endpoint = null,
-            ajaxSelector = null,
-            isGetRequestType = true,
-            isHtmlType = true,
-            selector = null,
-            addBaseUrlToLink = false,
-            openInWebView = false,
-            nextPageSelector = null,
-            nextPageAtt = null,
-            nextPageValue = null,
-            linkSelector = null,
-            linkAtt = null,
-            nameSelector = null,
-            nameAtt = null,
-            coverSelector = null,
-            coverAtt = null,
-            supportPageList = false,
-            maxPageIndex = null,
-            addToStringEnd = null,
-            idSelector = null,
-        ),
-        popular = Popular(
-            endpoint = null,
-            ajaxSelector = null,
-            isGetRequestType = true,
-            isHtmlType = true,
-            selector = null,
-            addBaseUrlToLink = false,
-            openInWebView = false,
-            nextPageSelector = null,
-            nextPageAtt = null,
-            nextPageValue = null,
-            linkSelector = null,
-            linkAtt = null,
-            nameSelector = null,
-            nameAtt = null,
-            coverSelector = null,
-            coverAtt = null,
-            addToStringEnd = null,
-            idSelector = null,
-
-            ),
-        search = Search(
-            endpoint = null,
-            ajaxSelector = null,
-            isGetRequestType = true,
-            isHtmlType = true,
-            selector = null,
-            addBaseUrlToLink = false,
-            openInWebView = false,
-            nextPageSelector = null,
-            nextPageAtt = null,
-            nextPageValue = null,
-            linkSelector = null,
-            linkAtt = null,
-            nameSelector = null,
-            nameAtt = null,
-            coverSelector = null,
-            coverAtt = null,
-            addToStringEnd = null,
-            idSelector = null,
-        ),
-        detail = Detail(
-            endpoint = null,
-            ajaxSelector = null,
-            isGetRequestType = true,
-            isHtmlType = true,
-            selector = null,
-            addBaseUrlToLink = false,
-            openInWebView = false,
-            nextPageSelector = null,
-            nextPageAtt = null,
-            nextPageValue = null,
-            nameSelector = null,
-            nameAtt = null,
-            coverSelector = null,
-            coverAtt = null,
-            descriptionSelector = null,
-            descriptionBookAtt = null,
-            authorBookSelector = null,
-            authorBookAtt = null,
-            categorySelector = null,
-            categoryAtt = null,
-            addToStringEnd = null,
-            idSelector = null,
-
-            ),
-        chapters = Chapters(
-            endpoint = null,
-            ajaxSelector = null,
-            isGetRequestType = true,
-            isHtmlType = true,
-            selector = null,
-            addBaseUrlToLink = false,
-            openInWebView = false,
-            nextPageSelector = null,
-            nextPageAtt = null,
-            nextPageValue = null,
-            nameSelector = null,
-            nameAtt = null,
-            linkSelector = null,
-            linkAtt = null,
-            supportNextPagesList = false,
-            chaptersEndpointWithoutPage = null,
-            isChapterStatsFromFirst = true,
-            isDownloadable = false,
-            subStringSomethingAtEnd = null,
-            addToStringEnd = null,
-            idSelector = null,
-
-            ),
-        content = Content(
-            endpoint = null,
-            ajaxSelector = null,
-            isGetRequestType = true,
-            isHtmlType = true,
-            selector = null,
-            addBaseUrlToLink = false,
-            openInWebView = false,
-            nextPageSelector = null,
-            nextPageAtt = null,
-            nextPageValue = null,
-            pageContentSelector = null,
-            pageTitleAtt = null,
-            pageTitleSelector = null,
-            pageContentAtt = null,
-            addToStringEnd = null,
-            idSelector = null,
-        ),
-    )
+class AvailableSources(dependencies: Dependencies) {
 
 
     val realwebnovel = org.ireader.domain.source.SourceTower(
         sourceId = 16615641,
         baseUrl = "https://readwebnovels.net",
+        deps = dependencies,
         lang = "en",
         name = "RealWebNovel",
         supportsLatest = true,
@@ -241,6 +101,7 @@ class AvailableSources {
     val freeWebNovel = org.ireader.domain.source.SourceTower(
         sourceId = 48607989,
         name = "FreeWebNovel",
+        deps = dependencies,
         lang = "en",
         baseUrl = "https://freewebnovel.com",
         supportsLatest = true,
@@ -308,6 +169,7 @@ class AvailableSources {
 
     val mtl = org.ireader.domain.source.SourceTower(
         sourceId = 638830,
+        deps = dependencies,
         lang = "en",
         name = "MtlNovel",
         baseUrl = "https://www.mtlnovel.com",
@@ -375,6 +237,7 @@ class AvailableSources {
     val wuxiaworld = org.ireader.domain.source.SourceTower(
         sourceId = 24791917,
         name = "Wuxiaworld.Site",
+        deps = dependencies,
         lang = "en",
         baseUrl = "https://wuxiaworld.site",
         supportsMostPopular = true,
@@ -435,6 +298,7 @@ class AvailableSources {
     val myLoveNovel = org.ireader.domain.source.SourceTower(
         sourceId = 43670368,
         name = "MyLoveNovel",
+        deps = dependencies,
         lang = "en",
         supportsLatest = true,
         baseUrl = "https://m.mylovenovel.com/",
@@ -498,6 +362,7 @@ class AvailableSources {
     val koreanMtl = org.ireader.domain.source.SourceTower(
         sourceId = 19789884,
         name = "KoreanMtl.Online",
+        deps = dependencies,
         lang = "en",
         supportsLatest = true,
         baseUrl = "https://www.koreanmtl.online/",
@@ -547,6 +412,7 @@ class AvailableSources {
         supportsMostPopular = true,
         supportsLatest = true,
         creator = "@Kazem",
+        deps = dependencies,
         lang = "en",
         iconUrl = "https://mtlnation.com/wp-content/uploads/2017/10/mtlnation-logo-style-2.png",
         latest = Latest(
@@ -605,6 +471,7 @@ class AvailableSources {
         supportsLatest = true,
         creator = "@Kazem",
         iconUrl = "https://readlightnovels.net/wp-content/uploads/2020/01/rln-logo-ret.png",
+        deps = dependencies,
         lang = "en",
         latest = Latest(
             endpoint = "/latest/page/{page}",
@@ -663,6 +530,7 @@ class AvailableSources {
         supportsMostPopular = true,
         supportsLatest = true,
         creator = "@Kazem",
+        deps = dependencies,
         lang = "en",
         iconUrl = "https://wuxiaworldsite.co/manga_data/image/options/logo-wuxia-world.png",
         latest = Latest(
@@ -747,6 +615,6 @@ class AvailableSources {
         mtlNation,
         realLightWebNovel,
         wuxiaworldsiteco,
-        Webnovel()
+        Webnovel(dependencies)
     )
 }

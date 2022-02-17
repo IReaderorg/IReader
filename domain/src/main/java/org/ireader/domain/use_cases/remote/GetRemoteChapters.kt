@@ -19,21 +19,7 @@ class GetRemoteChapters(private val remoteRepository: RemoteRepository) {
         flow {
             try {
                 Timber.d("Timber: GetRemoteChaptersUseCase was Called")
-                val chapters = mutableListOf<Chapter>()
-                var currentPage = 1
-
-                var hasNextPage = true
-
-                while (hasNextPage) {
-                    Timber.d("Timber: GetRemoteChaptersUseCase was with pages $currentPage Called")
-                    val chaptersPage = source.fetchChapters(book = book, page = currentPage)
-                    chapters.addAll(chaptersPage.chapters.map {
-                        it.copy(bookId = book.id,
-                            inLibrary = book.favorite)
-                    })
-                    hasNextPage = chaptersPage.hasNextPage
-                    currentPage += 1
-                }
+                val chapters = source.fetchChapters(book = book)
                 emit(Resource.Success<List<Chapter>>(chapters))
                 Timber.d("Timber: GetRemoteChaptersUseCase was Finished Successfully")
 

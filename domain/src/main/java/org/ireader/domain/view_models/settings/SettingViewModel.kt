@@ -20,6 +20,7 @@ class SettingViewModel @Inject constructor(private val preferencesUseCase: org.i
 
 
     fun setDohPrfUpdate(prefCode: Int) {
+        //TODO Need to implement this in the more efficent way.
         _state.value = state.value.copy(doh = prefCode)
         preferencesUseCase.saveDohPrefUseCase(prefCode)
     }

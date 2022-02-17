@@ -1,6 +1,7 @@
 package org.ireader.core.okhttp
 
 import android.app.Application
+import com.tfowl.ktor.client.features.JsoupFeature
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.json.*
@@ -23,18 +24,24 @@ class HttpClients @Inject internal constructor(context: Application) {
 
   private val cookieJar = WebViewCookieJar()
 
-  private val okhttpClient = OkHttpClient.Builder()
-    .cache(cache)
-    .cookieJar(cookieJar)
-    .build()
+    val okhttpClient = OkHttpClient.Builder()
+        .cache(cache)
+        .cookieJar(cookieJar)
+        .build()
 
   val default = HttpClient(OkHttp) {
-    engine {
-      preconfigured = okhttpClient
-    }
-    install(JsonFeature) {
-      serializer = KotlinxSerializer()
-    }
+      engine {
+          preconfigured = okhttpClient
+      }
+      install(JsonFeature) {
+          serializer = KotlinxSerializer()
+      }
+      install(JsoupFeature)
+
   }
 
+
 }
+
+class okHttpClient
+

@@ -34,8 +34,7 @@ android {
         compose true
     }
     composeOptions {
-
-        kotlinCompilerExtensionVersion Compose.composeCompilerVersion
+        kotlinCompilerExtensionVersion Compose.composeVersion
     }
 }
 dependencies {
@@ -52,7 +51,6 @@ dependencies {
     kapt(DaggerHilt.hiltCompiler)
     implementation(DaggerHilt.hiltAndroid)
     implementation(DaggerHilt.hiltAndroidCompiler)
-    implementation(Koin.koinCompose)
     implementation(Timber.timber)
 
     /** LifeCycle **/

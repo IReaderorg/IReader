@@ -17,4 +17,5 @@ dependencies {
     "implementation"(Ktor.core)
     "implementation"(Ktor.serialization)
     "implementation"(Ktor.okhttp)
+    "implementation"(Ktor.ktor_jsoup)
 }
