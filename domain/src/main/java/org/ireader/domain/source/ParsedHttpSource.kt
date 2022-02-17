@@ -1,6 +1,5 @@
 package org.ireader.domain.source
 
-import org.ireader.core.utils.Constants.CLOUDFLARE_LOG
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.source.BooksPage
@@ -9,6 +8,7 @@ import org.ireader.domain.models.source.ContentPage
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 
+/** Taken from https://tachiyomi.org/ **/
 abstract class ParsedHttpSource : HttpSource() {
 
     /****************************************************************************************************/
@@ -47,20 +47,20 @@ abstract class ParsedHttpSource : HttpSource() {
     /**
      * Returns the Jsoup selector that returns a list of [Element] corresponding to each manga.
      */
-    protected abstract val popularSelector: String
+    protected abstract fun popularSelector(): String
 
     /**
      * Returns the Jsoup selector that returns the <a> tag linking to the next page, or null if
      * there's no next page.
      */
-    protected abstract val popularBookNextPageSelector: String?
+    protected abstract fun popularNextPageSelector(): String?
 
     override fun popularParse(document: Document, page: Int): BooksPage {
-        val books = document.select(popularSelector).map { element ->
+        val books = document.select(popularSelector()).map { element ->
             popularFromElement(element)
         }
 
-        val hasNextPage = popularBookNextPageSelector?.let { selector ->
+        val hasNextPage = popularNextPageSelector()?.let { selector ->
             document.select(selector).first()
         } != null
 
@@ -70,20 +70,20 @@ abstract class ParsedHttpSource : HttpSource() {
     /**
      * Returns the Jsoup selector that returns a list of [Element] corresponding to each manga.
      */
-    protected abstract val latestSelector: String
+    protected abstract fun latestSelector(): String
 
     /**
      * Returns the Jsoup selector that returns the <a> tag linking to the next page, or null if
      * there's no next page.
      */
-    protected abstract val latestUpdatesNextPageSelector: String?
+    protected abstract fun latestNextPageSelector(): String?
     override fun latestParse(document: Document, page: Int): BooksPage {
 
-        val books = document.select(latestSelector).map { element ->
+        val books = document.select(latestSelector()).map { element ->
             latestFromElement(element)
         }
 
-        val hasNextPage = latestUpdatesNextPageSelector?.let { selector ->
+        val hasNextPage = latestNextPageSelector()?.let { selector ->
             document.select(selector).first()
         } != null
 
@@ -93,55 +93,50 @@ abstract class ParsedHttpSource : HttpSource() {
     /**
      * Returns the Jsoup selector that returns a list of [Element] corresponding to each manga.
      */
-    protected abstract val chaptersSelector: String
+    protected abstract fun chaptersSelector(): String
 
     /**
      * Returns the Jsoup selector that returns the <a> tag linking to the next page, or null if
      * there's no next page.
      */
-    protected abstract val hasNextChapterSelector: String
+    protected abstract fun hasNextChapterSelector(): String
 
     override fun chaptersParse(document: Document): ChaptersPage {
-
-        val isCloudflareEnable = document.body().allElements.text().contains(CLOUDFLARE_LOG)
-
-        val chapters = document.select(chaptersSelector).map { chapterFromElement(it) }
+        val chapters = document.select(chaptersSelector()).map { chapterFromElement(it) }
 
         val hasNext = hasNextChaptersParse(document)
 
         return ChaptersPage(chapters,
             hasNext)
 
+
     }
 
     abstract fun hasNextChaptersParse(document: Document): Boolean
 
-    abstract override fun contentFromElementParse(
+    abstract override fun pageContentParse(
         document: Document,
     ): ContentPage
 
     /**
      * Returns the Jsoup selector that returns a list of [Element] corresponding to each manga.
      */
-    protected abstract val searchSelector: String
+    protected abstract fun searchSelector(): String
 
-    protected abstract val searchBookNextPageSelector: String
+    protected abstract fun searchNextPageSelector(): String
 
 
     override fun searchParse(document: Document, page: Int): BooksPage {
-
-        val isCloudflareEnable = document.body().allElements.text().contains(CLOUDFLARE_LOG)
-
         /**
          * I Add Filter Because sometimes this value contains null values
          * so the null book shows in search screen
          */
-        val books = document.select(searchSelector).map { element ->
+        val books = document.select(searchSelector()).map { element ->
             searchFromElement(element)
         }.filter {
             it.title.isNotBlank()
         }
-        val hasNextPage = searchBookNextPageSelector.let { selector ->
+        val hasNextPage = searchNextPageSelector().let { selector ->
             document.select(selector).first()
         } != null
 

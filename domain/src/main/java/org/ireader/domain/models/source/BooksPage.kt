@@ -8,8 +8,8 @@ data class BooksPage(
 
 
 data class ChaptersPage(
-    val chapters: List<org.ireader.domain.models.entities.Chapter> = emptyList(),
-    val hasNextPage: Boolean = false,
+    var chapters: List<org.ireader.domain.models.entities.Chapter> = emptyList(),
+    var hasNextPage: Boolean = false,
 )
 
 data class ContentPage(

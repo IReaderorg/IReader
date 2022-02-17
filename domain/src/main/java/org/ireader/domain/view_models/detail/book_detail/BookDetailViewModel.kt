@@ -10,7 +10,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.work.*
 import dagger.hilt.android.lifecycle.HiltViewModel
-import isLoading.DetailState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -34,6 +33,7 @@ import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.entities.updateBook
 import org.ireader.domain.models.source.Source
 import org.ireader.domain.source.Extensions
+import org.ireader.domain.source.HttpSource
 import org.ireader.domain.use_cases.fetchers.FetchUseCase
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
@@ -145,18 +145,18 @@ class BookDetailViewModel @Inject constructor(
 
     fun getLocalChaptersByBookId(bookId: Long) {
         clearChapterError()
-        toggleLocalChapterLoading(true)
+        this.toggleChaptersLoading(true)
         getChapterUseCase.getChaptersByBookId(
             bookId = bookId,
             isAsc = true)
             .onEach { chapters ->
                 if (chapters.isNotEmpty()) {
-                    toggleLocalChapterLoading(false)
+                    this.toggleChaptersLoading(false)
                     clearChapterError()
                     setChapters(chapters)
                     toggleAreChaptersLoaded(true)
                 }
-                toggleLocalChapterLoading(false)
+                this.toggleChaptersLoading(false)
             }.launchIn(viewModelScope)
     }
 
@@ -194,7 +194,7 @@ class BookDetailViewModel @Inject constructor(
     }
 
     fun getRemoteChapterDetail(book: Book, source: Source) {
-        toggleRemoteChaptersLoading(true)
+        this.toggleChaptersLoading(true)
         clearChapterError()
         toggleAreChaptersLoaded(false)
         getChapterDetailJob?.cancel()
@@ -209,7 +209,7 @@ class BookDetailViewModel @Inject constructor(
                                     it.title
                                 }
                             setChapters(chapters = uniqueList)
-                            toggleRemoteChaptersLoading(false)
+                            this.toggleChaptersLoading(false)
                             clearChapterError()
                             deleteUseCase.deleteChaptersByBookId(book.id)
                             insertChaptersToLocal(uniqueList, book.id)
@@ -217,8 +217,8 @@ class BookDetailViewModel @Inject constructor(
                         }
                     }
                     is Resource.Error -> {
-                        toggleRemoteChaptersLoading(false)
                         showSnackBar(result.uiText)
+                        this.toggleChaptersLoading(false)
                     }
                 }
             }.launchIn(viewModelScope)
@@ -228,6 +228,8 @@ class BookDetailViewModel @Inject constructor(
     @ExperimentalCoroutinesApi
     fun getWebViewData(source: Source) {
         getFromWebViewJob?.cancel()
+        webView.settings.userAgentString =
+            source.headers["User-Agent"] ?: HttpSource.DEFAULT_USER_AGENT
         getFromWebViewJob = viewModelScope.launch {
             showSnackBar(UiText.StringResource(org.ireader.core.R.string.trying_to_fetch))
             fetchUseCase.fetchBookDetailAndChapterDetailFromWebView(
@@ -243,7 +245,7 @@ class BookDetailViewModel @Inject constructor(
                         if (result.data != null && state.book != null) {
                             showSnackBar(UiText.DynamicString(result.data.text))
                             this@BookDetailViewModel.toggleLoading(false)
-                            toggleRemoteChaptersLoading(false)
+                            this@BookDetailViewModel.toggleChaptersLoading(false)
                             getLocalChaptersByBookId(bookId = state.book!!.id)
                         }
                     }
@@ -332,7 +334,7 @@ class BookDetailViewModel @Inject constructor(
         )
     }
 
-    private fun toggleLocalChapterLoading(isLoading: Boolean) {
+    private fun toggleChaptersLoading(isLoading: Boolean) {
         chapterState = chapterState.copy(isLoading = isLoading)
     }
 
@@ -348,9 +350,6 @@ class BookDetailViewModel @Inject constructor(
         chapterState = chapterState.copy(chapters = chapters)
     }
 
-    private fun toggleRemoteChaptersLoading(isLoading: Boolean) {
-        chapterState = chapterState.copy(isLoading = isLoading)
-    }
 
     /********************************************************/
     private fun isLocalBookLoaded(loaded: Boolean) {

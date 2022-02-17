@@ -2,6 +2,7 @@ package org.ireader.domain.source
 
 import android.content.Context
 import org.ireader.domain.models.source.*
+import org.ireader.domain.source.en.webnovel.Webnovel
 
 
 class Extensions(
@@ -745,6 +746,7 @@ class AvailableSources {
         wuxiaworld,
         mtlNation,
         realLightWebNovel,
-        wuxiaworldsiteco
+        wuxiaworldsiteco,
+        Webnovel()
     )
 }

@@ -14,11 +14,11 @@ suspend fun OkHttpClient.call(request: Request): Response =
 
                 override fun onResponse(call: Call, response: Response) {
                     if (!response.isSuccessful) {
-                        continuation.resumeWithException(Exception("HTTP error ${response.code()}"))
+                        continuation.resumeWithException(Exception("HTTP error ${response.code}"))
                         return
                     }
                     continuation.resume(response) {
-                        response.body()?.close()
+                        response.body?.close()
                     }
 
                 }

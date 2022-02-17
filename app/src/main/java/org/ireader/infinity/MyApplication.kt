@@ -11,6 +11,7 @@ import okhttp3.OkHttpClient
 import org.ireader.domain.feature_services.notification.Notifications
 import org.ireader.domain.source.Extensions
 import org.ireader.domain.source.NetworkHelper
+import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 import timber.log.Timber
@@ -50,14 +51,16 @@ class MyApplication : Application(), Configuration.Provider {
         FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG)
 
         val appModule = module {
+
             single<NetworkHelper> { networkHelper }
             single<WebView> { webView }
-            single<Extensions> { extensions }
             single<org.ireader.domain.use_cases.preferences.reader_preferences.PreferencesUseCase> { preferencesUseCase }
             single<OkHttpClient> { okHttpClient }
+            single<Extensions> { extensions }
         }
 
         startKoin {
+            androidContext(androidContext = this@MyApplication)
             modules(appModule)
         }
         setupNotificationChannels()

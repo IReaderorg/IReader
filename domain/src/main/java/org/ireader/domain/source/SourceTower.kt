@@ -13,7 +13,9 @@ import okhttp3.Response
 import org.ireader.core.utils.*
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
+import org.ireader.domain.models.entities.FilterList
 import org.ireader.domain.models.source.*
+import org.ireader.domain.utils.GET
 import org.ireader.domain.utils.asJsoup
 import org.ireader.infinity.core.data.network.models.*
 import org.jsoup.Jsoup
@@ -51,6 +53,9 @@ data class SourceTower constructor(
 
 
     override val supportContentAppView: Boolean = content?.openInWebView == false
+    override fun getFilterList(): FilterList {
+        return FilterList()
+    }
 
 
     override fun headersBuilder(): Headers.Builder = Headers.Builder().apply {
@@ -62,25 +67,25 @@ data class SourceTower constructor(
         add("cache-control", "max-age=0")
     }
 
-    override val fetchLatestEndpoint: String? = latest?.endpoint
-    override val fetchPopularEndpoint: String? = popular?.endpoint
-    override val fetchSearchEndpoint: String? = search?.endpoint
-    override val fetchChaptersEndpoint: String? = chapters?.endpoint
-    override val fetchContentEndpoint: String? = content?.endpoint
+    override fun fetchLatestEndpoint(page: Int): String? = latest?.endpoint
+    override fun fetchPopularEndpoint(page: Int): String? = popular?.endpoint
+    override fun fetchSearchEndpoint(page: Int, query: String): String? = search?.endpoint
+    override fun fetchChaptersEndpoint(): String? = chapters?.endpoint
+    override fun fetchContentEndpoint(): String? = content?.endpoint
 
 
     /****************************SELECTOR*************************************************************/
-    override val popularSelector: String = popular?.selector ?: ""
-    override val latestSelector: String = latest?.selector ?: ""
+    override fun popularSelector(): String = popular?.selector ?: ""
+    override fun latestSelector(): String = latest?.selector ?: ""
 
-    override val popularBookNextPageSelector: String? = popular?.nextPageSelector
-    override val latestUpdatesNextPageSelector: String? = latest?.nextPageSelector
-    override val hasNextChapterSelector = chapters?.nextPageSelector ?: ""
-    override val searchSelector: String = search?.selector ?: ""
-    override val searchBookNextPageSelector: String = search?.nextPageSelector ?: ""
+    override fun popularNextPageSelector(): String? = popular?.nextPageSelector
+    override fun latestNextPageSelector(): String? = latest?.nextPageSelector
+    override fun hasNextChapterSelector() = chapters?.nextPageSelector ?: ""
+    override fun searchSelector(): String = search?.selector ?: ""
+    override fun searchNextPageSelector(): String = search?.nextPageSelector ?: ""
 
 
-    override val chaptersSelector: String = chapters?.selector ?: ""
+    override fun chaptersSelector(): String = chapters?.selector ?: ""
 
 
     /****************************SELECTOR*************************************************************/
@@ -136,16 +141,16 @@ data class SourceTower constructor(
         }
     }
 
-    override fun searchRequest(page: Int, query: String): Request {
+    override fun searchRequest(page: Int, query: String, filters: FilterList): Request {
         return if (search?.isGetRequestType == true) {
             org.ireader.domain.utils.GET("$baseUrl${
-                getUrlWithoutDomain(fetchSearchEndpoint?.replace(searchQueryFormat,
+                getUrlWithoutDomain(fetchSearchEndpoint(page, query)?.replace(searchQueryFormat,
                     query) ?: "")
             }")
         } else {
             org.ireader.domain.utils.POST(
                 "$baseUrl${
-                    getUrlWithoutDomain(fetchSearchEndpoint?.replace(searchQueryFormat,
+                    getUrlWithoutDomain(fetchSearchEndpoint(page, query)?.replace(searchQueryFormat,
                         query) ?: "")
                 }")
         }
@@ -158,6 +163,10 @@ data class SourceTower constructor(
         } else {
             org.ireader.domain.utils.POST(baseUrl + getUrlWithoutDomain(chapter.link), headers)
         }
+    }
+
+    override fun detailsRequest(book: Book): Request {
+        return GET(baseUrl + getUrlWithoutDomain(book.link), headers)
     }
     /****************************REQUESTS**********************************************************/
 
@@ -253,9 +262,6 @@ data class SourceTower constructor(
     /****************************PARSE*************************************************************/
 
     override fun latestParse(document: Document, page: Int): BooksPage {
-        val isCloudflareEnable =
-            document.body().allElements.text().contains(Constants.CLOUDFLARE_LOG)
-
         val books = mutableListOf<Book>()
         if (this.latest?.isHtmlType == true && latest.selector != null) {
             books.addAll(document.select(latest.selector).map { element ->
@@ -274,7 +280,7 @@ data class SourceTower constructor(
 
         }
 
-        val hasNextPage = latestUpdatesNextPageSelector?.let { selector ->
+        val hasNextPage = latestNextPageSelector()?.let { selector ->
             document.select(selector).first()
         } != null
         if (latest?.supportPageList == true) {
@@ -313,7 +319,8 @@ data class SourceTower constructor(
                 selectorDescription,
                 attDescription).map { it.formatHtmlText() }.joinToString()
             val category = selectorReturnerListType(document, selectorCategory, attCategory)
-            return Book(title = title,
+            return Book(
+                title = title,
                 cover = coverLink,
                 author = author,
                 description = description,
@@ -337,13 +344,9 @@ data class SourceTower constructor(
 
 
     override fun chaptersParse(document: Document): ChaptersPage {
-        val isCloudflareEnable =
-            document.body().allElements.text().contains(Constants.CLOUDFLARE_LOG)
-
-
         val chapters = mutableListOf<Chapter>()
         if (this.chapters?.isHtmlType == true) {
-            chapters.addAll(document.select(chaptersSelector).map { chapterFromElement(it) })
+            chapters.addAll(document.select(chaptersSelector()).map { chapterFromElement(it) })
         } else {
             try {
                 val crudeJson = Jsoup.parse(document.html()).text().trim()
@@ -367,7 +370,7 @@ data class SourceTower constructor(
             hasNext)
     }
 
-    override fun contentFromElementParse(document: Document): ContentPage {
+    override fun pageContentParse(document: Document): ContentPage {
         val isCloudflareEnable =
             document.body().allElements.text().contains(Constants.CLOUDFLARE_LOG)
 
@@ -408,7 +411,7 @@ data class SourceTower constructor(
              * I Add Filter Because sometimes this value contains null values
              * so the null book shows in search screen
              */
-            books.addAll(document.select(searchSelector).map { element ->
+            books.addAll(document.select(searchSelector()).map { element ->
                 searchFromElement(element)
             })
         } else {
@@ -437,11 +440,11 @@ data class SourceTower constructor(
     override fun popularParse(document: Document, page: Int): BooksPage {
         val isCloudflareEnable =
             document.body().allElements.text().contains(Constants.CLOUDFLARE_LOG)
-        val books = document.select(popularSelector).map { element ->
+        val books = document.select(popularSelector()).map { element ->
             popularFromElement(element)
         }
 
-        val hasNextPage = popularBookNextPageSelector?.let { selector ->
+        val hasNextPage = popularNextPageSelector()?.let { selector ->
             document.select(selector).first()
         } != null
 
@@ -589,7 +592,8 @@ data class SourceTower constructor(
                 if (!request.isSuccessful) {
                     chapters =
                         chaptersParse(network.getHtmlFromWebView(baseUrl + getUrlWithoutDomain(book.link),
-                            this@SourceTower.chapters?.ajaxSelector))
+                            this@SourceTower.chapters?.ajaxSelector,
+                            ua = headers["User-Agent"] ?: DEFAULT_USER_AGENT))
                 }
 
                 return@withContext chapters.copy(chapters = chapters.chapters,
@@ -603,7 +607,7 @@ data class SourceTower constructor(
      * override this method.
      * @param page the page number to retrieve.
      */
-    override suspend fun fetchPopular(page: Int): BooksPage {
+    override suspend fun getPopular(page: Int): BooksPage {
         return kotlin.runCatching {
             withContext(Dispatchers.IO) {
                 val request = client.call(popularRequest(page))
@@ -611,8 +615,10 @@ data class SourceTower constructor(
                 var books = popularParse(request, page = page)
                 if (!request.isSuccessful) {
                     books =
-                        popularParse(document = network.getHtmlFromWebView(baseUrl + fetchPopularEndpoint?.applyPageFormat(
-                            page)), page = page)
+                        popularParse(document = network.getHtmlFromWebView(baseUrl + fetchPopularEndpoint(
+                            page)?.applyPageFormat(
+                            page),
+                            ua = headers.get("User-Agent") ?: DEFAULT_USER_AGENT), page = page)
                 }
 
                 return@withContext books
@@ -634,16 +640,17 @@ data class SourceTower constructor(
         return popularParse(response.asJsoup(), page)
     }
 
-    override suspend fun fetchLatest(page: Int): BooksPage {
+    override suspend fun getLatest(page: Int): BooksPage {
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
                 val request = client.call(latestRequest(page))
                 //val request = client.call(latestRequest(page))
-                var books = latestParse(request, page = page)
+                var books = latestParse(request.asJsoup(), page = page)
                 if (!request.isSuccessful) {
                     books =
-                        latestParse(network.getHtmlFromWebView(baseUrl + fetchLatestEndpoint?.applyPageFormat(
-                            page)), page = page)
+                        latestParse(network.getHtmlFromWebView(baseUrl + fetchLatestEndpoint(page)?.applyPageFormat(
+                            page),
+                            ua = headers.get("User-Agent") ?: DEFAULT_USER_AGENT), page = page)
                 }
 
 
@@ -658,15 +665,16 @@ data class SourceTower constructor(
      *
      * @param page the page number to retrieve.
      */
-    override suspend fun fetchBook(book: Book): Book {
+    override suspend fun getDetails(book: Book): Book {
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
                 val request = client.call(detailsRequest(book))
                 //val request = client.call(detailsRequest(book))
-                var completebook = detailParse(client.call(detailsRequest(book)))
+                var completebook = detailParse(client.call(detailsRequest(book)).asJsoup())
                 if (!request.isSuccessful) {
                     completebook =
-                        detailParse(network.getHtmlFromWebView(baseUrl + getUrlWithoutDomain(book.link)))
+                        detailParse(network.getHtmlFromWebView(baseUrl + getUrlWithoutDomain(book.link),
+                            ua = headers["User-Agent"] ?: DEFAULT_USER_AGENT))
                 }
 
                 return@withContext completebook
@@ -682,18 +690,19 @@ data class SourceTower constructor(
      *
      * @param page the page number to retrieve.
      */
-    override suspend fun fetchContent(chapter: Chapter): ContentPage {
+    override suspend fun getContentList(chapter: Chapter): ContentPage {
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
                 val request = client.call(contentRequest(chapter))
                 //val request = client.call(contentRequest(chapter))
-                var content = pageContentParse(request)
+                var content = pageContentParse(request.asJsoup())
 
                 if (!request.isSuccessful) {
                     content =
-                        contentFromElementParse(
+                        pageContentParse(
                             network.getHtmlFromWebView(baseUrl + getUrlWithoutDomain(
-                                chapter.link)),
+                                chapter.link),
+                                ua = headers["User-Agent"] ?: DEFAULT_USER_AGENT),
                         )
                 }
 
@@ -711,17 +720,19 @@ data class SourceTower constructor(
      * @param page the page number to retrieve.
      * @param query the search query to retrieve.
      */
-    override suspend fun fetchSearch(page: Int, query: String): BooksPage {
+    override suspend fun getSearch(page: Int, query: String, filters: FilterList): BooksPage {
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
-                val request = client.call(searchRequest(page, query))
+                val request = client.call(searchRequest(page, query, FilterList()))
                 //val request = client.call(searchRequest(page, query))
-                var books = searchBookParse(request, page)
+                var books = searchParse(request.asJsoup(), page)
                 if (!request.isSuccessful) {
                     books =
-                        searchParse(network.getHtmlFromWebView(baseUrl + fetchSearchEndpoint?.applySearchFormat(
+                        searchParse(network.getHtmlFromWebView(baseUrl + fetchSearchEndpoint(page,
+                            query)?.applySearchFormat(
                             query,
-                            page)), page = page)
+                            page),
+                            ua = headers.get("User-Agent") ?: DEFAULT_USER_AGENT), page = page)
                 }
 
                 return@withContext books

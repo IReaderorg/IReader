@@ -5,6 +5,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -32,11 +33,13 @@ fun ScreenContent() {
     val modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val screenSpec = ScreenSpec.allScreens[currentDestination?.route]
 
+
+    val hideBottomBar = navBackStackEntry?.arguments?.getBoolean(ARG_HIDE_BOTTOM_BAR)
     Box(Modifier.fillMaxSize()) {
 
         Box(modifier = Modifier
-            .align(Alignment.TopCenter)
-            .fillMaxWidth()) {
+            .fillMaxWidth()
+            .align(Alignment.TopCenter)) {
 
             if (navBackStackEntry != null) {
                 screenSpec?.TopBar(navController,
@@ -45,39 +48,41 @@ fun ScreenContent() {
             }
 
         }
-        AnimatedNavHost(
-            navController = navController,
-            startDestination = BottomNavScreenSpec.screens[0].navHostRoute,
-            modifier = Modifier
-                .fillMaxSize(),
-            enterTransition = { fadeIn(animationSpec = tween(300)) },
-            exitTransition = { fadeOut(animationSpec = tween(300)) },
-        ) {
-            ScreenSpec.allScreens.values.forEach { screen ->
-                composable(
-                    route = screen.navHostRoute,
-                    arguments = screen.arguments,
-                    deepLinks = screen.deepLinks,
-                ) { navBackStackEntry ->
-                    screen.Content(
-                        navController = navController,
-                        navBackStackEntry = navBackStackEntry,
-                        scaffoldState = scaffoldState,
-                    )
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .padding(bottom = if (hideBottomBar == null || hideBottomBar == true) 45.dp else 0.dp)) {
+            AnimatedNavHost(
+                navController = navController,
+                startDestination = BottomNavScreenSpec.screens[0].navHostRoute,
+                modifier = Modifier
+                    .fillMaxSize(),
+                enterTransition = { fadeIn(animationSpec = tween(300)) },
+                exitTransition = { fadeOut(animationSpec = tween(300)) },
+            ) {
+                ScreenSpec.allScreens.values.forEach { screen ->
+                    composable(
+                        route = screen.navHostRoute,
+                        arguments = screen.arguments,
+                        deepLinks = screen.deepLinks,
+                    ) { navBackStackEntry ->
+                        screen.Content(
+                            navController = navController,
+                            navBackStackEntry = navBackStackEntry,
+                            scaffoldState = scaffoldState,
+                        )
+                    }
                 }
             }
         }
+        Box(modifier = Modifier.align(Alignment.BottomCenter)) {
 
-        Box(modifier = Modifier
-            .align(Alignment.BottomCenter)
-            .fillMaxWidth()) {
-            val hideBottomBar = navBackStackEntry?.arguments?.getBoolean(ARG_HIDE_BOTTOM_BAR)
             AnimatedVisibility(
                 visible = hideBottomBar == null || hideBottomBar == true,
                 enter = slideInVertically(initialOffsetY = { it }),
                 exit = slideOutVertically(targetOffsetY = { it })
             ) {
                 BottomNavigation(
+                    modifier = Modifier.fillMaxWidth(),
                     backgroundColor = MaterialTheme.colors.background,
                     elevation = 5.dp
                 ) {
@@ -109,3 +114,4 @@ fun ScreenContent() {
         }
     }
 }
+

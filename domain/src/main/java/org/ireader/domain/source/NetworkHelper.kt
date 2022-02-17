@@ -68,10 +68,13 @@ class NetworkHelper(private val context: Context) : KoinComponent {
 
     @SuppressLint("SetJavaScriptEnabled")
     @OptIn(ExperimentalCoroutinesApi::class)
-    suspend fun getHtmlFromWebView(url: String, ajaxSelector: String? = null): Document {
+    suspend fun getHtmlFromWebView(
+        url: String,
+        ajaxSelector: String? = null,
+        ua: String,
+    ): Document {
 
-        Timber.d("Infinity: GetData Using WebView")
-
+        webView.settings.userAgentString = ua
         webView.setDefaultSettings()
         with(webView.settings) {
             javaScriptEnabled = true

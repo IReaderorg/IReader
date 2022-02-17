@@ -12,15 +12,6 @@ object Testing {
     private const val truthVersion = "1.1.3"
     const val truth = "com.google.truth:truth:$truthVersion"
 
-    private const val mockkVersion = "1.10.0"
-    const val mockk = "io.mockk:mockk:$mockkVersion"
-    const val mockkAndroid = "io.mockk:mockk-android:$mockkVersion"
-
-    private const val turbineVersion = "0.7.0"
-    const val turbine = "app.cash.turbine:turbine:$turbineVersion"
-
-    private const val mockWebServerVersion = "4.9.3"
-    const val mockWebServer = "com.squareup.okhttp3:mockwebserver:$mockWebServerVersion"
 
     const val composeUiTest = "androidx.compose.ui:ui-test-junit4:${Compose.composeVersion}"
 

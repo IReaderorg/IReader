@@ -102,6 +102,10 @@ fun WebPageScreen(
                     ViewGroup.LayoutParams.MATCH_PARENT
                 )
                 setDefaultSettings()
+                source?.headers?.get("User-Agent").let {
+                    webView.settings.userAgentString = it
+                }
+
                 webViewClient = object : WebViewClientCompat() {
                     override fun shouldOverrideUrlCompat(view: WebView, url: String): Boolean {
                         return false

@@ -7,7 +7,9 @@ import kotlinx.coroutines.withContext
 import okhttp3.*
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
+import org.ireader.domain.models.entities.FilterList
 import org.ireader.domain.models.source.*
+import org.ireader.domain.utils.GET
 import org.ireader.domain.utils.asJsoup
 import org.ireader.infinity.core.data.network.models.*
 import org.jsoup.nodes.Document
@@ -24,13 +26,18 @@ import java.util.*
 abstract class HttpSource : Source, KoinComponent {
 
 
-    protected val network: NetworkHelper by inject<NetworkHelper>()
-
-
     /**
      * Base url of the website without the trailing slash, like: http://mysite.com
      */
     abstract override val baseUrl: String
+
+
+    /**
+     * Version id used to generate the source id. If the site completely changes and urls are
+     * incompatible, you may increase this value and it'll be considered as a new source.
+     */
+    open val versionId = 1
+
 
     /**
      * Default network client for doing requests.
@@ -59,11 +66,7 @@ abstract class HttpSource : Source, KoinComponent {
     }
 
 
-    /**
-     * Version id used to generate the source id. If the site completely changes and urls are
-     * incompatible, you may increase this value and it'll be considered as a new source.
-     */
-    open val versionId = 1
+    protected val network: NetworkHelper by inject()
 
     /**
      * Visible name of the source.
@@ -79,14 +82,14 @@ abstract class HttpSource : Source, KoinComponent {
      * if there is not endpoint just return null
      * note: use "{page}" in the endpoint instead of page number
      */
-    abstract val fetchLatestEndpoint: String?
+    abstract fun fetchLatestEndpoint(page: Int): String?
 
     /**
      *return the end point for the  fetch Popular books feature,
      * if there is not endpoint just return null
      * note: use "{page}" in the endpoint instead of page number
      */
-    abstract val fetchPopularEndpoint: String?
+    abstract fun fetchPopularEndpoint(page: Int): String?
 
     /**
      *return the end point for the fetch Search feature,
@@ -94,20 +97,20 @@ abstract class HttpSource : Source, KoinComponent {
      * note: use "{page}" in the endpoint instead of page number
      * note: use "{query}" in the endpoint instead of query
      */
-    abstract val fetchSearchEndpoint: String?
+    abstract fun fetchSearchEndpoint(page: Int, query: String): String?
 
     /**
      *return the end point for the fetch Chapters books feature,
      * if there is not endpoint just return null
      * note: use "{page}" in the endpoint instead of page number
      */
-    abstract val fetchChaptersEndpoint: String?
+    abstract fun fetchChaptersEndpoint(): String?
 
     /**
      *return the end point for the fetch Content  books feature,
      * if there is not endpoint just return null
      */
-    abstract val fetchContentEndpoint: String?
+    abstract fun fetchContentEndpoint(): String?
 
     /****************************************************************************************************/
     /**
@@ -115,7 +118,7 @@ abstract class HttpSource : Source, KoinComponent {
      * override this method.
      * @param page the page number to retrieve.
      */
-    override suspend fun fetchPopular(page: Int): BooksPage {
+    override suspend fun getPopular(page: Int): BooksPage {
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
                 val request = client.call(popularRequest(page))
@@ -130,11 +133,10 @@ abstract class HttpSource : Source, KoinComponent {
      *
      * @param page the page number to retrieve.
      */
-    override suspend fun fetchLatest(page: Int): BooksPage {
+    override suspend fun getLatest(page: Int): BooksPage {
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
                 val request = client.call(latestRequest(page))
-
                 return@withContext latestParse(request, page = page)
             }
         }.getOrThrow()
@@ -146,7 +148,7 @@ abstract class HttpSource : Source, KoinComponent {
      *
      * @param page the page number to retrieve.
      */
-    override suspend fun fetchBook(book: Book): Book {
+    override suspend fun getDetails(book: Book): Book {
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
                 val request = client.call(detailsRequest(book))
@@ -179,7 +181,7 @@ abstract class HttpSource : Source, KoinComponent {
      *
      * @param page the page number to retrieve.
      */
-    override suspend fun fetchContent(chapter: Chapter): ContentPage {
+    override suspend fun getContentList(chapter: Chapter): ContentPage {
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
                 val request = client.call(contentRequest(chapter))
@@ -196,11 +198,11 @@ abstract class HttpSource : Source, KoinComponent {
      * @param page the page number to retrieve.
      * @param query the search query to retrieve.
      */
-    override suspend fun fetchSearch(page: Int, query: String): BooksPage {
+    override suspend fun getSearch(page: Int, query: String, filters: FilterList): BooksPage {
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
-                val request = client.call(searchRequest(page, query))
-                return@withContext searchBookParse(request, page)
+                val request = client.call(searchRequest(page, query, filters))
+                return@withContext searchParse(request, page)
             }
         }.getOrThrow()
 
@@ -212,14 +214,14 @@ abstract class HttpSource : Source, KoinComponent {
      *
      * @param page the page number to retrieve.
      */
-    abstract fun popularRequest(page: Int): Request
+    protected abstract fun popularRequest(page: Int): Request
 
     /**
      * Returns the request for latest  Books given the page.
      *
      * @param page the page number to retrieve.
      */
-    abstract fun latestRequest(page: Int): Request
+    protected abstract fun latestRequest(page: Int): Request
 
 
     /**
@@ -228,8 +230,8 @@ abstract class HttpSource : Source, KoinComponent {
      *
      * @param book the Book to be updated.
      */
-    open fun detailsRequest(book: Book): Request {
-        return org.ireader.domain.utils.GET(baseUrl + getUrlWithoutDomain(book.link), headers)
+    protected open fun detailsRequest(book: Book): Request {
+        return GET(baseUrl + book.link, headers)
     }
 
     /**
@@ -238,11 +240,13 @@ abstract class HttpSource : Source, KoinComponent {
      *
      * @param book the Book to look for chapters.
      */
-    open fun chaptersRequest(book: Book): Request {
-        return org.ireader.domain.utils.GET(baseUrl + getUrlWithoutDomain(book.link), headers)
+    protected open fun chaptersRequest(book: Book): Request {
+        return GET(baseUrl + book.link, headers)
     }
 
-    abstract fun chaptersRequest(book: Book, page: Int): Request
+    protected open fun chaptersRequest(book: Book, page: Int): Request {
+        return GET(baseUrl + book.link, headers)
+    }
 
 
     /**
@@ -251,8 +255,8 @@ abstract class HttpSource : Source, KoinComponent {
      *
      * @param chapter the chapter whose page list has to be fetched.
      */
-    open fun contentRequest(chapter: Chapter): Request {
-        return org.ireader.domain.utils.GET(baseUrl + getUrlWithoutDomain(chapter.link), headers)
+    protected open fun contentRequest(chapter: Chapter): Request {
+        return GET(baseUrl + chapter.link, headers)
     }
 
     /**
@@ -260,7 +264,7 @@ abstract class HttpSource : Source, KoinComponent {
      *
      * @param page the page number to retrieve.
      */
-    abstract fun searchRequest(page: Int, query: String): Request
+    protected abstract fun searchRequest(page: Int, query: String, filters: FilterList): Request
 
     /****************************************************************************************************/
 
@@ -325,11 +329,11 @@ abstract class HttpSource : Source, KoinComponent {
      *
      * @param response the response from the site.
      */
-    fun pageContentParse(response: Response): ContentPage {
-        return contentFromElementParse(response.asJsoup())
+    private fun pageContentParse(response: Response): ContentPage {
+        return pageContentParse(response.asJsoup())
     }
 
-    abstract override fun contentFromElementParse(
+    abstract override fun pageContentParse(
         document: Document,
     ): ContentPage
 
@@ -350,7 +354,7 @@ abstract class HttpSource : Source, KoinComponent {
      *
      * @param response the response from the site.
      */
-    fun searchBookParse(response: Response, page: Int): BooksPage {
+    private fun searchParse(response: Response, page: Int): BooksPage {
         return searchParse(response.asJsoup(), page = page)
     }
 
@@ -388,6 +392,6 @@ abstract class HttpSource : Source, KoinComponent {
 
     companion object {
         const val DEFAULT_USER_AGENT =
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36 Edg/88.0.705.63"
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0"
     }
 }

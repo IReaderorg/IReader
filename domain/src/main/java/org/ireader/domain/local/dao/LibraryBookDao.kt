@@ -46,7 +46,7 @@ interface LibraryBookDao {
         isAsc: Boolean = false,
     ): Flow<List<Book>>
 
-
+    @RewriteQueriesToDropUnusedColumns
     @Query("""SELECT  library.*,COUNT(DISTINCT chapter.id) AS total_chapter
         FROM  library,page_key_table
         LEFT JOIN chapter ON library.id = chapter.bookId  

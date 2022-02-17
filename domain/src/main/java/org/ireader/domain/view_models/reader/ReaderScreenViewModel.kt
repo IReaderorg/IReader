@@ -208,7 +208,7 @@ class ReaderScreenViewModel @Inject constructor(
         try {
             viewModelScope.launch {
                 showSnackBar(UiText.StringResource(R.string.trying_to_fetch_chapters_content))
-                val chapter = source.contentFromElementParse(Jsoup.parse(webView.getHtml()))
+                val chapter = source.pageContentParse(Jsoup.parse(webView.getHtml()))
                 if (!chapter.content.isNullOrEmpty() && state.isBookLoaded && state.isChapterLoaded && webView.originalUrl == state.chapter?.link) {
                     clearError()
                     val localChapter = state.chapter?.copy(content = chapter.content)

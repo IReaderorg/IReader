@@ -23,6 +23,7 @@ import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.source.FetchType
 import org.ireader.domain.models.source.Source
 import org.ireader.domain.source.Extensions
+import org.ireader.domain.source.HttpSource
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.domain.use_cases.fetchers.FetchUseCase
 import org.ireader.domain.use_cases.local.DeleteUseCase
@@ -87,6 +88,8 @@ class WebViewPageModel @Inject constructor(
             _eventFlow.emit(UiEvent.ShowSnackbar(
                 uiText = UiText.StringResource(R.string.trying_to_fetch)
             ))
+            webView.settings.userAgentString =
+                source.headers.get("User-Agent") ?: HttpSource.DEFAULT_USER_AGENT
             fetcherUseCase.fetchBookDetailAndChapterDetailFromWebView(
                 localBook = state.book,
                 localChapters = state.chapters,

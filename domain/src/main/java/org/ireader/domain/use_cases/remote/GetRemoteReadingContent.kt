@@ -22,7 +22,7 @@ class GetRemoteReadingContent(private val remoteRepository: RemoteRepository) {
     ): Flow<Resource<ContentPage>> = flow<Resource<ContentPage>> {
         try {
             Timber.d("Timber: GetRemoteReadingContentUseCase was Called")
-            val content = source.fetchContent(chapter)
+            val content = source.getContentList(chapter)
 
             if (content.content.joinToString()
                     .isBlank() || content.content.contains(Constants.CLOUDFLARE_LOG)

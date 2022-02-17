@@ -9,6 +9,7 @@ import org.ireader.domain.local.BookDatabase
 import org.ireader.domain.models.ExploreType
 import org.ireader.domain.models.RemoteKeys
 import org.ireader.domain.models.entities.Book
+import org.ireader.domain.models.entities.FilterList
 import org.ireader.domain.models.source.Source
 import retrofit2.HttpException
 import java.io.IOException
@@ -62,13 +63,13 @@ class ExploreRemoteMediator(
 
             val response = when (exploreType) {
                 is ExploreType.Latest -> {
-                    source.fetchLatest(currentPage)
+                    source.getLatest(currentPage)
                 }
                 is ExploreType.Popular -> {
-                    source.fetchPopular(currentPage)
+                    source.getPopular(currentPage)
                 }
                 is ExploreType.Search -> {
-                    source.fetchSearch(currentPage, query = query ?: "")
+                    source.getSearch(currentPage, query = query ?: "", filters = FilterList())
                 }
             }
 

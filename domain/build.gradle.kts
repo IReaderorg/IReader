@@ -207,23 +207,21 @@ fun DependencyHandler.addBaseDependencies() {
     testImplementation(Testing.junitAndroidExt)
     testImplementation(Testing.truth)
     testImplementation(Testing.coroutines)
-    testImplementation(Testing.turbine)
     testImplementation(Testing.composeUiTest)
-    testImplementation(Testing.mockk)
-    testImplementation(Testing.mockWebServer)
 
 
     androidTestImplementation(Testing.junit4)
     androidTestImplementation(Testing.junitAndroidExt)
     androidTestImplementation(Testing.truth)
     androidTestImplementation(Testing.coroutines)
-    androidTestImplementation(Testing.turbine)
     androidTestImplementation(Testing.composeUiTest)
-    androidTestImplementation(Testing.mockk)
-    androidTestImplementation(Testing.mockWebServer)
     androidTestImplementation(Testing.hiltTesting)
     // Instrumented Unit Tests
     androidTestImplementation("androidx.arch.core:core-testing:2.1.0")
     androidTestImplementation("androidx.test.ext:junit:1.1.1")
     androidTestImplementation("org.mockito:mockito-core:2.21.0")
+    implementation(kotlin("stdlib"))
+    implementation(Ktor.core)
+    implementation(Ktor.serialization)
+    implementation(Ktor.okhttp)
 }

@@ -3,8 +3,10 @@ package org.ireader.domain.models.source
 import okhttp3.Headers
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
+import org.ireader.domain.models.entities.FilterList
 import org.jsoup.nodes.Document
 
+/** Source : tachiyomi**/
 
 interface Source {
 
@@ -40,7 +42,7 @@ interface Source {
      *
      * @param page the page number to retrieve.
      */
-    suspend fun fetchLatest(page: Int): BooksPage
+    suspend fun getLatest(page: Int): BooksPage
 
 
     /**
@@ -48,7 +50,7 @@ interface Source {
      *
      * @param page the page number to retrieve.
      */
-    suspend fun fetchPopular(page: Int): BooksPage
+    suspend fun getPopular(page: Int): BooksPage
 
     /**
      * Returns a page with a list of books.
@@ -56,7 +58,7 @@ interface Source {
      * @param page the page number to retrieve.
      * @param query the search query.
      */
-    suspend fun fetchSearch(page: Int, query: String): BooksPage
+    suspend fun getSearch(page: Int, query: String, filters: FilterList): BooksPage
 
 
     /**
@@ -64,7 +66,7 @@ interface Source {
      *
      * @param chapter the chapter that it contents is going to be retrieve.
      */
-    suspend fun fetchContent(chapter: Chapter): ContentPage
+    suspend fun getContentList(chapter: Chapter): ContentPage
 
 
     /**
@@ -72,7 +74,7 @@ interface Source {
      *
      * @param book a book that contain need to be contain a bookName and a link
      */
-    suspend fun fetchBook(book: Book): Book
+    suspend fun getDetails(book: Book): Book
 
     /**
      * Returns a list of chapter.
@@ -86,7 +88,14 @@ interface Source {
     fun detailParse(document: Document): Book
     fun chaptersParse(document: Document): ChaptersPage
     fun searchParse(document: Document, page: Int = 0): BooksPage
-    fun contentFromElementParse(document: Document): ContentPage
+    fun pageContentParse(document: Document): ContentPage
 
+    /**
+     * Returns the list of filters for the source.
+     */
+    fun getFilterList(): FilterList
+    fun getRegex(): Regex {
+        return Regex("")
+    }
 }
 
