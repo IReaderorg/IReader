@@ -2,6 +2,7 @@ package org.ireader.domain.source
 
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.source.BooksPage
+import org.ireader.domain.models.source.HttpSource
 import org.ireader.source.models.BookInfo
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element

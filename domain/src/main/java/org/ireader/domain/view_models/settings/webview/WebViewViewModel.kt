@@ -21,9 +21,9 @@ import org.ireader.domain.R
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.source.FetchType
+import org.ireader.domain.models.source.HttpSource
 import org.ireader.domain.models.source.Source
 import org.ireader.domain.source.Extensions
-import org.ireader.domain.source.HttpSource
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.domain.use_cases.fetchers.FetchUseCase
 import org.ireader.domain.use_cases.local.DeleteUseCase
@@ -61,7 +61,7 @@ class WebViewPageModel @Inject constructor(
         val fetcher = savedStateHandle.get<Int>(NavigationArgs.fetchType.name)
 
         if (sourceId != null && chapterId != null && bookId != null) {
-            state = state.copy(source = extensions.mappingSourceNameToSource(sourceId))
+            state = state.copy(source = extensions.findSourceById(sourceId))
         }
         if (fetcher != null) {
             state = state.copy(fetcher = mapFetcher(fetcher))

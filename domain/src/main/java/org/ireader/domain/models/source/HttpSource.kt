@@ -1,14 +1,17 @@
-package org.ireader.domain.source
+package org.ireader.domain.models.source
 
 import io.ktor.client.*
 import io.ktor.client.request.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.*
+import org.ireader.domain.feature_services.io.ImageUrl
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.entities.FilterList
 import org.ireader.domain.models.source.*
+import org.ireader.domain.source.Dependencies
+import org.ireader.domain.source.nec.Listing
 import org.ireader.domain.utils.asJsoup
 import org.ireader.infinity.core.data.network.models.*
 import org.ireader.source.models.BookInfo
@@ -175,7 +178,7 @@ abstract class HttpSource(private val dependencies: Dependencies) : Source {
      *
      * @param page the page number to retrieve.
      */
-    override suspend fun getContentList(chapter: Chapter): List<String> {
+    override suspend fun getContents(chapter: Chapter): List<String> {
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
                 val request = client.get<Document>(contentRequest(chapter))
@@ -366,6 +369,21 @@ abstract class HttpSource(private val dependencies: Dependencies) : Source {
         }
     }
 
+    open fun getImageRequest(page: ImageUrl): Pair<HttpClient, HttpRequestBuilder> {
+        return client to HttpRequestBuilder().apply {
+            url(page.url)
+        }
+    }
+
+    open fun getCoverRequest(url: String): Pair<HttpClient, HttpRequestBuilder> {
+        return client to HttpRequestBuilder().apply {
+            url(url)
+        }
+    }
+
+    override fun getListings(): List<Listing> {
+        return emptyList()
+    }
 
     protected open fun headersBuilder() = Headers.Builder().apply {
         add("User-Agent", DEFAULT_USER_AGENT)

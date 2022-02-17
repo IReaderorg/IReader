@@ -49,7 +49,7 @@ class ExploreViewModel @Inject constructor(
         val exploreId = savedStateHandle.get<Int>("exploreType")
         val sourceId = savedStateHandle.get<Long>("sourceId")
         if (sourceId != null && exploreId != null) {
-            val source = extensions.mappingSourceNameToSource(sourceId)
+            val source = extensions.findSourceById(sourceId)
             if (source != null) {
                 state.value = state.value.copy(source = source)
                 state.value = state.value.copy(exploreType = exploreTypeMapper(exploreId))

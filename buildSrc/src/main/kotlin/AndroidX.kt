@@ -10,4 +10,5 @@ object AndroidX {
     const val material = "com.google.android.material:material:1.6.0-alpha02"
     const val activity = "androidx.activity:activity-ktx:1.5.0-alpha02"
     const val appStartUpRuntime = "androidx.startup:startup-runtime:1.2.0-alpha01"
+    const val emojiCompat = "com.android.support:support-emoji:28.0.0"
 }

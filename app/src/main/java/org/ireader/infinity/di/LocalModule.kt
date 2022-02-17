@@ -7,10 +7,13 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import okio.FileSystem
+import okio.Path.Companion.toOkioPath
 import org.ireader.core.okhttp.HttpClients
 import org.ireader.core.prefs.AndroidPreferenceStore
 import org.ireader.core.prefs.PreferenceStore
 import org.ireader.data.repository.DownloadRepositoryImpl
+import org.ireader.domain.feature_services.io.LibraryCovers
 import org.ireader.domain.local.BookDatabase
 import org.ireader.domain.local.MIGRATION_8_9
 import org.ireader.domain.local.dao.DownloadDao
@@ -49,6 +52,7 @@ import org.ireader.domain.use_cases.local.insert_usecases.InsertBooks
 import org.ireader.domain.use_cases.local.insert_usecases.InsertChapter
 import org.ireader.domain.use_cases.local.insert_usecases.InsertChapters
 import org.ireader.infinity.core.domain.use_cases.local.book_usecases.GetBooksByQueryPagingSource
+import java.io.File
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
@@ -204,6 +208,17 @@ class LocalModule {
         preferences: PreferenceStore,
     ): AppPreferences {
         return AppPreferences(preferences)
+    }
+
+    @Provides
+    @Singleton
+    fun provideLibraryCovers(
+        @ApplicationContext context: Context,
+    ): LibraryCovers {
+        return LibraryCovers(
+            FileSystem.SYSTEM,
+            File(context.filesDir, "library_covers").toOkioPath()
+        )
     }
 
     @Provides

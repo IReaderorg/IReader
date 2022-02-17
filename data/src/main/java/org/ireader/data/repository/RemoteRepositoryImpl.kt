@@ -44,7 +44,7 @@ class RemoteRepositoryImpl(
     ): Flow<Resource<List<String>>> = flow<Resource<List<String>>> {
         try {
             Timber.d("Timber: GetRemoteReadingContentUseCase was Called")
-            val content = source.getContentList(chapter)
+            val content = source.getContents(chapter)
 
             if (content.joinToString()
                     .isBlank() || content.contains(Constants.CLOUDFLARE_LOG)

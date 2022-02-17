@@ -2,7 +2,6 @@ package org.ireader.domain.use_cases.remote
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import org.ireader.core.utils.Constants
 import org.ireader.core.utils.UiText
 import org.ireader.domain.R
 import org.ireader.domain.models.entities.Book
@@ -21,11 +20,9 @@ class GetRemoteReadingContent(private val remoteRepository: RemoteRepository) {
     ): Flow<Resource<List<String>>> = flow<Resource<List<String>>> {
         try {
             Timber.d("Timber: GetRemoteReadingContentUseCase was Called")
-            val content = source.getContentList(chapter)
+            val content = source.getContents(chapter)
 
-            if (content.joinToString()
-                    .isBlank() || content.contains(Constants.CLOUDFLARE_LOG)
-            ) {
+            if (content.joinToString().isBlank()) {
                 emit(Resource.Error<List<String>>(uiText = UiText.StringResource(R.string.cant_get_content)))
             } else {
                 Timber.d("Timber: GetRemoteReadingContentUseCase was Finished Successfully")

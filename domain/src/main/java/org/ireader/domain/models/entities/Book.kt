@@ -30,6 +30,7 @@ data class Book(
 ) {
 
     companion object {
+
         fun BookInfo.fromBookInfo(sourceId: Long): Book {
             return Book(
                 id = 0,
@@ -52,7 +53,6 @@ data class Book(
                 viewer = this.viewer
             )
         }
-
         const val UNKNOWN = 0
         const val ONGOING = 1
         const val COMPLETED = 2

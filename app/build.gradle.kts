@@ -176,6 +176,7 @@ dependencies {
 
 //    /** Network Client - OkHttp**/
     implementation(OkHttp.okHttp3)
+    implementation(OkHttp.okio)
     implementation(OkHttp.okHttp3Interceptor)
 
 

@@ -12,6 +12,7 @@ import org.ireader.domain.models.source.Source
 
 data class ReaderScreenState(
     val isLoading: Boolean = false,
+    val isRemoteLoading: Boolean = false,
     val isLocalLoaded: Boolean = false,
     val isRemoteLoaded: Boolean = false,
     val enable: Boolean = true,

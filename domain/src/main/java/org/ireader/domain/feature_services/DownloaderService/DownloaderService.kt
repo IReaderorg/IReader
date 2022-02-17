@@ -75,7 +75,7 @@ class DownloadService @AssistedInject constructor(
             sourceId = bookResource.sourceId,
         )
 
-        val source = extensions.mappingSourceNameToSource(sourceId)
+        val source = extensions.findSourceById(sourceId)
 
         val chapters = chapterRepo.findChaptersByBookId(bookId).first()
 

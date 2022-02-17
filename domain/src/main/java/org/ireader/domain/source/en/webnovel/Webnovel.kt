@@ -33,13 +33,13 @@ class Webnovel(deps: Dependencies) : ParsedHttpSource(deps) {
 
 
     override fun fetchLatestEndpoint(page: Int): String? =
-        "${baseUrl}/stories/novel?pageIndex=$page&orderBy=5"
+        "/stories/novel?pageIndex=$page&orderBy=5"
 
     override fun fetchPopularEndpoint(page: Int): String? =
-        "${baseUrl}/stories/novel?pageIndex=$page&orderBy=1"
+        "/stories/novel?pageIndex=$page&orderBy=1"
 
     override fun fetchSearchEndpoint(page: Int, query: String): String? =
-        "${baseUrl}/search?keywords=$query?pageIndex=$page"
+        "/search?keywords=$query?pageIndex=$page"
 
     override fun fetchChaptersEndpoint(): String? = null
     override fun fetchContentEndpoint(): String? = null
@@ -159,23 +159,26 @@ class Webnovel(deps: Dependencies) : ParsedHttpSource(deps) {
         }.getOrThrow()
     }
 
-    override fun chaptersParse(document: Document): List<Chapter> {
-
-        val chapters = super.chaptersParse(document)
-        //val chapters = document.select(chaptersSelector()).map { chapterFromElement(it) }
-        return chapters
-    }
-
     override fun hasNextChaptersParse(document: Document): Boolean {
         return false
     }
 
     override fun pageContentParse(document: Document): List<String> {
         val title: List<String> = listOf(document.select("div.cha-tit").text())
-        val content: List<String> = document.select("div.cha-content  p").eachText()
-        val final = merge(title, content)
+        val content: List<String> = document.select("div.cha-content p").eachText()
+        return merge(title, content)
+    }
 
-        return final
+    override suspend fun getContents(chapter: Chapter): List<String> {
+        return pageContentParse(client.get<Document>(contentRequest(chapter)))
+    }
+
+
+    override fun contentRequest(chapter: Chapter): HttpRequestBuilder {
+        return HttpRequestBuilder().apply {
+            url(chapter.link)
+            headers { headers }
+        }
     }
 
     fun parseChapterDate(date: String): Long {

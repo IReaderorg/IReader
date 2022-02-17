@@ -595,7 +595,7 @@ data class SourceTower constructor(
      *
      * @param page the page number to retrieve.
      */
-    override suspend fun getContentList(chapter: Chapter): List<String> {
+    override suspend fun getContents(chapter: Chapter): List<String> {
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
                 return@withContext pageContentParse(client.get<Document>(contentRequest(chapter)))

@@ -8,7 +8,8 @@ class Extensions(
     private val dependencies: Dependencies,
 ) {
 
-    fun mappingSourceNameToSource(id: Long): Source? {
+
+    fun findSourceById(id: Long): Source? {
         val sources = getSources()
 
         return sources.find { it.sourceId == id }

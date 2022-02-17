@@ -4,6 +4,7 @@ import okhttp3.Headers
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.entities.FilterList
+import org.ireader.domain.source.nec.Listing
 import org.ireader.source.models.BookInfo
 import org.jsoup.nodes.Document
 
@@ -40,7 +41,7 @@ interface Source {
 
     suspend fun getSearch(page: Int, query: String, filters: FilterList): BooksPage
 
-    suspend fun getContentList(chapter: Chapter): List<String>
+    suspend fun getContents(chapter: Chapter): List<String>
 
     suspend fun getDetails(book: Book): BookInfo
 
@@ -57,6 +58,7 @@ interface Source {
      * Returns the list of filters for the source.
      */
     fun getFilterList(): FilterList
+    fun getListings(): List<Listing>
     fun getRegex(): Regex {
         return Regex("")
     }

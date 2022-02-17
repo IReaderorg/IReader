@@ -31,9 +31,9 @@ import org.ireader.domain.feature_services.DownloaderService.DownloadService.Com
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.entities.updateBook
+import org.ireader.domain.models.source.HttpSource
 import org.ireader.domain.models.source.Source
 import org.ireader.domain.source.Extensions
-import org.ireader.domain.source.HttpSource
 import org.ireader.domain.use_cases.fetchers.FetchUseCase
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
@@ -90,7 +90,7 @@ class BookDetailViewModel @Inject constructor(
         val bookId = savedStateHandle.get<Long>("bookId")
         val sourceId = savedStateHandle.get<Long>("sourceId")
         if (bookId != null && sourceId != null) {
-            val source = extensions.mappingSourceNameToSource(sourceId)
+            val source = extensions.findSourceById(sourceId)
             if (source != null) {
                 state = state.copy(source = source)
                 state = state.copy(isLoading = true)
@@ -129,7 +129,7 @@ class BookDetailViewModel @Inject constructor(
                     clearBookError()
                     setBook(book)
                     toggleInLibrary(book.favorite)
-                    if (book.lastUpdated < 1L && !state.isRemoteLoaded) {
+                    if (book.lastUpdated < 1L && !state.isRemoteLoaded || state.isLoading) {
                         getRemoteBookDetail(book, source)
                         getRemoteChapterDetail(book, source)
                     }

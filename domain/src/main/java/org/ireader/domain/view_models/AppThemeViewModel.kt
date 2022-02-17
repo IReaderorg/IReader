@@ -15,9 +15,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
-import org.ireader.core.coil.CoilLoaderFactory
 import org.ireader.core_ui.theme.*
 import org.ireader.core_ui.viewmodel.BaseViewModel
+import org.ireader.domain.feature_services.io.coil.CoilLoaderFactory
 import org.ireader.domain.ui.UiPreferences
 import javax.inject.Inject
 
