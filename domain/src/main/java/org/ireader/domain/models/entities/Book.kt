@@ -31,7 +31,7 @@ data class Book(
 
     companion object {
 
-        fun BookInfo.fromBookInfo(sourceId: Long): Book {
+        fun BookInfo.toBook(sourceId: Long): Book {
             return Book(
                 id = 0,
                 sourceId = sourceId,

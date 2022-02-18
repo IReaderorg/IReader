@@ -6,6 +6,7 @@ import org.ireader.core.utils.UiText
 import org.ireader.domain.R
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
+import org.ireader.domain.models.entities.toChapter
 import org.ireader.domain.models.source.Source
 import org.ireader.domain.repository.RemoteRepository
 import org.ireader.domain.utils.Resource
@@ -20,7 +21,7 @@ class GetRemoteChapters(private val remoteRepository: RemoteRepository) {
             try {
                 Timber.d("Timber: GetRemoteChaptersUseCase was Called")
                 val chapters = source.fetchChapters(book = book)
-                emit(Resource.Success<List<Chapter>>(chapters))
+                emit(Resource.Success<List<Chapter>>(chapters.map { it.toChapter() }))
                 Timber.d("Timber: GetRemoteChaptersUseCase was Finished Successfully")
 
             } catch (e: HttpException) {

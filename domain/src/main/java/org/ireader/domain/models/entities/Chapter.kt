@@ -4,6 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 import org.ireader.core.utils.Constants.CHAPTER_TABLE
+import org.ireader.source.models.ChapterInfo
 
 
 @Serializable
@@ -30,4 +31,14 @@ data class Chapter(
     fun isChapterNotEmpty(): Boolean {
         return content.joinToString().length > 10
     }
+
+
+}
+
+fun ChapterInfo.toChapter(): Chapter {
+    return Chapter(
+        title = name,
+        link = key,
+        bookId = 0
+    )
 }

@@ -14,6 +14,7 @@ import org.ireader.domain.models.entities.FilterList
 import org.ireader.domain.models.source.*
 import org.ireader.infinity.core.data.network.models.*
 import org.ireader.source.models.BookInfo
+import org.ireader.source.models.ChapterInfo
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
@@ -46,6 +47,8 @@ data class SourceTower constructor(
         return FilterList()
     }
 
+    val pageFormat = "{page}"
+    val searchQueryFormat = "{query}"
 
     override fun headersBuilder(): Headers.Builder = Headers.Builder().apply {
         add(
@@ -59,8 +62,8 @@ data class SourceTower constructor(
     override fun fetchLatestEndpoint(page: Int): String? = latest?.endpoint
     override fun fetchPopularEndpoint(page: Int): String? = popular?.endpoint
     override fun fetchSearchEndpoint(page: Int, query: String): String? = search?.endpoint
-    override fun fetchChaptersEndpoint(): String? = chapters?.endpoint
-    override fun fetchContentEndpoint(): String? = content?.endpoint
+    fun fetchChaptersEndpoint(): String? = chapters?.endpoint
+    fun fetchContentEndpoint(): String? = content?.endpoint
 
 
     /****************************SELECTOR*************************************************************/
@@ -69,7 +72,7 @@ data class SourceTower constructor(
 
     override fun popularNextPageSelector(): String? = popular?.nextPageSelector
     override fun latestNextPageSelector(): String? = latest?.nextPageSelector
-    override fun hasNextChapterSelector() = chapters?.nextPageSelector ?: ""
+    fun hasNextChapterSelector() = chapters?.nextPageSelector ?: ""
     override fun searchSelector(): String = search?.selector ?: ""
     override fun searchNextPageSelector(): String = search?.nextPageSelector ?: ""
 
@@ -179,7 +182,7 @@ data class SourceTower constructor(
         return BookInfo(link = link, title = title, cover = cover)
     }
 
-    override fun chapterFromElement(element: Element): Chapter {
+    override fun chapterFromElement(element: Element): ChapterInfo {
 
         val selectorLink = chapters?.linkSelector
         val attLink = chapters?.linkAtt
@@ -193,7 +196,7 @@ data class SourceTower constructor(
 
 
 
-        return Chapter(link = link, title = title, bookId = 0)
+        return ChapterInfo(key = link, name = title)
     }
 
     override fun searchFromElement(element: Element): BookInfo {
@@ -299,8 +302,8 @@ data class SourceTower constructor(
     }
 
 
-    override fun chaptersParse(document: Document): List<Chapter> {
-        val chapters = mutableListOf<Chapter>()
+    override fun chaptersParse(document: Document): List<ChapterInfo> {
+        val chapters = mutableListOf<ChapterInfo>()
         if (this.chapters?.isHtmlType == true) {
             chapters.addAll(document.select(chaptersSelector()).map { chapterFromElement(it) })
         } else {
@@ -408,14 +411,14 @@ data class SourceTower constructor(
     }
 
     /****************************PARSE FROM JSON**********************************/
-    fun chapterListFromJson(jsonObject: Map<String, String>): Chapter {
+    fun chapterListFromJson(jsonObject: Map<String, String>): ChapterInfo {
 
         val mName = chapters?.nameSelector
         val mLink = chapters?.linkSelector
         val title = jsonObject[mName]?.formatHtmlText() ?: ""
         val link = jsonObject[mLink] ?: ""
 
-        return Chapter(title = title, link = link, bookId = 0)
+        return ChapterInfo(name = title, key = link)
     }
 
     fun searchBookFromJson(jsonObject: Map<String, String>): BookInfo {
@@ -500,7 +503,7 @@ data class SourceTower constructor(
     /****************************PARSE FROM JSON**********************************/
 
 
-    override fun hasNextChaptersParse(document: Document): Boolean {
+    fun hasNextChaptersParse(document: Document): Boolean {
         if (chapters?.supportNextPagesList == true) {
             val docs = selectorReturnerStringType(document,
                 chapters.nextPageSelector,
@@ -533,7 +536,7 @@ data class SourceTower constructor(
     /**
      * Fetchers
      */
-    override suspend fun fetchChapters(book: Book): List<Chapter> {
+    override suspend fun fetchChapters(book: Book): List<ChapterInfo> {
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
                 val request = client.get<Document>(chaptersRequest(book))

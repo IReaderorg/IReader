@@ -1,9 +1,9 @@
 package org.ireader.domain.source
 
-import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.source.BooksPage
 import org.ireader.domain.models.source.HttpSource
 import org.ireader.source.models.BookInfo
+import org.ireader.source.models.ChapterInfo
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 
@@ -32,7 +32,7 @@ abstract class ParsedHttpSource(dependencies: Dependencies) : HttpSource(depende
      *
      * @param element an element obtained from [chaptersSelector].
      */
-    abstract fun chapterFromElement(element: Element): Chapter
+    abstract fun chapterFromElement(element: Element): ChapterInfo
 
     /**
      * Returns a Book from the given [element]. Most sites only show the title and the url, it's
@@ -94,23 +94,11 @@ abstract class ParsedHttpSource(dependencies: Dependencies) : HttpSource(depende
      */
     protected abstract fun chaptersSelector(): String
 
-    /**
-     * Returns the Jsoup selector that returns the <a> tag linking to the next page, or null if
-     * there's no next page.
-     */
-    protected abstract fun hasNextChapterSelector(): String
 
-    override fun chaptersParse(document: Document): List<Chapter> {
-        val chapters = document.select(chaptersSelector()).map { chapterFromElement(it) }
-
-        val hasNext = hasNextChaptersParse(document)
-
-        return chapters
-
-
+    override fun chaptersParse(document: Document): List<ChapterInfo> {
+        return document.select(chaptersSelector()).map { chapterFromElement(it) }
     }
 
-    abstract fun hasNextChaptersParse(document: Document): Boolean
 
     abstract override fun pageContentParse(
         document: Document,

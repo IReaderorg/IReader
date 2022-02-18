@@ -1,6 +1,7 @@
 package org.ireader.domain.source
 
 import org.ireader.domain.models.source.*
+import org.ireader.domain.source.en.freewebnovel.FreeWbNovel
 import org.ireader.domain.source.en.webnovel.Webnovel
 
 
@@ -616,6 +617,7 @@ class AvailableSources(dependencies: Dependencies) {
         mtlNation,
         realLightWebNovel,
         wuxiaworldsiteco,
+        FreeWbNovel(dependencies),
         Webnovel(dependencies)
     )
 }

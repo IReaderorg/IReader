@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.flow
 import org.ireader.core.utils.UiText
 import org.ireader.domain.R
 import org.ireader.domain.models.entities.Book
-import org.ireader.domain.models.entities.Book.Companion.fromBookInfo
+import org.ireader.domain.models.entities.Book.Companion.toBook
 import org.ireader.domain.models.entities.updateBook
 import org.ireader.domain.models.source.Source
 import org.ireader.domain.repository.RemoteRepository
@@ -20,7 +20,7 @@ class GetBookDetail(private val remoteRepository: RemoteRepository) {
             val now = System.currentTimeMillis()
             Timber.d("Timber: Remote Book Detail for ${book.title} Was called")
             val bookDetail = remoteRepository.getRemoteBookDetail(book = book, source = source)
-                .fromBookInfo(source.sourceId)
+                .toBook(source.sourceId)
 
             Timber.d("Timber: Remote Book Detail Was Fetched")
 

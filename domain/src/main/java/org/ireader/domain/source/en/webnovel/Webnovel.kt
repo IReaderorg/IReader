@@ -12,6 +12,7 @@ import org.ireader.domain.models.entities.FilterList
 import org.ireader.domain.source.Dependencies
 import org.ireader.domain.source.ParsedHttpSource
 import org.ireader.source.models.BookInfo
+import org.ireader.source.models.ChapterInfo
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import java.text.SimpleDateFormat
@@ -41,8 +42,7 @@ class Webnovel(deps: Dependencies) : ParsedHttpSource(deps) {
     override fun fetchSearchEndpoint(page: Int, query: String): String? =
         "/search?keywords=$query?pageIndex=$page"
 
-    override fun fetchChaptersEndpoint(): String? = null
-    override fun fetchContentEndpoint(): String? = null
+
 
     private val dateFormat: SimpleDateFormat = SimpleDateFormat("MMM dd,yyyy", Locale.US)
 
@@ -131,11 +131,8 @@ class Webnovel(deps: Dependencies) : ParsedHttpSource(deps) {
     }
 
     override fun chaptersSelector() = ".volume-item li a"
-    override fun hasNextChapterSelector(): String {
-        return ""
-    }
 
-    override fun chapterFromElement(element: Element): Chapter {
+    override fun chapterFromElement(element: Element): ChapterInfo {
         val link = baseUrl + element.attr("href")
         val name = if (element.select("svg").hasAttr("class")) {
             "\uD83D\uDD12 "
@@ -145,10 +142,10 @@ class Webnovel(deps: Dependencies) : ParsedHttpSource(deps) {
                 element.attr("title")
         val date_upload = parseChapterDate(element.select(".oh small").text())
 
-        return Chapter(title = name, dateUploaded = date_upload, link = link, bookId = 0)
+        return ChapterInfo(name = name, dateUpload = date_upload, key = link)
     }
 
-    override suspend fun fetchChapters(book: Book): List<Chapter> {
+    override suspend fun fetchChapters(book: Book): List<ChapterInfo> {
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
 
@@ -157,10 +154,6 @@ class Webnovel(deps: Dependencies) : ParsedHttpSource(deps) {
                 return@withContext chaptersParse(request)
             }
         }.getOrThrow()
-    }
-
-    override fun hasNextChaptersParse(document: Document): Boolean {
-        return false
     }
 
     override fun pageContentParse(document: Document): List<String> {

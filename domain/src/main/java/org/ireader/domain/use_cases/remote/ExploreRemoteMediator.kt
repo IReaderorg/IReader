@@ -9,7 +9,7 @@ import org.ireader.domain.local.BookDatabase
 import org.ireader.domain.models.ExploreType
 import org.ireader.domain.models.RemoteKeys
 import org.ireader.domain.models.entities.Book
-import org.ireader.domain.models.entities.Book.Companion.fromBookInfo
+import org.ireader.domain.models.entities.Book.Companion.toBook
 import org.ireader.domain.models.entities.FilterList
 import org.ireader.domain.models.source.Source
 import retrofit2.HttpException
@@ -96,7 +96,7 @@ class ExploreRemoteMediator(
                 }
 
                 remoteKey.addAllRemoteKeys(remoteKeys = keys)
-                remoteKey.insertAllExploredBook(response.books.map { it.fromBookInfo(source.sourceId) })
+                remoteKey.insertAllExploredBook(response.books.map { it.toBook(source.sourceId) })
             }
             RemoteMediator.MediatorResult.Success(endOfPaginationReached = endOfPaginationReached)
         } catch (e: UnknownHostException) {

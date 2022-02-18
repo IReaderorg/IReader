@@ -6,8 +6,9 @@ import org.ireader.core.utils.UiText
 import org.ireader.core.utils.removeSameItemsFromList
 import org.ireader.domain.R
 import org.ireader.domain.models.entities.Book
-import org.ireader.domain.models.entities.Book.Companion.fromBookInfo
+import org.ireader.domain.models.entities.Book.Companion.toBook
 import org.ireader.domain.models.entities.Chapter
+import org.ireader.domain.models.entities.toChapter
 import org.ireader.domain.models.entities.updateBook
 import org.ireader.domain.models.source.Source
 import org.ireader.domain.use_cases.local.DeleteUseCase
@@ -32,13 +33,13 @@ class FetchBookDetailAndChapterDetailFromWebView {
                 emit(Resource.Error<UiText.DynamicString>(UiText.StringResource(R.string.trying_to_fetch)))
                 if (localChapters != null && chaptersFromPageSource.isNotEmpty() && localBook?.title?.isNotBlank() == true) {
                     val uniqueList = removeSameItemsFromList(oldList = localChapters,
-                        newList = chaptersFromPageSource,
+                        newList = chaptersFromPageSource.map { it.toChapter() },
                         differentiateBy = {
                             it.title
                         })
                     deleteUseCase.deleteChaptersByBookId(bookId = localBook.id)
                     insertUseCases.insertBook(
-                        updateBook(bookFromPageSource.fromBookInfo(source.sourceId), localBook)
+                        updateBook(bookFromPageSource.toBook(source.sourceId), localBook)
                     )
                     insertUseCases.insertChapters(uniqueList.map {
                         it.copy(

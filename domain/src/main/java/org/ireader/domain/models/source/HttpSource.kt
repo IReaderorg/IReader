@@ -15,6 +15,7 @@ import org.ireader.domain.source.nec.Listing
 import org.ireader.domain.utils.asJsoup
 import org.ireader.infinity.core.data.network.models.*
 import org.ireader.source.models.BookInfo
+import org.ireader.source.models.ChapterInfo
 import org.jsoup.nodes.Document
 import java.net.URI
 import java.net.URISyntaxException
@@ -70,8 +71,6 @@ abstract class HttpSource(private val dependencies: Dependencies) : Source {
      */
     override fun toString() = "$name (${lang.uppercase()})"
 
-    val pageFormat: String = "{page}"
-    val searchQueryFormat: String = "{query}"
     /****************************************************************************************************/
 
     /**
@@ -96,18 +95,6 @@ abstract class HttpSource(private val dependencies: Dependencies) : Source {
      */
     abstract fun fetchSearchEndpoint(page: Int, query: String): String?
 
-    /**
-     *return the end point for the fetch Chapters books feature,
-     * if there is not endpoint just return null
-     * note: use "{page}" in the endpoint instead of page number
-     */
-    abstract fun fetchChaptersEndpoint(): String?
-
-    /**
-     *return the end point for the fetch Content  books feature,
-     * if there is not endpoint just return null
-     */
-    abstract fun fetchContentEndpoint(): String?
 
     /****************************************************************************************************/
     /**
@@ -162,7 +149,7 @@ abstract class HttpSource(private val dependencies: Dependencies) : Source {
      * @param page the page number to retrieve.
      * @param book the chapters to retrieve.
      */
-    override suspend fun fetchChapters(book: Book): List<Chapter> {
+    override suspend fun fetchChapters(book: Book): List<ChapterInfo> {
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
                 val request = client.get<Document>(chaptersRequest(book))
@@ -340,7 +327,7 @@ abstract class HttpSource(private val dependencies: Dependencies) : Source {
      *
      * @param response the response from the site.
      */
-    abstract override fun chaptersParse(document: Document): List<Chapter>
+    abstract override fun chaptersParse(document: Document): List<ChapterInfo>
 
 
     abstract override fun searchParse(

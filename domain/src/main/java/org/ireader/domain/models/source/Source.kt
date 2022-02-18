@@ -6,6 +6,7 @@ import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.entities.FilterList
 import org.ireader.domain.source.nec.Listing
 import org.ireader.source.models.BookInfo
+import org.ireader.source.models.ChapterInfo
 import org.jsoup.nodes.Document
 
 /** Source : tachiyomi**/
@@ -45,12 +46,12 @@ interface Source {
 
     suspend fun getDetails(book: Book): BookInfo
 
-    suspend fun fetchChapters(book: Book): List<Chapter>
+    suspend fun fetchChapters(book: Book): List<ChapterInfo>
 
     fun popularParse(document: Document): BooksPage
     fun latestParse(document: Document): BooksPage
     fun detailParse(document: Document): BookInfo
-    fun chaptersParse(document: Document): List<Chapter>
+    fun chaptersParse(document: Document): List<ChapterInfo>
     fun searchParse(document: Document): BooksPage
     fun pageContentParse(document: Document): List<String>
 
