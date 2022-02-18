@@ -38,9 +38,16 @@ class FetchBookDetailAndChapterDetailFromWebView {
                             it.title
                         })
                     deleteUseCase.deleteChaptersByBookId(bookId = localBook.id)
-                    insertUseCases.insertBook(
-                        updateBook(bookFromPageSource.toBook(source.sourceId), localBook)
-                    )
+                    if (localBook.id != 0L) {
+                        insertUseCases.insertBook(
+                            updateBook(bookFromPageSource.toBook(source.sourceId), localBook)
+                        )
+                    } else {
+                        insertUseCases.insertBook(
+                            updateBook(bookFromPageSource.toBook(source.sourceId), localBook)
+                        )
+                    }
+
                     insertUseCases.insertChapters(uniqueList.map {
                         it.copy(
                             bookId = localBook.id,
@@ -48,7 +55,7 @@ class FetchBookDetailAndChapterDetailFromWebView {
                             dateFetch = System.currentTimeMillis(),
                         )
                     })
-                    emit(Resource.Success<UiText.DynamicString>(UiText.DynamicString("${localBook.title} was fetched with ${chaptersFromPageSource.size}   chapters")))
+                    emit(Resource.Success<UiText.DynamicString>(UiText.DynamicString("${localBook.title.ifBlank { bookFromPageSource.title }} was fetched with ${chaptersFromPageSource.size}   chapters")))
 
                 } else {
                     if (chaptersFromPageSource.isNotEmpty()) {

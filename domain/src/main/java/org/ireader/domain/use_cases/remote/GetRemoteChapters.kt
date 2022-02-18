@@ -20,7 +20,7 @@ class GetRemoteChapters(private val remoteRepository: RemoteRepository) {
         flow {
             try {
                 Timber.d("Timber: GetRemoteChaptersUseCase was Called")
-                val chapters = source.fetchChapters(book = book)
+                val chapters = source.getChapters(book = book)
                 emit(Resource.Success<List<Chapter>>(chapters.map { it.toChapter() }))
                 Timber.d("Timber: GetRemoteChaptersUseCase was Finished Successfully")
 

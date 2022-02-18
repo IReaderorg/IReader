@@ -6,8 +6,6 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.TrackChanges
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -15,21 +13,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.web.rememberWebViewState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collectLatest
 import org.ireader.core.utils.UiEvent
-import org.ireader.domain.models.source.FetchType
 import org.ireader.infinity.core.data.network.utils.setDefaultSettings
 import org.ireader.infinity.feature_sources.sources.utils.WebViewClientCompat
-import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
-import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
-import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
 
 
@@ -43,7 +37,7 @@ fun WebPageScreen(
     val urlToRender = viewModel.state.url
     val scaffoldState = rememberScaffoldState()
     val context = LocalContext.current
-    val webView = viewModel.state.webView
+    val webView: WebView = viewModel.state.webView
     val source = viewModel.state.source
 
     LaunchedEffect(key1 = true) {
@@ -59,28 +53,42 @@ fun WebPageScreen(
         }
 
     }
+    val state = rememberWebViewState(urlToRender)
+
+
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    MidSizeTextComposable(text = urlToRender,
-                        overflow = TextOverflow.Ellipsis)
-                },
-                navigationIcon = {
-                    TopAppBarBackButton(navController = navController)
-                },
-                actions = {
-                    if (viewModel.state.fetcher == FetchType.DetailFetchType && source != null) {
-                        TopAppBarActionButton(imageVector = Icons.Default.TrackChanges,
-                            title = "Menu",
-                            onClick = {
-                                viewModel.getInfo(source = source)
-                            })
+            WebPageTopBar(
+                navController = navController,
+                urlToRender = urlToRender,
+                onTrackButtonClick = {
+                    if (source != null) {
+                        viewModel.getInfo(source = source)
                     }
                 },
-                backgroundColor = MaterialTheme.colors.background,
-
-                )
+                fetchType = viewModel.state.fetcher,
+                source = source,
+                refresh = {
+                    webView.reload()
+                },
+                goBack = {
+                    webView.goBack()
+                },
+                goForward = {
+                    webView.goForward()
+                },
+                fetchBook = {
+                    if (source != null) {
+                        viewModel.getInfo(source)
+                    }
+                },
+                fetchBooks = {
+                    //webView.goForward()
+                },
+                fetchChapter = {
+                    //webView.goForward()
+                }
+            )
         },
         scaffoldState = scaffoldState,
         snackbarHost = {
@@ -95,6 +103,15 @@ fun WebPageScreen(
         }
 
     ) {
+//        WebView(
+//            modifier = Modifier.fillMaxSize(),
+//            state = state,
+//            captureBackPresses = false,
+//
+//            onCreated = {
+//                it.setDefaultSettings()
+//            }
+//        )
         AndroidView(factory = {
             webView.apply {
                 layoutParams = ViewGroup.LayoutParams(
@@ -115,14 +132,13 @@ fun WebPageScreen(
 
             webView
         }, update = {
-            if (webView.originalUrl != urlToRender) {
-                it.loadUrl(urlToRender)
-            }
+            it.loadUrl(urlToRender)
         }, modifier = Modifier.fillMaxSize())
     }
 
 
 }
+
 
 @Composable
 fun ScrollableAppBar(

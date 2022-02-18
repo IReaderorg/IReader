@@ -12,22 +12,6 @@ fun List<String>.formatList(): String {
         .replace("]", "")
 }
 
-fun String.shouldSubstring(
-    condition: Boolean?,
-    string: String,
-    unit: ((string: String) -> String)? = null,
-): String {
-    return if (condition == true) {
-        if (unit != null) {
-            return string + unit(this)
-
-        } else {
-            return string + this
-        }
-    } else {
-        this
-    }
-}
 
 fun String.replaceImageFormat(condition: Boolean): String {
     return if (condition) {

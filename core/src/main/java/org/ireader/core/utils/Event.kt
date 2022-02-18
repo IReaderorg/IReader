@@ -21,7 +21,10 @@ sealed class UiText {
         return when (this) {
             is DynamicString -> text
             is StringResource -> context.getString(resId)
-            is ExceptionString -> e.localizedMessage ?: context.getString(R.string.error_unknown)
+            is ExceptionString -> {
+                val eString = e.localizedMessage ?: context.getString(R.string.error_unknown)
+                return eString.substring(0, eString.length.coerceAtMost(200))
+            }
         }
     }
 }

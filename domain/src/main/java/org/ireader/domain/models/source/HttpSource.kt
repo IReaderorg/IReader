@@ -149,7 +149,7 @@ abstract class HttpSource(private val dependencies: Dependencies) : Source {
      * @param page the page number to retrieve.
      * @param book the chapters to retrieve.
      */
-    override suspend fun fetchChapters(book: Book): List<ChapterInfo> {
+    override suspend fun getChapters(book: Book): List<ChapterInfo> {
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
                 val request = client.get<Document>(chaptersRequest(book))
@@ -238,13 +238,6 @@ abstract class HttpSource(private val dependencies: Dependencies) : Source {
      * @param book the Book to look for chapters.
      */
     protected open fun chaptersRequest(book: Book): HttpRequestBuilder {
-        return HttpRequestBuilder().apply {
-            url(baseUrl + book.link)
-            headers { headers }
-        }
-    }
-
-    protected open fun chaptersRequest(book: Book, page: Int): HttpRequestBuilder {
         return HttpRequestBuilder().apply {
             url(baseUrl + book.link)
             headers { headers }

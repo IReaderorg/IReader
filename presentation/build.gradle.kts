@@ -26,6 +26,7 @@ dependencies {
     "implementation"(Accompanist.navAnimation)
     "implementation"(Accompanist.flowlayout)
     "implementation"(Accompanist.navMaterial)
+    "implementation"(Accompanist.webView)
 
     "implementation"(Coil.coilCompose)
 

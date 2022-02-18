@@ -536,7 +536,8 @@ class ReaderScreenViewModel @Inject constructor(
 
 
     private fun toggleReaderMode(enable: Boolean? = null) {
-        state = state.copy(isReaderModeEnable = enable ?: !state.isReaderModeEnable,
+        state = state.copy(
+            isReaderModeEnable = enable ?: !state.isReaderModeEnable,
             isMainBottomModeEnable = true,
             isSettingModeEnable = false)
     }

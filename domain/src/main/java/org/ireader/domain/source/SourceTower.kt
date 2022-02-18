@@ -1,6 +1,5 @@
 package org.ireader.domain.source
 
-import android.util.Patterns
 import com.nfeld.jsonpathkt.JsonPath
 import com.nfeld.jsonpathkt.extension.read
 import io.ktor.client.request.*
@@ -50,20 +49,22 @@ data class SourceTower constructor(
     val pageFormat = "{page}"
     val searchQueryFormat = "{query}"
 
+
     override fun headersBuilder(): Headers.Builder = Headers.Builder().apply {
         add(
             "User-Agent",
-            "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36"
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4793.0 Safari/537.36"
         )
         add("Referer", baseUrl)
         add("cache-control", "max-age=0")
     }
 
+    override val headers: Headers
+        get() = headersBuilder().build()
+
     override fun fetchLatestEndpoint(page: Int): String? = latest?.endpoint
     override fun fetchPopularEndpoint(page: Int): String? = popular?.endpoint
     override fun fetchSearchEndpoint(page: Int, query: String): String? = search?.endpoint
-    fun fetchChaptersEndpoint(): String? = chapters?.endpoint
-    fun fetchContentEndpoint(): String? = content?.endpoint
 
 
     /****************************SELECTOR*************************************************************/
@@ -86,49 +87,32 @@ data class SourceTower constructor(
     /****************************REQUESTS**********************************************************/
 
     override fun popularRequest(page: Int): HttpRequestBuilder {
-        return requestBuilder("$baseUrl${
-            getUrlWithoutDomain(popular?.endpoint?.applyPageFormat(page) ?: "")
-        }")
+        return requestBuilder("$baseUrl${popular?.endpoint?.applyPageFormat(page)}")
     }
 
 
     override fun latestRequest(page: Int): HttpRequestBuilder {
-        return requestBuilder("$baseUrl${
-            getUrlWithoutDomain(latest?.endpoint?.applyPageFormat(page) ?: "")
-        }")
+        return requestBuilder(baseUrl + "${latest?.endpoint?.applyPageFormat(page)}")
     }
 
-    var nextChapterListLink: String = ""
-    override fun chaptersRequest(book: Book, page: Int): HttpRequestBuilder {
-        var url = book.link
-        /** This condition occurs when the next chapter selector returns a link to the next chapter**/
-        if (nextChapterListLink.isNotBlank()) {
-            url = nextChapterListLink
-        }
-        if (!chapters?.endpoint.isNullOrEmpty()) {
-            url = book.link.replace(chapters?.chaptersEndpointWithoutPage
-                ?: "", (chapters?.endpoint ?: "").replace(pageFormat, page.toString()))
-        }
-        if (!chapters?.subStringSomethingAtEnd.isNullOrEmpty()) {
-            url = book.link + chapters?.subStringSomethingAtEnd
-        }
-        return requestBuilder(baseUrl + getUrlWithoutDomain(url))
+    override fun chaptersRequest(book: Book): HttpRequestBuilder {
+        return requestBuilder(baseUrl + book.link)
     }
 
     override fun searchRequest(page: Int, query: String, filters: FilterList): HttpRequestBuilder {
-        return requestBuilder("$baseUrl${
-            getUrlWithoutDomain(fetchSearchEndpoint(page, query)?.replace(searchQueryFormat,
-                query) ?: "")
+        return requestBuilder(baseUrl + "${
+            fetchSearchEndpoint(page, query)?.replace(searchQueryFormat,
+                query)
         }")
     }
 
     override fun contentRequest(chapter: Chapter): HttpRequestBuilder {
-        return requestBuilder(baseUrl + getUrlWithoutDomain(chapter.link))
+        return requestBuilder(baseUrl + chapter.link)
     }
 
 
     override fun detailsRequest(book: Book): HttpRequestBuilder {
-        return requestBuilder(baseUrl + getUrlWithoutDomain(book.link))
+        return requestBuilder(baseUrl + book.link)
     }
     /****************************REQUESTS**********************************************************/
 
@@ -145,13 +129,13 @@ data class SourceTower constructor(
         val attCover = popular?.coverAtt
 
 
-        val link = baseUrl + getUrlWithoutDomain(selectorReturnerStringType(element,
+        val link = selectorReturnerStringType(element,
             selectorLink,
-            attLink).shouldSubstring(popular?.addBaseUrlToLink, baseUrl))
+            attLink).replace(baseUrl, "")
         val title = selectorReturnerStringType(element, selectorName, attName).formatHtmlText()
-        val cover = selectorReturnerStringType(element,
+        val cover = baseUrl + selectorReturnerStringType(element,
             selectorCover,
-            attCover).shouldSubstring(popular?.addBaseurlToCoverLink, baseUrl)
+            attCover).replace(baseUrl, "")
 
 
 
@@ -168,13 +152,13 @@ data class SourceTower constructor(
         val selectorCover = latest?.coverSelector
         val attCover = latest?.coverAtt
 
-        val link = baseUrl + getUrlWithoutDomain(selectorReturnerStringType(element,
+        val link = selectorReturnerStringType(element,
             selectorLink,
-            attLink).shouldSubstring(latest?.addBaseUrlToLink, baseUrl))
+            attLink).replace(baseUrl, "")
         val title = selectorReturnerStringType(element, selectorName, attName).formatHtmlText()
-        val cover = selectorReturnerStringType(element,
+        val cover = baseUrl + selectorReturnerStringType(element,
             selectorCover,
-            attCover).shouldSubstring(latest?.addBaseurlToCoverLink, baseUrl)
+            attCover).replace(baseUrl, "")
 
 
         //Timber.e("Timber: SourceCreator" + val coverLink)
@@ -189,12 +173,10 @@ data class SourceTower constructor(
         val selectorName = chapters?.nameSelector
         val attName = chapters?.nameAtt
 
-        val link = baseUrl + getUrlWithoutDomain(selectorReturnerStringType(element,
+        val link = selectorReturnerStringType(element,
             selectorLink,
-            attLink).shouldSubstring(chapters?.addBaseUrlToLink, baseUrl))
+            attLink).replace(baseUrl, "")
         val title = selectorReturnerStringType(element, selectorName, attName).formatHtmlText()
-
-
 
         return ChapterInfo(key = link, name = title)
     }
@@ -207,13 +189,13 @@ data class SourceTower constructor(
         val selectorCover = search?.coverSelector
         val attCover = search?.coverAtt
 
-        val link = baseUrl + getUrlWithoutDomain(selectorReturnerStringType(element,
+        val link = selectorReturnerStringType(element,
             selectorLink,
-            attLink).shouldSubstring(search?.addBaseUrlToLink, baseUrl))
+            attLink).replace(baseUrl, "")
         val title = selectorReturnerStringType(element, selectorName, attName).formatHtmlText()
-        val cover = selectorReturnerStringType(element,
+        val cover = baseUrl + selectorReturnerStringType(element,
             selectorCover,
-            attCover).shouldSubstring(search?.addBaseurlToCoverLink, baseUrl)
+            attCover).replace(baseUrl, "")
 
 
         return BookInfo(link = link, title = title, cover = cover)
@@ -319,7 +301,6 @@ data class SourceTower constructor(
 
         }
 
-        val hasNext = hasNextChaptersParse(document)
 
         val mChapters =
             if (this.chapters?.isChapterStatsFromFirst == true) chapters else chapters.reversed()
@@ -329,8 +310,6 @@ data class SourceTower constructor(
     }
 
     override fun pageContentParse(document: Document): List<String> {
-        val isCloudflareEnable =
-            document.body().allElements.text().contains(Constants.CLOUDFLARE_LOG)
 
         val contentList: MutableList<String> = mutableListOf()
         if (content?.isHtmlType == true) {
@@ -500,28 +479,6 @@ data class SourceTower constructor(
         )
     }
 
-    /****************************PARSE FROM JSON**********************************/
-
-
-    fun hasNextChaptersParse(document: Document): Boolean {
-        if (chapters?.supportNextPagesList == true) {
-            val docs = selectorReturnerStringType(document,
-                chapters.nextPageSelector,
-                chapters.nextPageAtt).shouldSubstring(chapters.addBaseUrlToLink,
-                baseUrl,
-                ::getUrlWithoutDomain)
-            val condition =
-                Patterns.WEB_URL.matcher(docs)
-                    .matches() || docs.contains(chapters.nextPageValue
-                    ?: "")
-            if (Patterns.WEB_URL.matcher(docs).matches()) {
-                nextChapterListLink = baseUrl + getUrlWithoutDomain(docs)
-            }
-            return condition
-        } else {
-            return false
-        }
-    }
 
     fun parseNextChapterListType(document: Document, page: Int): String {
         val selector = latest?.nextPageSelector
@@ -536,11 +493,14 @@ data class SourceTower constructor(
     /**
      * Fetchers
      */
-    override suspend fun fetchChapters(book: Book): List<ChapterInfo> {
+    override suspend fun getChapters(book: Book): List<ChapterInfo> {
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
-                val request = client.get<Document>(chaptersRequest(book))
-
+                val request = if (chapters?.isGetRequestType == true) {
+                    client.get<Document>(chaptersRequest(book))
+                } else {
+                    client.post<Document>(chaptersRequest(book))
+                }
                 return@withContext chaptersParse(request)
             }
         }.getOrThrow()
@@ -554,7 +514,12 @@ data class SourceTower constructor(
     override suspend fun getPopular(page: Int): BooksPage {
         return kotlin.runCatching {
             withContext(Dispatchers.IO) {
-                val request = client.get<Document>(popularRequest(page))
+
+                val request = if (popular?.isGetRequestType == true) {
+                    client.get<Document>(popularRequest(page))
+                } else {
+                    client.post<Document>(popularRequest(page))
+                }
 
                 var books = popularParse(request)
 
@@ -569,7 +534,11 @@ data class SourceTower constructor(
     override suspend fun getLatest(page: Int): BooksPage {
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
-                val request = client.get<Document>(latestRequest(page))
+                val request = if (latest?.isGetRequestType == true) {
+                    client.get<Document>(latestRequest(page))
+                } else {
+                    client.post<Document>(latestRequest(page))
+                }
                 //val request = client.get<Document>(latestRequest(page))
                 return@withContext latestParse(request)
             }
@@ -585,7 +554,13 @@ data class SourceTower constructor(
     override suspend fun getDetails(book: Book): BookInfo {
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
-                return@withContext detailParse(client.get<Document>(detailsRequest(book)))
+                val request = if (detail?.isGetRequestType == true) {
+                    client.get<Document>(detailsRequest(book))
+                } else {
+                    client.post<Document>(detailsRequest(book))
+                }
+
+                return@withContext detailParse(request)
             }
         }.getOrThrow()
 
@@ -601,7 +576,12 @@ data class SourceTower constructor(
     override suspend fun getContents(chapter: Chapter): List<String> {
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
-                return@withContext pageContentParse(client.get<Document>(contentRequest(chapter)))
+                val request = if (content?.isGetRequestType == true) {
+                    client.get<Document>(contentRequest(chapter))
+                } else {
+                    client.post<Document>(contentRequest(chapter))
+                }
+                return@withContext pageContentParse(request)
             }
         }.getOrThrow()
 
@@ -618,14 +598,17 @@ data class SourceTower constructor(
     override suspend fun getSearch(page: Int, query: String, filters: FilterList): BooksPage {
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
-                return@withContext searchParse(client.get<Document>(searchRequest(page,
-                    query,
-                    FilterList())))
+                val request = if (content?.isGetRequestType == true) {
+                    client.get<Document>(searchRequest(page, query, filters))
+                } else {
+                    client.post<Document>(searchRequest(page, query, filters))
+                }
+                return@withContext searchParse(request)
             }
         }.getOrThrow()
-
-
     }
+
+
 
 
 }

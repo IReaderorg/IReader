@@ -46,7 +46,7 @@ interface Source {
 
     suspend fun getDetails(book: Book): BookInfo
 
-    suspend fun fetchChapters(book: Book): List<ChapterInfo>
+    suspend fun getChapters(book: Book): List<ChapterInfo>
 
     fun popularParse(document: Document): BooksPage
     fun latestParse(document: Document): BooksPage

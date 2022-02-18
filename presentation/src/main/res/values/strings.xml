@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="delete_all_downloads">Delete all downloads</string>
+    <string name="refresh">Refresh</string>
+    <string name="go_back">Go Back</string>
+    <string name="go_forward">Go Forward</string>
 </resources>

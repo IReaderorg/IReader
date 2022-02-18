@@ -161,7 +161,7 @@ fun ExploreScreen(
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
-                        ErrorTextWithEmojis(error = "Sorry, the source failed to get any content.",
+                        ErrorTextWithEmojis(error = "the Source didn't get anything.",
                             modifier = Modifier
                                 .padding(20.dp))
                         Row(Modifier

@@ -15,7 +15,7 @@ fun UserSourcesScreen(viewModel: ExtensionViewModel, navController: NavControlle
     val scrollState = rememberLazyListState()
     val sources = viewModel.state.value.sources
 
-    SourceList(
+    SourceListComposable(
         modifier = Modifier.fillMaxSize(),
         sources = sources,
         scrollState = scrollState,

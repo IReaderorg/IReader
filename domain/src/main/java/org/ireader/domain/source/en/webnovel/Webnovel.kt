@@ -145,7 +145,7 @@ class Webnovel(deps: Dependencies) : ParsedHttpSource(deps) {
         return ChapterInfo(name = name, dateUpload = date_upload, key = link)
     }
 
-    override suspend fun fetchChapters(book: Book): List<ChapterInfo> {
+    override suspend fun getChapters(book: Book): List<ChapterInfo> {
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
 

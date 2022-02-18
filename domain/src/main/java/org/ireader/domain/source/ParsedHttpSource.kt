@@ -109,7 +109,7 @@ abstract class ParsedHttpSource(dependencies: Dependencies) : HttpSource(depende
      */
     protected abstract fun searchSelector(): String
 
-    protected abstract fun searchNextPageSelector(): String
+    protected abstract fun searchNextPageSelector(): String?
 
 
     override fun searchParse(document: Document): BooksPage {
@@ -122,7 +122,7 @@ abstract class ParsedHttpSource(dependencies: Dependencies) : HttpSource(depende
         }.filter {
             it.title.isNotBlank()
         }
-        val hasNextPage = searchNextPageSelector().let { selector ->
+        val hasNextPage = searchNextPageSelector()?.let { selector ->
             document.select(selector).first()
         } != null
 

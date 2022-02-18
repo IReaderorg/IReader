@@ -5,6 +5,8 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
+import org.ireader.core.utils.UiText
+import org.ireader.domain.R
 import org.ireader.domain.local.BookDatabase
 import org.ireader.domain.models.ExploreType
 import org.ireader.domain.models.RemoteKeys
@@ -70,7 +72,12 @@ class ExploreRemoteMediator(
                     source.getPopular(currentPage)
                 }
                 is ExploreType.Search -> {
-                    source.getSearch(currentPage, query = query ?: "", filters = FilterList())
+                    if (query?.isBlank() == false) {
+                        source.getSearch(currentPage, query = query, filters = FilterList())
+                    } else {
+                        throw Exception(UiText.StringResource(R.string.query_must_not_be_empty)
+                            .toString())
+                    }
                 }
             }
 

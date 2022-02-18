@@ -16,7 +16,7 @@ fun CommunitySourceScreen(viewModel: ExtensionViewModel, navController: NavContr
     val scrollState = rememberLazyListState()
     val sources = viewModel.state.value.communitySources
 
-    SourceList(modifier = Modifier.padding(bottom = 50.dp),
+    SourceListComposable(modifier = Modifier.padding(bottom = 50.dp),
         sources = sources,
         scrollState = scrollState,
         navController = navController)

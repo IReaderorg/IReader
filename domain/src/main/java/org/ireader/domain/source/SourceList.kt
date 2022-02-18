@@ -100,74 +100,6 @@ class AvailableSources(dependencies: Dependencies) {
             pageContentSelector = "div.reading-content h4,p",
         )
     )
-    val freeWebNovel = org.ireader.domain.source.SourceTower(
-        sourceId = 48607989,
-        name = "FreeWebNovel",
-        deps = dependencies,
-        lang = "en",
-        baseUrl = "https://freewebnovel.com",
-        supportsLatest = true,
-        supportSearch = true,
-        supportsMostPopular = true,
-        iconUrl = "https://freewebnovel.com/static/freewebnovel/images/logo.png",
-        creator = "@Kazem",
-        latest = Latest(
-            endpoint = "/latest-release-novel/{page}/",
-            selector = "div.ul-list1 div.li",
-            nameSelector = "div.txt a",
-            nameAtt = "title",
-            linkSelector = "div.txt a",
-            linkAtt = "href",
-            coverSelector = "div.pic img",
-            coverAtt = "src",
-            nextPageValue = "Next",
-            nextPageSelector = "div.ul-list1"
-        ),
-        popular = Popular(
-            endpoint = "/most-popular-novel/",
-            selector = "div.ul-list1",
-            linkAtt = "href",
-            nameAtt = "title",
-            coverSelector = "img",
-            coverAtt = "src",
-            nextPageSelector = "body > div.main > div > div.row-box > div.col-content > div.pages > ul > li > a:nth-child(14)"
-        ),
-        search = Search(
-            endpoint = "/search?searchkey={query}",
-            selector = "div.ul-list1 div.li",
-            linkSelector = "div.txt a",
-            linkAtt = "href",
-            nameSelector = "div.txt a",
-            nameAtt = "title",
-            coverSelector = "div.pic img",
-            coverAtt = "src",
-            nextPageSelector = "body > div.main > div > div.row-box > div.col-content > div.pages > ul > li > a:nth-child(14)"
-        ),
-        detail = Detail(
-            nameSelector = "div.m-desc h1.tit",
-            descriptionSelector = "div.inner",
-            authorBookSelector = "div.right a.a1",
-            authorBookAtt = "title",
-            categorySelector = "div.item div.right a.a1",
-        ),
-        chapters = Chapters(
-            supportNextPagesList = true,
-            isChapterStatsFromFirst = true,
-            endpoint = "/{page}.html",
-            chaptersEndpointWithoutPage = ".html",
-            selector = "div.m-newest2 ul.ul-list5 li",
-            linkSelector = "a",
-            linkAtt = "href",
-            nameSelector = "a",
-            nameAtt = "title",
-            nextPageSelector = "div.page a:nth-child(4)",
-            nextPageValue = "Next",
-
-            ),
-        content = Content(
-            pageContentSelector = "div.txt h4,p"
-        )
-    )
 
     val mtl = org.ireader.domain.source.SourceTower(
         sourceId = 638830,
@@ -608,7 +540,6 @@ class AvailableSources(dependencies: Dependencies) {
 
 
     val sourcesList = listOf<Source>(
-        freeWebNovel,
         koreanMtl,
         myLoveNovel,
         mtl,

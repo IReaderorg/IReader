@@ -96,7 +96,7 @@ class WebViewPageModel @Inject constructor(
                 source = source,
                 insertUseCases = insetUseCases,
                 deleteUseCase = deleteUseCase,
-                pageSource = webView.getHtml()
+                pageSource = webView.getHtml(),
             ).collect { result ->
                 when (result) {
                     is Resource.Success -> {
@@ -108,7 +108,6 @@ class WebViewPageModel @Inject constructor(
                     }
                     is Resource.Error -> {
                         _eventFlow.emit(UiEvent.ShowSnackbar(
-
                             uiText = result.uiText ?: UiText.StringResource(R.string.error_unknown)
                         ))
                     }

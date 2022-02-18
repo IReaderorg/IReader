@@ -1,7 +1,7 @@
 package org.ireader.presentation.feature_reader.presentation.reader
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -109,57 +109,63 @@ fun ReadingScreen(
     if (source != null) {
         Scaffold(topBar = {
             if (!state.isReaderModeEnable && state.isLocalLoaded && modalBottomSheetState.targetValue == ModalBottomSheetValue.Expanded) {
-                TopAppBar(
-                    title = {
-                        Text(
-                            text = chapter?.title ?: "",
-                            color = MaterialTheme.colors.onBackground,
-                            style = MaterialTheme.typography.subtitle1,
-                            fontWeight = FontWeight.Bold,
-                            overflow = TextOverflow.Ellipsis,
-                            maxLines = 1
-                        )
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    backgroundColor = MaterialTheme.colors.background,
-                    contentColor = MaterialTheme.colors.onBackground,
-                    elevation = 8.dp,
-                    navigationIcon = {
-                        TopAppBarBackButton(navController = navController)
-                    },
-                    actions = {
-                        if (chapter != null) {
-                            TopAppBarActionButton(imageVector = Icons.Default.Autorenew,
-                                title = "Refresh",
+                AnimatedVisibility(
+                    visible = !state.isReaderModeEnable && state.isLocalLoaded,
+                    enter = slideInVertically(initialOffsetY = { it }, animationSpec = tween(700)),
+                    exit = slideOutVertically(targetOffsetY = { it }, animationSpec = tween(700))
+                ) {
+                    TopAppBar(
+                        title = {
+                            Text(
+                                text = chapter?.title ?: "",
+                                color = MaterialTheme.colors.onBackground,
+                                style = MaterialTheme.typography.subtitle1,
+                                fontWeight = FontWeight.Bold,
+                                overflow = TextOverflow.Ellipsis,
+                                maxLines = 1
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        backgroundColor = MaterialTheme.colors.background,
+                        contentColor = MaterialTheme.colors.onBackground,
+                        elevation = 8.dp,
+                        navigationIcon = {
+                            TopAppBarBackButton(navController = navController)
+                        },
+                        actions = {
+                            if (chapter != null) {
+                                TopAppBarActionButton(imageVector = Icons.Default.Autorenew,
+                                    title = "Refresh",
+                                    onClick = {
+                                        viewModel.getReadingContentRemotely(chapter = chapter,
+                                            source = source)
+                                    })
+                            }
+                            if (isWebViewEnable) {
+                                TopAppBarActionButton(imageVector = Icons.Default.TrackChanges,
+                                    title = "Content Fetcher",
+                                    onClick = { viewModel.getFromWebView(source = source) })
+                            }
+                            TopAppBarActionButton(imageVector = Icons.Default.Public,
+                                title = "WebView",
                                 onClick = {
-                                    viewModel.getReadingContentRemotely(chapter = chapter,
-                                        source = source)
+                                    try {
+                                        navController.navigate(WebViewScreenSpec.buildRoute(
+                                            url = chapter?.link ?: "",
+                                            sourceId = source.sourceId,
+                                            fetchType = FetchType.ContentFetchType.index,
+                                        )
+                                        )
+                                    } catch (e: Exception) {
+                                        scope.launch {
+                                            viewModel.showSnackBar(UiText.ExceptionString(e))
+                                        }
+                                    }
+
                                 })
                         }
-                        if (isWebViewEnable) {
-                            TopAppBarActionButton(imageVector = Icons.Default.TrackChanges,
-                                title = "Content Fetcher",
-                                onClick = { viewModel.getFromWebView(source = source) })
-                        }
-                        TopAppBarActionButton(imageVector = Icons.Default.Public,
-                            title = "WebView",
-                            onClick = {
-                                try {
-                                    navController.navigate(WebViewScreenSpec.buildRoute(
-                                        url = chapter?.link ?: "",
-                                        sourceId = source.sourceId,
-                                        fetchType = FetchType.ContentFetchType.index,
-                                    )
-                                    )
-                                } catch (e: Exception) {
-                                    scope.launch {
-                                        viewModel.showSnackBar(UiText.ExceptionString(e))
-                                    }
-                                }
-
-                            })
-                    }
-                )
+                    )
+                }
             } else if (!state.isLocalLoaded) {
                 TopAppBar(title = {},
                     elevation = 0.dp,
@@ -200,37 +206,42 @@ fun ReadingScreen(
             snackbarHost = { ISnackBarHost(snackBarHostState = it) },
             bottomBar = {
                 if (!state.isReaderModeEnable && state.isLocalLoaded && chapter != null) {
-                    ModalBottomSheetLayout(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(IntrinsicSize.Max)
-                            .height(if (viewModel.state.isMainBottomModeEnable) 130.dp else 320.dp),
-                        sheetBackgroundColor = MaterialTheme.colors.background,
-                        sheetElevation = 8.dp,
-                        sheetState = modalBottomSheetState,
-                        sheetContent = {
-                            Column(modifier.fillMaxSize()) {
-                                Divider(modifier = modifier.fillMaxWidth(),
-                                    color = MaterialTheme.colors.onBackground.copy(alpha = .2f),
-                                    thickness = 1.dp)
-                                Spacer(modifier = modifier.height(15.dp))
-                                if (viewModel.state.isMainBottomModeEnable && source != null) {
-                                    MainBottomSettingComposable(
-                                        viewModel = viewModel,
-                                        scope = scope,
-                                        scaffoldState = scaffoldState, scrollState = scrollState,
-                                        chapter = chapter,
-                                        source = source
-                                    )
-                                }
-                                if (viewModel.state.isSettingModeEnable) {
-                                    ReaderSettingComposable(viewModel = viewModel)
-                                }
-
-                            }
-                        }
+                    AnimatedVisibility(
+                        visible = !state.isReaderModeEnable && state.isLocalLoaded,
+                        enter = slideInVertically(initialOffsetY = { it }),
+                        exit = slideOutVertically(targetOffsetY = { it })
                     ) {
-
+                        ModalBottomSheetLayout(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(IntrinsicSize.Max)
+                                .height(if (viewModel.state.isMainBottomModeEnable) 130.dp else 320.dp),
+                            sheetBackgroundColor = MaterialTheme.colors.background,
+                            sheetElevation = 8.dp,
+                            sheetState = modalBottomSheetState,
+                            sheetContent = {
+                                Column(modifier.fillMaxSize()) {
+                                    Divider(modifier = modifier.fillMaxWidth(),
+                                        color = MaterialTheme.colors.onBackground.copy(alpha = .2f),
+                                        thickness = 1.dp)
+                                    Spacer(modifier = modifier.height(15.dp))
+                                    if (viewModel.state.isMainBottomModeEnable && source != null) {
+                                        MainBottomSettingComposable(
+                                            viewModel = viewModel,
+                                            scope = scope,
+                                            scaffoldState = scaffoldState,
+                                            scrollState = scrollState,
+                                            chapter = chapter,
+                                            source = source
+                                        )
+                                    }
+                                    if (viewModel.state.isSettingModeEnable) {
+                                        ReaderSettingComposable(viewModel = viewModel)
+                                    }
+                                }
+                            },
+                            content = {}
+                        )
                     }
                 }
             },

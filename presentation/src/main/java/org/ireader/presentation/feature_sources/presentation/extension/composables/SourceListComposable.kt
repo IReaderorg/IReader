@@ -27,7 +27,7 @@ import org.ireader.presentation.ui.ExploreScreenSpec
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun SourceList(
+fun SourceListComposable(
     modifier: Modifier = Modifier,
     sources: List<Source>,
     scrollState: LazyListState,

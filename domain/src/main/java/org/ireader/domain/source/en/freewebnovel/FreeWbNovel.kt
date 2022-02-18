@@ -6,6 +6,7 @@ import okhttp3.Headers
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.entities.FilterList
+import org.ireader.domain.models.source.BooksPage
 import org.ireader.domain.source.Dependencies
 import org.ireader.domain.source.ParsedHttpSource
 import org.ireader.source.models.BookInfo
@@ -38,13 +39,16 @@ class FreeWbNovel(deps: Dependencies) : ParsedHttpSource(deps) {
         "/most-popular-novel/"
 
     override fun fetchSearchEndpoint(page: Int, query: String): String? =
-        "/s/search?searchkey=$query"
+        "/search/?searchkey=$query"
 
 
     override fun headersBuilder() = Headers.Builder().apply {
-        add("User-Agent",
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0 ")
+        add(
+            "User-Agent",
+            "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36"
+        )
         add("Referer", baseUrl)
+        add("cache-control", "max-age=0")
     }
 
     override val headers: Headers = headersBuilder().build()
@@ -53,21 +57,20 @@ class FreeWbNovel(deps: Dependencies) : ParsedHttpSource(deps) {
     // popular
     override fun popularRequest(page: Int): HttpRequestBuilder {
         return HttpRequestBuilder().apply {
-            url(baseUrl + fetchPopularEndpoint(page = page)!!)
+            url(baseUrl + fetchPopularEndpoint(page = page))
         }
     }
 
-    override fun popularSelector() = "div.ul-list1"
+    override fun popularSelector() = "div.ul-list1 div.li-row"
 
     override fun popularFromElement(element: Element): BookInfo {
-        val url = element.attr("href").substringAfter(baseUrl)
-        val title = element.attr("title")
+        val url = element.select("a").attr("href")
+        val title = element.select("a").attr("title")
         val thumbnailUrl = element.select("img").attr("src")
         return BookInfo(link = url, title = title, cover = thumbnailUrl)
     }
 
-    override fun popularNextPageSelector() =
-        "body > div.main > div > div.row-box > div.col-content > div.pages > ul > li > a:nth-child(14)"
+    override fun popularNextPageSelector() = null
 
 
     // latest
@@ -91,11 +94,16 @@ class FreeWbNovel(deps: Dependencies) : ParsedHttpSource(deps) {
 
     override fun latestNextPageSelector() = "div.ul-list1"
 
-    override fun searchSelector() = popularSelector()
+    override fun searchSelector() = "div.ul-list1 div.li-row"
 
-    override fun searchFromElement(element: Element) = popularFromElement(element)
+    override fun searchFromElement(element: Element): BookInfo {
+        val title = element.select("div.txt a").attr("title")
+        val url = element.select("div.txt a").attr("href")
+        val thumbnailUrl = element.select("div.pic img").attr("src")
+        return BookInfo(link = url, title = title, cover = thumbnailUrl)
+    }
 
-    override fun searchNextPageSelector() = popularNextPageSelector()
+    override fun searchNextPageSelector(): String? = null
 
 
     // manga details
@@ -139,7 +147,7 @@ class FreeWbNovel(deps: Dependencies) : ParsedHttpSource(deps) {
         }
     }
 
-    override suspend fun fetchChapters(book: Book): List<ChapterInfo> {
+    override suspend fun getChapters(book: Book): List<ChapterInfo> {
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
                 val page = client.get<Document>(chaptersRequest(book = book))
@@ -185,5 +193,10 @@ class FreeWbNovel(deps: Dependencies) : ParsedHttpSource(deps) {
     override fun searchRequest(page: Int, query: String, filters: FilterList): HttpRequestBuilder {
         return requestBuilder(baseUrl + fetchSearchEndpoint(page = page, query = query))
     }
+
+    override suspend fun getSearch(page: Int, query: String, filters: FilterList): BooksPage {
+        return searchParse(client.get<Document>(searchRequest(page, query, filters)))
+    }
+
 
 }
