@@ -74,7 +74,6 @@ class BookDetailViewModel @Inject constructor(
     lateinit var work: OneTimeWorkRequest
 
 
-
     private val _eventFlow = MutableSharedFlow<UiEvent>()
 
     val eventFlow = _eventFlow.asSharedFlow()
@@ -116,42 +115,39 @@ class BookDetailViewModel @Inject constructor(
     fun getLocalBookById(bookId: Long, source: Source) {
         this.toggleLoading(true)
         clearBookError()
-        getBookUseCases.getBookById(id = bookId)
-            .onEach { book ->
-                if (book != null) {
-                    this.toggleLoading(false)
-                    clearBookError()
-                    setBook(book)
-                    toggleInLibrary(book.favorite)
-                    if (book.lastUpdated < 1L && !state.isRemoteLoaded || state.isLoading) {
-                        getRemoteBookDetail(book, source)
-                        getRemoteChapterDetail(book, source)
-                    }
-                    isLocalBookLoaded(true)
-                } else {
-                    this.toggleLoading(false)
-                    showSnackBar(UiText.StringResource(R.string.no_book_found_error))
+        viewModelScope.launch {
+            val book = getBookUseCases.findBookById(bookId)
+            if (book != null) {
+                toggleLoading(false)
+                clearBookError()
+                setBook(book)
+                toggleInLibrary(book.favorite)
+                if (book.lastUpdated < 1L && !state.isRemoteLoaded || state.isLoading) {
+                    getRemoteBookDetail(book, source)
+                    getRemoteChapterDetail(book, source)
                 }
-            }.launchIn(viewModelScope)
-
+                isLocalBookLoaded(true)
+            } else {
+                toggleLoading(false)
+                showSnackBar(UiText.StringResource(R.string.no_book_found_error))
+            }
+        }
     }
 
 
     fun getLocalChaptersByBookId(bookId: Long) {
         clearChapterError()
         this.toggleChaptersLoading(true)
-        getChapterUseCase.getChaptersByBookId(
-            bookId = bookId,
-            isAsc = true)
-            .onEach { chapters ->
-                if (chapters.isNotEmpty()) {
-                    this.toggleChaptersLoading(false)
-                    clearChapterError()
-                    setChapters(chapters)
-                    toggleAreChaptersLoaded(true)
-                }
-                this.toggleChaptersLoading(false)
-            }.launchIn(viewModelScope)
+        viewModelScope.launch {
+            val chapters = getChapterUseCase.findChaptersByBookId(bookId)
+            if (chapters.isNotEmpty()) {
+                toggleChaptersLoading(false)
+                clearChapterError()
+                setChapters(chapters)
+                toggleAreChaptersLoaded(true)
+            }
+            toggleChaptersLoading(false)
+        }
     }
 
 
@@ -218,38 +214,6 @@ class BookDetailViewModel @Inject constructor(
             }.launchIn(viewModelScope)
 
     }
-
-//    @ExperimentalCoroutinesApi
-//    fun getWebViewData(source: Source) {
-//        getFromWebViewJob?.cancel()
-//        webView.settings.userAgentString =
-//            source.headers["User-Agent"] ?: HttpSource.DEFAULT_USER_AGENT
-//        getFromWebViewJob = viewModelScope.launch {
-//            showSnackBar(UiText.StringResource(org.ireader.core.R.string.trying_to_fetch))
-//            fetchUseCase.fetchBookDetailAndChapterDetailFromWebView(
-//                deleteUseCase = deleteUseCase,
-//                insertUseCases = localInsertUseCases,
-//                localBook = state.book,
-//                localChapters = chapterState.chapters,
-//                source = source,
-//                pageSource = webView.getHtml()
-//            ).onEach { result ->
-//                when (result) {
-//                    is Resource.Success -> {
-//                        if (result.data != null && state.book != null) {
-//                            showSnackBar(UiText.DynamicString(result.data.text))
-//                            this@BookDetailViewModel.toggleLoading(false)
-//                            this@BookDetailViewModel.toggleChaptersLoading(false)
-//                            getLocalChaptersByBookId(bookId = state.book!!.id)
-//                        }
-//                    }
-//                    is Resource.Error -> {
-//                        showSnackBar(result.uiText)
-//                    }
-//                }
-//            }.launchIn(viewModelScope)
-//        }
-//    }
 
 
     private fun insertBookDetailToLocal(book: Book) {

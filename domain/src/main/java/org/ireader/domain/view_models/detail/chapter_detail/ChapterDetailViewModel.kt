@@ -84,7 +84,7 @@ class ChapterDetailViewModel @Inject constructor(
 
     fun getLocalBookById(id: Long) {
         viewModelScope.launch {
-            getBookUseCases.getBookById(id = id).first { book ->
+            getBookUseCases.subscribeBookById(id = id).first { book ->
                 if (book != null) {
                     state = state.copy(
                         book = book,

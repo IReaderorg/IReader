@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
@@ -14,16 +14,14 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun CustomTextField(
     modifier: Modifier = Modifier,
-    initValue: String = "",
+    value: String = "",
+    onValueChange: (text: String) -> Unit,
     onValueConfirm: (text: String) -> Unit,
     paddingLeadingIconEnd: Dp = 0.dp,
     paddingTrailingIconStart: Dp = 0.dp,
     leadingIcon: (@Composable() () -> Unit)? = null,
     trailingIcon: (@Composable() () -> Unit)? = null,
 ) {
-    var state by remember {
-        mutableStateOf(initValue)
-    }
 
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         if (leadingIcon != null) {
@@ -36,12 +34,12 @@ fun CustomTextField(
         ) {
             BasicTextField(
                 modifier = modifier,
-                value = state,
-                onValueChange = { state = it },
+                value = value,
+                onValueChange = onValueChange,
                 maxLines = 1,
                 singleLine = true,
             )
-            if (state.isEmpty()) {
+            if (value.isEmpty()) {
                 Text(
                     text = "..."
                 )

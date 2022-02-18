@@ -1,4 +1,4 @@
-package org.ireader.presentation.feature_settings.presentation.webview
+package org.ireader.domain.view_models.settings.webview
 
 import android.annotation.SuppressLint
 import androidx.compose.runtime.getValue
@@ -9,15 +9,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
-import org.ireader.core.utils.Constants
 import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
+import org.ireader.core.utils.removeSameItemsFromList
 import org.ireader.domain.R
+import org.ireader.domain.local.dao.RemoteKeysDao
+import org.ireader.domain.models.RemoteKeys
 import org.ireader.domain.models.entities.Book
+import org.ireader.domain.models.entities.Book.Companion.toBook
 import org.ireader.domain.models.entities.Chapter
+import org.ireader.domain.models.entities.toChapter
+import org.ireader.domain.models.entities.updateBook
 import org.ireader.domain.models.source.FetchType
 import org.ireader.domain.models.source.Source
 import org.ireader.domain.source.Extensions
@@ -26,8 +31,6 @@ import org.ireader.domain.use_cases.fetchers.FetchUseCase
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
-import org.ireader.domain.utils.Resource
-import org.ireader.domain.view_models.settings.webview.mapFetcher
 import org.jsoup.Jsoup
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
@@ -44,6 +47,7 @@ class WebViewPageModel @Inject constructor(
     private val fetcherUseCase: FetchUseCase,
     private val savedStateHandle: SavedStateHandle,
     private val extensions: Extensions,
+    private val remoteKeysDao: RemoteKeysDao,
 ) : ViewModel() {
 
     var state by mutableStateOf<WebViewPageState>(WebViewPageState())
@@ -55,6 +59,7 @@ class WebViewPageModel @Inject constructor(
         val chapterId = savedStateHandle.get<Long>(NavigationArgs.chapterId.name)
         val url = URLDecoder.decode(savedStateHandle.get<String>(NavigationArgs.url.name),
             StandardCharsets.UTF_8.name())
+
         val fetcher = savedStateHandle.get<Int>(NavigationArgs.fetchType.name)
 
         if (sourceId != null && chapterId != null && bookId != null) {
@@ -63,15 +68,8 @@ class WebViewPageModel @Inject constructor(
         if (fetcher != null) {
             state = state.copy(fetcher = mapFetcher(fetcher))
         }
-        state = state.copy(url = url)
-
-        if (bookId != null && bookId != Constants.NULL_VALUE) {
-            getLocalChaptersByBookName(bookId)
-            getBookById(bookId = bookId)
-        }
-        if (bookId != null && chapterId != null && bookId != Constants.NULL_VALUE && chapterId != Constants.NULL_VALUE) {
-            getLocalChapterById(chapterId)
-        }
+        updateUrl(url)
+        updateWebUrl(url = url)
 
     }
 
@@ -79,102 +77,84 @@ class WebViewPageModel @Inject constructor(
     val eventFlow = _eventFlow.asSharedFlow()
 
 
-    @ExperimentalCoroutinesApi
-    fun getInfo(pageSource: String, url: String, source: Source) {
-        viewModelScope.launch {
-            _eventFlow.emit(UiEvent.ShowSnackbar(
-                uiText = UiText.StringResource(R.string.trying_to_fetch)
-            ))
-            fetcherUseCase.fetchBookDetailAndChapterDetailFromWebView(
-                localBook = state.book,
-                localChapters = state.chapters,
-                source = source,
-                insertUseCases = insertUseCases,
-                deleteUseCase = deleteUseCase,
-                pageSource = pageSource,
-                url = url
-            ).collect { result ->
-                when (result) {
-                    is Resource.Success -> {
-                        if (result.data != null) {
-                            _eventFlow.emit(UiEvent.ShowSnackbar(
-                                uiText = result.data
-                            ))
-                        }
-                    }
-                    is Resource.Error -> {
-                        _eventFlow.emit(UiEvent.ShowSnackbar(
-                            uiText = result.uiText ?: UiText.StringResource(R.string.error_unknown)
-                        ))
-                    }
-                }
-            }
-        }
-
-
-    }
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    fun getFromWebView(pageSource: String, url: String, source: Source) {
-        try {
-            viewModelScope.launch {
-                showSnackBar(UiText.StringResource(R.string.trying_to_fetch_chapters_content))
-                val chapter = source.pageContentParse(Jsoup.parse(pageSource))
-                if (!chapter.isNullOrEmpty() && url == state.chapter?.link) {
-                    val localChapter = state.chapter?.copy(content = chapter)
-                    if (localChapter != null) {
-                        toggleLastReadAndUpdateChapterContent(localChapter)
-                    }
-                    showSnackBar(UiText.DynamicString("${state.chapter?.title} of ${state.chapter?.title} was Fetched"))
-                } else {
-                    showSnackBar(UiText.DynamicString("Failed to to get the content"))
-                }
-            }
-        } catch (e: Exception) {
-        }
-
-
-    }
-
-    private fun toggleLastReadAndUpdateChapterContent(chapter: Chapter) {
+    fun getContentFromWebView(pageSource: String, url: String, source: Source) {
         viewModelScope.launch(Dispatchers.IO) {
-            deleteUseCase.deleteChapterByChapter(chapter)
-            insertUseCases.setLastReadToFalse(bookId = chapter.bookId)
-            insertChapter(chapter.copy(read = true, lastRead = true))
+            showSnackBar(UiText.StringResource(R.string.trying_to_fetch_chapters_content))
+            val list = mutableListOf<Chapter>()
+            list.addAll(getChapterUseCase.findChaptersByKey(url))
+            val content = source.pageContentParse(Jsoup.parse(pageSource))
+            if (content.isNotEmpty() && list.isNotEmpty()) {
+                insertUseCases.insertChapters(list.map { it.copy(content = content) })
+                showSnackBar(UiText.DynamicString("${list.first().title} of ${list.first().title} was updated"))
+            } else {
+                showSnackBar(UiText.DynamicString("Failed to to get the content"))
+            }
         }
+
     }
 
-    private fun getLocalChaptersByBookName(bookId: Long) {
-        getChapterUseCase.getChaptersByBookId(bookId = bookId)
-            .onEach { chapters ->
-                if (chapters.isNotEmpty()) {
-                    state = state.copy(
-                        chapters = chapters,
-                    )
-                }
-            }.launchIn(viewModelScope)
-    }
-
-    private fun getBookById(bookId: Long) {
-        getBookUseCases.getBookById(id = bookId).onEach { book ->
-            if (book != null) {
-                state = state.copy(
-                    book = book,
+    fun getExploredBook(pageSource: String, url: String, source: Source) {
+        viewModelScope.launch {
+            showSnackBar(UiText.StringResource(R.string.trying_to_fetch))
+            val exploreBooks = source.latestParse(Jsoup.parse(pageSource))
+            remoteKeysDao.deleteAllExploredBook()
+            remoteKeysDao.deleteAllRemoteKeys()
+            val keys = exploreBooks.books.map { book ->
+                RemoteKeys(
+                    id = book.title,
+                    prevPage = 1,
+                    nextPage = 2,
+                    sourceId = source.sourceId
                 )
             }
-        }.launchIn(viewModelScope)
+            remoteKeysDao.addAllRemoteKeys(remoteKeys = keys)
+            remoteKeysDao.insertAllExploredBook(exploreBooks.books.map { it.toBook(source.sourceId) })
+            showSnackBar(UiText.DynamicString("return to explore screen to view books"))
+        }
     }
 
-    private fun getLocalChapterById(chapterId: Long) {
+    fun getBookDetailAndChapter(pageSource: String, url: String, source: Source) {
         viewModelScope.launch {
-            getChapterUseCase.getOneChapterById(chapterId).first { result ->
-                if (result != null) {
-                    state = state.copy(
-                        chapter = result,
-                    )
-                    //insertChaptersToLocal(state.chapters)
+            showSnackBar(UiText.StringResource(R.string.trying_to_fetch))
+            val localBooks = mutableListOf<Book>()
+            localBooks.addAll(getBookUseCases.findBooksByKey(url))
+            val detail = source.detailParse(Jsoup.parse(pageSource))
+            val chapter = source.chaptersParse(Jsoup.parse(pageSource))
+            if (detail.title.isNotEmpty() && chapter.isNotEmpty() && localBooks.isNotEmpty()) {
+                val newList = mutableListOf<Book>()
+                val localChapterList = mutableListOf<Chapter>()
+                localBooks.forEach {
+                    newList.add(updateBook(detail.toBook(source.sourceId), it))
+                    getChapterUseCase.subscribeChaptersByBookId(it.id).collect { localChapters ->
+                        localChapterList.addAll(localChapters)
+                    }
                 }
-                true
+                val uniqueList = mutableListOf<Chapter>()
+                localBooks.forEach { lBook ->
+                    uniqueList.addAll(removeSameItemsFromList(oldList = localChapterList,
+                        newList = chapter.map { it.toChapter(lBook.id) },
+                        differentiateBy = {
+                            it.title
+                        }))
+                }
+                if (localBooks.isNotEmpty()) {
+                    insertUseCases.insertBooks(newList)
+                    newList.forEach {
+                        deleteUseCase.deleteChaptersByBookId(bookId = it.id)
+                        insertUseCases.insertChapters(uniqueList)
+                    }
+                    showSnackBar(UiText.DynamicString("${localBooks.first().title} of ${localBooks.first().title} was updated"))
+                } else {
+                    val bookId = insertUseCases.insertBook(detail.toBook(source.sourceId).copy(
+                        favorite = true,
+                        lastUpdated = System.currentTimeMillis(),
+                        dataAdded = System.currentTimeMillis()))
+                    insertUseCases.insertChapters(uniqueList.map { it.copy(bookId = bookId) })
+                    showSnackBar(UiText.DynamicString("${detail.title} of ${detail.title} was added to library"))
+                }
+            } else {
+
+                showSnackBar(UiText.DynamicString("Failed to to get the content"))
             }
         }
     }
@@ -205,14 +185,29 @@ class WebViewPageModel @Inject constructor(
         }
     }
 
+    fun toggleLoading(loading: Boolean) {
+        state = state.copy(isLoading = loading)
+    }
+
+    fun updateUrl(url: String) {
+
+        state = state.copy(url = url)
+
+    }
+
+    fun updateWebUrl(url: String) {
+
+        state = state.copy(webUrl = url)
+
+    }
+
+
 }
 
 data class WebViewPageState(
     val url: String = "",
-    val book: Book? = null,
-    val books: List<Book> = emptyList<Book>(),
-    val chapters: List<Chapter> = emptyList<Chapter>(),
-    val chapter: Chapter? = null,
+    val webUrl: String = "",
     val fetcher: FetchType = FetchType.LatestFetchType,
     val source: Source? = null,
+    val isLoading: Boolean = false,
 )

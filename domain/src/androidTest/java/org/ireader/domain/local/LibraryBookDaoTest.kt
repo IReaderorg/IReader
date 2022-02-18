@@ -38,7 +38,7 @@ class LibraryBookDaoTest {
     fun insertBook() = runTest {
         val book = Book(title = "Test", link = "https://example.com", sourceId = 1)
         dao.insertBook(book = book)
-        val allBooks = dao.getAllInLibraryBooks().first()
+        val allBooks = dao.subscribeAllInLibraryBooks().first()
         if (allBooks != null) {
             assertThat(book in allBooks)
         } else {

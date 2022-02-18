@@ -22,9 +22,9 @@ class LocalBookRepositoryImpl(
 
     /*****GET********************************/
 
-    override fun getBookById(id: Long): Flow<Book?> = flow {
+    override fun subscribeBookById(id: Long): Flow<Book?> = flow {
         Timber.d("Timber: GetExploreBookByIdUseCase was Called")
-        bookDao.getBookById(bookId = id)
+        bookDao.subscribeBookById(bookId = id)
             .first { book ->
                 if (book != null) {
                     emit(book)
@@ -38,36 +38,40 @@ class LocalBookRepositoryImpl(
 
     }
 
+    override suspend fun findBookById(id: Long): Book? {
+        return bookDao.findBookById(id)
+    }
+
 
     override fun getAllInLibraryPagingSource(
         sortType: SortType,
         isAsc: Boolean,
         unreadFilter: Boolean,
     ): PagingSource<Int, Book> {
-        bookDao.getAllLocalBooksForPagingSortedBySort()
+        bookDao.subscribeAllLocalBooksForPagingSortedBySort()
         return when (sortType) {
             is SortType.Alphabetically -> {
-                bookDao.getAllLocalBooksForPagingSortedBySort(sortByAbs = true,
+                bookDao.subscribeAllLocalBooksForPagingSortedBySort(sortByAbs = true,
                     isAsc = isAsc,
                     unread = unreadFilter
                 )
 
             }
             is SortType.DateAdded -> {
-                bookDao.getAllLocalBooksForPagingSortedBySort(sortByDateAdded = true,
+                bookDao.subscribeAllLocalBooksForPagingSortedBySort(sortByDateAdded = true,
                     isAsc = isAsc,
                     unread = unreadFilter
                 )
             }
             is SortType.LastRead -> {
-                bookDao.getAllLocalBooksForPagingSortedBySort(
+                bookDao.subscribeAllLocalBooksForPagingSortedBySort(
                     sortByLastRead = true,
                     isAsc = isAsc,
                     unread = unreadFilter
                 )
             }
             is SortType.TotalChapter -> {
-                bookDao.getAllLocalBooksForPagingSortedBySort(
+                bookDao.subscribeAllLocalBooksForPagingSortedBySort(
                     isAsc = isAsc,
                     unread = unreadFilter
                 )
@@ -75,39 +79,47 @@ class LocalBookRepositoryImpl(
         }
     }
 
-    override fun getAllInLibraryBooks(
+    override fun subscribeAllInLibraryBooks(
         sortType: SortType,
         isAsc: Boolean,
         unreadFilter: Boolean,
     ): Flow<List<Book>> {
         return when (sortType) {
             is SortType.Alphabetically -> {
-                bookDao.getAllInLibraryBooks(sortByAbs = true,
+                bookDao.subscribeAllInLibraryBooks(sortByAbs = true,
                     isAsc = isAsc,
                     unread = unreadFilter
                 )
 
             }
             is SortType.DateAdded -> {
-                bookDao.getAllInLibraryBooks(sortByDateAdded = true,
+                bookDao.subscribeAllInLibraryBooks(sortByDateAdded = true,
                     isAsc = isAsc,
                     unread = unreadFilter
                 )
             }
             is SortType.LastRead -> {
-                bookDao.getAllInLibraryBooks(
+                bookDao.subscribeAllInLibraryBooks(
                     sortByLastRead = true,
                     isAsc = isAsc,
                     unread = unreadFilter
                 )
             }
             is SortType.TotalChapter -> {
-                bookDao.findLibraryBooksByTotalDownload(
+                bookDao.subscribeLibraryBooksByTotalDownload(
                     isAsc = isAsc,
                     unread = unreadFilter
                 )
             }
         }
+    }
+
+    override suspend fun findAllInLibraryBooks(
+        sortType: SortType,
+        isAsc: Boolean,
+        unreadFilter: Boolean,
+    ): List<Book> {
+        return bookDao.findAllInLibraryBooks()
     }
 
     override fun getBooksByQueryByPagingSource(query: String):
@@ -140,6 +152,14 @@ class LocalBookRepositoryImpl(
 
     override fun getAllExploreBookPagingSource(): PagingSource<Int, Book> {
         return remoteKeysDao.getAllExploreBookByPaging()
+    }
+
+    override suspend fun findBookByKey(key: String): Book? {
+        return bookDao.findBookByKey(key = key)
+    }
+
+    override suspend fun findBooksByKey(key: String): List<Book> {
+        return bookDao.findBooksByKey(key = key)
     }
 
 

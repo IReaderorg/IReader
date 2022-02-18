@@ -13,7 +13,7 @@ import org.ireader.domain.repository.LocalBookRepository
 /**
  * Get Books that are in library and explore mode is false.
  */
-class GetInLibraryBooksPagingData(private val localBookRepository: LocalBookRepository) {
+class SubscribeInLibraryBooksPagingData(private val localBookRepository: LocalBookRepository) {
     operator fun invoke(
         sortType: SortType,
         isAsc: Boolean,

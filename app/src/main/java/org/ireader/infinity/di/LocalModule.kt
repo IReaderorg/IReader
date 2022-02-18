@@ -36,10 +36,7 @@ import org.ireader.domain.use_cases.download.get.GetAllDownloadsUseCaseByPaging
 import org.ireader.domain.use_cases.download.get.GetOneSavedDownload
 import org.ireader.domain.use_cases.download.insert.InsertDownload
 import org.ireader.domain.use_cases.download.insert.InsertDownloads
-import org.ireader.domain.use_cases.local.DeleteUseCase
-import org.ireader.domain.use_cases.local.LocalGetBookUseCases
-import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
-import org.ireader.domain.use_cases.local.LocalInsertUseCases
+import org.ireader.domain.use_cases.local.*
 import org.ireader.domain.use_cases.local.book_usecases.*
 import org.ireader.domain.use_cases.local.chapter_usecases.*
 import org.ireader.domain.use_cases.local.delete_usecases.book.DeleteAllBooks
@@ -175,16 +172,21 @@ class LocalModule {
         localBookRepository: LocalBookRepository,
     ): LocalGetBookUseCases {
         return LocalGetBookUseCases(
-            getAllInLibraryBooks = GetAllInLibraryBooks(
+            subscribeAllInLibraryBooks = SubscribeAllInLibraryBooks(
                 localBookRepository),
             getAllExploredBookPagingSource = GetAllExploredBookPagingSource(localBookRepository),
             getAllInLibraryPagingSource = GetAllInLibraryPagingSource(
                 localBookRepository),
-            getBookById = GetBookById(localBookRepository),
+            subscribeBookById = SubscribeBookById(localBookRepository),
             getBooksByQueryByPagination = GetBooksByQueryByPagination(localBookRepository),
             getBooksByQueryPagingSource = GetBooksByQueryPagingSource(localBookRepository),
-            GetInLibraryBooksPagingData = GetInLibraryBooksPagingData(localBookRepository),
+            SubscribeInLibraryBooksPagingData = SubscribeInLibraryBooksPagingData(
+                localBookRepository),
             getAllExploredBookPagingData = GetAllExploredBookPagingData(localBookRepository = localBookRepository),
+            findBookByKey = FindBookByKey(localBookRepository),
+            findBooksByKey = FindBooksByKey(localBookRepository),
+            findAllInLibraryBooks = FindAllInLibraryBooks(localBookRepository),
+            findBookById = FindBookById(localBookRepository)
         )
     }
 
@@ -194,11 +196,16 @@ class LocalModule {
         localChapterRepository: LocalChapterRepository,
     ): LocalGetChapterUseCase {
         return LocalGetChapterUseCase(
-            getOneChapterById = GetOneChapterById(localChapterRepository),
-            getChaptersByBookId = GetChaptersByBookId(localChapterRepository),
-            findLastReadChapter = FindLastReadChapter(localChapterRepository),
+            subscribeChapterById = SubscribeChapterById(localChapterRepository),
+            subscribeChaptersByBookId = SubscribeChaptersByBookId(localChapterRepository),
+            subscribeLastReadChapter = SubscribeLastReadChapter(localChapterRepository),
             getLocalChaptersByPaging = GetLocalChaptersByPaging(localChapterRepository),
-            findFirstChapter = FindFirstChapter(localChapterRepository)
+            findFirstChapter = FindFirstChapter(localChapterRepository),
+            findChapterByKey = FindChapterByKey(localChapterRepository),
+            findChaptersByKey = FindChaptersByKey(localChapterRepository),
+            findChapterById = FindChapterById(localChapterRepository),
+            findChaptersByBookId = FindChaptersByBookId(localChapterRepository),
+            findLastReadChapter = FindLastReadChapter(localChapterRepository)
         )
     }
 

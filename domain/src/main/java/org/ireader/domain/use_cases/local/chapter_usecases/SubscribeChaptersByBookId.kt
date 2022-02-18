@@ -14,19 +14,28 @@ import org.ireader.domain.repository.LocalChapterRepository
  * get all Chapter using a bookId
  * note: if nothing is found it return a resource of error
  */
-class GetChaptersByBookId(private val localChapterRepository: LocalChapterRepository) {
+class SubscribeChaptersByBookId(private val localChapterRepository: LocalChapterRepository) {
     operator fun invoke(
         bookId: Long,
         isAsc: Boolean = true,
     ): Flow<List<Chapter>> = flow {
         try {
-            localChapterRepository.findChaptersByBookId(bookId = bookId, isAsc)
+            localChapterRepository.subscribeChaptersByBookId(bookId = bookId, isAsc)
                 .first { chapters ->
                     emit(chapters)
                     true
                 }
         } catch (e: Exception) {
         }
+    }
+}
+
+class FindChaptersByBookId(private val localChapterRepository: LocalChapterRepository) {
+    suspend operator fun invoke(
+        bookId: Long,
+        isAsc: Boolean = true,
+    ): List<Chapter> {
+        return localChapterRepository.findChaptersByBookId(bookId = bookId, isAsc)
     }
 }
 

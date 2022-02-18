@@ -14,6 +14,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import com.google.accompanist.web.WebContent
 import com.google.accompanist.web.rememberWebViewState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collectLatest
@@ -21,6 +25,7 @@ import kotlinx.coroutines.launch
 import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.getHtml
 import org.ireader.domain.models.source.HttpSource
+import org.ireader.domain.view_models.settings.webview.WebViewPageModel
 import org.ireader.infinity.core.data.network.utils.setDefaultSettings
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
 
@@ -32,12 +37,12 @@ fun WebPageScreen(
     navController: NavController = rememberNavController(),
     viewModel: WebViewPageModel = hiltViewModel(),
 ) {
-    val urlToRender = viewModel.state.url
     val scaffoldState = rememberScaffoldState()
     val context = LocalContext.current
     val webView = remember {
-        mutableStateOf(WebView(context))
+        mutableStateOf<WebView?>(null)
     }
+
     val source = viewModel.state.source
     val scope = rememberCoroutineScope()
 
@@ -54,60 +59,74 @@ fun WebPageScreen(
         }
 
     }
-    val webViewState = rememberWebViewState(url = urlToRender)
+    val webUrl = remember {
+        mutableStateOf(viewModel.state.webUrl)
+    }
+    val webViewState = rememberWebViewState(url = webUrl.value)
+
+
+    val refreshState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isLoading)
 
 
     Scaffold(
         topBar = {
             WebPageTopBar(
                 navController = navController,
-                urlToRender = webViewState.content.getCurrentUrl() ?: urlToRender,
-                onTrackButtonClick = {
-                    if (source != null) {
-                        scope.launch {
-                            webView.value.setUserAgent(source.headers.get("User-Agent")
-                                ?: HttpSource.DEFAULT_USER_AGENT)
-                            viewModel.getInfo(pageSource = webView.value.getHtml(),
-                                url = webViewState.content.getCurrentUrl() ?: "",
-                                source = source)
-                        }
-                    }
-                },
+                urlToRender = viewModel.state.url,
                 fetchType = viewModel.state.fetcher,
                 source = source,
+                onGo = {
+                    webViewState.content = WebContent.Url(viewModel.state.url)
+                    // webView.value?.loadUrl(viewModel.state.url)
+                    viewModel.updateWebUrl(viewModel.state.url)
+                },
                 refresh = {
-                    webView.value.reload()
+                    webView.value?.reload()
+
                 },
                 goBack = {
-                    webView.value.goBack()
+                    webView.value?.goBack()
                 },
                 goForward = {
-                    webView.value.goForward()
+                    webView.value?.goForward()
                 },
                 fetchBook = {
                     if (source != null) {
                         scope.launch {
-                            webView.value.setUserAgent(source.headers.get("User-Agent")
+                            webView.value?.setUserAgent(source.headers.get("User-Agent")
                                 ?: HttpSource.DEFAULT_USER_AGENT)
-                            viewModel.getInfo(webView.value.getHtml(),
+                            viewModel.getBookDetailAndChapter(pageSource = webView.value?.getHtml()
+                                ?: "",
                                 url = webViewState.content.getCurrentUrl() ?: "",
                                 source)
                         }
                     }
                 },
                 fetchBooks = {
-                    //webView.goForward()
-                },
-                fetchChapter = {
                     if (source != null) {
                         scope.launch {
-                            webView.value.setUserAgent(source.headers.get("User-Agent")
+                            webView.value?.setUserAgent(source.headers.get("User-Agent")
                                 ?: HttpSource.DEFAULT_USER_AGENT)
-                            viewModel.getFromWebView(webView.value.getHtml(),
+                            viewModel.getExploredBook(pageSource = webView.value?.getHtml() ?: "",
                                 url = webViewState.content.getCurrentUrl() ?: "",
                                 source)
                         }
                     }
+                },
+                fetchChapter = {
+                    if (source != null) {
+                        scope.launch {
+                            webView.value?.setUserAgent(source.headers.get("User-Agent")
+                                ?: HttpSource.DEFAULT_USER_AGENT)
+                            viewModel.getContentFromWebView(pageSource = webView.value?.getHtml()
+                                ?: "",
+                                url = webViewState.content.getCurrentUrl() ?: "",
+                                source)
+                        }
+                    }
+                },
+                onValueChange = {
+                    viewModel.updateUrl(it)
                 }
             )
         },
@@ -124,41 +143,48 @@ fun WebPageScreen(
         }
 
     ) {
-        org.ireader.presentation.feature_settings.presentation.webview.WebView(
-            modifier = Modifier.fillMaxSize(),
-            newWebView = webView.value,
-            state = webViewState,
-            captureBackPresses = false,
-            onCreated = {
-                it.setDefaultSettings()
+        SwipeRefresh(
+            state = refreshState,
+            onRefresh = {
+                webView.value?.reload()
+                viewModel.toggleLoading(true)
+            },
+            indicator = { state, trigger ->
+                SwipeRefreshIndicator(
+                    state = state,
+                    refreshTriggerDistance = trigger,
+                    scale = true,
+                    backgroundColor = MaterialTheme.colors.background,
+                    contentColor = MaterialTheme.colors.primaryVariant,
+                    elevation = 8.dp
+                )
             }
-        )
-//        AndroidView(factory = {
-//            webView.apply {
-//                layoutParams = ViewGroup.LayoutParams(
-//                    ViewGroup.LayoutParams.MATCH_PARENT,
-//                    ViewGroup.LayoutParams.MATCH_PARENT
-//                )
-//                setDefaultSettings()
-//                source?.headers?.get("User-Agent").let {
-//                    webView.settings.userAgentString = it
-//                }
-//
-//                webViewClient = object : WebViewClientCompat() {
-//                    override fun shouldOverrideUrlCompat(view: WebView, url: String): Boolean {
-//                        return false
-//                    }
-//                }
-//            }
-//
-//            webView
-//        }, update = {
-//            it.loadUrl(urlToRender)
-//        }, modifier = Modifier.fillMaxSize())
-//    }
-
-
+        ) {
+            if (webViewState.isLoading) {
+                LinearProgressIndicator(Modifier.fillMaxWidth())
+            }
+            WebView(
+                modifier = Modifier.fillMaxSize(),
+                state = webViewState,
+                captureBackPresses = false,
+                isLoading = {
+                    viewModel.toggleLoading(it)
+                },
+                onCreated = {
+                    webView.value = it
+                    it.setDefaultSettings()
+                    if (source != null) {
+                        it.setUserAgent(source.headers.get("User-Agent")
+                            ?: HttpSource.DEFAULT_USER_AGENT)
+                    }
+                },
+                updateUrl = {
+                    viewModel.updateUrl(it)
+                },
+            )
+        }
     }
+
 }
 
 

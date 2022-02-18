@@ -51,13 +51,13 @@ class NotificationWorker @AssistedInject constructor(
     }
 
     private fun getNotifications() = flow {
-        val books = bookRepo.getAllInLibraryBooks().first()
+        val books = bookRepo.subscribeAllInLibraryBooks().first()
 
         progressNotification(books) { book ->
             try {
-                val lastGroup = chaptersRepo.findChaptersByBookId(book.id).first()
+                val lastGroup = chaptersRepo.subscribeChaptersByBookId(book.id).first()
                 val refreshedGroups =
-                    chaptersRepo.findChaptersByBookId(book.id, true).first()
+                    chaptersRepo.subscribeChaptersByBookId(book.id, true).first()
                 val updateCount = refreshedGroups.lastChapter() - lastGroup.lastChapter()
                 if (updateCount > 0)
                     emit(

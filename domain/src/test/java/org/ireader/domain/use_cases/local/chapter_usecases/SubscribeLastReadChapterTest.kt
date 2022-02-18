@@ -8,9 +8,9 @@ import org.ireader.domain.repository.FakeChapterRepository
 import org.junit.Before
 import org.junit.Test
 
-class FindLastReadChapterTest {
+class SubscribeLastReadChapterTest {
 
-    private lateinit var findLastReadChapter: FindLastReadChapter
+    private lateinit var subscribeLastReadChapter: SubscribeLastReadChapter
 
 
     private val lastReadChapterIndex = 5L
@@ -19,7 +19,7 @@ class FindLastReadChapterTest {
     @Before
     fun setUp() {
         val fakeRepository = FakeChapterRepository()
-        findLastReadChapter = FindLastReadChapter(fakeRepository)
+        subscribeLastReadChapter = SubscribeLastReadChapter(fakeRepository)
 
         val items = mutableListOf<Chapter>()
         ('a'..'z').forEachIndexed { index, c ->
@@ -37,7 +37,7 @@ class FindLastReadChapterTest {
 
     @Test
     fun `return correct chapter if available`() = runBlocking {
-        val result = findLastReadChapter(bookId).first()
+        val result = subscribeLastReadChapter(bookId).first()
         Truth.assertThat(result?.id == lastReadChapterIndex).isTrue()
     }
 

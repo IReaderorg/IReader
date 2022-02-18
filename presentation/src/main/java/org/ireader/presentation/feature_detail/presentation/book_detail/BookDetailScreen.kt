@@ -134,6 +134,7 @@ fun BookDetailScreen(
                         )
                     }
                 }) {
+
                 SwipeRefresh(
                     state = swipeRefreshState,
                     onRefresh = {

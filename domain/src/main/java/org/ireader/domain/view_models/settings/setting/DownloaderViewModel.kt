@@ -80,7 +80,7 @@ class DownloaderViewModel @Inject constructor(
 
     fun startDownloadService(context: Context, bookId: Long, sourceId: Long) {
         viewModelScope.launch {
-            val book = getBookUseCases.getBookById(bookId).first()
+            val book = getBookUseCases.subscribeBookById(bookId).first()
             if (book != null) {
                 // getChapters(book)
             }

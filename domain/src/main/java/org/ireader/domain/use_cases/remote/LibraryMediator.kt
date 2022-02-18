@@ -13,7 +13,7 @@ class LibraryMediator @Inject constructor(
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Book> {
         val currentPage = params.key ?: 1
         return try {
-            val response = dao.getAllInLibraryBooksForPaging()
+            val response = dao.findAllInLibraryBooks()
             val endOfPaginationReached = true
             if (response.isNotEmpty()) {
                 LoadResult.Page(

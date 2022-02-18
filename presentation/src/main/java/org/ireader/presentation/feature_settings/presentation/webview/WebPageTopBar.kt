@@ -11,7 +11,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.TrackChanges
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,9 +28,10 @@ import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackBu
 fun WebPageTopBar(
     navController: NavController,
     urlToRender: String,
-    onTrackButtonClick: () -> Unit,
+    onValueChange: (text: String) -> Unit,
     fetchType: FetchType,
     source: Source? = null,
+    onGo: () -> Unit,
     refresh: () -> Unit,
     goBack: () -> Unit,
     goForward: () -> Unit,
@@ -49,24 +49,21 @@ fun WebPageTopBar(
                 .fillMaxHeight(.7f)
                 .fillMaxWidth()
                 .background(
-                    color = Color(0xffb9b9b9),
+                    color = Color(0xFFD5D5D5),
                     shape = CircleShape
-                ), initValue = urlToRender, onValueConfirm = {
+                ),
+                value = urlToRender,
+                onValueChange = {
+                    onValueChange(it)
+                },
+                onValueConfirm = {
 
-            })
+                })
         },
         navigationIcon = {
             TopAppBarBackButton(navController = navController)
         },
         actions = {
-            if (fetchType == FetchType.DetailFetchType && source != null) {
-                TopAppBarActionButton(imageVector = Icons.Default.TrackChanges,
-                    title = "Menu",
-                    onClick = {
-                        onTrackButtonClick()
-
-                    })
-            }
             TopAppBarActionButton(
                 imageVector = Icons.Default.Menu,
                 title = "Menu Icon",
@@ -81,6 +78,12 @@ fun WebPageTopBar(
                     isMenuExpanded = false
                 },
             ) {
+                DropdownMenuItem(onClick = {
+                    isMenuExpanded = false
+                    onGo()
+                }) {
+                    MidSizeTextComposable(text = stringResource(R.string.Go))
+                }
                 DropdownMenuItem(onClick = {
                     isMenuExpanded = false
                     refresh()

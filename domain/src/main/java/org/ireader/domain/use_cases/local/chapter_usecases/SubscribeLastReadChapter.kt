@@ -10,16 +10,16 @@ import org.ireader.domain.repository.LocalChapterRepository
  * Get latest read chapter
  *  * note: if nothing is found it return a resource of error
  */
-class FindLastReadChapter(private val localChapterRepository: LocalChapterRepository) {
+class SubscribeLastReadChapter(private val localChapterRepository: LocalChapterRepository) {
     operator fun invoke(
         bookId: Long,
     ): Flow<Chapter?> = flow {
 
-        localChapterRepository.findLastReadChapter(bookId).first { chapter ->
+        localChapterRepository.subscribeLastReadChapter(bookId).first { chapter ->
             if (chapter != null) {
                 emit(chapter)
             } else {
-                localChapterRepository.findFirstChapter(bookId).first {
+                localChapterRepository.subscribeFirstChapter(bookId).first {
                     emit(it)
                     true
                 }
@@ -30,10 +30,27 @@ class FindLastReadChapter(private val localChapterRepository: LocalChapterReposi
     }
 }
 
-class FindFirstChapter(private val localChapterRepository: LocalChapterRepository) {
+class FindLastReadChapter(private val localChapterRepository: LocalChapterRepository) {
+    suspend operator fun invoke(
+        bookId: Long,
+    ): Chapter? {
+        return localChapterRepository.findLastReadChapter(bookId)
+    }
+}
+
+class SubscribeFirstChapter(private val localChapterRepository: LocalChapterRepository) {
     operator fun invoke(
         bookId: Long,
     ): Flow<Chapter?> {
+        return localChapterRepository.subscribeFirstChapter(bookId)
+
+    }
+}
+
+class FindFirstChapter(private val localChapterRepository: LocalChapterRepository) {
+    suspend operator fun invoke(
+        bookId: Long,
+    ): Chapter? {
         return localChapterRepository.findFirstChapter(bookId)
 
     }

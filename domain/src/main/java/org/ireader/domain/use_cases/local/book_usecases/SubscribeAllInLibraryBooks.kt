@@ -16,10 +16,10 @@ import java.io.IOException
  * get All books that inLibrary field is true
  * note: when there is no book with that id it return a error resource
  */
-class GetAllInLibraryBooks(private val localBookRepository: LocalBookRepository) {
+class SubscribeAllInLibraryBooks(private val localBookRepository: LocalBookRepository) {
     operator fun invoke(): Flow<List<Book>> = flow {
         try {
-            localBookRepository.getAllInLibraryBooks(sortType = SortType.LastRead,
+            localBookRepository.subscribeAllInLibraryBooks(sortType = SortType.LastRead,
                 isAsc = false,
                 unreadFilter = false).first { books ->
                 emit(books)
@@ -40,5 +40,13 @@ class GetAllInLibraryBooks(private val localBookRepository: LocalBookRepository)
         }
 
 
+    }
+}
+
+class FindAllInLibraryBooks(private val localBookRepository: LocalBookRepository) {
+    suspend operator fun invoke(): List<Book> {
+        return localBookRepository.findAllInLibraryBooks(sortType = SortType.LastRead,
+            isAsc = false,
+            unreadFilter = false)
     }
 }

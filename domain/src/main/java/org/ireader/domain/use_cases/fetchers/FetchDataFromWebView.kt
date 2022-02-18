@@ -34,7 +34,7 @@ class FetchBookDetailAndChapterDetailFromWebView {
                 emit(Resource.Error<UiText.DynamicString>(UiText.StringResource(R.string.trying_to_fetch)))
                 if (localChapters != null && localBook?.title == bookFromPageSource.title && chaptersFromPageSource.isNotEmpty() && localBook.title.isNotBlank()) {
                     val uniqueList = removeSameItemsFromList(oldList = localChapters,
-                        newList = chaptersFromPageSource.map { it.toChapter() },
+                        newList = chaptersFromPageSource.map { it.toChapter(localBook.id) },
                         differentiateBy = {
                             it.title
                         })
@@ -73,7 +73,7 @@ class FetchBookDetailAndChapterDetailFromWebView {
                             insertUseCases.insertBook(book)
 
                         insertUseCases.insertChapters(chaptersFromPageSource.map {
-                            it.toChapter().copy(
+                            it.toChapter(insertedBookId).copy(
                                 bookId = insertedBookId,
                                 inLibrary = true,
                                 dateFetch = System.currentTimeMillis(),

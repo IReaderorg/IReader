@@ -13,12 +13,12 @@ internal class FakeLocalBookRepository : LocalBookRepository {
     val books = mutableListOf<Book>()
 
 
-    override fun getBookById(id: Long): Flow<Book?> = flow {
+    override fun subscribeBookById(id: Long): Flow<Book?> = flow {
         val result = books.find { it.id == id }
         emit(result)
     }
 
-    override fun getAllInLibraryBooks(
+    override fun subscribeAllInLibraryBooks(
         sortType: SortType,
         isAsc: Boolean,
         unreadFilter: Boolean,

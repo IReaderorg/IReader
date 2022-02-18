@@ -9,26 +9,27 @@ class FakeChapterRepository : LocalChapterRepository {
 
     val chapters = mutableListOf<Chapter>()
 
-    override fun findOneChapterById(chapterId: Long): Flow<Chapter?> = flow {
+    override fun subscribeChapterById(chapterId: Long): Flow<Chapter?> = flow {
         val result = chapters.find { it.id == chapterId }
         emit(result)
     }
 
-    override fun findChaptersByBookId(bookId: Long, isAsc: Boolean): Flow<List<Chapter>> = flow {
-        val result = chapters.filter { it.id == bookId }.sortedBy { it.id }
-        if (isAsc) {
-            emit(result)
-        } else {
-            emit(result.reversed())
+    override fun subscribeChaptersByBookId(bookId: Long, isAsc: Boolean): Flow<List<Chapter>> =
+        flow {
+            val result = chapters.filter { it.id == bookId }.sortedBy { it.id }
+            if (isAsc) {
+                emit(result)
+            } else {
+                emit(result.reversed())
+            }
         }
-    }
 
-    override fun findLastReadChapter(bookId: Long): Flow<Chapter?> = flow {
+    override fun subscribeLastReadChapter(bookId: Long): Flow<Chapter?> = flow {
         val result = chapters.find { it.lastRead }
         emit(result)
     }
 
-    override fun findFirstChapter(bookId: Long): Flow<Chapter?> = flow {
+    override fun subscribeFirstChapter(bookId: Long): Flow<Chapter?> = flow {
         val result = chapters.first()
         emit(result)
     }

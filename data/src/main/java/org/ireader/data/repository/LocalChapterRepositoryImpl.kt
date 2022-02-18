@@ -18,20 +18,44 @@ class LocalChapterRepositoryImpl @Inject constructor(private val daoLibrary: Lib
 
     }
 
-    override fun findOneChapterById(chapterId: Long): Flow<Chapter?> {
-        return daoLibrary.findChapterById(chapterId = chapterId)
+    override fun subscribeChapterById(chapterId: Long): Flow<Chapter?> {
+        return daoLibrary.subscribeChapterById(chapterId = chapterId)
     }
 
-    override fun findChaptersByBookId(bookId: Long, isAsc: Boolean): Flow<List<Chapter>> {
-        return daoLibrary.findChaptersByBookId(bookId = bookId, isAsc = isAsc)
+    override suspend fun findChapterById(chapterId: Long): Chapter? {
+        return daoLibrary.findChapterById(chapterId)
+    }
+
+    override fun subscribeChaptersByBookId(bookId: Long, isAsc: Boolean): Flow<List<Chapter>> {
+        return daoLibrary.subscribeChaptersByBookId(bookId = bookId, isAsc = isAsc)
+    }
+
+    override suspend fun findChaptersByBookId(bookId: Long, isAsc: Boolean): List<Chapter> {
+        return daoLibrary.findChaptersByBookId(bookId, isAsc)
+    }
+
+    override suspend fun findChaptersByKey(key: String): List<Chapter> {
+        return daoLibrary.findChaptersByKey(key = key)
+    }
+
+    override suspend fun findChapterByKey(key: String): Chapter? {
+        return daoLibrary.findChapterByKey(key = key)
     }
 
 
-    override fun findLastReadChapter(bookId: Long): Flow<Chapter?> {
+    override fun subscribeLastReadChapter(bookId: Long): Flow<Chapter?> {
+        return daoLibrary.subscribeLastReadChapter(bookId)
+    }
+
+    override suspend fun findLastReadChapter(bookId: Long): Chapter? {
         return daoLibrary.findLastReadChapter(bookId)
     }
 
-    override fun findFirstChapter(bookId: Long): Flow<Chapter?> {
+    override fun subscribeFirstChapter(bookId: Long): Flow<Chapter?> {
+        return daoLibrary.subscribeFirstChapter(bookId)
+    }
+
+    override suspend fun findFirstChapter(bookId: Long): Chapter? {
         return daoLibrary.findFirstChapter(bookId)
     }
 
@@ -55,6 +79,7 @@ class LocalChapterRepositoryImpl @Inject constructor(private val daoLibrary: Lib
     override suspend fun deleteChaptersByBookId(bookId: Long) {
         return daoLibrary.deleteChaptersById(bookId)
     }
+
 
     override suspend fun deleteChapters(chapters: List<Chapter>) {
         return daoLibrary.deleteChaptersById(chapters)

@@ -20,7 +20,7 @@ interface LibraryBookDao {
         CASE WHEN :isAsc = 1 AND :sortByLastRead = 1 THEN library.lastRead END ASC,
         CASE WHEN :isAsc = 0 AND :sortByLastRead = 1 THEN  library.lastRead END DESC
 """)
-    fun getAllLocalBooksForPagingSortedBySort(
+    fun subscribeAllLocalBooksForPagingSortedBySort(
         sortByAbs: Boolean = false,
         sortByDateAdded: Boolean = false,
         sortByLastRead: Boolean = false,
@@ -38,7 +38,7 @@ interface LibraryBookDao {
         CASE WHEN :isAsc = 0 AND :sortByDateAdded = 1 THEN  library.dataAdded END DESC,
         CASE WHEN :isAsc = 1 AND :sortByLastRead = 1 THEN library.lastRead END ASC,
         CASE WHEN :isAsc = 0 AND :sortByLastRead = 1 THEN  library.lastRead END DESC""")
-    fun getAllInLibraryBooks(
+    fun subscribeAllInLibraryBooks(
         sortByAbs: Boolean = false,
         sortByDateAdded: Boolean = false,
         sortByLastRead: Boolean = false,
@@ -55,19 +55,28 @@ interface LibraryBookDao {
         ORDER BY
         CASE WHEN :isAsc = 1 THEN  total_chapter END ASC,
         CASE WHEN :isAsc = 0 THEN  total_chapter END DESC""")
-    fun findLibraryBooksByTotalDownload(
+    fun subscribeLibraryBooksByTotalDownload(
         isAsc: Boolean = false,
         unread: Boolean = false,
     ): Flow<List<Book>>
 
     @Query("SELECT * FROM library WHERE favorite = 1")
-    suspend fun getAllInLibraryBooksForPaging(): List<Book>
+    suspend fun findAllInLibraryBooks(): List<Book>
 
     @Query("SELECT * FROM library WHERE id = :bookId")
-    fun getLocalBook(bookId: Long): Flow<List<Book>?>
+    fun subscribeLocalBook(bookId: Long): Flow<List<Book>?>
 
     @Query("SELECT * FROM library WHERE id = :bookId Limit 1")
-    fun getBookById(bookId: Long): Flow<Book?>
+    fun subscribeBookById(bookId: Long): Flow<Book?>
+
+    @Query("SELECT * FROM library WHERE id = :bookId Limit 1")
+    suspend fun findBookById(bookId: Long): Book?
+
+    @Query("SELECT * FROM library WHERE link = :key Limit 1")
+    suspend fun findBookByKey(key: String): Book?
+
+    @Query("SELECT * FROM library WHERE link = :key")
+    suspend fun findBooksByKey(key: String): List<Book>
 
     @Query("SELECT * FROM library WHERE title LIKE '%' || :query || '%' AND favorite = 1")
     fun searchBook(query: String): PagingSource<Int, Book>

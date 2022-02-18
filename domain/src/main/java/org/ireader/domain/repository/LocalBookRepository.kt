@@ -10,13 +10,20 @@ interface LocalBookRepository {
 
     /** Local GetUseCase**/
 
-    fun getBookById(id: Long): Flow<Book?>
+    fun subscribeBookById(id: Long): Flow<Book?>
+    suspend fun findBookById(id: Long): Book?
 
-    fun getAllInLibraryBooks(
+    fun subscribeAllInLibraryBooks(
         sortType: SortType = SortType.LastRead,
         isAsc: Boolean = false,
         unreadFilter: Boolean = false,
     ): Flow<List<Book>>
+
+    suspend fun findAllInLibraryBooks(
+        sortType: SortType = SortType.LastRead,
+        isAsc: Boolean = false,
+        unreadFilter: Boolean = false,
+    ): List<Book>
 
     fun getBooksByQueryByPagingSource(query: String): PagingSource<Int, Book>
 
@@ -32,6 +39,9 @@ interface LocalBookRepository {
 
     fun getAllExploreBookPagingSource(): PagingSource<Int, Book>
 
+    suspend fun findBookByKey(key: String): Book?
+
+    suspend fun findBooksByKey(key: String): List<Book>
 
     /****************************************************/
 

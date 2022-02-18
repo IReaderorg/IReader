@@ -74,7 +74,7 @@ class LibraryViewModel @Inject constructor(
 
     private fun getLibraryBooks() {
         viewModelScope.launch {
-            localGetBookUseCases.GetInLibraryBooksPagingData(
+            localGetBookUseCases.SubscribeInLibraryBooksPagingData(
                 sortType = state.sortType,
                 isAsc = state.isSortAcs,
                 unreadFilter = state.unreadFilter)

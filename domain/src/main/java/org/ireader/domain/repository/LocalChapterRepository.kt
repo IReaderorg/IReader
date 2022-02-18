@@ -7,19 +7,34 @@ import org.ireader.domain.models.entities.Chapter
 interface LocalChapterRepository {
 
 
-    fun findOneChapterById(
+    fun subscribeChapterById(
         chapterId: Long,
     ): Flow<Chapter?>
 
-    fun findChaptersByBookId(
+    suspend fun findChapterById(
+        chapterId: Long,
+    ): Chapter?
+
+    fun subscribeChaptersByBookId(
         bookId: Long,
         isAsc: Boolean = true,
     ): Flow<List<Chapter>>
 
+    suspend fun findChaptersByBookId(
+        bookId: Long,
+        isAsc: Boolean = true,
+    ): List<Chapter>
 
-    fun findLastReadChapter(bookId: Long): Flow<Chapter?>
+    suspend fun findChaptersByKey(key: String): List<Chapter>
 
-    fun findFirstChapter(bookId: Long): Flow<Chapter?>
+    suspend fun findChapterByKey(key: String): Chapter?
+
+    fun subscribeLastReadChapter(bookId: Long): Flow<Chapter?>
+    suspend fun findLastReadChapter(bookId: Long): Chapter?
+
+    fun subscribeFirstChapter(bookId: Long): Flow<Chapter?>
+    suspend fun findFirstChapter(bookId: Long): Chapter?
+
 
     suspend fun setLastReadToFalse(bookId: Long)
 

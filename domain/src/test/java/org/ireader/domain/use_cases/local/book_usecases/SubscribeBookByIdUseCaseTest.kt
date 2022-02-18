@@ -9,14 +9,14 @@ import org.ireader.domain.repository.FakeLocalBookRepository
 import org.junit.Before
 import org.junit.Test
 
-class GetBookByIdUseCaseTest {
+class SubscribeBookByIdUseCaseTest {
 
-    private lateinit var getBooks: GetBookById
+    private lateinit var subscribeBooks: SubscribeBookById
 
     @Before
     fun setUp() {
         val fakeLocalBookRepository = FakeLocalBookRepository()
-        getBooks = GetBookById(fakeLocalBookRepository)
+        subscribeBooks = SubscribeBookById(fakeLocalBookRepository)
 
         val booksToInsert = mutableListOf<Book>()
         ('a'..'z').forEachIndexed { index, c ->
@@ -33,14 +33,14 @@ class GetBookByIdUseCaseTest {
     @Test
     fun `return books`() = runBlocking {
         val id = 1L
-        val result = getBooks(id).first()
+        val result = subscribeBooks(id).first()
         assertThat(result?.id == id).isTrue()
     }
 
     @Test
     fun `return nothing when there is no book with this id`() = runBlocking {
         val id = 500L
-        val result = getBooks(id).first()
+        val result = subscribeBooks(id).first()
         assertThat(result?.id == id).isFalse()
     }
 

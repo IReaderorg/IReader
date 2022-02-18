@@ -16,11 +16,12 @@ import com.google.accompanist.web.WebViewState
 @Composable
 fun WebView(
     state: WebViewState,
-    newWebView: WebView,
     modifier: Modifier = Modifier,
     captureBackPresses: Boolean = true,
     onCreated: (WebView) -> Unit = {},
     onError: (request: WebResourceRequest?, error: WebResourceError?) -> Unit = { _, _ -> },
+    isLoading: (isLoading: Boolean) -> Unit,
+    updateUrl: (url: String) -> Unit,
 ) {
     var webView by remember { mutableStateOf<WebView?>(null) }
     var canGoBack: Boolean by remember { mutableStateOf(false) }
@@ -31,17 +32,25 @@ fun WebView(
 
     AndroidView(
         factory = { context ->
-            newWebView.apply {
+            WebView(context).apply {
                 onCreated(this)
 
                 webViewClient = object : WebViewClient() {
                     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                         super.onPageStarted(view, url, favicon)
+                        isLoading(true)
+                        if (url != null) {
+                            updateUrl(url)
+                        }
                         state.errorsForCurrentRequest.clear()
                     }
 
                     override fun onPageFinished(view: WebView?, url: String?) {
                         super.onPageFinished(view, url)
+                        isLoading(false)
+                        if (url != null) {
+                            updateUrl(url)
+                        }
                         canGoBack = view?.canGoBack() ?: false
                     }
 
@@ -71,7 +80,8 @@ fun WebView(
                         error: WebResourceError?,
                     ) {
                         super.onReceivedError(view, request, error)
-
+                        isLoading(false)
+                        url?.let { updateUrl(it) }
                         if (error != null) {
                             state.errorsForCurrentRequest.add(WebViewError(request, error))
                         }

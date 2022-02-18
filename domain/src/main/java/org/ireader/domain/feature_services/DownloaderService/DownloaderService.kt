@@ -57,7 +57,7 @@ class DownloadService @AssistedInject constructor(
 
         val bookId = inputData.getLong("book_id", 0)
         val sourceId = inputData.getLong("sourceId", 0)
-        val bookResource = bookRepo.getBookById(bookId).first()
+        val bookResource = bookRepo.subscribeBookById(bookId).first()
             ?: throw IllegalArgumentException(
                 "Invalid bookId as argument: $bookId"
             )
@@ -77,7 +77,7 @@ class DownloadService @AssistedInject constructor(
 
         val source = extensions.findSourceById(sourceId)
 
-        val chapters = chapterRepo.findChaptersByBookId(bookId).first()
+        val chapters = chapterRepo.subscribeChaptersByBookId(bookId).first()
 
         val cancelDownloadIntent = WorkManager.getInstance(applicationContext)
             .createCancelPendingIntent(id)

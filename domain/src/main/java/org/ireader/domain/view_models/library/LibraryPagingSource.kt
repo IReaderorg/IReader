@@ -21,7 +21,7 @@ class LibraryPagingSource(
         return try {
             val nextPageNumber = params.key ?: 1
             var book = emptyList<Book>()
-            val books = localBookRepository.getAllInLibraryBooks(
+            val books = localBookRepository.subscribeAllInLibraryBooks(
                 isAsc = isAsc,
                 unreadFilter = unreadFilter,
                 sortType = sortType

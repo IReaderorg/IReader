@@ -35,10 +35,10 @@ data class Chapter(
 
 }
 
-fun ChapterInfo.toChapter(): Chapter {
+fun ChapterInfo.toChapter(bookId: Long): Chapter {
     return Chapter(
         title = name,
         link = key,
-        bookId = 0
+        bookId = bookId,
     )
 }
