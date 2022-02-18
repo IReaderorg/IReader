@@ -13,7 +13,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Sort
-import androidx.compose.material.icons.filled.TrackChanges
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -103,9 +102,6 @@ fun ReadingScreen(
         }
     }
 
-    val isWebViewEnable by remember {
-        mutableStateOf(viewModel.webView.originalUrl == chapter?.link)
-    }
     if (source != null) {
         Scaffold(topBar = {
             if (!state.isReaderModeEnable && state.isLocalLoaded && modalBottomSheetState.targetValue == ModalBottomSheetValue.Expanded) {
@@ -140,11 +136,6 @@ fun ReadingScreen(
                                         viewModel.getReadingContentRemotely(chapter = chapter,
                                             source = source)
                                     })
-                            }
-                            if (isWebViewEnable) {
-                                TopAppBarActionButton(imageVector = Icons.Default.TrackChanges,
-                                    title = "Content Fetcher",
-                                    onClick = { viewModel.getFromWebView(source = source) })
                             }
                             TopAppBarActionButton(imageVector = Icons.Default.Public,
                                 title = "WebView",
@@ -191,11 +182,6 @@ fun ReadingScreen(
                                     }
                                 }
                             })
-                        if (isWebViewEnable) {
-                            TopAppBarActionButton(imageVector = Icons.Default.TrackChanges,
-                                title = "Content Fetcher",
-                                onClick = { viewModel.getFromWebView(source = source) })
-                        }
                     },
                     navigationIcon = {
                         TopAppBarBackButton(navController = navController)

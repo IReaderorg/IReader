@@ -23,7 +23,7 @@ sealed class UiText {
             is StringResource -> context.getString(resId)
             is ExceptionString -> {
                 val eString = e.localizedMessage ?: context.getString(R.string.error_unknown)
-                return eString.substring(0, eString.length.coerceAtMost(200))
+                return eString.substring(0, eString.length.coerceAtMost(500))
             }
         }
     }

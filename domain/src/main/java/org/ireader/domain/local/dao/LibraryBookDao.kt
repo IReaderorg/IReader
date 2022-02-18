@@ -73,7 +73,7 @@ interface LibraryBookDao {
     fun searchBook(query: String): PagingSource<Int, Book>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertBook(book: Book)
+    suspend fun insertBook(book: Book): Long
 
 
     @Query("DELETE FROM library WHERE id = :bookId ")

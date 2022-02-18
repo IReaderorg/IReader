@@ -109,6 +109,7 @@ class FreeWbNovel(deps: Dependencies) : ParsedHttpSource(deps) {
     // manga details
     override fun detailParse(document: Document): BookInfo {
         val title = document.select("div.m-desc h1.tit").text()
+        val link = baseUrl + document.select("div.cur div.wp a:nth-child(5)").attr("href")
         val authorBookSelector = document.select("div.right a.a1").attr("title")
         val description = document.select("div.inner p").eachText().joinToString("\n")
         val category = document.select("div.item div.right a.a1").eachText()
@@ -118,7 +119,7 @@ class FreeWbNovel(deps: Dependencies) : ParsedHttpSource(deps) {
             description = description,
             author = authorBookSelector,
             genres = category,
-            link = ""
+            link = link
         )
     }
 

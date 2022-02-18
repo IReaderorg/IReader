@@ -21,12 +21,12 @@ class DownloadRepositoryImpl(private val dao: DownloadDao) : DownloadRepository 
         return dao.getOneDownloads(bookId)
     }
 
-    override suspend fun insertDownload(savedDownload: SavedDownload) {
-        dao.insertDownload(savedDownload = savedDownload)
+    override suspend fun insertDownload(savedDownload: SavedDownload): Long {
+        return dao.insertDownload(savedDownload = savedDownload)
     }
 
-    override suspend fun insertDownloads(savedDownloads: List<SavedDownload>) {
-        dao.insertDownloads(savedDownloads)
+    override suspend fun insertDownloads(savedDownloads: List<SavedDownload>): List<Long> {
+        return dao.insertDownloads(savedDownloads)
     }
 
     override suspend fun deleteSavedDownload(savedDownload: SavedDownload) {

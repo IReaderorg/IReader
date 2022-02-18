@@ -2,7 +2,6 @@ package org.ireader.domain.view_models.detail.book_detail
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.webkit.WebView
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -11,7 +10,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.work.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -21,7 +19,6 @@ import kotlinx.coroutines.launch
 import org.ireader.core.R
 import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
-import org.ireader.core.utils.getHtml
 import org.ireader.core.utils.removeSameItemsFromList
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.feature_services.DownloaderService.DownloadService
@@ -31,7 +28,6 @@ import org.ireader.domain.feature_services.DownloaderService.DownloadService.Com
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.entities.updateBook
-import org.ireader.domain.models.source.HttpSource
 import org.ireader.domain.models.source.Source
 import org.ireader.domain.source.Extensions
 import org.ireader.domain.use_cases.fetchers.FetchUseCase
@@ -55,7 +51,6 @@ class BookDetailViewModel @Inject constructor(
     private val remoteUseCases: RemoteUseCases,
     private val deleteUseCase: DeleteUseCase,
     private val fetchUseCase: FetchUseCase,
-    private val hiltWebView: WebView,
     savedStateHandle: SavedStateHandle,
     extensions: Extensions,
 ) : BaseViewModel() {
@@ -78,7 +73,6 @@ class BookDetailViewModel @Inject constructor(
 
     lateinit var work: OneTimeWorkRequest
 
-    val webView: WebView = hiltWebView
 
 
     private val _eventFlow = MutableSharedFlow<UiEvent>()
@@ -225,37 +219,37 @@ class BookDetailViewModel @Inject constructor(
 
     }
 
-    @ExperimentalCoroutinesApi
-    fun getWebViewData(source: Source) {
-        getFromWebViewJob?.cancel()
-        webView.settings.userAgentString =
-            source.headers["User-Agent"] ?: HttpSource.DEFAULT_USER_AGENT
-        getFromWebViewJob = viewModelScope.launch {
-            showSnackBar(UiText.StringResource(org.ireader.core.R.string.trying_to_fetch))
-            fetchUseCase.fetchBookDetailAndChapterDetailFromWebView(
-                deleteUseCase = deleteUseCase,
-                insertUseCases = localInsertUseCases,
-                localBook = state.book,
-                localChapters = chapterState.chapters,
-                source = source,
-                pageSource = webView.getHtml()
-            ).onEach { result ->
-                when (result) {
-                    is Resource.Success -> {
-                        if (result.data != null && state.book != null) {
-                            showSnackBar(UiText.DynamicString(result.data.text))
-                            this@BookDetailViewModel.toggleLoading(false)
-                            this@BookDetailViewModel.toggleChaptersLoading(false)
-                            getLocalChaptersByBookId(bookId = state.book!!.id)
-                        }
-                    }
-                    is Resource.Error -> {
-                        showSnackBar(result.uiText)
-                    }
-                }
-            }.launchIn(viewModelScope)
-        }
-    }
+//    @ExperimentalCoroutinesApi
+//    fun getWebViewData(source: Source) {
+//        getFromWebViewJob?.cancel()
+//        webView.settings.userAgentString =
+//            source.headers["User-Agent"] ?: HttpSource.DEFAULT_USER_AGENT
+//        getFromWebViewJob = viewModelScope.launch {
+//            showSnackBar(UiText.StringResource(org.ireader.core.R.string.trying_to_fetch))
+//            fetchUseCase.fetchBookDetailAndChapterDetailFromWebView(
+//                deleteUseCase = deleteUseCase,
+//                insertUseCases = localInsertUseCases,
+//                localBook = state.book,
+//                localChapters = chapterState.chapters,
+//                source = source,
+//                pageSource = webView.getHtml()
+//            ).onEach { result ->
+//                when (result) {
+//                    is Resource.Success -> {
+//                        if (result.data != null && state.book != null) {
+//                            showSnackBar(UiText.DynamicString(result.data.text))
+//                            this@BookDetailViewModel.toggleLoading(false)
+//                            this@BookDetailViewModel.toggleChaptersLoading(false)
+//                            getLocalChaptersByBookId(bookId = state.book!!.id)
+//                        }
+//                    }
+//                    is Resource.Error -> {
+//                        showSnackBar(result.uiText)
+//                    }
+//                }
+//            }.launchIn(viewModelScope)
+//        }
+//    }
 
 
     private fun insertBookDetailToLocal(book: Book) {

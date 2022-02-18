@@ -44,10 +44,10 @@ interface LibraryChapterDao {
     suspend fun setLastReadToFalse(bookId: Long)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertChapters(chapters: List<Chapter>)
+    suspend fun insertChapters(chapters: List<Chapter>): List<Long>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertChapter(chapter: Chapter)
+    suspend fun insertChapter(chapter: Chapter): Long
 
 
     @Query("DELETE FROM chapter WHERE bookId = :bookId")

@@ -96,7 +96,7 @@ data class SourceTower constructor(
     }
 
     override fun chaptersRequest(book: Book): HttpRequestBuilder {
-        return requestBuilder(baseUrl + book.link)
+        return requestBuilder(book.link)
     }
 
     override fun searchRequest(page: Int, query: String, filters: FilterList): HttpRequestBuilder {
@@ -107,12 +107,12 @@ data class SourceTower constructor(
     }
 
     override fun contentRequest(chapter: Chapter): HttpRequestBuilder {
-        return requestBuilder(baseUrl + chapter.link)
+        return requestBuilder(chapter.link)
     }
 
 
     override fun detailsRequest(book: Book): HttpRequestBuilder {
-        return requestBuilder(baseUrl + book.link)
+        return requestBuilder(book.link)
     }
     /****************************REQUESTS**********************************************************/
 
@@ -133,13 +133,13 @@ data class SourceTower constructor(
             selectorLink,
             attLink).replace(baseUrl, "")
         val title = selectorReturnerStringType(element, selectorName, attName).formatHtmlText()
-        val cover = baseUrl + selectorReturnerStringType(element,
+        val cover = selectorReturnerStringType(element,
             selectorCover,
             attCover).replace(baseUrl, "")
 
 
 
-        return BookInfo(link = link, title = title, cover = cover)
+        return BookInfo(link = baseUrl + link, title = title, cover = baseUrl + cover)
     }
 
 
@@ -163,7 +163,7 @@ data class SourceTower constructor(
 
         //Timber.e("Timber: SourceCreator" + val coverLink)
 
-        return BookInfo(link = link, title = title, cover = cover)
+        return BookInfo(link = baseUrl + link, title = title, cover = baseUrl + cover)
     }
 
     override fun chapterFromElement(element: Element): ChapterInfo {
@@ -178,7 +178,7 @@ data class SourceTower constructor(
             attLink).replace(baseUrl, "")
         val title = selectorReturnerStringType(element, selectorName, attName).formatHtmlText()
 
-        return ChapterInfo(key = link, name = title)
+        return ChapterInfo(key = baseUrl + link, name = title)
     }
 
     override fun searchFromElement(element: Element): BookInfo {
@@ -198,7 +198,7 @@ data class SourceTower constructor(
             attCover).replace(baseUrl, "")
 
 
-        return BookInfo(link = link, title = title, cover = cover)
+        return BookInfo(link = baseUrl + link, title = title, cover = baseUrl + cover)
     }
 
     /****************************PARSE FROM ELEMENTS***********************************************/
@@ -559,8 +559,8 @@ data class SourceTower constructor(
                 } else {
                     client.post<Document>(detailsRequest(book))
                 }
-
-                return@withContext detailParse(request)
+                val book = detailParse(request)
+                return@withContext book.copy(link = book.link)
             }
         }.getOrThrow()
 

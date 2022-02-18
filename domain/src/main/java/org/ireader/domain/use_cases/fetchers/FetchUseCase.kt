@@ -4,9 +4,7 @@ data class FetchUseCase(
     val fetchBookDetailAndChapterDetailFromWebView: FetchBookDetailAndChapterDetailFromWebView,
 )
 
-fun fetchBook() {
 
-}
 
 
 

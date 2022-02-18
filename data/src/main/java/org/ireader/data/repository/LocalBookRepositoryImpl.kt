@@ -143,11 +143,11 @@ class LocalBookRepositoryImpl(
     }
 
 
-    override suspend fun insertBooks(book: List<Book>) {
+    override suspend fun insertBooks(book: List<Book>): List<Long> {
         return remoteKeysDao.insertAllExploredBook(book)
     }
 
-    override suspend fun insertBook(book: Book) {
+    override suspend fun insertBook(book: Book): Long {
         return bookDao.insertBook(book)
     }
 }

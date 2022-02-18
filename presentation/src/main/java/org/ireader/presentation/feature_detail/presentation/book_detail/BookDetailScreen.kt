@@ -10,7 +10,9 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -76,8 +78,6 @@ fun BookDetailScreen(
     val state = viewModel.state
     val chapters = viewModel.chapterState.chapters
 
-
-    val webview = viewModel.webView
     val scrollState = rememberLazyListState()
     if (state.isLoading) {
         showLoading()
@@ -88,9 +88,6 @@ fun BookDetailScreen(
             viewModel.getLocalChaptersByBookId(bookId = book.id)
         }
 
-        val isWebViewEnable by remember {
-            mutableStateOf(webview.originalUrl == book.link)
-        }
         TransparentStatusBar {
             Scaffold(
                 topBar = {},
@@ -183,13 +180,9 @@ fun BookDetailScreen(
                                     viewModel.getRemoteBookDetail(book, source = source)
                                     viewModel.getRemoteChapterDetail(book, source)
                                 },
-                                onFetch = {
-                                    viewModel.getWebViewData(source)
-                                },
                                 isSummaryExpanded = viewModel.expandedSummary,
                                 book = book,
                                 source = source,
-                                isFetchModeEnable = isWebViewEnable
                             )
 
                         }

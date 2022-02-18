@@ -12,7 +12,6 @@ import org.ireader.domain.models.entities.FilterList
 import org.ireader.domain.models.source.*
 import org.ireader.domain.source.Dependencies
 import org.ireader.domain.source.nec.Listing
-import org.ireader.domain.utils.asJsoup
 import org.ireader.infinity.core.data.network.models.*
 import org.ireader.source.models.BookInfo
 import org.ireader.source.models.ChapterInfo
@@ -301,14 +300,6 @@ abstract class HttpSource(private val dependencies: Dependencies) : Source {
     abstract override fun detailParse(document: Document): BookInfo
 
 
-    /**
-     * Parses the response from the site and returns a list of pages.
-     *
-     * @param response the response from the site.
-     */
-    private fun pageContentParse(response: Response): List<String> {
-        return pageContentParse(response.asJsoup())
-    }
 
     abstract override fun pageContentParse(
         document: Document,

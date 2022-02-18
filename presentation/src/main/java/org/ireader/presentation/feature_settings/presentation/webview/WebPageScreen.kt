@@ -1,29 +1,27 @@
 package org.ireader.presentation.feature_settings.presentation.webview
 
-import android.view.ViewGroup
 import android.webkit.WebView
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.web.rememberWebViewState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import org.ireader.core.utils.UiEvent
+import org.ireader.core.utils.getHtml
+import org.ireader.domain.models.source.HttpSource
 import org.ireader.infinity.core.data.network.utils.setDefaultSettings
-import org.ireader.infinity.feature_sources.sources.utils.WebViewClientCompat
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
 
 
@@ -37,8 +35,11 @@ fun WebPageScreen(
     val urlToRender = viewModel.state.url
     val scaffoldState = rememberScaffoldState()
     val context = LocalContext.current
-    val webView: WebView = viewModel.state.webView
+    val webView = remember {
+        mutableStateOf(WebView(context))
+    }
     val source = viewModel.state.source
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
@@ -53,40 +54,60 @@ fun WebPageScreen(
         }
 
     }
-    val state = rememberWebViewState(urlToRender)
+    val webViewState = rememberWebViewState(url = urlToRender)
 
 
     Scaffold(
         topBar = {
             WebPageTopBar(
                 navController = navController,
-                urlToRender = urlToRender,
+                urlToRender = webViewState.content.getCurrentUrl() ?: urlToRender,
                 onTrackButtonClick = {
                     if (source != null) {
-                        viewModel.getInfo(source = source)
+                        scope.launch {
+                            webView.value.setUserAgent(source.headers.get("User-Agent")
+                                ?: HttpSource.DEFAULT_USER_AGENT)
+                            viewModel.getInfo(pageSource = webView.value.getHtml(),
+                                url = webViewState.content.getCurrentUrl() ?: "",
+                                source = source)
+                        }
                     }
                 },
                 fetchType = viewModel.state.fetcher,
                 source = source,
                 refresh = {
-                    webView.reload()
+                    webView.value.reload()
                 },
                 goBack = {
-                    webView.goBack()
+                    webView.value.goBack()
                 },
                 goForward = {
-                    webView.goForward()
+                    webView.value.goForward()
                 },
                 fetchBook = {
                     if (source != null) {
-                        viewModel.getInfo(source)
+                        scope.launch {
+                            webView.value.setUserAgent(source.headers.get("User-Agent")
+                                ?: HttpSource.DEFAULT_USER_AGENT)
+                            viewModel.getInfo(webView.value.getHtml(),
+                                url = webViewState.content.getCurrentUrl() ?: "",
+                                source)
+                        }
                     }
                 },
                 fetchBooks = {
                     //webView.goForward()
                 },
                 fetchChapter = {
-                    //webView.goForward()
+                    if (source != null) {
+                        scope.launch {
+                            webView.value.setUserAgent(source.headers.get("User-Agent")
+                                ?: HttpSource.DEFAULT_USER_AGENT)
+                            viewModel.getFromWebView(webView.value.getHtml(),
+                                url = webViewState.content.getCurrentUrl() ?: "",
+                                source)
+                        }
+                    }
                 }
             )
         },
@@ -103,40 +124,41 @@ fun WebPageScreen(
         }
 
     ) {
-//        WebView(
-//            modifier = Modifier.fillMaxSize(),
-//            state = state,
-//            captureBackPresses = false,
-//
-//            onCreated = {
-//                it.setDefaultSettings()
-//            }
-//        )
-        AndroidView(factory = {
-            webView.apply {
-                layoutParams = ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
-                )
-                setDefaultSettings()
-                source?.headers?.get("User-Agent").let {
-                    webView.settings.userAgentString = it
-                }
-
-                webViewClient = object : WebViewClientCompat() {
-                    override fun shouldOverrideUrlCompat(view: WebView, url: String): Boolean {
-                        return false
-                    }
-                }
+        org.ireader.presentation.feature_settings.presentation.webview.WebView(
+            modifier = Modifier.fillMaxSize(),
+            newWebView = webView.value,
+            state = webViewState,
+            captureBackPresses = false,
+            onCreated = {
+                it.setDefaultSettings()
             }
+        )
+//        AndroidView(factory = {
+//            webView.apply {
+//                layoutParams = ViewGroup.LayoutParams(
+//                    ViewGroup.LayoutParams.MATCH_PARENT,
+//                    ViewGroup.LayoutParams.MATCH_PARENT
+//                )
+//                setDefaultSettings()
+//                source?.headers?.get("User-Agent").let {
+//                    webView.settings.userAgentString = it
+//                }
+//
+//                webViewClient = object : WebViewClientCompat() {
+//                    override fun shouldOverrideUrlCompat(view: WebView, url: String): Boolean {
+//                        return false
+//                    }
+//                }
+//            }
+//
+//            webView
+//        }, update = {
+//            it.loadUrl(urlToRender)
+//        }, modifier = Modifier.fillMaxSize())
+//    }
 
-            webView
-        }, update = {
-            it.loadUrl(urlToRender)
-        }, modifier = Modifier.fillMaxSize())
+
     }
-
-
 }
 
 

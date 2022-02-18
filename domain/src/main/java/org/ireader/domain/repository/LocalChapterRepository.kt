@@ -24,11 +24,11 @@ interface LocalChapterRepository {
     suspend fun setLastReadToFalse(bookId: Long)
 
 
-    suspend fun insertChapter(chapter: Chapter)
+    suspend fun insertChapter(chapter: Chapter): Long
 
     suspend fun insertChapters(
         chapters: List<Chapter>,
-    )
+    ): List<Long>
 
 
     fun findLocalChaptersByPaging(

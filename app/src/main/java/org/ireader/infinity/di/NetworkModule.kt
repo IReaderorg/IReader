@@ -1,11 +1,8 @@
 package org.ireader.infinity.di
 
-import android.content.Context
-import android.webkit.WebView
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.CookieJar
 import okhttp3.Dispatcher
@@ -111,12 +108,6 @@ class NetworkModule {
     @Provides
     fun provideNetworkPreference(preferenceStore: PreferenceStore): NetworkPreferences {
         return NetworkPreferences(preferenceStore)
-    }
-
-    @Singleton
-    @Provides
-    fun providesWebView(@ApplicationContext context: Context): WebView {
-        return WebView(context)
     }
 
     @Singleton

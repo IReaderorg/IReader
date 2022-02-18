@@ -12,9 +12,9 @@ interface DownloadRepository {
 
     fun findOneSavedDownload(bookId: Long): Flow<SavedDownload?>
 
-    suspend fun insertDownload(savedDownload: SavedDownload)
+    suspend fun insertDownload(savedDownload: SavedDownload): Long
 
-    suspend fun insertDownloads(savedDownloads: List<SavedDownload>)
+    suspend fun insertDownloads(savedDownloads: List<SavedDownload>): List<Long>
 
     suspend fun deleteSavedDownload(savedDownload: SavedDownload)
 

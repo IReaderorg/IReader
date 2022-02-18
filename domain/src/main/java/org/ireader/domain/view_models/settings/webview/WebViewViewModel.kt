@@ -1,7 +1,6 @@
 package org.ireader.presentation.feature_settings.presentation.webview
 
 import android.annotation.SuppressLint
-import android.webkit.WebView
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -16,12 +15,10 @@ import kotlinx.coroutines.launch
 import org.ireader.core.utils.Constants
 import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
-import org.ireader.core.utils.getHtml
 import org.ireader.domain.R
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.source.FetchType
-import org.ireader.domain.models.source.HttpSource
 import org.ireader.domain.models.source.Source
 import org.ireader.domain.source.Extensions
 import org.ireader.domain.ui.NavigationArgs
@@ -31,6 +28,7 @@ import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.utils.Resource
 import org.ireader.domain.view_models.settings.webview.mapFetcher
+import org.jsoup.Jsoup
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 import javax.inject.Inject
@@ -39,17 +37,16 @@ import javax.inject.Inject
 @SuppressLint("StaticFieldLeak")
 @HiltViewModel
 class WebViewPageModel @Inject constructor(
-    private val insetUseCases: LocalInsertUseCases,
+    private val insertUseCases: LocalInsertUseCases,
     private val deleteUseCase: DeleteUseCase,
     private val getBookUseCases: org.ireader.domain.use_cases.local.LocalGetBookUseCases,
     private val getChapterUseCase: LocalGetChapterUseCase,
     private val fetcherUseCase: FetchUseCase,
-    private val webView: WebView,
     private val savedStateHandle: SavedStateHandle,
     private val extensions: Extensions,
 ) : ViewModel() {
 
-    var state by mutableStateOf<WebViewPageState>(WebViewPageState(webView = webView))
+    var state by mutableStateOf<WebViewPageState>(WebViewPageState())
         private set
 
     init {
@@ -83,20 +80,19 @@ class WebViewPageModel @Inject constructor(
 
 
     @ExperimentalCoroutinesApi
-    fun getInfo(source: Source) {
+    fun getInfo(pageSource: String, url: String, source: Source) {
         viewModelScope.launch {
             _eventFlow.emit(UiEvent.ShowSnackbar(
                 uiText = UiText.StringResource(R.string.trying_to_fetch)
             ))
-            webView.settings.userAgentString =
-                source.headers.get("User-Agent") ?: HttpSource.DEFAULT_USER_AGENT
             fetcherUseCase.fetchBookDetailAndChapterDetailFromWebView(
                 localBook = state.book,
                 localChapters = state.chapters,
                 source = source,
-                insertUseCases = insetUseCases,
+                insertUseCases = insertUseCases,
                 deleteUseCase = deleteUseCase,
-                pageSource = webView.getHtml(),
+                pageSource = pageSource,
+                url = url
             ).collect { result ->
                 when (result) {
                     is Resource.Success -> {
@@ -118,6 +114,35 @@ class WebViewPageModel @Inject constructor(
 
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun getFromWebView(pageSource: String, url: String, source: Source) {
+        try {
+            viewModelScope.launch {
+                showSnackBar(UiText.StringResource(R.string.trying_to_fetch_chapters_content))
+                val chapter = source.pageContentParse(Jsoup.parse(pageSource))
+                if (!chapter.isNullOrEmpty() && url == state.chapter?.link) {
+                    val localChapter = state.chapter?.copy(content = chapter)
+                    if (localChapter != null) {
+                        toggleLastReadAndUpdateChapterContent(localChapter)
+                    }
+                    showSnackBar(UiText.DynamicString("${state.chapter?.title} of ${state.chapter?.title} was Fetched"))
+                } else {
+                    showSnackBar(UiText.DynamicString("Failed to to get the content"))
+                }
+            }
+        } catch (e: Exception) {
+        }
+
+
+    }
+
+    private fun toggleLastReadAndUpdateChapterContent(chapter: Chapter) {
+        viewModelScope.launch(Dispatchers.IO) {
+            deleteUseCase.deleteChapterByChapter(chapter)
+            insertUseCases.setLastReadToFalse(bookId = chapter.bookId)
+            insertChapter(chapter.copy(read = true, lastRead = true))
+        }
+    }
 
     private fun getLocalChaptersByBookName(bookId: Long) {
         getChapterUseCase.getChaptersByBookId(bookId = bookId)
@@ -156,14 +181,33 @@ class WebViewPageModel @Inject constructor(
 
     fun insertBookDetailToLocal(book: Book) {
         viewModelScope.launch(Dispatchers.IO) {
-            insetUseCases.insertBook(book)
+            insertUseCases.insertBook(book)
+        }
+    }
+
+    suspend fun showSnackBar(message: UiText?) {
+        _eventFlow.emit(
+            UiEvent.ShowSnackbar(
+                uiText = message ?: UiText.StringResource(R.string.error_unknown)
+            )
+        )
+    }
+
+    fun insertBook(book: Book) {
+        viewModelScope.launch(Dispatchers.IO) {
+            insertUseCases.insertBook(book)
+        }
+    }
+
+    fun insertChapter(chapter: Chapter) {
+        viewModelScope.launch(Dispatchers.IO) {
+            insertUseCases.insertChapter(chapter)
         }
     }
 
 }
 
 data class WebViewPageState(
-    val webView: WebView,
     val url: String = "",
     val book: Book? = null,
     val books: List<Book> = emptyList<Book>(),

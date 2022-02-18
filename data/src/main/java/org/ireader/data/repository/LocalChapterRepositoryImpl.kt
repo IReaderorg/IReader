@@ -42,11 +42,11 @@ class LocalChapterRepositoryImpl @Inject constructor(private val daoLibrary: Lib
     /******************************Insert******************************/
     override suspend fun insertChapters(
         chapters: List<Chapter>,
-    ) {
+    ): List<Long> {
         return daoLibrary.insertChapters(chapters = chapters)
     }
 
-    override suspend fun insertChapter(chapter: Chapter) {
+    override suspend fun insertChapter(chapter: Chapter): Long {
         return daoLibrary.insertChapter(chapter)
     }
 

@@ -5,7 +5,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.view.WindowManager
-import android.webkit.WebView
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -14,8 +13,11 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.ireader.core.utils.*
 import org.ireader.core_ui.theme.FontType
 import org.ireader.core_ui.theme.OrientationMode
@@ -33,7 +35,6 @@ import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import org.ireader.domain.utils.Resource
-import org.jsoup.Jsoup
 import javax.inject.Inject
 
 
@@ -52,7 +53,6 @@ class ReaderScreenViewModel @Inject constructor(
     private val remoteUseCases: RemoteUseCases,
     private val insertUseCases: LocalInsertUseCases,
     private val deleteUseCase: DeleteUseCase,
-    private val _webView: WebView,
     savedStateHandle: SavedStateHandle,
     extensions: Extensions,
 ) : BaseViewModel() {
@@ -69,8 +69,6 @@ class ReaderScreenViewModel @Inject constructor(
 
     private val _chapters = MutableStateFlow<PagingData<Chapter>>(PagingData.empty())
     val chapters = _chapters
-
-    val webView: WebView = _webView
 
 
     init {
@@ -204,36 +202,7 @@ class ReaderScreenViewModel @Inject constructor(
 
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    fun getFromWebView(source: Source) {
-        try {
-            viewModelScope.launch {
-                showSnackBar(UiText.StringResource(R.string.trying_to_fetch_chapters_content))
-                val chapter = source.pageContentParse(Jsoup.parse(webView.getHtml()))
-                if (!chapter.isNullOrEmpty() && state.isBookLoaded && state.isChapterLoaded && webView.originalUrl == state.chapter?.link) {
-                    clearError()
-                    val localChapter = state.chapter?.copy(content = chapter)
-                    this@ReaderScreenViewModel.toggleLoading(false)
-                    if (localChapter != null) {
-                        toggleLastReadAndUpdateChapterContent(localChapter)
-                    }
-                    showSnackBar(UiText.DynamicString("${state.chapter?.title} of ${state.chapter?.title} was Fetched"))
-                    if (state.chapter?.content?.size ?: 0 > 10) {
-                        state = state.copy(isLocalLoaded = true)
-                        if (localChapter != null) {
-                            getChapter(chapterId = localChapter.id, source)
-                        }
-                    }
-                    state = state
-                } else {
-                    showSnackBar(UiText.DynamicString("Failed to to get the content"))
-                }
-            }
-        } catch (e: Exception) {
-        }
 
-
-    }
 
     fun getReadingContentRemotely(chapter: Chapter, source: Source) {
         clearError()

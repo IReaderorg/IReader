@@ -18,10 +18,10 @@ interface DownloadDao {
     fun getOneDownloads(bookId: Long): Flow<SavedDownload?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertDownload(savedDownload: SavedDownload)
+    suspend fun insertDownload(savedDownload: SavedDownload): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertDownloads(savedDownloads: List<SavedDownload>)
+    suspend fun insertDownloads(savedDownloads: List<SavedDownload>): List<Long>
 
 
     @Delete

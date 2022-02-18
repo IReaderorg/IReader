@@ -39,10 +39,9 @@ fun BookDetailScreenLoadedComposable(
     onRefresh: () -> Unit,
     onSummaryExpand: () -> Unit,
     isSummaryExpanded: Boolean,
-    onFetch: () -> Unit,
-    isFetchModeEnable: Boolean,
 ) {
     var imageLoaded by remember { mutableStateOf(false) }
+
     val fadeInImage by animateFloatAsState(
         if (imageLoaded) 0.2f else 0f, tween(easing = LinearOutSlowInEasing)
     )
@@ -86,7 +85,6 @@ fun BookDetailScreenLoadedComposable(
         }
         Column {
             BookDetailTopAppBar(
-                isWebViewEnable = isFetchModeEnable,
                 navController = navController,
                 onWebView = {
                     onWebView()
@@ -94,9 +92,6 @@ fun BookDetailScreenLoadedComposable(
                 onRefresh = {
                     onRefresh()
                 },
-                onFetch = {
-                    onFetch()
-                }
             )
             Row(
                 modifier = modifier
