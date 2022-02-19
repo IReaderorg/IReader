@@ -5,6 +5,7 @@ import org.ireader.source.core.Source
 import org.ireader.source.sources.en.freewebnovel.FreeWebNovel
 import org.ireader.source.sources.en.source_tower_deprecated.*
 import org.ireader.source.sources.en.webnovel.Webnovel
+import org.ireader.source.sources.en.wuxiaworld.WuxiaWorld
 
 
 class Extensions(
@@ -548,10 +549,11 @@ class AvailableSources(dependencies: Dependencies) {
         myLoveNovel,
         mtl,
         realwebnovel,
-        wuxiaworld,
+        //wuxiaworld,
         mtlNation,
         realLightWebNovel,
         wuxiaworldsiteco,
+        WuxiaWorld(dependencies),
         FreeWebNovel(dependencies),
         Webnovel(dependencies)
     )

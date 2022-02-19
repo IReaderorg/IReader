@@ -59,7 +59,8 @@ fun CompactGridLayoutComposable(
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(4.dp))
                                 .border(2.dp,
-                                    MaterialTheme.colors.onBackground.copy(alpha = .1f)),
+                                    MaterialTheme.colors.onBackground.copy(alpha = .1f))
+                                .align(Alignment.Center),
                             image = book.cover,
                         )
 

@@ -208,7 +208,7 @@ abstract class HttpSource(private val dependencies: Dependencies) : Source {
      */
     protected open fun detailsRequest(book: BookInfo): HttpRequestBuilder {
         return HttpRequestBuilder().apply {
-            url(baseUrl + book.link)
+            url(book.link)
             headers { headers }
         }
     }
@@ -231,7 +231,7 @@ abstract class HttpSource(private val dependencies: Dependencies) : Source {
      */
     protected open fun chaptersRequest(book: BookInfo): HttpRequestBuilder {
         return HttpRequestBuilder().apply {
-            url(baseUrl + book.link)
+            url(book.link)
             headers { headers }
         }
     }
@@ -245,7 +245,7 @@ abstract class HttpSource(private val dependencies: Dependencies) : Source {
      */
     protected open fun contentRequest(chapter: ChapterInfo): HttpRequestBuilder {
         return HttpRequestBuilder().apply {
-            url(baseUrl + chapter.key)
+            url(chapter.key)
             headers {
                 append(HttpHeaders.Accept, "text/html")
                 append(HttpHeaders.Authorization, "token")

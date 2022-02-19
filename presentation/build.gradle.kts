@@ -32,6 +32,7 @@ dependencies {
 
     "implementation"(DaggerHilt.worker)
     "implementation"(Retrofit.retrofit)
+    "implementation"(Ktor.okhttp)
 
 
 }

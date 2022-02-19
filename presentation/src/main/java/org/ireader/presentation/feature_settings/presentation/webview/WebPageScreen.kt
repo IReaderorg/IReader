@@ -27,6 +27,7 @@ import org.ireader.domain.utils.getHtml
 import org.ireader.domain.utils.setDefaultSettings
 import org.ireader.domain.view_models.settings.webview.WebViewPageModel
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
+import org.ireader.source.core.HttpSource
 
 
 @ExperimentalCoroutinesApi
@@ -92,8 +93,8 @@ fun WebPageScreen(
                 fetchBook = {
                     if (source != null) {
                         scope.launch {
-//                            webView.value?.setUserAgent(source.sourceHeaders.get("User-Agent")
-//                                ?: HttpSource.DEFAULT_USER_AGENT)
+                            webView.value?.setUserAgent(source.headers.get("User-Agent")
+                                ?: HttpSource.DEFAULT_USER_AGENT)
                             viewModel.getBookDetailAndChapter(pageSource = webView.value?.getHtml()
                                 ?: "",
                                 url = webViewState.content.getCurrentUrl() ?: "",
@@ -104,8 +105,8 @@ fun WebPageScreen(
                 fetchBooks = {
                     if (source != null) {
                         scope.launch {
-//                            webView.value?.setUserAgent(source.sourceHeaders.get("User-Agent")
-//                                ?: HttpSource.DEFAULT_USER_AGENT)
+                            webView.value?.setUserAgent(source.headers.get("User-Agent")
+                                ?: HttpSource.DEFAULT_USER_AGENT)
                             viewModel.getExploredBook(pageSource = webView.value?.getHtml() ?: "",
                                 url = webViewState.content.getCurrentUrl() ?: "",
                                 source)
@@ -173,9 +174,9 @@ fun WebPageScreen(
                     webView.value = it
                     it.setDefaultSettings()
                     if (source != null) {
-//                        it.settings.userAgentString =
-//                            source.sourceHeaders.get("User-Agent")
-//                            ?: HttpSource.DEFAULT_USER_AGENT
+                        it.settings.userAgentString =
+                            source.headers.get("User-Agent")
+                                ?: HttpSource.DEFAULT_USER_AGENT
                     }
                 },
                 updateUrl = {

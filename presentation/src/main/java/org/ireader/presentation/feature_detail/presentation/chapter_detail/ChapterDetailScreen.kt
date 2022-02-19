@@ -4,7 +4,6 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -12,7 +11,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.PublishedWithChanges
 import androidx.compose.material.icons.filled.Sort
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -24,9 +22,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -39,6 +34,7 @@ import org.ireader.core.utils.Constants
 import org.ireader.domain.view_models.detail.chapter_detail.ChapterDetailEvent
 import org.ireader.domain.view_models.detail.chapter_detail.ChapterDetailViewModel
 import org.ireader.presentation.presentation.components.CenterTopAppBar
+import org.ireader.presentation.presentation.components.ChapterListItemComposable
 import org.ireader.presentation.presentation.components.handlePagingChapterResult
 import org.ireader.presentation.presentation.reusable_composable.ErrorTextWithEmojis
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
@@ -133,43 +129,51 @@ fun ChapterDetailScreen(
 
                         items(items = chapters) { chapter ->
                             if (chapter != null) {
-                                ListItem(
-                                    modifier = modifier.clickable {
+                                ChapterListItemComposable(modifier = modifier,
+                                    chapter = chapter, goTo = {
                                         navController.navigate(ReaderScreenSpec.buildRoute(
                                             bookId = book.id,
                                             sourceId = book.sourceId,
                                             chapterId = chapter.id,
                                         ))
-                                    },
-                                    text = {
-                                        Text(
-                                            text = chapter.title,
-                                            color = if (chapter.read) MaterialTheme.colors.onBackground.copy(
-                                                alpha = .4f) else MaterialTheme.colors.onBackground,
-                                            style = MaterialTheme.typography.subtitle1,
-                                            fontWeight = FontWeight.SemiBold,
-                                            overflow = TextOverflow.Ellipsis,
-                                        )
-                                    },
-                                    trailing = {
-                                        Icon(
-                                            imageVector = Icons.Default.PublishedWithChanges,
-                                            contentDescription = "Cached",
-                                            tint = if (chapter.content.joinToString(" , ").length > 10) MaterialTheme.colors.onBackground else MaterialTheme.colors.background,
-                                        )
-                                    },
-                                    secondaryText = {
-                                        Text(
-                                            text = if (chapter.dateUploaded != 0L) chapter.dateUploaded.toString() else "",
-                                            fontStyle = FontStyle.Italic,
-                                            color = if (chapter.read) MaterialTheme.colors.onBackground.copy(
-                                                alpha = .4f) else MaterialTheme.colors.onBackground,
-                                            fontWeight = FontWeight.SemiBold,
-                                            style = MaterialTheme.typography.caption
-                                        )
-                                    }
-
-                                )
+                                    })
+//                                ListItem(
+//                                    modifier = modifier.clickable {
+//                                        navController.navigate(ReaderScreenSpec.buildRoute(
+//                                            bookId = book.id,
+//                                            sourceId = book.sourceId,
+//                                            chapterId = chapter.id,
+//                                        ))
+//                                    },
+//                                    text = {
+//                                        Text(
+//                                            text = chapter.title,
+//                                            color = if (chapter.read) MaterialTheme.colors.onBackground.copy(
+//                                                alpha = .4f) else MaterialTheme.colors.onBackground,
+//                                            style = MaterialTheme.typography.subtitle1,
+//                                            fontWeight = FontWeight.SemiBold,
+//                                            overflow = TextOverflow.Ellipsis,
+//                                        )
+//                                    },
+//                                    trailing = {
+//                                        Icon(
+//                                            imageVector = Icons.Default.PublishedWithChanges,
+//                                            contentDescription = "Cached",
+//                                            tint = if (chapter.content.joinToString(" , ").length > 10) MaterialTheme.colors.onBackground else MaterialTheme.colors.background,
+//                                        )
+//                                    },
+//                                    secondaryText = {
+//                                        Text(
+//                                            text = if (chapter.dateUploaded != 0L) chapter.dateUploaded.toString() else "",
+//                                            fontStyle = FontStyle.Italic,
+//                                            color = if (chapter.read) MaterialTheme.colors.onBackground.copy(
+//                                                alpha = .4f) else MaterialTheme.colors.onBackground,
+//                                            fontWeight = FontWeight.SemiBold,
+//                                            style = MaterialTheme.typography.caption
+//                                        )
+//                                    }
+//
+//                                )
                             }
                         }
                     }
