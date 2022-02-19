@@ -50,7 +50,6 @@ class Webnovel(deps: Dependencies) : ParsedHttpSource(deps) {
         add("Referer", baseUrl)
     }
 
-    override val headers: Headers = headersBuilder().build()
 
 
     // popular

@@ -10,7 +10,7 @@
     <application
         android:name="org.ireader.infinity.MyApplication"
         android:allowBackup="true"
-        android:configChanges="orientation|screenSize"
+        android:configChanges="orientation|screenLayout|screenSize"
         android:fullBackupOnly="true"
         android:hardwareAccelerated="true"
         android:hasFragileUserData="true"
@@ -36,6 +36,14 @@
                 <data
                     android:host="www.ireader.com"
                     android:scheme="https" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data
+                    android:host="deeplink"
+                    android:scheme="ireader" />
             </intent-filter>
         </activity>
 

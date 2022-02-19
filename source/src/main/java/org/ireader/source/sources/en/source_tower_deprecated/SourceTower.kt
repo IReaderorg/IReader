@@ -1,6 +1,7 @@
 package org.ireader.source.sources.en.source_tower_deprecated
 
 import io.ktor.client.request.*
+import io.ktor.http.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.Headers
@@ -45,14 +46,15 @@ data class SourceTower constructor(
     val searchQueryFormat = "{query}"
 
 
-    override fun headersBuilder(): Headers.Builder = Headers.Builder().apply {
+    override fun headersBuilder() = Headers.Builder().apply {
         add(
-            "User-Agent",
+            HttpHeaders.UserAgent,
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4793.0 Safari/537.36"
         )
-        add("Referer", baseUrl)
-        add("cache-control", "max-age=0")
+        add(HttpHeaders.Referrer, baseUrl)
+        add(HttpHeaders.CacheControl, "max-age=0")
     }
+
 
     override val headers: Headers
         get() = headersBuilder().build()
@@ -217,10 +219,6 @@ data class SourceTower constructor(
     }
 
     override fun detailParse(document: Document): BookInfo {
-        val isCloudflareEnable =
-            document.body().allElements.text().contains(Constants.CLOUDFLARE_LOG)
-
-
         val selectorBookName = detail?.nameSelector
         val attBookName = detail?.nameAtt
         val coverSelector = detail?.coverSelector
@@ -288,8 +286,7 @@ data class SourceTower constructor(
     }
 
     override fun searchParse(document: Document): BooksPage {
-        val isCloudflareEnable =
-            document.body().allElements.text().contains(Constants.CLOUDFLARE_LOG)
+
         var books = mutableListOf<BookInfo>()
 
             /**

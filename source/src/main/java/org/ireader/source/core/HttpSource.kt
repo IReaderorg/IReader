@@ -2,9 +2,10 @@ package org.ireader.source.core
 
 import io.ktor.client.*
 import io.ktor.client.request.*
+import io.ktor.http.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okhttp3.*
+import okhttp3.Headers
 import org.ireader.domain.models.ImageUrl
 import org.ireader.source.models.*
 import org.jsoup.nodes.Document
@@ -245,7 +246,12 @@ abstract class HttpSource(private val dependencies: Dependencies) : Source {
     protected open fun contentRequest(chapter: ChapterInfo): HttpRequestBuilder {
         return HttpRequestBuilder().apply {
             url(baseUrl + chapter.key)
-            headers { headers }
+            headers {
+                append(HttpHeaders.Accept, "text/html")
+                append(HttpHeaders.Authorization, "token")
+                append(HttpHeaders.UserAgent, "ktor client")
+                headers
+            }.build()
         }
     }
 
@@ -273,7 +279,6 @@ abstract class HttpSource(private val dependencies: Dependencies) : Source {
     ): BooksPage
 
 
-
     /**
      * Parses the document from the site and returns a [BooksPage] object.
      *
@@ -290,7 +295,6 @@ abstract class HttpSource(private val dependencies: Dependencies) : Source {
      * @param document the parsed document.
      */
     abstract override fun detailParse(document: Document): BookInfo
-
 
 
     abstract override fun pageContentParse(
@@ -348,7 +352,7 @@ abstract class HttpSource(private val dependencies: Dependencies) : Source {
         return emptyList()
     }
 
-    protected open fun headersBuilder() = Headers.Builder().apply {
+    protected open fun headersBuilder() = okhttp3.Headers.Builder().apply {
         add("User-Agent", DEFAULT_USER_AGENT)
     }
 

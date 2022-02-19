@@ -23,6 +23,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
+import okhttp3.Headers
 import org.ireader.domain.models.entities.Book
 import org.ireader.presentation.feature_detail.presentation.book_detail.components.BookSummary
 import org.ireader.presentation.presentation.components.BookImageComposable
@@ -109,7 +110,8 @@ fun BookDetailScreenLoadedComposable(
                         .clip(MaterialTheme.shapes.medium)
                         .border(2.dp, MaterialTheme.colors.onBackground.copy(alpha = .1f)),
                     contentScale = ContentScale.Crop,
-                    headers = source.headers
+                    //TODO change this part later
+                    headers = Headers.Builder().build()
                 )
                 Spacer(modifier = modifier.width(8.dp))
                 /** Book Info **/

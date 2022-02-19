@@ -10,16 +10,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
-import org.ireader.core.BuildConfig
 import org.ireader.core.okhttp.HttpClients
 import org.ireader.core.prefs.AndroidPreferenceStore
 import org.ireader.core.prefs.PrefixedPreferenceStore
-import org.ireader.domain.models.entities.CatalogBundled
 import org.ireader.domain.models.entities.CatalogInstalled
 import org.ireader.domain.models.entities.CatalogLocal
 import org.ireader.source.core.Dependencies
 import org.ireader.source.core.Source
-import org.ireader.source.sources.en.freewebnovel.FreeWebNovel
 import timber.log.Timber
 import java.io.File
 
@@ -41,22 +38,19 @@ class AndroidCatalogLoader(
    */
   @SuppressLint("QueryPermissionsNeeded")
   override fun loadAll(): List<CatalogLocal> {
-    val bundled = mutableListOf<CatalogLocal>()
-    if (BuildConfig.DEBUG) {
-      val freeWebNovel = FreeWebNovel(deps = Dependencies(httpClients, catalogPreferences))
-      val testCatalog = CatalogBundled(freeWebNovel, "Source used for testing")
-      bundled.add(testCatalog)
-    }
+      val bundled = mutableListOf<CatalogLocal>()
+//      val testCatalog = CatalogBundled(FreeWebNovel(deps = Dependencies(httpClients, catalogPreferences)), "Source used for testing")
+//      bundled.add(testCatalog)
 
-    val systemPkgs = pkgManager.getInstalledPackages(PACKAGE_FLAGS).filter(::isPackageAnExtension)
-    val localPkgs = File(context.filesDir, "catalogs").listFiles()
-      .orEmpty()
-      .filter { it.isDirectory }
-      .map { File(it, it.name + ".apk") }
-      .filter { it.exists() }
+      val systemPkgs = pkgManager.getInstalledPackages(PACKAGE_FLAGS).filter(::isPackageAnExtension)
+      val localPkgs = File(context.filesDir, "catalogs").listFiles()
+          .orEmpty()
+          .filter { it.isDirectory }
+          .map { File(it, it.name + ".apk") }
+          .filter { it.exists() }
 
-    // Load each catalog concurrently and wait for completion
-    val installedCatalogs = runBlocking {
+      // Load each catalog concurrently and wait for completion
+      val installedCatalogs = runBlocking {
       val deferred = localPkgs.map { file ->
         async(Dispatchers.Default) {
           loadLocalCatalog(file.nameWithoutExtension)
@@ -244,8 +238,8 @@ class AndroidCatalogLoader(
   )
 
   private companion object {
-    const val EXTENSION_FEATURE = "ireaderx"
-    const val METADATA_SOURCE_CLASS = "source.class"
+      const val EXTENSION_FEATURE = "tachiyomix"
+      const val METADATA_SOURCE_CLASS = "source.class"
     const val METADATA_DESCRIPTION = "source.description"
     const val METADATA_NSFW = "source.nsfw"
     const val LIB_VERSION_MIN = 1
