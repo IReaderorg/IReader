@@ -27,7 +27,6 @@ import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.R
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
-import org.ireader.domain.models.source.Source
 import org.ireader.domain.source.Extensions
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.domain.use_cases.local.DeleteUseCase
@@ -35,6 +34,7 @@ import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import org.ireader.domain.utils.Resource
+import org.ireader.source.core.Source
 import javax.inject.Inject
 
 

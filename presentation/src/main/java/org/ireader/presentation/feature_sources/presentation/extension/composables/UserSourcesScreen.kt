@@ -13,7 +13,7 @@ import org.ireader.presentation.feature_sources.presentation.extension.Extension
 @Composable
 fun UserSourcesScreen(viewModel: ExtensionViewModel, navController: NavController) {
     val scrollState = rememberLazyListState()
-    val sources = viewModel.state.value.sources
+    val sources = viewModel.state.sources
 
     SourceListComposable(
         modifier = Modifier.fillMaxSize(),

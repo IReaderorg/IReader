@@ -12,18 +12,17 @@ import okio.Path.Companion.toOkioPath
 import org.ireader.core.okhttp.HttpClients
 import org.ireader.core.prefs.AndroidPreferenceStore
 import org.ireader.core.prefs.PreferenceStore
+import org.ireader.data.local.AppDatabase
+import org.ireader.data.local.MIGRATION_8_9
+import org.ireader.data.local.dao.DownloadDao
+import org.ireader.data.local.dao.LibraryBookDao
+import org.ireader.data.local.dao.LibraryChapterDao
+import org.ireader.data.local.dao.RemoteKeysDao
 import org.ireader.data.repository.DownloadRepositoryImpl
 import org.ireader.domain.feature_services.io.LibraryCovers
-import org.ireader.domain.local.BookDatabase
-import org.ireader.domain.local.MIGRATION_8_9
-import org.ireader.domain.local.dao.DownloadDao
-import org.ireader.domain.local.dao.LibraryBookDao
-import org.ireader.domain.local.dao.LibraryChapterDao
-import org.ireader.domain.local.dao.RemoteKeysDao
 import org.ireader.domain.repository.DownloadRepository
 import org.ireader.domain.repository.LocalBookRepository
 import org.ireader.domain.repository.LocalChapterRepository
-import org.ireader.domain.source.Dependencies
 import org.ireader.domain.source.Extensions
 import org.ireader.domain.ui.AppPreferences
 import org.ireader.domain.ui.UiPreferences
@@ -49,6 +48,7 @@ import org.ireader.domain.use_cases.local.insert_usecases.InsertBooks
 import org.ireader.domain.use_cases.local.insert_usecases.InsertChapter
 import org.ireader.domain.use_cases.local.insert_usecases.InsertChapters
 import org.ireader.infinity.core.domain.use_cases.local.book_usecases.GetBooksByQueryPagingSource
+import org.ireader.source.core.Dependencies
 import java.io.File
 import javax.inject.Singleton
 
@@ -61,11 +61,11 @@ class LocalModule {
     @Singleton
     fun provideBookDatabase(
         @ApplicationContext appContext: Context,
-    ): BookDatabase {
+    ): AppDatabase {
         return Room.databaseBuilder(
             appContext,
-            BookDatabase::class.java,
-            BookDatabase.DATABASE_NAME
+            AppDatabase::class.java,
+            AppDatabase.DATABASE_NAME
         )
             .addMigrations(MIGRATION_8_9)
             .fallbackToDestructiveMigration()
@@ -74,20 +74,20 @@ class LocalModule {
 
     @Provides
     @Singleton
-    fun providesBookDao(db: BookDatabase): LibraryBookDao {
+    fun providesBookDao(db: AppDatabase): LibraryBookDao {
         return db.libraryBookDao
     }
 
 
     @Provides
     @Singleton
-    fun provideChapterDao(db: BookDatabase): LibraryChapterDao {
+    fun provideChapterDao(db: AppDatabase): LibraryChapterDao {
         return db.libraryChapterDao
     }
 
     @Provides
     @Singleton
-    fun provideRemoteKeyDao(db: BookDatabase): RemoteKeysDao {
+    fun provideRemoteKeyDao(db: AppDatabase): RemoteKeysDao {
         return db.remoteKeysDao
     }
 
@@ -95,7 +95,8 @@ class LocalModule {
     @Singleton
     @Provides
     fun providesExtensions(httpClients: HttpClients, preferences: PreferenceStore): Extensions {
-        return Extensions(Dependencies(httpClients = httpClients, preferences = preferences))
+        return Extensions(Dependencies(httpClients = httpClients,
+            preferences = preferences))
     }
 
     @Singleton
@@ -145,7 +146,7 @@ class LocalModule {
     @Singleton
     @Provides
     fun provideDownloadDao(
-        database: BookDatabase,
+        database: AppDatabase,
     ): DownloadDao {
         return database.downloadDao
     }

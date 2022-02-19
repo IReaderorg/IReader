@@ -8,10 +8,10 @@ import androidx.navigation.NavController
 import androidx.paging.compose.LazyPagingItems
 import org.ireader.domain.models.LayoutType
 import org.ireader.domain.models.entities.Book
-import org.ireader.domain.models.source.Source
 import org.ireader.presentation.presentation.layouts.CompactGridLayoutComposable
 import org.ireader.presentation.presentation.layouts.GridLayoutComposable
 import org.ireader.presentation.presentation.layouts.LinearListDisplay
+import org.ireader.source.core.Source
 
 
 @OptIn(ExperimentalFoundationApi::class)

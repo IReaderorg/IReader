@@ -29,9 +29,8 @@ import kotlinx.coroutines.launch
 import org.ireader.core.utils.Constants
 import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
-import org.ireader.core.utils.getUrlWithoutDomain
 import org.ireader.core_ui.theme.TransparentStatusBar
-import org.ireader.domain.models.source.FetchType
+import org.ireader.domain.utils.getUrlWithoutDomain
 import org.ireader.domain.view_models.detail.book_detail.BookDetailEvent
 import org.ireader.domain.view_models.detail.book_detail.BookDetailViewModel
 import org.ireader.presentation.R
@@ -44,6 +43,7 @@ import org.ireader.presentation.presentation.components.showLoading
 import org.ireader.presentation.ui.ChapterScreenSpec
 import org.ireader.presentation.ui.ReaderScreenSpec
 import org.ireader.presentation.ui.WebViewScreenSpec
+import org.ireader.source.sources.en.source_tower_deprecated.FetchType
 
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -116,13 +116,13 @@ fun BookDetailScreen(
                                 if (book.lastRead != 0L && viewModel.chapterState.chapters.isNotEmpty()) {
                                     navController.navigate(ReaderScreenSpec.buildRoute(
                                         bookId = book.id,
-                                        sourceId = source.sourceId,
+                                        sourceId = source.id,
                                         chapterId = Constants.LAST_CHAPTER,
                                     ))
                                 } else if (viewModel.chapterState.chapters.isNotEmpty()) {
                                     navController.navigate(ReaderScreenSpec.buildRoute(
                                         bookId = book.id,
-                                        sourceId = source.sourceId,
+                                        sourceId = source.id,
                                         chapterId = viewModel.chapterState.chapters.first().id,
                                     ))
                                 } else {
@@ -167,7 +167,7 @@ fun BookDetailScreen(
                                             WebViewScreenSpec.buildRoute(
                                                 url = source.baseUrl + getUrlWithoutDomain(
                                                     book.link),
-                                                sourceId = source.sourceId,
+                                                sourceId = source.id,
                                                 fetchType = FetchType.DetailFetchType.index,
                                                 bookId = book.id
                                             )
@@ -194,7 +194,7 @@ fun BookDetailScreen(
                                     .fillMaxWidth(),
                                 onClick = {
                                     navController.navigate(ChapterScreenSpec.buildRoute(bookId = book.id,
-                                        sourceId = source.sourceId))
+                                        sourceId = source.id))
                                 },
                                 title = "Contents",
                                 subtitle = "${chapters.size} Chapters",

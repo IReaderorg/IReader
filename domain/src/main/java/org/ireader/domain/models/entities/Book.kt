@@ -9,7 +9,8 @@ import org.ireader.source.models.BookInfo
 @Serializable
 @Entity(tableName = BOOK_TABLE)
 data class Book(
-    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0,
     val sourceId: Long,
     val link: String,
     val title: String,
@@ -30,19 +31,10 @@ data class Book(
 ) {
 
     companion object {
-
-        fun BookInfo.toBook(sourceId: Long): Book {
-            return Book(
-                id = 0,
-                sourceId = sourceId,
-                customCover = this.cover,
+        fun Book.toBookInfo(sourceId: Long): BookInfo {
+            return BookInfo(
                 cover = this.cover,
-                flags = 0,
                 link = this.link,
-                lastRead = 0,
-                dataAdded = 0L,
-                lastUpdated = 0L,
-                favorite = false,
                 title = this.title,
                 translator = this.translator,
                 status = this.status,
@@ -50,9 +42,10 @@ data class Book(
                 description = this.description,
                 author = this.author,
                 rating = this.rating,
-                viewer = this.viewer
+                viewer = this.viewer,
             )
         }
+
         const val UNKNOWN = 0
         const val ONGOING = 1
         const val COMPLETED = 2
@@ -94,3 +87,48 @@ fun updateBook(newBook: Book, oldBook: Book): Book {
     )
 }
 
+fun BookInfo.toBook(sourceId: Long): Book {
+    return Book(
+        id = 0,
+        sourceId = sourceId,
+        customCover = this.cover,
+        cover = this.cover,
+        flags = 0,
+        link = this.link,
+        lastRead = 0,
+        dataAdded = 0L,
+        lastUpdated = 0L,
+        favorite = false,
+        title = this.title,
+        translator = this.translator,
+        status = this.status,
+        genres = this.genres,
+        description = this.description,
+        author = this.author,
+        rating = this.rating,
+        viewer = this.viewer
+    )
+}
+
+fun BookInfo.fromBookInfo(sourceId: Long): Book {
+    return Book(
+        id = 0,
+        sourceId = sourceId,
+        customCover = this.cover,
+        cover = this.cover,
+        flags = 0,
+        link = this.link,
+        lastRead = 0,
+        dataAdded = 0L,
+        lastUpdated = 0L,
+        favorite = false,
+        title = this.title,
+        translator = this.translator,
+        status = this.status,
+        genres = this.genres,
+        description = this.description,
+        author = this.author,
+        rating = this.rating,
+        viewer = this.viewer
+    )
+}

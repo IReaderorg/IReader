@@ -9,12 +9,12 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import org.ireader.core.prefs.AndroidPreferenceStore
 import org.ireader.core.prefs.PreferenceStore
+import org.ireader.data.local.AppDatabase
+import org.ireader.data.local.dao.DownloadDao
+import org.ireader.data.local.dao.LibraryBookDao
+import org.ireader.data.local.dao.LibraryChapterDao
+import org.ireader.data.local.dao.RemoteKeysDao
 import org.ireader.data.repository.DownloadRepositoryImpl
-import org.ireader.domain.local.BookDatabase
-import org.ireader.domain.local.dao.DownloadDao
-import org.ireader.domain.local.dao.LibraryBookDao
-import org.ireader.domain.local.dao.LibraryChapterDao
-import org.ireader.domain.local.dao.RemoteKeysDao
 import org.ireader.domain.repository.DownloadRepository
 import org.ireader.domain.repository.LocalBookRepository
 import org.ireader.domain.repository.LocalChapterRepository
@@ -57,29 +57,29 @@ class TestLocalModule {
     @Singleton
     fun provideBookDatabase(
         @ApplicationContext appContext: Context,
-    ): BookDatabase {
+    ): AppDatabase {
         return Room.inMemoryDatabaseBuilder(
             appContext,
-            BookDatabase::class.java,
+            AppDatabase::class.java,
         ).build()
     }
 
     @Provides
     @Singleton
-    fun providesBookDao(db: BookDatabase): LibraryBookDao {
+    fun providesBookDao(db: AppDatabase): LibraryBookDao {
         return db.libraryBookDao
     }
 
 
     @Provides
     @Singleton
-    fun provideChapterDao(db: BookDatabase): LibraryChapterDao {
+    fun provideChapterDao(db: AppDatabase): LibraryChapterDao {
         return db.libraryChapterDao
     }
 
     @Provides
     @Singleton
-    fun provideRemoteKeyDao(db: BookDatabase): RemoteKeysDao {
+    fun provideRemoteKeyDao(db: AppDatabase): RemoteKeysDao {
         return db.remoteKeysDao
     }
 
@@ -137,7 +137,7 @@ class TestLocalModule {
     @Singleton
     @Provides
     fun provideDownloadDao(
-        database: BookDatabase,
+        database: AppDatabase,
     ): DownloadDao {
         return database.downloadDao
     }

@@ -1,4 +1,4 @@
-package org.ireader.infinity.core.data.network.utils
+package org.ireader.domain.utils
 
 import android.annotation.SuppressLint
 import android.content.Context

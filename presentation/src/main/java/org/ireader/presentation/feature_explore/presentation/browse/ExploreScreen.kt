@@ -20,7 +20,6 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import org.ireader.core.R
 import org.ireader.domain.models.ExploreType
 import org.ireader.domain.models.layouts
-import org.ireader.domain.models.source.FetchType
 import org.ireader.domain.view_models.explore.ExploreScreenEvents
 import org.ireader.domain.view_models.explore.ExploreViewModel
 import org.ireader.presentation.feature_library.presentation.components.LayoutComposable
@@ -30,6 +29,7 @@ import org.ireader.presentation.presentation.components.handlePagingResult
 import org.ireader.presentation.presentation.reusable_composable.*
 import org.ireader.presentation.ui.BookDetailScreenSpec
 import org.ireader.presentation.ui.WebViewScreenSpec
+import org.ireader.source.sources.en.source_tower_deprecated.FetchType
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -101,7 +101,7 @@ fun ExploreScreen(
                             title = "WebView",
                             onClick = {
                                 navController.navigate(WebViewScreenSpec.buildRoute(
-                                    sourceId = source.sourceId,
+                                    sourceId = source.id,
                                     fetchType = FetchType.LatestFetchType.index,
                                     url = source.baseUrl
                                 )
@@ -188,7 +188,7 @@ fun ExploreScreen(
                                     title = "Open in WebView",
                                     onClick = {
                                         navController.navigate(WebViewScreenSpec.buildRoute(
-                                            sourceId = source.sourceId,
+                                            sourceId = source.id,
                                             fetchType = FetchType.LatestFetchType.index,
                                             url = source.baseUrl
                                         )
@@ -239,7 +239,7 @@ fun ExploreScreen(
                                     title = "Open in WebView",
                                     onClick = {
                                         navController.navigate(WebViewScreenSpec.buildRoute(
-                                            sourceId = source.sourceId,
+                                            sourceId = source.id,
                                             fetchType = FetchType.LatestFetchType.index,
                                             url = source.baseUrl
                                         )

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 10,
-    "identityHash": "b32db6d2fbd581dc25755fa7a4d7609e",
+    "identityHash": "a1412c468d76e90f6b04c00c8d0f2cac",
     "entities": [
       {
         "tableName": "library",
@@ -127,7 +127,7 @@
         "foreignKeys": []
       },
       {
-        "tableName": "CatalogRemote",
+        "tableName": "cataloge",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `name` TEXT NOT NULL, `description` TEXT NOT NULL, `pkgName` TEXT NOT NULL, `versionName` TEXT NOT NULL, `versionCode` INTEGER NOT NULL, `lang` TEXT NOT NULL, `apkUrl` TEXT NOT NULL, `iconUrl` TEXT NOT NULL, `nsfw` INTEGER NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
@@ -582,7 +582,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b32db6d2fbd581dc25755fa7a4d7609e')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a1412c468d76e90f6b04c00c8d0f2cac')"
     ]
   }
 }

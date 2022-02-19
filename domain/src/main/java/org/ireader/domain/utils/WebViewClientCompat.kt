@@ -1,4 +1,4 @@
-package org.ireader.infinity.feature_sources.sources.utils
+package org.ireader.domain.utils
 
 import android.annotation.TargetApi
 import android.os.Build

@@ -35,8 +35,7 @@ android {
 
     buildTypes {
         named("release") {
-            isShrinkResources = true
-            isMinifyEnabled = true
+            isMinifyEnabled = false
             proguardFiles("proguard-android-optimize.txt", "proguard-rules.pro")
         }
     }
@@ -82,6 +81,7 @@ dependencies {
     implementation(project(Modules.domain))
     implementation(project(Modules.core))
     implementation(project(Modules.presentation))
+    implementation(project(Modules.source))
 
     implementation(AndroidX.coreKtx)
     implementation(AndroidX.appCompat)

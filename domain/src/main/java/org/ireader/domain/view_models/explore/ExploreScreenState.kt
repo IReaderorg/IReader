@@ -4,8 +4,8 @@ import org.ireader.core.utils.UiText
 import org.ireader.domain.models.ExploreType
 import org.ireader.domain.models.LayoutType
 import org.ireader.domain.models.entities.Book
-import org.ireader.domain.models.source.BooksPage
-import org.ireader.domain.models.source.Source
+import org.ireader.source.core.Source
+import org.ireader.source.models.BooksPage
 
 data class ExploreScreenState(
     val isLoading: Boolean = false,

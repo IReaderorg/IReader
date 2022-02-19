@@ -1,4 +1,4 @@
-package org.ireader.infinity.core.domain.models
+package org.ireader.domain.models
 
 import org.ireader.domain.models.entities.Book
 

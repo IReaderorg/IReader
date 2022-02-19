@@ -1,26 +1,31 @@
 package org.ireader.presentation.feature_sources.presentation.extension
 
-import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.launch
 import org.ireader.core.utils.UiEvent
-import org.ireader.domain.models.source.Source
+import org.ireader.domain.extensions.cataloge_service.CatalogStore
+import org.ireader.domain.models.entities.CatalogLocal
 import org.ireader.domain.source.Extensions
+import org.ireader.source.core.Source
 import javax.inject.Inject
 
 @HiltViewModel
 class ExtensionViewModel @Inject constructor(
     private val extensions: Extensions,
+    private val catalogStore: CatalogStore,
 ) :
     ViewModel() {
 
-    private val _state =
-        mutableStateOf(ExtensionScreenState())
+    var state by mutableStateOf(ExtensionScreenState())
+        private set
 
-    val state: State<ExtensionScreenState> = _state
 
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
@@ -28,10 +33,23 @@ class ExtensionViewModel @Inject constructor(
 
     init {
         getSources()
+        subscribeSources()
     }
 
     fun getSources() {
-        _state.value = state.value.copy(sources = extensions.getSources())
+        state = state.copy(sources = extensions.getSources())
+
+    }
+
+    fun subscribeSources() {
+        viewModelScope.launch {
+            catalogStore.getCatalogsFlow().collect { catalog ->
+                state = state.copy(catalogLocal = catalog)
+                catalog.forEach {
+                    state = state.copy(sources = state.sources.plus(it.source))
+                }
+            }
+        }
 
     }
 
@@ -41,4 +59,5 @@ class ExtensionViewModel @Inject constructor(
 data class ExtensionScreenState(
     val sources: List<Source> = emptyList(),
     val communitySources: List<Source> = emptyList(),
+    val catalogLocal: List<CatalogLocal> = emptyList(),
 )

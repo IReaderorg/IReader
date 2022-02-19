@@ -4,10 +4,10 @@ import androidx.paging.PagingSource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
-import org.ireader.domain.local.BookDatabase
-import org.ireader.domain.local.dao.LibraryBookDao
-import org.ireader.domain.local.dao.LibraryChapterDao
-import org.ireader.domain.local.dao.RemoteKeysDao
+import org.ireader.data.local.AppDatabase
+import org.ireader.data.local.dao.LibraryBookDao
+import org.ireader.data.local.dao.LibraryChapterDao
+import org.ireader.data.local.dao.RemoteKeysDao
 import org.ireader.domain.models.SortType
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.repository.LocalBookRepository
@@ -16,7 +16,7 @@ import timber.log.Timber
 class LocalBookRepositoryImpl(
     private val bookDao: LibraryBookDao,
     private val libraryChapterDao: LibraryChapterDao,
-    private val bookDatabase: BookDatabase,
+    private val appDatabase: AppDatabase,
     private val remoteKeysDao: RemoteKeysDao,
 ) : LocalBookRepository {
 

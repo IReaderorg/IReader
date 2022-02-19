@@ -12,8 +12,9 @@ import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.ireader.core.prefs.PreferenceStore
+import org.ireader.data.local.AppDatabase
 import org.ireader.data.repository.NetworkPreferences
-import org.ireader.domain.local.BookDatabase
+import org.ireader.data.repository.mediator.GetRemoteBooksByRemoteMediator
 import org.ireader.domain.repository.RemoteRepository
 import org.ireader.domain.ui.AppPreferences
 import org.ireader.domain.ui.UiPreferences
@@ -123,7 +124,7 @@ class TestNetworkModule {
     @Provides
     fun providesRemoteUseCase(
         remoteRepository: RemoteRepository,
-        database: BookDatabase,
+        database: AppDatabase,
     ): RemoteUseCases {
         return RemoteUseCases(
             getRemoteBooksByRemoteMediator = GetRemoteBooksByRemoteMediator(remoteRepository,

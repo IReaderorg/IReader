@@ -14,7 +14,7 @@ import org.ireader.presentation.feature_sources.presentation.extension.Extension
 @Composable
 fun CommunitySourceScreen(viewModel: ExtensionViewModel, navController: NavController) {
     val scrollState = rememberLazyListState()
-    val sources = viewModel.state.value.communitySources
+    val sources = viewModel.state.communitySources
 
     SourceListComposable(modifier = Modifier.padding(bottom = 50.dp),
         sources = sources,

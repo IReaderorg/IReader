@@ -16,21 +16,17 @@ import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
 import org.ireader.core.utils.removeSameItemsFromList
 import org.ireader.domain.R
-import org.ireader.domain.local.dao.RemoteKeysDao
 import org.ireader.domain.models.RemoteKeys
-import org.ireader.domain.models.entities.Book
-import org.ireader.domain.models.entities.Book.Companion.toBook
-import org.ireader.domain.models.entities.Chapter
-import org.ireader.domain.models.entities.toChapter
-import org.ireader.domain.models.entities.updateBook
-import org.ireader.domain.models.source.FetchType
-import org.ireader.domain.models.source.Source
+import org.ireader.domain.models.entities.*
 import org.ireader.domain.source.Extensions
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.domain.use_cases.fetchers.FetchUseCase
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
+import org.ireader.domain.use_cases.remote.key.RemoteKeyUseCase
+import org.ireader.source.core.Source
+import org.ireader.source.sources.en.source_tower_deprecated.FetchType
 import org.jsoup.Jsoup
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
@@ -47,7 +43,7 @@ class WebViewPageModel @Inject constructor(
     private val fetcherUseCase: FetchUseCase,
     private val savedStateHandle: SavedStateHandle,
     private val extensions: Extensions,
-    private val remoteKeysDao: RemoteKeysDao,
+    private val remoteKeyUseCase: RemoteKeyUseCase,
 ) : ViewModel() {
 
     var state by mutableStateOf<WebViewPageState>(WebViewPageState())
@@ -97,18 +93,18 @@ class WebViewPageModel @Inject constructor(
         viewModelScope.launch {
             showSnackBar(UiText.StringResource(R.string.trying_to_fetch))
             val exploreBooks = source.latestParse(Jsoup.parse(pageSource))
-            remoteKeysDao.deleteAllExploredBook()
-            remoteKeysDao.deleteAllRemoteKeys()
+            remoteKeyUseCase.deleteAllExploredBook()
+            remoteKeyUseCase.deleteAllRemoteKeys()
             val keys = exploreBooks.books.map { book ->
                 RemoteKeys(
                     id = book.title,
                     prevPage = 1,
                     nextPage = 2,
-                    sourceId = source.sourceId
+                    sourceId = source.id
                 )
             }
-            remoteKeysDao.addAllRemoteKeys(remoteKeys = keys)
-            remoteKeysDao.insertAllExploredBook(exploreBooks.books.map { it.toBook(source.sourceId) })
+            remoteKeyUseCase.insertAllRemoteKeys(keys = keys)
+            remoteKeyUseCase.insertAllExploredBook(exploreBooks.books.map { it.toBook(source.id) })
             showSnackBar(UiText.DynamicString("return to explore screen to view books"))
         }
     }
@@ -124,7 +120,7 @@ class WebViewPageModel @Inject constructor(
                 val newList = mutableListOf<Book>()
                 val localChapterList = mutableListOf<Chapter>()
                 localBooks.forEach {
-                    newList.add(updateBook(detail.toBook(source.sourceId), it))
+                    newList.add(updateBook(detail.toBook(source.id), it))
                     getChapterUseCase.subscribeChaptersByBookId(it.id).collect { localChapters ->
                         localChapterList.addAll(localChapters)
                     }
@@ -145,7 +141,7 @@ class WebViewPageModel @Inject constructor(
                     }
                     showSnackBar(UiText.DynamicString("${localBooks.first().title} of ${localBooks.first().title} was updated"))
                 } else {
-                    val bookId = insertUseCases.insertBook(detail.toBook(source.sourceId).copy(
+                    val bookId = insertUseCases.insertBook(detail.toBook(source.id).copy(
                         favorite = true,
                         lastUpdated = System.currentTimeMillis(),
                         dataAdded = System.currentTimeMillis()))

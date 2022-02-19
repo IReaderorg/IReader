@@ -1,6 +1,6 @@
 package org.ireader.domain.view_models.settings.webview
 
-import org.ireader.domain.models.source.FetchType
+import org.ireader.source.sources.en.source_tower_deprecated.FetchType
 
 fun mapFetcher(fetcher: Int): FetchType {
     return when (fetcher) {

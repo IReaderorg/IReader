@@ -6,9 +6,8 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
-import org.ireader.domain.local.dao.LibraryBookDao
+import org.ireader.data.local.dao.LibraryBookDao
 import org.ireader.domain.models.entities.Book
 import org.junit.After
 import org.junit.Before
@@ -17,14 +16,15 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class LibraryBookDaoTest {
-    private lateinit var db: BookDatabase
-    private lateinit var dao: LibraryBookDao
+    private lateinit var db: org.ireader.data.local.BookDatabase
+    private lateinit var dao: org.ireader.data.local.dao.LibraryBookDao
 
     @Before
     fun setup() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         db =
-            Room.inMemoryDatabaseBuilder(context, BookDatabase::class.java).allowMainThreadQueries()
+            Room.inMemoryDatabaseBuilder(context, org.ireader.data.local.BookDatabase::class.java)
+                .allowMainThreadQueries()
                 .build()
     }
 

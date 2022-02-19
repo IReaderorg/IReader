@@ -8,7 +8,7 @@ import org.ireader.core_ui.theme.FontType
 import org.ireader.domain.R
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
-import org.ireader.domain.models.source.Source
+import org.ireader.source.core.Source
 
 data class ReaderScreenState(
     val isLoading: Boolean = false,

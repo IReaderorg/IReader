@@ -35,6 +35,17 @@ data class Chapter(
 
 }
 
+fun Chapter.toChapterInfo(): ChapterInfo {
+    return ChapterInfo(
+        key = this.link,
+        translator = this.translator,
+        name = this.title,
+        dateUpload = this.dateUploaded,
+        number = this.number
+    )
+}
+
+
 fun ChapterInfo.toChapter(bookId: Long): Chapter {
     return Chapter(
         title = name,

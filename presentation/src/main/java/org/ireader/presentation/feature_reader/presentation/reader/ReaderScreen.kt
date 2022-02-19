@@ -34,7 +34,6 @@ import kotlinx.coroutines.launch
 import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
 import org.ireader.core_ui.ui.Colour.scrollingThumbColor
-import org.ireader.domain.models.source.FetchType
 import org.ireader.domain.view_models.reader.ReaderEvent
 import org.ireader.domain.view_models.reader.ReaderScreenViewModel
 import org.ireader.presentation.R
@@ -53,6 +52,7 @@ import org.ireader.presentation.utils.scroll.Carousel
 import org.ireader.presentation.utils.scroll.CarouselDefaults
 import org.ireader.presentation.utils.scroll.rememberCarouselScrollState
 import org.ireader.presentation.utils.scroll.verticalScroll
+import org.ireader.source.sources.en.source_tower_deprecated.FetchType
 
 
 @ExperimentalAnimationApi
@@ -143,7 +143,7 @@ fun ReadingScreen(
                                     try {
                                         navController.navigate(WebViewScreenSpec.buildRoute(
                                             url = chapter?.link ?: "",
-                                            sourceId = source.sourceId,
+                                            sourceId = source.id,
                                             fetchType = FetchType.ContentFetchType.index,
                                         )
                                         )
@@ -169,7 +169,7 @@ fun ReadingScreen(
                                     try {
                                         navController.navigate(WebViewScreenSpec.buildRoute(
                                             url = chapter.link,
-                                            sourceId = source.sourceId,
+                                            sourceId = source.id,
                                             fetchType = FetchType.ContentFetchType.index,
                                             bookId = chapter.bookId,
                                             chapterId = chapter.id

@@ -5,11 +5,11 @@ import kotlinx.coroutines.flow.flow
 import org.ireader.core.utils.UiText
 import org.ireader.domain.R
 import org.ireader.domain.models.entities.Book
-import org.ireader.domain.models.entities.Book.Companion.toBook
+import org.ireader.domain.models.entities.toBook
 import org.ireader.domain.models.entities.updateBook
-import org.ireader.domain.models.source.Source
 import org.ireader.domain.repository.RemoteRepository
 import org.ireader.domain.utils.Resource
+import org.ireader.source.core.Source
 import retrofit2.HttpException
 import timber.log.Timber
 import java.io.IOException
@@ -20,7 +20,7 @@ class GetBookDetail(private val remoteRepository: RemoteRepository) {
             val now = System.currentTimeMillis()
             Timber.d("Timber: Remote Book Detail for ${book.title} Was called")
             val bookDetail = remoteRepository.getRemoteBookDetail(book = book, source = source)
-                .toBook(source.sourceId)
+                .toBook(source.id)
 
             Timber.d("Timber: Remote Book Detail Was Fetched")
 

@@ -8,15 +8,15 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import org.ireader.data.local.AppDatabase
+import org.ireader.data.local.dao.LibraryBookDao
+import org.ireader.data.local.dao.LibraryChapterDao
+import org.ireader.data.local.dao.RemoteKeysDao
 import org.ireader.data.repository.LocalBookRepositoryImpl
 import org.ireader.data.repository.LocalChapterRepositoryImpl
 import org.ireader.data.repository.RemoteRepositoryImpl
 import org.ireader.data.repository.RepositoryImpl
 import org.ireader.domain.feature_services.notification.DefaultNotificationHelper
-import org.ireader.domain.local.BookDatabase
-import org.ireader.domain.local.dao.LibraryBookDao
-import org.ireader.domain.local.dao.LibraryChapterDao
-import org.ireader.domain.local.dao.RemoteKeysDao
 import org.ireader.domain.repository.LocalBookRepository
 import org.ireader.domain.repository.LocalChapterRepository
 import org.ireader.domain.repository.RemoteRepository
@@ -34,13 +34,12 @@ class AppModule {
         localChapterRepository: LocalChapterRepository,
         localBookRepository: LocalBookRepository,
         remoteRepository: RemoteRepository,
-        bookDatabase: BookDatabase,
+        appDatabase: AppDatabase,
     ): Repository {
         return RepositoryImpl(
             localChapterRepository = localChapterRepository,
             localBookRepository = localBookRepository,
             remoteRepository = remoteRepository,
-            database = bookDatabase
         )
     }
 
@@ -56,7 +55,7 @@ class AppModule {
     fun providesLibraryRepository(
         libraryBookDao: LibraryBookDao,
         libraryChapterDao: LibraryChapterDao,
-        database: BookDatabase,
+        database: AppDatabase,
         remoteKeysDao: RemoteKeysDao,
     ): LocalBookRepository {
         return LocalBookRepositoryImpl(libraryBookDao,
@@ -69,8 +68,9 @@ class AppModule {
     @Singleton
     fun providesRemoteBookRepository(
         keysDao: RemoteKeysDao,
+        database: AppDatabase,
     ): RemoteRepository {
-        return RemoteRepositoryImpl(remoteKeysDao = keysDao)
+        return RemoteRepositoryImpl(remoteKeysDao = keysDao, database = database)
     }
 
     @Singleton

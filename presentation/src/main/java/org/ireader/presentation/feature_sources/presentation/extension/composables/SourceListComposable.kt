@@ -20,10 +20,10 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import org.ireader.core.R
 import org.ireader.domain.models.ExploreType
-import org.ireader.domain.models.source.Source
 import org.ireader.presentation.presentation.components.BookImageComposable
 import org.ireader.presentation.presentation.reusable_composable.SuperSmallTextComposable
 import org.ireader.presentation.ui.ExploreScreenSpec
+import org.ireader.source.core.Source
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -68,7 +68,7 @@ fun SourceListComposable(
                 modifier = Modifier
                     .clickable {
                         navController.navigate(ExploreScreenSpec.buildRoute(
-                            sourceId = sources[index].sourceId,
+                            sourceId = sources[index].id,
                             exploreType = ExploreType.Latest.id
                         ))
                     }
@@ -81,7 +81,7 @@ fun SourceListComposable(
                             style = MaterialTheme.typography.subtitle2,
                             modifier = Modifier.clickable {
                                 navController.navigate(ExploreScreenSpec.buildRoute(
-                                    sourceId = sources[index].sourceId,
+                                    sourceId = sources[index].id,
                                     exploreType = ExploreType.Popular.id
                                 ))
                             })

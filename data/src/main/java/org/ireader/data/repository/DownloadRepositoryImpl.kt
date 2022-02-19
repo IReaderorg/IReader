@@ -2,7 +2,7 @@ package org.ireader.data.repository
 
 import androidx.paging.PagingSource
 import kotlinx.coroutines.flow.Flow
-import org.ireader.domain.local.dao.DownloadDao
+import org.ireader.data.local.dao.DownloadDao
 import org.ireader.domain.models.entities.SavedDownload
 import org.ireader.domain.repository.DownloadRepository
 

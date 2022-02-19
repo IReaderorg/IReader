@@ -23,11 +23,11 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.ireader.core.utils.UiEvent
-import org.ireader.core.utils.getHtml
-import org.ireader.domain.models.source.HttpSource
+import org.ireader.domain.utils.getHtml
+import org.ireader.domain.utils.setDefaultSettings
 import org.ireader.domain.view_models.settings.webview.WebViewPageModel
-import org.ireader.infinity.core.data.network.utils.setDefaultSettings
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
+import org.ireader.source.core.HttpSource
 
 
 @ExperimentalCoroutinesApi

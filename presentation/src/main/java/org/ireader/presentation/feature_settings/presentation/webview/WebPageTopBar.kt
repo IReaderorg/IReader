@@ -17,12 +17,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import org.ireader.domain.models.source.FetchType
-import org.ireader.domain.models.source.Source
 import org.ireader.presentation.R
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
+import org.ireader.source.core.Source
+import org.ireader.source.sources.en.source_tower_deprecated.FetchType
 
 @Composable
 fun WebPageTopBar(

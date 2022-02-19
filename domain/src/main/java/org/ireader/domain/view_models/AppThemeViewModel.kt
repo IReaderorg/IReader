@@ -42,7 +42,6 @@ class AppThemeViewModel @Inject constructor(
             ThemeMode.Dark -> AppRippleTheme(false)
         }
     }
-
     @Composable
     fun getColors(): Pair<Colors, ExtraColors> {
         val baseTheme = getBaseTheme(themeMode, lightTheme, darkTheme)

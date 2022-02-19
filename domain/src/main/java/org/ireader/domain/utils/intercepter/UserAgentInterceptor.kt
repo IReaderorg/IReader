@@ -2,7 +2,7 @@ package org.ireader.domain.utils.intercepter
 
 import okhttp3.Interceptor
 import okhttp3.Response
-import org.ireader.domain.models.source.HttpSource
+import org.ireader.source.core.HttpSource
 
 class UserAgentInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {

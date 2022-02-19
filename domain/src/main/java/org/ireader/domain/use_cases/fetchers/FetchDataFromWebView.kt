@@ -5,15 +5,11 @@ import kotlinx.coroutines.flow.flow
 import org.ireader.core.utils.UiText
 import org.ireader.core.utils.removeSameItemsFromList
 import org.ireader.domain.R
-import org.ireader.domain.models.entities.Book
-import org.ireader.domain.models.entities.Book.Companion.toBook
-import org.ireader.domain.models.entities.Chapter
-import org.ireader.domain.models.entities.toChapter
-import org.ireader.domain.models.entities.updateBook
-import org.ireader.domain.models.source.Source
+import org.ireader.domain.models.entities.*
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.utils.Resource
+import org.ireader.source.core.Source
 import org.jsoup.Jsoup
 
 class FetchBookDetailAndChapterDetailFromWebView {
@@ -41,11 +37,11 @@ class FetchBookDetailAndChapterDetailFromWebView {
                     deleteUseCase.deleteChaptersByBookId(bookId = localBook.id)
                     if (localBook.id != 0L) {
                         insertUseCases.insertBook(
-                            updateBook(bookFromPageSource.toBook(source.sourceId), localBook)
+                            updateBook(bookFromPageSource.toBook(source.id), localBook)
                         )
                     } else {
                         insertUseCases.insertBook(
-                            updateBook(bookFromPageSource.toBook(source.sourceId), localBook)
+                            updateBook(bookFromPageSource.toBook(source.id), localBook)
                         )
                     }
 
@@ -60,7 +56,7 @@ class FetchBookDetailAndChapterDetailFromWebView {
 
                 } else if (!chaptersFromPageSource.isNullOrEmpty() && chaptersFromPageSource.isNotEmpty()) {
                     if (chaptersFromPageSource.isNotEmpty() && bookFromPageSource.title.isNotBlank()) {
-                        var book = bookFromPageSource.toBook(source.sourceId)
+                        var book = bookFromPageSource.toBook(source.id)
                             .copy(
                                 favorite = true,
                                 dataAdded = System.currentTimeMillis(),

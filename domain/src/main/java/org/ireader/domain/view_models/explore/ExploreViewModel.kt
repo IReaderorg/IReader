@@ -21,11 +21,11 @@ import org.ireader.domain.R
 import org.ireader.domain.models.DisplayMode
 import org.ireader.domain.models.ExploreType
 import org.ireader.domain.models.entities.Book
-import org.ireader.domain.models.source.BooksPage
-import org.ireader.domain.models.source.Source
 import org.ireader.domain.source.Extensions
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.remote.RemoteUseCases
+import org.ireader.source.core.Source
+import org.ireader.source.models.BooksPage
 import javax.inject.Inject
 
 
@@ -95,7 +95,7 @@ class ExploreViewModel @Inject constructor(
     fun getBooks(query: String? = null, type: ExploreType? = null, source: Source) {
         getBooksJob?.cancel()
         getBooksJob = viewModelScope.launch(Dispatchers.Main) {
-            remoteUseCases.getRemoteBooksByRemoteMediator(
+            remoteUseCases.getRemoteBookByPaginationUseCase(
                 source,
                 type ?: state.value.exploreType,
                 query = query).cachedIn(viewModelScope)

@@ -16,10 +16,10 @@ import kotlinx.coroutines.launch
 import org.ireader.core.R
 import org.ireader.core.utils.UiText
 import org.ireader.domain.models.entities.Chapter
-import org.ireader.domain.models.source.Source
 import org.ireader.domain.view_models.reader.ReaderScreenViewModel
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
 import org.ireader.presentation.utils.scroll.CarouselScrollState
+import org.ireader.source.core.Source
 
 @Composable
 fun MainBottomSettingComposable(

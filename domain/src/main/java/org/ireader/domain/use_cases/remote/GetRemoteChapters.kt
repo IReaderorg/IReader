@@ -5,11 +5,12 @@ import kotlinx.coroutines.flow.flow
 import org.ireader.core.utils.UiText
 import org.ireader.domain.R
 import org.ireader.domain.models.entities.Book
+import org.ireader.domain.models.entities.Book.Companion.toBookInfo
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.entities.toChapter
-import org.ireader.domain.models.source.Source
 import org.ireader.domain.repository.RemoteRepository
 import org.ireader.domain.utils.Resource
+import org.ireader.source.core.Source
 import org.jsoup.select.Selector
 import retrofit2.HttpException
 import timber.log.Timber
@@ -20,7 +21,7 @@ class GetRemoteChapters(private val remoteRepository: RemoteRepository) {
         flow {
             try {
                 Timber.d("Timber: GetRemoteChaptersUseCase was Called")
-                val chapters = source.getChapters(book = book)
+                val chapters = source.getChapters(book = book.toBookInfo(source.id))
                 emit(Resource.Success<List<Chapter>>(chapters.map { it.toChapter(book.id) }))
                 Timber.d("Timber: GetRemoteChaptersUseCase was Finished Successfully")
 

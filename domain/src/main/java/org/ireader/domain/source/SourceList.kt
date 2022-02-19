@@ -1,8 +1,10 @@
 package org.ireader.domain.source
 
-import org.ireader.domain.models.source.*
-import org.ireader.domain.source.en.freewebnovel.FreeWbNovel
-import org.ireader.domain.source.en.webnovel.Webnovel
+import org.ireader.source.core.Dependencies
+import org.ireader.source.core.Source
+import org.ireader.source.sources.en.freewebnovel.FreeWebNovel
+import org.ireader.source.sources.en.source_tower_deprecated.*
+import org.ireader.source.sources.en.webnovel.Webnovel
 
 
 class Extensions(
@@ -13,19 +15,21 @@ class Extensions(
     fun findSourceById(id: Long): Source? {
         val sources = getSources()
 
-        return sources.find { it.sourceId == id }
+        return sources.find { it.id == id }
     }
-
 
     private val sources = mutableListOf<Source>(
     )
 
+
     fun getSources(): List<Source> {
+
         return sources
     }
 
     fun addSource(source: Source) {
         sources.add(source)
+
     }
 
     init {
@@ -40,8 +44,8 @@ class Extensions(
 class AvailableSources(dependencies: Dependencies) {
 
 
-    val realwebnovel = org.ireader.domain.source.SourceTower(
-        sourceId = 16615641,
+    val realwebnovel = SourceTower(
+        id = 16615641,
         baseUrl = "https://readwebnovels.net",
         deps = dependencies,
         lang = "en",
@@ -101,8 +105,8 @@ class AvailableSources(dependencies: Dependencies) {
         )
     )
 
-    val mtl = org.ireader.domain.source.SourceTower(
-        sourceId = 638830,
+    val mtl = SourceTower(
+        id = 638830,
         deps = dependencies,
         lang = "en",
         name = "MtlNovel",
@@ -168,8 +172,8 @@ class AvailableSources(dependencies: Dependencies) {
         )
 
     )
-    val wuxiaworld = org.ireader.domain.source.SourceTower(
-        sourceId = 24791917,
+    val wuxiaworld = SourceTower(
+        id = 24791917,
         name = "Wuxiaworld.Site",
         deps = dependencies,
         lang = "en",
@@ -229,8 +233,8 @@ class AvailableSources(dependencies: Dependencies) {
             coverAtt = "src",
         )
     )
-    val myLoveNovel = org.ireader.domain.source.SourceTower(
-        sourceId = 43670368,
+    val myLoveNovel = SourceTower(
+        id = 43670368,
         name = "MyLoveNovel",
         deps = dependencies,
         lang = "en",
@@ -293,8 +297,8 @@ class AvailableSources(dependencies: Dependencies) {
             pageContentSelector = "div.content"
         )
     )
-    val koreanMtl = org.ireader.domain.source.SourceTower(
-        sourceId = 19789884,
+    val koreanMtl = SourceTower(
+        id = 19789884,
         name = "KoreanMtl.Online",
         deps = dependencies,
         lang = "en",
@@ -338,8 +342,8 @@ class AvailableSources(dependencies: Dependencies) {
         )
     )
 
-    val mtlNation = org.ireader.domain.source.SourceTower(
-        sourceId = 26150742,
+    val mtlNation = SourceTower(
+        id = 26150742,
         name = "MtlNation",
         baseUrl = "https://mtlnation.com/",
         supportSearch = true,
@@ -396,8 +400,8 @@ class AvailableSources(dependencies: Dependencies) {
             authorBookSelector = "div.author-content a"
         )
     )
-    val realLightWebNovel = org.ireader.domain.source.SourceTower(
-        sourceId = 33567369,
+    val realLightWebNovel = SourceTower(
+        id = 33567369,
         name = "RealLightWebNovel",
         baseUrl = "https://readlightnovels.net",
         supportSearch = true,
@@ -456,8 +460,8 @@ class AvailableSources(dependencies: Dependencies) {
 
         )
     )
-    val wuxiaworldsiteco = org.ireader.domain.source.SourceTower(
-        sourceId = 2033459,
+    val wuxiaworldsiteco = SourceTower(
+        id = 2033459,
         name = "Wuxiaworldsite.co",
         baseUrl = "https://wuxiaworldsite.co",
         supportSearch = true,
@@ -548,7 +552,7 @@ class AvailableSources(dependencies: Dependencies) {
         mtlNation,
         realLightWebNovel,
         wuxiaworldsiteco,
-        FreeWbNovel(dependencies),
+        FreeWebNovel(dependencies),
         Webnovel(dependencies)
     )
 }

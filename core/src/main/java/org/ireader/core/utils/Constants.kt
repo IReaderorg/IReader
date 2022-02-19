@@ -20,6 +20,7 @@ object Constants {
     const val BOOK_TABLE = "library"
     const val CHAPTER_TABLE = "chapter"
     const val DOWNLOAD_TABLE = "download"
+    const val CATALOG_REMOTE = "catalog_remote"
 
     const val EXPLORE_BOOK_TABLE = "explore"
 

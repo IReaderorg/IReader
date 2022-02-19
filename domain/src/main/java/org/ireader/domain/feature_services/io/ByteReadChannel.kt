@@ -11,6 +11,10 @@ import okio.use
 private const val BUFFER_SIZE = 8096
 
 
+suspend fun ByteReadChannel.peek(bytes: Int, buffer: ByteArray = ByteArray(bytes)): ByteArray {
+    return ByteArray(0)
+}
+
 suspend fun ByteReadChannel.saveTo(path: Path, fileSystem: FileSystem) {
     withContext(Dispatchers.IO) {
         val buffer = ByteArray(BUFFER_SIZE)
@@ -24,3 +28,4 @@ suspend fun ByteReadChannel.saveTo(path: Path, fileSystem: FileSystem) {
         }
     }
 }
+

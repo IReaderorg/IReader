@@ -17,6 +17,9 @@ dependencies {
     "implementation"(OkHttp.okio)
     "implementation"(Compose.paging)
     "implementation"(Jsoup.jsoup)
+    "implementation"(Ktor.core)
+    "implementation"(Ktor.ktor_jsoup)
+    "implementation"(Ktor.okhttp)
 
 
 }

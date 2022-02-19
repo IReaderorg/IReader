@@ -9,8 +9,11 @@ import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.ireader.core.prefs.PreferenceStore
+import org.ireader.data.local.AppDatabase
+import org.ireader.data.local.dao.RemoteKeysDao
 import org.ireader.data.repository.NetworkPreferences
-import org.ireader.domain.local.BookDatabase
+import org.ireader.data.repository.RemoteKeyRepositoryImpl
+import org.ireader.domain.repository.RemoteKeyRepository
 import org.ireader.domain.repository.RemoteRepository
 import org.ireader.domain.ui.AppPreferences
 import org.ireader.domain.ui.UiPreferences
@@ -22,6 +25,7 @@ import org.ireader.domain.use_cases.preferences.reader_preferences.*
 import org.ireader.domain.use_cases.preferences.services.ReadLastUpdateTime
 import org.ireader.domain.use_cases.preferences.services.SetLastUpdateTime
 import org.ireader.domain.use_cases.remote.*
+import org.ireader.domain.use_cases.remote.key.*
 import org.ireader.domain.utils.MemoryCookieJar
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
@@ -70,10 +74,34 @@ class NetworkModule {
         )
     }
 
-    @Singleton
     @Provides
+    @Singleton
     fun providesCookieJar(): CookieJar {
         return MemoryCookieJar()
+    }
+
+
+    @Provides
+    @Singleton
+    fun provideRemoteKeyRepository(
+        remoteKeysDao: RemoteKeysDao,
+    ): RemoteKeyRepository {
+        return RemoteKeyRepositoryImpl(
+            dao = remoteKeysDao
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideRemoteKeyUseCase(
+        remoteKeyRepository: RemoteKeyRepository,
+    ): RemoteKeyUseCase {
+        return RemoteKeyUseCase(
+            deleteAllExploredBook = DeleteAllExploredBook(remoteKeyRepository),
+            deleteAllRemoteKeys = DeleteAllRemoteKeys(remoteKeyRepository),
+            insertAllExploredBook = InsertAllExploredBook(remoteKeyRepository),
+            insertAllRemoteKeys = InsertAllRemoteKeys(remoteKeyRepository)
+        )
     }
 
     @Singleton
@@ -114,14 +142,14 @@ class NetworkModule {
     @Provides
     fun providesRemoteUseCase(
         remoteRepository: RemoteRepository,
-        database: BookDatabase,
+        database: AppDatabase,
     ): RemoteUseCases {
         return RemoteUseCases(
-            getRemoteBooksByRemoteMediator = GetRemoteBooksByRemoteMediator(remoteRepository,
-                database),
             getBookDetail = GetBookDetail(remoteRepository),
             getRemoteChapters = GetRemoteChapters(remoteRepository),
-            getRemoteReadingContent = GetRemoteReadingContent(remoteRepository)
+            getRemoteReadingContent = GetRemoteReadingContent(remoteRepository),
+            getRemoteBookByPaginationUseCase = GetRemoteBookByPaginationUseCase(remoteRepository)
+
         )
     }
 
