@@ -17,6 +17,7 @@
             <option value="$PROJECT_DIR$/core-ui" />
             <option value="$PROJECT_DIR$/data" />
             <option value="$PROJECT_DIR$/domain" />
+            <option value="$PROJECT_DIR$/extensions" />
             <option value="$PROJECT_DIR$/presentation" />
             <option value="$PROJECT_DIR$/source" />
           </set>

@@ -3,10 +3,7 @@ package org.ireader.source.core
 import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import okhttp3.Headers
-import org.ireader.domain.models.ImageUrl
 import org.ireader.source.models.*
 import org.jsoup.nodes.Document
 import java.net.URI
@@ -95,13 +92,8 @@ abstract class HttpSource(private val dependencies: Dependencies) : Source {
      * @param page the page number to retrieve.
      */
     override suspend fun getPopular(page: Int): BooksPage {
-        return kotlin.runCatching {
-            return@runCatching withContext(Dispatchers.IO) {
-                val request = client.get<Document>(popularRequest(page))
-
-                return@withContext popularParse(request)
-            }
-        }.getOrThrow()
+        val request = client.get<Document>(popularRequest(page))
+        return popularParse(request)
     }
 
     /**
@@ -110,12 +102,8 @@ abstract class HttpSource(private val dependencies: Dependencies) : Source {
      * @param page the page number to retrieve.
      */
     override suspend fun getLatest(page: Int): BooksPage {
-        return kotlin.runCatching {
-            return@runCatching withContext(Dispatchers.IO) {
-                val request = client.get<Document>(latestRequest(page))
-                return@withContext latestParse(request)
-            }
-        }.getOrThrow()
+        val request = client.get<Document>(latestRequest(page))
+        return latestParse(request)
     }
 
     /**
@@ -125,13 +113,8 @@ abstract class HttpSource(private val dependencies: Dependencies) : Source {
      * @param page the page number to retrieve.
      */
     override suspend fun getDetails(book: BookInfo): BookInfo {
-        return kotlin.runCatching {
-            return@runCatching withContext(Dispatchers.IO) {
-                val request = client.get<Document>(detailsRequest(book))
-
-                return@withContext detailParse(request)
-            }
-        }.getOrThrow()
+        val request = client.get<Document>(detailsRequest(book))
+        return detailParse(request)
     }
 
     /**
@@ -142,13 +125,8 @@ abstract class HttpSource(private val dependencies: Dependencies) : Source {
      * @param book the chapters to retrieve.
      */
     override suspend fun getChapters(book: BookInfo): List<ChapterInfo> {
-        return kotlin.runCatching {
-            return@runCatching withContext(Dispatchers.IO) {
-                val request = client.get<Document>(chaptersRequest(book))
-
-                return@withContext chaptersParse(request)
-            }
-        }.getOrThrow()
+        val request = client.get<Document>(chaptersRequest(book))
+        return chaptersParse(request)
     }
 
     /**
@@ -158,13 +136,8 @@ abstract class HttpSource(private val dependencies: Dependencies) : Source {
      * @param page the page number to retrieve.
      */
     override suspend fun getContents(chapter: ChapterInfo): List<String> {
-        return kotlin.runCatching {
-            return@runCatching withContext(Dispatchers.IO) {
-                val request = client.get<Document>(contentRequest(chapter))
-
-                return@withContext pageContentParse(request)
-            }
-        }.getOrThrow()
+        val request = client.get<Document>(contentRequest(chapter))
+        return pageContentParse(request)
     }
 
     /**
@@ -175,13 +148,8 @@ abstract class HttpSource(private val dependencies: Dependencies) : Source {
      * @param query the search query to retrieve.
      */
     override suspend fun getSearch(page: Int, query: String, filters: FilterList): BooksPage {
-        return kotlin.runCatching {
-            return@runCatching withContext(Dispatchers.IO) {
-                val request = client.get<Document>(searchRequest(page, query, filters))
-                return@withContext searchParse(request)
-            }
-        }.getOrThrow()
-
+        val request = client.get<Document>(searchRequest(page, query, filters))
+        return searchParse(request)
     }
 
 
@@ -191,7 +159,6 @@ abstract class HttpSource(private val dependencies: Dependencies) : Source {
      * @param page the page number to retrieve.
      */
     protected abstract fun popularRequest(page: Int): HttpRequestBuilder
-
     /**
      * Returns the request for latest  Books given the page.
      *

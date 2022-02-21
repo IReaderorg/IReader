@@ -163,7 +163,6 @@ class LocalModule {
             insertBooks = InsertBooks(localBookRepository),
             insertChapter = InsertChapter(localChapterRepository),
             insertChapters = InsertChapters(localChapterRepository),
-            setLastReadToFalse = SetLastReadToFalse(localChapterRepository)
         )
     }
 

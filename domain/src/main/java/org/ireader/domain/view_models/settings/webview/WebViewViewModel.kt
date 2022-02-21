@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
 import org.ireader.core.utils.removeSameItemsFromList
+import org.ireader.domain.FetchType
 import org.ireader.domain.R
 import org.ireader.domain.models.RemoteKeys
 import org.ireader.domain.models.entities.*
@@ -26,7 +27,6 @@ import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.key.RemoteKeyUseCase
 import org.ireader.source.core.Source
-import org.ireader.source.sources.en.source_tower_deprecated.FetchType
 import org.jsoup.Jsoup
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets

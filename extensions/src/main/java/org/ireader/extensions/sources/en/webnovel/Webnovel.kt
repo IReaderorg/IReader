@@ -4,7 +4,7 @@ import io.ktor.client.request.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.Headers
-import org.ireader.core.utils.merge
+import org.ireader.extensions.sources.en.webnovel.merge
 import org.ireader.source.core.Dependencies
 import org.ireader.source.core.ParsedHttpSource
 import org.ireader.source.models.BookInfo

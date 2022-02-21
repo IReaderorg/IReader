@@ -1,4 +1,4 @@
-package org.ireader.domain.models
+package org.ireader.source.models
 
 sealed class Page
 

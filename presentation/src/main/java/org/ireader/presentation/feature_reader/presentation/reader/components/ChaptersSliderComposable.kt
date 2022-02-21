@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -13,13 +14,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import org.ireader.domain.models.entities.Chapter
-import org.ireader.presentation.utils.scroll.CarouselScrollState
 
 
 @Composable
 fun ChaptersSliderComposable(
     modifier: Modifier = Modifier,
-    scrollState: CarouselScrollState,
+    scrollState: LazyListState,
     currentChapter: Chapter,
     currentChapterIndex: Int,
     chapters: List<Chapter>,

@@ -80,6 +80,7 @@ class ReaderScreenViewModel @Inject constructor(
             if (source != null) {
                 state = state.copy(source = source)
                 getLocalChaptersByPaging(bookId)
+                getChapters(bookId, source = source)
                 getLocalBookById(bookId, chapterId, source = source)
                 readPreferences()
             } else {
@@ -117,6 +118,7 @@ class ReaderScreenViewModel @Inject constructor(
             is ReaderEvent.ToggleReaderMode -> {
                 toggleReaderMode(event.enable)
             }
+            else -> {}
         }
     }
 
@@ -129,7 +131,7 @@ class ReaderScreenViewModel @Inject constructor(
                 toggleLocalLoaded(true)
                 setChapter(lastChapter)
                 setScrollPosition(lastChapter.progress)
-                toggleLastReadAndUpdateChapterContent(lastChapter)
+                updateLastReadTime(lastChapter)
                 val chapter = state.chapter
                 if (chapter != null && chapter.content.joinToString()
                         .isBlank() && !state.isRemoteLoading
@@ -139,38 +141,19 @@ class ReaderScreenViewModel @Inject constructor(
             } else {
                 if (state.chapters.isNotEmpty()) {
                     getChapter(state.chapters.first().id, source)
+                } else {
+                    showSnackBar(UiText.StringResource(R.string.there_was_a_problem_in_getting_chapter))
                 }
                 toggleLoading(false)
                 toggleLocalLoaded(false)
             }
-//            getChapterUseCase.subscribeLastReadChapter(bookId)
-//                .first { result ->
-//                    if (result != null) {
-//                        clearError()
-//                        toggleLoading(false)
-//                        toggleLocalLoaded(true)
-//                        setChapter(result)
-//                        setScrollPosition(result.progress)
-//                        toggleLastReadAndUpdateChapterContent(result)
-//                        val chapter = state.chapter
-//                        if (chapter != null && chapter.content.joinToString()
-//                                .isBlank() && !state.isRemoteLoading
-//                        ) {
-//                            getReadingContentRemotely(source = source, chapter = chapter)
-//                        }
-//                    } else {
-//                        toggleLoading(false)
-//                        toggleLocalLoaded(false)
-//                    }
-//                    true
-//                }
         }
     }
 
 
-    private fun getChapters(book: Book, source: Source) {
+    private fun getChapters(bookId: Long, source: Source) {
         viewModelScope.launch {
-            val chapters = getChapterUseCase.findChaptersByBookId(bookId = book.id)
+            val chapters = getChapterUseCase.findChaptersByBookId(bookId = bookId)
             if (chapters.isNotEmpty()) {
                 state = state.copy(
                     chapters = chapters,
@@ -183,51 +166,40 @@ class ReaderScreenViewModel @Inject constructor(
                 }
             }
         }
-//        getChapterUseCase.subscribeChaptersByBookId(bookId = book.id)
-//            .onEach { chapters ->
-//                if (chapters.isNotEmpty()) {
-//                    state = state.copy(
-//                        chapters = chapters,
-//                        isChapterLoaded = true,
-//                    )
-//                    state =
-//                        state.copy(currentChapterIndex = chapters.indexOfFirst { state.chapter?.id == it.id })
-//                    if (state.chapter?.id == Constants.LAST_CHAPTER && state.chapters.isNotEmpty()) {
-//                        getChapter(state.chapters.first().id, source = source)
-//                    }
-//                }
-//            }.launchIn(viewModelScope)
     }
 
-    fun getChapter(chapterId: Long, source: Source) {
+    fun getChapter(
+        chapterId: Long,
+        source: Source,
+        onGetChapterEnd: () -> Unit = {},
+    ) {
         clearError()
         state = state.copy(
             isLoading = true,
             isLocalLoaded = false,
         )
         viewModelScope.launch {
-
+            val ch = state.chapter
             val resultChapter = getChapterUseCase.findChapterById(chapterId = chapterId)
             if (resultChapter != null) {
                 clearError()
                 setScrollPosition(resultChapter.progress)
+
                 this@ReaderScreenViewModel.toggleLoading(false)
                 toggleLocalLoaded(true)
-                setChapter(resultChapter)
-                toggleLastReadAndUpdateChapterContent(resultChapter)
+                setChapter(resultChapter.copy(content = resultChapter.content.joinToString("\n\n")
+                    .split("\n\n")))
+                updateLastReadTime(resultChapter)
                 val chapter = state.chapter
                 if (chapter != null && chapter.content.joinToString()
                         .isBlank() && !state.isRemoteLoading
                 ) {
                     getReadingContentRemotely(chapter = chapter, source = source)
                 }
+                onGetChapterEnd()
             } else {
                 this@ReaderScreenViewModel.toggleLoading(false)
                 toggleLocalLoaded(false)
-                val chapter = state.chapter
-                chapter?.let {
-                    getReadingContentRemotely(source = source, chapter = it)
-                }
             }
         }
 
@@ -254,7 +226,7 @@ class ReaderScreenViewModel @Inject constructor(
                             this.toggleLoading(false)
                             toggleLocalLoaded(true)
                             if (localChapter.chapter != null) {
-                                toggleLastReadAndUpdateChapterContent(localChapter.chapter)
+                                updateLastReadTime(localChapter.chapter)
                             }
                             getChapter(chapter.id, source = source)
                         } else {
@@ -285,7 +257,7 @@ class ReaderScreenViewModel @Inject constructor(
                     insertBook(book.copy(
                         lastRead = System.currentTimeMillis()))
                 }
-                getChapters(book, source = source)
+
                 if (chapterId != Constants.LAST_CHAPTER && chapterId != Constants.NO_VALUE) {
                     getChapter(chapterId, source = source)
                 } else {
@@ -298,11 +270,9 @@ class ReaderScreenViewModel @Inject constructor(
 
     }
 
-    private fun toggleLastReadAndUpdateChapterContent(chapter: Chapter) {
+    private fun updateLastReadTime(chapter: Chapter) {
         viewModelScope.launch(Dispatchers.IO) {
-            deleteUseCase.deleteChapterByChapter(chapter)
-            insertUseCases.setLastReadToFalse(bookId = chapter.bookId)
-            insertChapter(chapter.copy(read = true, lastRead = true))
+            insertChapter(chapter.copy(read = true, lastRead = System.currentTimeMillis()))
         }
     }
 
@@ -622,5 +592,15 @@ class ReaderScreenViewModel @Inject constructor(
 
     private fun clearError() {
         state = state.copy(error = UiText.StringResource(R.string.no_error))
+    }
+
+    fun saveScrollState(currentProgress: Int? = 0) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val ch = state.chapter
+            if (ch != null) {
+                insertUseCases.insertChapter(ch.copy(progress = currentProgress
+                    ?: ch.progress))
+            }
+        }
     }
 }

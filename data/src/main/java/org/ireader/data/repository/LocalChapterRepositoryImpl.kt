@@ -59,9 +59,6 @@ class LocalChapterRepositoryImpl @Inject constructor(private val daoLibrary: Lib
         return daoLibrary.findFirstChapter(bookId)
     }
 
-    override suspend fun setLastReadToFalse(bookId: Long) {
-        return daoLibrary.setLastReadToFalse(bookId)
-    }
 
     /******************************Insert******************************/
     override suspend fun insertChapters(

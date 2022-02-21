@@ -1,5 +1,6 @@
 package org.ireader.domain.source
 
+
 import org.ireader.source.core.Dependencies
 import org.ireader.source.core.Source
 import org.ireader.source.sources.en.freewebnovel.FreeWebNovel

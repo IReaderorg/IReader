@@ -18,6 +18,7 @@ import androidx.navigation.NavController
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.compose.collectAsLazyPagingItems
 import org.ireader.core.R
+import org.ireader.domain.FetchType
 import org.ireader.domain.models.ExploreType
 import org.ireader.domain.models.layouts
 import org.ireader.domain.view_models.explore.ExploreScreenEvents
@@ -29,7 +30,6 @@ import org.ireader.presentation.presentation.components.handlePagingResult
 import org.ireader.presentation.presentation.reusable_composable.*
 import org.ireader.presentation.ui.BookDetailScreenSpec
 import org.ireader.presentation.ui.WebViewScreenSpec
-import org.ireader.source.sources.en.source_tower_deprecated.FetchType
 
 
 @OptIn(ExperimentalFoundationApi::class)

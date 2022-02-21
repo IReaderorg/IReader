@@ -36,7 +36,6 @@ interface LocalChapterRepository {
     suspend fun findFirstChapter(bookId: Long): Chapter?
 
 
-    suspend fun setLastReadToFalse(bookId: Long)
 
 
     suspend fun insertChapter(chapter: Chapter): Long

@@ -38,17 +38,17 @@ class ExploreRemoteMediator(
         state: PagingState<Int, Book>,
     ): RemoteMediator.MediatorResult {
         return try {
-
-            val currentPage = when (loadType) {
-                LoadType.REFRESH -> {
-                    chapterDao.deleteNotInLibraryChapters()
-                    libraryDao.deleteNotInLibraryBooks()
-                    val remoteKeys = getRemoteKeyClosestToCurrentPosition(state)
-                    remoteKeys?.nextPage?.minus(1) ?: 1
-                }
-                LoadType.PREPEND -> {
-                    val remoteKeys = getRemoteKeyForFirstItem(state)
-                    val prevPage = remoteKeys?.prevPage
+            kotlin.runCatching {
+                val currentPage = when (loadType) {
+                    LoadType.REFRESH -> {
+                        chapterDao.deleteNotInLibraryChapters()
+                        libraryDao.deleteNotInLibraryBooks()
+                        val remoteKeys = getRemoteKeyClosestToCurrentPosition(state)
+                        remoteKeys?.nextPage?.minus(1) ?: 1
+                    }
+                    LoadType.PREPEND -> {
+                        val remoteKeys = getRemoteKeyForFirstItem(state)
+                        val prevPage = remoteKeys?.prevPage
                         ?: return RemoteMediator.MediatorResult.Success(
                             endOfPaginationReached = remoteKeys != null
                         )
@@ -106,7 +106,8 @@ class ExploreRemoteMediator(
                 remoteKey.insertAllRemoteKeys(remoteKeys = keys)
                 remoteKey.insertAllExploredBook(response.books.map { it.toBook(source.id) })
             }
-            RemoteMediator.MediatorResult.Success(endOfPaginationReached = endOfPaginationReached)
+                RemoteMediator.MediatorResult.Success(endOfPaginationReached = endOfPaginationReached)
+            }.getOrThrow()
         } catch (e: UnknownHostException) {
             return RemoteMediator.MediatorResult.Error(Exception("There is no internet available,please check your internet connection"))
         } catch (e: IOException) {

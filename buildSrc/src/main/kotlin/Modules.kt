@@ -6,4 +6,5 @@ object Modules {
     const val core = ":core"
     const val presentation = ":presentation"
     const val source = ":source"
+    const val extensions = ":extensions"
 }

@@ -2,8 +2,6 @@ plugins {
     id("com.android.library")
     kotlin("android")
     id("kotlin-kapt")
-    id("kotlin-parcelize")
-    kotlin("plugin.serialization")
 }
 
 android {
@@ -46,30 +44,7 @@ dependencies {
 }
 
 fun DependencyHandler.addBaseDependencies() {
-    implementation(Kotlin.jsonSerialization)
-
-    implementation(DaggerHilt.hiltAndroid)
-    implementation(DaggerHilt.hiltAndroidCompiler)
     implementation(Timber.timber)
-
-    /** LifeCycle **/
-    implementation(LifeCycle.runtimeKtx)
-    implementation(LifeCycle.viewModel)
-
-
-    testImplementation(Testing.junit4)
-    testImplementation(Testing.junitAndroidExt)
-    testImplementation(Testing.truth)
-    testImplementation(Testing.coroutines)
-
-
-
-    androidTestImplementation(Testing.junit4)
-    androidTestImplementation(Testing.junitAndroidExt)
-    androidTestImplementation(Testing.truth)
-    androidTestImplementation(Testing.coroutines)
-    // Instrumented Unit Tests
-    implementation(kotlin("stdlib"))
     implementation(Ktor.core)
     implementation(Ktor.serialization)
     implementation(Ktor.okhttp)

@@ -22,7 +22,7 @@ data class Chapter(
     val dateUploaded: Long = 0,
     val dateFetch: Long = 0,
     val content: List<String> = emptyList(),
-    var lastRead: Boolean = false,
+    var lastRead: Long = 0L,
     val number: Float = -1f,
     val translator: String = "",
 ) {

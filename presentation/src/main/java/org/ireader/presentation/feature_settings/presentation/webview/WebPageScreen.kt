@@ -23,11 +23,11 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.ireader.core.utils.UiEvent
-import org.ireader.domain.utils.getHtml
 import org.ireader.domain.utils.setDefaultSettings
 import org.ireader.domain.view_models.settings.webview.WebViewPageModel
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
 import org.ireader.source.core.HttpSource
+import org.ireader.source.core.getHtml
 
 
 @ExperimentalCoroutinesApi
@@ -214,3 +214,18 @@ fun ScrollableAppBar(
         }
     }
 }
+
+//AlertDialog(onDismissRequest = { /*TODO*/ }, title = { MidSizeTextComposable(text = "Title") }, text = {
+//
+//
+//}, buttons = {
+//    TextButton(onClick = {}) {
+//        MidSizeTextComposable(text = "Title")
+//    }
+//    TextButton(onClick = {
+//
+//    }) {
+//        MidSizeTextComposable(text = "Title")
+//    }
+//
+//})

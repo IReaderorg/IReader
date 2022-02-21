@@ -3,83 +3,53 @@ package org.ireader.presentation.feature_reader.presentation.reader.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import org.ireader.core.R
-import org.ireader.core.utils.UiText
 import org.ireader.domain.models.entities.Chapter
-import org.ireader.domain.view_models.reader.ReaderScreenViewModel
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
-import org.ireader.presentation.utils.scroll.CarouselScrollState
 import org.ireader.source.core.Source
 
 @Composable
 fun MainBottomSettingComposable(
     modifier: Modifier = Modifier,
-    viewModel: ReaderScreenViewModel,
     scope: CoroutineScope,
     scaffoldState: ScaffoldState,
-    scrollState: CarouselScrollState,
+    scrollState: LazyListState,
+    chapters: List<Chapter>,
     chapter: Chapter,
+    currentChapterIndex: Int,
     source: Source,
+    onSetting: () -> Unit,
+    onNext: () -> Unit,
+    onPrev: () -> Unit,
+    onSliderFinished: () -> Unit,
+    onSliderChange: (index: Float) -> Unit,
 ) {
-    val coroutineScope = rememberCoroutineScope()
-    val currentIndex = viewModel.state.currentChapterIndex
-    //val currentChapter = viewModel.getCurrentChapterByIndex()
-    val chapters = viewModel.state.chapters
     ChaptersSliderComposable(
         scrollState = scrollState,
         onNext = {
-            if (currentIndex < chapters.lastIndex) {
-                viewModel.updateChapterSliderIndex(currentIndex + 1)
-                viewModel.getChapter(viewModel.getCurrentChapterByIndex().id, source = source)
-                coroutineScope.launch {
-                    scrollState.scrollTo(0)
-                }
-            } else {
-                coroutineScope.launch {
-                    viewModel.showSnackBar(UiText.StringResource(R.string.this_is_last_chapter))
-
-                }
-            }
+            onNext()
         },
         onPrev = {
-            if (currentIndex > 0) {
-                viewModel.updateChapterSliderIndex(currentIndex - 1)
-                viewModel.getChapter(viewModel.getCurrentChapterByIndex().id, source = source)
-                coroutineScope.launch {
-                    scrollState.scrollTo(0)
-                }
-            } else {
-                coroutineScope.launch {
-                    viewModel.showSnackBar(UiText.StringResource(org.ireader.core.R.string.this_is_first_chapter))
-                }
-            }
+            onPrev()
         },
         onSliderDragFinished = {
-            coroutineScope.launch {
-                viewModel.showSnackBar(UiText.DynamicString(chapters[viewModel.state.currentChapterIndex].title))
-            }
-            viewModel.updateChapterSliderIndex(currentIndex)
-            viewModel.getChapter(chapters[viewModel.state.currentChapterIndex].id, source = source)
-            coroutineScope.launch {
-                scrollState.scrollTo(0)
-            }
+            onSliderFinished()
         },
         onSliderChange = {
-            viewModel.updateChapterSliderIndex(it.toInt())
+            onSliderChange(it)
         },
-        chapters = viewModel.state.chapters,
+        chapters = chapters,
         currentChapter = chapter,
-        currentChapterIndex = viewModel.state.currentChapterIndex
+        currentChapterIndex = currentChapterIndex
     )
     Row(modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly,
@@ -89,6 +59,6 @@ fun MainBottomSettingComposable(
             onClick = { scope.launch { scaffoldState.drawerState.open() } })
         TopAppBarActionButton(imageVector = Icons.Default.Settings,
             title = "Setting Drawer",
-            onClick = { viewModel.toggleSettingMode(true) })
+            onClick = { onSetting() })
     }
 }

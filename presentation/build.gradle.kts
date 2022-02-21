@@ -33,6 +33,7 @@ dependencies {
     "implementation"(DaggerHilt.worker)
     "implementation"(Retrofit.retrofit)
     "implementation"(Ktor.okhttp)
+    "implementation"("dev.chrisbanes.snapper:snapper:0.2.0")
 
 
 }

@@ -24,11 +24,7 @@ android {
                 "proguard-rules.pro")
         }
     }
-    kapt {
-        arguments {
-            arg("room.schemaLocation", "$projectDir/schemas")
-        }
-    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -50,6 +46,7 @@ dependencies {
     implementation(project(Modules.core))
     implementation(project(Modules.coreUi))
     implementation(project(Modules.source))
+    implementation(project(Modules.extensions))
     implementation(Compose.ui)
     implementation(Compose.runtime)
     implementation(Compose.navigation)
@@ -86,85 +83,6 @@ dependencies {
 
 }
 
-
-////apply {
-////    from("$rootDir/base-module.gradle")
-////    addKotlinCompilerFlags()
-////}
-//
-//plugins {
-//    id("kotlinx-serialization")
-//}
-//
-//android {
-//    compileSdk = 31
-//
-//    defaultConfig {
-//        applicationId = "com.example.test"
-//        minSdk = 21
-//        targetSdk = 31
-//        versionCode = 1
-//        versionName = "1.0"
-//
-//        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-//    }
-//
-//    buildTypes {
-//        release {
-//            isMinifyEnabled = false
-//            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"),
-//                "proguard-rules.pro")
-//        }
-//    }
-//    compileOptions {
-//        sourceCompatibility = JavaVersion.VERSION_1_8
-//        targetCompatibility = JavaVersion.VERSION_1_8
-//    }
-//    kotlinOptions {
-//        jvmTarget = "1.8"
-//    }
-//}
-//
-//dependencies {
-//    "implementation"(project(Modules.core))
-//    "implementation"(project(Modules.coreUi))
-//    "implementation"(project(Modules.source))
-//    "implementation"(Compose.ui)
-//    "implementation"(Compose.runtime)
-//    "implementation"(Compose.navigation)
-//    "implementation"(Compose.material)
-//    "implementation"(Worker.runtimeKtx)
-//    "implementation"(DaggerHilt.worker)
-//    "implementation"(Coil.coilCompose)
-//
-//    /** Room **/
-//    "implementation"(Room.roomRuntime)
-//    "kapt"(Room.roomCompiler)
-//    "implementation"(Room.roomKtx)
-//    "implementation"(Room.roomPaging)
-//
-//    /** Coroutine **/
-//    "implementation"(Coroutines.core)
-//    "implementation"(Coroutines.android)
-//
-//    /** Retrofit **/
-//    "implementation"(Retrofit.retrofit)
-//    "implementation"(Retrofit.moshiConverter)
-//
-//    "implementation"(OkHttp.okHttp3)
-//
-//    "implementation"(OkHttp.okHttp3Interceptor)
-//    "implementation"(OkHttp.okhttp3_doh)
-//    "implementation"(OkHttp.okio)
-//    "implementation"(Compose.paging)
-//    "implementation"(Jsoup.jsoup)
-//    "implementation"(Jsonpathkt.jsonpathkt)
-//    "implementation"(Datastore.datastore)
-//
-//
-//
-//}
-//
 fun Project.addKotlinCompilerFlags() {
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
         kotlinOptions {
@@ -181,7 +99,6 @@ fun Project.addKotlinCompilerFlags() {
 
 
 fun DependencyHandler.addBaseDependencies() {
-    implementation(MultiDex.multiDex)
     implementation(AndroidX.coreKtx)
     implementation(AndroidX.appCompat)
     implementation(AndroidX.webkit)

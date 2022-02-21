@@ -53,10 +53,10 @@ interface LibraryChapterDao {
     ): PagingSource<Int, Chapter>
 
 
-    @Query("SELECT * from chapter WHERE bookId = :bookId AND lastRead = 1 LIMIT 1")
+    @Query("SELECT * from chapter WHERE bookId == :bookId AND lastRead = (SELECT MAX(lastRead) FROM chapter WHERE bookId == :bookId) LIMIT 1")
     fun subscribeLastReadChapter(bookId: Long): Flow<Chapter?>
 
-    @Query("SELECT * from chapter WHERE bookId = :bookId AND lastRead = 1 LIMIT 1")
+    @Query("SELECT * from chapter WHERE bookId == :bookId AND lastRead = (SELECT MAX(lastRead) FROM chapter WHERE bookId == :bookId) LIMIT 1")
     suspend fun findLastReadChapter(bookId: Long): Chapter?
 
     @Query("SELECT * from chapter WHERE bookId = :bookId LIMIT 1")
@@ -65,8 +65,6 @@ interface LibraryChapterDao {
     @Query("SELECT * from chapter WHERE bookId = :bookId LIMIT 1")
     suspend fun findFirstChapter(bookId: Long): Chapter?
 
-    @Query("UPDATE chapter SET lastRead = 0 WHERE bookId = :bookId")
-    suspend fun setLastReadToFalse(bookId: Long)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertChapters(chapters: List<Chapter>): List<Long>

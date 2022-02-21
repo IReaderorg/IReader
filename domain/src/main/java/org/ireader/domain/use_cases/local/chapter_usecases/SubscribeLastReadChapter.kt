@@ -56,14 +56,6 @@ class FindFirstChapter(private val localChapterRepository: LocalChapterRepositor
     }
 }
 
-class SetLastReadToFalse(private val localChapterRepository: LocalChapterRepository) {
-    suspend operator fun invoke(
-        bookId: Long,
-    ) {
-        return localChapterRepository.setLastReadToFalse(bookId)
-
-    }
-}
 
 
 

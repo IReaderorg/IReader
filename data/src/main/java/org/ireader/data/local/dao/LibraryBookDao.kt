@@ -48,7 +48,7 @@ interface LibraryBookDao {
 
     @RewriteQueriesToDropUnusedColumns
     @Query("""SELECT  library.*,COUNT(DISTINCT chapter.id) AS total_chapter
-        FROM  library,page_key_table
+        FROM  library
         LEFT JOIN chapter ON library.id = chapter.bookId  
         GROUP BY library.id
         HAVING library.favorite = 1 AND NOT (CASE WHEN :unread= 1 THEN SUM(chapter.read != 0) ELSE 0 END)
