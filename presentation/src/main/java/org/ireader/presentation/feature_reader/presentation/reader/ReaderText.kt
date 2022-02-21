@@ -99,7 +99,8 @@ fun ReaderText(
                                 ArrowIndicator(
                                     icon = Icons.Default.KeyboardArrowUp,
                                     swipeRefreshState = swipeState,
-                                    refreshTriggerDistance = 80.dp
+                                    refreshTriggerDistance = 80.dp,
+                                    color = viewModel.prefState.textColor
                                 )
                             }, onRefresh = {
                                 onPrev()
@@ -113,7 +114,8 @@ fun ReaderText(
                                 ArrowIndicator(
                                     icon = Icons.Default.KeyboardArrowDown,
                                     swipeRefreshState = swipeState,
-                                    refreshTriggerDistance = 80.dp
+                                    refreshTriggerDistance = 80.dp,
+                                    color = viewModel.prefState.textColor
                                 )
                             }),
                     ),

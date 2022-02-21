@@ -15,7 +15,9 @@ import androidx.paging.cachedIn
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ireader.core.utils.*
@@ -209,6 +211,7 @@ class ReaderScreenViewModel @Inject constructor(
     }
 
 
+    var getContentJob: Job? = null
     fun getReadingContentRemotely(chapter: Chapter, source: Source) {
         clearError()
         state = state.copy(
@@ -216,37 +219,42 @@ class ReaderScreenViewModel @Inject constructor(
             isLocalLoaded = false,
         )
         toggleRemoteLoading(true)
-        remoteUseCases.getRemoteReadingContent(chapter, source = source)
-            .onEach { result ->
-                when (result) {
-                    is Resource.Success -> {
-                        if (result.data != null) {
-                            toggleRemoteLoading(false)
-                            clearError()
-                            val localChapter = state.copy(
-                                chapter = chapter.copy(content = result.data),
-                            )
-                            this.toggleLoading(false)
-                            toggleLocalLoaded(true)
-                            if (localChapter.chapter != null) {
-                                updateLastReadTime(localChapter.chapter)
+        getContentJob?.cancel()
+        getContentJob = viewModelScope.launch {
+            remoteUseCases.getRemoteReadingContent(chapter, source = source)
+                .collect { result ->
+                    when (result) {
+                        is Resource.Success -> {
+                            if (result.data != null) {
+                                toggleRemoteLoading(false)
+                                clearError()
+                                val localChapter = state.copy(
+                                    chapter = chapter.copy(content = result.data),
+                                )
+                                toggleLoading(false)
+                                toggleLocalLoaded(true)
+                                if (localChapter.chapter != null) {
+                                    updateLastReadTime(localChapter.chapter)
+                                }
+                                getChapter(chapter.id, source = source)
+                            } else {
+                                showSnackBar(UiText.StringResource(R.string.something_is_wrong_with_this_chapter))
                             }
-                            getChapter(chapter.id, source = source)
-                        } else {
-                            showSnackBar(UiText.StringResource(R.string.something_is_wrong_with_this_chapter))
+                        }
+                        is Resource.Error -> {
+                            toggleRemoteLoading(false)
+                            state =
+                                state.copy(
+                                    isLoading = false,
+                                    isLocalLoaded = false,
+                                )
+                            showSnackBar(result.uiText)
                         }
                     }
-                    is Resource.Error -> {
-                        toggleRemoteLoading(false)
-                        state =
-                            state.copy(
-                                isLoading = false,
-                                isLocalLoaded = false,
-                            )
-                        showSnackBar(result.uiText)
-                    }
                 }
-            }.launchIn(viewModelScope)
+        }
+
+
     }
 
 

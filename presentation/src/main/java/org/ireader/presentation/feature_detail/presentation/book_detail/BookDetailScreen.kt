@@ -72,14 +72,14 @@ fun BookDetailScreen(
 
     val scope = rememberCoroutineScope()
     val swipeRefreshState =
-        rememberSwipeRefreshState(isRefreshing = viewModel.state.isLoading)
+        rememberSwipeRefreshState(isRefreshing = viewModel.state.isLocalLoading || viewModel.state.isRemoteLoading)
 
     val source = viewModel.state.source
     val state = viewModel.state
     val chapters = viewModel.chapterState.chapters
 
     val scrollState = rememberLazyListState()
-    if (state.isLoading) {
+    if (state.isLocalLoading) {
         showLoading()
     }
     if (book != null && source != null) {
@@ -139,7 +139,10 @@ fun BookDetailScreen(
                     state = swipeRefreshState,
                     onRefresh = {
                         source.let {
-                            viewModel.getRemoteChapterDetail(book, source)
+                            scope.launch {
+                                viewModel.getRemoteChapterDetail(book, source)
+
+                            }
                         }
                     },
                     indicator = { state, trigger ->
@@ -178,8 +181,10 @@ fun BookDetailScreen(
                                     viewModel.onEvent(BookDetailEvent.ToggleSummary)
                                 },
                                 onRefresh = {
-                                    viewModel.getRemoteBookDetail(book, source = source)
-                                    viewModel.getRemoteChapterDetail(book, source)
+                                    scope.launch {
+                                        viewModel.getRemoteBookDetail(book, source = source)
+                                        viewModel.getRemoteChapterDetail(book, source)
+                                    }
                                 },
                                 isSummaryExpanded = viewModel.expandedSummary,
                                 book = book,

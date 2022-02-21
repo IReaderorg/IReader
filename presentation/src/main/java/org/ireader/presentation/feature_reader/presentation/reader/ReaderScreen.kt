@@ -80,162 +80,167 @@ fun ReadingScreen(
             }
         }
     }
+    LaunchedEffect(key1 = chapter) {
+        if (chapter != null) {
+            viewModel.updateChapterSliderIndex(viewModel.getCurrentIndexOfChapter(chapter))
+        }
+    }
 
-        Scaffold(topBar = {
-            if (chapter != null) {
-                ReaderScreenTopBar(
-                    isReaderModeEnable = state.isReaderModeEnable,
-                    isLoaded = state.isLocalLoaded,
-                    modalBottomSheetValue = modalBottomSheetState.targetValue,
-                    onRefresh = {
-                        viewModel.getReadingContentRemotely(chapter = chapter,
-                            source = source)
-                    },
-                    source = source,
-                    chapter = chapter,
-                    navController = navController,
-                    onWebView = {
-                        try {
-                            if (!state.isReaderModeEnable && state.isLocalLoaded && modalBottomSheetState.targetValue == ModalBottomSheetValue.Expanded) {
-                                navController.navigate(WebViewScreenSpec.buildRoute(
-                                    url = chapter.link,
-                                    sourceId = source.id,
-                                    fetchType = FetchType.ContentFetchType.index,
-                                )
-                                )
-                            } else if (!state.isLocalLoaded) {
-                                navController.navigate(WebViewScreenSpec.buildRoute(
-                                    url = chapter.link,
-                                    sourceId = source.id,
-                                    fetchType = FetchType.ContentFetchType.index,
-                                    bookId = chapter.bookId,
-                                    chapterId = chapter.id
-                                ))
-                            }
-                        } catch (e: Exception) {
-                            scope.launch {
-                                viewModel.showSnackBar(UiText.ExceptionString(e))
-                            }
+    Scaffold(topBar = {
+        if (chapter != null) {
+            ReaderScreenTopBar(
+                isReaderModeEnable = state.isReaderModeEnable,
+                isLoaded = state.isLocalLoaded,
+                modalBottomSheetValue = modalBottomSheetState.targetValue,
+                onRefresh = {
+                    viewModel.getReadingContentRemotely(chapter = chapter,
+                        source = source)
+                },
+                source = source,
+                chapter = chapter,
+                navController = navController,
+                onWebView = {
+                    try {
+                        if (!state.isReaderModeEnable && state.isLocalLoaded && modalBottomSheetState.targetValue == ModalBottomSheetValue.Expanded) {
+                            navController.navigate(WebViewScreenSpec.buildRoute(
+                                url = chapter.link,
+                                sourceId = source.id,
+                                fetchType = FetchType.ContentFetchType.index,
+                            )
+                            )
+                        } else if (!state.isLocalLoaded) {
+                            navController.navigate(WebViewScreenSpec.buildRoute(
+                                url = chapter.link,
+                                sourceId = source.id,
+                                fetchType = FetchType.ContentFetchType.index,
+                                bookId = chapter.bookId,
+                                chapterId = chapter.id
+                            ))
+                        }
+                    } catch (e: Exception) {
+                        scope.launch {
+                            viewModel.showSnackBar(UiText.ExceptionString(e))
                         }
                     }
-                )
-
-            }
-        },
-            scaffoldState = scaffoldState,
-            snackbarHost = { ISnackBarHost(snackBarHostState = it) },
-            bottomBar = {
-                if (!state.isReaderModeEnable && state.isLocalLoaded && chapter != null) {
-                    AnimatedVisibility(
-                        visible = !state.isReaderModeEnable && state.isLocalLoaded,
-                        enter = slideInVertically(initialOffsetY = { it }),
-                        exit = slideOutVertically(targetOffsetY = { it })
-                    ) {
-                        ModalBottomSheetLayout(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(IntrinsicSize.Max)
-                                .height(if (viewModel.state.isMainBottomModeEnable) 130.dp else 320.dp),
-                            sheetBackgroundColor = MaterialTheme.colors.background,
-                            sheetElevation = 8.dp,
-                            sheetState = modalBottomSheetState,
-                            sheetContent = {
-                                Column(modifier.fillMaxSize()) {
-                                    Divider(modifier = modifier.fillMaxWidth(),
-                                        color = MaterialTheme.colors.onBackground.copy(alpha = .2f),
-                                        thickness = 1.dp)
-                                    Spacer(modifier = modifier.height(15.dp))
-                                    if (viewModel.state.isMainBottomModeEnable) {
-                                        MainBottomSettingComposable(
-                                            scope = scope,
-                                            scaffoldState = scaffoldState,
-                                            scrollState = scrollState,
-                                            chapter = chapter,
-                                            chapters = viewModel.state.chapters,
-                                            currentChapterIndex = viewModel.state.currentChapterIndex,
-                                            onSetting = {
-                                                viewModel.toggleSettingMode(true)
-                                            },
-                                            source = source,
-                                            onNext = {
-                                                onNext()
-                                            },
-                                            onPrev = {
-                                                onPrev()
-                                            },
-                                            onSliderChange = { onSliderChange(it) },
-                                            onSliderFinished = { onSliderFinished() }
-                                        )
-                                    }
-                                    if (viewModel.state.isSettingModeEnable) {
-                                        ReaderSettingComposable(viewModel = viewModel)
-                                    }
-                                }
-                            },
-                            content = {}
-                        )
-                    }
                 }
-            },
-            drawerGesturesEnabled = true,
-            drawerBackgroundColor = MaterialTheme.colors.background,
-            drawerContent = {
-                if (chapter != null) {
-                    ReaderScreenDrawer(
-                        onReverseIcon = {
-                            viewModel.reverseChapters()
-                            viewModel.getLocalChaptersByPaging(chapter.bookId)
-                        },
-                        onChapter = { ch ->
-                            viewModel.getChapter(ch.id,
-                                source = source)
-                            coroutineScope.launch {
-                                scrollState.animateScrollToItem(0, 0)
+            )
+
+        }
+    },
+        scaffoldState = scaffoldState,
+        snackbarHost = { ISnackBarHost(snackBarHostState = it) },
+        bottomBar = {
+            if (!state.isReaderModeEnable && state.isLocalLoaded && chapter != null) {
+                AnimatedVisibility(
+                    visible = !state.isReaderModeEnable && state.isLocalLoaded,
+                    enter = slideInVertically(initialOffsetY = { it }),
+                    exit = slideOutVertically(targetOffsetY = { it })
+                ) {
+                    ModalBottomSheetLayout(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(IntrinsicSize.Max)
+                            .height(if (viewModel.state.isMainBottomModeEnable) 130.dp else 320.dp),
+                        sheetBackgroundColor = MaterialTheme.colors.background,
+                        sheetElevation = 8.dp,
+                        sheetState = modalBottomSheetState,
+                        sheetContent = {
+                            Column(modifier.fillMaxSize()) {
+                                Divider(modifier = modifier.fillMaxWidth(),
+                                    color = MaterialTheme.colors.onBackground.copy(alpha = .2f),
+                                    thickness = 1.dp)
+                                Spacer(modifier = modifier.height(15.dp))
+                                if (viewModel.state.isMainBottomModeEnable) {
+                                    MainBottomSettingComposable(
+                                        scope = scope,
+                                        scaffoldState = scaffoldState,
+                                        scrollState = scrollState,
+                                        chapter = chapter,
+                                        chapters = viewModel.state.chapters,
+                                        currentChapterIndex = viewModel.state.currentChapterIndex,
+                                        onSetting = {
+                                            viewModel.toggleSettingMode(true)
+                                        },
+                                        source = source,
+                                        onNext = {
+                                            onNext()
+                                        },
+                                        onPrev = {
+                                            onPrev()
+                                        },
+                                        onSliderChange = { onSliderChange(it) },
+                                        onSliderFinished = { onSliderFinished() }
+                                    )
+                                }
+                                if (viewModel.state.isSettingModeEnable) {
+                                    ReaderSettingComposable(viewModel = viewModel)
+                                }
                             }
-                            viewModel.updateChapterSliderIndex(viewModel.getCurrentIndexOfChapter(
-                                ch))
                         },
-                        chapter = chapter,
-                        source = source,
-                        chapters = chapters,
+                        content = {}
                     )
                 }
             }
-        ) {
+        },
+        drawerGesturesEnabled = true,
+        drawerBackgroundColor = MaterialTheme.colors.background,
+        drawerContent = {
             if (chapter != null) {
-                Box(modifier = modifier.fillMaxSize()) {
-                    if (chapter.isChapterNotEmpty() && !state.isLoading) {
-                        ReaderText(
-                            viewModel = viewModel,
-                            chapter = chapter,
-                            onNext = { onNext() },
-                            swipeState = swipeState,
-                            onPrev = { onPrev() },
-                            scrollState = scrollState
-                        )
-                    }
+                ReaderScreenDrawer(
+                    onReverseIcon = {
+                        viewModel.reverseChapters()
+                        viewModel.getLocalChaptersByPaging(chapter.bookId)
+                    },
+                    onChapter = { ch ->
+                        viewModel.getChapter(ch.id,
+                            source = source)
+                        coroutineScope.launch {
+                            scrollState.animateScrollToItem(0, 0)
+                        }
+                        viewModel.updateChapterSliderIndex(viewModel.getCurrentIndexOfChapter(
+                            ch))
+                    },
+                    chapter = chapter,
+                    source = source,
+                    chapters = chapters,
+                )
+            }
+        }
+    ) {
+        if (chapter != null) {
+            Box(modifier = modifier.fillMaxSize()) {
+                if (chapter.isChapterNotEmpty() && !state.isLoading) {
+                    ReaderText(
+                        viewModel = viewModel,
+                        chapter = chapter,
+                        onNext = { onNext() },
+                        swipeState = swipeState,
+                        onPrev = { onPrev() },
+                        scrollState = scrollState
+                    )
+                }
 
 
-                    if (state.error.asString(context).isNotBlank()) {
-                        ErrorTextWithEmojis(
-                            error = state.error.asString(context),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(20.dp)
-                                .wrapContentSize(Alignment.Center)
-                                .align(Alignment.Center),
-                        )
-                    }
+                if (state.error.asString(context).isNotBlank()) {
+                    ErrorTextWithEmojis(
+                        error = state.error.asString(context),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp)
+                            .wrapContentSize(Alignment.Center)
+                            .align(Alignment.Center),
+                    )
+                }
 
-                    if (viewModel.state.isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.align(Alignment.Center),
-                            color = MaterialTheme.colors.primary
-                        )
-                    }
+                if (viewModel.state.isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center),
+                        color = MaterialTheme.colors.primary
+                    )
                 }
             }
         }
+    }
 
 }
 
