@@ -52,6 +52,7 @@ object ReaderScreenSpec : ScreenSpec {
         val coroutineScope = rememberCoroutineScope()
         val scrollState = rememberLazyListState()
         val swipeState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isLoading)
+
         if (source != null) {
             ReadingScreen(
                 navController = navController,
@@ -67,9 +68,6 @@ object ReaderScreenSpec : ScreenSpec {
                                 scrollState.animateScrollToItem(0, 0)
                             }
                         }
-                        coroutineScope.launch {
-                            scrollState.animateScrollToItem(0, 0)
-                        }
                     } else {
                         coroutineScope.launch {
                             viewModel.showSnackBar(UiText.StringResource(R.string.this_is_last_chapter))
@@ -81,10 +79,12 @@ object ReaderScreenSpec : ScreenSpec {
                     if (currentIndex > 0) {
                         viewModel.updateChapterSliderIndex(currentIndex - 1)
                         viewModel.getChapter(viewModel.getCurrentChapterByIndex().id,
-                            source = source)
-                        coroutineScope.launch {
-                            scrollState.animateScrollToItem(0, 0)
+                            source = source) {
+                            coroutineScope.launch {
+                                scrollState.animateScrollToItem(0, 0)
+                            }
                         }
+
                     } else {
                         coroutineScope.launch {
                             viewModel.showSnackBar(UiText.StringResource(org.ireader.core.R.string.this_is_first_chapter))

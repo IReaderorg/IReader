@@ -1,23 +1,23 @@
 package org.ireader.presentation.feature_reader.presentation.reader
 
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -28,6 +28,7 @@ import org.ireader.domain.view_models.reader.ReaderEvent
 import org.ireader.domain.view_models.reader.ReaderScreenViewModel
 import org.ireader.presentation.utils.scroll.Carousel
 import org.ireader.presentation.utils.scroll.CarouselDefaults
+import timber.log.Timber
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -38,7 +39,9 @@ fun ReaderText(
     onNext: () -> Unit,
     onPrev: () -> Unit,
     swipeState: SwipeRefreshState,
+    scrollState: LazyListState,
 ) {
+
     val modalBottomSheetState =
         rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Expanded)
     val scope = rememberCoroutineScope()
@@ -46,8 +49,9 @@ fun ReaderText(
     val state = viewModel.state
     val prefState = viewModel.prefState
     val interactionSource = remember { MutableInteractionSource() }
-
-    val scrollState = rememberLazyListState()
+    val maxOffset = remember {
+        mutableStateOf(0)
+    }
 
     Box(
         Modifier
@@ -75,121 +79,75 @@ fun ReaderText(
 
         Box(modifier = Modifier
             .fillMaxSize()
+            .pointerInput(true) {
+                detectVerticalDragGestures { change, dragAmount ->
+                    Timber.e(dragAmount.toString())
+                    Timber.e(change.toString())
+                }
+            }
         ) {
             Row(
                 modifier = modifier
             ) {
-                val animatedProgress = remember { Animatable(1f) }
-
-                LaunchedEffect(animatedProgress) {
-                    animatedProgress.animateTo(0.5f,
-                        animationSpec = tween(
-                            durationMillis = 2000,
-                            delayMillis = 2000
-                        ))
-                }
-                if (scrollState.firstVisibleItemScrollOffset == 0) {
-                    SwipeRefresh(
-                        modifier = Modifier.fillMaxSize(),
-                        state = swipeState,
-                        onRefresh = {
-                            onPrev()
-                        },
-                        indicatorAlignment = Alignment.TopCenter,
-                        indicator = { state, trigger ->
-                            ArrowIndicator(
-                                icon = Icons.Default.KeyboardArrowUp,
-                                swipeRefreshState = swipeState,
-                                refreshTriggerDistance = 80.dp
-                            )
-                        }
-                    )
-                    {
-                        LazyColumn(
-                            state = scrollState,
-                            modifier = Modifier
-                        ) {
-                            item {
-                                Box(modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(Color.Red)) {
-
-                                }
-
-                            }
-                            item {
-                                Text(
-                                    modifier = modifier
-                                        .weight(1f),
-                                    text = chapter.content.map { it.trimStart() }
-                                        .joinToString("\n".repeat(prefState.distanceBetweenParagraphs)),
-                                    fontSize = viewModel.prefState.fontSize.sp,
-                                    fontFamily = viewModel.prefState.font.fontFamily,
-                                    textAlign = TextAlign.Start,
-                                    color = prefState.textColor,
-                                    lineHeight = prefState.lineHeight.sp,
+                MultiSwipeRefresh(
+                    modifier = Modifier.fillMaxSize(),
+                    state = swipeState,
+                    indicators = listOf(
+                        ISwipeRefreshIndicator(scrollState.firstVisibleItemScrollOffset == 0,
+                            alignment = Alignment.TopCenter,
+                            indicator = { state, trigger ->
+                                ArrowIndicator(
+                                    icon = Icons.Default.KeyboardArrowUp,
+                                    swipeRefreshState = swipeState,
+                                    refreshTriggerDistance = 80.dp
                                 )
-                            }
-
+                            }, onRefresh = {
+                                onPrev()
+                            }),
+                        ISwipeRefreshIndicator(scrollState.firstVisibleItemScrollOffset != 0,
+                            alignment = Alignment.BottomCenter,
+                            onRefresh = {
+                                onNext()
+                            },
+                            indicator = { state, trigger ->
+                                ArrowIndicator(
+                                    icon = Icons.Default.KeyboardArrowDown,
+                                    swipeRefreshState = swipeState,
+                                    refreshTriggerDistance = 80.dp
+                                )
+                            }),
+                    ),
+                )
+                {
+                    LazyColumn(
+                        state = scrollState,
+                        modifier = Modifier
+                    ) {
+                        item {
+                            Text(
+                                modifier = modifier
+                                    .weight(1f),
+                                text = chapter.content.map { it.trimStart() }
+                                    .joinToString("\n".repeat(prefState.distanceBetweenParagraphs)),
+                                fontSize = viewModel.prefState.fontSize.sp,
+                                fontFamily = viewModel.prefState.font.fontFamily,
+                                textAlign = TextAlign.Start,
+                                color = prefState.textColor,
+                                lineHeight = prefState.lineHeight.sp,
+                            )
                         }
 
                     }
 
-                } else {
-                    SwipeRefresh(
-                        modifier = Modifier.fillMaxSize(),
-                        state = swipeState,
-                        onRefresh = {
-                            onNext()
-                        },
-                        indicatorAlignment = Alignment.BottomCenter,
-                        indicator = { state, trigger ->
-                            ArrowIndicator(
-                                icon = Icons.Default.KeyboardArrowUp,
-                                swipeRefreshState = swipeState,
-                                refreshTriggerDistance = 80.dp
-                            )
-                        }
-                    )
-                    {
-                        LazyColumn(
-                            state = scrollState,
-                            modifier = Modifier
-                        ) {
-                            item {
-                                Box(modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(Color.Red)) {
 
-                                }
-
-                            }
-                            item {
-                                Text(
-                                    modifier = modifier
-                                        .weight(1f),
-                                    text = chapter.content.map { it.trimStart() }
-                                        .joinToString("\n".repeat(prefState.distanceBetweenParagraphs)),
-                                    fontSize = viewModel.prefState.fontSize.sp,
-                                    fontFamily = viewModel.prefState.font.fontFamily,
-                                    textAlign = TextAlign.Start,
-                                    color = prefState.textColor,
-                                    lineHeight = prefState.lineHeight.sp,
-                                )
-                            }
-
-                        }
-
-                    }
                 }
-
 
                 Carousel(
                     state = scrollState,
                     modifier = Modifier
                         .fillMaxHeight()
                         .weight(.02f)
-                        .padding(start = 6.dp),
+                        .padding(start = 4.dp),
                     colors = CarouselDefaults.colors(
                         thumbColor = MaterialTheme.colors.scrollingThumbColor,
                         scrollingThumbColor = MaterialTheme.colors.scrollingThumbColor,
@@ -202,4 +160,9 @@ fun ReaderText(
 
         }
     }
+}
+
+fun LazyListState.isScrolledToTheEnd(): Boolean {
+    val lastItem = layoutInfo.visibleItemsInfo.lastOrNull()
+    return lastItem == null || lastItem.size + lastItem.offset <= layoutInfo.viewportEndOffset
 }

@@ -210,7 +210,8 @@ fun ReadingScreen(
                             chapter = chapter,
                             onNext = { onNext() },
                             swipeState = swipeState,
-                            onPrev = { onPrev() }
+                            onPrev = { onPrev() },
+                            scrollState = scrollState
                         )
                     }
 

@@ -83,6 +83,7 @@ class ReaderScreenViewModel @Inject constructor(
                 getChapters(bookId, source = source)
                 getLocalBookById(bookId, chapterId, source = source)
                 readPreferences()
+
             } else {
                 viewModelScope.launch {
                     showSnackBar(UiText.StringResource(org.ireader.core.R.string.the_source_is_not_found))
@@ -189,13 +190,15 @@ class ReaderScreenViewModel @Inject constructor(
                 toggleLocalLoaded(true)
                 setChapter(resultChapter.copy(content = resultChapter.content.joinToString("\n\n")
                     .split("\n\n")))
-                updateLastReadTime(resultChapter)
+
                 val chapter = state.chapter
                 if (chapter != null && chapter.content.joinToString()
                         .isBlank() && !state.isRemoteLoading
                 ) {
                     getReadingContentRemotely(chapter = chapter, source = source)
                 }
+                updateLastReadTime(resultChapter)
+                updateChapterSliderIndex(getCurrentIndexOfChapter(resultChapter))
                 onGetChapterEnd()
             } else {
                 this@ReaderScreenViewModel.toggleLoading(false)
@@ -456,8 +459,9 @@ class ReaderScreenViewModel @Inject constructor(
      * get the index pf chapter based on the reversed state
      */
     fun getCurrentIndexOfChapter(chapter: Chapter): Int {
-        val chaptersById: List<Int> = state.chapters.map { it.id.toInt() }
-        return if (chaptersById.indexOf(chapter.id.toInt()) != -1) chaptersById.indexOf(chapter.id.toInt()) else 0
+
+        val selectedChapter = state.chapters.indexOfFirst { it.id == chapter.id }
+        return if (selectedChapter != -1) selectedChapter else 0
     }
 
     private fun getCurrentIndex(): Int {

@@ -47,7 +47,7 @@ fun rememberSwipeRefreshState(
 }
 
 /**
- * A state object that can be hoisted to control and observe changes for [SwipeRefresh].
+ * A state object that can be hoisted to control and observe changes for [MultiSwipeRefresh].
  *
  * In most cases, this will be created via [rememberSwipeRefreshState].
  *
@@ -201,7 +201,7 @@ private class SwipeRefreshNestedScrollConnection(
  *
  * @sample com.google.accompanist.sample.swiperefresh.SwipeRefreshSample
  *
- * @param state the state object to be used to control or observe the [SwipeRefresh] state.
+ * @param state the state object to be used to control or observe the [MultiSwipeRefresh] state.
  * @param onRefresh Lambda which is invoked when a swipe to refresh gesture is completed.
  * @param modifier the modifier to apply to this layout.
  * @param swipeEnabled Whether the the layout should react to swipe gestures or not.
@@ -214,27 +214,33 @@ private class SwipeRefreshNestedScrollConnection(
  * provided the indicator will be clipped to the [content] bounds. Defaults to true.
  * @param content The content containing a scroll composable.
  */
-@Composable
-fun SwipeRefresh(
-    state: SwipeRefreshState,
-    onRefresh: () -> Unit,
-    modifier: Modifier = Modifier,
-    swipeEnabled: Boolean = true,
-    refreshTriggerDistance: Dp = 80.dp,
-    indicatorAlignment: Alignment = Alignment.TopCenter,
-    indicatorPadding: PaddingValues = PaddingValues(0.dp),
-    indicator: @Composable (state: SwipeRefreshState, refreshTrigger: Dp) -> Unit = { s, trigger ->
+
+data class ISwipeRefreshIndicator(
+    val enable: Boolean,
+    val alignment: Alignment,
+    val indicator: @Composable (state: SwipeRefreshState, refreshTrigger: Dp) -> Unit = { s, trigger ->
         org.ireader.presentation.feature_reader.presentation.reader.reverrse_swip_refresh.SwipeRefreshIndicator(
             state = s,
             refreshTriggerDistance = trigger,
-            clockwise = (indicatorAlignment as BiasAlignment).verticalBias != 1f
+            clockwise = true//(alignment as BiasAlignment).verticalBias != 1f
         )
     },
+    val onRefresh: () -> Unit,
+)
+
+@Composable
+fun MultiSwipeRefresh(
+    state: SwipeRefreshState,
+    modifier: Modifier = Modifier,
+    swipeEnabled: Boolean = true,
+    refreshTriggerDistance: Dp = 80.dp,
+    indicators: List<ISwipeRefreshIndicator>,
+    //indicatorAlignment: Alignment = Alignment.TopCenter,
+    indicatorPadding: PaddingValues = PaddingValues(0.dp),
     clipIndicatorToPadding: Boolean = true,
     content: @Composable () -> Unit,
 ) {
-    val coroutineScope = rememberCoroutineScope()
-    val updatedOnRefresh = rememberUpdatedState(onRefresh)
+
 
     // Our LaunchedEffect, which animates the indicator to its resting position
     LaunchedEffect(state.isSwipeInProgress) {
@@ -244,41 +250,47 @@ fun SwipeRefresh(
         }
     }
 
-    val refreshTriggerPx = with(LocalDensity.current) { refreshTriggerDistance.toPx() }
+    indicators.forEach { indicator ->
+        val coroutineScope = rememberCoroutineScope()
+        val refreshTriggerPx = with(LocalDensity.current) { refreshTriggerDistance.toPx() }
+        val updatedOnRefresh = rememberUpdatedState(indicator.onRefresh)
+        if (indicator.enable) {
+            // Our nested scroll connection, which updates our state.
+            val nestedScrollConnection = remember(state, coroutineScope) {
+                SwipeRefreshNestedScrollConnection(
+                    state = state,
+                    coroutineScope = coroutineScope,
+                    onRefresh = {
+                        // On refresh, re-dispatch to the update onRefresh block
+                        updatedOnRefresh.value.invoke()
+                    },
+                    scrollFromTop = (indicator.alignment as BiasAlignment).verticalBias != 1f
+                )
+            }.apply {
+                this.enabled = swipeEnabled
+                this.refreshTrigger = refreshTriggerPx
+            }
 
-    // Our nested scroll connection, which updates our state.
-    val nestedScrollConnection = remember(state, coroutineScope) {
-        SwipeRefreshNestedScrollConnection(
-            state = state,
-            coroutineScope = coroutineScope,
-            onRefresh = {
-                // On refresh, re-dispatch to the update onRefresh block
-                updatedOnRefresh.value.invoke()
-            },
-            scrollFromTop = (indicatorAlignment as BiasAlignment).verticalBias != 1f
-        )
-    }.apply {
-        this.enabled = swipeEnabled
-        this.refreshTrigger = refreshTriggerPx
-    }
+            Box(modifier.nestedScroll(connection = nestedScrollConnection)) {
+                content()
 
-    Box(modifier.nestedScroll(connection = nestedScrollConnection)) {
-        content()
-
-        Box(
-            Modifier
-                // If we're not clipping to the padding, we use clipToBounds() before the padding()
-                // modifier.
-                .let { if (!clipIndicatorToPadding) it.clipToBounds() else it }
-                .padding(indicatorPadding)
-                .matchParentSize()
-                // Else, if we're are clipping to the padding, we use clipToBounds() after
-                // the padding() modifier.
-                .let { if (clipIndicatorToPadding) it.clipToBounds() else it }
-        ) {
-            Box(Modifier.align(indicatorAlignment)) {
-                indicator(state, refreshTriggerDistance)
+                Box(
+                    Modifier
+                        // If we're not clipping to the padding, we use clipToBounds() before the padding()
+                        // modifier.
+                        .let { if (!clipIndicatorToPadding) it.clipToBounds() else it }
+                        .padding(indicatorPadding)
+                        .matchParentSize()
+                        // Else, if we're are clipping to the padding, we use clipToBounds() after
+                        // the padding() modifier.
+                        .let { if (clipIndicatorToPadding) it.clipToBounds() else it }
+                ) {
+                    Box(Modifier.align(indicator.alignment)) {
+                        indicator.indicator(state, refreshTriggerDistance)
+                    }
+                }
             }
         }
     }
+
 }

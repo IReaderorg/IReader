@@ -71,10 +71,12 @@ fun ReaderScreenDrawer(
             AnimatedContent(chapters.loadState.refresh is LoadState.NotLoading) {
                 LazyColumn(modifier = Modifier.fillMaxSize(),
                     state = drawerScrollState) {
-                    items(items = chapters) { chapter ->
-                        if (chapter != null && source != null) {
+                    items(items = chapters) { chapterItem ->
+                        if (chapterItem != null) {
                             ChapterListItemComposable(modifier = modifier,
-                                chapter = chapter, goTo = { onChapter(chapter) })
+                                chapter = chapterItem,
+                                goTo = { onChapter(chapterItem) },
+                                selected = chapter.id == chapterItem.id)
                         }
                     }
                 }

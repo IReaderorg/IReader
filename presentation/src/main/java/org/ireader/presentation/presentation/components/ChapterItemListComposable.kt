@@ -14,7 +14,11 @@ import org.ireader.domain.models.entities.Chapter
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun ChapterListItemComposable(modifier: Modifier = Modifier, chapter: Chapter, goTo: () -> Unit) {
+fun ChapterListItemComposable(
+    modifier: Modifier = Modifier,
+    chapter: Chapter, goTo: () -> Unit,
+    selected: Boolean = false,
+) {
     ListItem(
         modifier = modifier.clickable {
             goTo()
@@ -22,8 +26,12 @@ fun ChapterListItemComposable(modifier: Modifier = Modifier, chapter: Chapter, g
         text = {
             Text(
                 text = chapter.title,
-                color = if (chapter.read) MaterialTheme.colors.onBackground.copy(
-                    alpha = .4f) else MaterialTheme.colors.onBackground,
+                color = if (!selected) {
+                    if (chapter.read) MaterialTheme.colors.onBackground.copy(
+                        alpha = .4f) else MaterialTheme.colors.onBackground
+                } else {
+                    MaterialTheme.colors.primary
+                },
                 style = MaterialTheme.typography.subtitle1,
                 fontWeight = FontWeight.SemiBold,
                 overflow = TextOverflow.Ellipsis,
@@ -38,7 +46,7 @@ fun ChapterListItemComposable(modifier: Modifier = Modifier, chapter: Chapter, g
         },
         secondaryText = {
 
-        Text(
+            Text(
                 text = if (chapter.dateUploaded != 0L) chapter.dateUploaded.toString() else "",
                 fontStyle = FontStyle.Italic,
                 color = if (chapter.read) MaterialTheme.colors.onBackground.copy(
