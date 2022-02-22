@@ -1,4 +1,4 @@
-package org.ireader.source.sources.en.freewebnovel
+package org.ireader.extensions.sources.en.freewebnovel
 
 import io.ktor.client.request.*
 import kotlinx.coroutines.*
@@ -62,7 +62,7 @@ class FreeWebNovel(deps: Dependencies) : ParsedHttpSource(deps) {
     override fun popularSelector() = "div.ul-list1 div.li-row"
 
     override fun popularFromElement(element: Element): BookInfo {
-        val url = element.select("a").attr("href")
+        val url = baseUrl + element.select("a").attr("href")
         val title = element.select("a").attr("title")
         val thumbnailUrl = element.select("img").attr("src")
         return BookInfo(link = url, title = title, cover = thumbnailUrl)
@@ -85,7 +85,7 @@ class FreeWebNovel(deps: Dependencies) : ParsedHttpSource(deps) {
 
     override fun latestFromElement(element: Element): BookInfo {
         val title = element.select("div.txt a").attr("title")
-        val url = element.select("div.txt a").attr("href").substringAfter(baseUrl)
+        val url = baseUrl + element.select("div.txt a").attr("href")
         val thumbnailUrl = element.select("div.pic img").attr("src")
         return BookInfo(link = url, title = title, cover = thumbnailUrl)
     }
@@ -96,7 +96,7 @@ class FreeWebNovel(deps: Dependencies) : ParsedHttpSource(deps) {
 
     override fun searchFromElement(element: Element): BookInfo {
         val title = element.select("div.txt a").attr("title")
-        val url = element.select("div.txt a").attr("href")
+        val url = baseUrl + element.select("div.txt a").attr("href")
         val thumbnailUrl = element.select("div.pic img").attr("src")
         return BookInfo(link = url, title = title, cover = thumbnailUrl)
     }
@@ -107,6 +107,7 @@ class FreeWebNovel(deps: Dependencies) : ParsedHttpSource(deps) {
     // manga details
     override fun detailParse(document: Document): BookInfo {
         val title = document.select("div.m-desc h1.tit").text()
+        val cover = document.select("div.m-book1 div.pic img").text()
         val link = baseUrl + document.select("div.cur div.wp a:nth-child(5)").attr("href")
         val authorBookSelector = document.select("div.right a.a1").attr("title")
         val description = document.select("div.inner p").eachText().joinToString("\n")
@@ -114,17 +115,18 @@ class FreeWebNovel(deps: Dependencies) : ParsedHttpSource(deps) {
 
         return BookInfo(
             title = title,
+            cover = cover,
             description = description,
             author = authorBookSelector,
             genres = category,
-            link = link
+            link = link,
         )
     }
 
     // chapters
     override fun chaptersRequest(book: BookInfo): HttpRequestBuilder {
         return HttpRequestBuilder().apply {
-            url(baseUrl + book.link)
+            url(book.link)
             headers { headers }
         }
     }
@@ -140,7 +142,7 @@ class FreeWebNovel(deps: Dependencies) : ParsedHttpSource(deps) {
 
     fun uniqueChaptersRequest(book: BookInfo, page: Int): HttpRequestBuilder {
         return HttpRequestBuilder().apply {
-            url(baseUrl + book.link.replace("/${page - 1}.html", "").replace(".html", "")
+            url(book.link.replace("/${page - 1}.html", "").replace(".html", "")
                 .plus("/$page.html"))
             headers { headers }
         }

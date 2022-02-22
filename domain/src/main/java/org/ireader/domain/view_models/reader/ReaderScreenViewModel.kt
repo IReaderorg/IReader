@@ -176,26 +176,23 @@ class ReaderScreenViewModel @Inject constructor(
         source: Source,
         onGetChapterEnd: () -> Unit = {},
     ) {
-        clearError()
-        state = state.copy(
-            isLoading = true,
-            isLocalLoaded = false,
-        )
+        toggleLoading(true)
+        toggleLocalLoaded(false)
         viewModelScope.launch {
-            val ch = state.chapter
             val resultChapter = getChapterUseCase.findChapterById(chapterId = chapterId)
             if (resultChapter != null) {
                 clearError()
                 setScrollPosition(resultChapter.progress)
-
                 this@ReaderScreenViewModel.toggleLoading(false)
                 toggleLocalLoaded(true)
-                setChapter(resultChapter.copy(content = resultChapter.content.joinToString("\n\n")
-                    .split("\n\n")))
-
+                setChapter(resultChapter.copy(content = resultChapter.content))
                 val chapter = state.chapter
-                if (chapter != null && chapter.content.joinToString()
-                        .isBlank() && !state.isRemoteLoading
+                if (
+                    chapter != null &&
+                    chapter.content.joinToString()
+                        .isBlank() &&
+                    !state.isRemoteLoading &&
+                    !state.isLoading
                 ) {
                     getReadingContentRemotely(chapter = chapter, source = source)
                 }
@@ -203,7 +200,7 @@ class ReaderScreenViewModel @Inject constructor(
                 updateChapterSliderIndex(getCurrentIndexOfChapter(resultChapter))
                 onGetChapterEnd()
             } else {
-                this@ReaderScreenViewModel.toggleLoading(false)
+                toggleLoading(false)
                 toggleLocalLoaded(false)
             }
         }
@@ -214,40 +211,34 @@ class ReaderScreenViewModel @Inject constructor(
     var getContentJob: Job? = null
     fun getReadingContentRemotely(chapter: Chapter, source: Source) {
         clearError()
-        state = state.copy(
-            isLoading = true,
-            isLocalLoaded = false,
-        )
+        toggleLocalLoaded(false)
         toggleRemoteLoading(true)
+        toggleLoading(true)
         getContentJob?.cancel()
-        getContentJob = viewModelScope.launch {
+        getContentJob = viewModelScope.launch(Dispatchers.IO) {
             remoteUseCases.getRemoteReadingContent(chapter, source = source)
                 .collect { result ->
                     when (result) {
                         is Resource.Success -> {
                             if (result.data != null) {
-                                toggleRemoteLoading(false)
-                                clearError()
-                                val localChapter = state.copy(
-                                    chapter = chapter.copy(content = result.data),
-                                )
+                                insertChapter(chapter.copy(content = result.data))
+                                setChapter(chapter.copy(content = result.data))
                                 toggleLoading(false)
+                                toggleRemoteLoading(false)
                                 toggleLocalLoaded(true)
-                                if (localChapter.chapter != null) {
-                                    updateLastReadTime(localChapter.chapter)
-                                }
+                                toggleRemoteLoaded(true)
+                                clearError()
                                 getChapter(chapter.id, source = source)
+
                             } else {
                                 showSnackBar(UiText.StringResource(R.string.something_is_wrong_with_this_chapter))
                             }
                         }
                         is Resource.Error -> {
                             toggleRemoteLoading(false)
-                            state =
-                                state.copy(
-                                    isLoading = false,
-                                    isLocalLoaded = false,
-                                )
+                            toggleLoading(false)
+                            toggleLocalLoaded(false)
+                            toggleRemoteLoading(false)
                             showSnackBar(result.uiText)
                         }
                     }
@@ -268,7 +259,6 @@ class ReaderScreenViewModel @Inject constructor(
                     insertBook(book.copy(
                         lastRead = System.currentTimeMillis()))
                 }
-
                 if (chapterId != Constants.LAST_CHAPTER && chapterId != Constants.NO_VALUE) {
                     getChapter(chapterId, source = source)
                 } else {
@@ -281,7 +271,7 @@ class ReaderScreenViewModel @Inject constructor(
 
     }
 
-    private fun updateLastReadTime(chapter: Chapter) {
+    private suspend fun updateLastReadTime(chapter: Chapter) {
         viewModelScope.launch(Dispatchers.IO) {
             insertChapter(chapter.copy(read = true, lastRead = System.currentTimeMillis()))
         }
@@ -509,6 +499,7 @@ class ReaderScreenViewModel @Inject constructor(
     override fun onDestroy() {
         state = state.copy(enable = false)
         getChapterJob?.cancel()
+        getContentJob?.cancel()
         super.onDestroy()
     }
 
@@ -531,15 +522,16 @@ class ReaderScreenViewModel @Inject constructor(
         }
     }
 
-    fun insertBook(book: Book) {
+    suspend fun insertBook(book: Book) {
         viewModelScope.launch(Dispatchers.IO) {
             insertUseCases.insertBook(book)
         }
     }
 
-    fun insertChapter(chapter: Chapter) {
+    suspend fun insertChapter(chapter: Chapter) {
         viewModelScope.launch(Dispatchers.IO) {
             insertUseCases.insertChapter(chapter)
+
         }
     }
 
@@ -607,8 +599,8 @@ class ReaderScreenViewModel @Inject constructor(
     }
 
     fun saveScrollState(currentProgress: Int? = 0) {
+        val ch = state.chapter
         viewModelScope.launch(Dispatchers.IO) {
-            val ch = state.chapter
             if (ch != null) {
                 insertUseCases.insertChapter(ch.copy(progress = currentProgress
                     ?: ch.progress))

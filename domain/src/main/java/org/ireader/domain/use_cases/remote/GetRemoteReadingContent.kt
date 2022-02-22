@@ -22,7 +22,6 @@ class GetRemoteReadingContent(private val remoteRepository: RemoteRepository) {
         try {
             Timber.d("Timber: GetRemoteReadingContentUseCase was Called")
             val content = source.getContents(chapter.toChapterInfo())
-
             if (content.joinToString().isBlank()) {
                 emit(Resource.Error<List<String>>(uiText = UiText.StringResource(R.string.cant_get_content)))
             } else {

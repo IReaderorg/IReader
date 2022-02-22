@@ -24,8 +24,11 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.ireader.core.utils.UiEvent
 import org.ireader.domain.utils.setDefaultSettings
+import org.ireader.domain.view_models.settings.webview.WebPageEvents
 import org.ireader.domain.view_models.settings.webview.WebViewPageModel
+import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
+import org.ireader.presentation.ui.BookDetailScreenSpec
 import org.ireader.source.core.HttpSource
 import org.ireader.source.core.getHtml
 
@@ -39,8 +42,15 @@ fun WebPageScreen(
 ) {
     val scaffoldState = rememberScaffoldState()
     val context = LocalContext.current
-    val webView = remember {
+    var webView by remember {
         mutableStateOf<WebView?>(null)
+    }
+    var isDialogShown by remember {
+        mutableStateOf(false)
+    }
+
+    var dialogTitle by remember {
+        mutableStateOf("")
     }
 
     val source = viewModel.state.source
@@ -53,6 +63,24 @@ fun WebPageScreen(
                     scaffoldState.snackbarHostState.showSnackbar(
                         event.uiText.asString(context)
                     )
+                }
+                is WebPageEvents.ShowDialog -> {
+                    dialogTitle = event.title
+                    isDialogShown = true
+                }
+                is WebPageEvents.OnDismiss -> {
+                    isDialogShown = false
+                }
+                is WebPageEvents.OnConfirm -> {
+                    isDialogShown = false
+                }
+                is WebPageEvents.GoTo -> {
+                    try {
+                        navController.navigate(BookDetailScreenSpec.buildRoute(bookId = event.bookId,
+                            sourceId = event.sourceId))
+                    } catch (e: Exception) {
+
+                    }
                 }
                 else -> {}
             }
@@ -81,33 +109,22 @@ fun WebPageScreen(
                     viewModel.updateWebUrl(viewModel.state.url)
                 },
                 refresh = {
-                    webView.value?.reload()
+                    webView?.reload()
 
                 },
                 goBack = {
-                    webView.value?.goBack()
+                    webView?.goBack()
                 },
                 goForward = {
-                    webView.value?.goForward()
+                    webView?.goForward()
                 },
                 fetchBook = {
                     if (source != null) {
                         scope.launch {
-                            webView.value?.setUserAgent(source.headers.get("User-Agent")
+                            webView?.setUserAgent(source.headers.get("User-Agent")
                                 ?: HttpSource.DEFAULT_USER_AGENT)
-                            viewModel.getBookDetailAndChapter(pageSource = webView.value?.getHtml()
+                            viewModel.getBookDetailAndChapter(pageSource = webView?.getHtml()
                                 ?: "",
-                                url = webViewState.content.getCurrentUrl() ?: "",
-                                source)
-                        }
-                    }
-                },
-                fetchBooks = {
-                    if (source != null) {
-                        scope.launch {
-                            webView.value?.setUserAgent(source.headers.get("User-Agent")
-                                ?: HttpSource.DEFAULT_USER_AGENT)
-                            viewModel.getExploredBook(pageSource = webView.value?.getHtml() ?: "",
                                 url = webViewState.content.getCurrentUrl() ?: "",
                                 source)
                         }
@@ -116,9 +133,7 @@ fun WebPageScreen(
                 fetchChapter = {
                     if (source != null) {
                         scope.launch {
-//                            webView.value?.setUserAgent(source.sourceHeaders.get("User-Agent")
-//                                ?: HttpSource.DEFAULT_USER_AGENT)
-                            viewModel.getContentFromWebView(pageSource = webView.value?.getHtml()
+                            viewModel.getContentFromWebView(pageSource = webView?.getHtml()
                                 ?: "",
                                 url = webViewState.content.getCurrentUrl() ?: "",
                                 source)
@@ -143,10 +158,39 @@ fun WebPageScreen(
         }
 
     ) {
+        ShowAlert(isDialogShown,
+            dialogTitle,
+            onConfirm = {
+                scope.launch {
+                    viewModel.onEvent(WebPageEvents.OnConfirm(
+                        webView?.getHtml()
+                            ?: "",
+                        url = webViewState.content.getCurrentUrl() ?: "",
+                    ))
+                }
+                isDialogShown = false
+            },
+            onDismiss = {
+                viewModel.onEvent(WebPageEvents.OnDismiss)
+                isDialogShown = false
+            },
+            onUpdate = {
+                scope.launch {
+                    viewModel.onEvent(WebPageEvents.OnUpdate(
+                        webView?.getHtml()
+                            ?: "",
+                        url = webViewState.content.getCurrentUrl() ?: "",
+
+                        ))
+                }
+                isDialogShown = false
+            },
+            showUpdate = isDialogShown
+        )
         SwipeRefresh(
             state = refreshState,
             onRefresh = {
-                webView.value?.reload()
+                webView?.reload()
                 viewModel.toggleLoading(true)
             },
             indicator = { state, trigger ->
@@ -163,6 +207,7 @@ fun WebPageScreen(
             if (webViewState.isLoading) {
                 LinearProgressIndicator(Modifier.fillMaxWidth())
             }
+
             WebView(
                 modifier = Modifier.fillMaxSize(),
                 state = webViewState,
@@ -171,7 +216,7 @@ fun WebPageScreen(
                     viewModel.toggleLoading(it)
                 },
                 onCreated = {
-                    webView.value = it
+                    webView = it
                     it.setDefaultSettings()
                     if (source != null) {
                         it.settings.userAgentString =
@@ -215,17 +260,42 @@ fun ScrollableAppBar(
     }
 }
 
-//AlertDialog(onDismissRequest = { /*TODO*/ }, title = { MidSizeTextComposable(text = "Title") }, text = {
-//
-//
-//}, buttons = {
-//    TextButton(onClick = {}) {
-//        MidSizeTextComposable(text = "Title")
-//    }
-//    TextButton(onClick = {
-//
-//    }) {
-//        MidSizeTextComposable(text = "Title")
-//    }
-//
-//})
+@Composable
+fun ShowAlert(
+    isShown: Boolean = false,
+    title: String = "",
+    content: String = "",
+    onConfirm: () -> Unit = {},
+    onDismiss: () -> Unit = {},
+    onUpdate: () -> Unit = {},
+    showUpdate: Boolean = false,
+) {
+    if (isShown) {
+        AlertDialog(
+            onDismissRequest = { onDismiss() },
+            title = { MidSizeTextComposable(text = title) },
+            text = {
+                MidSizeTextComposable(text = content)
+            },
+            contentColor = MaterialTheme.colors.onBackground,
+            backgroundColor = MaterialTheme.colors.background,
+            buttons = {
+                Row(horizontalArrangement = Arrangement.SpaceAround,
+                    modifier = Modifier.fillMaxWidth()) {
+                    if (showUpdate) {
+                        OutlinedButton(onClick = { onUpdate() }) {
+                            MidSizeTextComposable(text = "Update")
+                        }
+                    }
+                    OutlinedButton(onClick = { onDismiss() }) {
+                        MidSizeTextComposable(text = "DISMISS")
+                    }
+                    Button(onClick = { onConfirm() }) {
+                        MidSizeTextComposable(text = "CHECK IT OUT")
+                    }
+                }
+
+            },
+        )
+    }
+}

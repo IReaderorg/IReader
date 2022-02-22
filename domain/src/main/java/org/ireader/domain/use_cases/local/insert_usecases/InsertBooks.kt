@@ -4,7 +4,7 @@ import org.ireader.domain.models.entities.Book
 import org.ireader.domain.repository.LocalBookRepository
 
 class InsertBooks(private val localBookRepository: LocalBookRepository) {
-    suspend operator fun invoke(books: List<Book>) {
-        localBookRepository.insertBooks(books)
+    suspend operator fun invoke(books: List<Book>): List<Long> {
+        return localBookRepository.insertBooks(books)
     }
 }

@@ -36,7 +36,6 @@ fun WebPageTopBar(
     goBack: () -> Unit,
     goForward: () -> Unit,
     fetchBook: () -> Unit,
-    fetchBooks: () -> Unit,
     fetchChapter: () -> Unit,
 ) {
     var isMenuExpanded by remember {
@@ -101,12 +100,6 @@ fun WebPageTopBar(
                     goForward()
                 }) {
                     MidSizeTextComposable(text = stringResource(R.string.go_forward))
-                }
-                DropdownMenuItem(onClick = {
-                    isMenuExpanded = false
-                    fetchBooks()
-                }) {
-                    MidSizeTextComposable(text = "Fetch Books")
                 }
                 DropdownMenuItem(onClick = {
                     isMenuExpanded = false

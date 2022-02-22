@@ -2,7 +2,6 @@ package org.ireader.presentation.feature_reader.presentation.reader
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,7 +16,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -28,7 +26,6 @@ import org.ireader.domain.view_models.reader.ReaderEvent
 import org.ireader.domain.view_models.reader.ReaderScreenViewModel
 import org.ireader.presentation.utils.scroll.Carousel
 import org.ireader.presentation.utils.scroll.CarouselDefaults
-import timber.log.Timber
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -79,26 +76,17 @@ fun ReaderText(
 
         Box(modifier = Modifier
             .fillMaxSize()
-            .pointerInput(true) {
-                detectVerticalDragGestures { change, dragAmount ->
-                    Timber.e(dragAmount.toString())
-                    Timber.e(change.toString())
-                }
-            }
         ) {
-            Row(
-                modifier = modifier
-            ) {
-                MultiSwipeRefresh(
-                    modifier = Modifier.fillMaxSize(),
-                    state = swipeState,
-                    indicators = listOf(
-                        ISwipeRefreshIndicator(scrollState.firstVisibleItemScrollOffset == 0,
-                            alignment = Alignment.TopCenter,
-                            indicator = { state, trigger ->
-                                ArrowIndicator(
-                                    icon = Icons.Default.KeyboardArrowUp,
-                                    swipeRefreshState = swipeState,
+            MultiSwipeRefresh(
+                modifier = Modifier.fillMaxSize(),
+                state = swipeState,
+                indicators = listOf(
+                    ISwipeRefreshIndicator(scrollState.firstVisibleItemScrollOffset == 0,
+                        alignment = Alignment.TopCenter,
+                        indicator = { state, trigger ->
+                            ArrowIndicator(
+                                icon = Icons.Default.KeyboardArrowUp,
+                                swipeRefreshState = swipeState,
                                     refreshTriggerDistance = 80.dp,
                                     color = viewModel.prefState.textColor
                                 )
@@ -127,8 +115,7 @@ fun ReaderText(
                     ) {
                         item {
                             Text(
-                                modifier = modifier
-                                    .weight(1f),
+                                modifier = modifier.fillMaxSize(),
                                 text = chapter.content.map { it.trimStart() }
                                     .joinToString("\n".repeat(prefState.distanceBetweenParagraphs)),
                                 fontSize = viewModel.prefState.fontSize.sp,
@@ -147,9 +134,9 @@ fun ReaderText(
                 Carousel(
                     state = scrollState,
                     modifier = Modifier
+                        .align(Alignment.TopEnd)
                         .fillMaxHeight()
-                        .weight(.02f)
-                        .padding(start = 4.dp),
+                        .width(2.dp),
                     colors = CarouselDefaults.colors(
                         thumbColor = MaterialTheme.colors.scrollingThumbColor,
                         scrollingThumbColor = MaterialTheme.colors.scrollingThumbColor,
@@ -158,7 +145,7 @@ fun ReaderText(
                     )
 
                 )
-            }
+
 
         }
     }

@@ -13,6 +13,7 @@ import org.ireader.domain.models.RemoteKeys
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.toBook
 import org.ireader.source.core.Source
+import org.ireader.source.models.BooksPage
 import org.ireader.source.models.FilterList
 import retrofit2.HttpException
 import java.io.IOException
@@ -78,6 +79,9 @@ class ExploreRemoteMediator(
                         throw Exception(UiText.StringResource(R.string.query_must_not_be_empty)
                             .toString())
                     }
+                }
+                else -> {
+                    BooksPage()
                 }
             }
 
