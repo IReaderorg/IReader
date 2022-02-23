@@ -4,81 +4,56 @@ plugins {
     id("kotlin-kapt")
     id("kotlin-parcelize")
     kotlin("plugin.serialization")
+    id("module-plugin")
 }
 
 android {
-    compileSdk = ProjectConfig.compileSdk
-
-    defaultConfig {
-        minSdk = ProjectConfig.minSdk
-        targetSdk = ProjectConfig.targetSdk
-
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro")
-        }
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
     buildFeatures {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = Compose.composeVersion
+        kotlinCompilerExtensionVersion = Deps.Compose.composeVersion
     }
 }
 
 dependencies {
     addBaseDependencies()
-
     implementation(project(Modules.core))
     implementation(project(Modules.coreUi))
     implementation(project(Modules.source))
     implementation(project(Modules.extensions))
-    implementation(Compose.ui)
-    implementation(Compose.runtime)
-    implementation(Compose.navigation)
-    implementation(Compose.material)
-    debugImplementation(Compose.ui_test_manifest)
-    implementation(Worker.runtimeKtx)
-    implementation(DaggerHilt.worker)
-    implementation(Coil.coilCompose)
+    implementation(Deps.Compose.ui)
+    implementation(Deps.Compose.runtime)
+    implementation(Deps.Compose.navigation)
+    implementation(Deps.Compose.material)
+    debugImplementation(Deps.Compose.ui_test_manifest)
+    implementation(Deps.Worker.runtimeKtx)
+    implementation(Deps.DaggerHilt.worker)
+    implementation(Deps.Coil.coilCompose)
 
     /** Room **/
-    implementation(Room.roomRuntime)
-    "kapt"(Room.roomCompiler)
-    implementation(Room.roomKtx)
-    implementation(Room.roomPaging)
+    implementation(Deps.Room.roomRuntime)
+    "kapt"(Deps.Room.roomCompiler)
+    implementation(Deps.Room.roomKtx)
+    implementation(Deps.Room.roomPaging)
 
     /** Coroutine **/
-    implementation(Coroutines.core)
-    implementation(Coroutines.android)
+    implementation(Deps.Coroutines.core)
+    implementation(Deps.Coroutines.android)
 
     /** Retrofit **/
-    implementation(Retrofit.retrofit)
-    implementation(Retrofit.moshiConverter)
+    implementation(Deps.Retrofit.retrofit)
+    implementation(Deps.Retrofit.moshiConverter)
 
-    implementation(OkHttp.okHttp3)
+    implementation(Deps.OkHttp.okHttp3)
 
-    implementation(OkHttp.okHttp3Interceptor)
-    implementation(OkHttp.okhttp3_doh)
-    implementation(OkHttp.okio)
-    implementation(Compose.paging)
-    implementation(Jsoup.jsoup)
-    implementation(Jsonpathkt.jsonpathkt)
-    implementation(Datastore.datastore)
+    implementation(Deps.OkHttp.okHttp3Interceptor)
+    implementation(Deps.OkHttp.okhttp3_doh)
+    implementation(Deps.OkHttp.okio)
+    implementation(Deps.Compose.paging)
+    implementation(Deps.Jsoup.jsoup)
+    implementation(Deps.Jsonpathkt.jsonpathkt)
+    implementation(Deps.Datastore.datastore)
 
 
 }
@@ -99,46 +74,46 @@ fun Project.addKotlinCompilerFlags() {
 
 
 fun DependencyHandler.addBaseDependencies() {
-    implementation(AndroidX.coreKtx)
-    implementation(AndroidX.appCompat)
-    implementation(AndroidX.webkit)
-    implementation(AndroidX.browser)
-    implementation(AndroidX.material)
-    implementation(AndroidX.activity)
+    implementation(Deps.AndroidX.coreKtx)
+    implementation(Deps.AndroidX.appCompat)
+    implementation(Deps.AndroidX.webkit)
+    implementation(Deps.AndroidX.browser)
+    implementation(Deps.AndroidX.material)
+    implementation(Deps.AndroidX.activity)
 
-    implementation(Kotlin.jsonSerialization)
+    implementation(Deps.Kotlin.jsonSerialization)
 
 
-    kapt(DaggerHilt.hiltCompiler)
-    implementation(DaggerHilt.hiltAndroid)
-    implementation(DaggerHilt.hiltAndroidCompiler)
-    implementation(Timber.timber)
+    kapt(Deps.DaggerHilt.hiltCompiler)
+    implementation(Deps.DaggerHilt.hiltAndroid)
+    implementation(Deps.DaggerHilt.hiltAndroidCompiler)
+    implementation(Deps.Timber.timber)
 
     /** LifeCycle **/
-    implementation(LifeCycle.runtimeKtx)
-    implementation(LifeCycle.viewModel)
+    implementation(Deps.LifeCycle.runtimeKtx)
+    implementation(Deps.LifeCycle.viewModel)
 
 
-    testImplementation(Testing.junit4)
-    testImplementation(Testing.junitAndroidExt)
-    testImplementation(Testing.truth)
-    testImplementation(Testing.coroutines)
-    testImplementation(Testing.composeUiTest)
+    testImplementation(Deps.Testing.junit4)
+    testImplementation(Deps.Testing.junitAndroidExt)
+    testImplementation(Deps.Testing.truth)
+    testImplementation(Deps.Testing.coroutines)
+    testImplementation(Deps.Testing.composeUiTest)
 
 
-    androidTestImplementation(Testing.junit4)
-    androidTestImplementation(Testing.junitAndroidExt)
-    androidTestImplementation(Testing.truth)
-    androidTestImplementation(Testing.coroutines)
-    androidTestImplementation(Testing.composeUiTest)
-    androidTestImplementation(Testing.hiltTesting)
+    androidTestImplementation(Deps.Testing.junit4)
+    androidTestImplementation(Deps.Testing.junitAndroidExt)
+    androidTestImplementation(Deps.Testing.truth)
+    androidTestImplementation(Deps.Testing.coroutines)
+    androidTestImplementation(Deps.Testing.composeUiTest)
+    androidTestImplementation(Deps.Testing.hiltTesting)
     // Instrumented Unit Tests
     androidTestImplementation("androidx.arch.core:core-testing:2.1.0")
     androidTestImplementation("androidx.test.ext:junit:1.1.1")
     androidTestImplementation("org.mockito:mockito-core:2.21.0")
     implementation(kotlin("stdlib"))
-    implementation(Ktor.core)
-    implementation(Ktor.serialization)
-    implementation(Ktor.okhttp)
-    implementation(Ktor.ktor_jsoup)
+    implementation(Deps.Ktor.core)
+    implementation(Deps.Ktor.serialization)
+    implementation(Deps.Ktor.okhttp)
+    implementation(Deps.Ktor.ktor_jsoup)
 }

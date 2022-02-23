@@ -9,7 +9,7 @@ import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.utils.Resource
 import org.ireader.source.core.Source
-import org.ireader.source.models.BookInfo
+import org.ireader.source.models.MangaInfo
 
 interface RemoteRepository {
 
@@ -17,7 +17,7 @@ interface RemoteRepository {
     suspend fun getRemoteBookDetail(
         book: Book,
         source: Source,
-    ): BookInfo
+    ): MangaInfo
 
 
     fun getAllExploreBookByPaging(

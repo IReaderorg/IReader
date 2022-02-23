@@ -5,7 +5,7 @@ import org.ireader.domain.models.ExploreType
 import org.ireader.domain.models.LayoutType
 import org.ireader.domain.models.entities.Book
 import org.ireader.source.core.Source
-import org.ireader.source.models.BooksPage
+import org.ireader.source.models.MangasPageInfo
 
 data class ExploreScreenState(
     val isLoading: Boolean = false,
@@ -17,7 +17,7 @@ data class ExploreScreenState(
     val isMenuDropDownShown: Boolean = false,
     val isSearchModeEnable: Boolean = false,
     val searchQuery: String = "",
-    val searchedBook: BooksPage = BooksPage(),
+    val searchedBook: MangasPageInfo = MangasPageInfo(),
     val isLatestUpdateMode: Boolean = true,
     val hasNextPage: Boolean = true,
     val exploreType: ExploreType = ExploreType.Latest,

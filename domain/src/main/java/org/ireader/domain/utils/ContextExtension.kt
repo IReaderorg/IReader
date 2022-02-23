@@ -97,6 +97,7 @@ fun Context.copyToClipboard(label: String, content: String) {
  * @param block the function that will execute inside the builder.
  * @return a notification to be displayed or updated.
  */
+@RequiresApi(Build.VERSION_CODES.M)
 fun Context.notificationBuilder(
     channelId: String,
     block: (NotificationCompat.Builder.() -> Unit)? = null,
@@ -116,6 +117,7 @@ fun Context.notificationBuilder(
  * @param block the function that will execute inside the builder.
  * @return a notification to be displayed or updated.
  */
+@RequiresApi(Build.VERSION_CODES.M)
 fun Context.notification(
     channelId: String,
     block: (NotificationCompat.Builder.() -> Unit)?,

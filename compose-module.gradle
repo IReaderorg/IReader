@@ -19,7 +19,7 @@ android {
         compose true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion Compose.composeVersion
+        kotlinCompilerExtensionVersion Deps.Compose.composeVersion
     }
     buildTypes {
         release {
@@ -38,58 +38,58 @@ android {
 
 dependencies {
     /** Compose **/
-    implementation(Compose.compiler)
-    implementation(Compose.foundation)
-    implementation(Compose.activityCompose)
-    implementation(Compose.ui)
-    implementation(Compose.material)
-    implementation(Compose.runtime)
+    implementation(Deps.Compose.compiler)
+    implementation(Deps.Compose.foundation)
+    implementation(Deps.Compose.activityCompose)
+    implementation(Deps.Compose.ui)
+    implementation(Deps.Compose.material)
+    implementation(Deps.Compose.runtime)
 
-    implementation(Compose.uiToolingPreview)
-    implementation(Compose.viewModelCompose)
-    implementation(Compose.icons)
-    implementation(Compose.icons)
-    implementation(Compose.animations)
-    implementation(Compose.navigation)
-    implementation(Compose.hiltNavigationCompose)
-    androidTestImplementation(Compose.testing)
-    debugImplementation(Compose.composeTooling)
-    debugImplementation(Compose.ui_test_manifest)
-    implementation(Compose.paging)
+    implementation(Deps.Compose.uiToolingPreview)
+    implementation(Deps.Compose.viewModelCompose)
+    implementation(Deps.Compose.icons)
+    implementation(Deps.Compose.icons)
+    implementation(Deps.Compose.animations)
+    implementation(Deps.Compose.navigation)
+    implementation(Deps.Compose.hiltNavigationCompose)
+    androidTestImplementation(Deps.Compose.testing)
+    debugImplementation(Deps.Compose.composeTooling)
+    debugImplementation(Deps.Compose.ui_test_manifest)
+    implementation(Deps.Compose.paging)
 
-    implementation Timber.timber
+    implementation Deps.Timber.timber
 
     /** Hilt **/
-    implementation(DaggerHilt.hiltAndroid)
-    kapt(DaggerHilt.hiltAndroidCompiler)
-    kapt(DaggerHilt.hiltCompiler)
+    implementation(Deps.DaggerHilt.hiltAndroid)
+    kapt(Deps.DaggerHilt.hiltAndroidCompiler)
+    kapt(Deps.DaggerHilt.hiltCompiler)
 
 
     /** Accompanist **/
-    implementation(Accompanist.systemUiController)
-    implementation(Accompanist.swipeRefresh)
-    implementation(Accompanist.pager)
-    implementation(Accompanist.pagerIndicator)
-    implementation(Accompanist.insets)
-    implementation(Accompanist.navAnimation)
-    implementation(Accompanist.flowlayout)
-    implementation(Accompanist.navMaterial)
-    implementation(Accompanist.webView)
+    implementation(Deps.Accompanist.systemUiController)
+    implementation(Deps.Accompanist.swipeRefresh)
+    implementation(Deps.Accompanist.pager)
+    implementation(Deps.Accompanist.pagerIndicator)
+    implementation(Deps.Accompanist.insets)
+    implementation(Deps.Accompanist.navAnimation)
+    implementation(Deps.Accompanist.flowlayout)
+    implementation(Deps.Accompanist.navMaterial)
+    implementation(Deps.Accompanist.webView)
 
     /** LifeCycle **/
-    implementation(LifeCycle.runtimeKtx)
-    implementation(LifeCycle.viewModel)
+    implementation(Deps.LifeCycle.runtimeKtx)
+    implementation(Deps.ifeCycle.viewModel)
 
-    testImplementation Testing.junit4
-    testImplementation Testing.junitAndroidExt
-    testImplementation Testing.truth
-    testImplementation Testing.coroutines
-    testImplementation Testing.composeUiTest
+    testImplementation Deps.Testing.junit4
+    testImplementation Deps.Testing.junitAndroidExt
+    testImplementation Deps.Testing.truth
+    testImplementation Deps.Testing.coroutines
+    testImplementation Deps.Testing.composeUiTest
 
-    androidTestImplementation Testing.junit4
-    androidTestImplementation Testing.junitAndroidExt
-    androidTestImplementation Testing.truth
-    androidTestImplementation Testing.coroutines
-    androidTestImplementation Testing.composeUiTest
-    androidTestImplementation Testing.hiltTesting
+    androidTestImplementation Deps.Testing.junit4
+    androidTestImplementation Deps.Testing.junitAndroidExt
+    androidTestImplementation Deps.Testing.truth
+    androidTestImplementation Deps.Testing.coroutines
+    androidTestImplementation Deps.Testing.composeUiTest
+    androidTestImplementation Deps.Testing.hiltTesting
 }

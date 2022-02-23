@@ -3,6 +3,7 @@ package org.ireader.domain.extensions.cataloge_service.impl
 import android.app.Application
 import io.ktor.client.request.*
 import io.ktor.http.*
+import io.ktor.util.*
 import io.ktor.utils.io.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -36,6 +37,7 @@ class AndroidCatalogInstaller(
      *
      * @param catalog The catalog to install.
      */
+    @OptIn(InternalAPI::class)
     override fun install(catalog: CatalogRemote): Flow<InstallStep> = flow {
         emit(InstallStep.Downloading)
         val tmpApkFile = File(context.cacheDir, "${catalog.pkgName}.apk")

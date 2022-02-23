@@ -2,8 +2,9 @@ package org.ireader.domain.models.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import org.ireader.core.utils.Constants
 
-@Entity
+@Entity(tableName = Constants.UPDATE_TABLE)
 data class Updates(
     @PrimaryKey
     val id: Long = 0,

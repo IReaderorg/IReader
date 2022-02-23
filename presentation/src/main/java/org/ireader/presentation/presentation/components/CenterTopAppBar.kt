@@ -12,7 +12,6 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.ireader.domain.utils.dpToPxEnd
 import kotlin.math.abs
 import kotlin.math.max
 
@@ -96,7 +95,7 @@ fun CenterTopAppBar(
                                  As a result, both sections should have the same width.
                                  */
                                 val maxWidth =
-                                    max(leftSectionWidth.value.dpToPxEnd, rightSectionWidth)
+                                    max(leftSectionWidth.value, rightSectionWidth)
                                 leftSectionWidth = maxWidth.toDp()
                                 rightSectionPadding = abs(rightSectionWidth - maxWidth)
                             }

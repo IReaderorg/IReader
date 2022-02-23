@@ -21,7 +21,6 @@ import androidx.navigation.NavController
 import org.ireader.core.R
 import org.ireader.domain.models.ExploreType
 import org.ireader.presentation.presentation.components.BookImageComposable
-import org.ireader.presentation.presentation.reusable_composable.SuperSmallTextComposable
 import org.ireader.presentation.ui.ExploreScreenSpec
 import org.ireader.source.core.Source
 
@@ -40,56 +39,36 @@ fun SourceListComposable(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally) {
         items(sources.size) { index ->
-//            Row(modifier= modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-//                Box(modifier) {
-//                    BookImageComposable(
-//                        image = sources[index].iconUrl,
-//                        modifier = modifier
-//                            .clip(RoundedCornerShape(8.dp))
-//                            .size(25.dp),
-//                        contentScale = ContentScale.FillBounds,
-//                        alignment = Alignment.Center
-//                    )
-//                }
-//                Text(sources[index].name)
-//                if (sources[index].supportsMostPopular) {
-//                    Text(stringResource(R.string.popular_book),
-//                        color = MaterialTheme.colors.primary,
-//                        style = MaterialTheme.typography.subtitle2,
-//                        modifier = Modifier.clickable {
-//                            navController.navigate(Screen.Explore.passArgs(
-//                                sourceId = sources[index].sourceId,
-//                                exploreType = ExploreType.Popular.mode
-//                            ))
-//                        })
-//                }
-//            }
             ListItem(
                 modifier = Modifier
                     .clickable {
-                        navController.navigate(ExploreScreenSpec.buildRoute(
-                            sourceId = sources[index].id,
-                            exploreType = ExploreType.Latest.id
-                        ))
+                        if (sources[index]
+                                .getListings()
+                                .find { it.name == "popular" } != null
+                        ) {
+                            navController.navigate(ExploreScreenSpec.buildRoute(
+                                sourceId = sources[index].id,
+                                exploreType = ExploreType.Popular.id
+                            ))
+                        }
                     }
                     .height(60.dp),
                 text = { Text(sources[index].name) },
                 trailing = {
-                    if (sources[index].supportsMostPopular) {
-                        Text(stringResource(R.string.popular_book),
+                    if (sources[index].getListings().find { it.name == "latest" } != null) {
+                        Text(stringResource(R.string.latest_book),
                             color = MaterialTheme.colors.primary,
                             style = MaterialTheme.typography.subtitle2,
                             modifier = Modifier.clickable {
                                 navController.navigate(ExploreScreenSpec.buildRoute(
                                     sourceId = sources[index].id,
-                                    exploreType = ExploreType.Popular.id
+                                    exploreType = ExploreType.Latest.id
                                 ))
                             })
                     }
                 },
                 secondaryText = {
-                    SuperSmallTextComposable(title = "Created by ${sources[index].creator}",
-                        color = MaterialTheme.colors.onBackground.copy(alpha = .4f))
+
                 },
                 icon = {
                     Box(modifier = Modifier

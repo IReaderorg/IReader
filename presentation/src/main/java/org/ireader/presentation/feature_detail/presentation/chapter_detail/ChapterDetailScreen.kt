@@ -137,43 +137,6 @@ fun ChapterDetailScreen(
                                             chapterId = chapter.id,
                                         ))
                                     })
-//                                ListItem(
-//                                    modifier = modifier.clickable {
-//                                        navController.navigate(ReaderScreenSpec.buildRoute(
-//                                            bookId = book.id,
-//                                            sourceId = book.sourceId,
-//                                            chapterId = chapter.id,
-//                                        ))
-//                                    },
-//                                    text = {
-//                                        Text(
-//                                            text = chapter.title,
-//                                            color = if (chapter.read) MaterialTheme.colors.onBackground.copy(
-//                                                alpha = .4f) else MaterialTheme.colors.onBackground,
-//                                            style = MaterialTheme.typography.subtitle1,
-//                                            fontWeight = FontWeight.SemiBold,
-//                                            overflow = TextOverflow.Ellipsis,
-//                                        )
-//                                    },
-//                                    trailing = {
-//                                        Icon(
-//                                            imageVector = Icons.Default.PublishedWithChanges,
-//                                            contentDescription = "Cached",
-//                                            tint = if (chapter.content.joinToString(" , ").length > 10) MaterialTheme.colors.onBackground else MaterialTheme.colors.background,
-//                                        )
-//                                    },
-//                                    secondaryText = {
-//                                        Text(
-//                                            text = if (chapter.dateUploaded != 0L) chapter.dateUploaded.toString() else "",
-//                                            fontStyle = FontStyle.Italic,
-//                                            color = if (chapter.read) MaterialTheme.colors.onBackground.copy(
-//                                                alpha = .4f) else MaterialTheme.colors.onBackground,
-//                                            fontWeight = FontWeight.SemiBold,
-//                                            style = MaterialTheme.typography.caption
-//                                        )
-//                                    }
-//
-//                                )
                             }
                         }
                     }

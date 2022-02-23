@@ -4,11 +4,11 @@ package org.ireader.domain.source
 import org.ireader.extensions.sources.en.freewebnovel.FreeWebNovel
 import org.ireader.extensions.sources.en.mtlnovel.MtlNovel
 import org.ireader.extensions.sources.en.source_tower_deprecated.SourceTower
+import org.ireader.extensions.sources.en.webnovel.Webnovel
+import org.ireader.extensions.sources.en.wuxiaworld.WuxiaWorld
 import org.ireader.source.core.Dependencies
 import org.ireader.source.core.Source
 import org.ireader.source.sources.en.source_tower_deprecated.*
-import org.ireader.source.sources.en.webnovel.Webnovel
-import org.ireader.source.sources.en.wuxiaworld.WuxiaWorld
 
 
 class Extensions(

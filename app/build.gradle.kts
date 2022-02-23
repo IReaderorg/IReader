@@ -24,34 +24,12 @@ android {
         targetSdk = ProjectConfig.targetSdk
         versionCode = ProjectConfig.ConfigVersionCode
         versionName = ProjectConfig.ConfigVersionName
-        testInstrumentationRunner = "org.ireader.infinity.HiltTestRunner"
-        vectorDrawables {
-            useSupportLibrary = true
-        }
     }
     lint {
         baseline = file("lint-baseline.xml")
     }
 
-    buildTypes {
-        named("release") {
-            isMinifyEnabled = false
-            proguardFiles("proguard-android-optimize.txt", "proguard-rules.pro")
-        }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
-    buildFeatures {
-        compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = Compose.composeVersion
-    }
+
     packagingOptions {
         resources.excludes.addAll(listOf(
             "LICENSE.txt",
@@ -64,15 +42,20 @@ android {
             "META-INF/licenses/ASM",
             "META-INF/gradle/incremental.annotation.processors"
         ))
-
+    }
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+    buildFeatures {
+        compose = true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = Deps.Compose.composeVersion
     }
 }
-tasks {
-    withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-        kotlinOptions.freeCompilerArgs += "-opt-in=org.mylibrary.OptInAnnotation"
-    }
-}
 
+
+addCompose()
 
 dependencies {
     implementation("androidx.core:core-splashscreen:1.0.0-beta01")
@@ -82,122 +65,67 @@ dependencies {
     implementation(project(Modules.core))
     implementation(project(Modules.presentation))
     implementation(project(Modules.source))
-
-    implementation(AndroidX.coreKtx)
-    implementation(AndroidX.appCompat)
-    implementation(AndroidX.webkit)
-    implementation(AndroidX.browser)
-    implementation(AndroidX.material)
-    implementation(AndroidX.activity)
-    implementation(AndroidX.appStartUpRuntime)
-    implementation("androidx.test:runner:1.4.0")
-
-    testImplementation(Testing.junit4)
-    androidTestImplementation(Testing.extJunit)
-    androidTestImplementation(Testing.espresso)
-
-    /** Compose **/
-    implementation(Compose.compiler)
-    implementation(Compose.foundation)
-    implementation(Compose.activityCompose)
-    implementation(Compose.ui)
-    implementation(Compose.material)
-    implementation(Compose.uiToolingPreview)
-    implementation(Compose.viewModelCompose)
-    implementation(Compose.icons)
-    implementation(Compose.animations)
-    implementation(Compose.navigation)
-    implementation(Compose.hiltNavigationCompose)
-    debugImplementation(Compose.ui_test_manifest)
-    androidTestImplementation(Compose.testing)
-    androidTestImplementation(Compose.ui_test_manifest)
-    debugImplementation(Compose.composeTooling)
+    implementation(Deps.Timber.timber)
+    implementation(Deps.Accompanist.insets)
+    implementation(Deps.Accompanist.systemUiController)
+    implementation(Deps.Accompanist.navAnimation)
+    implementation(Deps.Accompanist.navMaterial)
 
 
-//    /** Accompanist **/
-    implementation(Accompanist.systemUiController)
-    implementation(Accompanist.webView)
-    implementation(Accompanist.swipeRefresh)
-    implementation(Accompanist.pager)
-    implementation(Accompanist.pagerIndicator)
-    implementation(Accompanist.insets)
-    implementation(Accompanist.navAnimation)
-    implementation(Accompanist.flowlayout)
-    implementation(Accompanist.navMaterial)
+    testImplementation(Deps.Testing.junit4)
+    androidTestImplementation(Deps.Testing.extJunit)
+    androidTestImplementation(Deps.Testing.espresso)
 
 
     /** LifeCycle **/
-    implementation(LifeCycle.runtimeKtx)
-    implementation(LifeCycle.viewModel)
+    implementation(Deps.LifeCycle.runtimeKtx)
+    implementation(Deps.LifeCycle.viewModel)
 
 
     /** Firebase **/
     implementation(platform("com.google.firebase:firebase-bom:29.0.4"))
-    implementation(Firebase.analyticKtx)
-    implementation(Firebase.analytic)
-    implementation(Firebase.crashlytics)
+    implementation(Deps.Firebase.analyticKtx)
+    implementation(Deps.Firebase.analytic)
+    implementation(Deps.Firebase.crashlytics)
 
 
     /** Coroutine **/
-    implementation(Coroutines.core)
-    implementation(Coroutines.android)
+    implementation(Deps.Coroutines.core)
+    implementation(Deps.Coroutines.android)
 
-    implementation(Worker.runtimeKtx)
+    implementation(Deps.Worker.runtimeKtx)
 
 
     /** Hilt **/
-    implementation(DaggerHilt.hiltAndroid)
-    kapt(DaggerHilt.hiltAndroidCompiler)
-    kaptTest(DaggerHilt.hiltAndroidCompiler)
-    kaptAndroidTest(DaggerHilt.hiltAndroidCompiler)
-    kapt(DaggerHilt.hiltCompiler)
-    implementation(DaggerHilt.worker)
-    testImplementation(DaggerHilt.hiltAndroidTest)
-    androidTestImplementation(DaggerHilt.hiltAndroidTest)
+    implementation(Deps.DaggerHilt.hiltAndroid)
+    kapt(Deps.DaggerHilt.hiltAndroidCompiler)
+    kaptTest(Deps.DaggerHilt.hiltAndroidCompiler)
+    kaptAndroidTest(Deps.DaggerHilt.hiltAndroidCompiler)
+    kapt(Deps.DaggerHilt.hiltCompiler)
+    implementation(Deps.DaggerHilt.worker)
+    testImplementation(Deps.DaggerHilt.hiltAndroidTest)
+    androidTestImplementation(Deps.DaggerHilt.hiltAndroidTest)
 
 
     /** Room **/
-    implementation(Room.roomRuntime)
-    kapt(Room.roomCompiler)
-    implementation(Room.roomKtx)
-    implementation(Room.roomPaging)
+    implementation(Deps.Room.roomRuntime)
+    kapt(Deps.Room.roomCompiler)
+    implementation(Deps.Room.roomKtx)
 
     /** Coil **/
-    implementation(Coil.coilCompose)
+    implementation(Deps.Coil.coilCompose)
 
 //
     /** Moshi **/
-    implementation(Moshi.moshi)
-    kapt(Moshi.moshiCodegen)
-    implementation(Moshi.moshiKotlin)
+    implementation(Deps.Moshi.moshi)
+    kapt(Deps.Moshi.moshiCodegen)
+    implementation(Deps.Moshi.moshiKotlin)
 
-    /** Timber **/
-    implementation(Timber.timber)
 
 //    /** Network Client - OkHttp**/
-    implementation(OkHttp.okHttp3)
-    implementation(OkHttp.okio)
-    implementation(OkHttp.okHttp3Interceptor)
-
-
-
-    testImplementation(Testing.junit4)
-    testImplementation(Testing.junitAndroidExt)
-    testImplementation(Testing.truth)
-    testImplementation(Testing.coroutines)
-    testImplementation(Testing.composeUiTest)
-
-
-    androidTestImplementation(Testing.junit4)
-    androidTestImplementation(Testing.junitAndroidExt)
-    androidTestImplementation(Testing.truth)
-    androidTestImplementation(Testing.coroutines)
-    androidTestImplementation(Testing.composeUiTest)
-    androidTestImplementation(Testing.hiltTesting)
-    androidTestImplementation(Testing.testRunner)
-    // Instrumented Unit Tests
-    androidTestImplementation("androidx.arch.core:core-testing:2.1.0")
-    androidTestImplementation("androidx.test.ext:junit:1.1.3")
+    implementation(Deps.OkHttp.okHttp3)
+    implementation(Deps.OkHttp.okio)
+    implementation(Deps.OkHttp.okHttp3Interceptor)
 
 }
 

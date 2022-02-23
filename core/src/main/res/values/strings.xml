@@ -50,6 +50,7 @@
     <string name="label_library">Checking Library</string>
     <string name="label_recent_updates">Recent Updates</string>
     <string name="popular_book">Most Popular</string>
+    <string name="latest_book">Latest</string>
     <string name="copied_to_clipboard">Copied to clipboard</string>
     <string name="clipboard_copy_error">can\'t copy this text</string>
     <string name="information_webview_required">need webview to view this content</string>

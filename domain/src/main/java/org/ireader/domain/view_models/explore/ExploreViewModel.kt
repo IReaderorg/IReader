@@ -25,7 +25,7 @@ import org.ireader.domain.source.Extensions
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import org.ireader.source.core.Source
-import org.ireader.source.models.BooksPage
+import org.ireader.source.models.MangasPageInfo
 import javax.inject.Inject
 
 
@@ -121,7 +121,7 @@ class ExploreViewModel @Inject constructor(
 
     private fun exitSearchedMode() {
         state.value = state.value.copy(
-            searchedBook = BooksPage(),
+            searchedBook = MangasPageInfo(),
             searchQuery = "",
             isLoading = false,
             error = UiText.StringResource(R.string.no_error))

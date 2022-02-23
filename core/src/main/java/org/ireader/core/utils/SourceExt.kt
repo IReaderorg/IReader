@@ -1,4 +1,4 @@
-package org.ireader.source.core
+package org.ireader.core.utils
 
 import android.annotation.SuppressLint
 import android.webkit.WebView

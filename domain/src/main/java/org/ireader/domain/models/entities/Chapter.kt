@@ -38,7 +38,7 @@ data class Chapter(
 fun Chapter.toChapterInfo(): ChapterInfo {
     return ChapterInfo(
         key = this.link,
-        translator = this.translator,
+        scanlator = this.translator,
         name = this.title,
         dateUpload = this.dateUploaded,
         number = this.number

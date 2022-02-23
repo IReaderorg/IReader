@@ -34,48 +34,48 @@ android {
         compose true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion Compose.composeVersion
+        kotlinCompilerExtensionVersion Deps.Compose.composeVersion
     }
 }
 dependencies {
-    implementation(AndroidX.coreKtx)
-    implementation(AndroidX.appCompat)
-    implementation(AndroidX.webkit)
-    implementation(AndroidX.browser)
-    implementation(AndroidX.material)
-    implementation(AndroidX.activity)
+    implementation(Deps.AndroidX.coreKtx)
+    implementation(Deps.AndroidX.appCompat)
+    implementation(Deps.AndroidX.webkit)
+    implementation(Deps.AndroidX.browser)
+    implementation(Deps.AndroidX.material)
+    implementation(Deps.AndroidX.activity)
 
     implementation(Kotlin.jsonSerialization)
-    debugImplementation(Compose.ui_test_manifest)
+    debugImplementation(Deps.Compose.ui_test_manifest)
 
-    kapt(DaggerHilt.hiltCompiler)
-    implementation(DaggerHilt.hiltAndroid)
-    implementation(DaggerHilt.hiltAndroidCompiler)
-    implementation(Timber.timber)
+    kapt(Deps.DaggerHilt.hiltCompiler)
+    implementation(Deps.DaggerHilt.hiltAndroid)
+    implementation(Deps.DaggerHilt.hiltAndroidCompiler)
+    implementation(Deps.Timber.timber)
 
     /** LifeCycle **/
-    implementation(LifeCycle.runtimeKtx)
-    implementation(LifeCycle.viewModel)
+    implementation(Deps.LifeCycle.runtimeKtx)
+    implementation(Deps.LifeCycle.viewModel)
 
 
-    testImplementation Testing.junit4
-    testImplementation Testing.junitAndroidExt
-    testImplementation Testing.truth
-    testImplementation Testing.coroutines
-    testImplementation Testing.composeUiTest
+    testImplementation(Deps.Testing.junit4)
+    testImplementation(Deps.Testing.junitAndroidExt)
+    testImplementation(Deps.Testing.truth)
+    testImplementation(Deps.Testing.coroutines)
+    testImplementation(Deps.Testing.composeUiTest)
 
 
 
-    androidTestImplementation Testing.junit4
-    androidTestImplementation Testing.junitAndroidExt
-    androidTestImplementation Testing.truth
-    androidTestImplementation Testing.coroutines
-    androidTestImplementation Testing.composeUiTest
-    androidTestImplementation Testing.hiltTesting
+    androidTestImplementation(Deps.Testing.junit4)
+    androidTestImplementation(Deps.Testing.junitAndroidExt)
+    androidTestImplementation(Deps.Testing.truth)
+    androidTestImplementation(Deps.Testing.coroutines)
+    androidTestImplementation(Deps.Testing.composeUiTest)
+    androidTestImplementation(Deps.Testing.hiltTesting)
     // Instrumented Unit Tests
-    androidTestImplementation "junit:junit:4.13"
-    androidTestImplementation "com.linkedin.dexmaker:dexmaker-mockito:2.12.1"
-    androidTestImplementation "androidx.arch.core:core-testing:2.1.0"
-    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
-    androidTestImplementation "org.mockito:mockito-core:2.21.0"
+    androidTestImplementation("junit:junit:4.13")
+    androidTestImplementation("com.linkedin.dexmaker:dexmaker-mockito:2.12.1")
+    androidTestImplementation("androidx.arch.core:core-testing:2.1.0")
+    androidTestImplementation('androidx.test.ext:junit:1.1.1')
+    androidTestImplementation("org.mockito:mockito-core:2.21.0")
 }

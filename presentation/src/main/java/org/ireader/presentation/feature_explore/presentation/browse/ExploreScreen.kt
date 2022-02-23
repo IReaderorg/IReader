@@ -87,7 +87,7 @@ fun ExploreScreen(
                                     viewModel.onEvent(ExploreScreenEvents.ToggleSearchMode(false))
                                 },
                             )
-                        } else if (source.supportSearch) {
+                        } else if (source.getListings().find { it.name == "search" } != null) {
                             TopAppBarActionButton(
                                 imageVector = Icons.Default.Search,
                                 title = "Search",

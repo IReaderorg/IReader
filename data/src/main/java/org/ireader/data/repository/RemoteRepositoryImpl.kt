@@ -19,7 +19,7 @@ import org.ireader.domain.models.entities.toChapterInfo
 import org.ireader.domain.repository.RemoteRepository
 import org.ireader.domain.utils.Resource
 import org.ireader.source.core.Source
-import org.ireader.source.models.BookInfo
+import org.ireader.source.models.MangaInfo
 import retrofit2.HttpException
 import timber.log.Timber
 import java.io.IOException
@@ -30,8 +30,8 @@ class RemoteRepositoryImpl(
 ) : RemoteRepository {
 
 
-    override suspend fun getRemoteBookDetail(book: Book, source: Source): BookInfo {
-        return source.getDetails(book.toBookInfo(source.id))
+    override suspend fun getRemoteBookDetail(book: Book, source: Source): MangaInfo {
+        return source.getMangaDetails(book.toBookInfo(source.id))
     }
 
     @OptIn(ExperimentalPagingApi::class)

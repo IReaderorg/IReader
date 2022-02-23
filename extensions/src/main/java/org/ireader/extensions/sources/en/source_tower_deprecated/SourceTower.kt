@@ -22,9 +22,9 @@ data class SourceTower constructor(
     override val lang: String,
     override val name: String,
     override val creator: String,
-    override val supportsMostPopular: Boolean = false,
-    override val supportSearch: Boolean = false,
-    override val supportsLatest: Boolean = false,
+    val supportsMostPopular: Boolean = false,
+    val supportSearch: Boolean = false,
+    val supportsLatest: Boolean = false,
     override val iconUrl: String = "",
     val creatorNote: String? = null,
     val customSource: Boolean = false,
@@ -41,6 +41,24 @@ data class SourceTower constructor(
         return FilterList()
     }
 
+    class PopularListing : Listing("popular")
+    class LatestListing : Listing("latest")
+    class SearchListing : Listing("search")
+
+    override fun getListings(): List<Listing> {
+        val list = mutableListOf<Listing>()
+        if (supportsMostPopular) {
+            list.add(PopularListing())
+        }
+        if (supportsLatest) {
+            list.add(LatestListing())
+        }
+        if (supportSearch) {
+            list.add(SearchListing())
+        }
+        return list
+    }
+
     val pageFormat = "{page}"
     val searchQueryFormat = "{query}"
 
@@ -53,6 +71,7 @@ data class SourceTower constructor(
         add(HttpHeaders.Referrer, baseUrl)
         add(HttpHeaders.CacheControl, "max-age=0")
     }
+
 
 
     override val headers: Headers
@@ -91,8 +110,8 @@ data class SourceTower constructor(
         return requestBuilder(baseUrl + "${latest?.endpoint?.applyPageFormat(page)}")
     }
 
-    override fun chaptersRequest(book: BookInfo): HttpRequestBuilder {
-        return requestBuilder(book.link)
+    override fun chaptersRequest(manga: MangaInfo): HttpRequestBuilder {
+        return requestBuilder(manga.key)
     }
 
     override fun searchRequest(page: Int, query: String, filters: FilterList): HttpRequestBuilder {
@@ -107,8 +126,8 @@ data class SourceTower constructor(
     }
 
 
-    override fun detailsRequest(book: BookInfo): HttpRequestBuilder {
-        return requestBuilder(book.link)
+    override fun detailsRequest(manga: MangaInfo): HttpRequestBuilder {
+        return requestBuilder(manga.key)
     }
     /****************************REQUESTS**********************************************************/
 
@@ -116,7 +135,7 @@ data class SourceTower constructor(
     /****************************PARSE FROM ELEMENTS***********************************************/
 
 
-    override fun popularFromElement(element: Element): BookInfo {
+    override fun popularFromElement(element: Element): MangaInfo {
         val selectorLink = popular?.linkSelector
         val attLink = popular?.linkAtt
         val selectorName = popular?.nameSelector
@@ -135,11 +154,11 @@ data class SourceTower constructor(
 
 
 
-        return BookInfo(link = baseUrl + link, title = title, cover = cover)
+        return MangaInfo(key = baseUrl + link, title = title, cover = cover)
     }
 
 
-    override fun latestFromElement(element: Element): BookInfo {
+    override fun latestFromElement(element: Element): MangaInfo {
 
         val selectorLink = latest?.linkSelector
         val attLink = latest?.linkAtt
@@ -159,7 +178,7 @@ data class SourceTower constructor(
 
         //Timber.e("Timber: SourceCreator" + val coverLink)
 
-        return BookInfo(link = baseUrl + link, title = title, cover = cover)
+        return MangaInfo(key = baseUrl + link, title = title, cover = cover)
     }
 
     override fun chapterFromElement(element: Element): ChapterInfo {
@@ -177,7 +196,7 @@ data class SourceTower constructor(
         return ChapterInfo(key = baseUrl + link, name = title)
     }
 
-    override fun searchFromElement(element: Element): BookInfo {
+    override fun searchFromElement(element: Element): MangaInfo {
         val selectorLink = search?.linkSelector
         val attLink = search?.linkAtt
         val selectorName = search?.nameSelector
@@ -194,15 +213,15 @@ data class SourceTower constructor(
             attCover)
 
 
-        return BookInfo(link = baseUrl + link, title = title, cover = cover)
+        return MangaInfo(key = baseUrl + link, title = title, cover = cover)
     }
 
     /****************************PARSE FROM ELEMENTS***********************************************/
 
     /****************************PARSE*************************************************************/
 
-    override fun latestParse(document: Document): BooksPage {
-        val books = mutableListOf<BookInfo>()
+    override fun latestParse(document: Document): MangasPageInfo {
+        val books = mutableListOf<MangaInfo>()
         books.addAll(document.select(latest?.selector).map { element ->
             latestFromElement(element)
         })
@@ -211,13 +230,13 @@ data class SourceTower constructor(
         } != null
 
 
-        return BooksPage(
-            books = books,
+        return MangasPageInfo(
+            mangas = books,
             hasNextPage = hasNextPage,
         )
     }
 
-    override fun detailParse(document: Document): BookInfo {
+    override fun detailParse(document: Document): MangaInfo {
         val selectorBookName = detail?.nameSelector
         val attBookName = detail?.nameAtt
         val coverSelector = detail?.coverSelector
@@ -239,13 +258,13 @@ data class SourceTower constructor(
             selectorDescription,
             attDescription).map { it.formatHtmlText() }.joinToString()
             val category = selectorReturnerListType(document, selectorCategory, attCategory)
-            return BookInfo(
-                title = title,
-                cover = coverLink,
-                author = author,
-                description = description,
-                genres = category,
-                link = "")
+        return MangaInfo(
+            title = title,
+            cover = coverLink,
+            author = author,
+            description = description,
+            genres = category,
+            key = "")
 
 
 
@@ -284,28 +303,28 @@ data class SourceTower constructor(
         return contentList
     }
 
-    override fun searchParse(document: Document): BooksPage {
+    override fun searchParse(document: Document): MangasPageInfo {
 
-        var books = mutableListOf<BookInfo>()
+        var books = mutableListOf<MangaInfo>()
 
-            /**
-             * I Add Filter Because sometimes this value contains null values
-             * so the null book shows in search screen
-             */
-            books.addAll(document.select(searchSelector()).map { element ->
-                searchFromElement(element)
-            })
+        /**
+         * I Add Filter Because sometimes this value contains null values
+         * so the null book shows in search screen
+         */
+        books.addAll(document.select(searchSelector()).map { element ->
+            searchFromElement(element)
+        })
 
         val hasNextPage = false
 
 
-        return BooksPage(
+        return MangasPageInfo(
             books,
             hasNextPage,
         )
     }
 
-    override fun popularParse(document: Document): BooksPage {
+    override fun popularParse(document: Document): MangasPageInfo {
         val books = document.select(popularSelector()).map { element ->
             popularFromElement(element)
         }
@@ -314,7 +333,7 @@ data class SourceTower constructor(
             document.select(selector).first()
         } != null
 
-        return BooksPage(
+        return MangasPageInfo(
             books,
             hasNextPage,
         )
@@ -331,7 +350,7 @@ data class SourceTower constructor(
         return ChapterInfo(name = title, key = link)
     }
 
-    fun searchBookFromJson(jsonObject: Map<String, String>): BookInfo {
+    fun searchBookFromJson(jsonObject: Map<String, String>): MangaInfo {
 
         val mName = search?.nameSelector
         val mLink = search?.linkSelector
@@ -339,10 +358,10 @@ data class SourceTower constructor(
         val title = jsonObject[mName]?.formatHtmlText() ?: ""
         val link = jsonObject[mLink] ?: ""
         val coverLink = jsonObject[mCover]
-        return BookInfo(title = title, link = link, cover = coverLink ?: "")
+        return MangaInfo(title = title, key = link, cover = coverLink ?: "")
     }
 
-    fun detailFromJson(jsonObject: Map<String, String>): BookInfo {
+    fun detailFromJson(jsonObject: Map<String, String>): MangaInfo {
 
         val mName = detail?.nameSelector
         val mCover = detail?.coverSelector
@@ -356,13 +375,13 @@ data class SourceTower constructor(
         val author = jsonObject[mAuthor]?.formatHtmlText() ?: ""
         val category = listOf(jsonObject[mCategory]?.formatHtmlText() ?: "")
 
-        return BookInfo(
+        return MangaInfo(
             title = title,
             description = description,
             author = author,
             genres = category,
             cover = coverLink ?: "",
-            link = "",
+            key = "",
         )
     }
 
@@ -370,13 +389,13 @@ data class SourceTower constructor(
     /**
      * Fetchers
      */
-    override suspend fun getChapters(book: BookInfo): List<ChapterInfo> {
+    override suspend fun getChapters(manga: MangaInfo): List<ChapterInfo> {
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
                 val request = if (chapters?.isGetRequestType == true) {
-                    client.get<Document>(chaptersRequest(book))
+                    client.get<Document>(chaptersRequest(manga))
                 } else {
-                    client.post<Document>(chaptersRequest(book))
+                    client.post<Document>(chaptersRequest(manga))
                 }
                 return@withContext chaptersParse(request)
             }
@@ -388,7 +407,7 @@ data class SourceTower constructor(
      * override this method.
      * @param page the page number to retrieve.
      */
-    override suspend fun getPopular(page: Int): BooksPage {
+    override suspend fun getPopular(page: Int): MangasPageInfo {
         return kotlin.runCatching {
             withContext(Dispatchers.IO) {
 
@@ -408,7 +427,7 @@ data class SourceTower constructor(
     }
 
 
-    override suspend fun getLatest(page: Int): BooksPage {
+    override suspend fun getLatest(page: Int): MangasPageInfo {
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
                 val request = if (latest?.isGetRequestType == true) {
@@ -428,16 +447,16 @@ data class SourceTower constructor(
      *
      * @param page the page number to retrieve.
      */
-    override suspend fun getDetails(book: BookInfo): BookInfo {
+    override suspend fun getMangaDetails(manga: MangaInfo): MangaInfo {
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
                 val request = if (detail?.isGetRequestType == true) {
-                    client.get<Document>(detailsRequest(book))
+                    client.get<Document>(detailsRequest(manga))
                 } else {
-                    client.post<Document>(detailsRequest(book))
+                    client.post<Document>(detailsRequest(manga))
                 }
                 val book = detailParse(request)
-                return@withContext book.copy(link = book.link)
+                return@withContext book.copy(key = book.key)
             }
         }.getOrThrow()
 
@@ -472,7 +491,7 @@ data class SourceTower constructor(
      * @param page the page number to retrieve.
      * @param query the search query to retrieve.
      */
-    override suspend fun getSearch(page: Int, query: String, filters: FilterList): BooksPage {
+    override suspend fun getSearch(page: Int, query: String, filters: FilterList): MangasPageInfo {
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
                 val request = if (content?.isGetRequestType == true) {

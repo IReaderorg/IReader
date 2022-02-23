@@ -29,6 +29,7 @@ import kotlinx.coroutines.launch
 import org.ireader.core.utils.Constants
 import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
+import org.ireader.core.utils.getUrlWithoutDomain
 import org.ireader.core_ui.theme.TransparentStatusBar
 import org.ireader.domain.FetchType
 import org.ireader.domain.view_models.detail.book_detail.BookDetailEvent
@@ -43,7 +44,6 @@ import org.ireader.presentation.presentation.components.showLoading
 import org.ireader.presentation.ui.ChapterScreenSpec
 import org.ireader.presentation.ui.ReaderScreenSpec
 import org.ireader.presentation.ui.WebViewScreenSpec
-import org.ireader.source.core.getUrlWithoutDomain
 
 
 @OptIn(ExperimentalCoroutinesApi::class)

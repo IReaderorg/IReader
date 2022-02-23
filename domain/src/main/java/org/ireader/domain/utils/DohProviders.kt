@@ -68,7 +68,6 @@ val dnsOverHttps = listOf<Dns>(
     Dns.Cloudflare,
     Dns.Google,
     Dns.AdGuard,
-    Dns.Shecan,
     Dns.Disable
 )
 
@@ -76,6 +75,5 @@ sealed class Dns(val title: String, val prefCode: Int) {
     object Cloudflare : Dns("CloudFlare", PREF_DOH_CLOUDFLARE)
     object Google : Dns("Google", PREF_DOH_GOOGLE)
     object AdGuard : Dns("AdGuard", PREF_DOH_ADGUARD)
-    object Shecan : Dns("Shecan", PREF_DOH_SHECAN)
     object Disable : Dns("Disable", 0)
 }

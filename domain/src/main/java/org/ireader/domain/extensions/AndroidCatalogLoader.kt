@@ -39,8 +39,6 @@ class AndroidCatalogLoader(
   @SuppressLint("QueryPermissionsNeeded")
   override fun loadAll(): List<CatalogLocal> {
       val bundled = mutableListOf<CatalogLocal>()
-//      val testCatalog = CatalogBundled(FreeWebNovel(deps = Dependencies(httpClients, catalogPreferences)), "Source used for testing")
-//      bundled.add(testCatalog)
 
       val systemPkgs = pkgManager.getInstalledPackages(PACKAGE_FLAGS).filter(::isPackageAnExtension)
       val localPkgs = File(context.filesDir, "catalogs").listFiles()
@@ -165,15 +163,15 @@ class AndroidCatalogLoader(
 
   private fun validateMetadata(pkgName: String, pkgInfo: PackageInfo): ValidatedData? {
     if (!isPackageAnExtension(pkgInfo)) {
-      Timber.w("Failed to load catalog, package {} isn't a catalog", pkgName)
+      Timber.e("Failed to load catalog, package {} isn't a catalog", pkgName)
       return null
     }
 
     if (pkgName != pkgInfo.packageName) {
-      Timber.w(
-        "Failed to load catalog, package name mismatch: Provided {} Actual {}",
-        pkgName, pkgInfo.packageName
-      )
+        Timber.e(
+            "Failed to load catalog, package name mismatch: Provided {} Actual {}",
+            pkgName, pkgInfo.packageName
+        )
       return null
     }
 
@@ -186,7 +184,7 @@ class AndroidCatalogLoader(
     if (majorLibVersion < LIB_VERSION_MIN || majorLibVersion > LIB_VERSION_MAX) {
       val exception = "Failed to load catalog, the package {} lib version is {}," +
               "while only versions {} to {} are allowed"
-      Timber.w(exception, pkgName, majorLibVersion, LIB_VERSION_MIN, LIB_VERSION_MAX)
+        Timber.e(exception, pkgName, majorLibVersion, LIB_VERSION_MIN, LIB_VERSION_MAX)
       return null
     }
 
@@ -195,7 +193,7 @@ class AndroidCatalogLoader(
     val metadata = appInfo.metaData
     val sourceClassName = metadata.getString(METADATA_SOURCE_CLASS)?.trim()
     if (sourceClassName == null) {
-      Timber.w("Failed to load catalog, the package {} didn't define source class", pkgName)
+        Timber.e("Failed to load catalog, the package {} didn't define source class", pkgName)
       return null
     }
 
@@ -223,7 +221,7 @@ class AndroidCatalogLoader(
 
       obj as? Source ?: throw Exception("Unknown source class type! ${obj.javaClass}")
     } catch (e: Throwable) {
-      Timber.w(e, "Failed to load catalog {}", pkgName)
+        Timber.e(e, "Failed to load catalog {}", pkgName)
       return null
     }
   }

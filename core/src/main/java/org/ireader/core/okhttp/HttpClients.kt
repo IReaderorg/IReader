@@ -9,13 +9,20 @@ import io.ktor.client.features.json.*
 import io.ktor.client.features.json.serializer.*
 import okhttp3.Cache
 import okhttp3.OkHttpClient
+import org.ireader.core.okhttp.doh.dohAdGuard
+import org.ireader.core.okhttp.doh.dohCloudflare
+import org.ireader.core.okhttp.doh.dohGoogle
+import org.ireader.core.prefs.PreferenceStore
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
 
 @Singleton
-class HttpClients @Inject internal constructor(context: Application) {
+class HttpClients @Inject internal constructor(
+    context: Application,
+    private val preferenceStore: PreferenceStore,
+) {
 
     private val cache = run {
         val dir = File(context.cacheDir, "network_cache")
@@ -25,10 +32,19 @@ class HttpClients @Inject internal constructor(context: Application) {
 
     private val cookieJar = WebViewCookieJar()
 
-    val okhttpClient = OkHttpClient.Builder()
-        .cache(cache)
-        .cookieJar(cookieJar)
-        .build()
+    val okhttpClient: OkHttpClient
+        get() {
+            val builder = OkHttpClient.Builder()
+                .cache(cache)
+                .cookieJar(cookieJar)
+            when (preferenceStore.getInt("SAVED_DOH_KEY").get()) {
+                1 -> builder.dohCloudflare()
+                2 -> builder.dohGoogle()
+                3 -> builder.dohAdGuard()
+            }
+
+            return builder.build()
+        }
 
 
     val default = HttpClient(OkHttp) {

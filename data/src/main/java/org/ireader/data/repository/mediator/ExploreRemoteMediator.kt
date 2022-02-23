@@ -13,8 +13,8 @@ import org.ireader.domain.models.RemoteKeys
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.toBook
 import org.ireader.source.core.Source
-import org.ireader.source.models.BooksPage
 import org.ireader.source.models.FilterList
+import org.ireader.source.models.MangasPageInfo
 import retrofit2.HttpException
 import java.io.IOException
 import java.net.UnknownHostException
@@ -81,7 +81,7 @@ class ExploreRemoteMediator(
                     }
                 }
                 else -> {
-                    BooksPage()
+                    MangasPageInfo()
                 }
             }
 
@@ -97,7 +97,7 @@ class ExploreRemoteMediator(
                     remoteKey.deleteAllExploredBook()
                     remoteKey.deleteAllRemoteKeys()
                 }
-                val keys = response.books.map { book ->
+                val keys = response.mangas.map { book ->
                     RemoteKeys(
                         id = book.title,
                         prevPage = prevPage,
@@ -108,7 +108,7 @@ class ExploreRemoteMediator(
 
 
                 remoteKey.insertAllRemoteKeys(remoteKeys = keys)
-                remoteKey.insertAllExploredBook(response.books.map { it.toBook(source.id) })
+                remoteKey.insertAllExploredBook(response.mangas.map { it.toBook(source.id) })
             }
                 RemoteMediator.MediatorResult.Success(endOfPaginationReached = endOfPaginationReached)
             }.getOrThrow()

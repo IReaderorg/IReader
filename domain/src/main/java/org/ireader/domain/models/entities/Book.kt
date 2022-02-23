@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 import org.ireader.core.utils.Constants.BOOK_TABLE
-import org.ireader.source.models.BookInfo
+import org.ireader.source.models.MangaInfo
 
 @Serializable
 @Entity(tableName = BOOK_TABLE)
@@ -31,18 +31,16 @@ data class Book(
 ) {
 
     companion object {
-        fun Book.toBookInfo(sourceId: Long): BookInfo {
-            return BookInfo(
+        fun Book.toBookInfo(sourceId: Long): MangaInfo {
+            return MangaInfo(
                 cover = this.cover,
-                link = this.link,
+                key = this.link,
                 title = this.title,
-                translator = this.translator,
+                artist = this.translator,
                 status = this.status,
                 genres = this.genres,
                 description = this.description,
                 author = this.author,
-                rating = this.rating,
-                viewer = this.viewer,
             )
         }
 
@@ -87,48 +85,44 @@ fun updateBook(newBook: Book, oldBook: Book): Book {
     )
 }
 
-fun BookInfo.toBook(sourceId: Long): Book {
+fun MangaInfo.toBook(sourceId: Long): Book {
     return Book(
         id = 0,
         sourceId = sourceId,
         customCover = this.cover,
         cover = this.cover,
         flags = 0,
-        link = this.link,
+        link = this.key,
         lastRead = 0,
         dataAdded = 0L,
         lastUpdated = 0L,
         favorite = false,
         title = this.title,
-        translator = this.translator,
+        translator = this.artist,
         status = this.status,
         genres = this.genres,
         description = this.description,
         author = this.author,
-        rating = this.rating,
-        viewer = this.viewer
     )
 }
 
-fun BookInfo.fromBookInfo(sourceId: Long): Book {
+fun MangaInfo.fromBookInfo(sourceId: Long): Book {
     return Book(
         id = 0,
         sourceId = sourceId,
         customCover = this.cover,
         cover = this.cover,
         flags = 0,
-        link = this.link,
+        link = this.key,
         lastRead = 0,
         dataAdded = 0L,
         lastUpdated = 0L,
         favorite = false,
         title = this.title,
-        translator = this.translator,
+        translator = this.artist,
         status = this.status,
         genres = this.genres,
         description = this.description,
         author = this.author,
-        rating = this.rating,
-        viewer = this.viewer
     )
 }

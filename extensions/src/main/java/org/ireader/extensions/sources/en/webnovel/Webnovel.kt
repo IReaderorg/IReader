@@ -1,16 +1,11 @@
-package org.ireader.source.sources.en.webnovel
+package org.ireader.extensions.sources.en.webnovel
 
 import io.ktor.client.request.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.Headers
-import org.ireader.extensions.sources.en.webnovel.merge
-import org.ireader.source.core.Dependencies
-import org.ireader.source.core.ParsedHttpSource
-import org.ireader.source.models.BookInfo
-import org.ireader.source.models.ChapterInfo
-import org.ireader.source.models.Filter
-import org.ireader.source.models.FilterList
+import org.ireader.source.core.*
+import org.ireader.source.models.*
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import java.text.SimpleDateFormat
@@ -26,10 +21,9 @@ class Webnovel(deps: Dependencies) : ParsedHttpSource(deps) {
 
     override val lang = "en"
 
-    override val supportsLatest = true
-    override val supportsMostPopular: Boolean = true
-    override val supportSearch: Boolean = true
-
+    override fun getListings(): List<Listing> {
+        return listOf(PopularListing(), LatestListing(), SearchListing())
+    }
 
     override fun fetchLatestEndpoint(page: Int): String? =
         "/stories/novel?pageIndex=$page&orderBy=5"
@@ -61,11 +55,11 @@ class Webnovel(deps: Dependencies) : ParsedHttpSource(deps) {
 
     override fun popularSelector() = "a.g_thumb, div.j_bookList .g_book_item a:has(img)"
 
-    override fun popularFromElement(element: Element): BookInfo {
+    override fun popularFromElement(element: Element): MangaInfo {
         val url = element.attr("abs:href").substringAfter(baseUrl)
         val title = element.attr("title")
         val thumbnailUrl = element.select("img").attr("abs:src")
-        return BookInfo(link = url, title = title, cover = thumbnailUrl)
+        return MangaInfo(key = url, title = title, cover = thumbnailUrl)
     }
 
     override fun popularNextPageSelector() = "[rel=next]"
@@ -107,22 +101,22 @@ class Webnovel(deps: Dependencies) : ParsedHttpSource(deps) {
     override fun searchNextPageSelector() = popularNextPageSelector()
 
     // manga details
-    override fun detailParse(document: Document): BookInfo {
+    override fun detailParse(document: Document): MangaInfo {
         val thumbnailUrl = document.select("i.g_thumb img:first-child").attr("abs:src")
         val title = document.select("h2").text()
         val description = document.select(".j_synopsis p").text()
 
-        return BookInfo(
+        return MangaInfo(
             title = title,
             description = description,
             cover = thumbnailUrl,
-            link = "")
+            key = "")
     }
 
     // chapters
-    override fun chaptersRequest(book: BookInfo): HttpRequestBuilder {
+    override fun chaptersRequest(manga: MangaInfo): HttpRequestBuilder {
         return HttpRequestBuilder().apply {
-            url(baseUrl + book.link + "/catalog")
+            url(baseUrl + manga.key + "/catalog")
             headers { headers }
         }
     }
@@ -130,7 +124,7 @@ class Webnovel(deps: Dependencies) : ParsedHttpSource(deps) {
     override fun chaptersSelector() = ".volume-item li a"
 
     override fun chapterFromElement(element: Element): ChapterInfo {
-        val link = baseUrl + element.attr("href")
+        val key = baseUrl + element.attr("href")
         val name = if (element.select("svg").hasAttr("class")) {
             "\uD83D\uDD12 "
         } else {
@@ -139,14 +133,14 @@ class Webnovel(deps: Dependencies) : ParsedHttpSource(deps) {
                 element.attr("title")
         val date_upload = parseChapterDate(element.select(".oh small").text())
 
-        return ChapterInfo(name = name, dateUpload = date_upload, key = link)
+        return ChapterInfo(name = name, dateUpload = date_upload, key = key)
     }
 
-    override suspend fun getChapters(book: BookInfo): List<ChapterInfo> {
+    override suspend fun getChapters(manga: MangaInfo): List<ChapterInfo> {
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
 
-                val request = client.get<Document>(chaptersRequest(book = book))
+                val request = client.get<Document>(chaptersRequest(manga = manga))
 
                 return@withContext chaptersParse(request)
             }

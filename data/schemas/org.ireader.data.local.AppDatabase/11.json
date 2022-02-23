@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 11,
-    "identityHash": "7358b00d4dbf6761e5160494bd12f983",
+    "identityHash": "47a7e60ac384597282a95d4d57c34ce3",
     "entities": [
       {
         "tableName": "library",
@@ -201,7 +201,7 @@
         "foreignKeys": []
       },
       {
-        "tableName": "Category",
+        "tableName": "category_table",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `sort` INTEGER NOT NULL, `updateInterval` INTEGER NOT NULL, `flags` INTEGER NOT NULL)",
         "fields": [
           {
@@ -417,7 +417,7 @@
         "foreignKeys": []
       },
       {
-        "tableName": "History",
+        "tableName": "history_table",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `bookId` INTEGER NOT NULL, `chapterId` INTEGER NOT NULL, `readAt` INTEGER NOT NULL)",
         "fields": [
           {
@@ -455,7 +455,7 @@
         "foreignKeys": []
       },
       {
-        "tableName": "Updates",
+        "tableName": "update_table",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `bookId` INTEGER NOT NULL, `sourceId` INTEGER NOT NULL, `bookLink` TEXT NOT NULL, `bookTitle` TEXT NOT NULL, `cover` TEXT NOT NULL, `favorite` INTEGER NOT NULL, `dateUploaded` INTEGER NOT NULL, `chapterId` INTEGER NOT NULL, `chapterTitle` TEXT NOT NULL, `read` INTEGER NOT NULL, `number` REAL NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
@@ -582,7 +582,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7358b00d4dbf6761e5160494bd12f983')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '47a7e60ac384597282a95d4d57c34ce3')"
     ]
   }
 }

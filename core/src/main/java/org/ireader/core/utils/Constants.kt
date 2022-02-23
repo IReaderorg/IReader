@@ -21,6 +21,9 @@ object Constants {
     const val CHAPTER_TABLE = "chapter"
     const val DOWNLOAD_TABLE = "download"
     const val CATALOG_REMOTE = "catalog_remote"
+    const val UPDATE_TABLE = "update_table"
+    const val HISTORY_TABLE = "history_table"
+    const val CATEGORY_TABLE = "category_table"
 
     const val EXPLORE_BOOK_TABLE = "explore"
 

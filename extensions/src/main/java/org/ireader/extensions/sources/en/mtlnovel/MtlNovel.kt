@@ -3,12 +3,8 @@ package org.ireader.extensions.sources.en.mtlnovel
 import io.ktor.client.request.*
 import io.ktor.http.*
 import okhttp3.Headers
-import org.ireader.source.core.Dependencies
-import org.ireader.source.core.ParsedHttpSource
-import org.ireader.source.models.BookInfo
-import org.ireader.source.models.BooksPage
-import org.ireader.source.models.ChapterInfo
-import org.ireader.source.models.FilterList
+import org.ireader.source.core.*
+import org.ireader.source.models.*
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
@@ -20,13 +16,14 @@ class MtlNovel(deps: Dependencies) : ParsedHttpSource(deps) {
     override val iconUrl: String = "https://www.mtlnovel.net/themes/mtlnovel/images/mtlnovel-32.png"
     override val baseUrl = "https://www.mtlnovel.com"
     override val lang = "en"
-    override val supportsLatest = true
-    override val supportsMostPopular: Boolean = true
-    override val supportSearch: Boolean = true
+
     override fun getFilterList(): FilterList {
         return FilterList()
     }
 
+    override fun getListings(): List<Listing> {
+        return listOf(PopularListing(), LatestListing(), SearchListing())
+    }
 
     override fun fetchLatestEndpoint(page: Int): String? =
         "/novel-list/?orderby=date&order=desc&status=all&pg=$page"
@@ -59,11 +56,11 @@ class MtlNovel(deps: Dependencies) : ParsedHttpSource(deps) {
 
     override fun popularSelector() = "div.box"
 
-    override fun popularFromElement(element: Element): BookInfo {
+    override fun popularFromElement(element: Element): MangaInfo {
         val title = element.select("a.list-title").attr("aria-label")
         val url = element.select("a.list-title").attr("href")
         val thumbnailUrl = element.select("amp-img.list-img").attr("src")
-        return BookInfo(link = url, title = title, cover = thumbnailUrl)
+        return MangaInfo(key = url, title = title, cover = thumbnailUrl)
     }
 
     override fun popularNextPageSelector() = "#pagination > a:nth-child(13)"
@@ -81,43 +78,43 @@ class MtlNovel(deps: Dependencies) : ParsedHttpSource(deps) {
     override fun latestSelector(): String = "div.box"
 
 
-    override fun latestFromElement(element: Element): BookInfo = popularFromElement(element)
+    override fun latestFromElement(element: Element): MangaInfo = popularFromElement(element)
     override fun latestNextPageSelector() = popularNextPageSelector()
 
     override fun searchSelector() = "div.ul-list1 div.li-row"
 
-    override fun searchFromElement(element: Element): BookInfo {
+    override fun searchFromElement(element: Element): MangaInfo {
         val title = element.select("div.txt a").attr("title")
         val url = element.select("div.txt a").attr("href")
         val thumbnailUrl = element.select("div.pic img").attr("src")
-        return BookInfo(link = url, title = title, cover = thumbnailUrl)
+        return MangaInfo(key = url, title = title, cover = thumbnailUrl)
     }
 
     override fun searchNextPageSelector(): String? = null
 
 
     // manga details
-    override fun detailParse(document: Document): BookInfo {
+    override fun detailParse(document: Document): MangaInfo {
         val title = document.select("h1.entry-title").text()
         val cover = document.select("div.nov-head img").attr("src")
         val authorBookSelector = document.select("#author a").text()
         val description = document.select("div.desc p").eachText().joinToString("\n")
         val category = document.select("#currentgen a").eachText()
 
-        return BookInfo(
+        return MangaInfo(
             title = title,
             cover = cover,
             description = description,
             author = authorBookSelector,
             genres = category,
-            link = "",
+            key = "",
         )
     }
 
     // chapters
-    override fun chaptersRequest(book: BookInfo): HttpRequestBuilder {
+    override fun chaptersRequest(manga: MangaInfo): HttpRequestBuilder {
         return HttpRequestBuilder().apply {
-            url(book.link + "chapter-list/")
+            url(manga.key, "chapter-list/")
             headers { headers }
         }
     }
@@ -131,8 +128,8 @@ class MtlNovel(deps: Dependencies) : ParsedHttpSource(deps) {
         return ChapterInfo(name = name, key = link)
     }
 
-    override suspend fun getChapters(book: BookInfo): List<ChapterInfo> {
-        return super.getChapters(book).reversed()
+    override suspend fun getChapters(manga: MangaInfo): List<ChapterInfo> {
+        return super.getChapters(manga).reversed()
     }
 
 
@@ -159,23 +156,23 @@ class MtlNovel(deps: Dependencies) : ParsedHttpSource(deps) {
         return requestBuilder(baseUrl + fetchSearchEndpoint(page = page, query = query))
     }
 
-    override suspend fun getSearch(page: Int, query: String, filters: FilterList): BooksPage {
+    override suspend fun getSearch(page: Int, query: String, filters: FilterList): MangasPageInfo {
         return customJsonSearchParse(client.get<mtlSearchItem>(searchRequest(page, query, filters)))
     }
 
-    private fun customJsonSearchParse(mtlSearchItem: mtlSearchItem): BooksPage {
-        val books = mutableListOf<BookInfo>()
+    private fun customJsonSearchParse(mtlSearchItem: mtlSearchItem): MangasPageInfo {
+        val books = mutableListOf<MangaInfo>()
         mtlSearchItem.items.first { item ->
             item.results.forEach { res ->
-                books.add(BookInfo(title = Jsoup.parse(res.title).text(),
-                    link = res.permalink,
+                books.add(MangaInfo(title = Jsoup.parse(res.title).text(),
+                    key = res.permalink,
                     author = res.cn,
                     cover = res.thumbnail))
             }
             return@first true
         }
 
-        return BooksPage(books, false)
+        return MangasPageInfo(books, false)
     }
 
 

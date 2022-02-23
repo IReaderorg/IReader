@@ -1,15 +1,11 @@
-package org.ireader.source.sources.en.wuxiaworld
+package org.ireader.extensions.sources.en.wuxiaworld
 
 import io.ktor.client.request.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.Headers
-import org.ireader.source.core.Dependencies
-import org.ireader.source.core.ParsedHttpSource
-import org.ireader.source.models.BookInfo
-import org.ireader.source.models.BooksPage
-import org.ireader.source.models.ChapterInfo
-import org.ireader.source.models.FilterList
+import org.ireader.source.core.*
+import org.ireader.source.models.*
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import java.text.SimpleDateFormat
@@ -26,13 +22,14 @@ class WuxiaWorld(deps: Dependencies) : ParsedHttpSource(deps) {
 
     override val lang = "en"
 
-    override val supportsLatest = true
-    override val supportsMostPopular: Boolean = true
-    override val supportSearch: Boolean = true
+
     override fun getFilterList(): FilterList {
         return FilterList()
     }
 
+    override fun getListings(): List<Listing> {
+        return listOf(PopularListing(), LatestListing(), SearchListing())
+    }
 
     override fun fetchLatestEndpoint(page: Int): String? =
         "/novel-list/page/$page/"
@@ -65,11 +62,11 @@ class WuxiaWorld(deps: Dependencies) : ParsedHttpSource(deps) {
 
     override fun popularSelector() = "div.page-item-detail"
 
-    override fun popularFromElement(element: Element): BookInfo {
+    override fun popularFromElement(element: Element): MangaInfo {
         val title = element.select("h3.h5 a").text()
         val url = element.select("h3.h5 a").attr("href")
         val thumbnailUrl = element.select("img").attr("src")
-        return BookInfo(link = url, title = title, cover = thumbnailUrl)
+        return MangaInfo(key = url, title = title, cover = thumbnailUrl)
     }
 
     override fun popularNextPageSelector() = "div.nav-previous>a"
@@ -87,29 +84,29 @@ class WuxiaWorld(deps: Dependencies) : ParsedHttpSource(deps) {
     override fun latestSelector(): String = "div.page-item-detail"
 
 
-    override fun latestFromElement(element: Element): BookInfo {
+    override fun latestFromElement(element: Element): MangaInfo {
         val title = element.select("h3.h5 a").text()
         val url = element.select("h3.h5 a").attr("href")
         val thumbnailUrl = element.select("img").attr("src")
-        return BookInfo(link = url, title = title, cover = thumbnailUrl)
+        return MangaInfo(key = url, title = title, cover = thumbnailUrl)
     }
 
     override fun latestNextPageSelector() = popularNextPageSelector()
 
     override fun searchSelector() = "div.c-tabs-item__content"
 
-    override fun searchFromElement(element: Element): BookInfo {
+    override fun searchFromElement(element: Element): MangaInfo {
         val title = element.select("div.post-title h3.h4 a").text()
         val url = element.select("div.post-title h3.h4 a").attr("href")
         val thumbnailUrl = element.select("img").attr("src")
-        return BookInfo(link = url, title = title, cover = thumbnailUrl)
+        return MangaInfo(key = url, title = title, cover = thumbnailUrl)
     }
 
     override fun searchNextPageSelector(): String? = null
 
 
     // manga details
-    override fun detailParse(document: Document): BookInfo {
+    override fun detailParse(document: Document): MangaInfo {
         val title = document.select("div.post-title>h1").text()
         val cover = document.select("div.summary_image a img").attr("src")
         val link = baseUrl + document.select("div.cur div.wp a:nth-child(5)").attr("href")
@@ -122,23 +119,22 @@ class WuxiaWorld(deps: Dependencies) : ParsedHttpSource(deps) {
         val status = document.select("div.post-status div.summary-content").text()
 
 
-        return BookInfo(
+        return MangaInfo(
             title = title,
             cover = cover,
             description = description,
             author = authorBookSelector,
             genres = category,
-            link = link,
-            rating = paresRating(rating),
+            key = link,
             status = parseStatus(status)
         )
     }
 
     private fun parseStatus(string: String): Int {
         return when {
-            "OnGoing" in string -> BookInfo.ONGOING
-            "Completed" in string -> BookInfo.COMPLETED
-            else -> BookInfo.UNKNOWN
+            "OnGoing" in string -> MangaInfo.ONGOING
+            "Completed" in string -> MangaInfo.COMPLETED
+            else -> MangaInfo.UNKNOWN
         }
     }
 
@@ -156,9 +152,9 @@ class WuxiaWorld(deps: Dependencies) : ParsedHttpSource(deps) {
     }
 
     // chapters
-    override fun chaptersRequest(book: BookInfo): HttpRequestBuilder {
+    override fun chaptersRequest(manga: MangaInfo): HttpRequestBuilder {
         return HttpRequestBuilder().apply {
-            url(book.link)
+            url(manga.key)
             headers { headers }
         }
     }
@@ -209,13 +205,13 @@ class WuxiaWorld(deps: Dependencies) : ParsedHttpSource(deps) {
     }
 
     private val dateFormat: SimpleDateFormat = SimpleDateFormat("MMM dd,yyyy", Locale.US)
-    override suspend fun getChapters(book: BookInfo): List<ChapterInfo> {
+    override suspend fun getChapters(manga: MangaInfo): List<ChapterInfo> {
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
                 var chapters =
-                    chaptersParse(client.post<Document>(requestBuilder(book.link + "ajax/chapters/")))
+                    chaptersParse(client.post<Document>(requestBuilder(manga.key + "ajax/chapters/")))
                 if (chapters.isEmpty()) {
-                    chapters = chaptersParse(client.post<Document>(requestBuilder(book.link)))
+                    chapters = chaptersParse(client.post<Document>(requestBuilder(manga.key)))
                 }
                 return@withContext chapters.reversed()
             }
@@ -243,7 +239,7 @@ class WuxiaWorld(deps: Dependencies) : ParsedHttpSource(deps) {
         return requestBuilder(baseUrl + fetchSearchEndpoint(page = page, query = query))
     }
 
-    override suspend fun getSearch(page: Int, query: String, filters: FilterList): BooksPage {
+    override suspend fun getSearch(page: Int, query: String, filters: FilterList): MangasPageInfo {
         return searchParse(client.get<Document>(searchRequest(page, query, filters)))
     }
 

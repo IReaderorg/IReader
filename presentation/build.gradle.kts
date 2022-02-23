@@ -1,39 +1,52 @@
-apply {
-    from("$rootDir/compose-module.gradle")
+plugins {
+    id("com.android.library")
+    kotlin("android")
+    id("kotlin-kapt")
+    id("module-plugin")
 }
+
+android {
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+    buildFeatures {
+        compose = true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = Deps.Compose.composeVersion
+    }
+}
+
+addCompose()
+addAccompanist()
+
 dependencies {
-    "implementation"(project(Modules.domain))
-    "implementation"(project(Modules.core))
-    "implementation"(project(Modules.coreUi))
-    "implementation"(project(Modules.source))
-    "implementation"(Compose.paging)
-    "implementation"(Compose.icons)
-    "implementation"(Compose.runtime)
-    "implementation"(Jsoup.jsoup)
-    "implementation"(Worker.runtimeKtx)
-    "implementation"(Room.roomRuntime)
-    "kapt"(Room.roomCompiler)
-    "implementation"(Room.roomKtx)
-    "implementation"(Room.roomPaging)
-    "implementation"(Moshi.moshi)
-    "implementation"(Moshi.moshiKotlin)
-    /** Accompanist **/
-    "implementation"(Accompanist.systemUiController)
-    "implementation"(Accompanist.swipeRefresh)
-    "implementation"(Accompanist.pager)
-    "implementation"(Accompanist.pagerIndicator)
-    "implementation"(Accompanist.insets)
-    "implementation"(Accompanist.navAnimation)
-    "implementation"(Accompanist.flowlayout)
-    "implementation"(Accompanist.navMaterial)
-    "implementation"(Accompanist.webView)
+    implementation(project(Modules.domain))
+    implementation(project(Modules.core))
+    implementation(project(Modules.coreUi))
+    implementation(project(Modules.source))
+    implementation(Deps.AndroidX.coreKtx)
+    implementation(Deps.AndroidX.appCompat)
+    implementation(Deps.Jsoup.jsoup)
+    implementation(Deps.Worker.runtimeKtx)
+    implementation(Deps.Room.roomRuntime)
+    kapt(Deps.Room.roomCompiler)
+    implementation(Deps.Room.roomKtx)
+    implementation(Deps.Room.roomPaging)
+    implementation(Deps.Moshi.moshi)
+    implementation(Deps.Moshi.moshiKotlin)
 
-    "implementation"(Coil.coilCompose)
 
-    "implementation"(DaggerHilt.worker)
-    "implementation"(Retrofit.retrofit)
-    "implementation"(Ktor.okhttp)
-    "implementation"("dev.chrisbanes.snapper:snapper:0.2.0")
+    implementation(Deps.DaggerHilt.worker)
+    implementation(Deps.Retrofit.retrofit)
+    implementation(Deps.Ktor.okhttp)
+    implementation(Deps.Compose.paging)
+
+    implementation(Deps.Compose.hiltNavigationCompose)
+    implementation(Deps.DaggerHilt.hiltAndroid)
+    implementation(Deps.DaggerHilt.hiltAndroidCompiler)
+    implementation(Deps.DaggerHilt.hiltCompiler)
 
 
 }

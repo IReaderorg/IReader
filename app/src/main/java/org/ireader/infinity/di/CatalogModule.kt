@@ -74,6 +74,15 @@ class CatalogModule {
         return AndroidCatalogLoader(context, httpClients)
     }
 
+    @Provides
+    @Singleton
+    fun provideAndroidCatalogLoader(
+        context: Application,
+        httpClients: HttpClients,
+    ): AndroidCatalogLoader {
+        return AndroidCatalogLoader(context, httpClients)
+    }
+
 
     @Provides
     @Singleton
