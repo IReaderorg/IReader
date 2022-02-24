@@ -26,7 +26,7 @@ import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.key.RemoteKeyUseCase
-import org.ireader.source.core.HttpSource
+import org.ireader.source.core.CatalogSource
 import org.jsoup.Jsoup
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
@@ -102,7 +102,7 @@ class WebViewPageModel @Inject constructor(
     }
 
 
-    fun getContentFromWebView(pageSource: String, url: String, source: HttpSource) {
+    fun getContentFromWebView(pageSource: String, url: String, source: CatalogSource) {
         viewModelScope.launch(Dispatchers.IO) {
             showSnackBar(UiText.StringResource(R.string.trying_to_fetch_chapters_content))
             val list = mutableListOf<Chapter>()
@@ -122,7 +122,7 @@ class WebViewPageModel @Inject constructor(
     suspend fun getBookDetailAndChapter(
         pageSource: String,
         url: String,
-        source: HttpSource,
+        source: CatalogSource,
         update: Boolean = false,
         goTo: Boolean = false,
     ) {
@@ -233,7 +233,7 @@ data class WebViewPageState(
     val url: String = "",
     val webUrl: String = "",
     val fetcher: FetchType = FetchType.LatestFetchType,
-    val source: HttpSource? = null,
+    val source: CatalogSource? = null,
     val isLoading: Boolean = false,
     val bookId: Long? = null,
 )

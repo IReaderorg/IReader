@@ -1,9 +1,8 @@
 package org.ireader.source.core
 
 import okhttp3.Headers
-import org.ireader.source.models.FilterList
-import org.ireader.source.models.Listing
-import org.ireader.source.models.MangasPageInfo
+import org.ireader.source.models.*
+import org.jsoup.nodes.Document
 
 interface CatalogSource : Source {
 
@@ -13,9 +12,22 @@ interface CatalogSource : Source {
 
     override val lang: String
 
-    suspend fun getMangaList(sort: Listing?, page: Int): MangasPageInfo
+    //TODO remove this later
+    val iconUrl: String
 
-    suspend fun getMangaList(filters: FilterList, page: Int): MangasPageInfo
+    suspend fun getBookList(sort: Listing?, page: Int): BookPageInfo
+
+    suspend fun getBookList(filters: FilterList, page: Int): BookPageInfo
+
+    suspend fun getSearch(query: String, filters: FilterList, page: Int): BookPageInfo
+
+    fun chaptersParse(document: Document): List<ChapterInfo>
+
+    fun detailParse(document: Document): BookInfo
+
+    fun pageContentParse(
+        document: Document,
+    ): List<String>
 
     fun getListings(): List<Listing>
 

@@ -19,6 +19,7 @@ import org.ireader.data.local.dao.LibraryBookDao
 import org.ireader.data.local.dao.LibraryChapterDao
 import org.ireader.data.local.dao.RemoteKeysDao
 import org.ireader.data.repository.DownloadRepositoryImpl
+import org.ireader.domain.extensions.AndroidCatalogLoader
 import org.ireader.domain.feature_services.io.LibraryCovers
 import org.ireader.domain.repository.DownloadRepository
 import org.ireader.domain.repository.LocalBookRepository
@@ -94,9 +95,13 @@ class LocalModule {
 
     @Singleton
     @Provides
-    fun providesExtensions(httpClients: HttpClients, preferences: PreferenceStore): Extensions {
+    fun providesExtensions(
+        httpClients: HttpClients,
+        preferences: PreferenceStore,
+        androidCatalogLoader: AndroidCatalogLoader,
+    ): Extensions {
         return Extensions(Dependencies(httpClients = httpClients,
-            preferences = preferences))
+            preferences = preferences), catalogLoader = androidCatalogLoader)
     }
 
     @Singleton

@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 import org.ireader.domain.models.ExploreType
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.repository.RemoteRepository
-import org.ireader.source.core.HttpSource
+import org.ireader.source.core.CatalogSource
 
 data class RemoteUseCases(
     val getBookDetail: GetBookDetail,
@@ -18,7 +18,7 @@ data class RemoteUseCases(
 class GetRemoteBookByPaginationUseCase(private val remoteRepository: RemoteRepository) {
     @OptIn(ExperimentalPagingApi::class)
     operator fun invoke(
-        source: HttpSource,
+        source: CatalogSource,
         exploreType: ExploreType,
         query: String?,
     ): Flow<PagingData<Book>> {

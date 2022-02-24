@@ -24,8 +24,8 @@ import org.ireader.domain.models.entities.Book
 import org.ireader.domain.source.Extensions
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.remote.RemoteUseCases
-import org.ireader.source.core.HttpSource
-import org.ireader.source.models.MangasPageInfo
+import org.ireader.source.core.CatalogSource
+import org.ireader.source.models.BookPageInfo
 import javax.inject.Inject
 
 
@@ -92,7 +92,7 @@ class ExploreViewModel @Inject constructor(
     private var getBooksJob: Job? = null
 
     @OptIn(ExperimentalPagingApi::class)
-    fun getBooks(query: String? = null, type: ExploreType? = null, source: HttpSource) {
+    fun getBooks(query: String? = null, type: ExploreType? = null, source: CatalogSource) {
         getBooksJob?.cancel()
         getBooksJob = viewModelScope.launch(Dispatchers.Main) {
             remoteUseCases.getRemoteBookByPaginationUseCase(
@@ -121,7 +121,7 @@ class ExploreViewModel @Inject constructor(
 
     private fun exitSearchedMode() {
         state.value = state.value.copy(
-            searchedBook = MangasPageInfo(),
+            searchedBook = BookPageInfo(),
             searchQuery = "",
             isLoading = false,
             error = UiText.StringResource(R.string.no_error))

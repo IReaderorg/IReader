@@ -16,39 +16,17 @@ import java.security.MessageDigest
  */
 abstract class HttpSource(private val dependencies: Dependencies) : CatalogSource {
 
-
-    /**
-     * Base url of the website without the trailing slash, like: http://mysite.com
-     */
     abstract override val baseUrl: String
 
-
-    /**
-     * Version id used to generate the source id. If the site completely changes and urls are
-     * incompatible, you may increase this value and it'll be considered as a new source.
-     */
     open val versionId = 1
 
-
-    /**
-     * Default network client for doing requests.
-     */
     open val client: HttpClient
         get() = dependencies.httpClients.default
 
-
-    /**
-     * Headers used for requests.
-     */
     override val headers: Headers by lazy { headersBuilder().build() }
 
-    abstract val iconUrl: String
+    abstract override val iconUrl: String
 
-    /**
-     * Id of the source. By default it uses a generated id using the first 16 characters (64 bits)
-     * of the MD5 of the string: source name/language/versionId
-     * Note the generated id sets the sign bit to 0.
-     */
     override val id by lazy {
         val key = "${name.lowercase()}/$lang/$versionId"
         val bytes = MessageDigest.getInstance("MD5").digest(key.toByteArray())
@@ -58,27 +36,44 @@ abstract class HttpSource(private val dependencies: Dependencies) : CatalogSourc
 
     override fun toString() = "$name (${lang.uppercase()})"
 
+    override suspend fun getBookList(sort: Listing?, page: Int): BookPageInfo {
+        if (sort == null) {
+            throw Exception("sort can not be empty.")
+        }
+        return when (sort) {
+            is LatestListing -> getLatest(page)
+            is PopularListing -> getPopular(page)
+            else -> {
+                throw Exception("no sort was found")
+            }
+        }
+    }
 
-    open suspend fun getPopular(page: Int): MangasPageInfo {
+    override suspend fun getBookList(filters: FilterList, page: Int): BookPageInfo {
+        throw Exception("not implemented")
+    }
+
+
+    open suspend fun getPopular(page: Int): BookPageInfo {
         val request = client.get<Document>(popularRequest(page))
         return popularParse(request)
     }
 
 
-    open suspend fun getLatest(page: Int): MangasPageInfo {
+    open suspend fun getLatest(page: Int): BookPageInfo {
         val request = client.get<Document>(latestRequest(page))
         return latestParse(request)
     }
 
 
-    override suspend fun getMangaDetails(manga: MangaInfo): MangaInfo {
-        val request = client.get<Document>(detailsRequest(manga))
+    override suspend fun getBookDetails(book: BookInfo): BookInfo {
+        val request = client.get<Document>(detailsRequest(book))
         return detailParse(request)
     }
 
 
-    override suspend fun getChapterList(manga: MangaInfo): List<ChapterInfo> {
-        val request = client.get<Document>(chaptersRequest(manga))
+    override suspend fun getChapterList(book: BookInfo): List<ChapterInfo> {
+        val request = client.get<Document>(chaptersRequest(book))
         return chaptersParse(request)
     }
 
@@ -87,7 +82,7 @@ abstract class HttpSource(private val dependencies: Dependencies) : CatalogSourc
         return pageContentParse(request)
     }
 
-    open suspend fun getSearch(page: Int, query: String, filters: FilterList): MangasPageInfo {
+    override suspend fun getSearch(query: String, filters: FilterList, page: Int): BookPageInfo {
         val request = client.get<Document>(searchRequest(page, query, filters))
         return searchParse(request)
     }
@@ -97,9 +92,9 @@ abstract class HttpSource(private val dependencies: Dependencies) : CatalogSourc
 
     protected abstract fun latestRequest(page: Int): HttpRequestBuilder
 
-    protected open fun detailsRequest(manga: MangaInfo): HttpRequestBuilder {
+    protected open fun detailsRequest(book: BookInfo): HttpRequestBuilder {
         return HttpRequestBuilder().apply {
-            url(manga.key)
+            url(book.key)
             headers { headers }
         }
     }
@@ -114,9 +109,9 @@ abstract class HttpSource(private val dependencies: Dependencies) : CatalogSourc
         }
     }
 
-    protected open fun chaptersRequest(manga: MangaInfo): HttpRequestBuilder {
+    protected open fun chaptersRequest(book: BookInfo): HttpRequestBuilder {
         return HttpRequestBuilder().apply {
-            url(manga.key)
+            url(book.key)
             headers { headers }
         }
     }
@@ -139,35 +134,35 @@ abstract class HttpSource(private val dependencies: Dependencies) : CatalogSourc
     protected abstract fun searchRequest(
         page: Int,
         query: String,
-        filters: FilterList,
+        filters: List<Filter<*>>,
     ): HttpRequestBuilder
 
     /****************************************************************************************************/
 
     abstract fun popularParse(
         document: Document,
-    ): MangasPageInfo
+    ): BookPageInfo
 
 
     abstract fun latestParse(
         document: Document,
-    ): MangasPageInfo
+    ): BookPageInfo
 
 
-    abstract fun detailParse(document: Document): MangaInfo
+    abstract override fun detailParse(document: Document): BookInfo
 
 
-    abstract fun pageContentParse(
+    abstract override fun pageContentParse(
         document: Document,
     ): List<String>
 
 
-    abstract fun chaptersParse(document: Document): List<ChapterInfo>
+    abstract override fun chaptersParse(document: Document): List<ChapterInfo>
 
 
     abstract fun searchParse(
         document: Document,
-    ): MangasPageInfo
+    ): BookPageInfo
 
 
     fun getUrlWithoutDomain(orig: String): String {

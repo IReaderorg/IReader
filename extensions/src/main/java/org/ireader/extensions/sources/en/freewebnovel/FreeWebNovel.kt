@@ -3,7 +3,8 @@ package org.ireader.extensions.sources.en.freewebnovel
 import io.ktor.client.request.*
 import kotlinx.coroutines.*
 import okhttp3.Headers
-import org.ireader.source.core.*
+import org.ireader.source.core.Dependencies
+import org.ireader.source.core.ParsedHttpSource
 import org.ireader.source.models.*
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
@@ -17,16 +18,10 @@ class FreeWebNovel(deps: Dependencies) : ParsedHttpSource(deps) {
     override val baseUrl = "https://freewebnovel.com"
 
     override val lang = "en"
-    override suspend fun getMangaList(sort: Listing?, page: Int): MangasPageInfo {
-        TODO("Not yet implemented")
-    }
 
-    override suspend fun getMangaList(filters: FilterList, page: Int): MangasPageInfo {
-        TODO("Not yet implemented")
-    }
 
     override fun getFilters(): FilterList {
-        return FilterList()
+        return listOf()
     }
 
 
@@ -65,11 +60,11 @@ class FreeWebNovel(deps: Dependencies) : ParsedHttpSource(deps) {
 
     override fun popularSelector() = "div.ul-list1 div.li-row"
 
-    override fun popularFromElement(element: Element): MangaInfo {
+    override fun popularFromElement(element: Element): BookInfo {
         val url = baseUrl + element.select("a").attr("href")
         val title = element.select("a").attr("title")
         val thumbnailUrl = element.select("img").attr("src")
-        return MangaInfo(key = url, title = title, cover = thumbnailUrl)
+        return BookInfo(key = url, title = title, cover = thumbnailUrl)
     }
 
     override fun popularNextPageSelector() = null
@@ -87,29 +82,29 @@ class FreeWebNovel(deps: Dependencies) : ParsedHttpSource(deps) {
     override fun latestSelector(): String = "div.ul-list1 div.li"
 
 
-    override fun latestFromElement(element: Element): MangaInfo {
+    override fun latestFromElement(element: Element): BookInfo {
         val title = element.select("div.txt a").attr("title")
         val url = baseUrl + element.select("div.txt a").attr("href")
         val thumbnailUrl = element.select("div.pic img").attr("src")
-        return MangaInfo(key = url, title = title, cover = thumbnailUrl)
+        return BookInfo(key = url, title = title, cover = thumbnailUrl)
     }
 
     override fun latestNextPageSelector() = "div.ul-list1"
 
     override fun searchSelector() = "div.ul-list1 div.li-row"
 
-    override fun searchFromElement(element: Element): MangaInfo {
+    override fun searchFromElement(element: Element): BookInfo {
         val title = element.select("div.txt a").attr("title")
         val url = baseUrl + element.select("div.txt a").attr("href")
         val thumbnailUrl = element.select("div.pic img").attr("src")
-        return MangaInfo(key = url, title = title, cover = thumbnailUrl)
+        return BookInfo(key = url, title = title, cover = thumbnailUrl)
     }
 
     override fun searchNextPageSelector(): String? = null
 
 
     // manga details
-    override fun detailParse(document: Document): MangaInfo {
+    override fun detailParse(document: Document): BookInfo {
         val title = document.select("div.m-desc h1.tit").text()
         val cover = document.select("div.m-book1 div.pic img").text()
         val link = baseUrl + document.select("div.cur div.wp a:nth-child(5)").attr("href")
@@ -117,7 +112,7 @@ class FreeWebNovel(deps: Dependencies) : ParsedHttpSource(deps) {
         val description = document.select("div.inner p").eachText().joinToString("\n")
         val category = document.select("div.item div.right a.a1").eachText()
 
-        return MangaInfo(
+        return BookInfo(
             title = title,
             cover = cover,
             description = description,
@@ -128,9 +123,9 @@ class FreeWebNovel(deps: Dependencies) : ParsedHttpSource(deps) {
     }
 
     // chapters
-    override fun chaptersRequest(manga: MangaInfo): HttpRequestBuilder {
+    override fun chaptersRequest(book: BookInfo): HttpRequestBuilder {
         return HttpRequestBuilder().apply {
-            url(manga.key)
+            url(book.key)
             headers { headers }
         }
     }
@@ -144,23 +139,23 @@ class FreeWebNovel(deps: Dependencies) : ParsedHttpSource(deps) {
         return ChapterInfo(name = name, key = link)
     }
 
-    fun uniqueChaptersRequest(manga: MangaInfo, page: Int): HttpRequestBuilder {
+    fun uniqueChaptersRequest(book: BookInfo, page: Int): HttpRequestBuilder {
         return HttpRequestBuilder().apply {
-            url(manga.key.replace("/${page - 1}.html", "").replace(".html", "")
+            url(book.key.replace("/${page - 1}.html", "").replace(".html", "")
                 .plus("/$page.html"))
             headers { headers }
         }
     }
 
-    override suspend fun getChapterList(manga: MangaInfo): List<ChapterInfo> {
+    override suspend fun getChapterList(book: BookInfo): List<ChapterInfo> {
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
-                val page = client.get<Document>(chaptersRequest(manga = manga))
-                val maxPage = parseMaxPage(manga)
+                val page = client.get<Document>(chaptersRequest(book = book))
+                val maxPage = parseMaxPage(book)
                 val list = mutableListOf<Deferred<List<ChapterInfo>>>()
                 for (i in 1..maxPage) {
                     val pChapters = async {
-                        chaptersParse(client.get<Document>(uniqueChaptersRequest(manga = manga,
+                        chaptersParse(client.get<Document>(uniqueChaptersRequest(book = book,
                             page = i)))
                     }
                     list.addAll(listOf(pChapters))
@@ -172,8 +167,8 @@ class FreeWebNovel(deps: Dependencies) : ParsedHttpSource(deps) {
         }.getOrThrow()
     }
 
-    suspend fun parseMaxPage(manga: MangaInfo): Int {
-        val page = client.get<Document>(chaptersRequest(manga = manga))
+    suspend fun parseMaxPage(book: BookInfo): Int {
+        val page = client.get<Document>(chaptersRequest(book = book))
         val maxPage = page.select("#indexselect option").eachText().size
         return maxPage
     }
@@ -195,11 +190,16 @@ class FreeWebNovel(deps: Dependencies) : ParsedHttpSource(deps) {
         }
     }
 
-    override fun searchRequest(page: Int, query: String, filters: FilterList): HttpRequestBuilder {
+
+    override fun searchRequest(
+        page: Int,
+        query: String,
+        filters: List<Filter<*>>,
+    ): HttpRequestBuilder {
         return requestBuilder(baseUrl + fetchSearchEndpoint(page = page, query = query))
     }
 
-    override suspend fun getSearch(page: Int, query: String, filters: FilterList): MangasPageInfo {
+    override suspend fun getSearch(query: String, filters: FilterList, page: Int): BookPageInfo {
         return searchParse(client.get<Document>(searchRequest(page, query, filters)))
     }
 

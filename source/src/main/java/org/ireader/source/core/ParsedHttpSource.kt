@@ -1,8 +1,8 @@
 package org.ireader.source.core
 
+import org.ireader.source.models.BookInfo
+import org.ireader.source.models.BookPageInfo
 import org.ireader.source.models.ChapterInfo
-import org.ireader.source.models.MangaInfo
-import org.ireader.source.models.MangasPageInfo
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 
@@ -16,7 +16,7 @@ abstract class ParsedHttpSource(dependencies: Dependencies) : HttpSource(depende
      *
      * @param element an element obtained from [popularSelector].
      */
-    abstract fun popularFromElement(element: Element): MangaInfo
+    abstract fun popularFromElement(element: Element): BookInfo
 
     /**
      * Returns a Book from the given [element]. Most sites only show the title and the url, it's
@@ -24,7 +24,7 @@ abstract class ParsedHttpSource(dependencies: Dependencies) : HttpSource(depende
      *
      * @param element an element obtained from [latestSelector].
      */
-    abstract fun latestFromElement(element: Element): MangaInfo
+    abstract fun latestFromElement(element: Element): BookInfo
 
     /**
      * Returns a chapter from the given element.
@@ -39,7 +39,7 @@ abstract class ParsedHttpSource(dependencies: Dependencies) : HttpSource(depende
      *
      * @param element an element obtained from [searchSelector].
      */
-    abstract fun searchFromElement(element: Element): MangaInfo
+    abstract fun searchFromElement(element: Element): BookInfo
 
     /****************************************************************************************************/
     /**
@@ -53,7 +53,7 @@ abstract class ParsedHttpSource(dependencies: Dependencies) : HttpSource(depende
      */
     protected abstract fun popularNextPageSelector(): String?
 
-    override fun popularParse(document: Document): MangasPageInfo {
+    override fun popularParse(document: Document): BookPageInfo {
         val books = document.select(popularSelector()).map { element ->
             popularFromElement(element)
         }
@@ -62,7 +62,7 @@ abstract class ParsedHttpSource(dependencies: Dependencies) : HttpSource(depende
             document.select(selector).first()
         } != null
 
-        return MangasPageInfo(books, hasNextPage)
+        return BookPageInfo(books, hasNextPage)
     }
 
     /**
@@ -75,7 +75,7 @@ abstract class ParsedHttpSource(dependencies: Dependencies) : HttpSource(depende
      * there's no next page.
      */
     protected abstract fun latestNextPageSelector(): String?
-    override fun latestParse(document: Document): MangasPageInfo {
+    override fun latestParse(document: Document): BookPageInfo {
 
         val books = document.select(latestSelector()).map { element ->
             latestFromElement(element)
@@ -85,7 +85,7 @@ abstract class ParsedHttpSource(dependencies: Dependencies) : HttpSource(depende
             document.select(selector).first()
         } != null
 
-        return MangasPageInfo(books, hasNextPage)
+        return BookPageInfo(books, hasNextPage)
     }
 
     /**
@@ -111,7 +111,7 @@ abstract class ParsedHttpSource(dependencies: Dependencies) : HttpSource(depende
     protected abstract fun searchNextPageSelector(): String?
 
 
-    override fun searchParse(document: Document): MangasPageInfo {
+    override fun searchParse(document: Document): BookPageInfo {
         /**
          * I Add Filter Because sometimes this value contains null values
          * so the null book shows in search screen
@@ -125,7 +125,7 @@ abstract class ParsedHttpSource(dependencies: Dependencies) : HttpSource(depende
             document.select(selector).first()
         } != null
 
-        return MangasPageInfo(books,
+        return BookPageInfo(books,
             hasNextPage)
     }
 

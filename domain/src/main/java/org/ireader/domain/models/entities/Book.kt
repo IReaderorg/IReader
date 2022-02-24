@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 import org.ireader.core.utils.Constants.BOOK_TABLE
-import org.ireader.source.models.MangaInfo
+import org.ireader.source.models.BookInfo
 
 @Serializable
 @Entity(tableName = BOOK_TABLE)
@@ -14,7 +14,6 @@ data class Book(
     val sourceId: Long,
     val link: String,
     val title: String,
-    val translator: String = "",
     val author: String = "",
     val description: String = "",
     val genres: List<String> = emptyList(),
@@ -30,12 +29,11 @@ data class Book(
 ) {
 
     companion object {
-        fun Book.toBookInfo(sourceId: Long): MangaInfo {
-            return MangaInfo(
+        fun Book.toBookInfo(sourceId: Long): BookInfo {
+            return BookInfo(
                 cover = this.cover,
                 key = this.link,
                 title = this.title,
-                artist = this.translator,
                 status = this.status,
                 genres = this.genres,
                 description = this.description,
@@ -73,7 +71,6 @@ fun updateBook(newBook: Book, oldBook: Book): Book {
         lastUpdated = System.currentTimeMillis(),
         favorite = oldBook.favorite,
         title = newBook.title.ifBlank { oldBook.title },
-        translator = newBook.translator.ifBlank { oldBook.translator },
         status = if (newBook.status != 0) newBook.status else oldBook.status,
         genres = newBook.genres.ifEmpty { oldBook.genres },
         description = newBook.description.ifBlank { oldBook.description },
@@ -83,7 +80,7 @@ fun updateBook(newBook: Book, oldBook: Book): Book {
     )
 }
 
-fun MangaInfo.toBook(sourceId: Long): Book {
+fun BookInfo.toBook(sourceId: Long): Book {
     return Book(
         id = 0,
         sourceId = sourceId,
@@ -96,7 +93,6 @@ fun MangaInfo.toBook(sourceId: Long): Book {
         lastUpdated = 0L,
         favorite = false,
         title = this.title,
-        translator = this.artist,
         status = this.status,
         genres = this.genres,
         description = this.description,
@@ -104,7 +100,7 @@ fun MangaInfo.toBook(sourceId: Long): Book {
     )
 }
 
-fun MangaInfo.fromBookInfo(sourceId: Long): Book {
+fun BookInfo.fromBookInfo(sourceId: Long): Book {
     return Book(
         id = 0,
         sourceId = sourceId,
@@ -117,7 +113,6 @@ fun MangaInfo.fromBookInfo(sourceId: Long): Book {
         lastUpdated = 0L,
         favorite = false,
         title = this.title,
-        translator = this.artist,
         status = this.status,
         genres = this.genres,
         description = this.description,

@@ -51,6 +51,7 @@ dependencies {
     kapt(Deps.Room.roomCompiler)
     implementation(Deps.Room.roomKtx)
     implementation(Deps.Room.roomPaging)
+    androidTestImplementation(Deps.Room.roomTesting)
     implementation(Deps.Moshi.moshi)
     implementation(Deps.Moshi.moshiKotlin)
     implementation(Deps.Jsoup.jsoup)
@@ -63,5 +64,7 @@ dependencies {
     /** Retrofit **/
     implementation(Deps.Retrofit.retrofit)
     implementation(Deps.Retrofit.moshiConverter)
+    implementation(Deps.Retrofit.moshiConverter)
+    testImplementation("androidx.test:monitor:1.6.0-alpha01")
 
 }

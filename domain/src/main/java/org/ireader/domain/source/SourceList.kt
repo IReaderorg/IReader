@@ -1,37 +1,38 @@
 package org.ireader.domain.source
 
 
+import org.ireader.domain.extensions.AndroidCatalogLoader
 import org.ireader.extensions.sources.en.freewebnovel.FreeWebNovel
 import org.ireader.extensions.sources.en.mtlnovel.MtlNovel
 import org.ireader.extensions.sources.en.source_tower_deprecated.SourceTower
 import org.ireader.extensions.sources.en.webnovel.Webnovel
 import org.ireader.extensions.sources.en.wuxiaworld.WuxiaWorld
+import org.ireader.source.core.CatalogSource
 import org.ireader.source.core.Dependencies
-import org.ireader.source.core.HttpSource
 import org.ireader.source.sources.en.source_tower_deprecated.*
+import timber.log.Timber
 
 
 class Extensions(
     private val dependencies: Dependencies,
+    private val catalogLoader: AndroidCatalogLoader,
 ) {
 
 
-    fun findSourceById(id: Long): HttpSource? {
+    fun findSourceById(id: Long): CatalogSource? {
         val sources = getSources()
 
         return sources.find { it.id == id }
     }
 
-    private val sources = mutableListOf<HttpSource>(
-    )
+    private val sources = mutableListOf<CatalogSource>()
 
 
-    fun getSources(): List<HttpSource> {
-
+    fun getSources(): List<CatalogSource> {
         return sources
     }
 
-    fun addSource(source: HttpSource) {
+    fun addSource(source: CatalogSource) {
         sources.add(source)
 
     }
@@ -41,7 +42,7 @@ class Extensions(
         AvailableSources(dependencies = dependencies).sourcesList.forEach { source ->
             addSource(source)
         }
-
+        Timber.e(catalogLoader.loadAll().toString())
     }
 }
 
@@ -547,7 +548,7 @@ class AvailableSources(dependencies: Dependencies) {
     )
 
 
-    val sourcesList = listOf<HttpSource>(
+    val sourcesList = listOf<CatalogSource>(
         koreanMtl,
         myLoveNovel,
         realwebnovel,

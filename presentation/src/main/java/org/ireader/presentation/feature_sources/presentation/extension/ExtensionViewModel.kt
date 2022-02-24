@@ -10,7 +10,7 @@ import org.ireader.core.utils.UiEvent
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.models.entities.CatalogLocal
 import org.ireader.domain.source.Extensions
-import org.ireader.source.core.HttpSource
+import org.ireader.source.core.CatalogSource
 import javax.inject.Inject
 
 @HiltViewModel
@@ -48,7 +48,7 @@ class ExtensionViewModel @Inject constructor(
 }
 
 data class ExtensionScreenState(
-    val sources: List<HttpSource> = emptyList(),
-    val communitySources: List<HttpSource> = emptyList(),
+    val sources: List<CatalogSource> = emptyList(),
+    val communitySources: List<CatalogSource> = emptyList(),
     val catalogLocal: List<CatalogLocal> = emptyList(),
 )

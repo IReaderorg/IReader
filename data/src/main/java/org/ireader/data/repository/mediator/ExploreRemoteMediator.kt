@@ -12,9 +12,9 @@ import org.ireader.domain.models.ExploreType
 import org.ireader.domain.models.RemoteKeys
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.toBook
-import org.ireader.source.core.HttpSource
-import org.ireader.source.models.FilterList
-import org.ireader.source.models.MangasPageInfo
+import org.ireader.source.core.CatalogSource
+import org.ireader.source.models.BookPageInfo
+import org.ireader.source.models.LatestListing
 import retrofit2.HttpException
 import java.io.IOException
 import java.net.UnknownHostException
@@ -22,7 +22,7 @@ import javax.net.ssl.SSLHandshakeException
 
 @ExperimentalPagingApi
 class ExploreRemoteMediator(
-    private val source: HttpSource,
+    private val source: CatalogSource,
     private val database: AppDatabase,
     private val exploreType: ExploreType,
     private val query: String? = null,
@@ -67,21 +67,21 @@ class ExploreRemoteMediator(
 
             val response = when (exploreType) {
                 is ExploreType.Latest -> {
-                    source.getLatest(currentPage)
+                    source.getBookList(sort = LatestListing(), currentPage)
                 }
                 is ExploreType.Popular -> {
-                    source.getPopular(currentPage)
+                    source.getBookList(sort = LatestListing(), currentPage)
                 }
                 is ExploreType.Search -> {
                     if (query?.isBlank() == false) {
-                        source.getSearch(currentPage, query = query, filters = FilterList())
+                        source.getSearch(page = currentPage, query = query, filters = listOf())
                     } else {
                         throw Exception(UiText.StringResource(R.string.query_must_not_be_empty)
                             .toString())
                     }
                 }
                 else -> {
-                    MangasPageInfo()
+                    BookPageInfo()
                 }
             }
 
@@ -97,7 +97,7 @@ class ExploreRemoteMediator(
                     remoteKey.deleteAllExploredBook()
                     remoteKey.deleteAllRemoteKeys()
                 }
-                val keys = response.mangas.map { book ->
+                val keys = response.mangases.map { book ->
                     RemoteKeys(
                         id = book.title,
                         prevPage = prevPage,
@@ -108,7 +108,7 @@ class ExploreRemoteMediator(
 
 
                 remoteKey.insertAllRemoteKeys(remoteKeys = keys)
-                remoteKey.insertAllExploredBook(response.mangas.map { it.toBook(source.id) })
+                remoteKey.insertAllExploredBook(response.mangases.map { it.toBook(source.id) })
             }
                 RemoteMediator.MediatorResult.Success(endOfPaginationReached = endOfPaginationReached)
             }.getOrThrow()

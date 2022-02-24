@@ -14,4 +14,6 @@ dependencies {
     implementation(project(Modules.core))
     implementation(Deps.Moshi.moshi)
     implementation(Deps.Jsoup.jsoup)
+    implementation(Deps.OkHttp.okhttp3_doh)
+    implementation(Deps.DaggerHilt.hiltAndroid)
 }

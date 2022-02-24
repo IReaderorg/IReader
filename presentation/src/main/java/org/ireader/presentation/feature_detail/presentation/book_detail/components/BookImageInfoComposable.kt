@@ -45,14 +45,6 @@ fun BookImageInfoComposable(modifier: Modifier = Modifier, bookDetail: Book) {
                 color = MaterialTheme.colors.onBackground
             )
             Spacer(modifier = modifier.height(8.dp))
-            Text(
-                text = "Translator: ${bookDetail.translator}",
-                style = MaterialTheme.typography.h4.copy(
-                    fontWeight = FontWeight.W400,
-                    fontSize = 16.sp
-                ),
-                color = MaterialTheme.colors.onBackground
-            )
         }
     }
 }

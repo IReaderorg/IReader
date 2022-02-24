@@ -1,7 +1,7 @@
 package org.ireader.source.core
 
+import org.ireader.source.models.BookInfo
 import org.ireader.source.models.ChapterInfo
-import org.ireader.source.models.MangaInfo
 
 /** Source : tachiyomi**/
 
@@ -13,9 +13,9 @@ interface Source {
 
     val name: String
 
-    suspend fun getMangaDetails(manga: MangaInfo): MangaInfo
+    suspend fun getBookDetails(book: BookInfo): BookInfo
 
-    suspend fun getChapterList(manga: MangaInfo): List<ChapterInfo>
+    suspend fun getChapterList(book: BookInfo): List<ChapterInfo>
 
     suspend fun getContents(chapter: ChapterInfo): List<String>
 

@@ -135,15 +135,6 @@ fun BookDetailScreenLoadedComposable(
                             overflow = TextOverflow.Ellipsis
                         )
                     }
-                    if (book.translator.isNotBlank()) {
-                        Text(
-                            text = "Translator: ${book.translator}",
-                            style = MaterialTheme.typography.subtitle2,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colors.onBackground.copy(alpha = .5f),
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
                     Row(
                         modifier = Modifier.padding(top = 4.dp),
                         horizontalArrangement = Arrangement.spacedBy(4.dp)

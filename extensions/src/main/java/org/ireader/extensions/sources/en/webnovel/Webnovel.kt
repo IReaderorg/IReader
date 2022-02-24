@@ -4,7 +4,8 @@ import io.ktor.client.request.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.Headers
-import org.ireader.source.core.*
+import org.ireader.source.core.Dependencies
+import org.ireader.source.core.ParsedHttpSource
 import org.ireader.source.models.*
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
@@ -20,13 +21,14 @@ class Webnovel(deps: Dependencies) : ParsedHttpSource(deps) {
     override val baseUrl = "https://www.webnovel.com"
 
     override val lang = "en"
-    override suspend fun getMangaList(sort: Listing?, page: Int): MangasPageInfo {
+    override suspend fun getSearch(
+        query: String,
+        filters: FilterList,
+        page: Int,
+    ): BookPageInfo {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getMangaList(filters: FilterList, page: Int): MangasPageInfo {
-        TODO("Not yet implemented")
-    }
 
     override fun getListings(): List<Listing> {
         return listOf(PopularListing(), LatestListing(), SearchListing())
@@ -42,7 +44,6 @@ class Webnovel(deps: Dependencies) : ParsedHttpSource(deps) {
         "/search?keywords=$query?pageIndex=$page"
 
 
-
     private val dateFormat: SimpleDateFormat = SimpleDateFormat("MMM dd,yyyy", Locale.US)
 
     override fun headersBuilder() = Headers.Builder().apply {
@@ -50,7 +51,6 @@ class Webnovel(deps: Dependencies) : ParsedHttpSource(deps) {
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0 ")
         add("Referer", baseUrl)
     }
-
 
 
     // popular
@@ -62,11 +62,11 @@ class Webnovel(deps: Dependencies) : ParsedHttpSource(deps) {
 
     override fun popularSelector() = "a.g_thumb, div.j_bookList .g_book_item a:has(img)"
 
-    override fun popularFromElement(element: Element): MangaInfo {
+    override fun popularFromElement(element: Element): BookInfo {
         val url = element.attr("abs:href").substringAfter(baseUrl)
         val title = element.attr("title")
         val thumbnailUrl = element.select("img").attr("abs:src")
-        return MangaInfo(key = url, title = title, cover = thumbnailUrl)
+        return BookInfo(key = url, title = title, cover = thumbnailUrl)
     }
 
     override fun popularNextPageSelector() = "[rel=next]"
@@ -89,7 +89,11 @@ class Webnovel(deps: Dependencies) : ParsedHttpSource(deps) {
 
 
     // search
-    override fun searchRequest(page: Int, query: String, filters: FilterList): HttpRequestBuilder {
+    override fun searchRequest(
+        page: Int,
+        query: String,
+        filters: List<Filter<*>>,
+    ): HttpRequestBuilder {
         val filters = if (filters.isEmpty()) getFilters() else filters
         val genre = filters.findInstance<GenreList>()?.toUriPart()
         val order = filters.findInstance<OrderByFilter>()?.toUriPart()
@@ -108,12 +112,12 @@ class Webnovel(deps: Dependencies) : ParsedHttpSource(deps) {
     override fun searchNextPageSelector() = popularNextPageSelector()
 
     // manga details
-    override fun detailParse(document: Document): MangaInfo {
+    override fun detailParse(document: Document): BookInfo {
         val thumbnailUrl = document.select("i.g_thumb img:first-child").attr("abs:src")
         val title = document.select("h2").text()
         val description = document.select(".j_synopsis p").text()
 
-        return MangaInfo(
+        return BookInfo(
             title = title,
             description = description,
             cover = thumbnailUrl,
@@ -121,9 +125,9 @@ class Webnovel(deps: Dependencies) : ParsedHttpSource(deps) {
     }
 
     // chapters
-    override fun chaptersRequest(manga: MangaInfo): HttpRequestBuilder {
+    override fun chaptersRequest(book: BookInfo): HttpRequestBuilder {
         return HttpRequestBuilder().apply {
-            url(baseUrl + manga.key + "/catalog")
+            url(baseUrl + book.key + "/catalog")
             headers { headers }
         }
     }
@@ -143,11 +147,11 @@ class Webnovel(deps: Dependencies) : ParsedHttpSource(deps) {
         return ChapterInfo(name = name, dateUpload = date_upload, key = key)
     }
 
-    override suspend fun getChapterList(manga: MangaInfo): List<ChapterInfo> {
+    override suspend fun getChapterList(book: BookInfo): List<ChapterInfo> {
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
 
-                val request = client.get<Document>(chaptersRequest(manga = manga))
+                val request = client.get<Document>(chaptersRequest(book = book))
 
                 return@withContext chaptersParse(request)
             }
@@ -209,13 +213,17 @@ class Webnovel(deps: Dependencies) : ParsedHttpSource(deps) {
 
 
     // filter
-    override fun getFilters() = FilterList(
-        Filter.Header("NOTE: Ignored if using text search!"),
-        Filter.Separator(),
-        StatusFilter(),
-        OrderByFilter(),
-        GenreList()
-    )
+    override fun getFilters(): FilterList {
+        return listOf(
+            Filter.Title("NOTE: Ignored if using text search!"),
+            StatusFilter(),
+            OrderByFilter(),
+            GenreList(),
+
+            )
+
+    }
+
 
     private class StatusFilter : UriPartFilter(
         "Status",
@@ -269,8 +277,8 @@ class Webnovel(deps: Dependencies) : ParsedHttpSource(deps) {
     )
 
     private open class UriPartFilter(displayName: String, val vals: Array<Pair<String, String>>) :
-        Filter.Select<String>(displayName, vals.map { it.second }.toTypedArray()) {
-        fun toUriPart() = vals[state].first
+        Filter.Select(displayName, vals.map { it.second }.toTypedArray()) {
+        fun toUriPart() = vals[value].first
     }
 
     private inline fun <reified T> Iterable<*>.findInstance() = find { it is T } as? T

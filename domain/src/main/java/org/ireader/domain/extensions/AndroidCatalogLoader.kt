@@ -238,12 +238,12 @@ class AndroidCatalogLoader(
   private companion object {
       const val EXTENSION_FEATURE = "tachiyomix"
       const val METADATA_SOURCE_CLASS = "source.class"
-    const val METADATA_DESCRIPTION = "source.description"
-    const val METADATA_NSFW = "source.nsfw"
-    const val LIB_VERSION_MIN = 1
-    const val LIB_VERSION_MAX = 1
+      const val METADATA_DESCRIPTION = "source.description"
+      const val METADATA_NSFW = "source.nsfw"
+      const val LIB_VERSION_MIN = 1
+      const val LIB_VERSION_MAX = 1
 
-    const val PACKAGE_FLAGS = PackageManager.GET_CONFIGURATIONS or PackageManager.GET_META_DATA
+      const val PACKAGE_FLAGS = PackageManager.GET_CONFIGURATIONS or PackageManager.GET_META_DATA
   }
 
 }
