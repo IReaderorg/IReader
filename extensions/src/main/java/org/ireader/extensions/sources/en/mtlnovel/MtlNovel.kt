@@ -114,7 +114,7 @@ class MtlNovel(deps: Dependencies) : ParsedHttpSource(deps) {
     // chapters
     override fun chaptersRequest(manga: MangaInfo): HttpRequestBuilder {
         return HttpRequestBuilder().apply {
-            url(manga.key, "chapter-list/")
+            url(manga.key.plus("chapter-list/"))
             headers { headers }
         }
     }
@@ -127,9 +127,9 @@ class MtlNovel(deps: Dependencies) : ParsedHttpSource(deps) {
 
         return ChapterInfo(name = name, key = link)
     }
-
     override suspend fun getChapters(manga: MangaInfo): List<ChapterInfo> {
-        return super.getChapters(manga).reversed()
+        val request = client.get<Document>(chaptersRequest(manga))
+        return chaptersParse(request)
     }
 
 

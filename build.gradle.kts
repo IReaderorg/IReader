@@ -19,6 +19,19 @@ allprojects {
         mavenCentral()
     }
 }
+subprojects {
+    tasks.withType<org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompile> {
+        kotlinOptions {
+            jvmTarget = JavaVersion.VERSION_1_8.toString()
+            freeCompilerArgs = freeCompilerArgs + listOf(
+                "-Xjvm-default=compatibility",
+            )
+        }
+    }
+    tasks.withType<Test> {
+        useJUnitPlatform()
+    }
+}
 
 tasks.register("clean", Delete::class) {
     delete(rootProject.buildDir)

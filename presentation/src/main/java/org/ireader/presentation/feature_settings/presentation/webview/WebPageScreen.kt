@@ -283,14 +283,25 @@ fun ShowAlert(
                 Row(horizontalArrangement = Arrangement.SpaceAround,
                     modifier = Modifier.fillMaxWidth()) {
                     if (showUpdate) {
-                        OutlinedButton(onClick = { onUpdate() }) {
+                        OutlinedButton(onClick = { onUpdate() },
+                            colors = ButtonDefaults.textButtonColors(
+                                backgroundColor = MaterialTheme.colors.background,
+                                contentColor = MaterialTheme.colors.onBackground
+                            )) {
                             MidSizeTextComposable(text = "Update")
                         }
                     }
-                    OutlinedButton(onClick = { onDismiss() }) {
+                    OutlinedButton(onClick = { onDismiss() },
+                        colors = ButtonDefaults.textButtonColors(
+                            backgroundColor = MaterialTheme.colors.background,
+                            contentColor = MaterialTheme.colors.onBackground
+                        )) {
                         MidSizeTextComposable(text = "DISMISS")
                     }
-                    Button(onClick = { onConfirm() }) {
+                    Button(onClick = { onConfirm() }, colors = ButtonDefaults.textButtonColors(
+                        backgroundColor = MaterialTheme.colors.primary,
+                        contentColor = MaterialTheme.colors.background
+                    )) {
                         MidSizeTextComposable(text = "CHECK IT OUT")
                     }
                 }

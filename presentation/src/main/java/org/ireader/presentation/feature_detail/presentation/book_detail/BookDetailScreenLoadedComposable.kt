@@ -144,15 +144,6 @@ fun BookDetailScreenLoadedComposable(
                             overflow = TextOverflow.Ellipsis
                         )
                     }
-                    if (book.rating != 0) {
-                        Text(
-                            text = "Rating: ${"⭐".repeat(if (book.rating in 1..4) book.rating else 5)}",
-                            style = MaterialTheme.typography.subtitle2,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colors.onBackground.copy(alpha = .5f),
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
                     Row(
                         modifier = Modifier.padding(top = 4.dp),
                         horizontalArrangement = Arrangement.spacedBy(4.dp)

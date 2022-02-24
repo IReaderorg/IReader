@@ -22,7 +22,6 @@ data class Book(
     val cover: String = "",
     val customCover: String = "",
     val favorite: Boolean = false,
-    val rating: Int = 0,
     val lastUpdated: Long = 0,
     val lastRead: Long = 0,
     val dataAdded: Long = 0,
@@ -80,7 +79,6 @@ fun updateBook(newBook: Book, oldBook: Book): Book {
         description = newBook.description.ifBlank { oldBook.description },
         author = newBook.author.ifBlank { oldBook.author },
         cover = newBook.cover.ifBlank { oldBook.cover },
-        rating = if (newBook.rating != 0) newBook.rating else oldBook.rating,
         viewer = if (newBook.viewer != 0) newBook.viewer else oldBook.viewer
     )
 }

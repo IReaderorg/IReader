@@ -34,6 +34,7 @@ import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import org.ireader.domain.utils.Resource
 import org.ireader.source.core.Source
+import timber.log.Timber
 import javax.inject.Inject
 
 
@@ -174,6 +175,7 @@ class BookDetailViewModel @Inject constructor(
                             }
                         }
                         is Resource.Error -> {
+                            Timber.e(result.uiText.toString())
                             toggleRemoteLoading(false)
                             insertBookDetailToLocal(state.book!!)
                             showSnackBar(result.uiText)
@@ -210,6 +212,7 @@ class BookDetailViewModel @Inject constructor(
                             }
                         }
                         is Resource.Error -> {
+                            Timber.e(result.uiText.toString())
                             showSnackBar(result.uiText)
                             toggleRemoteLoading(false)
                         }
