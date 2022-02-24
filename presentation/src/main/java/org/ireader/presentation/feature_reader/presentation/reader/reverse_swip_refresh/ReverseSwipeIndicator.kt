@@ -1,4 +1,4 @@
-package org.ireader.presentation.feature_reader.presentation.reader.reverrse_swip_refresh
+package org.ireader.presentation.feature_reader.presentation.reader.reverse_swip_refresh
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -23,7 +23,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.ireader.presentation.feature_reader.presentation.reader.SwipeRefreshState
 
 /**
  * A class to encapsulate details of different indicator sizes.

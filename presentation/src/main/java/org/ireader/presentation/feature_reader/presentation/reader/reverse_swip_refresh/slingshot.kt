@@ -1,4 +1,4 @@
-package org.ireader.presentation.feature_reader.presentation.reader.reverrse_swip_refresh
+package org.ireader.presentation.feature_reader.presentation.reader.reverse_swip_refresh
 
 import androidx.compose.runtime.*
 import kotlin.math.abs

@@ -12,12 +12,20 @@ import org.jsoup.nodes.Element
 class MtlNovel(deps: Dependencies) : ParsedHttpSource(deps) {
 
     override val name = "MtlNovel"
-    override val creator: String = "@Kazem"
+
     override val iconUrl: String = "https://www.mtlnovel.net/themes/mtlnovel/images/mtlnovel-32.png"
     override val baseUrl = "https://www.mtlnovel.com"
     override val lang = "en"
 
-    override fun getFilterList(): FilterList {
+    override suspend fun getMangaList(sort: Listing?, page: Int): MangasPageInfo {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getMangaList(filters: FilterList, page: Int): MangasPageInfo {
+        TODO("Not yet implemented")
+    }
+
+    override fun getFilters(): FilterList {
         return FilterList()
     }
 
@@ -127,7 +135,8 @@ class MtlNovel(deps: Dependencies) : ParsedHttpSource(deps) {
 
         return ChapterInfo(name = name, key = link)
     }
-    override suspend fun getChapters(manga: MangaInfo): List<ChapterInfo> {
+
+    override suspend fun getChapterList(manga: MangaInfo): List<ChapterInfo> {
         val request = client.get<Document>(chaptersRequest(manga))
         return chaptersParse(request)
     }

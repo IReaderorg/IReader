@@ -18,7 +18,7 @@ import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.entities.toChapterInfo
 import org.ireader.domain.repository.RemoteRepository
 import org.ireader.domain.utils.Resource
-import org.ireader.source.core.Source
+import org.ireader.source.core.HttpSource
 import org.ireader.source.models.MangaInfo
 import retrofit2.HttpException
 import timber.log.Timber
@@ -30,13 +30,13 @@ class RemoteRepositoryImpl(
 ) : RemoteRepository {
 
 
-    override suspend fun getRemoteBookDetail(book: Book, source: Source): MangaInfo {
+    override suspend fun getRemoteBookDetail(book: Book, source: HttpSource): MangaInfo {
         return source.getMangaDetails(book.toBookInfo(source.id))
     }
 
     @OptIn(ExperimentalPagingApi::class)
     override fun getAllExploreBookByPaging(
-        source: Source,
+        source: HttpSource,
         exploreType: ExploreType,
         query: String?,
     ): PagingSource<Int, Book> {
@@ -46,7 +46,7 @@ class RemoteRepositoryImpl(
 
     override fun getRemoteReadingContentUseCase(
         chapter: Chapter,
-        source: Source,
+        source: HttpSource,
     ): Flow<Resource<List<String>>> = flow<Resource<List<String>>> {
         try {
             Timber.d("Timber: GetRemoteReadingContentUseCase was Called")
@@ -85,7 +85,7 @@ class RemoteRepositoryImpl(
 
     @OptIn(ExperimentalPagingApi::class)
     override fun getRemoteBooksByRemoteMediator(
-        source: Source,
+        source: HttpSource,
         exploreType: ExploreType,
         query: String?,
     ): Flow<PagingData<Book>> {

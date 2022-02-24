@@ -14,12 +14,19 @@ import java.util.*
 class Webnovel(deps: Dependencies) : ParsedHttpSource(deps) {
 
     override val name = "Webnovel.com"
-    override val creator: String = "@Kazem"
+
     override val iconUrl: String = ""
 
     override val baseUrl = "https://www.webnovel.com"
 
     override val lang = "en"
+    override suspend fun getMangaList(sort: Listing?, page: Int): MangasPageInfo {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getMangaList(filters: FilterList, page: Int): MangasPageInfo {
+        TODO("Not yet implemented")
+    }
 
     override fun getListings(): List<Listing> {
         return listOf(PopularListing(), LatestListing(), SearchListing())
@@ -83,7 +90,7 @@ class Webnovel(deps: Dependencies) : ParsedHttpSource(deps) {
 
     // search
     override fun searchRequest(page: Int, query: String, filters: FilterList): HttpRequestBuilder {
-        val filters = if (filters.isEmpty()) getFilterList() else filters
+        val filters = if (filters.isEmpty()) getFilters() else filters
         val genre = filters.findInstance<GenreList>()?.toUriPart()
         val order = filters.findInstance<OrderByFilter>()?.toUriPart()
         val status = filters.findInstance<StatusFilter>()?.toUriPart()
@@ -136,7 +143,7 @@ class Webnovel(deps: Dependencies) : ParsedHttpSource(deps) {
         return ChapterInfo(name = name, dateUpload = date_upload, key = key)
     }
 
-    override suspend fun getChapters(manga: MangaInfo): List<ChapterInfo> {
+    override suspend fun getChapterList(manga: MangaInfo): List<ChapterInfo> {
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
 
@@ -202,7 +209,7 @@ class Webnovel(deps: Dependencies) : ParsedHttpSource(deps) {
 
 
     // filter
-    override fun getFilterList() = FilterList(
+    override fun getFilters() = FilterList(
         Filter.Header("NOTE: Ignored if using text search!"),
         Filter.Separator(),
         StatusFilter(),

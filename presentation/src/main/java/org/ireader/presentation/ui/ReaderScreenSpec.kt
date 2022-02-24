@@ -15,7 +15,7 @@ import org.ireader.core.utils.UiText
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.domain.view_models.reader.ReaderScreenViewModel
 import org.ireader.presentation.feature_reader.presentation.reader.ReadingScreen
-import org.ireader.presentation.feature_reader.presentation.reader.rememberSwipeRefreshState
+import org.ireader.presentation.feature_reader.presentation.reader.reverse_swip_refresh.rememberSwipeRefreshState
 import org.ireader.presentation.presentation.EmptyScreenComposable
 
 object ReaderScreenSpec : ScreenSpec {

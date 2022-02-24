@@ -14,6 +14,10 @@ class FakeChapterRepository : LocalChapterRepository {
         emit(result)
     }
 
+    override suspend fun findChapterById(chapterId: Long): Chapter? {
+        TODO("Not yet implemented")
+    }
+
     override fun subscribeChaptersByBookId(bookId: Long, isAsc: Boolean): Flow<List<Chapter>> =
         flow {
             val result = chapters.filter { it.id == bookId }.sortedBy { it.id }
@@ -24,9 +28,25 @@ class FakeChapterRepository : LocalChapterRepository {
             }
         }
 
+    override suspend fun findChaptersByBookId(bookId: Long, isAsc: Boolean): List<Chapter> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun findChaptersByKey(key: String): List<Chapter> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun findChapterByKey(key: String): Chapter? {
+        TODO("Not yet implemented")
+    }
+
     override fun subscribeLastReadChapter(bookId: Long): Flow<Chapter?> = flow {
-        val result = chapters.find { it.lastRead }
+        val result = chapters.find { it.lastRead != 0L }
         emit(result)
+    }
+
+    override suspend fun findLastReadChapter(bookId: Long): Chapter? {
+        TODO("Not yet implemented")
     }
 
     override fun subscribeFirstChapter(bookId: Long): Flow<Chapter?> = flow {
@@ -34,18 +54,19 @@ class FakeChapterRepository : LocalChapterRepository {
         emit(result)
     }
 
-    override suspend fun setLastReadToFalse(bookId: Long) {
-        chapters.forEach {
-            it.lastRead = false
-        }
+    override suspend fun findFirstChapter(bookId: Long): Chapter? {
+        TODO("Not yet implemented")
     }
 
-    override suspend fun insertChapter(chapter: Chapter) {
+
+    override suspend fun insertChapter(chapter: Chapter): Long {
         chapters.add(chapter)
+        return 0
     }
 
-    override suspend fun insertChapters(chapters: List<Chapter>) {
+    override suspend fun insertChapters(chapters: List<Chapter>): List<Long> {
         this.chapters.addAll(chapters)
+        return emptyList()
     }
 
     override fun findLocalChaptersByPaging(

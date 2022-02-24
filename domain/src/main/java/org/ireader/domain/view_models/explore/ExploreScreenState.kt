@@ -4,7 +4,7 @@ import org.ireader.core.utils.UiText
 import org.ireader.domain.models.ExploreType
 import org.ireader.domain.models.LayoutType
 import org.ireader.domain.models.entities.Book
-import org.ireader.source.core.Source
+import org.ireader.source.core.HttpSource
 import org.ireader.source.models.MangasPageInfo
 
 data class ExploreScreenState(
@@ -21,6 +21,6 @@ data class ExploreScreenState(
     val isLatestUpdateMode: Boolean = true,
     val hasNextPage: Boolean = true,
     val exploreType: ExploreType = ExploreType.Latest,
-    val source: Source? = null,
+    val source: HttpSource? = null,
 )
 

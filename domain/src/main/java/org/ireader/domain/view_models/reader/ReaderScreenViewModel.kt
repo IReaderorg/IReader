@@ -36,7 +36,7 @@ import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import org.ireader.domain.utils.Resource
-import org.ireader.source.core.Source
+import org.ireader.source.core.HttpSource
 import javax.inject.Inject
 
 
@@ -125,7 +125,7 @@ class ReaderScreenViewModel @Inject constructor(
         }
     }
 
-    private fun getLastChapter(bookId: Long, source: Source) {
+    private fun getLastChapter(bookId: Long, source: HttpSource) {
         viewModelScope.launch {
             val lastChapter = getChapterUseCase.findLastReadChapter(bookId)
             if (lastChapter != null) {
@@ -154,7 +154,7 @@ class ReaderScreenViewModel @Inject constructor(
     }
 
 
-    private fun getChapters(bookId: Long, source: Source) {
+    private fun getChapters(bookId: Long, source: HttpSource) {
         viewModelScope.launch {
             val chapters = getChapterUseCase.findChaptersByBookId(bookId = bookId)
             if (chapters.isNotEmpty()) {
@@ -173,7 +173,7 @@ class ReaderScreenViewModel @Inject constructor(
 
     fun getChapter(
         chapterId: Long,
-        source: Source,
+        source: HttpSource,
         onGetChapterEnd: () -> Unit = {},
     ) {
         toggleLoading(true)
@@ -209,7 +209,7 @@ class ReaderScreenViewModel @Inject constructor(
 
 
     var getContentJob: Job? = null
-    fun getReadingContentRemotely(chapter: Chapter, source: Source) {
+    fun getReadingContentRemotely(chapter: Chapter, source: HttpSource) {
         clearError()
         toggleLocalLoaded(false)
         toggleRemoteLoading(true)
@@ -249,7 +249,7 @@ class ReaderScreenViewModel @Inject constructor(
     }
 
 
-    private fun getLocalBookById(bookId: Long, chapterId: Long, source: Source) {
+    private fun getLocalBookById(bookId: Long, chapterId: Long, source: HttpSource) {
         viewModelScope.launch {
             val book = getBookUseCases.findBookById(id = bookId)
             if (book != null) {

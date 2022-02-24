@@ -21,7 +21,7 @@ data class SourceTower constructor(
     override val baseUrl: String,
     override val lang: String,
     override val name: String,
-    override val creator: String,
+    val creator: String,
     val supportsMostPopular: Boolean = false,
     val supportSearch: Boolean = false,
     val supportsLatest: Boolean = false,
@@ -37,7 +37,7 @@ data class SourceTower constructor(
 ) : ParsedHttpSource(deps) {
 
 
-    override fun getFilterList(): FilterList {
+    override fun getFilters(): FilterList {
         return FilterList()
     }
 
@@ -72,6 +72,13 @@ data class SourceTower constructor(
         add(HttpHeaders.CacheControl, "max-age=0")
     }
 
+    override suspend fun getMangaList(sort: Listing?, page: Int): MangasPageInfo {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getMangaList(filters: FilterList, page: Int): MangasPageInfo {
+        TODO("Not yet implemented")
+    }
 
 
     override val headers: Headers
@@ -389,7 +396,7 @@ data class SourceTower constructor(
     /**
      * Fetchers
      */
-    override suspend fun getChapters(manga: MangaInfo): List<ChapterInfo> {
+    override suspend fun getChapterList(manga: MangaInfo): List<ChapterInfo> {
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
                 val request = if (chapters?.isGetRequestType == true) {

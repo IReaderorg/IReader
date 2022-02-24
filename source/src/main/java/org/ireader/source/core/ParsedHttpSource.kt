@@ -130,6 +130,31 @@ abstract class ParsedHttpSource(dependencies: Dependencies) : HttpSource(depende
     }
 
     /****************************************************************************************************/
+    /****************************************************************************************************/
 
+    /**
+     *return the end point for the fetch latest books updates feature,
+     * if there is not endpoint just return null
+     * note: use "{page}" in the endpoint instead of page number
+     */
+    abstract fun fetchLatestEndpoint(page: Int): String?
+
+    /**
+     *return the end point for the  fetch Popular books feature,
+     * if there is not endpoint just return null
+     * note: use "{page}" in the endpoint instead of page number
+     */
+    abstract fun fetchPopularEndpoint(page: Int): String?
+
+    /**
+     *return the end point for the fetch Search feature,
+     * if there is not endpoint just return null
+     * note: use "{page}" in the endpoint instead of page number
+     * note: use "{query}" in the endpoint instead of query
+     */
+    abstract fun fetchSearchEndpoint(page: Int, query: String): String?
+
+
+    /****************************************************************************************************/
 
 }

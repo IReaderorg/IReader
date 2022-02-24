@@ -1,4 +1,4 @@
-object Build {
+object BuildConfig {
     private const val androidBuildToolsVersion = "7.1.1"
     const val androidBuildTools = "com.android.tools.build:gradle:$androidBuildToolsVersion"
 
@@ -12,4 +12,5 @@ object Build {
     const val kotlinSerialization =
         "org.jetbrains.kotlin:kotlin-serialization:${Deps.Kotlin.version}"
     const val firebaseCrashlytics = "com.google.firebase:firebase-crashlytics-gradle:2.8.1"
+    const val dependenciesCheckerBenManes = "com.github.ben-manes:gradle-versions-plugin:0.42.0"
 }

@@ -9,13 +9,13 @@ import org.ireader.domain.models.entities.toBook
 import org.ireader.domain.models.entities.updateBook
 import org.ireader.domain.repository.RemoteRepository
 import org.ireader.domain.utils.Resource
-import org.ireader.source.core.Source
+import org.ireader.source.core.HttpSource
 import retrofit2.HttpException
 import timber.log.Timber
 import java.io.IOException
 
 class GetBookDetail(private val remoteRepository: RemoteRepository) {
-    operator fun invoke(book: Book, source: Source): Flow<Resource<Book>> = flow {
+    operator fun invoke(book: Book, source: HttpSource): Flow<Resource<Book>> = flow {
         try {
             val now = System.currentTimeMillis()
             Timber.d("Timber: Remote Book Detail for ${book.title} Was called")

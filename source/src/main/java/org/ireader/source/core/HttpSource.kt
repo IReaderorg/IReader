@@ -10,12 +10,11 @@ import org.jsoup.nodes.Document
 import java.net.URI
 import java.net.URISyntaxException
 import java.security.MessageDigest
-import java.util.*
 
 /**
  * A simple implementation for sources from a website.
  */
-abstract class HttpSource(private val dependencies: Dependencies) : Source {
+abstract class HttpSource(private val dependencies: Dependencies) : CatalogSource {
 
 
     /**
@@ -43,6 +42,8 @@ abstract class HttpSource(private val dependencies: Dependencies) : Source {
      */
     override val headers: Headers by lazy { headersBuilder().build() }
 
+    abstract val iconUrl: String
+
     /**
      * Id of the source. By default it uses a generated id using the first 16 characters (64 bits)
      * of the MD5 of the string: source name/language/versionId
@@ -55,126 +56,47 @@ abstract class HttpSource(private val dependencies: Dependencies) : Source {
             .reduce(Long::or) and Long.MAX_VALUE
     }
 
-
-    /**
-     * Visible name of the source.
-     */
     override fun toString() = "$name (${lang.uppercase()})"
 
-    /****************************************************************************************************/
 
-    /**
-     *return the end point for the fetch latest books updates feature,
-     * if there is not endpoint just return null
-     * note: use "{page}" in the endpoint instead of page number
-     */
-    abstract fun fetchLatestEndpoint(page: Int): String?
-
-    /**
-     *return the end point for the  fetch Popular books feature,
-     * if there is not endpoint just return null
-     * note: use "{page}" in the endpoint instead of page number
-     */
-    abstract fun fetchPopularEndpoint(page: Int): String?
-
-    /**
-     *return the end point for the fetch Search feature,
-     * if there is not endpoint just return null
-     * note: use "{page}" in the endpoint instead of page number
-     * note: use "{query}" in the endpoint instead of query
-     */
-    abstract fun fetchSearchEndpoint(page: Int, query: String): String?
-
-
-    /****************************************************************************************************/
-    /**
-     * Returns a page with a list of book. Normally it's not needed to
-     * override this method.
-     * @param page the page number to retrieve.
-     */
-    override suspend fun getPopular(page: Int): MangasPageInfo {
+    open suspend fun getPopular(page: Int): MangasPageInfo {
         val request = client.get<Document>(popularRequest(page))
         return popularParse(request)
     }
 
-    /**
-     * Returns a page with a list of latest Book updates.
-     *
-     * @param page the page number to retrieve.
-     */
-    override suspend fun getLatest(page: Int): MangasPageInfo {
+
+    open suspend fun getLatest(page: Int): MangasPageInfo {
         val request = client.get<Document>(latestRequest(page))
         return latestParse(request)
     }
 
-    /**
-     * Returns a book. Normally it's not needed to
-     * override this method.
-     *
-     * @param page the page number to retrieve.
-     */
+
     override suspend fun getMangaDetails(manga: MangaInfo): MangaInfo {
         val request = client.get<Document>(detailsRequest(manga))
         return detailParse(request)
     }
 
-    /**
-     * Returns a list of chapter. Normally it's not needed to
-     * override this method.
-     *
-     * @param page the page number to retrieve.
-     * @param manga the chapters to retrieve.
-     */
-    override suspend fun getChapters(manga: MangaInfo): List<ChapterInfo> {
+
+    override suspend fun getChapterList(manga: MangaInfo): List<ChapterInfo> {
         val request = client.get<Document>(chaptersRequest(manga))
         return chaptersParse(request)
     }
 
-    /**
-     * Returns a ChapterPage. Normally it's not needed to
-     * override this method.
-     *
-     * @param page the page number to retrieve.
-     */
     override suspend fun getContents(chapter: ChapterInfo): List<String> {
         val request = client.get<Document>(contentRequest(chapter))
         return pageContentParse(request)
     }
 
-    /**
-     * Returns a BooksPage. Normally it's not needed to
-     * override this method.
-     *
-     * @param page the page number to retrieve.
-     * @param query the search query to retrieve.
-     */
-    override suspend fun getSearch(page: Int, query: String, filters: FilterList): MangasPageInfo {
+    open suspend fun getSearch(page: Int, query: String, filters: FilterList): MangasPageInfo {
         val request = client.get<Document>(searchRequest(page, query, filters))
         return searchParse(request)
     }
 
 
-    /**
-     * Returns the request for the popular books given the page.
-     *
-     * @param page the page number to retrieve.
-     */
     protected abstract fun popularRequest(page: Int): HttpRequestBuilder
 
-    /**
-     * Returns the request for latest  Books given the page.
-     *
-     * @param page the page number to retrieve.
-     */
     protected abstract fun latestRequest(page: Int): HttpRequestBuilder
 
-
-    /**
-     * Returns the request for the details of a Book. Override only if it's needed to change the
-     * url, send different headers or request method like POST.
-     *
-     * @param manga the Book to be updated.
-     */
     protected open fun detailsRequest(manga: MangaInfo): HttpRequestBuilder {
         return HttpRequestBuilder().apply {
             url(manga.key)
@@ -192,12 +114,6 @@ abstract class HttpSource(private val dependencies: Dependencies) : Source {
         }
     }
 
-    /**
-     * Returns the request for updating the chapter list. Override only if it's needed to override
-     * the url, send different headers or request method like POST.
-     *
-     * @param manga the Book to look for chapters.
-     */
     protected open fun chaptersRequest(manga: MangaInfo): HttpRequestBuilder {
         return HttpRequestBuilder().apply {
             url(manga.key)
@@ -206,12 +122,6 @@ abstract class HttpSource(private val dependencies: Dependencies) : Source {
     }
 
 
-    /**
-     * Returns the request for getting the page list. Override only if it's needed to override the
-     * url, send different headers or request method like POST.
-     *
-     * @param chapter the chapter whose page list has to be fetched.
-     */
     @OptIn(InternalAPI::class)
     protected open fun contentRequest(chapter: ChapterInfo): HttpRequestBuilder {
         return HttpRequestBuilder().apply {
@@ -225,11 +135,7 @@ abstract class HttpSource(private val dependencies: Dependencies) : Source {
         }
     }
 
-    /**
-     * Returns the request for latest  Books given the page.
-     *
-     * @param page the page number to retrieve.
-     */
+
     protected abstract fun searchRequest(
         page: Int,
         query: String,
@@ -238,58 +144,32 @@ abstract class HttpSource(private val dependencies: Dependencies) : Source {
 
     /****************************************************************************************************/
 
-
-    /**
-     * Parses the response from the site and returns a [MangasPageInfo] object.
-     *
-     * @param response the response from the site.
-     */
-    abstract override fun popularParse(
+    abstract fun popularParse(
         document: Document,
     ): MangasPageInfo
 
 
-    /**
-     * Parses the document from the site and returns a [MangasPageInfo] object.
-     *
-     * @param response the response from the site.
-     */
-    abstract override fun latestParse(
+    abstract fun latestParse(
         document: Document,
     ): MangasPageInfo
 
 
-    /**
-     * Returns the details of the Book from the given [document].
-     *
-     * @param document the parsed document.
-     */
-    abstract override fun detailParse(document: Document): MangaInfo
+    abstract fun detailParse(document: Document): MangaInfo
 
 
-    abstract override fun pageContentParse(
+    abstract fun pageContentParse(
         document: Document,
     ): List<String>
 
 
-    /**
-     * Parses the response from the site and returns a list of chapters.
-     *
-     * @param response the response from the site.
-     */
-    abstract override fun chaptersParse(document: Document): List<ChapterInfo>
+    abstract fun chaptersParse(document: Document): List<ChapterInfo>
 
 
-    abstract override fun searchParse(
+    abstract fun searchParse(
         document: Document,
     ): MangasPageInfo
 
 
-    /**
-     * Returns the url of the given string without the scheme and domain.
-     *
-     * @param orig the full url.
-     */
     fun getUrlWithoutDomain(orig: String): String {
         return try {
             val uri = URI(orig.replace(" ", "%20"))

@@ -24,7 +24,7 @@ import org.ireader.domain.models.entities.Book
 import org.ireader.domain.source.Extensions
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.remote.RemoteUseCases
-import org.ireader.source.core.Source
+import org.ireader.source.core.HttpSource
 import org.ireader.source.models.MangasPageInfo
 import javax.inject.Inject
 
@@ -92,7 +92,7 @@ class ExploreViewModel @Inject constructor(
     private var getBooksJob: Job? = null
 
     @OptIn(ExperimentalPagingApi::class)
-    fun getBooks(query: String? = null, type: ExploreType? = null, source: Source) {
+    fun getBooks(query: String? = null, type: ExploreType? = null, source: HttpSource) {
         getBooksJob?.cancel()
         getBooksJob = viewModelScope.launch(Dispatchers.Main) {
             remoteUseCases.getRemoteBookByPaginationUseCase(

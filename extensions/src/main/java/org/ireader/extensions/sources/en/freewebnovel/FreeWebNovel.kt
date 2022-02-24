@@ -11,14 +11,21 @@ import org.jsoup.nodes.Element
 class FreeWebNovel(deps: Dependencies) : ParsedHttpSource(deps) {
 
     override val name = "FreeWebNovel.com"
-    override val creator: String = "@Kazem"
+
     override val iconUrl: String = "https://freewebnovel.com/static/freewebnovel/images/logo.png"
 
     override val baseUrl = "https://freewebnovel.com"
 
     override val lang = "en"
+    override suspend fun getMangaList(sort: Listing?, page: Int): MangasPageInfo {
+        TODO("Not yet implemented")
+    }
 
-    override fun getFilterList(): FilterList {
+    override suspend fun getMangaList(filters: FilterList, page: Int): MangasPageInfo {
+        TODO("Not yet implemented")
+    }
+
+    override fun getFilters(): FilterList {
         return FilterList()
     }
 
@@ -145,7 +152,7 @@ class FreeWebNovel(deps: Dependencies) : ParsedHttpSource(deps) {
         }
     }
 
-    override suspend fun getChapters(manga: MangaInfo): List<ChapterInfo> {
+    override suspend fun getChapterList(manga: MangaInfo): List<ChapterInfo> {
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
                 val page = client.get<Document>(chaptersRequest(manga = manga))

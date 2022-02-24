@@ -26,7 +26,7 @@ import coil.compose.rememberImagePainter
 import org.ireader.domain.models.entities.Book
 import org.ireader.presentation.feature_detail.presentation.book_detail.components.BookSummary
 import org.ireader.presentation.presentation.components.BookImageComposable
-import org.ireader.source.core.Source
+import org.ireader.source.core.CatalogSource
 
 
 @Composable
@@ -34,7 +34,7 @@ fun BookDetailScreenLoadedComposable(
     modifier: Modifier = Modifier,
     navController: NavController,
     book: Book,
-    source: Source,
+    source: CatalogSource,
     onWebView: () -> Unit,
     onRefresh: () -> Unit,
     onSummaryExpand: () -> Unit,

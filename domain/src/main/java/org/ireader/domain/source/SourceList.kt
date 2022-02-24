@@ -7,7 +7,7 @@ import org.ireader.extensions.sources.en.source_tower_deprecated.SourceTower
 import org.ireader.extensions.sources.en.webnovel.Webnovel
 import org.ireader.extensions.sources.en.wuxiaworld.WuxiaWorld
 import org.ireader.source.core.Dependencies
-import org.ireader.source.core.Source
+import org.ireader.source.core.HttpSource
 import org.ireader.source.sources.en.source_tower_deprecated.*
 
 
@@ -16,22 +16,22 @@ class Extensions(
 ) {
 
 
-    fun findSourceById(id: Long): Source? {
+    fun findSourceById(id: Long): HttpSource? {
         val sources = getSources()
 
         return sources.find { it.id == id }
     }
 
-    private val sources = mutableListOf<Source>(
+    private val sources = mutableListOf<HttpSource>(
     )
 
 
-    fun getSources(): List<Source> {
+    fun getSources(): List<HttpSource> {
 
         return sources
     }
 
-    fun addSource(source: Source) {
+    fun addSource(source: HttpSource) {
         sources.add(source)
 
     }
@@ -547,7 +547,7 @@ class AvailableSources(dependencies: Dependencies) {
     )
 
 
-    val sourcesList = listOf<Source>(
+    val sourcesList = listOf<HttpSource>(
         koreanMtl,
         myLoveNovel,
         realwebnovel,

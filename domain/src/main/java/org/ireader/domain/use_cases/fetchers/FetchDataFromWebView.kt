@@ -9,7 +9,7 @@ import org.ireader.domain.models.entities.*
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.utils.Resource
-import org.ireader.source.core.Source
+import org.ireader.source.core.HttpSource
 import org.jsoup.Jsoup
 
 class FetchBookDetailAndChapterDetailFromWebView {
@@ -18,7 +18,7 @@ class FetchBookDetailAndChapterDetailFromWebView {
         pageSource: String,
         localChapters: List<Chapter>? = null,
         localBook: Book? = null,
-        source: Source,
+        source: HttpSource,
         insertUseCases: LocalInsertUseCases,
         deleteUseCase: DeleteUseCase,
         url: String? = null,

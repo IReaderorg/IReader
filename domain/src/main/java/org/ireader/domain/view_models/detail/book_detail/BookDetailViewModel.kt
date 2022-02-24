@@ -33,6 +33,7 @@ import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import org.ireader.domain.utils.Resource
+import org.ireader.source.core.HttpSource
 import org.ireader.source.core.Source
 import timber.log.Timber
 import javax.inject.Inject
@@ -111,7 +112,7 @@ class BookDetailViewModel @Inject constructor(
     }
 
 
-    fun getLocalBookById(bookId: Long, source: Source) {
+    fun getLocalBookById(bookId: Long, source: HttpSource) {
         this.toggleLocalLoading(true)
         clearBookError()
         viewModelScope.launch {
@@ -150,7 +151,7 @@ class BookDetailViewModel @Inject constructor(
     }
 
 
-    fun getRemoteBookDetail(book: Book, source: Source) {
+    fun getRemoteBookDetail(book: Book, source: HttpSource) {
         toggleRemoteLoading(true)
         clearBookError()
         isLocalBookLoaded(false)

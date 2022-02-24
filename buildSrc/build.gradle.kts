@@ -20,17 +20,28 @@ repositories {
     }
 }
 
+kotlin {
+    sourceSets.getByName("main").kotlin.srcDir("$rootDir/buildSrc/src/main/kotlin")
+}
+tasks.withType<org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompile> {
+    kotlinOptions {
+        freeCompilerArgs += listOf(
+            "-Xopt-in=kotlin.RequiresOptIn"
+        )
+    }
+}
+
 
 dependencies {
     compileOnly(gradleApi())
-    implementation("com.android.tools.build:gradle:7.1.1")
-    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.10")
-    implementation("com.google.dagger:hilt-android-gradle-plugin:2.39.1")
-    implementation("com.google.gms:google-services:4.3.10")
-    implementation("org.jetbrains.kotlin:kotlin-serialization:1.6.10")
-    implementation("com.google.firebase:firebase-crashlytics-gradle:2.8.1")
-    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.10")
-    implementation("com.github.ben-manes:gradle-versions-plugin:0.42.0")
+    implementation(BuildConfig.androidBuildTools)
+    implementation(BuildConfig.kotlinGradlePlugin)
+    implementation(BuildConfig.hiltAndroidGradlePlugin)
+    implementation(BuildConfig.googleGsmService)
+    implementation(BuildConfig.kotlinSerialization)
+    implementation(BuildConfig.firebaseCrashlytics)
+    implementation(BuildConfig.firebaseCrashlytics)
+    implementation(BuildConfig.dependenciesCheckerBenManes)
 }
 
 

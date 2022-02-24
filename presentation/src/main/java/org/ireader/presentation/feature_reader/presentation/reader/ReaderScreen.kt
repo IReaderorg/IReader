@@ -26,10 +26,11 @@ import org.ireader.domain.FetchType
 import org.ireader.domain.view_models.reader.ReaderScreenViewModel
 import org.ireader.presentation.feature_reader.presentation.reader.components.MainBottomSettingComposable
 import org.ireader.presentation.feature_reader.presentation.reader.components.ReaderSettingComposable
+import org.ireader.presentation.feature_reader.presentation.reader.reverse_swip_refresh.SwipeRefreshState
 import org.ireader.presentation.presentation.components.ISnackBarHost
 import org.ireader.presentation.presentation.reusable_composable.ErrorTextWithEmojis
 import org.ireader.presentation.ui.WebViewScreenSpec
-import org.ireader.source.core.Source
+import org.ireader.source.core.HttpSource
 
 
 @ExperimentalAnimationApi
@@ -40,7 +41,7 @@ fun ReadingScreen(
     modifier: Modifier = Modifier,
     navController: NavController = rememberNavController(),
     viewModel: ReaderScreenViewModel,
-    source: Source,
+    source: HttpSource,
     scrollState: LazyListState,
     onNext: () -> Unit,
     onPrev: () -> Unit,

@@ -14,12 +14,13 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import org.ireader.presentation.feature_reader.presentation.reader.reverse_swip_refresh.SwipeRefreshState
 
 
 @Composable
 fun ArrowIndicator(
     icon: ImageVector,
-    swipeRefreshState: org.ireader.presentation.feature_reader.presentation.reader.SwipeRefreshState,
+    swipeRefreshState: SwipeRefreshState,
     refreshTriggerDistance: Dp,
     color: Color = MaterialTheme.colors.primary,
     maxSize: Dp = 40.dp,

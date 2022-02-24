@@ -2,10 +2,10 @@ package org.ireader.domain.view_models.detail.book_detail
 
 import org.ireader.core.utils.UiText
 import org.ireader.domain.models.entities.Book
-import org.ireader.source.core.Source
+import org.ireader.source.core.HttpSource
 
 data class DetailState(
-    val source: Source? = null,
+    val source: HttpSource? = null,
     val book: Book? = null,
     val inLibrary: Boolean = false,
     val isLocalLoading: Boolean = false,

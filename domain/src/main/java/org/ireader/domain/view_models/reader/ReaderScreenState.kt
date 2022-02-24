@@ -8,7 +8,7 @@ import org.ireader.core_ui.theme.FontType
 import org.ireader.domain.R
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
-import org.ireader.source.core.Source
+import org.ireader.source.core.HttpSource
 
 data class ReaderScreenState(
     val isLoading: Boolean = false,
@@ -23,7 +23,7 @@ data class ReaderScreenState(
     val chapter: Chapter? = null,
     val chapters: List<Chapter> = emptyList(),
     val error: UiText = UiText.StringResource(R.string.no_error),
-    val source: Source? = null,
+    val source: HttpSource? = null,
     val isReaderModeEnable: Boolean = true,
     val isSettingModeEnable: Boolean = false,
     val isMainBottomModeEnable: Boolean = true,

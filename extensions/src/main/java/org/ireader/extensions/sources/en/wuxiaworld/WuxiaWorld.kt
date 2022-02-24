@@ -14,7 +14,7 @@ import java.util.*
 class WuxiaWorld(deps: Dependencies) : ParsedHttpSource(deps) {
 
     override val name = "WuxiaWorld.site"
-    override val creator: String = "@Kazem"
+
     override val iconUrl: String =
         "https://wuxiaworld.site/wp-content/uploads/2019/02/WuxiaWorld-e1567126455773.png"
 
@@ -22,8 +22,15 @@ class WuxiaWorld(deps: Dependencies) : ParsedHttpSource(deps) {
 
     override val lang = "en"
 
+    override suspend fun getMangaList(sort: Listing?, page: Int): MangasPageInfo {
+        TODO("Not yet implemented")
+    }
 
-    override fun getFilterList(): FilterList {
+    override suspend fun getMangaList(filters: FilterList, page: Int): MangasPageInfo {
+        TODO("Not yet implemented")
+    }
+
+    override fun getFilters(): FilterList {
         return FilterList()
     }
 
@@ -205,7 +212,8 @@ class WuxiaWorld(deps: Dependencies) : ParsedHttpSource(deps) {
     }
 
     private val dateFormat: SimpleDateFormat = SimpleDateFormat("MMM dd,yyyy", Locale.US)
-    override suspend fun getChapters(manga: MangaInfo): List<ChapterInfo> {
+
+    override suspend fun getChapterList(manga: MangaInfo): List<ChapterInfo> {
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
                 var chapters =

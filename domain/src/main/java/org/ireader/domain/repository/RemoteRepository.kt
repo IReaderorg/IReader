@@ -8,7 +8,7 @@ import org.ireader.domain.models.ExploreType
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.utils.Resource
-import org.ireader.source.core.Source
+import org.ireader.source.core.HttpSource
 import org.ireader.source.models.MangaInfo
 
 interface RemoteRepository {
@@ -16,12 +16,12 @@ interface RemoteRepository {
 
     suspend fun getRemoteBookDetail(
         book: Book,
-        source: Source,
+        source: HttpSource,
     ): MangaInfo
 
 
     fun getAllExploreBookByPaging(
-        source: Source,
+        source: HttpSource,
         exploreType: ExploreType,
         query: String? = null,
     ): PagingSource<Int, Book>
@@ -29,13 +29,13 @@ interface RemoteRepository {
 
     fun getRemoteReadingContentUseCase(
         chapter: Chapter,
-        source: Source,
+        source: HttpSource,
     ): Flow<Resource<List<String>>>
 
 
     @OptIn(ExperimentalPagingApi::class)
     fun getRemoteBooksByRemoteMediator(
-        source: Source,
+        source: HttpSource,
         exploreType: ExploreType,
         query: String?,
     ): Flow<PagingData<Book>>

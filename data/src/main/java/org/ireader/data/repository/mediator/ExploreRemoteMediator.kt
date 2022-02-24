@@ -12,7 +12,7 @@ import org.ireader.domain.models.ExploreType
 import org.ireader.domain.models.RemoteKeys
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.toBook
-import org.ireader.source.core.Source
+import org.ireader.source.core.HttpSource
 import org.ireader.source.models.FilterList
 import org.ireader.source.models.MangasPageInfo
 import retrofit2.HttpException
@@ -22,7 +22,7 @@ import javax.net.ssl.SSLHandshakeException
 
 @ExperimentalPagingApi
 class ExploreRemoteMediator(
-    private val source: Source,
+    private val source: HttpSource,
     private val database: AppDatabase,
     private val exploreType: ExploreType,
     private val query: String? = null,

@@ -9,7 +9,7 @@ import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.entities.toChapterInfo
 import org.ireader.domain.repository.RemoteRepository
 import org.ireader.domain.utils.Resource
-import org.ireader.source.core.Source
+import org.ireader.source.core.CatalogSource
 import retrofit2.HttpException
 import timber.log.Timber
 import java.io.IOException
@@ -17,7 +17,7 @@ import java.io.IOException
 class GetRemoteReadingContent(private val remoteRepository: RemoteRepository) {
     operator fun invoke(
         chapter: Chapter,
-        source: Source,
+        source: CatalogSource,
     ): Flow<Resource<List<String>>> = flow<Resource<List<String>>> {
         try {
             Timber.d("Timber: GetRemoteReadingContentUseCase was Called")

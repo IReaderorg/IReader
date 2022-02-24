@@ -10,7 +10,7 @@ import org.ireader.data.local.AppDatabase
 import org.ireader.domain.models.ExploreType
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.repository.RemoteRepository
-import org.ireader.source.core.Source
+import org.ireader.source.core.HttpSource
 
 class GetRemoteBooksByRemoteMediator(
     private val remoteRepository: RemoteRepository,
@@ -18,7 +18,7 @@ class GetRemoteBooksByRemoteMediator(
 ) {
     @ExperimentalPagingApi
     operator fun invoke(
-        source: Source,
+        source: HttpSource,
         exploreType: ExploreType,
         query: String?,
     ): Flow<PagingData<Book>> {

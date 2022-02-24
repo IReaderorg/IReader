@@ -1,4 +1,4 @@
-package org.ireader.presentation.feature_reader.presentation.reader
+package org.ireader.presentation.feature_reader.presentation.reader.reverse_swip_refresh
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.MutatePriority
@@ -219,7 +219,7 @@ data class ISwipeRefreshIndicator(
     val enable: Boolean,
     val alignment: Alignment,
     val indicator: @Composable (state: SwipeRefreshState, refreshTrigger: Dp) -> Unit = { s, trigger ->
-        org.ireader.presentation.feature_reader.presentation.reader.reverrse_swip_refresh.SwipeRefreshIndicator(
+        SwipeRefreshIndicator(
             state = s,
             refreshTriggerDistance = trigger,
             clockwise = true//(alignment as BiasAlignment).verticalBias != 1f

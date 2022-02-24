@@ -22,13 +22,13 @@ import org.ireader.core.R
 import org.ireader.domain.models.ExploreType
 import org.ireader.presentation.presentation.components.BookImageComposable
 import org.ireader.presentation.ui.ExploreScreenSpec
-import org.ireader.source.core.Source
+import org.ireader.source.core.HttpSource
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun SourceListComposable(
     modifier: Modifier = Modifier,
-    sources: List<Source>,
+    sources: List<HttpSource>,
     scrollState: LazyListState,
     navController: NavController,
 ) {
@@ -81,7 +81,8 @@ fun SourceListComposable(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .padding(1.dp),
-                            image = sources[index].iconUrl,
+                            //TODO change icon later
+                            image = "",
                             contentScale = ContentScale.Inside,
                             alignment = Alignment.Center,
                             placeholder = org.ireader.core.R.drawable.ic_wallpaper
