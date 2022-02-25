@@ -43,3 +43,9 @@ val MIGRATION_8_9 = object : Migration(8, 9) {
         database.execSQL("ALTER TABLE book_table RENAME COLUMN download TO isDownloaded")
     }
 }
+val MIGRATION_10_11 = object : Migration(10, 11) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        database.execSQL("ALTER TABLE book_table ADD COLUMN beingDownloaded INTEGER NOT NULL DEFAULT 0")
+        database.execSQL("ALTER TABLE book_table RENAME COLUMN download TO isDownloaded")
+    }
+}

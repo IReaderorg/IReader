@@ -207,7 +207,9 @@ class BookDetailViewModel @Inject constructor(
                                 setChapters(chapters = uniqueList)
                                 toggleRemoteLoading(false)
                                 clearChapterError()
-                                deleteUseCase.deleteChaptersByBookId(book.id)
+                                if (uniqueList.isNotEmpty()) {
+                                    deleteUseCase.deleteChaptersByBookId(book.id)
+                                }
                                 insertChaptersToLocal(uniqueList, book.id)
                                 getLocalChaptersByBookId(bookId = book.id)
                             }
@@ -266,7 +268,6 @@ class BookDetailViewModel @Inject constructor(
 
     private fun insertChaptersToLocal(chapters: List<Chapter>, bookId: Long) {
         viewModelScope.launch(Dispatchers.IO) {
-            deleteUseCase.deleteChaptersByBookId(bookId = bookId)
             localInsertUseCases.insertChapters(chapters.map { it.copy(bookId = bookId) })
         }
     }

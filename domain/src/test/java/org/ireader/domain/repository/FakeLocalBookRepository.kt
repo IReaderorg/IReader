@@ -18,6 +18,10 @@ internal class FakeLocalBookRepository : LocalBookRepository {
         emit(result)
     }
 
+    override suspend fun findBookById(id: Long): Book? {
+        TODO("Not yet implemented")
+    }
+
     override fun subscribeAllInLibraryBooks(
         sortType: SortType,
         isAsc: Boolean,
@@ -25,6 +29,14 @@ internal class FakeLocalBookRepository : LocalBookRepository {
     ): Flow<List<Book>> = flow {
         val result = books.filter { it.favorite }
         emit(result)
+    }
+
+    override suspend fun findAllInLibraryBooks(
+        sortType: SortType,
+        isAsc: Boolean,
+        unreadFilter: Boolean,
+    ): List<Book> {
+        TODO("Not yet implemented")
     }
 
 
@@ -57,6 +69,14 @@ internal class FakeLocalBookRepository : LocalBookRepository {
         throw UnsupportedOperationException("unsupported")
     }
 
+    override suspend fun findBookByKey(key: String): Book? {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun findBooksByKey(key: String): List<Book> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun deleteNotInLibraryChapters() {
         val b = books.filter { !it.favorite }
         books.removeAll(b)
@@ -78,12 +98,14 @@ internal class FakeLocalBookRepository : LocalBookRepository {
         books.clear()
     }
 
-    override suspend fun insertBook(book: Book) {
+    override suspend fun insertBook(book: Book): Long {
         books.add(book)
+        return 1L
     }
 
-    override suspend fun insertBooks(book: List<Book>) {
+    override suspend fun insertBooks(book: List<Book>): List<Long> {
         books.addAll(book)
+        return listOf(1L)
     }
 }
 

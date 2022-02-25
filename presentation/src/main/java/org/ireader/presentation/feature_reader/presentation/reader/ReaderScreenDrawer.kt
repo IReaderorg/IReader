@@ -16,6 +16,7 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.items
 import org.ireader.domain.models.entities.Chapter
+import org.ireader.presentation.presentation.components.CenterTopAppBar
 import org.ireader.presentation.presentation.components.ChapterListItemComposable
 import org.ireader.presentation.presentation.components.handlePagingChapterResult
 import org.ireader.presentation.presentation.reusable_composable.ErrorTextWithEmojis
@@ -42,7 +43,9 @@ fun ReaderScreenDrawer(
         Row(verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = modifier.fillMaxWidth()) {
-            TopAppBarTitle(title = "Content", modifier = modifier.padding(start = 8.dp))
+            CenterTopAppBar(modifier = Modifier.fillMaxWidth(), title = {
+                TopAppBarTitle(title = "Content")
+            })
             Row {
                 TopAppBarActionButton(imageVector = Icons.Default.Sort,
                     title = "Reverse list icon",

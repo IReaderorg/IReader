@@ -16,6 +16,9 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = Deps.Compose.composeVersion
     }
+    lint {
+        baseline = file("lint-baseline.xml")
+    }
 }
 
 addCompose()

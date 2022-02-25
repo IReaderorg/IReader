@@ -65,10 +65,9 @@ fun ChapterDetailScreen(
 
     Scaffold(
         topBar = {
-            CenterTopAppBar(title = {
+            CenterTopAppBar(modifier = Modifier.fillMaxWidth(), title = {
                 TopAppBarTitle(title = "Content")
             },
-                modifier = modifier.fillMaxWidth(),
                 backgroundColor = MaterialTheme.colors.background,
                 contentColor = MaterialTheme.colors.onBackground,
                 elevation = Constants.DEFAULT_ELEVATION,

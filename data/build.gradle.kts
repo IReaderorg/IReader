@@ -9,6 +9,8 @@ plugins {
 
 android {
     compileSdk = ProjectConfig.compileSdk
+
+
     kapt {
         arguments {
             arg("room.schemaLocation", "$projectDir/schemas")

@@ -25,11 +25,6 @@ android {
         versionCode = ProjectConfig.ConfigVersionCode
         versionName = ProjectConfig.ConfigVersionName
     }
-    lint {
-        baseline = file("lint-baseline.xml")
-    }
-
-
     packagingOptions {
         resources.excludes.addAll(listOf(
             "LICENSE.txt",

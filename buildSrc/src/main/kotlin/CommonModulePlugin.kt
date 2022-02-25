@@ -22,6 +22,7 @@ class CommonModulePlugin : Plugin<Project> {
                 compileSdkVersion(31)
                 buildToolsVersion("30.0.3")
 
+
 //                project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class.java).configureEach {
 //                    kotlinOptions.jvmTarget = JavaVersion.VERSION_1_8.toString()
 //                }
@@ -31,17 +32,32 @@ class CommonModulePlugin : Plugin<Project> {
                             jvmTarget = JavaVersion.VERSION_1_8.toString()
                             freeCompilerArgs = freeCompilerArgs + listOf(
                                 "-Xjvm-default=compatibility",
+                                "-Xopt-in=kotlin.RequiresOptIn"
                             )
                         }
                     }
+
+                packagingOptions {
+                    resources.excludes.addAll(listOf(
+                        "LICENSE.txt",
+                        "META-INF/LICENSE",
+                        "META-INF/LICENSE.txt",
+                        "META-INF/README.md",
+                        "META-INF/AL2.0",
+                        "META-INF/LGPL2.1",
+                        "**/attach_hotspot_windows.dll",
+                        "META-INF/licenses/ASM",
+                        "META-INF/gradle/incremental.annotation.processors"
+                    ))
+                }
                 testOptions {
                     unitTests.isReturnDefaultValues = true
                 }
                 defaultConfig {
                     minSdk = ProjectConfig.minSdk
                     targetSdk = ProjectConfig.targetSdk
-                    versionCode = ProjectConfig.ConfigVersionCode
-                    versionName = ProjectConfig.ConfigVersionName
+                    versionCode(ProjectConfig.ConfigVersionCode)
+                    versionName(ProjectConfig.ConfigVersionName)
 
 
                     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -50,6 +66,12 @@ class CommonModulePlugin : Plugin<Project> {
                         useSupportLibrary = true
                     }
                 }
+                compileOptions {
+                    isCoreLibraryDesugaringEnabled = true
+                    sourceCompatibility(JavaVersion.VERSION_11)
+                    targetCompatibility(JavaVersion.VERSION_11)
+                }
+
                 when (this) {
                     is LibraryExtension -> {
                         defaultConfig {
@@ -67,11 +89,6 @@ class CommonModulePlugin : Plugin<Project> {
                             }
                         }
                     }
-                }
-
-                compileOptions {
-                    sourceCompatibility = JavaVersion.VERSION_1_8
-                    targetCompatibility = JavaVersion.VERSION_1_8
                 }
 
             }

@@ -28,7 +28,7 @@ class SubscribeLastReadChapterTest {
                 title = c.toString(),
                 link = c.toString(),
                 bookId = bookId,
-                lastRead = index.toLong() == lastReadChapterIndex
+                lastRead = index.toLong()
             ))
         }
         fakeRepository.chapters.addAll(items)

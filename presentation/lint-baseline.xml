@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues name="AGP (7.1.1)" by="lint 7.1.1" client="gradle" dependencies="false" format="6"
+    type="baseline" variant="all" version="7.1.1">
+
+    <issue errorLine1="fun Modifier.simpleVerticalScrollbar("
+        errorLine2="             ~~~~~~~~~~~~~~~~~~~~~~~" id="ComposableModifierFactory"
+        message="Modifier factory functions should not be marked as @Composable, and should use composed instead">
+        <location column="14"
+            file="src/main/java/org/ireader/presentation/feature_detail/presentation/chapter_detail/ChapterDetailScreen.kt"
+            line="149" />
+    </issue>
+
+    <issue errorLine1="fun showLoading(modifier: Modifier = Modifier) {"
+        errorLine2="    ~~~~~~~~~~~" id="ComposableNaming"
+        message="Composable functions that return Unit should start with an uppercase letter">
+        <location column="5"
+            file="src/main/java/org/ireader/presentation/presentation/components/showLoading.kt"
+            line="11" />
+    </issue>
+
+</issues>

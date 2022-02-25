@@ -24,12 +24,14 @@ internal class FakeDownloadRepository : DownloadRepository {
     }
 
 
-    override suspend fun insertDownload(savedDownload: SavedDownload) {
+    override suspend fun insertDownload(savedDownload: SavedDownload): Long {
         downloads.add(savedDownload)
+        return 1L
     }
 
-    override suspend fun insertDownloads(savedDownloadList: List<SavedDownload>) {
+    override suspend fun insertDownloads(savedDownloadList: List<SavedDownload>): List<Long> {
         downloads.addAll(savedDownloadList)
+        return listOf(1L)
     }
 
     override suspend fun deleteSavedDownload(savedDownload: SavedDownload) {
