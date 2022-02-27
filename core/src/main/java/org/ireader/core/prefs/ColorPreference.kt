@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
+import tachiyomi.core.prefs.Preference
 
 class ColorPreference(
     private val preference: Preference<Int>,

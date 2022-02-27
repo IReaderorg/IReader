@@ -5,39 +5,24 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import org.ireader.core.okhttp.HttpClients
-import org.ireader.core.prefs.PreferenceStore
+import org.ireader.data.catalog.AndroidCatalogInstallationChanges
+import org.ireader.data.catalog.AndroidCatalogInstaller
+import org.ireader.data.catalog.AndroidCatalogLoader
 import org.ireader.data.local.AppDatabase
 import org.ireader.data.local.dao.CatalogDao
 import org.ireader.data.repository.CatalogRemoteRepositoryImpl
-import org.ireader.domain.extensions.AndroidCatalogLoader
-import org.ireader.domain.extensions.CatalogLoader
-import org.ireader.domain.extensions.cataloge_service.*
-import org.ireader.domain.extensions.cataloge_service.impl.AndroidCatalogInstallationChanges
-import org.ireader.domain.extensions.cataloge_service.impl.AndroidCatalogInstaller
+import org.ireader.domain.catalog.CatalogInterceptors
+import org.ireader.domain.catalog.interactor.*
+import org.ireader.domain.catalog.service.*
+import org.ireader.domain.repository.LocalBookRepository
+import org.ireader.presentation.feature_sources.presentation.extension.CatalogsStateImpl
+import tachiyomi.core.http.HttpClients
+import tachiyomi.core.prefs.PreferenceStore
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
 @Module
 class CatalogModule {
-    @Provides
-    @Singleton
-    fun providesCataloguePreferences(store: PreferenceStore): CatalogPreferences {
-        return CatalogPreferences(store)
-    }
-
-
-    @Provides
-    @Singleton
-    fun provideCatalogInstallationChanges(value: AndroidCatalogInstallationChanges): CatalogInstallationChanges {
-        return value
-    }
-
-    @Provides
-    @Singleton
-    fun provideAndroidCatalogInstallationChanges(context: Application): AndroidCatalogInstallationChanges {
-        return AndroidCatalogInstallationChanges(context = context)
-    }
 
     @Provides
     @Singleton
@@ -53,7 +38,84 @@ class CatalogModule {
 
     @Provides
     @Singleton
-    fun provideCatalogStore(
+    fun provideCatalogLoader(context: Application, httpClients: HttpClients): CatalogLoader {
+        return AndroidCatalogLoader(context = context, httpClients)
+    }
+
+    @Provides
+    @Singleton
+    fun provideCatalogsState(): CatalogsStateImpl {
+        return CatalogsStateImpl()
+    }
+
+    @Provides
+    @Singleton
+    fun provideCatalogInstallationChanges(context: Application): CatalogInstallationChanges {
+        return AndroidCatalogInstallationChanges(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideAndroidCatalogInstaller(
+        context: Application,
+        httpClients: HttpClients,
+        installationChanges: AndroidCatalogInstallationChanges,
+    ): CatalogInstaller {
+        return AndroidCatalogInstaller(context, httpClients, installationChanges)
+    }
+
+    @Provides
+    @Singleton
+    fun provideCatalogRemoteApi(
+        httpClients: HttpClients,
+    ): CatalogRemoteApi {
+        return CatalogGithubApi(httpClients)
+    }
+
+    @Provides
+    @Singleton
+    fun provideCatalogInterceptor(
+        catalogStore: CatalogStore,
+        localCatalogs: GetLocalCatalogs,
+        remoteCatalogs: GetRemoteCatalogs,
+        localBookRepository: LocalBookRepository,
+        catalogRemoteRepository: CatalogRemoteRepository,
+        catalogInstaller: CatalogInstaller,
+        catalogPreferences: CatalogPreferences,
+        catalogRemoteApi: CatalogRemoteApi,
+        installCatalog: InstallCatalog,
+    ): CatalogInterceptors {
+        return CatalogInterceptors(
+            getInstalledCatalog = GetInstalledCatalog(catalogStore),
+            getCatalogsByType = GetCatalogsByType(localCatalogs, remoteCatalogs),
+            getLocalCatalog = GetLocalCatalog(catalogStore),
+            getLocalCatalogs = GetLocalCatalogs(catalogStore, localBookRepository),
+            getRemoteCatalogs = GetRemoteCatalogs(catalogRemoteRepository),
+            installCatalog = InstallCatalog(catalogInstaller),
+            syncRemoteCatalogs = SyncRemoteCatalogs(catalogRemoteRepository,
+                catalogRemoteApi,
+                catalogPreferences),
+            togglePinnedCatalog = TogglePinnedCatalog(catalogStore),
+            uninstallCatalog = UninstallCatalog(catalogInstaller),
+            updateCatalog = UpdateCatalog(catalogRemoteRepository, installCatalog = installCatalog),
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideCatalogPreferences(store: PreferenceStore): CatalogPreferences {
+        return CatalogPreferences(store)
+    }
+
+    @Provides
+    @Singleton
+    fun providesGetRemoteCatalogs(catalogRemoteRepository: CatalogRemoteRepository): GetRemoteCatalogs {
+        return GetRemoteCatalogs(catalogRemoteRepository)
+    }
+
+    @Provides
+    @Singleton
+    fun providesCatalogStore(
         loader: CatalogLoader,
         catalogPreferences: CatalogPreferences,
         catalogRemoteRepository: CatalogRemoteRepository,
@@ -67,31 +129,10 @@ class CatalogModule {
 
     @Provides
     @Singleton
-    fun provideCatalogLoader(
-        context: Application,
-        httpClients: HttpClients,
-    ): CatalogLoader {
-        return AndroidCatalogLoader(context, httpClients)
-    }
-
-    @Provides
-    @Singleton
-    fun provideAndroidCatalogLoader(
-        context: Application,
-        httpClients: HttpClients,
-    ): AndroidCatalogLoader {
-        return AndroidCatalogLoader(context, httpClients)
-    }
-
-
-    @Provides
-    @Singleton
-    fun provideCatalogInstaller(
-        context: Application,
-        httpClients: HttpClients,
-        installationChanges: AndroidCatalogInstallationChanges,
-    ): CatalogInstaller {
-        return AndroidCatalogInstaller(context, httpClients, installationChanges)
+    fun providesInstallCatalog(
+        catalogInstaller: CatalogInstaller,
+    ): InstallCatalog {
+        return InstallCatalog(catalogInstaller)
     }
 
 

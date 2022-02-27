@@ -20,11 +20,9 @@ import okhttp3.Request
 import okio.Path
 import okio.buffer
 import okio.source
-import org.ireader.core.okhttp.okhttp
-import org.ireader.core.okhttp.saveTo
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.source.Extensions
-import org.ireader.source.core.HttpSource
+import tachiyomi.core.io.saveTo
 import java.io.File
 
 
@@ -130,19 +128,20 @@ internal class LibraryMangaFetcher(
   }
 
   private fun getCall(manga: MangaCover): Call {
-    val catalog = extension.findSourceById(manga.sourceId)
-    val source = catalog as? HttpSource
-
-    val clientAndRequest = source?.getCoverRequest(manga.cover)
-
-    val newClient = (clientAndRequest?.first?.okhttp ?: defaultClient).newBuilder()
-      .cache(coilCache)
-      .build()
-
-    val request = clientAndRequest?.second?.build()?.convertToOkHttpRequest()
-      ?: Request.Builder().url(manga.cover).build()
-
-    return newClient.newCall(request)
+//    val catalog = extension.findSourceById(manga.sourceId)
+//    val source = catalog as? HttpSource
+//
+//    val clientAndRequest = source?.getCoverRequest(manga.cover)
+//
+//    val newClient = (clientAndRequest?.first?.okhttp ?: defaultClient).newBuilder()
+//      .cache(coilCache)
+//      .build()
+//
+//    val request = clientAndRequest?.second?.build()?.convertToOkHttpRequest()
+//      ?: Request.Builder().url(manga.cover).build()
+//
+//    return newClient.newCall(request)
+      throw Exception("Not Implemented")
   }
 
   private fun getResourceType(cover: String): Type? {

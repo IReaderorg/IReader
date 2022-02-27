@@ -21,11 +21,17 @@ class CommonModulePlugin : Plugin<Project> {
             androidExtensions.apply {
                 compileSdkVersion(31)
                 buildToolsVersion("30.0.3")
-
-
-//                project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class.java).configureEach {
-//                    kotlinOptions.jvmTarget = JavaVersion.VERSION_1_8.toString()
-//                }
+                defaultConfig {
+                    minSdk = ProjectConfig.minSdk
+                    targetSdk = ProjectConfig.targetSdk
+                    versionCode(ProjectConfig.ConfigVersionCode)
+                    versionName(ProjectConfig.ConfigVersionName)
+                }
+                compileOptions {
+                    isCoreLibraryDesugaringEnabled = true
+                    sourceCompatibility(JavaVersion.VERSION_11)
+                    targetCompatibility(JavaVersion.VERSION_11)
+                }
                 project.tasks.withType<org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompile>()
                     .configureEach {
                         kotlinOptions {
@@ -53,24 +59,8 @@ class CommonModulePlugin : Plugin<Project> {
                 testOptions {
                     unitTests.isReturnDefaultValues = true
                 }
-                defaultConfig {
-                    minSdk = ProjectConfig.minSdk
-                    targetSdk = ProjectConfig.targetSdk
-                    versionCode(ProjectConfig.ConfigVersionCode)
-                    versionName(ProjectConfig.ConfigVersionName)
 
 
-                    testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-                    vectorDrawables {
-                        useSupportLibrary = true
-                    }
-                }
-                compileOptions {
-                    isCoreLibraryDesugaringEnabled = true
-                    sourceCompatibility(JavaVersion.VERSION_11)
-                    targetCompatibility(JavaVersion.VERSION_11)
-                }
 
                 when (this) {
                     is LibraryExtension -> {
@@ -98,11 +88,9 @@ class CommonModulePlugin : Plugin<Project> {
 
         // dependencies common to all projects
         project.dependencies {
-            add("implementation", Deps.AndroidX.coreKtx)
-            add("implementation", Deps.AndroidX.coreKtx)
-            add("implementation", Deps.AndroidX.appCompat)
-            add("implementation", Deps.AndroidX.material)
-            add("implementation", Deps.AndroidX.activity)
+            add("implementation", Deps.androidx.core)
+            add("implementation", Deps.androidx.appCompat)
+            add("implementation", Deps.androidx.material)
             add("implementation", Deps.Timber.timber)
 
 
@@ -120,6 +108,7 @@ class CommonModulePlugin : Plugin<Project> {
             add("androidTestImplementation", Deps.Testing.coroutines)
 
             add("implementation", Deps.Compose.runtime)
+            add("coreLibraryDesugaring", Deps.desugarJdkLibs)
 
         }
     }

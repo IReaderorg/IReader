@@ -22,7 +22,7 @@ import org.ireader.presentation.R
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
-import org.ireader.source.core.Source
+import tachiyomi.source.Source
 
 @Composable
 fun WebPageTopBar(

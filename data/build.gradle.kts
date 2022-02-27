@@ -22,18 +22,21 @@ addTesting()
 addKtor()
 
 dependencies {
-    implementation(project(Modules.source))
+    //implementation(project(Modules.source))
+
+    compileOnly(Deps.tachiyomi.core)
+    compileOnly(Deps.tachiyomi.api)
     implementation(project(Modules.core))
     implementation(project(Modules.domain))
 
-    implementation(Deps.AndroidX.coreKtx)
-    implementation(Deps.AndroidX.appCompat)
-    implementation(Deps.AndroidX.webkit)
-    implementation(Deps.AndroidX.browser)
-    implementation(Deps.AndroidX.material)
-    implementation(Deps.AndroidX.activity)
+    implementation(Deps.androidx.core)
+    implementation(Deps.androidx.appCompat)
+    implementation(Deps.androidx.webkit)
+    implementation(Deps.androidx.browser)
+    implementation(Deps.androidx.material)
+    implementation(Deps.androidx.compose.activity)
 
-    implementation(Deps.Kotlin.jsonSerialization)
+    implementation(Deps.kotlin.jsonSerialization)
 
 
     kapt(Deps.DaggerHilt.hiltCompiler)
@@ -56,8 +59,8 @@ dependencies {
     androidTestImplementation(Deps.Room.roomTesting)
     implementation(Deps.Moshi.moshi)
     implementation(Deps.Moshi.moshiKotlin)
-    implementation(Deps.Jsoup.jsoup)
-    implementation(Deps.OkHttp.okHttp3Interceptor)
+    implementation(Deps.jsoup)
+    implementation(Deps.okhttp.okHttp3Interceptor)
 
     /** Coroutine **/
     implementation(Deps.Coroutines.core)

@@ -2,11 +2,12 @@ import java.io.FileInputStream
 import java.util.*
 
 plugins {
-    id("com.android.library")
-    id("module-plugin")
     `maven-publish`
     signing
+    id("com.android.library")
+    id("module-plugin")
 }
+
 val githubProperties = Properties()
 githubProperties.load(FileInputStream(rootProject.file("github.properties")))
 
@@ -17,13 +18,16 @@ android {
 }
 
 dependencies {
-    implementation(Deps.AndroidX.appCompat)
+    implementation(Deps.androidx.appCompat)
+
+    compileOnly(Deps.tachiyomi.api)
+    compileOnly(Deps.tachiyomi.core)
 
     implementation(Deps.Compose.ui)
     implementation(Deps.Coil.coilCompose)
 
-    implementation(Deps.OkHttp.okhttp3_doh)
-    implementation(Deps.OkHttp.okio)
+    implementation(Deps.okhttp.okhttp3_doh)
+    implementation(Deps.okio)
 
     implementation(Deps.Retrofit.retrofit)
     implementation(Deps.Retrofit.moshiConverter)
@@ -31,17 +35,17 @@ dependencies {
     implementation(Deps.Moshi.moshi)
     implementation(Deps.Moshi.moshiKotlin)
 
-    implementation(Deps.Jsoup.jsoup)
+    implementation(Deps.jsoup)
     implementation(Deps.Datastore.datastore)
 
     implementation(Deps.DaggerHilt.hiltAndroid)
 
     implementation(kotlin("stdlib"))
 
-    implementation(Deps.Ktor.core)
-    implementation(Deps.Ktor.serialization)
-    implementation(Deps.Ktor.okhttp)
-    implementation(Deps.Ktor.ktor_jsoup)
+    implementation(Deps.ktor.core)
+    implementation(Deps.ktor.serialization)
+    implementation(Deps.ktor.okhttp)
+    implementation(Deps.ktor.ktor_jsoup)
 
     implementation(Deps.Timber.timber)
 }
@@ -53,11 +57,20 @@ fun getArtificatId(): String {
     return "core" // Replace with library name ID
 }
 
+afterEvaluate {
+    configure<PublishingExtension> {
+        publications.all {
+            val mavenPublication = this as? MavenPublication
+            mavenPublication?.artifactId = "${project.name}-$name"
+        }
+    }
+}
+
 publishing {
     repositories {
         maven {
             name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/kazemcodes/IReader")
+            url = uri("https://maven.pkg.github.com/kazemcodes/ireader")
 
             credentials {
                 username = githubProperties.get("gpr.usr") as String? ?: System.getenv("GPR_USER")
@@ -68,14 +81,15 @@ publishing {
     }
 
     publications.withType(MavenPublication::class) {
+        from(components["java"])
         groupId = "io.github.kazemcodes"
-        artifactId = "core"
+        artifactId = "source-api"
         version = packageVersion
         artifact("$buildDir/outputs/aar/${getArtificatId()}-release.aar")
         pom {
-            name.set("IReader Core")
-            description.set("Common classes for IReader.")
-            url.set("https://github.com/kazemcodes/IReader")
+            name.set("IReader Source API")
+            description.set("Core source API for IReader.")
+            url.set("https://github.com/kazemcodes/ireader")
             licenses {
                 license {
                     name.set("Mozilla Public License 2.0")
@@ -96,8 +110,4 @@ publishing {
             }
         }
     }
-}
-
-signing {
-    sign(publishing.publications)
 }

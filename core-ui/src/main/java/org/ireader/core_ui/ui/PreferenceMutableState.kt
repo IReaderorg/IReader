@@ -5,7 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import org.ireader.core.prefs.Preference
+import tachiyomi.core.prefs.Preference
 
 class PreferenceMutableState<T>(
     private val preference: Preference<T>,

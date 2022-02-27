@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 import org.ireader.domain.models.ExploreType
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.repository.RemoteRepository
-import org.ireader.source.core.CatalogSource
+import tachiyomi.source.CatalogSource
 
 data class RemoteUseCases(
     val getBookDetail: GetBookDetail,

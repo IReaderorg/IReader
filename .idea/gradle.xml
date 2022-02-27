@@ -19,7 +19,6 @@
             <option value="$PROJECT_DIR$/domain" />
             <option value="$PROJECT_DIR$/extensions" />
             <option value="$PROJECT_DIR$/presentation" />
-            <option value="$PROJECT_DIR$/source" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

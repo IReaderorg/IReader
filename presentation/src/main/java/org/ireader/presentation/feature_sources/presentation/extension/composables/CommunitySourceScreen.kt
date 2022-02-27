@@ -7,17 +7,26 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import org.ireader.domain.models.entities.CatalogLocal
 import org.ireader.presentation.feature_sources.presentation.extension.ExtensionViewModel
+import timber.log.Timber
 
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun CommunitySourceScreen(viewModel: ExtensionViewModel, navController: NavController) {
+    val allSource = mutableListOf<CatalogLocal>()
     val scrollState = rememberLazyListState()
-    val sources = viewModel.state.communitySources
+    viewModel.UiState.catalogLocal.forEach {
+        allSource.add(it)
+    }
+    allSource.forEach {
+        Timber.e(it.toString())
+    }
+
 
     SourceListComposable(modifier = Modifier.padding(bottom = 50.dp),
-        sources = sources,
+        sources = allSource.map { it.source },
         scrollState = scrollState,
         navController = navController)
 }

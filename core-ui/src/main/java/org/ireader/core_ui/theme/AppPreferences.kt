@@ -1,10 +1,9 @@
-package org.ireader.domain.ui
+package org.ireader.core_ui.theme
 
-import org.ireader.core.prefs.Preference
-import org.ireader.core.prefs.PreferenceStore
-import org.ireader.core.prefs.getEnum
-import org.ireader.core_ui.theme.OrientationMode
-import org.ireader.core_ui.theme.ThemeMode
+import tachiyomi.core.prefs.Preference
+import tachiyomi.core.prefs.PreferenceStore
+import tachiyomi.core.prefs.getEnum
+
 
 class AppPreferences(
     private val preferenceStore: PreferenceStore,

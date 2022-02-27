@@ -9,8 +9,8 @@ import org.ireader.domain.models.entities.toBook
 import org.ireader.domain.models.entities.updateBook
 import org.ireader.domain.repository.RemoteRepository
 import org.ireader.domain.utils.Resource
-import org.ireader.source.core.CatalogSource
 import retrofit2.HttpException
+import tachiyomi.source.CatalogSource
 import timber.log.Timber
 import java.io.IOException
 

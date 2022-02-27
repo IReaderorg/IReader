@@ -36,7 +36,7 @@ import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import org.ireader.domain.utils.Resource
-import org.ireader.source.core.CatalogSource
+import tachiyomi.source.CatalogSource
 import javax.inject.Inject
 
 

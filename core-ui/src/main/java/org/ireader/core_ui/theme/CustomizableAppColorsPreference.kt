@@ -3,11 +3,9 @@ package org.ireader.core_ui.theme
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import kotlinx.coroutines.CoroutineScope
-import org.ireader.core.prefs.Preference
-import org.ireader.core.prefs.asColor
 import org.ireader.core_ui.ui.PreferenceMutableState
 import org.ireader.core_ui.ui.asStateIn
-import org.ireader.domain.ui.UiPreferences
+import tachiyomi.core.prefs.Preference
 
 data class CustomizableAppColorsPreference(
     val primary: Preference<Color>,
@@ -48,3 +46,4 @@ fun CustomizableAppColorsPreference.asState(scope: CoroutineScope): Customizable
         bars.asStateIn(scope)
     )
 }
+

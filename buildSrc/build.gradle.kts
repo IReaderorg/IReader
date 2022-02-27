@@ -18,6 +18,7 @@ repositories {
     maven {
         url = uri("https://plugins.gradle.org/m2/")
     }
+    maven { setUrl("https://oss.sonatype.org/content/repositories/snapshots/") }
 }
 
 kotlin {

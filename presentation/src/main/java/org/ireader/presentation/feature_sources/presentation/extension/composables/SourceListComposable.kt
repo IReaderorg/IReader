@@ -22,16 +22,17 @@ import org.ireader.core.R
 import org.ireader.domain.models.ExploreType
 import org.ireader.presentation.presentation.components.BookImageComposable
 import org.ireader.presentation.ui.ExploreScreenSpec
-import org.ireader.source.core.CatalogSource
+import tachiyomi.source.Source
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun SourceListComposable(
     modifier: Modifier = Modifier,
-    sources: List<CatalogSource>,
+    sources: List<Source>,
     scrollState: LazyListState,
     navController: NavController,
 ) {
+
 
     LazyColumn(modifier = modifier
         .fillMaxSize(),
@@ -42,21 +43,17 @@ fun SourceListComposable(
             ListItem(
                 modifier = Modifier
                     .clickable {
-                        if (sources[index]
-                                .getListings()
-                                .find { it.name == "popular" } != null
-                        ) {
-                            navController.navigate(ExploreScreenSpec.buildRoute(
-                                sourceId = sources[index].id,
-                                exploreType = ExploreType.Popular.id
-                            ))
-                        }
+                        navController.navigate(ExploreScreenSpec.buildRoute(
+                            sourceId = sources[index].id,
+                            exploreType = ExploreType.Popular.id
+                        ))
+
                     }
                     .height(60.dp),
                 text = { Text(sources[index].name) },
                 trailing = {
-                    if (sources[index].getListings().find { it.name == "latest" } != null) {
-                        Text(stringResource(R.string.latest_book),
+
+                Text(stringResource(R.string.latest_book),
                             color = MaterialTheme.colors.primary,
                             style = MaterialTheme.typography.subtitle2,
                             modifier = Modifier.clickable {
@@ -65,7 +62,7 @@ fun SourceListComposable(
                                     exploreType = ExploreType.Latest.id
                                 ))
                             })
-                    }
+
                 },
                 secondaryText = {
 
@@ -81,7 +78,8 @@ fun SourceListComposable(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .padding(1.dp),
-                            image = sources[index].iconUrl,
+                            //TODO need to add this later
+                            image = "",
                             contentScale = ContentScale.Inside,
                             alignment = Alignment.Center,
                             placeholder = org.ireader.core.R.drawable.ic_wallpaper

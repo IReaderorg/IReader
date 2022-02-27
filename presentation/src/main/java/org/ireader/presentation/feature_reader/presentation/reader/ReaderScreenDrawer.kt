@@ -16,13 +16,12 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.items
 import org.ireader.domain.models.entities.Chapter
-import org.ireader.presentation.presentation.components.CenterTopAppBar
 import org.ireader.presentation.presentation.components.ChapterListItemComposable
 import org.ireader.presentation.presentation.components.handlePagingChapterResult
 import org.ireader.presentation.presentation.reusable_composable.ErrorTextWithEmojis
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
-import org.ireader.source.core.Source
+import tachiyomi.source.Source
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -40,18 +39,24 @@ fun ReaderScreenDrawer(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top) {
         Spacer(modifier = modifier.height(5.dp))
-        Row(verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = modifier.fillMaxWidth()) {
-            CenterTopAppBar(modifier = Modifier.fillMaxWidth(), title = {
-                TopAppBarTitle(title = "Content")
-            })
-            Row {
+        Box(modifier = Modifier.fillMaxWidth()) {
+            TopAppBarTitle(title = "Content", modifier = Modifier.align(Alignment.Center))
+            Row(verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = modifier.fillMaxWidth()) {
+                Box {}
+
+//                CenterTopAppBar(modifier = Modifier
+//                    .fillMaxWidth()
+//                    .background(MaterialTheme.colors.background), title = {
+//                    TopAppBarTitle(title = "Content")
+//                })
                 TopAppBarActionButton(imageVector = Icons.Default.Sort,
                     title = "Reverse list icon",
                     onClick = {
                         onReverseIcon()
                     })
+
             }
         }
 

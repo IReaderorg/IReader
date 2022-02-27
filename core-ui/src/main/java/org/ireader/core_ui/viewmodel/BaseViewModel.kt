@@ -5,8 +5,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import org.ireader.core.prefs.Preference
 import org.ireader.core_ui.ui.PreferenceMutableState
+import tachiyomi.core.prefs.Preference
 
 
 abstract class BaseViewModel : androidx.lifecycle.ViewModel() {

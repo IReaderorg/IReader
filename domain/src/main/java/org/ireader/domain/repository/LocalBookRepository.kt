@@ -60,8 +60,10 @@ interface LocalBookRepository {
 
     suspend fun insertBook(book: Book): Long
     suspend fun insertBooks(book: List<Book>): List<Long>
+
     /**************************************************/
 
+    suspend fun findFavoriteSourceIds(): List<Long>
 
 }
 

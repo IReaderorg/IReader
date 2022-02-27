@@ -1,8 +1,8 @@
 package org.ireader.domain.use_cases.preferences.reader_preferences
 
+import org.ireader.core_ui.theme.AppPreferences
 import org.ireader.core_ui.theme.FontType
 import org.ireader.core_ui.theme.fonts
-import org.ireader.domain.ui.AppPreferences
 
 class ReadSelectedFontStateUseCase(
     private val appPreferences: AppPreferences,

@@ -18,14 +18,14 @@ import kotlinx.coroutines.launch
 import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
 import org.ireader.domain.R
+import org.ireader.domain.catalog.service.CatalogStore
 import org.ireader.domain.models.DisplayMode
 import org.ireader.domain.models.ExploreType
 import org.ireader.domain.models.entities.Book
-import org.ireader.domain.source.Extensions
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.remote.RemoteUseCases
-import org.ireader.source.core.CatalogSource
-import org.ireader.source.models.BookPageInfo
+import tachiyomi.source.CatalogSource
+import tachiyomi.source.model.MangasPageInfo
 import javax.inject.Inject
 
 
@@ -34,7 +34,7 @@ class ExploreViewModel @Inject constructor(
     private val preferencesUseCase: org.ireader.domain.use_cases.preferences.reader_preferences.PreferencesUseCase,
     private val remoteUseCases: RemoteUseCases,
     private val deleteUseCase: DeleteUseCase,
-    private val extensions: Extensions,
+    private val catalogStore: CatalogStore,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -48,8 +48,9 @@ class ExploreViewModel @Inject constructor(
     init {
         val exploreId = savedStateHandle.get<Int>("exploreType")
         val sourceId = savedStateHandle.get<Long>("sourceId")
-        if (sourceId != null && exploreId != null) {
-            val source = extensions.findSourceById(sourceId)
+        val source =
+            catalogStore.catalogs.find { it.source.id == sourceId }?.source as CatalogSource
+        if (sourceId != null && exploreId != null && source != null) {
             if (source != null) {
                 state.value = state.value.copy(source = source)
                 state.value = state.value.copy(exploreType = exploreTypeMapper(exploreId))
@@ -121,7 +122,7 @@ class ExploreViewModel @Inject constructor(
 
     private fun exitSearchedMode() {
         state.value = state.value.copy(
-            searchedBook = BookPageInfo(),
+            searchedBook = MangasPageInfo(emptyList(), false),
             searchQuery = "",
             isLoading = false,
             error = UiText.StringResource(R.string.no_error))

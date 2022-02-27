@@ -17,6 +17,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import tachiyomi.core.prefs.Preference
+import tachiyomi.core.prefs.PreferenceStore
 
 /**
  * An implementation of a [PreferenceStore] backed by Androidx [DataStore].

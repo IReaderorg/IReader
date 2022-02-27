@@ -33,7 +33,7 @@ import androidx.core.graphics.blue
 import androidx.core.graphics.green
 import androidx.core.graphics.red
 import androidx.core.net.toUri
-import org.ireader.source.R
+import org.ireader.domain.R
 import timber.log.Timber
 import kotlin.math.roundToInt
 

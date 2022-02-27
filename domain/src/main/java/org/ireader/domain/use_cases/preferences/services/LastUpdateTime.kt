@@ -1,6 +1,6 @@
 package org.ireader.domain.use_cases.preferences.services
 
-import org.ireader.domain.ui.AppPreferences
+import org.ireader.core_ui.theme.AppPreferences
 
 class SetLastUpdateTime(
     private val appPreferences: AppPreferences,

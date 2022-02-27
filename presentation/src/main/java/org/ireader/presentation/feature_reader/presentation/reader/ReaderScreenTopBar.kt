@@ -19,7 +19,7 @@ import androidx.navigation.NavController
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
-import org.ireader.source.core.Source
+import tachiyomi.source.Source
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable

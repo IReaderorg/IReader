@@ -30,7 +30,7 @@ import org.ireader.presentation.feature_reader.presentation.reader.reverse_swip_
 import org.ireader.presentation.presentation.components.ISnackBarHost
 import org.ireader.presentation.presentation.reusable_composable.ErrorTextWithEmojis
 import org.ireader.presentation.ui.WebViewScreenSpec
-import org.ireader.source.core.CatalogSource
+import tachiyomi.source.CatalogSource
 
 
 @ExperimentalAnimationApi

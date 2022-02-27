@@ -1,5 +1,8 @@
 package org.ireader.core.prefs
 
+import tachiyomi.core.prefs.Preference
+import tachiyomi.core.prefs.PreferenceStore
+
 /**
  * An implementation of a [PreferenceStore] that writes to a [prefix]ed key, allowing to share a
  * single [commonStore] with many consumers.

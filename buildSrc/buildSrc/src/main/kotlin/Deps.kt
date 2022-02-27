@@ -15,20 +15,20 @@ object Deps {
         const val navMaterial = "com.google.accompanist:accompanist-navigation-material:$version"
     }
 
-    object AndroidX {
-        private const val coreKtxVersion = "1.8.0-alpha04"
-        const val coreKtx = "androidx.core:core-ktx:$coreKtxVersion"
-
-        private const val appCompatVersion = "1.4.1"
-        const val appCompat = "androidx.appcompat:appcompat:$appCompatVersion"
-
-        const val webkit = "androidx.webkit:webkit:1.4.0"
-        const val browser = "androidx.browser:browser:1.4.0"
-        const val material = "com.google.android.material:material:1.6.0-alpha02"
-        const val activity = "androidx.activity:activity-ktx:1.5.0-alpha02"
-        const val appStartUpRuntime = "androidx.startup:startup-runtime:1.2.0-alpha01"
-        const val emojiCompat = "com.android.support:support-emoji:28.0.0"
-    }
+//    object AndroidX {
+//        private const val coreKtxVersion = "1.8.0-alpha04"
+//        const val coreKtx = "androidx.core:core-ktx:$coreKtxVersion"
+//
+//        private const val appCompatVersion = "1.4.1"
+//        const val appCompat = "androidx.appcompat:appcompat:$appCompatVersion"
+//
+//        const val webkit = "androidx.webkit:webkit:1.4.0"
+//        const val browser = "androidx.browser:browser:1.4.0"
+//        const val material = "com.google.android.material:material:1.6.0-alpha02"
+//        const val activity = "androidx.activity:activity-ktx:1.5.0-alpha02"
+//        const val appStartUpRuntime = "androidx.startup:startup-runtime:1.2.0-alpha01"
+//        const val emojiCompat = "com.android.support:support-emoji:28.0.0"
+//    }
 
     object Coil {
         private const val version = "1.4.0"
@@ -107,31 +107,40 @@ object Deps {
         const val gsonConvertor = "com.squareup.retrofit2:converter-gson:2.9.0"
     }
 
+    object tachiyomi {
+        private const val version = "1.2-SNAPSHOT"
+        const val core = "org.tachiyomi:core-desktop:$version"
+        const val api = "org.tachiyomi:source-api-jvm:$version"
+        const val core_jvm = "org.tachiyomi:core-jvm:$version"
+    }
+
     object Jsonpathkt {
         const val jsonpathkt = "com.nfeld.jsonpathkt:jsonpathkt:2.0.0"
     }
 
-    object Jsoup {
-        const val jsoup = "org.jsoup:jsoup:1.14.3"
-    }
+    const val okio = "com.squareup.okio:okio:3.0.0"
+    const val quickjsAndroid = "app.cash.quickjs:quickjs-android:0.9.2"
+    const val quickjsJvm = "app.cash.quickjs:quickjs-jvm:0.9.2"
+    const val jsoup = "org.jsoup:jsoup:1.14.3"
+//    object Kotlin {
+//        const val version = "1.6.10"
+//
+//        const val jsonSerialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2"
+//        const val stdlib = "org.jetbrains.kotlin:kotlin-stdlib-common:$version"
+//        const val reflect = "org.jetbrains.kotlin:kotlin-reflect:$version"
+//        const val dateTime = "org.jetbrains.kotlinx:kotlinx-datetime:0.3.2"
+//    }
 
-    object Kotlin {
-        const val version = "1.6.10"
 
-        const val jsonSerialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2"
-        const val stdlib = "stdlib"
-        //const val dateTime = "org.jetbrains.kotlinx:kotlinx-datetime:0.3.2"
-    }
-
-    object Ktor {
-        private const val version = "1.6.7"
-        private const val ktorJsoupVersion = "1.6.4"
-        const val core = "io.ktor:ktor-client-core:$version"
-        const val okhttp = "io.ktor:ktor-client-okhttp:$version"
-        const val serialization = "io.ktor:ktor-client-serialization:$version"
-
-        const val ktor_jsoup = "com.tfowl.ktor:ktor-jsoup:$ktorJsoupVersion"
-    }
+//    object Ktor {
+//        private const val version = "1.6.7"
+//        const val core = "io.ktor:ktor-client-core:$version"
+//        const val okhttp = "io.ktor:ktor-client-okhttp:$version"
+//        const val serialization = "io.ktor:ktor-client-serialization:$version"
+//
+//        private const val ktorJsoupVersion = "1.6.4"
+//        const val ktor_jsoup = "com.tfowl.ktor:ktor-jsoup:$ktorJsoupVersion"
+//    }
 
     object LifeCycle {
         private const val lifecycle_version = "2.5.0-alpha02"
@@ -152,13 +161,12 @@ object Deps {
 
     }
 
-    object OkHttp {
+    object okhttp {
         private const val okhttp_version = "5.0.0-alpha.4"
 
         const val okHttp3 = "com.squareup.okhttp3:okhttp:$okhttp_version"
         const val okHttp3Interceptor = "com.squareup.okhttp3:logging-interceptor:$okhttp_version"
         const val okhttp3_doh = "com.squareup.okhttp3:okhttp-dnsoverhttps:$okhttp_version"
-        const val okio = "com.squareup.okio:okio:3.0.0"
 
     }
 
@@ -182,11 +190,6 @@ object Deps {
         const val roomTesting = "androidx.room:room-testing:$version"
     }
 
-    object tachiyomi {
-        private const val version = "1.2-SNAPSHOT"
-        const val core = "org.tachiyomi:core-jvm:$version"
-        const val api = "org.tachiyomi:source-api-jvm:$version"
-    }
 
     object Testing {
         const val junit4 = "junit:junit:4.13.2"
@@ -221,6 +224,76 @@ object Deps {
         const val runtimeKtx = "androidx.work:work-runtime-ktx:${work_version}"
 
     }
+
+    //Tach
+
+    object kotlin {
+        const val version = "1.6.10"
+        const val stdlib = "org.jetbrains.kotlin:kotlin-stdlib-common:$version"
+        const val datetime = "org.jetbrains.kotlinx:kotlinx-datetime:0.3.1"
+        const val reflect = "org.jetbrains.kotlin:kotlin-reflect:$version"
+        const val plugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:$version"
+        const val jsonSerialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2"
+
+        object coroutines {
+            private const val version = "1.5.2"
+            const val core = "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version"
+            const val android = "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version"
+        }
+
+        object serialization {
+            private const val version = "1.3.0"
+            const val json = "org.jetbrains.kotlinx:kotlinx-serialization-json:$version"
+            const val protobuf = "org.jetbrains.kotlinx:kotlinx-serialization-protobuf:$version"
+            const val plugin = "org.jetbrains.kotlin:kotlin-serialization:${kotlin.version}"
+        }
+    }
+
+    object androidx {
+        const val core = "androidx.core:core-ktx:1.7.0"
+        const val appCompat = "androidx.appcompat:appcompat:1.4.0"
+        const val browser = "androidx.browser:browser:1.4.0"
+        const val webkit = "androidx.webkit:webkit:1.4.0"
+        const val sqlite = "androidx.sqlite:sqlite-ktx:2.2.0-rc01"
+        const val dataStore = "androidx.datastore:datastore-preferences:1.0.0"
+        const val emoji = "androidx.emoji2:emoji2-views:1.0.0"
+        const val material = "com.google.android.material:material:1.6.0-alpha02"
+
+        object compose {
+            const val activity = "androidx.activity:activity-compose:1.4.0"
+            const val navigation = "androidx.navigation:navigation-compose:2.4.0-beta02"
+            const val plugin = "org.jetbrains.compose:compose-gradle-plugin:1.0.1-rc2"
+        }
+
+        object lifecycle {
+            private const val version = "2.4.0"
+            const val common = "androidx.lifecycle:lifecycle-common-java8:$version"
+            const val process = "androidx.lifecycle:lifecycle-process:$version"
+            const val viewModel = "androidx.lifecycle:lifecycle-viewmodel-compose:$version"
+        }
+
+        object workManager {
+            private const val version = "2.7.1"
+            const val runtime = "androidx.work:work-runtime-ktx:$version"
+        }
+    }
+
+
+    const val requerySqlite = "com.github.requery:sqlite-android:3.36.0"
+    const val androidSqlite = "androidx.sqlite:sqlite-framework:2.2.0-alpha02"
+
+
+    object ktor {
+        private const val version = "1.6.7"
+        const val core = "io.ktor:ktor-client-core:$version"
+        const val okhttp = "io.ktor:ktor-client-okhttp:$version"
+        const val serialization = "io.ktor:ktor-client-serialization:$version"
+        private const val ktorJsoupVersion = "1.6.4"
+        const val ktor_jsoup = "com.tfowl.ktor:ktor-jsoup:$ktorJsoupVersion"
+    }
+
+
+    const val desugarJdkLibs = "com.android.tools:desugar_jdk_libs:1.1.5"
 
 
 }

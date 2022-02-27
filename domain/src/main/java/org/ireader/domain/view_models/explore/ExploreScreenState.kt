@@ -1,11 +1,12 @@
 package org.ireader.domain.view_models.explore
 
+import org.ireader.core.emptyMangaInfoPage
 import org.ireader.core.utils.UiText
 import org.ireader.domain.models.ExploreType
 import org.ireader.domain.models.LayoutType
 import org.ireader.domain.models.entities.Book
-import org.ireader.source.core.CatalogSource
-import org.ireader.source.models.BookPageInfo
+import tachiyomi.source.CatalogSource
+import tachiyomi.source.model.MangasPageInfo
 
 data class ExploreScreenState(
     val isLoading: Boolean = false,
@@ -17,7 +18,7 @@ data class ExploreScreenState(
     val isMenuDropDownShown: Boolean = false,
     val isSearchModeEnable: Boolean = false,
     val searchQuery: String = "",
-    val searchedBook: BookPageInfo = BookPageInfo(),
+    val searchedBook: MangasPageInfo = emptyMangaInfoPage(),
     val isLatestUpdateMode: Boolean = true,
     val hasNextPage: Boolean = true,
     val exploreType: ExploreType = ExploreType.Latest,

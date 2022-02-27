@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 import org.ireader.core.utils.Constants.CHAPTER_TABLE
-import org.ireader.source.models.ChapterInfo
+import tachiyomi.source.model.ChapterInfo
 
 
 @Serializable
@@ -38,10 +38,10 @@ data class Chapter(
 fun Chapter.toChapterInfo(): ChapterInfo {
     return ChapterInfo(
         key = this.link,
-        translator = this.translator,
+        scanlator = this.translator,
         name = this.title,
         dateUpload = this.dateUploaded,
-        number = this.number
+        number = this.number,
     )
 }
 

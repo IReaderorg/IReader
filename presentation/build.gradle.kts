@@ -28,10 +28,13 @@ dependencies {
     implementation(project(Modules.domain))
     implementation(project(Modules.core))
     implementation(project(Modules.coreUi))
-    implementation(project(Modules.source))
-    implementation(Deps.AndroidX.coreKtx)
-    implementation(Deps.AndroidX.appCompat)
-    implementation(Deps.Jsoup.jsoup)
+
+    compileOnly(Deps.tachiyomi.api)
+    compileOnly(Deps.tachiyomi.core)
+
+    implementation(Deps.androidx.core)
+    implementation(Deps.androidx.appCompat)
+    implementation(Deps.jsoup)
     implementation(Deps.Worker.runtimeKtx)
     implementation(Deps.Room.roomRuntime)
     kapt(Deps.Room.roomCompiler)
@@ -43,7 +46,7 @@ dependencies {
 
     implementation(Deps.DaggerHilt.worker)
     implementation(Deps.Retrofit.retrofit)
-    implementation(Deps.Ktor.okhttp)
+    implementation(Deps.ktor.okhttp)
     implementation(Deps.Compose.paging)
 
     implementation(Deps.Compose.hiltNavigationCompose)

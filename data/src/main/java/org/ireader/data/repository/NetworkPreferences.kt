@@ -1,7 +1,7 @@
 package org.ireader.data.repository
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import org.ireader.core.prefs.PreferenceStore
+import tachiyomi.core.prefs.PreferenceStore
 import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)

@@ -9,9 +9,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okio.FileSystem
 import okio.Path.Companion.toOkioPath
-import org.ireader.core.okhttp.HttpClients
 import org.ireader.core.prefs.AndroidPreferenceStore
-import org.ireader.core.prefs.PreferenceStore
+import org.ireader.core_ui.theme.AppPreferences
+import org.ireader.core_ui.theme.UiPreferences
 import org.ireader.data.local.AppDatabase
 import org.ireader.data.local.MIGRATION_8_9
 import org.ireader.data.local.dao.DownloadDao
@@ -19,14 +19,11 @@ import org.ireader.data.local.dao.LibraryBookDao
 import org.ireader.data.local.dao.LibraryChapterDao
 import org.ireader.data.local.dao.RemoteKeysDao
 import org.ireader.data.repository.DownloadRepositoryImpl
-import org.ireader.domain.extensions.AndroidCatalogLoader
 import org.ireader.domain.feature_services.io.LibraryCovers
 import org.ireader.domain.repository.DownloadRepository
 import org.ireader.domain.repository.LocalBookRepository
 import org.ireader.domain.repository.LocalChapterRepository
 import org.ireader.domain.source.Extensions
-import org.ireader.domain.ui.AppPreferences
-import org.ireader.domain.ui.UiPreferences
 import org.ireader.domain.use_cases.download.DownloadUseCases
 import org.ireader.domain.use_cases.download.delete.DeleteAllSavedDownload
 import org.ireader.domain.use_cases.download.delete.DeleteSavedDownload
@@ -49,7 +46,8 @@ import org.ireader.domain.use_cases.local.insert_usecases.InsertBooks
 import org.ireader.domain.use_cases.local.insert_usecases.InsertChapter
 import org.ireader.domain.use_cases.local.insert_usecases.InsertChapters
 import org.ireader.infinity.core.domain.use_cases.local.book_usecases.GetBooksByQueryPagingSource
-import org.ireader.source.core.Dependencies
+import tachiyomi.core.prefs.PreferenceStore
+import tachiyomi.source.Dependencies
 import java.io.File
 import javax.inject.Singleton
 
@@ -96,12 +94,19 @@ class LocalModule {
     @Singleton
     @Provides
     fun providesExtensions(
-        httpClients: HttpClients,
-        preferences: PreferenceStore,
-        androidCatalogLoader: AndroidCatalogLoader,
+        dependencies: Dependencies,
     ): Extensions {
-        return Extensions(Dependencies(httpClients = httpClients,
-            preferences = preferences), catalogLoader = androidCatalogLoader)
+        return Extensions(dependencies)
+    }
+
+    @Singleton
+    @Provides
+    fun provideDependencies(
+        httpClients: tachiyomi.core.http.HttpClients,
+        preferences: PreferenceStore,
+    ): Dependencies {
+        return Dependencies(httpClients = httpClients,
+            preferences = preferences)
     }
 
     @Singleton
@@ -246,4 +251,5 @@ class LocalModule {
     fun providePreferencesStore(@ApplicationContext context: Context): PreferenceStore {
         return AndroidPreferenceStore(context = context, "ui")
     }
+
 }

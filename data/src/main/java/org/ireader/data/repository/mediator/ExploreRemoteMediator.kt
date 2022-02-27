@@ -5,6 +5,8 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
+import org.ireader.core.LatestListing
+import org.ireader.core.PopularListing
 import org.ireader.core.utils.UiText
 import org.ireader.data.local.AppDatabase
 import org.ireader.domain.R
@@ -12,10 +14,10 @@ import org.ireader.domain.models.ExploreType
 import org.ireader.domain.models.RemoteKeys
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.toBook
-import org.ireader.source.core.CatalogSource
-import org.ireader.source.models.BookPageInfo
-import org.ireader.source.models.LatestListing
 import retrofit2.HttpException
+import tachiyomi.source.CatalogSource
+import tachiyomi.source.model.Filter
+import tachiyomi.source.model.MangasPageInfo
 import java.io.IOException
 import java.net.UnknownHostException
 import javax.net.ssl.SSLHandshakeException
@@ -50,66 +52,67 @@ class ExploreRemoteMediator(
                     LoadType.PREPEND -> {
                         val remoteKeys = getRemoteKeyForFirstItem(state)
                         val prevPage = remoteKeys?.prevPage
-                        ?: return RemoteMediator.MediatorResult.Success(
-                            endOfPaginationReached = remoteKeys != null
-                        )
-                    prevPage
-                }
-                LoadType.APPEND -> {
-                    val remoteKeys = getRemoteKeyForLastItem(state)
-                    val nextPage = remoteKeys?.nextPage
-                        ?: return RemoteMediator.MediatorResult.Success(
-                            endOfPaginationReached = remoteKeys != null
-                        )
-                    nextPage
-                }
-            }
-
-            val response = when (exploreType) {
-                is ExploreType.Latest -> {
-                    source.getBookList(sort = LatestListing(), currentPage)
-                }
-                is ExploreType.Popular -> {
-                    source.getBookList(sort = LatestListing(), currentPage)
-                }
-                is ExploreType.Search -> {
-                    if (query?.isBlank() == false) {
-                        source.getSearch(page = currentPage, query = query, filters = listOf())
-                    } else {
-                        throw Exception(UiText.StringResource(R.string.query_must_not_be_empty)
-                            .toString())
+                            ?: return RemoteMediator.MediatorResult.Success(
+                                endOfPaginationReached = remoteKeys != null
+                            )
+                        prevPage
+                    }
+                    LoadType.APPEND -> {
+                        val remoteKeys = getRemoteKeyForLastItem(state)
+                        val nextPage = remoteKeys?.nextPage
+                            ?: return RemoteMediator.MediatorResult.Success(
+                                endOfPaginationReached = remoteKeys != null
+                            )
+                        nextPage
                     }
                 }
-                else -> {
-                    BookPageInfo()
-                }
-            }
 
-
-            val endOfPaginationReached = !response.hasNextPage
-
-
-            val prevPage = if (currentPage == 1) null else currentPage - 1
-            val nextPage = if (endOfPaginationReached) null else currentPage + 1
-
-            database.withTransaction {
-                if (loadType == LoadType.REFRESH) {
-                    remoteKey.deleteAllExploredBook()
-                    remoteKey.deleteAllRemoteKeys()
-                }
-                val keys = response.mangases.map { book ->
-                    RemoteKeys(
-                        id = book.title,
-                        prevPage = prevPage,
-                        nextPage = nextPage,
-                        sourceId = source.id
-                    )
+                val response = when (exploreType) {
+                    is ExploreType.Latest -> {
+                        source.getMangaList(sort = LatestListing(), currentPage)
+                    }
+                    is ExploreType.Popular -> {
+                        source.getMangaList(sort = PopularListing(), currentPage)
+                    }
+                    is ExploreType.Search -> {
+                        if (query?.isBlank() == false) {
+                            source.getMangaList(filters = listOf(Filter.Text("query", query)),
+                                page = currentPage)
+                        } else {
+                            throw Exception(UiText.StringResource(R.string.query_must_not_be_empty)
+                                .toString())
+                        }
+                    }
+                    else -> {
+                        MangasPageInfo(emptyList(), false)
+                    }
                 }
 
 
-                remoteKey.insertAllRemoteKeys(remoteKeys = keys)
-                remoteKey.insertAllExploredBook(response.mangases.map { it.toBook(source.id) })
-            }
+                val endOfPaginationReached = !response.hasNextPage
+
+
+                val prevPage = if (currentPage == 1) null else currentPage - 1
+                val nextPage = if (endOfPaginationReached) null else currentPage + 1
+
+                database.withTransaction {
+                    if (loadType == LoadType.REFRESH) {
+                        remoteKey.deleteAllExploredBook()
+                        remoteKey.deleteAllRemoteKeys()
+                    }
+                    val keys = response.mangas.map { book ->
+                        RemoteKeys(
+                            id = book.title,
+                            prevPage = prevPage,
+                            nextPage = nextPage,
+                            sourceId = source.id
+                        )
+                    }
+
+
+                    remoteKey.insertAllRemoteKeys(remoteKeys = keys)
+                    remoteKey.insertAllExploredBook(response.mangas.map { it.toBook(source.id) })
+                }
                 RemoteMediator.MediatorResult.Success(endOfPaginationReached = endOfPaginationReached)
             }.getOrThrow()
         } catch (e: UnknownHostException) {

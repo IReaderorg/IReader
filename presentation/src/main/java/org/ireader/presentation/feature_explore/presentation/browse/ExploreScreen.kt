@@ -30,6 +30,7 @@ import org.ireader.presentation.presentation.components.handlePagingResult
 import org.ireader.presentation.presentation.reusable_composable.*
 import org.ireader.presentation.ui.BookDetailScreenSpec
 import org.ireader.presentation.ui.WebViewScreenSpec
+import tachiyomi.source.HttpSource
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -103,7 +104,7 @@ fun ExploreScreen(
                                 navController.navigate(WebViewScreenSpec.buildRoute(
                                     sourceId = source.id,
                                     fetchType = FetchType.LatestFetchType.index,
-                                    url = source.baseUrl
+                                    url = (source as HttpSource).baseUrl
                                 )
                                 )
                             },
@@ -190,7 +191,7 @@ fun ExploreScreen(
                                         navController.navigate(WebViewScreenSpec.buildRoute(
                                             sourceId = source.id,
                                             fetchType = FetchType.LatestFetchType.index,
-                                            url = source.baseUrl
+                                            url = (source as HttpSource).baseUrl
                                         )
                                         )
                                     })
@@ -241,7 +242,7 @@ fun ExploreScreen(
                                         navController.navigate(WebViewScreenSpec.buildRoute(
                                             sourceId = source.id,
                                             fetchType = FetchType.LatestFetchType.index,
-                                            url = source.baseUrl
+                                            url = (source as HttpSource).baseUrl
                                         )
                                         )
                                     })

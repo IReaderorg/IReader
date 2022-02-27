@@ -18,9 +18,10 @@ import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.entities.toChapterInfo
 import org.ireader.domain.repository.RemoteRepository
 import org.ireader.domain.utils.Resource
-import org.ireader.source.core.CatalogSource
-import org.ireader.source.models.BookInfo
 import retrofit2.HttpException
+import tachiyomi.source.CatalogSource
+import tachiyomi.source.model.MangaInfo
+import tachiyomi.source.model.Text
 import timber.log.Timber
 import java.io.IOException
 
@@ -30,8 +31,8 @@ class RemoteRepositoryImpl(
 ) : RemoteRepository {
 
 
-    override suspend fun getRemoteBookDetail(book: Book, source: CatalogSource): BookInfo {
-        return source.getBookDetails(book.toBookInfo(source.id))
+    override suspend fun getRemoteBookDetail(book: Book, source: CatalogSource): MangaInfo {
+        return source.getMangaDetails(book.toBookInfo(source.id))
     }
 
     @OptIn(ExperimentalPagingApi::class)
@@ -50,7 +51,15 @@ class RemoteRepositoryImpl(
     ): Flow<Resource<List<String>>> = flow<Resource<List<String>>> {
         try {
             Timber.d("Timber: GetRemoteReadingContentUseCase was Called")
-            val content = source.getContents(chapter.toChapterInfo())
+            val page = source.getPageList(chapter.toChapterInfo())
+            val content = mutableListOf<String>()
+            page.forEach {
+                when (it) {
+                    is Text -> {
+                        content.add(it.text)
+                    }
+                }
+            }
 
             if (content.joinToString()
                     .isBlank() || content.contains(Constants.CLOUDFLARE_LOG)

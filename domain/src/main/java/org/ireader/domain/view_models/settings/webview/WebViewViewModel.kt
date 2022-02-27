@@ -15,10 +15,10 @@ import kotlinx.coroutines.launch
 import org.ireader.core.utils.Event
 import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
-import org.ireader.core.utils.removeSameItemsFromList
 import org.ireader.domain.FetchType
 import org.ireader.domain.R
-import org.ireader.domain.models.entities.*
+import org.ireader.domain.models.entities.Book
+import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.source.Extensions
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.domain.use_cases.fetchers.FetchUseCase
@@ -26,8 +26,7 @@ import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.key.RemoteKeyUseCase
-import org.ireader.source.core.CatalogSource
-import org.jsoup.Jsoup
+import tachiyomi.source.CatalogSource
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 import javax.inject.Inject
@@ -103,18 +102,18 @@ class WebViewPageModel @Inject constructor(
 
 
     fun getContentFromWebView(pageSource: String, url: String, source: CatalogSource) {
-        viewModelScope.launch(Dispatchers.IO) {
-            showSnackBar(UiText.StringResource(R.string.trying_to_fetch_chapters_content))
-            val list = mutableListOf<Chapter>()
-            list.addAll(getChapterUseCase.findChaptersByKey(url))
-            val content = source.pageContentParse(Jsoup.parse(pageSource))
-            if (content.isNotEmpty() && list.isNotEmpty()) {
-                insertUseCases.insertChapters(list.map { it.copy(content = content) })
-                showSnackBar(UiText.DynamicString("${list.first().title} of ${list.first().title} was updated"))
-            } else {
-                showSnackBar(UiText.DynamicString("Failed to to get the content"))
-            }
-        }
+//        viewModelScope.launch(Dispatchers.IO) {
+//            showSnackBar(UiText.StringResource(R.string.trying_to_fetch_chapters_content))
+//            val list = mutableListOf<Chapter>()
+//            list.addAll(getChapterUseCase.findChaptersByKey(url))
+//            val content = source.pageContentParse(Jsoup.parse(pageSource))
+//            if (content.isNotEmpty() && list.isNotEmpty()) {
+//                insertUseCases.insertChapters(list.map { it.copy(content = content) })
+//                showSnackBar(UiText.DynamicString("${list.first().title} of ${list.first().title} was updated"))
+//            } else {
+//                showSnackBar(UiText.DynamicString("Failed to to get the content"))
+//            }
+//        }
 
     }
 
@@ -126,62 +125,62 @@ class WebViewPageModel @Inject constructor(
         update: Boolean = false,
         goTo: Boolean = false,
     ) {
-        showSnackBar(UiText.StringResource(R.string.trying_to_fetch))
-        val localBooks = mutableListOf<Book>()
-        localBooks.addAll(getBookUseCases.findBooksByKey(url))
-        val detail = source.detailParse(Jsoup.parse(pageSource))
-        val chapter = source.chaptersParse(Jsoup.parse(pageSource))
-
-        val newList = mutableListOf<Book>()
-        val localChapterList = mutableListOf<Chapter>()
-        localBooks.forEach {
-            newList.add(updateBook(detail.toBook(source.id), it))
-            val localChapters = getChapterUseCase.findChaptersByBookId(it.id)
-            localChapterList.addAll(localChapters)
-        }
-        val uniqueList = mutableListOf<Chapter>()
-        localBooks.forEach { lBook ->
-            uniqueList.addAll(removeSameItemsFromList(oldList = localChapterList,
-                newList = chapter.map { it.toChapter(lBook.id) },
-                differentiateBy = {
-                    it.title
-                }))
-        }
-        if (!update) {
-            _eventFlow.emit(WebPageEvents.ShowDialog("${detail.title} was fetched Successfully with ${chapter.size} chapters"))
-        }
-        if (update) {
-            if (localBooks.isNotEmpty()) {
-                val bookId = insertUseCases.insertBooks(newList)
-                newList.forEach {
-                    deleteUseCase.deleteChaptersByBookId(bookId = it.id)
-                    insertUseCases.insertChapters(uniqueList)
-                }
-                showSnackBar(UiText.DynamicString("${localBooks.first().title} of ${localBooks.first().title} was updated"))
-                if (goTo) {
-                    viewModelScope.launch {
-                        _eventFlow.emit(
-                            WebPageEvents.GoTo(bookId = newList.first().id,
-                                sourceId = source.id)
-                        )
-                    }
-                }
-            } else {
-                val bookId = insertUseCases.insertBook(detail.toBook(source.id).copy(
-                    lastUpdated = System.currentTimeMillis(),
-                ))
-                insertUseCases.insertChapters(uniqueList.map { it.copy(bookId = bookId) })
-                showSnackBar(UiText.DynamicString("${detail.title} of ${detail.title} was updated"))
-                if (goTo) {
-                    viewModelScope.launch {
-                        _eventFlow.emit(
-                            WebPageEvents.GoTo(bookId = bookId,
-                                sourceId = source.id)
-                        )
-                    }
-                }
-            }
-        }
+//        showSnackBar(UiText.StringResource(R.string.trying_to_fetch))
+//        val localBooks = mutableListOf<Book>()
+//        localBooks.addAll(getBookUseCases.findBooksByKey(url))
+//        val detail = source.detailParse(Jsoup.parse(pageSource))
+//        val chapter = source.chaptersParse(Jsoup.parse(pageSource))
+//
+//        val newList = mutableListOf<Book>()
+//        val localChapterList = mutableListOf<Chapter>()
+//        localBooks.forEach {
+//            newList.add(updateBook(detail.toBook(source.id), it))
+//            val localChapters = getChapterUseCase.findChaptersByBookId(it.id)
+//            localChapterList.addAll(localChapters)
+//        }
+//        val uniqueList = mutableListOf<Chapter>()
+//        localBooks.forEach { lBook ->
+//            uniqueList.addAll(removeSameItemsFromList(oldList = localChapterList,
+//                newList = chapter.map { it.toChapter(lBook.id) },
+//                differentiateBy = {
+//                    it.title
+//                }))
+//        }
+//        if (!update) {
+//            _eventFlow.emit(WebPageEvents.ShowDialog("${detail.title} was fetched Successfully with ${chapter.size} chapters"))
+//        }
+//        if (update) {
+//            if (localBooks.isNotEmpty()) {
+//                val bookId = insertUseCases.insertBooks(newList)
+//                newList.forEach {
+//                    deleteUseCase.deleteChaptersByBookId(bookId = it.id)
+//                    insertUseCases.insertChapters(uniqueList)
+//                }
+//                showSnackBar(UiText.DynamicString("${localBooks.first().title} of ${localBooks.first().title} was updated"))
+//                if (goTo) {
+//                    viewModelScope.launch {
+//                        _eventFlow.emit(
+//                            WebPageEvents.GoTo(bookId = newList.first().id,
+//                                sourceId = source.id)
+//                        )
+//                    }
+//                }
+//            } else {
+//                val bookId = insertUseCases.insertBook(detail.toBook(source.id).copy(
+//                    lastUpdated = System.currentTimeMillis(),
+//                ))
+//                insertUseCases.insertChapters(uniqueList.map { it.copy(bookId = bookId) })
+//                showSnackBar(UiText.DynamicString("${detail.title} of ${detail.title} was updated"))
+//                if (goTo) {
+//                    viewModelScope.launch {
+//                        _eventFlow.emit(
+//                            WebPageEvents.GoTo(bookId = bookId,
+//                                sourceId = source.id)
+//                        )
+//                    }
+//                }
+//            }
+//        }
     }
 
     fun insertBookDetailToLocal(book: Book) {

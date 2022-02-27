@@ -23,4 +23,5 @@ dependencies {
     implementation(Deps.Accompanist.systemUiController)
 
 
+    compileOnly(Deps.tachiyomi.core)
 }

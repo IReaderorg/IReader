@@ -94,5 +94,8 @@ interface LibraryBookDao {
     @Query("DELETE FROM library WHERE favorite = 0")
     suspend fun deleteNotInLibraryBooks()
 
+    @Query("SELECT sourceId FROM library GROUP BY sourceId ORDER BY COUNT(sourceId) DESC")
+    suspend fun findFavoriteSourceIds(): List<Long>
+
 }
 

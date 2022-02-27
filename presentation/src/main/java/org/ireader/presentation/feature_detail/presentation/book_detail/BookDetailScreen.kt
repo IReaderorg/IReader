@@ -44,6 +44,7 @@ import org.ireader.presentation.presentation.components.showLoading
 import org.ireader.presentation.ui.ChapterScreenSpec
 import org.ireader.presentation.ui.ReaderScreenSpec
 import org.ireader.presentation.ui.WebViewScreenSpec
+import tachiyomi.source.HttpSource
 
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -168,7 +169,7 @@ fun BookDetailScreen(
                                     source.let {
                                         navController.navigate(
                                             WebViewScreenSpec.buildRoute(
-                                                url = source.baseUrl + getUrlWithoutDomain(
+                                                url = (source as HttpSource).baseUrl + getUrlWithoutDomain(
                                                     book.link),
                                                 sourceId = source.id,
                                                 fetchType = FetchType.DetailFetchType.index,

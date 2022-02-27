@@ -17,12 +17,20 @@ android {
 }
 
 dependencies {
+
     addBaseDependencies()
     implementation(project(Modules.core))
     implementation(project(Modules.coreUi))
-    implementation(project(Modules.source))
     implementation(project(Modules.extensions))
+
+    implementation(Deps.tachiyomi.api)
+    compileOnly(Deps.tachiyomi.core)
+    compileOnly(Deps.tachiyomi.core_jvm)
+    //implementation(Deps.tachiyomi.core)
+
+
     implementation(Deps.Compose.ui)
+    implementation(Deps.kotlin.datetime)
     implementation(Deps.Compose.runtime)
     implementation(Deps.Compose.navigation)
     implementation(Deps.Compose.material)
@@ -45,13 +53,13 @@ dependencies {
     implementation(Deps.Retrofit.retrofit)
     implementation(Deps.Retrofit.moshiConverter)
 
-    implementation(Deps.OkHttp.okHttp3)
+    implementation(Deps.okhttp.okHttp3)
 
-    implementation(Deps.OkHttp.okHttp3Interceptor)
-    implementation(Deps.OkHttp.okhttp3_doh)
-    implementation(Deps.OkHttp.okio)
+    implementation(Deps.okhttp.okHttp3Interceptor)
+    implementation(Deps.okhttp.okhttp3_doh)
+    implementation(Deps.okio)
     implementation(Deps.Compose.paging)
-    implementation(Deps.Jsoup.jsoup)
+    implementation(Deps.jsoup)
     implementation(Deps.Jsonpathkt.jsonpathkt)
     implementation(Deps.Datastore.datastore)
 
@@ -74,14 +82,15 @@ fun Project.addKotlinCompilerFlags() {
 
 
 fun DependencyHandler.addBaseDependencies() {
-    implementation(Deps.AndroidX.coreKtx)
-    implementation(Deps.AndroidX.appCompat)
-    implementation(Deps.AndroidX.webkit)
-    implementation(Deps.AndroidX.browser)
-    implementation(Deps.AndroidX.material)
-    implementation(Deps.AndroidX.activity)
+    implementation(Deps.androidx.core)
+    implementation(Deps.androidx.appCompat)
+    implementation(Deps.androidx.webkit)
+    implementation(Deps.androidx.browser)
+    implementation(Deps.androidx.material)
+    implementation(Deps.androidx.compose.activity)
 
-    implementation(Deps.Kotlin.jsonSerialization)
+    implementation(Deps.kotlin.jsonSerialization)
+    implementation(Deps.kotlin.reflect)
 
 
     kapt(Deps.DaggerHilt.hiltCompiler)
@@ -111,9 +120,9 @@ fun DependencyHandler.addBaseDependencies() {
     androidTestImplementation("androidx.arch.core:core-testing:2.1.0")
     androidTestImplementation("androidx.test.ext:junit:1.1.1")
     androidTestImplementation("org.mockito:mockito-core:2.21.0")
-    implementation(kotlin("stdlib"))
-    implementation(Deps.Ktor.core)
-    implementation(Deps.Ktor.serialization)
-    implementation(Deps.Ktor.okhttp)
-    implementation(Deps.Ktor.ktor_jsoup)
+    implementation(Deps.kotlin.stdlib)
+    implementation(Deps.ktor.core)
+    implementation(Deps.ktor.serialization)
+    implementation(Deps.ktor.okhttp)
+    implementation(Deps.ktor.ktor_jsoup)
 }

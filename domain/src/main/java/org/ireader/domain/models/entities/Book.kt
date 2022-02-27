@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 import org.ireader.core.utils.Constants.BOOK_TABLE
-import org.ireader.source.models.BookInfo
+import tachiyomi.source.model.MangaInfo
 
 @Serializable
 @Entity(tableName = BOOK_TABLE)
@@ -29,8 +29,8 @@ data class Book(
 ) {
 
     companion object {
-        fun Book.toBookInfo(sourceId: Long): BookInfo {
-            return BookInfo(
+        fun Book.toBookInfo(sourceId: Long): MangaInfo {
+            return MangaInfo(
                 cover = this.cover,
                 key = this.link,
                 title = this.title,
@@ -80,7 +80,7 @@ fun updateBook(newBook: Book, oldBook: Book): Book {
     )
 }
 
-fun BookInfo.toBook(sourceId: Long): Book {
+fun MangaInfo.toBook(sourceId: Long): Book {
     return Book(
         id = 0,
         sourceId = sourceId,
@@ -100,7 +100,7 @@ fun BookInfo.toBook(sourceId: Long): Book {
     )
 }
 
-fun BookInfo.fromBookInfo(sourceId: Long): Book {
+fun MangaInfo.fromBookInfo(sourceId: Long): Book {
     return Book(
         id = 0,
         sourceId = sourceId,

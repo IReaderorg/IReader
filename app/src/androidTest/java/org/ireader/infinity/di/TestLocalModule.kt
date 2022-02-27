@@ -9,6 +9,8 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import org.ireader.core.prefs.AndroidPreferenceStore
 import org.ireader.core.prefs.PreferenceStore
+import org.ireader.core_ui.theme.AppPreferences
+import org.ireader.core_ui.theme.UiPreferences
 import org.ireader.data.local.AppDatabase
 import org.ireader.data.local.dao.DownloadDao
 import org.ireader.data.local.dao.LibraryBookDao
@@ -19,8 +21,6 @@ import org.ireader.domain.repository.DownloadRepository
 import org.ireader.domain.repository.LocalBookRepository
 import org.ireader.domain.repository.LocalChapterRepository
 import org.ireader.domain.source.Extensions
-import org.ireader.domain.ui.AppPreferences
-import org.ireader.domain.ui.UiPreferences
 import org.ireader.domain.use_cases.download.DownloadUseCases
 import org.ireader.domain.use_cases.download.delete.DeleteAllSavedDownload
 import org.ireader.domain.use_cases.download.delete.DeleteSavedDownload

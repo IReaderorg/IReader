@@ -10,9 +10,9 @@ import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.entities.toChapter
 import org.ireader.domain.repository.RemoteRepository
 import org.ireader.domain.utils.Resource
-import org.ireader.source.core.Source
 import org.jsoup.select.Selector
 import retrofit2.HttpException
+import tachiyomi.source.Source
 import timber.log.Timber
 import java.io.IOException
 
@@ -21,7 +21,7 @@ class GetRemoteChapters(private val remoteRepository: RemoteRepository) {
         flow {
             try {
                 Timber.d("Timber: GetRemoteChaptersUseCase was Called")
-                val chapters = source.getChapterList(book = book.toBookInfo(source.id))
+                val chapters = source.getChapterList(manga = book.toBookInfo(source.id))
                 emit(Resource.Success<List<Chapter>>(chapters.map { it.toChapter(book.id) }))
                 Timber.d("Timber: GetRemoteChaptersUseCase was Finished Successfully")
 

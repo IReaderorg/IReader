@@ -1,4 +1,3 @@
-
 import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
@@ -54,17 +53,27 @@ addCompose()
 
 dependencies {
     implementation("androidx.core:core-splashscreen:1.0.0-beta01")
+
+
+    implementation(Deps.androidx.material)
+
     implementation(project(Modules.coreUi))
     implementation(project(Modules.data))
     implementation(project(Modules.domain))
     implementation(project(Modules.core))
     implementation(project(Modules.presentation))
-    implementation(project(Modules.source))
+
+    compileOnly(Deps.tachiyomi.api)
+
+    compileOnly(Deps.tachiyomi.core)
+
+
     implementation(Deps.Timber.timber)
     implementation(Deps.Accompanist.insets)
     implementation(Deps.Accompanist.systemUiController)
     implementation(Deps.Accompanist.navAnimation)
     implementation(Deps.Accompanist.navMaterial)
+
 
 
     testImplementation(Deps.Testing.junit4)
@@ -118,9 +127,10 @@ dependencies {
 
 
 //    /** Network Client - OkHttp**/
-    implementation(Deps.OkHttp.okHttp3)
-    implementation(Deps.OkHttp.okio)
-    implementation(Deps.OkHttp.okHttp3Interceptor)
+    implementation(Deps.okhttp.okHttp3)
+    implementation(Deps.okio)
+    implementation(Deps.okhttp.okHttp3Interceptor)
+    implementation("net.gotev:cookie-store:1.4.0")
 
 }
 
@@ -153,8 +163,10 @@ fun runCommand(command: String): String {
     }
     return String(byteOut.toByteArray()).trim()
 }
-allprojects {
-    configurations.all {
-        resolutionStrategy.force("org.objenesis:objenesis:2.6")
-    }
-}
+//configurations.all {
+//    resolutionStrategy.dependencySubstitution {
+//        substitute(module("org.tachiyomi:core-desktop:1.2-SNAPSHOT"))
+//            .using(module("org.tachiyomi:core-jvm:1.2-SNAPSHOT"))
+//            .withoutClassifier()
+//    }
+//}

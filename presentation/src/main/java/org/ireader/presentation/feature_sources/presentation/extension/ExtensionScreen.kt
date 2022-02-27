@@ -2,10 +2,9 @@ package org.ireader.presentation.feature_sources.presentation.extension
 
 
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.TopAppBar
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -27,7 +26,6 @@ fun ExtensionScreen(
     navController: NavController = rememberNavController(),
     viewModel: ExtensionViewModel = hiltViewModel(),
 ) {
-
     val pageState = rememberPagerState()
 
     Scaffold(
@@ -40,8 +38,13 @@ fun ExtensionScreen(
                 backgroundColor = MaterialTheme.colors.background,
                 contentColor = MaterialTheme.colors.onBackground,
                 elevation = DEFAULT_ELEVATION,
+                actions = {
+                    IconButton(onClick = { }) {
+                        Icon(imageVector = Icons.Default.Refresh, contentDescription = "Refresh")
+                    }
+                }
             )
-        }
+        },
     ) {
         UserSourcesScreen(viewModel, navController)
         val tabs = listOf<TabItem>(TabItem.Sources(viewModel, navController),

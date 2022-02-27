@@ -26,7 +26,7 @@ import coil.compose.rememberImagePainter
 import org.ireader.domain.models.entities.Book
 import org.ireader.presentation.feature_detail.presentation.book_detail.components.BookSummary
 import org.ireader.presentation.presentation.components.BookImageComposable
-import org.ireader.source.core.CatalogSource
+import tachiyomi.source.CatalogSource
 
 
 @Composable
@@ -109,7 +109,6 @@ fun BookDetailScreenLoadedComposable(
                         .clip(MaterialTheme.shapes.medium)
                         .border(2.dp, MaterialTheme.colors.onBackground.copy(alpha = .1f)),
                     contentScale = ContentScale.Crop,
-                    headers = source.headers
                 )
                 Spacer(modifier = modifier.width(8.dp))
                 /** Book Info **/

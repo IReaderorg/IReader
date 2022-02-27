@@ -9,10 +9,12 @@ plugins {
 addKtor()
 addTesting()
 dependencies {
-    implementation(project(Modules.source))
+    implementation(project(Modules.core))
+    compileOnly(Deps.tachiyomi.api)
+    // implementation(Deps.Ktor.ktor_jsoup)
     implementation(Deps.Moshi.moshi)
-    implementation(Deps.Jsoup.jsoup)
-    implementation(Deps.Kotlin.jsonSerialization)
+    // implementation(Deps.Jsoup.jsoup)
+    implementation(Deps.kotlin.jsonSerialization)
     implementation(Deps.Timber.timber)
 
 }

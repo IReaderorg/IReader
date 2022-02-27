@@ -44,10 +44,10 @@ fun Project.addAccompanist() {
 
 fun Project.addKtor() {
     dependencies {
-        add("implementation", Deps.Ktor.core)
-        add("implementation", Deps.Ktor.ktor_jsoup)
-        add("implementation", Deps.Ktor.okhttp)
-        add("implementation", Deps.Ktor.serialization)
+        add("implementation", Deps.ktor.core)
+        add("implementation", Deps.ktor.ktor_jsoup)
+        add("implementation", Deps.ktor.okhttp)
+        add("implementation", Deps.ktor.serialization)
     }
 }
 
