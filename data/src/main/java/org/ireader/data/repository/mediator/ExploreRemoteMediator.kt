@@ -5,19 +5,16 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
-import org.ireader.core.LatestListing
-import org.ireader.core.PopularListing
 import org.ireader.core.utils.UiText
 import org.ireader.data.local.AppDatabase
 import org.ireader.domain.R
-import org.ireader.domain.models.ExploreType
 import org.ireader.domain.models.RemoteKeys
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.toBook
 import retrofit2.HttpException
 import tachiyomi.source.CatalogSource
 import tachiyomi.source.model.Filter
-import tachiyomi.source.model.MangasPageInfo
+import tachiyomi.source.model.Listing
 import java.io.IOException
 import java.net.UnknownHostException
 import javax.net.ssl.SSLHandshakeException
@@ -26,7 +23,7 @@ import javax.net.ssl.SSLHandshakeException
 class ExploreRemoteMediator(
     private val source: CatalogSource,
     private val database: AppDatabase,
-    private val exploreType: ExploreType,
+    private val listing: Listing,
     private val query: String? = null,
 ) : RemoteMediator<Int, Book>() {
 
@@ -67,26 +64,39 @@ class ExploreRemoteMediator(
                     }
                 }
 
-                val response = when (exploreType) {
-                    is ExploreType.Latest -> {
-                        source.getMangaList(sort = LatestListing(), currentPage)
+                val response = if (query == null) {
+                    source.getMangaList(sort = listing, currentPage)
+                } else {
+                    if (query.isNotBlank()) {
+                        source.getMangaList(filters = listOf(Filter.Text("query", query)),
+                            page = currentPage)
+                    } else {
+                        throw Exception(UiText.StringResource(R.string.query_must_not_be_empty)
+                            .toString())
                     }
-                    is ExploreType.Popular -> {
-                        source.getMangaList(sort = PopularListing(), currentPage)
-                    }
-                    is ExploreType.Search -> {
-                        if (query?.isBlank() == false) {
-                            source.getMangaList(filters = listOf(Filter.Text("query", query)),
-                                page = currentPage)
-                        } else {
-                            throw Exception(UiText.StringResource(R.string.query_must_not_be_empty)
-                                .toString())
-                        }
-                    }
-                    else -> {
-                        MangasPageInfo(emptyList(), false)
-                    }
+
                 }
+//                val response = source.getMangaList(sort = listing, currentPage)
+//                val response = when (exploreType) {
+//                    is ExploreType.Latest -> {
+//                        source.getMangaList(sort = LatestListing(), currentPage)
+//                    }
+//                    is ExploreType.Popular -> {
+//                        source.getMangaList(sort = PopularListing(), currentPage)
+//                    }
+//                    is ExploreType.Search -> {
+//                        if (query?.isBlank() == false) {
+//                            source.getMangaList(filters = listOf(Filter.Text("query", query)),
+//                                page = currentPage)
+//                        } else {
+//                            throw Exception(UiText.StringResource(R.string.query_must_not_be_empty)
+//                                .toString())
+//                        }
+//                    }
+//                    else -> {
+//                        MangasPageInfo(emptyList(), false)
+//                    }
+//                }
 
 
                 val endOfPaginationReached = !response.hasNextPage

@@ -55,6 +55,12 @@ class CatalogModule {
 
     @Provides
     @Singleton
+    fun provideAndroidCatalogInstallationChanges(context: Application): AndroidCatalogInstallationChanges {
+        return AndroidCatalogInstallationChanges(context)
+    }
+
+    @Provides
+    @Singleton
     fun provideCatalogInstallationChanges(context: Application): CatalogInstallationChanges {
         return AndroidCatalogInstallationChanges(context)
     }

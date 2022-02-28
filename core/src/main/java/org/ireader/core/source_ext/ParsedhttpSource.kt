@@ -68,16 +68,16 @@ abstract class ParsedHttpSource(private val dependencies: Dependencies) : HttpSo
         .readTimeout(30, TimeUnit.SECONDS)
         .build()
 
-    open val headers: Headers = headersBuilder().build()
-
-    open fun headersBuilder() = Headers.Builder().apply {
+    private fun headersBuilder() = Headers.Builder().apply {
         add(
             "User-Agent",
             "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36"
         )
-        add("Referer", baseUrl)
         add("cache-control", "max-age=0")
     }
+
+    open val headers: Headers = headersBuilder().build()
+
 
     protected open fun requestBuilder(
         url: String,
@@ -196,7 +196,7 @@ abstract class ParsedHttpSource(private val dependencies: Dependencies) : HttpSo
      */
     protected abstract fun popularNextPageSelector(): String?
 
-    fun popularParse(document: Document): MangasPageInfo {
+    open fun popularParse(document: Document): MangasPageInfo {
         val books = document.select(popularSelector()).map { element ->
             popularFromElement(element)
         }
@@ -218,7 +218,7 @@ abstract class ParsedHttpSource(private val dependencies: Dependencies) : HttpSo
      * there's no next page.
      */
     protected abstract fun latestNextPageSelector(): String?
-    fun latestParse(document: Document): MangasPageInfo {
+    open fun latestParse(document: Document): MangasPageInfo {
 
         val books = document.select(latestSelector()).map { element ->
             latestFromElement(element)
@@ -237,7 +237,7 @@ abstract class ParsedHttpSource(private val dependencies: Dependencies) : HttpSo
     protected abstract fun chaptersSelector(): String
 
 
-    fun chaptersParse(document: Document): List<ChapterInfo> {
+    open fun chaptersParse(document: Document): List<ChapterInfo> {
         return document.select(chaptersSelector()).map { chapterFromElement(it) }
     }
 
@@ -254,7 +254,7 @@ abstract class ParsedHttpSource(private val dependencies: Dependencies) : HttpSo
     protected abstract fun searchNextPageSelector(): String?
 
 
-    fun searchParse(document: Document): MangasPageInfo {
+    open fun searchParse(document: Document): MangasPageInfo {
         /**
          * I Add Filter Because sometimes this value contains null values
          * so the null book shows in search screen

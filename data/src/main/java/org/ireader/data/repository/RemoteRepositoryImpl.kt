@@ -11,7 +11,6 @@ import org.ireader.data.R
 import org.ireader.data.local.AppDatabase
 import org.ireader.data.local.dao.RemoteKeysDao
 import org.ireader.data.repository.mediator.GetRemoteBooksByRemoteMediator
-import org.ireader.domain.models.ExploreType
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Book.Companion.toBookInfo
 import org.ireader.domain.models.entities.Chapter
@@ -21,6 +20,7 @@ import org.ireader.domain.utils.Resource
 import retrofit2.HttpException
 import tachiyomi.source.CatalogSource
 import tachiyomi.source.Source
+import tachiyomi.source.model.Listing
 import tachiyomi.source.model.MangaInfo
 import tachiyomi.source.model.Text
 import timber.log.Timber
@@ -39,7 +39,7 @@ class RemoteRepositoryImpl(
     @OptIn(ExperimentalPagingApi::class)
     override fun getAllExploreBookByPaging(
         source: CatalogSource,
-        exploreType: ExploreType,
+        listing: Listing,
         query: String?,
     ): PagingSource<Int, Book> {
         return remoteKeysDao.getAllExploreBookByPaging()
@@ -97,11 +97,11 @@ class RemoteRepositoryImpl(
     @OptIn(ExperimentalPagingApi::class)
     override fun getRemoteBooksByRemoteMediator(
         source: CatalogSource,
-        exploreType: ExploreType,
+        listing: Listing,
         query: String?,
     ): Flow<PagingData<Book>> {
         return GetRemoteBooksByRemoteMediator(database = database,
-            remoteRepository = this@RemoteRepositoryImpl).invoke(source, exploreType, query)
+            remoteRepository = this@RemoteRepositoryImpl).invoke(source, listing, query)
     }
 
 

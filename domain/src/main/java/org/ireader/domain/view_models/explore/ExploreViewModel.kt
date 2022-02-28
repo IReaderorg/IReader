@@ -20,11 +20,11 @@ import org.ireader.core.utils.UiText
 import org.ireader.domain.R
 import org.ireader.domain.catalog.service.CatalogStore
 import org.ireader.domain.models.DisplayMode
-import org.ireader.domain.models.ExploreType
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import tachiyomi.source.CatalogSource
+import tachiyomi.source.model.Listing
 import tachiyomi.source.model.MangasPageInfo
 import javax.inject.Inject
 
@@ -41,19 +41,21 @@ class ExploreViewModel @Inject constructor(
     var state: MutableState<ExploreScreenState> =
         mutableStateOf<ExploreScreenState>(ExploreScreenState())
         private set
+    var filterState: MutableState<BrowseFilterState> =
+        mutableStateOf<BrowseFilterState>(BrowseFilterState())
+        private set
 
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
 
     init {
-        val exploreId = savedStateHandle.get<Int>("exploreType")
         val sourceId = savedStateHandle.get<Long>("sourceId")
         val source =
             catalogStore.catalogs.find { it.source.id == sourceId }?.source
-        if (sourceId != null && exploreId != null && source is CatalogSource) {
+        if (sourceId != null && source is CatalogSource) {
             if (source != null) {
                 state.value = state.value.copy(source = source)
-                state.value = state.value.copy(exploreType = exploreTypeMapper(exploreId))
+                state.value = state.value.copy(exploreType = source.getListings().first())
                 getBooks(source = source)
                 readLayoutType()
             } else {
@@ -71,6 +73,7 @@ class ExploreViewModel @Inject constructor(
 
     private val _books = MutableStateFlow<PagingData<Book>>(PagingData.empty())
     val books = _books
+
 
 
     fun onEvent(event: ExploreScreenEvents) {
@@ -93,12 +96,12 @@ class ExploreViewModel @Inject constructor(
     private var getBooksJob: Job? = null
 
     @OptIn(ExperimentalPagingApi::class)
-    fun getBooks(query: String? = null, type: ExploreType? = null, source: CatalogSource) {
+    fun getBooks(query: String? = null, listing: Listing? = null, source: CatalogSource) {
         getBooksJob?.cancel()
         getBooksJob = viewModelScope.launch(Dispatchers.Main) {
             remoteUseCases.getRemoteBookByPaginationUseCase(
                 source,
-                type ?: state.value.exploreType,
+                listing ?: state.value.exploreType,
                 query = query).cachedIn(viewModelScope)
                 .collect { snapshot ->
                     _books.value = snapshot
@@ -148,6 +151,10 @@ class ExploreViewModel @Inject constructor(
                 uiText = message ?: UiText.StringResource(org.ireader.core.R.string.error_unknown)
             )
         )
+    }
+
+    fun toggleFilterMode(enable: Boolean? = null) {
+        state.value = state.value.copy(isFilterEnable = enable ?: !state.value.isFilterEnable)
     }
 
 }

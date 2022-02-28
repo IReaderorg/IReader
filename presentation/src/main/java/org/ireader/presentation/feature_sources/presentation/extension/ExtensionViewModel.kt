@@ -38,11 +38,6 @@ class ExtensionViewModel @Inject constructor(
     val eventFlow = _eventFlow.asSharedFlow()
 
     init {
-        val sources = mutableListOf<CatalogLocal>()
-        catalogLoader.loadAll().forEach {
-            sources.add(it)
-        }
-        UiState = UiState.copy(catalogLocal = sources)
         scope.launch {
             catalogInterceptors.getCatalogsByType.subscribe(excludeRemoteInstalled = true)
                 .collect { (pinned, unpinned, remote) ->

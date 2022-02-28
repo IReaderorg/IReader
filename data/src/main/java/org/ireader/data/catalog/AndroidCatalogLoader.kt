@@ -26,6 +26,10 @@ import org.ireader.domain.catalog.service.CatalogLoader
 import org.ireader.domain.models.entities.CatalogBundled
 import org.ireader.domain.models.entities.CatalogInstalled
 import org.ireader.domain.models.entities.CatalogLocal
+import org.ireader.extensions.sources.en.freewebnovel.FreeWebNovel
+import org.ireader.extensions.sources.en.mtlnovel.MtlNovel
+import org.ireader.extensions.sources.en.webnovel.Webnovel
+import org.ireader.extensions.sources.en.wuxiaworld.WuxiaWorld
 import tachiyomi.core.http.HttpClients
 import tachiyomi.core.log.Log
 import tachiyomi.core.prefs.PrefixedPreferenceStore
@@ -57,8 +61,16 @@ class AndroidCatalogLoader(
           val testCatalog = CatalogBundled(TestSource(), "Source used for testing")
           bundled.add(testCatalog)
       }
-//      val wuxiaworld = CatalogBundled(WuxiaWorld(Dependencies(httpClients,catalogPreferences),client),"WuxiaWorld")
-//      bundled.add(wuxiaworld)
+      val WuxiaWorld = CatalogBundled(WuxiaWorld(Dependencies(httpClients, catalogPreferences),
+          okHttpClient = client), "")
+      val FreeWebNovel =
+          CatalogBundled(FreeWebNovel(Dependencies(httpClients, catalogPreferences)), "")
+      val MtlNovel = CatalogBundled(MtlNovel(Dependencies(httpClients, catalogPreferences)), "")
+      val Webnovel = CatalogBundled(Webnovel(Dependencies(httpClients, catalogPreferences)), "")
+      bundled.add(WuxiaWorld)
+      bundled.add(FreeWebNovel)
+      bundled.add(MtlNovel)
+      bundled.add(Webnovel)
       val systemPkgs = pkgManager.getInstalledPackages(PACKAGE_FLAGS).filter(::isPackageAnExtension)
       val localPkgs = File(context.filesDir, "catalogs").listFiles()
           .orEmpty()

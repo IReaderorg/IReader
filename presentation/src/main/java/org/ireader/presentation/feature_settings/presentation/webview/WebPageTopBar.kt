@@ -101,18 +101,18 @@ fun WebPageTopBar(
                 }) {
                     MidSizeTextComposable(text = stringResource(R.string.go_forward))
                 }
-                DropdownMenuItem(onClick = {
-                    isMenuExpanded = false
-                    fetchBook()
-                }) {
-                    MidSizeTextComposable(text = "Fetch Book")
-                }
-                DropdownMenuItem(onClick = {
-                    isMenuExpanded = false
-                    fetchChapter()
-                }) {
-                    MidSizeTextComposable(text = "Fetch Chapter")
-                }
+//                DropdownMenuItem(onClick = {
+//                    isMenuExpanded = false
+//                    fetchBook()
+//                }) {
+//                    MidSizeTextComposable(text = "Fetch Book")
+//                }
+//                DropdownMenuItem(onClick = {
+//                    isMenuExpanded = false
+//                    fetchChapter()
+//                }) {
+//                    MidSizeTextComposable(text = "Fetch Chapter")
+//                }
             }
         },
         backgroundColor = MaterialTheme.colors.background,

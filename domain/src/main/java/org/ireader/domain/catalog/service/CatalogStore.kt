@@ -69,10 +69,12 @@ class CatalogStore(
         installationChanges.flow
             .onEach { change ->
                 when (change) {
-                    is CatalogInstallationChange.SystemInstall -> onInstalled(change.pkgName, false)
+                    is CatalogInstallationChange.SystemInstall -> onInstalled(change.pkgName,
+                        false)
                     is CatalogInstallationChange.SystemUninstall -> onUninstalled(change.pkgName,
                         false)
-                    is CatalogInstallationChange.LocalInstall -> onInstalled(change.pkgName, true)
+                    is CatalogInstallationChange.LocalInstall -> onInstalled(change.pkgName,
+                        true)
                     is CatalogInstallationChange.LocalUninstall -> onUninstalled(change.pkgName,
                         true)
                 }

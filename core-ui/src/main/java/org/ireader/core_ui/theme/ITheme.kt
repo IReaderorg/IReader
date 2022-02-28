@@ -52,10 +52,10 @@ val themes = listOf(
     Theme(
         5,
         darkColors(
-            primary = Colour.blue_200,
+            primary = Colour.blue_accent,
             primaryVariant = Colour.blue_600,
             onPrimary = Colour.black_900,
-            secondary = Colour.light_blue_a_200,
+            secondary = Colour.blue_accent,
             onSecondary = Colour.black_900,
             background = Colour.black_900,
             surface = Colour.white_50,
@@ -68,11 +68,11 @@ val themes = listOf(
             onBars = Color.White
         )
     ), Theme(6, lightColors(
-        primary = Colour.blue_500,
+        primary = Colour.blue_accent,
         primaryVariant = Colour.blue_700,
         onPrimary = Colour.white_50,
-        secondary = Colour.light_blue_a_200,
-        onSecondary = Colour.black_900,
+        secondary = Colour.blue_accent,
+        onSecondary = Colour.white_50,
         background = Colour.white_50,
         surface = Colour.white_50,
         onBackground = Colour.black_900,

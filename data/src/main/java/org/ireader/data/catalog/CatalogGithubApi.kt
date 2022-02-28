@@ -15,10 +15,9 @@ import kotlinx.serialization.json.Json
 import org.ireader.domain.catalog.service.CatalogRemoteApi
 import org.ireader.domain.models.entities.CatalogRemote
 import tachiyomi.core.http.HttpClients
-import javax.inject.Inject
 
 
-class CatalogGithubApi @Inject constructor(
+class CatalogGithubApi(
     private val httpClients: HttpClients,
 ) : CatalogRemoteApi {
 

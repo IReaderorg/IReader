@@ -7,10 +7,10 @@ import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
 import org.ireader.core.utils.Constants
 import org.ireader.data.local.AppDatabase
-import org.ireader.domain.models.ExploreType
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.repository.RemoteRepository
 import tachiyomi.source.CatalogSource
+import tachiyomi.source.model.Listing
 
 class GetRemoteBooksByRemoteMediator(
     private val remoteRepository: RemoteRepository,
@@ -19,19 +19,19 @@ class GetRemoteBooksByRemoteMediator(
     @ExperimentalPagingApi
     operator fun invoke(
         source: CatalogSource,
-        exploreType: ExploreType,
+        listing: Listing,
         query: String?,
     ): Flow<PagingData<Book>> {
         return Pager(
             config = PagingConfig(pageSize = Constants.DEFAULT_PAGE_SIZE,
                 maxSize = Constants.MAX_PAGE_SIZE),
             pagingSourceFactory = {
-                remoteRepository.getAllExploreBookByPaging(source, exploreType, query)
+                remoteRepository.getAllExploreBookByPaging(source, listing, query)
             },
             remoteMediator = ExploreRemoteMediator(
                 source = source,
                 database = database,
-                exploreType = exploreType,
+                listing = listing,
                 query = query
             ),
         ).flow

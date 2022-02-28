@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -31,7 +32,8 @@ fun ButtonWithIconAndText(
             )
             Text(
                 text = text, style = MaterialTheme.typography.caption,
-                color = MaterialTheme.colors.onBackground
+                color = MaterialTheme.colors.onBackground,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }

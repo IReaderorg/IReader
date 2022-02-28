@@ -54,7 +54,7 @@ class WuxiaWorld(private val deps: Dependencies, private val okHttpClient: OkHtt
         "/?s=$query&post_type=wp-manga&op=&author=&artist=&release=&adult="
 
 
-    override fun headersBuilder() = Headers.Builder().apply {
+    fun headersBuilder() = Headers.Builder().apply {
         add(
             "User-Agent",
             "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36"
