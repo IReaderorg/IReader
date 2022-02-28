@@ -21,7 +21,7 @@ dependencies {
     addBaseDependencies()
     implementation(project(Modules.core))
     implementation(project(Modules.coreUi))
-    implementation(project(Modules.extensions))
+
 
     implementation(Deps.tachiyomi.api)
     compileOnly(Deps.tachiyomi.core)

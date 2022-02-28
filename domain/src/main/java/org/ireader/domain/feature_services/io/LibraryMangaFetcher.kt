@@ -20,8 +20,8 @@ import okhttp3.Request
 import okio.Path
 import okio.buffer
 import okio.source
+import org.ireader.domain.catalog.service.CatalogStore
 import org.ireader.domain.models.entities.Book
-import org.ireader.domain.source.Extensions
 import tachiyomi.core.io.saveTo
 import java.io.File
 
@@ -38,10 +38,10 @@ fun Path.setLastModified(epoch: Long) {
 }
 
 internal class LibraryMangaFetcher(
-  private val defaultClient: OkHttpClient,
-  private val libraryCovers: LibraryCovers,
-  private val coilCache: Cache,
-  private val extension: Extensions,
+    private val defaultClient: OkHttpClient,
+    private val libraryCovers: LibraryCovers,
+    private val coilCache: Cache,
+    private val extension: CatalogStore,
 ) : Fetcher<Book> {
   override fun key(data: Book): String? {
     return when (getResourceType(data.cover)) {

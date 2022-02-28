@@ -27,16 +27,16 @@ import org.ireader.core_ui.theme.fonts
 import org.ireader.core_ui.theme.readerScreenBackgroundColors
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.R
+import org.ireader.domain.catalog.service.CatalogStore
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
-import org.ireader.domain.source.Extensions
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import org.ireader.domain.utils.Resource
-import tachiyomi.source.CatalogSource
+import tachiyomi.source.Source
 import javax.inject.Inject
 
 
@@ -55,8 +55,8 @@ class ReaderScreenViewModel @Inject constructor(
     private val remoteUseCases: RemoteUseCases,
     private val insertUseCases: LocalInsertUseCases,
     private val deleteUseCase: DeleteUseCase,
+    private val catalogStore: CatalogStore,
     savedStateHandle: SavedStateHandle,
-    extensions: Extensions,
 ) : BaseViewModel() {
 
 
@@ -78,7 +78,7 @@ class ReaderScreenViewModel @Inject constructor(
         val chapterId = savedStateHandle.get<Long>(NavigationArgs.chapterId.name)
         val bookId = savedStateHandle.get<Long>(NavigationArgs.bookId.name)
         if (bookId != null && chapterId != null && sourceId != null) {
-            val source = extensions.findSourceById(sourceId)
+            val source = catalogStore.get(sourceId)?.source
             if (source != null) {
                 state = state.copy(source = source)
                 getLocalChaptersByPaging(bookId)
@@ -125,7 +125,7 @@ class ReaderScreenViewModel @Inject constructor(
         }
     }
 
-    private fun getLastChapter(bookId: Long, source: CatalogSource) {
+    private fun getLastChapter(bookId: Long, source: Source) {
         viewModelScope.launch {
             val lastChapter = getChapterUseCase.findLastReadChapter(bookId)
             if (lastChapter != null) {
@@ -154,7 +154,7 @@ class ReaderScreenViewModel @Inject constructor(
     }
 
 
-    private fun getChapters(bookId: Long, source: CatalogSource) {
+    private fun getChapters(bookId: Long, source: Source) {
         viewModelScope.launch {
             val chapters = getChapterUseCase.findChaptersByBookId(bookId = bookId)
             if (chapters.isNotEmpty()) {
@@ -173,7 +173,7 @@ class ReaderScreenViewModel @Inject constructor(
 
     fun getChapter(
         chapterId: Long,
-        source: CatalogSource,
+        source: Source,
         onGetChapterEnd: () -> Unit = {},
     ) {
         toggleLoading(true)
@@ -209,7 +209,7 @@ class ReaderScreenViewModel @Inject constructor(
 
 
     var getContentJob: Job? = null
-    fun getReadingContentRemotely(chapter: Chapter, source: CatalogSource) {
+    fun getReadingContentRemotely(chapter: Chapter, source: Source) {
         clearError()
         toggleLocalLoaded(false)
         toggleRemoteLoading(true)
@@ -249,7 +249,7 @@ class ReaderScreenViewModel @Inject constructor(
     }
 
 
-    private fun getLocalBookById(bookId: Long, chapterId: Long, source: CatalogSource) {
+    private fun getLocalBookById(bookId: Long, chapterId: Long, source: Source) {
         viewModelScope.launch {
             val book = getBookUseCases.findBookById(id = bookId)
             if (book != null) {

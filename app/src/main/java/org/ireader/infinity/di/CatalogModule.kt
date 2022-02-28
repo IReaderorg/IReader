@@ -5,6 +5,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import okhttp3.OkHttpClient
 import org.ireader.data.catalog.AndroidCatalogInstallationChanges
 import org.ireader.data.catalog.AndroidCatalogInstaller
 import org.ireader.data.catalog.AndroidCatalogLoader
@@ -38,8 +39,12 @@ class CatalogModule {
 
     @Provides
     @Singleton
-    fun provideCatalogLoader(context: Application, httpClients: HttpClients): CatalogLoader {
-        return AndroidCatalogLoader(context = context, httpClients)
+    fun provideCatalogLoader(
+        context: Application,
+        httpClients: HttpClients,
+        client: OkHttpClient,
+    ): CatalogLoader {
+        return AndroidCatalogLoader(context = context, httpClients, client)
     }
 
     @Provides

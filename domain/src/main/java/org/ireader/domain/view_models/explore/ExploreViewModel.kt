@@ -49,8 +49,8 @@ class ExploreViewModel @Inject constructor(
         val exploreId = savedStateHandle.get<Int>("exploreType")
         val sourceId = savedStateHandle.get<Long>("sourceId")
         val source =
-            catalogStore.catalogs.find { it.source.id == sourceId }?.source as CatalogSource
-        if (sourceId != null && exploreId != null && source != null) {
+            catalogStore.catalogs.find { it.source.id == sourceId }?.source
+        if (sourceId != null && exploreId != null && source is CatalogSource) {
             if (source != null) {
                 state.value = state.value.copy(source = source)
                 state.value = state.value.copy(exploreType = exploreTypeMapper(exploreId))
@@ -114,7 +114,7 @@ class ExploreViewModel @Inject constructor(
         state.value =
             state.value.copy(isSearchModeEnable = inSearchMode)
         val source = state.value.source
-        if (!inSearchMode && source != null) {
+        if (!inSearchMode && source != null && source is CatalogSource) {
             exitSearchedMode()
             getBooks(source = source)
         }

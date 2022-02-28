@@ -23,7 +23,6 @@ import org.ireader.domain.feature_services.io.LibraryCovers
 import org.ireader.domain.repository.DownloadRepository
 import org.ireader.domain.repository.LocalBookRepository
 import org.ireader.domain.repository.LocalChapterRepository
-import org.ireader.domain.source.Extensions
 import org.ireader.domain.use_cases.download.DownloadUseCases
 import org.ireader.domain.use_cases.download.delete.DeleteAllSavedDownload
 import org.ireader.domain.use_cases.download.delete.DeleteSavedDownload
@@ -91,13 +90,6 @@ class LocalModule {
     }
 
 
-    @Singleton
-    @Provides
-    fun providesExtensions(
-        dependencies: Dependencies,
-    ): Extensions {
-        return Extensions(dependencies)
-    }
 
     @Singleton
     @Provides

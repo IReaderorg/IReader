@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 import org.ireader.core.R
+import org.ireader.domain.catalog.service.CatalogStore
 import org.ireader.domain.feature_services.notification.DefaultNotificationHelper
 import org.ireader.domain.feature_services.notification.Notifications
 import org.ireader.domain.feature_services.notification.Notifications.CHANNEL_DOWNLOADER_PROGRESS
@@ -25,7 +26,6 @@ import org.ireader.domain.feature_services.notification.Notifications.ID_DOWNLOA
 import org.ireader.domain.models.entities.SavedDownload
 import org.ireader.domain.repository.LocalBookRepository
 import org.ireader.domain.repository.LocalChapterRepository
-import org.ireader.domain.source.Extensions
 import org.ireader.domain.use_cases.download.DownloadUseCases
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
@@ -39,7 +39,7 @@ class DownloadService @AssistedInject constructor(
     private val bookRepo: LocalBookRepository,
     private val chapterRepo: LocalChapterRepository,
     private val remoteUseCases: RemoteUseCases,
-    private val extensions: Extensions,
+    private val extensions: CatalogStore,
     private val insertUseCases: LocalInsertUseCases,
     private val defaultNotificationHelper: DefaultNotificationHelper,
     private val downloadUseCases: DownloadUseCases,
@@ -75,7 +75,7 @@ class DownloadService @AssistedInject constructor(
             sourceId = bookResource.sourceId,
         )
 
-        val source = extensions.findSourceById(sourceId)
+        val source = extensions.get(sourceId)?.source
 
         val chapters = chapterRepo.subscribeChaptersByBookId(bookId).first()
 

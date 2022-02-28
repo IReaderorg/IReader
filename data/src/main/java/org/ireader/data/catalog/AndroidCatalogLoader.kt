@@ -19,6 +19,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
+import okhttp3.OkHttpClient
 import org.ireader.core.BuildConfig
 import org.ireader.core.prefs.AndroidPreferenceStore
 import org.ireader.domain.catalog.service.CatalogLoader
@@ -39,6 +40,7 @@ import java.io.File
 class AndroidCatalogLoader(
     private val context: Application,
     private val httpClients: HttpClients,
+    private val client: OkHttpClient,
 ) : CatalogLoader {
 
   private val pkgManager = context.packageManager
@@ -55,7 +57,8 @@ class AndroidCatalogLoader(
           val testCatalog = CatalogBundled(TestSource(), "Source used for testing")
           bundled.add(testCatalog)
       }
-
+//      val wuxiaworld = CatalogBundled(WuxiaWorld(Dependencies(httpClients,catalogPreferences),client),"WuxiaWorld")
+//      bundled.add(wuxiaworld)
       val systemPkgs = pkgManager.getInstalledPackages(PACKAGE_FLAGS).filter(::isPackageAnExtension)
       val localPkgs = File(context.filesDir, "catalogs").listFiles()
           .orEmpty()
@@ -232,8 +235,8 @@ class AndroidCatalogLoader(
   private fun loadSource(pkgName: String, loader: ClassLoader, data: ValidatedData): Source? {
     return try {
       val obj = Class.forName(data.classToLoad, false, loader)
-        .getConstructor(Dependencies::class.java)
-        .newInstance(data.dependencies)
+          .getConstructor(Dependencies::class.java, OkHttpClient::class.java)
+          .newInstance(data.dependencies, client)
 
       obj as? Source ?: throw Exception("Unknown source class type! ${obj.javaClass}")
     } catch (e: Throwable) {
@@ -252,7 +255,7 @@ class AndroidCatalogLoader(
   )
 
   private companion object {
-      const val EXTENSION_FEATURE = "tachiyomix"
+      const val EXTENSION_FEATURE = "ireader"
       const val METADATA_SOURCE_CLASS = "source.class"
       const val METADATA_DESCRIPTION = "source.description"
       const val METADATA_NSFW = "source.nsfw"

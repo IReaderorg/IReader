@@ -28,6 +28,7 @@ dependencies {
     compileOnly(Deps.tachiyomi.api)
     implementation(project(Modules.core))
     implementation(project(Modules.domain))
+    implementation(project(Modules.extensions))
 
     implementation(Deps.androidx.core)
     implementation(Deps.androidx.appCompat)

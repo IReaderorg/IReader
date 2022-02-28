@@ -2,10 +2,10 @@ package org.ireader.domain.view_models.detail.book_detail
 
 import org.ireader.core.utils.UiText
 import org.ireader.domain.models.entities.Book
-import tachiyomi.source.CatalogSource
+import tachiyomi.source.Source
 
 data class DetailState(
-    val source: CatalogSource? = null,
+    val source: Source? = null,
     val book: Book? = null,
     val inLibrary: Boolean = false,
     val isLocalLoading: Boolean = false,

@@ -20,6 +20,7 @@ import org.ireader.domain.repository.RemoteRepository
 import org.ireader.domain.utils.Resource
 import retrofit2.HttpException
 import tachiyomi.source.CatalogSource
+import tachiyomi.source.Source
 import tachiyomi.source.model.MangaInfo
 import tachiyomi.source.model.Text
 import timber.log.Timber
@@ -31,7 +32,7 @@ class RemoteRepositoryImpl(
 ) : RemoteRepository {
 
 
-    override suspend fun getRemoteBookDetail(book: Book, source: CatalogSource): MangaInfo {
+    override suspend fun getRemoteBookDetail(book: Book, source: Source): MangaInfo {
         return source.getMangaDetails(book.toBookInfo(source.id))
     }
 
@@ -58,6 +59,7 @@ class RemoteRepositoryImpl(
                     is Text -> {
                         content.add(it.text)
                     }
+                    else -> {}
                 }
             }
 

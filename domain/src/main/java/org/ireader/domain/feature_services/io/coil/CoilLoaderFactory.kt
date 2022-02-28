@@ -5,15 +5,15 @@ import android.app.Application
 import coil.ImageLoader
 import coil.util.CoilUtils
 import okhttp3.OkHttpClient
+import org.ireader.domain.catalog.service.CatalogStore
 import org.ireader.domain.feature_services.io.LibraryCovers
 import org.ireader.domain.feature_services.io.LibraryMangaFetcher
-import org.ireader.domain.source.Extensions
 import javax.inject.Inject
 
 class CoilLoaderFactory @Inject constructor(
     private val context: Application,
     private val libraryCovers: LibraryCovers,
-    private val extensions: Extensions,
+    private val extensions: CatalogStore,
     private val client: OkHttpClient,
 ) {
     fun create(): ImageLoader {

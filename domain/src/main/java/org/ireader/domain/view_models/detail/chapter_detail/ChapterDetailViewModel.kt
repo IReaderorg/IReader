@@ -19,9 +19,9 @@ import kotlinx.coroutines.launch
 import org.ireader.core.R
 import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
+import org.ireader.domain.catalog.service.CatalogStore
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
-import org.ireader.domain.source.Extensions
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
@@ -36,7 +36,7 @@ class ChapterDetailViewModel @Inject constructor(
     private val deleteUseCase: DeleteUseCase,
     private val savedStateHandle: SavedStateHandle,
     private val getBookUseCases: org.ireader.domain.use_cases.local.LocalGetBookUseCases,
-    extensions: Extensions,
+    extensions: CatalogStore,
 ) : ViewModel() {
 
     private val _eventFlow = MutableSharedFlow<UiEvent>()

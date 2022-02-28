@@ -19,6 +19,7 @@ import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
 import org.ireader.core.utils.removeSameItemsFromList
 import org.ireader.core_ui.viewmodel.BaseViewModel
+import org.ireader.domain.catalog.service.CatalogStore
 import org.ireader.domain.feature_services.DownloaderService.DownloadService
 import org.ireader.domain.feature_services.DownloaderService.DownloadService.Companion.DOWNLOADER_BOOK_ID
 import org.ireader.domain.feature_services.DownloaderService.DownloadService.Companion.DOWNLOADER_SERVICE_NAME
@@ -26,14 +27,12 @@ import org.ireader.domain.feature_services.DownloaderService.DownloadService.Com
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.entities.updateBook
-import org.ireader.domain.source.Extensions
 import org.ireader.domain.use_cases.fetchers.FetchUseCase
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import org.ireader.domain.utils.Resource
-import tachiyomi.source.CatalogSource
 import tachiyomi.source.Source
 import timber.log.Timber
 import javax.inject.Inject
@@ -52,7 +51,7 @@ class BookDetailViewModel @Inject constructor(
     private val deleteUseCase: DeleteUseCase,
     private val fetchUseCase: FetchUseCase,
     savedStateHandle: SavedStateHandle,
-    extensions: Extensions,
+    private val catalogStore: CatalogStore,
 ) : BaseViewModel() {
 
     var state by mutableStateOf(DetailState())
@@ -83,7 +82,7 @@ class BookDetailViewModel @Inject constructor(
         val bookId = savedStateHandle.get<Long>("bookId")
         val sourceId = savedStateHandle.get<Long>("sourceId")
         if (bookId != null && sourceId != null) {
-            val source = extensions.findSourceById(sourceId)
+            val source = catalogStore.get(sourceId)?.source
             if (source != null) {
                 state = state.copy(source = source)
                 state = state.copy(isLocalLoading = true)
@@ -112,7 +111,7 @@ class BookDetailViewModel @Inject constructor(
     }
 
 
-    fun getLocalBookById(bookId: Long, source: CatalogSource) {
+    fun getLocalBookById(bookId: Long, source: Source) {
         this.toggleLocalLoading(true)
         clearBookError()
         viewModelScope.launch {
@@ -151,7 +150,7 @@ class BookDetailViewModel @Inject constructor(
     }
 
 
-    fun getRemoteBookDetail(book: Book, source: CatalogSource) {
+    fun getRemoteBookDetail(book: Book, source: Source) {
         toggleRemoteLoading(true)
         clearBookError()
         isLocalBookLoaded(false)
