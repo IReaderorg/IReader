@@ -8,6 +8,8 @@
 
 package org.ireader.domain.catalog.interactor
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import org.ireader.domain.catalog.service.CatalogPreferences
@@ -30,9 +32,12 @@ class SyncRemoteCatalogs(
 
         if (forceRefresh || now - lastCheck > minTimeApiCheck) {
             try {
-                val newCatalogs = catalogRemoteApi.fetchCatalogs()
-                catalogRemoteRepository.setRemoteCatalogs(newCatalogs)
-                lastCheckPref.set(Clock.System.now().toEpochMilliseconds())
+                withContext(Dispatchers.IO) {
+                    val newCatalogs = catalogRemoteApi.fetchCatalogs()
+                    catalogRemoteRepository.deleteAllRemoteCatalogs()
+                    catalogRemoteRepository.setRemoteCatalogs(newCatalogs)
+                    lastCheckPref.set(Clock.System.now().toEpochMilliseconds())
+                }
                 return true
             } catch (e: Exception) {
                 Log.warn(e, "Failed to fetch remote catalogs")

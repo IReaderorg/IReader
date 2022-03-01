@@ -10,6 +10,7 @@ interface CatalogRemoteRepository {
     fun getRemoteCatalogsFlow(): Flow<List<CatalogRemote>>
 
     suspend fun setRemoteCatalogs(catalogs: List<CatalogRemote>)
+    suspend fun deleteAllRemoteCatalogs()
 
 }
 

@@ -1,10 +1,8 @@
 package org.ireader.presentation.feature_sources.presentation.extension
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.launchIn
@@ -14,7 +12,6 @@ import org.ireader.core.utils.UiEvent
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.catalog.CatalogInterceptors
 import org.ireader.domain.catalog.model.InstallStep
-import org.ireader.domain.catalog.service.CatalogLoader
 import org.ireader.domain.models.entities.Catalog
 import org.ireader.domain.models.entities.CatalogInstalled
 import org.ireader.domain.models.entities.CatalogLocal
@@ -26,13 +23,7 @@ import javax.inject.Inject
 class ExtensionViewModel @Inject constructor(
     private val state: CatalogsStateImpl,
     private val catalogInterceptors: CatalogInterceptors,
-    catalogLoader: CatalogLoader,
 ) : BaseViewModel(), CatalogsState by state {
-
-
-    var UiState by mutableStateOf(ExtensionScreenState())
-        private set
-
 
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
@@ -96,7 +87,7 @@ class ExtensionViewModel @Inject constructor(
     }
 
     fun refreshCatalogs() {
-        scope.launch {
+        scope.launch(Dispatchers.IO) {
             state.isRefreshing = true
             catalogInterceptors.syncRemoteCatalogs.await(true)
             state.isRefreshing = false

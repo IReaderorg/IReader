@@ -9,29 +9,32 @@
 package org.ireader.presentation.feature_sources.presentation.extension
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.Icons.Filled
 import androidx.compose.material.icons.filled.GetApp
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
 import org.ireader.domain.catalog.model.InstallStep
-import org.ireader.domain.models.entities.Catalog
-import org.ireader.domain.models.entities.CatalogBundled
-import org.ireader.domain.models.entities.CatalogInstalled
-import org.ireader.domain.models.entities.CatalogRemote
+import org.ireader.domain.models.entities.*
 import org.ireader.presentation.feature_sources.presentation.extension.composables.LetterIcon
+import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
+import java.util.*
 import kotlin.math.max
 
 @Composable
@@ -50,7 +53,7 @@ fun CatalogItem(
         is CatalogBundled -> null
         is CatalogInstalled -> catalog.source.lang
         is CatalogRemote -> catalog.lang
-    }?.let { Language(it).toEmoji() }
+    }?.let { Language(it) }
 
     Layout(
         modifier = onClick?.let { Modifier.clickable(onClick = it) } ?: Modifier,
@@ -71,8 +74,9 @@ fun CatalogItem(
                     .layoutId("title")
                     .padding(top = 12.dp)
             )
+
             Text(
-                text = "",
+                text = lang?.code?.uppercase(Locale.getDefault()) ?: "",
                 style = MaterialTheme.typography.body2,
                 color = LocalContentColor.current.copy(alpha = ContentAlpha.medium),
                 maxLines = 2,
@@ -131,9 +135,25 @@ private fun CatalogPic(catalog: Catalog, modifier: Modifier = Modifier) {
             LetterIcon(catalog.name, modifier)
         }
         is CatalogInstalled -> {
+            runCatching {
+                Image(
+                    painter = rememberImagePainter(LocalContext.current.packageManager.getApplicationIcon(
+                        catalog.pkgName)),
+                    contentDescription = null,
+                    modifier = modifier
+                )
+            }.getOrElse {
+                Image(
+                    painter = rememberImagePainter(catalog),
+                    contentDescription = null,
+                    modifier = modifier
+                )
+            }
+
+        }
+        is CatalogRemote -> {
             Image(
-                painter = rememberImagePainter(LocalContext.current.packageManager.getApplicationIcon(
-                    catalog.pkgName)),
+                painter = rememberImagePainter(catalog.iconUrl),
                 contentDescription = null,
                 modifier = modifier
             )
@@ -175,12 +195,68 @@ private fun CatalogButtons(
                 }
             }
             if (catalog !is CatalogRemote) {
-//        CatalogMenuButton(
-//          catalog = catalog,
-//          onPinToggle = onPinToggle,
-//          onUninstall = onUninstall
-//        )
+                CatalogMenuButton(
+                    catalog = catalog,
+                    onPinToggle = onPinToggle,
+                    onUninstall = onUninstall
+                )
             }
         }
     }
+}
+
+@Composable
+internal fun CatalogMenuButton(
+    catalog: Catalog,
+    onPinToggle: (() -> Unit)?,
+    onUninstall: (() -> Unit)?,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Box {
+        IconButton(onClick = { expanded = true }) {
+            Icon(imageVector = Icons.Filled.MoreVert, contentDescription = null)
+        }
+        DropdownMenu(expanded = expanded,
+            onDismissRequest = { expanded = false },
+            Modifier.background(MaterialTheme.colors.background)) {
+            DropdownMenuItem(onClick = { /*TODO*/ },
+                Modifier.background(MaterialTheme.colors.background)) {
+                MidSizeTextComposable(text = "Details")
+            }
+            if (onPinToggle != null && catalog is CatalogLocal) {
+                DropdownMenuItem(onClick = onPinToggle,
+                    Modifier.background(MaterialTheme.colors.background)) {
+                    MidSizeTextComposable(text = if (!catalog.isPinned) "Pin" else "UnPin")
+                }
+            }
+            if (onUninstall != null) {
+                DropdownMenuItem(onClick = onUninstall) {
+                    MidSizeTextComposable(text = "Uninstall")
+                }
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun CatalogItemPreview() {
+    CatalogItem(
+        catalog = CatalogRemote(
+            name = "My Catalog",
+            description = "Some description",
+            sourceId = 0L,
+            pkgName = "my.catalog",
+            versionName = "1.0.0",
+            versionCode = 1,
+            lang = "en",
+            pkgUrl = "",
+            iconUrl = "",
+            nsfw = false,
+        ),
+        onClick = {},
+        onInstall = {},
+        onUninstall = {},
+        onPinToggle = {}
+    )
 }

@@ -22,10 +22,10 @@ class CatalogGithubApi(
 ) : CatalogRemoteApi {
 
     private val repoUrl =
-        "https://raw.githubusercontent.com/tachiyomiorg/tachiyomi-extensions-1.x/repo"
+        "https://raw.githubusercontent.com/kazemcodes/IReader-Sources/main"
 
     override suspend fun fetchCatalogs(): List<CatalogRemote> {
-        val response = httpClients.default.get<String>("$repoUrl/index.min.json")
+        val response = httpClients.default.get<String>("$repoUrl/index.json")
         val catalogs = Json.Default.decodeFromString<List<CatalogRemoteApiModel>>(response)
         return catalogs.map { catalog ->
             CatalogRemote(
@@ -36,8 +36,8 @@ class CatalogGithubApi(
                 versionName = catalog.version,
                 versionCode = catalog.code,
                 lang = catalog.lang,
-                pkgUrl = "$repoUrl/apk/${catalog.apk}",
-                iconUrl = "$repoUrl/icon/${catalog.apk.replace(".apk", ".png")}",
+                pkgUrl = catalog.apk,
+                iconUrl = catalog.apk.replace(".apk", ".png"),
                 nsfw = catalog.nsfw
             )
         }

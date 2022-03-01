@@ -188,7 +188,7 @@ class BookDetailViewModel @Inject constructor(
     }
 
     fun getRemoteChapterDetail(book: Book, source: Source) {
-        toggleRemoteLoading(true)
+        toggleChaptersLoading(true)
         clearChapterError()
         toggleAreChaptersLoaded(false)
         getChapterDetailJob?.cancel()
@@ -204,7 +204,7 @@ class BookDetailViewModel @Inject constructor(
                                         it.title
                                     }
                                 setChapters(chapters = uniqueList)
-                                toggleRemoteLoading(false)
+                                toggleChaptersLoading(false)
                                 clearChapterError()
                                 if (uniqueList.isNotEmpty()) {
                                     deleteUseCase.deleteChaptersByBookId(book.id)
@@ -216,7 +216,7 @@ class BookDetailViewModel @Inject constructor(
                         is Resource.Error -> {
                             Timber.e(result.uiText.toString())
                             showSnackBar(result.uiText)
-                            toggleRemoteLoading(false)
+                            toggleChaptersLoading(false)
                         }
                     }
                 }

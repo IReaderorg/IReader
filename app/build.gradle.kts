@@ -56,6 +56,7 @@ dependencies {
 
 
     implementation(Deps.androidx.material)
+    implementation(Deps.androidx.emoji)
 
     implementation(project(Modules.coreUi))
     implementation(project(Modules.data))

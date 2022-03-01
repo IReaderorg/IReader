@@ -73,7 +73,7 @@ fun BookDetailScreen(
 
     val scope = rememberCoroutineScope()
     val swipeRefreshState =
-        rememberSwipeRefreshState(isRefreshing = viewModel.state.isLocalLoading || viewModel.state.isRemoteLoading)
+        rememberSwipeRefreshState(isRefreshing = viewModel.state.isLocalLoading || viewModel.state.isRemoteLoading || viewModel.chapterState.isLoading)
 
     val source = viewModel.state.source
     val state = viewModel.state

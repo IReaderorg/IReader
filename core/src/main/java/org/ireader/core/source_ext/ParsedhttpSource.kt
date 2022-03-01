@@ -69,10 +69,8 @@ abstract class ParsedHttpSource(private val dependencies: Dependencies) : HttpSo
         .build()
 
     private fun headersBuilder() = Headers.Builder().apply {
-        add(
-            "User-Agent",
-            "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36"
-        )
+        add("User-Agent",
+            "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36")
         add("cache-control", "max-age=0")
     }
 

@@ -26,7 +26,8 @@ class CatalogRemoteRepositoryImpl @Inject constructor(
         dao.insertAll(catalogs)
     }
 
-    suspend fun deleteAllRemoteCatalogs(catalogs: List<CatalogRemote>) {
+
+    override suspend fun deleteAllRemoteCatalogs() {
         return dao.deleteAll()
     }
 }

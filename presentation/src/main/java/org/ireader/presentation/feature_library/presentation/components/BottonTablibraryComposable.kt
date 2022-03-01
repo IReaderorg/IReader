@@ -34,18 +34,11 @@ fun Tabs(libraryTabs: List<TabItem>, pagerState: PagerState) {
                 )
         }) {
         libraryTabs.forEachIndexed { index, tab ->
-            LeadingIconTab(
-                icon = { },
-                text = {
-                    MidSizeTextComposable(text = tab.title,
-                        color = MaterialTheme.colors.onBackground)
-                },
+            Tab(
+                text = { MidSizeTextComposable(text = tab.title) },
                 selected = pagerState.currentPage == index,
-                onClick = {
-                    scope.launch {
-                        pagerState.animateScrollToPage(index)
-                    }
-                },
+
+                onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
             )
         }
     }
@@ -55,9 +48,11 @@ fun Tabs(libraryTabs: List<TabItem>, pagerState: PagerState) {
 @ExperimentalPagerApi
 @Composable
 fun TabsContent(libraryTabs: List<TabItem>, pagerState: PagerState) {
-    HorizontalPager(state = pagerState,
+    HorizontalPager(
         count = libraryTabs.size,
-        modifier = Modifier.fillMaxSize()) { page ->
+        state = pagerState,
+        modifier = Modifier.fillMaxSize()
+    ) {
         libraryTabs[pagerState.currentPage].screen()
     }
 }

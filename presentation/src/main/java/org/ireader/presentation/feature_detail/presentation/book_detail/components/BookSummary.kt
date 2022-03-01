@@ -30,9 +30,7 @@ fun BookSummary(
         mutableStateOf<Boolean?>(null)
     }
 
-    val allGenres =
-        genres.joinToString(",").replace(":", ",").split(",", ignoreCase = true)
-            .filterNot { it.contains("genre", ignoreCase = true) }.filter { it.isNotBlank() }
+
     val modifier = when (isExpandable) {
         true -> Modifier.animateContentSize()
         else -> Modifier
@@ -58,7 +56,7 @@ fun BookSummary(
                 mainAxisSpacing = 4.dp,
                 crossAxisSpacing = 6.dp
             ) {
-                allGenres.forEach { genre ->
+                genres.forEach { genre ->
                     GenreChip(genre)
                 }
             }
@@ -67,7 +65,7 @@ fun BookSummary(
                 contentPadding = PaddingValues(horizontal = 0.dp, vertical = 4.dp),
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                items(allGenres) { genre ->
+                items(genres) { genre ->
                     GenreChip(genre)
                 }
             }

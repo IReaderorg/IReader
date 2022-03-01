@@ -25,8 +25,8 @@ class MainActivity : ComponentActivity() {
         androidx.compose.material.ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
+        //WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
-
         setContent {
             InfinityTheme {
                 Surface(color = MaterialTheme.colors.background
@@ -34,11 +34,8 @@ class MainActivity : ComponentActivity() {
                     ScreenContent()
                 }
             }
-
             val manager = WorkManager.getInstance(applicationContext)
-
             manager.cancelAllWorkByTag(DownloadService.DOWNLOADER_SERVICE_NAME)
-
             manager.enqueue(updateRequest)
         }
     }

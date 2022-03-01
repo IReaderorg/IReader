@@ -16,8 +16,8 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class LibraryBookDaoTest {
-    private lateinit var db: org.ireader.data.local.BookDatabase
-    private lateinit var dao: org.ireader.data.local.dao.LibraryBookDao
+    private lateinit var db: BookDatabase
+    private lateinit var dao: LibraryBookDao
 
     @Before
     fun setup() {

@@ -29,11 +29,13 @@ class GetCatalogsByType(
         val remoteFlow = remoteCatalogs.subscribe(withNsfw = withNsfw)
         return localFlow.combine(remoteFlow) { local, remote ->
             val (pinned, unpinned) = local
+                .distinctBy { it.sourceId }
                 .sortedByDescending { it.hasUpdate }
                 .partition { it.isPinned }
 
             if (excludeRemoteInstalled) {
                 val installedPkgs = local
+                    .distinctBy { it.sourceId }
                     .asSequence()
                     .filterIsInstance<CatalogInstalled>()
                     .map { it.pkgName }

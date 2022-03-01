@@ -27,6 +27,8 @@ class CoilLoaderFactory @Inject constructor(
         return ImageLoader.Builder(context)
             .componentRegistry {
                 add(libraryFetcher)
+                add(CatalogRemoteMapper())
+                add(CatalogInstalledFetcher(context))
             }
             .okHttpClient(okhttpClient.newBuilder().cache(coilCache).build())
             .build()
