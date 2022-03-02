@@ -27,9 +27,9 @@ class GetRemoteCatalogs(
         return catalogRemoteRepository.getRemoteCatalogsFlow()
             .map { catalogs ->
                 if (withNsfw) {
-                    catalogs
+                    catalogs.distinctBy { it.sourceId }
                 } else {
-                    catalogs.filter { !it.nsfw }
+                    catalogs.filter { !it.nsfw }.distinctBy { it.sourceId }
                 }
             }
     }

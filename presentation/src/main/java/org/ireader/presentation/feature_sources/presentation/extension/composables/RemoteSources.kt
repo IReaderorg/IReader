@@ -37,7 +37,7 @@ fun RemoteSourcesScreen(
     val swipeState = rememberSwipeRefreshState(isRefreshing = state.isRefreshing)
     val all = (state.pinnedCatalogs + state.unpinnedCatalogs)
     val catalogLocalItem: LazyListScope.(CatalogLocal) -> Unit = { catalog ->
-        item(key = catalog.sourceId) {
+        item {
             kotlin.runCatching {
                 CatalogItem(
                     catalog = catalog,
@@ -69,7 +69,7 @@ fun RemoteSourcesScreen(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally) {
             if (all.isNotEmpty()) {
-                item(key = "h2") {
+                item {
                     CatalogsSection(
                         text = "Installed",
                     )
@@ -81,13 +81,13 @@ fun RemoteSourcesScreen(
 
             }
             if (state.remoteCatalogs.isNotEmpty()) {
-                item(key = "h3") {
+                item {
                     CatalogsSection(
                         text = "Available",
                     )
                 }
 
-                item(key = "langs") {
+                item {
                     LanguageChipGroup(
                         choices = state.languageChoices,
                         selected = state.selectedLanguage,

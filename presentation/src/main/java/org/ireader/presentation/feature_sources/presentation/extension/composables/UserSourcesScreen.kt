@@ -31,7 +31,7 @@ fun UserSourcesScreen(
 
     val catalogLocalItem: LazyListScope.(CatalogLocal) -> Unit = { catalog ->
         kotlin.runCatching {
-            item(key = catalog.sourceId) {
+            item {
                 CatalogItem(
                     catalog = catalog,
                     installStep = if (catalog is CatalogInstalled) state.installSteps[catalog.pkgName] else null,
@@ -50,7 +50,7 @@ fun UserSourcesScreen(
         horizontalAlignment = Alignment.CenterHorizontally) {
         kotlin.runCatching {
             if (state.pinnedCatalogs.isNotEmpty()) {
-                item(key = "h1") {
+                item {
                     CatalogsSection(
                         text = "Pinned",
                     )
@@ -62,7 +62,7 @@ fun UserSourcesScreen(
 
             if (state.unpinnedCatalogs.isNotEmpty()) {
                 for (lang in langs) {
-                    item(key = "$lang h2") {
+                    item {
                         CatalogsSection(
                             text = lang,
                         )

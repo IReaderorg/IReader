@@ -32,7 +32,7 @@ class GetLocalCatalogs @Inject constructor(
 
     private fun sortByName(catalogsFlow: Flow<List<CatalogLocal>>): Flow<List<CatalogLocal>> {
         return catalogsFlow.map { catalogs ->
-            catalogs.sortedBy { it.name }
+            catalogs.sortedBy { it.name }.distinctBy { it.sourceId }
         }
     }
 
@@ -44,6 +44,7 @@ class GetLocalCatalogs @Inject constructor(
 
         return catalogsFlow.map { catalogs ->
             catalogs.sortedWith(FavoritesComparator(favoriteIds).thenBy { it.name })
+                .distinctBy { it.sourceId }
         }
     }
 

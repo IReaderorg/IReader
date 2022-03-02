@@ -10,6 +10,7 @@ import okhttp3.OkHttpClient
 import org.ireader.data.catalog.AndroidCatalogInstallationChanges
 import org.ireader.data.catalog.AndroidCatalogInstaller
 import org.ireader.data.catalog.AndroidCatalogLoader
+import org.ireader.data.catalog.CatalogGithubApi
 import org.ireader.data.local.AppDatabase
 import org.ireader.data.local.dao.CatalogDao
 import org.ireader.data.repository.CatalogRemoteRepositoryImpl
