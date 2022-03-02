@@ -34,7 +34,7 @@ fun BookDetailScreenLoadedComposable(
     modifier: Modifier = Modifier,
     navController: NavController,
     book: Book,
-    source: Source,
+    source: Source?,
     onWebView: () -> Unit,
     onRefresh: () -> Unit,
     onSummaryExpand: () -> Unit,
@@ -146,13 +146,15 @@ fun BookDetailScreenLoadedComposable(
                             overflow = TextOverflow.Ellipsis
                         )
                         Text("•")
-                        Text(
-                            text = source.name,
-                            color = MaterialTheme.colors.onBackground.copy(alpha = .5f),
-                            fontWeight = FontWeight.Bold,
-                            style = MaterialTheme.typography.subtitle2,
-                            overflow = TextOverflow.Ellipsis
-                        )
+                        if (source != null) {
+                            Text(
+                                text = source.name,
+                                color = MaterialTheme.colors.onBackground.copy(alpha = .5f),
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.subtitle2,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
                     }
 
                 }

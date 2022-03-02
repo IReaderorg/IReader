@@ -58,5 +58,6 @@
     <string name="information_cloudflare_bypass_failure">Can\'t bypass the cloudflare</string>
     <string name="update_notification">Application Updates</string>
     <string name="library_updates_notification">Library Updates</string>
+    <string name="source_not_available">this Source is not available in your device.</string>
 
 </resources>

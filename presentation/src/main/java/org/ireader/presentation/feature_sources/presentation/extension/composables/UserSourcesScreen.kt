@@ -27,6 +27,8 @@ fun UserSourcesScreen(
 ) {
     val scrollState = rememberLazyListState()
 
+    val langs = state.unpinnedCatalogs.map { it.source.lang }.distinct()
+
     val catalogLocalItem: LazyListScope.(CatalogLocal) -> Unit = { catalog ->
         kotlin.runCatching {
             item(key = catalog.sourceId) {
@@ -57,16 +59,19 @@ fun UserSourcesScreen(
                     catalogLocalItem(catalog)
                 }
             }
+
             if (state.unpinnedCatalogs.isNotEmpty()) {
-                item(key = "h2") {
-                    CatalogsSection(
-                        text = "Installed",
-                    )
+                for (lang in langs) {
+                    item(key = "h2") {
+                        CatalogsSection(
+                            text = lang,
+                        )
+                    }
+                    for (catalog in state.unpinnedCatalogs.filter { it.source.lang == lang }) {
+                        catalogLocalItem(catalog)
+                    }
                 }
 
-                for (catalog in state.unpinnedCatalogs) {
-                    catalogLocalItem(catalog)
-                }
 
             }
         }.getOrElse {

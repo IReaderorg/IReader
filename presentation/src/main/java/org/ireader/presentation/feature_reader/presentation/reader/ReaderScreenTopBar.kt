@@ -76,10 +76,18 @@ fun ReaderScreenTopBar(
             )
         }
     } else if (!isLoaded) {
-        TopAppBar(title = {},
+        TopAppBar(
+            title = {},
             elevation = 0.dp,
             backgroundColor = Color.Transparent,
             actions = {
+                if (chapter != null) {
+                    TopAppBarActionButton(imageVector = Icons.Default.Autorenew,
+                        title = "Refresh",
+                        onClick = {
+                            onRefresh()
+                        })
+                }
                 TopAppBarActionButton(imageVector = Icons.Default.Public,
                     title = "WebView",
                     onClick = {
@@ -88,7 +96,11 @@ fun ReaderScreenTopBar(
                     })
             },
             navigationIcon = {
+
                 TopAppBarBackButton(navController = navController)
-            })
+            },
+
+
+            )
     }
 }

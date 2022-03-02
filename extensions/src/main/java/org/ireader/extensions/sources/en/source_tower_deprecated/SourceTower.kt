@@ -6,7 +6,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.Headers
 import org.ireader.core.source_ext.ParsedHttpSource
-import org.ireader.extensions.sources.en.webnovel.merge
 import org.ireader.source.sources.en.source_tower_deprecated.*
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
@@ -295,7 +294,7 @@ data class SourceTower constructor(
         val page = selectorReturnerListType(document,
             contentSelector,
             contentAtt).map { it.formatHtmlText() }
-        contentList.addAll(merge(listOf(title), page))
+        contentList.addAll((listOf(title) + page))
 
 
         return contentList

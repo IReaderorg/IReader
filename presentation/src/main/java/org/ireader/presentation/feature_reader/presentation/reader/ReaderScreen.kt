@@ -30,7 +30,7 @@ import org.ireader.presentation.feature_reader.presentation.reader.reverse_swip_
 import org.ireader.presentation.presentation.components.ISnackBarHost
 import org.ireader.presentation.presentation.reusable_composable.ErrorTextWithEmojis
 import org.ireader.presentation.ui.WebViewScreenSpec
-import tachiyomi.source.CatalogSource
+import tachiyomi.source.Source
 
 
 @ExperimentalAnimationApi
@@ -41,7 +41,7 @@ fun ReadingScreen(
     modifier: Modifier = Modifier,
     navController: NavController = rememberNavController(),
     viewModel: ReaderScreenViewModel,
-    source: CatalogSource,
+    source: Source,
     scrollState: LazyListState,
     onNext: () -> Unit,
     onPrev: () -> Unit,
@@ -88,45 +88,44 @@ fun ReadingScreen(
     }
 
     Scaffold(topBar = {
-        if (chapter != null) {
-            ReaderScreenTopBar(
-                isReaderModeEnable = state.isReaderModeEnable,
-                isLoaded = state.isLocalLoaded,
-                modalBottomSheetValue = modalBottomSheetState.targetValue,
-                onRefresh = {
+        ReaderScreenTopBar(
+            isReaderModeEnable = state.isReaderModeEnable,
+            isLoaded = state.isLocalLoaded,
+            modalBottomSheetValue = modalBottomSheetState.targetValue,
+            onRefresh = {
+                if (chapter != null) {
                     viewModel.getReadingContentRemotely(chapter = chapter,
                         source = source)
-                },
-                source = source,
-                chapter = chapter,
-                navController = navController,
-                onWebView = {
-                    try {
-                        if (!state.isReaderModeEnable && state.isLocalLoaded && modalBottomSheetState.targetValue == ModalBottomSheetValue.Expanded) {
-                            navController.navigate(WebViewScreenSpec.buildRoute(
-                                url = chapter.link,
-                                sourceId = source.id,
-                                fetchType = FetchType.ContentFetchType.index,
-                            )
-                            )
-                        } else if (!state.isLocalLoaded) {
-                            navController.navigate(WebViewScreenSpec.buildRoute(
-                                url = chapter.link,
-                                sourceId = source.id,
-                                fetchType = FetchType.ContentFetchType.index,
-                                bookId = chapter.bookId,
-                                chapterId = chapter.id
-                            ))
-                        }
-                    } catch (e: Exception) {
-                        scope.launch {
-                            viewModel.showSnackBar(UiText.ExceptionString(e))
-                        }
+                }
+            },
+            source = source,
+            chapter = chapter,
+            navController = navController,
+            onWebView = {
+                try {
+                    if (chapter != null && !state.isReaderModeEnable && state.isLocalLoaded && modalBottomSheetState.targetValue == ModalBottomSheetValue.Expanded) {
+                        navController.navigate(WebViewScreenSpec.buildRoute(
+                            url = chapter.link,
+                            sourceId = source.id,
+                            fetchType = FetchType.ContentFetchType.index,
+                        )
+                        )
+                    } else if (chapter != null && !state.isLocalLoaded) {
+                        navController.navigate(WebViewScreenSpec.buildRoute(
+                            url = chapter.link,
+                            sourceId = source.id,
+                            fetchType = FetchType.ContentFetchType.index,
+                            bookId = chapter.bookId,
+                            chapterId = chapter.id
+                        ))
+                    }
+                } catch (e: Exception) {
+                    scope.launch {
+                        viewModel.showSnackBar(UiText.ExceptionString(e))
                     }
                 }
-            )
-
-        }
+            }
+        )
     },
         scaffoldState = scaffoldState,
         snackbarHost = { ISnackBarHost(snackBarHostState = it) },
@@ -244,6 +243,7 @@ fun ReadingScreen(
     }
 
 }
+
 
 
 

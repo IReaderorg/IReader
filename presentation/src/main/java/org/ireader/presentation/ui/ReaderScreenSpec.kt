@@ -17,7 +17,6 @@ import org.ireader.domain.view_models.reader.ReaderScreenViewModel
 import org.ireader.presentation.feature_reader.presentation.reader.ReadingScreen
 import org.ireader.presentation.feature_reader.presentation.reader.reverse_swip_refresh.rememberSwipeRefreshState
 import org.ireader.presentation.presentation.EmptyScreenComposable
-import tachiyomi.source.CatalogSource
 
 object ReaderScreenSpec : ScreenSpec {
 
@@ -54,7 +53,7 @@ object ReaderScreenSpec : ScreenSpec {
         val scrollState = rememberLazyListState()
         val swipeState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isLoading)
 
-        if (source != null && source is CatalogSource) {
+        if (source != null) {
             ReadingScreen(
                 navController = navController,
                 viewModel = viewModel,

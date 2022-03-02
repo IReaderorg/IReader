@@ -9,7 +9,6 @@
 package org.ireader.presentation.feature_sources.presentation.extension
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -17,9 +16,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.Icons.Filled
-import androidx.compose.material.icons.filled.GetApp
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.PushPin
+import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
@@ -34,6 +32,7 @@ import org.ireader.domain.catalog.model.InstallStep
 import org.ireader.domain.models.entities.*
 import org.ireader.presentation.feature_sources.presentation.extension.composables.LetterIcon
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
+import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
 import java.util.*
 import kotlin.math.max
 
@@ -187,12 +186,9 @@ private fun CatalogButtons(
                         .padding(12.dp)
                 )
             } else if (onInstall != null) {
-                IconButton(onClick = onInstall) {
-                    Icon(
-                        imageVector = Filled.GetApp,
-                        contentDescription = null
-                    )
-                }
+                MidSizeTextComposable(text = "Install",
+                    color = MaterialTheme.colors.primary,
+                    modifier = Modifier.clickable { onInstall() })
             }
             if (catalog !is CatalogRemote) {
                 CatalogMenuButton(
@@ -213,26 +209,25 @@ internal fun CatalogMenuButton(
 ) {
     var expanded by remember { mutableStateOf(false) }
     Box {
-        IconButton(onClick = { expanded = true }) {
-            Icon(imageVector = Icons.Filled.MoreVert, contentDescription = null)
-        }
-        DropdownMenu(expanded = expanded,
-            onDismissRequest = { expanded = false },
-            Modifier.background(MaterialTheme.colors.background)) {
-            DropdownMenuItem(onClick = { /*TODO*/ },
-                Modifier.background(MaterialTheme.colors.background)) {
-                MidSizeTextComposable(text = "Details")
+        if (onPinToggle != null && catalog is CatalogLocal && onUninstall == null) {
+            if (catalog.isPinned) {
+                TopAppBarActionButton(
+                    imageVector = Icons.Filled.PushPin,
+                    tint = MaterialTheme.colors.primary,
+                    title = "Pin",
+                    onClick = onPinToggle)
+            } else {
+                TopAppBarActionButton(
+                    imageVector = Icons.Outlined.PushPin,
+                    tint = MaterialTheme.colors.onBackground.copy(.5f),
+                    title = "UnPin",
+                    onClick = onPinToggle)
             }
-            if (onPinToggle != null && catalog is CatalogLocal) {
-                DropdownMenuItem(onClick = onPinToggle,
-                    Modifier.background(MaterialTheme.colors.background)) {
-                    MidSizeTextComposable(text = if (!catalog.isPinned) "Pin" else "UnPin")
-                }
-            }
+        } else {
             if (onUninstall != null) {
-                DropdownMenuItem(onClick = onUninstall) {
-                    MidSizeTextComposable(text = "Uninstall")
-                }
+                MidSizeTextComposable(text = "Uninstall",
+                    color = MaterialTheme.colors.primary,
+                    modifier = Modifier.clickable { onUninstall() })
             }
         }
     }

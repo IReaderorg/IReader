@@ -34,7 +34,6 @@ fun AppearanceSettingScreen(
     }
     val context = LocalContext.current
 
-
     Scaffold(
         modifier = Modifier.fillMaxSize(), topBar = {
             TopAppBar(

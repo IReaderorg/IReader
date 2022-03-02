@@ -83,17 +83,14 @@ class BookDetailViewModel @Inject constructor(
         val sourceId = savedStateHandle.get<Long>("sourceId")
         if (bookId != null && sourceId != null) {
             val source = catalogStore.get(sourceId)?.source
-            if (source != null) {
-                state = state.copy(source = source)
-                state = state.copy(isLocalLoading = true)
-                chapterState = chapterState.copy(isLoading = true)
+            state = state.copy(source = source)
+            state = state.copy(isLocalLoading = true)
+            chapterState = chapterState.copy(isLoading = true)
+            viewModelScope.launch {
                 getLocalBookById(bookId, source)
                 getLocalChaptersByBookId(bookId = bookId)
-            } else {
-                viewModelScope.launch {
-                    showSnackBar(UiText.StringResource(R.string.the_source_is_not_found))
-                }
             }
+
         } else {
             viewModelScope.launch {
                 showSnackBar(UiText.StringResource(R.string.something_is_wrong_with_this_book))
@@ -111,7 +108,7 @@ class BookDetailViewModel @Inject constructor(
     }
 
 
-    fun getLocalBookById(bookId: Long, source: Source) {
+    suspend fun getLocalBookById(bookId: Long, source: Source?) {
         this.toggleLocalLoading(true)
         clearBookError()
         viewModelScope.launch {
@@ -121,7 +118,7 @@ class BookDetailViewModel @Inject constructor(
                 clearBookError()
                 setBook(book)
                 toggleInLibrary(book.favorite)
-                if (book.lastUpdated < 1L && !state.isRemoteLoaded) {
+                if (book.lastUpdated < 1L && !state.isRemoteLoaded && source != null) {
                     getRemoteBookDetail(book, source)
                     getRemoteChapterDetail(book, source)
                 }
@@ -134,7 +131,7 @@ class BookDetailViewModel @Inject constructor(
     }
 
 
-    fun getLocalChaptersByBookId(bookId: Long) {
+    suspend fun getLocalChaptersByBookId(bookId: Long) {
         clearChapterError()
         this.toggleChaptersLoading(true)
         viewModelScope.launch {
