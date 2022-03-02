@@ -163,7 +163,7 @@ fun TopAppBarSearch(
 ) {
     val focusManager = LocalFocusManager.current
     Box {
-        if (!isSearchModeEnable) {
+        if (!isSearchModeEnable || query.isBlank()) {
             Text(
                 text = "Search...",
                 style = MaterialTheme.typography.subtitle1,

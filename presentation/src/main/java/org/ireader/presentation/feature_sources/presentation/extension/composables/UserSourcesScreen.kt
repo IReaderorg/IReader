@@ -62,7 +62,7 @@ fun UserSourcesScreen(
 
             if (state.unpinnedCatalogs.isNotEmpty()) {
                 for (lang in langs) {
-                    item(key = "h2") {
+                    item(key = "$lang h2") {
                         CatalogsSection(
                             text = lang,
                         )

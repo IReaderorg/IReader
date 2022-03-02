@@ -38,7 +38,6 @@ class ExploreRemoteMediator(
         state: PagingState<Int, Book>,
     ): RemoteMediator.MediatorResult {
         return try {
-            kotlin.runCatching {
                 val currentPage = when (loadType) {
                     LoadType.REFRESH -> {
                         chapterDao.deleteNotInLibraryChapters()
@@ -124,7 +123,7 @@ class ExploreRemoteMediator(
                     remoteKey.insertAllExploredBook(response.mangas.map { it.toBook(source.id) })
                 }
                 RemoteMediator.MediatorResult.Success(endOfPaginationReached = endOfPaginationReached)
-            }.getOrThrow()
+
         } catch (e: UnknownHostException) {
             return RemoteMediator.MediatorResult.Error(Exception("There is no internet available,please check your internet connection"))
         } catch (e: IOException) {

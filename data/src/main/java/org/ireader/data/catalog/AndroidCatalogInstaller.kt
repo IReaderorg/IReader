@@ -71,7 +71,6 @@ class AndroidCatalogInstaller(
             if (success) {
                 installationChanges.notifyAppInstall(catalog.pkgName)
             }
-
             emit(if (success) InstallStep.Completed else InstallStep.Error)
         } catch (e: Exception) {
             Log.warn(e, "Error installing package")

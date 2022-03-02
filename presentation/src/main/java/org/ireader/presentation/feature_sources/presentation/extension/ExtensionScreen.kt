@@ -5,10 +5,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.navigation.NavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
@@ -21,6 +24,8 @@ import org.ireader.domain.models.entities.CatalogLocal
 import org.ireader.presentation.feature_sources.presentation.extension.composables.RemoteSourcesScreen
 import org.ireader.presentation.feature_sources.presentation.extension.composables.UserSourcesScreen
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
+import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
+import org.ireader.presentation.presentation.reusable_composable.TopAppBarSearch
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
 
 
@@ -45,18 +50,52 @@ fun ExtensionScreen(
         "Extensions"
     )
 
-
+    var searchMode by remember {
+        mutableStateOf(false)
+    }
+    val focusManager = LocalFocusManager.current
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    TopAppBarTitle(title = "Extensions")
+                    if (!searchMode) {
+                        TopAppBarTitle(title = "Extensions")
+                    } else {
+                        TopAppBarSearch(
+                            query = viewModel.searchQuery ?: "",
+                            onValueChange = {
+                                viewModel.searchQuery = it
+                            },
+                            onSearch = {
+
+                                focusManager.clearFocus()
+                            },
+                            isSearchModeEnable = searchMode)
+                    }
                 },
                 modifier = Modifier.fillMaxWidth(),
                 backgroundColor = MaterialTheme.colors.background,
                 contentColor = MaterialTheme.colors.onBackground,
                 elevation = DEFAULT_ELEVATION,
                 actions = {
+                    if (searchMode) {
+                        TopAppBarActionButton(
+                            imageVector = Icons.Default.Close,
+                            title = "Close",
+                            onClick = {
+                                searchMode = false
+                                viewModel.searchQuery = ""
+                            },
+                        )
+                    } else {
+                        TopAppBarActionButton(
+                            imageVector = Icons.Default.Search,
+                            title = "Search",
+                            onClick = {
+                                searchMode = true
+                            },
+                        )
+                    }
 
                 }
             )

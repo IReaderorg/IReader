@@ -32,7 +32,7 @@ fun NotImplementedText() {
 
 @Composable
 fun ErrorTextWithEmojis(modifier: Modifier = Modifier, error: String, textColor: Color? = null) {
-    val sad_emojis = listOf<String>("ಥ_ಥ", "(╥﹏╥)", "(╥︣﹏᷅╥᷅)", "⊙.☉")
+    val sad_emojis = listOf<String>("ಥ_ಥ", "(╥﹏╥)", "(╥︣﹏᷅╥᷅)")
     Column(modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center) {

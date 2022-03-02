@@ -153,6 +153,13 @@ class ExploreViewModel @Inject constructor(
         )
     }
 
+    fun removeExploreBooks() {
+        viewModelScope.launch(Dispatchers.IO) {
+            deleteUseCase.deleteAllExploreBook()
+            deleteUseCase.deleteAllRemoteKeys()
+        }
+    }
+
     fun toggleFilterMode(enable: Boolean? = null) {
         state.value = state.value.copy(isFilterEnable = enable ?: !state.value.isFilterEnable)
     }

@@ -27,11 +27,15 @@ class MyApplication : Application(), Configuration.Provider {
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
         }
+        if (!BuildConfig.DEBUG) {
+            setupCrashHandler()
+        }
+
         FirebaseAnalytics.getInstance(this).setAnalyticsCollectionEnabled(!BuildConfig.DEBUG)
         FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG)
 
         //setupNotificationChannels()
-        setupCrashHandler()
+
     }
 
     private fun setupNotificationChannels() {

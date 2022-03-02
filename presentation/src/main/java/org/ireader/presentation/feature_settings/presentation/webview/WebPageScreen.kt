@@ -56,6 +56,12 @@ fun WebPageScreen(
     val source = viewModel.state.source
     val scope = rememberCoroutineScope()
 
+    DisposableEffect(key1 = true) {
+        onDispose {
+            webView?.destroy()
+        }
+    }
+
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
             when (event) {

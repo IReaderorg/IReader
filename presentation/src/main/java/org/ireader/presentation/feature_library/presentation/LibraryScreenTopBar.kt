@@ -1,8 +1,8 @@
 package org.ireader.presentation.feature_library.presentation
 
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.BottomSheetScaffoldState
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -29,7 +29,7 @@ fun LibraryScreenTopBar(
     navController: NavController,
     viewModel: LibraryViewModel,
     coroutineScope: CoroutineScope,
-    bottomSheetState: BottomSheetScaffoldState,
+    bottomSheetState: ModalBottomSheetState,
 ) {
     val state = viewModel.state
     val focusManager = LocalFocusManager.current
@@ -69,10 +69,10 @@ fun LibraryScreenTopBar(
                 title = "Filter",
                 onClick = {
                     coroutineScope.launch {
-                        if (bottomSheetState.bottomSheetState.isExpanded) {
-                            bottomSheetState.bottomSheetState.collapse()
+                        if (bottomSheetState.isVisible) {
+                            bottomSheetState.hide()
                         } else {
-                            bottomSheetState.bottomSheetState.expand()
+                            bottomSheetState.show()
                         }
                     }
                 },

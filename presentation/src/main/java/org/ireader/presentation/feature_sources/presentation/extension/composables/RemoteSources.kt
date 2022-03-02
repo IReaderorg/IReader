@@ -37,7 +37,7 @@ fun RemoteSourcesScreen(
     val swipeState = rememberSwipeRefreshState(isRefreshing = state.isRefreshing)
     val all = (state.pinnedCatalogs + state.unpinnedCatalogs)
     val catalogLocalItem: LazyListScope.(CatalogLocal) -> Unit = { catalog ->
-        item(key = catalog.sourceId.toString() + catalog.name) {
+        item(key = catalog.sourceId) {
             kotlin.runCatching {
                 CatalogItem(
                     catalog = catalog,

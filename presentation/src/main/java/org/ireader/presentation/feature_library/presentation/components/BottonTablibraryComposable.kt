@@ -11,6 +11,7 @@ import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.pagerTabIndicatorOffset
 import kotlinx.coroutines.launch
 import org.ireader.core_ui.ui.Colour.contentColor
+import org.ireader.domain.view_models.library.LibraryViewModel
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 
 typealias ComposableFun = @Composable () -> Unit
@@ -37,7 +38,8 @@ fun Tabs(libraryTabs: List<TabItem>, pagerState: PagerState) {
             Tab(
                 text = { MidSizeTextComposable(text = tab.title) },
                 selected = pagerState.currentPage == index,
-
+                unselectedContentColor = MaterialTheme.colors.onBackground,
+                selectedContentColor = MaterialTheme.colors.primary,
                 onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
             )
         }
@@ -47,12 +49,16 @@ fun Tabs(libraryTabs: List<TabItem>, pagerState: PagerState) {
 
 @ExperimentalPagerApi
 @Composable
-fun TabsContent(libraryTabs: List<TabItem>, pagerState: PagerState) {
+fun TabsContent(libraryTabs: List<TabItem>, pagerState: PagerState, viewModel: LibraryViewModel) {
     HorizontalPager(
         count = libraryTabs.size,
         state = pagerState,
         modifier = Modifier.fillMaxSize()
-    ) {
-        libraryTabs[pagerState.currentPage].screen()
+    ) { page ->
+        when (page) {
+            0 -> FilterScreen(viewModel)
+            1 -> SortScreen(viewModel)
+            2 -> DisplayScreen(viewModel)
+        }
     }
 }

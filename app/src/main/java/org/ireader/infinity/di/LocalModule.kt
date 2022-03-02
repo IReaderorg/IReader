@@ -23,6 +23,7 @@ import org.ireader.domain.feature_services.io.LibraryCovers
 import org.ireader.domain.repository.DownloadRepository
 import org.ireader.domain.repository.LocalBookRepository
 import org.ireader.domain.repository.LocalChapterRepository
+import org.ireader.domain.repository.RemoteKeyRepository
 import org.ireader.domain.use_cases.download.DownloadUseCases
 import org.ireader.domain.use_cases.download.delete.DeleteAllSavedDownload
 import org.ireader.domain.use_cases.download.delete.DeleteSavedDownload
@@ -44,6 +45,7 @@ import org.ireader.domain.use_cases.local.insert_usecases.InsertBook
 import org.ireader.domain.use_cases.local.insert_usecases.InsertBooks
 import org.ireader.domain.use_cases.local.insert_usecases.InsertChapter
 import org.ireader.domain.use_cases.local.insert_usecases.InsertChapters
+import org.ireader.domain.use_cases.remote.key.DeleteAllRemoteKeys
 import org.ireader.infinity.core.domain.use_cases.local.book_usecases.GetBooksByQueryPagingSource
 import tachiyomi.core.prefs.PreferenceStore
 import tachiyomi.source.Dependencies
@@ -106,6 +108,7 @@ class LocalModule {
     fun providesDeleteUseCase(
         localBookRepository: LocalBookRepository,
         localChapterRepository: LocalChapterRepository,
+        remoteKeyRepository: RemoteKeyRepository,
     ): DeleteUseCase {
         return DeleteUseCase(
             deleteAllBook = DeleteAllBooks(localBookRepository),
@@ -116,7 +119,8 @@ class LocalModule {
             deleteChaptersByBookId = DeleteChaptersByBookId(localChapterRepository),
             deleteNotInLibraryChapters = DeleteNotInLibraryChapters(localChapterRepository),
             deleteAllChapters = DeleteAllChapters(localChapterRepository),
-            deleteChapters = DeleteChapters(localChapterRepository = localChapterRepository)
+            deleteChapters = DeleteChapters(localChapterRepository = localChapterRepository),
+            deleteAllRemoteKeys = DeleteAllRemoteKeys(remoteKeyRepository = remoteKeyRepository)
         )
     }
 

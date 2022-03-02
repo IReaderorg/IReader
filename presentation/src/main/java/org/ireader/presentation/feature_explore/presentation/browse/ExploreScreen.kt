@@ -56,7 +56,6 @@ fun ExploreScreen(
     var isFilterMode by remember {
         mutableStateOf(false)
     }
-
     val gridState = rememberLazyGridState()
     val lazyListState = rememberLazyListState()
     val bottomSheetState =
@@ -222,66 +221,19 @@ fun ExploreScreen(
 
                 ) {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    val result = handlePagingResult(books = books, onEmptyResult = {
-                        Column(
-                            modifier = modifier
-                                .fillMaxSize()
-                                .align(Alignment.Center)
-                                .padding(bottom = 30.dp),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                        ) {
-                            ErrorTextWithEmojis(error = "the Source didn't get anything.",
-                                modifier = Modifier
-                                    .padding(20.dp))
-                            Row(Modifier
-                                .fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceEvenly,
-                                verticalAlignment = Alignment.CenterVertically
+                    val result = handlePagingResult(books = books,
+                        onEmptyResult = {},
+                        onErrorResult = { error ->
+                            Column(
+                                modifier = modifier
+                                    .fillMaxSize()
+                                    .align(Alignment.Center)
+                                    .padding(bottom = 30.dp),
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally,
                             ) {
-                                Column(Modifier
-                                    .weight(.5f)
-                                    .wrapContentSize(Alignment.Center),
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    TopAppBarActionButton(imageVector = Icons.Default.Refresh,
-                                        title = "Retry",
-                                        onClick = { viewModel.getBooks(source = source) })
-                                    SmallTextComposable(text = "Retry")
-                                }
-                                Column(Modifier
-                                    .weight(.5f)
-                                    .wrapContentSize(Alignment.Center),
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    TopAppBarActionButton(imageVector = Icons.Default.Public,
-                                        title = "Open in WebView",
-                                        onClick = {
-                                            navController.navigate(WebViewScreenSpec.buildRoute(
-                                                sourceId = source.id,
-                                                fetchType = FetchType.LatestFetchType.index,
-                                                url = (source as HttpSource).baseUrl
-                                            )
-                                            )
-                                        })
-                                    SmallTextComposable(text = "Open in WebView")
-                                }
-
-                            }
-
-                        }
-
-                    }, onErrorResult = { error ->
-                        Column(
-                            modifier = modifier
-                                .fillMaxSize()
-                                .align(Alignment.Center)
-                                .padding(bottom = 30.dp),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                        ) {
-                            ErrorTextWithEmojis(
-                                error = error.toString(),
+                                ErrorTextWithEmojis(
+                                    error = error.toString(),
                                 modifier = Modifier
                                     .padding(20.dp)
                             )
@@ -346,7 +298,7 @@ fun ExploreScreen(
             }
         }
     } else {
-        EmptyScreenComposable(navController, R.string.something_is_wrong_with_this_book)
+        EmptyScreenComposable(navController, R.string.source_not_available)
     }
 }
 

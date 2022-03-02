@@ -6,9 +6,7 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.BottomSheetScaffold
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.rememberBottomSheetScaffoldState
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -49,23 +47,26 @@ fun LibraryScreen(
     val books = viewModel.book.collectAsLazyPagingItems()
     //val books = viewModel.books.collectAsLazyPagingItems()
     val pagerState = rememberPagerState()
-    val bottomSheetState = rememberBottomSheetScaffoldState()
+    val bottomSheetState =
+        rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
 
     val gridState = rememberLazyGridState()
     val lazyListState = rememberLazyListState()
 
-    BottomSheetScaffold(
-        sheetPeekHeight = (-1).dp,
+    ModalBottomSheetLayout(
         sheetContent = {
-            if (bottomSheetState.bottomSheetState.isExpanded) {
+            Box(modifier.defaultMinSize(minHeight = 1.dp)) {
                 BottomTabComposable(
                     viewModel = viewModel,
                     pagerState = pagerState,
                     navController = navController,
                     scope = coroutineScope)
+
             }
         },
-        scaffoldState = bottomSheetState
+        sheetState = bottomSheetState,
+        sheetBackgroundColor = MaterialTheme.colors.background,
+        sheetContentColor = MaterialTheme.colors.onBackground,
     ) {
         Column(modifier = Modifier
             .fillMaxSize()) {
@@ -117,7 +118,6 @@ fun LibraryScreen(
 
 
     }
-
 
 }
 
