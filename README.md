@@ -33,7 +33,7 @@ If you have a suggestion that would make this better, please fork the repo and c
 5. Open a Pull Request
 
 ### Adding a new Source
-- You can take a look at [here](https://github.com/kazemcodes/Infinity/blob/master/how_to_make_a_source_guide.md), to understand how to create a source for this applicaiton 
+- You can take a look at [here]([samples](https://github.com/kazemcodes/tachiyomi-extensions-1.x/tree/master/src/en), to understand how to create a source for this applicaiton 
 
 
 ## Screenshots :camera:
