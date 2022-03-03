@@ -9,7 +9,6 @@
 package org.ireader.data.catalog
 
 import android.app.Application
-import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.utils.io.*
@@ -17,6 +16,7 @@ import kotlinx.coroutines.flow.flow
 import org.ireader.domain.catalog.model.InstallStep
 import org.ireader.domain.catalog.service.CatalogInstaller
 import org.ireader.domain.models.entities.CatalogRemote
+import tachiyomi.core.http.HttpClients
 import tachiyomi.core.io.saveTo
 import tachiyomi.core.log.Log
 import java.io.File
@@ -29,14 +29,14 @@ import java.io.File
 
 class AndroidCatalogInstaller(
     private val context: Application,
-    private val httpClient: HttpClient,
+    private val httpClient: HttpClients,
     private val installationChanges: AndroidCatalogInstallationChanges,
 ) : CatalogInstaller {
 
     /**
      * The client used for http requests.
      */
-    private val client get() = httpClient
+    private val client get() = httpClient.default
 
     /**
      * Adds the given extension to the downloads queue and returns an observable containing its

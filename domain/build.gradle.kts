@@ -30,7 +30,6 @@ dependencies {
 
 
     implementation(Deps.Compose.ui)
-    implementation(Deps.kotlin.datetime)
     implementation(Deps.Compose.runtime)
     implementation(Deps.Compose.navigation)
     implementation(Deps.Compose.material)

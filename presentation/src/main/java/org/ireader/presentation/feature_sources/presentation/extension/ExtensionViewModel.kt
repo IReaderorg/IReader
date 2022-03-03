@@ -42,18 +42,17 @@ class ExtensionViewModel @Inject constructor(
 
         // Update catalogs whenever the query changes or there's a new update from the backend
         snapshotFlow {
-            state.allPinnedCatalogs.filteredByQuery(searchQuery).distinctBy { it.sourceId }
+            state.allPinnedCatalogs.filteredByQuery(searchQuery)
         }
             .onEach { state.pinnedCatalogs = it }
             .launchIn(scope)
         snapshotFlow {
-            state.allUnpinnedCatalogs.filteredByQuery(searchQuery).distinctBy { it.sourceId }
+            state.allUnpinnedCatalogs.filteredByQuery(searchQuery)
         }
             .onEach { state.unpinnedCatalogs = it }
             .launchIn(scope)
         snapshotFlow {
             state.allRemoteCatalogs.filteredByQuery(searchQuery).filteredByChoice(selectedLanguage)
-                .distinctBy { it.sourceId }
         }
             .onEach { state.remoteCatalogs = it }
             .launchIn(scope)

@@ -6,7 +6,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.ktor.client.*
-import okhttp3.OkHttpClient
+import org.ireader.core.os.PackageInstaller
 import org.ireader.data.catalog.AndroidCatalogInstallationChanges
 import org.ireader.data.catalog.AndroidCatalogInstaller
 import org.ireader.data.catalog.AndroidCatalogLoader
@@ -44,9 +44,8 @@ class CatalogModule {
     fun provideCatalogLoader(
         context: Application,
         httpClients: HttpClients,
-        client: OkHttpClient,
     ): CatalogLoader {
-        return AndroidCatalogLoader(context = context, httpClients, client)
+        return AndroidCatalogLoader(context = context, httpClients)
     }
 
     @Provides
@@ -71,7 +70,7 @@ class CatalogModule {
     @Singleton
     fun provideAndroidCatalogInstaller(
         context: Application,
-        httpClient: HttpClient,
+        httpClient: HttpClients,
         installationChanges: AndroidCatalogInstallationChanges,
     ): CatalogInstaller {
         return AndroidCatalogInstaller(context, httpClient, installationChanges)
@@ -80,7 +79,7 @@ class CatalogModule {
     @Provides
     @Singleton
     fun provideCatalogRemoteApi(
-        httpClient: HttpClient,
+        httpClient: HttpClients,
     ): CatalogRemoteApi {
         return CatalogGithubApi(httpClient)
     }
@@ -152,6 +151,12 @@ class CatalogModule {
     @Singleton
     fun providesHttpClient(): HttpClient {
         return HttpClient()
+    }
+
+    @Provides
+    @Singleton
+    fun providesPackageInstaller(context: Application): PackageInstaller {
+        return PackageInstaller(context)
     }
 
 

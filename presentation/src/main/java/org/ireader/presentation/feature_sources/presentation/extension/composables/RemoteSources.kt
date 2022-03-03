@@ -97,7 +97,7 @@ fun RemoteSourcesScreen(
                 }
                 //ERROR : this lines may throws anexception
                 kotlin.runCatching {
-                    items(state.remoteCatalogs, key = { it.sourceId }) { catalog ->
+                    items(state.remoteCatalogs) { catalog ->
                         CatalogItem(
                             catalog = catalog,
                             installStep = state.installSteps[catalog.pkgName],

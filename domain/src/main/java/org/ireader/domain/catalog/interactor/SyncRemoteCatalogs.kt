@@ -11,12 +11,11 @@ package org.ireader.domain.catalog.interactor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import org.ireader.core.utils.Constants
 import org.ireader.domain.catalog.service.CatalogPreferences
 import org.ireader.domain.catalog.service.CatalogRemoteApi
 import org.ireader.domain.catalog.service.CatalogRemoteRepository
 import tachiyomi.core.log.Log
-import kotlin.time.Duration.Companion.minutes
 import kotlin.time.ExperimentalTime
 
 class SyncRemoteCatalogs(
@@ -27,8 +26,8 @@ class SyncRemoteCatalogs(
 
     suspend fun await(forceRefresh: Boolean): Boolean {
         val lastCheckPref = catalogPreferences.lastRemoteCheck()
-        val lastCheck = Instant.fromEpochMilliseconds(lastCheckPref.get())
-        val now = Clock.System.now()
+        val lastCheck = lastCheckPref.get()
+        val now = System.currentTimeMillis()
 
         if (forceRefresh || now - lastCheck > minTimeApiCheck) {
             try {
@@ -49,7 +48,7 @@ class SyncRemoteCatalogs(
 
     internal companion object {
         @OptIn(ExperimentalTime::class)
-        val minTimeApiCheck = 5.minutes
+        val minTimeApiCheck = Constants.FIVE_MIN
     }
 
 }

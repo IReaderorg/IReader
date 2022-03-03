@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -96,7 +97,13 @@ fun ExtensionScreen(
                             },
                         )
                     }
-
+                    TopAppBarActionButton(
+                        imageVector = Icons.Default.Refresh,
+                        title = "Refresh",
+                        onClick = {
+                            viewModel.refreshCatalogs()
+                        },
+                    )
                 }
             )
         },

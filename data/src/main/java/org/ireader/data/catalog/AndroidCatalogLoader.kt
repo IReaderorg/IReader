@@ -19,7 +19,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
-import okhttp3.OkHttpClient
 import org.ireader.core.BuildConfig
 import org.ireader.core.prefs.AndroidPreferenceStore
 import org.ireader.domain.catalog.service.CatalogLoader
@@ -40,7 +39,6 @@ import java.io.File
 class AndroidCatalogLoader(
     private val context: Application,
     private val httpClients: HttpClients,
-    private val client: OkHttpClient,
 ) : CatalogLoader {
 
   private val pkgManager = context.packageManager
@@ -233,8 +231,8 @@ class AndroidCatalogLoader(
   private fun loadSource(pkgName: String, loader: ClassLoader, data: ValidatedData): Source? {
     return try {
       val obj = Class.forName(data.classToLoad, false, loader)
-          .getConstructor(Dependencies::class.java, OkHttpClient::class.java)
-          .newInstance(data.dependencies, client)
+          .getConstructor(Dependencies::class.java)
+          .newInstance(data.dependencies)
 
       obj as? Source ?: throw Exception("Unknown source class type! ${obj.javaClass}")
     } catch (e: Throwable) {

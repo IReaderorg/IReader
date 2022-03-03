@@ -55,6 +55,8 @@ object Constants {
     const val LAST_CHAPTER = -2L
     const val NO_VALUE = 0L
 
+    const val FIVE_MIN = 300000L
+
 
 }
 

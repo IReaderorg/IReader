@@ -29,7 +29,7 @@ class GetRemoteCatalogs(
                 if (withNsfw) {
                     catalogs.distinctBy { it.sourceId }
                 } else {
-                    catalogs.filter { !it.nsfw }.distinctBy { it.sourceId }
+                    catalogs.filter { !it.nsfw }
                 }
             }
     }

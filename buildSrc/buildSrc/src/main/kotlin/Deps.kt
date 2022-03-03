@@ -109,7 +109,7 @@ object Deps {
 
     object tachiyomi {
         private const val version = "1.2-SNAPSHOT"
-        const val core = "org.tachiyomi:core-desktop:$version"
+        const val core = "io.github.kazemcodes:core-androidRelease:1.2.1-SNAPSHOT"
         const val api = "org.tachiyomi:source-api-jvm:$version"
         const val core_jvm = "org.tachiyomi:core-jvm:$version"
     }
@@ -230,7 +230,6 @@ object Deps {
     object kotlin {
         const val version = "1.6.10"
         const val stdlib = "org.jetbrains.kotlin:kotlin-stdlib-common:$version"
-        const val datetime = "org.jetbrains.kotlinx:kotlinx-datetime:0.3.1"
         const val reflect = "org.jetbrains.kotlin:kotlin-reflect:$version"
         const val plugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:$version"
         const val jsonSerialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2"

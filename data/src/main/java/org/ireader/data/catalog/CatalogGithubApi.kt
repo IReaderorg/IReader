@@ -1,22 +1,22 @@
 package org.ireader.data.catalog
 
-import io.ktor.client.*
 import io.ktor.client.request.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.ireader.domain.catalog.service.CatalogRemoteApi
 import org.ireader.domain.models.entities.CatalogRemote
+import tachiyomi.core.http.HttpClients
 
 class CatalogGithubApi(
-    private val httpClient: HttpClient,
+    private val httpClient: HttpClients,
 ) : CatalogRemoteApi {
 
     private val repoUrl =
         "https://raw.githubusercontent.com/kazemcodes/IReader-Sources/main"
 
     override suspend fun fetchCatalogs(): List<CatalogRemote> {
-        val response = httpClient.get<String>("$repoUrl/index.json")
+        val response = httpClient.default.get<String>("$repoUrl/index.json")
         val catalogs = Json.Default.decodeFromString<List<CatalogRemoteApiModel>>(response)
         return catalogs.map { catalog ->
             CatalogRemote(
