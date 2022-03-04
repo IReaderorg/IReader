@@ -10,10 +10,7 @@ package org.ireader.presentation.feature_sources.presentation.extension
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PushPin
@@ -186,9 +183,16 @@ private fun CatalogButtons(
                         .padding(12.dp)
                 )
             } else if (onInstall != null) {
-                MidSizeTextComposable(text = "Install",
-                    color = MaterialTheme.colors.primary,
-                    modifier = Modifier.clickable { onInstall() })
+                if (catalog is CatalogLocal) {
+                    MidSizeTextComposable(text = "Update",
+                        color = MaterialTheme.colors.primary,
+                        modifier = Modifier.clickable { onInstall() })
+                } else if (catalog is CatalogRemote) {
+                    MidSizeTextComposable(text = "Install",
+                        color = MaterialTheme.colors.primary,
+                        modifier = Modifier.clickable { onInstall() })
+                }
+
             }
             if (catalog !is CatalogRemote) {
                 CatalogMenuButton(
@@ -208,7 +212,7 @@ internal fun CatalogMenuButton(
     onUninstall: (() -> Unit)?,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    Box {
+    Box(modifier = Modifier.padding(horizontal = 8.dp)) {
         if (onPinToggle != null && catalog is CatalogLocal && onUninstall == null) {
             if (catalog.isPinned) {
                 TopAppBarActionButton(
@@ -224,11 +228,13 @@ internal fun CatalogMenuButton(
                     onClick = onPinToggle)
             }
         } else {
-            if (onUninstall != null) {
+            Spacer(modifier = Modifier.padding(horizontal = 4.dp))
+            if (onUninstall != null && catalog is CatalogLocal) {
                 MidSizeTextComposable(text = "Uninstall",
                     color = MaterialTheme.colors.primary,
                     modifier = Modifier.clickable { onUninstall() })
             }
+            Spacer(modifier = Modifier.padding(horizontal = 4.dp))
         }
     }
 }

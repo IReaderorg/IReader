@@ -1,14 +1,16 @@
 package org.ireader.presentation.feature_sources.presentation.extension
 
 import androidx.compose.runtime.snapshotFlow
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.ireader.core.utils.UiEvent
+import org.ireader.core.utils.UiText
+import org.ireader.core.utils.showSnackBar
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.catalog.CatalogInterceptors
 import org.ireader.domain.catalog.model.InstallStep
@@ -16,6 +18,7 @@ import org.ireader.domain.models.entities.Catalog
 import org.ireader.domain.models.entities.CatalogInstalled
 import org.ireader.domain.models.entities.CatalogLocal
 import org.ireader.domain.models.entities.CatalogRemote
+import org.ireader.presentation.R
 import javax.inject.Inject
 
 
@@ -28,8 +31,15 @@ class ExtensionViewModel @Inject constructor(
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
 
+    var getCatalogJob: Job? = null
+
     init {
-        scope.launch {
+        getCatalogs()
+    }
+
+    private fun getCatalogs() {
+        getCatalogJob?.cancel()
+        getCatalogJob = scope.launch {
             catalogInterceptors.getCatalogsByType.subscribe(excludeRemoteInstalled = true)
                 .collect { (pinned, unpinned, remote) ->
                     state.allPinnedCatalogs = pinned
@@ -41,21 +51,27 @@ class ExtensionViewModel @Inject constructor(
         }
 
         // Update catalogs whenever the query changes or there's a new update from the backend
-        snapshotFlow {
-            state.allPinnedCatalogs.filteredByQuery(searchQuery)
+        viewModelScope.launch {
+            snapshotFlow {
+                state.allPinnedCatalogs.filteredByQuery(searchQuery)
+            }
+                .collect { state.pinnedCatalogs = it }
         }
-            .onEach { state.pinnedCatalogs = it }
-            .launchIn(scope)
-        snapshotFlow {
-            state.allUnpinnedCatalogs.filteredByQuery(searchQuery)
+        viewModelScope.launch {
+            snapshotFlow {
+                state.allUnpinnedCatalogs.filteredByQuery(searchQuery)
+            }
+                .collect { state.unpinnedCatalogs = it }
         }
-            .onEach { state.unpinnedCatalogs = it }
-            .launchIn(scope)
-        snapshotFlow {
-            state.allRemoteCatalogs.filteredByQuery(searchQuery).filteredByChoice(selectedLanguage)
+        viewModelScope.launch {
+            snapshotFlow {
+                state.allRemoteCatalogs.filteredByQuery(searchQuery)
+                    .filteredByChoice(selectedLanguage)
+            }
+                .collect { state.remoteCatalogs = it }
         }
-            .onEach { state.remoteCatalogs = it }
-            .launchIn(scope)
+
+
     }
 
     fun installCatalog(catalog: Catalog) {
@@ -69,6 +85,7 @@ class ExtensionViewModel @Inject constructor(
                 catalog.pkgName to catalogInterceptors.installCatalog.await(catalog)
             }
             flow.collect { step ->
+                _eventFlow.showSnackBar(UiText.DynamicString(step.toString()))
                 state.installSteps = if (step != InstallStep.Completed) {
                     installSteps + (pkgName to step)
                 } else {
@@ -87,6 +104,7 @@ class ExtensionViewModel @Inject constructor(
     fun uninstallCatalog(catalog: Catalog) {
         scope.launch {
             catalogInterceptors.uninstallCatalog.await(catalog as CatalogInstalled)
+            _eventFlow.showSnackBar(UiText.StringResource(R.string.uninstalled))
         }
     }
 
@@ -94,6 +112,7 @@ class ExtensionViewModel @Inject constructor(
         scope.launch(Dispatchers.IO) {
             state.isRefreshing = true
             catalogInterceptors.syncRemoteCatalogs.await(true)
+            _eventFlow.showSnackBar(UiText.StringResource(R.string.Refreshed))
             state.isRefreshing = false
         }
     }

@@ -59,5 +59,7 @@
     <string name="update_notification">Application Updates</string>
     <string name="library_updates_notification">Library Updates</string>
     <string name="source_not_available">this Source is not available in your device.</string>
+    <string name="uninstalled">Uninstalled</string>
+    <string name="Refreshed">Refreshed</string>
 
 </resources>

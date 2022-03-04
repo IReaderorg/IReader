@@ -1,5 +1,6 @@
 package org.ireader.infinity.di
 
+import android.app.Application
 import android.content.Context
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -21,12 +22,24 @@ import org.ireader.domain.repository.LocalBookRepository
 import org.ireader.domain.repository.LocalChapterRepository
 import org.ireader.domain.repository.RemoteRepository
 import org.ireader.domain.repository.Repository
+import org.ireader.infinity.initiators.*
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
 @Module
 class AppModule {
 
+    @Provides
+    @Singleton
+    fun provideInitializer(context: Application): AppInitializers {
+        return AppInitializers(
+            crashHandler = CrashHandler(context),
+            emojiCompatInitializer = EmojiCompatInitializer(context),
+            firebaseInitializer = FirebaseInitializer(context),
+            notificationsInitializer = NotificationsInitializer(context),
+            timberInitializer = TimberInitializer()
+        )
+    }
 
     @Provides
     @Singleton

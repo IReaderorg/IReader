@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -209,13 +210,20 @@ fun ExploreScreen(
                 floatingActionButtonPosition = FabPosition.End,
                 floatingActionButton = {
                     ExtendedFloatingActionButton(
-                        text = { MidSizeTextComposable(text = stringResource(org.ireader.presentation.R.string.filter)) },
+                        text = {
+                            MidSizeTextComposable(
+                                text = stringResource(org.ireader.presentation.R.string.filter),
+                                color = Color.White
+                            )
+                        },
                         onClick = {
                             scope.launch {
                                 bottomSheetState.show()
                             }
                         },
-                        icon = { Icon(Icons.Filled.Add, "") }
+                        icon = {
+                            Icon(Icons.Filled.Add, "", tint = Color.White)
+                        }
                     )
                 },
 

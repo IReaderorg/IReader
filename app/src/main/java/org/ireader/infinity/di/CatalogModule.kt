@@ -5,7 +5,6 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import io.ktor.client.*
 import org.ireader.core.os.PackageInstaller
 import org.ireader.data.catalog.AndroidCatalogInstallationChanges
 import org.ireader.data.catalog.AndroidCatalogInstaller
@@ -131,7 +130,7 @@ class CatalogModule {
         loader: CatalogLoader,
         catalogPreferences: CatalogPreferences,
         catalogRemoteRepository: CatalogRemoteRepository,
-        installationChanges: CatalogInstallationChanges,
+        installationChanges: AndroidCatalogInstallationChanges,
     ): CatalogStore {
         return CatalogStore(loader,
             catalogPreferences,
@@ -147,11 +146,6 @@ class CatalogModule {
         return InstallCatalog(catalogInstaller)
     }
 
-    @Provides
-    @Singleton
-    fun providesHttpClient(): HttpClient {
-        return HttpClient()
-    }
 
     @Provides
     @Singleton

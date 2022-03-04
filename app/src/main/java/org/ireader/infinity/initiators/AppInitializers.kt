@@ -1,8 +1,9 @@
 package org.ireader.infinity.initiators
 
-import javax.inject.Inject
-
-class AppInitializers @Inject constructor(
+class AppInitializers(
     emojiCompatInitializer: EmojiCompatInitializer,
     notificationsInitializer: NotificationsInitializer,
+    crashHandler: CrashHandler,
+    timberInitializer: TimberInitializer,
+    firebaseInitializer: FirebaseInitializer,
 )

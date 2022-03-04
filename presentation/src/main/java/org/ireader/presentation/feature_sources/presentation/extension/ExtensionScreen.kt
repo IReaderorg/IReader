@@ -12,18 +12,22 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.navigation.NavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.google.accompanist.pager.rememberPagerState
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.ireader.core.utils.Constants.DEFAULT_ELEVATION
+import org.ireader.core.utils.UiEvent
 import org.ireader.domain.models.entities.Catalog
 import org.ireader.domain.models.entities.CatalogLocal
 import org.ireader.presentation.feature_sources.presentation.extension.composables.RemoteSourcesScreen
 import org.ireader.presentation.feature_sources.presentation.extension.composables.UserSourcesScreen
+import org.ireader.presentation.presentation.components.ISnackBarHost
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarSearch
@@ -45,6 +49,19 @@ fun ExtensionScreen(
 ) {
     val pagerState = rememberPagerState()
     val scope = rememberCoroutineScope()
+    val scaffoldState = rememberScaffoldState()
+    val context = LocalContext.current
+    LaunchedEffect(key1 = true) {
+        viewModel.eventFlow.collectLatest { event ->
+            when (event) {
+                is UiEvent.ShowSnackbar -> {
+                    scaffoldState.snackbarHostState.showSnackbar(
+                        event.uiText.asString(context)
+                    )
+                }
+            }
+        }
+    }
 
     val pages = listOf<String>(
         "Sources",
@@ -107,7 +124,10 @@ fun ExtensionScreen(
                 }
             )
         },
-    ) {
+        scaffoldState = scaffoldState,
+        snackbarHost = { ISnackBarHost(snackBarHostState = it) },
+
+        ) {
         // UserSourcesScreen(viewModel, navController)
         Column(modifier = Modifier.fillMaxSize()) {
             TabRow(

@@ -3,9 +3,8 @@ package org.ireader.infinity.initiators
 import android.app.Application
 import org.ireader.domain.feature_services.notification.Notifications
 import timber.log.Timber
-import javax.inject.Inject
 
-class NotificationsInitializer @Inject constructor(
+class NotificationsInitializer(
     context: Application,
 ) {
 

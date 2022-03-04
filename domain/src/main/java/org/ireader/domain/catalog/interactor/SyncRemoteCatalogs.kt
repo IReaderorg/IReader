@@ -10,15 +10,14 @@ package org.ireader.domain.catalog.interactor
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
 import org.ireader.core.utils.Constants
 import org.ireader.domain.catalog.service.CatalogPreferences
 import org.ireader.domain.catalog.service.CatalogRemoteApi
 import org.ireader.domain.catalog.service.CatalogRemoteRepository
 import tachiyomi.core.log.Log
-import kotlin.time.ExperimentalTime
+import javax.inject.Inject
 
-class SyncRemoteCatalogs(
+class SyncRemoteCatalogs @Inject constructor(
     private val catalogRemoteRepository: CatalogRemoteRepository,
     private val catalogRemoteApi: CatalogRemoteApi,
     private val catalogPreferences: CatalogPreferences,
@@ -29,13 +28,13 @@ class SyncRemoteCatalogs(
         val lastCheck = lastCheckPref.get()
         val now = System.currentTimeMillis()
 
-        if (forceRefresh || now - lastCheck > minTimeApiCheck) {
+        if (forceRefresh || (now - lastCheck) > minTimeApiCheck) {
             try {
                 withContext(Dispatchers.IO) {
                     val newCatalogs = catalogRemoteApi.fetchCatalogs()
                     catalogRemoteRepository.deleteAllRemoteCatalogs()
                     catalogRemoteRepository.setRemoteCatalogs(newCatalogs)
-                    lastCheckPref.set(Clock.System.now().toEpochMilliseconds())
+                    lastCheckPref.set(System.currentTimeMillis())
                 }
                 return true
             } catch (e: Exception) {
@@ -47,8 +46,7 @@ class SyncRemoteCatalogs(
     }
 
     internal companion object {
-        @OptIn(ExperimentalTime::class)
-        val minTimeApiCheck = Constants.FIVE_MIN
+        const val minTimeApiCheck = Constants.FIVE_MIN
     }
 
 }
