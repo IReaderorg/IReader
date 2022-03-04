@@ -12,9 +12,9 @@ import org.ireader.domain.models.RemoteKeys
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.toBook
 import retrofit2.HttpException
-import tachiyomi.source.CatalogSource
-import tachiyomi.source.model.Filter
-import tachiyomi.source.model.Listing
+import sources.CatalogSource
+import sources.model.Filter
+import sources.model.Listing
 import java.io.IOException
 import java.net.UnknownHostException
 import javax.net.ssl.SSLHandshakeException

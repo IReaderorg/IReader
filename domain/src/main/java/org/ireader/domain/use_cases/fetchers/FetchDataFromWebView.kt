@@ -8,7 +8,8 @@ import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.utils.Resource
-import tachiyomi.source.HttpSource
+import sources.HttpSource
+
 
 class FetchBookDetailAndChapterDetailFromWebView {
 

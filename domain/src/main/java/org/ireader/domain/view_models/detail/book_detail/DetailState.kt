@@ -2,7 +2,7 @@ package org.ireader.domain.view_models.detail.book_detail
 
 import org.ireader.core.utils.UiText
 import org.ireader.domain.models.entities.Book
-import tachiyomi.source.Source
+import sources.Source
 
 data class DetailState(
     val source: Source? = null,

@@ -33,7 +33,7 @@ import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import org.ireader.domain.utils.Resource
-import tachiyomi.source.Source
+import sources.Source
 import timber.log.Timber
 import javax.inject.Inject
 

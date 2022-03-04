@@ -26,7 +26,7 @@ import coil.compose.rememberImagePainter
 import org.ireader.domain.models.entities.Book
 import org.ireader.presentation.feature_detail.presentation.book_detail.components.BookSummary
 import org.ireader.presentation.presentation.components.BookImageComposable
-import tachiyomi.source.Source
+import sources.Source
 
 
 @Composable

@@ -64,9 +64,9 @@ dependencies {
     implementation(project(Modules.core))
     implementation(project(Modules.presentation))
 
-    compileOnly(Deps.tachiyomi.api)
+    //compileOnly(Deps.tachiyomi.api)
 
-    compileOnly(Deps.tachiyomi.core)
+    implementation(Deps.tachiyomi.core)
 
 
     implementation(Deps.Timber.timber)

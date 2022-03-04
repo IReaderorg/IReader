@@ -21,7 +21,7 @@ import org.ireader.presentation.presentation.components.handlePagingChapterResul
 import org.ireader.presentation.presentation.reusable_composable.ErrorTextWithEmojis
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
-import tachiyomi.source.Source
+import sources.Source
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable

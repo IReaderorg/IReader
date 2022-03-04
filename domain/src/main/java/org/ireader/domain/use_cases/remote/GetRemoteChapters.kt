@@ -12,7 +12,7 @@ import org.ireader.domain.repository.RemoteRepository
 import org.ireader.domain.utils.Resource
 import org.jsoup.select.Selector
 import retrofit2.HttpException
-import tachiyomi.source.Source
+import sources.Source
 import timber.log.Timber
 import java.io.IOException
 

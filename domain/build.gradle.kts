@@ -23,10 +23,9 @@ dependencies {
     implementation(project(Modules.coreUi))
 
 
-    implementation(Deps.tachiyomi.api)
-    compileOnly(Deps.tachiyomi.core)
-    compileOnly(Deps.tachiyomi.core_jvm)
-    //implementation(Deps.tachiyomi.core)
+    // implementation(Deps.tachiyomi.api)
+    implementation(Deps.tachiyomi.core)
+
 
 
     implementation(Deps.Compose.ui)

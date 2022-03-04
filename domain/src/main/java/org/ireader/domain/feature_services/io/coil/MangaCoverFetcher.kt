@@ -21,9 +21,9 @@ import okio.source
 import org.ireader.domain.catalog.interactor.GetLocalCatalog
 import org.ireader.domain.feature_services.io.LibraryCovers
 import org.ireader.domain.feature_services.io.MangaCover
+import sources.HttpSource
 import tachiyomi.core.http.okhttp
 import tachiyomi.core.io.saveTo
-import tachiyomi.source.HttpSource
 import java.io.File
 
 internal class LibraryMangaFetcher(

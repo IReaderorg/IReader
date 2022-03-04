@@ -11,7 +11,7 @@ import org.ireader.domain.models.entities.Book
 import org.ireader.presentation.presentation.layouts.CompactGridLayoutComposable
 import org.ireader.presentation.presentation.layouts.GridLayoutComposable
 import org.ireader.presentation.presentation.layouts.LinearListDisplay
-import tachiyomi.source.Source
+import sources.Source
 
 
 @OptIn(ExperimentalFoundationApi::class)

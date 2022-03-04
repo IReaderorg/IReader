@@ -20,8 +20,8 @@ android {
 dependencies {
     implementation(Deps.androidx.appCompat)
 
-    compileOnly(Deps.tachiyomi.api)
-    compileOnly(Deps.tachiyomi.core)
+    //compileOnly(Deps.tachiyomi.api)
+    implementation(Deps.tachiyomi.core)
 
     implementation(Deps.Compose.ui)
     implementation(Deps.Coil.coilCompose)

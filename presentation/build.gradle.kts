@@ -29,8 +29,8 @@ dependencies {
     implementation(project(Modules.core))
     implementation(project(Modules.coreUi))
 
-    compileOnly(Deps.tachiyomi.api)
-    compileOnly(Deps.tachiyomi.core)
+    //  compileOnly(Deps.tachiyomi.api)
+    implementation(Deps.tachiyomi.core)
 
     implementation(Deps.androidx.core)
     implementation(Deps.androidx.emoji)
