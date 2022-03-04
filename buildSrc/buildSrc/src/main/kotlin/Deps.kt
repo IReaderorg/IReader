@@ -111,7 +111,7 @@ object Deps {
         private const val version = "1.2-SNAPSHOT"
 
         //  const val core = "io.github.kazemcodes:core-androidRelease:1.2.1-SNAPSHOT"
-        const val core = "io.github.kazemcodes:core-androidRelease:1.0.0-SNAPSHOT"
+        const val core = "io.github.kazemcodes:core-androidRelease:1.0.1-SNAPSHOT"
         //  const val api = "org.tachiyomi:source-api-jvm:$version"
         //  const val core_jvm = "org.tachiyomi:core-jvm:$version"
     }

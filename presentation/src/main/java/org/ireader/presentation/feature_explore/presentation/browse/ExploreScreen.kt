@@ -33,7 +33,7 @@ import org.ireader.presentation.presentation.components.handlePagingResult
 import org.ireader.presentation.presentation.reusable_composable.*
 import org.ireader.presentation.ui.BookDetailScreenSpec
 import org.ireader.presentation.ui.WebViewScreenSpec
-import sources.HttpSource
+import tachiyomi.source.HttpSource
 
 
 @OptIn(ExperimentalFoundationApi::class, androidx.compose.material.ExperimentalMaterialApi::class)

@@ -5,9 +5,9 @@ import org.ireader.core.emptyMangaInfoPage
 import org.ireader.core.utils.UiText
 import org.ireader.domain.models.LayoutType
 import org.ireader.domain.models.entities.Book
-import sources.CatalogSource
-import sources.model.Listing
-import sources.model.MangasPageInfo
+import tachiyomi.source.CatalogSource
+import tachiyomi.source.model.Listing
+import tachiyomi.source.model.MangasPageInfo
 
 data class ExploreScreenState(
     val isLoading: Boolean = false,

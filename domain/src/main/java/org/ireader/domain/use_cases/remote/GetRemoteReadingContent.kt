@@ -10,8 +10,8 @@ import org.ireader.domain.models.entities.toChapterInfo
 import org.ireader.domain.repository.RemoteRepository
 import org.ireader.domain.utils.Resource
 import retrofit2.HttpException
-import sources.Source
-import sources.model.Text
+import tachiyomi.source.Source
+import tachiyomi.source.model.Text
 import timber.log.Timber
 import java.io.IOException
 

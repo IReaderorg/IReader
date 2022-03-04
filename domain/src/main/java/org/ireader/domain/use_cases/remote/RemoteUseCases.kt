@@ -5,8 +5,8 @@ import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.repository.RemoteRepository
-import sources.CatalogSource
-import sources.model.Listing
+import tachiyomi.source.CatalogSource
+import tachiyomi.source.model.Listing
 
 data class RemoteUseCases(
     val getBookDetail: GetBookDetail,

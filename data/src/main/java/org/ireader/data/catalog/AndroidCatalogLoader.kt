@@ -25,12 +25,12 @@ import org.ireader.domain.catalog.service.CatalogLoader
 import org.ireader.domain.models.entities.CatalogBundled
 import org.ireader.domain.models.entities.CatalogInstalled
 import org.ireader.domain.models.entities.CatalogLocal
-import sources.Dependencies
-import sources.Source
-import sources.TestSource
 import tachiyomi.core.http.HttpClients
 import tachiyomi.core.log.Log
 import tachiyomi.core.prefs.PrefixedPreferenceStore
+import tachiyomi.source.Dependencies
+import tachiyomi.source.Source
+import tachiyomi.source.TestSource
 import java.io.File
 
 /**

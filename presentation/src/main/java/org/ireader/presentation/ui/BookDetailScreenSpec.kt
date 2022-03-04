@@ -18,7 +18,7 @@ import org.ireader.domain.view_models.detail.book_detail.BookDetailViewModel
 import org.ireader.presentation.R
 import org.ireader.presentation.feature_detail.presentation.book_detail.BookDetailScreen
 import org.ireader.presentation.presentation.EmptyScreenComposable
-import sources.HttpSource
+import tachiyomi.source.HttpSource
 
 object BookDetailScreenSpec : ScreenSpec {
 

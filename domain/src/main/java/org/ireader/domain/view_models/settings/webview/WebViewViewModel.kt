@@ -26,7 +26,7 @@ import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.key.RemoteKeyUseCase
-import sources.CatalogSource
+import tachiyomi.source.CatalogSource
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 import javax.inject.Inject

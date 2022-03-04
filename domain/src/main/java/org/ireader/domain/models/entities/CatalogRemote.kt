@@ -3,7 +3,7 @@ package org.ireader.domain.models.entities
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import org.ireader.core.utils.Constants
-import sources.Source
+import tachiyomi.source.Source
 import java.io.File
 
 @Entity(tableName = Constants.CATALOG_REMOTE)

@@ -7,10 +7,10 @@ import kotlinx.coroutines.flow.Flow
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.utils.Resource
-import sources.CatalogSource
-import sources.Source
-import sources.model.Listing
-import sources.model.MangaInfo
+import tachiyomi.source.CatalogSource
+import tachiyomi.source.Source
+import tachiyomi.source.model.Listing
+import tachiyomi.source.model.MangaInfo
 
 interface RemoteRepository {
 

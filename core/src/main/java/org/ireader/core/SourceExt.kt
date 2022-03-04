@@ -4,7 +4,7 @@ import android.annotation.SuppressLint
 import android.webkit.WebView
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.suspendCancellableCoroutine
-import sources.model.MangasPageInfo
+import tachiyomi.source.model.MangasPageInfo
 import java.net.URI
 import java.net.URISyntaxException
 

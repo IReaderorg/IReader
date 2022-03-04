@@ -23,9 +23,9 @@ import org.ireader.domain.models.DisplayMode
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.remote.RemoteUseCases
-import sources.CatalogSource
-import sources.model.Listing
-import sources.model.MangasPageInfo
+import tachiyomi.source.CatalogSource
+import tachiyomi.source.model.Listing
+import tachiyomi.source.model.MangasPageInfo
 import javax.inject.Inject
 
 

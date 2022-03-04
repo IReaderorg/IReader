@@ -1,6 +1,5 @@
 package org.ireader.domain.view_models.detail.book_detail
 
-import android.annotation.SuppressLint
 import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,15 +32,11 @@ import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import org.ireader.domain.utils.Resource
-import sources.Source
+import tachiyomi.source.Source
 import timber.log.Timber
 import javax.inject.Inject
 
 
-/**
- * need to change this to BaseViewModel later
- */
-@SuppressLint("StaticFieldLeak")
 @HiltViewModel
 class BookDetailViewModel @Inject constructor(
     private val localInsertUseCases: LocalInsertUseCases,

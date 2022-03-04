@@ -9,8 +9,8 @@ import org.ireader.core.utils.Constants
 import org.ireader.data.local.AppDatabase
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.repository.RemoteRepository
-import sources.CatalogSource
-import sources.model.Listing
+import tachiyomi.source.CatalogSource
+import tachiyomi.source.model.Listing
 
 class GetRemoteBooksByRemoteMediator(
     private val remoteRepository: RemoteRepository,

@@ -47,8 +47,8 @@ import org.ireader.domain.use_cases.local.insert_usecases.InsertChapter
 import org.ireader.domain.use_cases.local.insert_usecases.InsertChapters
 import org.ireader.domain.use_cases.remote.key.DeleteAllRemoteKeys
 import org.ireader.infinity.core.domain.use_cases.local.book_usecases.GetBooksByQueryPagingSource
-import sources.Dependencies
 import tachiyomi.core.prefs.PreferenceStore
+import tachiyomi.source.Dependencies
 import java.io.File
 import javax.inject.Singleton
 
