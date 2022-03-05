@@ -25,6 +25,7 @@ import org.ireader.core.utils.Constants.DEFAULT_ELEVATION
 import org.ireader.core.utils.UiEvent
 import org.ireader.domain.models.entities.Catalog
 import org.ireader.domain.models.entities.CatalogLocal
+import org.ireader.presentation.feature_detail.presentation.book_detail.components.Toolbar
 import org.ireader.presentation.feature_sources.presentation.extension.composables.RemoteSourcesScreen
 import org.ireader.presentation.feature_sources.presentation.extension.composables.UserSourcesScreen
 import org.ireader.presentation.presentation.components.ISnackBarHost
@@ -74,7 +75,7 @@ fun ExtensionScreen(
     val focusManager = LocalFocusManager.current
     Scaffold(
         topBar = {
-            TopAppBar(
+            Toolbar(
                 title = {
                     if (!searchMode) {
                         TopAppBarTitle(title = "Extensions")

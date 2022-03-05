@@ -3,11 +3,13 @@ package org.ireader.infinity.initiators
 import android.app.Application
 import org.ireader.domain.feature_services.notification.Notifications
 import timber.log.Timber
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class NotificationsInitializer(
+@Singleton
+class NotificationsInitializer @Inject constructor(
     context: Application,
 ) {
-
     init {
         try {
             Notifications.createChannels(context)

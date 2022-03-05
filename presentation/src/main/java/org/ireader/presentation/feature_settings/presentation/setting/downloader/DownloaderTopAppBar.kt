@@ -13,6 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavController
 import org.ireader.presentation.R
+import org.ireader.presentation.feature_detail.presentation.book_detail.components.Toolbar
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
 
@@ -27,7 +28,7 @@ fun DownloaderTopAppBar(
     var isMenuExpanded by remember {
         mutableStateOf(false)
     }
-    TopAppBar(
+    Toolbar(
         title = {
             Text(
                 text = "Downloads",
@@ -59,6 +60,7 @@ fun DownloaderTopAppBar(
                 expanded = isMenuExpanded,//viewModel.state.isMenuExpanded,
                 onDismissRequest = {
                     isMenuExpanded = false
+                    /**viewModel.toggleExpandMenu(false)**/
                     /**viewModel.toggleExpandMenu(false)**/
                 },
             ) {

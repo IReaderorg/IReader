@@ -119,7 +119,7 @@ fun ReaderText(
                         item {
                             Text(
                                 modifier = modifier.fillMaxSize(),
-                                text = chapter.content.map { it.trimStart() }
+                                text = "\n\n" + chapter.content.map { it.trimStart() }
                                     .joinToString("\n".repeat(prefState.distanceBetweenParagraphs)),
                                 fontSize = viewModel.prefState.fontSize.sp,
                                 fontFamily = viewModel.prefState.font.fontFamily,

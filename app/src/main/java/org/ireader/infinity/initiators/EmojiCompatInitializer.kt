@@ -6,8 +6,9 @@ import androidx.emoji2.text.DefaultEmojiCompatConfig
 import androidx.emoji2.text.EmojiCompat
 import androidx.emoji2.text.FontRequestEmojiCompatConfig
 import org.ireader.infinity.R
+import javax.inject.Inject
 
-class EmojiCompatInitializer(context: Application) {
+class EmojiCompatInitializer @Inject constructor(context: Application) {
 
     init {
         // Note: if play services are not available, emoji fonts won't be downloaded

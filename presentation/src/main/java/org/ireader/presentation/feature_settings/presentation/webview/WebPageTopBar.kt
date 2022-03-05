@@ -8,7 +8,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.*
@@ -17,11 +16,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import org.ireader.core.ChaptersParse
+import org.ireader.core.DetailParse
 import org.ireader.domain.FetchType
 import org.ireader.presentation.R
+import org.ireader.presentation.feature_detail.presentation.book_detail.components.Toolbar
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
+import tachiyomi.source.HttpSource
 import tachiyomi.source.Source
 
 @Composable
@@ -41,7 +44,7 @@ fun WebPageTopBar(
     var isMenuExpanded by remember {
         mutableStateOf(false)
     }
-    TopAppBar(
+    Toolbar(
         title = {
             CustomTextField(modifier = Modifier
                 .padding(horizontal = 8.dp, vertical = 4.dp)
@@ -101,18 +104,22 @@ fun WebPageTopBar(
                 }) {
                     MidSizeTextComposable(text = stringResource(R.string.go_forward))
                 }
-//                DropdownMenuItem(onClick = {
-//                    isMenuExpanded = false
-//                    fetchBook()
-//                }) {
-//                    MidSizeTextComposable(text = "Fetch Book")
-//                }
-//                DropdownMenuItem(onClick = {
-//                    isMenuExpanded = false
-//                    fetchChapter()
-//                }) {
-//                    MidSizeTextComposable(text = "Fetch Chapter")
-//                }
+                if (source is HttpSource && source.getListings().contains(DetailParse())) {
+                    DropdownMenuItem(onClick = {
+                        isMenuExpanded = false
+                        fetchBook()
+                    }) {
+                        MidSizeTextComposable(text = "Fetch Book")
+                    }
+                }
+                if (source is HttpSource && source.getListings().contains(ChaptersParse())) {
+                    DropdownMenuItem(onClick = {
+                        isMenuExpanded = false
+                        fetchChapter()
+                    }) {
+                        MidSizeTextComposable(text = "Fetch Chapter")
+                    }
+                }
             }
         },
         backgroundColor = MaterialTheme.colors.background,

@@ -77,6 +77,7 @@ fun ReadingScreen(
     LaunchedEffect(key1 = true) {
         viewModel.readOrientation(context)
         viewModel.readBrightness(context)
+
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
                 is UiEvent.ShowSnackbar -> {
@@ -93,46 +94,47 @@ fun ReadingScreen(
         }
     }
 
-    Scaffold(topBar = {
-        ReaderScreenTopBar(
-            isReaderModeEnable = state.isReaderModeEnable,
-            isLoaded = state.isLocalLoaded,
-            modalBottomSheetValue = modalBottomSheetState.targetValue,
-            onRefresh = {
-                if (chapter != null) {
-                    viewModel.getReadingContentRemotely(chapter = chapter,
-                        source = source)
-                }
-            },
-            source = source,
-            chapter = chapter,
-            navController = navController,
-            onWebView = {
-                try {
-                    if (chapter != null && !state.isReaderModeEnable && state.isLocalLoaded && modalBottomSheetState.targetValue == ModalBottomSheetValue.Expanded) {
-                        navController.navigate(WebViewScreenSpec.buildRoute(
-                            url = chapter.link,
-                            sourceId = source.id,
-                            fetchType = FetchType.ContentFetchType.index,
-                        )
-                        )
-                    } else if (chapter != null && !state.isLocalLoaded) {
-                        navController.navigate(WebViewScreenSpec.buildRoute(
-                            url = chapter.link,
-                            sourceId = source.id,
-                            fetchType = FetchType.ContentFetchType.index,
-                            bookId = chapter.bookId,
-                            chapterId = chapter.id
-                        ))
+    Scaffold(
+        topBar = {
+            ReaderScreenTopBar(
+                isReaderModeEnable = state.isReaderModeEnable,
+                isLoaded = state.isLocalLoaded,
+                modalBottomSheetValue = modalBottomSheetState.targetValue,
+                onRefresh = {
+                    if (chapter != null) {
+                        viewModel.getReadingContentRemotely(chapter = chapter,
+                            source = source)
                     }
-                } catch (e: Exception) {
-                    scope.launch {
-                        viewModel.showSnackBar(UiText.ExceptionString(e))
+                },
+                source = source,
+                chapter = chapter,
+                navController = navController,
+                onWebView = {
+                    try {
+                        if (chapter != null && !state.isReaderModeEnable && state.isLocalLoaded && modalBottomSheetState.targetValue == ModalBottomSheetValue.Expanded) {
+                            navController.navigate(WebViewScreenSpec.buildRoute(
+                                url = chapter.link,
+                                sourceId = source.id,
+                                fetchType = FetchType.ContentFetchType.index,
+                            )
+                            )
+                        } else if (chapter != null && !state.isLocalLoaded) {
+                            navController.navigate(WebViewScreenSpec.buildRoute(
+                                url = chapter.link,
+                                sourceId = source.id,
+                                fetchType = FetchType.ContentFetchType.index,
+                                bookId = chapter.bookId,
+                                chapterId = chapter.id
+                            ))
+                        }
+                    } catch (e: Exception) {
+                        scope.launch {
+                            viewModel.showSnackBar(UiText.ExceptionString(e))
+                        }
                     }
                 }
-            }
-        )
-    },
+            )
+        },
         scaffoldState = scaffoldState,
         snackbarHost = { ISnackBarHost(snackBarHostState = it) },
         bottomBar = {

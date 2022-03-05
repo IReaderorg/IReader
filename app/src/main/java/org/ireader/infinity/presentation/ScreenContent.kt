@@ -39,7 +39,8 @@ fun ScreenContent() {
 
         Box(modifier = Modifier
             .fillMaxWidth()
-            .align(Alignment.TopCenter)) {
+            .align(Alignment.TopCenter)
+        ) {
 
             if (navBackStackEntry != null) {
                 screenSpec?.TopBar(navController,

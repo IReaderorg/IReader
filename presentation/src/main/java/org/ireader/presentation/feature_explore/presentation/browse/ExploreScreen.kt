@@ -27,6 +27,7 @@ import org.ireader.domain.FetchType
 import org.ireader.domain.models.layouts
 import org.ireader.domain.view_models.explore.ExploreScreenEvents
 import org.ireader.domain.view_models.explore.ExploreViewModel
+import org.ireader.presentation.feature_detail.presentation.book_detail.components.Toolbar
 import org.ireader.presentation.feature_library.presentation.components.LayoutComposable
 import org.ireader.presentation.feature_library.presentation.components.RadioButtonWithTitleComposable
 import org.ireader.presentation.presentation.EmptyScreenComposable
@@ -122,7 +123,7 @@ fun ExploreScreen(
         ) {
             Scaffold(
                 topBar = {
-                    TopAppBar(
+                    Toolbar(
                         title = {
                             if (!state.isSearchModeEnable) {
                                 TopAppBarTitle(title = source.name)

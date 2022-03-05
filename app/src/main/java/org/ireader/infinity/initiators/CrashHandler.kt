@@ -3,8 +3,9 @@ package org.ireader.infinity.initiators
 import android.app.Application
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import org.ireader.infinity.BuildConfig
+import javax.inject.Inject
 
-class CrashHandler(private val context: Application) {
+class CrashHandler @Inject constructor(private val context: Application) {
 
     init {
         setupCrashHandler()
@@ -24,10 +25,11 @@ class CrashHandler(private val context: Application) {
 
         // 4. Setup our handler, which tries to restart the app.
         if (systemHandler != null && fabricExceptionHandler != null) {
-            Thread.setDefaultUncaughtExceptionHandler(AppExceptionHandler(
-                systemHandler,
-                fabricExceptionHandler,
-                context))
+            Thread.setDefaultUncaughtExceptionHandler(
+                AppExceptionHandler(
+                    systemHandler,
+                    fabricExceptionHandler,
+                    context))
         }
 
     }

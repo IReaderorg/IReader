@@ -17,6 +17,7 @@ import androidx.navigation.NavController
 import org.ireader.core.utils.Constants
 import org.ireader.core_ui.theme.ThemeMode
 import org.ireader.domain.view_models.settings.apperance.MainViewModel
+import org.ireader.presentation.feature_detail.presentation.book_detail.components.Toolbar
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
@@ -36,7 +37,7 @@ fun AppearanceSettingScreen(
 
     Scaffold(
         modifier = Modifier.fillMaxSize(), topBar = {
-            TopAppBar(
+            Toolbar(
                 title = {
                     TopAppBarTitle(title = "Appearance")
                 },

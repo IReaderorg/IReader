@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
-import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -17,6 +16,7 @@ import org.ireader.core.utils.Constants
 import org.ireader.domain.utils.toast
 import org.ireader.domain.view_models.settings.SettingViewModel
 import org.ireader.infinity.core.data.network.models.dnsOverHttps
+import org.ireader.presentation.feature_detail.presentation.book_detail.components.Toolbar
 import org.ireader.presentation.feature_library.presentation.components.RadioButtonWithTitleComposable
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
@@ -32,7 +32,7 @@ fun DnsOverHttpScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            Toolbar(
                 title = {
                     TopAppBarTitle(title = "DnsOverHttp")
                 },

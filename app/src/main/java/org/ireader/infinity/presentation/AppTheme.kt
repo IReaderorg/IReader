@@ -3,6 +3,8 @@ package org.ireader.infinity.presentation
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.LocalImageLoader
 import com.google.accompanist.insets.ProvideWindowInsets
@@ -15,7 +17,7 @@ import org.ireader.domain.view_models.AppThemeViewModel
 
 
 @Composable
-fun InfinityTheme(
+fun AppTheme(
     content: @Composable() () -> Unit,
 ) {
     val vm: AppThemeViewModel = hiltViewModel()
@@ -23,6 +25,16 @@ fun InfinityTheme(
     val rippleTheme = vm.getRippleTheme()
     val systemUiController = rememberSystemUiController()
     val transparentStatusBar = LocalTransparentStatusBar.current.enabled
+
+    LaunchedEffect(customColors.isBarLight, transparentStatusBar) {
+        val darkIcons =
+            if (transparentStatusBar) materialColors.isLight else customColors.isBarLight
+        systemUiController.setSystemBarsColor(
+            color = Color.Transparent,
+            darkIcons = darkIcons,
+            isNavigationBarContrastEnforced = false
+        )
+    }
 
     AppColors(
         materialColors = materialColors,
