@@ -8,7 +8,7 @@ import android.os.Process
 import timber.log.Timber
 
 class AppExceptionHandler(
-    val systemHandler: Thread.UncaughtExceptionHandler,
+    private val systemHandler: Thread.UncaughtExceptionHandler,
     val crashlyticsHandler: Thread.UncaughtExceptionHandler,
     application: Application,
 ) : Thread.UncaughtExceptionHandler {

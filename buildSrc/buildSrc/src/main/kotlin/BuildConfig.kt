@@ -1,5 +1,5 @@
 object BuildConfig {
-    private const val androidBuildToolsVersion = "7.1.1"
+    private const val androidBuildToolsVersion = "7.1.2"
     const val androidBuildTools = "com.android.tools.build:gradle:$androidBuildToolsVersion"
 
     const val kotlinGradlePlugin =

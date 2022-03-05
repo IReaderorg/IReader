@@ -4,7 +4,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.Divider
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Sort
@@ -32,8 +32,8 @@ fun ReaderScreenDrawer(
     onChapter: (chapter: Chapter) -> Unit,
     chapters: LazyPagingItems<Chapter>,
     onReverseIcon: () -> Unit,
+    drawerScrollState: LazyListState,
 ) {
-    val drawerScrollState = rememberLazyListState()
 
     Column(modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -45,12 +45,6 @@ fun ReaderScreenDrawer(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = modifier.fillMaxWidth()) {
                 Box {}
-
-//                CenterTopAppBar(modifier = Modifier
-//                    .fillMaxWidth()
-//                    .background(MaterialTheme.colors.background), title = {
-//                    TopAppBarTitle(title = "Content")
-//                })
                 TopAppBarActionButton(imageVector = Icons.Default.Sort,
                     title = "Reverse list icon",
                     onClick = {

@@ -6,6 +6,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -60,11 +61,16 @@ fun ReadingScreen(
     val chapter = viewModel.state.chapter
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-
+    val drawerScrollState = rememberLazyListState()
 
     DisposableEffect(key1 = true) {
         onDispose {
             viewModel.restoreSetting(context)
+        }
+    }
+    LaunchedEffect(key1 = scaffoldState.drawerState.targetValue) {
+        if (scaffoldState.drawerState.targetValue == DrawerValue.Open && state.chapters.isNotEmpty()) {
+            drawerScrollState.scrollToItem(state.currentChapterIndex)
         }
     }
 
@@ -203,6 +209,7 @@ fun ReadingScreen(
                     chapter = chapter,
                     source = source,
                     chapters = chapters,
+                    drawerScrollState = drawerScrollState
                 )
             }
         }

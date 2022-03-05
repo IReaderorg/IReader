@@ -135,7 +135,13 @@ fun ChapterDetailScreen(
                                             sourceId = book.sourceId,
                                             chapterId = chapter.id,
                                         ))
-                                    })
+                                    },
+                                    selected = if (chapters.itemSnapshotList.items.isNotEmpty()) {
+                                        chapter.id == chapters.itemSnapshotList.maxByOrNull {
+                                            it?.lastRead ?: 0L
+                                        }?.id
+                                    } else false
+                                )
                             }
                         }
                     }

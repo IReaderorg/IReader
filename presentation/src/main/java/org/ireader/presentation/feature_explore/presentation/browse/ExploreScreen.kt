@@ -68,8 +68,8 @@ fun ExploreScreen(
         ModalBottomSheetLayout(
             sheetState = bottomSheetState,
             sheetContent = {
-                Box(modifier = Modifier
-                    .padding(16.dp)
+                Column(modifier = Modifier
+                    .padding(8.dp)
                     .fillMaxSize()
                 ) {
                     Row(modifier = Modifier
@@ -79,17 +79,26 @@ fun ExploreScreen(
                         },
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically) {
-                        MidSizeTextComposable(text = "SortBy:")
-                        Row(modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceEvenly,
-                            verticalAlignment = Alignment.CenterVertically) {
+                        MidSizeTextComposable(text = "Sort By:")
+                        Box(modifier = Modifier) {
                             MidSizeTextComposable(text = filterState.sortBy)
-                            TopAppBarActionButton(imageVector = Icons.Default.ArrowDownward,
+                            IconButton(onClick = { /*TODO*/ }) {
+                                Icon(
+                                    imageVector = Icons.Default.ArrowDownward,
+                                    contentDescription = "",
+                                    tint = MaterialTheme.colors.primary,
+
+                                    )
+                            }
+                            TopAppBarActionButton(
+                                imageVector = Icons.Default.ArrowDownward,
                                 title = "",
                                 onClick = { })
                         }
                         DropdownMenu(
-                            modifier = Modifier.background(MaterialTheme.colors.background),
+                            modifier = Modifier
+                                .background(MaterialTheme.colors.background)
+                                .fillMaxWidth(.5f),
                             expanded = isFilterMode,//viewModel.state.isMenuExpanded,
                             onDismissRequest = {
                                 isFilterMode = false
@@ -242,49 +251,49 @@ fun ExploreScreen(
                             ) {
                                 ErrorTextWithEmojis(
                                     error = error.toString(),
-                                modifier = Modifier
-                                    .padding(20.dp)
-                            )
-                            Row(Modifier
-                                .fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceEvenly,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Column(Modifier
-                                    .weight(.5f)
-                                    .wrapContentSize(Alignment.Center),
-                                    horizontalAlignment = Alignment.CenterHorizontally
+                                    modifier = Modifier
+                                        .padding(20.dp)
+                                )
+                                Row(Modifier
+                                    .fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceEvenly,
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    TopAppBarActionButton(imageVector = Icons.Default.Refresh,
-                                        title = "Retry",
-                                        onClick = { viewModel.getBooks(source = source) })
-                                    SmallTextComposable(text = "Retry")
-                                }
-                                Column(Modifier
-                                    .weight(.5f)
-                                    .wrapContentSize(Alignment.Center),
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    //TODO change this part later
+                                    Column(Modifier
+                                        .weight(.5f)
+                                        .wrapContentSize(Alignment.Center),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        TopAppBarActionButton(imageVector = Icons.Default.Refresh,
+                                            title = "Retry",
+                                            onClick = { viewModel.getBooks(source = source) })
+                                        SmallTextComposable(text = "Retry")
+                                    }
+                                    Column(Modifier
+                                        .weight(.5f)
+                                        .wrapContentSize(Alignment.Center),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        //TODO change this part later
 
-                                    TopAppBarActionButton(imageVector = Icons.Default.Public,
-                                        title = "Open in WebView",
-                                        onClick = {
-                                            navController.navigate(WebViewScreenSpec.buildRoute(
-                                                sourceId = source.id,
-                                                fetchType = FetchType.LatestFetchType.index,
-                                                url = (source as HttpSource).baseUrl
-                                            )
-                                            )
-                                        })
-                                    SmallTextComposable(text = "Open in WebView")
+                                        TopAppBarActionButton(imageVector = Icons.Default.Public,
+                                            title = "Open in WebView",
+                                            onClick = {
+                                                navController.navigate(WebViewScreenSpec.buildRoute(
+                                                    sourceId = source.id,
+                                                    fetchType = FetchType.LatestFetchType.index,
+                                                    url = (source as HttpSource).baseUrl
+                                                )
+                                                )
+                                            })
+                                        SmallTextComposable(text = "Open in WebView")
+                                    }
+
                                 }
 
                             }
 
-                        }
-
-                    })
+                        })
                     if (result) {
                         LayoutComposable(
                             books = books,

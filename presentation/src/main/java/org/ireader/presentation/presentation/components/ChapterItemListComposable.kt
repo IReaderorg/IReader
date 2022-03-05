@@ -16,7 +16,8 @@ import org.ireader.domain.models.entities.Chapter
 @Composable
 fun ChapterListItemComposable(
     modifier: Modifier = Modifier,
-    chapter: Chapter, goTo: () -> Unit,
+    chapter: Chapter,
+    goTo: () -> Unit,
     selected: Boolean = false,
 ) {
     ListItem(

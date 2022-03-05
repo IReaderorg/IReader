@@ -8,16 +8,9 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.CookieJar
-import okhttp3.Dispatcher
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
-import org.ireader.core.prefs.PreferenceStore
 import org.ireader.core_ui.theme.AppPreferences
 import org.ireader.core_ui.theme.UiPreferences
-import org.ireader.data.local.AppDatabase
 import org.ireader.data.repository.NetworkPreferences
-import org.ireader.data.repository.mediator.GetRemoteBooksByRemoteMediator
-import org.ireader.domain.repository.RemoteRepository
 import org.ireader.domain.use_cases.fetchers.FetchBookDetailAndChapterDetailFromWebView
 import org.ireader.domain.use_cases.fetchers.FetchUseCase
 import org.ireader.domain.use_cases.preferences.apperance.ReadNightModePreferences
@@ -25,9 +18,8 @@ import org.ireader.domain.use_cases.preferences.apperance.SaveNightModePreferenc
 import org.ireader.domain.use_cases.preferences.reader_preferences.*
 import org.ireader.domain.use_cases.preferences.services.ReadLastUpdateTime
 import org.ireader.domain.use_cases.preferences.services.SetLastUpdateTime
-import org.ireader.domain.use_cases.remote.*
 import org.ireader.domain.utils.MemoryCookieJar
-import java.util.concurrent.TimeUnit
+import tachiyomi.core.prefs.PreferenceStore
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
@@ -80,33 +72,6 @@ class TestNetworkModule {
         return MemoryCookieJar()
     }
 
-    @Singleton
-    @Provides
-    fun providesOkHttpClient(
-        cookieJar: CookieJar,
-        networkPreferences: NetworkPreferences,
-    ): OkHttpClient {
-        return OkHttpClient.Builder().apply {
-            connectTimeout(networkPreferences.connectionTimeOut.get(), TimeUnit.MINUTES)
-            writeTimeout(networkPreferences.writeTimeOut.get(), TimeUnit.MINUTES)
-            readTimeout(networkPreferences.readTimeOut.get(), TimeUnit.MINUTES)
-            dispatcher(Dispatcher().apply {
-                maxRequestsPerHost = networkPreferences.maxHostRequest.get()
-                maxRequests = networkPreferences.maxRequest.get()
-            })
-            networkInterceptors().add(
-                HttpLoggingInterceptor().apply {
-                    setLevel(HttpLoggingInterceptor.Level.BASIC)
-                    // proxy(Proxy(Proxy.Type.HTTP,InetSocketAddress("127.0.0.1",8080)))
-                }
-            )
-            readTimeout(15, TimeUnit.SECONDS)
-            connectTimeout(15, TimeUnit.SECONDS)
-            cookieJar(cookieJar)
-        }
-            .build()
-    }
-
 
     @Singleton
     @Provides
@@ -120,20 +85,6 @@ class TestNetworkModule {
         return WebView(context)
     }
 
-    @Singleton
-    @Provides
-    fun providesRemoteUseCase(
-        remoteRepository: RemoteRepository,
-        database: AppDatabase,
-    ): RemoteUseCases {
-        return RemoteUseCases(
-            getRemoteBooksByRemoteMediator = GetRemoteBooksByRemoteMediator(remoteRepository,
-                database),
-            getBookDetail = GetBookDetail(remoteRepository),
-            getRemoteChapters = GetRemoteChapters(remoteRepository),
-            getRemoteReadingContent = GetRemoteReadingContent(remoteRepository)
-        )
-    }
 
     @Singleton
     @Provides

@@ -3,17 +3,14 @@ package org.ireader.presentation.feature_detail.presentation.book_detail.compone
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 
 @Composable
 fun ButtonWithIconAndText(
@@ -34,11 +31,16 @@ fun ButtonWithIconAndText(
                 contentDescription = contentDescription,
                 tint = MaterialTheme.colors.onBackground
             )
-            MidSizeTextComposable(
-                text = text, style = MaterialTheme.typography.caption,
+            Text(
+                text = text,
+                style = MaterialTheme.typography.caption,
                 color = MaterialTheme.colors.onBackground,
-                overflow = TextOverflow.Ellipsis
-            )
+                overflow = TextOverflow.Visible,
+                maxLines = 1,
+                textAlign = TextAlign.Center,
+
+                )
+
         }
     }
 }

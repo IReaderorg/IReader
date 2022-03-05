@@ -5,9 +5,6 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import okhttp3.CookieJar
-import okhttp3.Dispatcher
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import org.ireader.core_ui.theme.AppPreferences
 import org.ireader.core_ui.theme.UiPreferences
 import org.ireader.data.local.AppDatabase
@@ -27,7 +24,6 @@ import org.ireader.domain.use_cases.remote.*
 import org.ireader.domain.use_cases.remote.key.*
 import org.ireader.domain.utils.MemoryCookieJar
 import tachiyomi.core.prefs.PreferenceStore
-import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
@@ -104,32 +100,6 @@ class NetworkModule {
         )
     }
 
-    @Singleton
-    @Provides
-    fun providesOkHttpClient(
-        cookieJar: CookieJar,
-        networkPreferences: NetworkPreferences,
-    ): OkHttpClient {
-        return OkHttpClient.Builder().apply {
-            connectTimeout(networkPreferences.connectionTimeOut.get(), TimeUnit.MINUTES)
-            writeTimeout(networkPreferences.writeTimeOut.get(), TimeUnit.MINUTES)
-            readTimeout(networkPreferences.readTimeOut.get(), TimeUnit.MINUTES)
-            dispatcher(Dispatcher().apply {
-                maxRequestsPerHost = networkPreferences.maxHostRequest.get()
-                maxRequests = networkPreferences.maxRequest.get()
-            })
-            networkInterceptors().add(
-                HttpLoggingInterceptor().apply {
-                    setLevel(HttpLoggingInterceptor.Level.BASIC)
-                    // proxy(Proxy(Proxy.Type.HTTP,InetSocketAddress("127.0.0.1",8080)))
-                }
-            )
-            readTimeout(15, TimeUnit.SECONDS)
-            connectTimeout(15, TimeUnit.SECONDS)
-            cookieJar(cookieJar)
-        }
-            .build()
-    }
 
 
     @Singleton
