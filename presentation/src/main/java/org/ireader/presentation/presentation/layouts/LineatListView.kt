@@ -17,6 +17,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.items
+import org.ireader.domain.feature_services.io.BookCover
 import org.ireader.domain.models.entities.Book
 import org.ireader.presentation.presentation.components.BookImageComposable
 
@@ -25,9 +26,8 @@ import org.ireader.presentation.presentation.components.BookImageComposable
 fun LinearBookItem(
     modifier: Modifier = Modifier,
     title: String,
-    img_thumbnail: Any,
-
-    ) {
+    book: Book,
+) {
 
     Box(
         modifier = modifier
@@ -37,11 +37,12 @@ fun LinearBookItem(
         Row(modifier = Modifier
             .fillMaxWidth()
             .height(40.dp)) {
-            BookImageComposable(image = img_thumbnail, modifier = modifier
-                .height(40.dp)
-                .width(40.dp)
-                .clip(RoundedCornerShape(4.dp))
-                .border(.2.dp, MaterialTheme.colors.onBackground.copy(alpha = .1f)))
+            BookImageComposable(
+                image = BookCover.from(book),
+                modifier = modifier
+                    .aspectRatio(3f / 4f)
+                    .clip(RoundedCornerShape(4.dp))
+                    .border(.2.dp, MaterialTheme.colors.onBackground.copy(alpha = .1f)))
             Spacer(modifier = Modifier.width(15.dp))
             Text(
                 text = title,
@@ -67,7 +68,7 @@ fun LinearListDisplay(
             if (book != null) {
                 LinearBookItem(
                     title = book.title,
-                    img_thumbnail = book.cover,
+                    book = book,
                     modifier = Modifier.clickable {
                         onClick(book)
                     }

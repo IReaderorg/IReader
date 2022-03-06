@@ -15,12 +15,13 @@ import coil.compose.rememberImagePainter
 import coil.request.CachePolicy
 import okhttp3.Headers
 import okhttp3.internal.addHeaderLenient
+import org.ireader.domain.feature_services.io.BookCover
 import org.ireader.presentation.R
 
 @OptIn(ExperimentalCoilApi::class)
 @Composable
 fun BookImageComposable(
-    image: Any,
+    image: BookCover,
     modifier: Modifier = Modifier,
     alignment: Alignment = Alignment.TopCenter,
     contentScale: ContentScale = ContentScale.FillHeight,
@@ -29,7 +30,7 @@ fun BookImageComposable(
     @DrawableRes placeholder: Int = R.drawable.ic_no_image_placeholder,
 ) {
 
-    val painter = rememberImagePainter(data = image, imageLoader = LocalImageLoader.current) {
+    val painter = rememberImagePainter(data = image.cover, imageLoader = LocalImageLoader.current) {
         crossfade(durationMillis = 700)
         placeholder(placeholder)
         error(placeholder)

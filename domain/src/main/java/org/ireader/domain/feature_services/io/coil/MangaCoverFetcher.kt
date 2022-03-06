@@ -19,8 +19,8 @@ import okhttp3.Request
 import okio.buffer
 import okio.source
 import org.ireader.domain.catalog.interactor.GetLocalCatalog
+import org.ireader.domain.feature_services.io.BookCover
 import org.ireader.domain.feature_services.io.LibraryCovers
-import org.ireader.domain.feature_services.io.MangaCover
 import tachiyomi.core.http.okhttp
 import tachiyomi.core.io.saveTo
 import tachiyomi.source.HttpSource
@@ -31,9 +31,9 @@ internal class LibraryMangaFetcher(
     private val libraryCovers: LibraryCovers,
     private val getLocalCatalog: GetLocalCatalog,
     private val coilCache: Cache,
-) : Fetcher<MangaCover> {
+) : Fetcher<BookCover> {
 
-    override fun key(data: MangaCover): String? {
+    override fun key(data: BookCover): String? {
         return when (getResourceType(data.cover)) {
             Type.File -> {
                 val cover = File(data.cover.substringAfter("file://"))
@@ -53,7 +53,7 @@ internal class LibraryMangaFetcher(
 
     override suspend fun fetch(
         pool: BitmapPool,
-        data: MangaCover,
+        data: BookCover,
         size: Size,
         options: Options,
     ): SourceResult {
@@ -64,7 +64,7 @@ internal class LibraryMangaFetcher(
         }
     }
 
-    private fun getFileLoader(manga: MangaCover): SourceResult {
+    private fun getFileLoader(manga: BookCover): SourceResult {
         val file = File(manga.cover.substringAfter("file://"))
         return getFileLoader(file)
     }
@@ -77,7 +77,7 @@ internal class LibraryMangaFetcher(
         )
     }
 
-    private suspend fun getUrlLoader(manga: MangaCover): SourceResult {
+    private suspend fun getUrlLoader(manga: BookCover): SourceResult {
         val file = libraryCovers.find(manga.id).toFile()
         if (file.exists() && file.lastModified() != 0L) {
             return getFileLoader(file)
@@ -117,7 +117,7 @@ internal class LibraryMangaFetcher(
         )
     }
 
-    private fun getCall(manga: MangaCover): Call {
+    private fun getCall(manga: BookCover): Call {
         val catalog = getLocalCatalog.get(manga.sourceId)
         val source = catalog?.source as? HttpSource
 

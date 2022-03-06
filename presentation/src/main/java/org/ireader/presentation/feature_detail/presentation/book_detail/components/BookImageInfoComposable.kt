@@ -11,14 +11,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.ireader.domain.feature_services.io.BookCover
 import org.ireader.domain.models.entities.Book
 import org.ireader.presentation.presentation.components.BookImageComposable
 
 @Composable
-fun BookImageInfoComposable(modifier: Modifier = Modifier, bookDetail: Book) {
+fun BookImageInfoComposable(modifier: Modifier = Modifier, book: Book) {
     Row {
         BookImageComposable(
-            image = bookDetail.cover,
+            image = BookCover.from(book),
             modifier = Modifier
                 .height(180.dp)
                 .width(150.dp)
@@ -28,7 +29,7 @@ fun BookImageInfoComposable(modifier: Modifier = Modifier, bookDetail: Book) {
         Spacer(modifier = modifier.height(8.dp))
         Column {
             Text(
-                text = bookDetail.title,
+                text = book.title,
                 style = MaterialTheme.typography.h4.copy(
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 24.sp
@@ -37,7 +38,7 @@ fun BookImageInfoComposable(modifier: Modifier = Modifier, bookDetail: Book) {
             )
             Spacer(modifier = modifier.height(8.dp))
             Text(
-                text = "Author: ${bookDetail.author}",
+                text = "Author: ${book.author}",
                 style = MaterialTheme.typography.h4.copy(
                     fontWeight = FontWeight.W400,
                     fontSize = 16.sp

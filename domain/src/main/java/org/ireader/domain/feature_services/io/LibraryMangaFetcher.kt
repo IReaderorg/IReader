@@ -68,13 +68,13 @@ internal class LibraryMangaFetcher(
     options: Options,
   ): FetchResult {
     return when (getResourceType(data.cover)) {
-      Type.File -> getFileLoader(MangaCover.from(data))
-      Type.URL -> getUrlLoader(MangaCover.from(data))
+      Type.File -> getFileLoader(BookCover.from(data))
+      Type.URL -> getUrlLoader(BookCover.from(data))
       null -> error("Not a valid image")
     }
   }
 
-  private fun getFileLoader(manga: MangaCover): SourceResult {
+  private fun getFileLoader(manga: BookCover): SourceResult {
     val file = File(manga.cover.substringAfter("file://"))
     return getFileLoader(file)
   }
@@ -87,7 +87,7 @@ internal class LibraryMangaFetcher(
     )
   }
 
-  private suspend fun getUrlLoader(manga: MangaCover): SourceResult {
+  private suspend fun getUrlLoader(manga: BookCover): SourceResult {
     val file = libraryCovers.find(manga.id).toFile()
     if (file.exists() && file.lastModified() != 0L) {
       return getFileLoader(file)
@@ -127,7 +127,7 @@ internal class LibraryMangaFetcher(
     )
   }
 
-  private fun getCall(manga: MangaCover): Call {
+  private fun getCall(manga: BookCover): Call {
 //    val catalog = extension.findSourceById(manga.sourceId)
 //    val source = catalog as? HttpSource
 //

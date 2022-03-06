@@ -24,6 +24,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
 import org.ireader.core.utils.items
+import org.ireader.domain.feature_services.io.BookCover
 import org.ireader.domain.models.entities.Book
 import org.ireader.presentation.presentation.components.BookImageComposable
 
@@ -53,13 +54,12 @@ fun GridLayoutComposable(
                     ) {
                         BookImageComposable(
                             modifier = modifier
-                                .width(120.dp)
-                                .height(180.dp)
+                                .aspectRatio(3f / 4f)
                                 .clip(RoundedCornerShape(4.dp))
                                 .border(2.5.dp,
                                     MaterialTheme.colors.onBackground.copy(alpha = .1f))
                                 .align(Alignment.Center),
-                            image = book.cover,
+                            image = BookCover.from(book),
                         )
                         Box(
                             Modifier

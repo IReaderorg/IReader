@@ -195,6 +195,7 @@ fun ReadingScreen(
         drawerContent = {
             if (chapter != null) {
                 ReaderScreenDrawer(
+                    modifier = Modifier.statusBarsPadding(),
                     onReverseIcon = {
                         viewModel.reverseChapters()
                         viewModel.getLocalChaptersByPaging(chapter.bookId)
