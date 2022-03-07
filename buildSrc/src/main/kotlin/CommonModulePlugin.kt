@@ -24,8 +24,8 @@ class CommonModulePlugin : Plugin<Project> {
                 defaultConfig {
                     minSdk = ProjectConfig.minSdk
                     targetSdk = ProjectConfig.targetSdk
-                    versionCode(ProjectConfig.ConfigVersionCode)
-                    versionName(ProjectConfig.ConfigVersionName)
+                    versionCode(ProjectConfig.versionCode)
+                    versionName(ProjectConfig.versionName)
                 }
                 compileOptions {
                     isCoreLibraryDesugaringEnabled = true

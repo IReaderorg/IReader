@@ -56,7 +56,9 @@ object Constants {
     const val NO_VALUE = 0L
 
     const val FIVE_MIN = 300000L
-    const val PARSE = "300"
+    const val PARSE_CONTENT = "PARSE_CONTENT"
+    const val PARSE_DETAIL = "PARSE_DETAIL"
+    const val PARSE_CHAPTERS = "PARSE_CHAPTERS"
 
 
 }

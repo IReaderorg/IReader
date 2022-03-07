@@ -54,7 +54,7 @@ fun GridLayoutComposable(
                     ) {
                         BookImageComposable(
                             modifier = modifier
-                                .aspectRatio(3f / 4f)
+                                .aspectRatio(6f / 10f)
                                 .clip(RoundedCornerShape(4.dp))
                                 .border(2.5.dp,
                                     MaterialTheme.colors.onBackground.copy(alpha = .1f))

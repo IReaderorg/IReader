@@ -34,6 +34,10 @@ fun AppTheme(
             darkIcons = darkIcons,
             isNavigationBarContrastEnforced = false
         )
+        systemUiController.setNavigationBarColor(
+            color = Color.Black,
+            darkIcons = darkIcons,
+        )
     }
 
     AppColors(

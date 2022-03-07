@@ -6,9 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -52,6 +50,8 @@ fun ExtensionScreen(
     val scope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
     val context = LocalContext.current
+
+
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
@@ -60,6 +60,7 @@ fun ExtensionScreen(
                         event.uiText.asString(context)
                     )
                 }
+                else -> {}
             }
         }
     }
@@ -97,32 +98,65 @@ fun ExtensionScreen(
                 contentColor = MaterialTheme.colors.onBackground,
                 elevation = DEFAULT_ELEVATION,
                 actions = {
-                    if (searchMode) {
+                    if (pagerState.currentPage == 1) {
+                        if (searchMode) {
+                            TopAppBarActionButton(
+                                imageVector = Icons.Default.Close,
+                                title = "Close",
+                                onClick = {
+                                    searchMode = false
+                                    viewModel.searchQuery = ""
+                                },
+                            )
+                        } else {
+                            TopAppBarActionButton(
+                                imageVector = Icons.Default.Search,
+                                title = "Search",
+                                onClick = {
+                                    searchMode = true
+                                },
+                            )
+                        }
                         TopAppBarActionButton(
-                            imageVector = Icons.Default.Close,
-                            title = "Close",
+                            imageVector = Icons.Default.Refresh,
+                            title = "Refresh",
                             onClick = {
-                                searchMode = false
-                                viewModel.searchQuery = ""
+                                viewModel.refreshCatalogs()
                             },
                         )
                     } else {
-                        TopAppBarActionButton(
-                            imageVector = Icons.Default.Search,
-                            title = "Search",
-                            onClick = {
-                                searchMode = true
-                            },
-                        )
+                        if (searchMode) {
+                            TopAppBarActionButton(
+                                imageVector = Icons.Default.Close,
+                                title = "Close",
+                                onClick = {
+                                    searchMode = false
+                                    viewModel.searchQuery = ""
+                                },
+                            )
+                        } else {
+                            TopAppBarActionButton(
+                                imageVector = Icons.Default.TravelExplore,
+                                title = "Search",
+                                onClick = {
+                                    searchMode = true
+                                },
+                            )
+                        }
                     }
-                    TopAppBarActionButton(
-                        imageVector = Icons.Default.Refresh,
-                        title = "Refresh",
-                        onClick = {
-                            viewModel.refreshCatalogs()
-                        },
-                    )
-                }
+                },
+                navigationIcon = if (searchMode) {
+                    {
+
+                        TopAppBarActionButton(imageVector = Icons.Default.ArrowBack,
+                            title = "Disable Search",
+                            onClick = {
+                                searchMode = false
+                                viewModel.searchQuery = ""
+                            })
+
+                    }
+                } else null
             )
         },
         scaffoldState = scaffoldState,

@@ -16,15 +16,7 @@ buildscript {
     }
 }
 
-allprojects {
-    repositories {
-        mavenCentral()
-        google()
-        maven { setUrl("https://oss.sonatype.org/content/repositories/snapshots/") }
-        maven { setUrl("https://s01.oss.sonatype.org/content/repositories/snapshots/") }
-    }
 
-}
 subprojects {
     tasks.withType<org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompile> {
         kotlinOptions {
@@ -36,6 +28,33 @@ subprojects {
     }
     tasks.withType<Test> {
         useJUnitPlatform()
+    }
+    plugins.withType<com.android.build.gradle.BasePlugin> {
+        configure<com.android.build.gradle.BaseExtension> {
+            compileSdkVersion(ProjectConfig.compileSdk)
+            defaultConfig {
+                minSdk = ProjectConfig.minSdk
+                targetSdk = ProjectConfig.targetSdk
+                versionCode(ProjectConfig.versionCode)
+                versionName(ProjectConfig.versionName)
+            }
+            compileOptions {
+                isCoreLibraryDesugaringEnabled = true
+                sourceCompatibility(JavaVersion.VERSION_11)
+                targetCompatibility(JavaVersion.VERSION_11)
+            }
+            sourceSets {
+                named("main") {
+                    val altManifest = file("src/androidMain/AndroidManifest.xml")
+                    if (altManifest.exists()) {
+                        manifest.srcFile(altManifest.path)
+                    }
+                }
+            }
+            dependencies {
+                add("coreLibraryDesugaring", libs.desugarJdkLibs)
+            }
+        }
     }
 }
 

@@ -56,7 +56,7 @@ fun CompactGridLayoutComposable(
                     ) {
                         BookImageComposable(
                             modifier = modifier
-                                .aspectRatio(3f / 4f)
+                                .aspectRatio(6f / 10f)
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(4.dp))
                                 .border(2.dp,

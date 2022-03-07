@@ -108,8 +108,9 @@ class WebViewPageModel @Inject constructor(
             showSnackBar(UiText.StringResource(R.string.trying_to_fetch_chapters_content))
             val list = mutableListOf<Chapter>()
             list.addAll(getChapterUseCase.findChaptersByKey(url))
-            val content = source.getPageList(ChapterInfo(key = Constants.PARSE, name = pageSource))
-                .filterIsInstance<Text>().map { it.text }
+            val content =
+                source.getPageList(ChapterInfo(key = Constants.PARSE_CONTENT, name = pageSource))
+                    .filterIsInstance<Text>().map { it.text }
             if (content.isNotEmpty() && list.isNotEmpty()) {
                 insertUseCases.insertChapters(list.map { it.copy(content = content) })
                 showSnackBar(UiText.DynamicString("${list.first().title} of ${list.first().title} was updated"))
@@ -131,8 +132,10 @@ class WebViewPageModel @Inject constructor(
         showSnackBar(UiText.StringResource(R.string.trying_to_fetch))
         val localBooks = mutableListOf<Book>()
         localBooks.addAll(getBookUseCases.findBooksByKey(url))
-        val detail = source.getMangaDetails(MangaInfo(key = Constants.PARSE, title = pageSource))
-        val chapter = source.getChapterList(MangaInfo(key = Constants.PARSE, title = pageSource))
+        val detail =
+            source.getMangaDetails(MangaInfo(key = Constants.PARSE_DETAIL, title = pageSource))
+        val chapter =
+            source.getChapterList(MangaInfo(key = Constants.PARSE_CHAPTERS, title = pageSource))
 
         val newList = mutableListOf<Book>()
         val localChapterList = mutableListOf<Chapter>()

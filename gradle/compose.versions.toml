@@ -1,0 +1,32 @@
+[versions]
+compose = "1.1.1"
+composePaging = "1.0.0-alpha14"
+compose-navigation = "2.5.0-alpha02"
+hiltNavigation = "1.0.0"
+activity = "1.5.0-alpha02"
+lifecycle = "2.5.0-alpha02"
+
+[libraries]
+compose-runtime = { module = "androidx.compose.runtime:runtime", version.ref = "compose" }
+compose-compiler = { module = "androidx.compose.compiler:compiler", version.ref = "compose" }
+compose-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "compose" }
+compose-material = { module = "androidx.compose.material:material", version.ref = "compose" }
+compose-icons = { module = "androidx.compose.material:material-icons-extended", version.ref = "compose" }
+compose-ui = { module = "androidx.compose.ui:ui", version.ref = "compose" }
+compose-uiToolingPreview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "compose" }
+compose-paging = { module = "androidx.paging:paging-compose", version.ref = "composePaging" }
+compose-animations = { module = "androidx.compose.animation:animation", version.ref = "compose" }
+compose-testing = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "compose" }
+compose-composeTooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose" }
+compose-ui_test_manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "compose" }
+
+
+compose-navigation = { module = "androidx.navigation:navigation-compose", version.ref = "compose-navigation" }
+compose-hiltNavigation = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigation" }
+compose-activity = { module = "androidx.activity:activity-compose", version.ref = "activity" }
+compose-lifecycle = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
+
+[bundles]
+
+
+[plugins]

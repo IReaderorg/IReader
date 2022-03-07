@@ -33,6 +33,7 @@ dependencies {
     implementation(Deps.tachiyomi.core)
 
     implementation(Deps.androidx.core)
+    implementation(Deps.androidx.core)
     implementation(Deps.androidx.emoji)
     implementation(Deps.androidx.appCompat)
     implementation(Deps.jsoup)

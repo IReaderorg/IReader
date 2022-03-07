@@ -21,8 +21,8 @@ android {
         applicationId = ProjectConfig.applicationId
         minSdk = ProjectConfig.minSdk
         targetSdk = ProjectConfig.targetSdk
-        versionCode = ProjectConfig.ConfigVersionCode
-        versionName = ProjectConfig.ConfigVersionName
+        versionCode = ProjectConfig.versionCode
+        versionName = ProjectConfig.versionName
     }
     packagingOptions {
         resources.excludes.addAll(listOf(
