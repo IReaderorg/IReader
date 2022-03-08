@@ -2,9 +2,9 @@ package org.ireader.domain.models.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import org.ireader.core.utils.Constants
+import org.ireader.core.utils.Constants.DOWNLOAD_TABLE
 
-@Entity(tableName = Constants.DOWNLOAD_TABLE)
+@Entity(tableName = DOWNLOAD_TABLE)
 data class SavedDownload(
     @PrimaryKey(autoGenerate = false)
     val bookId: Long,

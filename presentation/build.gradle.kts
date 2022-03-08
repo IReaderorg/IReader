@@ -1,8 +1,7 @@
 plugins {
     id("com.android.library")
-    kotlin("android")
+    id("kotlin-android")
     id("kotlin-kapt")
-    id("module-plugin")
 }
 
 android {
@@ -55,6 +54,7 @@ dependencies {
     implementation(Deps.DaggerHilt.hiltAndroid)
     implementation(Deps.DaggerHilt.hiltAndroidCompiler)
     implementation(Deps.DaggerHilt.hiltCompiler)
+    implementation(Deps.Timber.timber)
 
 
 }
