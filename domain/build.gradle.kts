@@ -11,115 +11,106 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = Deps.Compose.composeVersion
+        kotlinCompilerExtensionVersion = compose.versions.compose.get()
     }
 }
 
 dependencies {
 
-    addBaseDependencies()
     implementation(project(Modules.core))
     implementation(project(Modules.coreUi))
 
 
     // implementation(Deps.tachiyomi.api)
-    implementation(Deps.tachiyomi.core)
+    implementation(libs.tachiyomi)
 
 
 
-    implementation(Deps.Compose.ui)
-    implementation(Deps.Compose.runtime)
-    implementation(Deps.Compose.navigation)
-    implementation(Deps.Compose.material)
-    debugImplementation(Deps.Compose.ui_test_manifest)
-    implementation(Deps.Worker.runtimeKtx)
-    implementation(Deps.DaggerHilt.worker)
-    implementation(Deps.Coil.coilCompose)
+    implementation(compose.compose.activity)
+    implementation(compose.compose.ui)
+    implementation(compose.compose.runtime)
+    implementation(compose.compose.navigation)
+    implementation(compose.compose.material)
+    implementation(compose.compose.coil)
+    implementation(compose.compose.paging)
+    debugImplementation(compose.compose.uiTestManifest)
+
+    implementation(androidx.work.runtime)
+    implementation(libs.hilt.worker)
 
     /** Room **/
-    implementation(Deps.Room.roomRuntime)
-    "kapt"(Deps.Room.roomCompiler)
-    implementation(Deps.Room.roomKtx)
-    implementation(Deps.Room.roomPaging)
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    implementation(libs.room.paging)
+    kapt(libs.room.compiler)
+
 
     /** Coroutine **/
-    implementation(Deps.Coroutines.core)
-    implementation(Deps.Coroutines.android)
+    implementation(kotlinx.coroutines.core)
+    implementation(kotlinx.coroutines.android)
+
 
     /** Retrofit **/
-    implementation(Deps.Retrofit.retrofit)
-    implementation(Deps.Retrofit.moshiConverter)
+    implementation(libs.retrofit.retrofit)
+    implementation(libs.retrofit.moshiConverter)
 
-    implementation(Deps.okhttp.okHttp3)
-
-    implementation(Deps.okhttp.okHttp3Interceptor)
-    implementation(Deps.okhttp.okhttp3_doh)
-    implementation(Deps.okio)
-    implementation(Deps.Compose.paging)
-    implementation(Deps.jsoup)
-    implementation(Deps.Jsonpathkt.jsonpathkt)
-    implementation(Deps.Datastore.datastore)
+    implementation(libs.okhttp.okhttp3)
+    implementation(libs.okhttp.interceptor)
+    implementation(libs.okhttp.doh)
 
 
-}
-
-fun Project.addKotlinCompilerFlags() {
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-        kotlinOptions {
-            jvmTarget = "1.8"
-            kotlinOptions.freeCompilerArgs += listOf(
-                "-XXLanguage:+InlineClasses",
-                "-Xallow-result-return-type",
-                "-Xopt-in=kotlin.RequiresOptIn",
-                "-Xuse-experimental=kotlin.ExperimentalStdlibApi"
-            )
-        }
-    }
-}
+    implementation(libs.okhttp.doh)
 
 
-fun DependencyHandler.addBaseDependencies() {
-    implementation(Deps.androidx.core)
-    implementation(Deps.androidx.appCompat)
-    implementation(Deps.androidx.webkit)
-    implementation(Deps.androidx.browser)
-    implementation(Deps.androidx.material)
-    implementation(Deps.androidx.compose.activity)
+    implementation(libs.okio)
+    implementation(libs.jsoup)
 
-    implementation(Deps.kotlin.jsonSerialization)
-    implementation(Deps.kotlin.reflect)
+    implementation(androidx.dataStore)
+
+    implementation(androidx.core)
+    implementation(androidx.appCompat)
+    implementation(androidx.webkit)
+    implementation(androidx.browser)
+    implementation(androidx.material)
+    implementation(kotlinx.serialization.json)
+    implementation(kotlinx.reflect)
 
 
-    kapt(Deps.DaggerHilt.hiltCompiler)
-    implementation(Deps.DaggerHilt.hiltAndroid)
-    implementation(Deps.DaggerHilt.hiltAndroidCompiler)
-    implementation(Deps.Timber.timber)
+
+    kapt(libs.hilt.compiler)
+    implementation(libs.hilt.androidcompiler)
+    implementation(libs.hilt.android)
+    implementation(libs.timber)
 
     /** LifeCycle **/
-    implementation(Deps.LifeCycle.runtimeKtx)
-    implementation(Deps.LifeCycle.viewModel)
+    implementation(kotlinx.lifecycle.viewModel)
+    implementation(androidx.lifecycle.runtime)
+
+    implementation(kotlinx.stdlib)
+    implementation(libs.ktor.core)
+    implementation(libs.ktor.serialization)
+    implementation(libs.ktor.okhttp)
+    implementation(libs.ktor.jsoup)
 
 
-    testImplementation(Deps.Testing.junit4)
-    testImplementation(Deps.Testing.junitAndroidExt)
-    testImplementation(Deps.Testing.truth)
-    testImplementation(Deps.Testing.coroutines)
-    testImplementation(Deps.Testing.composeUiTest)
+    testImplementation(test.junit4)
+    testImplementation(test.junitAndroidExt)
+    testImplementation(test.truth)
+    testImplementation(test.coroutines)
+    testImplementation(compose.compose.uiTesting)
 
+    androidTestImplementation(test.junit4)
+    androidTestImplementation(test.junitAndroidExt)
+    androidTestImplementation(test.truth)
+    androidTestImplementation(test.coroutines)
+    androidTestImplementation(test.coroutines)
+    androidTestImplementation(compose.compose.uiTesting)
+    androidTestImplementation(libs.hilt.androidtest)
 
-    androidTestImplementation(Deps.Testing.junit4)
-    androidTestImplementation(Deps.Testing.junitAndroidExt)
-    androidTestImplementation(Deps.Testing.truth)
-    androidTestImplementation(Deps.Testing.coroutines)
-    androidTestImplementation(Deps.Testing.composeUiTest)
-    androidTestImplementation(Deps.Testing.hiltTesting)
     // Instrumented Unit Tests
     androidTestImplementation("androidx.arch.core:core-testing:2.1.0")
     androidTestImplementation("androidx.test.ext:junit:1.1.1")
     androidTestImplementation("org.mockito:mockito-core:2.21.0")
-    implementation(Deps.kotlin.stdlib)
-    implementation(Deps.ktor.core)
-    implementation(Deps.ktor.serialization)
-    implementation(Deps.ktor.okhttp)
-    implementation(Deps.ktor.ktor_jsoup)
+
+
 }

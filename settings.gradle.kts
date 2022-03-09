@@ -30,6 +30,18 @@ dependencyResolutionManagement {
         create("compose") {
             from(files("gradle/compose.versions.toml"))
         }
+        create("kotlinx") {
+            from(files("gradle/kotlinx.versions.toml"))
+        }
+        create("androidx") {
+            from(files("gradle/androidx.versions.toml"))
+        }
+        create("accompanist") {
+            from(files("gradle/accompanist.versions.toml"))
+        }
+        create("test") {
+            from(files("gradle/testing.versions.toml"))
+        }
 
     }
 }

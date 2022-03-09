@@ -17,59 +17,55 @@ android {
     }
 }
 
-addTesting()
-addKtor()
 
 dependencies {
-    //implementation(project(Modules.source))
-
-    implementation(Deps.tachiyomi.core)
-    // compileOnly(Deps.tachiyomi.api)
+    implementation(libs.tachiyomi)
     implementation(project(Modules.core))
     implementation(project(Modules.domain))
 
+    implementation(androidx.core)
+    implementation(androidx.appCompat)
+    implementation(androidx.webkit)
+    implementation(androidx.browser)
+    implementation(androidx.material)
+    implementation(kotlinx.serialization.json)
+    implementation(kotlinx.reflect)
+    implementation(kotlinx.serialization.json)
+    implementation(compose.compose.activity)
 
-    implementation(Deps.androidx.core)
-    implementation(Deps.androidx.appCompat)
-    implementation(Deps.androidx.webkit)
-    implementation(Deps.androidx.browser)
-    implementation(Deps.androidx.material)
-    implementation(Deps.androidx.compose.activity)
+    kapt(libs.hilt.compiler)
+    implementation(libs.hilt.androidcompiler)
+    implementation(libs.hilt.android)
 
-    implementation(Deps.kotlin.jsonSerialization)
-
-
-    kapt(Deps.DaggerHilt.hiltCompiler)
-    implementation(Deps.DaggerHilt.hiltAndroid)
-    implementation(Deps.DaggerHilt.hiltAndroidCompiler)
-    implementation(Deps.Timber.timber)
+    implementation(libs.timber)
+    implementation(libs.jsoup)
 
     /** LifeCycle **/
-    implementation(Deps.LifeCycle.runtimeKtx)
-    implementation(Deps.LifeCycle.viewModel)
+    implementation(androidx.lifecycle.runtime)
+    implementation(androidx.lifecycle.viewModel)
 
-    implementation(kotlin("stdlib"))
+    implementation(kotlinx.stdlib)
 
 
-    implementation(Deps.Room.roomRuntime)
-    implementation(Deps.Compose.runtime)
-    kapt(Deps.Room.roomCompiler)
-    implementation(Deps.Room.roomKtx)
-    implementation(Deps.Room.roomPaging)
-    androidTestImplementation(Deps.Room.roomTesting)
-    implementation(Deps.Moshi.moshi)
-    implementation(Deps.Moshi.moshiKotlin)
-    implementation(Deps.jsoup)
-    implementation(Deps.okhttp.okHttp3Interceptor)
+    implementation(libs.room.runtime)
+    kapt(libs.room.compiler)
+    implementation(libs.room.ktx)
+    implementation(libs.room.paging)
+    androidTestImplementation(libs.room.testing)
+
+
+    implementation(libs.moshi.moshi)
+    implementation(libs.moshi.kotlin)
+
+    implementation(libs.okhttp.interceptor)
 
     /** Coroutine **/
-    implementation(Deps.Coroutines.core)
-    implementation(Deps.Coroutines.android)
+    implementation(kotlinx.coroutines.core)
+    implementation(kotlinx.coroutines.android)
 
     /** Retrofit **/
-    implementation(Deps.Retrofit.retrofit)
-    implementation(Deps.Retrofit.moshiConverter)
-    implementation(Deps.Retrofit.moshiConverter)
+    implementation(libs.retrofit.retrofit)
+    implementation(libs.retrofit.moshiConverter)
     testImplementation("androidx.test:monitor:1.6.0-alpha01")
 
 }

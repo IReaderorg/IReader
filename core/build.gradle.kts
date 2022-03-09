@@ -6,34 +6,35 @@ plugins {
 }
 
 dependencies {
-    implementation(Deps.androidx.appCompat)
 
-    //compileOnly(Deps.tachiyomi.api)
-    implementation(Deps.tachiyomi.core)
+    implementation(androidx.appCompat)
 
-    implementation(Deps.Compose.ui)
-    implementation(Deps.Coil.coilCompose)
+    implementation(libs.tachiyomi)
 
-    implementation(Deps.okhttp.okhttp3_doh)
-    implementation(Deps.okio)
+    implementation(compose.compose.ui)
+    implementation(compose.compose.coil)
 
-    implementation(Deps.Retrofit.retrofit)
-    implementation(Deps.Retrofit.moshiConverter)
 
-    implementation(Deps.Moshi.moshi)
-    implementation(Deps.Moshi.moshiKotlin)
+    implementation(libs.okhttp.doh)
+    implementation(libs.okio)
 
-    implementation(Deps.jsoup)
-    implementation(Deps.Datastore.datastore)
+    implementation(libs.retrofit.retrofit)
+    implementation(libs.retrofit.moshiConverter)
 
-    implementation(Deps.DaggerHilt.hiltAndroid)
+    implementation(libs.hilt.android)
+    implementation(libs.moshi.moshi)
+    implementation(libs.moshi.kotlin)
 
-    implementation(kotlin("stdlib"))
+    implementation(libs.jsoup)
+    implementation(androidx.dataStore)
 
-    implementation(Deps.ktor.core)
-    implementation(Deps.ktor.serialization)
-    implementation(Deps.ktor.okhttp)
-    implementation(Deps.ktor.ktor_jsoup)
 
-    implementation(Deps.Timber.timber)
+    implementation(kotlinx.stdlib)
+
+    implementation(libs.ktor.core)
+    implementation(libs.ktor.serialization)
+    implementation(libs.ktor.okhttp)
+    implementation(libs.ktor.jsoup)
+
+    implementation(libs.timber)
 }

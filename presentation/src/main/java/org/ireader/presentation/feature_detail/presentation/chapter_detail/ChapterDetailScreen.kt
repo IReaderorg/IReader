@@ -30,6 +30,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
+import com.google.accompanist.insets.statusBarsPadding
 import org.ireader.core.utils.Constants
 import org.ireader.domain.view_models.detail.chapter_detail.ChapterDetailEvent
 import org.ireader.domain.view_models.detail.chapter_detail.ChapterDetailViewModel

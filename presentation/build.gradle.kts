@@ -13,48 +13,79 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = Deps.Compose.composeVersion
+        kotlinCompilerExtensionVersion = compose.versions.compose.get()
     }
     lint {
         baseline = file("lint-baseline.xml")
     }
 }
 
-addCompose()
-addAccompanist()
-
 dependencies {
     implementation(project(Modules.domain))
     implementation(project(Modules.core))
     implementation(project(Modules.coreUi))
 
+
+    implementation(compose.compose.foundation)
+    implementation(compose.compose.ui)
+    implementation(compose.compose.compiler)
+    implementation(compose.compose.activity)
+
+    implementation(compose.compose.material)
+    implementation(compose.compose.uiToolingPreview)
+    implementation(compose.compose.icons)
+    implementation(compose.compose.animations)
+    implementation(compose.compose.navigation)
+    implementation(compose.compose.paging)
+    implementation(compose.compose.hiltNavigation)
+    implementation(compose.compose.lifecycle)
+    implementation(compose.compose.coil)
+    implementation(androidx.lifecycle.hiltviewModel)
+
+    androidTestImplementation(compose.compose.uiTestManifest)
+    androidTestImplementation(compose.compose.testing)
+    androidTestImplementation(compose.compose.composeTooling)
+
+
+
+    implementation(accompanist.flowlayout)
+    implementation(accompanist.insets)
+    implementation(accompanist.navAnimation)
+    implementation(accompanist.navMaterial)
+    implementation(accompanist.pager)
+    implementation(accompanist.pagerIndicator)
+    implementation(accompanist.swipeRefresh)
+    implementation(accompanist.systemUiController)
+    implementation(accompanist.web)
+
+
     //  compileOnly(Deps.tachiyomi.api)
-    implementation(Deps.tachiyomi.core)
+    implementation(libs.tachiyomi)
 
-    implementation(Deps.androidx.core)
-    implementation(Deps.androidx.core)
-    implementation(Deps.androidx.emoji)
-    implementation(Deps.androidx.appCompat)
-    implementation(Deps.jsoup)
-    implementation(Deps.Worker.runtimeKtx)
-    implementation(Deps.Room.roomRuntime)
-    kapt(Deps.Room.roomCompiler)
-    implementation(Deps.Room.roomKtx)
-    implementation(Deps.Room.roomPaging)
-    implementation(Deps.Moshi.moshi)
-    implementation(Deps.Moshi.moshiKotlin)
+    implementation(androidx.core)
+    implementation(androidx.material)
+    implementation(androidx.emoji)
+    implementation(androidx.appCompat)
+    implementation(libs.jsoup)
+    implementation(androidx.work.runtime)
+    implementation(libs.room.runtime)
+    kapt(libs.room.compiler)
+    implementation(libs.room.ktx)
+    implementation(libs.room.paging)
+
+    implementation(libs.moshi.moshi)
+    implementation(libs.moshi.kotlin)
+
+    implementation(libs.hilt.worker)
+    implementation(libs.hilt.android)
+    implementation(libs.hilt.compiler)
+    implementation(libs.hilt.androidcompiler)
+
+    implementation(libs.retrofit.retrofit)
+    implementation(libs.ktor.okhttp)
 
 
-    implementation(Deps.DaggerHilt.worker)
-    implementation(Deps.Retrofit.retrofit)
-    implementation(Deps.ktor.okhttp)
-    implementation(Deps.Compose.paging)
-
-    implementation(Deps.Compose.hiltNavigationCompose)
-    implementation(Deps.DaggerHilt.hiltAndroid)
-    implementation(Deps.DaggerHilt.hiltAndroidCompiler)
-    implementation(Deps.DaggerHilt.hiltCompiler)
-    implementation(Deps.Timber.timber)
+    implementation(libs.timber)
 
 
 }

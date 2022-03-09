@@ -2,16 +2,21 @@
 kotlin = "1.6.10"
 coroutines = "1.6.0"
 serialization = "1.3.0"
+lifecycle = "2.4.0"
 
 [libraries]
 stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib-common", version.ref = "kotlin" }
-datetime = "org.jetbrains.kotlinx:kotlinx-datetime:0.3.2"
 reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
 gradle = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 
-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref ="coroutines" }
-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref ="coroutines" }
+coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
 
-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref ="serialization" }
+serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 serialization-protobuf = { module = "org.jetbrains.kotlinx:kotlinx-serialization-protobuf", version.ref = "serialization" }
-serialization-gradle = { module = "org.jetbrains.kotlin:kotlin-serialization", version.ref ="serialization" }
+serialization-gradle = { module = "org.jetbrains.kotlin:kotlin-serialization", version.ref = "serialization" }
+
+
+lifecycle-common = { module = "androidx.lifecycle:lifecycle-common-java8", version.ref = "lifecycle" }
+lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "lifecycle" }
+lifecycle-viewModel = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }

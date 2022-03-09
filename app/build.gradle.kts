@@ -44,19 +44,19 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = Deps.Compose.composeVersion
+        kotlinCompilerExtensionVersion = compose.versions.compose.get()
     }
 }
 
 
-addCompose()
+
 
 dependencies {
     implementation("androidx.core:core-splashscreen:1.0.0-beta01")
 
 
-    implementation(Deps.androidx.material)
-    implementation(Deps.androidx.emoji)
+    implementation(androidx.emoji)
+    implementation(androidx.material)
 
     implementation(project(Modules.coreUi))
     implementation(project(Modules.data))
@@ -64,74 +64,72 @@ dependencies {
     implementation(project(Modules.core))
     implementation(project(Modules.presentation))
 
-    //compileOnly(Deps.tachiyomi.api)
+    implementation(libs.tachiyomi)
 
-    implementation(Deps.tachiyomi.core)
-
-
-    implementation(Deps.Timber.timber)
-    implementation(Deps.Accompanist.insets)
-    implementation(Deps.Accompanist.systemUiController)
-    implementation(Deps.Accompanist.navAnimation)
-    implementation(Deps.Accompanist.navMaterial)
+    implementation(compose.compose.material)
+    implementation(compose.compose.hiltNavigation)
 
 
+    implementation(libs.timber)
+    implementation(accompanist.insets)
+    implementation(accompanist.systemUiController)
+    implementation(accompanist.navAnimation)
+    implementation(accompanist.navMaterial)
 
-    testImplementation(Deps.Testing.junit4)
-    androidTestImplementation(Deps.Testing.extJunit)
-    androidTestImplementation(Deps.Testing.espresso)
+
+    testImplementation(test.junit4)
+    testImplementation(test.extJunit)
+    testImplementation(test.espresso)
 
 
     /** LifeCycle **/
-    implementation(Deps.LifeCycle.runtimeKtx)
-    implementation(Deps.LifeCycle.viewModel)
+    testImplementation(androidx.lifecycle.runtime)
+    testImplementation(androidx.lifecycle.viewModel)
 
 
     /** Firebase **/
-    implementation(platform("com.google.firebase:firebase-bom:29.0.4"))
-    implementation(Deps.Firebase.analyticKtx)
-    implementation(Deps.Firebase.analytic)
-    implementation(Deps.Firebase.crashlytics)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analyticKtx)
+    implementation(libs.firebase.analytic)
+    implementation(libs.firebase.crashlytics)
 
 
     /** Coroutine **/
-    implementation(Deps.Coroutines.core)
-    implementation(Deps.Coroutines.android)
-
-    implementation(Deps.Worker.runtimeKtx)
+    implementation(kotlinx.coroutines.core)
+    implementation(kotlinx.coroutines.android)
 
 
     /** Hilt **/
-    implementation(Deps.DaggerHilt.hiltAndroid)
-    kapt(Deps.DaggerHilt.hiltAndroidCompiler)
-    kaptTest(Deps.DaggerHilt.hiltAndroidCompiler)
-    kaptAndroidTest(Deps.DaggerHilt.hiltAndroidCompiler)
-    kapt(Deps.DaggerHilt.hiltCompiler)
-    implementation(Deps.DaggerHilt.worker)
-    testImplementation(Deps.DaggerHilt.hiltAndroidTest)
-    androidTestImplementation(Deps.DaggerHilt.hiltAndroidTest)
+    kapt(libs.hilt.compiler)
+    kapt(libs.hilt.androidcompiler)
+    implementation(libs.hilt.android)
+    implementation(androidx.work.runtime)
+    implementation(libs.hilt.worker)
+    implementation(libs.hilt.androidtest)
+    androidTestImplementation(libs.hilt.androidtest)
 
 
     /** Room **/
-    implementation(Deps.Room.roomRuntime)
-    kapt(Deps.Room.roomCompiler)
-    implementation(Deps.Room.roomKtx)
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    implementation(libs.room.paging)
+    kapt(libs.room.compiler)
+
 
     /** Coil **/
-    implementation(Deps.Coil.coilCompose)
+    implementation(compose.compose.coil)
 
-//
     /** Moshi **/
-    implementation(Deps.Moshi.moshi)
-    kapt(Deps.Moshi.moshiCodegen)
-    implementation(Deps.Moshi.moshiKotlin)
+    implementation(libs.moshi.moshi)
+    implementation(libs.moshi.kotlin)
+    kapt(libs.moshi.codegen)
 
 
-//    /** Network Client - OkHttp**/
-    implementation(Deps.okhttp.okHttp3)
-    implementation(Deps.okio)
-    implementation(Deps.okhttp.okHttp3Interceptor)
-    implementation("net.gotev:cookie-store:1.4.0")
+    /** Network Client - OkHttp**/
+    implementation(libs.okio)
+    implementation(libs.okhttp.okhttp3)
+    implementation(libs.okhttp.interceptor)
+
 
 }
 
