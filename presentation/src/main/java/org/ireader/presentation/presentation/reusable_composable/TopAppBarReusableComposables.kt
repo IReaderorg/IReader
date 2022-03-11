@@ -155,6 +155,19 @@ fun TopAppBarBackButton(navController: NavController, onClick: (() -> Unit?)? = 
 }
 
 @Composable
+fun TopAppBarBackButton(onClick: () -> Unit) {
+    IconButton(onClick = {
+        onClick()
+    }) {
+        Icon(
+            imageVector = Icons.Default.ArrowBack,
+            contentDescription = "ArrowBack Icon",
+            tint = MaterialTheme.colors.onBackground,
+        )
+    }
+}
+
+@Composable
 fun TopAppBarSearch(
     query: String,
     onValueChange: (value: String) -> Unit,

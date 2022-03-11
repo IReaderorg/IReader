@@ -9,6 +9,7 @@ import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.utils.Resource
 import tachiyomi.source.CatalogSource
 import tachiyomi.source.Source
+import tachiyomi.source.model.Filter
 import tachiyomi.source.model.Listing
 import tachiyomi.source.model.MangaInfo
 
@@ -23,7 +24,8 @@ interface RemoteRepository {
 
     fun getAllExploreBookByPaging(
         source: CatalogSource,
-        listing: Listing,
+        listing: Listing?,
+        filters: List<Filter<*>>?,
         query: String? = null,
     ): PagingSource<Int, Book>
 
@@ -37,7 +39,8 @@ interface RemoteRepository {
     @OptIn(ExperimentalPagingApi::class)
     fun getRemoteBooksByRemoteMediator(
         source: CatalogSource,
-        listing: Listing,
+        listing: Listing?,
+        filters: List<Filter<*>>?,
         query: String?,
     ): Flow<PagingData<Book>>
 

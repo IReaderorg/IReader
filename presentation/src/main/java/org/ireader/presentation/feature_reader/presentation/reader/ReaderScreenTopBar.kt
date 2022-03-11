@@ -4,11 +4,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.Text
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.material.icons.filled.Public
@@ -20,7 +17,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import org.ireader.domain.models.entities.Chapter
-import org.ireader.presentation.feature_detail.presentation.book_detail.components.Toolbar
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
 import tachiyomi.source.Source
@@ -45,7 +41,8 @@ fun ReaderScreenTopBar(
             enter = slideInVertically(initialOffsetY = { it }, animationSpec = tween(700)),
             exit = slideOutVertically(targetOffsetY = { it }, animationSpec = tween(700))
         ) {
-            Toolbar(
+            TopAppBar(
+                modifier = Modifier.systemBarsPadding(),
                 title = {
                     Text(
                         text = chapter?.title ?: "",
@@ -56,7 +53,6 @@ fun ReaderScreenTopBar(
                         maxLines = 1
                     )
                 },
-                modifier = Modifier.fillMaxWidth(),
                 backgroundColor = MaterialTheme.colors.background,
                 contentColor = MaterialTheme.colors.onBackground,
                 elevation = 8.dp,
@@ -80,7 +76,8 @@ fun ReaderScreenTopBar(
             )
         }
     } else if (!isLoaded) {
-        Toolbar(
+        TopAppBar(
+            modifier = Modifier.systemBarsPadding(),
             title = {},
             elevation = 0.dp,
             backgroundColor = Color.Transparent,

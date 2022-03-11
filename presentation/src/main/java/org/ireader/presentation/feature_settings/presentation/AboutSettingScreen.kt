@@ -16,7 +16,6 @@ import androidx.navigation.compose.rememberNavController
 import org.ireader.core.ProjectConfig
 import org.ireader.core.utils.Constants
 import org.ireader.domain.utils.toast
-import org.ireader.presentation.feature_detail.presentation.book_detail.components.Toolbar
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
@@ -30,11 +29,11 @@ fun AboutSettingScreen(
 
     val context = LocalContext.current
     Scaffold(modifier = modifier.fillMaxSize(), topBar = {
-        Toolbar(
+        TopAppBar(
+            modifier = Modifier.systemBarsPadding(),
             title = {
                 TopAppBarTitle(title = "About", style = MaterialTheme.typography.h6)
             },
-            modifier = Modifier.fillMaxWidth(),
             backgroundColor = MaterialTheme.colors.background,
             contentColor = MaterialTheme.colors.onBackground,
             elevation = Constants.DEFAULT_ELEVATION,

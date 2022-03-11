@@ -1,6 +1,7 @@
 package org.ireader.presentation.feature_settings.presentation.setting.downloader
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -13,7 +14,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavController
 import org.ireader.presentation.R
-import org.ireader.presentation.feature_detail.presentation.book_detail.components.Toolbar
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
 
@@ -28,7 +28,8 @@ fun DownloaderTopAppBar(
     var isMenuExpanded by remember {
         mutableStateOf(false)
     }
-    Toolbar(
+    TopAppBar(
+        modifier = Modifier.systemBarsPadding(),
         title = {
             Text(
                 text = "Downloads",

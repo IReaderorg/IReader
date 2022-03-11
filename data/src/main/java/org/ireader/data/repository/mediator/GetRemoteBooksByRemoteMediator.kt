@@ -10,6 +10,7 @@ import org.ireader.data.local.AppDatabase
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.repository.RemoteRepository
 import tachiyomi.source.CatalogSource
+import tachiyomi.source.model.Filter
 import tachiyomi.source.model.Listing
 
 class GetRemoteBooksByRemoteMediator(
@@ -19,20 +20,22 @@ class GetRemoteBooksByRemoteMediator(
     @ExperimentalPagingApi
     operator fun invoke(
         source: CatalogSource,
-        listing: Listing,
+        listing: Listing?,
+        filters: List<Filter<*>>?,
         query: String?,
     ): Flow<PagingData<Book>> {
         return Pager(
             config = PagingConfig(pageSize = Constants.DEFAULT_PAGE_SIZE,
                 maxSize = Constants.MAX_PAGE_SIZE),
             pagingSourceFactory = {
-                remoteRepository.getAllExploreBookByPaging(source, listing, query)
+                remoteRepository.getAllExploreBookByPaging(source, listing, filters, query)
             },
             remoteMediator = ExploreRemoteMediator(
                 source = source,
                 database = database,
                 listing = listing,
-                query = query
+                query = query,
+                filters = filters
             ),
         ).flow
     }

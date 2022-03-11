@@ -20,6 +20,7 @@ import org.ireader.domain.utils.Resource
 import retrofit2.HttpException
 import tachiyomi.source.CatalogSource
 import tachiyomi.source.Source
+import tachiyomi.source.model.Filter
 import tachiyomi.source.model.Listing
 import tachiyomi.source.model.MangaInfo
 import tachiyomi.source.model.Text
@@ -39,7 +40,8 @@ class RemoteRepositoryImpl(
     @OptIn(ExperimentalPagingApi::class)
     override fun getAllExploreBookByPaging(
         source: CatalogSource,
-        listing: Listing,
+        listing: Listing?,
+        filters: List<Filter<*>>?,
         query: String?,
     ): PagingSource<Int, Book> {
         return remoteKeysDao.getAllExploreBookByPaging()
@@ -97,11 +99,12 @@ class RemoteRepositoryImpl(
     @OptIn(ExperimentalPagingApi::class)
     override fun getRemoteBooksByRemoteMediator(
         source: CatalogSource,
-        listing: Listing,
+        listing: Listing?,
+        filters: List<Filter<*>>?,
         query: String?,
     ): Flow<PagingData<Book>> {
         return GetRemoteBooksByRemoteMediator(database = database,
-            remoteRepository = this@RemoteRepositoryImpl).invoke(source, listing, query)
+            remoteRepository = this@RemoteRepositoryImpl).invoke(source, listing, filters, query)
     }
 
 

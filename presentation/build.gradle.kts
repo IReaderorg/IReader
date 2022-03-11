@@ -33,6 +33,8 @@ dependencies {
 
     implementation(compose.compose.material)
     implementation(compose.compose.uiToolingPreview)
+    implementation(compose.compose.uiTooling)
+    debugImplementation(compose.compose.uiTooling)
     implementation(compose.compose.icons)
     implementation(compose.compose.animations)
     implementation(compose.compose.navigation)

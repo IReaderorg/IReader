@@ -3,10 +3,7 @@ package org.ireader.presentation.feature_settings.presentation.setting
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.Download
@@ -24,7 +21,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import org.ireader.core.utils.Constants
-import org.ireader.presentation.feature_detail.presentation.book_detail.components.Toolbar
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
 import org.ireader.presentation.ui.AboutInfoScreenSpec
 import org.ireader.presentation.ui.AppearanceScreenSpec
@@ -49,11 +45,11 @@ fun SettingScreen(
         .fillMaxSize()
         .padding(bottom = 50.dp)) {
         Scaffold(modifier = Modifier.fillMaxSize(), topBar = {
-            Toolbar(
+            TopAppBar(
+                modifier = Modifier.systemBarsPadding(),
                 title = {
                     TopAppBarTitle(title = "Setting")
                 },
-                modifier = Modifier.fillMaxWidth(),
                 backgroundColor = MaterialTheme.colors.background,
                 contentColor = MaterialTheme.colors.onBackground,
                 elevation = Constants.DEFAULT_ELEVATION,

@@ -9,6 +9,12 @@ fun <T> List<T>.replace(position: Int, newItem: T): List<T> {
     return newList
 }
 
+fun <T> List<T>.replaceAll(newItems: List<T>): List<T> {
+    var newList = toMutableList()
+    newList = newItems.toMutableList()
+    return newList
+}
+
 /**
  * Returns a new list that replaces the first occurrence that matches the given [predicate] with
  * [newItem]. If no item matches the predicate, the same list is returned (and unmodified).

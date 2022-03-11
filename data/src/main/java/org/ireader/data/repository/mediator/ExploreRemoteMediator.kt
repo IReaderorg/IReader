@@ -23,7 +23,8 @@ import javax.net.ssl.SSLHandshakeException
 class ExploreRemoteMediator(
     private val source: CatalogSource,
     private val database: AppDatabase,
-    private val listing: Listing,
+    private val listing: Listing?,
+    private val filters: List<Filter<*>>?,
     private val query: String? = null,
 ) : RemoteMediator<Int, Book>() {
 
@@ -38,91 +39,72 @@ class ExploreRemoteMediator(
         state: PagingState<Int, Book>,
     ): RemoteMediator.MediatorResult {
         return try {
-                val currentPage = when (loadType) {
-                    LoadType.REFRESH -> {
-                        chapterDao.deleteNotInLibraryChapters()
-                        libraryDao.deleteNotInLibraryBooks()
-                        val remoteKeys = getRemoteKeyClosestToCurrentPosition(state)
-                        remoteKeys?.nextPage?.minus(1) ?: 1
-                    }
-                    LoadType.PREPEND -> {
-                        val remoteKeys = getRemoteKeyForFirstItem(state)
-                        val prevPage = remoteKeys?.prevPage
-                            ?: return RemoteMediator.MediatorResult.Success(
-                                endOfPaginationReached = remoteKeys != null
-                            )
-                        prevPage
-                    }
-                    LoadType.APPEND -> {
-                        val remoteKeys = getRemoteKeyForLastItem(state)
-                        val nextPage = remoteKeys?.nextPage
-                            ?: return RemoteMediator.MediatorResult.Success(
-                                endOfPaginationReached = remoteKeys != null
-                            )
-                        nextPage
-                    }
+            val currentPage = when (loadType) {
+                LoadType.REFRESH -> {
+                    chapterDao.deleteNotInLibraryChapters()
+                    libraryDao.deleteNotInLibraryBooks()
+                    val remoteKeys = getRemoteKeyClosestToCurrentPosition(state)
+                    remoteKeys?.nextPage?.minus(1) ?: 1
                 }
-
-                val response = if (query == null) {
-                    source.getMangaList(sort = listing, currentPage)
-                } else {
-                    if (query.isNotBlank()) {
-                        source.getMangaList(filters = listOf(Filter.Text("query", query)),
-                            page = currentPage)
-                    } else {
-                        throw Exception(UiText.StringResource(R.string.query_must_not_be_empty)
-                            .toString())
-                    }
-
-                }
-//                val response = source.getMangaList(sort = listing, currentPage)
-//                val response = when (exploreType) {
-//                    is ExploreType.Latest -> {
-//                        source.getMangaList(sort = LatestListing(), currentPage)
-//                    }
-//                    is ExploreType.Popular -> {
-//                        source.getMangaList(sort = PopularListing(), currentPage)
-//                    }
-//                    is ExploreType.Search -> {
-//                        if (query?.isBlank() == false) {
-//                            source.getMangaList(filters = listOf(Filter.Text("query", query)),
-//                                page = currentPage)
-//                        } else {
-//                            throw Exception(UiText.StringResource(R.string.query_must_not_be_empty)
-//                                .toString())
-//                        }
-//                    }
-//                    else -> {
-//                        MangasPageInfo(emptyList(), false)
-//                    }
-//                }
-
-
-                val endOfPaginationReached = !response.hasNextPage
-
-
-                val prevPage = if (currentPage == 1) null else currentPage - 1
-                val nextPage = if (endOfPaginationReached) null else currentPage + 1
-
-                database.withTransaction {
-                    if (loadType == LoadType.REFRESH) {
-                        remoteKey.deleteAllExploredBook()
-                        remoteKey.deleteAllRemoteKeys()
-                    }
-                    val keys = response.mangas.map { book ->
-                        RemoteKeys(
-                            id = book.title,
-                            prevPage = prevPage,
-                            nextPage = nextPage,
-                            sourceId = source.id
+                LoadType.PREPEND -> {
+                    val remoteKeys = getRemoteKeyForFirstItem(state)
+                    val prevPage = remoteKeys?.prevPage
+                        ?: return RemoteMediator.MediatorResult.Success(
+                            endOfPaginationReached = remoteKeys != null
                         )
-                    }
-
-
-                    remoteKey.insertAllRemoteKeys(remoteKeys = keys)
-                    remoteKey.insertAllExploredBook(response.mangas.map { it.toBook(source.id) })
+                    prevPage
                 }
-                RemoteMediator.MediatorResult.Success(endOfPaginationReached = endOfPaginationReached)
+                LoadType.APPEND -> {
+                    val remoteKeys = getRemoteKeyForLastItem(state)
+                    val nextPage = remoteKeys?.nextPage
+                        ?: return RemoteMediator.MediatorResult.Success(
+                            endOfPaginationReached = remoteKeys != null
+                        )
+                    nextPage
+                }
+            }
+            val response = if (query != null) {
+                if (query.isNotBlank()) {
+                    source.getMangaList(filters = listOf(Filter.Title(query)),
+                        page = currentPage)
+                } else {
+                    throw Exception(UiText.StringResource(R.string.query_must_not_be_empty)
+                        .toString())
+                }
+            } else if (filters != null) {
+                source.getMangaList(filters = filters, currentPage)
+            } else if (listing != null) {
+                source.getMangaList(sort = listing, currentPage)
+            } else {
+                throw Exception(UiText.StringResource(R.string.no_filter_applied)
+                    .toString())
+            }
+
+            val endOfPaginationReached = !response.hasNextPage
+
+
+            val prevPage = if (currentPage == 1) null else currentPage - 1
+            val nextPage = if (endOfPaginationReached) null else currentPage + 1
+
+            database.withTransaction {
+                if (loadType == LoadType.REFRESH) {
+                    remoteKey.deleteAllExploredBook()
+                    remoteKey.deleteAllRemoteKeys()
+                }
+                val keys = response.mangas.map { book ->
+                    RemoteKeys(
+                        id = book.title,
+                        prevPage = prevPage,
+                        nextPage = nextPage,
+                        sourceId = source.id
+                    )
+                }
+
+
+                remoteKey.insertAllRemoteKeys(remoteKeys = keys)
+                remoteKey.insertAllExploredBook(response.mangas.map { it.toBook(source.id) })
+            }
+            RemoteMediator.MediatorResult.Success(endOfPaginationReached = endOfPaginationReached)
 
         } catch (e: UnknownHostException) {
             return RemoteMediator.MediatorResult.Error(Exception("There is no internet available,please check your internet connection"))

@@ -1,12 +1,14 @@
 package org.ireader.presentation.feature_sources.presentation.extension
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.referentialEqualityPolicy
+import androidx.compose.runtime.setValue
 import org.ireader.domain.catalog.model.InstallStep
 import org.ireader.domain.models.entities.CatalogLocal
 import org.ireader.domain.models.entities.CatalogRemote
 
 
-@Stable
 interface CatalogsState {
     val pinnedCatalogs: List<CatalogLocal>
     val unpinnedCatalogs: List<CatalogLocal>

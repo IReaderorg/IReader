@@ -1,7 +1,5 @@
 package org.ireader.domain.view_models.explore
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -24,26 +22,20 @@ import org.ireader.domain.models.entities.Book
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import tachiyomi.source.CatalogSource
+import tachiyomi.source.model.Filter
 import tachiyomi.source.model.Listing
-import tachiyomi.source.model.MangasPageInfo
 import javax.inject.Inject
 
 
 @HiltViewModel
 class ExploreViewModel @Inject constructor(
+    private val state: ExploreStateImpl,
     private val preferencesUseCase: org.ireader.domain.use_cases.preferences.reader_preferences.PreferencesUseCase,
     private val remoteUseCases: RemoteUseCases,
     private val deleteUseCase: DeleteUseCase,
     private val catalogStore: CatalogStore,
     savedStateHandle: SavedStateHandle,
-) : ViewModel() {
-
-    var state: MutableState<ExploreScreenState> =
-        mutableStateOf<ExploreScreenState>(ExploreScreenState())
-        private set
-    var filterState: MutableState<BrowseFilterState> =
-        mutableStateOf<BrowseFilterState>(BrowseFilterState())
-        private set
+) : ViewModel(), ExploreState by state {
 
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
@@ -53,19 +45,13 @@ class ExploreViewModel @Inject constructor(
         val source =
             catalogStore.catalogs.find { it.source.id == sourceId }?.source
         if (sourceId != null && source is CatalogSource) {
-            if (source != null) {
-                state.value = state.value.copy(source = source)
-                state.value = state.value.copy(exploreType = source.getListings().first())
-                getBooks(source = source)
-                readLayoutType()
-            } else {
-                viewModelScope.launch {
-                    showSnackBar(UiText.StringResource(org.ireader.core.R.string.the_source_is_not_found))
-                }
-            }
+            state.source = source
+            state.exploreType = source.getListings().first()
+            getBooks(source = source)
+            readLayoutType()
         } else {
             viewModelScope.launch {
-                showSnackBar(UiText.StringResource(org.ireader.core.R.string.something_is_wrong_with_this_book))
+                showSnackBar(UiText.StringResource(org.ireader.core.R.string.the_source_is_not_found))
             }
         }
 
@@ -75,14 +61,10 @@ class ExploreViewModel @Inject constructor(
     val books = _books
 
 
-
     fun onEvent(event: ExploreScreenEvents) {
         when (event) {
             is ExploreScreenEvents.OnLayoutTypeChnage -> {
                 saveLayoutType(event.layoutType)
-            }
-            is ExploreScreenEvents.ToggleMenuDropDown -> {
-                toggleMenuDropDown(isShown = event.isShown)
             }
             is ExploreScreenEvents.ToggleSearchMode -> {
                 toggleSearchMode(event.inSearchMode)
@@ -96,13 +78,16 @@ class ExploreViewModel @Inject constructor(
     private var getBooksJob: Job? = null
 
     @OptIn(ExperimentalPagingApi::class)
-    fun getBooks(query: String? = null, listing: Listing? = null, source: CatalogSource) {
+    fun getBooks(
+        query: String? = null, listing: Listing? = null,
+        filters: List<Filter<*>>? = null, source: CatalogSource,
+    ) {
         getBooksJob?.cancel()
         getBooksJob = viewModelScope.launch(Dispatchers.Main) {
             remoteUseCases.getRemoteBookByPaginationUseCase(
                 source,
-                listing ?: state.value.exploreType,
-                query = query).cachedIn(viewModelScope)
+                listing ?: state.exploreType ?: source.getListings().first(),
+                query = query, filters = filters).cachedIn(viewModelScope)
                 .collect { snapshot ->
                     _books.value = snapshot
                 }
@@ -110,40 +95,36 @@ class ExploreViewModel @Inject constructor(
     }
 
     private fun onQueryChange(query: String) {
-        state.value = state.value.copy(searchQuery = query)
+        state.searchQuery = query
     }
 
     private fun toggleSearchMode(inSearchMode: Boolean) {
-        state.value =
-            state.value.copy(isSearchModeEnable = inSearchMode)
-        val source = state.value.source
-        if (!inSearchMode && source != null && source is CatalogSource) {
+        state.isSearchModeEnable = inSearchMode
+
+        if (!inSearchMode && source != null) {
             exitSearchedMode()
             getBooks(source = source)
         }
     }
 
     private fun exitSearchedMode() {
-        state.value = state.value.copy(
-            searchedBook = MangasPageInfo(emptyList(), false),
-            searchQuery = "",
-            isLoading = false,
-            error = UiText.StringResource(R.string.no_error))
+        state.searchQuery = ""
+        state.apply {
+            searchQuery = ""
+            isLoading = false
+            error = UiText.StringResource(R.string.no_error)
+        }
     }
 
     private fun saveLayoutType(layoutType: DisplayMode) {
-        state.value = state.value.copy(layout = layoutType.layout)
+        state.layout = layoutType.layout
         preferencesUseCase.saveBrowseLayoutUseCase(layoutType.layoutIndex)
     }
 
     private fun readLayoutType() {
-        state.value =
-            state.value.copy(layout = preferencesUseCase.readBrowseLayoutUseCase().layout)
+        state.layout = preferencesUseCase.readBrowseLayoutUseCase().layout
     }
 
-    private fun toggleMenuDropDown(isShown: Boolean) {
-        state.value = state.value.copy(isMenuDropDownShown = isShown)
-    }
 
     suspend fun showSnackBar(message: UiText?) {
         _eventFlow.emit(
@@ -161,7 +142,7 @@ class ExploreViewModel @Inject constructor(
     }
 
     fun toggleFilterMode(enable: Boolean? = null) {
-        state.value = state.value.copy(isFilterEnable = enable ?: !state.value.isFilterEnable)
+        state.isFilterEnable = enable ?: !state.isFilterEnable
     }
 
 }

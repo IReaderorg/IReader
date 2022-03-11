@@ -1,8 +1,9 @@
 package org.ireader.presentation.feature_library.presentation
 
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
+import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
@@ -18,10 +19,10 @@ import org.ireader.core.utils.Constants
 import org.ireader.core_ui.theme.AppColors
 import org.ireader.domain.view_models.library.LibraryEvents
 import org.ireader.domain.view_models.library.LibraryViewModel
-import org.ireader.presentation.Toolbar
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarSearch
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
+
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -33,7 +34,9 @@ fun LibraryScreenTopBar(
 ) {
     val state = viewModel.state
     val focusManager = LocalFocusManager.current
-    Toolbar(
+
+    TopAppBar(
+        modifier = Modifier.systemBarsPadding(),
         title = {
             if (!state.inSearchMode) {
                 TopAppBarTitle(title = "Library")
@@ -50,7 +53,6 @@ fun LibraryScreenTopBar(
                     isSearchModeEnable = state.searchQuery.isNotBlank())
             }
         },
-        modifier = Modifier.fillMaxWidth(),
         backgroundColor = AppColors.current.bars,
         contentColor = AppColors.current.onBars,
         elevation = Constants.DEFAULT_ELEVATION,

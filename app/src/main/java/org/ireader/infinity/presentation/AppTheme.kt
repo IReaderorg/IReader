@@ -35,7 +35,7 @@ fun AppTheme(
             isNavigationBarContrastEnforced = false
         )
         systemUiController.setNavigationBarColor(
-            color = Color.Black,
+            color = materialColors.background,
             darkIcons = darkIcons,
         )
     }

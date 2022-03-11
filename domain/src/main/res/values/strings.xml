@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="query_must_not_be_empty">query must not be empty.</string>
+    <string name="no_filter_applied">No Filter Applied.</string>
 </resources>

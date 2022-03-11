@@ -3,7 +3,7 @@ package org.ireader.presentation.feature_sources.presentation.extension
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -23,7 +23,6 @@ import org.ireader.core.utils.Constants.DEFAULT_ELEVATION
 import org.ireader.core.utils.UiEvent
 import org.ireader.domain.models.entities.Catalog
 import org.ireader.domain.models.entities.CatalogLocal
-import org.ireader.presentation.feature_detail.presentation.book_detail.components.Toolbar
 import org.ireader.presentation.feature_sources.presentation.extension.composables.RemoteSourcesScreen
 import org.ireader.presentation.feature_sources.presentation.extension.composables.UserSourcesScreen
 import org.ireader.presentation.presentation.components.ISnackBarHost
@@ -76,7 +75,8 @@ fun ExtensionScreen(
     val focusManager = LocalFocusManager.current
     Scaffold(
         topBar = {
-            Toolbar(
+            TopAppBar(
+                modifier = Modifier.systemBarsPadding(),
                 title = {
                     if (!searchMode) {
                         TopAppBarTitle(title = "Extensions")
@@ -93,7 +93,6 @@ fun ExtensionScreen(
                             isSearchModeEnable = searchMode)
                     }
                 },
-                modifier = Modifier.fillMaxWidth(),
                 backgroundColor = MaterialTheme.colors.background,
                 contentColor = MaterialTheme.colors.onBackground,
                 elevation = DEFAULT_ELEVATION,

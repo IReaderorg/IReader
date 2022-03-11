@@ -54,6 +54,7 @@ fun LibraryScreen(
     val lazyListState = rememberLazyListState()
 
     ModalBottomSheetLayout(
+        modifier = Modifier.systemBarsPadding(),
         sheetContent = {
             Box(modifier.defaultMinSize(minHeight = 1.dp)) {
                 BottomTabComposable(
@@ -69,7 +70,8 @@ fun LibraryScreen(
         sheetContentColor = MaterialTheme.colors.onBackground,
     ) {
         Column(modifier = Modifier
-            .fillMaxSize()) {
+            .fillMaxSize()
+            .systemBarsPadding()) {
             LibraryScreenTopBar(navController = navController,
                 viewModel = viewModel,
                 coroutineScope = coroutineScope,

@@ -1,10 +1,11 @@
 package org.ireader.presentation.feature_settings.presentation.setting.dns
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
+import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -16,7 +17,6 @@ import org.ireader.core.utils.Constants
 import org.ireader.domain.utils.toast
 import org.ireader.domain.view_models.settings.SettingViewModel
 import org.ireader.infinity.core.data.network.models.dnsOverHttps
-import org.ireader.presentation.feature_detail.presentation.book_detail.components.Toolbar
 import org.ireader.presentation.feature_library.presentation.components.RadioButtonWithTitleComposable
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
@@ -32,11 +32,11 @@ fun DnsOverHttpScreen(
 
     Scaffold(
         topBar = {
-            Toolbar(
+            TopAppBar(
+                modifier = Modifier.systemBarsPadding(),
                 title = {
                     TopAppBarTitle(title = "DnsOverHttp")
                 },
-                modifier = Modifier.fillMaxWidth(),
                 backgroundColor = MaterialTheme.colors.background,
                 contentColor = MaterialTheme.colors.onBackground,
                 elevation = Constants.DEFAULT_ELEVATION,
