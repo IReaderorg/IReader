@@ -10,8 +10,9 @@ import org.ireader.domain.repository.DownloadRepository
 import org.ireader.domain.utils.Resource
 import retrofit2.HttpException
 import java.io.IOException
+import javax.inject.Inject
 
-class GetAllDownloadsUseCase(private val downloadRepository: DownloadRepository) {
+class GetAllDownloadsUseCase @Inject constructor(private val downloadRepository: DownloadRepository) {
     operator fun invoke(): Flow<List<SavedDownload>> = flow {
         try {
             downloadRepository.findAllDownloads().first { downloads ->

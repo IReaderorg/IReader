@@ -67,7 +67,9 @@ fun ChapterDetailScreen(
     Scaffold(
         modifier = Modifier.statusBarsPadding(),
         topBar = {
-            CenterTopAppBar(modifier = Modifier.fillMaxWidth(), title = {
+            CenterTopAppBar(modifier = Modifier
+                .fillMaxWidth()
+                .systemBarsPadding(), title = {
                 TopAppBarTitle(title = "Content")
             },
                 backgroundColor = MaterialTheme.colors.background,

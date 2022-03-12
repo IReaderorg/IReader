@@ -7,8 +7,9 @@ import kotlinx.coroutines.flow.Flow
 import org.ireader.core.utils.Constants
 import org.ireader.domain.models.entities.SavedDownload
 import org.ireader.domain.repository.DownloadRepository
+import javax.inject.Inject
 
-class GetAllDownloadsUseCaseByPaging(private val downloadRepository: DownloadRepository) {
+class GetAllDownloadsUseCaseByPaging @Inject constructor(private val downloadRepository: DownloadRepository) {
     operator fun invoke(): Flow<PagingData<SavedDownload>> {
         val config = downloadRepository.findAllDownloadsByPaging()
         return Pager(

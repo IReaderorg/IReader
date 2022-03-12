@@ -13,9 +13,9 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import org.ireader.core.ProjectConfig
 import org.ireader.core.utils.Constants
 import org.ireader.domain.utils.toast
+import org.ireader.presentation.presentation.ToolBar
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
@@ -28,8 +28,14 @@ fun AboutSettingScreen(
 ) {
 
     val context = LocalContext.current
+    val versionCode: String =
+        try {
+            context.packageManager.getPackageInfo(context.packageName, 0).versionName
+        } catch (e: Exception) {
+            "Unable to get Package Version"
+        }
     Scaffold(modifier = modifier.fillMaxSize(), topBar = {
-        TopAppBar(
+        ToolBar(
             modifier = Modifier.systemBarsPadding(),
             title = {
                 TopAppBarTitle(title = "About", style = MaterialTheme.typography.h6)
@@ -43,7 +49,7 @@ fun AboutSettingScreen(
         )
     }) {
         val list = listOf<AboutTile>(
-            AboutTile.Version,
+            AboutTile.Version(versionCode),
             AboutTile.WhatsNew,
             AboutTile.Discord,
             AboutTile.Github,
@@ -86,13 +92,14 @@ fun AboutSettingScreen(
                     color = MaterialTheme.colors.onBackground.copy(alpha = .1f))
             }
 
+
         }
     }
 }
 
 sealed class AboutTile(val title: String, val subtitle: String, val intent: Intent) {
-    object Version : AboutTile("Version",
-        ProjectConfig.versionName + " Beta",
+    data class Version(val version: String) : AboutTile("Version",
+        version,
         Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/kazemcodes/Infinity/releases")))
 
     object WhatsNew : AboutTile("Whats New",

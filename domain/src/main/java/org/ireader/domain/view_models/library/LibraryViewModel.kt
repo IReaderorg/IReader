@@ -16,7 +16,6 @@ import org.ireader.domain.models.DisplayMode
 import org.ireader.domain.models.FilterType
 import org.ireader.domain.models.SortType
 import org.ireader.domain.models.entities.Book
-import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetBookUseCases
 import org.ireader.domain.use_cases.preferences.reader_preferences.PreferencesUseCase
 import javax.inject.Inject
@@ -25,7 +24,6 @@ import javax.inject.Inject
 @HiltViewModel
 class LibraryViewModel @Inject constructor(
     private val localGetBookUseCases: LocalGetBookUseCases,
-    private val deleteUseCase: DeleteUseCase,
     private val preferencesUseCase: PreferencesUseCase,
 ) : BaseViewModel() {
 

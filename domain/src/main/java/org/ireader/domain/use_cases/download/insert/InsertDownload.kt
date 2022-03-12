@@ -7,8 +7,9 @@ import org.ireader.domain.repository.DownloadRepository
 import org.ireader.domain.utils.Resource
 import retrofit2.HttpException
 import java.io.IOException
+import javax.inject.Inject
 
-class InsertDownload(private val downloadRepository: DownloadRepository) {
+class InsertDownload @Inject constructor(private val downloadRepository: DownloadRepository) {
     suspend operator fun invoke(download: SavedDownload) {
         try {
             downloadRepository.insertDownload(download)

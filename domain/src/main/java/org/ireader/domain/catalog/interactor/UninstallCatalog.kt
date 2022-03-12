@@ -10,8 +10,9 @@ package org.ireader.domain.catalog.interactor
 
 import org.ireader.domain.catalog.service.CatalogInstaller
 import org.ireader.domain.models.entities.CatalogInstalled
+import javax.inject.Inject
 
-class UninstallCatalog(
+class UninstallCatalog @Inject constructor(
     private val catalogInstaller: CatalogInstaller,
 ) {
 

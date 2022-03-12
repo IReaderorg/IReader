@@ -5,7 +5,6 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import org.ireader.core.os.PackageInstaller
 import org.ireader.data.catalog.AndroidCatalogInstallationChanges
 import org.ireader.data.catalog.AndroidCatalogInstaller
 import org.ireader.data.catalog.AndroidCatalogLoader
@@ -13,13 +12,9 @@ import org.ireader.data.catalog.CatalogGithubApi
 import org.ireader.data.local.AppDatabase
 import org.ireader.data.local.dao.CatalogDao
 import org.ireader.data.repository.CatalogRemoteRepositoryImpl
-import org.ireader.domain.catalog.CatalogInterceptors
-import org.ireader.domain.catalog.interactor.*
 import org.ireader.domain.catalog.service.*
-import org.ireader.domain.repository.LocalBookRepository
 import org.ireader.presentation.feature_sources.presentation.extension.CatalogsStateImpl
 import tachiyomi.core.http.HttpClients
-import tachiyomi.core.prefs.PreferenceStore
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
@@ -83,46 +78,7 @@ class CatalogModule {
         return CatalogGithubApi(httpClient)
     }
 
-    @Provides
-    @Singleton
-    fun provideCatalogInterceptor(
-        catalogStore: CatalogStore,
-        localCatalogs: GetLocalCatalogs,
-        remoteCatalogs: GetRemoteCatalogs,
-        localBookRepository: LocalBookRepository,
-        catalogRemoteRepository: CatalogRemoteRepository,
-        catalogInstaller: CatalogInstaller,
-        catalogPreferences: CatalogPreferences,
-        catalogRemoteApi: CatalogRemoteApi,
-        installCatalog: InstallCatalog,
-    ): CatalogInterceptors {
-        return CatalogInterceptors(
-            getInstalledCatalog = GetInstalledCatalog(catalogStore),
-            getCatalogsByType = GetCatalogsByType(localCatalogs, remoteCatalogs),
-            getLocalCatalog = GetLocalCatalog(catalogStore),
-            getLocalCatalogs = GetLocalCatalogs(catalogStore, localBookRepository),
-            getRemoteCatalogs = GetRemoteCatalogs(catalogRemoteRepository),
-            installCatalog = InstallCatalog(catalogInstaller),
-            syncRemoteCatalogs = SyncRemoteCatalogs(catalogRemoteRepository,
-                catalogRemoteApi,
-                catalogPreferences),
-            togglePinnedCatalog = TogglePinnedCatalog(catalogStore),
-            uninstallCatalog = UninstallCatalog(catalogInstaller),
-            updateCatalog = UpdateCatalog(catalogRemoteRepository, installCatalog = installCatalog),
-        )
-    }
 
-    @Provides
-    @Singleton
-    fun provideCatalogPreferences(store: PreferenceStore): CatalogPreferences {
-        return CatalogPreferences(store)
-    }
-
-    @Provides
-    @Singleton
-    fun providesGetRemoteCatalogs(catalogRemoteRepository: CatalogRemoteRepository): GetRemoteCatalogs {
-        return GetRemoteCatalogs(catalogRemoteRepository)
-    }
 
     @Provides
     @Singleton
@@ -138,20 +94,6 @@ class CatalogModule {
             installationChanges)
     }
 
-    @Provides
-    @Singleton
-    fun providesInstallCatalog(
-        catalogInstaller: CatalogInstaller,
-    ): InstallCatalog {
-        return InstallCatalog(catalogInstaller)
-    }
-
-
-    @Provides
-    @Singleton
-    fun providesPackageInstaller(context: Application): PackageInstaller {
-        return PackageInstaller(context)
-    }
 
 
 }

@@ -18,7 +18,10 @@ fun FilterTextItem(
     onUpdate: (String) -> Unit,
 ) {
     var state by remember {
-        mutableStateOf(filter.initialValue)
+        mutableStateOf(filter.value)
+    }
+    if (filter.value.isBlank()) {
+        state = ""
     }
     Box(modifier = Modifier,
         contentAlignment = Alignment.CenterStart) {

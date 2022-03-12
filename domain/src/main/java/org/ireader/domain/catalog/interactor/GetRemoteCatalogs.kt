@@ -12,8 +12,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import org.ireader.domain.catalog.service.CatalogRemoteRepository
 import org.ireader.domain.models.entities.CatalogRemote
+import javax.inject.Inject
 
-class GetRemoteCatalogs(
+class GetRemoteCatalogs @Inject constructor(
     private val catalogRemoteRepository: CatalogRemoteRepository,
 ) {
 

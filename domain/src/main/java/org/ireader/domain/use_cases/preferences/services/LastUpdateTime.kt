@@ -1,8 +1,9 @@
 package org.ireader.domain.use_cases.preferences.services
 
 import org.ireader.core_ui.theme.AppPreferences
+import javax.inject.Inject
 
-class SetLastUpdateTime(
+class SetLastUpdateTime @Inject constructor(
     private val appPreferences: AppPreferences,
 ) {
     operator fun invoke(time: Long) {
@@ -10,7 +11,7 @@ class SetLastUpdateTime(
     }
 }
 
-class ReadLastUpdateTime(
+class ReadLastUpdateTime @Inject constructor(
     private val appPreferences: AppPreferences,
 ) {
     operator fun invoke(): Long {

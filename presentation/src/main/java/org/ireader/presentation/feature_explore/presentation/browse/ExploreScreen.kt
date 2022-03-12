@@ -21,7 +21,6 @@ import androidx.navigation.NavController
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.compose.collectAsLazyPagingItems
 import kotlinx.coroutines.launch
-import org.ireader.core.utils.replace
 import org.ireader.domain.FetchType
 import org.ireader.domain.models.DisplayMode
 import org.ireader.domain.models.LayoutType
@@ -67,13 +66,13 @@ fun ExploreScreen(
     val bottomSheetState =
         rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
     val scope = rememberCoroutineScope()
-    val filters = vm.modifiedFilter
 
     LaunchedEffect(key1 = true) {
         vm.modifiedFilter = source.getFilters()
     }
 
     ModalBottomSheetLayout(
+        modifier = Modifier.statusBarsPadding(),
         sheetState = bottomSheetState,
         sheetContent = {
             FilterBottomSheet(
@@ -81,9 +80,11 @@ fun ExploreScreen(
                     vm.getBooks(filters = vm.modifiedFilter, source = source)
                 },
                 filters = vm.modifiedFilter,
-                onReset = { vm.modifiedFilter = source.getFilters() },
-                onUpdate = { filter, i ->
-                    vm.modifiedFilter = vm.modifiedFilter.replace(i, filter)
+                onReset = {
+                    vm.modifiedFilter = source.getFilters()
+                },
+                onUpdate = {
+                    vm.modifiedFilter = it
                 }
             )
         },

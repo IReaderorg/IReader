@@ -45,7 +45,7 @@ fun LibraryScreen(
     val coroutineScope = rememberCoroutineScope()
 
     val books = viewModel.book.collectAsLazyPagingItems()
-    //val books = viewModel.books.collectAsLazyPagingItems()
+
     val pagerState = rememberPagerState()
     val bottomSheetState =
         rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
@@ -71,7 +71,7 @@ fun LibraryScreen(
     ) {
         Column(modifier = Modifier
             .fillMaxSize()
-            .systemBarsPadding()) {
+        ) {
             LibraryScreenTopBar(navController = navController,
                 viewModel = viewModel,
                 coroutineScope = coroutineScope,

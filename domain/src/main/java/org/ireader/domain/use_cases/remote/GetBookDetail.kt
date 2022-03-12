@@ -13,8 +13,9 @@ import retrofit2.HttpException
 import tachiyomi.source.Source
 import timber.log.Timber
 import java.io.IOException
+import javax.inject.Inject
 
-class GetBookDetail(private val remoteRepository: RemoteRepository) {
+class GetBookDetail @Inject constructor(private val remoteRepository: RemoteRepository) {
     operator fun invoke(book: Book, source: Source): Flow<Resource<Book>> = flow {
         try {
             val now = System.currentTimeMillis()

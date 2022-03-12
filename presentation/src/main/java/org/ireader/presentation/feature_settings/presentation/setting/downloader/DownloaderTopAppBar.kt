@@ -1,7 +1,6 @@
 package org.ireader.presentation.feature_settings.presentation.setting.downloader
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -14,6 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavController
 import org.ireader.presentation.R
+import org.ireader.presentation.presentation.ToolBar
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
 
@@ -28,8 +28,7 @@ fun DownloaderTopAppBar(
     var isMenuExpanded by remember {
         mutableStateOf(false)
     }
-    TopAppBar(
-        modifier = Modifier.systemBarsPadding(),
+    ToolBar(
         title = {
             Text(
                 text = "Downloads",
@@ -61,14 +60,11 @@ fun DownloaderTopAppBar(
                 expanded = isMenuExpanded,//viewModel.state.isMenuExpanded,
                 onDismissRequest = {
                     isMenuExpanded = false
-                    /**viewModel.toggleExpandMenu(false)**/
-                    /**viewModel.toggleExpandMenu(false)**/
                 },
             ) {
                 DropdownMenuItem(onClick = {
                     isMenuExpanded = false
                     onDeleteAllDownload()
-                    //viewModel.deleteAllDownloads()
                 }) {
                     MidSizeTextComposable(text = stringResource(R.string.delete_all_downloads))
                 }

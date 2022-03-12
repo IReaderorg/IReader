@@ -11,7 +11,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import org.ireader.core.ProjectConfig
+import org.ireader.core.BuildConfig
 import org.ireader.domain.R
 import org.ireader.domain.feature_services.notification.Notifications.CHANNEL_APP_UPDATE
 import org.ireader.domain.feature_services.notification.Notifications.ID_APP_UPDATER
@@ -43,9 +43,16 @@ class UpdateService @AssistedInject constructor(
 
         val version = Version.create(release.tagName)
 
-        val current = Version.create(ProjectConfig.versionName)
+        BuildConfig.LIBRARY_PACKAGE_NAME
+        val versionCode: String =
+            try {
+                context.packageManager.getPackageInfo(context.packageName, 0).versionName
+            } catch (e: Exception) {
+                "1.0"
+            }
+        val current = Version.create(versionCode)
 
-        if (Version.isNewVersion(release.tagName)) {
+        if (Version.isNewVersion(release.tagName, versionCode)) {
             preferences.setLastUpdateTime(Date().time)
             with(NotificationManagerCompat.from(applicationContext)) {
                 notify(ID_APP_UPDATER, createNotification(current, version, createIntent(release)))

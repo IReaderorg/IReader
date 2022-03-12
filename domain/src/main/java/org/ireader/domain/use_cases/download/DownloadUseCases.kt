@@ -8,8 +8,9 @@ import org.ireader.domain.use_cases.download.get.GetAllDownloadsUseCaseByPaging
 import org.ireader.domain.use_cases.download.get.GetOneSavedDownload
 import org.ireader.domain.use_cases.download.insert.InsertDownload
 import org.ireader.domain.use_cases.download.insert.InsertDownloads
+import javax.inject.Inject
 
-data class DownloadUseCases(
+data class DownloadUseCases @Inject constructor(
     val getAllDownloadsUseCase: GetAllDownloadsUseCase,
     val getAllDownloadsUseCaseByPaging: GetAllDownloadsUseCaseByPaging,
     val getOneSavedDownload: GetOneSavedDownload,

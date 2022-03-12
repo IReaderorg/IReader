@@ -1,8 +1,9 @@
 package org.ireader.domain.use_cases.preferences.reader_preferences
 
 import org.ireader.core_ui.theme.AppPreferences
+import javax.inject.Inject
 
-class SaveFontHeightUseCase(
+class SaveFontHeightUseCase @Inject constructor(
     private val appPreferences: AppPreferences,
 ) {
     operator fun invoke(fontHeight: Int) {
@@ -10,7 +11,7 @@ class SaveFontHeightUseCase(
     }
 }
 
-class ReadFontHeightUseCase(
+class ReadFontHeightUseCase @Inject constructor(
     private val appPreferences: AppPreferences,
 ) {
     operator fun invoke(): Int {

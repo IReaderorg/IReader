@@ -1,6 +1,8 @@
 package org.ireader.domain.use_cases.remote.key
 
-data class RemoteKeyUseCase(
+import javax.inject.Inject
+
+data class RemoteKeyUseCase @Inject constructor(
     val deleteAllExploredBook: DeleteAllExploredBook,
     val deleteAllRemoteKeys: DeleteAllRemoteKeys,
     val insertAllExploredBook: InsertAllExploredBook,

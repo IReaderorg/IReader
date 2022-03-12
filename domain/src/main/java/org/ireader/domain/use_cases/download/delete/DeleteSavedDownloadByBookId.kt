@@ -6,8 +6,9 @@ import org.ireader.domain.repository.DownloadRepository
 import org.ireader.domain.utils.Resource
 import retrofit2.HttpException
 import java.io.IOException
+import javax.inject.Inject
 
-class DeleteSavedDownloadByBookId(private val downloadRepository: DownloadRepository) {
+class DeleteSavedDownloadByBookId @Inject constructor(private val downloadRepository: DownloadRepository) {
     suspend operator fun invoke(bookId: Long) {
         try {
             downloadRepository.deleteSavedDownloadByBookId(bookId)

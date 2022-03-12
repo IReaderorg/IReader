@@ -4,12 +4,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.*
@@ -22,6 +20,7 @@ import org.ireader.core.ChaptersParse
 import org.ireader.core.DetailParse
 import org.ireader.domain.FetchType
 import org.ireader.presentation.R
+import org.ireader.presentation.presentation.ToolBar
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
@@ -45,8 +44,7 @@ fun WebPageTopBar(
     var isMenuExpanded by remember {
         mutableStateOf(false)
     }
-    TopAppBar(
-        modifier = Modifier.systemBarsPadding(),
+    ToolBar(
         title = {
             CustomTextField(modifier = Modifier
                 .padding(horizontal = 8.dp, vertical = 4.dp)

@@ -14,8 +14,9 @@ import org.ireader.domain.catalog.model.CatalogSort
 import org.ireader.domain.models.entities.CatalogInstalled
 import org.ireader.domain.models.entities.CatalogLocal
 import org.ireader.domain.models.entities.CatalogRemote
+import javax.inject.Inject
 
-class GetCatalogsByType(
+class GetCatalogsByType @Inject constructor(
     private val localCatalogs: GetLocalCatalogs,
     private val remoteCatalogs: GetRemoteCatalogs,
 ) {

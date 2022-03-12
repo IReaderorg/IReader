@@ -1,7 +1,5 @@
 package org.ireader.domain.feature_services.updater_service.models
 
-import org.ireader.core.ProjectConfig
-
 data class Version(
     val version: String,
 ) {
@@ -12,11 +10,10 @@ data class Version(
             return Version(version)
         }
 
-        fun isNewVersion(versionTag: String): Boolean {
+        fun isNewVersion(versionTag: String, currentVersion: String): Boolean {
             val newVersion = versionTag.replace("[^\\d.]".toRegex(), "")
 
-
-            return newVersion != ProjectConfig.versionName
+            return newVersion != currentVersion
         }
     }
 

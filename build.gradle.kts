@@ -9,14 +9,13 @@ buildscript {
         maven("https://s01.oss.sonatype.org/content/repositories/snapshots/")
     }
     dependencies {
-        classpath(BuildConfig.androidBuildTools)
-        classpath(BuildConfig.kotlinGradlePlugin)
-        classpath(BuildConfig.hiltAndroidGradlePlugin)
-        classpath(BuildConfig.googleGsmService)
-        classpath(BuildConfig.kotlinSerialization)
-        classpath(BuildConfig.firebaseCrashlytics)
-        classpath(BuildConfig.firebaseCrashlytics)
-        classpath(BuildConfig.dependenciesCheckerBenManes)
+        classpath(libs.gradle.tools)
+        classpath(libs.gradle.kotlin)
+        classpath(libs.gradle.kotlinSerialization)
+        classpath(libs.gradle.hilt)
+        classpath(libs.gradle.google)
+        classpath(libs.gradle.firebaseCrashlytic)
+        classpath(libs.gradle.benmanes)
     }
 }
 
@@ -45,10 +44,29 @@ subprojects {
                 versionCode = ProjectConfig.versionCode
                 versionName = ProjectConfig.versionName
             }
+            when (this) {
+                is com.android.build.gradle.LibraryExtension -> {
+                    defaultConfig {
+                        // apply the pro guard rules for library
+                        consumerProguardFiles("consumer-rules.pro")
+                    }
+                }
+
+                is com.android.build.gradle.AppExtension -> {
+                    buildTypes {
+                        getByName("release") {
+                            isMinifyEnabled = false
+                            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"),
+                                "proguard-rules.pro")
+                        }
+                    }
+                }
+            }
             compileOptions {
                 sourceCompatibility(JavaVersion.VERSION_11)
                 targetCompatibility(JavaVersion.VERSION_11)
             }
+
             dependencies {
             }
         }

@@ -20,18 +20,19 @@ import kotlinx.coroutines.withContext
 import tachiyomi.core.BuildConfig
 import tachiyomi.core.log.Log
 import java.io.File
+import javax.inject.Inject
 
-class PackageInstaller(
-  private val context: Application,
+class PackageInstaller @Inject constructor(
+    private val context: Application,
 ) {
 
-  private val packageInstaller = context.packageManager.packageInstaller
+    private val packageInstaller = context.packageManager.packageInstaller
 
-  @Suppress("BlockingMethodInNonBlockingContext")
-  suspend fun install(file: File, packageName: String): Boolean {
-    return withInstallReceiver { sender ->
-      withContext(Dispatchers.IO) {
-        val params = PackageInstaller.SessionParams(MODE_FULL_INSTALL)
+    @Suppress("BlockingMethodInNonBlockingContext")
+    suspend fun install(file: File, packageName: String): Boolean {
+        return withInstallReceiver { sender ->
+            withContext(Dispatchers.IO) {
+                val params = PackageInstaller.SessionParams(MODE_FULL_INSTALL)
         params.setAppPackageName(packageName)
         val sessionId = packageInstaller.createSession(params)
         packageInstaller.openSession(sessionId).use { session ->

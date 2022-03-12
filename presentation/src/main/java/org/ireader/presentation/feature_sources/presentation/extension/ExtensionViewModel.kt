@@ -7,12 +7,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
 import org.ireader.core.utils.showSnackBar
 import org.ireader.core_ui.viewmodel.BaseViewModel
-import org.ireader.domain.catalog.CatalogInterceptors
+import org.ireader.domain.catalog.interactor.*
 import org.ireader.domain.catalog.model.InstallStep
 import org.ireader.domain.models.entities.Catalog
 import org.ireader.domain.models.entities.CatalogInstalled
@@ -25,8 +27,15 @@ import javax.inject.Inject
 @HiltViewModel
 class ExtensionViewModel @Inject constructor(
     private val state: CatalogsStateImpl,
-    private val catalogInterceptors: CatalogInterceptors,
-) : BaseViewModel(), CatalogsState by state {
+    private val getCatalogsByType: GetCatalogsByType,
+    private val updateCatalog: UpdateCatalog,
+    private val installCatalog: InstallCatalog,
+    private val uninstallCatalog: UninstallCatalog,
+    private val togglePinnedCatalog: TogglePinnedCatalog,
+    private val syncRemoteCatalogs: SyncRemoteCatalogs,
+
+
+    ) : BaseViewModel(), CatalogsState by state {
 
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
@@ -34,13 +43,35 @@ class ExtensionViewModel @Inject constructor(
     var getCatalogJob: Job? = null
 
     init {
-        getCatalogs()
+        scope.launch {
+            getCatalogsByType.subscribe(excludeRemoteInstalled = true)
+                .collect { (pinned, unpinned, remote) ->
+                    state.allPinnedCatalogs = pinned
+                    state.allUnpinnedCatalogs = unpinned
+                    state.allRemoteCatalogs = remote
+
+                    state.languageChoices = getLanguageChoices(remote, pinned + unpinned)
+                }
+        }
+
+        // Update catalogs whenever the query changes or there's a new update from the backend
+        snapshotFlow { state.allPinnedCatalogs.filteredByQuery(searchQuery) }
+            .onEach { state.pinnedCatalogs = it }
+            .launchIn(scope)
+        snapshotFlow { state.allUnpinnedCatalogs.filteredByQuery(searchQuery) }
+            .onEach { state.unpinnedCatalogs = it }
+            .launchIn(scope)
+        snapshotFlow {
+            state.allRemoteCatalogs.filteredByQuery(searchQuery).filteredByChoice(selectedLanguage)
+        }
+            .onEach { state.remoteCatalogs = it }
+            .launchIn(scope)
     }
 
     private fun getCatalogs() {
         getCatalogJob?.cancel()
         getCatalogJob = scope.launch {
-            catalogInterceptors.getCatalogsByType.subscribe(excludeRemoteInstalled = true)
+            getCatalogsByType.subscribe(excludeRemoteInstalled = true)
                 .collect { (pinned, unpinned, remote) ->
                     state.allPinnedCatalogs = pinned
                     state.allUnpinnedCatalogs = unpinned
@@ -79,10 +110,10 @@ class ExtensionViewModel @Inject constructor(
             val isUpdate = catalog is CatalogInstalled
             val (pkgName, flow) = if (isUpdate) {
                 catalog as CatalogInstalled
-                catalog.pkgName to catalogInterceptors.updateCatalog.await(catalog)
+                catalog.pkgName to updateCatalog.await(catalog)
             } else {
                 catalog as CatalogRemote
-                catalog.pkgName to catalogInterceptors.installCatalog.await(catalog)
+                catalog.pkgName to installCatalog.await(catalog)
             }
             flow.collect { step ->
                 _eventFlow.showSnackBar(UiText.DynamicString(step.toString()))
@@ -97,13 +128,13 @@ class ExtensionViewModel @Inject constructor(
 
     fun togglePinnedCatalog(catalog: CatalogLocal) {
         scope.launch {
-            catalogInterceptors.togglePinnedCatalog.await(catalog)
+            togglePinnedCatalog.await(catalog)
         }
     }
 
     fun uninstallCatalog(catalog: Catalog) {
         scope.launch {
-            catalogInterceptors.uninstallCatalog.await(catalog as CatalogInstalled)
+            uninstallCatalog.await(catalog as CatalogInstalled)
             _eventFlow.showSnackBar(UiText.StringResource(R.string.uninstalled))
         }
     }
@@ -111,7 +142,7 @@ class ExtensionViewModel @Inject constructor(
     fun refreshCatalogs() {
         scope.launch(Dispatchers.IO) {
             state.isRefreshing = true
-            catalogInterceptors.syncRemoteCatalogs.await(true)
+            syncRemoteCatalogs.await(true)
             _eventFlow.showSnackBar(UiText.StringResource(R.string.Refreshed))
             state.isRefreshing = false
         }

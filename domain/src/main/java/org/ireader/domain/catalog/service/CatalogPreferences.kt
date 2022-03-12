@@ -10,8 +10,9 @@ package org.ireader.domain.catalog.service
 
 import tachiyomi.core.prefs.Preference
 import tachiyomi.core.prefs.PreferenceStore
+import javax.inject.Inject
 
-class CatalogPreferences(private val store: PreferenceStore) {
+class CatalogPreferences @Inject constructor(private val store: PreferenceStore) {
 
     fun gridMode(): Preference<Boolean> {
         return store.getBoolean("grid_mode", true)

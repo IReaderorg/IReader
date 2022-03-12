@@ -5,8 +5,9 @@ import org.ireader.core_ui.theme.AppPreferences
 import org.ireader.core_ui.theme.OrientationMode
 import org.ireader.domain.models.FilterType
 import org.ireader.domain.models.SortType
+import javax.inject.Inject
 
-class SaveOrientationUseCase(
+class SaveOrientationUseCase @Inject constructor(
     private val appPreferences: AppPreferences,
 ) {
     operator fun invoke(orientation: OrientationMode) {
@@ -15,8 +16,7 @@ class SaveOrientationUseCase(
 }
 
 
-
-class ReadOrientationUseCase(
+class ReadOrientationUseCase @Inject constructor(
     private val appPreferences: AppPreferences,
 ) {
     operator fun invoke(): OrientationMode {
@@ -24,7 +24,7 @@ class ReadOrientationUseCase(
     }
 }
 
-class SaveFiltersUseCase(
+class SaveFiltersUseCase @Inject constructor(
     private val appPreferences: AppPreferences,
 ) {
     operator fun invoke(value: Int) {
@@ -32,7 +32,7 @@ class SaveFiltersUseCase(
     }
 }
 
-class ReadFilterUseCase(
+class ReadFilterUseCase @Inject constructor(
     private val appPreferences: AppPreferences,
 ) {
     operator fun invoke(): FilterType {
@@ -40,7 +40,7 @@ class ReadFilterUseCase(
     }
 }
 
-class SaveSortersUseCase(
+class SaveSortersUseCase @Inject constructor(
     private val appPreferences: AppPreferences,
 ) {
     operator fun invoke(value: Int) {
@@ -48,7 +48,7 @@ class SaveSortersUseCase(
     }
 }
 
-class ReadSortersUseCase(
+class ReadSortersUseCase @Inject constructor(
     private val appPreferences: AppPreferences,
 ) {
     operator fun invoke(): SortType {

@@ -15,8 +15,9 @@ import retrofit2.HttpException
 import tachiyomi.source.Source
 import timber.log.Timber
 import java.io.IOException
+import javax.inject.Inject
 
-class GetRemoteChapters(private val remoteRepository: RemoteRepository) {
+class GetRemoteChapters @Inject constructor(private val remoteRepository: RemoteRepository) {
     operator fun invoke(book: Book, source: Source): Flow<Resource<List<Chapter>>> =
         flow {
             try {

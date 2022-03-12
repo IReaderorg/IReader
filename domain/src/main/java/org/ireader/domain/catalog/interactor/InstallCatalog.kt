@@ -12,8 +12,9 @@ import kotlinx.coroutines.flow.Flow
 import org.ireader.domain.catalog.model.InstallStep
 import org.ireader.domain.catalog.service.CatalogInstaller
 import org.ireader.domain.models.entities.CatalogRemote
+import javax.inject.Inject
 
-class InstallCatalog(
+class InstallCatalog @Inject constructor(
     private val catalogInstaller: CatalogInstaller,
 ) {
 

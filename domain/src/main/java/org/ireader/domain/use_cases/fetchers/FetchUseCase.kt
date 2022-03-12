@@ -1,6 +1,8 @@
 package org.ireader.domain.use_cases.fetchers
 
-data class FetchUseCase(
+import javax.inject.Inject
+
+data class FetchUseCase @Inject constructor(
     val fetchBookDetailAndChapterDetailFromWebView: FetchBookDetailAndChapterDetailFromWebView,
 )
 

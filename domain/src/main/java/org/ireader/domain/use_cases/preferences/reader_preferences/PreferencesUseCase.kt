@@ -4,8 +4,9 @@ import org.ireader.domain.use_cases.preferences.apperance.ReadNightModePreferenc
 import org.ireader.domain.use_cases.preferences.apperance.SaveNightModePreferences
 import org.ireader.domain.use_cases.preferences.services.ReadLastUpdateTime
 import org.ireader.domain.use_cases.preferences.services.SetLastUpdateTime
+import javax.inject.Inject
 
-data class PreferencesUseCase(
+data class PreferencesUseCase @Inject constructor(
     val readSelectedFontStateUseCase: ReadSelectedFontStateUseCase,
     val saveSelectedFontStateUseCase: SaveSelectedFontStateUseCase,
     val readFontSizeStateUseCase: ReadFontSizeStateUseCase,

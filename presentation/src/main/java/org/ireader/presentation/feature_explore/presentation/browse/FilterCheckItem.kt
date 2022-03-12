@@ -3,7 +3,6 @@ package org.ireader.presentation.feature_explore.presentation.browse
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.Checkbox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -13,10 +12,13 @@ import tachiyomi.source.model.Filter
 @Composable
 fun FilterCheckItem(
     filter: Filter.Check,
-    onCheck: (Boolean) -> Unit,
+    onCheck: (Boolean?) -> Unit,
 ) {
     var state by remember {
-        mutableStateOf(filter.initialValue ?: false)
+        mutableStateOf(filter.initialValue)
+    }
+    LaunchedEffect(key1 = filter.value) {
+        state = filter.value
     }
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -24,10 +26,13 @@ fun FilterCheckItem(
         verticalAlignment = Alignment.CenterVertically
     ) {
         MidSizeTextComposable(text = filter.name)
-        Checkbox(checked = state,
-            onCheckedChange = { value ->
-                onCheck(value)
-                state = value
-            })
+        UnCheckedCheckBox(
+            isChecked = state,
+            filter.allowsExclusion,
+            onChecked = {
+                state = it
+                onCheck(it)
+            }
+        )
     }
 }

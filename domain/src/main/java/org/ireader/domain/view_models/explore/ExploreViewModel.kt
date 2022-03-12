@@ -47,7 +47,7 @@ class ExploreViewModel @Inject constructor(
         if (sourceId != null && source is CatalogSource) {
             state.source = source
             state.exploreType = source.getListings().first()
-            getBooks(source = source)
+            getBooks(source = source, listing = source.getListings().first())
             readLayoutType()
         } else {
             viewModelScope.launch {
@@ -86,7 +86,7 @@ class ExploreViewModel @Inject constructor(
         getBooksJob = viewModelScope.launch(Dispatchers.Main) {
             remoteUseCases.getRemoteBookByPaginationUseCase(
                 source,
-                listing ?: state.exploreType ?: source.getListings().first(),
+                listing,
                 query = query, filters = filters).cachedIn(viewModelScope)
                 .collect { snapshot ->
                     _books.value = snapshot
@@ -103,7 +103,9 @@ class ExploreViewModel @Inject constructor(
 
         if (!inSearchMode && source != null) {
             exitSearchedMode()
-            getBooks(source = source)
+            getBooks(source = source,
+                filters = state.modifiedFilter,
+                listing = source.getListings().first())
         }
     }
 

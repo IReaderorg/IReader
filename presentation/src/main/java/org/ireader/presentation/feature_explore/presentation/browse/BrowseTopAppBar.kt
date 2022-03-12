@@ -1,11 +1,9 @@
 package org.ireader.presentation.feature_explore.presentation.browse
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.GridView
@@ -18,6 +16,7 @@ import org.ireader.domain.models.LayoutType
 import org.ireader.domain.models.layouts
 import org.ireader.domain.view_models.explore.ExploreState
 import org.ireader.presentation.feature_library.presentation.components.RadioButtonWithTitleComposable
+import org.ireader.presentation.presentation.ToolBar
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarSearch
@@ -41,8 +40,7 @@ fun BrowseTopAppBar(
     var topMenu by remember {
         mutableStateOf(false)
     }
-    TopAppBar(
-        modifier = Modifier.systemBarsPadding(),
+    ToolBar(
         title = {
             if (!state.isSearchModeEnable) {
                 TopAppBarTitle(title = source.name)

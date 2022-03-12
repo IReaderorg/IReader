@@ -3,7 +3,6 @@ package org.ireader.presentation.feature_sources.presentation.extension
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -25,6 +24,7 @@ import org.ireader.domain.models.entities.Catalog
 import org.ireader.domain.models.entities.CatalogLocal
 import org.ireader.presentation.feature_sources.presentation.extension.composables.RemoteSourcesScreen
 import org.ireader.presentation.feature_sources.presentation.extension.composables.UserSourcesScreen
+import org.ireader.presentation.presentation.ToolBar
 import org.ireader.presentation.presentation.components.ISnackBarHost
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
@@ -75,8 +75,7 @@ fun ExtensionScreen(
     val focusManager = LocalFocusManager.current
     Scaffold(
         topBar = {
-            TopAppBar(
-                modifier = Modifier.systemBarsPadding(),
+            ToolBar(
                 title = {
                     if (!searchMode) {
                         TopAppBarTitle(title = "Extensions")

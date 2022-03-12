@@ -8,15 +8,16 @@ import org.ireader.domain.repository.RemoteRepository
 import tachiyomi.source.CatalogSource
 import tachiyomi.source.model.Filter
 import tachiyomi.source.model.Listing
+import javax.inject.Inject
 
-data class RemoteUseCases(
+data class RemoteUseCases @Inject constructor(
     val getBookDetail: GetBookDetail,
     val getRemoteReadingContent: GetRemoteReadingContent,
     val getRemoteBookByPaginationUseCase: GetRemoteBookByPaginationUseCase,
     val getRemoteChapters: GetRemoteChapters,
 )
 
-class GetRemoteBookByPaginationUseCase(private val remoteRepository: RemoteRepository) {
+class GetRemoteBookByPaginationUseCase @Inject constructor(private val remoteRepository: RemoteRepository) {
     @OptIn(ExperimentalPagingApi::class)
     operator fun invoke(
         source: CatalogSource,

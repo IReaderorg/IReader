@@ -1,16 +1,13 @@
 package org.ireader.presentation.feature_library.presentation
 
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Sort
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.navigation.NavController
 import kotlinx.coroutines.CoroutineScope
@@ -19,6 +16,7 @@ import org.ireader.core.utils.Constants
 import org.ireader.core_ui.theme.AppColors
 import org.ireader.domain.view_models.library.LibraryEvents
 import org.ireader.domain.view_models.library.LibraryViewModel
+import org.ireader.presentation.presentation.ToolBar
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarSearch
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
@@ -35,8 +33,7 @@ fun LibraryScreenTopBar(
     val state = viewModel.state
     val focusManager = LocalFocusManager.current
 
-    TopAppBar(
-        modifier = Modifier.systemBarsPadding(),
+    ToolBar(
         title = {
             if (!state.inSearchMode) {
                 TopAppBarTitle(title = "Library")

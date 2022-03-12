@@ -2,10 +2,8 @@ package org.ireader.presentation.presentation
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
-import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,8 +17,7 @@ import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackBu
 fun EmptyScreenComposable(navController: NavController, errorResId: Int) {
     Scaffold(
         topBar = {
-            TopAppBar(
-                modifier = Modifier.systemBarsPadding(),
+            ToolBar(
                 title = {},
                 navigationIcon = { TopAppBarBackButton(navController = navController) },
                 backgroundColor = MaterialTheme.colors.background,

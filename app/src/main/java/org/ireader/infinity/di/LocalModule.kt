@@ -23,32 +23,15 @@ import org.ireader.domain.feature_services.io.LibraryCovers
 import org.ireader.domain.repository.DownloadRepository
 import org.ireader.domain.repository.LocalBookRepository
 import org.ireader.domain.repository.LocalChapterRepository
-import org.ireader.domain.repository.RemoteKeyRepository
-import org.ireader.domain.use_cases.download.DownloadUseCases
-import org.ireader.domain.use_cases.download.delete.DeleteAllSavedDownload
-import org.ireader.domain.use_cases.download.delete.DeleteSavedDownload
-import org.ireader.domain.use_cases.download.delete.DeleteSavedDownloadByBookId
-import org.ireader.domain.use_cases.download.get.GetAllDownloadsUseCase
-import org.ireader.domain.use_cases.download.get.GetAllDownloadsUseCaseByPaging
-import org.ireader.domain.use_cases.download.get.GetOneSavedDownload
-import org.ireader.domain.use_cases.download.insert.InsertDownload
-import org.ireader.domain.use_cases.download.insert.InsertDownloads
 import org.ireader.domain.use_cases.local.*
 import org.ireader.domain.use_cases.local.book_usecases.*
 import org.ireader.domain.use_cases.local.chapter_usecases.*
-import org.ireader.domain.use_cases.local.delete_usecases.book.DeleteAllBooks
-import org.ireader.domain.use_cases.local.delete_usecases.book.DeleteAllExploreBook
-import org.ireader.domain.use_cases.local.delete_usecases.book.DeleteBookById
-import org.ireader.domain.use_cases.local.delete_usecases.book.DeleteNotInLibraryBook
-import org.ireader.domain.use_cases.local.delete_usecases.chapter.*
 import org.ireader.domain.use_cases.local.insert_usecases.InsertBook
 import org.ireader.domain.use_cases.local.insert_usecases.InsertBooks
 import org.ireader.domain.use_cases.local.insert_usecases.InsertChapter
 import org.ireader.domain.use_cases.local.insert_usecases.InsertChapters
-import org.ireader.domain.use_cases.remote.key.DeleteAllRemoteKeys
 import org.ireader.infinity.core.domain.use_cases.local.book_usecases.GetBooksByQueryPagingSource
 import tachiyomi.core.prefs.PreferenceStore
-import tachiyomi.source.Dependencies
 import java.io.File
 import javax.inject.Singleton
 
@@ -93,53 +76,7 @@ class LocalModule {
 
 
 
-    @Singleton
-    @Provides
-    fun provideDependencies(
-        httpClients: tachiyomi.core.http.HttpClients,
-        preferences: PreferenceStore,
-    ): Dependencies {
-        return Dependencies(httpClients = httpClients,
-            preferences = preferences)
-    }
 
-    @Singleton
-    @Provides
-    fun providesDeleteUseCase(
-        localBookRepository: LocalBookRepository,
-        localChapterRepository: LocalChapterRepository,
-        remoteKeyRepository: RemoteKeyRepository,
-    ): DeleteUseCase {
-        return DeleteUseCase(
-            deleteAllBook = DeleteAllBooks(localBookRepository),
-            deleteAllExploreBook = DeleteAllExploreBook(localBookRepository),
-            deleteBookById = DeleteBookById(localBookRepository),
-            deleteNotInLibraryBook = DeleteNotInLibraryBook(localBookRepository),
-            deleteChapterByChapter = DeleteChapterByChapter(localChapterRepository),
-            deleteChaptersByBookId = DeleteChaptersByBookId(localChapterRepository),
-            deleteNotInLibraryChapters = DeleteNotInLibraryChapters(localChapterRepository),
-            deleteAllChapters = DeleteAllChapters(localChapterRepository),
-            deleteChapters = DeleteChapters(localChapterRepository = localChapterRepository),
-            deleteAllRemoteKeys = DeleteAllRemoteKeys(remoteKeyRepository = remoteKeyRepository)
-        )
-    }
-
-    @Singleton
-    @Provides
-    fun provideDownloadUseCase(
-        downloadRepository: DownloadRepository,
-    ): DownloadUseCases {
-        return DownloadUseCases(
-            deleteAllSavedDownload = DeleteAllSavedDownload(downloadRepository),
-            deleteSavedDownload = DeleteSavedDownload(downloadRepository),
-            deleteSavedDownloadByBookId = DeleteSavedDownloadByBookId(downloadRepository),
-            getAllDownloadsUseCase = GetAllDownloadsUseCase(downloadRepository),
-            getOneSavedDownload = GetOneSavedDownload(downloadRepository),
-            insertDownload = InsertDownload(downloadRepository),
-            insertDownloads = InsertDownloads(downloadRepository),
-            getAllDownloadsUseCaseByPaging = GetAllDownloadsUseCaseByPaging(downloadRepository)
-        )
-    }
 
     @Singleton
     @Provides

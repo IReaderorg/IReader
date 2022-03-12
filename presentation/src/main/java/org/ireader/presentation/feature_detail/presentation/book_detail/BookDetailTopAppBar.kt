@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.material.icons.filled.Public
@@ -14,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import org.ireader.presentation.presentation.ToolBar
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
 
 @Composable
@@ -23,12 +23,11 @@ fun BookDetailTopAppBar(
     onWebView: () -> Unit,
     onRefresh: () -> Unit,
 ) {
-    TopAppBar(
-
+    ToolBar(
         title = {},
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 32.dp),
+            .padding(horizontal = 8.dp, vertical = 0.dp),
         backgroundColor = Color.Transparent,
         contentColor = MaterialTheme.colors.onBackground,
         elevation = 0.dp,

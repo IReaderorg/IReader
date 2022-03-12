@@ -14,8 +14,9 @@ import tachiyomi.source.Source
 import tachiyomi.source.model.Text
 import timber.log.Timber
 import java.io.IOException
+import javax.inject.Inject
 
-class GetRemoteReadingContent(private val remoteRepository: RemoteRepository) {
+class GetRemoteReadingContent @Inject constructor(private val remoteRepository: RemoteRepository) {
     operator fun invoke(
         chapter: Chapter,
         source: Source,

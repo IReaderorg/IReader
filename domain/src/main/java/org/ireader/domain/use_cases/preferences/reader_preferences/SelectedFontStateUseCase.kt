@@ -3,8 +3,9 @@ package org.ireader.domain.use_cases.preferences.reader_preferences
 import org.ireader.core_ui.theme.AppPreferences
 import org.ireader.core_ui.theme.FontType
 import org.ireader.core_ui.theme.fonts
+import javax.inject.Inject
 
-class ReadSelectedFontStateUseCase(
+class ReadSelectedFontStateUseCase @Inject constructor(
     private val appPreferences: AppPreferences,
 ) {
     operator fun invoke(): FontType {
@@ -13,7 +14,7 @@ class ReadSelectedFontStateUseCase(
     }
 }
 
-class SaveSelectedFontStateUseCase(
+class SaveSelectedFontStateUseCase @Inject constructor(
     private val appPreferences: AppPreferences,
 ) {
     /**

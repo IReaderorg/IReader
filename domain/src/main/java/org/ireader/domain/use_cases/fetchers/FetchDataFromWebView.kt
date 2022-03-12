@@ -9,9 +9,10 @@ import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.utils.Resource
 import tachiyomi.source.HttpSource
+import javax.inject.Inject
 
 
-class FetchBookDetailAndChapterDetailFromWebView {
+class FetchBookDetailAndChapterDetailFromWebView @Inject constructor() {
 
     operator fun invoke(
         pageSource: String,
