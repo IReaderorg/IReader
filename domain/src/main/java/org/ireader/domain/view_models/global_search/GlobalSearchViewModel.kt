@@ -10,6 +10,7 @@ import org.ireader.core.utils.replace
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.catalog.service.CatalogStore
 import org.ireader.domain.models.entities.toBook
+import org.ireader.domain.use_cases.remote.key.DeleteAllSearchedBook
 import org.ireader.domain.use_cases.remote.key.RemoteKeyUseCase
 import tachiyomi.source.CatalogSource
 import tachiyomi.source.model.Filter
@@ -20,6 +21,7 @@ class GlobalSearchViewModel @Inject constructor(
     private val state: GlobalSearchStateImpl,
     private val catalogStore: CatalogStore,
     private val insertUseCases: RemoteKeyUseCase,
+    private val deleteAllSearchedBooks: DeleteAllSearchedBook,
     savedStateHandle: SavedStateHandle,
 ) : BaseViewModel(), GlobalSearchState by state {
 
@@ -34,6 +36,9 @@ class GlobalSearchViewModel @Inject constructor(
     fun searchBooks(query: String) {
         viewModelScope.launch {
             searchItems = emptyList()
+            withContext(Dispatchers.IO) {
+                deleteAllSearchedBooks()
+            }
             catalogStore.catalogs.map { it.source }.forEachIndexed { index, source ->
                 try {
                     if (source is CatalogSource) {
@@ -41,7 +46,8 @@ class GlobalSearchViewModel @Inject constructor(
                         var items = source.getMangaList(filters = listOf(Filter.Title()
                             .apply { this.value = query }), 1).mangas.map { it.toBook(source.id) }
                         withContext(Dispatchers.IO) {
-                            val ids = insertUseCases.insertAllExploredBook(items)
+                            val ids =
+                                insertUseCases.insertAllExploredBook(items.map { it.copy(tableId = 2) })
                             items.forEachIndexed { index, book ->
                                 items = items.replace(index, book.copy(id = ids[index]))
                             }

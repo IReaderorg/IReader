@@ -65,5 +65,9 @@ interface LocalBookRepository {
 
     suspend fun findFavoriteSourceIds(): List<Long>
 
+    suspend fun deleteAllExploredBook()
+
+    suspend fun convertExploredTOLibraryBooks()
+
 }
 

@@ -9,3 +9,9 @@ class DeleteAllExploredBook @Inject constructor(private val remoteKeyRepository:
     }
 }
 
+class DeleteAllSearchedBook @Inject constructor(private val remoteKeyRepository: RemoteKeyRepository) {
+    suspend operator fun invoke() {
+        remoteKeyRepository.deleteAllSearchedBook()
+    }
+}
+

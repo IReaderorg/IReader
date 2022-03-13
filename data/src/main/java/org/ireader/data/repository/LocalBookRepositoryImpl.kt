@@ -171,6 +171,14 @@ class LocalBookRepositoryImpl(
         return bookDao.findFavoriteSourceIds()
     }
 
+    override suspend fun deleteAllExploredBook() {
+        return bookDao.deleteExploredBooks()
+    }
+
+    override suspend fun convertExploredTOLibraryBooks() {
+        return bookDao.convertExploredTOLibraryBooks()
+    }
+
     override suspend fun insertBook(book: Book): Long {
         return bookDao.insertBook(book)
     }

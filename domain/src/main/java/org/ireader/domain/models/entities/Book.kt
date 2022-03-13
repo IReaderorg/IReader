@@ -11,6 +11,7 @@ import tachiyomi.source.model.MangaInfo
 data class Book(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
+    val tableId: Long = 0,
     val sourceId: Long,
     val link: String,
     val title: String,
@@ -76,11 +77,12 @@ fun updateBook(newBook: Book, oldBook: Book): Book {
         description = newBook.description.ifBlank { oldBook.description },
         author = newBook.author.ifBlank { oldBook.author },
         cover = newBook.cover.ifBlank { oldBook.cover },
-        viewer = if (newBook.viewer != 0) newBook.viewer else oldBook.viewer
+        viewer = if (newBook.viewer != 0) newBook.viewer else oldBook.viewer,
+        tableId = oldBook.tableId,
     )
 }
 
-fun MangaInfo.toBook(sourceId: Long): Book {
+fun MangaInfo.toBook(sourceId: Long, tableId: Long = 0): Book {
     return Book(
         id = 0,
         sourceId = sourceId,
@@ -97,6 +99,7 @@ fun MangaInfo.toBook(sourceId: Long): Book {
         genres = this.genres,
         description = this.description,
         author = this.author,
+        tableId = tableId
     )
 }
 

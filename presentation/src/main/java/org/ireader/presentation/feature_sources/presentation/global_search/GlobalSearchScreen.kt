@@ -20,6 +20,7 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.view_models.global_search.GlobalSearchViewModel
 import org.ireader.domain.view_models.global_search.SearchItem
+import org.ireader.presentation.feature_detail.presentation.book_detail.components.DotsFlashing
 import org.ireader.presentation.presentation.layouts.BookImage
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
@@ -119,9 +120,15 @@ fun GlobalSearchBookInfo(
                 MidSizeTextComposable(text = book.source.name, fontWeight = FontWeight.Bold)
                 SmallTextComposable(text = book.source.lang.uppercase())
             }
-            AppIconButton(imageVector = Icons.Default.ArrowForward,
-                title = "open explore",
-                onClick = goToExplore)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (book.loading) {
+                    DotsFlashing()
+                }
+                AppIconButton(imageVector = Icons.Default.ArrowForward,
+                    title = "open explore",
+                    onClick = goToExplore)
+            }
+
         }
         Spacer(modifier = Modifier.height(20.dp))
         LazyRow {

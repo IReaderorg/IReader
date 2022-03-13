@@ -20,6 +20,9 @@ import org.ireader.domain.models.entities.Catalog
 import org.ireader.domain.models.entities.CatalogInstalled
 import org.ireader.domain.models.entities.CatalogLocal
 import org.ireader.domain.models.entities.CatalogRemote
+import org.ireader.domain.use_cases.local.delete_usecases.book.ConvertExploredTOLibraryBooks
+import org.ireader.domain.use_cases.local.delete_usecases.book.DeleteAllExploredBooks
+import org.ireader.domain.utils.launchIO
 import org.ireader.presentation.R
 import javax.inject.Inject
 
@@ -33,9 +36,9 @@ class ExtensionViewModel @Inject constructor(
     private val uninstallCatalog: UninstallCatalog,
     private val togglePinnedCatalog: TogglePinnedCatalog,
     private val syncRemoteCatalogs: SyncRemoteCatalogs,
-
-
-    ) : BaseViewModel(), CatalogsState by state {
+    private val convertExploredTOLibraryBooks: ConvertExploredTOLibraryBooks,
+    private val deleteAllExploredBook: DeleteAllExploredBooks,
+) : BaseViewModel(), CatalogsState by state {
 
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
@@ -66,6 +69,11 @@ class ExtensionViewModel @Inject constructor(
         }
             .onEach { state.remoteCatalogs = it }
             .launchIn(scope)
+
+        viewModelScope.launchIO {
+            convertExploredTOLibraryBooks()
+            deleteAllExploredBook()
+        }
     }
 
     private fun getCatalogs() {

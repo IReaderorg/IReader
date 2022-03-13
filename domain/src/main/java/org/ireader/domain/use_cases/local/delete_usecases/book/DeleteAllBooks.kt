@@ -11,3 +11,16 @@ class DeleteAllBooks @Inject constructor(private val localBookRepository: LocalB
         return localBookRepository.deleteAllBooks()
     }
 }
+
+
+class DeleteAllExploredBooks @Inject constructor(private val localBookRepository: LocalBookRepository) {
+    suspend operator fun invoke() {
+        return localBookRepository.deleteAllExploredBook()
+    }
+}
+
+class ConvertExploredTOLibraryBooks @Inject constructor(private val localBookRepository: LocalBookRepository) {
+    suspend operator fun invoke() {
+        return localBookRepository.convertExploredTOLibraryBooks()
+    }
+}

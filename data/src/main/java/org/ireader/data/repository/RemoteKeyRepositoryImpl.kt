@@ -16,6 +16,10 @@ class RemoteKeyRepositoryImpl(private val dao: RemoteKeysDao) : RemoteKeyReposit
         return dao.deleteAllExploredBook()
     }
 
+    override suspend fun deleteAllSearchedBook() {
+        return dao.deleteAllSearchedBook()
+    }
+
     override suspend fun deleteAllRemoteKeys() {
         return dao.deleteAllRemoteKeys()
     }
@@ -35,4 +39,6 @@ class RemoteKeyRepositoryImpl(private val dao: RemoteKeysDao) : RemoteKeyReposit
     override suspend fun insertAllRemoteKeys(remoteKeys: List<RemoteKeys>) {
         return dao.insertAllRemoteKeys(remoteKeys)
     }
+
+
 }

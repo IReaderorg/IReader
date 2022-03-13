@@ -103,7 +103,10 @@ class ExploreRemoteMediator(
 
 
                 remoteKey.insertAllRemoteKeys(remoteKeys = keys)
-                remoteKey.insertAllExploredBook(response.mangas.map { it.toBook(source.id) })
+                remoteKey.insertAllExploredBook(response.mangas.map {
+                    it.toBook(source.id,
+                        tableId = 1)
+                })
             }
             RemoteMediator.MediatorResult.Success(endOfPaginationReached = endOfPaginationReached)
 

@@ -13,6 +13,7 @@ import org.ireader.core.prefs.AndroidPreferenceStore
 import org.ireader.core_ui.theme.AppPreferences
 import org.ireader.core_ui.theme.UiPreferences
 import org.ireader.data.local.AppDatabase
+import org.ireader.data.local.MIGRATION_11_12
 import org.ireader.data.local.MIGRATION_8_9
 import org.ireader.data.local.dao.DownloadDao
 import org.ireader.data.local.dao.LibraryBookDao
@@ -51,6 +52,7 @@ class LocalModule {
             AppDatabase.DATABASE_NAME
         )
             .addMigrations(MIGRATION_8_9)
+            .addMigrations(MIGRATION_11_12)
             .fallbackToDestructiveMigration()
             .build()
     }

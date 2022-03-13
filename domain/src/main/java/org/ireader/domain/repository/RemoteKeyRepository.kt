@@ -9,6 +9,7 @@ interface RemoteKeyRepository {
     suspend fun insertAllExploredBook(bookEntity: List<Book>): List<Long>
 
     suspend fun deleteAllExploredBook()
+    suspend fun deleteAllSearchedBook()
 
     suspend fun deleteAllRemoteKeys()
 
