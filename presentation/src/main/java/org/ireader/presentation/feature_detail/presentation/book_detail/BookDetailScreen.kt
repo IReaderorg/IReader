@@ -69,14 +69,14 @@ fun BookDetailScreen(
 
     val scope = rememberCoroutineScope()
     val swipeRefreshState =
-        rememberSwipeRefreshState(isRefreshing = viewModel.state.isLocalLoading || viewModel.state.isRemoteLoading || viewModel.chapterState.isLoading)
+        rememberSwipeRefreshState(isRefreshing = viewModel.detailIsLocalLoading || viewModel.detailIsRemoteLoading || viewModel.chapterIsLoading)
 
-    val source = viewModel.state.source
-    val state = viewModel.state
-    val chapters = viewModel.chapterState.chapters
+    val source = viewModel.source
+    val state = viewModel
+    val chapters = viewModel.chapters
 
     val scrollState = rememberLazyListState()
-    if (state.isLocalLoading) {
+    if (state.detailIsLocalLoading) {
         showLoading()
     }
     LaunchedEffect(key1 = true) {
@@ -169,7 +169,7 @@ fun BookDetailScreen(
                                         color = MaterialTheme.colors.onBackground,
                                         style = MaterialTheme.typography.subtitle2
                                     )
-                                    if (viewModel.chapterState.isLoading) {
+                                    if (viewModel.chapterIsLoading) {
                                         DotsFlashing()
                                     }
                                     Icon(

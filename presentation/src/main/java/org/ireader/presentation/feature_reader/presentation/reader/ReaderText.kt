@@ -34,7 +34,7 @@ import org.ireader.presentation.utils.scroll.CarouselDefaults
 @Composable
 fun ReaderText(
     modifier: Modifier = Modifier,
-    viewModel: ReaderScreenViewModel,
+    vm: ReaderScreenViewModel,
     chapter: Chapter,
     onNext: () -> Unit,
     onPrev: () -> Unit,
@@ -46,8 +46,6 @@ fun ReaderText(
         rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Expanded)
     val scope = rememberCoroutineScope()
 
-    val state = viewModel.state
-    val prefState = viewModel.prefState
     val interactionSource = remember { MutableInteractionSource() }
     val maxOffset = remember {
         mutableStateOf(0)
@@ -57,10 +55,10 @@ fun ReaderText(
         Modifier
             .clickable(interactionSource = interactionSource,
                 indication = null) {
-                viewModel.onEvent(ReaderEvent.ToggleReaderMode(!state.isReaderModeEnable))
-                if (state.isReaderModeEnable) {
+                vm.onEvent(ReaderEvent.ToggleReaderMode(!vm.isReaderModeEnable))
+                if (vm.isReaderModeEnable) {
                     scope.launch {
-                        viewModel.getLocalChaptersByPaging(chapter.bookId)
+                        vm.getLocalChaptersByPaging(chapter.bookId)
                         modalBottomSheetState.animateTo(ModalBottomSheetValue.Expanded)
                     }
                 } else {
@@ -70,8 +68,8 @@ fun ReaderText(
                 }
 
             }
-            .background(viewModel.prefState.backgroundColor)
-            .padding(horizontal = viewModel.prefState.paragraphsIndent.dp,
+            .background(vm.backgroundColor)
+            .padding(horizontal = vm.paragraphsIndent.dp,
                 vertical = 4.dp)
             .fillMaxSize()
             .wrapContentSize(Alignment.CenterStart)
@@ -91,7 +89,7 @@ fun ReaderText(
                                 icon = Icons.Default.KeyboardArrowUp,
                                 swipeRefreshState = swipeState,
                                     refreshTriggerDistance = 80.dp,
-                                    color = viewModel.prefState.textColor
+                                color = vm.textColor
                                 )
                             }, onRefresh = {
                                 onPrev()
@@ -106,7 +104,7 @@ fun ReaderText(
                                     icon = Icons.Default.KeyboardArrowDown,
                                     swipeRefreshState = swipeState,
                                     refreshTriggerDistance = 80.dp,
-                                    color = viewModel.prefState.textColor
+                                    color = vm.textColor
                                 )
                             }),
                     ),
@@ -120,12 +118,12 @@ fun ReaderText(
                             Text(
                                 modifier = modifier.fillMaxSize(),
                                 text = "\n\n" + chapter.content.map { it.trimStart() }
-                                    .joinToString("\n".repeat(prefState.distanceBetweenParagraphs)),
-                                fontSize = viewModel.prefState.fontSize.sp,
-                                fontFamily = viewModel.prefState.font.fontFamily,
+                                    .joinToString("\n".repeat(vm.distanceBetweenParagraphs)),
+                                fontSize = vm.fontSize.sp,
+                                fontFamily = vm.font.fontFamily,
                                 textAlign = TextAlign.Start,
-                                color = prefState.textColor,
-                                lineHeight = prefState.lineHeight.sp,
+                                color = vm.textColor,
+                                lineHeight = vm.lineHeight.sp,
                             )
                         }
 
@@ -143,8 +141,8 @@ fun ReaderText(
                     colors = CarouselDefaults.colors(
                         thumbColor = MaterialTheme.colors.scrollingThumbColor,
                         scrollingThumbColor = MaterialTheme.colors.scrollingThumbColor,
-                        backgroundColor = viewModel.prefState.backgroundColor,
-                        scrollingBackgroundColor = viewModel.prefState.backgroundColor
+                        backgroundColor = vm.backgroundColor,
+                        scrollingBackgroundColor = vm.backgroundColor
                     )
 
                 )

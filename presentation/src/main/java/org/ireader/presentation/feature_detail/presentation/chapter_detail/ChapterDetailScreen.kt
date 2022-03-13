@@ -4,13 +4,16 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Sort
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,6 +25,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -33,9 +37,11 @@ import androidx.paging.compose.items
 import org.ireader.core.utils.Constants
 import org.ireader.domain.view_models.detail.chapter_detail.ChapterDetailEvent
 import org.ireader.domain.view_models.detail.chapter_detail.ChapterDetailViewModel
+import org.ireader.presentation.feature_settings.presentation.webview.CustomTextField
 import org.ireader.presentation.presentation.components.CenterTopAppBar
 import org.ireader.presentation.presentation.components.ChapterListItemComposable
 import org.ireader.presentation.presentation.components.handlePagingChapterResult
+import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.ErrorTextWithEmojis
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
@@ -52,15 +58,15 @@ fun ChapterDetailScreen(
 ) {
 
     val chapters = viewModel.chapters.collectAsLazyPagingItems()
-    val book = viewModel.state.book
+    val book = viewModel.book
     val scrollState = rememberLazyListState()
-    val state = viewModel.state
     val context = LocalContext.current
 
+    val focusManager = LocalFocusManager.current
 
 
     LaunchedEffect(key1 = true) {
-        viewModel.getLocalBookById(state.book.id)
+        viewModel.book?.let { viewModel.getLocalBookById(it.id) }
     }
 
     Scaffold(
@@ -98,7 +104,9 @@ fun ChapterDetailScreen(
         drawerGesturesEnabled = true,
         drawerBackgroundColor = MaterialTheme.colors.background,
         drawerContent = {
-            Column(modifier = modifier.fillMaxSize(),
+            Column(modifier = modifier
+                .fillMaxSize()
+                .systemBarsPadding(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top) {
                 Spacer(modifier = modifier.height(5.dp))
@@ -113,38 +121,74 @@ fun ChapterDetailScreen(
             }
         }
     ) {
-        Box(modifier.fillMaxSize()) {
+        Column {
+            CustomTextField(modifier = Modifier
+                .padding(horizontal = 8.dp, vertical = 8.dp)
+                .height(35.dp)
+                .fillMaxWidth()
+                .background(
+                    color = MaterialTheme.colors.onBackground.copy(.1f),
+                    shape = CircleShape
+                ),
+                hint = "Search...",
+                value = viewModel.query,
+                onValueChange = {
+                    viewModel.query = it
+                    viewModel.getLocalChaptersByPaging(viewModel.isAsc)
+                },
+                onValueConfirm = {
+                    focusManager.clearFocus()
+                },
+                paddingTrailingIconStart = 8.dp,
+                paddingLeadingIconEnd = 8.dp,
+                trailingIcon = {
+                    if (viewModel.query.isNotBlank()) {
+                        AppIconButton(imageVector = Icons.Default.Close,
+                            title = "Exit search",
+                            onClick = {
+                                viewModel.query = ""
+                                viewModel.getLocalChaptersByPaging(viewModel.isAsc)
+                            })
+                    }
+                }
+            )
+            Box(modifier.fillMaxSize()) {
 
-            val result = handlePagingChapterResult(books = chapters, onEmptyResult = {
-                ErrorTextWithEmojis(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(20.dp)
-                        .align(Alignment.Center),
-                    error = "There is no chapter."
-                )
-            })
-            if (result) {
-                AnimatedContent(chapters.loadState.refresh is LoadState.NotLoading) {
-                    LazyColumn(modifier = Modifier
-                        .fillMaxSize(), state = scrollState) {
+                val result = handlePagingChapterResult(books = chapters, onEmptyResult = {
+                    ErrorTextWithEmojis(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp)
+                            .align(Alignment.Center),
+                        error = "There is no chapter."
+                    )
+                })
+                if (result) {
+                    AnimatedContent(chapters.loadState.refresh is LoadState.NotLoading) {
+                        LazyColumn(modifier = Modifier
+                            .fillMaxSize(), state = scrollState) {
 
-                        items(items = chapters) { chapter ->
-                            if (chapter != null) {
-                                ChapterListItemComposable(modifier = modifier,
-                                    chapter = chapter, goTo = {
-                                        navController.navigate(ReaderScreenSpec.buildRoute(
-                                            bookId = book.id,
-                                            sourceId = book.sourceId,
-                                            chapterId = chapter.id,
-                                        ))
-                                    },
-                                    selected = if (chapters.itemSnapshotList.items.isNotEmpty()) {
-                                        chapter.id == chapters.itemSnapshotList.maxByOrNull {
-                                            it?.lastRead ?: 0L
-                                        }?.id
-                                    } else false
-                                )
+
+                            items(items = chapters) { chapter ->
+                                if (chapter != null) {
+                                    ChapterListItemComposable(modifier = modifier,
+                                        chapter = chapter, goTo = {
+                                            if (book != null) {
+                                                navController.navigate(ReaderScreenSpec.buildRoute(
+                                                    bookId = book.id,
+                                                    sourceId = book.sourceId,
+                                                    chapterId = chapter.id,
+                                                ))
+                                            }
+                                        },
+                                        selected = if (chapters.itemSnapshotList.items.isNotEmpty()) {
+                                            chapter.id == chapters.itemSnapshotList.filter { it?.lastRead != 0L }
+                                                .maxByOrNull {
+                                                    it?.lastRead ?: 0L
+                                                }?.id
+                                        } else false
+                                    )
+                                }
                             }
                         }
                     }

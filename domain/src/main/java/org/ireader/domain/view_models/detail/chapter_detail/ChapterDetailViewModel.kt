@@ -1,8 +1,5 @@
 package org.ireader.domain.view_models.detail.chapter_detail
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -19,7 +16,6 @@ import kotlinx.coroutines.launch
 import org.ireader.core.R
 import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
-import org.ireader.domain.catalog.service.CatalogStore
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.ui.NavigationArgs
@@ -36,14 +32,11 @@ class ChapterDetailViewModel @Inject constructor(
     private val deleteUseCase: DeleteUseCase,
     private val savedStateHandle: SavedStateHandle,
     private val getBookUseCases: org.ireader.domain.use_cases.local.LocalGetBookUseCases,
-    extensions: CatalogStore,
-) : ViewModel() {
+    private val state: ChapterDetailStateImpl,
+) : ViewModel(), ChapterDetailState by state {
 
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
-
-    var state by mutableStateOf(ChapterDetailState())
-        private set
 
     private val _chapters = MutableStateFlow<PagingData<Chapter>>(PagingData.empty())
     val chapters = _chapters
@@ -52,7 +45,6 @@ class ChapterDetailViewModel @Inject constructor(
         val sourceId = savedStateHandle.get<Long>(NavigationArgs.sourceId.name)
         val bookId = savedStateHandle.get<Long>(NavigationArgs.bookId.name)
         if (bookId != null && sourceId != null) {
-            state = state.copy(book = state.book.copy(id = bookId))
             getLocalBookById(bookId)
         } else {
             viewModelScope.launch {
@@ -64,32 +56,32 @@ class ChapterDetailViewModel @Inject constructor(
     fun onEvent(event: ChapterDetailEvent) {
         when (event) {
             is ChapterDetailEvent.ToggleOrder -> {
-                state = state.copy(
-                    localChapters = state.localChapters.reversed(),
-                    isAsc = !state.isAsc
-                )
-                getLocalChaptersByPaging(bookId = state.book.id, isAsc = state.isAsc)
+                this.localChapters = this.localChapters.reversed()
+                toggleAsc()
+                book?.let { getLocalChaptersByPaging(isAsc = isAsc) }
             }
 
         }
     }
 
     fun reverseChapterInDB() {
-        state = state.copy(isAsc = !state.isAsc)
-        getLocalChaptersByPaging(bookId = state.book.id, isAsc = state.isAsc)
+        toggleAsc()
+        book?.let { getLocalChaptersByPaging(isAsc = isAsc) }
         viewModelScope.launch(Dispatchers.IO) {
-            insertUseCases.insertChapters(state.chapters.reversed())
+            insertUseCases.insertChapters(stateChapters.reversed())
         }
+    }
+
+    fun toggleAsc() {
+        this.isAsc = !this.isAsc
     }
 
     fun getLocalBookById(id: Long) {
         viewModelScope.launch {
             getBookUseCases.subscribeBookById(id = id).first { book ->
                 if (book != null) {
-                    state = state.copy(
-                        book = book,
-                    )
-                    getLocalChaptersByPaging(bookId = state.book.id, isAsc = state.isAsc)
+                    this@ChapterDetailViewModel.book = book
+                    getLocalChaptersByPaging(isAsc = isAsc)
                     true
                 } else {
                     false
@@ -100,17 +92,23 @@ class ChapterDetailViewModel @Inject constructor(
     }
 
     private var getChapterJob: Job? = null
-    private fun getLocalChaptersByPaging(bookId: Long, isAsc: Boolean) {
+    fun getLocalChaptersByPaging(isAsc: Boolean = true) {
+        val book = state.book
         getChapterJob?.cancel()
         getChapterJob = viewModelScope.launch {
-            getChapterUseCase.getLocalChaptersByPaging(
-                bookId = bookId,
-                isAsc = isAsc
-            )
-                .cachedIn(viewModelScope)
-                .collect { snapshot ->
-                    _chapters.value = snapshot
-                }
+            if (book != null) {
+                getChapterUseCase.getLocalChaptersByPaging(
+                    bookId = book.id,
+                    isAsc = isAsc,
+                    query = query
+                )
+                    .cachedIn(viewModelScope)
+                    .collect { snapshot ->
+                        _chapters.value = snapshot
+                    }
+
+            }
+
         }
     }
 

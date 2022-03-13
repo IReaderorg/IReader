@@ -40,7 +40,7 @@ fun ReaderBackgroundComposable(modifier: Modifier = Modifier, viewModel: ReaderS
                     .clickable { viewModel.changeBackgroundColor(index) },
                     contentAlignment = Alignment.Center
                 ) {
-                    if (viewModel.prefState.backgroundColor == readerScreenBackgroundColors[index].color) {
+                    if (viewModel.backgroundColor == readerScreenBackgroundColors[index].color) {
                         Icon(imageVector = Icons.Default.Check,
                             contentDescription = "color selected",
                             tint = MaterialTheme.colors.primary)

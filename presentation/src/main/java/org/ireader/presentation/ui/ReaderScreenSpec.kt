@@ -46,17 +46,17 @@ object ReaderScreenSpec : ScreenSpec {
         scaffoldState: ScaffoldState,
     ) {
         val viewModel: ReaderScreenViewModel = hiltViewModel()
-        val currentIndex = viewModel.state.currentChapterIndex
-        val source = viewModel.state.source
-        val chapters = viewModel.state.chapters
+        val currentIndex = viewModel.currentChapterIndex
+        val source = viewModel.source
+        val chapters = viewModel.stateChapters
         val coroutineScope = rememberCoroutineScope()
         val scrollState = rememberLazyListState()
-        val swipeState = rememberSwipeRefreshState(isRefreshing = viewModel.state.isLoading)
+        val swipeState = rememberSwipeRefreshState(isRefreshing = viewModel.isLoading)
 
         if (source != null) {
             ReadingScreen(
                 navController = navController,
-                viewModel = viewModel,
+                vm = viewModel,
                 scrollState = scrollState,
                 source = source,
                 onNext = {
@@ -93,10 +93,10 @@ object ReaderScreenSpec : ScreenSpec {
                 },
                 onSliderFinished = {
                     coroutineScope.launch {
-                        viewModel.showSnackBar(UiText.DynamicString(chapters[viewModel.state.currentChapterIndex].title))
+                        viewModel.showSnackBar(UiText.DynamicString(chapters[viewModel.currentChapterIndex].title))
                     }
                     viewModel.updateChapterSliderIndex(currentIndex)
-                    viewModel.getChapter(chapters[viewModel.state.currentChapterIndex].id,
+                    viewModel.getChapter(chapters[viewModel.currentChapterIndex].id,
                         source = source)
                     coroutineScope.launch {
                         scrollState.animateScrollToItem(0, 0)

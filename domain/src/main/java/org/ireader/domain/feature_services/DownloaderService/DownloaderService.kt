@@ -10,6 +10,7 @@ import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectIndexed
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
@@ -100,7 +101,6 @@ class DownloadService @AssistedInject constructor(
             try {
                 chapters.forEachIndexed { index, chapter ->
                     if (chapter.content.joinToString().length < 10) {
-                        //TODO check this later source!!
                         remoteUseCases.getRemoteReadingContent(chapter = chapter, source = source!!)
                             .flowOn(Dispatchers.Main)
                             .collectIndexed { i, chapterPage ->
@@ -131,6 +131,7 @@ class DownloadService @AssistedInject constructor(
                                 }
                             }
                         Timber.d("getNotifications: Successfully to downloaded ${bookResource.title} chapter ${chapter.title}")
+                        delay(500)
                     }
                 }
             } catch (e: Exception) {

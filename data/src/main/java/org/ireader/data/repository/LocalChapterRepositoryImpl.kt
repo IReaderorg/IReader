@@ -12,9 +12,9 @@ class LocalChapterRepositoryImpl @Inject constructor(private val daoLibrary: Lib
 
 
     override fun findLocalChaptersByPaging(
-        bookId: Long, isAsc: Boolean,
+        bookId: Long, isAsc: Boolean, query: String,
     ): PagingSource<Int, Chapter> {
-        return daoLibrary.getChaptersForPaging(bookId = bookId, isAsc = isAsc)
+        return daoLibrary.getChaptersForPaging(bookId = bookId, isAsc = isAsc, query)
 
     }
 

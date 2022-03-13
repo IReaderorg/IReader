@@ -53,7 +53,7 @@ object BookDetailScreenSpec : ScreenSpec {
     ) {
         val viewModel: BookDetailViewModel = hiltViewModel()
         val context = LocalContext.current
-        val state = viewModel.state
+        val state = viewModel
         val book = state.book
         val source = state.source
         val scope = rememberCoroutineScope()
@@ -72,17 +72,17 @@ object BookDetailScreenSpec : ScreenSpec {
                 },
                 onRead = {
                     if (source != null) {
-                        if (book.lastRead != 0L && viewModel.chapterState.chapters.isNotEmpty()) {
+                        if (book.lastRead != 0L && viewModel.chapters.isNotEmpty()) {
                             navController.navigate(ReaderScreenSpec.buildRoute(
                                 bookId = book.id,
                                 sourceId = source.id,
                                 chapterId = Constants.LAST_CHAPTER,
                             ))
-                        } else if (viewModel.chapterState.chapters.isNotEmpty()) {
+                        } else if (viewModel.chapters.isNotEmpty()) {
                             navController.navigate(ReaderScreenSpec.buildRoute(
                                 bookId = book.id,
                                 sourceId = source.id,
-                                chapterId = viewModel.chapterState.chapters.first().id,
+                                chapterId = viewModel.chapters.first().id,
                             ))
                         } else {
                             scope.launch {

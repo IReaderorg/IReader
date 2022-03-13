@@ -46,7 +46,7 @@ interface LocalChapterRepository {
 
 
     fun findLocalChaptersByPaging(
-        bookId: Long, isAsc: Boolean,
+        bookId: Long, isAsc: Boolean, query: String,
     ): PagingSource<Int, Chapter>
 
 

@@ -44,12 +44,15 @@ class GetLocalChaptersByPaging(private val localChapterRepository: LocalChapterR
     operator fun invoke(
         bookId: Long,
         isAsc: Boolean,
+        query: String = "",
     ): Flow<PagingData<Chapter>> {
         return Pager(
             config = PagingConfig(pageSize = Constants.DEFAULT_BIG_PAGE_SIZE,
                 maxSize = Constants.MAX_BIG_PAGE_SIZE, enablePlaceholders = true),
             pagingSourceFactory = {
-                localChapterRepository.findLocalChaptersByPaging(bookId = bookId, isAsc = isAsc)
+                localChapterRepository.findLocalChaptersByPaging(bookId = bookId,
+                    isAsc = isAsc,
+                    query)
             }
         ).flow
     }

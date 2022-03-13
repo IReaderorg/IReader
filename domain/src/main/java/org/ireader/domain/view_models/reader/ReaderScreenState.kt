@@ -1,53 +1,116 @@
 package org.ireader.domain.view_models.reader
 
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import org.ireader.core.utils.UiText
 import org.ireader.core_ui.theme.BackgroundColor
 import org.ireader.core_ui.theme.FontType
-import org.ireader.domain.R
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import tachiyomi.source.Source
+import javax.inject.Inject
 
-data class ReaderScreenState(
-    val isLoading: Boolean = false,
-    val isRemoteLoading: Boolean = false,
-    val isLocalLoaded: Boolean = false,
-    val isRemoteLoaded: Boolean = false,
-    val enable: Boolean = true,
-    val book: Book? = null,
-    val isDrawerAsc: Boolean = true,
-    val isBookLoaded: Boolean = false,
-    val isChapterLoaded: Boolean = false,
-    val chapter: Chapter? = null,
-    val chapters: List<Chapter> = emptyList(),
-    val error: UiText = UiText.StringResource(R.string.no_error),
-    val source: Source? = null,
-    val isReaderModeEnable: Boolean = true,
-    val isSettingModeEnable: Boolean = false,
-    val isMainBottomModeEnable: Boolean = true,
-    val currentChapterIndex: Int = 0,
-    val isWebViewEnable: Boolean = false,
-)
+//data class ReaderScreenState(
+//    val isLoading: Boolean = false,
+//    val isRemoteLoading: Boolean = false,
+//    val isLocalLoaded: Boolean = false,
+//    val isRemoteLoaded: Boolean = false,
+//    val enable: Boolean = true,
+//    val book: Book? = null,
+//    val isDrawerAsc: Boolean = true,
+//    val isBookLoaded: Boolean = false,
+//    val isChapterLoaded: Boolean = false,
+//    val chapter: Chapter? = null,
+//    val chapters: List<Chapter> = emptyList(),
+//    val error: UiText = UiText.StringResource(R.string.no_error),
+//    val source: Source? = null,
+//    val isReaderModeEnable: Boolean = true,
+//    val isSettingModeEnable: Boolean = false,
+//    val isMainBottomModeEnable: Boolean = true,
+//    val currentChapterIndex: Int = 0,
+//    val isWebViewEnable: Boolean = false,
+//)
 
-data class ReaderScreenPreferencesState(
-    val isAsc: Boolean = true,
-    val fontSize: Int = 18,
-    val font: FontType = FontType.Poppins,
-    val brightness: Float = 0.3f,
-    val distanceBetweenParagraphs: Int = 2,
-    val paragraphsIndent: Int = 8,
-    val lineHeight: Int = 25,
-    val currentChapterIndex: Int = 0,
-    val backgroundColor: Color = BackgroundColor.Black.color,
-    val textColor: Color = BackgroundColor.Black.onTextColor,
-    val orientation: Orientation = Orientation.Portrait,
-    val isChaptersReversed: Boolean = false,
-    val isChapterReversingInProgress: Boolean = false,
-    val scrollPosition: Int = 0,
-)
+open class ReaderScreenStateImpl @Inject constructor() : ReaderScreenState {
+    override var isLoading by mutableStateOf<Boolean>(false)
+    override var isRemoteLoading by mutableStateOf<Boolean>(false)
+    override var isLocalLoaded by mutableStateOf<Boolean>(false)
+    override var isRemoteLoaded by mutableStateOf<Boolean>(false)
+    override var enable by mutableStateOf<Boolean>(true)
+    override var isDrawerAsc by mutableStateOf<Boolean>(true)
+    override var isBookLoaded by mutableStateOf<Boolean>(false)
+    override var isChapterLoaded by mutableStateOf<Boolean>(false)
+    override var isReaderModeEnable by mutableStateOf<Boolean>(true)
+    override var isSettingModeEnable by mutableStateOf<Boolean>(false)
+    override var isMainBottomModeEnable by mutableStateOf<Boolean>(false)
+    override var currentChapterIndex: Int by mutableStateOf<Int>(0)
+    override var source: Source? by mutableStateOf<Source?>(null)
+    override var error: UiText by mutableStateOf<UiText>(UiText.DynamicString(""))
+    override var stateChapters: List<Chapter> by mutableStateOf<List<Chapter>>(emptyList())
+    override var stateChapter: Chapter? by mutableStateOf<Chapter?>(null)
+    override var book: Book? by mutableStateOf<Book?>(null)
 
+
+}
+
+
+interface ReaderScreenState {
+    var isLoading: Boolean
+    var isRemoteLoading: Boolean
+    var isLocalLoaded: Boolean
+    var isRemoteLoaded: Boolean
+    var enable: Boolean
+    var isDrawerAsc: Boolean
+    var isBookLoaded: Boolean
+    var isChapterLoaded: Boolean
+    var isReaderModeEnable: Boolean
+    var isSettingModeEnable: Boolean
+    var isMainBottomModeEnable: Boolean
+    var currentChapterIndex: Int
+    var source: Source?
+    var error: UiText
+    var stateChapters: List<Chapter>
+    var stateChapter: Chapter?
+    var book: Book?
+}
+
+
+open class ReaderScreenPreferencesStateImpl @Inject constructor() : ReaderScreenPreferencesState {
+    override var isAsc by mutableStateOf<Boolean>(true)
+    override var fontSize by mutableStateOf<Int>(18)
+    override var font by mutableStateOf<FontType>(FontType.Poppins)
+    override var brightness by mutableStateOf<Float>(0.3f)
+    override var distanceBetweenParagraphs by mutableStateOf<Int>(2)
+    override var paragraphsIndent by mutableStateOf<Int>(8)
+    override var lineHeight by mutableStateOf<Int>(25)
+    override var backgroundColor by mutableStateOf<Color>(BackgroundColor.Black.color)
+    override var textColor by mutableStateOf<Color>(BackgroundColor.Black.onTextColor)
+    override var orientation by mutableStateOf<Orientation>(Orientation.Portrait)
+    override var isChaptersReversed by mutableStateOf<Boolean>(false)
+    override var isChapterReversingInProgress by mutableStateOf<Boolean>(false)
+    override var scrollPosition by mutableStateOf<Int>(0)
+
+}
+
+
+interface ReaderScreenPreferencesState {
+    var isAsc: Boolean
+    var fontSize: Int
+    var font: FontType
+    var brightness: Float
+    var distanceBetweenParagraphs: Int
+    var paragraphsIndent: Int
+    var lineHeight: Int
+    var backgroundColor: Color
+    var textColor: Color
+    var orientation: Orientation
+    var isChaptersReversed: Boolean
+    var isChapterReversingInProgress: Boolean
+    var scrollPosition: Int
+}
 
 sealed class Orientation(val index: Int) {
     object Portrait : Orientation(0)

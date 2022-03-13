@@ -40,10 +40,14 @@ interface LibraryChapterDao {
     """)
     suspend fun findChapterByKey(key: String): Chapter?
 
-    @Query("""SELECT * FROM chapter WHERE bookId = :bookId ORDER BY 
+    @Query("""SELECT * FROM chapter WHERE bookId = :bookId AND title LIKE '%' || :query || '%' ORDER BY 
         CASE WHEN :isAsc = 1 THEN id END ASC,
         CASE WHEN :isAsc = 0 THEN  id END DESC""")
-    fun getChaptersForPaging(bookId: Long, isAsc: Boolean): PagingSource<Int, Chapter>
+    fun getChaptersForPaging(
+        bookId: Long,
+        isAsc: Boolean,
+        query: String,
+    ): PagingSource<Int, Chapter>
 
 
     @Query("SELECT * FROM chapter WHERE id = :chapterId AND bookId = :bookId Limit 1")

@@ -63,7 +63,7 @@ fun BookSummary(
                 contentPadding = PaddingValues(horizontal = 0.dp, vertical = 4.dp),
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                items(genres) { genre ->
+                items(genres.filter { it.isNotBlank() }) { genre ->
                     GenreChip(genre)
                 }
             }

@@ -52,7 +52,7 @@ fun FontMenuComposable(
                 .padding(8.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text(text = viewModel.prefState.font.fontName)
+            Text(text = viewModel.font.fontName)
             DropdownMenu(
                 modifier = Modifier.background(MaterialTheme.colors.background
                 ),
