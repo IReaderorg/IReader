@@ -1,4 +1,4 @@
-package org.ireader.infinity.presentation
+package org.ireader.presentation.ui
 
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.runtime.Composable

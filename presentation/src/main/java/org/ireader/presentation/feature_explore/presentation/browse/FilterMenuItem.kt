@@ -13,8 +13,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
-import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
 
 @Composable
 fun FilterMenuItem(
@@ -47,7 +47,7 @@ fun FilterMenuItem(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 MidSizeTextComposable(text = currentItem ?: items.first())
-                TopAppBarActionButton(
+                AppIconButton(
                     imageVector = Icons.Default.ArrowDropDown,
                     title = "",
                     onClick = {

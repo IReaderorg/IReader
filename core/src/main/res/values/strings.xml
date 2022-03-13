@@ -61,5 +61,6 @@
     <string name="source_not_available">this Source is not available in your device.</string>
     <string name="uninstalled">Uninstalled</string>
     <string name="Refreshed">Refreshed</string>
+    <string name="query_must_not_be_empty">text field is empty.</string>
 
 </resources>

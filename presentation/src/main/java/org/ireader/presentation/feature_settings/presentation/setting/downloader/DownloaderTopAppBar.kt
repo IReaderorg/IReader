@@ -14,8 +14,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavController
 import org.ireader.presentation.R
 import org.ireader.presentation.presentation.ToolBar
+import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
-import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
 
 
 @Composable
@@ -40,14 +40,14 @@ fun DownloaderTopAppBar(
         },
         backgroundColor = MaterialTheme.colors.background,
         actions = {
-            TopAppBarActionButton(
+            AppIconButton(
                 imageVector = Icons.Default.FileDownloadOff,
                 title = "Stop Download Icon",
                 onClick = {
                     onStopAllDownload()
                 },
             )
-            TopAppBarActionButton(
+            AppIconButton(
                 imageVector = Icons.Default.Menu,
                 title = "Menu Icon",
                 onClick = {

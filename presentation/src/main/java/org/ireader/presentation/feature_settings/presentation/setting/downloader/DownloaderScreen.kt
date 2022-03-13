@@ -25,8 +25,8 @@ import org.ireader.core.utils.UiText
 import org.ireader.domain.feature_services.DownloaderService.DownloadService
 import org.ireader.domain.utils.toast
 import org.ireader.presentation.presentation.components.ISnackBarHost
+import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
-import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
 import org.ireader.presentation.ui.BookDetailScreenSpec
 import timber.log.Timber
 
@@ -100,7 +100,7 @@ fun DownloaderScreen(
                                 if (download.totalChapter == download.progress) {
                                     Box {}
                                 } else if (download.priority != 0) {
-                                    TopAppBarActionButton(imageVector = Icons.Default.StopCircle,
+                                    AppIconButton(imageVector = Icons.Default.StopCircle,
                                         title = "StopDownloads",
                                         onClick = {
                                             viewModel.stopDownloads(context = context,
@@ -114,7 +114,7 @@ fun DownloaderScreen(
                                         viewModel.showSnackBar(UiText.DynamicString("The Download of ${download.bookName} was stopped"))
                                         viewModel.insertSavedDownload(download.copy(priority = 0))
                                     }
-                                    TopAppBarActionButton(imageVector = Icons.Default.PlayArrow,
+                                    AppIconButton(imageVector = Icons.Default.PlayArrow,
                                         title = "Start Download",
                                         onClick = {
                                             viewModel.startDownloadService(context = context,

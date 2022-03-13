@@ -20,6 +20,7 @@ import org.ireader.domain.catalog.service.CatalogStore
 import org.ireader.domain.models.DisplayMode
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.use_cases.local.DeleteUseCase
+import org.ireader.domain.use_cases.preferences.reader_preferences.BrowseLayoutTypeUseCase
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import tachiyomi.source.CatalogSource
 import tachiyomi.source.model.Filter
@@ -30,10 +31,10 @@ import javax.inject.Inject
 @HiltViewModel
 class ExploreViewModel @Inject constructor(
     private val state: ExploreStateImpl,
-    private val preferencesUseCase: org.ireader.domain.use_cases.preferences.reader_preferences.PreferencesUseCase,
     private val remoteUseCases: RemoteUseCases,
     private val deleteUseCase: DeleteUseCase,
     private val catalogStore: CatalogStore,
+    private val browseLayoutTypeUseCase: BrowseLayoutTypeUseCase,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel(), ExploreState by state {
 
@@ -42,13 +43,28 @@ class ExploreViewModel @Inject constructor(
 
     init {
         val sourceId = savedStateHandle.get<Long>("sourceId")
+        val query = savedStateHandle.get<String>("query")
         val source =
             catalogStore.catalogs.find { it.source.id == sourceId }?.source
         if (sourceId != null && source is CatalogSource) {
             state.source = source
-            state.exploreType = source.getListings().first()
-            getBooks(source = source, listing = source.getListings().first())
-            readLayoutType()
+            if (!query.isNullOrBlank()) {
+                toggleSearchMode(true)
+                searchQuery = query
+                getBooks(filters = listOf(Filter.Title().apply { this.value = query }),
+                    source = source)
+            } else {
+                val listings = source.getListings()
+                if (listings.isNotEmpty()) {
+                    state.exploreType = source.getListings().first()
+                    getBooks(source = source, listing = source.getListings().first())
+                    readLayoutType()
+                } else {
+                    viewModelScope.launch {
+                        showSnackBar(UiText.StringResource(org.ireader.core.R.string.the_source_is_not_found))
+                    }
+                }
+            }
         } else {
             viewModelScope.launch {
                 showSnackBar(UiText.StringResource(org.ireader.core.R.string.the_source_is_not_found))
@@ -120,11 +136,11 @@ class ExploreViewModel @Inject constructor(
 
     private fun saveLayoutType(layoutType: DisplayMode) {
         state.layout = layoutType.layout
-        preferencesUseCase.saveBrowseLayoutUseCase(layoutType.layoutIndex)
+        browseLayoutTypeUseCase.save(layoutType.layoutIndex)
     }
 
     private fun readLayoutType() {
-        state.layout = preferencesUseCase.readBrowseLayoutUseCase().layout
+        state.layout = browseLayoutTypeUseCase.read().layout
     }
 
 

@@ -3,18 +3,15 @@ package org.ireader.domain.use_cases.preferences.reader_preferences
 import org.ireader.core_ui.theme.AppPreferences
 import javax.inject.Inject
 
-class ReadFontSizeStateUseCase @Inject constructor(
+class FontSizeStateUseCase @Inject constructor(
     private val appPreferences: AppPreferences,
 ) {
-    operator fun invoke(): Int {
-        return appPreferences.fontSize().get()
-    }
-}
-
-class SaveFontSizeStateUseCase @Inject constructor(
-    private val appPreferences: AppPreferences,
-) {
-    operator fun invoke(fontSize: Int) {
+    fun save(fontSize: Int) {
         appPreferences.fontSize().set(fontSize)
     }
+
+    fun read(): Int {
+        return appPreferences.fontSize().get()
+    }
+
 }

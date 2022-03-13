@@ -10,8 +10,9 @@ package org.ireader.domain.catalog.interactor
 
 import org.ireader.domain.catalog.service.CatalogStore
 import org.ireader.domain.models.entities.CatalogLocal
+import javax.inject.Inject
 
-class GetLocalCatalog(
+class GetLocalCatalog @Inject constructor(
     private val store: CatalogStore,
 ) {
 

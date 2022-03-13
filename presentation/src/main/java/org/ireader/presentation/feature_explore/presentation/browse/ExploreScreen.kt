@@ -27,10 +27,10 @@ import org.ireader.domain.models.LayoutType
 import org.ireader.domain.view_models.explore.ExploreViewModel
 import org.ireader.presentation.feature_library.presentation.components.LayoutComposable
 import org.ireader.presentation.presentation.components.handlePagingResult
+import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.ErrorTextWithEmojis
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.SmallTextComposable
-import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
 import org.ireader.presentation.ui.BookDetailScreenSpec
 import org.ireader.presentation.ui.WebViewScreenSpec
 import tachiyomi.source.CatalogSource
@@ -77,7 +77,8 @@ fun ExploreScreen(
         sheetContent = {
             FilterBottomSheet(
                 onApply = {
-                    vm.getBooks(filters = vm.modifiedFilter, source = source)
+                    val mFilters = vm.modifiedFilter.filterNot { it.isDefaultValue() }
+                    vm.getBooks(filters = mFilters, source = source)
                 },
                 filters = vm.modifiedFilter,
                 onReset = {
@@ -152,7 +153,7 @@ fun ExploreScreen(
                                     .wrapContentSize(Alignment.Center),
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
-                                    TopAppBarActionButton(imageVector = Icons.Default.Refresh,
+                                    AppIconButton(imageVector = Icons.Default.Refresh,
                                         title = "Retry",
                                         onClick = { getBooks(null, null, emptyList()) })
                                     SmallTextComposable(text = "Retry")
@@ -163,7 +164,7 @@ fun ExploreScreen(
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
                                     if (source is HttpSource) {
-                                        TopAppBarActionButton(imageVector = Icons.Default.Public,
+                                        AppIconButton(imageVector = Icons.Default.Public,
                                             title = "Open in WebView",
                                             onClick = {
                                                 navController.navigate(WebViewScreenSpec.buildRoute(

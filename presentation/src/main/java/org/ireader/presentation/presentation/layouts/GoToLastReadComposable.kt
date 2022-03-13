@@ -14,7 +14,7 @@ import androidx.compose.material.icons.filled.ImportContacts
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
+import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 
 @Composable
 fun GoToLastReadComposable(onClick: () -> Unit) {
@@ -32,7 +32,7 @@ fun GoToLastReadComposable(onClick: () -> Unit) {
                     alpha = .4f)
             )
         ) {
-            TopAppBarActionButton(
+            AppIconButton(
                 imageVector = Icons.Default.ImportContacts,
                 title = "Open last chapter",
                 onClick = {

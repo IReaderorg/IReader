@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.presentation.presentation.ToolBar
-import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
+import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
 import tachiyomi.source.Source
 
@@ -65,13 +65,13 @@ fun ReaderScreenTopBar(
                 },
                 actions = {
                     if (chapter != null) {
-                        TopAppBarActionButton(imageVector = Icons.Default.Autorenew,
+                        AppIconButton(imageVector = Icons.Default.Autorenew,
                             title = "Refresh",
                             onClick = {
                                 onRefresh()
                             })
                     }
-                    TopAppBarActionButton(imageVector = Icons.Default.Public,
+                    AppIconButton(imageVector = Icons.Default.Public,
                         title = "WebView",
                         onClick = {
                             onWebView()
@@ -87,13 +87,13 @@ fun ReaderScreenTopBar(
             backgroundColor = Color.Transparent,
             actions = {
                 if (chapter != null) {
-                    TopAppBarActionButton(imageVector = Icons.Default.Autorenew,
+                    AppIconButton(imageVector = Icons.Default.Autorenew,
                         title = "Refresh",
                         onClick = {
                             onRefresh()
                         })
                 }
-                TopAppBarActionButton(imageVector = Icons.Default.Public,
+                AppIconButton(imageVector = Icons.Default.Public,
                     title = "WebView",
                     onClick = {
                         onWebView()

@@ -18,8 +18,8 @@ import androidx.paging.compose.items
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.presentation.presentation.components.ChapterListItemComposable
 import org.ireader.presentation.presentation.components.handlePagingChapterResult
+import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.ErrorTextWithEmojis
-import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
 import tachiyomi.source.Source
 
@@ -45,7 +45,7 @@ fun ReaderScreenDrawer(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = modifier.fillMaxWidth()) {
                 Box {}
-                TopAppBarActionButton(imageVector = Icons.Default.Sort,
+                AppIconButton(imageVector = Icons.Default.Sort,
                     title = "Reverse list icon",
                     onClick = {
                         onReverseIcon()

@@ -17,7 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.ireader.domain.view_models.reader.ReaderScreenViewModel
-import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
+import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 
 @Composable
 fun ReaderSettingComposable(modifier: Modifier = Modifier, viewModel: ReaderScreenViewModel) {
@@ -68,7 +68,7 @@ fun ReaderSettingComposable(modifier: Modifier = Modifier, viewModel: ReaderScre
                 style = TextStyle(fontWeight = FontWeight.W400),
                 color = MaterialTheme.colors.onBackground
             )
-            TopAppBarActionButton(imageVector = Icons.Default.FlipCameraAndroid,
+            AppIconButton(imageVector = Icons.Default.FlipCameraAndroid,
                 title = "Change Orientation",
                 onClick = { viewModel.saveOrientation(context) })
         }

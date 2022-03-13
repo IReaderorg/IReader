@@ -2,8 +2,8 @@ package org.ireader.domain.feature_services.io
 
 
 import coil.bitmap.BitmapPool
+import coil.decode.DataSource
 import coil.decode.Options
-import coil.fetch.FetchResult
 import coil.fetch.Fetcher
 import coil.fetch.SourceResult
 import coil.size.Size
@@ -20,9 +20,10 @@ import okhttp3.Request
 import okio.Path
 import okio.buffer
 import okio.source
-import org.ireader.domain.catalog.service.CatalogStore
-import org.ireader.domain.models.entities.Book
+import org.ireader.domain.catalog.interactor.GetLocalCatalog
+import tachiyomi.core.http.okhttp
 import tachiyomi.core.io.saveTo
+import tachiyomi.source.HttpSource
 import java.io.File
 
 
@@ -40,50 +41,51 @@ fun Path.setLastModified(epoch: Long) {
 internal class LibraryMangaFetcher(
     private val defaultClient: OkHttpClient,
     private val libraryCovers: LibraryCovers,
+    private val getLocalCatalog: GetLocalCatalog,
     private val coilCache: Cache,
-    private val extension: CatalogStore,
-) : Fetcher<Book> {
-  override fun key(data: Book): String? {
-    return when (getResourceType(data.cover)) {
-      Type.File -> {
-        val cover = File(data.cover.substringAfter("file://"))
-        "${data.cover}_${cover.lastModified()}"
-      }
-      Type.URL -> {
-        val cover = libraryCovers.find(data.id).toFile()
-        if (data.favorite && (!cover.exists() || cover.lastModified() == 0L)) {
-          null
-        } else {
-          "${data.cover}_${cover.lastModified()}"
+) : Fetcher<BookCover> {
+
+    override fun key(data: BookCover): String? {
+        return when (getResourceType(data.cover)) {
+            Type.File -> {
+                val cover = File(data.cover.substringAfter("file://"))
+                "${data.cover}_${cover.lastModified()}"
+            }
+            Type.URL -> {
+                val cover = libraryCovers.find(data.id).toFile()
+                if (data.favorite && (!cover.exists() || cover.lastModified() == 0L)) {
+                    null
+                } else {
+                    "${data.cover}_${cover.lastModified()}"
+                }
+            }
+            null -> null
         }
-      }
-      null -> null
     }
-  }
 
-  override suspend fun fetch(
-    pool: BitmapPool,
-    data: Book,
-    size: Size,
-    options: Options,
-  ): FetchResult {
-    return when (getResourceType(data.cover)) {
-      Type.File -> getFileLoader(BookCover.from(data))
-      Type.URL -> getUrlLoader(BookCover.from(data))
-      null -> error("Not a valid image")
+    override suspend fun fetch(
+        pool: BitmapPool,
+        data: BookCover,
+        size: Size,
+        options: Options,
+    ): SourceResult {
+        return when (getResourceType(data.cover)) {
+            Type.File -> getFileLoader(data)
+            Type.URL -> getUrlLoader(data)
+            null -> error("Not a valid image")
+        }
     }
-  }
 
-  private fun getFileLoader(manga: BookCover): SourceResult {
-    val file = File(manga.cover.substringAfter("file://"))
-    return getFileLoader(file)
-  }
+    private fun getFileLoader(manga: BookCover): SourceResult {
+        val file = File(manga.cover.substringAfter("file://"))
+        return getFileLoader(file)
+    }
 
-  private fun getFileLoader(file: File): SourceResult {
-    return SourceResult(
-      source = file.source().buffer(),
-      mimeType = "image/*",
-      dataSource = coil.decode.DataSource.DISK
+    private fun getFileLoader(file: File): SourceResult {
+        return SourceResult(
+            source = file.source().buffer(),
+            mimeType = "image/*",
+            dataSource = DataSource.DISK
     )
   }
 
@@ -123,25 +125,24 @@ internal class LibraryMangaFetcher(
     return SourceResult(
       source = body.source(),
       mimeType = "image/*",
-      dataSource = if (response.cacheResponse != null) coil.decode.DataSource.DISK else coil.decode.DataSource.NETWORK
+        dataSource = if (response.cacheResponse != null) DataSource.DISK else DataSource.NETWORK
     )
   }
 
   private fun getCall(manga: BookCover): Call {
-//    val catalog = extension.findSourceById(manga.sourceId)
-//    val source = catalog as? HttpSource
-//
-//    val clientAndRequest = source?.getCoverRequest(manga.cover)
-//
-//    val newClient = (clientAndRequest?.first?.okhttp ?: defaultClient).newBuilder()
-//      .cache(coilCache)
-//      .build()
-//
-//    val request = clientAndRequest?.second?.build()?.convertToOkHttpRequest()
-//      ?: Request.Builder().url(manga.cover).build()
-//
-//    return newClient.newCall(request)
-      throw Exception("Not Implemented")
+      val catalog = getLocalCatalog.get(manga.sourceId)
+      val source = catalog?.source as? HttpSource
+
+      val clientAndRequest = source?.getCoverRequest(manga.cover)
+
+      val newClient = (clientAndRequest?.first?.okhttp ?: defaultClient).newBuilder()
+          .cache(coilCache)
+          .build()
+
+      val request = clientAndRequest?.second?.build()?.convertToOkHttpRequest()
+          ?: Request.Builder().url(manga.cover).build()
+
+      return newClient.newCall(request)
   }
 
   private fun getResourceType(cover: String): Type? {
@@ -157,16 +158,13 @@ internal class LibraryMangaFetcher(
     File, URL;
   }
 
-
 }
-
 
 /**
  * Converts a ktor request to okhttp. Note that it does not support sending a request body. If we
  * ever need it we could use reflection to call this other method instead:
  * https://github.com/ktorio/ktor/blob/1.6.4/ktor-client/ktor-client-okhttp/jvm/src/io/ktor/client/engine/okhttp/OkHttpEngine.kt#L180
  */
-
 @OptIn(InternalAPI::class)
 private fun HttpRequestData.convertToOkHttpRequest(): Request {
   val builder = Request.Builder()
@@ -183,4 +181,3 @@ private fun HttpRequestData.convertToOkHttpRequest(): Request {
 
   return builder.build()
 }
-

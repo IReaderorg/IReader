@@ -24,7 +24,8 @@ sealed interface ScreenSpec {
             ChapterScreenSpec,
             ReaderScreenSpec,
             WebViewScreenSpec,
-            ExploreScreenSpec
+            ExploreScreenSpec,
+            GlobalSearchScreenSpec
         ).associateBy { it.navHostRoute }
     }
 

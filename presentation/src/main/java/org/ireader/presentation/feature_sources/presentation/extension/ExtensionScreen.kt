@@ -26,10 +26,11 @@ import org.ireader.presentation.feature_sources.presentation.extension.composabl
 import org.ireader.presentation.feature_sources.presentation.extension.composables.UserSourcesScreen
 import org.ireader.presentation.presentation.ToolBar
 import org.ireader.presentation.presentation.components.ISnackBarHost
+import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
-import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarSearch
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
+import org.ireader.presentation.ui.GlobalSearchScreenSpec
 
 
 @ExperimentalMaterialApi
@@ -86,7 +87,6 @@ fun ExtensionScreen(
                                 viewModel.searchQuery = it
                             },
                             onSearch = {
-
                                 focusManager.clearFocus()
                             },
                             isSearchModeEnable = searchMode)
@@ -98,7 +98,7 @@ fun ExtensionScreen(
                 actions = {
                     if (pagerState.currentPage == 1) {
                         if (searchMode) {
-                            TopAppBarActionButton(
+                            AppIconButton(
                                 imageVector = Icons.Default.Close,
                                 title = "Close",
                                 onClick = {
@@ -107,7 +107,7 @@ fun ExtensionScreen(
                                 },
                             )
                         } else {
-                            TopAppBarActionButton(
+                            AppIconButton(
                                 imageVector = Icons.Default.Search,
                                 title = "Search",
                                 onClick = {
@@ -115,7 +115,7 @@ fun ExtensionScreen(
                                 },
                             )
                         }
-                        TopAppBarActionButton(
+                        AppIconButton(
                             imageVector = Icons.Default.Refresh,
                             title = "Refresh",
                             onClick = {
@@ -124,7 +124,7 @@ fun ExtensionScreen(
                         )
                     } else {
                         if (searchMode) {
-                            TopAppBarActionButton(
+                            AppIconButton(
                                 imageVector = Icons.Default.Close,
                                 title = "Close",
                                 onClick = {
@@ -133,11 +133,20 @@ fun ExtensionScreen(
                                 },
                             )
                         } else {
-                            TopAppBarActionButton(
-                                imageVector = Icons.Default.TravelExplore,
+                            AppIconButton(
+                                imageVector = Icons.Default.Search,
                                 title = "Search",
                                 onClick = {
                                     searchMode = true
+                                },
+                            )
+                            AppIconButton(
+                                imageVector = Icons.Default.TravelExplore,
+                                title = "Search",
+                                onClick = {
+                                    navController.navigate(
+                                        GlobalSearchScreenSpec.navHostRoute
+                                    )
                                 },
                             )
                         }
@@ -145,8 +154,7 @@ fun ExtensionScreen(
                 },
                 navigationIcon = if (searchMode) {
                     {
-
-                        TopAppBarActionButton(imageVector = Icons.Default.ArrowBack,
+                        AppIconButton(imageVector = Icons.Default.ArrowBack,
                             title = "Disable Search",
                             onClick = {
                                 searchMode = false

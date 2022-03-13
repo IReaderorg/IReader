@@ -17,7 +17,7 @@ import org.ireader.domain.feature_services.notification.Notifications.CHANNEL_AP
 import org.ireader.domain.feature_services.notification.Notifications.ID_APP_UPDATER
 import org.ireader.domain.feature_services.updater_service.models.Release
 import org.ireader.domain.feature_services.updater_service.models.Version
-import org.ireader.domain.use_cases.preferences.reader_preferences.PreferencesUseCase
+import org.ireader.domain.use_cases.preferences.services.LastUpdateTime
 import org.ireader.infinity.feature_services.flags
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -26,14 +26,14 @@ import java.util.concurrent.TimeUnit
 class UpdateService @AssistedInject constructor(
     @Assisted private val context: Context,
     @Assisted params: WorkerParameters,
-    private val preferences: PreferencesUseCase,
+    private val lastUpdateTime: LastUpdateTime,
     private val api: UpdateApi,
 ) : CoroutineWorker(context, params) {
 
 
     override suspend fun doWork(): Result {
 
-        if (preferences.readLastUpdateTime() < preferences.readLastUpdateTime() + TimeUnit.DAYS.toMillis(
+        if (lastUpdateTime.read() < lastUpdateTime.read() - TimeUnit.DAYS.toMillis(
                 1)
         ) {
             return Result.success()
@@ -53,7 +53,7 @@ class UpdateService @AssistedInject constructor(
         val current = Version.create(versionCode)
 
         if (Version.isNewVersion(release.tagName, versionCode)) {
-            preferences.setLastUpdateTime(Date().time)
+            lastUpdateTime.save(Date().time)
             with(NotificationManagerCompat.from(applicationContext)) {
                 notify(ID_APP_UPDATER, createNotification(current, version, createIntent(release)))
             }

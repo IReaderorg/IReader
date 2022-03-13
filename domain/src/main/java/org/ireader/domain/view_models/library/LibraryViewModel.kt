@@ -17,14 +17,18 @@ import org.ireader.domain.models.FilterType
 import org.ireader.domain.models.SortType
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.use_cases.local.LocalGetBookUseCases
-import org.ireader.domain.use_cases.preferences.reader_preferences.PreferencesUseCase
+import org.ireader.domain.use_cases.preferences.reader_preferences.FiltersUseCase
+import org.ireader.domain.use_cases.preferences.reader_preferences.LibraryLayoutTypeUseCase
+import org.ireader.domain.use_cases.preferences.reader_preferences.SortersUseCase
 import javax.inject.Inject
 
 
 @HiltViewModel
 class LibraryViewModel @Inject constructor(
     private val localGetBookUseCases: LocalGetBookUseCases,
-    private val preferencesUseCase: PreferencesUseCase,
+    private val libraryLayoutUseCase: LibraryLayoutTypeUseCase,
+    private val sortersUseCase: SortersUseCase,
+    private val filtersUseCase: FiltersUseCase,
 ) : BaseViewModel() {
 
 
@@ -103,15 +107,15 @@ class LibraryViewModel @Inject constructor(
 
 
     private fun onLayoutTypeChange(layoutType: DisplayMode) {
-        preferencesUseCase.saveLibraryLayoutUseCase(layoutType.layoutIndex)
+        libraryLayoutUseCase.save(layoutType.layoutIndex)
         state = state.copy(layout = layoutType.layout)
     }
 
 
     private fun readLayoutTypeAndFilterTypeAndSortType() {
-        val sortType = preferencesUseCase.readSortersUseCase()
-        val filterType = preferencesUseCase.readFilterUseCase()
-        val layoutType = preferencesUseCase.readLibraryLayoutUseCase().layout
+        val sortType = sortersUseCase.read()
+        val filterType = filtersUseCase.read()
+        val layoutType = libraryLayoutUseCase.read().layout
         state = state.copy(layout = layoutType,
             sortType = sortType,
             unreadFilter = filterType)
@@ -127,12 +131,12 @@ class LibraryViewModel @Inject constructor(
     }
 
     private fun saveSortType(sortType: SortType) {
-        preferencesUseCase.saveSortersUseCase(sortType.index)
+        sortersUseCase.save(sortType.index)
     }
 
     fun enableUnreadFilter(filterType: FilterType) {
         state = state.copy(unreadFilter = filterType)
-        preferencesUseCase.saveFiltersUseCase(state.unreadFilter.index)
+        filtersUseCase.save(state.unreadFilter.index)
         getLibraryBooks()
     }
 

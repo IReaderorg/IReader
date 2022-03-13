@@ -28,8 +28,8 @@ import coil.compose.rememberImagePainter
 import org.ireader.domain.catalog.model.InstallStep
 import org.ireader.domain.models.entities.*
 import org.ireader.presentation.feature_sources.presentation.extension.composables.LetterIcon
+import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
-import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
 import java.util.*
 import kotlin.math.max
 
@@ -215,13 +215,13 @@ internal fun CatalogMenuButton(
     Box(modifier = Modifier.padding(horizontal = 8.dp)) {
         if (onPinToggle != null && catalog is CatalogLocal && onUninstall == null) {
             if (catalog.isPinned) {
-                TopAppBarActionButton(
+                AppIconButton(
                     imageVector = Icons.Filled.PushPin,
                     tint = MaterialTheme.colors.primary,
                     title = "Pin",
                     onClick = onPinToggle)
             } else {
-                TopAppBarActionButton(
+                AppIconButton(
                     imageVector = Icons.Outlined.PushPin,
                     tint = MaterialTheme.colors.onBackground.copy(.5f),
                     title = "UnPin",

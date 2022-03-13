@@ -7,10 +7,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import org.ireader.core.utils.UiEvent
+import org.ireader.domain.use_cases.preferences.reader_preferences.DohPrefUseCase
 import javax.inject.Inject
 
 @HiltViewModel
-class SettingViewModel @Inject constructor(private val preferencesUseCase: org.ireader.domain.use_cases.preferences.reader_preferences.PreferencesUseCase) :
+class SettingViewModel @Inject constructor(
+    private val dohPrefUseCase: DohPrefUseCase,
+) :
     ViewModel() {
     private val _state = mutableStateOf(SettingState())
     val state: State<SettingState> = _state
@@ -22,13 +25,13 @@ class SettingViewModel @Inject constructor(private val preferencesUseCase: org.i
     fun setDohPrfUpdate(prefCode: Int) {
         //TODO Need to implement this in the more efficent way.
         _state.value = state.value.copy(doh = prefCode)
-        preferencesUseCase.saveDohPrefUseCase(prefCode)
+        dohPrefUseCase.save(prefCode)
     }
 
     private fun readDohPref() {
         _state.value = state.value
             .copy(
-                doh = preferencesUseCase.readDohPrefUseCase()
+                doh = dohPrefUseCase.read()
             )
     }
 

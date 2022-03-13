@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.ireader.domain.models.entities.Chapter
-import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
+import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import tachiyomi.source.Source
 
 @Composable
@@ -54,10 +54,10 @@ fun MainBottomSettingComposable(
     Row(modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically) {
-        TopAppBarActionButton(imageVector = Icons.Default.Menu,
+        AppIconButton(imageVector = Icons.Default.Menu,
             title = "Chapter List Drawer",
             onClick = { scope.launch { scaffoldState.drawerState.open() } })
-        TopAppBarActionButton(imageVector = Icons.Default.Settings,
+        AppIconButton(imageVector = Icons.Default.Settings,
             title = "Setting Drawer",
             onClick = { onSetting() })
     }

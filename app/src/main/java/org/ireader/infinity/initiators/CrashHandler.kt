@@ -8,7 +8,9 @@ import javax.inject.Inject
 class CrashHandler @Inject constructor(private val context: Application) {
 
     init {
-        setupCrashHandler()
+        if (!BuildConfig.DEBUG) {
+            setupCrashHandler()
+        }
     }
 
     private fun setupCrashHandler() {

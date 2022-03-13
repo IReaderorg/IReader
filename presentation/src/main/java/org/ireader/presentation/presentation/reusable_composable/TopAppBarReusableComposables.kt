@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
@@ -117,7 +118,7 @@ fun SuperSmallTextComposable(
 }
 
 @Composable
-fun TopAppBarActionButton(
+fun AppIconButton(
     modifier: Modifier = Modifier,
     imageVector: ImageVector,
     title: String,
@@ -196,6 +197,7 @@ fun TopAppBarSearch(
             }),
             singleLine = true,
             textStyle = TextStyle(color = MaterialTheme.colors.onBackground),
+            cursorBrush = SolidColor(MaterialTheme.colors.primary)
         )
     }
 }

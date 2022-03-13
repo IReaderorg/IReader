@@ -21,8 +21,8 @@ import org.ireader.core.DetailParse
 import org.ireader.domain.FetchType
 import org.ireader.presentation.R
 import org.ireader.presentation.presentation.ToolBar
+import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
-import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
 import tachiyomi.source.HttpSource
 import tachiyomi.source.Source
@@ -66,7 +66,7 @@ fun WebPageTopBar(
             TopAppBarBackButton(navController = navController)
         },
         actions = {
-            TopAppBarActionButton(
+            AppIconButton(
                 imageVector = Icons.Default.Menu,
                 title = "Menu Icon",
                 onClick = {

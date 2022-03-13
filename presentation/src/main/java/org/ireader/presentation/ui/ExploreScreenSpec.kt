@@ -9,8 +9,9 @@ import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import com.google.accompanist.pager.ExperimentalPagerApi
+import kotlinx.coroutines.launch
 import org.ireader.core.R
-import org.ireader.core.SearchListing
+import org.ireader.core.utils.UiText
 import org.ireader.domain.FetchType
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.domain.view_models.explore.ExploreScreenEvents
@@ -21,17 +22,21 @@ import tachiyomi.source.HttpSource
 
 object ExploreScreenSpec : ScreenSpec {
 
-    override val navHostRoute: String = "explore_route/{sourceId}"
+    override val navHostRoute: String = "explore_route/{sourceId}?query={query}"
 
 
     override val arguments: List<NamedNavArgument> = listOf(
-        NavigationArgs.exploreType,
+        NavigationArgs.query,
         NavigationArgs.sourceId
     )
 
 
-    fun buildRoute(sourceId: Long): String {
-        return "explore_route/$sourceId"
+    fun buildRoute(sourceId: Long, query: String? = null): String {
+        return if (query != null) {
+            "explore_route/$sourceId?query=$query"
+        } else {
+            "explore_route/$sourceId"
+        }
     }
 
     @OptIn(ExperimentalPagerApi::class, androidx.compose.animation.ExperimentalAnimationApi::class,
@@ -63,11 +68,16 @@ object ExploreScreenSpec : ScreenSpec {
                         layoutType = layout))
                 },
                 onSearch = {
-                    vm.getBooks(
-                        query = state.searchQuery,
-                        listing = SearchListing(),
-                        source = source
-                    )
+                    if (state.searchQuery.isNotBlank())
+                        vm.getBooks(
+                            query = state.searchQuery,
+                            source = source
+                        ) else {
+                        vm.getBooks(listing = source.getListings().first(), source = source)
+                        scope.launch {
+                            vm.showSnackBar(UiText.StringResource(R.string.query_must_not_be_empty))
+                        }
+                    }
                     focusManager.clearFocus()
                 },
                 onSearchDisable = {

@@ -9,8 +9,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.ireader.core.utils.replace
+import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
-import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
 import tachiyomi.source.model.Filter
 
 @Composable
@@ -35,7 +35,7 @@ fun FilterGroupItem(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             MidSizeTextComposable(text = name)
-            TopAppBarActionButton(
+            AppIconButton(
                 imageVector = Icons.Default.ArrowDropDown,
                 title = name,
                 onClick = { expanded = !expanded })
@@ -60,26 +60,6 @@ fun FilterGroupItem(
                 is Filter.Note -> {
                     MidSizeTextComposable(text = filter.name)
                 }
-                is Filter.Select -> {
-                    var state by remember {
-                        mutableStateOf(filter.value)
-                    }
-                    LaunchedEffect(key1 = filter.value) {
-                        state = filter.value
-                    }
-                    FilterMenuItem(
-                        filter = filter.name,
-                        onSelected = { value ->
-                            onUpdate(
-                                filters.replace(index, filter.apply {
-                                    this.value = value
-                                })
-                            )
-                            state = value
-                        },
-                        currentItem = filter.options[state],
-                        items = filter.options)
-                }
                 is Filter.Sort -> {
                     var state by remember {
                         mutableStateOf(filter.initialValue?.index)
@@ -92,7 +72,7 @@ fun FilterGroupItem(
                         onSelected = { value ->
                             onUpdate(
                                 filters.replace(index, filter.apply {
-                                    Filter.Sort.Selection(value, false)
+                                    this.value = Filter.Sort.Selection(value, false)
                                 })
                             )
                             state = value
@@ -119,7 +99,7 @@ fun FilterGroupItem(
                         name = filter.name,
                         filters = filter.filters,
                         onUpdate = {
-                            onUpdate(filters + it)
+                            onUpdate(filters.replace(index, Filter.Group(filter.name, it)))
                         },
                         isExpandable = true,
                     )

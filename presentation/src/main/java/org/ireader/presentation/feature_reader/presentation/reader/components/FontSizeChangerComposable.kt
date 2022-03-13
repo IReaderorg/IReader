@@ -19,7 +19,7 @@ import org.ireader.core.R
 import org.ireader.domain.view_models.reader.FontSizeEvent
 import org.ireader.domain.view_models.reader.ReaderEvent
 import org.ireader.domain.view_models.reader.ReaderScreenViewModel
-import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
+import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 
 @Composable
 fun FontSizeChangerComposable(
@@ -66,10 +66,10 @@ fun FontHeightChangerComposable(
             style = TextStyle(fontWeight = FontWeight.W400),
             color = MaterialTheme.colors.onBackground
         )
-        TopAppBarActionButton(imageVector = Icons.Default.CloseFullscreen,
+        AppIconButton(imageVector = Icons.Default.CloseFullscreen,
             title = "Decrease font height",
             onClick = { viewModel.saveFontHeight(false) })
-        TopAppBarActionButton(imageVector = Icons.Default.OpenInFull,
+        AppIconButton(imageVector = Icons.Default.OpenInFull,
             title = "Increase font height",
             onClick = { viewModel.saveFontHeight(true) })
     }
@@ -88,11 +88,11 @@ fun ParagraphDistanceComposable(modifier: Modifier = Modifier, viewModel: Reader
             style = TextStyle(fontWeight = FontWeight.W400),
             color = MaterialTheme.colors.onBackground
         )
-        TopAppBarActionButton(imageVector = Icons.Default.VerticalAlignTop,
+        AppIconButton(imageVector = Icons.Default.VerticalAlignTop,
             tint = MaterialTheme.colors.onBackground,
             title = "Decrease font height",
             onClick = { viewModel.saveParagraphDistance(false) })
-        TopAppBarActionButton(imageVector = Icons.Default.VerticalAlignBottom,
+        AppIconButton(imageVector = Icons.Default.VerticalAlignBottom,
             tint = MaterialTheme.colors.onBackground,
             title = "Increase font height",
             onClick = { viewModel.saveParagraphDistance(true) })
@@ -112,11 +112,11 @@ fun IndentChangerComposable(modifier: Modifier = Modifier, viewModel: ReaderScre
             style = TextStyle(fontWeight = FontWeight.W400),
             color = MaterialTheme.colors.onBackground
         )
-        TopAppBarActionButton(imageVector = Icons.Default.FormatIndentDecrease,
+        AppIconButton(imageVector = Icons.Default.FormatIndentDecrease,
             tint = MaterialTheme.colors.onBackground,
             title = "Decrease paragraph indent",
             onClick = { viewModel.saveParagraphIndent(false) })
-        TopAppBarActionButton(imageVector = Icons.Default.FormatIndentIncrease,
+        AppIconButton(imageVector = Icons.Default.FormatIndentIncrease,
             tint = MaterialTheme.colors.onBackground,
             title = "Increase paragraph indent",
             onClick = { viewModel.saveParagraphIndent(true) })

@@ -31,31 +31,31 @@ import org.ireader.domain.catalog.service.CatalogStore
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.ui.NavigationArgs
-import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
+import org.ireader.domain.use_cases.preferences.reader_preferences.*
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import org.ireader.domain.utils.Resource
 import tachiyomi.source.Source
 import javax.inject.Inject
 
 
-/**
- * the order of this screen is
- * first we need to get the book from room then
- * we use the areReversedChapter to understanding the order of
- * chapters for chapterList slider then get Chapters using pagination for chapter drawer.
- */
-@SuppressLint("StaticFieldLeak")
+
 @HiltViewModel
 class ReaderScreenViewModel @Inject constructor(
-    private val preferencesUseCase: org.ireader.domain.use_cases.preferences.reader_preferences.PreferencesUseCase,
     private val getBookUseCases: org.ireader.domain.use_cases.local.LocalGetBookUseCases,
     private val getChapterUseCase: LocalGetChapterUseCase,
     private val remoteUseCases: RemoteUseCases,
     private val insertUseCases: LocalInsertUseCases,
-    private val deleteUseCase: DeleteUseCase,
     private val catalogStore: CatalogStore,
+    private val selectedFontStateUseCase: SelectedFontStateUseCase,
+    private val brightnessStateUseCase: BrightnessStateUseCase,
+    private val fontHeightUseCase: FontHeightUseCase,
+    private val fontSizeStateUseCase: FontSizeStateUseCase,
+    private val backgroundColorUseCase: BackgroundColorUseCase,
+    private val paragraphDistanceUseCase: ParagraphDistanceUseCase,
+    private val paragraphIndentUseCase: ParagraphIndentUseCase,
+    private val orientationUseCase: OrientationUseCase,
     savedStateHandle: SavedStateHandle,
 ) : BaseViewModel() {
 
@@ -296,11 +296,11 @@ class ReaderScreenViewModel @Inject constructor(
 
 
     private fun readSelectedFontState() {
-        prefState = prefState.copy(font = preferencesUseCase.readSelectedFontStateUseCase())
+        prefState = prefState.copy(font = selectedFontStateUseCase.read())
     }
 
     fun readBrightness(context: Context) {
-        val brightness = preferencesUseCase.readBrightnessStateUseCase()
+        val brightness = brightnessStateUseCase.read()
         val activity = context.findComponentActivity()
         if (activity != null) {
             val window = activity.window
@@ -312,25 +312,25 @@ class ReaderScreenViewModel @Inject constructor(
     }
 
     private fun readFontSize() {
-        prefState = prefState.copy(fontSize = preferencesUseCase.readFontSizeStateUseCase())
+        prefState = prefState.copy(fontSize = fontSizeStateUseCase.read())
     }
 
     private fun readParagraphDistance() {
         prefState =
-            prefState.copy(distanceBetweenParagraphs = preferencesUseCase.readParagraphDistanceUseCase())
+            prefState.copy(distanceBetweenParagraphs = paragraphDistanceUseCase.read())
     }
 
     private fun readParagraphIndent() {
         prefState =
-            prefState.copy(paragraphsIndent = preferencesUseCase.readParagraphIndentUseCase())
+            prefState.copy(paragraphsIndent = paragraphIndentUseCase.read())
     }
 
     private fun readFontHeight() {
-        prefState = prefState.copy(lineHeight = preferencesUseCase.readFontHeightUseCase())
+        prefState = prefState.copy(lineHeight = fontHeightUseCase.read())
     }
 
     private fun readBackgroundColor() {
-        val color = readerScreenBackgroundColors[preferencesUseCase.getBackgroundColorUseCase()]
+        val color = readerScreenBackgroundColors[backgroundColorUseCase.read()]
         prefState =
             prefState.copy(backgroundColor = color.color, textColor = color.onTextColor)
     }
@@ -340,7 +340,7 @@ class ReaderScreenViewModel @Inject constructor(
     fun readOrientation(context: Context) {
         val activity = context.findComponentActivity()
         if (activity != null) {
-            when (preferencesUseCase.readOrientationUseCase()) {
+            when (orientationUseCase.read()) {
                 OrientationMode.Portrait -> {
                     activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                     prefState = prefState.copy(orientation = Orientation.Portrait)
@@ -357,7 +357,7 @@ class ReaderScreenViewModel @Inject constructor(
         val color = readerScreenBackgroundColors[colorIndex]
         prefState =
             prefState.copy(backgroundColor = color.color, textColor = color.onTextColor)
-        preferencesUseCase.setBackgroundColorUseCase(colorIndex)
+        backgroundColorUseCase.save(colorIndex)
     }
 
     @SuppressLint("SourceLockedOrientationActivity")
@@ -368,12 +368,13 @@ class ReaderScreenViewModel @Inject constructor(
                 is Orientation.Landscape -> {
                     activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                     prefState = prefState.copy(orientation = Orientation.Portrait)
-                    preferencesUseCase.saveOrientationUseCase(OrientationMode.Portrait)
+                    orientationUseCase.save(OrientationMode.Portrait)
+
                 }
                 is Orientation.Portrait -> {
                     activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
                     prefState = prefState.copy(orientation = Orientation.Landscape)
-                    preferencesUseCase.saveOrientationUseCase(OrientationMode.Landscape)
+                    orientationUseCase.save(OrientationMode.Landscape)
                 }
             }
         }
@@ -382,11 +383,12 @@ class ReaderScreenViewModel @Inject constructor(
     fun saveFontHeight(isIncreased: Boolean) {
         val currentFontHeight = prefState.lineHeight
         if (isIncreased) {
-            preferencesUseCase.saveFontHeightUseCase(currentFontHeight + 1)
+            fontHeightUseCase.save(currentFontHeight + 1)
+
             prefState = prefState.copy(lineHeight = currentFontHeight + 1)
 
         } else if (currentFontHeight > 20 && !isIncreased) {
-            preferencesUseCase.saveFontHeightUseCase(currentFontHeight - 1)
+            fontHeightUseCase.save(currentFontHeight - 1)
             prefState = prefState.copy(lineHeight = currentFontHeight - 1)
         }
     }
@@ -394,11 +396,12 @@ class ReaderScreenViewModel @Inject constructor(
     fun saveParagraphDistance(isIncreased: Boolean) {
         val currentDistance = prefState.distanceBetweenParagraphs
         if (isIncreased) {
-            preferencesUseCase.saveParagraphDistanceUseCase(currentDistance + 1)
+            paragraphDistanceUseCase.save(currentDistance + 1)
+
             prefState = prefState.copy(distanceBetweenParagraphs = currentDistance + 1)
 
         } else if (currentDistance > 1 && !isIncreased) {
-            preferencesUseCase.saveParagraphDistanceUseCase(currentDistance - 1)
+            paragraphDistanceUseCase.save(currentDistance - 1)
             prefState = prefState.copy(distanceBetweenParagraphs = currentDistance - 1)
         }
     }
@@ -406,11 +409,13 @@ class ReaderScreenViewModel @Inject constructor(
     fun saveParagraphIndent(isIncreased: Boolean) {
         val paragraphsIndent = prefState.paragraphsIndent
         if (isIncreased) {
-            preferencesUseCase.saveParagraphIndentUseCase(paragraphsIndent + 1)
+            paragraphIndentUseCase.save(paragraphsIndent + 1)
+
             prefState = prefState.copy(paragraphsIndent = paragraphsIndent + 1)
 
         } else if (paragraphsIndent > 1 && !isIncreased) {
-            preferencesUseCase.saveParagraphIndentUseCase(paragraphsIndent - 1)
+            paragraphIndentUseCase.save(paragraphsIndent - 1)
+
             prefState = prefState.copy(paragraphsIndent = paragraphsIndent - 1)
         }
     }
@@ -418,18 +423,19 @@ class ReaderScreenViewModel @Inject constructor(
     private fun saveFontSize(event: FontSizeEvent) {
         if (event == FontSizeEvent.Increase) {
             prefState = prefState.copy(fontSize = prefState.fontSize + 1)
-            preferencesUseCase.saveFontSizeStateUseCase(prefState.fontSize)
+            fontSizeStateUseCase.save(prefState.fontSize)
         } else {
             if (prefState.fontSize > 0) {
                 prefState = prefState.copy(fontSize = prefState.fontSize - 1)
-                preferencesUseCase.saveFontSizeStateUseCase(prefState.fontSize)
+                fontSizeStateUseCase.save(prefState.fontSize)
             }
         }
     }
 
     private fun saveFont(fontType: FontType) {
         prefState = prefState.copy(font = fontType)
-        preferencesUseCase.saveSelectedFontStateUseCase(fonts.indexOf(fontType))
+        selectedFontStateUseCase.save(fonts.indexOf(fontType))
+
     }
 
     private fun saveBrightness(brightness: Float, context: Context) {
@@ -440,8 +446,7 @@ class ReaderScreenViewModel @Inject constructor(
             val layoutParams: WindowManager.LayoutParams = window.attributes
             layoutParams.screenBrightness = brightness
             window.attributes = layoutParams
-
-            preferencesUseCase.saveBrightnessStateUseCase(brightness)
+            brightnessStateUseCase.save(brightness)
         }
     }
 

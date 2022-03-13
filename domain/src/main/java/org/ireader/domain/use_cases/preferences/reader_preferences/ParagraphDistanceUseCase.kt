@@ -4,34 +4,28 @@ import org.ireader.core_ui.theme.AppPreferences
 import javax.inject.Inject
 
 
-class SaveParagraphDistanceUseCase @Inject constructor(
+class ParagraphDistanceUseCase @Inject constructor(
     private val appPreferences: AppPreferences,
 ) {
-    operator fun invoke(paragraphDistance: Int) {
+    fun save(paragraphDistance: Int) {
         appPreferences.paragraphDistance().set(paragraphDistance)
     }
-}
 
-class ReadParagraphDistanceUseCase @Inject constructor(
-    private val appPreferences: AppPreferences,
-) {
-    operator fun invoke(): Int {
+    fun read(): Int {
         return appPreferences.paragraphDistance().get()
     }
+
 }
 
-class SaveParagraphIndentUseCase @Inject constructor(
+class ParagraphIndentUseCase @Inject constructor(
     private val appPreferences: AppPreferences,
 ) {
-    operator fun invoke(paragraphIndent: Int) {
+    fun save(paragraphIndent: Int) {
         appPreferences.paragraphIndent().set(paragraphIndent)
     }
-}
 
-class ReadParagraphIndentUseCase @Inject constructor(
-    private val appPreferences: AppPreferences,
-) {
-    operator fun invoke(): Int {
+    fun read(): Int {
         return appPreferences.paragraphIndent().get()
     }
+
 }

@@ -13,8 +13,8 @@ import org.ireader.core_ui.theme.UiPreferences
 import org.ireader.data.repository.NetworkPreferences
 import org.ireader.domain.use_cases.fetchers.FetchBookDetailAndChapterDetailFromWebView
 import org.ireader.domain.use_cases.fetchers.FetchUseCase
+import org.ireader.domain.use_cases.preferences.apperance.NightModePreferencesUseCase
 import org.ireader.domain.use_cases.preferences.apperance.ReadNightModePreferences
-import org.ireader.domain.use_cases.preferences.apperance.SaveNightModePreferences
 import org.ireader.domain.use_cases.preferences.reader_preferences.*
 import org.ireader.domain.use_cases.preferences.services.ReadLastUpdateTime
 import org.ireader.domain.use_cases.preferences.services.SetLastUpdateTime
@@ -38,8 +38,8 @@ class TestNetworkModule {
             readFontSizeStateUseCase = ReadFontSizeStateUseCase(appPreferences),
             saveFontSizeStateUseCase = SaveFontSizeStateUseCase(appPreferences),
             readBrightnessStateUseCase = ReadBrightnessStateUseCase(appPreferences),
-            saveBrightnessStateUseCase = SaveBrightnessStateUseCase(appPreferences),
-            saveLibraryLayoutUseCase = SaveLibraryLayoutTypeStateUseCase(appPreferences),
+            brightnessStateUseCase = BrightnessStateUseCase(appPreferences),
+            libraryLayoutPreferencesUseCase = LibraryLayoutTypeUseCase(appPreferences),
             readLibraryLayoutUseCase = ReadLibraryLayoutTypeStateUseCase(appPreferences),
             saveBrowseLayoutUseCase = SaveBrowseLayoutTypeStateUseCase(appPreferences),
             readBrowseLayoutUseCase = ReadBrowseLayoutTypeStateUseCase(appPreferences),
@@ -62,7 +62,7 @@ class TestNetworkModule {
             readLastUpdateTime = ReadLastUpdateTime(appPreferences),
             setLastUpdateTime = SetLastUpdateTime(appPreferences),
             readNightModePreferences = ReadNightModePreferences(uiPreferences),
-            saveNightModePreferences = SaveNightModePreferences(uiPreferences)
+            nightModePreferencesUseCase = NightModePreferencesUseCase(uiPreferences)
         )
     }
 

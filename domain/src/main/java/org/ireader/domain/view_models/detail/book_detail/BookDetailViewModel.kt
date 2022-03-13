@@ -18,7 +18,7 @@ import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
 import org.ireader.core.utils.removeSameItemsFromList
 import org.ireader.core_ui.viewmodel.BaseViewModel
-import org.ireader.domain.catalog.service.CatalogStore
+import org.ireader.domain.catalog.interactor.GetLocalCatalog
 import org.ireader.domain.feature_services.DownloaderService.DownloadService
 import org.ireader.domain.feature_services.DownloaderService.DownloadService.Companion.DOWNLOADER_BOOK_ID
 import org.ireader.domain.feature_services.DownloaderService.DownloadService.Companion.DOWNLOADER_SERVICE_NAME
@@ -46,7 +46,7 @@ class BookDetailViewModel @Inject constructor(
     private val deleteUseCase: DeleteUseCase,
     private val fetchUseCase: FetchUseCase,
     savedStateHandle: SavedStateHandle,
-    private val catalogStore: CatalogStore,
+    private val getLocalCatalog: GetLocalCatalog,
 ) : BaseViewModel() {
 
     var state by mutableStateOf(DetailState())
@@ -77,7 +77,7 @@ class BookDetailViewModel @Inject constructor(
         val bookId = savedStateHandle.get<Long>("bookId")
         val sourceId = savedStateHandle.get<Long>("sourceId")
         if (bookId != null && sourceId != null) {
-            val source = catalogStore.get(sourceId)?.source
+            val source = getLocalCatalog.get(sourceId)?.source
             state = state.copy(source = source)
             state = state.copy(isLocalLoading = true)
             chapterState = chapterState.copy(isLoading = true)

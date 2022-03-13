@@ -17,7 +17,7 @@ import org.ireader.domain.models.layouts
 import org.ireader.domain.view_models.explore.ExploreState
 import org.ireader.presentation.feature_library.presentation.components.RadioButtonWithTitleComposable
 import org.ireader.presentation.presentation.ToolBar
-import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
+import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarSearch
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
@@ -58,7 +58,7 @@ fun BrowseTopAppBar(
         backgroundColor = MaterialTheme.colors.background,
         actions = {
             if (state.isSearchModeEnable) {
-                TopAppBarActionButton(
+                AppIconButton(
                     imageVector = Icons.Default.Close,
                     title = "Close",
                     onClick = {
@@ -68,7 +68,7 @@ fun BrowseTopAppBar(
             } else if (source.getFilters()
                     .find { it is Filter.Title } != null
             ) {
-                TopAppBarActionButton(
+                AppIconButton(
                     imageVector = Icons.Default.Search,
                     title = "Search",
                     onClick = {
@@ -76,14 +76,14 @@ fun BrowseTopAppBar(
                     },
                 )
             }
-            TopAppBarActionButton(
+            AppIconButton(
                 imageVector = Icons.Default.Public,
                 title = "WebView",
                 onClick = {
                     onWebView()
                 },
             )
-            TopAppBarActionButton(
+            AppIconButton(
                 imageVector = Icons.Default.GridView,
                 title = "Layout",
                 onClick = {

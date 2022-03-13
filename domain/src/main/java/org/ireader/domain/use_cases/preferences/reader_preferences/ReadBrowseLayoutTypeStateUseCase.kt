@@ -5,34 +5,28 @@ import org.ireader.domain.models.DisplayMode
 import org.ireader.domain.models.layouts
 import javax.inject.Inject
 
-class ReadBrowseLayoutTypeStateUseCase @Inject constructor(
+
+class LibraryLayoutTypeUseCase @Inject constructor(
     private val appPreferences: AppPreferences,
 ) {
-    operator fun invoke(): DisplayMode {
+    fun save(layoutIndex: Int) {
+        appPreferences.libraryLayoutType().set(layoutIndex)
+    }
+
+    fun read(): DisplayMode {
+        return layouts[appPreferences.libraryLayoutType().get()]
+    }
+}
+
+class BrowseLayoutTypeUseCase @Inject constructor(
+    private val appPreferences: AppPreferences,
+) {
+    fun save(layoutIndex: Int) {
+        appPreferences.exploreLayoutType().set(layoutIndex)
+    }
+
+    fun read(): DisplayMode {
         return layouts[appPreferences.exploreLayoutType().get()]
     }
 }
 
-class SaveLibraryLayoutTypeStateUseCase @Inject constructor(
-    private val appPreferences: AppPreferences,
-) {
-    operator fun invoke(layoutIndex: Int) {
-        appPreferences.libraryLayoutType().set(layoutIndex)
-    }
-}
-
-class SaveBrowseLayoutTypeStateUseCase @Inject constructor(
-    private val appPreferences: AppPreferences,
-) {
-    operator fun invoke(layoutIndex: Int) {
-        appPreferences.exploreLayoutType().set(layoutIndex)
-    }
-}
-
-class ReadLibraryLayoutTypeStateUseCase @Inject constructor(
-    private val appPreferences: AppPreferences,
-) {
-    operator fun invoke(): DisplayMode {
-        return layouts[appPreferences.libraryLayoutType().get()]
-    }
-}

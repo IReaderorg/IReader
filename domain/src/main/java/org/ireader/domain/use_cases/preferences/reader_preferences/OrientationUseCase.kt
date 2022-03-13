@@ -7,53 +7,42 @@ import org.ireader.domain.models.FilterType
 import org.ireader.domain.models.SortType
 import javax.inject.Inject
 
-class SaveOrientationUseCase @Inject constructor(
+class OrientationUseCase @Inject constructor(
     private val appPreferences: AppPreferences,
 ) {
-    operator fun invoke(orientation: OrientationMode) {
+    fun save(orientation: OrientationMode) {
         appPreferences.orientation().set(orientation)
     }
-}
 
-
-class ReadOrientationUseCase @Inject constructor(
-    private val appPreferences: AppPreferences,
-) {
-    operator fun invoke(): OrientationMode {
+    fun read(): OrientationMode {
         return appPreferences.orientation().get()
     }
 }
 
-class SaveFiltersUseCase @Inject constructor(
+
+class FiltersUseCase @Inject constructor(
     private val appPreferences: AppPreferences,
 ) {
-    operator fun invoke(value: Int) {
+    fun save(value: Int) {
         appPreferences.filterLibraryScreen().set(value)
     }
-}
 
-class ReadFilterUseCase @Inject constructor(
-    private val appPreferences: AppPreferences,
-) {
-    operator fun invoke(): FilterType {
+    fun read(): FilterType {
         return mapFilterType(appPreferences.filterLibraryScreen().get())
     }
 }
 
-class SaveSortersUseCase @Inject constructor(
+class SortersUseCase @Inject constructor(
     private val appPreferences: AppPreferences,
 ) {
-    operator fun invoke(value: Int) {
+    fun save(value: Int) {
         appPreferences.sortLibraryScreen().set(value)
     }
-}
 
-class ReadSortersUseCase @Inject constructor(
-    private val appPreferences: AppPreferences,
-) {
-    operator fun invoke(): SortType {
+    fun read(): SortType {
         return mapSortType(appPreferences.sortLibraryScreen().get())
     }
+
 }
 
 fun mapSortType(input: Int): SortType {

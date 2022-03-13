@@ -5,22 +5,19 @@ import org.ireader.core_ui.theme.FontType
 import org.ireader.core_ui.theme.fonts
 import javax.inject.Inject
 
-class ReadSelectedFontStateUseCase @Inject constructor(
+class SelectedFontStateUseCase @Inject constructor(
     private val appPreferences: AppPreferences,
 ) {
-    operator fun invoke(): FontType {
-        val fontType = appPreferences.font().get()
-        return fonts[fontType]
+    fun save(fontIndex: Int) {
+        appPreferences.font().set(fontIndex)
     }
-}
 
-class SaveSelectedFontStateUseCase @Inject constructor(
-    private val appPreferences: AppPreferences,
-) {
     /**
      * fontIndex is the index of font which is in fonts list inside the Type package
      */
-    operator fun invoke(fontIndex: Int) {
-        appPreferences.font().set(fontIndex)
+    fun read(): FontType {
+        val fontType = appPreferences.font().get()
+        return fonts[fontType]
     }
+
 }

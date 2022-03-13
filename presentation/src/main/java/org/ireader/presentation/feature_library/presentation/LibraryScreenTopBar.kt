@@ -17,7 +17,7 @@ import org.ireader.core_ui.theme.AppColors
 import org.ireader.domain.view_models.library.LibraryEvents
 import org.ireader.domain.view_models.library.LibraryViewModel
 import org.ireader.presentation.presentation.ToolBar
-import org.ireader.presentation.presentation.reusable_composable.TopAppBarActionButton
+import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarSearch
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
 
@@ -55,7 +55,7 @@ fun LibraryScreenTopBar(
         elevation = Constants.DEFAULT_ELEVATION,
         actions = {
             if (state.inSearchMode) {
-                TopAppBarActionButton(
+                AppIconButton(
                     imageVector = Icons.Default.Close,
                     title = "Close",
                     onClick = {
@@ -63,7 +63,7 @@ fun LibraryScreenTopBar(
                     },
                 )
             }
-            TopAppBarActionButton(
+            AppIconButton(
                 imageVector = Icons.Default.Sort,
                 title = "Filter",
                 onClick = {
@@ -76,7 +76,7 @@ fun LibraryScreenTopBar(
                     }
                 },
             )
-            TopAppBarActionButton(
+            AppIconButton(
                 imageVector = Icons.Default.Search,
                 title = "Search",
                 onClick = {
@@ -88,7 +88,7 @@ fun LibraryScreenTopBar(
         },
         navigationIcon = if (state.inSearchMode) {
             {
-                TopAppBarActionButton(imageVector = Icons.Default.ArrowBack,
+                AppIconButton(imageVector = Icons.Default.ArrowBack,
                     title = "Toggle search mode off",
                     onClick = { viewModel.onEvent(LibraryEvents.ToggleSearchMode(false)) })
 

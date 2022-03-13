@@ -15,7 +15,7 @@ interface ExploreState {
     val error: UiText?
     val layout: LayoutType
     val isSearchModeEnable: Boolean
-    val searchQuery: String
+    var searchQuery: String
     val exploreType: Listing?
     val source: CatalogSource?
     val isFilterEnable: Boolean

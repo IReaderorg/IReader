@@ -188,7 +188,7 @@ fun BookDetailScreenLoadedComposable(
         BookSummary(
             onClickToggle = { onSummaryExpand() },
             description = book.description,
-            genres = book.genres.filter { it.isNotBlank() },
+            genres = book.genres,
             expandedSummary = isSummaryExpanded,
         )
         Divider(

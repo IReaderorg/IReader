@@ -65,7 +65,8 @@ class ExploreRemoteMediator(
             }
             val response = if (query != null) {
                 if (query.isNotBlank()) {
-                    source.getMangaList(filters = listOf(Filter.Title(query)),
+                    source.getMangaList(filters = listOf(Filter.Title()
+                        .apply { this.value = query }),
                         page = currentPage)
                 } else {
                     throw Exception(UiText.StringResource(R.string.query_must_not_be_empty)

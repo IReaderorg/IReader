@@ -29,6 +29,10 @@ object NavigationArgs {
         type = NavType.IntType
         defaultValue = 0
     }
+    val query = navArgument("query") {
+        type = NavType.StringType
+        defaultValue = ""
+    }
 
     val showBottomNav = navArgument(ARG_HIDE_BOTTOM_BAR) {
         defaultValue = true
