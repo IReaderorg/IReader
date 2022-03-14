@@ -2,11 +2,15 @@ package org.ireader.presentation.feature_reader.presentation.reader
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.material.*
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.ModalBottomSheetState
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -51,16 +55,6 @@ fun ReaderText(
         Modifier
             .clickable(interactionSource = interactionSource,
                 indication = null) {
-                if (vm.isReaderModeEnable) {
-                    scope.launch {
-                        vm.getLocalChaptersByPaging(chapter.bookId)
-                        modalState.animateTo(ModalBottomSheetValue.Expanded)
-                    }
-                } else {
-                    scope.launch {
-                        modalState.animateTo(ModalBottomSheetValue.Hidden)
-                    }
-                }
                 vm.onEvent(ReaderEvent.ToggleReaderMode(!vm.isReaderModeEnable))
             }
             .background(vm.backgroundColor)
@@ -69,7 +63,6 @@ fun ReaderText(
             .fillMaxSize()
             .wrapContentSize(Alignment.CenterStart)
     ) {
-
         Box(modifier = Modifier
             .fillMaxSize()
         ) {
@@ -83,67 +76,118 @@ fun ReaderText(
                             ArrowIndicator(
                                 icon = Icons.Default.KeyboardArrowUp,
                                 swipeRefreshState = swipeState,
-                                    refreshTriggerDistance = 80.dp,
+                                refreshTriggerDistance = 80.dp,
                                 color = vm.textColor
-                                )
-                            }, onRefresh = {
-                                onPrev()
-                            }),
-                        ISwipeRefreshIndicator(scrollState.firstVisibleItemScrollOffset != 0,
-                            alignment = Alignment.BottomCenter,
-                            onRefresh = {
-                                onNext()
-                            },
-                            indicator = { state, trigger ->
-                                ArrowIndicator(
-                                    icon = Icons.Default.KeyboardArrowDown,
-                                    swipeRefreshState = swipeState,
-                                    refreshTriggerDistance = 80.dp,
-                                    color = vm.textColor
-                                )
-                            }),
-                    ),
-                )
-                {
-                    LazyColumn(
-                        state = scrollState,
-                        modifier = Modifier
-                    ) {
-                        item {
-                            Text(
-                                modifier = modifier.fillMaxSize(),
-                                text = "\n\n" + chapter.content.map { it.trimStart() }
-                                    .joinToString("\n".repeat(vm.distanceBetweenParagraphs)),
-                                fontSize = vm.fontSize.sp,
-                                fontFamily = vm.font.fontFamily,
-                                textAlign = TextAlign.Start,
-                                color = vm.textColor,
-                                lineHeight = vm.lineHeight.sp,
                             )
-                        }
-
+                        }, onRefresh = {
+                            onPrev()
+                        }),
+                    ISwipeRefreshIndicator(scrollState.firstVisibleItemScrollOffset != 0,
+                        alignment = Alignment.BottomCenter,
+                        onRefresh = {
+                            onNext()
+                        },
+                        indicator = { state, trigger ->
+                            ArrowIndicator(
+                                icon = Icons.Default.KeyboardArrowDown,
+                                swipeRefreshState = swipeState,
+                                refreshTriggerDistance = 80.dp,
+                                color = vm.textColor
+                            )
+                        }),
+                ),
+            )
+            {
+                LazyColumn(
+                    state = scrollState,
+                    modifier = Modifier
+                ) {
+                    item {
+                        Text(
+                            modifier = modifier.fillMaxSize(),
+                            text = "\n\n" + chapter.content.map { it.trimStart() }
+                                .joinToString("\n".repeat(vm.distanceBetweenParagraphs)),
+                            fontSize = vm.fontSize.sp,
+                            fontFamily = vm.font.fontFamily,
+                            textAlign = TextAlign.Start,
+                            color = vm.textColor,
+                            lineHeight = vm.lineHeight.sp,
+                        )
                     }
-
 
                 }
 
-                Carousel(
-                    state = scrollState,
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .fillMaxHeight()
-                        .width(2.dp),
-                    colors = CarouselDefaults.colors(
-                        thumbColor = MaterialTheme.colors.scrollingThumbColor,
-                        scrollingThumbColor = MaterialTheme.colors.scrollingThumbColor,
-                        backgroundColor = vm.backgroundColor,
-                        scrollingBackgroundColor = vm.backgroundColor
-                    )
 
+            }
+
+            Carousel(
+                state = scrollState,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .fillMaxHeight()
+                    .width(2.dp),
+                colors = CarouselDefaults.colors(
+                    thumbColor = MaterialTheme.colors.scrollingThumbColor,
+                    scrollingThumbColor = MaterialTheme.colors.scrollingThumbColor,
+                    backgroundColor = vm.backgroundColor,
+                    scrollingBackgroundColor = vm.backgroundColor
                 )
+
+            )
 
 
         }
+        if (!vm.verticalScrolling) {
+            Row(modifier = Modifier.fillMaxSize()) {
+
+                Box(Modifier
+                    .fillMaxSize()
+                    .weight(1f)
+                    .clickable(interactionSource = interactionSource,
+                        indication = null) {
+                        scope.launch {
+
+                            if (scrollState.layoutInfo.viewportStartOffset != scrollState.firstVisibleItemScrollOffset) {
+                                scrollState.scrollBy(-scrollState.layoutInfo.viewportEndOffset.toFloat())
+                            } else {
+                                onPrev()
+                            }
+
+
+                        }
+                    }) {
+
+                }
+                Box(Modifier
+                    .fillMaxSize()
+                    .weight(1f)
+                    .clickable(interactionSource = interactionSource,
+                        indication = null) {
+                        vm.onEvent(ReaderEvent.ToggleReaderMode(!vm.isReaderModeEnable))
+                    }) {
+
+                }
+                Box(Modifier
+                    .fillMaxSize()
+                    .weight(1f)
+                    .clickable(interactionSource = interactionSource,
+                        indication = null) {
+                        scope.launch {
+                            if (!scrollState.isScrolledToTheEnd()) {
+                                scrollState.scrollBy(scrollState.layoutInfo.viewportEndOffset.toFloat())
+
+                            } else {
+                                onNext()
+                            }
+
+                        }
+                    }) {
+
+                }
+            }
+        }
+
+
     }
 }
 

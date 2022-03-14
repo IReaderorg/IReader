@@ -50,7 +50,7 @@ fun ReadingScreen(
 
     val chapters = vm.chapters.collectAsLazyPagingItems()
     val scaffoldState = rememberScaffoldState(rememberDrawerState(DrawerValue.Closed))
-    val modalBottomSheetState =
+    val modalState =
         rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Expanded,
             confirmStateChange = {
                 vm.isReaderModeEnable = it != ModalBottomSheetValue.Expanded
@@ -71,6 +71,23 @@ fun ReadingScreen(
     LaunchedEffect(key1 = scaffoldState.drawerState.targetValue) {
         if (scaffoldState.drawerState.targetValue == DrawerValue.Open && vm.stateChapters.isNotEmpty()) {
             drawerScrollState.scrollToItem(vm.currentChapterIndex)
+        }
+    }
+    LaunchedEffect(key1 = vm.isReaderModeEnable) {
+        when (vm.isReaderModeEnable) {
+            false -> {
+                scope.launch {
+                    if (chapter != null) {
+                        vm.getLocalChaptersByPaging(chapter.bookId)
+                    }
+                    modalState.animateTo(ModalBottomSheetValue.Expanded)
+                }
+            }
+            true -> {
+                scope.launch {
+                    modalState.animateTo(ModalBottomSheetValue.Hidden)
+                }
+            }
         }
     }
 
@@ -99,7 +116,7 @@ fun ReadingScreen(
             ReaderScreenTopBar(
                 isReaderModeEnable = vm.isReaderModeEnable,
                 isLoaded = vm.isLocalLoaded,
-                modalBottomSheetValue = modalBottomSheetState.targetValue,
+                modalBottomSheetValue = modalState.targetValue,
                 onRefresh = {
                     if (chapter != null) {
                         vm.getReadingContentRemotely(chapter = chapter,
@@ -111,7 +128,7 @@ fun ReadingScreen(
                 navController = navController,
                 onWebView = {
                     try {
-                        if (chapter != null && !vm.isReaderModeEnable && vm.isLocalLoaded && modalBottomSheetState.targetValue == ModalBottomSheetValue.Expanded) {
+                        if (chapter != null && !vm.isReaderModeEnable && vm.isLocalLoaded && modalState.targetValue == ModalBottomSheetValue.Expanded) {
                             navController.navigate(WebViewScreenSpec.buildRoute(
                                 url = chapter.link,
                                 sourceId = source.id,
@@ -146,7 +163,7 @@ fun ReadingScreen(
                         .height(if (vm.isMainBottomModeEnable) 130.dp else 320.dp),
                     sheetBackgroundColor = MaterialTheme.colors.background,
                     sheetElevation = 8.dp,
-                    sheetState = modalBottomSheetState,
+                    sheetState = modalState,
                     sheetContent = {
                         Column(modifier.fillMaxSize()) {
                             Divider(modifier = modifier.fillMaxWidth(),
@@ -222,7 +239,7 @@ fun ReadingScreen(
                         swipeState = swipeState,
                         onPrev = { onPrev() },
                         scrollState = scrollState,
-                        modalState = modalBottomSheetState
+                        modalState = modalState
                     )
                 }
 

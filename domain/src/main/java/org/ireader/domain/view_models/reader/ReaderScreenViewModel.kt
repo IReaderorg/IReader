@@ -47,6 +47,7 @@ class ReaderScreenViewModel @Inject constructor(
     private val catalogStore: CatalogStore,
     private val selectedFontStateUseCase: SelectedFontStateUseCase,
     private val brightnessStateUseCase: BrightnessStateUseCase,
+    private val scrollModeUseCase: ScrollModeUseCase,
     private val fontHeightUseCase: FontHeightUseCase,
     private val fontSizeStateUseCase: FontSizeStateUseCase,
     private val backgroundColorUseCase: BackgroundColorUseCase,
@@ -98,6 +99,7 @@ class ReaderScreenViewModel @Inject constructor(
         readFontHeight()
         readParagraphDistance()
         readParagraphIndent()
+        verticalScrolling = scrollModeUseCase.read()
     }
 
     fun onEvent(event: ReaderEvent) {
@@ -397,6 +399,12 @@ class ReaderScreenViewModel @Inject constructor(
             distanceBetweenParagraphs = currentDistance - 1
 
         }
+    }
+
+    fun toggleScrollMode() {
+        verticalScrolling = !verticalScrolling
+        scrollModeUseCase.save(verticalScrolling)
+
     }
 
     fun saveParagraphIndent(isIncreased: Boolean) {

@@ -8,6 +8,8 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FlipCameraAndroid
+import androidx.compose.material.icons.filled.HorizontalDistribute
+import androidx.compose.material.icons.filled.VerticalDistribute
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,7 +40,27 @@ fun ReaderSettingComposable(modifier: Modifier = Modifier, viewModel: ReaderScre
             viewModel = viewModel
         )
         Spacer(modifier = Modifier.height(12.dp))
-        IndentChangerComposable(viewModel = viewModel)
+        IndentChangerComposable(Modifier, viewModel = viewModel)
+        Row(modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically) {
+            Row(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Scrolling Mode",
+                    fontSize = 12.sp,
+                    style = TextStyle(fontWeight = FontWeight.W400),
+                    color = MaterialTheme.colors.onBackground
+                )
+                AppIconButton(imageVector = if (viewModel.verticalScrolling) Icons.Default.HorizontalDistribute else Icons.Default.VerticalDistribute,
+                    title = if (viewModel.verticalScrolling) "Vertical Mode" else "Horizontal ",
+                    onClick = {
+                        viewModel.toggleScrollMode()
+                    })
+
+            }
+
+        }
+
         Spacer(modifier = Modifier.height(12.dp))
         Row(modifier = modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,

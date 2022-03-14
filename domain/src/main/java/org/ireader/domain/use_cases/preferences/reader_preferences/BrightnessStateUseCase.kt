@@ -15,3 +15,16 @@ class BrightnessStateUseCase @Inject constructor(
     }
 
 }
+
+class ScrollModeUseCase @Inject constructor(
+    private val appPreferences: AppPreferences,
+) {
+    fun save(mode: Boolean) {
+        return appPreferences.scrollMode().set(mode)
+    }
+
+    fun read(): Boolean {
+        return appPreferences.scrollMode().get()
+    }
+
+}
