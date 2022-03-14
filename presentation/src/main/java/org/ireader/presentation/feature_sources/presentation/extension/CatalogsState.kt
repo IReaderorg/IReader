@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import org.ireader.domain.catalog.model.InstallStep
 import org.ireader.domain.models.entities.CatalogLocal
 import org.ireader.domain.models.entities.CatalogRemote
+import javax.inject.Inject
 
 
 interface CatalogsState {
@@ -24,7 +25,7 @@ fun CatalogsState(): CatalogsState {
     return CatalogsStateImpl()
 }
 
-class CatalogsStateImpl : CatalogsState {
+class CatalogsStateImpl @Inject constructor() : CatalogsState {
     override var pinnedCatalogs by mutableStateOf(emptyList<CatalogLocal>())
     override var unpinnedCatalogs by mutableStateOf(emptyList<CatalogLocal>())
     override var remoteCatalogs by mutableStateOf(emptyList<CatalogRemote>())

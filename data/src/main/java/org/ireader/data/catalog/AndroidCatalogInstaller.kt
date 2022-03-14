@@ -20,6 +20,7 @@ import tachiyomi.core.http.HttpClients
 import tachiyomi.core.io.saveTo
 import tachiyomi.core.log.Log
 import java.io.File
+import javax.inject.Inject
 
 /**
  * The installer which installs, updates and uninstalls the extensions.
@@ -27,7 +28,7 @@ import java.io.File
  * @param context The application context.
  */
 
-class AndroidCatalogInstaller(
+class AndroidCatalogInstaller @Inject constructor(
     private val context: Application,
     private val httpClient: HttpClients,
     private val installationChanges: AndroidCatalogInstallationChanges,

@@ -3,9 +3,10 @@ package org.ireader.core_ui.theme
 import tachiyomi.core.prefs.Preference
 import tachiyomi.core.prefs.PreferenceStore
 import tachiyomi.core.prefs.getEnum
+import javax.inject.Inject
 
 
-class AppPreferences(
+class AppPreferences @Inject constructor(
     private val preferenceStore: PreferenceStore,
 ) {
     companion object PreferenceKeys {
@@ -92,7 +93,7 @@ class AppPreferences(
 }
 
 
-class UiPreferences(private val preferenceStore: PreferenceStore) {
+class UiPreferences @Inject constructor(private val preferenceStore: PreferenceStore) {
 
     fun themeMode(): Preference<ThemeMode> {
         return preferenceStore.getEnum("theme_mode", ThemeMode.System)

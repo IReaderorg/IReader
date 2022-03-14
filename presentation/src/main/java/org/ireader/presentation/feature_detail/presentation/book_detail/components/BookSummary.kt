@@ -12,9 +12,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -28,7 +26,9 @@ fun BookSummary(
     genres: List<String>,
     expandedSummary: Boolean,
 ) {
-    val (isExpandable, setIsExpandable) = remember { mutableStateOf<Boolean?>(null) }
+    var isExpandable by remember {
+        mutableStateOf<Boolean?>(null)
+    }
 
 
     val modifier = when (isExpandable) {
@@ -44,7 +44,9 @@ fun BookSummary(
         BookSummaryDescription(
             description,
             isExpandable,
-            setIsExpandable = setIsExpandable,
+            setIsExpandable = {
+                isExpandable = it
+            },
             expandedSummary,
             onClickToggle
         )

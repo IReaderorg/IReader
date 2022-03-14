@@ -14,6 +14,7 @@ import org.ireader.domain.catalog.service.CatalogPreferences
 import org.ireader.domain.catalog.service.CatalogRemoteApi
 import org.ireader.domain.catalog.service.CatalogRemoteRepository
 import tachiyomi.core.log.Log
+import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -26,7 +27,7 @@ class SyncRemoteCatalogs @Inject constructor(
     suspend fun await(forceRefresh: Boolean): Boolean {
         val lastCheckPref = catalogPreferences.lastRemoteCheck()
         val lastCheck = lastCheckPref.get()
-        val now = System.currentTimeMillis()
+        val now = Calendar.getInstance().timeInMillis
 
         if (forceRefresh || (now - lastCheck) > TimeUnit.MINUTES.toMillis(5)) {
             try {
@@ -34,7 +35,7 @@ class SyncRemoteCatalogs @Inject constructor(
                     val newCatalogs = catalogRemoteApi.fetchCatalogs()
                     catalogRemoteRepository.deleteAllRemoteCatalogs()
                     catalogRemoteRepository.setRemoteCatalogs(newCatalogs)
-                    lastCheckPref.set(System.currentTimeMillis())
+                    lastCheckPref.set(Calendar.getInstance().timeInMillis)
                 }
                 return true
             } catch (e: Exception) {

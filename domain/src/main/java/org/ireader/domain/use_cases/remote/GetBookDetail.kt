@@ -13,12 +13,13 @@ import retrofit2.HttpException
 import tachiyomi.source.Source
 import timber.log.Timber
 import java.io.IOException
+import java.util.*
 import javax.inject.Inject
 
 class GetBookDetail @Inject constructor(private val remoteRepository: RemoteRepository) {
     operator fun invoke(book: Book, source: Source): Flow<Resource<Book>> = flow {
         try {
-            val now = System.currentTimeMillis()
+            val now = Calendar.getInstance().timeInMillis
             Timber.d("Timber: Remote Book Detail for ${book.title} Was called")
             val bookDetail = remoteRepository.getRemoteBookDetail(book = book, source = source)
                 .toBook(source.id)

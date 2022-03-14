@@ -7,11 +7,12 @@ import kotlinx.coroutines.flow.Flow
 import org.ireader.core.utils.Constants
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.repository.LocalBookRepository
+import javax.inject.Inject
 
 /**
  * get a paging data that is used in library screen
  */
-class GetBooksByQueryByPagination(private val localBookRepository: LocalBookRepository) {
+class GetBooksByQueryByPagination @Inject constructor(private val localBookRepository: LocalBookRepository) {
     operator fun invoke(query: String): Flow<PagingData<Book>> {
         return Pager(
             config = PagingConfig(pageSize = Constants.DEFAULT_PAGE_SIZE,

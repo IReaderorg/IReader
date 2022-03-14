@@ -34,6 +34,7 @@ import org.ireader.domain.use_cases.remote.RemoteUseCases
 import org.ireader.domain.utils.Resource
 import tachiyomi.source.Source
 import timber.log.Timber
+import java.util.*
 import javax.inject.Inject
 
 
@@ -216,7 +217,7 @@ class BookDetailViewModel @Inject constructor(
 
     private fun insertBookDetailToLocal(book: Book) {
         viewModelScope.launch(Dispatchers.IO) {
-            localInsertUseCases.insertBook(book.copy(dataAdded = System.currentTimeMillis()))
+            localInsertUseCases.insertBook(book.copy(dataAdded = Calendar.getInstance().timeInMillis))
         }
     }
 
@@ -237,7 +238,7 @@ class BookDetailViewModel @Inject constructor(
                     book.copy(
                         id = book.id,
                         favorite = true,
-                        dataAdded = System.currentTimeMillis(),
+                        dataAdded = Calendar.getInstance().timeInMillis,
                     )
                 )
                 updateChaptersEntity(true, book.id)

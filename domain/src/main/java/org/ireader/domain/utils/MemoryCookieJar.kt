@@ -3,6 +3,7 @@ package org.ireader.domain.utils
 import okhttp3.Cookie
 import okhttp3.CookieJar
 import okhttp3.HttpUrl
+import java.util.*
 
 class MemoryCookieJar : CookieJar {
     private val cache = mutableSetOf<WrappedCookie>()
@@ -42,7 +43,7 @@ class MemoryCookieJar : CookieJar {
 class WrappedCookie private constructor(val cookie: Cookie) {
     fun unwrap() = cookie
 
-    fun isExpired() = cookie.expiresAt < System.currentTimeMillis()
+    fun isExpired() = cookie.expiresAt < Calendar.getInstance().timeInMillis
 
     fun matches(url: HttpUrl) = cookie.matches(url)
 

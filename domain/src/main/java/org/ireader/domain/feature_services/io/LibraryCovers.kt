@@ -2,8 +2,9 @@ package org.ireader.domain.feature_services.io
 
 import okio.FileSystem
 import okio.Path
+import javax.inject.Inject
 
-class LibraryCovers(
+class LibraryCovers @Inject constructor(
     private val fileSystem: FileSystem,
     private val path: Path,
 ) {

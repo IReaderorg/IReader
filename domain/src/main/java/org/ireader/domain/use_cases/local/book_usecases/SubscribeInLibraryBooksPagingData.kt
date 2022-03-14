@@ -9,11 +9,12 @@ import org.ireader.domain.models.FilterType
 import org.ireader.domain.models.SortType
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.repository.LocalBookRepository
+import javax.inject.Inject
 
 /**
  * Get Books that are in library and explore mode is false.
  */
-class SubscribeInLibraryBooksPagingData(private val localBookRepository: LocalBookRepository) {
+class SubscribeInLibraryBooksPagingData @Inject constructor(private val localBookRepository: LocalBookRepository) {
     operator fun invoke(
         sortType: SortType,
         isAsc: Boolean,

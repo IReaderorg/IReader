@@ -8,15 +8,16 @@ import kotlinx.coroutines.flow.Flow
 import org.ireader.core.utils.Constants
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.repository.LocalBookRepository
+import javax.inject.Inject
 
-class GetAllExploredBookPagingSource(private val localBookRepository: LocalBookRepository) {
+class GetAllExploredBookPagingSource @Inject constructor(private val localBookRepository: LocalBookRepository) {
     operator fun invoke(
     ): PagingSource<Int, Book> {
         return localBookRepository.getAllExploreBookPagingSource()
     }
 }
 
-class GetAllExploredBookPagingData(private val localBookRepository: LocalBookRepository) {
+class GetAllExploredBookPagingData @Inject constructor(private val localBookRepository: LocalBookRepository) {
     operator fun invoke(
     ): Flow<PagingData<Book>> {
         return Pager(

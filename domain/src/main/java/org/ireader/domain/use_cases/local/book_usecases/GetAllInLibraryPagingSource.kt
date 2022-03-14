@@ -4,9 +4,10 @@ import androidx.paging.PagingSource
 import org.ireader.domain.models.SortType
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.repository.LocalBookRepository
+import javax.inject.Inject
 
 
-class GetAllInLibraryPagingSource(private val localBookRepository: LocalBookRepository) {
+class GetAllInLibraryPagingSource @Inject constructor(private val localBookRepository: LocalBookRepository) {
     operator fun invoke(
         sortType: SortType,
         isAsc: Boolean,

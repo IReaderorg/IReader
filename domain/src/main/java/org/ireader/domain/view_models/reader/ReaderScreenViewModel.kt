@@ -34,6 +34,7 @@ import org.ireader.domain.use_cases.preferences.reader_preferences.*
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import org.ireader.domain.utils.Resource
 import tachiyomi.source.Source
+import java.util.*
 import javax.inject.Inject
 
 
@@ -248,7 +249,7 @@ class ReaderScreenViewModel @Inject constructor(
                 toggleBookLoaded(true)
                 withContext(Dispatchers.IO) {
                     insertBook(book.copy(
-                        lastRead = System.currentTimeMillis()))
+                        lastRead = Calendar.getInstance().timeInMillis))
                 }
                 if (chapterId != Constants.LAST_CHAPTER && chapterId != Constants.NO_VALUE) {
                     getChapter(chapterId, source = source)
@@ -264,7 +265,7 @@ class ReaderScreenViewModel @Inject constructor(
 
     private suspend fun updateLastReadTime(chapter: Chapter) {
         viewModelScope.launch(Dispatchers.IO) {
-            insertChapter(chapter.copy(read = true, lastRead = System.currentTimeMillis()))
+            insertChapter(chapter.copy(read = true, lastRead = Calendar.getInstance().timeInMillis))
         }
     }
 

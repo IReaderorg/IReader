@@ -5,6 +5,7 @@ import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 import org.ireader.core.utils.Constants.BOOK_TABLE
 import tachiyomi.source.model.MangaInfo
+import java.util.*
 
 @Serializable
 @Entity(tableName = BOOK_TABLE)
@@ -69,7 +70,7 @@ fun updateBook(newBook: Book, oldBook: Book): Book {
         link = oldBook.link,
         lastRead = oldBook.lastRead,
         dataAdded = oldBook.dataAdded,
-        lastUpdated = System.currentTimeMillis(),
+        lastUpdated = Calendar.getInstance().timeInMillis,
         favorite = oldBook.favorite,
         title = newBook.title.ifBlank { oldBook.title },
         status = if (newBook.status != 0) newBook.status else oldBook.status,

@@ -32,21 +32,22 @@ import tachiyomi.source.Dependencies
 import tachiyomi.source.Source
 import tachiyomi.source.TestSource
 import java.io.File
+import javax.inject.Inject
 
 /**
  * Class that handles the loading of the catalogs installed in the system and the app.
  */
-class AndroidCatalogLoader(
+class AndroidCatalogLoader @Inject constructor(
     private val context: Application,
     private val httpClients: HttpClients,
 ) : CatalogLoader {
 
-  private val pkgManager = context.packageManager
+    private val pkgManager = context.packageManager
 
-  private val catalogPreferences = AndroidPreferenceStore(context, "catalogs_data", false)
+    private val catalogPreferences = AndroidPreferenceStore(context, "catalogs_data", false)
 
-  /**
-   * Return a list of all the installed catalogs initialized concurrently.
+    /**
+     * Return a list of all the installed catalogs initialized concurrently.
    */
   @SuppressLint("QueryPermissionsNeeded")
   override fun loadAll(): List<CatalogLocal> {

@@ -1,8 +1,9 @@
 package org.ireader.domain.use_cases.local
 
 import org.ireader.domain.use_cases.local.chapter_usecases.*
+import javax.inject.Inject
 
-data class LocalGetChapterUseCase(
+data class LocalGetChapterUseCase @Inject constructor(
     val subscribeChapterById: SubscribeChapterById,
     val findChapterById: FindChapterById,
     val subscribeChaptersByBookId: SubscribeChaptersByBookId,

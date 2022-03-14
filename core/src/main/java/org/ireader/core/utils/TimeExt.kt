@@ -10,7 +10,7 @@ fun convertLongToTime(time: Long): String {
 }
 
 fun currentTimeToLong(): Long {
-    return System.currentTimeMillis()
+    return Calendar.getInstance().timeInMillis
 }
 
 fun convertDateToLong(date: String): Long {

@@ -11,12 +11,13 @@ import org.ireader.domain.repository.LocalBookRepository
 import org.ireader.domain.utils.Resource
 import retrofit2.HttpException
 import java.io.IOException
+import javax.inject.Inject
 
 /**
  * get All books that inLibrary field is true
  * note: when there is no book with that id it return a error resource
  */
-class SubscribeAllInLibraryBooks(private val localBookRepository: LocalBookRepository) {
+class SubscribeAllInLibraryBooks @Inject constructor(private val localBookRepository: LocalBookRepository) {
     operator fun invoke(): Flow<List<Book>> = flow {
         try {
             localBookRepository.subscribeAllInLibraryBooks(sortType = SortType.LastRead,
@@ -43,7 +44,7 @@ class SubscribeAllInLibraryBooks(private val localBookRepository: LocalBookRepos
     }
 }
 
-class FindAllInLibraryBooks(private val localBookRepository: LocalBookRepository) {
+class FindAllInLibraryBooks @Inject constructor(private val localBookRepository: LocalBookRepository) {
     suspend operator fun invoke(): List<Book> {
         return localBookRepository.findAllInLibraryBooks(sortType = SortType.LastRead,
             isAsc = false,

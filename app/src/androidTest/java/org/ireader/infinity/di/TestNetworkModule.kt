@@ -8,7 +8,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.CookieJar
-import org.ireader.data.repository.NetworkPreferences
 import org.ireader.domain.use_cases.fetchers.FetchBookDetailAndChapterDetailFromWebView
 import org.ireader.domain.use_cases.fetchers.FetchUseCase
 import org.ireader.domain.utils.MemoryCookieJar

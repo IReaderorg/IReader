@@ -12,7 +12,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -51,7 +50,7 @@ fun WebPageTopBar(
                 .fillMaxHeight(.7f)
                 .fillMaxWidth()
                 .background(
-                    color = Color(0xFFD5D5D5),
+                    color = MaterialTheme.colors.onBackground.copy(.2f),
                     shape = CircleShape
                 ),
                 value = urlToRender,

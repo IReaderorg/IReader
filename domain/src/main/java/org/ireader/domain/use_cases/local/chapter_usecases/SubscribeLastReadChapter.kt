@@ -5,12 +5,13 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.repository.LocalChapterRepository
+import javax.inject.Inject
 
 /**
  * Get latest read chapter
  *  * note: if nothing is found it return a resource of error
  */
-class SubscribeLastReadChapter(private val localChapterRepository: LocalChapterRepository) {
+class SubscribeLastReadChapter @Inject constructor(private val localChapterRepository: LocalChapterRepository) {
     operator fun invoke(
         bookId: Long,
     ): Flow<Chapter?> = flow {
@@ -30,7 +31,7 @@ class SubscribeLastReadChapter(private val localChapterRepository: LocalChapterR
     }
 }
 
-class FindLastReadChapter(private val localChapterRepository: LocalChapterRepository) {
+class FindLastReadChapter @Inject constructor(private val localChapterRepository: LocalChapterRepository) {
     suspend operator fun invoke(
         bookId: Long,
     ): Chapter? {
@@ -38,7 +39,7 @@ class FindLastReadChapter(private val localChapterRepository: LocalChapterReposi
     }
 }
 
-class SubscribeFirstChapter(private val localChapterRepository: LocalChapterRepository) {
+class SubscribeFirstChapter @Inject constructor(private val localChapterRepository: LocalChapterRepository) {
     operator fun invoke(
         bookId: Long,
     ): Flow<Chapter?> {
@@ -47,7 +48,7 @@ class SubscribeFirstChapter(private val localChapterRepository: LocalChapterRepo
     }
 }
 
-class FindFirstChapter(private val localChapterRepository: LocalChapterRepository) {
+class FindFirstChapter @Inject constructor(private val localChapterRepository: LocalChapterRepository) {
     suspend operator fun invoke(
         bookId: Long,
     ): Chapter? {

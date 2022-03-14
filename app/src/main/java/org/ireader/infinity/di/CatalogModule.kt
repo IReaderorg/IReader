@@ -13,7 +13,6 @@ import org.ireader.data.local.AppDatabase
 import org.ireader.data.local.dao.CatalogDao
 import org.ireader.data.repository.CatalogRemoteRepositoryImpl
 import org.ireader.domain.catalog.service.*
-import org.ireader.presentation.feature_sources.presentation.extension.CatalogsStateImpl
 import tachiyomi.core.http.HttpClients
 import javax.inject.Singleton
 
@@ -42,11 +41,11 @@ class CatalogModule {
         return AndroidCatalogLoader(context = context, httpClients)
     }
 
-    @Provides
-    @Singleton
-    fun provideCatalogsState(): CatalogsStateImpl {
-        return CatalogsStateImpl()
-    }
+//    @Provides
+//    @Singleton
+//    fun provideCatalogsState(): CatalogsStateImpl {
+//        return CatalogsStateImpl()
+//    }
 
     @Provides
     @Singleton

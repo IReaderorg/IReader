@@ -25,6 +25,7 @@ import tachiyomi.core.http.okhttp
 import tachiyomi.core.io.saveTo
 import tachiyomi.source.HttpSource
 import java.io.File
+import java.util.*
 
 
 val Path.nameWithoutExtension
@@ -115,8 +116,8 @@ internal class LibraryMangaFetcher(
       }
       // If the cover is already saved but both covers have the same size, use the saved one
       if (file.exists() && file.length() == body.contentLength()) {
-        body.close()
-        file.setLastModified(System.currentTimeMillis())
+          body.close()
+          file.setLastModified(Calendar.getInstance().timeInMillis)
         return getFileLoader(file)
       }
     }

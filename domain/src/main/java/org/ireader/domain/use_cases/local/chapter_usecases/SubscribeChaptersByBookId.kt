@@ -9,12 +9,13 @@ import kotlinx.coroutines.flow.flow
 import org.ireader.core.utils.Constants
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.repository.LocalChapterRepository
+import javax.inject.Inject
 
 /**
  * get all Chapter using a bookId
  * note: if nothing is found it return a resource of error
  */
-class SubscribeChaptersByBookId(private val localChapterRepository: LocalChapterRepository) {
+class SubscribeChaptersByBookId @Inject constructor(private val localChapterRepository: LocalChapterRepository) {
     operator fun invoke(
         bookId: Long,
         isAsc: Boolean = true,
@@ -30,7 +31,7 @@ class SubscribeChaptersByBookId(private val localChapterRepository: LocalChapter
     }
 }
 
-class FindChaptersByBookId(private val localChapterRepository: LocalChapterRepository) {
+class FindChaptersByBookId @Inject constructor(private val localChapterRepository: LocalChapterRepository) {
     suspend operator fun invoke(
         bookId: Long,
         isAsc: Boolean = true,
@@ -40,7 +41,7 @@ class FindChaptersByBookId(private val localChapterRepository: LocalChapterRepos
 }
 
 
-class GetLocalChaptersByPaging(private val localChapterRepository: LocalChapterRepository) {
+class GetLocalChaptersByPaging @Inject constructor(private val localChapterRepository: LocalChapterRepository) {
     operator fun invoke(
         bookId: Long,
         isAsc: Boolean,

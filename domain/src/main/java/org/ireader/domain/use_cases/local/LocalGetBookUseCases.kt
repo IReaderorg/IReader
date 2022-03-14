@@ -2,8 +2,9 @@ package org.ireader.domain.use_cases.local
 
 import org.ireader.domain.use_cases.local.book_usecases.*
 import org.ireader.infinity.core.domain.use_cases.local.book_usecases.GetBooksByQueryPagingSource
+import javax.inject.Inject
 
-data class LocalGetBookUseCases(
+data class LocalGetBookUseCases @Inject constructor(
     val subscribeBookById: SubscribeBookById,
     val findBookById: FindBookById,
     val SubscribeInLibraryBooksPagingData: SubscribeInLibraryBooksPagingData,

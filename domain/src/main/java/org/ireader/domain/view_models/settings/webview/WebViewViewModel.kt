@@ -29,6 +29,7 @@ import tachiyomi.source.model.MangaInfo
 import tachiyomi.source.model.Text
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
+import java.util.*
 import javax.inject.Inject
 
 /**This is fake Alert **/
@@ -173,7 +174,7 @@ class WebViewPageModel @Inject constructor(
                 }
             } else {
                 val bookId = insertUseCases.insertBook(detail.toBook(source.id).copy(
-                    lastUpdated = System.currentTimeMillis(),
+                    lastUpdated = Calendar.getInstance().timeInMillis,
                 ))
                 insertUseCases.insertChapters(uniqueList.map { it.copy(bookId = bookId) })
                 showSnackBar(UiText.DynamicString("${detail.title} of ${detail.title} was updated"))
