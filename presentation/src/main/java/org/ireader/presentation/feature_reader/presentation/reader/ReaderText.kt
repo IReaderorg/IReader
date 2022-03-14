@@ -11,7 +11,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -40,33 +39,29 @@ fun ReaderText(
     onPrev: () -> Unit,
     swipeState: SwipeRefreshState,
     scrollState: LazyListState,
+    modalState: ModalBottomSheetState,
 ) {
 
-    val modalBottomSheetState =
-        rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Expanded)
     val scope = rememberCoroutineScope()
 
     val interactionSource = remember { MutableInteractionSource() }
-    val maxOffset = remember {
-        mutableStateOf(0)
-    }
+
 
     Box(
         Modifier
             .clickable(interactionSource = interactionSource,
                 indication = null) {
-                vm.onEvent(ReaderEvent.ToggleReaderMode(!vm.isReaderModeEnable))
                 if (vm.isReaderModeEnable) {
                     scope.launch {
                         vm.getLocalChaptersByPaging(chapter.bookId)
-                        modalBottomSheetState.animateTo(ModalBottomSheetValue.Expanded)
+                        modalState.animateTo(ModalBottomSheetValue.Expanded)
                     }
                 } else {
                     scope.launch {
-                        modalBottomSheetState.animateTo(ModalBottomSheetValue.Hidden)
+                        modalState.animateTo(ModalBottomSheetValue.Hidden)
                     }
                 }
-
+                vm.onEvent(ReaderEvent.ToggleReaderMode(!vm.isReaderModeEnable))
             }
             .background(vm.backgroundColor)
             .padding(horizontal = vm.paragraphsIndent.dp,

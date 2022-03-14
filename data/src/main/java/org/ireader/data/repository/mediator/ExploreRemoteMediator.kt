@@ -74,11 +74,8 @@ class ExploreRemoteMediator(
                 }
             } else if (filters != null) {
                 source.getMangaList(filters = filters, currentPage)
-            } else if (listing != null) {
-                source.getMangaList(sort = listing, currentPage)
             } else {
-                throw Exception(UiText.StringResource(R.string.no_filter_applied)
-                    .toString())
+                source.getMangaList(sort = listing, currentPage)
             }
 
             val endOfPaginationReached = !response.hasNextPage

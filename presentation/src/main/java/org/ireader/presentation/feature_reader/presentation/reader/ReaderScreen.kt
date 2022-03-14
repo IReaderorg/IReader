@@ -51,7 +51,11 @@ fun ReadingScreen(
     val chapters = vm.chapters.collectAsLazyPagingItems()
     val scaffoldState = rememberScaffoldState(rememberDrawerState(DrawerValue.Closed))
     val modalBottomSheetState =
-        rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Expanded)
+        rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Expanded,
+            confirmStateChange = {
+                vm.isReaderModeEnable = it != ModalBottomSheetValue.Expanded
+                true
+            })
     val scope = rememberCoroutineScope()
 
     val chapter = vm.stateChapter
@@ -217,7 +221,8 @@ fun ReadingScreen(
                         onNext = { onNext() },
                         swipeState = swipeState,
                         onPrev = { onPrev() },
-                        scrollState = scrollState
+                        scrollState = scrollState,
+                        modalState = modalBottomSheetState
                     )
                 }
 
@@ -244,6 +249,7 @@ fun ReadingScreen(
     }
 
 }
+
 
 
 

@@ -39,7 +39,7 @@ fun ReaderScreenTopBar(
 
 
     ) {
-    if (!isReaderModeEnable && isLoaded && modalBottomSheetValue == ModalBottomSheetValue.Expanded) {
+    if (!isReaderModeEnable && isLoaded) {
         AnimatedVisibility(
             visible = !isReaderModeEnable && isLoaded,
             enter = slideInVertically(initialOffsetY = { it }, animationSpec = tween(700)),
@@ -59,7 +59,7 @@ fun ReaderScreenTopBar(
                 },
                 backgroundColor = MaterialTheme.colors.background,
                 contentColor = MaterialTheme.colors.onBackground,
-                elevation = 8.dp,
+                elevation = 0.dp,
                 navigationIcon = {
                     TopAppBarBackButton(navController = navController)
                 },
