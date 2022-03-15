@@ -8,7 +8,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FlipCameraAndroid
 import androidx.compose.material.icons.filled.HorizontalDistribute
-import androidx.compose.material.icons.filled.SquareFoot
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.VerticalDistribute
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -53,13 +53,13 @@ fun ReaderSettingComposable(modifier: Modifier = Modifier, viewModel: ReaderScre
                     horizontalArrangement = Arrangement.Start,
                     verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = "Indicator",
+                        text = "Advance Setting",
                         fontSize = 12.sp,
                         style = TextStyle(fontWeight = FontWeight.W400),
                         color = MaterialTheme.colors.onBackground
                     )
-                    AppIconButton(imageVector = Icons.Default.SquareFoot,
-                        title = "Change Indicator",
+                    AppIconButton(imageVector = Icons.Default.Settings,
+                        title = "Advance Setting",
                         onClick = { viewModel.scrollIndicatorDialogShown = true })
                 }
             }

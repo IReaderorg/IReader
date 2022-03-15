@@ -63,11 +63,11 @@ class AppPreferences @Inject constructor(
     }
 
     fun backgroundColorReader(): Preference<Int> {
-        return preferenceStore.getInt(SAVED_BACkGROUND_COLOR, -16777216)
+        return preferenceStore.getInt(SAVED_BACkGROUND_COLOR, -14277082)
     }
 
     fun textColorReader(): Preference<Int> {
-        return preferenceStore.getInt(SAVED_TEXT_COLOR, -1)
+        return preferenceStore.getInt(SAVED_TEXT_COLOR, -1447447)
     }
 
     fun lineHeight(): Preference<Int> {

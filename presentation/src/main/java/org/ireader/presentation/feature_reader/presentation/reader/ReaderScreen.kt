@@ -9,11 +9,13 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.toColorInt
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -31,6 +33,8 @@ import org.ireader.presentation.presentation.reusable_composable.AppTextField
 import org.ireader.presentation.presentation.reusable_composable.ErrorTextWithEmojis
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 import org.ireader.presentation.ui.WebViewScreenSpec
+import org.ireader.presentation.utils.scroll.rememberCarouselScrollState
+import org.ireader.presentation.utils.scroll.verticalScroll
 import tachiyomi.source.Source
 
 
@@ -275,35 +279,52 @@ fun ReadingScreen(
 }
 
 @Composable
-fun ScrollIndicatorSetting(enable: Boolean = false, vm: ReaderScreenViewModel) {
+fun ScrollIndicatorSetting(
+    enable: Boolean = false, vm: ReaderScreenViewModel,
+    onDismiss: () -> Unit = {
+        vm.scrollIndicatorDialogShown = false
+        vm.scrollIndicatorPadding = vm.readScrollIndicatorPadding()
+        vm.scrollIndicatorWith = vm.readScrollIndicatorWidth()
+        vm.readBackgroundColor()
+        vm.readTextColor()
+    },
+) {
     val (pValue, setPaddingValue) = remember { mutableStateOf<String>("") }
     val (wValue, setWidthValue) = remember { mutableStateOf<String>("") }
+    val (bgValue, setBGValue) = remember { mutableStateOf<String>("") }
+    val (txtValue, setTxtValue) = remember { mutableStateOf<String>("") }
     val focusManager = LocalFocusManager.current
+
     if (enable) {
         AlertDialog(
             modifier = Modifier.fillMaxWidth(),
-            onDismissRequest = { vm.scrollIndicatorDialogShown = false },
+            onDismissRequest = {
+                onDismiss()
+            },
             title = null,
             text = {
-                Column(modifier = Modifier.padding(horizontal = 8.dp),
+                Column(modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .verticalScroll(
+                        rememberCarouselScrollState()),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center) {
-                    MidSizeTextComposable(text = "Scroll Indicator Setting")
+                    MidSizeTextComposable(text = "Advance Setting")
                     Spacer(modifier = Modifier.height(32.dp))
                     AppTextField(
                         query = pValue,
                         onValueChange = {
+                            setPaddingValue(it)
                             try {
                                 vm.scrollIndicatorPadding = it.toInt()
                             } catch (e: Exception) {
                             }
-                            setPaddingValue(it)
+
                         },
                         onConfirm = {
                             focusManager.clearFocus()
                         },
-                        enable = pValue.isNotBlank(),
-                        hint = "Padding Value",
+                        hint = "Scroll Indicator Padding Value",
                         isBasicTextField = false,
                         keyboardAction = KeyboardOptions(imeAction = ImeAction.Done,
                             keyboardType = KeyboardType.Number),
@@ -312,20 +333,59 @@ fun ScrollIndicatorSetting(enable: Boolean = false, vm: ReaderScreenViewModel) {
                     AppTextField(
                         query = wValue,
                         onValueChange = {
+                            setWidthValue(it)
                             try {
                                 vm.scrollIndicatorWith = it.toInt()
                             } catch (e: Exception) {
                             }
-                            setWidthValue(it)
+
                         },
                         onConfirm = {
                             focusManager.clearFocus()
                         },
-                        enable = wValue.isNotBlank(),
-                        hint = "Width Value",
+                        hint = "Scroll Indicator  Width Value",
                         isBasicTextField = false,
                         keyboardAction = KeyboardOptions(imeAction = ImeAction.Done,
                             keyboardType = KeyboardType.Number)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    AppTextField(
+                        query = bgValue,
+                        onValueChange = {
+                            setBGValue(it)
+                            try {
+                                vm.backgroundColor = Color(it.toColorInt())
+                            } catch (e: Exception) {
+                                vm.readBackgroundColor()
+                            }
+
+                        },
+                        onConfirm = {
+                            focusManager.clearFocus()
+                        },
+                        hint = "Background Color",
+                        isBasicTextField = false,
+                        keyboardAction = KeyboardOptions(imeAction = ImeAction.Done,
+                            keyboardType = KeyboardType.Text)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    AppTextField(
+                        query = txtValue,
+                        onValueChange = {
+                            setTxtValue(it)
+                            try {
+                                vm.textColor = Color(it.toColorInt())
+                            } catch (e: Exception) {
+                                vm.readTextColor()
+                            }
+                        },
+                        onConfirm = {
+                            focusManager.clearFocus()
+                        },
+                        hint = "TextColor Value",
+                        isBasicTextField = false,
+                        keyboardAction = KeyboardOptions(imeAction = ImeAction.Done,
+                            keyboardType = KeyboardType.Text)
                     )
                 }
 
@@ -335,26 +395,47 @@ fun ScrollIndicatorSetting(enable: Boolean = false, vm: ReaderScreenViewModel) {
             buttons = {
                 Row(horizontalArrangement = Arrangement.SpaceAround,
                     modifier = Modifier.fillMaxWidth()) {
-                    OutlinedButton(onClick = { vm.scrollIndicatorDialogShown = false },
+                    OutlinedButton(onClick = {
+                        vm.scrollIndicatorDialogShown = false
+                        onDismiss()
+                    },
                         colors = ButtonDefaults.textButtonColors(
                             backgroundColor = MaterialTheme.colors.background,
                             contentColor = MaterialTheme.colors.onBackground
                         )) {
-                        vm.scrollIndicatorPadding = vm.readScrollIndicatorPadding()
-                        vm.scrollIndicatorWith = vm.readScrollIndicatorWidth()
+
                         MidSizeTextComposable(text = "DISMISS")
                     }
-                    Button(onClick = { vm.scrollIndicatorDialogShown = false },
+                    Button(onClick = {
+                        vm.scrollIndicatorDialogShown = false
+                        kotlin.runCatching {
+                            if (pValue.isNotBlank()) {
+                                vm.saveScrollIndicatorPadding(pValue.toInt())
+                            }
+                        }.getOrNull()
+                        kotlin.runCatching {
+                            if (wValue.isNotBlank()) {
+                                vm.saveScrollIndicatorWidth(wValue.toInt())
+                            }
+                        }.getOrNull()
+                        kotlin.runCatching {
+                            if (bgValue.isNotBlank()) {
+                                vm.setReaderBackgroundColor(vm.backgroundColor)
+                            }
+
+                        }.getOrNull()
+                        kotlin.runCatching {
+                            if (txtValue.isNotBlank()) {
+                                vm.setReaderTextColor(vm.textColor)
+                            }
+                        }.getOrNull()
+
+                    },
                         colors = ButtonDefaults.textButtonColors(
                             backgroundColor = MaterialTheme.colors.primary,
                             contentColor = MaterialTheme.colors.background
                         )) {
-                        kotlin.runCatching {
-                            vm.saveScrollIndicatorPadding(pValue.toInt())
-                        }.getOrNull()
-                        kotlin.runCatching {
-                            vm.saveScrollIndicatorWidth(wValue.toInt())
-                        }.getOrNull()
+
                         MidSizeTextComposable(text = "APPLY")
                     }
                 }

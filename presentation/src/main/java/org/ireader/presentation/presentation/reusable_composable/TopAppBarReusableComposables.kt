@@ -173,7 +173,6 @@ fun AppTextField(
     query: String,
     onValueChange: (value: String) -> Unit,
     onConfirm: () -> Unit,
-    enable: Boolean = false,
     hint: String = "Search...",
     isBasicTextField: Boolean = true,
     keyboardAction: KeyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
@@ -183,7 +182,7 @@ fun AppTextField(
 ) {
     val focusManager = LocalFocusManager.current
     Box(contentAlignment = Alignment.CenterStart) {
-        if (!enable || query.isBlank()) {
+        if (query.isBlank()) {
             Text(
                 modifier = Modifier.padding(horizontal = 16.dp),
                 text = hint,

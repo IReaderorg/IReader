@@ -89,7 +89,7 @@ fun ExtensionScreen(
                             onConfirm = {
                                 focusManager.clearFocus()
                             },
-                            enable = searchMode)
+                        )
                     }
                 },
                 backgroundColor = MaterialTheme.colors.background,

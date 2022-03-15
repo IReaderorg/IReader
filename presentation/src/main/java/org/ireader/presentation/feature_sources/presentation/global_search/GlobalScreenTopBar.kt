@@ -38,7 +38,6 @@ fun GlobalScreenTopBar(
                     onSearch(query)
                     focusManager.clearFocus()
                 },
-                enable = query.isNotBlank(),
             )
         },
         backgroundColor = AppColors.current.bars,

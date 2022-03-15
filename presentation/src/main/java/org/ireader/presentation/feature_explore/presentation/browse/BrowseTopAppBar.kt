@@ -45,14 +45,15 @@ fun BrowseTopAppBar(
             if (!state.isSearchModeEnable) {
                 TopAppBarTitle(title = source.name)
             } else {
-                AppTextField(query = state.searchQuery,
+                AppTextField(
+                    query = state.searchQuery,
                     onValueChange = {
                         onValueChange(it)
                     },
                     onConfirm = {
                         onSearch()
                     },
-                    enable = state.searchQuery.isNotBlank())
+                )
             }
         },
         backgroundColor = MaterialTheme.colors.background,

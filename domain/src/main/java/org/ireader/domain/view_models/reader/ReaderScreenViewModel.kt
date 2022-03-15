@@ -36,6 +36,7 @@ import org.ireader.domain.use_cases.preferences.reader_preferences.ReaderPrefUse
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import org.ireader.domain.utils.Resource
 import tachiyomi.source.Source
+import timber.log.Timber
 import java.util.*
 import javax.inject.Inject
 
@@ -92,6 +93,7 @@ class ReaderScreenViewModel @Inject constructor(
         this.fontSize = readerUseCases.fontSizeStateUseCase.read()
 
         readBackgroundColor()
+        readTextColor()
 
         lineHeight = readerUseCases.fontHeightUseCase.read()
         distanceBetweenParagraphs = readerUseCases.paragraphDistanceUseCase.read()
@@ -302,12 +304,16 @@ class ReaderScreenViewModel @Inject constructor(
     }
 
 
-    private fun readBackgroundColor() {
-        //val color = readerScreenBackgroundColors[readerUseCases.backgroundColorUseCase.read()]
+    fun readBackgroundColor(): Color {
         val color = Color(readerUseCases.backgroundColorUseCase.read())
-        val textColor = Color(readerUseCases.textColorUseCase.read())
         this.backgroundColor = color
+        return color
+    }
+
+    fun readTextColor(): Color {
+        val textColor = Color(readerUseCases.textColorUseCase.read())
         this.textColor = textColor
+        return textColor
     }
 
 
@@ -334,8 +340,18 @@ class ReaderScreenViewModel @Inject constructor(
         val textColor = readerScreenBackgroundColors[colorIndex].onTextColor
         backgroundColor = bgColor
         this.textColor = textColor
-        readerUseCases.backgroundColorUseCase.save(bgColor.copy(alpha = 1f).toArgb())
-        readerUseCases.textColorUseCase.save(textColor.copy(alpha = 1f).toArgb())
+        setReaderBackgroundColor(bgColor)
+        setReaderTextColor(textColor)
+        Timber.e(backgroundColor.toArgb().toString())
+        Timber.e(this.textColor.toArgb().toString())
+    }
+
+    fun setReaderBackgroundColor(color: Color) {
+        readerUseCases.backgroundColorUseCase.save(color.toArgb())
+    }
+
+    fun setReaderTextColor(color: Color) {
+        readerUseCases.textColorUseCase.save(color.toArgb())
     }
 
     @SuppressLint("SourceLockedOrientationActivity")
@@ -382,6 +398,7 @@ class ReaderScreenViewModel @Inject constructor(
     fun readScrollIndicatorWidth(): Int {
         return readerUseCases.scrollIndicatorUseCase.readWidth()
     }
+
 
     fun readScrollIndicatorPadding(): Int {
         return readerUseCases.scrollIndicatorUseCase.readPadding()

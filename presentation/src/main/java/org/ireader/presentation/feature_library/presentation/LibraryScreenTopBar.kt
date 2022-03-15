@@ -38,7 +38,8 @@ fun LibraryScreenTopBar(
             if (!state.inSearchMode) {
                 TopAppBarTitle(title = "Library")
             } else {
-                AppTextField(query = state.searchQuery,
+                AppTextField(
+                    query = state.searchQuery,
                     onValueChange = {
                         viewModel.onEvent(LibraryEvents.UpdateSearchInput(it))
                         viewModel.onEvent(LibraryEvents.SearchBook(state.searchQuery))
@@ -47,7 +48,7 @@ fun LibraryScreenTopBar(
                         viewModel.onEvent(LibraryEvents.SearchBook(state.searchQuery))
                         focusManager.clearFocus()
                     },
-                    enable = state.searchQuery.isNotBlank())
+                )
             }
         },
         backgroundColor = AppColors.current.bars,
