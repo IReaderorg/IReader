@@ -28,3 +28,24 @@ class ScrollModeUseCase @Inject constructor(
     }
 
 }
+
+class ScrollIndicatorUseCase @Inject constructor(
+    private val appPreferences: AppPreferences,
+) {
+    fun saveWidth(value: Int) {
+        return appPreferences.scrollIndicatorWith().set(value)
+    }
+
+    fun readWidth(): Int {
+        return appPreferences.scrollIndicatorWith().get()
+    }
+
+    fun savePadding(value: Int) {
+        return appPreferences.scrollIndicatorPadding().set(value)
+    }
+
+    fun readPadding(): Int {
+        return appPreferences.scrollIndicatorPadding().get()
+    }
+
+}

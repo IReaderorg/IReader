@@ -29,7 +29,7 @@ fun ChaptersSliderComposable(
     onSliderDragFinished: () -> Unit,
 ) {
     Column(modifier = modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(text = currentChapter.title,
+        Text(text = if (chapters.isNotEmpty()) chapters[currentChapterIndex].title else currentChapter.title,
             color = MaterialTheme.colors.onBackground,
             style = MaterialTheme.typography.subtitle2,
             maxLines = 1,

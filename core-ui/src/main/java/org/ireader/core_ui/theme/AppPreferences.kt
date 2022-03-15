@@ -17,6 +17,7 @@ class AppPreferences @Inject constructor(
         const val SAVED_LIBRARY_LAYOUT_KEY = "library_layout_type"
         const val SAVED_BROWSE_LAYOUT_KEY = "browser_layout_type"
         const val SAVED_BACkGROUND_COLOR = "background_color"
+        const val SAVED_TEXT_COLOR = "text_color"
         const val SAVED_FONT_HEIGHT = "font_height"
         const val SAVED_PARAGRAPH_DISTANCE = "paragraph_distance"
         const val SAVED_PARAGRAPH_INDENT = "paragraph_indent"
@@ -24,6 +25,8 @@ class AppPreferences @Inject constructor(
         const val SORT_LIBRARY_SCREEN = "sort_library_screen"
         const val FILTER_LIBRARY_SCREEN = "filter_library_screen"
         const val SCROLL_MODE = "scroll_mode"
+        const val SCROLL_INDICATOR_PADDING = "scroll_indicator_padding"
+        const val SCROLL_INDICATOR_WIDTH = "scroll_indicator_width"
 
         /** Services **/
         const val Last_UPDATE_CHECK = "last_update_check"
@@ -59,8 +62,12 @@ class AppPreferences @Inject constructor(
         return preferenceStore.getInt(SAVED_DOH_KEY, 0)
     }
 
-    fun backgroundColorIndex(): Preference<Int> {
-        return preferenceStore.getInt(SAVED_BACkGROUND_COLOR, 0)
+    fun backgroundColorReader(): Preference<Int> {
+        return preferenceStore.getInt(SAVED_BACkGROUND_COLOR, -16777216)
+    }
+
+    fun textColorReader(): Preference<Int> {
+        return preferenceStore.getInt(SAVED_TEXT_COLOR, -1)
     }
 
     fun lineHeight(): Preference<Int> {
@@ -81,6 +88,14 @@ class AppPreferences @Inject constructor(
 
     fun scrollMode(): Preference<Boolean> {
         return preferenceStore.getBoolean(SCROLL_MODE, true)
+    }
+
+    fun scrollIndicatorWith(): Preference<Int> {
+        return preferenceStore.getInt(SCROLL_INDICATOR_WIDTH, 2)
+    }
+
+    fun scrollIndicatorPadding(): Preference<Int> {
+        return preferenceStore.getInt(SCROLL_INDICATOR_PADDING, 4)
     }
 
     fun sortLibraryScreen(): Preference<Int> {

@@ -10,7 +10,7 @@ import org.ireader.core.utils.Constants
 import org.ireader.core_ui.theme.AppColors
 import org.ireader.presentation.presentation.ToolBar
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
-import org.ireader.presentation.presentation.reusable_composable.TopAppBarSearch
+import org.ireader.presentation.presentation.reusable_composable.AppTextField
 
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -31,13 +31,15 @@ fun GlobalScreenTopBar(
 
     ToolBar(
         title = {
-            TopAppBarSearch(query = query,
+            AppTextField(
+                query = query,
                 onValueChange = onValueChange,
-                onSearch = {
+                onConfirm = {
                     onSearch(query)
                     focusManager.clearFocus()
                 },
-                isSearchModeEnable = query.isNotBlank())
+                enable = query.isNotBlank(),
+            )
         },
         backgroundColor = AppColors.current.bars,
         contentColor = AppColors.current.onBars,

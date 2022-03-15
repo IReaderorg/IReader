@@ -1,6 +1,7 @@
 package org.ireader.presentation.feature_reader.presentation.reader.components
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -13,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.ireader.core.R
 import org.ireader.domain.view_models.reader.FontSizeEvent
@@ -27,7 +27,6 @@ fun FontSizeChangerComposable(
     viewModel: ReaderScreenViewModel,
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Spacer(modifier = modifier.width(5.dp))
         Text(
             text = "Font Size",
             fontSize = 12.sp,
@@ -59,7 +58,6 @@ fun FontHeightChangerComposable(
 ) {
     Row(verticalAlignment = Alignment.CenterVertically
     ) {
-        Spacer(modifier = modifier.width(5.dp))
         Text(
             text = "Line Height",
             fontSize = 12.sp,
@@ -81,7 +79,6 @@ fun FontHeightChangerComposable(
 fun ParagraphDistanceComposable(modifier: Modifier = Modifier, viewModel: ReaderScreenViewModel) {
     Row(verticalAlignment = Alignment.CenterVertically
     ) {
-        Spacer(modifier = modifier.width(5.dp))
         Text(
             text = "Paragraph Distance",
             fontSize = 12.sp,
@@ -101,11 +98,10 @@ fun ParagraphDistanceComposable(modifier: Modifier = Modifier, viewModel: Reader
 
 @Composable
 fun IndentChangerComposable(modifier: Modifier = Modifier, viewModel: ReaderScreenViewModel) {
-    Row(modifier = Modifier.fillMaxWidth(),
+    Row(modifier = Modifier,
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start
     ) {
-        Spacer(modifier = modifier.width(5.dp))
         Text(
             text = "Paragraph Indent",
             fontSize = 12.sp,

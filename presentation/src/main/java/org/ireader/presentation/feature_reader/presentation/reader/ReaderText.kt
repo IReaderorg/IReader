@@ -58,8 +58,6 @@ fun ReaderText(
                 vm.onEvent(ReaderEvent.ToggleReaderMode(!vm.isReaderModeEnable))
             }
             .background(vm.backgroundColor)
-            .padding(horizontal = vm.paragraphsIndent.dp,
-                vertical = 4.dp)
             .fillMaxSize()
             .wrapContentSize(Alignment.CenterStart)
     ) {
@@ -104,7 +102,10 @@ fun ReaderText(
                 ) {
                     item {
                         Text(
-                            modifier = modifier.fillMaxSize(),
+                            modifier = modifier
+                                .fillMaxSize()
+                                .padding(horizontal = vm.paragraphsIndent.dp,
+                                    vertical = 4.dp),
                             text = "\n\n" + chapter.content.map { it.trimStart() }
                                 .joinToString("\n".repeat(vm.distanceBetweenParagraphs)),
                             fontSize = vm.fontSize.sp,
@@ -125,7 +126,8 @@ fun ReaderText(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .fillMaxHeight()
-                    .width(2.dp),
+                    .padding(vm.scrollIndicatorPadding.dp)
+                    .width(vm.scrollIndicatorWith.dp),
                 colors = CarouselDefaults.colors(
                     thumbColor = MaterialTheme.colors.scrollingThumbColor,
                     scrollingThumbColor = MaterialTheme.colors.scrollingThumbColor,

@@ -27,8 +27,8 @@ import org.ireader.presentation.feature_sources.presentation.extension.composabl
 import org.ireader.presentation.presentation.ToolBar
 import org.ireader.presentation.presentation.components.ISnackBarHost
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
+import org.ireader.presentation.presentation.reusable_composable.AppTextField
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
-import org.ireader.presentation.presentation.reusable_composable.TopAppBarSearch
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
 import org.ireader.presentation.ui.GlobalSearchScreenSpec
 
@@ -81,15 +81,15 @@ fun ExtensionScreen(
                     if (!searchMode) {
                         TopAppBarTitle(title = "Extensions")
                     } else {
-                        TopAppBarSearch(
+                        AppTextField(
                             query = viewModel.searchQuery ?: "",
                             onValueChange = {
                                 viewModel.searchQuery = it
                             },
-                            onSearch = {
+                            onConfirm = {
                                 focusManager.clearFocus()
                             },
-                            isSearchModeEnable = searchMode)
+                            enable = searchMode)
                     }
                 },
                 backgroundColor = MaterialTheme.colors.background,

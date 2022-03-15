@@ -18,7 +18,7 @@ import org.ireader.domain.view_models.library.LibraryEvents
 import org.ireader.domain.view_models.library.LibraryViewModel
 import org.ireader.presentation.presentation.ToolBar
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
-import org.ireader.presentation.presentation.reusable_composable.TopAppBarSearch
+import org.ireader.presentation.presentation.reusable_composable.AppTextField
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
 
 
@@ -38,16 +38,16 @@ fun LibraryScreenTopBar(
             if (!state.inSearchMode) {
                 TopAppBarTitle(title = "Library")
             } else {
-                TopAppBarSearch(query = state.searchQuery,
+                AppTextField(query = state.searchQuery,
                     onValueChange = {
                         viewModel.onEvent(LibraryEvents.UpdateSearchInput(it))
                         viewModel.onEvent(LibraryEvents.SearchBook(state.searchQuery))
                     },
-                    onSearch = {
+                    onConfirm = {
                         viewModel.onEvent(LibraryEvents.SearchBook(state.searchQuery))
                         focusManager.clearFocus()
                     },
-                    isSearchModeEnable = state.searchQuery.isNotBlank())
+                    enable = state.searchQuery.isNotBlank())
             }
         },
         backgroundColor = AppColors.current.bars,

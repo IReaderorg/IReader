@@ -5,6 +5,8 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.view.WindowManager
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
@@ -30,7 +32,7 @@ import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
-import org.ireader.domain.use_cases.preferences.reader_preferences.*
+import org.ireader.domain.use_cases.preferences.reader_preferences.ReaderPrefUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import org.ireader.domain.utils.Resource
 import tachiyomi.source.Source
@@ -45,15 +47,7 @@ class ReaderScreenViewModel @Inject constructor(
     private val remoteUseCases: RemoteUseCases,
     private val insertUseCases: LocalInsertUseCases,
     private val catalogStore: CatalogStore,
-    private val selectedFontStateUseCase: SelectedFontStateUseCase,
-    private val brightnessStateUseCase: BrightnessStateUseCase,
-    private val scrollModeUseCase: ScrollModeUseCase,
-    private val fontHeightUseCase: FontHeightUseCase,
-    private val fontSizeStateUseCase: FontSizeStateUseCase,
-    private val backgroundColorUseCase: BackgroundColorUseCase,
-    private val paragraphDistanceUseCase: ParagraphDistanceUseCase,
-    private val paragraphIndentUseCase: ParagraphIndentUseCase,
-    private val orientationUseCase: OrientationUseCase,
+    private val readerUseCases: ReaderPrefUseCases,
     private val prefState: ReaderScreenPreferencesStateImpl,
     private val state: ReaderScreenStateImpl,
     savedStateHandle: SavedStateHandle,
@@ -93,13 +87,18 @@ class ReaderScreenViewModel @Inject constructor(
     }
 
     private fun readPreferences() {
-        readSelectedFontState()
-        readFontSize()
+        font = readerUseCases.selectedFontStateUseCase.read()
+
+        this.fontSize = readerUseCases.fontSizeStateUseCase.read()
+
         readBackgroundColor()
-        readFontHeight()
-        readParagraphDistance()
-        readParagraphIndent()
-        verticalScrolling = scrollModeUseCase.read()
+
+        lineHeight = readerUseCases.fontHeightUseCase.read()
+        distanceBetweenParagraphs = readerUseCases.paragraphDistanceUseCase.read()
+        paragraphsIndent = readerUseCases.paragraphIndentUseCase.read()
+        verticalScrolling = readerUseCases.scrollModeUseCase.read()
+        scrollIndicatorPadding = readerUseCases.scrollIndicatorUseCase.readPadding()
+        scrollIndicatorWith = readerUseCases.scrollIndicatorUseCase.readWidth()
     }
 
     fun onEvent(event: ReaderEvent) {
@@ -289,12 +288,8 @@ class ReaderScreenViewModel @Inject constructor(
     }
 
 
-    private fun readSelectedFontState() {
-        font = selectedFontStateUseCase.read()
-    }
-
     fun readBrightness(context: Context) {
-        val brightness = brightnessStateUseCase.read()
+        val brightness = readerUseCases.brightnessStateUseCase.read()
         val activity = context.findComponentActivity()
         if (activity != null) {
             val window = activity.window
@@ -306,27 +301,13 @@ class ReaderScreenViewModel @Inject constructor(
         }
     }
 
-    private fun readFontSize() {
-        this.fontSize = fontSizeStateUseCase.read()
-
-    }
-
-    private fun readParagraphDistance() {
-        distanceBetweenParagraphs = paragraphDistanceUseCase.read()
-    }
-
-    private fun readParagraphIndent() {
-        paragraphsIndent = paragraphIndentUseCase.read()
-    }
-
-    private fun readFontHeight() {
-        lineHeight = fontHeightUseCase.read()
-    }
 
     private fun readBackgroundColor() {
-        val color = readerScreenBackgroundColors[backgroundColorUseCase.read()]
-        backgroundColor = color.color
-        textColor = color.onTextColor
+        //val color = readerScreenBackgroundColors[readerUseCases.backgroundColorUseCase.read()]
+        val color = Color(readerUseCases.backgroundColorUseCase.read())
+        val textColor = Color(readerUseCases.textColorUseCase.read())
+        this.backgroundColor = color
+        this.textColor = textColor
     }
 
 
@@ -334,7 +315,7 @@ class ReaderScreenViewModel @Inject constructor(
     fun readOrientation(context: Context) {
         val activity = context.findComponentActivity()
         if (activity != null) {
-            when (orientationUseCase.read()) {
+            when (readerUseCases.orientationUseCase.read()) {
                 OrientationMode.Portrait -> {
                     activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                     orientation = Orientation.Portrait
@@ -349,10 +330,12 @@ class ReaderScreenViewModel @Inject constructor(
     }
 
     fun changeBackgroundColor(colorIndex: Int) {
-        val color = readerScreenBackgroundColors[colorIndex]
-        backgroundColor = color.color
-        textColor = color.onTextColor
-        backgroundColorUseCase.save(colorIndex)
+        val bgColor = readerScreenBackgroundColors[colorIndex].color
+        val textColor = readerScreenBackgroundColors[colorIndex].onTextColor
+        backgroundColor = bgColor
+        this.textColor = textColor
+        readerUseCases.backgroundColorUseCase.save(bgColor.copy(alpha = 1f).toArgb())
+        readerUseCases.textColorUseCase.save(textColor.copy(alpha = 1f).toArgb())
     }
 
     @SuppressLint("SourceLockedOrientationActivity")
@@ -363,13 +346,13 @@ class ReaderScreenViewModel @Inject constructor(
                 is Orientation.Landscape -> {
                     activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                     orientation = Orientation.Portrait
-                    orientationUseCase.save(OrientationMode.Portrait)
+                    readerUseCases.orientationUseCase.save(OrientationMode.Portrait)
 
                 }
                 is Orientation.Portrait -> {
                     activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
                     orientation = Orientation.Landscape
-                    orientationUseCase.save(OrientationMode.Landscape)
+                    readerUseCases.orientationUseCase.save(OrientationMode.Landscape)
                 }
             }
         }
@@ -378,24 +361,41 @@ class ReaderScreenViewModel @Inject constructor(
     fun saveFontHeight(isIncreased: Boolean) {
         val currentFontHeight = prefState.lineHeight
         if (isIncreased) {
-            fontHeightUseCase.save(currentFontHeight + 1)
+            readerUseCases.fontHeightUseCase.save(currentFontHeight + 1)
             lineHeight = currentFontHeight + 1
 
         } else if (currentFontHeight > 20 && !isIncreased) {
-            fontHeightUseCase.save(currentFontHeight - 1)
+            readerUseCases.fontHeightUseCase.save(currentFontHeight - 1)
             lineHeight = currentFontHeight - 1
 
         }
     }
 
+    fun saveScrollIndicatorPadding(value: Int) {
+        readerUseCases.scrollIndicatorUseCase.savePadding(value)
+    }
+
+    fun saveScrollIndicatorWidth(value: Int) {
+        readerUseCases.scrollIndicatorUseCase.saveWidth(value)
+    }
+
+    fun readScrollIndicatorWidth(): Int {
+        return readerUseCases.scrollIndicatorUseCase.readWidth()
+    }
+
+    fun readScrollIndicatorPadding(): Int {
+        return readerUseCases.scrollIndicatorUseCase.readPadding()
+    }
+
+
     fun saveParagraphDistance(isIncreased: Boolean) {
         val currentDistance = prefState.distanceBetweenParagraphs
         if (isIncreased) {
-            paragraphDistanceUseCase.save(currentDistance + 1)
+            readerUseCases.paragraphDistanceUseCase.save(currentDistance + 1)
             distanceBetweenParagraphs = currentDistance + 1
 
         } else if (currentDistance > 1 && !isIncreased) {
-            paragraphDistanceUseCase.save(currentDistance - 1)
+            readerUseCases.paragraphDistanceUseCase.save(currentDistance - 1)
             distanceBetweenParagraphs = currentDistance - 1
 
         }
@@ -403,19 +403,19 @@ class ReaderScreenViewModel @Inject constructor(
 
     fun toggleScrollMode() {
         verticalScrolling = !verticalScrolling
-        scrollModeUseCase.save(verticalScrolling)
+        readerUseCases.scrollModeUseCase.save(verticalScrolling)
 
     }
 
     fun saveParagraphIndent(isIncreased: Boolean) {
         val paragraphsIndent = prefState.paragraphsIndent
         if (isIncreased) {
-            paragraphIndentUseCase.save(paragraphsIndent + 1)
+            readerUseCases.paragraphIndentUseCase.save(paragraphsIndent + 1)
             this.paragraphsIndent = paragraphsIndent + 1
 
 
         } else if (paragraphsIndent > 1 && !isIncreased) {
-            paragraphIndentUseCase.save(paragraphsIndent - 1)
+            readerUseCases.paragraphIndentUseCase.save(paragraphsIndent - 1)
             this.paragraphsIndent = paragraphsIndent - 1
         }
     }
@@ -423,18 +423,18 @@ class ReaderScreenViewModel @Inject constructor(
     private fun saveFontSize(event: FontSizeEvent) {
         if (event == FontSizeEvent.Increase) {
             this.fontSize = this.fontSize + 1
-            fontSizeStateUseCase.save(prefState.fontSize)
+            readerUseCases.fontSizeStateUseCase.save(prefState.fontSize)
         } else {
             if (prefState.fontSize > 0) {
                 this.fontSize = this.fontSize - 1
-                fontSizeStateUseCase.save(prefState.fontSize)
+                readerUseCases.fontSizeStateUseCase.save(prefState.fontSize)
             }
         }
     }
 
     private fun saveFont(fontType: FontType) {
         this.font = fontType
-        selectedFontStateUseCase.save(fonts.indexOf(fontType))
+        readerUseCases.selectedFontStateUseCase.save(fonts.indexOf(fontType))
 
     }
 
@@ -446,7 +446,7 @@ class ReaderScreenViewModel @Inject constructor(
             val layoutParams: WindowManager.LayoutParams = window.attributes
             layoutParams.screenBrightness = brightness
             window.attributes = layoutParams
-            brightnessStateUseCase.save(brightness)
+            readerUseCases.brightnessStateUseCase.save(brightness)
         }
     }
 

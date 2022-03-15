@@ -4,14 +4,15 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
@@ -26,7 +27,9 @@ import org.ireader.presentation.feature_reader.presentation.reader.components.Ma
 import org.ireader.presentation.feature_reader.presentation.reader.components.ReaderSettingComposable
 import org.ireader.presentation.feature_reader.presentation.reader.reverse_swip_refresh.SwipeRefreshState
 import org.ireader.presentation.presentation.components.ISnackBarHost
+import org.ireader.presentation.presentation.reusable_composable.AppTextField
 import org.ireader.presentation.presentation.reusable_composable.ErrorTextWithEmojis
+import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 import org.ireader.presentation.ui.WebViewScreenSpec
 import tachiyomi.source.Source
 
@@ -51,11 +54,7 @@ fun ReadingScreen(
     val chapters = vm.chapters.collectAsLazyPagingItems()
     val scaffoldState = rememberScaffoldState(rememberDrawerState(DrawerValue.Closed))
     val modalState =
-        rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Expanded,
-            confirmStateChange = {
-                vm.isReaderModeEnable = it != ModalBottomSheetValue.Expanded
-                true
-            })
+        rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
     val scope = rememberCoroutineScope()
 
     val chapter = vm.stateChapter
@@ -71,6 +70,13 @@ fun ReadingScreen(
     LaunchedEffect(key1 = scaffoldState.drawerState.targetValue) {
         if (scaffoldState.drawerState.targetValue == DrawerValue.Open && vm.stateChapters.isNotEmpty()) {
             drawerScrollState.scrollToItem(vm.currentChapterIndex)
+        }
+    }
+    LaunchedEffect(key1 = modalState.currentValue) {
+        when (modalState.currentValue) {
+            ModalBottomSheetValue.Expanded -> vm.isReaderModeEnable = false
+            ModalBottomSheetValue.Hidden -> vm.isReaderModeEnable = true
+            else -> {}
         }
     }
     LaunchedEffect(key1 = vm.isReaderModeEnable) {
@@ -229,6 +235,7 @@ fun ReadingScreen(
             }
         }
     ) {
+        ScrollIndicatorSetting(enable = vm.scrollIndicatorDialogShown, vm)
         if (chapter != null) {
             Box(modifier = modifier.fillMaxSize()) {
                 if (chapter.isChapterNotEmpty() && !vm.isLoading) {
@@ -267,7 +274,94 @@ fun ReadingScreen(
 
 }
 
+@Composable
+fun ScrollIndicatorSetting(enable: Boolean = false, vm: ReaderScreenViewModel) {
+    val (pValue, setPaddingValue) = remember { mutableStateOf<String>("") }
+    val (wValue, setWidthValue) = remember { mutableStateOf<String>("") }
+    val focusManager = LocalFocusManager.current
+    if (enable) {
+        AlertDialog(
+            modifier = Modifier.fillMaxWidth(),
+            onDismissRequest = { vm.scrollIndicatorDialogShown = false },
+            title = null,
+            text = {
+                Column(modifier = Modifier.padding(horizontal = 8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center) {
+                    MidSizeTextComposable(text = "Scroll Indicator Setting")
+                    Spacer(modifier = Modifier.height(32.dp))
+                    AppTextField(
+                        query = pValue,
+                        onValueChange = {
+                            try {
+                                vm.scrollIndicatorPadding = it.toInt()
+                            } catch (e: Exception) {
+                            }
+                            setPaddingValue(it)
+                        },
+                        onConfirm = {
+                            focusManager.clearFocus()
+                        },
+                        enable = pValue.isNotBlank(),
+                        hint = "Padding Value",
+                        isBasicTextField = false,
+                        keyboardAction = KeyboardOptions(imeAction = ImeAction.Done,
+                            keyboardType = KeyboardType.Number),
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    AppTextField(
+                        query = wValue,
+                        onValueChange = {
+                            try {
+                                vm.scrollIndicatorWith = it.toInt()
+                            } catch (e: Exception) {
+                            }
+                            setWidthValue(it)
+                        },
+                        onConfirm = {
+                            focusManager.clearFocus()
+                        },
+                        enable = wValue.isNotBlank(),
+                        hint = "Width Value",
+                        isBasicTextField = false,
+                        keyboardAction = KeyboardOptions(imeAction = ImeAction.Done,
+                            keyboardType = KeyboardType.Number)
+                    )
+                }
 
+            },
+            contentColor = MaterialTheme.colors.onBackground,
+            backgroundColor = MaterialTheme.colors.background,
+            buttons = {
+                Row(horizontalArrangement = Arrangement.SpaceAround,
+                    modifier = Modifier.fillMaxWidth()) {
+                    OutlinedButton(onClick = { vm.scrollIndicatorDialogShown = false },
+                        colors = ButtonDefaults.textButtonColors(
+                            backgroundColor = MaterialTheme.colors.background,
+                            contentColor = MaterialTheme.colors.onBackground
+                        )) {
+                        vm.scrollIndicatorPadding = vm.readScrollIndicatorPadding()
+                        vm.scrollIndicatorWith = vm.readScrollIndicatorWidth()
+                        MidSizeTextComposable(text = "DISMISS")
+                    }
+                    Button(onClick = { vm.scrollIndicatorDialogShown = false },
+                        colors = ButtonDefaults.textButtonColors(
+                            backgroundColor = MaterialTheme.colors.primary,
+                            contentColor = MaterialTheme.colors.background
+                        )) {
+                        kotlin.runCatching {
+                            vm.saveScrollIndicatorPadding(pValue.toInt())
+                        }.getOrNull()
+                        kotlin.runCatching {
+                            vm.saveScrollIndicatorWidth(wValue.toInt())
+                        }.getOrNull()
+                        MidSizeTextComposable(text = "APPLY")
+                    }
+                }
 
+            },
+        )
+    }
+}
 
 

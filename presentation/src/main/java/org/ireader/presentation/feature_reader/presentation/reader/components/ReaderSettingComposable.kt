@@ -3,12 +3,12 @@ package org.ireader.presentation.feature_reader.presentation.reader.components
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FlipCameraAndroid
 import androidx.compose.material.icons.filled.HorizontalDistribute
+import androidx.compose.material.icons.filled.SquareFoot
 import androidx.compose.material.icons.filled.VerticalDistribute
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -40,61 +40,70 @@ fun ReaderSettingComposable(modifier: Modifier = Modifier, viewModel: ReaderScre
             viewModel = viewModel
         )
         Spacer(modifier = Modifier.height(12.dp))
-        IndentChangerComposable(Modifier, viewModel = viewModel)
         Row(modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically) {
-            Row(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "Scrolling Mode",
-                    fontSize = 12.sp,
-                    style = TextStyle(fontWeight = FontWeight.W400),
-                    color = MaterialTheme.colors.onBackground
-                )
-                AppIconButton(imageVector = if (viewModel.verticalScrolling) Icons.Default.HorizontalDistribute else Icons.Default.VerticalDistribute,
-                    title = if (viewModel.verticalScrolling) "Vertical Mode" else "Horizontal ",
-                    onClick = {
-                        viewModel.toggleScrollMode()
-                    })
-
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.Top) {
+            Column(modifier = Modifier,
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.Start) {
+                IndentChangerComposable(Modifier, viewModel = viewModel)
+                FontSizeChangerComposable(viewModel = viewModel)
+                ParagraphDistanceComposable(viewModel = viewModel)
+                Row(modifier = Modifier,
+                    horizontalArrangement = Arrangement.Start,
+                    verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "Indicator",
+                        fontSize = 12.sp,
+                        style = TextStyle(fontWeight = FontWeight.W400),
+                        color = MaterialTheme.colors.onBackground
+                    )
+                    AppIconButton(imageVector = Icons.Default.SquareFoot,
+                        title = "Change Indicator",
+                        onClick = { viewModel.scrollIndicatorDialogShown = true })
+                }
+            }
+            Column(modifier = Modifier,
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.Start) {
+                ScrollModeSetting(viewModel)
+                FontHeightChangerComposable(viewModel = viewModel)
+                Row(
+                    horizontalArrangement = Arrangement.Start,
+                    verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "Orientation",
+                        fontSize = 12.sp,
+                        style = TextStyle(fontWeight = FontWeight.W400),
+                        color = MaterialTheme.colors.onBackground
+                    )
+                    AppIconButton(imageVector = Icons.Default.FlipCameraAndroid,
+                        title = "Change Orientation",
+                        onClick = { viewModel.saveOrientation(context) })
+                }
             }
 
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
-        Row(modifier = modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically) {
-            FontSizeChangerComposable(viewModel = viewModel)
-            Divider(
-                color = MaterialTheme.colors.onBackground.copy(alpha = .2f),
-                modifier = Modifier
-                    .height(20.dp)
-                    .width(1.dp)
-            )
-            FontHeightChangerComposable(viewModel = viewModel)
-        }
-        Row(modifier = modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically) {
-            ParagraphDistanceComposable(viewModel = viewModel)
-            Divider(
-                color = MaterialTheme.colors.onBackground.copy(alpha = .2f),
-                modifier = Modifier
-                    .height(20.dp)
-                    .width(1.dp)
-            )
-            Text(
-                text = "Orientation",
-                fontSize = 12.sp,
-                style = TextStyle(fontWeight = FontWeight.W400),
-                color = MaterialTheme.colors.onBackground
-            )
-            AppIconButton(imageVector = Icons.Default.FlipCameraAndroid,
-                title = "Change Orientation",
-                onClick = { viewModel.saveOrientation(context) })
-        }
 
+    }
+}
 
+@Composable
+fun ScrollModeSetting(viewModel: ReaderScreenViewModel) {
+    Row(modifier = Modifier,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            text = "Scrolling Mode",
+            fontSize = 12.sp,
+            style = TextStyle(fontWeight = FontWeight.W400),
+            color = MaterialTheme.colors.onBackground
+        )
+        AppIconButton(imageVector = if (viewModel.verticalScrolling) Icons.Default.HorizontalDistribute else Icons.Default.VerticalDistribute,
+            title = if (viewModel.verticalScrolling) "Vertical Mode" else "Horizontal ",
+            onClick = {
+                viewModel.toggleScrollMode()
+            })
     }
 }

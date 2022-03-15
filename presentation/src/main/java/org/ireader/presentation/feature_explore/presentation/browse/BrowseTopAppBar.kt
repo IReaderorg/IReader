@@ -18,8 +18,8 @@ import org.ireader.domain.view_models.explore.ExploreState
 import org.ireader.presentation.feature_library.presentation.components.RadioButtonWithTitleComposable
 import org.ireader.presentation.presentation.ToolBar
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
+import org.ireader.presentation.presentation.reusable_composable.AppTextField
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
-import org.ireader.presentation.presentation.reusable_composable.TopAppBarSearch
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
 import tachiyomi.source.CatalogSource
 import tachiyomi.source.model.Filter
@@ -45,14 +45,14 @@ fun BrowseTopAppBar(
             if (!state.isSearchModeEnable) {
                 TopAppBarTitle(title = source.name)
             } else {
-                TopAppBarSearch(query = state.searchQuery,
+                AppTextField(query = state.searchQuery,
                     onValueChange = {
                         onValueChange(it)
                     },
-                    onSearch = {
+                    onConfirm = {
                         onSearch()
                     },
-                    isSearchModeEnable = state.searchQuery.isNotBlank())
+                    enable = state.searchQuery.isNotBlank())
             }
         },
         backgroundColor = MaterialTheme.colors.background,

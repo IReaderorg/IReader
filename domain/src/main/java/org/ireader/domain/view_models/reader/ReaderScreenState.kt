@@ -93,6 +93,9 @@ open class ReaderScreenPreferencesStateImpl @Inject constructor() : ReaderScreen
     override var isChapterReversingInProgress by mutableStateOf<Boolean>(false)
     override var scrollPosition by mutableStateOf<Int>(0)
     override var verticalScrolling by mutableStateOf<Boolean>(true)
+    override var scrollIndicatorWith by mutableStateOf<Int>(2)
+    override var scrollIndicatorPadding by mutableStateOf<Int>(4)
+    override var scrollIndicatorDialogShown by mutableStateOf<Boolean>(false)
 
 }
 
@@ -112,6 +115,9 @@ interface ReaderScreenPreferencesState {
     var isChapterReversingInProgress: Boolean
     var scrollPosition: Int
     var verticalScrolling: Boolean
+    var scrollIndicatorWith: Int
+    var scrollIndicatorPadding: Int
+    var scrollIndicatorDialogShown: Boolean
 }
 
 sealed class Orientation(val index: Int) {

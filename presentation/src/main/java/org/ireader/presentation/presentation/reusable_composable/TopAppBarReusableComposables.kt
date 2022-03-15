@@ -2,16 +2,15 @@ package org.ireader.presentation.presentation.reusable_composable
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
@@ -22,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 
@@ -169,35 +169,56 @@ fun TopAppBarBackButton(onClick: () -> Unit) {
 }
 
 @Composable
-fun TopAppBarSearch(
+fun AppTextField(
     query: String,
     onValueChange: (value: String) -> Unit,
-    onSearch: () -> Unit,
-    isSearchModeEnable: Boolean = false,
+    onConfirm: () -> Unit,
+    enable: Boolean = false,
+    hint: String = "Search...",
+    isBasicTextField: Boolean = true,
+    keyboardAction: KeyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+    keyboardActions: KeyboardActions = KeyboardActions(onSearch = {
+        onConfirm()
+    }, onDone = { onConfirm() }),
 ) {
     val focusManager = LocalFocusManager.current
-    Box {
-        if (!isSearchModeEnable || query.isBlank()) {
+    Box(contentAlignment = Alignment.CenterStart) {
+        if (!enable || query.isBlank()) {
             Text(
-                text = "Search...",
+                modifier = Modifier.padding(horizontal = 16.dp),
+                text = hint,
                 style = MaterialTheme.typography.subtitle1,
                 color = MaterialTheme.colors.onBackground.copy(alpha = .7F)
             )
         }
-        BasicTextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = query,
-            onValueChange = {
-                onValueChange(it)
-            },
-            maxLines = 1,
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-            keyboardActions = KeyboardActions(onSearch = {
-                onSearch()
-            }),
-            singleLine = true,
-            textStyle = TextStyle(color = MaterialTheme.colors.onBackground),
-            cursorBrush = SolidColor(MaterialTheme.colors.primary)
-        )
+        if (isBasicTextField) {
+            BasicTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = query,
+                onValueChange = {
+                    onValueChange(it)
+                },
+                maxLines = 1,
+                keyboardOptions = keyboardAction,
+                keyboardActions = keyboardActions,
+                singleLine = true,
+                textStyle = TextStyle(color = MaterialTheme.colors.onBackground),
+                cursorBrush = SolidColor(MaterialTheme.colors.primary)
+            )
+        } else {
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = query,
+                onValueChange = onValueChange,
+                maxLines = 1,
+                keyboardOptions = keyboardAction,
+                keyboardActions = keyboardActions,
+
+                singleLine = true,
+                textStyle = TextStyle(color = MaterialTheme.colors.onBackground),
+            )
+        }
+
+
     }
 }
