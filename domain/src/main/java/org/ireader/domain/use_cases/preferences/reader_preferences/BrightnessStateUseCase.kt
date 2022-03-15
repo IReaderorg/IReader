@@ -49,3 +49,25 @@ class ScrollIndicatorUseCase @Inject constructor(
     }
 
 }
+
+class AutoScrollMode @Inject constructor(
+    private val appPreferences: AppPreferences,
+) {
+    fun saveInterval(value: Long) {
+        return appPreferences.autoScrollInterval().set(value)
+    }
+
+    fun readInterval(): Long {
+        return appPreferences.autoScrollInterval().get()
+    }
+
+    fun saveOffset(value: Int) {
+        return appPreferences.autoScrollOffset().set(value)
+    }
+
+    fun readOffset(): Int {
+        return appPreferences.autoScrollOffset().get()
+    }
+
+
+}

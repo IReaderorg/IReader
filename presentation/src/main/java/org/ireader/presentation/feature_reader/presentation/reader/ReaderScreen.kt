@@ -1,6 +1,7 @@
 package org.ireader.presentation.feature_reader.presentation.reader
 
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -19,6 +20,7 @@ import androidx.core.graphics.toColorInt
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import androidx.paging.compose.collectAsLazyPagingItems
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.ireader.core.utils.UiEvent
@@ -74,6 +76,12 @@ fun ReadingScreen(
     LaunchedEffect(key1 = scaffoldState.drawerState.targetValue) {
         if (scaffoldState.drawerState.targetValue == DrawerValue.Open && vm.stateChapters.isNotEmpty()) {
             drawerScrollState.scrollToItem(vm.currentChapterIndex)
+        }
+    }
+    LaunchedEffect(key1 = vm.autpScrollMode) {
+        while (vm.autoScrollInterval != 0L && vm.autpScrollMode) {
+            scrollState.scrollBy(vm.autoScrollOffset.toFloat())
+            delay(vm.autoScrollInterval)
         }
     }
     LaunchedEffect(key1 = modalState.currentValue) {
@@ -293,6 +301,8 @@ fun ScrollIndicatorSetting(
     val (wValue, setWidthValue) = remember { mutableStateOf<String>("") }
     val (bgValue, setBGValue) = remember { mutableStateOf<String>("") }
     val (txtValue, setTxtValue) = remember { mutableStateOf<String>("") }
+    val (autoScrollText, setAutoScrollValue) = remember { mutableStateOf<String>("") }
+    val (autoScrollOffsetText, setAutoScrolOffsetlValue) = remember { mutableStateOf<String>("") }
     val focusManager = LocalFocusManager.current
 
     if (enable) {
@@ -387,6 +397,34 @@ fun ScrollIndicatorSetting(
                         keyboardAction = KeyboardOptions(imeAction = ImeAction.Done,
                             keyboardType = KeyboardType.Text)
                     )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    AppTextField(
+                        query = autoScrollText,
+                        onValueChange = {
+                            setAutoScrollValue(it)
+                        },
+                        onConfirm = {
+                            focusManager.clearFocus()
+                        },
+                        hint = "Auto Scroll Interval (Milli Seconds)",
+                        isBasicTextField = false,
+                        keyboardAction = KeyboardOptions(imeAction = ImeAction.Done,
+                            keyboardType = KeyboardType.Text)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    AppTextField(
+                        query = autoScrollOffsetText,
+                        onValueChange = {
+                            setAutoScrolOffsetlValue(it)
+                        },
+                        onConfirm = {
+                            focusManager.clearFocus()
+                        },
+                        hint = "Auto Scroll Offset",
+                        isBasicTextField = false,
+                        keyboardAction = KeyboardOptions(imeAction = ImeAction.Done,
+                            keyboardType = KeyboardType.Text)
+                    )
                 }
 
             },
@@ -408,27 +446,47 @@ fun ScrollIndicatorSetting(
                     }
                     Button(onClick = {
                         vm.scrollIndicatorDialogShown = false
-                        kotlin.runCatching {
+                        try {
+
                             if (pValue.isNotBlank()) {
                                 vm.saveScrollIndicatorPadding(pValue.toInt())
                             }
-                        }.getOrNull()
-                        kotlin.runCatching {
+                        } catch (e: Exception) {
+                        }
+
+                        try {
                             if (wValue.isNotBlank()) {
                                 vm.saveScrollIndicatorWidth(wValue.toInt())
                             }
-                        }.getOrNull()
-                        kotlin.runCatching {
+                        } catch (e: Exception) {
+                        }
+
+
+                        try {
                             if (bgValue.isNotBlank()) {
                                 vm.setReaderBackgroundColor(vm.backgroundColor)
                             }
+                        } catch (e: Exception) {
+                        }
 
-                        }.getOrNull()
-                        kotlin.runCatching {
+                        try {
                             if (txtValue.isNotBlank()) {
                                 vm.setReaderTextColor(vm.textColor)
                             }
-                        }.getOrNull()
+                        } catch (e: Exception) {
+                        }
+
+                        try {
+                            if (autoScrollText.isNotBlank() && autoScrollOffsetText.isNotBlank()) {
+                                vm.setAutoScrollIntervalReader(autoScrollText.toLong())
+                                vm.setAutoScrollOffsetReader(autoScrollOffsetText.toInt())
+                            } else {
+                                vm.setAutoScrollIntervalReader(0L)
+                                vm.setAutoScrollOffsetReader(0)
+                            }
+                        } catch (e: Exception) {
+                        }
+
 
                     },
                         colors = ButtonDefaults.textButtonColors(

@@ -6,10 +6,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FlipCameraAndroid
-import androidx.compose.material.icons.filled.HorizontalDistribute
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.VerticalDistribute
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -81,6 +78,7 @@ fun ReaderSettingComposable(modifier: Modifier = Modifier, viewModel: ReaderScre
                         title = "Change Orientation",
                         onClick = { viewModel.saveOrientation(context) })
                 }
+                AutoScrollSetting(viewModel = viewModel)
             }
 
         }
@@ -104,6 +102,25 @@ fun ScrollModeSetting(viewModel: ReaderScreenViewModel) {
             title = if (viewModel.verticalScrolling) "Vertical Mode" else "Horizontal ",
             onClick = {
                 viewModel.toggleScrollMode()
+            })
+    }
+}
+
+@Composable
+fun AutoScrollSetting(viewModel: ReaderScreenViewModel) {
+    Row(modifier = Modifier,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            text = "Auto Scroll Mode",
+            fontSize = 12.sp,
+            style = TextStyle(fontWeight = FontWeight.W400),
+            color = MaterialTheme.colors.onBackground
+        )
+        AppIconButton(imageVector = if (viewModel.autpScrollMode) Icons.Default.CheckCircle else Icons.Default.Unpublished,
+            title = if (viewModel.autpScrollMode) "Enable" else "Disable",
+            onClick = {
+                viewModel.toggleAutoScrollMode()
             })
     }
 }

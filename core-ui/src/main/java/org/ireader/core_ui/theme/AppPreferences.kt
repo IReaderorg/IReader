@@ -25,6 +25,8 @@ class AppPreferences @Inject constructor(
         const val SORT_LIBRARY_SCREEN = "sort_library_screen"
         const val FILTER_LIBRARY_SCREEN = "filter_library_screen"
         const val SCROLL_MODE = "scroll_mode"
+        const val AUTO_SCROLL_MODE_INTERVAL = "auto_scroll_mode_interval"
+        const val AUTO_SCROLL_MODE_OFFSET = "auto_scroll_mode_offset"
         const val SCROLL_INDICATOR_PADDING = "scroll_indicator_padding"
         const val SCROLL_INDICATOR_WIDTH = "scroll_indicator_width"
 
@@ -88,6 +90,14 @@ class AppPreferences @Inject constructor(
 
     fun scrollMode(): Preference<Boolean> {
         return preferenceStore.getBoolean(SCROLL_MODE, true)
+    }
+
+    fun autoScrollInterval(): Preference<Long> {
+        return preferenceStore.getLong(AUTO_SCROLL_MODE_INTERVAL, 5000L)
+    }
+
+    fun autoScrollOffset(): Preference<Int> {
+        return preferenceStore.getInt(AUTO_SCROLL_MODE_OFFSET, 500)
     }
 
     fun scrollIndicatorWith(): Preference<Int> {

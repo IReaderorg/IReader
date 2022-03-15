@@ -101,6 +101,8 @@ class ReaderScreenViewModel @Inject constructor(
         verticalScrolling = readerUseCases.scrollModeUseCase.read()
         scrollIndicatorPadding = readerUseCases.scrollIndicatorUseCase.readPadding()
         scrollIndicatorWith = readerUseCases.scrollIndicatorUseCase.readWidth()
+        autoScrollInterval = readerUseCases.autoScrollMode.readInterval()
+        autoScrollOffset = readerUseCases.autoScrollMode.readOffset()
     }
 
     fun onEvent(event: ReaderEvent) {
@@ -354,6 +356,17 @@ class ReaderScreenViewModel @Inject constructor(
         readerUseCases.textColorUseCase.save(color.toArgb())
     }
 
+    fun setAutoScrollIntervalReader(value: Long) {
+        //readerUseCases.textColorUseCase.save(color.toArgb())
+        autoScrollInterval = value
+        readerUseCases.autoScrollMode.saveInterval(value)
+    }
+
+    fun setAutoScrollOffsetReader(value: Int) {
+        autoScrollOffset = value
+        readerUseCases.autoScrollMode.saveOffset(value)
+    }
+
     @SuppressLint("SourceLockedOrientationActivity")
     fun saveOrientation(context: Context) {
         val activity = context.findComponentActivity()
@@ -422,6 +435,10 @@ class ReaderScreenViewModel @Inject constructor(
         verticalScrolling = !verticalScrolling
         readerUseCases.scrollModeUseCase.save(verticalScrolling)
 
+    }
+
+    fun toggleAutoScrollMode() {
+        autpScrollMode = !autpScrollMode
     }
 
     fun saveParagraphIndent(isIncreased: Boolean) {

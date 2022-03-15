@@ -6,6 +6,7 @@ data class ReaderPrefUseCases @Inject constructor(
     val selectedFontStateUseCase: SelectedFontStateUseCase,
     val brightnessStateUseCase: BrightnessStateUseCase,
     val scrollModeUseCase: ScrollModeUseCase,
+    val autoScrollMode: AutoScrollMode,
     val fontHeightUseCase: FontHeightUseCase,
     val fontSizeStateUseCase: FontSizeStateUseCase,
     val backgroundColorUseCase: BackgroundColorUseCase,
