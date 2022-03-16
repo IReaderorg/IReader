@@ -8,7 +8,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
@@ -18,13 +17,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import org.ireader.core_ui.theme.readerScreenBackgroundColors
 import org.ireader.domain.view_models.reader.ReaderScreenViewModel
+import org.ireader.presentation.presentation.reusable_composable.CaptionTextComposable
 
 @Composable
 fun ReaderBackgroundComposable(modifier: Modifier = Modifier, viewModel: ReaderScreenViewModel) {
 
-    Column {
-        Text(text = "Background Color", style = MaterialTheme.typography.subtitle2)
-        Spacer(modifier = modifier.height(10.dp))
+    Row(modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically) {
+        CaptionTextComposable(modifier = Modifier.width(100.dp),
+            text = "Background Color",
+            style = MaterialTheme.typography.caption)
         LazyRow {
             items(readerScreenBackgroundColors.size) { index ->
                 Spacer(modifier = modifier.width(10.dp))

@@ -1,6 +1,7 @@
 package org.ireader.presentation.feature_reader.presentation.reader
 
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyListState
@@ -178,10 +179,16 @@ fun ReadingScreen(
                     sheetState = modalState,
                     sheetContent = {
                         Column(modifier.fillMaxSize()) {
-                            Divider(modifier = modifier.fillMaxWidth(),
-                                color = MaterialTheme.colors.onBackground.copy(alpha = .2f),
-                                thickness = 1.dp)
-                            Spacer(modifier = modifier.height(15.dp))
+                            Spacer(modifier = modifier.height(4.dp))
+                            Box(modifier = Modifier
+                                .align(Alignment.CenterHorizontally)
+                                .width(50.dp)
+                                .height(5.dp)
+                                .background(MaterialTheme.colors.onBackground.copy(.6f))
+                            ) {
+
+                            }
+                            Spacer(modifier = modifier.height(5.dp))
                             if (vm.isMainBottomModeEnable) {
                                 MainBottomSettingComposable(
                                     scope = scope,

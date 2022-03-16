@@ -5,69 +5,89 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.ireader.core_ui.theme.fonts
 import org.ireader.domain.view_models.reader.ReaderEvent
 import org.ireader.domain.view_models.reader.ReaderScreenViewModel
+import org.ireader.presentation.presentation.reusable_composable.CaptionTextComposable
 
 
 @Composable
-fun FontMenuComposable(
+fun FontChip(
     modifier: Modifier = Modifier,
     viewModel: ReaderScreenViewModel,
 ) {
     var expanded by remember { mutableStateOf(false) }
 
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(end = 28.dp),
-        verticalAlignment = Alignment.CenterVertically,
+    Row(modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
-
-        ) {
+        verticalAlignment = Alignment.CenterVertically) {
         Text(
-            modifier = modifier.fillMaxWidth(.2f),
+            modifier = Modifier.width(100.dp),
             text = "Font",
             fontSize = 12.sp,
             style = TextStyle(fontWeight = FontWeight.W400)
         )
-        Box(
-            modifier = modifier
-                .fillMaxWidth(.8f)
-                .clickable {
-                    expanded = !expanded
-                }
-                .border(.8.dp, color = MaterialTheme.colors.onBackground.copy(.5f))
-                .padding(8.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(text = viewModel.font.fontName)
-            DropdownMenu(
-                modifier = Modifier.background(MaterialTheme.colors.background
-                ),
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-            ) {
-                fonts.forEach { font ->
-                    DropdownMenuItem(onClick = {
-                        viewModel.onEvent(ReaderEvent.ChangeFont(font))
-                    }) {
-                        Text(text = font.fontName, color = MaterialTheme.colors.onBackground)
-                    }
+        LazyRow {
+            items(fonts) { font ->
+                Spacer(modifier = modifier.width(10.dp))
+                Box(modifier = modifier
+                    .height(30.dp)
+                    .clip(RectangleShape)
+                    .background(MaterialTheme.colors.background)
+                    .border(2.dp,
+                        if (font == viewModel.font) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground,
+                        CircleShape)
+                    .clickable { viewModel.onEvent(ReaderEvent.ChangeFont(font)) },
+                    contentAlignment = Alignment.Center
+                ) {
+                    CaptionTextComposable(text = font.fontName,
+                        maxLine = 1,
+                        align = TextAlign.Center,
+                        modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp))
                 }
             }
         }
+//        Box(
+//            modifier = modifier
+//                .fillMaxWidth(.8f)
+//                .clickable {
+//                    expanded = !expanded
+//                }
+//                .border(.8.dp, color = MaterialTheme.colors.onBackground.copy(.5f))
+//                .padding(8.dp),
+//            contentAlignment = Alignment.Center
+//        ) {
+//            Text(text = viewModel.font.fontName)
+//            DropdownMenu(
+//                modifier = Modifier.background(MaterialTheme.colors.background
+//                ),
+//                expanded = expanded,
+//                onDismissRequest = { expanded = false },
+//            ) {
+//                fonts.forEach { font ->
+//                    DropdownMenuItem(onClick = {
+//                        viewModel.onEvent(ReaderEvent.ChangeFont(font))
+//                    }) {
+//                        Text(text = font.fontName, color = MaterialTheme.colors.onBackground)
+//                    }
+//                }
+//            }
+//        }
     }
 
 

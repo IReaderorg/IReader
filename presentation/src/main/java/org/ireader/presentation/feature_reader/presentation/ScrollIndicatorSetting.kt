@@ -69,7 +69,7 @@ fun ScrollIndicatorSetting(
                             focusManager.clearFocus()
                         },
                         hint = "Scroll Indicator Padding Value",
-                        isBasicTextField = false,
+                        mode = 2,
                         keyboardAction = KeyboardOptions(imeAction = ImeAction.Done,
                             keyboardType = KeyboardType.Number),
                     )
@@ -88,7 +88,7 @@ fun ScrollIndicatorSetting(
                             focusManager.clearFocus()
                         },
                         hint = "Scroll Indicator  Width Value",
-                        isBasicTextField = false,
+                        mode = 2,
                         keyboardAction = KeyboardOptions(imeAction = ImeAction.Done,
                             keyboardType = KeyboardType.Number)
                     )
@@ -108,7 +108,7 @@ fun ScrollIndicatorSetting(
                             focusManager.clearFocus()
                         },
                         hint = "Background Color",
-                        isBasicTextField = false,
+                        mode = 2,
                         keyboardAction = KeyboardOptions(imeAction = ImeAction.Done,
                             keyboardType = KeyboardType.Text)
                     )
@@ -127,7 +127,7 @@ fun ScrollIndicatorSetting(
                             focusManager.clearFocus()
                         },
                         hint = "TextColor Value",
-                        isBasicTextField = false,
+                        mode = 2,
                         keyboardAction = KeyboardOptions(imeAction = ImeAction.Done,
                             keyboardType = KeyboardType.Text)
                     )
@@ -141,7 +141,7 @@ fun ScrollIndicatorSetting(
                             focusManager.clearFocus()
                         },
                         hint = "Auto Scroll Interval (Milli Seconds)",
-                        isBasicTextField = false,
+                        mode = 2,
                         keyboardAction = KeyboardOptions(imeAction = ImeAction.Done,
                             keyboardType = KeyboardType.Text)
                     )
@@ -155,7 +155,7 @@ fun ScrollIndicatorSetting(
                             focusManager.clearFocus()
                         },
                         hint = "Auto Scroll Offset",
-                        isBasicTextField = false,
+                        mode = 2,
                         keyboardAction = KeyboardOptions(imeAction = ImeAction.Done,
                             keyboardType = KeyboardType.Text)
                     )

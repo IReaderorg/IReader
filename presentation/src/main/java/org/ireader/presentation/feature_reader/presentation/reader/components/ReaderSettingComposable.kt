@@ -6,7 +6,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -15,6 +15,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.ireader.domain.view_models.reader.FontSizeEvent
+import org.ireader.domain.view_models.reader.Orientation
+import org.ireader.domain.view_models.reader.ReaderEvent
 import org.ireader.domain.view_models.reader.ReaderScreenViewModel
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 
@@ -29,99 +32,81 @@ fun ReaderSettingComposable(modifier: Modifier = Modifier, viewModel: ReaderScre
             .verticalScroll(scrollState)
     ) {
         BrightnessSliderComposable(viewModel = viewModel)
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         ReaderBackgroundComposable(viewModel = viewModel)
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         /** Font indent and font menu **/
-        FontMenuComposable(
+        FontChip(
             viewModel = viewModel
         )
         Spacer(modifier = Modifier.height(12.dp))
-        Row(modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Top) {
-            Column(modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.Start) {
-                IndentChangerComposable(Modifier, viewModel = viewModel)
-                FontSizeChangerComposable(viewModel = viewModel)
-                ParagraphDistanceComposable(viewModel = viewModel)
-                Row(modifier = Modifier.fillMaxSize(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(
-                        text = "Advance Setting",
-                        fontSize = 12.sp,
-                        style = TextStyle(fontWeight = FontWeight.W400),
-                        color = MaterialTheme.colors.onBackground
-                    )
-                    AppIconButton(imageVector = Icons.Default.Settings,
-                        title = "Advance Setting",
-                        onClick = { viewModel.scrollIndicatorDialogShown = true })
-                }
-            }
-            Column(modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.Start) {
-                ScrollModeSetting(viewModel)
-                FontHeightChangerComposable(viewModel = viewModel)
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = "Orientation",
-                        fontSize = 12.sp,
-                        style = TextStyle(fontWeight = FontWeight.W400),
-                        color = MaterialTheme.colors.onBackground
-                    )
-                    AppIconButton(imageVector = Icons.Default.FlipCameraAndroid,
-                        title = "Change Orientation",
-                        onClick = { viewModel.saveOrientation(context) })
-                }
-                AutoScrollSetting(viewModel = viewModel)
-            }
+        SettingItemToggleComposable(text = "Scroll Mode",
+            value = viewModel.verticalScrolling,
+            onToggle = { viewModel.toggleScrollMode() })
 
+        SettingItemToggleComposable(text = "Orientation",
+            value = viewModel.orientation == Orientation.Landscape,
+            onToggle = { viewModel.saveOrientation(context) })
+        SettingItemToggleComposable(text = "AutoScroll",
+            value = viewModel.autpScrollMode,
+            onToggle = { viewModel.toggleAutoScrollMode() })
+        SettingItemComposable(text = "Font Size",
+            value = viewModel.fontSize.toString(),
+            onAdd = {
+                viewModel.onEvent(ReaderEvent.ChangeFontSize(FontSizeEvent.Increase))
+            },
+            onMinus = {
+                viewModel.onEvent(
+                    ReaderEvent.ChangeFontSize(FontSizeEvent.Decrease))
+
+            })
+        SettingItemComposable(text = "Paragraph Indent",
+            value = viewModel.paragraphsIndent.toString(),
+            onAdd = {
+                viewModel.saveParagraphIndent(true)
+
+            },
+            onMinus = {
+                viewModel.saveParagraphIndent(false)
+            })
+
+        SettingItemComposable(text = "Paragraph Distance",
+            value = viewModel.distanceBetweenParagraphs.toString(),
+            onAdd = {
+                viewModel.saveParagraphDistance(true)
+            },
+            onMinus = {
+                viewModel.saveParagraphDistance(false)
+
+            })
+        SettingItemComposable(text = "Line Height",
+            value = viewModel.lineHeight.toString(),
+            onAdd = {
+                viewModel.saveFontHeight(true)
+            },
+            onMinus = {
+                viewModel.saveFontHeight(false)
+
+            })
+
+
+
+
+        Row(modifier = Modifier.fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween) {
+            Text(
+                text = "Advance Setting",
+                fontSize = 12.sp,
+                style = TextStyle(fontWeight = FontWeight.W400),
+                color = MaterialTheme.colors.onBackground
+            )
+            AppIconButton(imageVector = Icons.Default.Settings,
+                title = "Advance Setting",
+                onClick = { viewModel.scrollIndicatorDialogShown = true })
         }
 
 
     }
 }
 
-@Composable
-fun ScrollModeSetting(viewModel: ReaderScreenViewModel) {
-    Row(modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically) {
-        Text(
-            text = "Scrolling Mode",
-            fontSize = 12.sp,
-            style = TextStyle(fontWeight = FontWeight.W400),
-            color = MaterialTheme.colors.onBackground
-        )
-        AppIconButton(imageVector = if (viewModel.verticalScrolling) Icons.Default.HorizontalDistribute else Icons.Default.VerticalDistribute,
-            title = if (viewModel.verticalScrolling) "Vertical Mode" else "Horizontal ",
-            onClick = {
-                viewModel.toggleScrollMode()
-            })
-    }
-}
-
-@Composable
-fun AutoScrollSetting(viewModel: ReaderScreenViewModel) {
-    Row(modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically) {
-        Text(
-            text = "Auto Scroll Mode",
-            fontSize = 12.sp,
-            style = TextStyle(fontWeight = FontWeight.W400),
-            color = MaterialTheme.colors.onBackground
-        )
-        AppIconButton(imageVector = if (viewModel.autpScrollMode) Icons.Default.CheckCircle else Icons.Default.Unpublished,
-            title = if (viewModel.autpScrollMode) "Enable" else "Disable",
-            onClick = {
-                viewModel.toggleAutoScrollMode()
-            })
-    }
-}

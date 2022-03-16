@@ -1,20 +1,21 @@
 package org.ireader.presentation.feature_reader.presentation.reader.components
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Brightness7
-import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Slider
+import androidx.compose.material.SliderDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import org.ireader.core.utils.DEFAULT
 import org.ireader.domain.view_models.reader.ReaderEvent
 import org.ireader.domain.view_models.reader.ReaderScreenViewModel
+import org.ireader.presentation.presentation.reusable_composable.CaptionTextComposable
 
 @Composable
 fun BrightnessSliderComposable(
@@ -23,14 +24,16 @@ fun BrightnessSliderComposable(
 ) {
 
     val context = LocalContext.current
-    Column {
-        Text(text = "Brightness", style = MaterialTheme.typography.caption)
-        Row(modifier = modifier.fillMaxWidth(),
+    Row(modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically) {
+        CaptionTextComposable(modifier = Modifier.width(100.dp),
+            text = "Brightness",
+            style = MaterialTheme.typography.caption,
+            maxLine = 1)
+        Row(modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically) {
-            Icon(modifier = modifier.weight(1f),
-                imageVector = Icons.Default.LightMode,
-                contentDescription = "less brightness")
             Slider(
                 viewModel.brightness,
                 onValueChange = { viewModel.onEvent(ReaderEvent.ChangeBrightness(it, context)) },
@@ -46,9 +49,6 @@ fun BrightnessSliderComposable(
                 )
 
             )
-            Icon(modifier = modifier.weight(1f),
-                imageVector = Icons.Default.Brightness7,
-                contentDescription = "less brightness")
         }
     }
 

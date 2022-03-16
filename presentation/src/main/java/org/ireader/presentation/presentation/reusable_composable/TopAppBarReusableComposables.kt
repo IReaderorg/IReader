@@ -95,7 +95,7 @@ fun SmallTextComposable(
 @Composable
 fun SuperSmallTextComposable(
     modifier: Modifier = Modifier,
-    title: String,
+    text: String,
     color: Color? = null,
     style: TextStyle? = null,
     fontWeight: FontWeight? = null,
@@ -106,11 +106,34 @@ fun SuperSmallTextComposable(
     ) {
     Text(
         modifier = modifier,
-        text = title,
+        text = text,
         color = color ?: MaterialTheme.colors.onBackground,
         style = style ?: MaterialTheme.typography.caption,
         fontWeight = fontWeight ?: FontWeight.Normal,
         fontSize = 12.sp,
+        overflow = overflow ?: TextOverflow.Ellipsis,
+        maxLines = maxLine,
+        textAlign = align ?: TextAlign.Start,
+    )
+}
+
+@Composable
+fun CaptionTextComposable(
+    modifier: Modifier = Modifier,
+    text: String,
+    color: Color? = null,
+    style: TextStyle? = null,
+    fontWeight: FontWeight? = null,
+    overflow: TextOverflow? = null,
+    maxLine: Int = Int.MAX_VALUE,
+    align: TextAlign? = null,
+) {
+    Text(
+        modifier = modifier,
+        text = text,
+        color = color ?: MaterialTheme.colors.onBackground,
+        style = style ?: MaterialTheme.typography.caption,
+        fontWeight = fontWeight ?: FontWeight.Normal,
         overflow = overflow ?: TextOverflow.Ellipsis,
         maxLines = maxLine,
         textAlign = align ?: TextAlign.Start,
@@ -174,7 +197,7 @@ fun AppTextField(
     onValueChange: (value: String) -> Unit,
     onConfirm: () -> Unit,
     hint: String = "Search...",
-    isBasicTextField: Boolean = true,
+    mode: Int = 0,
     keyboardAction: KeyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
     keyboardActions: KeyboardActions = KeyboardActions(onSearch = {
         onConfirm()
@@ -182,7 +205,7 @@ fun AppTextField(
 ) {
     val focusManager = LocalFocusManager.current
     Box(contentAlignment = Alignment.CenterStart) {
-        if (query.isBlank()) {
+        if (query.isBlank() && mode != 2) {
             Text(
                 modifier = Modifier.padding(horizontal = 16.dp),
                 text = hint,
@@ -190,7 +213,8 @@ fun AppTextField(
                 color = MaterialTheme.colors.onBackground.copy(alpha = .7F)
             )
         }
-        if (isBasicTextField) {
+
+        if (mode == 0) {
             BasicTextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = query,
@@ -204,7 +228,7 @@ fun AppTextField(
                 textStyle = TextStyle(color = MaterialTheme.colors.onBackground),
                 cursorBrush = SolidColor(MaterialTheme.colors.primary)
             )
-        } else {
+        } else if (mode == 1) {
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = query,
@@ -213,6 +237,20 @@ fun AppTextField(
                 keyboardOptions = keyboardAction,
                 keyboardActions = keyboardActions,
 
+                singleLine = true,
+                textStyle = TextStyle(color = MaterialTheme.colors.onBackground),
+            )
+        } else if (mode == 2) {
+            TextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = query,
+                onValueChange = onValueChange,
+                label = {
+                    CaptionTextComposable(text = hint)
+                },
+                maxLines = 1,
+                keyboardOptions = keyboardAction,
+                keyboardActions = keyboardActions,
                 singleLine = true,
                 textStyle = TextStyle(color = MaterialTheme.colors.onBackground),
             )
