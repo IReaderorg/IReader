@@ -38,17 +38,17 @@ fun ReaderSettingComposable(modifier: Modifier = Modifier, viewModel: ReaderScre
         )
         Spacer(modifier = Modifier.height(12.dp))
         Row(modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Start,
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.Top) {
-            Column(modifier = Modifier,
+            Column(modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.Start) {
                 IndentChangerComposable(Modifier, viewModel = viewModel)
                 FontSizeChangerComposable(viewModel = viewModel)
                 ParagraphDistanceComposable(viewModel = viewModel)
-                Row(modifier = Modifier,
-                    horizontalArrangement = Arrangement.Start,
-                    verticalAlignment = Alignment.CenterVertically) {
+                Row(modifier = Modifier.fillMaxSize(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween) {
                     Text(
                         text = "Advance Setting",
                         fontSize = 12.sp,
@@ -60,13 +60,14 @@ fun ReaderSettingComposable(modifier: Modifier = Modifier, viewModel: ReaderScre
                         onClick = { viewModel.scrollIndicatorDialogShown = true })
                 }
             }
-            Column(modifier = Modifier,
+            Column(modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.Start) {
                 ScrollModeSetting(viewModel)
                 FontHeightChangerComposable(viewModel = viewModel)
                 Row(
-                    horizontalArrangement = Arrangement.Start,
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = "Orientation",
@@ -89,7 +90,7 @@ fun ReaderSettingComposable(modifier: Modifier = Modifier, viewModel: ReaderScre
 
 @Composable
 fun ScrollModeSetting(viewModel: ReaderScreenViewModel) {
-    Row(modifier = Modifier,
+    Row(modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically) {
         Text(
@@ -108,7 +109,7 @@ fun ScrollModeSetting(viewModel: ReaderScreenViewModel) {
 
 @Composable
 fun AutoScrollSetting(viewModel: ReaderScreenViewModel) {
-    Row(modifier = Modifier,
+    Row(modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically) {
         Text(

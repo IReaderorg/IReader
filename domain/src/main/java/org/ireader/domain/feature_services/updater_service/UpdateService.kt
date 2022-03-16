@@ -32,10 +32,11 @@ class UpdateService @AssistedInject constructor(
 
 
     override suspend fun doWork(): Result {
+        val last = lastUpdateTime.read()
+        val time = lastUpdateTime.read() + TimeUnit.DAYS.toMillis(1)
+        val oneDay = TimeUnit.DAYS.toMillis(1)
 
-        if (lastUpdateTime.read() < lastUpdateTime.read() - TimeUnit.DAYS.toMillis(
-                1)
-        ) {
+        if (last > (last + oneDay)) {
             return Result.success()
         }
 
@@ -53,7 +54,7 @@ class UpdateService @AssistedInject constructor(
         val current = Version.create(versionCode)
 
         if (Version.isNewVersion(release.tagName, versionCode)) {
-            lastUpdateTime.save(Date().time)
+            lastUpdateTime.save(Calendar.getInstance().timeInMillis)
             with(NotificationManagerCompat.from(applicationContext)) {
                 notify(ID_APP_UPDATER, createNotification(current, version, createIntent(release)))
             }

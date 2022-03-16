@@ -22,6 +22,7 @@ import org.ireader.domain.models.entities.CatalogLocal
 import org.ireader.domain.models.entities.CatalogRemote
 import org.ireader.domain.use_cases.local.delete_usecases.book.ConvertExploredTOLibraryBooks
 import org.ireader.domain.use_cases.local.delete_usecases.book.DeleteAllExploredBooks
+import org.ireader.domain.use_cases.local.delete_usecases.chapter.DeleteNotInLibraryChapters
 import org.ireader.domain.utils.launchIO
 import org.ireader.presentation.R
 import javax.inject.Inject
@@ -38,6 +39,7 @@ class ExtensionViewModel @Inject constructor(
     private val syncRemoteCatalogs: SyncRemoteCatalogs,
     private val convertExploredTOLibraryBooks: ConvertExploredTOLibraryBooks,
     private val deleteAllExploredBook: DeleteAllExploredBooks,
+    private val deleteNotInLibraryChapters: DeleteNotInLibraryChapters,
 ) : BaseViewModel(), CatalogsState by state {
 
     private val _eventFlow = MutableSharedFlow<UiEvent>()
@@ -70,48 +72,16 @@ class ExtensionViewModel @Inject constructor(
             .onEach { state.remoteCatalogs = it }
             .launchIn(scope)
 
+    }
+
+    fun deleteAllExploredBookOnInit() {
         viewModelScope.launchIO {
-            convertExploredTOLibraryBooks()
             deleteAllExploredBook()
+            convertExploredTOLibraryBooks()
+            deleteNotInLibraryChapters()
         }
     }
 
-    private fun getCatalogs() {
-        getCatalogJob?.cancel()
-        getCatalogJob = scope.launch {
-            getCatalogsByType.subscribe(excludeRemoteInstalled = true)
-                .collect { (pinned, unpinned, remote) ->
-                    state.allPinnedCatalogs = pinned
-                    state.allUnpinnedCatalogs = unpinned
-                    state.allRemoteCatalogs = remote
-
-                    state.languageChoices = getLanguageChoices(remote, pinned + unpinned)
-                }
-        }
-
-        // Update catalogs whenever the query changes or there's a new update from the backend
-        viewModelScope.launch {
-            snapshotFlow {
-                state.allPinnedCatalogs.filteredByQuery(searchQuery)
-            }
-                .collect { state.pinnedCatalogs = it }
-        }
-        viewModelScope.launch {
-            snapshotFlow {
-                state.allUnpinnedCatalogs.filteredByQuery(searchQuery)
-            }
-                .collect { state.unpinnedCatalogs = it }
-        }
-        viewModelScope.launch {
-            snapshotFlow {
-                state.allRemoteCatalogs.filteredByQuery(searchQuery)
-                    .filteredByChoice(selectedLanguage)
-            }
-                .collect { state.remoteCatalogs = it }
-        }
-
-
-    }
 
     fun installCatalog(catalog: Catalog) {
         scope.launch {

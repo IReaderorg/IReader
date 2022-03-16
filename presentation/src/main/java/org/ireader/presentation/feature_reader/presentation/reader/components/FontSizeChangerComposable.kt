@@ -2,6 +2,7 @@ package org.ireader.presentation.feature_reader.presentation.reader.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -26,24 +27,31 @@ fun FontSizeChangerComposable(
     modifier: Modifier = Modifier,
     viewModel: ReaderScreenViewModel,
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         Text(
             text = "Font Size",
             fontSize = 12.sp,
             style = TextStyle(fontWeight = FontWeight.W400),
             color = MaterialTheme.colors.onBackground
         )
-        IconButton(onClick = {
-            viewModel.onEvent(
-                ReaderEvent.ChangeFontSize(FontSizeEvent.Decrease))
-        }) {
-            Icon(painter = painterResource(id = org.ireader.core.R.drawable.ic_decrease_text_size),
-                contentDescription = "Decrease font size")
+        Row {
+            IconButton(onClick = {
+                viewModel.onEvent(
+                    ReaderEvent.ChangeFontSize(FontSizeEvent.Decrease))
+            }) {
+                Icon(painter = painterResource(id = org.ireader.core.R.drawable.ic_decrease_text_size),
+                    contentDescription = "Decrease font size")
+            }
+            IconButton(onClick = { viewModel.onEvent(ReaderEvent.ChangeFontSize(FontSizeEvent.Increase)) }) {
+                Icon(painter = painterResource(id = R.drawable.ic_increase_text_size),
+                    contentDescription = "Increase font size")
+            }
         }
-        IconButton(onClick = { viewModel.onEvent(ReaderEvent.ChangeFontSize(FontSizeEvent.Increase)) }) {
-            Icon(painter = painterResource(id = R.drawable.ic_increase_text_size),
-                contentDescription = "Increase font size")
-        }
+
         //TopAppBarActionButton(modifier = modifier.size(40.dp), imageVector = Icons.Default.TextFormat, title = "Decrease font size", onClick = {   })
         //TopAppBarActionButton(modifier = modifier.size(60.dp),imageVector = Icons.Default.TextFormat, title = "Increase font size", onClick = {  })
     }
@@ -56,7 +64,10 @@ fun FontHeightChangerComposable(
     modifier: Modifier = Modifier,
     viewModel: ReaderScreenViewModel,
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = "Line Height",
@@ -64,12 +75,14 @@ fun FontHeightChangerComposable(
             style = TextStyle(fontWeight = FontWeight.W400),
             color = MaterialTheme.colors.onBackground
         )
-        AppIconButton(imageVector = Icons.Default.CloseFullscreen,
-            title = "Decrease font height",
-            onClick = { viewModel.saveFontHeight(false) })
-        AppIconButton(imageVector = Icons.Default.OpenInFull,
-            title = "Increase font height",
-            onClick = { viewModel.saveFontHeight(true) })
+        Row {
+            AppIconButton(imageVector = Icons.Default.CloseFullscreen,
+                title = "Decrease font height",
+                onClick = { viewModel.saveFontHeight(false) })
+            AppIconButton(imageVector = Icons.Default.OpenInFull,
+                title = "Increase font height",
+                onClick = { viewModel.saveFontHeight(true) })
+        }
     }
 
 
@@ -77,7 +90,10 @@ fun FontHeightChangerComposable(
 
 @Composable
 fun ParagraphDistanceComposable(modifier: Modifier = Modifier, viewModel: ReaderScreenViewModel) {
-    Row(verticalAlignment = Alignment.CenterVertically
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = "Paragraph Distance",
@@ -85,22 +101,26 @@ fun ParagraphDistanceComposable(modifier: Modifier = Modifier, viewModel: Reader
             style = TextStyle(fontWeight = FontWeight.W400),
             color = MaterialTheme.colors.onBackground
         )
-        AppIconButton(imageVector = Icons.Default.VerticalAlignTop,
-            tint = MaterialTheme.colors.onBackground,
-            title = "Decrease font height",
-            onClick = { viewModel.saveParagraphDistance(false) })
-        AppIconButton(imageVector = Icons.Default.VerticalAlignBottom,
-            tint = MaterialTheme.colors.onBackground,
-            title = "Increase font height",
-            onClick = { viewModel.saveParagraphDistance(true) })
+        Row {
+            AppIconButton(imageVector = Icons.Default.VerticalAlignTop,
+                tint = MaterialTheme.colors.onBackground,
+                title = "Decrease font height",
+                onClick = { viewModel.saveParagraphDistance(false) })
+            AppIconButton(imageVector = Icons.Default.VerticalAlignBottom,
+                tint = MaterialTheme.colors.onBackground,
+                title = "Increase font height",
+                onClick = { viewModel.saveParagraphDistance(true) })
+        }
+
     }
 }
 
 @Composable
 fun IndentChangerComposable(modifier: Modifier = Modifier, viewModel: ReaderScreenViewModel) {
-    Row(modifier = Modifier,
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Start
     ) {
         Text(
             text = "Paragraph Indent",
@@ -108,13 +128,16 @@ fun IndentChangerComposable(modifier: Modifier = Modifier, viewModel: ReaderScre
             style = TextStyle(fontWeight = FontWeight.W400),
             color = MaterialTheme.colors.onBackground
         )
-        AppIconButton(imageVector = Icons.Default.FormatIndentDecrease,
-            tint = MaterialTheme.colors.onBackground,
-            title = "Decrease paragraph indent",
-            onClick = { viewModel.saveParagraphIndent(false) })
-        AppIconButton(imageVector = Icons.Default.FormatIndentIncrease,
-            tint = MaterialTheme.colors.onBackground,
-            title = "Increase paragraph indent",
-            onClick = { viewModel.saveParagraphIndent(true) })
+        Row {
+            AppIconButton(imageVector = Icons.Default.FormatIndentDecrease,
+                tint = MaterialTheme.colors.onBackground,
+                title = "Decrease paragraph indent",
+                onClick = { viewModel.saveParagraphIndent(false) })
+            AppIconButton(imageVector = Icons.Default.FormatIndentIncrease,
+                tint = MaterialTheme.colors.onBackground,
+                title = "Increase paragraph indent",
+                onClick = { viewModel.saveParagraphIndent(true) })
+        }
+
     }
 }

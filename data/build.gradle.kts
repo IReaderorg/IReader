@@ -10,10 +10,31 @@ android {
     compileSdk = ProjectConfig.compileSdk
 
 
-    kapt {
-        arguments {
-            arg("room.schemaLocation", "$projectDir/schemas")
+
+    defaultConfig {
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += mapOf("room.schemaLocation" to "$projectDir/schemas")
+            }
         }
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+    sourceSets {
+        getByName("androidTest").assets.srcDir("$projectDir/schemas")
+    }
+    packagingOptions {
+        resources.excludes.addAll(listOf(
+            "LICENSE.txt",
+            "META-INF/LICENSE",
+            "META-INF/LICENSE.txt",
+            "META-INF/README.md",
+            "META-INF/AL2.0",
+            "META-INF/LGPL2.1",
+            "**/attach_hotspot_windows.dll",
+            "META-INF/licenses/ASM",
+            "META-INF/*",
+            "META-INF/gradle/incremental.annotation.processors"
+        ))
     }
 }
 
@@ -67,5 +88,12 @@ dependencies {
     implementation(libs.retrofit.retrofit)
     implementation(libs.retrofit.moshiConverter)
     testImplementation("androidx.test:monitor:1.6.0-alpha01")
+
+    androidTestImplementation(test.junit4)
+    androidTestImplementation(test.junitAndroidExt)
+    androidTestImplementation(test.truth)
+    androidTestImplementation(test.extJunit)
+    androidTestImplementation(test.testRunner)
+    androidTestImplementation(test.espresso)
 
 }

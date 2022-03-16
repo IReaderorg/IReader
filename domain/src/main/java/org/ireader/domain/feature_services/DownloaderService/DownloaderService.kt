@@ -131,7 +131,7 @@ class DownloadService @AssistedInject constructor(
                                 }
                             }
                         Timber.d("getNotifications: Successfully to downloaded ${bookResource.title} chapter ${chapter.title}")
-                        delay(500)
+                        delay(1000)
                     }
                 }
             } catch (e: Exception) {

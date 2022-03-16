@@ -5,11 +5,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.ireader.domain.catalog.interactor.SyncRemoteCatalogs
-import org.ireader.domain.catalog.service.CatalogStore
+import javax.inject.Inject
 
 @OptIn(DelicateCoroutinesApi::class)
-class CatalogStoreInitializer(
-    catalogStoreLazy: Lazy<CatalogStore>,
+class CatalogStoreInitializer @Inject constructor(
     syncRemoteCatalogs: SyncRemoteCatalogs,
 ) {
 

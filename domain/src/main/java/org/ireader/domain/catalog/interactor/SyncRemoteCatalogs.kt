@@ -29,6 +29,7 @@ class SyncRemoteCatalogs @Inject constructor(
         val lastCheck = lastCheckPref.get()
         val now = Calendar.getInstance().timeInMillis
 
+
         if (forceRefresh || (now - lastCheck) > TimeUnit.MINUTES.toMillis(5)) {
             try {
                 withContext(Dispatchers.IO) {

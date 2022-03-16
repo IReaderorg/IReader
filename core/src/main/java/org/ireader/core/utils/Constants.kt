@@ -29,7 +29,7 @@ object Constants {
 
     const val PAGE_KET_TABLE = "page_key_table"
 
-    const val DEFAULT_PAGE_SIZE = 50
+    const val DEFAULT_PAGE_SIZE = 6
     const val DEFAULT_BIG_PAGE_SIZE = 150
     const val MAX_PAGE_SIZE = 150
     const val MAX_BIG_PAGE_SIZE = 450

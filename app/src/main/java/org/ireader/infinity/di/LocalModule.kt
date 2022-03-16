@@ -39,8 +39,10 @@ class LocalModule {
             AppDatabase::class.java,
             AppDatabase.DATABASE_NAME
         )
-            .addMigrations(MIGRATION_8_9)
-            .addMigrations(MIGRATION_11_12)
+            .addMigrations(
+                MIGRATION_8_9,
+                MIGRATION_11_12
+            )
             .fallbackToDestructiveMigration()
             .build()
     }
@@ -65,7 +67,6 @@ class LocalModule {
     }
 
 
-
     @Singleton
     @Provides
     fun provideDownloadRepository(
@@ -81,7 +82,6 @@ class LocalModule {
     ): DownloadDao {
         return database.downloadDao
     }
-
 
 
     @Provides

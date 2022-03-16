@@ -9,4 +9,5 @@ class AppInitializers @Inject constructor(
     timberInitializer: TimberInitializer,
     firebaseInitializer: FirebaseInitializer,
     updateService: UpdateService,
+    catalogStoreInitializer: CatalogStoreInitializer,
 )

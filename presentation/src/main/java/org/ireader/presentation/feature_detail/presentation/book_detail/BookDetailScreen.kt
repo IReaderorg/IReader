@@ -118,6 +118,7 @@ fun BookDetailScreen(
                 onRefresh = {
                     onSwipeRefresh()
                 },
+                indicatorPadding = PaddingValues(vertical = 40.dp),
                 indicator = { state, trigger ->
                     SwipeRefreshIndicator(
                         state = state,

@@ -107,6 +107,18 @@ internal class FakeLocalBookRepository : LocalBookRepository {
         books.addAll(book)
         return listOf(1L)
     }
+
+    override suspend fun findFavoriteSourceIds(): List<Long> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun deleteAllExploredBook() {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun convertExploredTOLibraryBooks() {
+        TODO("Not yet implemented")
+    }
 }
 
 private suspend fun <T : Any> PagingData<T>.collectDataForTest(): List<T> {

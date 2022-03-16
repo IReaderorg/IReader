@@ -72,6 +72,7 @@ class FakeChapterRepository : LocalChapterRepository {
     override fun findLocalChaptersByPaging(
         bookId: Long,
         isAsc: Boolean,
+        query: String,
     ): PagingSource<Int, Chapter> {
         throw UnsupportedOperationException("unsupported")
     }

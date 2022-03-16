@@ -51,6 +51,10 @@ fun ExtensionScreen(
     val scaffoldState = rememberScaffoldState()
     val context = LocalContext.current
 
+    LaunchedEffect(key1 = true) {
+        viewModel.deleteAllExploredBookOnInit()
+    }
+
 
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->

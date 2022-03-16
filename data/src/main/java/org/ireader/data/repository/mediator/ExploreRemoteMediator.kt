@@ -15,6 +15,7 @@ import retrofit2.HttpException
 import tachiyomi.source.CatalogSource
 import tachiyomi.source.model.Filter
 import tachiyomi.source.model.Listing
+import timber.log.Timber
 import java.io.IOException
 import java.net.UnknownHostException
 import javax.net.ssl.SSLHandshakeException
@@ -41,8 +42,6 @@ class ExploreRemoteMediator(
         return try {
             val currentPage = when (loadType) {
                 LoadType.REFRESH -> {
-                    chapterDao.deleteNotInLibraryChapters()
-                    libraryDao.deleteNotInLibraryBooks()
                     val remoteKeys = getRemoteKeyClosestToCurrentPosition(state)
                     remoteKeys?.nextPage?.minus(1) ?: 1
                 }
@@ -77,6 +76,8 @@ class ExploreRemoteMediator(
             } else {
                 source.getMangaList(sort = listing, currentPage)
             }
+
+            Timber.e("TAG$currentPage")
 
             val endOfPaginationReached = !response.hasNextPage
 

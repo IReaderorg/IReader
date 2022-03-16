@@ -15,11 +15,11 @@ interface RemoteKeysDao {
     @Query("SELECT * FROM library WHERE id =:id")
     fun getExploreBookById(id: Int): Flow<Book?>
 
-    @Query("SELECT DISTINCT library.* FROM library JOIN  page_key_table ON library.title = page_key_table.id AND library.sourceId = page_key_table.sourceId AND tableId = 0 OR tableId = 1 GROUP BY  library.title ORDER BY id")
+    @Query("SELECT DISTINCT library.* FROM library JOIN  page_key_table ON library.title = page_key_table.id AND library.sourceId = page_key_table.sourceId  OR tableId = 1 GROUP BY  library.title ORDER BY id")
     fun getAllExploreBookByPaging(): PagingSource<Int, Book>
 
 
-    @Query("SELECT DISTINCT library.* FROM library JOIN  page_key_table ON library.title = page_key_table.id AND library.sourceId = page_key_table.sourceId AND tableId = 0 OR tableId = 1 GROUP BY  library.title ORDER BY id")
+    @Query("SELECT DISTINCT library.* FROM library JOIN  page_key_table ON library.title = page_key_table.id AND library.sourceId = page_key_table.sourceId  OR tableId = 1 GROUP BY  library.title ORDER BY id")
     fun getAllExploreBook(): List<Book>?
 
     @Query("SELECT * FROM page_key_table WHERE id =:id")
@@ -35,7 +35,7 @@ interface RemoteKeysDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAllExploredBook(bookEntity: List<Book>): List<Long>
 
-    @Query("DELETE FROM library WHERE favorite = 0")
+    @Query("DELETE FROM library WHERE favorite = 0 AND tableId = 1")
     suspend fun deleteAllExploredBook()
 
     @Query("DELETE FROM library WHERE favorite = 0 AND tableId = 2")
