@@ -6,6 +6,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
@@ -37,6 +38,7 @@ fun BookDetailScreenLoadedComposable(
     book: Book,
     source: Source?,
     onWebView: () -> Unit,
+    onTitle: (String) -> Unit,
     onRefresh: () -> Unit,
     onSummaryExpand: () -> Unit,
     isSummaryExpanded: Boolean,
@@ -120,6 +122,7 @@ fun BookDetailScreenLoadedComposable(
                         .align(Alignment.Bottom)
                 ) {
                     Text(
+                        modifier = Modifier.clickable { onTitle(book.title) },
                         text = book.title,
                         style = MaterialTheme.typography.h6,
                         fontWeight = FontWeight.Bold,

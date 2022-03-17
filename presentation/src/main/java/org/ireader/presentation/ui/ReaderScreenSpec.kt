@@ -12,6 +12,7 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import kotlinx.coroutines.launch
 import org.ireader.core.R
 import org.ireader.core.utils.UiText
+import org.ireader.core_ui.theme.TransparentStatusBar
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.domain.view_models.reader.ReaderScreenViewModel
 import org.ireader.presentation.feature_reader.presentation.reader.ReadingScreen
@@ -53,64 +54,67 @@ object ReaderScreenSpec : ScreenSpec {
         val scrollState = rememberLazyListState()
         val swipeState = rememberSwipeRefreshState(isRefreshing = viewModel.isLoading)
 
-        if (source != null) {
-            ReadingScreen(
-                navController = navController,
-                vm = viewModel,
-                scrollState = scrollState,
-                source = source,
-                onNext = {
-                    if (currentIndex < chapters.lastIndex) {
-                        viewModel.updateChapterSliderIndex(currentIndex + 1)
-                        viewModel.getChapter(viewModel.getCurrentChapterByIndex().id,
-                            source = source) {
+        TransparentStatusBar {
+
+
+            if (source != null) {
+                ReadingScreen(
+                    navController = navController,
+                    vm = viewModel,
+                    scrollState = scrollState,
+                    source = source,
+                    onNext = {
+                        if (currentIndex < chapters.lastIndex) {
+                            viewModel.updateChapterSliderIndex(currentIndex + 1)
+                            viewModel.getChapter(viewModel.getCurrentChapterByIndex().id,
+                                source = source) {
+                                coroutineScope.launch {
+                                    scrollState.animateScrollToItem(0, 0)
+                                }
+                            }
+                        } else {
                             coroutineScope.launch {
-                                scrollState.animateScrollToItem(0, 0)
+                                viewModel.showSnackBar(UiText.StringResource(R.string.this_is_last_chapter))
+
                             }
                         }
-                    } else {
-                        coroutineScope.launch {
-                            viewModel.showSnackBar(UiText.StringResource(R.string.this_is_last_chapter))
+                    },
+                    onPrev = {
+                        if (currentIndex > 0) {
+                            viewModel.updateChapterSliderIndex(currentIndex - 1)
+                            viewModel.getChapter(viewModel.getCurrentChapterByIndex().id,
+                                source = source) {
+                                coroutineScope.launch {
+                                    scrollState.animateScrollToItem(0, 0)
+                                }
+                            }
 
-                        }
-                    }
-                },
-                onPrev = {
-                    if (currentIndex > 0) {
-                        viewModel.updateChapterSliderIndex(currentIndex - 1)
-                        viewModel.getChapter(viewModel.getCurrentChapterByIndex().id,
-                            source = source) {
+                        } else {
                             coroutineScope.launch {
-                                scrollState.animateScrollToItem(0, 0)
+                                viewModel.showSnackBar(UiText.StringResource(org.ireader.core.R.string.this_is_first_chapter))
                             }
                         }
-
-                    } else {
+                    },
+                    onSliderFinished = {
                         coroutineScope.launch {
-                            viewModel.showSnackBar(UiText.StringResource(org.ireader.core.R.string.this_is_first_chapter))
+                            viewModel.showSnackBar(UiText.DynamicString(chapters[viewModel.currentChapterIndex].title))
                         }
-                    }
-                },
-                onSliderFinished = {
-                    coroutineScope.launch {
-                        viewModel.showSnackBar(UiText.DynamicString(chapters[viewModel.currentChapterIndex].title))
-                    }
-                    viewModel.updateChapterSliderIndex(currentIndex)
-                    viewModel.getChapter(chapters[viewModel.currentChapterIndex].id,
-                        source = source)
-                    coroutineScope.launch {
-                        scrollState.animateScrollToItem(0, 0)
-                    }
-                },
-                onSliderChange = {
-                    viewModel.updateChapterSliderIndex(it.toInt())
-                },
-                swipeState = swipeState
-            )
-        } else {
-            EmptyScreenComposable(navController = navController,
-                errorResId = org.ireader.presentation.R.string.something_is_wrong_with_this_book)
+                        viewModel.updateChapterSliderIndex(currentIndex)
+                        viewModel.getChapter(chapters[viewModel.currentChapterIndex].id,
+                            source = source)
+                        coroutineScope.launch {
+                            scrollState.animateScrollToItem(0, 0)
+                        }
+                    },
+                    onSliderChange = {
+                        viewModel.updateChapterSliderIndex(it.toInt())
+                    },
+                    swipeState = swipeState
+                )
+            } else {
+                EmptyScreenComposable(navController = navController,
+                    errorResId = org.ireader.presentation.R.string.something_is_wrong_with_this_book)
+            }
         }
     }
-
 }

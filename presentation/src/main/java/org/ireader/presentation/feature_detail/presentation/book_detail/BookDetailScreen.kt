@@ -33,6 +33,7 @@ import org.ireader.presentation.feature_detail.presentation.book_detail.componen
 import org.ireader.presentation.feature_detail.presentation.book_detail.components.DotsFlashing
 import org.ireader.presentation.presentation.components.ISnackBarHost
 import org.ireader.presentation.presentation.components.showLoading
+import org.ireader.presentation.ui.GlobalSearchScreenSpec
 
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -140,6 +141,13 @@ fun BookDetailScreen(
                             navController = navController,
                             onWebView = {
                                 onWebView()
+                            },
+                            onTitle = {
+                                try {
+                                    navController.navigate(GlobalSearchScreenSpec.buildRoute(query = it))
+                                } catch (e: Exception) {
+                                }
+
                             },
                             onSummaryExpand = {
                                 onSummaryExpand()

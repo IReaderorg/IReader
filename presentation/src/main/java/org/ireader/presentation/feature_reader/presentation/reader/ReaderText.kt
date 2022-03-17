@@ -57,8 +57,8 @@ fun ReaderText(
                 indication = null) {
                 vm.onEvent(ReaderEvent.ToggleReaderMode(!vm.isReaderModeEnable))
             }
-            .background(vm.backgroundColor)
             .fillMaxSize()
+            .background(vm.backgroundColor)
             .wrapContentSize(Alignment.CenterStart)
     ) {
         Box(modifier = Modifier

@@ -7,6 +7,9 @@ import android.content.pm.ActivityInfo
 import android.view.WindowManager
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
@@ -521,12 +524,43 @@ class ReaderScreenViewModel @Inject constructor(
         }
     }
 
+    fun hideSystemBars(context: Context) {
+        val activity = context.findComponentActivity()
+        if (activity != null) {
+            val window = activity.window
+            val windowInsetsController =
+                ViewCompat.getWindowInsetsController(window.decorView) ?: return
+            // Configure the behavior of the hidden system bars
+            windowInsetsController.systemBarsBehavior =
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            // Hide both the status bar and the navigation bar
+            windowInsetsController.hide(WindowInsetsCompat.Type.statusBars())
+            //  windowInsetsController.hide(WindowInsetsCompat.Type.navigationBars())
+        }
+    }
+
+    fun showSystemBars(context: Context) {
+        val activity = context.findComponentActivity()
+        if (activity != null) {
+            val window = activity.window
+            val windowInsetsController =
+                ViewCompat.getWindowInsetsController(window.decorView) ?: return
+            // Configure the behavior of the hidden system bars
+            windowInsetsController.systemBarsBehavior =
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+
+            // Hide both the status bar and the navigation bar
+            //windowInsetsController.show(WindowInsetsCompat.Type.systemBars())
+            windowInsetsController.show(WindowInsetsCompat.Type.statusBars())
+        }
+    }
 
     fun restoreSetting(context: Context) {
         val activity = context.findComponentActivity()
         if (activity != null) {
             val window = activity.window
             val layoutParams: WindowManager.LayoutParams = window.attributes
+            showSystemBars(context = context)
             layoutParams.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
             activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
             window.attributes = layoutParams

@@ -107,6 +107,7 @@ fun ReadingScreen(
     LaunchedEffect(key1 = true) {
         vm.readOrientation(context)
         vm.readBrightness(context)
+        vm.hideSystemBars(context)
 
         vm.eventFlow.collectLatest { event ->
             when (event) {
@@ -125,6 +126,7 @@ fun ReadingScreen(
     }
 
     Scaffold(
+        modifier = Modifier.fillMaxSize(),
         topBar = {
             ReaderScreenTopBar(
                 isReaderModeEnable = vm.isReaderModeEnable,
