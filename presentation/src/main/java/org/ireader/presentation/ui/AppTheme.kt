@@ -7,7 +7,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.LocalImageLoader
-import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import org.ireader.core_ui.theme.AppColors
 import org.ireader.core_ui.theme.LocalTransparentStatusBar
@@ -46,13 +45,11 @@ fun AppTheme(
         typography = Typography,
         shape = Shapes
     ) {
-        ProvideWindowInsets {
             CompositionLocalProvider(
                 LocalRippleTheme provides rippleTheme,
                 LocalImageLoader provides vm.coilLoader,
                 content = content
             )
-        }
     }
 
 }

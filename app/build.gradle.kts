@@ -71,7 +71,6 @@ dependencies {
 
 
     implementation(libs.timber)
-    implementation(accompanist.insets)
     implementation(accompanist.systemUiController)
     implementation(accompanist.navAnimation)
     implementation(accompanist.navMaterial)

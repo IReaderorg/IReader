@@ -1,11 +1,9 @@
 package org.ireader.presentation.feature_reader.presentation.reader
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -45,6 +43,7 @@ fun ReadingScreen(
     vm: ReaderScreenViewModel,
     source: Source,
     scrollState: LazyListState,
+    drawerScrollState: LazyListState,
     onNext: () -> Unit,
     onPrev: () -> Unit,
     onSliderFinished: () -> Unit,
@@ -61,7 +60,6 @@ fun ReadingScreen(
     val chapter = vm.stateChapter
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-    val drawerScrollState = rememberLazyListState()
 
     DisposableEffect(key1 = true) {
         onDispose {
@@ -69,12 +67,26 @@ fun ReadingScreen(
         }
     }
     LaunchedEffect(key1 = scaffoldState.drawerState.targetValue) {
-        if (scaffoldState.drawerState.targetValue == DrawerValue.Open && vm.stateChapters.isNotEmpty()) {
-            drawerScrollState.scrollToItem(vm.currentChapterIndex)
+//        if (scaffoldState.drawerState.targetValue == DrawerValue.Open && vm.stateChapters.isNotEmpty()) {
+//            drawerScrollState.animateScrollToItem(vm.getCurrentIndexOfChapter(vm.currentChapterIndex), -500)
+//        }
+    }
+    LaunchedEffect(key1 = scaffoldState.drawerState.targetValue) {
+        if (chapter != null && scaffoldState.drawerState.targetValue == DrawerValue.Open && vm.stateChapters.isNotEmpty()) {
+            drawerScrollState.scrollToItem(vm.getCurrentIndexOfChapter(chapter))
+        }
+//        if (scaffoldState.drawerState.targetValue == DrawerValue.Open && vm.stateChapters.isNotEmpty()) {
+//            drawerScrollState.animateScrollToItem(vm.getCurrentIndexOfChapter(vm.stateChapter), -500)
+//        }
+    }
+    LaunchedEffect(key1 = vm.currentChapterIndex) {
+        val index = vm.currentChapterIndex
+        if (index != -1) {
+            drawerScrollState.scrollToItem(vm.currentChapterIndex, -500)
         }
     }
-    LaunchedEffect(key1 = vm.autpScrollMode) {
-        while (vm.autoScrollInterval != 0L && vm.autpScrollMode) {
+    LaunchedEffect(key1 = vm.autoScrollMode) {
+        while (vm.autoScrollInterval != 0L && vm.autoScrollMode) {
             scrollState.scrollBy(vm.autoScrollOffset.toFloat())
             delay(vm.autoScrollInterval)
         }
@@ -93,15 +105,18 @@ fun ReadingScreen(
                     if (chapter != null) {
                         vm.getLocalChaptersByPaging(chapter.bookId)
                     }
-                    modalState.animateTo(ModalBottomSheetValue.Expanded)
+                    modalState.snapTo(ModalBottomSheetValue.Expanded)
                 }
             }
             true -> {
                 scope.launch {
-                    modalState.animateTo(ModalBottomSheetValue.Hidden)
+                    modalState.snapTo(ModalBottomSheetValue.Hidden)
                 }
             }
         }
+    }
+    LaunchedEffect(key1 = vm.autoBrightnessMode) {
+        vm.readBrightness(context)
     }
 
     LaunchedEffect(key1 = true) {
@@ -181,15 +196,9 @@ fun ReadingScreen(
                     sheetState = modalState,
                     sheetContent = {
                         Column(modifier.fillMaxSize()) {
-                            Spacer(modifier = modifier.height(4.dp))
-                            Box(modifier = Modifier
-                                .align(Alignment.CenterHorizontally)
-                                .width(50.dp)
-                                .height(5.dp)
-                                .background(MaterialTheme.colors.onBackground.copy(.6f))
-                            ) {
-
-                            }
+                            Divider(modifier = modifier.fillMaxWidth(),
+                                color = MaterialTheme.colors.onBackground.copy(alpha = .2f),
+                                thickness = 1.dp)
                             Spacer(modifier = modifier.height(5.dp))
                             if (vm.isMainBottomModeEnable) {
                                 MainBottomSettingComposable(
@@ -237,7 +246,7 @@ fun ReadingScreen(
                         vm.getChapter(ch.id,
                             source = source)
                         coroutineScope.launch {
-                            scrollState.animateScrollToItem(0, 0)
+                            scrollState.scrollToItem(0, 0)
                         }
                         vm.updateChapterSliderIndex(vm.getCurrentIndexOfChapter(
                             ch))

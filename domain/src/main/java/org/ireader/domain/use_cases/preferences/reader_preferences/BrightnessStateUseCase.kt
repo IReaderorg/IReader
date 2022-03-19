@@ -6,12 +6,20 @@ import javax.inject.Inject
 class BrightnessStateUseCase @Inject constructor(
     private val appPreferences: AppPreferences,
 ) {
-    fun save(brightness: Float) {
+    fun saveBrightness(brightness: Float) {
         return appPreferences.brightness().set(brightness)
     }
 
-    fun read(): Float {
+    fun readBrightness(): Float {
         return appPreferences.brightness().get()
+    }
+
+    fun saveAutoBrightness(brightness: Boolean) {
+        return appPreferences.autoBrightness().set(brightness)
+    }
+
+    fun readAutoBrightness(): Boolean {
+        return appPreferences.autoBrightness().get()
     }
 
 }

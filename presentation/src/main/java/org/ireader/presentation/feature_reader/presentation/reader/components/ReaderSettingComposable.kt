@@ -48,7 +48,7 @@ fun ReaderSettingComposable(modifier: Modifier = Modifier, viewModel: ReaderScre
             value = viewModel.orientation == Orientation.Landscape,
             onToggle = { viewModel.saveOrientation(context) })
         SettingItemToggleComposable(text = "AutoScroll",
-            value = viewModel.autpScrollMode,
+            value = viewModel.autoScrollMode,
             onToggle = { viewModel.toggleAutoScrollMode() })
         SettingItemComposable(text = "Font Size",
             value = viewModel.fontSize.toString(),
@@ -86,6 +86,42 @@ fun ReaderSettingComposable(modifier: Modifier = Modifier, viewModel: ReaderScre
             },
             onMinus = {
                 viewModel.saveFontHeight(false)
+
+            })
+        SettingItemComposable(text = "Autoscroll Interval",
+            value = "${viewModel.autoScrollInterval / 1000} second",
+            onAdd = {
+                viewModel.setAutoScrollIntervalReader(true)
+            },
+            onMinus = {
+                viewModel.setAutoScrollIntervalReader(false)
+
+            })
+        SettingItemComposable(text = "Autoscroll Offset",
+            value = viewModel.autoScrollOffset.toString(),
+            onAdd = {
+                viewModel.setAutoScrollOffsetReader(true)
+            },
+            onMinus = {
+                viewModel.setAutoScrollOffsetReader(false)
+
+            })
+        SettingItemComposable(text = "ScrollIndicator Padding",
+            value = viewModel.scrollIndicatorPadding.toString(),
+            onAdd = {
+                viewModel.saveScrollIndicatorPadding(true)
+            },
+            onMinus = {
+                viewModel.saveScrollIndicatorPadding(false)
+
+            })
+        SettingItemComposable(text = "ScrollIndicator Width",
+            value = viewModel.scrollIndicatorWith.toString(),
+            onAdd = {
+                viewModel.saveScrollIndicatorWidth(true)
+            },
+            onMinus = {
+                viewModel.saveScrollIndicatorWidth(false)
 
             })
 

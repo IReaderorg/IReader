@@ -52,6 +52,7 @@ object ReaderScreenSpec : ScreenSpec {
         val chapters = viewModel.stateChapters
         val coroutineScope = rememberCoroutineScope()
         val scrollState = rememberLazyListState()
+        val drawerScrollState = rememberLazyListState()
         val swipeState = rememberSwipeRefreshState(isRefreshing = viewModel.isLoading)
 
         TransparentStatusBar {
@@ -109,7 +110,8 @@ object ReaderScreenSpec : ScreenSpec {
                     onSliderChange = {
                         viewModel.updateChapterSliderIndex(it.toInt())
                     },
-                    swipeState = swipeState
+                    swipeState = swipeState,
+                    drawerScrollState = drawerScrollState
                 )
             } else {
                 EmptyScreenComposable(navController = navController,

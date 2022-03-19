@@ -51,7 +51,6 @@ dependencies {
 
 
     implementation(accompanist.flowlayout)
-    implementation(accompanist.insets)
     implementation(accompanist.navAnimation)
     implementation(accompanist.navMaterial)
     implementation(accompanist.pager)

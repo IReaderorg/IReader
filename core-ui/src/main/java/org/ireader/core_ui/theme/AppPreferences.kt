@@ -13,6 +13,7 @@ class AppPreferences @Inject constructor(
         const val SAVED_FONT_SIZE_PREFERENCES = "reader_font_size"
         const val SAVED_FONT_PREFERENCES = "reader_font_family"
         const val SAVED_BRIGHTNESS_PREFERENCES = "reader_brightness"
+        const val SAVED_AUTO_BRIGHTNESS_PREFERENCES = "reader_auto_brightness"
 
         const val SAVED_LIBRARY_LAYOUT_KEY = "library_layout_type"
         const val SAVED_BROWSE_LAYOUT_KEY = "browser_layout_type"
@@ -42,6 +43,10 @@ class AppPreferences @Inject constructor(
 
     fun brightness(): Preference<Float> {
         return preferenceStore.getFloat(SAVED_BRIGHTNESS_PREFERENCES, .5F)
+    }
+
+    fun autoBrightness(): Preference<Boolean> {
+        return preferenceStore.getBoolean(SAVED_AUTO_BRIGHTNESS_PREFERENCES, true)
     }
 
     fun fontSize(): Preference<Int> {

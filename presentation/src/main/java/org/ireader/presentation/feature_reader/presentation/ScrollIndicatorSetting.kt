@@ -31,12 +31,9 @@ fun ScrollIndicatorSetting(
         vm.readTextColor()
     },
 ) {
-    val (pValue, setPaddingValue) = remember { mutableStateOf<String>("") }
-    val (wValue, setWidthValue) = remember { mutableStateOf<String>("") }
+
     val (bgValue, setBGValue) = remember { mutableStateOf<String>("") }
     val (txtValue, setTxtValue) = remember { mutableStateOf<String>("") }
-    val (autoScrollText, setAutoScrollValue) = remember { mutableStateOf<String>("") }
-    val (autoScrollOffsetText, setAutoScrolOffsetlValue) = remember { mutableStateOf<String>("") }
     val focusManager = LocalFocusManager.current
 
     if (enable) {
@@ -55,44 +52,6 @@ fun ScrollIndicatorSetting(
                     verticalArrangement = Arrangement.Center) {
                     MidSizeTextComposable(text = "Advance Setting")
                     Spacer(modifier = Modifier.height(32.dp))
-                    AppTextField(
-                        query = pValue,
-                        onValueChange = {
-                            setPaddingValue(it)
-                            try {
-                                vm.scrollIndicatorPadding = it.toInt()
-                            } catch (e: Exception) {
-                            }
-
-                        },
-                        onConfirm = {
-                            focusManager.clearFocus()
-                        },
-                        hint = "Scroll Indicator Padding Value",
-                        mode = 2,
-                        keyboardAction = KeyboardOptions(imeAction = ImeAction.Done,
-                            keyboardType = KeyboardType.Number),
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    AppTextField(
-                        query = wValue,
-                        onValueChange = {
-                            setWidthValue(it)
-                            try {
-                                vm.scrollIndicatorWith = it.toInt()
-                            } catch (e: Exception) {
-                            }
-
-                        },
-                        onConfirm = {
-                            focusManager.clearFocus()
-                        },
-                        hint = "Scroll Indicator  Width Value",
-                        mode = 2,
-                        keyboardAction = KeyboardOptions(imeAction = ImeAction.Done,
-                            keyboardType = KeyboardType.Number)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
                     AppTextField(
                         query = bgValue,
                         onValueChange = {
@@ -132,33 +91,6 @@ fun ScrollIndicatorSetting(
                             keyboardType = KeyboardType.Text)
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    AppTextField(
-                        query = autoScrollText,
-                        onValueChange = {
-                            setAutoScrollValue(it)
-                        },
-                        onConfirm = {
-                            focusManager.clearFocus()
-                        },
-                        hint = "Auto Scroll Interval (Milli Seconds)",
-                        mode = 2,
-                        keyboardAction = KeyboardOptions(imeAction = ImeAction.Done,
-                            keyboardType = KeyboardType.Text)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    AppTextField(
-                        query = autoScrollOffsetText,
-                        onValueChange = {
-                            setAutoScrolOffsetlValue(it)
-                        },
-                        onConfirm = {
-                            focusManager.clearFocus()
-                        },
-                        hint = "Auto Scroll Offset",
-                        mode = 2,
-                        keyboardAction = KeyboardOptions(imeAction = ImeAction.Done,
-                            keyboardType = KeyboardType.Text)
-                    )
                 }
 
             },
@@ -180,20 +112,6 @@ fun ScrollIndicatorSetting(
                     }
                     Button(onClick = {
                         vm.scrollIndicatorDialogShown = false
-                        try {
-
-                            if (pValue.isNotBlank()) {
-                                vm.saveScrollIndicatorPadding(pValue.toInt())
-                            }
-                        } catch (e: Exception) {
-                        }
-
-                        try {
-                            if (wValue.isNotBlank()) {
-                                vm.saveScrollIndicatorWidth(wValue.toInt())
-                            }
-                        } catch (e: Exception) {
-                        }
 
 
                         try {
@@ -206,19 +124,6 @@ fun ScrollIndicatorSetting(
                         try {
                             if (txtValue.isNotBlank()) {
                                 vm.setReaderTextColor(vm.textColor)
-                            }
-                        } catch (e: Exception) {
-                        }
-
-                        try {
-                            if (autoScrollText.isNotBlank()) {
-                                vm.setAutoScrollIntervalReader(autoScrollText.toLong())
-                            }
-                        } catch (e: Exception) {
-                        }
-                        try {
-                            if (autoScrollOffsetText.isNotBlank()) {
-                                vm.setAutoScrollOffsetReader(autoScrollOffsetText.toInt())
                             }
                         } catch (e: Exception) {
                         }

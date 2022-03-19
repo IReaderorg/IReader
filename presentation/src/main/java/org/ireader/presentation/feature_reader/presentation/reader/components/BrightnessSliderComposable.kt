@@ -1,12 +1,14 @@
 package org.ireader.presentation.feature_reader.presentation.reader.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.width
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Slider
-import androidx.compose.material.SliderDefaults
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Brightness7
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,13 +29,15 @@ fun BrightnessSliderComposable(
     Row(modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically) {
-        CaptionTextComposable(modifier = Modifier.width(100.dp),
-            text = "Brightness",
-            style = MaterialTheme.typography.caption,
-            maxLine = 1)
-        Row(modifier = Modifier.fillMaxWidth(),
+
+        Row(modifier = Modifier
+            .fillMaxWidth()
+            .weight(4F),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically) {
+            Icon(modifier = modifier.weight(1f),
+                imageVector = Icons.Default.LightMode,
+                contentDescription = "less brightness")
             Slider(
                 viewModel.brightness,
                 onValueChange = { viewModel.onEvent(ReaderEvent.ChangeBrightness(it, context)) },
@@ -44,12 +48,32 @@ fun BrightnessSliderComposable(
                 steps = 0,
                 colors = SliderDefaults.colors(
                     thumbColor = MaterialTheme.colors.primary,
-                    activeTrackColor = MaterialTheme.colors.onBackground.copy(alpha = .6f),
-                    inactiveTrackColor = MaterialTheme.colors.onBackground.copy(alpha = .6f),
+                    activeTrackColor = MaterialTheme.colors.primary.copy(alpha = .6f),
+                    inactiveTrackColor = MaterialTheme.colors.onBackground.copy(alpha = .4f),
                 )
 
             )
+            Icon(modifier = modifier.weight(1f),
+                imageVector = Icons.Default.Brightness7,
+                contentDescription = "less brightness")
+        }
+        OutlinedButton(onClick = { viewModel.toggleAutoBrightness() },
+            modifier = Modifier
+                .weight(1F)
+                .padding(8.dp),
+            border = BorderStroke(
+                ButtonDefaults.OutlinedBorderSize,
+                if (viewModel.autoBrightnessMode) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground
+            ),
+            colors = ButtonDefaults.outlinedButtonColors(
+                backgroundColor = MaterialTheme.colors.background,
+                contentColor = if (viewModel.autoBrightnessMode) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground)) {
+            CaptionTextComposable(
+                modifier = Modifier.align(Alignment.CenterVertically),
+                color = if (viewModel.autoBrightnessMode) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground,
+                text = "Auto",
+                style = MaterialTheme.typography.caption,
+                maxLine = 1)
         }
     }
-
 }

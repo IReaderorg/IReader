@@ -35,6 +35,7 @@
         android:usesCleartextTraffic="true">
         <activity
             android:name="org.ireader.infinity.presentation.MainActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="true"
             android:theme="@style/Theme.ISplash">
             <intent-filter>

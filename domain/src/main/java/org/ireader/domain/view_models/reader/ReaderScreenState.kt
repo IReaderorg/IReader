@@ -98,7 +98,8 @@ open class ReaderScreenPreferencesStateImpl @Inject constructor() : ReaderScreen
     override var scrollIndicatorDialogShown by mutableStateOf<Boolean>(false)
     override var autoScrollOffset by mutableStateOf<Int>(500)
     override var autoScrollInterval by mutableStateOf<Long>(2000)
-    override var autpScrollMode by mutableStateOf<Boolean>(false)
+    override var autoScrollMode by mutableStateOf<Boolean>(false)
+    override var autoBrightnessMode by mutableStateOf<Boolean>(false)
 
 }
 
@@ -123,7 +124,9 @@ interface ReaderScreenPreferencesState {
     var scrollIndicatorDialogShown: Boolean
     var autoScrollOffset: Int
     var autoScrollInterval: Long
-    var autpScrollMode: Boolean
+    var autoScrollMode: Boolean
+    var autoBrightnessMode: Boolean
+
 }
 
 sealed class Orientation(val index: Int) {

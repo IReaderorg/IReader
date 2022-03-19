@@ -106,6 +106,7 @@ class ReaderScreenViewModel @Inject constructor(
         scrollIndicatorWith = readerUseCases.scrollIndicatorUseCase.readWidth()
         autoScrollInterval = readerUseCases.autoScrollMode.readInterval()
         autoScrollOffset = readerUseCases.autoScrollMode.readOffset()
+        autoBrightnessMode = readerUseCases.brightnessStateUseCase.readAutoBrightness()
     }
 
     fun onEvent(event: ReaderEvent) {
@@ -296,15 +297,22 @@ class ReaderScreenViewModel @Inject constructor(
 
 
     fun readBrightness(context: Context) {
-        val brightness = readerUseCases.brightnessStateUseCase.read()
+        val brightness = readerUseCases.brightnessStateUseCase.readBrightness()
         val activity = context.findComponentActivity()
         if (activity != null) {
             val window = activity.window
-            val layoutParams: WindowManager.LayoutParams = window.attributes
-            layoutParams.screenBrightness = brightness
-            window.attributes = layoutParams
-            this.brightness = brightness
-
+            if (!autoBrightnessMode) {
+                val layoutParams: WindowManager.LayoutParams = window.attributes
+                layoutParams.screenBrightness = brightness
+                window.attributes = layoutParams
+                this.brightness = brightness
+            } else {
+                val layoutParams: WindowManager.LayoutParams = window.attributes
+                showSystemBars(context = context)
+                layoutParams.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
+                activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+                window.attributes = layoutParams
+            }
         }
     }
 
@@ -359,15 +367,38 @@ class ReaderScreenViewModel @Inject constructor(
         readerUseCases.textColorUseCase.save(color.toArgb())
     }
 
-    fun setAutoScrollIntervalReader(value: Long) {
-        //readerUseCases.textColorUseCase.save(color.toArgb())
-        autoScrollInterval = value
-        readerUseCases.autoScrollMode.saveInterval(value)
+    fun setAutoScrollIntervalReader(increase: Boolean) {
+        if (increase) {
+            autoScrollInterval += 500
+            readerUseCases.autoScrollMode.saveInterval(autoScrollInterval + 500)
+        } else {
+            autoScrollInterval -= 500
+            readerUseCases.autoScrollMode.saveInterval(autoScrollInterval - 500)
+        }
+
     }
 
-    fun setAutoScrollOffsetReader(value: Int) {
-        autoScrollOffset = value
-        readerUseCases.autoScrollMode.saveOffset(value)
+    fun setAutoScrollOffsetReader(increase: Boolean) {
+        if (increase) {
+            autoScrollOffset += 50
+            readerUseCases.autoScrollMode.saveOffset(autoScrollOffset + 50)
+        } else {
+            autoScrollOffset -= 50
+            readerUseCases.autoScrollMode.saveOffset(autoScrollOffset - 50)
+        }
+
+
+    }
+
+    fun toggleAutoBrightness() {
+        if (autoBrightnessMode) {
+            autoBrightnessMode = false
+            readerUseCases.brightnessStateUseCase.saveAutoBrightness(false)
+        } else {
+            autoBrightnessMode = true
+            readerUseCases.brightnessStateUseCase.saveAutoBrightness(true)
+        }
+
     }
 
     @SuppressLint("SourceLockedOrientationActivity")
@@ -403,12 +434,26 @@ class ReaderScreenViewModel @Inject constructor(
         }
     }
 
-    fun saveScrollIndicatorPadding(value: Int) {
-        readerUseCases.scrollIndicatorUseCase.savePadding(value)
+    fun saveScrollIndicatorPadding(increase: Boolean) {
+        if (increase) {
+            scrollIndicatorPadding += 1
+
+            readerUseCases.scrollIndicatorUseCase.savePadding(scrollIndicatorPadding + 1)
+        } else {
+            scrollIndicatorPadding -= 1
+            readerUseCases.scrollIndicatorUseCase.savePadding(scrollIndicatorPadding - 1)
+        }
+
     }
 
-    fun saveScrollIndicatorWidth(value: Int) {
-        readerUseCases.scrollIndicatorUseCase.saveWidth(value)
+    fun saveScrollIndicatorWidth(increase: Boolean) {
+        if (increase) {
+            scrollIndicatorWith += 1
+            readerUseCases.scrollIndicatorUseCase.saveWidth(scrollIndicatorWith + 1)
+        } else {
+            scrollIndicatorWith -= 1
+            readerUseCases.scrollIndicatorUseCase.saveWidth(scrollIndicatorWith - 1)
+        }
     }
 
     fun readScrollIndicatorWidth(): Int {
@@ -441,7 +486,7 @@ class ReaderScreenViewModel @Inject constructor(
     }
 
     fun toggleAutoScrollMode() {
-        autpScrollMode = !autpScrollMode
+        autoScrollMode = !autoScrollMode
     }
 
     fun saveParagraphIndent(isIncreased: Boolean) {
@@ -483,7 +528,7 @@ class ReaderScreenViewModel @Inject constructor(
             val layoutParams: WindowManager.LayoutParams = window.attributes
             layoutParams.screenBrightness = brightness
             window.attributes = layoutParams
-            readerUseCases.brightnessStateUseCase.save(brightness)
+            readerUseCases.brightnessStateUseCase.saveBrightness(brightness)
         }
     }
 
@@ -500,7 +545,8 @@ class ReaderScreenViewModel @Inject constructor(
      */
     fun getCurrentIndexOfChapter(chapter: Chapter): Int {
 
-        val selectedChapter = state.stateChapters.indexOfFirst { it.id == chapter.id }
+        val selectedChapter =
+            state.stateChapters.indexOfFirst { it.id == chapter.id && it.title == chapter.title }
         return if (selectedChapter != -1) selectedChapter else 0
     }
 
