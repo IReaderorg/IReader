@@ -1,4 +1,9 @@
-//package org.ireader.core.io
+package org.ireader.core.io
+
+
+import java.io.File
+
+
 //
 //import okio.BufferedSink
 //import okio.FileSystem
@@ -19,3 +24,7 @@
 ////suspend fun <T> FileSystem.withAsyncGzipSource(path: Path, block: (BufferedSource) -> T): T {
 ////    return T
 ////}
+
+fun File.calculateSizeRecursively(): Long {
+    return walkBottomUp().fold(0L) { acc, file -> acc + file.length() }
+}

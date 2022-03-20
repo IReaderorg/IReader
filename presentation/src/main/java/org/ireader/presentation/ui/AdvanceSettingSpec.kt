@@ -5,11 +5,11 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import com.google.accompanist.pager.ExperimentalPagerApi
-import org.ireader.presentation.feature_settings.presentation.setting.dns.DnsOverHttpScreen
+import org.ireader.presentation.feature_settings.presentation.setting.dns.AdvanceSettings
 
-object DnsOverHttpSettingSpec : ScreenSpec {
+object AdvanceSettingSpec : ScreenSpec {
 
-    override val navHostRoute: String = "dnh_over_http_route"
+    override val navHostRoute: String = "advance_setting_route"
 
 
     @OptIn(ExperimentalPagerApi::class, androidx.compose.animation.ExperimentalAnimationApi::class,
@@ -20,7 +20,7 @@ object DnsOverHttpSettingSpec : ScreenSpec {
         navBackStackEntry: NavBackStackEntry,
         scaffoldState: ScaffoldState,
     ) {
-        DnsOverHttpScreen(navController = navController)
+        AdvanceSettings(navController = navController)
     }
 
 }

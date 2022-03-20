@@ -18,7 +18,7 @@ sealed interface ScreenSpec {
             SettingScreenSpec,
             AppearanceScreenSpec,
             AboutInfoScreenSpec,
-            DnsOverHttpSettingSpec,
+            AdvanceSettingSpec,
             BookDetailScreenSpec,
             DownloaderScreenSpec,
             ChapterScreenSpec,

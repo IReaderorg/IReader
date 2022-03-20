@@ -15,6 +15,8 @@ interface LocalChapterRepository {
         chapterId: Long,
     ): Chapter?
 
+    suspend fun findAllInLibraryChapter(): List<Chapter>
+
     fun subscribeChaptersByBookId(
         bookId: Long,
         isAsc: Boolean = true,

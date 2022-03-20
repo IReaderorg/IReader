@@ -67,17 +67,9 @@ fun ReadingScreen(
         }
     }
     LaunchedEffect(key1 = scaffoldState.drawerState.targetValue) {
-//        if (scaffoldState.drawerState.targetValue == DrawerValue.Open && vm.stateChapters.isNotEmpty()) {
-//            drawerScrollState.animateScrollToItem(vm.getCurrentIndexOfChapter(vm.currentChapterIndex), -500)
-//        }
-    }
-    LaunchedEffect(key1 = scaffoldState.drawerState.targetValue) {
         if (chapter != null && scaffoldState.drawerState.targetValue == DrawerValue.Open && vm.stateChapters.isNotEmpty()) {
             drawerScrollState.scrollToItem(vm.getCurrentIndexOfChapter(chapter))
         }
-//        if (scaffoldState.drawerState.targetValue == DrawerValue.Open && vm.stateChapters.isNotEmpty()) {
-//            drawerScrollState.animateScrollToItem(vm.getCurrentIndexOfChapter(vm.stateChapter), -500)
-//        }
     }
     LaunchedEffect(key1 = vm.currentChapterIndex) {
         val index = vm.currentChapterIndex
@@ -122,7 +114,7 @@ fun ReadingScreen(
     LaunchedEffect(key1 = true) {
         vm.readOrientation(context)
         vm.readBrightness(context)
-        vm.hideSystemBars(context)
+        vm.readImmersiveMode(context)
 
         vm.eventFlow.collectLatest { event ->
             when (event) {

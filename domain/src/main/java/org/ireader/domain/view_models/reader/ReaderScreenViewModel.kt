@@ -489,6 +489,25 @@ class ReaderScreenViewModel @Inject constructor(
         autoScrollMode = !autoScrollMode
     }
 
+    fun toggleImmersiveMode(context: Context) {
+        immersiveMode = !immersiveMode
+        readerUseCases.immersiveModeUseCase.save(immersiveMode)
+        if (immersiveMode) {
+            hideSystemBars(context = context)
+        } else {
+            showSystemBars(context)
+        }
+    }
+
+    fun readImmersiveMode(context: Context) {
+        immersiveMode = readerUseCases.immersiveModeUseCase.read()
+        if (immersiveMode) {
+            hideSystemBars(context = context)
+        } else {
+            showSystemBars(context)
+        }
+    }
+
     fun saveParagraphIndent(isIncreased: Boolean) {
         val paragraphsIndent = prefState.paragraphsIndent
         if (isIncreased) {
@@ -572,7 +591,7 @@ class ReaderScreenViewModel @Inject constructor(
 
     fun hideSystemBars(context: Context) {
         val activity = context.findComponentActivity()
-        if (activity != null) {
+        if (activity != null && immersiveMode) {
             val window = activity.window
             val windowInsetsController =
                 ViewCompat.getWindowInsetsController(window.decorView) ?: return
@@ -580,7 +599,8 @@ class ReaderScreenViewModel @Inject constructor(
             windowInsetsController.systemBarsBehavior =
                 WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             // Hide both the status bar and the navigation bar
-            windowInsetsController.hide(WindowInsetsCompat.Type.statusBars())
+            windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+
             //  windowInsetsController.hide(WindowInsetsCompat.Type.navigationBars())
         }
     }
@@ -595,9 +615,10 @@ class ReaderScreenViewModel @Inject constructor(
             windowInsetsController.systemBarsBehavior =
                 WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 
+
             // Hide both the status bar and the navigation bar
             //windowInsetsController.show(WindowInsetsCompat.Type.systemBars())
-            windowInsetsController.show(WindowInsetsCompat.Type.statusBars())
+            windowInsetsController.show(WindowInsetsCompat.Type.systemBars())
         }
     }
 

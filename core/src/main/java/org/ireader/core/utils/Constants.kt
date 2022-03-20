@@ -55,7 +55,8 @@ object Constants {
     const val LAST_CHAPTER = -2L
     const val NO_VALUE = 0L
 
-    const val FIVE_MIN = 300000L
+    const val BACKUP_CODE = 666
+    const val RESTORE_CODE = 665
     const val PARSE_CONTENT = "PARSE_CONTENT"
     const val PARSE_DETAIL = "PARSE_DETAIL"
     const val PARSE_CHAPTERS = "PARSE_CHAPTERS"

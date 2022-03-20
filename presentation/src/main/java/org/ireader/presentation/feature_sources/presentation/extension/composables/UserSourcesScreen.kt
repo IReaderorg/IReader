@@ -51,7 +51,7 @@ fun UserSourcesScreen(
         kotlin.runCatching {
             if (state.pinnedCatalogs.isNotEmpty()) {
                 item {
-                    CatalogsSection(
+                    TextSection(
                         text = "Pinned",
                     )
                 }
@@ -63,7 +63,7 @@ fun UserSourcesScreen(
             if (state.unpinnedCatalogs.isNotEmpty()) {
                 for (lang in langs) {
                     item {
-                        CatalogsSection(
+                        TextSection(
                             text = lang,
                         )
                     }

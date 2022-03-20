@@ -70,7 +70,7 @@ fun RemoteSourcesScreen(
             horizontalAlignment = Alignment.CenterHorizontally) {
             if (all.isNotEmpty()) {
                 item {
-                    CatalogsSection(
+                    TextSection(
                         text = "Installed",
                     )
                 }
@@ -82,7 +82,7 @@ fun RemoteSourcesScreen(
             }
             if (state.remoteCatalogs.isNotEmpty()) {
                 item {
-                    CatalogsSection(
+                    TextSection(
                         text = "Available",
                     )
                 }

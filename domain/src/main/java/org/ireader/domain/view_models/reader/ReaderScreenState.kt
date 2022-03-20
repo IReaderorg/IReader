@@ -100,6 +100,7 @@ open class ReaderScreenPreferencesStateImpl @Inject constructor() : ReaderScreen
     override var autoScrollInterval by mutableStateOf<Long>(2000)
     override var autoScrollMode by mutableStateOf<Boolean>(false)
     override var autoBrightnessMode by mutableStateOf<Boolean>(false)
+    override var immersiveMode by mutableStateOf<Boolean>(false)
 
 }
 
@@ -126,6 +127,7 @@ interface ReaderScreenPreferencesState {
     var autoScrollInterval: Long
     var autoScrollMode: Boolean
     var autoBrightnessMode: Boolean
+    var immersiveMode: Boolean
 
 }
 

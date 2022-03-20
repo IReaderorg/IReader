@@ -50,7 +50,8 @@ fun BrightnessSliderComposable(
                     thumbColor = MaterialTheme.colors.primary,
                     activeTrackColor = MaterialTheme.colors.primary.copy(alpha = .6f),
                     inactiveTrackColor = MaterialTheme.colors.onBackground.copy(alpha = .4f),
-                )
+                ),
+                enabled = !viewModel.autoBrightnessMode
 
             )
             Icon(modifier = modifier.weight(1f),
@@ -66,11 +67,11 @@ fun BrightnessSliderComposable(
                 if (viewModel.autoBrightnessMode) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground
             ),
             colors = ButtonDefaults.outlinedButtonColors(
-                backgroundColor = MaterialTheme.colors.background,
-                contentColor = if (viewModel.autoBrightnessMode) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground)) {
+                backgroundColor = if (viewModel.autoBrightnessMode) MaterialTheme.colors.primary else MaterialTheme.colors.background,
+            )) {
             CaptionTextComposable(
                 modifier = Modifier.align(Alignment.CenterVertically),
-                color = if (viewModel.autoBrightnessMode) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground,
+                color = if (viewModel.autoBrightnessMode) MaterialTheme.colors.onPrimary else MaterialTheme.colors.onBackground,
                 text = "Auto",
                 style = MaterialTheme.typography.caption,
                 maxLine = 1)

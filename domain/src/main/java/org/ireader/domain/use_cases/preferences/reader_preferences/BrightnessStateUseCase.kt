@@ -37,6 +37,19 @@ class ScrollModeUseCase @Inject constructor(
 
 }
 
+class ImmersiveModeUseCase @Inject constructor(
+    private val appPreferences: AppPreferences,
+) {
+    fun save(mode: Boolean) {
+        return appPreferences.immersiveMode().set(mode)
+    }
+
+    fun read(): Boolean {
+        return appPreferences.immersiveMode().get()
+    }
+
+}
+
 class ScrollIndicatorUseCase @Inject constructor(
     private val appPreferences: AppPreferences,
 ) {

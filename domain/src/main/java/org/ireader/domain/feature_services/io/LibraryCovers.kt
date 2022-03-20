@@ -25,5 +25,9 @@ class LibraryCovers @Inject constructor(
         find(mangaId).setLastModified(0)
     }
 
+    fun deleteAll() {
+        fileSystem.delete(path)
+    }
+
 }
 

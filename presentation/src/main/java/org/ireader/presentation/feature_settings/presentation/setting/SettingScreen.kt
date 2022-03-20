@@ -8,10 +8,10 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,8 +27,8 @@ import org.ireader.core.utils.Constants
 import org.ireader.presentation.presentation.ToolBar
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
 import org.ireader.presentation.ui.AboutInfoScreenSpec
+import org.ireader.presentation.ui.AdvanceSettingSpec
 import org.ireader.presentation.ui.AppearanceScreenSpec
-import org.ireader.presentation.ui.DnsOverHttpSettingSpec
 import org.ireader.presentation.ui.DownloaderScreenSpec
 
 @Composable
@@ -92,7 +92,7 @@ sealed class SettingItems(
         SettingItems("Appearance", Icons.Default.Palette, AppearanceScreenSpec.navHostRoute)
 
     object DnsOverHttp :
-        SettingItems("DnsOverHttp", Icons.Default.Dns, DnsOverHttpSettingSpec.navHostRoute)
+        SettingItems("Advance Setting", Icons.Default.Settings, AdvanceSettingSpec.navHostRoute)
 
     object About : SettingItems("About", Icons.Default.Info, AboutInfoScreenSpec.navHostRoute)
 }

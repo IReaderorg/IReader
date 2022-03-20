@@ -19,6 +19,9 @@ interface LibraryChapterDao {
         chapterId: Long,
     ): Chapter?
 
+    @Query("SELECT * FROM chapter WHERE inLibrary = 1")
+    suspend fun findAllInLibraryChapters(): List<Chapter>
+
 
     @Query("""SELECT * FROM chapter WHERE bookId= :bookId ORDER BY
         CASE WHEN :isAsc = 1 THEN id END ASC,

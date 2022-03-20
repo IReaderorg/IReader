@@ -15,4 +15,5 @@ data class ReaderPrefUseCases @Inject constructor(
     val orientationUseCase: OrientationUseCase,
     val scrollIndicatorUseCase: ScrollIndicatorUseCase,
     val textColorUseCase: TextColorUseCase,
+    val immersiveModeUseCase: ImmersiveModeUseCase,
 )

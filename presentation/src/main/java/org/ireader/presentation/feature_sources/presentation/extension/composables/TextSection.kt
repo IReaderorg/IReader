@@ -13,8 +13,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun CatalogsSection(
+fun TextSection(
     text: String,
+    toUpper: Boolean = true,
 ) {
     Row(
         modifier = Modifier
@@ -23,7 +24,7 @@ fun CatalogsSection(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text.uppercase(),
+            if (toUpper) text.uppercase() else text,
             style = MaterialTheme.typography.subtitle2,
             color = LocalContentColor.current.copy(alpha = ContentAlpha.medium)
         )

@@ -24,3 +24,10 @@ class FindChapterById @Inject constructor(private val localChapterRepository: Lo
         return localChapterRepository.findChapterById(chapterId = chapterId)
     }
 }
+
+class FindAllInLibraryChapters @Inject constructor(private val localChapterRepository: LocalChapterRepository) {
+    suspend operator fun invoke(
+    ): List<Chapter> {
+        return localChapterRepository.findAllInLibraryChapter()
+    }
+}
