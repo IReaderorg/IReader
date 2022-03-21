@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
@@ -57,25 +58,42 @@ fun LinearBookItem(
 
 @Composable
 fun LinearListDisplay(
-    books: LazyPagingItems<Book>,
+    lazyBooks: LazyPagingItems<Book>,
+    books: List<Book>,
     onClick: (book: Book) -> Unit,
     scrollState: LazyListState = rememberLazyListState(),
     isLocal: Boolean,
     goToLatestChapter: (book: Book) -> Unit,
 ) {
     LazyColumn(modifier = Modifier.fillMaxSize(), state = scrollState) {
-        items(items = books) { book ->
-            if (book != null) {
-                LinearBookItem(
-                    title = book.title,
-                    book = book,
-                    modifier = Modifier.clickable {
-                        onClick(book)
-                    }
-                )
-            }
+        if (books.isEmpty()) {
+            items(lazyBooks) { book ->
+                if (book != null) {
+                    LinearBookItem(
+                        title = book.title,
+                        book = book,
+                        modifier = Modifier.clickable {
+                            onClick(book)
+                        }
+                    )
+                }
 
+            }
+        } else {
+            items(items = books) { book ->
+                if (book != null) {
+                    LinearBookItem(
+                        title = book.title,
+                        book = book,
+                        modifier = Modifier.clickable {
+                            onClick(book)
+                        }
+                    )
+                }
+
+            }
         }
+
 
     }
 }

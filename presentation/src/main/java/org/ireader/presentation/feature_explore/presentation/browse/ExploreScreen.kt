@@ -185,7 +185,7 @@ fun ExploreScreen(
                     })
                 if (result) {
                     LayoutComposable(
-                        books = books,
+                        lazyBook = books,
                         layout = vm.layout,
                         scrollState = scrollState,
                         source = source,

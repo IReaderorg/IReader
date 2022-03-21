@@ -21,7 +21,7 @@ fun DisplayScreen(viewModel: LibraryViewModel) {
         layouts.forEach { layout ->
             RadioButtonWithTitleComposable(
                 text = layout.title,
-                selected = viewModel.state.layout == layout.layout,
+                selected = viewModel.layout == layout.layout,
                 onClick = {
                     viewModel.onEvent(LibraryEvents.OnLayoutTypeChange(layout))
                 }

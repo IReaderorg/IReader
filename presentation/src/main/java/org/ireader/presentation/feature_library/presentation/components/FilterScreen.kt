@@ -23,8 +23,8 @@ fun FilterScreen(viewModel: LibraryViewModel) {
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Top) {
         CheckBoxWithText("Unread",
-            viewModel.state.unreadFilter.index == FilterType.Unread.index) {
-            if (viewModel.state.unreadFilter == FilterType.Unread) {
+            viewModel.unreadFilter.index == FilterType.Unread.index) {
+            if (viewModel.unreadFilter == FilterType.Unread) {
                 viewModel.enableUnreadFilter(FilterType.Disable)
             } else {
                 viewModel.enableUnreadFilter(FilterType.Unread)

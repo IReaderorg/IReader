@@ -1,15 +1,14 @@
 package org.ireader.domain.repository
 
-import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
 import org.ireader.domain.feature_services.io.HistoryWithRelations
 import org.ireader.domain.models.entities.History
 
 interface HistoryRepository {
-    suspend fun findHistory(id: Long): History
+    suspend fun findHistory(id: Long): History?
 
-
-    fun findHistoriesPaging(): Flow<PagingData<HistoryWithRelations>>
+    suspend fun findHistoryByBookId(bookId: Long): History?
+    fun findHistoriesPaging(): Flow<List<HistoryWithRelations>>
 
 
     suspend fun findHistories(): List<History>

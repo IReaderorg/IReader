@@ -1,6 +1,5 @@
 package org.ireader.data.local.dao
 
-import androidx.paging.PagingSource
 import androidx.room.*
 import org.ireader.domain.feature_services.io.HistoryWithRelations
 import org.ireader.domain.models.entities.History
@@ -8,8 +7,11 @@ import org.ireader.domain.models.entities.History
 @Dao
 interface HistoryDao {
 
-    @Query("SELECT * FROM history WHERE chapterId = :id")
-    suspend fun findHistory(id: Long): History
+    @Query("SELECT * FROM history WHERE chapterId = :id LIMIT 1")
+    suspend fun findHistory(id: Long): History?
+
+    @Query("SELECT * FROM history WHERE bookId = :bookId LIMIT 1")
+    suspend fun findHistoryByBookId(bookId: Long): History?
 
     @Query("SELECT * FROM history")
     suspend fun findHistories(): List<History>
@@ -21,7 +23,7 @@ interface HistoryDao {
     JOIN library ON history.bookId = library.id
     JOIN chapter ON history.chapterId = chapter.id
     ORDER BY readAt DESC""")
-    fun findHistoriesPaging(): PagingSource<Int, HistoryWithRelations>
+    fun findHistoriesPaging(): kotlinx.coroutines.flow.Flow<List<HistoryWithRelations>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertHistory(history: History): Long

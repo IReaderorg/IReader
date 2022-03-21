@@ -19,7 +19,12 @@ interface LibraryChapterDao {
         chapterId: Long,
     ): Chapter?
 
-    @Query("SELECT * FROM chapter WHERE inLibrary = 1")
+    @Query("""
+        SELECT *,library.favorite
+FROM chapter 
+ JOIN library ON library.id = chapter.bookId 
+WHERE library.favorite = 1
+    """)
     suspend fun findAllInLibraryChapters(): List<Chapter>
 
 
@@ -60,10 +65,23 @@ interface LibraryChapterDao {
     ): PagingSource<Int, Chapter>
 
 
-    @Query("SELECT * from chapter WHERE bookId == :bookId AND lastRead = (SELECT MAX(lastRead) FROM chapter WHERE bookId == :bookId) LIMIT 1")
+    @Query("""
+        SELECT *, history.readAt as lastRead
+        from chapter 
+        JOIN history ON history.bookId = chapter.bookId
+        GROUP BY chapterId
+        HAVING chapter.bookId == :bookId AND lastRead = (SELECT MAX(lastRead) FROM chapter WHERE bookId == :bookId)
+        LIMIT 1
+    """)
     fun subscribeLastReadChapter(bookId: Long): Flow<Chapter?>
 
-    @Query("SELECT * from chapter WHERE bookId == :bookId AND lastRead = (SELECT MAX(lastRead) FROM chapter WHERE bookId == :bookId) LIMIT 1")
+    @Query("""
+        SELECT chapter.* , MAX(history.readAt) as lastRead, history.*
+        from chapter 
+         LEFT JOIN history ON history.bookId = chapter.bookId
+        GROUP BY chapter.id
+        HAVING chapter.bookId == :bookId  AND chapter.id = history.chapterId
+    """)
     suspend fun findLastReadChapter(bookId: Long): Chapter?
 
     @Query("SELECT * from chapter WHERE bookId = :bookId LIMIT 1")
@@ -93,6 +111,14 @@ interface LibraryChapterDao {
     @Query("DELETE FROM chapter ")
     suspend fun deleteAllChapters()
 
-    @Query("DELETE FROM chapter WHERE inLibrary = 0")
+    @Query("""
+        DELETE FROM chapter
+        WHERE bookId IN (
+        SELECT chapter.ROWID FROM chapter a
+        INNER JOIN library b
+         ON (a.bookId=b.id)
+         WHERE b.favorite = 1
+        )
+    """)
     suspend fun deleteNotInLibraryChapters()
 }

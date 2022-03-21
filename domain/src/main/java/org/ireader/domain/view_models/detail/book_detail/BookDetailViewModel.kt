@@ -24,6 +24,7 @@ import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.entities.updateBook
 import org.ireader.domain.use_cases.fetchers.FetchUseCase
+import org.ireader.domain.use_cases.history.HistoryUseCase
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
@@ -41,6 +42,7 @@ class BookDetailViewModel @Inject constructor(
     private val getChapterUseCase: LocalGetChapterUseCase,
     private val getBookUseCases: org.ireader.domain.use_cases.local.LocalGetBookUseCases,
     private val remoteUseCases: RemoteUseCases,
+    private val historyUseCase: HistoryUseCase,
     private val deleteUseCase: DeleteUseCase,
     private val fetchUseCase: FetchUseCase,
     savedStateHandle: SavedStateHandle,
@@ -84,6 +86,10 @@ class BookDetailViewModel @Inject constructor(
         }
     }
 
+    suspend fun getHistory(bookId: Long) {
+        lastRead = historyUseCase.findHistoryByBookId(bookId)?.readAt
+    }
+
     fun onEvent(event: BookDetailEvent) {
         when (event) {
             is BookDetailEvent.ToggleSummary -> {
@@ -100,6 +106,7 @@ class BookDetailViewModel @Inject constructor(
         viewModelScope.launch {
             val book = getBookUseCases.findBookById(bookId)
             if (book != null) {
+                getHistory(book.id)
                 toggleLocalLoading(false)
                 clearBookError()
                 setDetailBook(book)
@@ -218,7 +225,7 @@ class BookDetailViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             deleteUseCase.deleteChaptersByBookId(bookId)
             localInsertUseCases.insertChapters(chapterState.chapters.map {
-                it.copy(bookId = bookId, inLibrary = inLibrary)
+                it.copy(bookId = bookId)
             })
         }
     }

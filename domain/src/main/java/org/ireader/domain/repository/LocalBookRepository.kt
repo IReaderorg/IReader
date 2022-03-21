@@ -36,6 +36,15 @@ interface LocalBookRepository {
         unreadFilter: Boolean,
     ): PagingSource<Int, Book>
 
+    fun subscribeAllInLibrary(
+        sortByAbs: Boolean,
+        sortByDateAdded: Boolean,
+        sortByLastRead: Boolean,
+        sortByTotalChapter: Boolean,
+        unread: Boolean,
+        isAsc: Boolean,
+    ): Flow<List<Book>>
+
 
     fun getAllExploreBookPagingSource(): PagingSource<Int, Book>
 

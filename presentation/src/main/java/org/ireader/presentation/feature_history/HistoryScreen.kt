@@ -7,7 +7,6 @@ import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.paging.compose.collectAsLazyPagingItems
 import org.ireader.core.utils.convertLongToTime
 import org.ireader.domain.feature_services.io.HistoryWithRelations
 import org.ireader.domain.models.entities.History
@@ -22,9 +21,9 @@ fun HistoryScreen(
     navController: NavController,
     vm: HistoryViewModel = hiltViewModel(),
 ) {
-    val histories = vm.history.collectAsLazyPagingItems()
+    val histories = vm.history
     val times =
-        histories.itemSnapshotList.items.map { convertLongToTime(it.readAt, "HH:mm") }.distinct()
+        histories.map { convertLongToTime(it.readAt, "HH:mm") }.distinct()
     val historyItem: LazyListScope.(HistoryWithRelations) -> Unit = { history ->
         item {
             HistoryItem(history = history,
@@ -65,7 +64,7 @@ fun HistoryScreen(
                         text = time,
                     )
                 }
-                for (history in histories.itemSnapshotList.items.filter {
+                for (history in histories.filter {
                     convertLongToTime(it.readAt,
                         format = "HH:mm") == time
                 }) {

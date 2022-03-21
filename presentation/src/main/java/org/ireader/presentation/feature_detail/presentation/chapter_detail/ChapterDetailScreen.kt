@@ -1,6 +1,5 @@
 package org.ireader.presentation.feature_detail.presentation.chapter_detail
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -8,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
@@ -31,16 +31,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import androidx.paging.LoadState
-import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.items
 import org.ireader.core.utils.Constants
 import org.ireader.domain.view_models.detail.chapter_detail.ChapterDetailEvent
 import org.ireader.domain.view_models.detail.chapter_detail.ChapterDetailViewModel
 import org.ireader.presentation.feature_settings.presentation.webview.CustomTextField
 import org.ireader.presentation.presentation.components.CenterTopAppBar
 import org.ireader.presentation.presentation.components.ChapterListItemComposable
-import org.ireader.presentation.presentation.components.handlePagingChapterResult
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.ErrorTextWithEmojis
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
@@ -57,7 +53,6 @@ fun ChapterDetailScreen(
     navController: NavController = rememberNavController(),
 ) {
 
-    val chapters = viewModel.chapters.collectAsLazyPagingItems()
     val book = viewModel.book
     val scrollState = rememberLazyListState()
     val context = LocalContext.current
@@ -153,83 +148,105 @@ fun ChapterDetailScreen(
                 }
             )
             Box(modifier.fillMaxSize()) {
+                LazyColumn(modifier = Modifier
+                    .fillMaxSize(), state = scrollState) {
 
-                val result = handlePagingChapterResult(books = chapters, onEmptyResult = {
+
+                    items(items = viewModel.stateChapters) { chapter ->
+                        if (chapter != null) {
+                            ChapterListItemComposable(modifier = modifier,
+                                chapter = chapter, goTo = {
+                                    if (book != null) {
+                                        navController.navigate(ReaderScreenSpec.buildRoute(
+                                            bookId = book.id,
+                                            sourceId = book.sourceId,
+                                            chapterId = chapter.id,
+                                        ))
+                                    }
+                                },
+                                selected = chapter.id == viewModel.lastRead)
+                        }
+                    }
+                }
+                if (viewModel.stateChapters.isEmpty()) {
                     ErrorTextWithEmojis(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(20.dp)
                             .align(Alignment.Center),
-                        error = "There is no chapter."
-                    )
-                })
-                if (result) {
-                    AnimatedContent(chapters.loadState.refresh is LoadState.NotLoading) {
-                        LazyColumn(modifier = Modifier
-                            .fillMaxSize(), state = scrollState) {
-
-
-                            items(items = chapters) { chapter ->
-                                if (chapter != null) {
-                                    ChapterListItemComposable(modifier = modifier,
-                                        chapter = chapter, goTo = {
-                                            if (book != null) {
-                                                navController.navigate(ReaderScreenSpec.buildRoute(
-                                                    bookId = book.id,
-                                                    sourceId = book.sourceId,
-                                                    chapterId = chapter.id,
-                                                ))
-                                            }
-                                        },
-                                        selected = if (chapters.itemSnapshotList.items.isNotEmpty()) {
-                                            chapter.id == chapters.itemSnapshotList.filter { it?.lastRead != 0L }
-                                                .maxByOrNull {
-                                                    it?.lastRead ?: 0L
-                                                }?.id
-                                        } else false
-                                    )
-                                }
-                            }
-                        }
-                    }
+                        error = "There is no chapter.")
                 }
+
+//                val result = handlePagingChapterResult(books = chapters, onEmptyResult = {
+//                    ErrorTextWithEmojis(
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .padding(20.dp)
+//                            .align(Alignment.Center),
+//                        error = "There is no chapter."
+//                    )
+//                })
+//                if (result) {
+//                    AnimatedContent(chapters.loadState.refresh is LoadState.NotLoading) {
+//                        LazyColumn(modifier = Modifier
+//                            .fillMaxSize(), state = scrollState) {
+//
+//
+//                            items(items = chapters) { chapter ->
+//                                if (chapter != null) {
+//                                    ChapterListItemComposable(modifier = modifier,
+//                                        chapter = chapter, goTo = {
+//                                            if (book != null) {
+//                                                navController.navigate(ReaderScreenSpec.buildRoute(
+//                                                    bookId = book.id,
+//                                                    sourceId = book.sourceId,
+//                                                    chapterId = chapter.id,
+//                                                ))
+//                                            }
+//                                        },
+//                                        selected = chapter.id == viewModel.lastRead)
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
             }
         }
     }
-}
 
-@Composable
-fun Modifier.simpleVerticalScrollbar(
-    state: LazyListState,
-    width: Dp = 8.dp,
-    color: Color = MaterialTheme.colors.primary,
-): Modifier {
-    val targetAlpha = if (state.isScrollInProgress) 1f else 0f
-    val duration = if (state.isScrollInProgress) 150 else 500
+    @Composable
+    fun Modifier.simpleVerticalScrollbar(
+        state: LazyListState,
+        width: Dp = 8.dp,
+        color: Color = MaterialTheme.colors.primary,
+    ): Modifier {
+        val targetAlpha = if (state.isScrollInProgress) 1f else 0f
+        val duration = if (state.isScrollInProgress) 150 else 500
 
-    val alpha by animateFloatAsState(
-        targetValue = targetAlpha,
-        animationSpec = tween(durationMillis = duration)
-    )
+        val alpha by animateFloatAsState(
+            targetValue = targetAlpha,
+            animationSpec = tween(durationMillis = duration)
+        )
 
-    return drawWithContent {
-        drawContent()
+        return drawWithContent {
+            drawContent()
 
-        val firstVisibleElementIndex = state.layoutInfo.visibleItemsInfo.firstOrNull()?.index
-        val needDrawScrollbar = state.isScrollInProgress || alpha > 0.0f
+            val firstVisibleElementIndex = state.layoutInfo.visibleItemsInfo.firstOrNull()?.index
+            val needDrawScrollbar = state.isScrollInProgress || alpha > 0.0f
 
-        // Draw scrollbar if scrolling or if the animation is still running and lazy column has content
-        if (needDrawScrollbar && firstVisibleElementIndex != null) {
-            val elementHeight = this.size.height / state.layoutInfo.totalItemsCount
-            val scrollbarOffsetY = firstVisibleElementIndex * elementHeight
-            val scrollbarHeight = state.layoutInfo.visibleItemsInfo.size * elementHeight
+            // Draw scrollbar if scrolling or if the animation is still running and lazy column has content
+            if (needDrawScrollbar && firstVisibleElementIndex != null) {
+                val elementHeight = this.size.height / state.layoutInfo.totalItemsCount
+                val scrollbarOffsetY = firstVisibleElementIndex * elementHeight
+                val scrollbarHeight = state.layoutInfo.visibleItemsInfo.size * elementHeight
 
-            drawRect(
-                color = color,
-                topLeft = Offset(this.size.width - width.toPx(), scrollbarOffsetY),
-                size = Size(width.toPx(), scrollbarHeight),
-                alpha = alpha
-            )
+                drawRect(
+                    color = color,
+                    topLeft = Offset(this.size.width - width.toPx(), scrollbarOffsetY),
+                    size = Size(width.toPx(), scrollbarHeight),
+                    alpha = alpha
+                )
+            }
         }
     }
 }

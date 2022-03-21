@@ -48,9 +48,6 @@ fun BookDetailScreenLoadedComposable(
     val fadeInImage by animateFloatAsState(
         if (imageLoaded) 0.2f else 0f, tween(easing = LinearOutSlowInEasing)
     )
-    var isExpandable by remember {
-        mutableStateOf<Boolean?>(null)
-    }
 
     Box(Modifier.height(IntrinsicSize.Min)) {
         Box {

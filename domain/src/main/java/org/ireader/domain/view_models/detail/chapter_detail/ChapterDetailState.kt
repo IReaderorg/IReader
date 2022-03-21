@@ -16,22 +16,22 @@ open class ChapterDetailStateImpl @Inject constructor() : ChapterDetailState {
     override var isAsc by mutableStateOf<Boolean>(true)
     override var error by mutableStateOf<UiText?>(null)
     override var chapterOrderType by mutableStateOf<OrderType>(OrderType.Ascending)
-    override var localChapters by mutableStateOf<List<Chapter>>(emptyList())
     override var reverse by mutableStateOf<Boolean>(false)
     override var currentScrollPosition by mutableStateOf<Int>(0)
     override var query by mutableStateOf<String>("")
+    override var lastRead by mutableStateOf<Long?>(null)
 }
 
 
 interface ChapterDetailState {
     val isLoading: Boolean
-    val stateChapters: List<Chapter>
+    var stateChapters: List<Chapter>
     var book: Book?
     var isAsc: Boolean
     val error: UiText?
     val chapterOrderType: OrderType
-    var localChapters: List<Chapter>
     val reverse: Boolean
     val currentScrollPosition: Int
     var query: String
+    var lastRead: Long?
 }

@@ -42,7 +42,6 @@ open class ReaderScreenStateImpl @Inject constructor() : ReaderScreenState {
     override var enable by mutableStateOf<Boolean>(true)
     override var isDrawerAsc by mutableStateOf<Boolean>(true)
     override var isBookLoaded by mutableStateOf<Boolean>(false)
-    override var isChapterLoaded by mutableStateOf<Boolean>(false)
     override var isReaderModeEnable by mutableStateOf<Boolean>(true)
     override var isSettingModeEnable by mutableStateOf<Boolean>(false)
     override var isMainBottomModeEnable by mutableStateOf<Boolean>(false)
@@ -65,7 +64,6 @@ interface ReaderScreenState {
     var enable: Boolean
     var isDrawerAsc: Boolean
     var isBookLoaded: Boolean
-    var isChapterLoaded: Boolean
     var isReaderModeEnable: Boolean
     var isSettingModeEnable: Boolean
     var isMainBottomModeEnable: Boolean

@@ -1,6 +1,5 @@
 package org.ireader.domain.use_cases.history
 
-import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
 import org.ireader.domain.feature_services.io.HistoryWithRelations
 import org.ireader.domain.models.entities.History
@@ -10,11 +9,15 @@ import javax.inject.Inject
 class HistoryUseCase @Inject constructor(private val historyRepository: HistoryRepository) :
     HistoryRepository {
 
-    override suspend fun findHistory(id: Long): History {
-        return historyRepository.findHistory(id)
+    override suspend fun findHistory(chapterId: Long): History? {
+        return historyRepository.findHistory(chapterId)
     }
 
-    override fun findHistoriesPaging(): Flow<PagingData<HistoryWithRelations>> {
+    override suspend fun findHistoryByBookId(bookId: Long): History? {
+        return historyRepository.findHistoryByBookId(bookId)
+    }
+
+    override fun findHistoriesPaging(): Flow<List<HistoryWithRelations>> {
         return historyRepository.findHistoriesPaging()
     }
 

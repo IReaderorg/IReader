@@ -15,7 +15,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import androidx.paging.compose.collectAsLazyPagingItems
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -51,7 +50,7 @@ fun ReadingScreen(
     swipeState: SwipeRefreshState,
 ) {
 
-    val chapters = vm.chapters.collectAsLazyPagingItems()
+    val chapters = vm.stateChapters
     val scaffoldState = rememberScaffoldState(rememberDrawerState(DrawerValue.Closed))
     val modalState =
         rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
@@ -232,7 +231,9 @@ fun ReadingScreen(
                     modifier = Modifier.statusBarsPadding(),
                     onReverseIcon = {
                         vm.reverseChapters()
-                        vm.getLocalChaptersByPaging(chapter.bookId)
+                        scope.launch {
+                            vm.getLocalChaptersByPaging(chapter.bookId)
+                        }
                     },
                     onChapter = { ch ->
                         vm.getChapter(ch.id,

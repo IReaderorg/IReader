@@ -4,7 +4,6 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import org.ireader.core.utils.Constants
 import org.ireader.domain.models.entities.Chapter
@@ -19,15 +18,12 @@ class SubscribeChaptersByBookId @Inject constructor(private val localChapterRepo
     operator fun invoke(
         bookId: Long,
         isAsc: Boolean = true,
+        query: String,
     ): Flow<List<Chapter>> = flow {
-        try {
-            localChapterRepository.subscribeChaptersByBookId(bookId = bookId, isAsc)
-                .first { chapters ->
-                    emit(chapters)
-                    true
-                }
-        } catch (e: Exception) {
+        localChapterRepository.subscribeChaptersByBookId(bookId = bookId, isAsc).collect { books ->
+            emit(books.filter { it.title.contains(query, ignoreCase = true) })
         }
+
     }
 }
 

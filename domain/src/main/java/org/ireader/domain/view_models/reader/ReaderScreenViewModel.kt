@@ -12,14 +12,10 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.paging.PagingData
-import androidx.paging.cachedIn
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.ireader.core.utils.*
 import org.ireader.core_ui.theme.FontType
 import org.ireader.core_ui.theme.OrientationMode
@@ -40,7 +36,6 @@ import org.ireader.domain.use_cases.remote.RemoteUseCases
 import org.ireader.domain.utils.Resource
 import tachiyomi.source.Source
 import timber.log.Timber
-import java.util.*
 import javax.inject.Inject
 
 
@@ -60,11 +55,6 @@ class ReaderScreenViewModel @Inject constructor(
 
 
 
-
-    private val _chapters = MutableStateFlow<PagingData<Chapter>>(PagingData.empty())
-    val chapters = _chapters
-
-
     init {
         val sourceId = savedStateHandle.get<Long>(NavigationArgs.sourceId.name)
         val chapterId = savedStateHandle.get<Long>(NavigationArgs.chapterId.name)
@@ -74,7 +64,7 @@ class ReaderScreenViewModel @Inject constructor(
             if (source != null) {
                 this.source = source
                 getLocalChaptersByPaging(bookId)
-                getChapters(bookId, source = source)
+                getChapterIndex(source = source)
                 getLocalBookById(bookId, chapterId, source = source)
                 readPreferences()
 
@@ -127,41 +117,11 @@ class ReaderScreenViewModel @Inject constructor(
         }
     }
 
-    private fun getLastChapter(bookId: Long, source: Source) {
-        viewModelScope.launch {
-            val lastChapter = getChapterUseCase.findLastReadChapter(bookId)
-            if (lastChapter != null) {
-                clearError()
-                toggleLoading(false)
-                toggleLocalLoaded(true)
-                setChapter(lastChapter)
-                setPrefScrollPosition(lastChapter.progress)
-                updateLastReadTime(lastChapter)
-                val chapter = state.stateChapter
-                if (chapter != null && chapter.content.joinToString()
-                        .isBlank() && !isRemoteLoading
-                ) {
-                    getReadingContentRemotely(source = source, chapter = chapter)
-                }
-            } else {
-                if (state.stateChapters.isNotEmpty()) {
-                    getChapter(state.stateChapters.first().id, source)
-                } else {
-                    showSnackBar(UiText.StringResource(R.string.there_was_a_problem_in_getting_chapter))
-                }
-                toggleLoading(false)
-                toggleLocalLoaded(false)
-            }
-        }
-    }
 
-
-    private fun getChapters(bookId: Long, source: Source) {
+    private fun getChapterIndex(source: Source) {
         viewModelScope.launch {
-            val chapters = getChapterUseCase.findChaptersByBookId(bookId = bookId)
+            val chapters = stateChapters
             if (chapters.isNotEmpty()) {
-                state.stateChapters = chapters
-                state.isChapterLoaded = true
                 state.currentChapterIndex =
                     stateChapters.indexOfFirst { state.stateChapter?.id == it.id }
 
@@ -174,13 +134,16 @@ class ReaderScreenViewModel @Inject constructor(
 
     fun getChapter(
         chapterId: Long,
+        lastRead: Boolean = false,
         source: Source,
         onGetChapterEnd: () -> Unit = {},
     ) {
         toggleLoading(true)
         toggleLocalLoaded(false)
         viewModelScope.launch {
-            val resultChapter = getChapterUseCase.findChapterById(chapterId = chapterId)
+            val resultChapter = getChapterUseCase.findChapterById(chapterId = chapterId,
+                state.book?.id,
+                lastRead = lastRead)
             if (resultChapter != null) {
                 clearError()
                 setPrefScrollPosition(resultChapter.progress)
@@ -257,14 +220,15 @@ class ReaderScreenViewModel @Inject constructor(
             if (book != null) {
                 setStateChapter(book)
                 toggleBookLoaded(true)
-                withContext(Dispatchers.IO) {
-                    insertBook(book.copy(
-                        lastRead = Calendar.getInstance().timeInMillis))
-                }
+                getChapter(
+                    chapterId,
+                    lastRead = chapterId != Constants.LAST_CHAPTER && chapterId != Constants.NO_VALUE,
+                    source = source,
+                )
                 if (chapterId != Constants.LAST_CHAPTER && chapterId != Constants.NO_VALUE) {
                     getChapter(chapterId, source = source)
                 } else {
-                    getLastChapter(bookId, source = source)
+                    getChapter(chapterId = chapterId, lastRead = true, source = source)
                 }
                 getLocalChaptersByPaging(bookId)
 
@@ -274,12 +238,13 @@ class ReaderScreenViewModel @Inject constructor(
     }
 
     private suspend fun updateLastReadTime(chapter: Chapter) {
-        viewModelScope.launch {
-            insertChapter(chapter.copy(read = true, lastRead = Calendar.getInstance().timeInMillis))
-            historyUseCase.insertHistory(History(bookId = chapter.bookId,
-                chapterId = chapter.id,
-                readAt = currentTimeToLong()))
-        }
+        insertUseCases.insertChapter(
+            chapter = chapter.copy(read = true)
+        )
+        historyUseCase.insertHistory(History(
+            bookId = chapter.bookId,
+            chapterId = chapter.id,
+            readAt = currentTimeToLong()))
     }
 
     fun reverseChapters() {
@@ -290,10 +255,10 @@ class ReaderScreenViewModel @Inject constructor(
     fun getLocalChaptersByPaging(bookId: Long) {
         getChapterJob?.cancel()
         getChapterJob = viewModelScope.launch {
-            getChapterUseCase.getLocalChaptersByPaging(bookId = bookId,
-                isAsc = prefState.isAsc)
-                .cachedIn(viewModelScope).collect { snapshot ->
-                    _chapters.value = snapshot
+            getChapterUseCase.subscribeChaptersByBookId(bookId = bookId,
+                isAsc = prefState.isAsc, "")
+                .collect {
+                    stateChapters = it
                 }
         }
 

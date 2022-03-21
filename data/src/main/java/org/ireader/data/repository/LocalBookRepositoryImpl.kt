@@ -79,6 +79,26 @@ class LocalBookRepositoryImpl(
         }
     }
 
+
+    override fun subscribeAllInLibrary(
+        sortByAbs: Boolean,
+        sortByDateAdded: Boolean,
+        sortByLastRead: Boolean,
+        sortByTotalChapter: Boolean,
+        unread: Boolean,
+        isAsc: Boolean,
+    ): Flow<List<Book>> {
+        return bookDao.subscribeAllInLibraryBooks(
+            sortByAbs = sortByAbs,
+            sortByDateAdded = sortByDateAdded,
+            sortByLastRead = sortByLastRead,
+            sortByTotalDownload = sortByTotalChapter,
+            unread = unread,
+            isAsc = isAsc
+        )
+
+    }
+
     override fun subscribeAllInLibraryBooks(
         sortType: SortType,
         isAsc: Boolean,
@@ -106,7 +126,8 @@ class LocalBookRepositoryImpl(
                 )
             }
             is SortType.TotalChapter -> {
-                bookDao.subscribeLibraryBooksByTotalDownload(
+                bookDao.subscribeAllInLibraryBooks(
+                    sortByTotalDownload = true,
                     isAsc = isAsc,
                     unread = unreadFilter
                 )

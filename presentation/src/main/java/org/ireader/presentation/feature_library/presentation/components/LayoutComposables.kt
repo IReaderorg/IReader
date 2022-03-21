@@ -8,6 +8,7 @@ import androidx.navigation.NavController
 import androidx.paging.compose.LazyPagingItems
 import org.ireader.domain.models.LayoutType
 import org.ireader.domain.models.entities.Book
+import org.ireader.domain.models.entities.History
 import org.ireader.presentation.presentation.layouts.CompactGridLayoutComposable
 import org.ireader.presentation.presentation.layouts.GridLayoutComposable
 import org.ireader.presentation.presentation.layouts.LinearListDisplay
@@ -18,7 +19,9 @@ import tachiyomi.source.Source
 @Composable
 fun LayoutComposable(
     navController: NavController,
-    books: LazyPagingItems<Book>,
+    books: List<Book> = emptyList(),
+    lazyBook: LazyPagingItems<Book>,
+    histories: List<History> = emptyList(),
     onBookTap: (book: Book) -> Unit,
     layout: LayoutType,
     scrollState: LazyListState,
@@ -33,17 +36,19 @@ fun LayoutComposable(
         is LayoutType.GridLayout -> {
             GridLayoutComposable(
                 books = books,
+                lazyBooks = lazyBook,
                 onClick = { book ->
                     onBookTap(book)
                 }, scrollState = gridState,
                 isLocal = isLocal,
-                goToLatestChapter = { goToLatestChapter(it) })
+                goToLatestChapter = { goToLatestChapter(it) }, histories = histories)
         }
         is LayoutType.ListLayout -> {
             LinearListDisplay(books = books, onClick = { book ->
                 onBookTap(book)
             }, scrollState = scrollState,
                 isLocal = isLocal,
+                lazyBooks = lazyBook,
                 goToLatestChapter = { goToLatestChapter(it) })
         }
         is LayoutType.CompactGrid -> {
@@ -53,7 +58,8 @@ fun LayoutComposable(
                     onBookTap(book)
                 }, scrollState = gridState,
                 isLocal = isLocal,
-                goToLatestChapter = { goToLatestChapter(it) })
+                lazyBooks = lazyBook,
+                goToLatestChapter = { goToLatestChapter(it) }, histories = histories)
 
         }
     }

@@ -106,7 +106,7 @@ fun BookDetailScreen(
                         onDownload = {
                             onDownload()
                         },
-                        isRead = book.lastRead != 0L,
+                        isRead = viewModel.lastRead != null,
                         onRead = {
                             onRead()
                         }

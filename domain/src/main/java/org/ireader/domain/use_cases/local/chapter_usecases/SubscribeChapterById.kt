@@ -20,8 +20,14 @@ class SubscribeChapterById @Inject constructor(private val localChapterRepositor
 class FindChapterById @Inject constructor(private val localChapterRepository: LocalChapterRepository) {
     suspend operator fun invoke(
         chapterId: Long,
+        bookId: Long?,
+        lastRead: Boolean = false,
     ): Chapter? {
-        return localChapterRepository.findChapterById(chapterId = chapterId)
+        return if (!lastRead) {
+            localChapterRepository.findChapterById(chapterId = chapterId)
+        } else if (bookId != null) {
+            return localChapterRepository.findLastReadChapter(bookId)
+        } else null
     }
 }
 

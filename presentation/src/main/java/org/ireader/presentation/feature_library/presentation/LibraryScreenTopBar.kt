@@ -26,26 +26,25 @@ import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
 @Composable
 fun LibraryScreenTopBar(
     navController: NavController,
-    viewModel: LibraryViewModel,
+    vm: LibraryViewModel,
     coroutineScope: CoroutineScope,
     bottomSheetState: ModalBottomSheetState,
 ) {
-    val state = viewModel.state
     val focusManager = LocalFocusManager.current
 
     ToolBar(
         title = {
-            if (!state.inSearchMode) {
+            if (!vm.inSearchMode) {
                 TopAppBarTitle(title = "Library")
             } else {
                 AppTextField(
-                    query = state.searchQuery,
+                    query = vm.searchQuery,
                     onValueChange = {
-                        viewModel.onEvent(LibraryEvents.UpdateSearchInput(it))
-                        viewModel.onEvent(LibraryEvents.SearchBook(state.searchQuery))
+                        vm.onEvent(LibraryEvents.UpdateSearchInput(it))
+                        vm.onEvent(LibraryEvents.SearchBook(vm.searchQuery))
                     },
                     onConfirm = {
-                        viewModel.onEvent(LibraryEvents.SearchBook(state.searchQuery))
+                        vm.onEvent(LibraryEvents.SearchBook(vm.searchQuery))
                         focusManager.clearFocus()
                     },
                 )
@@ -55,12 +54,12 @@ fun LibraryScreenTopBar(
         contentColor = AppColors.current.onBars,
         elevation = Constants.DEFAULT_ELEVATION,
         actions = {
-            if (state.inSearchMode) {
+            if (vm.inSearchMode) {
                 AppIconButton(
                     imageVector = Icons.Default.Close,
                     title = "Close",
                     onClick = {
-                        viewModel.onEvent(LibraryEvents.ToggleSearchMode(false))
+                        vm.onEvent(LibraryEvents.ToggleSearchMode(false))
                     },
                 )
             }
@@ -81,17 +80,17 @@ fun LibraryScreenTopBar(
                 imageVector = Icons.Default.Search,
                 title = "Search",
                 onClick = {
-                    viewModel.onEvent(LibraryEvents.ToggleSearchMode(true))
+                    vm.onEvent(LibraryEvents.ToggleSearchMode(true))
                 },
             )
 
 
         },
-        navigationIcon = if (state.inSearchMode) {
+        navigationIcon = if (vm.inSearchMode) {
             {
                 AppIconButton(imageVector = Icons.Default.ArrowBack,
                     title = "Toggle search mode off",
-                    onClick = { viewModel.onEvent(LibraryEvents.ToggleSearchMode(false)) })
+                    onClick = { vm.onEvent(LibraryEvents.ToggleSearchMode(false)) })
 
             }
         } else null

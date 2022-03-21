@@ -4,7 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
-import androidx.paging.cachedIn
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -56,12 +55,16 @@ class ChapterDetailViewModel @Inject constructor(
     fun onEvent(event: ChapterDetailEvent) {
         when (event) {
             is ChapterDetailEvent.ToggleOrder -> {
-                this.localChapters = this.localChapters.reversed()
+                this.stateChapters = this.stateChapters.reversed()
                 toggleAsc()
                 book?.let { getLocalChaptersByPaging(isAsc = isAsc) }
             }
 
         }
+    }
+
+    suspend fun getLastReadChapter(book: Book) {
+        lastRead = getChapterUseCase.findLastReadChapter(book.id)?.id
     }
 
     fun reverseChapterInDB() {
@@ -82,6 +85,7 @@ class ChapterDetailViewModel @Inject constructor(
                 if (book != null) {
                     this@ChapterDetailViewModel.book = book
                     getLocalChaptersByPaging(isAsc = isAsc)
+                    getLastReadChapter(book)
                     true
                 } else {
                     false
@@ -97,15 +101,22 @@ class ChapterDetailViewModel @Inject constructor(
         getChapterJob?.cancel()
         getChapterJob = viewModelScope.launch {
             if (book != null) {
-                getChapterUseCase.getLocalChaptersByPaging(
+//                getChapterUseCase.getLocalChaptersByPaging(
+//                    bookId = book.id,
+//                    isAsc = isAsc,
+//                    query = query
+//                )
+//                    .cachedIn(viewModelScope)
+//                    .collect { snapshot ->
+//                        _chapters.value = snapshot
+//                    }
+                getChapterUseCase.subscribeChaptersByBookId(
                     bookId = book.id,
                     isAsc = isAsc,
                     query = query
-                )
-                    .cachedIn(viewModelScope)
-                    .collect { snapshot ->
-                        _chapters.value = snapshot
-                    }
+                ).collect { chapters ->
+                    stateChapters = chapters
+                }
 
             }
 

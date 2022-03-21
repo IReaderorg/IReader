@@ -1,10 +1,10 @@
 package org.ireader.presentation.feature_reader.presentation.reader
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Divider
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Sort
@@ -12,12 +12,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.paging.LoadState
-import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.items
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.presentation.presentation.components.ChapterListItemComposable
-import org.ireader.presentation.presentation.components.handlePagingChapterResult
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.ErrorTextWithEmojis
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
@@ -30,7 +26,7 @@ fun ReaderScreenDrawer(
     chapter: Chapter,
     source: Source,
     onChapter: (chapter: Chapter) -> Unit,
-    chapters: LazyPagingItems<Chapter>,
+    chapters: List<Chapter>,
     onReverseIcon: () -> Unit,
     drawerScrollState: LazyListState,
 ) {
@@ -56,33 +52,25 @@ fun ReaderScreenDrawer(
 
         Spacer(modifier = modifier.height(5.dp))
         Divider(modifier = modifier.fillMaxWidth(), thickness = 1.dp)
-
-        val result = handlePagingChapterResult(books = chapters, onEmptyResult = {
-            Box(modifier = modifier.fillMaxSize()) {
-                ErrorTextWithEmojis(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(20.dp)
-                        .align(Alignment.Center),
-                    error = "There is no book is Library, you can add books in the Explore screen"
-                )
-            }
-
-        })
-        if (result) {
-            AnimatedContent(chapters.loadState.refresh is LoadState.NotLoading) {
-                LazyColumn(modifier = Modifier.fillMaxSize(),
-                    state = drawerScrollState) {
-                    items(items = chapters) { chapterItem ->
-                        if (chapterItem != null) {
-                            ChapterListItemComposable(modifier = modifier,
-                                chapter = chapterItem,
-                                goTo = { onChapter(chapterItem) },
-                                selected = chapter.id == chapterItem.id)
-                        }
-                    }
+        LazyColumn(modifier = Modifier.fillMaxSize(),
+            state = drawerScrollState) {
+            items(items = chapters) { chapterItem ->
+                if (chapterItem != null) {
+                    ChapterListItemComposable(modifier = modifier,
+                        chapter = chapterItem,
+                        goTo = { onChapter(chapterItem) },
+                        selected = chapter.id == chapterItem.id)
                 }
             }
+        }
+        if (chapters.isEmpty()) {
+            ErrorTextWithEmojis(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp)
+                    .align(Alignment.CenterHorizontally),
+                error = "There is no book is Library, you can add books in the Explore screen"
+            )
         }
 
 
