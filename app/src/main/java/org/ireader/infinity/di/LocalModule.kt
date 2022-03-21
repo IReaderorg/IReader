@@ -13,10 +13,7 @@ import org.ireader.core.prefs.AndroidPreferenceStore
 import org.ireader.data.local.AppDatabase
 import org.ireader.data.local.MIGRATION_11_12
 import org.ireader.data.local.MIGRATION_8_9
-import org.ireader.data.local.dao.DownloadDao
-import org.ireader.data.local.dao.LibraryBookDao
-import org.ireader.data.local.dao.LibraryChapterDao
-import org.ireader.data.local.dao.RemoteKeysDao
+import org.ireader.data.local.dao.*
 import org.ireader.data.repository.DownloadRepositoryImpl
 import org.ireader.domain.feature_services.io.LibraryCovers
 import org.ireader.domain.repository.DownloadRepository
@@ -64,6 +61,12 @@ class LocalModule {
     @Singleton
     fun provideRemoteKeyDao(db: AppDatabase): RemoteKeysDao {
         return db.remoteKeysDao
+    }
+
+    @Provides
+    @Singleton
+    fun provideHistoryDao(db: AppDatabase): HistoryDao {
+        return db.historyDao
     }
 
 

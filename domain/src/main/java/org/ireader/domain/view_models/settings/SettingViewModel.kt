@@ -5,16 +5,11 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToJsonElement
-import org.ireader.core.utils.UiEvent
-import org.ireader.core.utils.UiText
 import org.ireader.core.utils.convertLongToTime
-import org.ireader.core.utils.showSnackBar
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.feature_services.io.LibraryCovers
 import org.ireader.domain.models.entities.Book
@@ -39,8 +34,6 @@ class SettingViewModel @Inject constructor(
     private val _state = mutableStateOf(SettingState())
     val state: State<SettingState> = _state
 
-    private val _eventFlow = MutableSharedFlow<UiEvent>()
-    val eventFlow = _eventFlow.asSharedFlow()
 
     fun deleteAllDatabase() {
         viewModelScope.launchIO {
@@ -64,11 +57,6 @@ class SettingViewModel @Inject constructor(
         }
     }
 
-    fun showSnackBar(message: UiText) {
-        viewModelScope.launch {
-            _eventFlow.showSnackBar(message)
-        }
-    }
 
     fun onLocalBackupRequested(onStart: (Intent) -> Unit) {
         val mimeTypes = arrayOf("text/plain")

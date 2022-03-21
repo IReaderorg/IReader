@@ -14,6 +14,7 @@ sealed interface ScreenSpec {
     companion object {
         val allScreens = listOf<ScreenSpec>(
             LibraryScreenSpec,
+            HistoryScreenSpec,
             ExtensionScreenSpec,
             SettingScreenSpec,
             AppearanceScreenSpec,

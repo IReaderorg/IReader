@@ -20,7 +20,7 @@ import org.ireader.domain.models.entities.*
         Updates::class,
         RemoteKeys::class,
     ],
-    version = 12,
+    version = 13,
     exportSchema = true,
 )
 @TypeConverters(DatabaseConverter::class)
@@ -30,6 +30,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract val remoteKeysDao: RemoteKeysDao
     abstract val downloadDao: DownloadDao
     abstract val catalogDao: CatalogDao
+    abstract val historyDao: HistoryDao
 
     companion object {
         const val DATABASE_NAME = "infinity_db"
@@ -52,5 +53,11 @@ val MIGRATION_10_11 = object : Migration(10, 11) {
 val MIGRATION_11_12 = object : Migration(11, 12) {
     override fun migrate(database: SupportSQLiteDatabase) {
         database.execSQL("ALTER TABLE library ADD COLUMN tableId INTEGER NOT NULL DEFAULT 0")
+    }
+}
+
+val MIGRATION_12_11 = object : Migration(12, 13) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        database.execSQL("ALTER TABLE history_table RENAME TO history")
     }
 }

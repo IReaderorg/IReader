@@ -17,9 +17,7 @@ import androidx.paging.cachedIn
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ireader.core.utils.*
@@ -32,7 +30,9 @@ import org.ireader.domain.R
 import org.ireader.domain.catalog.service.CatalogStore
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
+import org.ireader.domain.models.entities.History
 import org.ireader.domain.ui.NavigationArgs
+import org.ireader.domain.use_cases.history.HistoryUseCase
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.preferences.reader_preferences.ReaderPrefUseCases
@@ -50,6 +50,7 @@ class ReaderScreenViewModel @Inject constructor(
     private val getChapterUseCase: LocalGetChapterUseCase,
     private val remoteUseCases: RemoteUseCases,
     private val insertUseCases: LocalInsertUseCases,
+    private val historyUseCase: HistoryUseCase,
     private val catalogStore: CatalogStore,
     private val readerUseCases: ReaderPrefUseCases,
     private val prefState: ReaderScreenPreferencesStateImpl,
@@ -58,8 +59,7 @@ class ReaderScreenViewModel @Inject constructor(
 ) : BaseViewModel(), ReaderScreenPreferencesState by prefState, ReaderScreenState by state {
 
 
-    private val _eventFlow = MutableSharedFlow<Event>()
-    val eventFlow = _eventFlow.asSharedFlow()
+
 
     private val _chapters = MutableStateFlow<PagingData<Chapter>>(PagingData.empty())
     val chapters = _chapters
@@ -240,7 +240,8 @@ class ReaderScreenViewModel @Inject constructor(
                             toggleLoading(false)
                             toggleLocalLoaded(false)
                             toggleRemoteLoading(false)
-                            showSnackBar(result.uiText)
+                            showSnackBar(result.uiText
+                                ?: UiText.StringResource(R.string.error_unknown))
                         }
                     }
                 }
@@ -273,8 +274,11 @@ class ReaderScreenViewModel @Inject constructor(
     }
 
     private suspend fun updateLastReadTime(chapter: Chapter) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             insertChapter(chapter.copy(read = true, lastRead = Calendar.getInstance().timeInMillis))
+            historyUseCase.insertHistory(History(bookId = chapter.bookId,
+                chapterId = chapter.id,
+                readAt = currentTimeToLong()))
         }
     }
 
@@ -671,14 +675,6 @@ class ReaderScreenViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             insertUseCases.insertChapter(chapter)
         }
-    }
-
-    suspend fun showSnackBar(message: UiText?) {
-        _eventFlow.emit(
-            UiEvent.ShowSnackbar(
-                uiText = message ?: UiText.StringResource(R.string.error_unknown)
-            )
-        )
     }
 
     private fun setPrefScrollPosition(position: Int) {

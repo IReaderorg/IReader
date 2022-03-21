@@ -5,6 +5,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import org.ireader.core.utils.UiEvent
+import org.ireader.core.utils.UiText
+import org.ireader.core.utils.showSnackBar
+import org.ireader.core_ui.R
 import org.ireader.core_ui.ui.PreferenceMutableState
 import tachiyomi.core.prefs.Preference
 
@@ -15,6 +19,15 @@ abstract class BaseViewModel : androidx.lifecycle.ViewModel() {
         get() = viewModelScope
 
     private val activeScope = MutableStateFlow<CoroutineScope?>(null)
+
+    protected val _eventFlow = MutableSharedFlow<UiEvent>()
+    val eventFlow = _eventFlow.asSharedFlow()
+
+    fun showSnackBar(message: UiText?) {
+        viewModelScope.launch {
+            _eventFlow.showSnackBar(message ?: UiText.StringResource(R.string.error_unknown))
+        }
+    }
 
     final override fun onCleared() {
         onDestroy()

@@ -4,6 +4,7 @@
     <string name="library_screen_label">Library</string>
     <string name="explore_screen_label">Explore</string>
     <string name="setting_screen_label">Setting</string>
+    <string name="history_screen_label">History</string>
 
 
     <!-- IReader-->

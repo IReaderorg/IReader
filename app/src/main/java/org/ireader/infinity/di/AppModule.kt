@@ -7,12 +7,15 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import org.ireader.data.local.AppDatabase
+import org.ireader.data.local.dao.HistoryDao
 import org.ireader.data.local.dao.LibraryBookDao
 import org.ireader.data.local.dao.LibraryChapterDao
 import org.ireader.data.local.dao.RemoteKeysDao
+import org.ireader.data.repository.HistoryRepositoryImpl
 import org.ireader.data.repository.LocalBookRepositoryImpl
 import org.ireader.data.repository.LocalChapterRepositoryImpl
 import org.ireader.data.repository.RemoteRepositoryImpl
+import org.ireader.domain.repository.HistoryRepository
 import org.ireader.domain.repository.LocalBookRepository
 import org.ireader.domain.repository.LocalChapterRepository
 import org.ireader.domain.repository.RemoteRepository
@@ -52,6 +55,14 @@ class AppModule {
         database: AppDatabase,
     ): RemoteRepository {
         return RemoteRepositoryImpl(remoteKeysDao = keysDao, database = database)
+    }
+
+    @Provides
+    @Singleton
+    fun providesHistoryRepository(
+        historyDao: HistoryDao,
+    ): HistoryRepository {
+        return HistoryRepositoryImpl(historyDao)
     }
 
     @Singleton

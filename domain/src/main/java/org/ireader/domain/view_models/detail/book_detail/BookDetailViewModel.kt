@@ -10,11 +10,8 @@ import androidx.work.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import org.ireader.core.R
-import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
 import org.ireader.core.utils.removeSameItemsFromList
 import org.ireader.core_ui.viewmodel.BaseViewModel
@@ -65,10 +62,6 @@ class BookDetailViewModel @Inject constructor(
 
     lateinit var work: OneTimeWorkRequest
 
-
-    private val _eventFlow = MutableSharedFlow<UiEvent>()
-
-    val eventFlow = _eventFlow.asSharedFlow()
 
 
     init {
@@ -282,13 +275,7 @@ class BookDetailViewModel @Inject constructor(
     }
 
     /************************************************************/
-    suspend fun showSnackBar(message: UiText?) {
-        _eventFlow.emit(
-            UiEvent.ShowSnackbar(
-                uiText = message ?: UiText.StringResource(R.string.error_unknown)
-            )
-        )
-    }
+
 
     private fun toggleChaptersLoading(isLoading: Boolean) {
         chapterIsLoading = isLoading

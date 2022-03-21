@@ -9,6 +9,12 @@ fun convertLongToTime(time: Long): String {
     return format.format(date)
 }
 
+fun convertLongToTime(time: Long, format: String = "yyyy.MM.dd HH:mm"): String {
+    val date = Date(time)
+    val format = SimpleDateFormat(format, Locale.US)
+    return format.format(date)
+}
+
 fun currentTimeToLong(): Long {
     return Calendar.getInstance().timeInMillis
 }

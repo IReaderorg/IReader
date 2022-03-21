@@ -11,11 +11,19 @@ package org.ireader.domain.feature_services.io.coil
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import org.ireader.domain.feature_services.io.BookCover
+import org.ireader.domain.feature_services.io.HistoryWithRelations
 import org.ireader.domain.models.entities.Book
 
 @Composable
 fun rememberBookCover(manga: Book): BookCover {
-  return remember(manga.id) {
-    BookCover.from(manga)
-  }
+    return remember(manga.id) {
+        BookCover.from(manga)
+    }
+}
+
+@Composable
+fun rememberBookCover(history: HistoryWithRelations): BookCover {
+    return remember(history.bookId) {
+        BookCover.from(history)
+    }
 }

@@ -5,14 +5,10 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
-import org.ireader.core.utils.showSnackBar
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.catalog.interactor.*
 import org.ireader.domain.catalog.model.InstallStep
@@ -42,8 +38,6 @@ class ExtensionViewModel @Inject constructor(
     private val deleteNotInLibraryChapters: DeleteNotInLibraryChapters,
 ) : BaseViewModel(), CatalogsState by state {
 
-    private val _eventFlow = MutableSharedFlow<UiEvent>()
-    val eventFlow = _eventFlow.asSharedFlow()
 
     var getCatalogJob: Job? = null
 
@@ -94,7 +88,7 @@ class ExtensionViewModel @Inject constructor(
                 catalog.pkgName to installCatalog.await(catalog)
             }
             flow.collect { step ->
-                _eventFlow.showSnackBar(UiText.DynamicString(step.toString()))
+                showSnackBar(UiText.DynamicString(step.toString()))
                 state.installSteps = if (step != InstallStep.Completed) {
                     installSteps + (pkgName to step)
                 } else {
@@ -113,7 +107,7 @@ class ExtensionViewModel @Inject constructor(
     fun uninstallCatalog(catalog: Catalog) {
         scope.launch {
             uninstallCatalog.await(catalog as CatalogInstalled)
-            _eventFlow.showSnackBar(UiText.StringResource(R.string.uninstalled))
+            showSnackBar(UiText.StringResource(R.string.uninstalled))
         }
     }
 
@@ -121,7 +115,7 @@ class ExtensionViewModel @Inject constructor(
         scope.launch(Dispatchers.IO) {
             state.isRefreshing = true
             syncRemoteCatalogs.await(true)
-            _eventFlow.showSnackBar(UiText.StringResource(R.string.Refreshed))
+            showSnackBar(UiText.StringResource(R.string.Refreshed))
             state.isRefreshing = false
         }
     }
