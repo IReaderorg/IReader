@@ -29,13 +29,7 @@ interface LocalBookRepository {
 
     fun getBooksByQueryPagingSource(query: String): PagingSource<Int, Book>
 
-
-    fun getAllInLibraryPagingSource(
-        sortType: SortType,
-        isAsc: Boolean,
-        unreadFilter: Boolean,
-    ): PagingSource<Int, Book>
-
+    
     fun subscribeAllInLibrary(
         sortByAbs: Boolean,
         sortByDateAdded: Boolean,

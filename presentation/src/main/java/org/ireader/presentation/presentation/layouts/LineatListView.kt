@@ -58,7 +58,7 @@ fun LinearBookItem(
 
 @Composable
 fun LinearListDisplay(
-    lazyBooks: LazyPagingItems<Book>,
+    lazyBooks: LazyPagingItems<Book>?,
     books: List<Book>,
     onClick: (book: Book) -> Unit,
     scrollState: LazyListState = rememberLazyListState(),
@@ -66,7 +66,7 @@ fun LinearListDisplay(
     goToLatestChapter: (book: Book) -> Unit,
 ) {
     LazyColumn(modifier = Modifier.fillMaxSize(), state = scrollState) {
-        if (books.isEmpty()) {
+        if (lazyBooks != null) {
             items(lazyBooks) { book ->
                 if (book != null) {
                     LinearBookItem(

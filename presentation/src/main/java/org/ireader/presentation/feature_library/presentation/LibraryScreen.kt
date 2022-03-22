@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -14,7 +15,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import androidx.paging.compose.collectAsLazyPagingItems
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
 import org.ireader.core.utils.Constants
@@ -39,7 +39,6 @@ fun LibraryScreen(
 
     val coroutineScope = rememberCoroutineScope()
 
-    val books = viewModel.book.collectAsLazyPagingItems()
 
     val pagerState = rememberPagerState()
     val bottomSheetState =
@@ -47,6 +46,10 @@ fun LibraryScreen(
 
     val gridState = rememberLazyGridState()
     val lazyListState = rememberLazyListState()
+
+    LaunchedEffect(key1 = true) {
+        viewModel.getLibraryBooks()
+    }
 
     ModalBottomSheetLayout(
         modifier = Modifier.systemBarsPadding(),
@@ -75,7 +78,6 @@ fun LibraryScreen(
                 .fillMaxSize()) {
                 LayoutComposable(
                     books = viewModel.books,
-                    lazyBook = if (!viewModel.inSearchMode) books else books,
                     layout = viewModel.layout,
                     navController = navController,
                     isLocal = true,

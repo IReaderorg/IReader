@@ -10,7 +10,7 @@ interface HistoryDao {
     @Query("SELECT * FROM history WHERE chapterId = :id LIMIT 1")
     suspend fun findHistory(id: Long): History?
 
-    @Query("SELECT * FROM history WHERE bookId = :bookId LIMIT 1")
+    @Query("SELECT history.* FROM history GROUP  By history.chapterId HAVING bookId = :bookId  ORDER BY readAt DESC LIMIT 1")
     suspend fun findHistoryByBookId(bookId: Long): History?
 
     @Query("SELECT * FROM history")

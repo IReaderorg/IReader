@@ -226,18 +226,22 @@ fun ReadingScreen(
         drawerGesturesEnabled = true,
         drawerBackgroundColor = MaterialTheme.colors.background,
         drawerContent = {
-            if (chapter != null) {
+
                 ReaderScreenDrawer(
                     modifier = Modifier.statusBarsPadding(),
                     onReverseIcon = {
-                        vm.reverseChapters()
-                        scope.launch {
-                            vm.getLocalChaptersByPaging(chapter.bookId)
+                        if (chapter != null) {
+                            vm.reverseChapters()
+                            scope.launch {
+                                vm.getLocalChaptersByPaging(chapter.bookId)
+                            }
                         }
                     },
                     onChapter = { ch ->
-                        vm.getChapter(ch.id,
-                            source = source)
+                        scope.launch {
+                            vm.getChapter(ch.id,
+                                source = source)
+                        }
                         coroutineScope.launch {
                             scrollState.scrollToItem(0, 0)
                         }
@@ -249,7 +253,7 @@ fun ReadingScreen(
                     chapters = chapters,
                     drawerScrollState = drawerScrollState
                 )
-            }
+
         }
     ) {
         ScrollIndicatorSetting(enable = vm.scrollIndicatorDialogShown, vm)

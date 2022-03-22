@@ -43,42 +43,6 @@ class LocalBookRepositoryImpl(
     }
 
 
-    override fun getAllInLibraryPagingSource(
-        sortType: SortType,
-        isAsc: Boolean,
-        unreadFilter: Boolean,
-    ): PagingSource<Int, Book> {
-        bookDao.subscribeAllLocalBooksForPagingSortedBySort()
-        return when (sortType) {
-            is SortType.Alphabetically -> {
-                bookDao.subscribeAllLocalBooksForPagingSortedBySort(sortByAbs = true,
-                    isAsc = isAsc,
-                    unread = unreadFilter
-                )
-
-            }
-            is SortType.DateAdded -> {
-                bookDao.subscribeAllLocalBooksForPagingSortedBySort(sortByDateAdded = true,
-                    isAsc = isAsc,
-                    unread = unreadFilter
-                )
-            }
-            is SortType.LastRead -> {
-                bookDao.subscribeAllLocalBooksForPagingSortedBySort(
-                    sortByLastRead = true,
-                    isAsc = isAsc,
-                    unread = unreadFilter
-                )
-            }
-            is SortType.TotalChapter -> {
-                bookDao.subscribeAllLocalBooksForPagingSortedBySort(
-                    isAsc = isAsc,
-                    unread = unreadFilter
-                )
-            }
-        }
-    }
-
 
     override fun subscribeAllInLibrary(
         sortByAbs: Boolean,

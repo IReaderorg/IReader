@@ -1,6 +1,7 @@
 package org.ireader.domain.use_cases.local.chapter_usecases
 
 import kotlinx.coroutines.flow.Flow
+import org.ireader.core.utils.Constants
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.repository.LocalChapterRepository
 import javax.inject.Inject
@@ -21,12 +22,11 @@ class FindChapterById @Inject constructor(private val localChapterRepository: Lo
     suspend operator fun invoke(
         chapterId: Long,
         bookId: Long?,
-        lastRead: Boolean = false,
     ): Chapter? {
-        return if (!lastRead) {
+        return if (chapterId != Constants.LAST_CHAPTER) {
             localChapterRepository.findChapterById(chapterId = chapterId)
         } else if (bookId != null) {
-            return localChapterRepository.findLastReadChapter(bookId)
+            localChapterRepository.findLastReadChapter(bookId)
         } else null
     }
 }

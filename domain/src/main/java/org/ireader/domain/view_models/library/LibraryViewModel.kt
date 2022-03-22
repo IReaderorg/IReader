@@ -2,16 +2,13 @@ package org.ireader.domain.view_models.library
 
 
 import androidx.lifecycle.viewModelScope
-import androidx.paging.PagingData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.models.DisplayMode
 import org.ireader.domain.models.FilterType
 import org.ireader.domain.models.SortType
-import org.ireader.domain.models.entities.Book
 import org.ireader.domain.use_cases.history.HistoryUseCase
 import org.ireader.domain.use_cases.local.LocalGetBookUseCases
 import org.ireader.domain.use_cases.preferences.reader_preferences.FiltersUseCase
@@ -30,8 +27,6 @@ class LibraryViewModel @Inject constructor(
     private val libraryState: LibraryStateImpl,
 ) : BaseViewModel(), LibraryState by libraryState {
 
-    private val _books = MutableStateFlow<PagingData<Book>>(PagingData.empty())
-    val book = _books
 
     init {
         readLayoutTypeAndFilterTypeAndSortType()
@@ -72,8 +67,8 @@ class LibraryViewModel @Inject constructor(
     }
 
 
-    var getBooksJob: Job? = null
-    private fun getLibraryBooks() {
+    private var getBooksJob: Job? = null
+    fun getLibraryBooks() {
         getBooksJob?.cancel()
         getBooksJob = viewModelScope.launch {
             localGetBookUseCases.SubscribeInLibraryBooks(

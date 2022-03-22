@@ -67,12 +67,15 @@ object ReaderScreenSpec : ScreenSpec {
                     onNext = {
                         if (currentIndex < chapters.lastIndex) {
                             viewModel.updateChapterSliderIndex(currentIndex + 1)
-                            viewModel.getChapter(viewModel.getCurrentChapterByIndex().id,
-                                source = source) {
-                                coroutineScope.launch {
-                                    scrollState.animateScrollToItem(0, 0)
+                            coroutineScope.launch {
+                                viewModel.getChapter(viewModel.getCurrentChapterByIndex().id,
+                                    source = source) {
+                                    coroutineScope.launch {
+                                        scrollState.animateScrollToItem(0, 0)
+                                    }
                                 }
                             }
+
                         } else {
                             coroutineScope.launch {
                                 viewModel.showSnackBar(UiText.StringResource(R.string.this_is_last_chapter))
@@ -83,10 +86,12 @@ object ReaderScreenSpec : ScreenSpec {
                     onPrev = {
                         if (currentIndex > 0) {
                             viewModel.updateChapterSliderIndex(currentIndex - 1)
-                            viewModel.getChapter(viewModel.getCurrentChapterByIndex().id,
-                                source = source) {
-                                coroutineScope.launch {
-                                    scrollState.animateScrollToItem(0, 0)
+                            coroutineScope.launch {
+                                viewModel.getChapter(viewModel.getCurrentChapterByIndex().id,
+                                    source = source) {
+                                    coroutineScope.launch {
+                                        scrollState.animateScrollToItem(0, 0)
+                                    }
                                 }
                             }
 
@@ -101,8 +106,10 @@ object ReaderScreenSpec : ScreenSpec {
                             viewModel.showSnackBar(UiText.DynamicString(chapters[viewModel.currentChapterIndex].title))
                         }
                         viewModel.updateChapterSliderIndex(currentIndex)
-                        viewModel.getChapter(chapters[viewModel.currentChapterIndex].id,
-                            source = source)
+                        coroutineScope.launch {
+                            viewModel.getChapter(chapters[viewModel.currentChapterIndex].id,
+                                source = source)
+                        }
                         coroutineScope.launch {
                             scrollState.animateScrollToItem(0, 0)
                         }

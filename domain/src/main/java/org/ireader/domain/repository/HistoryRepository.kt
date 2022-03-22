@@ -8,6 +8,7 @@ interface HistoryRepository {
     suspend fun findHistory(id: Long): History?
 
     suspend fun findHistoryByBookId(bookId: Long): History?
+
     fun findHistoriesPaging(): Flow<List<HistoryWithRelations>>
 
 

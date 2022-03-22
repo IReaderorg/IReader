@@ -17,7 +17,7 @@ import org.ireader.domain.models.entities.History
 @Composable
 fun CompactGridLayoutComposable(
     modifier: Modifier = Modifier,
-    lazyBooks: LazyPagingItems<Book>,
+    lazyBooks: LazyPagingItems<Book>?,
     books: List<Book>,
     histories: List<History>,
     onClick: (book: Book) -> Unit,
@@ -31,7 +31,7 @@ fun CompactGridLayoutComposable(
         cells = GridCells.Fixed(2),
         contentPadding = PaddingValues(8.dp),
         content = {
-            if (books.isEmpty()) {
+            if (lazyBooks != null) {
                 items(lazyBooks) { book ->
                     if (book != null) {
                         BookImage(

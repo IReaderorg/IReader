@@ -20,7 +20,7 @@ import tachiyomi.source.Source
 fun LayoutComposable(
     navController: NavController,
     books: List<Book> = emptyList(),
-    lazyBook: LazyPagingItems<Book>,
+    lazyBook: LazyPagingItems<Book>? = null,
     histories: List<History> = emptyList(),
     onBookTap: (book: Book) -> Unit,
     layout: LayoutType,

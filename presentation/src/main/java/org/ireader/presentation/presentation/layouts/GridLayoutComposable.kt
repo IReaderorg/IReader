@@ -18,7 +18,7 @@ import org.ireader.domain.models.entities.History
 @Composable
 fun GridLayoutComposable(
     modifier: Modifier = Modifier,
-    lazyBooks: LazyPagingItems<Book>,
+    lazyBooks: LazyPagingItems<Book>?,
     books: List<Book>,
     histories: List<History>,
     onClick: (book: Book) -> Unit,
@@ -31,7 +31,7 @@ fun GridLayoutComposable(
         modifier = modifier.fillMaxSize(),
         cells = GridCells.Fixed(3),
         content = {
-            if (books.isEmpty()) {
+            if (books.isEmpty() && lazyBooks != null) {
                 items(lazyBooks) { book ->
                     if (book != null) {
                         BookImage(

@@ -81,6 +81,7 @@ WHERE library.favorite = 1
          LEFT JOIN history ON history.bookId = chapter.bookId
         GROUP BY chapter.id
         HAVING chapter.bookId == :bookId  AND chapter.id = history.chapterId
+        LIMIT 1
     """)
     suspend fun findLastReadChapter(bookId: Long): Chapter?
 

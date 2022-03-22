@@ -63,10 +63,11 @@ class ReaderScreenViewModel @Inject constructor(
             val source = catalogStore.get(sourceId)?.source
             if (source != null) {
                 this.source = source
-                getLocalChaptersByPaging(bookId)
-                getChapterIndex(source = source)
-                getLocalBookById(bookId, chapterId, source = source)
-                readPreferences()
+                viewModelScope.launch {
+                    getLocalBookById(bookId, chapterId, source = source)
+                    readPreferences()
+                }
+
 
             } else {
                 viewModelScope.launch {
@@ -118,32 +119,18 @@ class ReaderScreenViewModel @Inject constructor(
     }
 
 
-    private fun getChapterIndex(source: Source) {
-        viewModelScope.launch {
-            val chapters = stateChapters
-            if (chapters.isNotEmpty()) {
-                state.currentChapterIndex =
-                    stateChapters.indexOfFirst { state.stateChapter?.id == it.id }
-
-                if (stateChapter?.id == Constants.LAST_CHAPTER && state.stateChapters.isNotEmpty()) {
-                    getChapter(state.stateChapters.first().id, source = source)
-                }
-            }
-        }
-    }
-
-    fun getChapter(
+    suspend fun getChapter(
         chapterId: Long,
-        lastRead: Boolean = false,
         source: Source,
         onGetChapterEnd: () -> Unit = {},
     ) {
         toggleLoading(true)
         toggleLocalLoaded(false)
         viewModelScope.launch {
-            val resultChapter = getChapterUseCase.findChapterById(chapterId = chapterId,
+            val resultChapter = getChapterUseCase.findChapterById(
+                chapterId = chapterId,
                 state.book?.id,
-                lastRead = lastRead)
+            )
             if (resultChapter != null) {
                 clearError()
                 setPrefScrollPosition(resultChapter.progress)
@@ -214,37 +201,50 @@ class ReaderScreenViewModel @Inject constructor(
     }
 
 
-    private fun getLocalBookById(bookId: Long, chapterId: Long, source: Source) {
+    private suspend fun getLocalBookById(bookId: Long, chapterId: Long, source: Source) {
         viewModelScope.launch {
             val book = getBookUseCases.findBookById(id = bookId)
             if (book != null) {
                 setStateChapter(book)
                 toggleBookLoaded(true)
-                getChapter(
-                    chapterId,
-                    lastRead = chapterId != Constants.LAST_CHAPTER && chapterId != Constants.NO_VALUE,
-                    source = source,
-                )
+                getLocalChaptersByPaging(bookId)
+                val last = historyUseCase.findHistoryByBookId(bookId)
                 if (chapterId != Constants.LAST_CHAPTER && chapterId != Constants.NO_VALUE) {
                     getChapter(chapterId, source = source)
+                } else if (last != null) {
+                    getChapter(chapterId = last.chapterId, source = source)
                 } else {
-                    getChapter(chapterId = chapterId, lastRead = true, source = source)
+                    val chapters = getChapterUseCase.findChaptersByBookId(bookId)
+                    if (chapters.isNotEmpty()) {
+                        getChapter(chapters.first().id, source = source)
+                    }
                 }
-                getLocalChaptersByPaging(bookId)
+                if (stateChapters.isNotEmpty()) {
+                    state.currentChapterIndex =
+                        stateChapters.indexOfFirst { state.stateChapter?.id == it.id }
+
+//                    if (stateChapter == null && state.stateChapters.isNotEmpty()) {
+//                        getChapter(state.stateChapters.first().id, source = source)
+//                    }
+                }
+
 
             }
         }
 
     }
 
-    private suspend fun updateLastReadTime(chapter: Chapter) {
-        insertUseCases.insertChapter(
-            chapter = chapter.copy(read = true)
-        )
-        historyUseCase.insertHistory(History(
-            bookId = chapter.bookId,
-            chapterId = chapter.id,
-            readAt = currentTimeToLong()))
+    private fun updateLastReadTime(chapter: Chapter) {
+        viewModelScope.launch(Dispatchers.IO) {
+            insertUseCases.insertChapter(
+                chapter = chapter.copy(read = true)
+            )
+            historyUseCase.insertHistory(History(
+                bookId = chapter.bookId,
+                chapterId = chapter.id,
+                readAt = currentTimeToLong()))
+        }
+
     }
 
     fun reverseChapters() {

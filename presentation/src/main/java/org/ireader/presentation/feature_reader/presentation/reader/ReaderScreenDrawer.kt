@@ -23,7 +23,7 @@ import tachiyomi.source.Source
 @Composable
 fun ReaderScreenDrawer(
     modifier: Modifier = Modifier,
-    chapter: Chapter,
+    chapter: Chapter?,
     source: Source,
     onChapter: (chapter: Chapter) -> Unit,
     chapters: List<Chapter>,
@@ -55,12 +55,10 @@ fun ReaderScreenDrawer(
         LazyColumn(modifier = Modifier.fillMaxSize(),
             state = drawerScrollState) {
             items(items = chapters) { chapterItem ->
-                if (chapterItem != null) {
                     ChapterListItemComposable(modifier = modifier,
                         chapter = chapterItem,
                         goTo = { onChapter(chapterItem) },
-                        selected = chapter.id == chapterItem.id)
-                }
+                        selected = chapter?.id == chapterItem.id)
             }
         }
         if (chapters.isEmpty()) {
