@@ -20,7 +20,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import org.ireader.domain.models.entities.Chapter
-import org.ireader.presentation.presentation.ToolBar
+import org.ireader.presentation.presentation.Toolbar
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
 import tachiyomi.source.Source
@@ -45,7 +45,7 @@ fun ReaderScreenTopBar(
             enter = slideInVertically(initialOffsetY = { it }, animationSpec = tween(700)),
             exit = slideOutVertically(targetOffsetY = { it }, animationSpec = tween(700))
         ) {
-            ToolBar(
+            Toolbar(
                 modifier = Modifier.systemBarsPadding(),
                 title = {
                     Text(
@@ -80,7 +80,7 @@ fun ReaderScreenTopBar(
             )
         }
     } else if (!isLoaded) {
-        ToolBar(
+        Toolbar(
             modifier = Modifier.systemBarsPadding(),
             title = {},
             elevation = 0.dp,

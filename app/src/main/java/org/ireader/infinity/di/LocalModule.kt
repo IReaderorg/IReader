@@ -15,8 +15,10 @@ import org.ireader.data.local.MIGRATION_11_12
 import org.ireader.data.local.MIGRATION_8_9
 import org.ireader.data.local.dao.*
 import org.ireader.data.repository.DownloadRepositoryImpl
+import org.ireader.data.repository.UpdatesRepositoryImpl
 import org.ireader.domain.feature_services.io.LibraryCovers
 import org.ireader.domain.repository.DownloadRepository
+import org.ireader.domain.repository.UpdatesRepository
 import tachiyomi.core.prefs.PreferenceStore
 import java.io.File
 import javax.inject.Singleton
@@ -69,6 +71,12 @@ class LocalModule {
         return db.historyDao
     }
 
+    @Provides
+    @Singleton
+    fun provideUpdatesDao(db: AppDatabase): UpdatesDao {
+        return db.updatesDao
+    }
+
 
     @Singleton
     @Provides
@@ -76,6 +84,14 @@ class LocalModule {
         downloadDao: DownloadDao,
     ): DownloadRepository {
         return DownloadRepositoryImpl(downloadDao)
+    }
+
+    @Singleton
+    @Provides
+    fun provideUpdatesRepository(
+        updatesDao: UpdatesDao,
+    ): UpdatesRepository {
+        return UpdatesRepositoryImpl(updatesDao)
     }
 
     @Singleton

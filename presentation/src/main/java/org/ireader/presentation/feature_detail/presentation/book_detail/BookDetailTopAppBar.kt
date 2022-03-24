@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import org.ireader.presentation.presentation.ToolBar
+import org.ireader.presentation.presentation.Toolbar
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
 
 @Composable
@@ -23,7 +23,7 @@ fun BookDetailTopAppBar(
     onWebView: () -> Unit,
     onRefresh: () -> Unit,
 ) {
-    ToolBar(
+    Toolbar(
         title = {},
         modifier = modifier
             .fillMaxWidth()

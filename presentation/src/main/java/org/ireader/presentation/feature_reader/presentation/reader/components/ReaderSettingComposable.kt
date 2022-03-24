@@ -15,10 +15,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.ireader.domain.view_models.reader.FontSizeEvent
-import org.ireader.domain.view_models.reader.Orientation
-import org.ireader.domain.view_models.reader.ReaderEvent
-import org.ireader.domain.view_models.reader.ReaderScreenViewModel
+import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.FontSizeEvent
+import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.Orientation
+import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.ReaderEvent
+import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.ReaderScreenViewModel
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 
 @Composable

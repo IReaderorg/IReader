@@ -15,8 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import org.ireader.core.utils.DEFAULT
-import org.ireader.domain.view_models.reader.ReaderEvent
-import org.ireader.domain.view_models.reader.ReaderScreenViewModel
+import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.ReaderEvent
+import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.ReaderScreenViewModel
 import org.ireader.presentation.presentation.reusable_composable.CaptionTextComposable
 
 @Composable

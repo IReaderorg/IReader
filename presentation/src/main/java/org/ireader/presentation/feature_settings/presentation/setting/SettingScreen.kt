@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import org.ireader.core.utils.Constants
-import org.ireader.presentation.presentation.ToolBar
+import org.ireader.presentation.presentation.Toolbar
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
 import org.ireader.presentation.ui.AboutInfoScreenSpec
 import org.ireader.presentation.ui.AdvanceSettingSpec
@@ -49,7 +49,7 @@ fun SettingScreen(
         .fillMaxSize()
         .padding(bottom = 50.dp)) {
         Scaffold(modifier = Modifier.fillMaxSize(), topBar = {
-            ToolBar(
+            Toolbar(
                 title = {
                     TopAppBarTitle(title = "Setting")
                 },

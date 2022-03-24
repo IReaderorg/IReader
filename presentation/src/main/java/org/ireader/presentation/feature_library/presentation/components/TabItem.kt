@@ -1,7 +1,7 @@
 package org.ireader.presentation.feature_library.presentation.components
 
 import androidx.navigation.NavController
-import org.ireader.domain.view_models.library.LibraryViewModel
+import org.ireader.presentation.feature_library.presentation.viewmodel.LibraryViewModel
 
 sealed class TabItem(
     var title: String,

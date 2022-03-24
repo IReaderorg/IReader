@@ -14,9 +14,9 @@ import org.ireader.core.R
 import org.ireader.core.utils.UiText
 import org.ireader.domain.FetchType
 import org.ireader.domain.ui.NavigationArgs
-import org.ireader.domain.view_models.explore.ExploreScreenEvents
-import org.ireader.domain.view_models.explore.ExploreViewModel
 import org.ireader.presentation.feature_explore.presentation.browse.ExploreScreen
+import org.ireader.presentation.feature_explore.presentation.browse.viewmodel.ExploreScreenEvents
+import org.ireader.presentation.feature_explore.presentation.browse.viewmodel.ExploreViewModel
 import org.ireader.presentation.presentation.EmptyScreenComposable
 import tachiyomi.source.HttpSource
 

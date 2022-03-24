@@ -19,7 +19,7 @@ import org.ireader.core.ChaptersParse
 import org.ireader.core.DetailParse
 import org.ireader.domain.FetchType
 import org.ireader.presentation.R
-import org.ireader.presentation.presentation.ToolBar
+import org.ireader.presentation.presentation.Toolbar
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
@@ -43,7 +43,7 @@ fun WebPageTopBar(
     var isMenuExpanded by remember {
         mutableStateOf(false)
     }
-    ToolBar(
+    Toolbar(
         title = {
             CustomTextField(modifier = Modifier
                 .padding(horizontal = 8.dp, vertical = 4.dp)

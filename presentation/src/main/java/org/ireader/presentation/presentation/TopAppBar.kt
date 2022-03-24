@@ -17,7 +17,7 @@ import org.ireader.presentation.presentation.components.NoElevationOverlay
 
 
 @Composable
-fun ToolBar(
+fun Toolbar(
     title: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     navigationIcon: @Composable (() -> Unit)? = null,

@@ -10,7 +10,7 @@ import androidx.navigation.NavController
 import org.ireader.core.utils.convertLongToTime
 import org.ireader.domain.feature_services.io.HistoryWithRelations
 import org.ireader.domain.models.entities.History
-import org.ireader.domain.view_models.history.HistoryViewModel
+import org.ireader.presentation.feature_history.viewmodel.HistoryViewModel
 import org.ireader.presentation.feature_sources.presentation.extension.composables.TextSection
 import org.ireader.presentation.ui.BookDetailScreenSpec
 import org.ireader.presentation.ui.ReaderScreenSpec
@@ -22,8 +22,9 @@ fun HistoryScreen(
     vm: HistoryViewModel = hiltViewModel(),
 ) {
     val histories = vm.history
+    val dateFormat = "yyyy/MM/dd"
     val times =
-        histories.map { convertLongToTime(it.readAt, "HH:mm") }.distinct()
+        histories.map { convertLongToTime(it.readAt, dateFormat) }.distinct()
     val historyItem: LazyListScope.(HistoryWithRelations) -> Unit = { history ->
         item {
             HistoryItem(history = history,
@@ -66,7 +67,7 @@ fun HistoryScreen(
                 }
                 for (history in histories.filter {
                     convertLongToTime(it.readAt,
-                        format = "HH:mm") == time
+                        format = dateFormat) == time
                 }) {
                     historyItem(history)
                 }

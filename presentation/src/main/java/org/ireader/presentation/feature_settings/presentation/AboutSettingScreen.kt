@@ -15,7 +15,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import org.ireader.core.utils.Constants
 import org.ireader.domain.utils.toast
-import org.ireader.presentation.presentation.ToolBar
+import org.ireader.presentation.presentation.Toolbar
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
@@ -35,7 +35,7 @@ fun AboutSettingScreen(
             "Unable to get Package Version"
         }
     Scaffold(modifier = modifier.fillMaxSize(), topBar = {
-        ToolBar(
+        Toolbar(
             modifier = Modifier.systemBarsPadding(),
             title = {
                 TopAppBarTitle(title = "About", style = MaterialTheme.typography.h6)

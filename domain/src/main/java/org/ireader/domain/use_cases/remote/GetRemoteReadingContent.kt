@@ -1,26 +1,24 @@
 package org.ireader.domain.use_cases.remote
 
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import org.ireader.core.utils.UiText
+import org.ireader.core.utils.exceptionHandler
 import org.ireader.domain.R
-import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.entities.toChapterInfo
 import org.ireader.domain.repository.RemoteRepository
 import org.ireader.domain.utils.Resource
-import retrofit2.HttpException
 import tachiyomi.source.Source
 import tachiyomi.source.model.Text
 import timber.log.Timber
-import java.io.IOException
 import javax.inject.Inject
 
 class GetRemoteReadingContent @Inject constructor(private val remoteRepository: RemoteRepository) {
-    operator fun invoke(
+    suspend operator fun invoke(
         chapter: Chapter,
         source: Source,
-    ): Flow<Resource<List<String>>> = flow<Resource<List<String>>> {
+        onError: suspend (message: UiText?) -> Unit,
+        onSuccess: suspend (content: List<String>) -> Unit,
+    ) {
         try {
             Timber.d("Timber: GetRemoteReadingContentUseCase was Called")
             // val page = source.getPageList(chapter.toChapterInfo())
@@ -36,21 +34,23 @@ class GetRemoteReadingContent @Inject constructor(private val remoteRepository: 
                 }
 
             if (content.joinToString().isBlank()) {
-                emit(Resource.Error<List<String>>(uiText = UiText.StringResource(R.string.cant_get_content)))
+                onError(UiText.StringResource(R.string.cant_get_content))
+
             } else {
                 Timber.d("Timber: GetRemoteReadingContentUseCase was Finished Successfully")
-                emit(Resource.Success<List<String>>(content))
+                onSuccess(content)
+
             }
-        } catch (e: HttpException) {
-            Resource.Error<Resource<List<Book>>>(
-                uiText = UiText.ExceptionString(e)
-            )
-        } catch (e: IOException) {
-            emit(Resource.Error<List<String>>(uiText = UiText.StringResource(R.string.noInternetError)))
         } catch (e: Exception) {
-            Resource.Error<Resource<List<Book>>>(
-                uiText = UiText.ExceptionString(e)
-            )
+            onError(exceptionHandler(e))
         }
+
     }
+}
+
+
+interface ResourceCallBack<T> {
+    fun onSuccess(): Resource<T>
+
+    fun onFailure(): Resource<T>
 }

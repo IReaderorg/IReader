@@ -18,9 +18,9 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import org.ireader.domain.models.entities.Book
-import org.ireader.domain.view_models.global_search.GlobalSearchViewModel
-import org.ireader.domain.view_models.global_search.SearchItem
 import org.ireader.presentation.feature_detail.presentation.book_detail.components.DotsFlashing
+import org.ireader.presentation.feature_sources.presentation.global_search.viewmodel.GlobalSearchViewModel
+import org.ireader.presentation.feature_sources.presentation.global_search.viewmodel.SearchItem
 import org.ireader.presentation.presentation.layouts.BookImage
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable

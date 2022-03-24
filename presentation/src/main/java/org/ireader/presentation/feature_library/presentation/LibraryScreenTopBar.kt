@@ -14,9 +14,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.ireader.core.utils.Constants
 import org.ireader.core_ui.theme.AppColors
-import org.ireader.domain.view_models.library.LibraryEvents
-import org.ireader.domain.view_models.library.LibraryViewModel
-import org.ireader.presentation.presentation.ToolBar
+import org.ireader.presentation.feature_library.presentation.viewmodel.LibraryEvents
+import org.ireader.presentation.feature_library.presentation.viewmodel.LibraryViewModel
+import org.ireader.presentation.presentation.Toolbar
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.AppTextField
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
@@ -32,7 +32,7 @@ fun LibraryScreenTopBar(
 ) {
     val focusManager = LocalFocusManager.current
 
-    ToolBar(
+    Toolbar(
         title = {
             if (!vm.inSearchMode) {
                 TopAppBarTitle(title = "Library")

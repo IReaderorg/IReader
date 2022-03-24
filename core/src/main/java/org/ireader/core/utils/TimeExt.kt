@@ -11,7 +11,7 @@ fun convertLongToTime(time: Long): String {
 
 fun convertLongToTime(time: Long, format: String = "yyyy.MM.dd HH:mm"): String {
     val date = Date(time)
-    val format = SimpleDateFormat(format, Locale.US)
+    val format = SimpleDateFormat(format, Locale.getDefault())
     return format.format(date)
 }
 
@@ -23,3 +23,4 @@ fun convertDateToLong(date: String): Long {
     val df = SimpleDateFormat("yyyy.MM.dd HH:mm", Locale.US)
     return df.parse(date).time
 }
+

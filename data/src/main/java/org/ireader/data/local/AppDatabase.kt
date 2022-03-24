@@ -17,7 +17,7 @@ import org.ireader.domain.models.entities.*
         Chapter::class,
         SavedDownload::class,
         History::class,
-        Updates::class,
+        Update::class,
         RemoteKeys::class,
     ],
     version = 13,
@@ -31,6 +31,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract val downloadDao: DownloadDao
     abstract val catalogDao: CatalogDao
     abstract val historyDao: HistoryDao
+    abstract val updatesDao: UpdatesDao
 
     companion object {
         const val DATABASE_NAME = "infinity_db"

@@ -14,9 +14,9 @@ import androidx.compose.ui.Modifier
 import org.ireader.domain.models.DisplayMode
 import org.ireader.domain.models.LayoutType
 import org.ireader.domain.models.layouts
-import org.ireader.domain.view_models.explore.ExploreState
+import org.ireader.presentation.feature_explore.presentation.browse.viewmodel.ExploreState
 import org.ireader.presentation.feature_library.presentation.components.RadioButtonWithTitleComposable
-import org.ireader.presentation.presentation.ToolBar
+import org.ireader.presentation.presentation.Toolbar
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.AppTextField
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
@@ -40,7 +40,7 @@ fun BrowseTopAppBar(
     var topMenu by remember {
         mutableStateOf(false)
     }
-    ToolBar(
+    Toolbar(
         title = {
             if (!state.isSearchModeEnable) {
                 TopAppBarTitle(title = source.name)

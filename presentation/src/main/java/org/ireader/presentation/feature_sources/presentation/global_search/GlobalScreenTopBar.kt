@@ -8,7 +8,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalFocusManager
 import org.ireader.core.utils.Constants
 import org.ireader.core_ui.theme.AppColors
-import org.ireader.presentation.presentation.ToolBar
+import org.ireader.presentation.presentation.Toolbar
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.AppTextField
 
@@ -29,7 +29,7 @@ fun GlobalScreenTopBar(
     }
 
 
-    ToolBar(
+    Toolbar(
         title = {
             AppTextField(
                 query = query,

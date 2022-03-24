@@ -24,7 +24,7 @@ import kotlinx.coroutines.launch
 import org.ireader.domain.FetchType
 import org.ireader.domain.models.DisplayMode
 import org.ireader.domain.models.LayoutType
-import org.ireader.domain.view_models.explore.ExploreViewModel
+import org.ireader.presentation.feature_explore.presentation.browse.viewmodel.ExploreViewModel
 import org.ireader.presentation.feature_library.presentation.components.LayoutComposable
 import org.ireader.presentation.presentation.components.handlePagingResult
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton

@@ -9,7 +9,7 @@ import androidx.navigation.NavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.PagerState
 import kotlinx.coroutines.CoroutineScope
-import org.ireader.domain.view_models.library.LibraryViewModel
+import org.ireader.presentation.feature_library.presentation.viewmodel.LibraryViewModel
 
 @ExperimentalMaterialApi
 @ExperimentalPagerApi

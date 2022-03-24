@@ -7,8 +7,8 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import org.ireader.domain.models.layouts
-import org.ireader.domain.view_models.library.LibraryEvents
-import org.ireader.domain.view_models.library.LibraryViewModel
+import org.ireader.presentation.feature_library.presentation.viewmodel.LibraryEvents
+import org.ireader.presentation.feature_library.presentation.viewmodel.LibraryViewModel
 
 
 @Composable

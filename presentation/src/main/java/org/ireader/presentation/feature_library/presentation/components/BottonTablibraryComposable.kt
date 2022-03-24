@@ -11,7 +11,7 @@ import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.pagerTabIndicatorOffset
 import kotlinx.coroutines.launch
 import org.ireader.core_ui.ui.Colour.contentColor
-import org.ireader.domain.view_models.library.LibraryViewModel
+import org.ireader.presentation.feature_library.presentation.viewmodel.LibraryViewModel
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 
 typealias ComposableFun = @Composable () -> Unit

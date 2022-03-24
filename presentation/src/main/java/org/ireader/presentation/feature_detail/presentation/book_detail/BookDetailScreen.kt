@@ -27,10 +27,10 @@ import kotlinx.coroutines.flow.collectLatest
 import org.ireader.core.utils.UiEvent
 import org.ireader.core_ui.theme.TransparentStatusBar
 import org.ireader.domain.models.entities.Book
-import org.ireader.domain.view_models.detail.book_detail.BookDetailViewModel
 import org.ireader.presentation.feature_detail.presentation.book_detail.components.BookDetailScreenBottomBar
 import org.ireader.presentation.feature_detail.presentation.book_detail.components.CardTileComposable
 import org.ireader.presentation.feature_detail.presentation.book_detail.components.DotsFlashing
+import org.ireader.presentation.feature_detail.presentation.book_detail.viewmodel.BookDetailViewModel
 import org.ireader.presentation.presentation.components.ISnackBarHost
 import org.ireader.presentation.presentation.components.showLoading
 import org.ireader.presentation.ui.GlobalSearchScreenSpec

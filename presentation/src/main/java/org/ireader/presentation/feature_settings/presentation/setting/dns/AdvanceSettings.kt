@@ -23,11 +23,11 @@ import kotlinx.serialization.SerializationException
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.ireader.core.utils.*
-import org.ireader.domain.view_models.settings.BackUpBook
-import org.ireader.domain.view_models.settings.SettingViewModel
 import org.ireader.presentation.feature_detail.presentation.book_detail.components.AdvanceSettingItem
+import org.ireader.presentation.feature_settings.presentation.setting.BackUpBook
+import org.ireader.presentation.feature_settings.presentation.setting.SettingViewModel
 import org.ireader.presentation.feature_sources.presentation.extension.composables.TextSection
-import org.ireader.presentation.presentation.ToolBar
+import org.ireader.presentation.presentation.Toolbar
 import org.ireader.presentation.presentation.components.ISnackBarHost
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
@@ -116,7 +116,7 @@ fun AdvanceSettings(
 
     Scaffold(
         topBar = {
-            ToolBar(
+            Toolbar(
                 title = {
                     TopAppBarTitle(title = "Advance Settings")
                 },

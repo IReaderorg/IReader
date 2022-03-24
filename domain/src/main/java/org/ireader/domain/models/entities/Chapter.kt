@@ -18,7 +18,7 @@ data class Chapter(
     val read: Boolean = false,
     val bookmark: Boolean = false,
     val progress: Int = 0,
-    val dateUploaded: Long = 0,
+    val dateUpload: Long = 0,
     val dateFetch: Long = 0,
     val content: List<String> = emptyList(),
     val number: Float = -1f,
@@ -38,7 +38,7 @@ fun Chapter.toChapterInfo(): ChapterInfo {
         key = this.link,
         scanlator = this.translator,
         name = this.title,
-        dateUpload = this.dateUploaded,
+        dateUpload = this.dateUpload,
         number = this.number,
     )
 }

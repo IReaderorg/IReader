@@ -11,7 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.ireader.domain.models.SortType
-import org.ireader.domain.view_models.library.LibraryViewModel
+import org.ireader.presentation.feature_library.presentation.viewmodel.LibraryViewModel
 
 
 @Composable

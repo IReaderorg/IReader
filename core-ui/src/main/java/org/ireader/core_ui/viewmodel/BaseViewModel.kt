@@ -45,10 +45,13 @@ abstract class BaseViewModel : androidx.lifecycle.ViewModel() {
         return PreferenceMutableState(this, scope)
     }
 
-    fun <T> Flow<T>.asState(initialValue: T): State<T> {
+    fun <T> Flow<T>.asState(initialValue: T, onChange: (T) -> Unit = {}): State<T> {
         val state = mutableStateOf(initialValue)
         scope.launch {
-            collect { state.value = it }
+            collect {
+                state.value = it
+                onChange(it)
+            }
         }
         return state
     }

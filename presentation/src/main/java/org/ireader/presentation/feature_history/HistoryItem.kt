@@ -25,37 +25,37 @@ fun HistoryItem(
   onClickDelete: (HistoryWithRelations) -> Unit,
   onClickPlay: (HistoryWithRelations) -> Unit,
 ) {
-  MangaListItem(
-    modifier = Modifier
-      .clickable { onClickItem(history) }
-      .height(80.dp)
-      .fillMaxWidth()
-      .padding(end = 4.dp),
+  BookListItem(
+      modifier = Modifier
+          .clickable { onClickItem(history) }
+          .height(80.dp)
+          .fillMaxWidth()
+          .padding(end = 4.dp),
   ) {
-    MangaListItemImage(
-      modifier = Modifier
-        .fillMaxHeight()
-        .aspectRatio(3f / 4f)
-        .padding(start = 16.dp, top = 8.dp, bottom = 8.dp)
-        .clip(MaterialTheme.shapes.medium),
-      mangaCover = rememberBookCover(history)
-    )
-    MangaListItemColumn(
-      modifier = Modifier
-        .weight(1f)
-        .padding(start = 16.dp, end = 8.dp)
-    ) {
-      MangaListItemTitle(
-        text = history.bookTitle,
-        maxLines = 2,
-        fontWeight = FontWeight.SemiBold
+      BookListItemImage(
+          modifier = Modifier
+              .fillMaxHeight()
+              .aspectRatio(3f / 4f)
+              .padding(start = 16.dp, top = 8.dp, bottom = 8.dp)
+              .clip(MaterialTheme.shapes.medium),
+          mangaCover = rememberBookCover(history)
       )
+      BookListItemColumn(
+          modifier = Modifier
+              .weight(1f)
+              .padding(start = 16.dp, end = 8.dp)
+      ) {
+          BookListItemTitle(
+              text = history.bookTitle,
+              maxLines = 2,
+              fontWeight = FontWeight.SemiBold
+          )
 
-      MangaListItemSubtitle(
-        text = "Ch. ${history.chapterTitle} - ${
-          convertLongToTime(history.readAt, "HH:mm")
-        }"
-      )
+          BookListItemSubtitle(
+              text = "Ch. ${history.chapterTitle} - ${
+                  convertLongToTime(history.readAt, "HH:mm")
+              }"
+          )
     }
     IconButton(onClick = { onClickDelete(history) }) {
       Icon(imageVector = Icons.Outlined.Delete, contentDescription = "")

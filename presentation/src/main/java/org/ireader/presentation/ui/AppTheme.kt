@@ -12,7 +12,6 @@ import org.ireader.core_ui.theme.AppColors
 import org.ireader.core_ui.theme.LocalTransparentStatusBar
 import org.ireader.core_ui.theme.Shapes
 import org.ireader.core_ui.theme.Typography
-import org.ireader.domain.view_models.AppThemeViewModel
 
 
 @Composable

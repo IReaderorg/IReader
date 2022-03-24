@@ -9,8 +9,8 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.navigation.NavController
 import org.ireader.core.utils.Constants
 import org.ireader.core_ui.theme.AppColors
-import org.ireader.domain.view_models.history.HistoryViewModel
-import org.ireader.presentation.presentation.ToolBar
+import org.ireader.presentation.feature_history.viewmodel.HistoryViewModel
+import org.ireader.presentation.presentation.Toolbar
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.AppTextField
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
@@ -22,7 +22,7 @@ fun HistoryTopAppBar(
 ) {
     val focusManager = LocalFocusManager.current
 
-    ToolBar(
+    Toolbar(
         title = {
             if (!vm.searchMode) {
                 TopAppBarTitle(title = "History")

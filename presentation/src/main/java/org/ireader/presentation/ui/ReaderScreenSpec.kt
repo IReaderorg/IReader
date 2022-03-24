@@ -14,9 +14,9 @@ import org.ireader.core.R
 import org.ireader.core.utils.UiText
 import org.ireader.core_ui.theme.TransparentStatusBar
 import org.ireader.domain.ui.NavigationArgs
-import org.ireader.domain.view_models.reader.ReaderScreenViewModel
 import org.ireader.presentation.feature_reader.presentation.reader.ReadingScreen
 import org.ireader.presentation.feature_reader.presentation.reader.reverse_swip_refresh.rememberSwipeRefreshState
+import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.ReaderScreenViewModel
 import org.ireader.presentation.presentation.EmptyScreenComposable
 
 object ReaderScreenSpec : ScreenSpec {

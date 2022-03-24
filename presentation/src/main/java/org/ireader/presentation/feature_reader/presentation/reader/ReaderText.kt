@@ -25,11 +25,11 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import org.ireader.core_ui.ui.Colour.scrollingThumbColor
 import org.ireader.domain.models.entities.Chapter
-import org.ireader.domain.view_models.reader.ReaderEvent
-import org.ireader.domain.view_models.reader.ReaderScreenViewModel
 import org.ireader.presentation.feature_reader.presentation.reader.reverse_swip_refresh.ISwipeRefreshIndicator
 import org.ireader.presentation.feature_reader.presentation.reader.reverse_swip_refresh.MultiSwipeRefresh
 import org.ireader.presentation.feature_reader.presentation.reader.reverse_swip_refresh.SwipeRefreshState
+import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.ReaderEvent
+import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.ReaderScreenViewModel
 import org.ireader.presentation.utils.scroll.Carousel
 import org.ireader.presentation.utils.scroll.CarouselDefaults
 

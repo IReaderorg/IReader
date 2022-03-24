@@ -17,7 +17,7 @@ import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackBu
 fun EmptyScreenComposable(navController: NavController, errorResId: Int) {
     Scaffold(
         topBar = {
-            ToolBar(
+            Toolbar(
                 title = {},
                 navigationIcon = { TopAppBarBackButton(navController = navController) },
                 backgroundColor = MaterialTheme.colors.background,

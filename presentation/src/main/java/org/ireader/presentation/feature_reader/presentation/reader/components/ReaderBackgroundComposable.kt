@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import org.ireader.core_ui.theme.readerScreenBackgroundColors
-import org.ireader.domain.view_models.reader.ReaderScreenViewModel
+import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.ReaderScreenViewModel
 import org.ireader.presentation.presentation.reusable_composable.CaptionTextComposable
 
 @Composable

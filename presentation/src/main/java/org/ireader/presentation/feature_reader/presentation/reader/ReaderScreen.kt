@@ -21,11 +21,11 @@ import kotlinx.coroutines.launch
 import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
 import org.ireader.domain.FetchType
-import org.ireader.domain.view_models.reader.ReaderScreenViewModel
 import org.ireader.presentation.feature_reader.presentation.ScrollIndicatorSetting
 import org.ireader.presentation.feature_reader.presentation.reader.components.MainBottomSettingComposable
 import org.ireader.presentation.feature_reader.presentation.reader.components.ReaderSettingComposable
 import org.ireader.presentation.feature_reader.presentation.reader.reverse_swip_refresh.SwipeRefreshState
+import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.ReaderScreenViewModel
 import org.ireader.presentation.presentation.components.ISnackBarHost
 import org.ireader.presentation.presentation.reusable_composable.ErrorTextWithEmojis
 import org.ireader.presentation.ui.WebViewScreenSpec

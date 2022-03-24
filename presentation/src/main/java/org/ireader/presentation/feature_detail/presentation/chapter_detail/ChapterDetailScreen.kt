@@ -32,8 +32,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import org.ireader.core.utils.Constants
-import org.ireader.domain.view_models.detail.chapter_detail.ChapterDetailEvent
-import org.ireader.domain.view_models.detail.chapter_detail.ChapterDetailViewModel
+import org.ireader.presentation.feature_detail.presentation.chapter_detail.viewmodel.ChapterDetailEvent
+import org.ireader.presentation.feature_detail.presentation.chapter_detail.viewmodel.ChapterDetailViewModel
 import org.ireader.presentation.feature_settings.presentation.webview.CustomTextField
 import org.ireader.presentation.presentation.components.CenterTopAppBar
 import org.ireader.presentation.presentation.components.ChapterListItemComposable

@@ -11,9 +11,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectIndexed
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 import org.ireader.core.R
 import org.ireader.domain.catalog.service.CatalogStore
@@ -96,19 +94,19 @@ class DownloadService @AssistedInject constructor(
 
 
         NotificationManagerCompat.from(applicationContext).apply {
+
             builder.setProgress(chapters.size, 0, false)
             notify(ID_DOWNLOAD_CHAPTER_PROGRESS, builder.build())
             try {
                 chapters.forEachIndexed { index, chapter ->
                     if (chapter.content.joinToString().length < 10) {
-                        remoteUseCases.getRemoteReadingContent(chapter = chapter, source = source!!)
-                            .flowOn(Dispatchers.Main)
-                            .collectIndexed { i, chapterPage ->
-                                if (chapterPage.data != null) {
-                                    insertUseCases.insertChapter(chapter = chapter.copy(content = chapterPage.data))
-                                }
-                                if (chapterPage.uiText?.asString(context)?.isNotBlank() == true) {
-                                    throw Exception(chapterPage.uiText.asString(context))
+                        remoteUseCases.getRemoteReadingContent(
+                            chapter = chapter,
+                            source = source!!,
+                            onSuccess = { content ->
+                                withContext(Dispatchers.IO) {
+                                    insertUseCases.insertChapter(chapter = chapter.copy(content = content))
+
                                 }
                                 builder.setContentText(chapter.title)
                                 builder.setSubText(index.toString())
@@ -129,7 +127,15 @@ class DownloadService @AssistedInject constructor(
                                 withContext(Dispatchers.IO) {
                                     downloadUseCases.insertDownload(savedDownload.copy(priority = 1))
                                 }
+
+
+                            },
+                            onError = { message ->
+                                if (message?.asString(context)?.isNotBlank() == true) {
+                                    throw Exception(message.asString(context))
+                                }
                             }
+                        )
                         Timber.d("getNotifications: Successfully to downloaded ${bookResource.title} chapter ${chapter.title}")
                         delay(1000)
                     }
