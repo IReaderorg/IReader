@@ -1,12 +1,12 @@
 package org.ireader.domain.use_cases.remote
 
 import org.ireader.core.utils.UiText
+import org.ireader.core.utils.currentTimeToLong
 import org.ireader.core.utils.exceptionHandler
 import org.ireader.domain.R
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.entities.toChapterInfo
 import org.ireader.domain.repository.RemoteRepository
-import org.ireader.domain.utils.Resource
 import tachiyomi.source.Source
 import tachiyomi.source.model.Text
 import timber.log.Timber
@@ -17,7 +17,7 @@ class GetRemoteReadingContent @Inject constructor(private val remoteRepository: 
         chapter: Chapter,
         source: Source,
         onError: suspend (message: UiText?) -> Unit,
-        onSuccess: suspend (content: List<String>) -> Unit,
+        onSuccess: suspend (chapter: Chapter) -> Unit,
     ) {
         try {
             Timber.d("Timber: GetRemoteReadingContentUseCase was Called")
@@ -38,7 +38,7 @@ class GetRemoteReadingContent @Inject constructor(private val remoteRepository: 
 
             } else {
                 Timber.d("Timber: GetRemoteReadingContentUseCase was Finished Successfully")
-                onSuccess(content)
+                onSuccess(chapter.copy(content = content, dateFetch = currentTimeToLong()))
 
             }
         } catch (e: Exception) {
@@ -46,11 +46,4 @@ class GetRemoteReadingContent @Inject constructor(private val remoteRepository: 
         }
 
     }
-}
-
-
-interface ResourceCallBack<T> {
-    fun onSuccess(): Resource<T>
-
-    fun onFailure(): Resource<T>
 }

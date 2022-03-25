@@ -17,7 +17,7 @@ class HistoryUseCase @Inject constructor(private val historyRepository: HistoryR
         return historyRepository.findHistoryByBookId(bookId)
     }
 
-    override fun findHistoriesPaging(): Flow<List<HistoryWithRelations>> {
+    override fun findHistoriesPaging(): Flow<Map<String, List<HistoryWithRelations>>> {
         return historyRepository.findHistoriesPaging()
     }
 
@@ -40,8 +40,8 @@ class HistoryUseCase @Inject constructor(private val historyRepository: HistoryR
 
     }
 
-    override suspend fun deleteHistory(history: History) {
-        return historyRepository.deleteHistory(history)
+    override suspend fun deleteHistory(id: Long) {
+        return historyRepository.deleteHistory(id)
 
     }
 }

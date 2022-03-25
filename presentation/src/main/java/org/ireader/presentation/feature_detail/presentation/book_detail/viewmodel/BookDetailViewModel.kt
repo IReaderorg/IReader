@@ -17,20 +17,18 @@ import org.ireader.core.utils.UiText
 import org.ireader.core.utils.removeSameItemsFromList
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.catalog.interactor.GetLocalCatalog
-import org.ireader.domain.feature_services.DownloaderService.DownloadService
-import org.ireader.domain.feature_services.DownloaderService.DownloadService.Companion.DOWNLOADER_BOOK_ID
-import org.ireader.domain.feature_services.DownloaderService.DownloadService.Companion.DOWNLOADER_SERVICE_NAME
-import org.ireader.domain.feature_services.DownloaderService.DownloadService.Companion.DOWNLOADER_SOURCE_ID
+import org.ireader.domain.feature_services.downloaderService.DownloadService
+import org.ireader.domain.feature_services.downloaderService.DownloadService.Companion.DOWNLOADER_BOOK_ID
+import org.ireader.domain.feature_services.downloaderService.DownloadService.Companion.DOWNLOADER_SERVICE_NAME
+import org.ireader.domain.feature_services.downloaderService.DownloadService.Companion.DOWNLOADER_SOURCE_ID
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
-import org.ireader.domain.models.entities.Update
 import org.ireader.domain.models.entities.updateBook
 import org.ireader.domain.use_cases.fetchers.FetchUseCase
 import org.ireader.domain.use_cases.history.HistoryUseCase
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
-import org.ireader.domain.use_cases.local.updates.InsertUpdatesUseCase
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import tachiyomi.source.Source
 import timber.log.Timber
@@ -46,7 +44,6 @@ class BookDetailViewModel @Inject constructor(
     private val remoteUseCases: RemoteUseCases,
     private val historyUseCase: HistoryUseCase,
     private val deleteUseCase: DeleteUseCase,
-    private val insertUpdatesUseCase: InsertUpdatesUseCase,
     private val fetchUseCase: FetchUseCase,
     savedStateHandle: SavedStateHandle,
     private val getLocalCatalog: GetLocalCatalog,
@@ -206,16 +203,11 @@ class BookDetailViewModel @Inject constructor(
                     if (uniqueList.isNotEmpty()) {
                         withContext(Dispatchers.IO) {
                             deleteUseCase.deleteChaptersByBookId(book.id)
-                            insertUpdatesUseCase(uniqueList.map {
-                                Update.toUpdates(book,
-                                    it)
-                            })
+                            insertChaptersToLocal(uniqueList, book.id)
+                            getLocalChaptersByBookId(bookId = book.id)
                         }
 
                     }
-
-                    insertChaptersToLocal(uniqueList, book.id)
-                    getLocalChaptersByBookId(bookId = book.id)
                     toggleChaptersLoading(false)
                 }
             )

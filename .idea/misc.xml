@@ -9,6 +9,8 @@
         <entry key="../../../../../../../layout/compose-model-1647958300714.xml" value="0.4842592592592593" />
         <entry key="../../../../../../../layout/compose-model-1647958817418.xml" value="0.1" />
         <entry key="../../../../../../../layout/compose-model-1648026587857.xml" value="0.1" />
+        <entry key="../../../../../../../layout/compose-model-1648140290652.xml" value="0.7544642857142857" />
+        <entry key="../../../../../../../layout/compose-model-1648205757800.xml" value="0.1" />
         <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.124" />
         <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/drawable/baseline_close_24.xml" value="0.27025641025641023" />
         <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/drawable/baseline_info_20.xml" value="0.27025641025641023" />
@@ -41,6 +43,7 @@
         <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/core/src/main/res/drawable/ic_downloading.xml" value="0.124" />
         <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/core/src/main/res/drawable/ic_wallpaper.xml" value="0.1265" />
         <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/core/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.124" />
+        <entry key="app/src/main/res/drawable/ic_decrease_text_size.xml" value="0.156" />
       </map>
     </option>
   </component>

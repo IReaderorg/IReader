@@ -1,4 +1,4 @@
-package org.ireader.domain.feature_services.DownloaderService
+package org.ireader.domain.feature_services.downloaderService
 
 import android.content.Context
 import androidx.core.app.NotificationCompat
@@ -105,7 +105,7 @@ class DownloadService @AssistedInject constructor(
                             source = source!!,
                             onSuccess = { content ->
                                 withContext(Dispatchers.IO) {
-                                    insertUseCases.insertChapter(chapter = chapter.copy(content = content))
+                                    insertUseCases.insertChapter(chapter = content)
 
                                 }
                                 builder.setContentText(chapter.title)

@@ -163,6 +163,10 @@ fun AdvanceSettings(
                         }
                     }
             }
+            TextSection(text = "Reset Setting", toUpper = false)
+            AdvanceSettingItem(title = "Reset Reader Screen Settings") {
+                vm.deleteDefaultSettings()
+            }
         }
 
 

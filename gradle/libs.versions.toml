@@ -8,7 +8,7 @@ retrofit = "2.9.0"
 aboutLibraries = "10.0.0-b03"
 
 [libraries]
-
+desugarJdkLibs = "com.android.tools:desugar_jdk_libs:1.1.5"
 gradle-tools = "com.android.tools.build:gradle:7.1.2"
 gradle-kotlin = "org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.10"
 gradle-kotlinSerialization = "org.jetbrains.kotlin:kotlin-serialization:1.6.10"
@@ -58,7 +58,7 @@ firebase-analytic = { module = "com.google.firebase:firebase-analytics" }
 
 
 
-desugarJdkLibs = "com.android.tools:desugar_jdk_libs:1.1.5"
+
 timber = "com.jakewharton.timber:timber:5.0.1"
 multidex = "androidx.multidex:multidex:2.0.1"
 tachiyomi = "io.github.kazemcodes:core-androidRelease:1.0.1-SNAPSHOT"

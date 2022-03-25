@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
 import org.ireader.core.utils.Constants
 import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
-import org.ireader.domain.feature_services.DownloaderService.DownloadService
+import org.ireader.domain.feature_services.downloaderService.DownloadService
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.entities.SavedDownload

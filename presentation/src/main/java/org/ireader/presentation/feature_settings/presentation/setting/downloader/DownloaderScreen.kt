@@ -22,7 +22,7 @@ import androidx.work.WorkManager
 import kotlinx.coroutines.flow.collectLatest
 import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
-import org.ireader.domain.feature_services.DownloaderService.DownloadService
+import org.ireader.domain.feature_services.downloaderService.DownloadService
 import org.ireader.domain.utils.toast
 import org.ireader.presentation.presentation.components.ISnackBarHost
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton

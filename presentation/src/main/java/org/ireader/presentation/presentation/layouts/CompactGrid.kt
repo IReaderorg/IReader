@@ -3,7 +3,10 @@ package org.ireader.presentation.presentation.layouts
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.lazy.GridCells
+import androidx.compose.foundation.lazy.LazyGridState
+import androidx.compose.foundation.lazy.LazyVerticalGrid
+import androidx.compose.foundation.lazy.rememberLazyGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -46,18 +49,15 @@ fun CompactGridLayoutComposable(
 
                 }
             } else {
-                items(books) { book ->
-                    if (book != null) {
-                        BookImage(
-                            onClick = { onClick(book) }, book = book, ratio = 6f / 9f
-                        ) {
-                            if (isLocal && histories.find { it.bookId == book.id }?.readAt != 0L) {
-                                GoToLastReadComposable(onClick = { goToLatestChapter(book) })
-                            }
+                items(count = books.size) { index ->
+
+                    BookImage(
+                        onClick = { onClick(books[index]) }, book = books[index], ratio = 6f / 9f
+                    ) {
+                        if (isLocal && histories.find { it.bookId == books[index].id }?.readAt != 0L) {
+                            GoToLastReadComposable(onClick = { goToLatestChapter(books[index]) })
                         }
-
                     }
-
                 }
             }
 

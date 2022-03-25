@@ -6,7 +6,7 @@ import org.ireader.domain.repository.UpdatesRepository
 import javax.inject.Inject
 
 class SubscribeUpdates @Inject constructor(private val updatesRepository: UpdatesRepository) {
-    operator fun invoke(): Flow<List<Update>> {
+    operator fun invoke(): Flow<Map<String, List<Update>>> {
         return updatesRepository.subscribeAllUpdates()
     }
 }

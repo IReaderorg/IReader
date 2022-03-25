@@ -17,7 +17,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.ireader.core.utils.*
-import org.ireader.core_ui.theme.FontType
 import org.ireader.core_ui.theme.OrientationMode
 import org.ireader.core_ui.theme.fonts
 import org.ireader.core_ui.theme.readerScreenBackgroundColors
@@ -82,6 +81,8 @@ class ReaderScreenViewModel @Inject constructor(
 
     private fun readPreferences() {
         font = readerUseCases.selectedFontStateUseCase.read()
+        readerUseCases.selectedFontStateUseCase.save(0)
+
 
         this.fontSize = readerUseCases.fontSizeStateUseCase.read()
 
@@ -108,7 +109,7 @@ class ReaderScreenViewModel @Inject constructor(
                 saveFontSize(event.fontSizeEvent)
             }
             is ReaderEvent.ChangeFont -> {
-                saveFont(event.fontType)
+                saveFont(event.index)
             }
             is ReaderEvent.ToggleReaderMode -> {
                 toggleReaderMode(event.enable)
@@ -171,8 +172,8 @@ class ReaderScreenViewModel @Inject constructor(
                 source = source,
                 onSuccess = { content ->
                     if (content != null) {
-                        insertChapter(chapter.copy(content = content))
-                        setChapter(chapter.copy(content = content))
+                        insertChapter(content)
+                        setChapter(content)
                         toggleLoading(false)
                         toggleRemoteLoading(false)
                         toggleLocalLoaded(true)
@@ -501,9 +502,9 @@ class ReaderScreenViewModel @Inject constructor(
         }
     }
 
-    private fun saveFont(fontType: FontType) {
-        this.font = fontType
-        readerUseCases.selectedFontStateUseCase.save(fonts.indexOf(fontType))
+    private fun saveFont(index: Int) {
+        this.font = fonts[index]
+        readerUseCases.selectedFontStateUseCase.save(index)
 
     }
 

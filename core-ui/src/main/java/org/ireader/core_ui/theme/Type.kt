@@ -5,7 +5,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import org.ireader.core.R
+import org.ireader.core_ui.R
+
 
 // Set of Material typography styles to start with
 val poppins = FontFamily(
@@ -13,18 +14,28 @@ val poppins = FontFamily(
     Font(R.font.poppins_semibold, weight = FontWeight.SemiBold)
 )
 val sourceSansPro = FontFamily(
-    Font(R.font.source_sans_pro_w200_extra_light, weight = FontWeight.ExtraLight),
-    Font(R.font.source_sans_pro_lignt, weight = FontWeight.Light),
-    Font(R.font.source_sans_pro_resgular, weight = FontWeight.Normal),
-    Font(R.font.source_sans_pro_semi_bold, weight = FontWeight.SemiBold),
-    Font(R.font.source_sans_pro_bold_700, weight = FontWeight.Bold),
-    Font(R.font.source_sans_pro_900, weight = FontWeight.ExtraBold),
+    listOf(
+        Font(R.font.source_sans_pro_w200_extra_light, weight = FontWeight.ExtraLight),
+        Font(R.font.source_sans_pro_lignt, weight = FontWeight.Light),
+        Font(R.font.source_sans_pro_resgular, weight = FontWeight.Normal),
+        Font(R.font.source_sans_pro_semi_bold, weight = FontWeight.SemiBold),
+        Font(R.font.source_sans_pro_bold_700, weight = FontWeight.Bold),
+        Font(R.font.source_sans_pro_900, weight = FontWeight.ExtraBold),
+    )
 )
 val supermercadoOne = FontFamily(
-    Font(R.font.supermercado_one_regular, weight = FontWeight.Normal),
+    listOf(
+
+        Font(R.font.supermercado_one_regular, weight = FontWeight.Normal),
+    )
 )
 val comfortaa = FontFamily(
-    Font(R.font.comfortaa_variable_font_500, weight = FontWeight.Normal),
+    listOf(
+        Font(R.font.comfortaa_font_regular, weight = FontWeight.Normal),
+        Font(R.font.comfortaa_font_regular, weight = FontWeight.Medium),
+        Font(R.font.comfortaa_font_regular, weight = FontWeight.W400),
+        Font(R.font.comfortaa_font_regular, weight = FontWeight.SemiBold),
+    )
 )
 
 // Set of Material typography styles to start with
@@ -37,6 +48,7 @@ val fonts = listOf<FontType>(
     FontType.SupermercadoOne,
     FontType.Comfortaa
 )
+
 val readerScreenBackgroundColors = listOf<BackgroundColor>(
     BackgroundColor.Black,
     BackgroundColor.White,

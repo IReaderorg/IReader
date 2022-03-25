@@ -2,8 +2,8 @@ package org.ireader.domain.models.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import kotlinx.datetime.Clock
 import org.ireader.core.utils.Constants
-import org.ireader.core.utils.currentTimeToLong
 
 
 @Entity(tableName = Constants.UPDATE_TABLE)
@@ -34,7 +34,7 @@ data class Update(
                 chapterLink = chapter.link,
                 chapterTitle = chapter.title,
                 cover = book.cover,
-                date = currentTimeToLong(),
+                date = Clock.System.now().toEpochMilliseconds(),
                 favorite = book.favorite,
                 number = chapter.number,
                 sourceId = book.sourceId

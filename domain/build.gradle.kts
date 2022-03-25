@@ -25,7 +25,7 @@ dependencies {
     implementation(libs.tachiyomi)
 
 
-
+    implementation(kotlinx.datetime)
     implementation(compose.compose.activity)
     implementation(compose.compose.ui)
     implementation(compose.compose.runtime)

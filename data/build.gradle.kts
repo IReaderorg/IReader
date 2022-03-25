@@ -51,6 +51,7 @@ dependencies {
     implementation(androidx.material)
     implementation(kotlinx.serialization.json)
     implementation(kotlinx.reflect)
+    implementation(kotlinx.datetime)
     implementation(kotlinx.serialization.json)
     implementation(compose.compose.activity)
 

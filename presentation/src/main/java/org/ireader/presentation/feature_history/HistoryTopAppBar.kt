@@ -40,7 +40,7 @@ fun HistoryTopAppBar(
         },
         backgroundColor = AppColors.current.bars,
         contentColor = AppColors.current.onBars,
-        elevation = Constants.DEFAULT_ELEVATION,
+        elevation = Constants.DEFAULT_MAIN_ELEVATION,
         actions = {
             if (vm.searchMode) {
                 AppIconButton(

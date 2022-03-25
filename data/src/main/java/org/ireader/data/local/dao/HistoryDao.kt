@@ -34,6 +34,6 @@ interface HistoryDao {
     @Delete
     suspend fun deleteAllHistories(history: List<History>)
 
-    @Delete
-    suspend fun deleteHistory(history: History)
+    @Query("DELETE FROM history WHERE chapterId = :id")
+    suspend fun deleteHistory(id: Long)
 }

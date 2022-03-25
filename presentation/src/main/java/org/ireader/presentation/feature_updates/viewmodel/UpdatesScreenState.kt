@@ -8,9 +8,9 @@ import javax.inject.Inject
 
 
 open class UpdateStateImpl @Inject constructor() : UpdateState {
-    override var isLoading: Boolean by mutableStateOf(true)
+    override var isLoading: Boolean by mutableStateOf(false)
     override val isEmpty: Boolean by derivedStateOf { updates.isEmpty() }
-    override var updates: List<Update> by mutableStateOf(emptyList())
+    override var updates: Map<String, List<Update>> by mutableStateOf(emptyMap())
     override var selection: SnapshotStateList<Long> = mutableStateListOf()
     override val hasSelection: Boolean by derivedStateOf { selection.isNotEmpty() }
 }
@@ -19,7 +19,7 @@ open class UpdateStateImpl @Inject constructor() : UpdateState {
 interface UpdateState {
     val isLoading: Boolean
     val isEmpty: Boolean
-    var updates: List<Update>
+    var updates: Map<String, List<Update>>
     var selection: SnapshotStateList<Long>
     val hasSelection: Boolean
 

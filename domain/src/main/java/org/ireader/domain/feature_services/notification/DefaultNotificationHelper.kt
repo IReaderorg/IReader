@@ -29,7 +29,7 @@ class DefaultNotificationHelper @Inject constructor(
     ): Intent {
         return Intent(
             Intent.ACTION_VIEW,
-            "https://www.ireader.com/book_detail_route/$bookId/$sourceId".toUri(),
+            "ireader/book_detail_route/$bookId/$sourceId".toUri(),
             applicationContext,
             applicationContext::class.java
         )

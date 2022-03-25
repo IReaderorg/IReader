@@ -55,7 +55,7 @@ fun SettingScreen(
                 },
                 backgroundColor = MaterialTheme.colors.background,
                 contentColor = MaterialTheme.colors.onBackground,
-                elevation = Constants.DEFAULT_ELEVATION,
+                elevation = Constants.DEFAULT_MAIN_ELEVATION,
             )
         }) {
             Column(

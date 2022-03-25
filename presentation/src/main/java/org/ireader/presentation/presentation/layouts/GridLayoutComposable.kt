@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyGridState
 import androidx.compose.foundation.lazy.LazyVerticalGrid
-import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.paging.compose.LazyPagingItems
@@ -44,14 +43,12 @@ fun GridLayoutComposable(
                     }
                 }
             } else {
-                items(books) { book ->
-                    if (book != null) {
-                        BookImage(
-                            onClick = { onClick(book) }, book = book, ratio = 6f / 10f
-                        ) {
-                            if (book.lastUpdated > 1 && isLocal && histories.find { it.bookId == book.id }?.readAt != 0L) {
-                                GoToLastReadComposable(onClick = { goToLatestChapter(book) })
-                            }
+                items(count = books.size) { index ->
+                    BookImage(
+                        onClick = { onClick(books[index]) }, book = books[index], ratio = 6f / 10f
+                    ) {
+                        if (books[index].lastUpdated > 1 && isLocal && histories.find { it.bookId == books[index].id }?.readAt != 0L) {
+                            GoToLastReadComposable(onClick = { goToLatestChapter(books[index]) })
                         }
                     }
                 }

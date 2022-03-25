@@ -1,6 +1,8 @@
 package org.ireader.data.repository
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.mapLatest
 import org.ireader.data.local.dao.HistoryDao
 import org.ireader.domain.feature_services.io.HistoryWithRelations
 import org.ireader.domain.models.entities.History
@@ -15,8 +17,12 @@ class HistoryRepositoryImpl constructor(private val historyDao: HistoryDao) : Hi
         return historyDao.findHistoryByBookId(bookId)
     }
 
-    override fun findHistoriesPaging(): Flow<List<HistoryWithRelations>> {
-        return historyDao.findHistoriesPaging()
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun findHistoriesPaging():
+            Flow<Map<String, List<HistoryWithRelations>>> {
+        return historyDao.findHistoriesPaging().mapLatest { histories ->
+            histories.distinctBy { it.bookId }.groupBy { history -> history.date }
+        }
     }
 
     override suspend fun findHistories(): List<History> {
@@ -35,8 +41,8 @@ class HistoryRepositoryImpl constructor(private val historyDao: HistoryDao) : Hi
         return historyDao.deleteAllHistories(histories)
     }
 
-    override suspend fun deleteHistory(history: History) {
-        return historyDao.deleteHistory(history)
+    override suspend fun deleteHistory(chapterId: Long) {
+        return historyDao.deleteHistory(chapterId)
     }
 
 }

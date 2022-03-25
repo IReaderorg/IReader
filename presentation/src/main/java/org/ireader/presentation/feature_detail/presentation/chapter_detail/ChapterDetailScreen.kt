@@ -7,7 +7,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
@@ -152,20 +151,20 @@ fun ChapterDetailScreen(
                     .fillMaxSize(), state = scrollState) {
 
 
-                    items(items = viewModel.stateChapters) { chapter ->
-                        if (chapter != null) {
-                            ChapterListItemComposable(modifier = modifier,
-                                chapter = chapter, goTo = {
-                                    if (book != null) {
-                                        navController.navigate(ReaderScreenSpec.buildRoute(
-                                            bookId = book.id,
-                                            sourceId = book.sourceId,
-                                            chapterId = chapter.id,
-                                        ))
-                                    }
-                                },
-                                selected = chapter.id == viewModel.lastRead)
-                        }
+                    items(viewModel.stateChapters.size) { index ->
+                        ChapterListItemComposable(modifier = modifier,
+                            chapter = viewModel.stateChapters[index], goTo = {
+                                if (book != null) {
+                                    navController.navigate(ReaderScreenSpec.buildRoute(
+                                        bookId = book.id,
+                                        sourceId = book.sourceId,
+                                        chapterId = viewModel.stateChapters[index].id,
+                                    ))
+                                }
+                            },
+                            selected = viewModel.stateChapters[index].id == viewModel.lastRead)
+
+
                     }
                 }
                 if (viewModel.stateChapters.isEmpty()) {

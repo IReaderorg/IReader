@@ -6,7 +6,7 @@ import org.ireader.domain.models.entities.Update
 interface UpdatesRepository {
 
 
-    fun subscribeAllUpdates(): Flow<List<Update>>
+    fun subscribeAllUpdates(): Flow<Map<String, List<Update>>>
 
     suspend fun insertUpdate(update: Update)
     suspend fun insertUpdates(update: List<Update>)

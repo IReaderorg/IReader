@@ -1,16 +1,29 @@
 package org.ireader.presentation.feature_updates.component
 
+import android.text.format.DateUtils
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import org.ireader.core.utils.convertLongToTime
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atStartOfDayIn
 
 @Composable
-fun RelativeTimeText(modifier: Modifier = Modifier, date: Long) {
+fun RelativeTimeText(modifier: Modifier = Modifier, date: LocalDate) {
     Text(
-        text = convertLongToTime(date, format = "yyyy.MM.dd"),
+        text = date.asRelativeTimeString(),
         modifier = modifier,
         color = MaterialTheme.colors.onBackground
     )
+}
+
+fun LocalDate.asRelativeTimeString(): String {
+    return DateUtils
+        .getRelativeTimeSpanString(
+            atStartOfDayIn(TimeZone.currentSystemDefault()).toEpochMilliseconds(),
+            System.currentTimeMillis(),
+            DateUtils.DAY_IN_MILLIS
+        )
+        .toString()
 }

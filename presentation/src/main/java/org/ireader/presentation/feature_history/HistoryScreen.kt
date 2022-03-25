@@ -1,17 +1,17 @@
 package org.ireader.presentation.feature_history
 
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import org.ireader.core.utils.convertLongToTime
+import org.ireader.core.utils.UiText
+import org.ireader.core_ui.ui.EmptyScreen
+import org.ireader.core_ui.ui.LoadingScreen
 import org.ireader.domain.feature_services.io.HistoryWithRelations
-import org.ireader.domain.models.entities.History
 import org.ireader.presentation.feature_history.viewmodel.HistoryViewModel
-import org.ireader.presentation.feature_sources.presentation.extension.composables.TextSection
 import org.ireader.presentation.ui.BookDetailScreenSpec
 import org.ireader.presentation.ui.ReaderScreenSpec
 
@@ -23,8 +23,7 @@ fun HistoryScreen(
 ) {
     val histories = vm.history
     val dateFormat = "yyyy/MM/dd"
-    val times =
-        histories.map { convertLongToTime(it.readAt, dateFormat) }.distinct()
+
     val historyItem: LazyListScope.(HistoryWithRelations) -> Unit = { history ->
         item {
             HistoryItem(history = history,
@@ -37,10 +36,7 @@ fun HistoryScreen(
                     )
                 },
                 onClickDelete = {
-                    vm.deleteHistory(History(
-                        history.bookId,
-                        history.chapterId,
-                        history.readAt))
+                    vm.deleteHistory(it.chapterId)
                 },
                 onClickPlay = {
                     navController.navigate(
@@ -57,23 +53,34 @@ fun HistoryScreen(
     Scaffold(
         topBar = { HistoryTopAppBar(navController = navController, vm = vm) }
     ) {
-        LazyColumn {
-
-            for (time in times) {
-                item {
-                    TextSection(
-                        text = time,
-                    )
-                }
-                for (history in histories.filter {
-                    convertLongToTime(it.readAt,
-                        format = dateFormat) == time
-                }) {
-                    historyItem(history)
-                }
+        Crossfade(targetState = Pair(vm.isLoading, vm.isEmpty)) { (isLoading, isEmpty) ->
+            when {
+                isLoading -> LoadingScreen()
+                isEmpty -> EmptyScreen(UiText.DynamicString("No History is Available."))
+                else -> HistoryContent(
+                    state = vm,
+                    onClickItem = { history ->
+                        navController.navigate(
+                            BookDetailScreenSpec.buildRoute(
+                                history.sourceId,
+                                history.bookId
+                            )
+                        )
+                    },
+                    onClickDelete = { history ->
+                        vm.deleteHistory(history.chapterId)
+                    },
+                    onClickPlay = { history ->
+                        navController.navigate(
+                            ReaderScreenSpec.buildRoute(
+                                history.bookId,
+                                history.sourceId,
+                                history.chapterId
+                            )
+                        )
+                    }
+                )
             }
-
-
         }
     }
 }

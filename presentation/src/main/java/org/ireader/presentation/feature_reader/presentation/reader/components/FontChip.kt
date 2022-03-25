@@ -6,7 +6,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -42,20 +41,20 @@ fun FontChip(
             style = TextStyle(fontWeight = FontWeight.W400)
         )
         LazyRow {
-            items(fonts) { font ->
+            items(count = fonts.size) { index ->
                 Spacer(modifier = modifier.width(10.dp))
                 Box(modifier = modifier
                     .height(30.dp)
                     .clip(RectangleShape)
                     .background(MaterialTheme.colors.background)
                     .border(2.dp,
-                        if (font == viewModel.font) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground.copy(
+                        if (fonts[index] == viewModel.font) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground.copy(
                             .4f),
                         CircleShape)
-                    .clickable { viewModel.onEvent(ReaderEvent.ChangeFont(font)) },
+                    .clickable { viewModel.onEvent(ReaderEvent.ChangeFont(index)) },
                     contentAlignment = Alignment.Center
                 ) {
-                    CaptionTextComposable(text = font.fontName,
+                    CaptionTextComposable(text = fonts[index].fontName,
                         maxLine = 1,
                         align = TextAlign.Center,
                         modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp))

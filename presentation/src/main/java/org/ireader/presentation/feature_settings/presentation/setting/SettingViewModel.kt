@@ -10,6 +10,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToJsonElement
 import org.ireader.core.utils.convertLongToTime
+import org.ireader.core_ui.theme.OrientationMode
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.feature_services.io.LibraryCovers
 import org.ireader.domain.models.entities.Book
@@ -18,6 +19,7 @@ import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetBookUseCases
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
+import org.ireader.domain.use_cases.preferences.reader_preferences.ReaderPrefUseCases
 import org.ireader.domain.utils.launchIO
 import java.util.*
 import javax.inject.Inject
@@ -29,6 +31,7 @@ class SettingViewModel @Inject constructor(
     private val booksUseCasa: LocalGetBookUseCases,
     private val chapterUseCase: LocalGetChapterUseCase,
     private val insertUseCases: LocalInsertUseCases,
+    private val prefUseCases: ReaderPrefUseCases,
 
     ) : BaseViewModel() {
     private val _state = mutableStateOf(SettingState())
@@ -48,6 +51,18 @@ class SettingViewModel @Inject constructor(
     fun deleteAllChapters() {
         viewModelScope.launchIO {
             deleteUseCase.deleteAllChapters()
+        }
+    }
+
+    fun deleteDefaultSettings() {
+        viewModelScope.launchIO {
+            prefUseCases.selectedFontStateUseCase.save(0)
+            prefUseCases.fontHeightUseCase.save(25)
+            prefUseCases.fontSizeStateUseCase.save(18)
+            prefUseCases.paragraphDistanceUseCase.save(2)
+            prefUseCases.orientationUseCase.save(OrientationMode.Portrait)
+            prefUseCases.paragraphIndentUseCase.save(8)
+            prefUseCases.scrollModeUseCase.save(true)
         }
     }
 

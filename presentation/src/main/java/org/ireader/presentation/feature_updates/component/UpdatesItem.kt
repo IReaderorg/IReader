@@ -71,12 +71,15 @@ fun UpdatesItem(
                 fontWeight = FontWeight.SemiBold
             )
             BookListItemSubtitle(
-                text = book.number.toString() + book.bookTitle
+                text = if (book.number == -1F) book.chapterTitle else "${book.number}  ${book.chapterTitle}"
             )
         }
 
-        IconButton(onClick = { onClickDownload(book) }) {
-            Icon(imageVector = Icons.Outlined.Download, contentDescription = "")
+        if (book.chapterDateUpload == 0L) {
+            IconButton(onClick = { onClickDownload(book) }) {
+                Icon(imageVector = Icons.Outlined.Download, contentDescription = "")
+            }
         }
+
     }
 }

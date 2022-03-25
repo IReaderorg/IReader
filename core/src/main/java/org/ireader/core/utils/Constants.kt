@@ -8,6 +8,7 @@ object Constants {
 
 
     val DEFAULT_ELEVATION = 0.dp
+    val DEFAULT_MAIN_ELEVATION = 1.dp
     const val CLOUDFLARE_LOG = "Performance & security by Cloudflare"
 
     const val ERROR_LOG = "ERROR_LOG "
