@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.ireader.core.utils.UiText
 
+/** All credit belongs to tachiyomi**/
 private val kaomojis = listOf(
     "(･o･;)",
     "Σ(ಠ_ಠ)",

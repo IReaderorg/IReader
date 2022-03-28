@@ -10,7 +10,7 @@ interface HistoryDao {
     @Query("SELECT * FROM history WHERE chapterId = :id LIMIT 1")
     suspend fun findHistory(id: Long): History?
 
-    @Query("SELECT history.* FROM history GROUP  By history.chapterId HAVING bookId = :bookId  ORDER BY readAt DESC LIMIT 1")
+    @Query("SELECT history.* FROM history GROUP  By history.chapterId HAVING bookId = :bookId  ORDER BY history.readAt DESC LIMIT 1")
     suspend fun findHistoryByBookId(bookId: Long): History?
 
     @Query("SELECT * FROM history")
@@ -18,11 +18,11 @@ interface HistoryDao {
 
 
     @Query("""SELECT history.*, library.title as bookTitle, library.sourceId, library.cover, library.favorite, chapter.title as chapterTitle,
-    date(ROUND(readAt / 1000), 'unixepoch', 'localtime') AS date
+    date(ROUND(history.readAt / 1000), 'unixepoch', 'localtime') AS date
     FROM history
     JOIN library ON history.bookId = library.id
     JOIN chapter ON history.chapterId = chapter.id
-    ORDER BY readAt DESC""")
+    ORDER BY history.readAt DESC""")
     fun findHistoriesPaging(): kotlinx.coroutines.flow.Flow<List<HistoryWithRelations>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

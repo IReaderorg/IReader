@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
+import org.ireader.core.utils.Constants
 import org.ireader.presentation.R
 import org.ireader.presentation.feature_updates.viewmodel.UpdateState
 import org.ireader.presentation.presentation.Toolbar
@@ -55,20 +56,21 @@ private fun UpdatesSelectionToolbar(
   onClickInvertSelection: () -> Unit,
 ) {
   Toolbar(
-    title = { TopAppBarTitle(title = "$selectionSize") },
-    navigationIcon = {
-      IconButton(onClick = onClickCancelSelection) {
-        Icon(Icons.Default.Close, contentDescription = null)
+      title = { TopAppBarTitle(title = "$selectionSize") },
+      navigationIcon = {
+          IconButton(onClick = onClickCancelSelection) {
+              Icon(Icons.Default.Close, contentDescription = null)
+          }
+      },
+      elevation = Constants.DEFAULT_ELEVATION,
+      actions = {
+          IconButton(onClick = onClickSelectAll) {
+              Icon(Icons.Default.SelectAll, contentDescription = null)
+          }
+          IconButton(onClick = onClickInvertSelection) {
+              Icon(Icons.Default.FlipToBack, contentDescription = null)
+          }
       }
-    },
-    actions = {
-      IconButton(onClick = onClickSelectAll) {
-        Icon(Icons.Default.SelectAll, contentDescription = null)
-      }
-      IconButton(onClick = onClickInvertSelection) {
-        Icon(Icons.Default.FlipToBack, contentDescription = null)
-      }
-    }
   )
 }
 

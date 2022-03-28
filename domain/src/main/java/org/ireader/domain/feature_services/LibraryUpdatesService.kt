@@ -3,6 +3,7 @@ package org.ireader.domain.feature_services
 import android.content.Context
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
@@ -27,8 +28,8 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.DurationUnit
 import kotlin.time.ExperimentalTime
 
-
-class CheckBookUpdatesService @AssistedInject constructor(
+@HiltWorker
+class LibraryUpdatesService @AssistedInject constructor(
     @Assisted private val context: Context,
     @Assisted params: WorkerParameters,
     private val getBookUseCases: LocalGetBookUseCases,
@@ -48,7 +49,7 @@ class CheckBookUpdatesService @AssistedInject constructor(
     override suspend fun doWork(): Result {
         val libraryBooks = getBookUseCases.findAllInLibraryBooks()
 
-        val cancelDownloadIntent = WorkManager.getInstance(applicationContext)
+        val cancelIntent = WorkManager.getInstance(applicationContext)
             .createCancelPendingIntent(id)
         val builder =
             NotificationCompat.Builder(applicationContext,
@@ -59,7 +60,7 @@ class CheckBookUpdatesService @AssistedInject constructor(
                 priority = NotificationCompat.PRIORITY_LOW
                 setAutoCancel(true)
                 setOngoing(true)
-                addAction(R.drawable.baseline_close_24, "Cancel", cancelDownloadIntent)
+                addAction(R.drawable.baseline_close_24, "Cancel", cancelIntent)
                 setContentIntent(defaultNotificationHelper.openDownloadsPendingIntent)
             }
 
@@ -136,7 +137,7 @@ class CheckBookUpdatesService @AssistedInject constructor(
                 Notifications.ID_LIBRARY_PROGRESS,
                 NotificationCompat.Builder(applicationContext,
                     Notifications.CHANNEL_DOWNLOADER_COMPLETE).apply {
-                    setContentTitle("Library Updates was finished Successfully.")
+                    setContentTitle("${libraryBooks.size} book was update successfully.")
                     setSmallIcon(R.drawable.ic_downloading)
                     priority = NotificationCompat.PRIORITY_DEFAULT
                     setSubText("It was Updated Successfully")

@@ -76,11 +76,10 @@ WHERE library.favorite = 1
     fun subscribeLastReadChapter(bookId: Long): Flow<Chapter?>
 
     @Query("""
-        SELECT chapter.* , MAX(history.readAt) as lastRead, history.*
-        from chapter 
-         LEFT JOIN history ON history.bookId = chapter.bookId
-        GROUP BY chapter.id
-        HAVING chapter.bookId == :bookId  AND chapter.id = history.chapterId
+        SELECT chapter.* , MAX(chapter.readAt) as lastRead
+        from chapter
+        GROUP By chapter.id
+        HAVING chapter.readAt == lastRead AND chapter.bookId = :bookId
         LIMIT 1
     """)
     suspend fun findLastReadChapter(bookId: Long): Chapter?

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 13,
-    "identityHash": "fa1282af4056acc4b27481edbce77ef3",
+    "identityHash": "8bcbb7c5073388da5a0a8fcaf4f0c940",
     "entities": [
       {
         "tableName": "library",
@@ -234,7 +234,7 @@
       },
       {
         "tableName": "chapter",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `bookId` INTEGER NOT NULL, `link` TEXT NOT NULL, `title` TEXT NOT NULL, `read` INTEGER NOT NULL, `bookmark` INTEGER NOT NULL, `progress` INTEGER NOT NULL, `dateUpload` INTEGER NOT NULL, `dateFetch` INTEGER NOT NULL, `content` TEXT NOT NULL, `number` REAL NOT NULL, `translator` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `bookId` INTEGER NOT NULL, `link` TEXT NOT NULL, `title` TEXT NOT NULL, `read` INTEGER NOT NULL, `bookmark` INTEGER NOT NULL, `progress` INTEGER NOT NULL, `dateUpload` INTEGER NOT NULL, `dateFetch` INTEGER NOT NULL, `readAt` INTEGER NOT NULL, `content` TEXT NOT NULL, `number` REAL NOT NULL, `translator` TEXT NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -287,6 +287,12 @@
           {
             "fieldPath": "dateFetch",
             "columnName": "dateFetch",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "readAt",
+            "columnName": "readAt",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -394,17 +400,17 @@
       },
       {
         "tableName": "history",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`chapterId` INTEGER NOT NULL, `bookId` INTEGER NOT NULL, `readAt` INTEGER NOT NULL, PRIMARY KEY(`chapterId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`bookId` INTEGER NOT NULL, `chapterId` INTEGER NOT NULL, `readAt` INTEGER NOT NULL, PRIMARY KEY(`bookId`))",
         "fields": [
           {
-            "fieldPath": "chapterId",
-            "columnName": "chapterId",
+            "fieldPath": "bookId",
+            "columnName": "bookId",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "bookId",
-            "columnName": "bookId",
+            "fieldPath": "chapterId",
+            "columnName": "chapterId",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -417,7 +423,7 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "chapterId"
+            "bookId"
           ],
           "autoGenerate": false
         },
@@ -558,7 +564,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'fa1282af4056acc4b27481edbce77ef3')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8bcbb7c5073388da5a0a8fcaf4f0c940')"
     ]
   }
 }

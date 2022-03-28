@@ -57,8 +57,8 @@ fun ReaderScreenDrawer(
             items(items = chapters) { chapterItem ->
                     ChapterListItemComposable(modifier = modifier,
                         chapter = chapterItem,
-                        goTo = { onChapter(chapterItem) },
-                        selected = chapter?.id == chapterItem.id)
+                        onItemClick = { onChapter(chapterItem) },
+                        isLastRead = chapter?.id == chapterItem.id)
             }
         }
         if (chapters.isEmpty()) {

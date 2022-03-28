@@ -62,7 +62,7 @@ fun ReadingScreen(
 
     DisposableEffect(key1 = true) {
         onDispose {
-            vm.restoreSetting(context)
+            vm.restoreSetting(context, scrollState)
         }
     }
     LaunchedEffect(key1 = scaffoldState.drawerState.targetValue) {
@@ -109,11 +109,18 @@ fun ReadingScreen(
     LaunchedEffect(key1 = vm.autoBrightnessMode) {
         vm.readBrightness(context)
     }
-
+    LaunchedEffect(key1 = vm.stateChapter) {
+        if (chapter != null) {
+            scrollState.scrollBy(chapter.progress.toFloat())
+        }
+    }
     LaunchedEffect(key1 = true) {
         vm.readOrientation(context)
         vm.readBrightness(context)
         vm.readImmersiveMode(context)
+        if (chapter != null) {
+            scrollState.scrollBy(chapter.progress.toFloat())
+        }
 
         vm.eventFlow.collectLatest { event ->
             when (event) {
@@ -227,32 +234,32 @@ fun ReadingScreen(
         drawerBackgroundColor = MaterialTheme.colors.background,
         drawerContent = {
 
-                ReaderScreenDrawer(
-                    modifier = Modifier.statusBarsPadding(),
-                    onReverseIcon = {
-                        if (chapter != null) {
-                            vm.reverseChapters()
-                            scope.launch {
-                                vm.getLocalChaptersByPaging(chapter.bookId)
-                            }
-                        }
-                    },
-                    onChapter = { ch ->
+            ReaderScreenDrawer(
+                modifier = Modifier.statusBarsPadding(),
+                onReverseIcon = {
+                    if (chapter != null) {
+                        vm.reverseChapters()
                         scope.launch {
-                            vm.getChapter(ch.id,
-                                source = source)
+                            vm.getLocalChaptersByPaging(chapter.bookId)
                         }
-                        coroutineScope.launch {
-                            scrollState.scrollToItem(0, 0)
-                        }
-                        vm.updateChapterSliderIndex(vm.getCurrentIndexOfChapter(
-                            ch))
-                    },
-                    chapter = chapter,
-                    source = source,
-                    chapters = chapters,
-                    drawerScrollState = drawerScrollState
-                )
+                    }
+                },
+                onChapter = { ch ->
+                    scope.launch {
+                        vm.getChapter(ch.id,
+                            source = source)
+                    }
+                    coroutineScope.launch {
+                        scrollState.scrollToItem(0, 0)
+                    }
+                    vm.updateChapterSliderIndex(vm.getCurrentIndexOfChapter(
+                        ch))
+                },
+                chapter = chapter,
+                source = source,
+                chapters = chapters,
+                drawerScrollState = drawerScrollState
+            )
 
         }
     ) {

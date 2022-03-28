@@ -1,5 +1,6 @@
 package org.ireader.presentation.feature_library.presentation.viewmodel
 
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -17,6 +18,7 @@ import javax.inject.Inject
 interface LibraryState {
     var isLoading: Boolean
     var books: List<Book>
+    val isEmpty: Boolean
     var searchedBook: List<Book>
     var error: UiText
     var layout: LayoutType
@@ -32,6 +34,7 @@ interface LibraryState {
 open class LibraryStateImpl @Inject constructor() : LibraryState {
     override var isLoading by mutableStateOf<Boolean>(false)
     override var books by mutableStateOf<List<Book>>(emptyList())
+    override val isEmpty: Boolean by derivedStateOf { books.isEmpty() }
     override var searchedBook by mutableStateOf<List<Book>>(emptyList())
     override var error by mutableStateOf<UiText>(UiText.StringResource(R.string.no_error))
     override var layout by mutableStateOf<LayoutType>(DisplayMode.GridLayout.layout)

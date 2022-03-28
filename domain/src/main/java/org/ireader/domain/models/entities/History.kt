@@ -8,7 +8,7 @@ import org.ireader.core.utils.Constants
 @Entity(tableName = Constants.HISTORY_TABLE)
 data class History(
     @PrimaryKey(autoGenerate = false)
-    val chapterId: Long,
     val bookId: Long,
+    val chapterId: Long,
     val readAt: Long,
 )

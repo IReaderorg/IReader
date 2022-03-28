@@ -3,12 +3,10 @@ package org.ireader.presentation.feature_detail.presentation.chapter_detail.view
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.PagingData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -16,7 +14,6 @@ import org.ireader.core.R
 import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
 import org.ireader.domain.models.entities.Book
-import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
@@ -37,14 +34,15 @@ class ChapterDetailViewModel @Inject constructor(
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
 
-    private val _chapters = MutableStateFlow<PagingData<Chapter>>(PagingData.empty())
-    val chapters = _chapters
 
     init {
         val sourceId = savedStateHandle.get<Long>(NavigationArgs.sourceId.name)
         val bookId = savedStateHandle.get<Long>(NavigationArgs.bookId.name)
         if (bookId != null && sourceId != null) {
-            getLocalBookById(bookId)
+            viewModelScope.launch {
+                getLocalBookById(bookId)
+
+            }
         } else {
             viewModelScope.launch {
                 showSnackBar(UiText.StringResource(R.string.the_source_is_not_found))
@@ -55,7 +53,7 @@ class ChapterDetailViewModel @Inject constructor(
     fun onEvent(event: ChapterDetailEvent) {
         when (event) {
             is ChapterDetailEvent.ToggleOrder -> {
-                this.stateChapters = this.stateChapters.reversed()
+                this.chapters = this.chapters.reversed()
                 toggleAsc()
                 book?.let { getLocalChaptersByPaging(isAsc = isAsc) }
             }
@@ -71,7 +69,7 @@ class ChapterDetailViewModel @Inject constructor(
         toggleAsc()
         book?.let { getLocalChaptersByPaging(isAsc = isAsc) }
         viewModelScope.launch(Dispatchers.IO) {
-            insertUseCases.insertChapters(stateChapters.reversed())
+            insertUseCases.insertChapters(chapters.reversed())
         }
     }
 
@@ -79,7 +77,7 @@ class ChapterDetailViewModel @Inject constructor(
         this.isAsc = !this.isAsc
     }
 
-    fun getLocalBookById(id: Long) {
+    private suspend fun getLocalBookById(id: Long) {
         viewModelScope.launch {
             getBookUseCases.subscribeBookById(id = id).first { book ->
                 if (book != null) {
@@ -115,7 +113,7 @@ class ChapterDetailViewModel @Inject constructor(
                     isAsc = isAsc,
                     query = query
                 ).collect { chapters ->
-                    stateChapters = chapters
+                    this@ChapterDetailViewModel.chapters = chapters
                 }
 
             }

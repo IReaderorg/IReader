@@ -10,8 +10,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.catalog.interactor.GetLocalCatalog
-import org.ireader.domain.feature_services.CheckBookUpdatesService
-import org.ireader.domain.feature_services.CheckBookUpdatesService.Companion.LibraryUpdateTag
+import org.ireader.domain.feature_services.LibraryUpdatesService
+import org.ireader.domain.feature_services.LibraryUpdatesService.Companion.LibraryUpdateTag
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.entities.Update
 import org.ireader.domain.repository.UpdatesRepository
@@ -78,7 +78,7 @@ class UpdatesViewModel @Inject constructor(
 
     fun refreshUpdate(context: Context) {
         work =
-            OneTimeWorkRequestBuilder<CheckBookUpdatesService>().apply {
+            OneTimeWorkRequestBuilder<LibraryUpdatesService>().apply {
                 addTag(LibraryUpdateTag)
             }.build()
         WorkManager.getInstance(context).enqueueUniqueWork(

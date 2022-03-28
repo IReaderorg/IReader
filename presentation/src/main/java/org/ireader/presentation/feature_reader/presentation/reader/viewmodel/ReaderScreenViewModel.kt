@@ -5,6 +5,8 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.view.WindowManager
+import androidx.compose.foundation.gestures.scrollBy
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.view.ViewCompat
@@ -32,6 +34,7 @@ import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.preferences.reader_preferences.ReaderPrefUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
+import org.ireader.domain.utils.launchIO
 import tachiyomi.source.Source
 import timber.log.Timber
 import javax.inject.Inject
@@ -591,7 +594,7 @@ class ReaderScreenViewModel @Inject constructor(
         }
     }
 
-    fun restoreSetting(context: Context) {
+    fun restoreSetting(context: Context, scrollState: LazyListState) {
         val activity = context.findComponentActivity()
         if (activity != null) {
             val window = activity.window
@@ -601,8 +604,21 @@ class ReaderScreenViewModel @Inject constructor(
             activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
             window.attributes = layoutParams
         }
+        viewModelScope.launchIO {
+            val chapter = stateChapter
+            if (chapter != null) {
+                insertChapter(chapter.copy(progress = scrollState.firstVisibleItemScrollOffset))
+            }
+        }
 
 
+    }
+
+    suspend fun restoreScrollState(scrollState: LazyListState) {
+        val chapter = stateChapter
+        if (chapter != null) {
+            scrollState.scrollBy(chapter.progress.toFloat())
+        }
     }
 
     override fun onDestroy() {
@@ -631,20 +647,15 @@ class ReaderScreenViewModel @Inject constructor(
     }
 
     suspend fun insertBook(book: Book) {
-        viewModelScope.launch(Dispatchers.IO) {
             insertUseCases.insertBook(book)
-        }
     }
 
     suspend fun insertChapter(chapter: Chapter) {
-        viewModelScope.launch(Dispatchers.IO) {
             insertUseCases.insertChapter(chapter)
-        }
     }
 
     private fun setPrefScrollPosition(position: Int) {
         this.scrollPosition = position
-
     }
 
     private fun toggleIsAsc(isAsc: Boolean) {

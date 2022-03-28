@@ -1,6 +1,6 @@
 package org.ireader.presentation.presentation.components
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PublishedWithChanges
@@ -9,25 +9,31 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import org.ireader.core_ui.modifier.selectedBackground
 import org.ireader.domain.models.entities.Chapter
 
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 fun ChapterListItemComposable(
     modifier: Modifier = Modifier,
     chapter: Chapter,
-    goTo: () -> Unit,
-    selected: Boolean = false,
+    onItemClick: () -> Unit,
+    onLongClick: () -> Unit = {},
+    isLastRead: Boolean = false,
+    isSelected: Boolean = false,
 ) {
     ListItem(
-        modifier = modifier.clickable {
-            goTo()
-        },
+        modifier = modifier
+            .combinedClickable(
+                onClick = { onItemClick() },
+                onLongClick = { onLongClick() }
+            )
+            .selectedBackground(isSelected),
         text = {
             Text(
                 text = chapter.title,
-                color = if (!selected) {
+                color = if (!isLastRead) {
                     if (chapter.read) MaterialTheme.colors.onBackground.copy(
                         alpha = .4f) else MaterialTheme.colors.onBackground
                 } else {
@@ -39,11 +45,14 @@ fun ChapterListItemComposable(
             )
         },
         trailing = {
-            Icon(
-                imageVector = Icons.Default.PublishedWithChanges,
-                contentDescription = "Cached",
-                tint = if (chapter.content.joinToString(" , ").length > 10) MaterialTheme.colors.onBackground else MaterialTheme.colors.background,
-            )
+            if (chapter.content.joinToString(" , ").length > 10) {
+                Icon(
+                    imageVector = Icons.Default.PublishedWithChanges,
+                    contentDescription = "Cached",
+                    tint = MaterialTheme.colors.onBackground,
+                )
+            }
+
         },
         secondaryText = {
 

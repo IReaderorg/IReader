@@ -1,7 +1,6 @@
 package org.ireader.presentation.feature_history
 
 import androidx.compose.animation.Crossfade
-import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
@@ -10,7 +9,6 @@ import androidx.navigation.NavController
 import org.ireader.core.utils.UiText
 import org.ireader.core_ui.ui.EmptyScreen
 import org.ireader.core_ui.ui.LoadingScreen
-import org.ireader.domain.feature_services.io.HistoryWithRelations
 import org.ireader.presentation.feature_history.viewmodel.HistoryViewModel
 import org.ireader.presentation.ui.BookDetailScreenSpec
 import org.ireader.presentation.ui.ReaderScreenSpec
@@ -21,35 +19,7 @@ fun HistoryScreen(
     navController: NavController,
     vm: HistoryViewModel = hiltViewModel(),
 ) {
-    val histories = vm.history
-    val dateFormat = "yyyy/MM/dd"
 
-    val historyItem: LazyListScope.(HistoryWithRelations) -> Unit = { history ->
-        item {
-            HistoryItem(history = history,
-                onClickItem = {
-                    navController.navigate(
-                        BookDetailScreenSpec.buildRoute(
-                            history.sourceId,
-                            history.bookId
-                        )
-                    )
-                },
-                onClickDelete = {
-                    vm.deleteHistory(it.chapterId)
-                },
-                onClickPlay = {
-                    navController.navigate(
-                        ReaderScreenSpec.buildRoute(
-                            history.bookId,
-                            history.sourceId,
-                            history.chapterId
-                        )
-                    )
-                })
-        }
-
-    }
     Scaffold(
         topBar = { HistoryTopAppBar(navController = navController, vm = vm) }
     ) {
