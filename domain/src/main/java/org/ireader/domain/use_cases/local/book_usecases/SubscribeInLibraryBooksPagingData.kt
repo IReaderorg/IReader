@@ -13,15 +13,20 @@ class SubscribeInLibraryBooks @Inject constructor(private val localBookRepositor
         query: String,
         sortType: SortType,
         isAsc: Boolean,
-        unreadFilter: FilterType,
+        filter: List<FilterType>,
     ): Flow<List<Book>> = flow {
         localBookRepository.subscribeAllInLibrary(
             sortByLastRead = sortType == SortType.LastRead,
             sortByAbs = sortType == SortType.Alphabetically,
             sortByDateAdded = sortType == SortType.DateAdded,
-            sortByTotalChapter = sortType == SortType.TotalChapter,
-            unread = FilterType.Unread == unreadFilter,
-            isAsc = isAsc
+            sortByTotalChapters = sortType == SortType.TotalChapters,
+            unread = FilterType.Unread in filter,
+            isAsc = isAsc,
+            complete = FilterType.Completed in filter,
+            dateAdded = sortType == SortType.DateAdded,
+            dateFetched = sortType == SortType.DateFetched,
+            downloaded = FilterType.Downloaded in filter,
+            latestChapter = sortType == SortType.LatestChapter,
         ).collect { books ->
             emit(books.filter { it.title.contains(query, true) })
         }

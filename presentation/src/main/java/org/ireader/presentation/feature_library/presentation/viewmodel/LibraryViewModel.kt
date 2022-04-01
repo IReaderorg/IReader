@@ -11,7 +11,6 @@ import org.ireader.domain.models.FilterType
 import org.ireader.domain.models.SortType
 import org.ireader.domain.use_cases.history.HistoryUseCase
 import org.ireader.domain.use_cases.local.LocalGetBookUseCases
-import org.ireader.domain.use_cases.preferences.reader_preferences.FiltersUseCase
 import org.ireader.domain.use_cases.preferences.reader_preferences.LibraryLayoutTypeUseCase
 import org.ireader.domain.use_cases.preferences.reader_preferences.SortersUseCase
 import javax.inject.Inject
@@ -22,7 +21,6 @@ class LibraryViewModel @Inject constructor(
     private val localGetBookUseCases: LocalGetBookUseCases,
     private val libraryLayoutUseCase: LibraryLayoutTypeUseCase,
     private val sortersUseCase: SortersUseCase,
-    private val filtersUseCase: FiltersUseCase,
     private val historyUseCase: HistoryUseCase,
     private val libraryState: LibraryStateImpl,
 ) : BaseViewModel(), LibraryState by libraryState {
@@ -55,7 +53,7 @@ class LibraryViewModel @Inject constructor(
             is LibraryEvents.EnableFilter -> {
                 when (event.filterType) {
                     is FilterType.Unread -> {
-                        enableUnreadFilter(event.filterType)
+                        addFilters(event.filterType)
                     }
                     else -> {
 
@@ -75,7 +73,7 @@ class LibraryViewModel @Inject constructor(
                 query = searchQuery,
                 sortType,
                 isAsc = isSortAcs,
-                unreadFilter
+                filters
             ).collect {
                 books = it
             }
@@ -100,11 +98,9 @@ class LibraryViewModel @Inject constructor(
 
     private fun readLayoutTypeAndFilterTypeAndSortType() {
         val sortType = sortersUseCase.read()
-        val filterType = filtersUseCase.read()
         val layoutType = libraryLayoutUseCase.read().layout
         this.layout = layoutType
         this.sortType = sortType
-        this.unreadFilter = filterType
 
     }
 
@@ -121,9 +117,15 @@ class LibraryViewModel @Inject constructor(
         sortersUseCase.save(sortType.index)
     }
 
-    fun enableUnreadFilter(filterType: FilterType) {
-        this.unreadFilter = filterType
-        filtersUseCase.save(unreadFilter.index)
+    fun addFilters(filterType: FilterType) {
+        this.filters.add(filterType)
+
+        getLibraryBooks()
+    }
+
+    fun removeFilters(filterType: FilterType) {
+        this.filters.remove(filterType)
+
         getLibraryBooks()
     }
 

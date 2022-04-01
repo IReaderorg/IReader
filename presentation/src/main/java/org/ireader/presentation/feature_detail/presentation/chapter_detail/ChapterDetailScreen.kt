@@ -5,6 +5,7 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -12,7 +13,10 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.GetApp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -98,79 +102,108 @@ fun ChapterDetailScreen(
             }
         }
     ) {
-        Column {
-            CustomTextField(modifier = Modifier
-                .padding(horizontal = 8.dp, vertical = 8.dp)
-                .height(35.dp)
-                .fillMaxWidth()
-                .background(
-                    color = MaterialTheme.colors.onBackground.copy(.1f),
-                    shape = CircleShape
-                ),
-                hint = "Search...",
-                value = vm.query,
-                onValueChange = {
-                    vm.query = it
-                    vm.getLocalChaptersByPaging(vm.isAsc)
-                },
-                onValueConfirm = {
-                    focusManager.clearFocus()
-                },
-                paddingTrailingIconStart = 8.dp,
-                paddingLeadingIconEnd = 8.dp,
-                trailingIcon = {
-                    if (vm.query.isNotBlank()) {
-                        AppIconButton(imageVector = Icons.Default.Close,
-                            title = "Exit search",
-                            onClick = {
-                                vm.query = ""
-                                vm.getLocalChaptersByPaging(vm.isAsc)
-                            })
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column {
+                CustomTextField(modifier = Modifier
+                    .padding(horizontal = 8.dp, vertical = 8.dp)
+                    .height(35.dp)
+                    .fillMaxWidth()
+                    .background(
+                        color = MaterialTheme.colors.onBackground.copy(.1f),
+                        shape = CircleShape
+                    ),
+                    hint = "Search...",
+                    value = vm.query,
+                    onValueChange = {
+                        vm.query = it
+                        vm.getLocalChaptersByPaging(vm.isAsc)
+                    },
+                    onValueConfirm = {
+                        focusManager.clearFocus()
+                    },
+                    paddingTrailingIconStart = 8.dp,
+                    paddingLeadingIconEnd = 8.dp,
+                    trailingIcon = {
+                        if (vm.query.isNotBlank()) {
+                            AppIconButton(imageVector = Icons.Default.Close,
+                                title = "Exit search",
+                                onClick = {
+                                    vm.query = ""
+                                    vm.getLocalChaptersByPaging(vm.isAsc)
+                                })
+                        }
                     }
-                }
-            )
-            Box(modifier.fillMaxSize()) {
-                Crossfade(targetState = Pair(vm.isLoading, vm.isEmpty)) { (isLoading, isEmpty) ->
-                    when {
-                        isLoading -> LoadingScreen()
-                        isEmpty -> EmptyScreen(UiText.DynamicString("There is no chapter."))
-                        else -> LazyColumn(modifier = Modifier
-                            .fillMaxSize(), state = scrollState) {
-                            items(vm.chapters.size) { index ->
-                                ChapterListItemComposable(modifier = modifier,
-                                    chapter = vm.chapters[index],
-                                    onItemClick = {
-                                        if (vm.selection.isEmpty()) {
-                                            if (book != null) {
-                                                navController.navigate(ReaderScreenSpec.buildRoute(
-                                                    bookId = book.id,
-                                                    sourceId = book.sourceId,
-                                                    chapterId = vm.chapters[index].id,
-                                                ))
-                                            }
-                                        } else {
-                                            when (vm.chapters[index].id) {
-                                                in vm.selection -> {
-                                                    vm.selection.remove(vm.chapters[index].id)
+                )
+                Box(modifier.fillMaxSize()) {
+                    Crossfade(targetState = Pair(vm.isLoading,
+                        vm.isEmpty)) { (isLoading, isEmpty) ->
+                        when {
+                            isLoading -> LoadingScreen()
+                            isEmpty -> EmptyScreen(UiText.DynamicString("There is no chapter."))
+                            else -> LazyColumn(modifier = Modifier
+                                .fillMaxSize(), state = scrollState) {
+                                items(vm.chapters.size) { index ->
+                                    ChapterListItemComposable(modifier = modifier,
+                                        chapter = vm.chapters[index],
+                                        onItemClick = {
+                                            if (vm.selection.isEmpty()) {
+                                                if (book != null) {
+                                                    navController.navigate(ReaderScreenSpec.buildRoute(
+                                                        bookId = book.id,
+                                                        sourceId = book.sourceId,
+                                                        chapterId = vm.chapters[index].id,
+                                                    ))
                                                 }
-                                                else -> {
-                                                    vm.selection.add(vm.chapters[index].id)
+                                            } else {
+                                                when (vm.chapters[index].id) {
+                                                    in vm.selection -> {
+                                                        vm.selection.remove(vm.chapters[index].id)
+                                                    }
+                                                    else -> {
+                                                        vm.selection.add(vm.chapters[index].id)
+                                                    }
                                                 }
+
                                             }
 
-                                        }
-
-                                    },
-                                    isLastRead = vm.chapters[index].id == vm.lastRead,
-                                    isSelected = vm.chapters[index].id in vm.selection,
-                                    onLongClick = { vm.selection.add(vm.chapters[index].id) }
-                                )
+                                        },
+                                        isLastRead = vm.chapters[index].id == vm.lastRead,
+                                        isSelected = vm.chapters[index].id in vm.selection,
+                                        onLongClick = { vm.selection.add(vm.chapters[index].id) }
+                                    )
+                                }
                             }
                         }
                     }
                 }
             }
+            when {
+                vm.hasSelection -> {
+                    Row(modifier = Modifier
+                        .fillMaxWidth()
+                        .height(60.dp)
+                        .align(Alignment.BottomCenter)
+                        .padding(8.dp)
+                        .background(MaterialTheme.colors.background)
+                        .border(width = 1.dp, color = MaterialTheme.colors.onBackground.copy(.4f)),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        AppIconButton(imageVector = Icons.Default.GetApp,
+                            title = "Download",
+                            onClick = { /*TODO*/ })
+                        AppIconButton(imageVector = Icons.Default.BookmarkBorder,
+                            title = "Bookmark",
+                            onClick = { /*TODO*/ })
+                        AppIconButton(imageVector = Icons.Default.Done,
+                            title = "Mark as read",
+                            onClick = { /*TODO*/ })
+                    }
+                }
+            }
         }
+
+
     }
 
     @Composable

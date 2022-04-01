@@ -20,8 +20,6 @@ class LocalBookRepositoryImpl(
     private val remoteKeysDao: RemoteKeysDao,
 ) : LocalBookRepository {
 
-    /*****GET********************************/
-
     override fun subscribeBookById(id: Long): Flow<Book?> = flow {
         Timber.d("Timber: GetExploreBookByIdUseCase was Called")
         bookDao.subscribeBookById(bookId = id)
@@ -48,56 +46,31 @@ class LocalBookRepositoryImpl(
         sortByAbs: Boolean,
         sortByDateAdded: Boolean,
         sortByLastRead: Boolean,
-        sortByTotalChapter: Boolean,
+        dateFetched: Boolean,
+        sortByTotalChapters: Boolean,
+        dateAdded: Boolean,
+        latestChapter: Boolean,
         unread: Boolean,
+        downloaded: Boolean,
+        complete: Boolean,
         isAsc: Boolean,
     ): Flow<List<Book>> {
         return bookDao.subscribeAllInLibraryBooks(
             sortByAbs = sortByAbs,
             sortByDateAdded = sortByDateAdded,
             sortByLastRead = sortByLastRead,
-            sortByTotalDownload = sortByTotalChapter,
             unread = unread,
-            isAsc = isAsc
+            isAsc = isAsc,
+            latestChapter = latestChapter,
+            downloaded = downloaded,
+            dateFetched = dateFetched,
+            dateAdded = dateAdded,
+            complete = complete,
+            sortByTotalChapter = sortByTotalChapters
         )
 
     }
 
-    override fun subscribeAllInLibraryBooks(
-        sortType: SortType,
-        isAsc: Boolean,
-        unreadFilter: Boolean,
-    ): Flow<List<Book>> {
-        return when (sortType) {
-            is SortType.Alphabetically -> {
-                bookDao.subscribeAllInLibraryBooks(sortByAbs = true,
-                    isAsc = isAsc,
-                    unread = unreadFilter
-                )
-
-            }
-            is SortType.DateAdded -> {
-                bookDao.subscribeAllInLibraryBooks(sortByDateAdded = true,
-                    isAsc = isAsc,
-                    unread = unreadFilter
-                )
-            }
-            is SortType.LastRead -> {
-                bookDao.subscribeAllInLibraryBooks(
-                    sortByLastRead = true,
-                    isAsc = isAsc,
-                    unread = unreadFilter
-                )
-            }
-            is SortType.TotalChapter -> {
-                bookDao.subscribeAllInLibraryBooks(
-                    sortByTotalDownload = true,
-                    isAsc = isAsc,
-                    unread = unreadFilter
-                )
-            }
-        }
-    }
 
     override suspend fun findAllInLibraryBooks(
         sortType: SortType,

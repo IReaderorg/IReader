@@ -47,7 +47,6 @@ fun UpdateScreen(
             )
         }
     ) {
-
         Crossfade(targetState = Pair(vm.isLoading, vm.isEmpty)) { (isLoading, isEmpty) ->
             when {
                 isLoading -> LoadingScreen()
@@ -77,23 +76,5 @@ fun UpdateScreen(
                 )
             }
         }
-//        LazyColumn(state = scrollState) {
-//
-//            for (time in times) {
-//                item {
-//                    TextSection(
-//                        text = time,
-//                    )
-//                }
-//                for (update in updates.filter {
-//                    convertLongToTime(it.date,
-//                        format = dateFormat) == time
-//                }) {
-//                    updatesItems(update)
-//                }
-//            }
-//
-//
-//        }
     }
 }

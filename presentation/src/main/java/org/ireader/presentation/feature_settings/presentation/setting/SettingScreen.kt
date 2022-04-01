@@ -23,7 +23,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import org.ireader.core.utils.Constants
 import org.ireader.presentation.presentation.Toolbar
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
 import org.ireader.presentation.ui.AboutInfoScreenSpec
@@ -55,7 +54,6 @@ fun SettingScreen(
                 },
                 backgroundColor = MaterialTheme.colors.background,
                 contentColor = MaterialTheme.colors.onBackground,
-                elevation = Constants.DEFAULT_MAIN_ELEVATION,
             )
         }) {
             Column(

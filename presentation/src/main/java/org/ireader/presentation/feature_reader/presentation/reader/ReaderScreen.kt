@@ -21,6 +21,7 @@ import kotlinx.coroutines.launch
 import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
 import org.ireader.domain.FetchType
+import org.ireader.domain.models.entities.Chapter
 import org.ireader.presentation.feature_reader.presentation.ScrollIndicatorSetting
 import org.ireader.presentation.feature_reader.presentation.reader.components.MainBottomSettingComposable
 import org.ireader.presentation.feature_reader.presentation.reader.components.ReaderSettingComposable
@@ -45,6 +46,7 @@ fun ReadingScreen(
     drawerScrollState: LazyListState,
     onNext: () -> Unit,
     onPrev: () -> Unit,
+    onChapter: (Chapter) -> Unit,
     onSliderFinished: () -> Unit,
     onSliderChange: (index: Float) -> Unit,
     swipeState: SwipeRefreshState,
@@ -58,7 +60,7 @@ fun ReadingScreen(
 
     val chapter = vm.stateChapter
     val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
+
 
     DisposableEffect(key1 = true) {
         onDispose {
@@ -109,18 +111,21 @@ fun ReadingScreen(
     LaunchedEffect(key1 = vm.autoBrightnessMode) {
         vm.readBrightness(context)
     }
-    LaunchedEffect(key1 = vm.stateChapter) {
+    LaunchedEffect(key1 = vm.initialized) {
         if (chapter != null) {
             scrollState.scrollBy(chapter.progress.toFloat())
         }
     }
+//    LaunchedEffect(key1 = vm.stateChapter) {
+//        if (chapter != null) {
+//            scrollState.scrollBy(chapter.progress.toFloat())
+//        }
+//    }
     LaunchedEffect(key1 = true) {
         vm.readOrientation(context)
         vm.readBrightness(context)
         vm.readImmersiveMode(context)
-        if (chapter != null) {
-            scrollState.scrollBy(chapter.progress.toFloat())
-        }
+
 
         vm.eventFlow.collectLatest { event ->
             when (event) {
@@ -244,17 +249,7 @@ fun ReadingScreen(
                         }
                     }
                 },
-                onChapter = { ch ->
-                    scope.launch {
-                        vm.getChapter(ch.id,
-                            source = source)
-                    }
-                    coroutineScope.launch {
-                        scrollState.scrollToItem(0, 0)
-                    }
-                    vm.updateChapterSliderIndex(vm.getCurrentIndexOfChapter(
-                        ch))
-                },
+                onChapter = onChapter,
                 chapter = chapter,
                 source = source,
                 chapters = chapters,
@@ -270,9 +265,9 @@ fun ReadingScreen(
                     ReaderText(
                         vm = vm,
                         chapter = chapter,
-                        onNext = { onNext() },
+                        onNext = onNext,
                         swipeState = swipeState,
-                        onPrev = { onPrev() },
+                        onPrev = onPrev,
                         scrollState = scrollState,
                         modalState = modalState
                     )

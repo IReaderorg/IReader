@@ -5,7 +5,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.view.WindowManager
-import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -13,6 +12,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -34,7 +34,7 @@ import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.preferences.reader_preferences.ReaderPrefUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
-import org.ireader.domain.utils.launchIO
+import org.ireader.domain.utils.withIOContext
 import tachiyomi.source.Source
 import timber.log.Timber
 import javax.inject.Inject
@@ -125,7 +125,6 @@ class ReaderScreenViewModel @Inject constructor(
     suspend fun getChapter(
         chapterId: Long,
         source: Source,
-        onGetChapterEnd: () -> Unit = {},
     ) {
         toggleLoading(true)
         toggleLocalLoaded(false)
@@ -135,8 +134,8 @@ class ReaderScreenViewModel @Inject constructor(
                 state.book?.id,
             )
             if (resultChapter != null) {
+
                 clearError()
-                setPrefScrollPosition(resultChapter.progress)
                 this@ReaderScreenViewModel.toggleLoading(false)
                 toggleLocalLoaded(true)
                 setChapter(resultChapter.copy(content = resultChapter.content))
@@ -152,7 +151,9 @@ class ReaderScreenViewModel @Inject constructor(
                 }
                 updateLastReadTime(resultChapter)
                 updateChapterSliderIndex(getCurrentIndexOfChapter(resultChapter))
-                onGetChapterEnd()
+                if (!initialized) {
+                    initialized = true
+                }
             } else {
                 toggleLoading(false)
                 toggleLocalLoaded(false)
@@ -603,23 +604,16 @@ class ReaderScreenViewModel @Inject constructor(
             layoutParams.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
             activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
             window.attributes = layoutParams
-        }
-        viewModelScope.launchIO {
-            val chapter = stateChapter
-            if (chapter != null) {
-                insertChapter(chapter.copy(progress = scrollState.firstVisibleItemScrollOffset))
+            stateChapter?.let {
+                activity.lifecycleScope.launch {
+                    insertChapter(it.copy(progress = scrollState.firstVisibleItemScrollOffset))
+                }
             }
         }
 
 
     }
 
-    suspend fun restoreScrollState(scrollState: LazyListState) {
-        val chapter = stateChapter
-        if (chapter != null) {
-            scrollState.scrollBy(chapter.progress.toFloat())
-        }
-    }
 
     override fun onDestroy() {
         enable = false
@@ -647,16 +641,15 @@ class ReaderScreenViewModel @Inject constructor(
     }
 
     suspend fun insertBook(book: Book) {
-            insertUseCases.insertBook(book)
+        insertUseCases.insertBook(book)
     }
 
     suspend fun insertChapter(chapter: Chapter) {
+        withIOContext {
             insertUseCases.insertChapter(chapter)
+        }
     }
 
-    private fun setPrefScrollPosition(position: Int) {
-        this.scrollPosition = position
-    }
 
     private fun toggleIsAsc(isAsc: Boolean) {
         this.isAsc = isAsc

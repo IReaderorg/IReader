@@ -20,18 +20,6 @@ class OrientationUseCase @Inject constructor(
 }
 
 
-class FiltersUseCase @Inject constructor(
-    private val appPreferences: AppPreferences,
-) {
-    fun save(value: Int) {
-        appPreferences.filterLibraryScreen().set(value)
-    }
-
-    fun read(): FilterType {
-        return mapFilterType(appPreferences.filterLibraryScreen().get())
-    }
-}
-
 class SortersUseCase @Inject constructor(
     private val appPreferences: AppPreferences,
 ) {
@@ -48,16 +36,31 @@ class SortersUseCase @Inject constructor(
 fun mapSortType(input: Int): SortType {
     return when (input) {
         0 -> {
-            SortType.DateAdded
-        }
-        1 -> {
             SortType.Alphabetically
         }
-        2 -> {
+        1 -> {
             SortType.LastRead
         }
+        2 -> {
+            SortType.LastChecked
+        }
+        3 -> {
+            SortType.Unread
+        }
+        4 -> {
+            SortType.TotalChapters
+        }
+        5 -> {
+            SortType.LatestChapter
+        }
+        6 -> {
+            SortType.DateFetched
+        }
+        7 -> {
+            SortType.DateAdded
+        }
         else -> {
-            SortType.TotalChapter
+            SortType.LastRead
         }
     }
 }

@@ -8,6 +8,8 @@
 
 package org.ireader.presentation.feature_updates.component
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
@@ -16,8 +18,8 @@ import androidx.compose.material.icons.filled.FlipToBack
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import org.ireader.core.utils.Constants
 import org.ireader.presentation.R
 import org.ireader.presentation.feature_updates.viewmodel.UpdateState
 import org.ireader.presentation.presentation.Toolbar
@@ -31,38 +33,40 @@ fun UpdatesToolbar(
   onClickFlipSelection: () -> Unit,
   onClickRefresh: () -> Unit,
 ) {
-  when {
-    state.hasSelection -> {
-      UpdatesSelectionToolbar(
-        selectionSize = state.selection.size,
-        onClickCancelSelection = onClickCancelSelection,
-        onClickSelectAll = onClickSelectAll,
-        onClickInvertSelection = onClickFlipSelection
-      )
+    Box(modifier = Modifier.fillMaxWidth()) {
+        when {
+            state.hasSelection -> {
+                UpdatesSelectionToolbar(
+                    selectionSize = state.selection.size,
+                    onClickCancelSelection = onClickCancelSelection,
+                    onClickSelectAll = onClickSelectAll,
+                    onClickInvertSelection = onClickFlipSelection
+                )
+            }
+            else -> {
+                UpdatesRegularToolbar(
+                    onClickRefresh = onClickRefresh
+                )
+            }
+        }
     }
-    else -> {
-      UpdatesRegularToolbar(
-        onClickRefresh = onClickRefresh
-      )
-    }
-  }
+
 }
 
 @Composable
 private fun UpdatesSelectionToolbar(
-  selectionSize: Int,
-  onClickCancelSelection: () -> Unit,
-  onClickSelectAll: () -> Unit,
-  onClickInvertSelection: () -> Unit,
+    selectionSize: Int,
+    onClickCancelSelection: () -> Unit,
+    onClickSelectAll: () -> Unit,
+    onClickInvertSelection: () -> Unit,
 ) {
-  Toolbar(
-      title = { TopAppBarTitle(title = "$selectionSize") },
+    Toolbar(
+        title = { TopAppBarTitle(title = "$selectionSize") },
       navigationIcon = {
           IconButton(onClick = onClickCancelSelection) {
               Icon(Icons.Default.Close, contentDescription = null)
           }
       },
-      elevation = Constants.DEFAULT_ELEVATION,
       actions = {
           IconButton(onClick = onClickSelectAll) {
               Icon(Icons.Default.SelectAll, contentDescription = null)

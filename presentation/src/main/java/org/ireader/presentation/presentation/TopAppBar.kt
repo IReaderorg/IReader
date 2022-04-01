@@ -2,7 +2,6 @@ package org.ireader.presentation.presentation
 
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.material.AppBarDefaults
 import androidx.compose.material.LocalElevationOverlay
 import androidx.compose.material.Surface
 import androidx.compose.material.TopAppBar
@@ -24,7 +23,7 @@ fun Toolbar(
     actions: @Composable RowScope.() -> Unit = {},
     backgroundColor: Color = AppColors.current.bars,
     contentColor: Color = AppColors.current.onBars,
-    elevation: Dp = AppBarDefaults.TopAppBarElevation,
+    elevation: Dp = 0.dp,
     applyInsets: Boolean = true,
 ) {
     CompositionLocalProvider(LocalElevationOverlay provides NoElevationOverlay) {
@@ -42,7 +41,7 @@ fun Toolbar(
                 actions = actions,
                 backgroundColor = backgroundColor,
                 contentColor = contentColor,
-                elevation = 0.dp
+                elevation = elevation
             )
         }
     }

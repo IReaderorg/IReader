@@ -1,5 +1,6 @@
 package org.ireader.presentation.feature_detail.presentation.chapter_detail
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.systemBarsPadding
@@ -27,22 +28,25 @@ fun ChapterDetailTopAppBar(
     onReverseClick: () -> Unit,
     onPopBackStack: () -> Unit,
 ) {
-    when {
-        state.hasSelection -> {
-            EditModeChapterDetailTopAppBar(
-                selectionSize = state.selection.size,
-                onClickCancelSelection = onClickCancelSelection,
-                onClickSelectAll = onClickSelectAll,
-                onClickInvertSelection = onClickFlipSelection
-            )
-        }
-        else -> {
-            RegularChapterDetailTopAppBar(
-                onReverseClick = onReverseClick,
-                onPopBackStack = onPopBackStack
-            )
+    Box(modifier = Modifier.fillMaxWidth()) {
+        when {
+            state.hasSelection -> {
+                EditModeChapterDetailTopAppBar(
+                    selectionSize = state.selection.size,
+                    onClickCancelSelection = onClickCancelSelection,
+                    onClickSelectAll = onClickSelectAll,
+                    onClickInvertSelection = onClickFlipSelection
+                )
+            }
+            else -> {
+                RegularChapterDetailTopAppBar(
+                    onReverseClick = onReverseClick,
+                    onPopBackStack = onPopBackStack
+                )
+            }
         }
     }
+
 }
 
 
@@ -51,12 +55,13 @@ fun RegularChapterDetailTopAppBar(
     onReverseClick: () -> Unit,
     onPopBackStack: () -> Unit,
 ) {
-    CenterTopAppBar(modifier = Modifier
-        .systemBarsPadding()
-        .fillMaxWidth()
-        .height(45.dp), title = {
-        TopAppBarTitle(title = "Content")
-    },
+    CenterTopAppBar(
+        modifier = Modifier
+            .systemBarsPadding()
+            .fillMaxWidth()
+            .height(45.dp), title = {
+            TopAppBarTitle(title = "Content")
+        },
         backgroundColor = MaterialTheme.colors.background,
         contentColor = MaterialTheme.colors.onBackground,
         elevation = Constants.DEFAULT_ELEVATION,

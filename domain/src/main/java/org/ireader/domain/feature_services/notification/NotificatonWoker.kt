@@ -51,7 +51,7 @@ class NotificationWorker @AssistedInject constructor(
     }
 
     private fun getNotifications() = flow {
-        val books = bookRepo.subscribeAllInLibraryBooks().first()
+        val books = bookRepo.findAllInLibraryBooks()
 
         progressNotification(books) { book ->
             try {

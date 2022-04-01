@@ -1,7 +1,7 @@
-package org.ireader.core.utils
+package org.ireader.presentation.utils
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.lazy.LazyGridScope
+import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.runtime.Composable
 import androidx.paging.compose.LazyPagingItems
 

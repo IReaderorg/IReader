@@ -1,7 +1,6 @@
 package org.ireader.presentation.feature_library.presentation.components
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.lazy.LazyGridState
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
@@ -25,7 +24,7 @@ fun LayoutComposable(
     onBookTap: (book: Book) -> Unit,
     layout: LayoutType,
     scrollState: LazyListState,
-    gridState: LazyGridState,
+    gridState: androidx.compose.foundation.lazy.grid.LazyGridState,
     source: Source? = null,
     isLocal: Boolean,
     goToLatestChapter: (book: Book) -> Unit = {},

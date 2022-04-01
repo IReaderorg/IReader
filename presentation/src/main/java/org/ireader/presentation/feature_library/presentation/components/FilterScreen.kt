@@ -22,14 +22,26 @@ fun FilterScreen(viewModel: LibraryViewModel) {
         .padding(horizontal = 12.dp, vertical = 16.dp),
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Top) {
-        CheckBoxWithText("Unread",
-            viewModel.unreadFilter.index == FilterType.Unread.index) {
-            if (viewModel.unreadFilter == FilterType.Unread) {
-                viewModel.enableUnreadFilter(FilterType.Disable)
-            } else {
-                viewModel.enableUnreadFilter(FilterType.Unread)
+        val items = listOf(
+            FilterItem("Unread", FilterType.Unread),
+            FilterItem("Complete", FilterType.Completed),
+            FilterItem("Download", FilterType.Downloaded),
+        )
+        items.forEach { filter ->
+            CheckBoxWithText(filter.name,
+                viewModel.filters.contains(filter.type)) {
+                if (!viewModel.filters.contains(filter.type)) {
+                    viewModel.addFilters(filter.type)
+                } else {
+                    viewModel.removeFilters(filter.type)
+                }
             }
         }
+
     }
 }
 
+private data class FilterItem(
+    val name: String,
+    val type: FilterType,
+)

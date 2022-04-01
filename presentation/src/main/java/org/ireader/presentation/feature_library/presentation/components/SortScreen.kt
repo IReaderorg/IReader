@@ -17,10 +17,14 @@ import org.ireader.presentation.feature_library.presentation.viewmodel.LibraryVi
 @Composable
 fun SortScreen(viewModel: LibraryViewModel) {
     val items = listOf<SortType>(
-        SortType.DateAdded,
         SortType.Alphabetically,
         SortType.LastRead,
-        SortType.TotalChapter,
+        SortType.LastChecked,
+        SortType.Unread,
+        SortType.TotalChapters,
+        SortType.LatestChapter,
+        SortType.DateFetched,
+        SortType.DateAdded,
     )
     Column(
         Modifier

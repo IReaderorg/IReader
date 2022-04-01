@@ -26,7 +26,7 @@ fun HistoryScreen(
         Crossfade(targetState = Pair(vm.isLoading, vm.isEmpty)) { (isLoading, isEmpty) ->
             when {
                 isLoading -> LoadingScreen()
-                isEmpty -> EmptyScreen(UiText.DynamicString("No History is Available."))
+                isEmpty -> EmptyScreen(UiText.DynamicString("Nothing read recently"))
                 else -> HistoryContent(
                     state = vm,
                     onClickItem = { history ->

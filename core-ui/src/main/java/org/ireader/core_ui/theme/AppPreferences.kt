@@ -25,7 +25,6 @@ class AppPreferences @Inject constructor(
         const val SAVED_PARAGRAPH_INDENT = "paragraph_indent"
         const val SAVED_ORIENTATION = "orientation_reader"
         const val SORT_LIBRARY_SCREEN = "sort_library_screen"
-        const val FILTER_LIBRARY_SCREEN = "filter_library_screen"
         const val SCROLL_MODE = "scroll_mode"
         const val AUTO_SCROLL_MODE_INTERVAL = "auto_scroll_mode_interval"
         const val AUTO_SCROLL_MODE_OFFSET = "auto_scroll_mode_offset"
@@ -122,9 +121,6 @@ class AppPreferences @Inject constructor(
         return preferenceStore.getInt(SORT_LIBRARY_SCREEN, 0)
     }
 
-    fun filterLibraryScreen(): Preference<Int> {
-        return preferenceStore.getInt(FILTER_LIBRARY_SCREEN, 0)
-    }
 
     fun lastUpdateCheck(): Preference<Long> {
         return preferenceStore.getLong(Last_UPDATE_CHECK, 0)

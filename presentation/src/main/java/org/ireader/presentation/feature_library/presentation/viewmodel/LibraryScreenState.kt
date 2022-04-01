@@ -1,9 +1,7 @@
 package org.ireader.presentation.feature_library.presentation.viewmodel
 
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import org.ireader.core.utils.UiText
 import org.ireader.domain.R
 import org.ireader.domain.models.DisplayMode
@@ -26,7 +24,7 @@ interface LibraryState {
     var searchQuery: String
     var sortType: SortType
     var isSortAcs: Boolean
-    var unreadFilter: FilterType
+    var filters: SnapshotStateList<FilterType>
     var currentScrollState: Int
     var histories: List<History>
 }
@@ -42,7 +40,7 @@ open class LibraryStateImpl @Inject constructor() : LibraryState {
     override var searchQuery by mutableStateOf<String>("")
     override var sortType by mutableStateOf<SortType>(SortType.LastRead)
     override var isSortAcs by mutableStateOf<Boolean>(false)
-    override var unreadFilter by mutableStateOf<FilterType>(FilterType.Disable)
+    override var filters: SnapshotStateList<FilterType> = mutableStateListOf()
     override var currentScrollState by mutableStateOf<Int>(0)
     override var histories by mutableStateOf<List<History>>(emptyList())
 }

@@ -46,14 +46,14 @@ object ReaderScreenSpec : ScreenSpec {
         navBackStackEntry: NavBackStackEntry,
         scaffoldState: ScaffoldState,
     ) {
-        val viewModel: ReaderScreenViewModel = hiltViewModel()
-        val currentIndex = viewModel.currentChapterIndex
-        val source = viewModel.source
-        val chapters = viewModel.stateChapters
-        val coroutineScope = rememberCoroutineScope()
+        val vm: ReaderScreenViewModel = hiltViewModel()
+        val currentIndex = vm.currentChapterIndex
+        val source = vm.source
+        val chapters = vm.stateChapters
+        val scope = rememberCoroutineScope()
         val scrollState = rememberLazyListState()
         val drawerScrollState = rememberLazyListState()
-        val swipeState = rememberSwipeRefreshState(isRefreshing = viewModel.isLoading)
+        val swipeState = rememberSwipeRefreshState(isRefreshing = vm.isLoading)
 
         TransparentStatusBar {
 
@@ -61,64 +61,69 @@ object ReaderScreenSpec : ScreenSpec {
             if (source != null) {
                 ReadingScreen(
                     navController = navController,
-                    vm = viewModel,
+                    vm = vm,
                     scrollState = scrollState,
                     source = source,
                     onNext = {
                         if (currentIndex < chapters.lastIndex) {
-                            viewModel.updateChapterSliderIndex(currentIndex + 1)
-                            coroutineScope.launch {
-                                viewModel.getChapter(viewModel.getCurrentChapterByIndex().id,
-                                    source = source) {
-                                    coroutineScope.launch {
-                                        scrollState.animateScrollToItem(0, 0)
-                                    }
-                                }
+                            vm.updateChapterSliderIndex(currentIndex + 1)
+                            scope.launch {
+                                vm.getChapter(vm.getCurrentChapterByIndex().id,
+                                    source = source)
+                                scrollState.animateScrollToItem(0, 0)
                             }
 
                         } else {
-                            coroutineScope.launch {
-                                viewModel.showSnackBar(UiText.StringResource(R.string.this_is_last_chapter))
+                            scope.launch {
+                                vm.showSnackBar(UiText.StringResource(R.string.this_is_last_chapter))
 
                             }
                         }
                     },
                     onPrev = {
                         if (currentIndex > 0) {
-                            viewModel.updateChapterSliderIndex(currentIndex - 1)
-                            coroutineScope.launch {
-                                viewModel.getChapter(viewModel.getCurrentChapterByIndex().id,
-                                    source = source) {
-                                    coroutineScope.launch {
-                                        scrollState.animateScrollToItem(0, 0)
-                                    }
-                                }
+                            vm.updateChapterSliderIndex(currentIndex - 1)
+                            scope.launch {
+                                vm.getChapter(vm.getCurrentChapterByIndex().id,
+                                    source = source)
+                                scrollState.animateScrollToItem(0, 0)
                             }
 
                         } else {
-                            coroutineScope.launch {
-                                viewModel.showSnackBar(UiText.StringResource(org.ireader.core.R.string.this_is_first_chapter))
+                            scope.launch {
+                                vm.showSnackBar(UiText.StringResource(org.ireader.core.R.string.this_is_first_chapter))
                             }
                         }
                     },
                     onSliderFinished = {
-                        coroutineScope.launch {
-                            viewModel.showSnackBar(UiText.DynamicString(chapters[viewModel.currentChapterIndex].title))
+                        scope.launch {
+                            vm.showSnackBar(UiText.DynamicString(chapters[vm.currentChapterIndex].title))
                         }
-                        viewModel.updateChapterSliderIndex(currentIndex)
-                        coroutineScope.launch {
-                            viewModel.getChapter(chapters[viewModel.currentChapterIndex].id,
+                        vm.updateChapterSliderIndex(currentIndex)
+                        scope.launch {
+                            vm.getChapter(chapters[vm.currentChapterIndex].id,
                                 source = source)
                         }
-                        coroutineScope.launch {
+                        scope.launch {
                             scrollState.animateScrollToItem(0, 0)
                         }
                     },
                     onSliderChange = {
-                        viewModel.updateChapterSliderIndex(it.toInt())
+                        vm.updateChapterSliderIndex(it.toInt())
                     },
                     swipeState = swipeState,
-                    drawerScrollState = drawerScrollState
+                    drawerScrollState = drawerScrollState,
+                    onChapter = { ch ->
+                        scope.launch {
+                            vm.getChapter(ch.id,
+                                source = source)
+                        }
+                        scope.launch {
+                            scrollState.scrollToItem(0, 0)
+                        }
+                        vm.updateChapterSliderIndex(vm.getCurrentIndexOfChapter(
+                            ch))
+                    }
                 )
             } else {
                 EmptyScreenComposable(navController = navController,

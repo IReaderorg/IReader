@@ -13,11 +13,7 @@ interface LocalBookRepository {
     fun subscribeBookById(id: Long): Flow<Book?>
     suspend fun findBookById(id: Long): Book?
 
-    fun subscribeAllInLibraryBooks(
-        sortType: SortType = SortType.LastRead,
-        isAsc: Boolean = false,
-        unreadFilter: Boolean = false,
-    ): Flow<List<Book>>
+
 
     suspend fun findAllInLibraryBooks(
         sortType: SortType = SortType.LastRead,
@@ -34,8 +30,13 @@ interface LocalBookRepository {
         sortByAbs: Boolean,
         sortByDateAdded: Boolean,
         sortByLastRead: Boolean,
-        sortByTotalChapter: Boolean,
+        dateFetched: Boolean,
+        sortByTotalChapters: Boolean,
+        dateAdded: Boolean,
+        latestChapter: Boolean,
         unread: Boolean,
+        downloaded: Boolean,
+        complete: Boolean,
         isAsc: Boolean,
     ): Flow<List<Book>>
 
