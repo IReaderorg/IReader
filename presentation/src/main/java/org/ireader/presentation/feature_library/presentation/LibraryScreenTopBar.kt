@@ -3,11 +3,9 @@ package org.ireader.presentation.feature_library.presentation
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Sort
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.navigation.NavController
 import kotlinx.coroutines.CoroutineScope
@@ -31,6 +29,7 @@ fun LibraryScreenTopBar(
     bottomSheetState: ModalBottomSheetState,
 ) {
     val focusManager = LocalFocusManager.current
+    val context = LocalContext.current
 
     Toolbar(
         title = {
@@ -63,6 +62,13 @@ fun LibraryScreenTopBar(
                     },
                 )
             }
+            AppIconButton(
+                imageVector = Icons.Default.Refresh,
+                title = "Refresh",
+                onClick = {
+                    vm.refreshUpdate(context = context)
+                },
+            )
             AppIconButton(
                 imageVector = Icons.Default.Sort,
                 title = "Filter",

@@ -119,3 +119,48 @@ fun MangaInfo.fromBookInfo(sourceId: Long): Book {
         author = this.author,
     )
 }
+
+data class BookWithInfo(
+    val id: Long = 0,
+    val title: String,
+    val lastRead: Long = 0,
+    val lastUpdated: Long = 0,
+    val unread: Boolean = false,
+    val totalChapters: Int = 0,
+    val dateUpload: Long = 0,
+    val dateFetch: Long = 0,
+    val dataAdded: Long = 0,
+    val sourceId: Long,
+    val totalDownload: Int,
+    val isRead: Int,
+    val link: String,
+    val status: Int = 0,
+    val cover: String = "",
+    val customCover: String = "",
+    val favorite: Boolean = false,
+    val tableId: Long = 0,
+    val author: String = "",
+    val description: String = "",
+    val genres: List<String> = emptyList(),
+    val viewer: Int = 0,
+    val flags: Int = 0,
+)
+
+fun BookWithInfo.toBook(): Book {
+    return Book(
+        id = this.id,
+        sourceId = sourceId,
+        customCover = this.cover,
+        cover = this.cover,
+        flags = 0,
+        link = this.link,
+        dataAdded = 0L,
+        lastUpdated = 0L,
+        favorite = false,
+        title = this.title,
+        status = this.status,
+        genres = this.genres,
+        description = this.description,
+        author = this.author,
+    )
+}

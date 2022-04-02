@@ -36,5 +36,6 @@ data class HistoryWithRelations(
     val cover: String,
     val favorite: Boolean,
     val chapterTitle: String,
+    val chapterNumber: Int,
     val date: String,
 )

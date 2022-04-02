@@ -23,7 +23,7 @@ interface LibraryState {
     var inSearchMode: Boolean
     var searchQuery: String
     var sortType: SortType
-    var isSortAcs: Boolean
+    var desc: Boolean
     var filters: SnapshotStateList<FilterType>
     var currentScrollState: Int
     var histories: List<History>
@@ -39,7 +39,7 @@ open class LibraryStateImpl @Inject constructor() : LibraryState {
     override var inSearchMode by mutableStateOf<Boolean>(false)
     override var searchQuery by mutableStateOf<String>("")
     override var sortType by mutableStateOf<SortType>(SortType.LastRead)
-    override var isSortAcs by mutableStateOf<Boolean>(false)
+    override var desc by mutableStateOf<Boolean>(false)
     override var filters: SnapshotStateList<FilterType> = mutableStateListOf()
     override var currentScrollState by mutableStateOf<Int>(0)
     override var histories by mutableStateOf<List<History>>(emptyList())

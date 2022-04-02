@@ -1,11 +1,18 @@
 package org.ireader.presentation.feature_library.presentation.viewmodel
 
 
+import android.content.Context
 import androidx.lifecycle.viewModelScope
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequest
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.ireader.core_ui.viewmodel.BaseViewModel
+import org.ireader.domain.feature_services.LibraryUpdatesService
 import org.ireader.domain.models.DisplayMode
 import org.ireader.domain.models.FilterType
 import org.ireader.domain.models.SortType
@@ -70,12 +77,11 @@ class LibraryViewModel @Inject constructor(
         getBooksJob?.cancel()
         getBooksJob = viewModelScope.launch {
             localGetBookUseCases.SubscribeInLibraryBooks(
-                query = searchQuery,
                 sortType,
-                isAsc = isSortAcs,
+                desc = desc,
                 filters
-            ).collect {
-                books = it
+            ).collectLatest {
+                books = it.filter { it.title.contains(searchQuery, true) }
             }
         }
     }
@@ -107,7 +113,7 @@ class LibraryViewModel @Inject constructor(
     fun changeSortIndex(sortType: SortType) {
         this.sortType = sortType
         if (sortType == sortType) {
-            this.isSortAcs = !isSortAcs
+            this.desc = !desc
         }
         saveSortType(sortType)
         getLibraryBooks()
@@ -119,13 +125,11 @@ class LibraryViewModel @Inject constructor(
 
     fun addFilters(filterType: FilterType) {
         this.filters.add(filterType)
-
         getLibraryBooks()
     }
 
     fun removeFilters(filterType: FilterType) {
         this.filters.remove(filterType)
-
         getLibraryBooks()
     }
 
@@ -134,5 +138,18 @@ class LibraryViewModel @Inject constructor(
         this.searchedBook = emptyList()
         this.searchQuery = ""
         getLibraryBooks()
+    }
+
+    lateinit var work: OneTimeWorkRequest
+    fun refreshUpdate(context: Context) {
+        work =
+            OneTimeWorkRequestBuilder<LibraryUpdatesService>().apply {
+                addTag(LibraryUpdatesService.LibraryUpdateTag)
+            }.build()
+        WorkManager.getInstance(context).enqueueUniqueWork(
+            LibraryUpdatesService.LibraryUpdateTag,
+            ExistingWorkPolicy.REPLACE,
+            work
+        )
     }
 }

@@ -18,7 +18,7 @@ interface HistoryDao {
 
 
     @Query("""SELECT history.*, library.title as bookTitle, library.sourceId, library.cover, library.favorite, chapter.title as chapterTitle,
-    date(ROUND(history.readAt / 1000), 'unixepoch', 'localtime') AS date
+    date(ROUND(history.readAt / 1000), 'unixepoch', 'localtime') AS date,chapter.number as chapterNumber
     FROM history
     JOIN library ON history.bookId = library.id
     JOIN chapter ON history.chapterId = chapter.id

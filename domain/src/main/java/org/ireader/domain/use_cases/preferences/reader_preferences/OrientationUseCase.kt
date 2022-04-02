@@ -45,18 +45,15 @@ fun mapSortType(input: Int): SortType {
             SortType.LastChecked
         }
         3 -> {
-            SortType.Unread
-        }
-        4 -> {
             SortType.TotalChapters
         }
-        5 -> {
+        4 -> {
             SortType.LatestChapter
         }
-        6 -> {
+        5 -> {
             SortType.DateFetched
         }
-        7 -> {
+        6 -> {
             SortType.DateAdded
         }
         else -> {

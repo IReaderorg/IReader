@@ -72,7 +72,8 @@ fun LibraryScreen(
         Column(modifier = Modifier
             .fillMaxSize()
         ) {
-            LibraryScreenTopBar(navController = navController,
+            LibraryScreenTopBar(
+                navController = navController,
                 vm = vm,
                 coroutineScope = coroutineScope,
                 bottomSheetState = bottomSheetState)

@@ -13,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import org.ireader.core.utils.convertLongToTime
 import org.ireader.domain.feature_services.io.HistoryWithRelations
 import org.ireader.domain.feature_services.io.coil.rememberBookCover
 
@@ -52,9 +51,11 @@ fun HistoryItem(
           )
 
           BookListItemSubtitle(
-              text = "Ch. ${history.chapterTitle} - ${
-                  convertLongToTime(history.readAt, "HH:mm")
-              }"
+              text = if (history.chapterNumber != -1) {
+                  "Ch. ${history.chapterNumber}"
+              } else {
+                  history.chapterTitle
+              }
           )
     }
     IconButton(onClick = { onClickDelete(history) }) {

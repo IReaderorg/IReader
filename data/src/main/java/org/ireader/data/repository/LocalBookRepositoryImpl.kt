@@ -41,6 +41,17 @@ class LocalBookRepositoryImpl(
     }
 
 
+    override suspend fun findUnreadBooks(): List<Book> {
+        return bookDao.findUnreadBooks()
+    }
+
+    override suspend fun findCompletedBooks(): List<Book> {
+        return bookDao.findCompletedBooks()
+    }
+
+    override suspend fun findDownloadedBooks(): List<Book> {
+        return bookDao.findDownloadedBooks()
+    }
 
     override fun subscribeAllInLibrary(
         sortByAbs: Boolean,
@@ -50,25 +61,27 @@ class LocalBookRepositoryImpl(
         sortByTotalChapters: Boolean,
         dateAdded: Boolean,
         latestChapter: Boolean,
-        unread: Boolean,
-        downloaded: Boolean,
-        complete: Boolean,
-        isAsc: Boolean,
+        lastChecked: Boolean,
+        desc: Boolean,
     ): Flow<List<Book>> {
-        return bookDao.subscribeAllInLibraryBooks(
-            sortByAbs = sortByAbs,
-            sortByDateAdded = sortByDateAdded,
-            sortByLastRead = sortByLastRead,
-            unread = unread,
-            isAsc = isAsc,
-            latestChapter = latestChapter,
-            downloaded = downloaded,
-            dateFetched = dateFetched,
-            dateAdded = dateAdded,
-            complete = complete,
-            sortByTotalChapter = sortByTotalChapters
-        )
+        return when {
+            sortByLastRead -> bookDao.subscribeLatestRead(desc)
+            sortByTotalChapters -> bookDao.subscribeTotalChapter(desc)
+            latestChapter -> bookDao.subscribeLatestChapter(desc)
+            else -> {
+                bookDao.subscribeAllInLibraryBooks(
+                    sortByAbs = sortByAbs,
+                    sortByDateAdded = sortByDateAdded,
+                    sortByLastRead = sortByLastRead,
+                    desc = desc,
+                    dateFetched = dateFetched,
+                    dateAdded = dateAdded,
+                    sortByTotalChapter = sortByTotalChapters,
+                    lastChecked = lastChecked
+                )
+            }
 
+        }
     }
 
 

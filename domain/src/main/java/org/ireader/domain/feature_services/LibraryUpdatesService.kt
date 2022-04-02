@@ -49,13 +49,14 @@ class LibraryUpdatesService @AssistedInject constructor(
     override suspend fun doWork(): Result {
         val libraryBooks = getBookUseCases.findAllInLibraryBooks()
 
+        var updatedBookSize = 0
         val cancelIntent = WorkManager.getInstance(applicationContext)
             .createCancelPendingIntent(id)
         val builder =
             NotificationCompat.Builder(applicationContext,
                 Notifications.CHANNEL_LIBRARY_PROGRESS).apply {
                 setContentTitle("Checking Updates")
-                setSmallIcon(R.drawable.ic_downloading)
+                setSmallIcon(R.drawable.ic_update)
                 setOnlyAlertOnce(true)
                 priority = NotificationCompat.PRIORITY_LOW
                 setAutoCancel(true)
@@ -88,6 +89,9 @@ class LibraryUpdatesService @AssistedInject constructor(
                             }, onError = {})
                         val newChapters =
                             remoteChapters.filterNot { chapter -> chapter.title in chapters.map { it.title } }
+                        if (newChapters.isNotEmpty()) {
+                            updatedBookSize += 1
+                        }
                         withContext(Dispatchers.IO) {
                             insertUseCases.insertChapters(newChapters.map {
                                 it.copy(
@@ -115,7 +119,7 @@ class LibraryUpdatesService @AssistedInject constructor(
                             setContentTitle("Failed to Check Library Updates.")
                             setSubText(e.localizedMessage)
                         }
-                        setSmallIcon(R.drawable.ic_downloading)
+                        setSmallIcon(R.drawable.ic_update)
                         priority = NotificationCompat.PRIORITY_DEFAULT
                         setAutoCancel(true)
                     }.build()
@@ -137,8 +141,8 @@ class LibraryUpdatesService @AssistedInject constructor(
                 Notifications.ID_LIBRARY_PROGRESS,
                 NotificationCompat.Builder(applicationContext,
                     Notifications.CHANNEL_DOWNLOADER_COMPLETE).apply {
-                    setContentTitle("${libraryBooks.size} book was update successfully.")
-                    setSmallIcon(R.drawable.ic_downloading)
+                    setContentTitle("$updatedBookSize book was updated.")
+                    setSmallIcon(R.drawable.ic_update)
                     priority = NotificationCompat.PRIORITY_DEFAULT
                     setSubText("It was Updated Successfully")
                     setAutoCancel(true)

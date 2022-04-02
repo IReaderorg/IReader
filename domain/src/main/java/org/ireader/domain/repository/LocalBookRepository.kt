@@ -34,12 +34,15 @@ interface LocalBookRepository {
         sortByTotalChapters: Boolean,
         dateAdded: Boolean,
         latestChapter: Boolean,
-        unread: Boolean,
-        downloaded: Boolean,
-        complete: Boolean,
-        isAsc: Boolean,
+        lastChecked: Boolean,
+        desc: Boolean,
     ): Flow<List<Book>>
 
+    suspend fun findUnreadBooks(): List<Book>
+
+    suspend fun findCompletedBooks(): List<Book>
+
+    suspend fun findDownloadedBooks(): List<Book>
 
     fun getAllExploreBookPagingSource(): PagingSource<Int, Book>
 

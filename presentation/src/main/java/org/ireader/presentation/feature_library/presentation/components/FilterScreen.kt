@@ -24,8 +24,8 @@ fun FilterScreen(viewModel: LibraryViewModel) {
         verticalArrangement = Arrangement.Top) {
         val items = listOf(
             FilterItem("Unread", FilterType.Unread),
-            FilterItem("Complete", FilterType.Completed),
-            FilterItem("Download", FilterType.Downloaded),
+            FilterItem("Completed", FilterType.Completed),
+            FilterItem("Downloaded", FilterType.Downloaded),
         )
         items.forEach { filter ->
             CheckBoxWithText(filter.name,

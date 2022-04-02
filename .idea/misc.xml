@@ -44,6 +44,7 @@
         <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/core/src/main/res/drawable/ic_wallpaper.xml" value="0.1265" />
         <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/core/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.124" />
         <entry key="app/src/main/res/drawable/ic_decrease_text_size.xml" value="0.156" />
+        <entry key="core/src/main/res/drawable/baseline_close_24.xml" value="0.2615" />
       </map>
     </option>
   </component>
