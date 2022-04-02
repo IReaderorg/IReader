@@ -27,6 +27,8 @@ interface LibraryState {
     var filters: SnapshotStateList<FilterType>
     var currentScrollState: Int
     var histories: List<History>
+    var selection: SnapshotStateList<Long>
+    val hasSelection: Boolean
 }
 
 open class LibraryStateImpl @Inject constructor() : LibraryState {
@@ -43,6 +45,8 @@ open class LibraryStateImpl @Inject constructor() : LibraryState {
     override var filters: SnapshotStateList<FilterType> = mutableStateListOf()
     override var currentScrollState by mutableStateOf<Int>(0)
     override var histories by mutableStateOf<List<History>>(emptyList())
+    override var selection: SnapshotStateList<Long> = mutableStateListOf()
+    override val hasSelection: Boolean by derivedStateOf { selection.isNotEmpty() }
 }
 
 

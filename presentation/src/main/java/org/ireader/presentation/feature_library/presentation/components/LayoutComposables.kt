@@ -21,7 +21,9 @@ fun LayoutComposable(
     books: List<Book> = emptyList(),
     lazyBook: LazyPagingItems<Book>? = null,
     histories: List<History> = emptyList(),
-    onBookTap: (book: Book) -> Unit,
+    onClick: (book: Book) -> Unit,
+    onLongClick: (Book) -> Unit = {},
+    selection: List<Long> = emptyList<Long>(),
     layout: LayoutType,
     scrollState: LazyListState,
     gridState: androidx.compose.foundation.lazy.grid.LazyGridState,
@@ -37,16 +39,21 @@ fun LayoutComposable(
                 books = books,
                 lazyBooks = lazyBook,
                 onClick = { book ->
-                    onBookTap(book)
-                }, scrollState = gridState,
+                    onClick(book)
+                },
+                selection = selection,
+                onLongClick = { onLongClick(it) },
+                scrollState = gridState,
                 isLocal = isLocal,
                 goToLatestChapter = { goToLatestChapter(it) }, histories = histories)
         }
         is LayoutType.ListLayout -> {
             LinearListDisplay(books = books, onClick = { book ->
-                onBookTap(book)
+                onClick(book)
             }, scrollState = scrollState,
                 isLocal = isLocal,
+                selection = selection,
+                onLongClick = { onLongClick(it) },
                 lazyBooks = lazyBook,
                 goToLatestChapter = { goToLatestChapter(it) })
         }
@@ -54,9 +61,11 @@ fun LayoutComposable(
             CompactGridLayoutComposable(
                 books = books,
                 onClick = { book ->
-                    onBookTap(book)
+                    onClick(book)
                 }, scrollState = gridState,
                 isLocal = isLocal,
+                selection = selection,
+                onLongClick = { onLongClick(it) },
                 lazyBooks = lazyBook,
                 goToLatestChapter = { goToLatestChapter(it) }, histories = histories)
 

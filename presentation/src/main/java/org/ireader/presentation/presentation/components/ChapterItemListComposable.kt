@@ -3,6 +3,7 @@ package org.ireader.presentation.presentation.components
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.PublishedWithChanges
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -30,6 +31,15 @@ fun ChapterListItemComposable(
                 onLongClick = { onLongClick() }
             )
             .selectedBackground(isSelected),
+        icon = if (chapter.bookmark) {
+            {
+                Icon(
+                    imageVector = Icons.Default.Bookmark,
+                    contentDescription = "Bookmarked",
+                    tint = MaterialTheme.colors.primary,
+                )
+            }
+        } else null,
         text = {
             Text(
                 text = chapter.title,

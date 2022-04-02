@@ -21,6 +21,7 @@ import org.ireader.domain.feature_services.notification.Notifications.CHANNEL_DO
 import org.ireader.domain.feature_services.notification.Notifications.ID_DOWNLOAD_CHAPTER_COMPLETE
 import org.ireader.domain.feature_services.notification.Notifications.ID_DOWNLOAD_CHAPTER_ERROR
 import org.ireader.domain.feature_services.notification.Notifications.ID_DOWNLOAD_CHAPTER_PROGRESS
+import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.entities.SavedDownload
 import org.ireader.domain.repository.LocalBookRepository
 import org.ireader.domain.repository.LocalChapterRepository
@@ -46,6 +47,8 @@ class DownloadService @AssistedInject constructor(
         const val DOWNLOADER_SERVICE_NAME = "DOWNLOAD_SERVICE"
         const val DOWNLOADER_BOOK_ID = "book_id"
         const val DOWNLOADER_SOURCE_ID = "sourceId"
+        const val DOWNLOADER_Chapters_IDS = "chapterIds"
+        const val DOWNLOADER_BOOKS_IDS = "booksIds"
     }
 
 
@@ -55,6 +58,8 @@ class DownloadService @AssistedInject constructor(
 
         val bookId = inputData.getLong("book_id", 0)
         val sourceId = inputData.getLong("sourceId", 0)
+        val downloadIds = inputData.getLongArray(DOWNLOADER_Chapters_IDS)?.distinct()
+        val booksIds = inputData.getLongArray(DOWNLOADER_BOOKS_IDS)?.distinct()
         val bookResource = bookRepo.subscribeBookById(bookId).first()
             ?: throw IllegalArgumentException(
                 "Invalid bookId as argument: $bookId"
@@ -75,7 +80,22 @@ class DownloadService @AssistedInject constructor(
 
         val source = extensions.get(sourceId)?.source
 
-        val chapters = chapterRepo.subscribeChaptersByBookId(bookId).first()
+        val chapters = mutableListOf<Chapter>()
+
+        if (booksIds?.isNotEmpty() == true) {
+            booksIds.forEach {
+                chapters.addAll(chapterRepo.findChaptersByBookId(it))
+            }
+        } else {
+            chapters.addAll(chapterRepo.findChaptersByBookId(bookId).filter {
+                if (downloadIds != null) {
+                    it.id in downloadIds
+                } else {
+                    true
+                }
+            })
+        }
+
 
         val cancelDownloadIntent = WorkManager.getInstance(applicationContext)
             .createCancelPendingIntent(id)
@@ -140,6 +160,7 @@ class DownloadService @AssistedInject constructor(
                         delay(1000)
                     }
                 }
+
             } catch (e: Exception) {
                 Timber.e("getNotifications: Failed to download ${bookResource.title}")
                 notify(

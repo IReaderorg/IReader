@@ -23,7 +23,9 @@ fun CompactGridLayoutComposable(
     lazyBooks: LazyPagingItems<Book>?,
     books: List<Book>,
     histories: List<History>,
+    selection: List<Long> = emptyList(),
     onClick: (book: Book) -> Unit,
+    onLongClick: (book: Book) -> Unit = {},
     scrollState: LazyGridState = rememberLazyGridState(),
     isLocal: Boolean,
     goToLatestChapter: (book: Book) -> Unit,
@@ -38,7 +40,9 @@ fun CompactGridLayoutComposable(
                 items(lazyBooks) { book ->
                     if (book != null) {
                         BookImage(
-                            onClick = { onClick(book) }, book = book, ratio = 6f / 9f
+                            onClick = { onClick(book) }, book = book, ratio = 6f / 9f,
+                            selected = book.id in selection,
+                            onLongClick = { onLongClick(book) },
                         ) {
                             if (isLocal && histories.find { it.bookId == book.id }?.readAt != 0L) {
                                 GoToLastReadComposable(onClick = { goToLatestChapter(book) })
@@ -52,7 +56,9 @@ fun CompactGridLayoutComposable(
                 items(count = books.size) { index ->
 
                     BookImage(
-                        onClick = { onClick(books[index]) }, book = books[index], ratio = 6f / 9f
+                        onClick = { onClick(books[index]) }, book = books[index], ratio = 6f / 9f,
+                        selected = books[index].id in selection,
+                        onLongClick = { onLongClick(books[index]) },
                     ) {
                         if (isLocal && histories.find { it.bookId == books[index].id }?.readAt != 0L) {
                             GoToLastReadComposable(onClick = { goToLatestChapter(books[index]) })

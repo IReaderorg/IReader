@@ -192,7 +192,7 @@ fun ExploreScreen(
                         navController = navController,
                         isLocal = false,
                         gridState = gridState,
-                        onBookTap = { book ->
+                        onClick = { book ->
                             navController.navigate(
                                 route = BookDetailScreenSpec.buildRoute(sourceId = book.sourceId,
                                     bookId = book.id)

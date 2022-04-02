@@ -62,13 +62,7 @@ fun LibraryScreenTopBar(
                     },
                 )
             }
-            AppIconButton(
-                imageVector = Icons.Default.Refresh,
-                title = "Refresh",
-                onClick = {
-                    vm.refreshUpdate(context = context)
-                },
-            )
+
             AppIconButton(
                 imageVector = Icons.Default.Sort,
                 title = "Filter",
@@ -89,7 +83,13 @@ fun LibraryScreenTopBar(
                     vm.onEvent(LibraryEvents.ToggleSearchMode(true))
                 },
             )
-
+            AppIconButton(
+                imageVector = Icons.Default.Refresh,
+                title = "Refresh",
+                onClick = {
+                    vm.refreshUpdate(context = context)
+                },
+            )
 
         },
         navigationIcon = if (vm.inSearchMode) {

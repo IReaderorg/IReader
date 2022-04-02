@@ -1,8 +1,10 @@
 package org.ireader.presentation.feature_detail.presentation.chapter_detail.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -13,7 +15,10 @@ import kotlinx.coroutines.launch
 import org.ireader.core.R
 import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
+import org.ireader.domain.feature_services.downloaderService.DownloadService
+import org.ireader.domain.feature_services.downloaderService.DownloadService.Companion.DOWNLOADER_Chapters_IDS
 import org.ireader.domain.models.entities.Book
+import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
@@ -125,6 +130,40 @@ class ChapterDetailViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             insertUseCases.insertBook(book)
         }
+    }
+
+    fun insertChapters(chapters: List<Chapter>) {
+        viewModelScope.launch(Dispatchers.IO) {
+            insertUseCases.insertChapters(chapters)
+        }
+    }
+
+    lateinit var work: OneTimeWorkRequest
+    fun downloadChapters(context: Context) {
+
+        book?.let { book ->
+            work =
+                OneTimeWorkRequestBuilder<DownloadService>().apply {
+                    setInputData(
+                        Data.Builder().apply {
+                            putLong(DownloadService.DOWNLOADER_BOOK_ID,
+                                book.id)
+                            putLong(DownloadService.DOWNLOADER_SOURCE_ID,
+                                book.sourceId)
+                            putLongArray(DOWNLOADER_Chapters_IDS,
+                                this@ChapterDetailViewModel.selection.toLongArray())
+                        }.build()
+                    )
+                    addTag(DownloadService.DOWNLOADER_SERVICE_NAME)
+                }.build()
+            WorkManager.getInstance(context).enqueueUniqueWork(
+                DownloadService.DOWNLOADER_SERVICE_NAME.plus(
+                    book.id + book.sourceId),
+                ExistingWorkPolicy.REPLACE,
+                work
+            )
+        }
+
     }
 
     suspend fun showSnackBar(message: UiText?) {

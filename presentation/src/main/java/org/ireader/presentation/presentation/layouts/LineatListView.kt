@@ -1,7 +1,8 @@
 package org.ireader.presentation.presentation.layouts
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -26,6 +27,7 @@ import org.ireader.presentation.presentation.components.BookImageComposable
 fun LinearBookItem(
     modifier: Modifier = Modifier,
     title: String,
+    selected: Boolean = false,
     book: Book,
 ) {
 
@@ -42,7 +44,9 @@ fun LinearBookItem(
                 modifier = modifier
                     .aspectRatio(3f / 4f)
                     .clip(RoundedCornerShape(4.dp))
-                    .border(.2.dp, MaterialTheme.colors.onBackground.copy(alpha = .1f)))
+                    .border(.2.dp,
+                        if (selected) MaterialTheme.colors.primary.copy(alpha = .5f) else MaterialTheme.colors.onBackground.copy(
+                            alpha = .1f)))
             Spacer(modifier = Modifier.width(15.dp))
             Text(
                 text = title,
@@ -55,11 +59,14 @@ fun LinearBookItem(
 
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun LinearListDisplay(
     lazyBooks: LazyPagingItems<Book>?,
     books: List<Book>,
+    selection: List<Long> = emptyList(),
     onClick: (book: Book) -> Unit,
+    onLongClick: (book: Book) -> Unit = {},
     scrollState: LazyListState = rememberLazyListState(),
     isLocal: Boolean,
     goToLatestChapter: (book: Book) -> Unit,
@@ -71,9 +78,11 @@ fun LinearListDisplay(
                     LinearBookItem(
                         title = book.title,
                         book = book,
-                        modifier = Modifier.clickable {
-                            onClick(book)
-                        }
+                        modifier = Modifier.combinedClickable(
+                            onClick = { onClick(book) },
+                            onLongClick = { onLongClick(book) },
+                        ),
+                        selected = book.id in selection
                     )
                 }
 
@@ -83,9 +92,11 @@ fun LinearListDisplay(
                 LinearBookItem(
                     title = books[index].title,
                     book = books[index],
-                    modifier = Modifier.clickable {
-                        onClick(books[index])
-                    }
+                    modifier = Modifier.combinedClickable(
+                        onClick = { onClick(books[index]) },
+                        onLongClick = { onClick(books[index]) },
+                    ),
+                    selected = books[index].id in selection
                 )
             }
         }

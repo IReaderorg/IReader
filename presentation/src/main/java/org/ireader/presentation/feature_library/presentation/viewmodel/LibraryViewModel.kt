@@ -8,6 +8,7 @@ import androidx.work.OneTimeWorkRequest
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -16,8 +17,12 @@ import org.ireader.domain.feature_services.LibraryUpdatesService
 import org.ireader.domain.models.DisplayMode
 import org.ireader.domain.models.FilterType
 import org.ireader.domain.models.SortType
+import org.ireader.domain.models.entities.Book
 import org.ireader.domain.use_cases.history.HistoryUseCase
+import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetBookUseCases
+import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
+import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.preferences.reader_preferences.LibraryLayoutTypeUseCase
 import org.ireader.domain.use_cases.preferences.reader_preferences.SortersUseCase
 import javax.inject.Inject
@@ -26,6 +31,9 @@ import javax.inject.Inject
 @HiltViewModel
 class LibraryViewModel @Inject constructor(
     private val localGetBookUseCases: LocalGetBookUseCases,
+    private val insertUseCases: LocalInsertUseCases,
+    private val deleteUseCase: DeleteUseCase,
+    private val localGetChapterUseCase: LocalGetChapterUseCase,
     private val libraryLayoutUseCase: LibraryLayoutTypeUseCase,
     private val sortersUseCase: SortersUseCase,
     private val historyUseCase: HistoryUseCase,
@@ -71,6 +79,10 @@ class LibraryViewModel @Inject constructor(
 
     }
 
+    fun addBooksToSelection(book: Book) {
+        selection.add(book.id)
+    }
+
 
     private var getBooksJob: Job? = null
     fun getLibraryBooks() {
@@ -101,6 +113,63 @@ class LibraryViewModel @Inject constructor(
         this.layout = layoutType.layout
     }
 
+//    lateinit var downloadWork: OneTimeWorkRequest
+//    fun downloadChapters(book: List<Book>,context: Context) {
+//        downloadWork =
+//                OneTimeWorkRequestBuilder<DownloadService>().apply {
+//                    setInputData(
+//                        Data.Builder().apply {
+//                            putLong(DownloadService.DOWNLOADER_BOOK_ID,
+//                                book.id)
+//                            putLong(DownloadService.DOWNLOADER_SOURCE_ID,
+//                                book.sourceId)
+//                        }.build()
+//                    )
+//                    addTag(DownloadService.DOWNLOADER_SERVICE_NAME)
+//                }.build()
+//            WorkManager.getInstance(context).enqueueUniqueWork(
+//                DownloadService.DOWNLOADER_SERVICE_NAME.plus(
+//                    book.id + book.sourceId),
+//                ExistingWorkPolicy.REPLACE,
+//                downloadWork
+//            )
+//
+//
+//    }
+
+    fun markAsRead() {
+        viewModelScope.launch(Dispatchers.IO) {
+            selection.forEach { bookId ->
+                val chapters = localGetChapterUseCase.findChaptersByBookId(bookId)
+                insertUseCases.insertChapters(chapters.map { it.copy(read = true) })
+
+            }
+            selection.clear()
+        }
+
+    }
+
+    fun markAsNotRead() {
+        viewModelScope.launch(Dispatchers.IO) {
+            selection.forEach { bookId ->
+                val chapters = localGetChapterUseCase.findChaptersByBookId(bookId)
+                insertUseCases.insertChapters(chapters.map { it.copy(read = false) })
+            }
+            selection.clear()
+        }
+
+    }
+
+    fun deleteBooks() {
+        viewModelScope.launch(Dispatchers.IO) {
+            selection.forEach { bookId ->
+                deleteUseCase.deleteBookById(bookId)
+            }
+            selection.clear()
+        }
+
+
+    }
 
     private fun readLayoutTypeAndFilterTypeAndSortType() {
         val sortType = sortersUseCase.read()

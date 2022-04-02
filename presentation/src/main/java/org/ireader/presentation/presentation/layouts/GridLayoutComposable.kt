@@ -19,7 +19,9 @@ fun GridLayoutComposable(
     lazyBooks: LazyPagingItems<Book>?,
     books: List<Book>,
     histories: List<History>,
+    selection: List<Long> = emptyList(),
     onClick: (book: Book) -> Unit,
+    onLongClick: (book: Book) -> Unit = {},
     scrollState: androidx.compose.foundation.lazy.grid.LazyGridState,
     isLocal: Boolean,
     goToLatestChapter: (book: Book) -> Unit,
@@ -33,7 +35,10 @@ fun GridLayoutComposable(
                 items(lazyBooks) { book ->
                     if (book != null) {
                         BookImage(
-                            onClick = { onClick(book) }, book = book, ratio = 6f / 10f
+                            onClick = { onClick(book) },
+                            onLongClick = { onLongClick(book) },
+                            book = book, ratio = 6f / 10f,
+                            selected = book.id in selection
                         ) {
                             if (book.lastUpdated > 1 && isLocal && histories.find { it.bookId == book.id }?.readAt != 0L) {
                                 GoToLastReadComposable(onClick = { goToLatestChapter(book) })
@@ -44,7 +49,9 @@ fun GridLayoutComposable(
             } else {
                 items(count = books.size) { index ->
                     BookImage(
-                        onClick = { onClick(books[index]) }, book = books[index], ratio = 6f / 10f
+                        onClick = { onClick(books[index]) }, book = books[index], ratio = 6f / 10f,
+                        selected = books[index].id in selection,
+                        onLongClick = { onLongClick(books[index]) },
                     ) {
                         if (books[index].lastUpdated > 1 && isLocal && histories.find { it.bookId == books[index].id }?.readAt != 0L) {
                             GoToLastReadComposable(onClick = { goToLatestChapter(books[index]) })

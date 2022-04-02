@@ -1,5 +1,6 @@
 package org.ireader.presentation.presentation.reusable_composable
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -140,6 +141,7 @@ fun CaptionTextComposable(
     )
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AppIconButton(
     modifier: Modifier = Modifier,
