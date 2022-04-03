@@ -8,14 +8,6 @@ IReader is a free and open source applicaiton for Android.
 |-------|---------|
 | [Latest Version](https://github.com/kazemcodes/IReader/releases/latest) | [Discord Server](https://discord.gg/HBU6zD8c5v) |
 
-## Features :sparkles:
-
-- Access all the books available on the website
-- Support 9 sources
-- Support the offline reading
-- Support Downloading the Novels.
-
-
 ## Release Page
 
 - You Can Download the App From [Here](https://github.com/kazemcodes/Infinity/releases)
@@ -23,7 +15,7 @@ IReader is a free and open source applicaiton for Android.
 
 ## Creating a new Source
 
-- You can take a look at [here](https://github.com/kazemcodes/tachiyomi-extensions-1.x/tree/master/sources/en), to understand how to create a source for this applicaiton 
+- You can take a look at [here](https://github.com/kazemcodes/tachiyomi-extensions-1.x/tree/Ireader/sources/en), to understand how to create a source for this applicaiton 
 
 
 ## Screenshots :camera:
