@@ -8,14 +8,6 @@ IReader is a free and open source applicaiton for Android.
 |-------|---------|
 | [Latest Version](https://github.com/kazemcodes/IReader/releases/latest) | [Discord Server](https://discord.gg/HBU6zD8c5v) |
 
-## Features :sparkles:
-
-- Access all the books available on the website
-- Support 9 sources
-- Support the offline reading
-- Support Downloading the Novels.
-
-
 ## Release Page
 
 - You Can Download the App From [Here](https://github.com/kazemcodes/Infinity/releases)
