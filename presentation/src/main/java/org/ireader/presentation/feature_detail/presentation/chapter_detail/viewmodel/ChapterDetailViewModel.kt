@@ -66,8 +66,18 @@ class ChapterDetailViewModel @Inject constructor(
         }
     }
 
-    suspend fun getLastReadChapter(book: Book) {
-        lastRead = getChapterUseCase.findLastReadChapter(book.id)?.id
+    fun getLastReadChapter(book: Book) {
+        viewModelScope.launch {
+            lastRead = getChapterUseCase.findLastReadChapter(book.id)?.id
+//            getChapterUseCase.subscribeLastReadChapter(book.id)
+//                .collect {
+//                    it?.let { chapter ->
+//                        lastRead = chapter.id
+//                    }
+//                }
+        }
+
+        //  lastRead = getChapterUseCase.findLastReadChapter(book.id)?.id
     }
 
     fun reverseChapterInDB() {
@@ -146,12 +156,9 @@ class ChapterDetailViewModel @Inject constructor(
                 OneTimeWorkRequestBuilder<DownloadService>().apply {
                     setInputData(
                         Data.Builder().apply {
-                            putLong(DownloadService.DOWNLOADER_BOOK_ID,
-                                book.id)
-                            putLong(DownloadService.DOWNLOADER_SOURCE_ID,
-                                book.sourceId)
                             putLongArray(DOWNLOADER_Chapters_IDS,
                                 this@ChapterDetailViewModel.selection.toLongArray())
+                            putLongArray(DownloadService.DOWNLOADER_BOOKS_IDS, longArrayOf(book.id))
                         }.build()
                     )
                     addTag(DownloadService.DOWNLOADER_SERVICE_NAME)

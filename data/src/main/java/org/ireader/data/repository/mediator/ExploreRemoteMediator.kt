@@ -92,7 +92,7 @@ class ExploreRemoteMediator(
                 }
                 val keys = response.mangas.map { book ->
                     RemoteKeys(
-                        id = book.title,
+                        title = book.title,
                         prevPage = prevPage,
                         nextPage = nextPage,
                         sourceId = source.id

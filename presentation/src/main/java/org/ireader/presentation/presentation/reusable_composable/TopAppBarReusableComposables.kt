@@ -209,7 +209,7 @@ fun AppTextField(
     Box(contentAlignment = Alignment.CenterStart) {
         if (query.isBlank() && mode != 2) {
             Text(
-                modifier = Modifier.padding(horizontal = 16.dp),
+                modifier = Modifier.padding(horizontal = 0.dp),
                 text = hint,
                 style = MaterialTheme.typography.subtitle1,
                 color = MaterialTheme.colors.onBackground.copy(alpha = .7F)

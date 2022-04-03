@@ -24,7 +24,7 @@ object Constants {
     const val CATALOG_REMOTE = "catalog_remote"
     const val UPDATE_TABLE = "updates"
     const val HISTORY_TABLE = "history"
-    const val CATEGORY_TABLE = "category_table"
+    const val CATEGORY_TABLE = "category"
 
     const val EXPLORE_BOOK_TABLE = "explore"
 
@@ -37,17 +37,6 @@ object Constants {
 
 
     const val ARG_HIDE_BOTTOM_BAR = "ARG_HIDE_BOTTOM_BAR"
-
-
-    const val NO_BOOKS_ERROR = "There is no book"
-    const val NO_BOOK_ERROR = "There is no book with this name"
-    const val NO_CHAPTER_ERROR = "There is No chapter with this name"
-    const val NO_CHAPTERS_ERROR = "There are no chapters with this name"
-
-    const val CLOUDFLARE_PROTECTION_ERROR =
-        "Cloudflare site protection is enable, Please Open the WebView."
-
-    const val UNKNOWN_ERROR = "Unknown Error Happened"
 
     const val repo_url = "/repos/kazemcodes/IReader/releases/latest"
     const val github_api_url = "https://api.github.com"

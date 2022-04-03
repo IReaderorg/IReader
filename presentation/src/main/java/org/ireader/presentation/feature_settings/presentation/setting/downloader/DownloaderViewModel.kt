@@ -89,10 +89,8 @@ class DownloaderViewModel @Inject constructor(
             OneTimeWorkRequestBuilder<DownloadService>().apply {
                 setInputData(
                     Data.Builder().apply {
-                        putLong(DownloadService.DOWNLOADER_BOOK_ID,
-                            bookId)
-                        putLong(DownloadService.DOWNLOADER_SOURCE_ID,
-                            sourceId)
+
+                        putLongArray(DownloadService.DOWNLOADER_BOOKS_IDS, longArrayOf(bookId))
                     }.build()
                 )
                 addTag(DownloadService.DOWNLOADER_SERVICE_NAME)
@@ -111,10 +109,7 @@ class DownloaderViewModel @Inject constructor(
             OneTimeWorkRequestBuilder<DownloadService>().apply {
                 setInputData(
                     Data.Builder().apply {
-                        putLong(DownloadService.DOWNLOADER_BOOK_ID,
-                            bookId)
-                        putLong(DownloadService.DOWNLOADER_SOURCE_ID,
-                            sourceId)
+                        putLongArray(DownloadService.DOWNLOADER_BOOKS_IDS, longArrayOf(bookId))
                     }.build()
                 )
             }.build()

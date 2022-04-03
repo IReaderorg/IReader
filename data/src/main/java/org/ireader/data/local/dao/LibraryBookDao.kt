@@ -50,7 +50,7 @@ interface LibraryBookDao {
         desc: Boolean = false,
     ): Flow<List<Book>>
 
-
+    @RewriteQueriesToDropUnusedColumns
     @Query("""
     SELECT library.*, MAX(history.readAt) AS max
     FROM library
@@ -66,6 +66,7 @@ interface LibraryBookDao {
 """)
     fun subscribeLatestRead(desc: Boolean): Flow<List<Book>>
 
+    @RewriteQueriesToDropUnusedColumns
     @Query("""
     SELECT library.*, MAX(chapter.dateUpload) AS max
     FROM library
@@ -78,6 +79,7 @@ interface LibraryBookDao {
 """)
     fun subscribeLatestChapter(desc: Boolean): Flow<List<Book>>
 
+    @RewriteQueriesToDropUnusedColumns
     @Query("""
     SELECT library.*, SUM(CASE WHEN chapter.read == 0 THEN 1 ELSE 0 END) AS unread
     FROM library
@@ -91,6 +93,7 @@ interface LibraryBookDao {
 """)
     fun subscribeTotalChapter(desc: Boolean): Flow<List<Book>>
 
+    @RewriteQueriesToDropUnusedColumns
     @Query("""
     SELECT library.*, 
     SUM(CASE WHEN chapter.read == 0 THEN 1 ELSE 0 END) AS unread,
@@ -103,6 +106,7 @@ interface LibraryBookDao {
 """)
     suspend fun findUnreadBooks(): List<Book>
 
+    @RewriteQueriesToDropUnusedColumns
     @Query("""
     SELECT library.*, 
     SUM(length(chapter.content) > 10) as total_download,
@@ -115,6 +119,7 @@ interface LibraryBookDao {
 """)
     suspend fun findCompletedBooks(): List<Book>
 
+    @RewriteQueriesToDropUnusedColumns
     @Query("""
     SELECT library.*, 
     SUM(CASE WHEN chapter.read == 0 THEN 1 ELSE 0 END) AS unread,

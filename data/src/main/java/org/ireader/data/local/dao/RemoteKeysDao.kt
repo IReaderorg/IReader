@@ -15,7 +15,12 @@ interface RemoteKeysDao {
     @Query("SELECT * FROM library WHERE id =:id")
     fun getExploreBookById(id: Int): Flow<Book?>
 
-    @Query("SELECT DISTINCT library.* FROM library JOIN  page_key_table ON library.title = page_key_table.id AND library.sourceId = page_key_table.sourceId  OR tableId = 1 GROUP BY  library.title ORDER BY id")
+    @Query("""
+        SELECT DISTINCT library.* FROM library 
+        JOIN  page_key_table ON library.title = page_key_table.title AND library.sourceId = page_key_table.sourceId  OR tableId = 1 
+        GROUP BY  library.title
+        ORDER BY page_key_table.id
+    """)
     fun getAllExploreBookByPaging(): PagingSource<Int, Book>
 
 

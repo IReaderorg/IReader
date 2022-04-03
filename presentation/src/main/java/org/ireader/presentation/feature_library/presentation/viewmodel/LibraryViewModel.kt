@@ -3,10 +3,7 @@ package org.ireader.presentation.feature_library.presentation.viewmodel
 
 import android.content.Context
 import androidx.lifecycle.viewModelScope
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequest
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
+import androidx.work.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -14,6 +11,8 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.feature_services.LibraryUpdatesService
+import org.ireader.domain.feature_services.downloaderService.DownloadService
+import org.ireader.domain.feature_services.downloaderService.DownloadService.Companion.DOWNLOADER_BOOKS_IDS
 import org.ireader.domain.models.DisplayMode
 import org.ireader.domain.models.FilterType
 import org.ireader.domain.models.SortType
@@ -113,29 +112,28 @@ class LibraryViewModel @Inject constructor(
         this.layout = layoutType.layout
     }
 
-//    lateinit var downloadWork: OneTimeWorkRequest
-//    fun downloadChapters(book: List<Book>,context: Context) {
-//        downloadWork =
-//                OneTimeWorkRequestBuilder<DownloadService>().apply {
-//                    setInputData(
-//                        Data.Builder().apply {
-//                            putLong(DownloadService.DOWNLOADER_BOOK_ID,
-//                                book.id)
-//                            putLong(DownloadService.DOWNLOADER_SOURCE_ID,
-//                                book.sourceId)
-//                        }.build()
-//                    )
-//                    addTag(DownloadService.DOWNLOADER_SERVICE_NAME)
-//                }.build()
-//            WorkManager.getInstance(context).enqueueUniqueWork(
-//                DownloadService.DOWNLOADER_SERVICE_NAME.plus(
-//                    book.id + book.sourceId),
-//                ExistingWorkPolicy.REPLACE,
-//                downloadWork
-//            )
-//
-//
-//    }
+    lateinit var downloadWork: OneTimeWorkRequest
+    fun downloadChapters(context: Context) {
+        downloadWork =
+            OneTimeWorkRequestBuilder<DownloadService>().apply {
+                setInputData(
+                    Data.Builder().apply {
+
+                        putLongArray(DOWNLOADER_BOOKS_IDS, selection.toLongArray())
+                    }.build()
+                )
+                addTag(DownloadService.DOWNLOADER_SERVICE_NAME)
+            }.build()
+        WorkManager.getInstance(context).enqueueUniqueWork(
+            DownloadService.DOWNLOADER_SERVICE_NAME.plus(
+                "Group_Download"),
+            ExistingWorkPolicy.REPLACE,
+            downloadWork
+        )
+        selection.clear()
+
+
+    }
 
     fun markAsRead() {
         viewModelScope.launch(Dispatchers.IO) {
@@ -164,6 +162,7 @@ class LibraryViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             selection.forEach { bookId ->
                 deleteUseCase.deleteBookById(bookId)
+                deleteUseCase.deleteChaptersByBookId(bookId)
             }
             selection.clear()
         }

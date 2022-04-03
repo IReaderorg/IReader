@@ -9,7 +9,7 @@ interface HistoryRepository {
 
     suspend fun findHistoryByBookId(bookId: Long): History?
 
-    fun findHistoriesPaging(): Flow<Map<String, List<HistoryWithRelations>>>
+    fun findHistoriesPaging(query: String): Flow<Map<String, List<HistoryWithRelations>>>
 
 
     suspend fun findHistories(): List<History>

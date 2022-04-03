@@ -19,6 +19,7 @@ interface LibraryChapterDao {
         chapterId: Long,
     ): Chapter?
 
+    @RewriteQueriesToDropUnusedColumns
     @Query("""
         SELECT *,library.favorite
 FROM chapter 
@@ -64,22 +65,24 @@ WHERE library.favorite = 1
         bookId: Int,
     ): PagingSource<Int, Chapter>
 
-
+    @RewriteQueriesToDropUnusedColumns
     @Query("""
-        SELECT *, history.readAt as lastRead
-        from chapter 
-        JOIN history ON history.bookId = chapter.bookId
-        GROUP BY chapterId
-        HAVING chapter.bookId == :bookId AND lastRead = (SELECT MAX(lastRead) FROM chapter WHERE bookId == :bookId)
+        SELECT *
+        from chapter
+        GROUP BY id
+        HAVING chapter.bookId == :bookId
+        ORDER BY readAt DESC
         LIMIT 1
     """)
     fun subscribeLastReadChapter(bookId: Long): Flow<Chapter?>
 
+    @RewriteQueriesToDropUnusedColumns
     @Query("""
-        SELECT chapter.* , MAX(chapter.readAt) as lastRead
+        SELECT *
         from chapter
-        GROUP By chapter.id
-        HAVING chapter.readAt == lastRead AND chapter.bookId = :bookId
+        GROUP BY id
+        HAVING chapter.bookId == :bookId
+        ORDER BY readAt DESC
         LIMIT 1
     """)
     suspend fun findLastReadChapter(bookId: Long): Chapter?

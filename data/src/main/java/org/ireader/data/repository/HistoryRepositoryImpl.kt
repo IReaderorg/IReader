@@ -18,9 +18,9 @@ class HistoryRepositoryImpl constructor(private val historyDao: HistoryDao) : Hi
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override fun findHistoriesPaging():
+    override fun findHistoriesPaging(query: String):
             Flow<Map<String, List<HistoryWithRelations>>> {
-        return historyDao.findHistoriesPaging().mapLatest { histories ->
+        return historyDao.findHistoriesPaging(query).mapLatest { histories ->
             histories.distinctBy { it.bookId }.groupBy { history -> history.date }
         }
     }

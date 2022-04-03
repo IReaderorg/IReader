@@ -17,8 +17,8 @@ class HistoryUseCase @Inject constructor(private val historyRepository: HistoryR
         return historyRepository.findHistoryByBookId(bookId)
     }
 
-    override fun findHistoriesPaging(): Flow<Map<String, List<HistoryWithRelations>>> {
-        return historyRepository.findHistoriesPaging()
+    override fun findHistoriesPaging(query: String): Flow<Map<String, List<HistoryWithRelations>>> {
+        return historyRepository.findHistoriesPaging(query)
     }
 
     override suspend fun findHistories(): List<History> {

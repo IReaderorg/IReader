@@ -16,6 +16,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -58,6 +59,11 @@ fun ChapterDetailScreen(
 //    LaunchedEffect(key1 = true) {
 //        vm.book?.let { vm.getLocalBookById(it.id) }
 //    }
+    LaunchedEffect(key1 = true) {
+        vm.book?.let { book ->
+            vm.getLastReadChapter(book)
+        }
+    }
     Scaffold(
         modifier = Modifier.systemBarsPadding(),
         topBar = {

@@ -30,17 +30,14 @@ class SubscribeInLibraryBooks @Inject constructor(private val localBookRepositor
             val filteredBooks = mutableListOf<Book>()
 
             withContext(Dispatchers.IO) {
-                when {
-                    filter.contains(FilterType.Unread) -> {
-                        filteredBooks.addAll(localBookRepository.findUnreadBooks())
-                    }
-                    filter.contains(FilterType.Downloaded) -> {
-                        filteredBooks.addAll(localBookRepository.findCompletedBooks())
-                    }
-                    filter.contains(FilterType.Completed) -> {
-                        filteredBooks.addAll(localBookRepository.findDownloadedBooks())
-                    }
-                    else -> {}
+                if (filter.contains(FilterType.Unread)) {
+                    filteredBooks.addAll(localBookRepository.findUnreadBooks())
+                }
+                if (filter.contains(FilterType.Downloaded)) {
+                    filteredBooks.addAll(localBookRepository.findCompletedBooks())
+                }
+                if (filter.contains(FilterType.Completed)) {
+                    filteredBooks.addAll(localBookRepository.findDownloadedBooks())
                 }
             }
             emit(books.filter { book ->

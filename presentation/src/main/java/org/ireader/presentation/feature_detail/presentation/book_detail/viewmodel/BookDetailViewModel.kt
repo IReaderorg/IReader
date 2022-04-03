@@ -18,9 +18,7 @@ import org.ireader.core.utils.removeSameItemsFromList
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.catalog.interactor.GetLocalCatalog
 import org.ireader.domain.feature_services.downloaderService.DownloadService
-import org.ireader.domain.feature_services.downloaderService.DownloadService.Companion.DOWNLOADER_BOOK_ID
 import org.ireader.domain.feature_services.downloaderService.DownloadService.Companion.DOWNLOADER_SERVICE_NAME
-import org.ireader.domain.feature_services.downloaderService.DownloadService.Companion.DOWNLOADER_SOURCE_ID
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.entities.updateBook
@@ -264,8 +262,8 @@ class BookDetailViewModel @Inject constructor(
         work = OneTimeWorkRequestBuilder<DownloadService>().apply {
             setInputData(
                 Data.Builder().apply {
-                    putLong(DOWNLOADER_BOOK_ID, book.id)
-                    putLong(DOWNLOADER_SOURCE_ID, book.sourceId)
+
+                    putLongArray(DownloadService.DOWNLOADER_BOOKS_IDS, longArrayOf(book.id))
                 }.build()
             )
             addTag(DOWNLOADER_SERVICE_NAME)

@@ -20,7 +20,8 @@ import org.ireader.domain.feature_services.updater_service.models.Version
 import org.ireader.domain.use_cases.preferences.services.LastUpdateTime
 import org.ireader.infinity.feature_services.flags
 import java.util.*
-import java.util.concurrent.TimeUnit
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 @HiltWorker
 class UpdateService @AssistedInject constructor(
@@ -33,10 +34,9 @@ class UpdateService @AssistedInject constructor(
 
     override suspend fun doWork(): Result {
         val last = lastUpdateTime.read()
-        val time = lastUpdateTime.read() + TimeUnit.DAYS.toMillis(1)
-        val oneDay = TimeUnit.DAYS.toMillis(1)
+        val time = lastUpdateTime.read() + 1.toDuration(DurationUnit.HOURS).inWholeMilliseconds
 
-        if (last > (last + oneDay)) {
+        if (last < time) {
             return Result.success()
         }
 

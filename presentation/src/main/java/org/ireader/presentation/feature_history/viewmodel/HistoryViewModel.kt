@@ -18,9 +18,9 @@ class HistoryViewModel @Inject constructor(
 
 
 
-    private fun getHistoryBooks() {
+    fun getHistoryBooks() {
         viewModelScope.launch {
-            historyUseCase.findHistoriesPaging().collect { histories ->
+            historyUseCase.findHistoriesPaging(searchQuery).collect { histories ->
                 history = histories
             }
         }

@@ -18,6 +18,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import org.ireader.core.utils.*
 import org.ireader.core_ui.theme.OrientationMode
 import org.ireader.core_ui.theme.fonts
@@ -138,7 +139,9 @@ class ReaderScreenViewModel @Inject constructor(
                 clearError()
                 this@ReaderScreenViewModel.toggleLoading(false)
                 toggleLocalLoaded(true)
-                setChapter(resultChapter.copy(content = resultChapter.content))
+                setChapter(resultChapter.copy(content = resultChapter.content,
+                    read = true,
+                    readAt = Clock.System.now().toEpochMilliseconds()))
                 val chapter = state.stateChapter
                 if (
                     chapter != null &&
@@ -176,7 +179,10 @@ class ReaderScreenViewModel @Inject constructor(
                 source = source,
                 onSuccess = { content ->
                     if (content != null) {
-                        insertChapter(content)
+                        insertChapter(content.copy(
+                            dateFetch = Clock.System.now()
+                                .toEpochMilliseconds(),
+                        ))
                         setChapter(content)
                         toggleLoading(false)
                         toggleRemoteLoading(false)
@@ -241,7 +247,8 @@ class ReaderScreenViewModel @Inject constructor(
     private fun updateLastReadTime(chapter: Chapter) {
         viewModelScope.launch(Dispatchers.IO) {
             insertUseCases.insertChapter(
-                chapter = chapter.copy(read = true)
+                chapter = chapter.copy(read = true,
+                    readAt = Clock.System.now().toEpochMilliseconds())
             )
             historyUseCase.insertHistory(History(
                 bookId = chapter.bookId,
@@ -604,9 +611,9 @@ class ReaderScreenViewModel @Inject constructor(
             layoutParams.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
             activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
             window.attributes = layoutParams
-            stateChapter?.let {
+            stateChapter?.let { chapter ->
                 activity.lifecycleScope.launch {
-                    insertChapter(it.copy(progress = scrollState.firstVisibleItemScrollOffset))
+                    insertChapter(chapter.copy(progress = scrollState.firstVisibleItemScrollOffset))
                 }
             }
         }
@@ -644,7 +651,7 @@ class ReaderScreenViewModel @Inject constructor(
         insertUseCases.insertBook(book)
     }
 
-    suspend fun insertChapter(chapter: Chapter) {
+    private suspend fun insertChapter(chapter: Chapter) {
         withIOContext {
             insertUseCases.insertChapter(chapter)
         }

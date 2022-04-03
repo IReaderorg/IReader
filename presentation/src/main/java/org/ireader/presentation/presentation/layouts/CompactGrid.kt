@@ -47,6 +47,9 @@ fun CompactGridLayoutComposable(
                             if (isLocal && histories.find { it.bookId == book.id }?.readAt != 0L) {
                                 GoToLastReadComposable(onClick = { goToLatestChapter(book) })
                             }
+                            if (!isLocal && book.favorite) {
+                                TextBadge(text = "in Library")
+                            }
                         }
 
                     }
@@ -62,6 +65,9 @@ fun CompactGridLayoutComposable(
                     ) {
                         if (isLocal && histories.find { it.bookId == books[index].id }?.readAt != 0L) {
                             GoToLastReadComposable(onClick = { goToLatestChapter(books[index]) })
+                        }
+                        if (!isLocal && books[index].favorite) {
+                            TextBadge(text = "in Library")
                         }
                     }
                 }

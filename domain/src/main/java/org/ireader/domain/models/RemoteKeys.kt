@@ -6,8 +6,9 @@ import org.ireader.core.utils.Constants
 
 @Entity(tableName = Constants.PAGE_KET_TABLE)
 data class RemoteKeys(
-    @PrimaryKey(autoGenerate = false)
-    val id: String,
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0,
+    val title: String,
     val sourceId: Long,
     val prevPage: Int?,
     val nextPage: Int?,

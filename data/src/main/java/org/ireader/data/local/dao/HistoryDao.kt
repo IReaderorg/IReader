@@ -22,8 +22,9 @@ interface HistoryDao {
     FROM history
     JOIN library ON history.bookId = library.id
     JOIN chapter ON history.chapterId = chapter.id
+    WHERE bookTitle LIKE '%' || :query || '%' 
     ORDER BY history.readAt DESC""")
-    fun findHistoriesPaging(): kotlinx.coroutines.flow.Flow<List<HistoryWithRelations>>
+    fun findHistoriesPaging(query: String): kotlinx.coroutines.flow.Flow<List<HistoryWithRelations>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertHistory(history: History): Long

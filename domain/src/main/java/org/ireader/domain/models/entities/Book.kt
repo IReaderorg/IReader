@@ -81,7 +81,7 @@ fun updateBook(newBook: Book, oldBook: Book): Book {
     )
 }
 
-fun MangaInfo.toBook(sourceId: Long, tableId: Long = 0): Book {
+fun MangaInfo.toBook(sourceId: Long, tableId: Long = 0, lastUpdated: Long = 0): Book {
     return Book(
         id = 0,
         sourceId = sourceId,
@@ -90,7 +90,7 @@ fun MangaInfo.toBook(sourceId: Long, tableId: Long = 0): Book {
         flags = 0,
         link = this.key,
         dataAdded = 0L,
-        lastUpdated = 0L,
+        lastUpdated = lastUpdated,
         favorite = false,
         title = this.title,
         status = this.status,

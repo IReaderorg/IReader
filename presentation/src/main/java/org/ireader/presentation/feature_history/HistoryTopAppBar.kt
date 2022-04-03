@@ -31,6 +31,7 @@ fun HistoryTopAppBar(
                     query = vm.searchQuery,
                     onValueChange = {
                         vm.searchQuery = it
+                        vm.getHistoryBooks()
                     },
                     onConfirm = {
                         focusManager.clearFocus()
@@ -48,6 +49,8 @@ fun HistoryTopAppBar(
                     title = "Close",
                     onClick = {
                         vm.searchMode = false
+                        vm.searchQuery = ""
+                        vm.getHistoryBooks()
                     },
                 )
             }

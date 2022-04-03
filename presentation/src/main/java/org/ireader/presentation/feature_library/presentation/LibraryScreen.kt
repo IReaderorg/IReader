@@ -14,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.DoneOutline
+import androidx.compose.material.icons.filled.GetApp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
@@ -153,6 +154,12 @@ fun LibraryScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
+                                AppIconButton(imageVector = Icons.Default.GetApp,
+                                    title = "Download",
+                                    onClick = {
+                                        vm.downloadChapters(context)
+                                        // vm.selection.clear()
+                                    })
                                 AppIconButton(imageVector = Icons.Default.Done,
                                     title = "Mark as read",
                                     onClick = {
