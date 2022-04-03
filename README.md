@@ -15,7 +15,7 @@ IReader is a free and open source applicaiton for Android.
 
 ## Creating a new Source
 
-- You can take a look at [here](https://github.com/kazemcodes/tachiyomi-extensions-1.x/tree/master/sources/en), to understand how to create a source for this applicaiton 
+- You can take a look at [here](https://github.com/kazemcodes/tachiyomi-extensions-1.x/tree/Ireader/sources/en), to understand how to create a source for this applicaiton 
 
 
 ## Screenshots :camera:
