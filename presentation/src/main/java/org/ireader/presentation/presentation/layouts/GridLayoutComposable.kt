@@ -1,6 +1,7 @@
 package org.ireader.presentation.presentation.layouts
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -26,45 +27,49 @@ fun GridLayoutComposable(
     isLocal: Boolean,
     goToLatestChapter: (book: Book) -> Unit,
 ) {
-    LazyVerticalGrid(
-        state = scrollState,
-        modifier = modifier.fillMaxSize(),
-        columns = GridCells.Fixed(3),
-        content = {
-            if (books.isEmpty() && lazyBooks != null) {
-                items(lazyBooks) { book ->
-                    if (book != null) {
-                        BookImage(
-                            onClick = { onClick(book) },
-                            onLongClick = { onLongClick(book) },
-                            book = book, ratio = 6f / 10f,
-                            selected = book.id in selection
-                        ) {
-                            if (book.lastUpdated > 1 && isLocal && histories.find { it.bookId == book.id }?.readAt != 0L) {
-                                GoToLastReadComposable(onClick = { goToLatestChapter(book) })
+    Column(modifier = Modifier.fillMaxSize()) {
+        LazyVerticalGrid(
+            state = scrollState,
+            modifier = modifier.fillMaxSize(),
+            columns = GridCells.Fixed(3),
+            content = {
+                if (books.isEmpty() && lazyBooks != null) {
+                    items(lazyBooks) { book ->
+                        if (book != null) {
+                            BookImage(
+                                onClick = { onClick(book) },
+                                onLongClick = { onLongClick(book) },
+                                book = book, ratio = 6f / 10f,
+                                selected = book.id in selection
+                            ) {
+                                if (book.lastUpdated > 1 && isLocal && histories.find { it.bookId == book.id }?.readAt != 0L) {
+                                    GoToLastReadComposable(onClick = { goToLatestChapter(book) })
+                                }
+                                if (!isLocal && book.favorite) {
+                                    TextBadge(text = "in Library")
+                                }
                             }
-                            if (!isLocal && book.favorite) {
+                        }
+                    }
+                } else {
+                    items(count = books.size) { index ->
+                        BookImage(
+                            onClick = { onClick(books[index]) },
+                            book = books[index],
+                            ratio = 6f / 10f,
+                            selected = books[index].id in selection,
+                            onLongClick = { onLongClick(books[index]) },
+                        ) {
+                            if (books[index].lastUpdated > 1 && isLocal && histories.find { it.bookId == books[index].id }?.readAt != 0L) {
+                                GoToLastReadComposable(onClick = { goToLatestChapter(books[index]) })
+                            }
+                            if (!isLocal && books[index].favorite) {
                                 TextBadge(text = "in Library")
                             }
                         }
                     }
                 }
-            } else {
-                items(count = books.size) { index ->
-                    BookImage(
-                        onClick = { onClick(books[index]) }, book = books[index], ratio = 6f / 10f,
-                        selected = books[index].id in selection,
-                        onLongClick = { onLongClick(books[index]) },
-                    ) {
-                        if (books[index].lastUpdated > 1 && isLocal && histories.find { it.bookId == books[index].id }?.readAt != 0L) {
-                            GoToLastReadComposable(onClick = { goToLatestChapter(books[index]) })
-                        }
-                        if (!isLocal && books[index].favorite) {
-                            TextBadge(text = "in Library")
-                        }
-                    }
-                }
-            }
+            })
+    }
 
-        })
 }

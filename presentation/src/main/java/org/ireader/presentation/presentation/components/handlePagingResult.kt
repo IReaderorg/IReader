@@ -45,7 +45,7 @@ fun handlePagingResult(
                 showLoading()
                 false
             }
-            error != null -> {
+            error != null && books.itemCount < 1 -> {
                 onErrorResult(UiText.ExceptionString(error.error).asString(context = context))
                 false
             }

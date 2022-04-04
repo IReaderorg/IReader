@@ -6,6 +6,7 @@ import javax.inject.Inject
 data class LocalGetChapterUseCase @Inject constructor(
     val subscribeChapterById: SubscribeChapterById,
     val findChapterById: FindChapterById,
+    val findChapterByIdByBatch: FindChapterByIdByBatch,
     val findAllInLibraryChapters: FindAllInLibraryChapters,
     val subscribeChaptersByBookId: SubscribeChaptersByBookId,
     val findChaptersByBookId: FindChaptersByBookId,

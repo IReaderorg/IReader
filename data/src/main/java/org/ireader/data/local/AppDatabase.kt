@@ -20,7 +20,7 @@ import org.ireader.domain.models.entities.*
         Update::class,
         RemoteKeys::class,
     ],
-    version = 13,
+    version = 14,
     exportSchema = true,
 )
 @TypeConverters(DatabaseConverter::class)

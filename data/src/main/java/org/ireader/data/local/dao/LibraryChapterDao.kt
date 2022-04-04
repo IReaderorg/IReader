@@ -19,6 +19,11 @@ interface LibraryChapterDao {
         chapterId: Long,
     ): Chapter?
 
+    @Query("SELECT * FROM chapter WHERE id in (:chapterId)")
+    suspend fun findChapterByIdByBatch(
+        chapterId: List<Long>,
+    ): List<Chapter>
+
     @RewriteQueriesToDropUnusedColumns
     @Query("""
         SELECT *,library.favorite

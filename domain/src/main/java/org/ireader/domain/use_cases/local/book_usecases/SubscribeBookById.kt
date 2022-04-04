@@ -20,4 +20,10 @@ class FindBookById @Inject constructor(private val localBookRepository: LocalBoo
     }
 }
 
+class FindBookByIds @Inject constructor(private val localBookRepository: LocalBookRepository) {
+    suspend operator fun invoke(id: List<Long>): List<Book> {
+        return localBookRepository.findBookByIds(id = id)
+    }
+}
+
 

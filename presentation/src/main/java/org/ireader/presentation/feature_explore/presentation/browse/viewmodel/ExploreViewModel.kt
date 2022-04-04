@@ -13,11 +13,13 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
+import org.ireader.core.utils.Constants
 import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
 import org.ireader.domain.R
 import org.ireader.domain.catalog.service.CatalogStore
 import org.ireader.domain.models.DisplayMode
+import org.ireader.domain.models.LayoutType
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.preferences.reader_preferences.BrowseLayoutTypeUseCase
@@ -73,6 +75,7 @@ class ExploreViewModel @Inject constructor(
 
     }
 
+
     private val _books = MutableStateFlow<PagingData<Book>>(PagingData.empty())
     val books = _books
 
@@ -103,7 +106,11 @@ class ExploreViewModel @Inject constructor(
             remoteUseCases.getRemoteBookByPaginationUseCase(
                 source,
                 listing,
-                query = query, filters = filters).cachedIn(viewModelScope)
+                query = query,
+                filters = filters,
+                pageSize = if (layout == LayoutType.GridLayout) 15 else 6,
+                maxSize = Constants.MAX_PAGE_SIZE
+            ).cachedIn(viewModelScope)
                 .collect { snapshot ->
                     _books.value = snapshot
                 }

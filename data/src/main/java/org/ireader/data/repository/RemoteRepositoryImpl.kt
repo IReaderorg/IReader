@@ -102,6 +102,8 @@ class RemoteRepositoryImpl(
         listing: Listing?,
         filters: List<Filter<*>>?,
         query: String?,
+        pageSize: Int,
+        maxSize: Int,
     ): Flow<PagingData<Book>> {
         return GetRemoteBooksByRemoteMediator(database = database,
             remoteRepository = this@RemoteRepositoryImpl).invoke(source, listing, filters, query)

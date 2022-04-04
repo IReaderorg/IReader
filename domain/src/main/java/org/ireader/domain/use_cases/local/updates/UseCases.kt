@@ -2,11 +2,12 @@ package org.ireader.domain.use_cases.local.updates
 
 import kotlinx.coroutines.flow.Flow
 import org.ireader.domain.models.entities.Update
+import org.ireader.domain.models.entities.UpdateWithInfo
 import org.ireader.domain.repository.UpdatesRepository
 import javax.inject.Inject
 
 class SubscribeUpdates @Inject constructor(private val updatesRepository: UpdatesRepository) {
-    operator fun invoke(): Flow<Map<String, List<Update>>> {
+    operator fun invoke(): Flow<Map<String, List<UpdateWithInfo>>> {
         return updatesRepository.subscribeAllUpdates()
     }
 }

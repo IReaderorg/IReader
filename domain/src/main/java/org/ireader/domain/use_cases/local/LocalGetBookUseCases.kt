@@ -7,6 +7,7 @@ import javax.inject.Inject
 data class LocalGetBookUseCases @Inject constructor(
     val subscribeBookById: SubscribeBookById,
     val findBookById: FindBookById,
+    val findBookByIds: FindBookByIds,
     val SubscribeInLibraryBooks: SubscribeInLibraryBooks,
     val findAllInLibraryBooks: FindAllInLibraryBooks,
     val getBooksByQueryByPagination: GetBooksByQueryByPagination,

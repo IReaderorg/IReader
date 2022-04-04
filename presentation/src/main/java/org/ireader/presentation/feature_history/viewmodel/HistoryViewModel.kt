@@ -38,4 +38,10 @@ class HistoryViewModel @Inject constructor(
         }
     }
 
+    fun deleteAllHistories() {
+        viewModelScope.launch {
+            historyUseCase.deleteAllHistories()
+        }
+    }
+
 }

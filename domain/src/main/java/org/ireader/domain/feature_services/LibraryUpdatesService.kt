@@ -18,14 +18,13 @@ import org.ireader.domain.feature_services.notification.DefaultNotificationHelpe
 import org.ireader.domain.feature_services.notification.Notifications
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.entities.Update
+import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetBookUseCases
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.local.updates.InsertUpdatesUseCase
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import timber.log.Timber
-import kotlin.time.Duration.Companion.minutes
-import kotlin.time.DurationUnit
 import kotlin.time.ExperimentalTime
 
 @HiltWorker
@@ -39,6 +38,7 @@ class LibraryUpdatesService @AssistedInject constructor(
     private val defaultNotificationHelper: DefaultNotificationHelper,
     private val insertUseCases: LocalInsertUseCases,
     private val updatesUseCase: InsertUpdatesUseCase,
+    private val deleteUseCase: DeleteUseCase,
 ) : CoroutineWorker(context, params) {
 
     companion object {
@@ -71,41 +71,45 @@ class LibraryUpdatesService @AssistedInject constructor(
             notify(Notifications.ID_LIBRARY_PROGRESS, builder.build())
             try {
                 libraryBooks.forEachIndexed { index, book ->
-                    if ((Clock.System.now()
-                            .toEpochMilliseconds() - book.lastUpdated) < 5.minutes.toLong(
-                            DurationUnit.MINUTES)
-                    ) {
-                        val chapters = getChapterUseCase.findChaptersByBookId(bookId = book.id)
-                        val source = getLocalCatalog.get(book.sourceId)!!.source
-                        val remoteChapters = mutableListOf<Chapter>()
-                        remoteUseCases.getRemoteChapters(
-                            book, source,
-                            onSuccess = {
-                                builder.setContentText(book.title)
-                                builder.setSubText(index.toString())
-                                builder.setProgress(libraryBooks.size, index, false)
-                                notify(Notifications.ID_LIBRARY_PROGRESS, builder.build())
-                                remoteChapters.addAll(it)
-                            }, onError = {})
-                        val newChapters =
-                            remoteChapters.filterNot { chapter -> chapter.title in chapters.map { it.title } }
-                        if (newChapters.isNotEmpty()) {
-                            updatedBookSize += 1
-                        }
-                        withContext(Dispatchers.IO) {
-                            insertUseCases.insertChapters(newChapters.map {
-                                it.copy(
-                                    bookId = book.id,
-                                    dateFetch = Clock.System.now().toEpochMilliseconds(),
-                                )
-                            })
-                            insertUseCases.insertBook(book.copy(lastUpdated = Clock.System.now()
-                                .toEpochMilliseconds()))
-                            updatesUseCase(newChapters.map { Update.toUpdates(book, it) })
-                        }
+                    val chapters = getChapterUseCase.findChaptersByBookId(bookId = book.id)
+                    val source = getLocalCatalog.get(book.sourceId)!!.source
+                    val remoteChapters = mutableListOf<Chapter>()
+                    remoteUseCases.getRemoteChapters(
+                        book, source,
+                        onSuccess = {
+                            builder.setContentText(book.title)
+                            builder.setSubText(index.toString())
+                            builder.setProgress(libraryBooks.size, index, false)
+                            notify(Notifications.ID_LIBRARY_PROGRESS, builder.build())
+                            remoteChapters.addAll(it)
+                        }, onError = {})
 
+                    val newChapters =
+                        remoteChapters.filter { chapter -> chapter.title !in chapters.map { it.title } }
+
+                    if (newChapters.isNotEmpty()) {
+                        updatedBookSize += 1
+                    }
+                    withContext(Dispatchers.IO) {
+
+                        val chapterIds = insertUseCases.insertChapters(newChapters.map {
+                            it.copy(
+                                bookId = book.id,
+                                dateFetch = Clock.System.now().toEpochMilliseconds(),
+                            )
+                        })
+                        insertUseCases.insertBook(book.copy(lastUpdated = Clock.System.now()
+                            .toEpochMilliseconds()))
+                        updatesUseCase(newChapters.mapIndexed { index, chapter ->
+                            Update(
+                                chapterId = chapterIds[index],
+                                bookId = chapter.bookId,
+                                date = Clock.System.now().toEpochMilliseconds()
+                            )
+                        })
                     }
                 }
+
             } catch (e: Exception) {
                 Timber.e("getNotifications: Failed to Check for Book Update")
                 notify(

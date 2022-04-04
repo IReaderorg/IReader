@@ -18,7 +18,7 @@ class SubscribeChaptersByBookId @Inject constructor(private val localChapterRepo
     operator fun invoke(
         bookId: Long,
         isAsc: Boolean = true,
-        query: String,
+        query: String = "",
     ): Flow<List<Chapter>> = flow {
         localChapterRepository.subscribeChaptersByBookId(bookId = bookId, isAsc).collect { books ->
             emit(books.filter { it.title.contains(query, ignoreCase = true) })

@@ -30,6 +30,8 @@ fun LayoutComposable(
     source: Source? = null,
     isLocal: Boolean,
     goToLatestChapter: (book: Book) -> Unit = {},
+    isLoading: Boolean = false,
+    error: String = "",
 ) {
 
     //TODO: Add an item change position animation
@@ -45,7 +47,9 @@ fun LayoutComposable(
                 onLongClick = { onLongClick(it) },
                 scrollState = gridState,
                 isLocal = isLocal,
-                goToLatestChapter = { goToLatestChapter(it) }, histories = histories)
+                goToLatestChapter = { goToLatestChapter(it) },
+                histories = histories,
+            )
         }
         is LayoutType.ListLayout -> {
             LinearListDisplay(books = books, onClick = { book ->

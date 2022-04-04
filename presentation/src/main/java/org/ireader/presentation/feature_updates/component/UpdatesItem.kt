@@ -25,18 +25,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.ireader.core_ui.modifier.selectedBackground
 import org.ireader.domain.feature_services.io.coil.rememberBookCover
-import org.ireader.domain.models.entities.Update
+import org.ireader.domain.models.entities.UpdateWithInfo
 import org.ireader.presentation.feature_history.*
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun UpdatesItem(
-    book: Update,
+    book: UpdateWithInfo,
     isSelected: Boolean,
-    onClickItem: (Update) -> Unit,
-    onLongClickItem: (Update) -> Unit,
-    onClickCover: (Update) -> Unit,
-    onClickDownload: (Update) -> Unit,
+    onClickItem: (UpdateWithInfo) -> Unit,
+    onLongClickItem: (UpdateWithInfo) -> Unit,
+    onClickCover: (UpdateWithInfo) -> Unit,
+    onClickDownload: (UpdateWithInfo) -> Unit,
+    isDownloadable: Boolean = false,
 ) {
     val alpha = if (book.read) 0.38f else 1f
 
@@ -75,7 +76,7 @@ fun UpdatesItem(
             )
         }
 
-        if (book.chapterDateUpload == 0L) {
+        if (isDownloadable) {
             IconButton(onClick = { onClickDownload(book) }) {
                 Icon(imageVector = Icons.Outlined.Download, contentDescription = "")
             }

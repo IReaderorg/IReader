@@ -16,6 +16,7 @@ import org.ireader.domain.models.entities.Catalog
 import org.ireader.domain.models.entities.CatalogInstalled
 import org.ireader.domain.models.entities.CatalogLocal
 import org.ireader.domain.models.entities.CatalogRemote
+import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.delete_usecases.book.ConvertExploredTOLibraryBooks
 import org.ireader.domain.use_cases.local.delete_usecases.book.DeleteAllExploredBooks
 import org.ireader.domain.use_cases.local.delete_usecases.chapter.DeleteNotInLibraryChapters
@@ -36,6 +37,7 @@ class ExtensionViewModel @Inject constructor(
     private val convertExploredTOLibraryBooks: ConvertExploredTOLibraryBooks,
     private val deleteAllExploredBook: DeleteAllExploredBooks,
     private val deleteNotInLibraryChapters: DeleteNotInLibraryChapters,
+    private val deleteUseCase: DeleteUseCase,
 ) : BaseViewModel(), CatalogsState by state {
 
 
@@ -73,6 +75,8 @@ class ExtensionViewModel @Inject constructor(
             deleteAllExploredBook()
             convertExploredTOLibraryBooks()
             deleteNotInLibraryChapters()
+            deleteUseCase.deleteAllExploreBook()
+            deleteUseCase.deleteAllRemoteKeys()
         }
     }
 

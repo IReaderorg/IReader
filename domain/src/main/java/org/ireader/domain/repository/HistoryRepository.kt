@@ -17,6 +17,7 @@ interface HistoryRepository {
     suspend fun insertHistory(history: History): Long
     suspend fun insertHistories(histories: List<History>): List<Long>
 
-    suspend fun deleteAllHistories(histories: List<History>)
+    suspend fun deleteHistories(histories: List<History>)
     suspend fun deleteHistory(chapterId: Long)
+    suspend fun deleteAllHistories()
 }

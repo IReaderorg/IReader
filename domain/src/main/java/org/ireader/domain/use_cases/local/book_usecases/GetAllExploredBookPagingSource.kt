@@ -19,10 +19,12 @@ class GetAllExploredBookPagingSource @Inject constructor(private val localBookRe
 
 class GetAllExploredBookPagingData @Inject constructor(private val localBookRepository: LocalBookRepository) {
     operator fun invoke(
+        pageSize: Int = Constants.DEFAULT_PAGE_SIZE,
+        maxSize: Int = Constants.MAX_PAGE_SIZE,
     ): Flow<PagingData<Book>> {
         return Pager(
-            config = PagingConfig(pageSize = Constants.DEFAULT_PAGE_SIZE,
-                maxSize = Constants.MAX_PAGE_SIZE, enablePlaceholders = true),
+            config = PagingConfig(pageSize = pageSize,
+                maxSize = maxSize, enablePlaceholders = true),
             pagingSourceFactory = {
                 localBookRepository.getAllExploreBookPagingSource()
             }

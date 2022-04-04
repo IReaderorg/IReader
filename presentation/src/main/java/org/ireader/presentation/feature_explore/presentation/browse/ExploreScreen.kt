@@ -9,16 +9,16 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.paging.ExperimentalPagingApi
+import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import kotlinx.coroutines.launch
 import org.ireader.domain.FetchType
@@ -59,6 +59,7 @@ fun ExploreScreen(
     getBooks: (query: String?, listing: Listing?, filters: List<Filter<*>>) -> Unit,
 ) {
     val scrollState = rememberLazyListState()
+    val context = LocalContext.current
 
     val books = vm.books.collectAsLazyPagingItems()
 
@@ -71,6 +72,43 @@ fun ExploreScreen(
         vm.modifiedFilter = source.getFilters()
     }
 
+    val scaffoldState = rememberScaffoldState()
+    val (showSnackBar, setShowSnackBar) = remember {
+        mutableStateOf(false)
+    }
+    val (snackBarText, setSnackBarText) = remember {
+        mutableStateOf("")
+    }
+    if (showSnackBar) {
+        LaunchedEffect(scaffoldState.snackbarHostState) {
+            val result = scaffoldState.snackbarHostState.showSnackbar(
+                snackBarText,
+                actionLabel = "Reload",
+                duration = SnackbarDuration.Indefinite
+            )
+            when (result) {
+                SnackbarResult.ActionPerformed -> {
+                    setShowSnackBar(false)
+                    books.retry()
+                }
+            }
+        }
+    }
+    val error = when {
+        books.loadState.refresh is LoadState.Error -> books.loadState.refresh as LoadState.Error
+        books.loadState.prepend is LoadState.Error -> books.loadState.prepend as LoadState.Error
+        books.loadState.append is LoadState.Error -> books.loadState.append as LoadState.Error
+        else -> null
+    }
+    LaunchedEffect(key1 = error?.error != null) {
+        val error = error?.error?.localizedMessage
+        if (error != null && error.isNotBlank() && books.itemCount > 0) {
+            setShowSnackBar(true)
+            setSnackBarText(error)
+
+        }
+
+    }
     ModalBottomSheetLayout(
         modifier = Modifier.statusBarsPadding(),
         sheetState = bottomSheetState,
@@ -90,7 +128,8 @@ fun ExploreScreen(
             )
         },
         sheetBackgroundColor = MaterialTheme.colors.background,
-    ) {
+
+        ) {
         Scaffold(
             topBar = {
                 BrowseTopAppBar(
@@ -105,6 +144,17 @@ fun ExploreScreen(
                     onLayoutTypeSelect = onLayoutTypeSelect,
                     currentLayout = currentLayout
                 )
+            },
+            scaffoldState = scaffoldState,
+            snackbarHost = {
+                SnackbarHost(hostState = it) { data ->
+                    Snackbar(
+                        actionColor = MaterialTheme.colors.primary,
+                        snackbarData = data,
+                        backgroundColor = MaterialTheme.colors.background,
+                        contentColor = MaterialTheme.colors.onBackground,
+                    )
+                }
             },
             floatingActionButtonPosition = FabPosition.End,
             floatingActionButton = {
@@ -197,7 +247,9 @@ fun ExploreScreen(
                                 route = BookDetailScreenSpec.buildRoute(sourceId = book.sourceId,
                                     bookId = book.id)
                             )
-                        }
+                        },
+                        isLoading = books.loadState.refresh is LoadState.Loading,
+                        error = error?.error?.message ?: "Unknown Error Happened"
                     )
                 }
             }

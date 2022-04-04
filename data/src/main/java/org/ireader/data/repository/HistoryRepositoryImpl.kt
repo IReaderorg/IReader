@@ -37,12 +37,16 @@ class HistoryRepositoryImpl constructor(private val historyDao: HistoryDao) : Hi
         return historyDao.insertHistories(histories)
     }
 
-    override suspend fun deleteAllHistories(histories: List<History>) {
-        return historyDao.deleteAllHistories(histories)
+    override suspend fun deleteHistories(histories: List<History>) {
+        return historyDao.deleteHistories(histories)
     }
 
     override suspend fun deleteHistory(chapterId: Long) {
         return historyDao.deleteHistory(chapterId)
+    }
+
+    override suspend fun deleteAllHistories() {
+        return historyDao.deleteAllHistory()
     }
 
 }

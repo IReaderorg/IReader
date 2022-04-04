@@ -23,10 +23,12 @@ class GetRemoteBooksByRemoteMediator(
         listing: Listing?,
         filters: List<Filter<*>>?,
         query: String?,
+        pageSize: Int = Constants.DEFAULT_PAGE_SIZE,
+        maxSize: Int = Constants.MAX_PAGE_SIZE,
     ): Flow<PagingData<Book>> {
         return Pager(
-            config = PagingConfig(pageSize = Constants.DEFAULT_PAGE_SIZE,
-                maxSize = Constants.MAX_PAGE_SIZE),
+            config = PagingConfig(pageSize = pageSize,
+                maxSize = maxSize),
             pagingSourceFactory = {
                 remoteRepository.getAllExploreBookByPaging(source, listing, filters, query)
             },

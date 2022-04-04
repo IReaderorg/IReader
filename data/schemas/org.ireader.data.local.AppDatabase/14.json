@@ -1,8 +1,8 @@
 {
   "formatVersion": 1,
   "database": {
-    "version": 13,
-    "identityHash": "3aac64670045f9577566c4550f4e5ab1",
+    "version": 14,
+    "identityHash": "7b4e52856d255eb1230046ac7e787f7c",
     "entities": [
       {
         "tableName": "library",
@@ -432,7 +432,7 @@
       },
       {
         "tableName": "updates",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `chapterId` INTEGER NOT NULL, `bookId` INTEGER NOT NULL, `sourceId` INTEGER NOT NULL, `chapterLink` TEXT NOT NULL, `bookTitle` TEXT NOT NULL, `cover` TEXT NOT NULL, `favorite` INTEGER NOT NULL, `chapterDateUpload` INTEGER NOT NULL, `chapterTitle` TEXT NOT NULL, `read` INTEGER NOT NULL, `number` REAL NOT NULL, `date` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `chapterId` INTEGER NOT NULL, `bookId` INTEGER NOT NULL, `date` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -453,60 +453,6 @@
             "notNull": true
           },
           {
-            "fieldPath": "sourceId",
-            "columnName": "sourceId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "chapterLink",
-            "columnName": "chapterLink",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "bookTitle",
-            "columnName": "bookTitle",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "cover",
-            "columnName": "cover",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "favorite",
-            "columnName": "favorite",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "chapterDateUpload",
-            "columnName": "chapterDateUpload",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "chapterTitle",
-            "columnName": "chapterTitle",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "read",
-            "columnName": "read",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "number",
-            "columnName": "number",
-            "affinity": "REAL",
-            "notNull": true
-          },
-          {
             "fieldPath": "date",
             "columnName": "date",
             "affinity": "INTEGER",
@@ -524,11 +470,17 @@
       },
       {
         "tableName": "page_key_table",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `sourceId` INTEGER NOT NULL, `prevPage` INTEGER, `nextPage` INTEGER, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `sourceId` INTEGER NOT NULL, `prevPage` INTEGER, `nextPage` INTEGER)",
         "fields": [
           {
             "fieldPath": "id",
             "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -555,7 +507,7 @@
           "columnNames": [
             "id"
           ],
-          "autoGenerate": false
+          "autoGenerate": true
         },
         "indices": [],
         "foreignKeys": []
@@ -564,7 +516,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3aac64670045f9577566c4550f4e5ab1')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7b4e52856d255eb1230046ac7e787f7c')"
     ]
   }
 }

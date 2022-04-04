@@ -6,9 +6,7 @@ import kotlinx.datetime.Clock
 import org.ireader.core.utils.Constants
 
 
-@Entity(tableName = Constants.UPDATE_TABLE)
-data class Update(
-    @PrimaryKey(autoGenerate = true)
+data class UpdateWithInfo(
     val id: Long = 0,
     val chapterId: Long,
     val bookId: Long,
@@ -22,24 +20,47 @@ data class Update(
     val read: Boolean = false,
     val number: Float = -1f,
     val date: Long,
+    val downloaded: Boolean = false,
 ) {
     companion object {
-        fun toUpdates(book: Book, chapter: Chapter): Update {
+        fun UpdateWithInfo.toUpdate(): Update {
             return Update(
-                bookId = chapter.bookId,
-                read = chapter.read,
-                chapterId = chapter.id,
-                bookTitle = book.title,
-                chapterDateUpload = chapter.dateUpload,
-                chapterLink = chapter.link,
-                chapterTitle = chapter.title,
-                cover = book.cover,
+                id = this.id,
+                bookId = this.bookId,
+                chapterId = this.id,
                 date = Clock.System.now().toEpochMilliseconds(),
-                favorite = book.favorite,
-                number = chapter.number,
-                sourceId = book.sourceId
             )
         }
+
+    }
+}
+
+@Entity(tableName = Constants.UPDATE_TABLE)
+data class Update(
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0,
+    val chapterId: Long,
+    val bookId: Long,
+    val date: Long,
+) {
+    companion object {
+//        fun toUpdates(book: Book, chapter: Chapter): Update {
+//            return Update(
+//                bookId = chapter.bookId,
+//                read = chapter.read,
+//                chapterId = chapter.id,
+//                bookTitle = book.title,
+//                chapterDateUpload = chapter.dateUpload,
+//                chapterLink = chapter.link,
+//                chapterTitle = chapter.title,
+//                cover = book.cover,
+//                date = Clock.System.now().toEpochMilliseconds(),
+//                favorite = book.favorite,
+//                number = chapter.number,
+//                sourceId = book.sourceId,
+//                downloaded = chapter.content.joinToString().isNotEmpty()
+//            )
+//        }
 
     }
 

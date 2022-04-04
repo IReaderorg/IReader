@@ -13,7 +13,7 @@ interface LocalBookRepository {
     fun subscribeBookById(id: Long): Flow<Book?>
     suspend fun findBookById(id: Long): Book?
 
-
+    suspend fun findBookByIds(id: List<Long>): List<Book>
 
     suspend fun findAllInLibraryBooks(
         sortType: SortType = SortType.LastRead,

@@ -18,6 +18,12 @@ class LocalChapterRepositoryImpl @Inject constructor(private val daoLibrary: Lib
 
     }
 
+    override suspend fun findChapterByIdByBatch(
+        chapterId: List<Long>,
+    ): List<Chapter> {
+        return daoLibrary.findChapterByIdByBatch(chapterId = chapterId)
+    }
+
     override fun subscribeChapterById(chapterId: Long): Flow<Chapter?> {
         return daoLibrary.subscribeChapterById(chapterId = chapterId)
     }
@@ -69,6 +75,7 @@ class LocalChapterRepositoryImpl @Inject constructor(private val daoLibrary: Lib
         chapters: List<Chapter>,
     ): List<Long> {
         return daoLibrary.insertChapters(chapters = chapters)
+
     }
 
     override suspend fun insertChapter(chapter: Chapter): Long {

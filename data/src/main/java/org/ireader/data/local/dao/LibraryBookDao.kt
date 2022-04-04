@@ -145,6 +145,9 @@ interface LibraryBookDao {
     @Query("SELECT * FROM library WHERE id = :bookId Limit 1")
     suspend fun findBookById(bookId: Long): Book?
 
+    @Query("SELECT * FROM library WHERE id in (:bookIds)")
+    suspend fun findBookByIds(bookIds: List<Long>): List<Book>
+
     @Query("SELECT * FROM library WHERE link = :key Limit 1")
     suspend fun findBookByKey(key: String): Book?
 

@@ -128,7 +128,7 @@ class ChapterDetailViewModel @Inject constructor(
                     isAsc = isAsc,
                     query = query
                 ).collect { chapters ->
-                    this@ChapterDetailViewModel.chapters = chapters
+                    this@ChapterDetailViewModel.chapters = chapters.distinctBy { it.id }
                 }
 
             }

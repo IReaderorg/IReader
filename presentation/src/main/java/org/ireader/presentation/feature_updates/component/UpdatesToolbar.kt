@@ -13,10 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.FlipToBack
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.SelectAll
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -27,11 +24,12 @@ import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
 
 @Composable
 fun UpdatesToolbar(
-  state: UpdateState,
-  onClickCancelSelection: () -> Unit,
-  onClickSelectAll: () -> Unit,
-  onClickFlipSelection: () -> Unit,
-  onClickRefresh: () -> Unit,
+    state: UpdateState,
+    onClickCancelSelection: () -> Unit,
+    onClickSelectAll: () -> Unit,
+    onClickFlipSelection: () -> Unit,
+    onClickRefresh: () -> Unit,
+    onClickDelete: () -> Unit,
 ) {
     Box(modifier = Modifier.fillMaxWidth()) {
         when {
@@ -45,7 +43,8 @@ fun UpdatesToolbar(
             }
             else -> {
                 UpdatesRegularToolbar(
-                    onClickRefresh = onClickRefresh
+                    onClickRefresh = onClickRefresh,
+                    onClickDelete = onClickDelete
                 )
             }
         }
@@ -79,13 +78,20 @@ private fun UpdatesSelectionToolbar(
 }
 
 @Composable
-fun UpdatesRegularToolbar(onClickRefresh: () -> Unit) {
-  Toolbar(
-    title = { TopAppBarTitle(title = stringResource(id = R.string.updates_screen_label)) },
-    actions = {
-      IconButton(onClick = onClickRefresh) {
-        Icon(Icons.Default.Refresh, contentDescription = null)
-      }
-    }
+fun UpdatesRegularToolbar(
+    onClickRefresh: () -> Unit,
+    onClickDelete: () -> Unit,
+) {
+    Toolbar(
+        title = { TopAppBarTitle(title = stringResource(id = R.string.updates_screen_label)) },
+        actions = {
+            IconButton(onClick = onClickRefresh) {
+                Icon(Icons.Default.Refresh, contentDescription = null)
+            }
+            IconButton(onClick = onClickDelete) {
+                Icon(Icons.Default.DeleteForever, contentDescription = null)
+            }
+
+        }
   )
 }

@@ -16,7 +16,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import org.ireader.domain.models.entities.Update
+import org.ireader.domain.models.entities.UpdateWithInfo
 import org.ireader.presentation.feature_sources.presentation.extension.composables.TextSection
 import org.ireader.presentation.feature_updates.viewmodel.UpdateState
 
@@ -25,10 +25,10 @@ import org.ireader.presentation.feature_updates.viewmodel.UpdateState
 @Composable
 fun UpdatesContent(
     state: UpdateState,
-    onClickItem: (Update) -> Unit,
-    onLongClickItem: (Update) -> Unit,
-    onClickCover: (Update) -> Unit,
-    onClickDownload: (Update) -> Unit,
+    onClickItem: (UpdateWithInfo) -> Unit,
+    onLongClickItem: (UpdateWithInfo) -> Unit,
+    onClickCover: (UpdateWithInfo) -> Unit,
+    onClickDownload: (UpdateWithInfo) -> Unit,
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
@@ -48,11 +48,12 @@ fun UpdatesContent(
                 ) { index ->
                     UpdatesItem(
                         book = updates[index],
-                        isSelected = updates[index].chapterId in state.selection,
+                        isSelected = updates[index].id in state.selection,
                         onClickItem = onClickItem,
                         onLongClickItem = onLongClickItem,
                         onClickCover = onClickCover,
-                        onClickDownload = onClickDownload
+                        onClickDownload = onClickDownload,
+                        isDownloadable = !updates[index].downloaded
                     )
                 }
             }

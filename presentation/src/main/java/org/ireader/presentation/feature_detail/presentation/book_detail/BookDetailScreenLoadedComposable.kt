@@ -52,7 +52,8 @@ fun BookDetailScreenLoadedComposable(
     Box(Modifier.height(IntrinsicSize.Min)) {
         Box {
 
-            Image(
+
+        Image(
                 painter = rememberImagePainter(
                     data = book.cover,
                     builder = {

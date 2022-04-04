@@ -40,6 +40,9 @@ class LocalBookRepositoryImpl(
         return bookDao.findBookById(id)
     }
 
+    override suspend fun findBookByIds(id: List<Long>): List<Book> {
+        return bookDao.findBookByIds(id)
+    }
 
     override suspend fun findUnreadBooks(): List<Book> {
         return bookDao.findUnreadBooks()

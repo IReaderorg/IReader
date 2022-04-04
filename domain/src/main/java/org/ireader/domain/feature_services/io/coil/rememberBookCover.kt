@@ -13,7 +13,7 @@ import androidx.compose.runtime.remember
 import org.ireader.domain.feature_services.io.BookCover
 import org.ireader.domain.feature_services.io.HistoryWithRelations
 import org.ireader.domain.models.entities.Book
-import org.ireader.domain.models.entities.Update
+import org.ireader.domain.models.entities.UpdateWithInfo
 
 @Composable
 fun rememberBookCover(manga: Book): BookCover {
@@ -30,7 +30,7 @@ fun rememberBookCover(history: HistoryWithRelations): BookCover {
 }
 
 @Composable
-fun rememberBookCover(manga: Update): BookCover {
+fun rememberBookCover(manga: UpdateWithInfo): BookCover {
     return remember(manga.bookId) {
         BookCover.from(manga)
     }

@@ -5,7 +5,7 @@ import org.ireader.domain.repository.LocalChapterRepository
 import javax.inject.Inject
 
 class InsertChapters @Inject constructor(private val localChapterRepository: LocalChapterRepository) {
-    suspend operator fun invoke(chapters: List<Chapter>) {
-        localChapterRepository.insertChapters(chapters)
+    suspend operator fun invoke(chapters: List<Chapter>): List<Long> {
+        return localChapterRepository.insertChapters(chapters)
     }
 }

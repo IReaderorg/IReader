@@ -17,8 +17,8 @@ interface RemoteKeysDao {
 
     @Query("""
         SELECT DISTINCT library.* FROM library 
-        JOIN  page_key_table ON library.title = page_key_table.title AND library.sourceId = page_key_table.sourceId  OR tableId = 1 
-        GROUP BY  library.title
+        JOIN  page_key_table ON library.title = page_key_table.title AND library.sourceId = page_key_table.sourceId AND tableId != 2
+        GROUP BY  page_key_table.id
         ORDER BY page_key_table.id
     """)
     fun getAllExploreBookByPaging(): PagingSource<Int, Book>
@@ -27,8 +27,8 @@ interface RemoteKeysDao {
     @Query("SELECT DISTINCT library.* FROM library JOIN  page_key_table ON library.title = page_key_table.id AND library.sourceId = page_key_table.sourceId  OR tableId = 1 GROUP BY  library.title ORDER BY id")
     fun getAllExploreBook(): List<Book>?
 
-    @Query("SELECT * FROM page_key_table WHERE id =:id")
-    suspend fun getRemoteKeys(id: String): RemoteKeys
+    @Query("SELECT * FROM page_key_table WHERE title = :title")
+    suspend fun getRemoteKeys(title: String): RemoteKeys
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAllRemoteKeys(remoteKeys: List<RemoteKeys>)

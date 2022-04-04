@@ -3,6 +3,7 @@ package org.ireader.presentation.feature_history
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalFocusManager
@@ -59,6 +60,13 @@ fun HistoryTopAppBar(
                 title = "Search",
                 onClick = {
                     vm.searchMode = true
+                },
+            )
+            AppIconButton(
+                imageVector = Icons.Default.Delete,
+                title = "Delete All Histories",
+                onClick = {
+                    vm.deleteAllHistories()
                 },
             )
 

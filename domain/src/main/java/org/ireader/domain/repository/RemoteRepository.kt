@@ -4,6 +4,7 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.PagingData
 import androidx.paging.PagingSource
 import kotlinx.coroutines.flow.Flow
+import org.ireader.core.utils.Constants
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.utils.Resource
@@ -42,6 +43,8 @@ interface RemoteRepository {
         listing: Listing?,
         filters: List<Filter<*>>?,
         query: String?,
+        pageSize: Int = Constants.DEFAULT_PAGE_SIZE,
+        maxSize: Int = Constants.MAX_PAGE_SIZE,
     ): Flow<PagingData<Book>>
 
 }

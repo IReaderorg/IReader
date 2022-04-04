@@ -1,7 +1,7 @@
 package org.ireader.domain.feature_services.io
 
 import org.ireader.domain.models.entities.Book
-import org.ireader.domain.models.entities.Update
+import org.ireader.domain.models.entities.UpdateWithInfo
 
 class BookCover(
     val id: Long,
@@ -20,7 +20,7 @@ class BookCover(
             return BookCover(history.bookId, history.sourceId, history.cover, history.favorite)
         }
 
-        fun from(update: Update): BookCover {
+        fun from(update: UpdateWithInfo): BookCover {
             return BookCover(update.bookId, update.sourceId, update.cover, update.favorite)
         }
     }

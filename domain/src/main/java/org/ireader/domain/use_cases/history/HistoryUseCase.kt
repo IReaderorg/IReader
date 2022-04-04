@@ -35,13 +35,17 @@ class HistoryUseCase @Inject constructor(private val historyRepository: HistoryR
     }
 
 
-    override suspend fun deleteAllHistories(histories: List<History>) {
-        return historyRepository.deleteAllHistories(histories)
+    override suspend fun deleteHistories(histories: List<History>) {
+        return historyRepository.deleteHistories(histories)
 
     }
 
     override suspend fun deleteHistory(id: Long) {
         return historyRepository.deleteHistory(id)
 
+    }
+
+    override suspend fun deleteAllHistories() {
+        return historyRepository.deleteAllHistories()
     }
 }

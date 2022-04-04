@@ -15,6 +15,10 @@ interface LocalChapterRepository {
         chapterId: Long,
     ): Chapter?
 
+    suspend fun findChapterByIdByBatch(
+        chapterId: List<Long>,
+    ): List<Chapter>
+
     suspend fun findAllInLibraryChapter(): List<Chapter>
 
     fun subscribeChaptersByBookId(

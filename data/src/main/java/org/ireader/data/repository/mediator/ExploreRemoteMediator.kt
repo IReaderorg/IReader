@@ -34,7 +34,6 @@ class ExploreRemoteMediator(
     private val libraryDao = database.libraryBookDao
     private val Localbook = database.libraryBookDao
 
-
     override suspend fun load(
         loadType: LoadType,
         state: PagingState<Int, Book>,
@@ -77,7 +76,7 @@ class ExploreRemoteMediator(
                 source.getMangaList(sort = listing, currentPage)
             }
 
-            Timber.e("TAG$currentPage")
+            Timber.d("current explore page is $currentPage")
 
             val endOfPaginationReached = !response.hasNextPage
 
@@ -98,8 +97,6 @@ class ExploreRemoteMediator(
                         sourceId = source.id
                     )
                 }
-
-
                 remoteKey.insertAllRemoteKeys(remoteKeys = keys)
                 remoteKey.insertAllExploredBook(response.mangas.map {
                     it.toBook(source.id,
@@ -126,7 +123,7 @@ class ExploreRemoteMediator(
     ): RemoteKeys? {
         return state.anchorPosition?.let { position ->
             state.closestItemToPosition(position)?.title?.let { bookName ->
-                remoteKey.getRemoteKeys(id = bookName)
+                remoteKey.getRemoteKeys(title = bookName)
             }
         }
     }
@@ -136,7 +133,7 @@ class ExploreRemoteMediator(
     ): RemoteKeys? {
         return state.pages.firstOrNull { it.data.isNotEmpty() }?.data?.firstOrNull()
             ?.let { book ->
-                remoteKey.getRemoteKeys(id = book.title)
+                remoteKey.getRemoteKeys(title = book.title)
             }
     }
 
@@ -145,7 +142,7 @@ class ExploreRemoteMediator(
     ): RemoteKeys? {
         return state.pages.lastOrNull { it.data.isNotEmpty() }?.data?.lastOrNull()
             ?.let { book ->
-                remoteKey.getRemoteKeys(id = book.title)
+                remoteKey.getRemoteKeys(title = book.title)
             }
     }
 
