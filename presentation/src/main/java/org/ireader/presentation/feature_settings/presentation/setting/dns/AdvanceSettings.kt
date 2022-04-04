@@ -23,6 +23,7 @@ import kotlinx.serialization.SerializationException
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.ireader.core.utils.*
+import org.ireader.presentation.R
 import org.ireader.presentation.feature_detail.presentation.book_detail.components.AdvanceSettingItem
 import org.ireader.presentation.feature_settings.presentation.setting.BackUpBook
 import org.ireader.presentation.feature_settings.presentation.setting.SettingViewModel
@@ -88,7 +89,7 @@ fun AdvanceSettings(
                                 kotlin.runCatching {
                                     vm.insertBackup(Json.Default.decodeFromString<List<BackUpBook>>(
                                         txt))
-
+                                    vm.showSnackBar(UiText.StringResource(R.string.restoredSuccessfully))
                                 }.getOrElse { e ->
                                     vm.showSnackBar(UiText.ExceptionString(e))
                                 }

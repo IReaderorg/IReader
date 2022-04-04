@@ -22,13 +22,14 @@ import com.google.accompanist.web.rememberWebViewState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import org.ireader.core.DEFAULT_USER_AGENT
+import org.ireader.core.utils.DEFAULT_USER_AGENT
 import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.getHtml
 import org.ireader.domain.utils.setDefaultSettings
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
 import org.ireader.presentation.ui.BookDetailScreenSpec
+import tachiyomi.source.HttpSource
 
 
 @ExperimentalCoroutinesApi
@@ -125,7 +126,14 @@ fun WebPageScreen(
                 fetchBook = {
                     if (source != null) {
                         scope.launch {
-                            webView?.setUserAgent(DEFAULT_USER_AGENT)
+                            val userAgent: String? = when (source) {
+                                is HttpSource -> {
+                                    source.getCoverRequest("").second.headers["User-Agent"]
+
+                                }
+                                else -> null
+                            }
+                            webView?.setUserAgent(userAgent ?: DEFAULT_USER_AGENT)
                             viewModel.getBookDetailAndChapter(pageSource = webView?.getHtml()
                                 ?: "",
                                 url = webViewState.content.getCurrentUrl() ?: "",

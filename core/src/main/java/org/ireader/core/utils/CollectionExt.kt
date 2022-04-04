@@ -42,3 +42,43 @@ inline fun <T> MutableCollection<T>.removeFirst(predicate: (T) -> Boolean): T? {
     }
     return null
 }
+
+fun <T> merge(first: List<T>, second: List<T>): List<T> {
+    return object : ArrayList<T>() {
+        init {
+            addAll(first)
+            addAll(second)
+        }
+    }
+}
+
+
+/**
+ * Returns first index of [element], or -1 if the collection does not contain element.
+ */
+fun <T> Iterable<T>.indexOf(element: T): Int? {
+    if (this is List) return this.indexOf(element)
+    var index = 0
+    for (item in this) {
+        if (index < 0) return null
+        if (element == item)
+            return index
+        index++
+    }
+    return null
+}
+
+fun <T, K> removeSameItemsFromList(
+    oldList: List<T>,
+    newList: List<T>,
+    differentiateBy: (T) -> K,
+): List<T> {
+    val sum: List<T> = oldList + newList
+
+    val uniqueList = sum.distinctBy {
+        differentiateBy(it)
+    }
+
+
+    return uniqueList
+}

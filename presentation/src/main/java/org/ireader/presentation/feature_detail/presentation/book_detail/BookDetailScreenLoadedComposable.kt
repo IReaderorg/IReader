@@ -3,10 +3,7 @@ package org.ireader.presentation.feature_detail.presentation.book_detail
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
@@ -19,11 +16,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
+import org.ireader.core.utils.copyToClipboard
 import org.ireader.domain.feature_services.io.BookCover
 import org.ireader.domain.models.entities.Book
 import org.ireader.presentation.feature_detail.presentation.book_detail.components.BookSummary
@@ -31,6 +30,7 @@ import org.ireader.presentation.presentation.components.BookImageComposable
 import tachiyomi.source.Source
 
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BookDetailScreenLoadedComposable(
     modifier: Modifier = Modifier,
@@ -43,6 +43,7 @@ fun BookDetailScreenLoadedComposable(
     onSummaryExpand: () -> Unit,
     isSummaryExpanded: Boolean,
 ) {
+    val context = LocalContext.current
     var imageLoaded by remember { mutableStateOf(false) }
 
     val fadeInImage by animateFloatAsState(
@@ -53,7 +54,7 @@ fun BookDetailScreenLoadedComposable(
         Box {
 
 
-        Image(
+            Image(
                 painter = rememberImagePainter(
                     data = book.cover,
                     builder = {
@@ -120,7 +121,10 @@ fun BookDetailScreenLoadedComposable(
                         .align(Alignment.Bottom)
                 ) {
                     Text(
-                        modifier = Modifier.clickable { onTitle(book.title) },
+                        modifier = Modifier.combinedClickable(
+                            onClick = { onTitle(book.title) },
+                            onLongClick = { context.copyToClipboard(book.title, book.title) }
+                        ),
                         text = book.title,
                         style = MaterialTheme.typography.h6,
                         fontWeight = FontWeight.Bold,

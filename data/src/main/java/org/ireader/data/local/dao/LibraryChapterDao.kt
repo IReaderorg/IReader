@@ -26,10 +26,10 @@ interface LibraryChapterDao {
 
     @RewriteQueriesToDropUnusedColumns
     @Query("""
-        SELECT *,library.favorite
-FROM chapter 
- JOIN library ON library.id = chapter.bookId 
-WHERE library.favorite = 1
+        SELECT *
+        FROM chapter 
+        LEFT JOIN library ON library.id = chapter.bookId 
+        WHERE library.favorite = 1
     """)
     suspend fun findAllInLibraryChapters(): List<Chapter>
 

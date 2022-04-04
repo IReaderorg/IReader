@@ -23,6 +23,7 @@ import org.ireader.domain.use_cases.local.LocalGetBookUseCases
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.preferences.reader_preferences.LibraryLayoutTypeUseCase
+import org.ireader.domain.use_cases.preferences.reader_preferences.SortersDescUseCase
 import org.ireader.domain.use_cases.preferences.reader_preferences.SortersUseCase
 import javax.inject.Inject
 
@@ -34,10 +35,12 @@ class LibraryViewModel @Inject constructor(
     private val deleteUseCase: DeleteUseCase,
     private val localGetChapterUseCase: LocalGetChapterUseCase,
     private val libraryLayoutUseCase: LibraryLayoutTypeUseCase,
+    private val sortersDescUseCase: SortersDescUseCase,
     private val sortersUseCase: SortersUseCase,
     private val historyUseCase: HistoryUseCase,
     private val libraryState: LibraryStateImpl,
-) : BaseViewModel(), LibraryState by libraryState {
+
+    ) : BaseViewModel(), LibraryState by libraryState {
 
 
     init {
@@ -173,8 +176,10 @@ class LibraryViewModel @Inject constructor(
     private fun readLayoutTypeAndFilterTypeAndSortType() {
         val sortType = sortersUseCase.read()
         val layoutType = libraryLayoutUseCase.read().layout
+        val sortBy = sortersDescUseCase.read()
         this.layout = layoutType
         this.sortType = sortType
+        this.desc = sortBy
 
     }
 
@@ -182,6 +187,7 @@ class LibraryViewModel @Inject constructor(
         this.sortType = sortType
         if (sortType == sortType) {
             this.desc = !desc
+            val sortBy = sortersDescUseCase.save(this.desc)
         }
         saveSortType(sortType)
         getLibraryBooks()

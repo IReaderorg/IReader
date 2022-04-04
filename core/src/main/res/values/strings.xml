@@ -19,6 +19,8 @@
     <string name="trying_in_few_second">Try again in a few second.</string>
     <string name="failed_to_get_content">Failed to get the content.</string>
     <string name="noInternetError">Could\'t Read Server, Check Your Internet Connection.</string>
+    <string name="restoredSuccessfully">The Backup Restored Successfully.</string>
+
     <string name="no_chapter_is_available">No Chapter is Available.</string>
     <string name="no_data_found_error">No Data was Found.</string>
     <string name="cant_get_content">Can\'t Get The Chapter Content.</string>

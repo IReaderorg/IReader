@@ -109,6 +109,8 @@ class ExploreRemoteMediator(
             return RemoteMediator.MediatorResult.Error(Exception("There is no internet available,please check your internet connection"))
         } catch (e: IOException) {
             return RemoteMediator.MediatorResult.Error(e)
+        } catch (e: IOException) {
+            return RemoteMediator.MediatorResult.Error(e)
         } catch (e: HttpException) {
             return RemoteMediator.MediatorResult.Error(e)
         } catch (e: SSLHandshakeException) {

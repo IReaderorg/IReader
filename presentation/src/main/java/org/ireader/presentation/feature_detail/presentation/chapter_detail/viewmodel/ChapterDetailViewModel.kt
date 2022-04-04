@@ -148,6 +148,12 @@ class ChapterDetailViewModel @Inject constructor(
         }
     }
 
+    fun deleteChapters(chapters: List<Chapter>) {
+        viewModelScope.launch(Dispatchers.IO) {
+            deleteUseCase.deleteChapters(chapters)
+        }
+    }
+
     lateinit var work: OneTimeWorkRequest
     fun downloadChapters(context: Context) {
 

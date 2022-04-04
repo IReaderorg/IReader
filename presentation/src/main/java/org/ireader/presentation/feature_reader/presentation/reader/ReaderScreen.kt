@@ -222,7 +222,12 @@ fun ReadingScreen(
                                         onPrev()
                                     },
                                     onSliderChange = { onSliderChange(it) },
-                                    onSliderFinished = { onSliderFinished() }
+                                    onSliderFinished = { onSliderFinished() },
+                                    onPlay = {
+
+                                        vm.isPlaying = !vm.isPlaying
+                                        vm.readText(context)
+                                    }
                                 )
                             }
                             if (vm.isSettingModeEnable) {

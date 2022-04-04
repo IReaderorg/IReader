@@ -27,6 +27,8 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import org.ireader.core.utils.Constants
 import org.ireader.core.utils.UiText
 import org.ireader.core_ui.ui.EmptyScreen
@@ -60,132 +62,134 @@ fun LibraryScreen(
     val gridState = rememberLazyGridState()
     val lazyListState = rememberLazyListState()
     val context = LocalContext.current
-
+    val swipeState = rememberSwipeRefreshState(isRefreshing = false)
     LaunchedEffect(key1 = true) {
         vm.getLibraryBooks()
     }
 
-    ModalBottomSheetLayout(
-        modifier = Modifier.systemBarsPadding(),
-        sheetContent = {
-            Box(modifier.defaultMinSize(minHeight = 1.dp)) {
-                BottomTabComposable(
-                    viewModel = vm,
-                    pagerState = pagerState,
-                    navController = navController,
-                    scope = coroutineScope)
+    SwipeRefresh(state = swipeState, onRefresh = { vm.refreshUpdate(context) }) {
+        ModalBottomSheetLayout(
+            modifier = Modifier.systemBarsPadding(),
+            sheetContent = {
+                Box(modifier.defaultMinSize(minHeight = 1.dp)) {
+                    BottomTabComposable(
+                        viewModel = vm,
+                        pagerState = pagerState,
+                        navController = navController,
+                        scope = coroutineScope)
 
-            }
-        },
-        sheetState = bottomSheetState,
-        sheetBackgroundColor = MaterialTheme.colors.background,
-        sheetContentColor = MaterialTheme.colors.onBackground,
-    ) {
-        Column(modifier = Modifier
-            .fillMaxSize()
+                }
+            },
+            sheetState = bottomSheetState,
+            sheetBackgroundColor = MaterialTheme.colors.background,
+            sheetContentColor = MaterialTheme.colors.onBackground,
         ) {
-            LibraryScreenTopBar(
-                navController = navController,
-                vm = vm,
-                coroutineScope = coroutineScope,
-                bottomSheetState = bottomSheetState)
-            Box(modifier = Modifier
-                .fillMaxSize()) {
-                Crossfade(targetState = Pair(vm.isLoading, vm.isEmpty)) { (isLoading, isEmpty) ->
-                    when {
-                        isLoading -> LoadingScreen()
-                        isEmpty && vm.filters.isEmpty() -> EmptyScreen(UiText.DynamicString("There is no book is Library, you can add books in the Explore screen."))
-                        else -> LayoutComposable(
-                            books = vm.books,
-                            layout = vm.layout,
-                            navController = navController,
-                            isLocal = true,
-                            gridState = gridState,
-                            scrollState = lazyListState,
-                            selection = vm.selection,
-                            goToLatestChapter = { book ->
-                                navController.navigate(
-                                    ReaderScreenSpec.buildRoute(
-                                        bookId = book.id,
-                                        sourceId = book.sourceId,
-                                        chapterId = Constants.LAST_CHAPTER
+            Column(modifier = Modifier
+                .fillMaxSize()
+            ) {
+                LibraryScreenTopBar(
+                    navController = navController,
+                    vm = vm,
+                    coroutineScope = coroutineScope,
+                    bottomSheetState = bottomSheetState)
+                Box(modifier = Modifier
+                    .fillMaxSize()) {
+                    Crossfade(targetState = Pair(vm.isLoading,
+                        vm.isEmpty)) { (isLoading, isEmpty) ->
+                        when {
+                            isLoading -> LoadingScreen()
+                            isEmpty && vm.filters.isEmpty() -> EmptyScreen(UiText.DynamicString(
+                                "There is no book is Library, you can add books in the Explore screen."))
+                            else -> LayoutComposable(
+                                books = vm.books,
+                                layout = vm.layout,
+                                navController = navController,
+                                isLocal = true,
+                                gridState = gridState,
+                                scrollState = lazyListState,
+                                selection = vm.selection,
+                                goToLatestChapter = { book ->
+                                    navController.navigate(
+                                        ReaderScreenSpec.buildRoute(
+                                            bookId = book.id,
+                                            sourceId = book.sourceId,
+                                            chapterId = Constants.LAST_CHAPTER
+                                        )
                                     )
-                                )
-                            },
-                            onClick = { book ->
-                                if (vm.hasSelection) {
-                                    if (book.id in vm.selection) {
-                                        vm.selection.remove(book.id)
+                                },
+                                onClick = { book ->
+                                    if (vm.hasSelection) {
+                                        if (book.id in vm.selection) {
+                                            vm.selection.remove(book.id)
+                                        } else {
+                                            vm.selection.add(book.id)
+                                        }
+
                                     } else {
-                                        vm.selection.add(book.id)
+                                        navController.navigate(
+                                            route = BookDetailScreenSpec.buildRoute(
+                                                sourceId = book.sourceId,
+                                                bookId = book.id)
+                                        )
                                     }
 
-                                } else {
-                                    navController.navigate(
-                                        route = BookDetailScreenSpec.buildRoute(
-                                            sourceId = book.sourceId,
-                                            bookId = book.id)
-                                    )
-                                }
-
-                            },
-                            onLongClick = {
-                                vm.selection.add(it.id)
-                            },
-                            histories = vm.histories
-                        )
-                    }
-                }
-                when {
-                    vm.hasSelection -> {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(80.dp)
-                                .align(Alignment.BottomCenter)
-                                .padding(8.dp)
-                                .background(MaterialTheme.colors.background)
-                                .border(width = 1.dp,
-                                    color = MaterialTheme.colors.onBackground.copy(.1f))
-                                .clickable(enabled = false) {},
-                        ) {
-                            Row(modifier = Modifier
-                                .fillMaxSize(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                AppIconButton(imageVector = Icons.Default.GetApp,
-                                    title = "Download",
-                                    onClick = {
-                                        vm.downloadChapters(context)
-                                        // vm.selection.clear()
-                                    })
-                                AppIconButton(imageVector = Icons.Default.Done,
-                                    title = "Mark as read",
-                                    onClick = {
-                                        vm.markAsRead()
-                                        // vm.selection.clear()
-                                    })
-                                AppIconButton(imageVector = Icons.Default.DoneOutline,
-                                    title = "Mark as Not read",
-                                    onClick = {
-                                        vm.markAsNotRead()
-                                    })
-                                AppIconButton(imageVector = Icons.Default.Delete,
-                                    title = "Mark Previous as read",
-                                    onClick = {
-                                        vm.deleteBooks()
-                                    })
-                            }
+                                },
+                                onLongClick = {
+                                    vm.selection.add(it.id)
+                                },
+                                histories = vm.histories
+                            )
                         }
-
                     }
-                }
+                    when {
+                        vm.hasSelection -> {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(80.dp)
+                                    .align(Alignment.BottomCenter)
+                                    .padding(8.dp)
+                                    .background(MaterialTheme.colors.background)
+                                    .border(width = 1.dp,
+                                        color = MaterialTheme.colors.onBackground.copy(.1f))
+                                    .clickable(enabled = false) {},
+                            ) {
+                                Row(modifier = Modifier
+                                    .fillMaxSize(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    AppIconButton(imageVector = Icons.Default.GetApp,
+                                        title = "Download",
+                                        onClick = {
+                                            vm.downloadChapters(context)
+                                            // vm.selection.clear()
+                                        })
+                                    AppIconButton(imageVector = Icons.Default.Done,
+                                        title = "Mark as read",
+                                        onClick = {
+                                            vm.markAsRead()
+                                            // vm.selection.clear()
+                                        })
+                                    AppIconButton(imageVector = Icons.Default.DoneOutline,
+                                        title = "Mark as Not read",
+                                        onClick = {
+                                            vm.markAsNotRead()
+                                        })
+                                    AppIconButton(imageVector = Icons.Default.Delete,
+                                        title = "Mark Previous as read",
+                                        onClick = {
+                                            vm.deleteBooks()
+                                        })
+                                }
+                            }
 
+                        }
+                    }
+
+                }
             }
         }
-
-
     }
 
 }

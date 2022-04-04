@@ -1,8 +1,9 @@
 package org.ireader.presentation.feature_explore.presentation.browse.viewmodel
 
 import org.ireader.core.LatestListing
-import org.ireader.core.emptyMangaInfoPage
+
 import org.ireader.core.utils.UiText
+import org.ireader.core.utils.emptyMangaInfoPage
 import org.ireader.domain.models.LayoutType
 import org.ireader.domain.models.entities.Book
 import tachiyomi.source.CatalogSource

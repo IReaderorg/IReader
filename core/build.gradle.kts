@@ -13,7 +13,7 @@ dependencies {
 
     implementation(compose.compose.ui)
     implementation(compose.compose.coil)
-
+    implementation(androidx.browser)
 
     implementation(libs.okhttp.doh)
     implementation(libs.okio)

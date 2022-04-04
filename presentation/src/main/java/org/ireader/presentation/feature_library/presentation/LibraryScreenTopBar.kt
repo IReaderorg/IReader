@@ -61,35 +61,35 @@ fun LibraryScreenTopBar(
                         vm.onEvent(LibraryEvents.ToggleSearchMode(false))
                     },
                 )
-            }
-
-            AppIconButton(
-                imageVector = Icons.Default.Sort,
-                title = "Filter",
-                onClick = {
-                    coroutineScope.launch {
-                        if (bottomSheetState.isVisible) {
-                            bottomSheetState.hide()
-                        } else {
-                            bottomSheetState.show()
+            } else {
+                AppIconButton(
+                    imageVector = Icons.Default.Sort,
+                    title = "Filter",
+                    onClick = {
+                        coroutineScope.launch {
+                            if (bottomSheetState.isVisible) {
+                                bottomSheetState.hide()
+                            } else {
+                                bottomSheetState.show()
+                            }
                         }
-                    }
-                },
-            )
-            AppIconButton(
-                imageVector = Icons.Default.Search,
-                title = "Search",
-                onClick = {
-                    vm.onEvent(LibraryEvents.ToggleSearchMode(true))
-                },
-            )
-            AppIconButton(
-                imageVector = Icons.Default.Refresh,
-                title = "Refresh",
-                onClick = {
-                    vm.refreshUpdate(context = context)
-                },
-            )
+                    },
+                )
+                AppIconButton(
+                    imageVector = Icons.Default.Search,
+                    title = "Search",
+                    onClick = {
+                        vm.onEvent(LibraryEvents.ToggleSearchMode(true))
+                    },
+                )
+                AppIconButton(
+                    imageVector = Icons.Default.Refresh,
+                    title = "Refresh",
+                    onClick = {
+                        vm.refreshUpdate(context = context)
+                    },
+                )
+            }
 
         },
         navigationIcon = if (vm.inSearchMode) {

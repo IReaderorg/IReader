@@ -4,6 +4,7 @@ package org.ireader.presentation.feature_reader.presentation.reader.viewmodel
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.ActivityInfo
+import android.speech.tts.TextToSpeech
 import android.view.WindowManager
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.ui.graphics.Color
@@ -38,6 +39,7 @@ import org.ireader.domain.use_cases.remote.RemoteUseCases
 import org.ireader.domain.utils.withIOContext
 import tachiyomi.source.Source
 import timber.log.Timber
+import java.util.*
 import javax.inject.Inject
 
 
@@ -130,6 +132,7 @@ class ReaderScreenViewModel @Inject constructor(
         toggleLoading(true)
         toggleLocalLoaded(false)
         viewModelScope.launch {
+            speaker?.shutdown()
             val resultChapter = getChapterUseCase.findChapterById(
                 chapterId = chapterId,
                 state.book?.id,
@@ -626,7 +629,35 @@ class ReaderScreenViewModel @Inject constructor(
         enable = false
         getChapterJob?.cancel()
         getContentJob?.cancel()
+        speaker?.shutdown()
         super.onDestroy()
+    }
+
+    var speaker: TextToSpeech? = null
+
+
+    fun readText(context: Context) {
+        speaker = TextToSpeech(context) { status ->
+            if (status != TextToSpeech.ERROR && speaker != null) {
+                speaker?.let { ttl ->
+                    ttl.language = Locale.US
+                    stateChapter?.let { chapter ->
+                        if (chapter.content.isNotEmpty() && currentReadingParagraph <= chapter.content.size) {
+                            chapter.content.forEach { str ->
+                                ttl.speak(str, TextToSpeech.QUEUE_ADD, null, "")
+                            }
+
+                            currentReadingParagraph += 1
+                        }
+
+                    }
+                }
+
+
+            } else {
+                context.toast("Not Initialized")
+            }
+        }
     }
 
 
@@ -637,7 +668,7 @@ class ReaderScreenViewModel @Inject constructor(
     }
 
     fun toggleSettingMode(enable: Boolean, returnToMain: Boolean? = null) {
-        if (returnToMain.isNull()) {
+        if (returnToMain == null) {
             isSettingModeEnable = enable
             isMainBottomModeEnable = false
 

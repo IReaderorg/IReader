@@ -51,6 +51,8 @@ open class ReaderScreenStateImpl @Inject constructor() : ReaderScreenState {
     override var stateChapters: List<Chapter> by mutableStateOf<List<Chapter>>(emptyList())
     override var stateChapter: Chapter? by mutableStateOf<Chapter?>(null)
     override var book: Book? by mutableStateOf<Book?>(null)
+    override var currentReadingParagraph: Int by mutableStateOf<Int>(0)
+    override var isPlaying by mutableStateOf<Boolean>(false)
 
 
 }
@@ -73,6 +75,8 @@ interface ReaderScreenState {
     var stateChapters: List<Chapter>
     var stateChapter: Chapter?
     var book: Book?
+    var currentReadingParagraph: Int
+    var isPlaying: Boolean
 }
 
 

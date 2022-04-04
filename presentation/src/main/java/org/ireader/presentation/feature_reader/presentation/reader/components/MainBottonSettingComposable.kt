@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Headphones
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
@@ -30,6 +31,7 @@ fun MainBottomSettingComposable(
     onSetting: () -> Unit,
     onNext: () -> Unit,
     onPrev: () -> Unit,
+    onPlay: () -> Unit,
     onSliderFinished: () -> Unit,
     onSliderChange: (index: Float) -> Unit,
 ) {
@@ -60,5 +62,8 @@ fun MainBottomSettingComposable(
         AppIconButton(imageVector = Icons.Default.Settings,
             title = "Setting Drawer",
             onClick = { onSetting() })
+        AppIconButton(imageVector = Icons.Default.Headphones,
+            title = "Play Text To Speech",
+            onClick = { onPlay() })
     }
 }

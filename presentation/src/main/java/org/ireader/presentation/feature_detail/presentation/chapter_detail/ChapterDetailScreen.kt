@@ -279,6 +279,12 @@ private fun BoxScope.ChapterDetailBottomBar(vm: ChapterDetailViewModel, context:
                         .map { it.copy(read = true) })
                     vm.selection.clear()
                 })
+            AppIconButton(imageVector = Icons.Default.Delete,
+                title = "Delete",
+                onClick = {
+                    vm.deleteChapters(vm.chapters.filter { it.id in vm.selection })
+                    vm.selection.clear()
+                })
         }
     }
 }

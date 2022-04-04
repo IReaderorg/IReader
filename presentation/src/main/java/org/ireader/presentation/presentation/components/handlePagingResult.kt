@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import org.ireader.core.utils.UiText
+import org.ireader.core.utils.exceptionHandler
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.presentation.presentation.reusable_composable.ErrorTextWithEmojis
@@ -46,7 +47,10 @@ fun handlePagingResult(
                 false
             }
             error != null && books.itemCount < 1 -> {
-                onErrorResult(UiText.ExceptionString(error.error).asString(context = context))
+                val message = exceptionHandler(error.error)
+                message?.let {
+                    onErrorResult(it.asString(context = context))
+                }
                 false
             }
             books.itemCount < 1 -> {

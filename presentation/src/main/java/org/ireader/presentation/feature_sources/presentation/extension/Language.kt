@@ -8,8 +8,6 @@
 
 package org.ireader.presentation.feature_sources.presentation.extension
 
-import org.ireader.core.utils.fromCodePoints
-
 
 /* inline */ data class Language(val code: String) {
 
@@ -40,4 +38,12 @@ import org.ireader.core.utils.fromCodePoints
         }
     }
 
+}
+
+fun String.Companion.fromCodePoints(vararg codePoints: Int): String {
+    var buffer = charArrayOf()
+    for (codePoint in codePoints) {
+        buffer += Character.toChars(codePoint)
+    }
+    return String(buffer)
 }

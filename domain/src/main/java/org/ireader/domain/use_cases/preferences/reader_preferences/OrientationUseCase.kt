@@ -33,6 +33,19 @@ class SortersUseCase @Inject constructor(
 
 }
 
+class SortersDescUseCase @Inject constructor(
+    private val appPreferences: AppPreferences,
+) {
+    fun save(value: Boolean) {
+        appPreferences.sortDescLibraryScreen().set(value)
+    }
+
+    fun read(): Boolean {
+        return appPreferences.sortDescLibraryScreen().get()
+    }
+
+}
+
 fun mapSortType(input: Int): SortType {
     return when (input) {
         0 -> {
