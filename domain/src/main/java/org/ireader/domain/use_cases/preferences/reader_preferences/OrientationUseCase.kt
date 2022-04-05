@@ -88,3 +88,39 @@ fun mapFilterType(input: Int): FilterType {
 }
 
 
+class TextReaderPrefUseCase @Inject constructor(
+    private val appPreferences: AppPreferences,
+) {
+    fun savePitch(value: Float) {
+        appPreferences.speechRate().set(value)
+    }
+
+    fun readPitch(): Float {
+        return appPreferences.speechRate().get()
+    }
+
+    fun saveRate(value: Float) {
+        appPreferences.speechPitch().set(value)
+    }
+
+    fun readRate(): Float {
+        return appPreferences.speechPitch().get()
+    }
+
+    fun saveLanguage(value: String) {
+        appPreferences.speechLanguage().set(value)
+    }
+
+    fun readLanguage(): String {
+        return appPreferences.speechLanguage().get()
+    }
+
+    fun saveVoice(value: String) {
+        appPreferences.speechVoice().set(value)
+    }
+
+    fun readVoice(): String {
+        return appPreferences.speechVoice().get()
+    }
+
+}

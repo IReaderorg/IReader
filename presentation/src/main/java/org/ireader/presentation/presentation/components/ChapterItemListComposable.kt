@@ -23,6 +23,7 @@ fun ChapterListItemComposable(
     onLongClick: () -> Unit = {},
     isLastRead: Boolean = false,
     isSelected: Boolean = false,
+    isLoading: Boolean = false,
 ) {
     ListItem(
         modifier = modifier
@@ -55,6 +56,9 @@ fun ChapterListItemComposable(
             )
         },
         trailing = {
+            if (isLoading) {
+                showLoading()
+            }
             if (chapter.content.joinToString(" , ").length > 10) {
                 Icon(
                     imageVector = Icons.Default.PublishedWithChanges,

@@ -10,6 +10,8 @@ import android.view.WindowManager
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -28,6 +30,7 @@ import org.ireader.core_ui.theme.readerScreenBackgroundColors
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.R
 import org.ireader.domain.catalog.service.CatalogStore
+import org.ireader.domain.feature_services.notification.Notifications
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.entities.History
@@ -36,11 +39,11 @@ import org.ireader.domain.use_cases.history.HistoryUseCase
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.preferences.reader_preferences.ReaderPrefUseCases
+import org.ireader.domain.use_cases.preferences.reader_preferences.TextReaderPrefUseCase
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import org.ireader.domain.utils.withIOContext
 import tachiyomi.source.Source
 import timber.log.Timber
-import java.util.*
 import javax.inject.Inject
 
 
@@ -55,8 +58,11 @@ class ReaderScreenViewModel @Inject constructor(
     private val readerUseCases: ReaderPrefUseCases,
     private val prefState: ReaderScreenPreferencesStateImpl,
     private val state: ReaderScreenStateImpl,
+    private val speakerState: TextReaderScreenStateImpl,
+    val speechPrefUseCases: TextReaderPrefUseCase,
     savedStateHandle: SavedStateHandle,
-) : BaseViewModel(), ReaderScreenPreferencesState by prefState, ReaderScreenState by state {
+) : BaseViewModel(), ReaderScreenPreferencesState by prefState, ReaderScreenState by state,
+    TextReaderScreenState by speakerState {
 
 
 
@@ -105,6 +111,10 @@ class ReaderScreenViewModel @Inject constructor(
         autoScrollInterval = readerUseCases.autoScrollMode.readInterval()
         autoScrollOffset = readerUseCases.autoScrollMode.readOffset()
         autoBrightnessMode = readerUseCases.brightnessStateUseCase.readAutoBrightness()
+        speechSpeed = speechPrefUseCases.readRate()
+        pitch = speechPrefUseCases.readPitch()
+        currentVoice = speechPrefUseCases.readVoice()
+        currentLanguage = speechPrefUseCases.readLanguage()
     }
 
     fun onEvent(event: ReaderEvent) {
@@ -133,7 +143,7 @@ class ReaderScreenViewModel @Inject constructor(
         toggleLoading(true)
         toggleLocalLoaded(false)
         viewModelScope.launch {
-            speaker?.stop()
+            onNextVoice()
             val resultChapter = getChapterUseCase.findChapterById(
                 chapterId = chapterId,
                 state.book?.id,
@@ -636,12 +646,59 @@ class ReaderScreenViewModel @Inject constructor(
 
     var speaker: TextToSpeech? = null
 
+    fun onNextVoice() {
+        speaker?.stop()
+        isPlaying = false
+        currentReadingParagraph = 0
+    }
+
+    fun showTextReaderNotification(context: Context) {
+        stateChapter?.let { chapter ->
+            val builder =
+                NotificationCompat.Builder(context,
+                    Notifications.CHANNEL_TEXT_READER_PROGRESS).apply {
+                    setContentTitle(chapter.title)
+                    setSmallIcon(org.ireader.core.R.drawable.ic_infinity)
+                    setOnlyAlertOnce(true)
+                    priority = NotificationCompat.PRIORITY_LOW
+                    setAutoCancel(true)
+                    setOngoing(true)
+                    setShowWhen(isPlaying)
+                }
+            NotificationManagerCompat.from(context).apply {
+                builder.setProgress(chapter.content.size, 0, false)
+                notify(Notifications.ID_TEXT_READER_PROGRESS, builder.build())
+                cancel(Notifications.ID_TEXT_READER_PROGRESS)
+
+            }
+
+        }
+
+    }
 
     fun readText(context: Context) {
         speaker = TextToSpeech(context) { status ->
+
             if (status != TextToSpeech.ERROR && speaker != null) {
                 speaker?.let { ttl ->
-                    ttl.language = Locale.UK
+                    ttl.availableLanguages?.let {
+                        languages = it.toList()
+                    }
+                    ttl.voices?.toList()?.let {
+                        voices = it
+                    }
+                    ttl.voices?.firstOrNull { it.name == currentVoice }?.let {
+                        ttl.voice = it
+                    }
+                    ttl.availableLanguages?.firstOrNull { it.displayName == currentLanguage }
+                        ?.let {
+                            ttl.language = it
+                        }
+
+                    ttl.setPitch(pitch)
+                    ttl.setSpeechRate(speechSpeed)
+
+
                     stateChapter?.let { chapter ->
                         try {
                             ttl.speak(chapter.content[currentReadingParagraph],
@@ -653,19 +710,36 @@ class ReaderScreenViewModel @Inject constructor(
                                 UtteranceProgressListener() {
                                 override fun onStop(utteranceId: String?, interrupted: Boolean) {
                                     super.onStop(utteranceId, interrupted)
-                                    Timber.e("onStop....")
                                     isPlaying = false
                                 }
 
                                 override fun onStart(p0: String?) {
-                                    Timber.e("OnStart....")
+                                    // showTextReaderNotification(context)
                                     isPlaying = true
                                 }
 
                                 override fun onDone(p0: String?) {
-                                    currentReadingParagraph += 1
-                                    Timber.e(currentReadingParagraph.toString())
-                                    readText(context)
+                                    if (currentReadingParagraph < chapter.content.size) {
+                                        currentReadingParagraph += 1
+                                        readText(context)
+                                    }
+                                    if (currentReadingParagraph == chapter.content.size - 1) {
+                                        isPlaying = false
+                                        if (autoNextChapter) {
+                                            source?.let {
+                                                updateChapterSliderIndex(currentChapterIndex + 1)
+                                                viewModelScope.launch {
+                                                    getChapter(getCurrentChapterByIndex().id,
+                                                        source = it)
+                                                    isPlaying = true
+                                                    readText(context = context)
+                                                }
+
+                                            }
+
+
+                                        }
+                                    }
                                 }
 
                                 override fun onError(p0: String?) {

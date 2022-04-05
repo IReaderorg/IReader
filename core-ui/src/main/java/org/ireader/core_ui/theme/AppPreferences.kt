@@ -32,6 +32,12 @@ class AppPreferences @Inject constructor(
         const val SCROLL_INDICATOR_PADDING = "scroll_indicator_padding"
         const val SCROLL_INDICATOR_WIDTH = "scroll_indicator_width"
 
+
+        const val TEXT_READER_SPEECH_RATE = "text_reader_speech_rate"
+        const val TEXT_READER_SPEECH_PITCH = "text_reader_speech_pitch"
+        const val TEXT_READER_SPEECH_LANGUAGE = "text_reader_speech_language"
+        const val TEXT_READER_SPEECH_VOICE = "text_reader_speech_voice"
+
         /** Services **/
         const val Last_UPDATE_CHECK = "last_update_check"
 
@@ -126,6 +132,21 @@ class AppPreferences @Inject constructor(
         return preferenceStore.getBoolean(SORT_DESC_LIBRARY_SCREEN, true)
     }
 
+    fun speechRate(): Preference<Float> {
+        return preferenceStore.getFloat(TEXT_READER_SPEECH_RATE, .8f)
+    }
+
+    fun speechPitch(): Preference<Float> {
+        return preferenceStore.getFloat(TEXT_READER_SPEECH_PITCH, .8f)
+    }
+
+    fun speechVoice(): Preference<String> {
+        return preferenceStore.getString(TEXT_READER_SPEECH_VOICE, "")
+    }
+
+    fun speechLanguage(): Preference<String> {
+        return preferenceStore.getString(TEXT_READER_SPEECH_LANGUAGE, "")
+    }
 
     fun lastUpdateCheck(): Preference<Long> {
         return preferenceStore.getLong(Last_UPDATE_CHECK, 0)

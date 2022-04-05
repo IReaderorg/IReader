@@ -1,5 +1,6 @@
 package org.ireader.presentation.feature_ttl
 
+import androidx.activity.OnBackPressedDispatcher
 import androidx.compose.animation.core.TweenSpec
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -16,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -26,6 +28,8 @@ import org.ireader.core.R
 import org.ireader.domain.feature_services.io.BookCover
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.presentation.feature_reader.presentation.reader.ReaderScreenDrawer
+import org.ireader.presentation.feature_reader.presentation.reader.components.SettingItemComposable
+import org.ireader.presentation.feature_reader.presentation.reader.components.SettingItemToggleComposable
 import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.ReaderScreenViewModel
 import org.ireader.presentation.presentation.Toolbar
 import org.ireader.presentation.presentation.components.BookImageComposable
@@ -33,8 +37,9 @@ import org.ireader.presentation.presentation.components.showLoading
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.BigSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
-import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
+import org.ireader.presentation.presentation.reusable_composable.SuperSmallTextComposable
 import tachiyomi.source.Source
+import java.math.RoundingMode
 
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -51,123 +56,199 @@ fun TTSScreen(
     source: Source,
     onChapter: (Chapter) -> Unit,
 ) {
+    navController.setOnBackPressedDispatcher(OnBackPressedDispatcher {
+
+    })
+    val context = LocalContext.current
+
     val drawerScrollState = rememberLazyListState()
     val scrollState = rememberLazyListState()
     val chapter = vm.stateChapter
     val chapters = vm.stateChapters
     val scope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
+    val bottomSheetState =
+        rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
 
     LaunchedEffect(key1 = scaffoldState.drawerState.targetValue) {
         if (chapter != null && scaffoldState.drawerState.targetValue == DrawerValue.Open && vm.stateChapters.isNotEmpty()) {
             drawerScrollState.scrollToItem(vm.getCurrentIndexOfChapter(chapter))
         }
     }
-    Scaffold(
-        modifier = Modifier
-            .fillMaxSize(),
+    ModalBottomSheetLayout(
+        modifier = Modifier.systemBarsPadding(),
+        sheetContent = {
+            Box(modifier.defaultMinSize(minHeight = 1.dp)) {
+                Column(modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)) {
+                    VoiceChip(viewModel = vm, modifier = Modifier.height(32.dp))
+                    LanguageChip(viewModel = vm, modifier = Modifier.height(32.dp))
+                    SettingItemToggleComposable(text = "Auto Next Chapter",
+                        value = vm.autoNextChapter,
+                        onToggle = { vm.autoNextChapter = !vm.autoNextChapter })
+                    SettingItemComposable(text = "Speech Rate",
+                        value = vm.speechSpeed.toString(),
+                        onAdd = {
+                            vm.speechSpeed += .1f
+                            vm.speechSpeed =
+                                vm.speechSpeed.toBigDecimal().setScale(1, RoundingMode.FLOOR)
+                                    .toFloat()
+                            vm.speechPrefUseCases.saveRate(vm.speechSpeed)
+                        },
+                        onMinus = {
+                            vm.speechSpeed -= .1f
+                            vm.speechSpeed =
+                                vm.speechSpeed.toBigDecimal().setScale(1, RoundingMode.FLOOR)
+                                    .toFloat()
+                            vm.speechPrefUseCases.saveRate(vm.speechSpeed)
+                        })
 
-        scaffoldState = scaffoldState,
-        topBar = {
-            Toolbar(
-                title = {},
-                navigationIcon = { TopAppBarBackButton(navController = navController) }
-            )
-        },
-        drawerGesturesEnabled = true,
-        drawerBackgroundColor = MaterialTheme.colors.background,
-        drawerContent = {
-            ReaderScreenDrawer(
-                modifier = Modifier.statusBarsPadding(),
-                onReverseIcon = {
-                    if (chapter != null) {
-                        vm.reverseChapters()
-                        scope.launch {
-                            vm.getLocalChaptersByPaging(chapter.bookId)
-                        }
-                    }
-                },
-                onChapter = onChapter,
-                chapter = chapter,
-                source = source,
-                chapters = chapters,
-                drawerScrollState = drawerScrollState
-            )
+                    SettingItemComposable(text = "Pitch",
+                        value = vm.pitch.toString(),
+                        onAdd = {
+                            vm.pitch += .1f
+                            vm.pitch =
+                                vm.pitch.toBigDecimal().setScale(1, RoundingMode.FLOOR).toFloat()
+                            vm.speechPrefUseCases.savePitch(vm.speechSpeed)
+                        },
+                        onMinus = {
+                            vm.pitch -= .1f
+                            vm.pitch =
+                                vm.pitch.toBigDecimal().setScale(1, RoundingMode.FLOOR).toFloat()
+                            vm.speechPrefUseCases.savePitch(vm.speechSpeed)
 
-        }
-    ) {
-        Column(modifier = Modifier
-            .fillMaxSize(),
-            verticalArrangement = Arrangement.SpaceBetween,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            vm.book?.let { book ->
-                vm.stateChapter?.let { chapter ->
-                    Column(modifier = Modifier
-                        .fillMaxWidth(),
-                        verticalArrangement = Arrangement.SpaceBetween,
-                        horizontalAlignment = Alignment.CenterHorizontally) {
-                        BookImageComposable(
-                            image = BookCover.from(book),
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .height(150.dp)
-                                .width(120.dp)
-                                .clip(MaterialTheme.shapes.medium)
-                                .border(2.dp, MaterialTheme.colors.onBackground.copy(alpha = .2f)),
-                            contentScale = ContentScale.Crop,
-                        )
-
-                        BigSizeTextComposable(text = chapter.title, align = TextAlign.Center)
-
-                        MidSizeTextComposable(text = book.title, align = TextAlign.Center)
-                    }
-                    Text(
-                        modifier = modifier
-
-                            .fillMaxWidth()
-                            .padding(horizontal = vm.paragraphsIndent.dp,
-                                vertical = 4.dp),
-                        text = chapter.content[vm.currentReadingParagraph],
-                        fontSize = vm.fontSize.sp,
-                        fontFamily = vm.font.fontFamily,
-                        textAlign = TextAlign.Start,
-                        color = MaterialTheme.colors.onBackground,
-                        lineHeight = vm.lineHeight.sp,
-                    )
-                    Column(modifier = Modifier
-                        .fillMaxWidth(),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally) {
-                        TTLScreenSetting(
-                            onSetting = {},
-                            onContent = {
-                                scope.launch {
-                                    scaffoldState.drawerState.animateTo(DrawerValue.Open,
-                                        TweenSpec())
-                                }
-                            }
-                        )
-                        TTLScreenPlay(
-                            modifier = Modifier.padding(bottom = 46.dp, top = 32.dp),
-                            onPlay = onPlay,
-                            onNext = onNext,
-                            onPrev = onPrev,
-                            vm = vm,
-                            onNextPar = onNextPar,
-                            onPrevPar = onPrevPar
-                        )
-                    }
-
+                        })
 
                 }
             }
+        },
+        sheetState = bottomSheetState,
+        sheetBackgroundColor = MaterialTheme.colors.background,
+        sheetContentColor = MaterialTheme.colors.onBackground,
+    ) {
+        Scaffold(
+            modifier = Modifier
+                .fillMaxSize(),
+
+            scaffoldState = scaffoldState,
+            topBar = {
+                Toolbar(
+                    title = {},
+                    navigationIcon = {
+                        AppIconButton(imageVector = Icons.Default.ArrowBack,
+                            title = "Return to Reader Screen",
+                            onClick = {
+                                vm.voiceMode = false
+                            })
+                    },
+                )
+            },
+            drawerGesturesEnabled = true,
+            drawerBackgroundColor = MaterialTheme.colors.background,
+            drawerContent = {
+                ReaderScreenDrawer(
+                    modifier = Modifier.statusBarsPadding(),
+                    onReverseIcon = {
+                        if (chapter != null) {
+                            vm.reverseChapters()
+                            scope.launch {
+                                vm.getLocalChaptersByPaging(chapter.bookId)
+                            }
+                        }
+                    },
+                    onChapter = onChapter,
+                    chapter = chapter,
+                    source = source,
+                    chapters = chapters,
+                    drawerScrollState = drawerScrollState
+                )
+
+            }
+        ) {
+            Column(modifier = Modifier
+                .fillMaxSize(),
+                verticalArrangement = Arrangement.SpaceBetween,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                vm.book?.let { book ->
+                    vm.stateChapter?.let { chapter ->
+                        Column(modifier = Modifier
+                            .fillMaxWidth(),
+                            verticalArrangement = Arrangement.SpaceBetween,
+                            horizontalAlignment = Alignment.CenterHorizontally) {
+                            BookImageComposable(
+                                image = BookCover.from(book),
+                                modifier = Modifier
+                                    .padding(8.dp)
+                                    .height(150.dp)
+                                    .width(120.dp)
+                                    .clip(MaterialTheme.shapes.medium)
+                                    .border(2.dp,
+                                        MaterialTheme.colors.onBackground.copy(alpha = .2f)),
+                                contentScale = ContentScale.Crop,
+                            )
+
+                            BigSizeTextComposable(text = chapter.title, align = TextAlign.Center)
+                            MidSizeTextComposable(text = book.title, align = TextAlign.Center)
+                            vm.stateChapter?.let { chapter ->
+                                SuperSmallTextComposable(text = "${vm.currentReadingParagraph}/${chapter.content.size - 1}")
+
+                            }
+                        }
+                        Text(
+                            modifier = modifier
+
+                                .fillMaxWidth()
+                                .align(Alignment.CenterHorizontally)
+                                .padding(horizontal = vm.paragraphsIndent.dp,
+                                    vertical = 4.dp),
+                            text = if (chapter.content.isNotEmpty() && vm.currentReadingParagraph != chapter.content.size) chapter.content[vm.currentReadingParagraph] else "",
+                            fontSize = vm.fontSize.sp,
+                            fontFamily = vm.font.fontFamily,
+                            textAlign = TextAlign.Start,
+                            color = MaterialTheme.colors.onBackground,
+                            lineHeight = vm.lineHeight.sp,
+                            maxLines = 12,
+                        )
+                        Column(modifier = Modifier
+                            .fillMaxWidth(),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally) {
+                            TTLScreenSetting(
+                                onSetting = {
+                                    scope.launch {
+                                        bottomSheetState.show()
+                                    }
+                                },
+                                onContent = {
+                                    scope.launch {
+                                        scaffoldState.drawerState.animateTo(DrawerValue.Open,
+                                            TweenSpec())
+                                    }
+                                }
+                            )
+                            TTLScreenPlay(
+                                modifier = Modifier.padding(bottom = 46.dp, top = 32.dp),
+                                onPlay = onPlay,
+                                onNext = onNext,
+                                onPrev = onPrev,
+                                vm = vm,
+                                onNextPar = onNextPar,
+                                onPrevPar = onPrevPar
+                            )
+                        }
+
+
+                    }
+                }
+
+            }
+
 
         }
 
-
     }
-
 }
 
 
@@ -249,7 +330,7 @@ private fun TTLScreenPlay(
                     }
                     vm.isPlaying -> {
                         AppIconButton(modifier = Modifier.size(80.dp),
-                            imageVector = Icons.Filled.Stop,
+                            imageVector = Icons.Filled.Pause,
                             title = "Play",
                             onClick = onPlay,
                             tint = MaterialTheme.colors.onBackground)
@@ -275,6 +356,7 @@ private fun TTLScreenPlay(
                 title = "Next",
                 onClick = onNext,
                 tint = MaterialTheme.colors.onBackground)
+
 
         }
     }

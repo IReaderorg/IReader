@@ -1,6 +1,7 @@
 package org.ireader.presentation.feature_reader.presentation.reader.viewmodel
 
 
+import android.speech.tts.Voice
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -11,6 +12,7 @@ import org.ireader.core_ui.theme.FontType
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import tachiyomi.source.Source
+import java.util.*
 import javax.inject.Inject
 
 //data class ReaderScreenState(
@@ -51,12 +53,38 @@ open class ReaderScreenStateImpl @Inject constructor() : ReaderScreenState {
     override var stateChapters: List<Chapter> by mutableStateOf<List<Chapter>>(emptyList())
     override var stateChapter: Chapter? by mutableStateOf<Chapter?>(null)
     override var book: Book? by mutableStateOf<Book?>(null)
-    override var currentReadingParagraph: Int by mutableStateOf<Int>(0)
-    override var isPlaying by mutableStateOf<Boolean>(false)
-    override var voiceMode by mutableStateOf<Boolean>(false)
 
 
 }
+
+
+interface TextReaderScreenState {
+    var currentReadingParagraph: Int
+    var isPlaying: Boolean
+    var voiceMode: Boolean
+    var autoNextChapter: Boolean
+    var languages: List<Locale>
+    var voices: List<Voice>
+    var currentVoice: String
+    var currentLanguage: String
+    var pitch: Float
+    var speechSpeed: Float
+}
+
+class TextReaderScreenStateImpl @Inject constructor() : TextReaderScreenState {
+    override var currentReadingParagraph: Int by mutableStateOf<Int>(0)
+    override var languages by mutableStateOf<List<Locale>>(emptyList())
+    override var voices by mutableStateOf<List<Voice>>(emptyList())
+
+    override var currentVoice by mutableStateOf<String>("")
+    override var currentLanguage by mutableStateOf<String>("")
+    override var isPlaying by mutableStateOf<Boolean>(false)
+    override var voiceMode by mutableStateOf<Boolean>(false)
+    override var autoNextChapter by mutableStateOf<Boolean>(false)
+    override var pitch by mutableStateOf<Float>(.8f)
+    override var speechSpeed by mutableStateOf<Float>(.8f)
+}
+
 
 
 interface ReaderScreenState {
@@ -76,9 +104,6 @@ interface ReaderScreenState {
     var stateChapters: List<Chapter>
     var stateChapter: Chapter?
     var book: Book?
-    var currentReadingParagraph: Int
-    var isPlaying: Boolean
-    var voiceMode: Boolean
 }
 
 

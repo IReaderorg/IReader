@@ -81,7 +81,7 @@ object ReaderScreenSpec : ScreenSpec {
                         },
                         onPlay = {
                             when {
-                                vm.speaker?.isSpeaking == true -> {
+                                vm.isPlaying -> {
                                     vm.speaker?.stop()
                                 }
                                 else -> {

@@ -28,6 +28,14 @@ object Notifications {
     const val CHANNEL_LIBRARY_ERROR = "library_errors_channel"
     const val ID_LIBRARY_ERROR = -102
 
+
+    private const val GROUP_TEXT_READER = "group_text_reader"
+    const val CHANNEL_TEXT_READER_PROGRESS = "library_text_reader_channel"
+    const val ID_TEXT_READER_PROGRESS = -601
+    const val CHANNEL_TEXT_READER_ERROR = "library_text_reader_error_channel"
+    const val ID_TEXT_READER_ERROR = -602
+
+
     /**
      * Notification channel and ids used by the downloader.
      */
@@ -110,6 +118,9 @@ object Notifications {
                 buildNotificationChannelGroup(GROUP_LIBRARY) {
                     setName(context.getString(R.string.label_library))
                 },
+                buildNotificationChannelGroup(GROUP_TEXT_READER) {
+                    setName(context.getString(R.string.label_text_reader))
+                },
                 buildNotificationChannelGroup(GROUP_APK_UPDATES) {
                     setName(context.getString(R.string.label_recent_updates))
                 },
@@ -121,6 +132,16 @@ object Notifications {
                 buildNotificationChannel(CHANNEL_COMMON, IMPORTANCE_LOW) {
                     setName(context.getString(R.string.channel_common))
                 },
+                buildNotificationChannel(CHANNEL_TEXT_READER_PROGRESS, IMPORTANCE_LOW) {
+                    setName(context.getString(R.string.channel_progress))
+                    setGroup(GROUP_TEXT_READER)
+                    setShowBadge(false)
+                },
+                buildNotificationChannel(CHANNEL_TEXT_READER_ERROR, IMPORTANCE_LOW) {
+                    setName(context.getString(R.string.channel_errors))
+                    setGroup(GROUP_TEXT_READER)
+                    setShowBadge(false)
+                },
                 buildNotificationChannel(CHANNEL_LIBRARY_PROGRESS, IMPORTANCE_LOW) {
                     setName(context.getString(R.string.channel_progress))
                     setGroup(GROUP_LIBRARY)
@@ -131,6 +152,7 @@ object Notifications {
                     setGroup(GROUP_LIBRARY)
                     setShowBadge(false)
                 },
+
                 buildNotificationChannel(CHANNEL_NEW_CHAPTERS, IMPORTANCE_DEFAULT) {
                     setName(context.getString(R.string.channel_new_chapters))
                 },

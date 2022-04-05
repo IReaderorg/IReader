@@ -31,7 +31,9 @@ fun FontChip(
     viewModel: ReaderScreenViewModel,
 ) {
 
-    Row(modifier = Modifier.fillMaxWidth(),
+    Row(modifier = Modifier
+        .fillMaxWidth()
+        .height(32.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically) {
         Text(
