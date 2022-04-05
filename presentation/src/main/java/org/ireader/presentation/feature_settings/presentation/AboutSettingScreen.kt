@@ -16,9 +16,9 @@ import androidx.navigation.compose.rememberNavController
 import org.ireader.core.utils.Constants
 import org.ireader.domain.utils.toast
 import org.ireader.presentation.presentation.Toolbar
+import org.ireader.presentation.presentation.reusable_composable.BigSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
-import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -38,7 +38,7 @@ fun AboutSettingScreen(
         Toolbar(
             modifier = Modifier.systemBarsPadding(),
             title = {
-                TopAppBarTitle(title = "About", style = MaterialTheme.typography.h6)
+                BigSizeTextComposable(text = "About", style = MaterialTheme.typography.h6)
             },
             backgroundColor = MaterialTheme.colors.background,
             contentColor = MaterialTheme.colors.onBackground,
@@ -83,9 +83,9 @@ fun AboutSettingScreen(
                             color = MaterialTheme.colors.onBackground)
                     },
                     text = {
-                        TopAppBarTitle(modifier = modifier
+                        BigSizeTextComposable(modifier = modifier
                             .fillMaxWidth()
-                            .align(Alignment.Start), title = it.title)
+                            .align(Alignment.Start), text = it.title)
                     },
                 )
                 Divider(modifier = modifier.fillMaxWidth(),

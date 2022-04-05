@@ -46,7 +46,7 @@ class DefaultNotificationHelper @Inject constructor(
 
     val openDownloadIntent = Intent(
         Intent.ACTION_VIEW,
-        "https://www.ireader.com/downloader_route".toUri(),
+        "ireader/downloader_route".toUri(),
         applicationContext,
         applicationContext::class.java
     )

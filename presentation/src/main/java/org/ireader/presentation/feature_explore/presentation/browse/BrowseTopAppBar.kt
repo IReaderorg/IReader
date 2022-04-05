@@ -19,8 +19,8 @@ import org.ireader.presentation.feature_library.presentation.components.RadioBut
 import org.ireader.presentation.presentation.Toolbar
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.AppTextField
+import org.ireader.presentation.presentation.reusable_composable.BigSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
-import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
 import tachiyomi.source.CatalogSource
 import tachiyomi.source.model.Filter
 
@@ -43,7 +43,7 @@ fun BrowseTopAppBar(
     Toolbar(
         title = {
             if (!state.isSearchModeEnable) {
-                TopAppBarTitle(title = source.name)
+                BigSizeTextComposable(text = source.name)
             } else {
                 AppTextField(
                     query = state.searchQuery,

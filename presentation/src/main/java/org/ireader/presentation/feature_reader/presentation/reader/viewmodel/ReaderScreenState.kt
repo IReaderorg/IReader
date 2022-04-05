@@ -53,6 +53,7 @@ open class ReaderScreenStateImpl @Inject constructor() : ReaderScreenState {
     override var book: Book? by mutableStateOf<Book?>(null)
     override var currentReadingParagraph: Int by mutableStateOf<Int>(0)
     override var isPlaying by mutableStateOf<Boolean>(false)
+    override var voiceMode by mutableStateOf<Boolean>(false)
 
 
 }
@@ -77,6 +78,7 @@ interface ReaderScreenState {
     var book: Book?
     var currentReadingParagraph: Int
     var isPlaying: Boolean
+    var voiceMode: Boolean
 }
 
 

@@ -15,8 +15,8 @@ import androidx.compose.ui.unit.dp
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.presentation.presentation.components.ChapterListItemComposable
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
+import org.ireader.presentation.presentation.reusable_composable.BigSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.ErrorTextWithEmojis
-import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
 import tachiyomi.source.Source
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -36,7 +36,7 @@ fun ReaderScreenDrawer(
         verticalArrangement = Arrangement.Top) {
         Spacer(modifier = modifier.height(5.dp))
         Box(modifier = Modifier.fillMaxWidth()) {
-            TopAppBarTitle(title = "Content", modifier = Modifier.align(Alignment.Center))
+            BigSizeTextComposable(text = "Content", modifier = Modifier.align(Alignment.Center))
             Row(verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = modifier.fillMaxWidth()) {

@@ -75,8 +75,6 @@ class ExtensionViewModel @Inject constructor(
             deleteAllExploredBook()
             convertExploredTOLibraryBooks()
             deleteNotInLibraryChapters()
-            deleteUseCase.deleteAllExploreBook()
-            deleteUseCase.deleteAllRemoteKeys()
         }
     }
 

@@ -40,8 +40,8 @@ import org.ireader.presentation.feature_detail.presentation.chapter_detail.viewm
 import org.ireader.presentation.feature_settings.presentation.webview.CustomTextField
 import org.ireader.presentation.presentation.components.ChapterListItemComposable
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
+import org.ireader.presentation.presentation.reusable_composable.BigSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
-import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
 import org.ireader.presentation.ui.ReaderScreenSpec
 
 
@@ -98,7 +98,7 @@ fun ChapterDetailScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top) {
                 Spacer(modifier = modifier.height(5.dp))
-                TopAppBarTitle(title = "Advance Setting")
+                BigSizeTextComposable(text = "Advance Setting")
 
                 Spacer(modifier = modifier.height(5.dp))
                 Divider(modifier = modifier.fillMaxWidth(), thickness = 1.dp)

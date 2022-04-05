@@ -26,8 +26,8 @@ import org.ireader.core.utils.DEFAULT_USER_AGENT
 import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.getHtml
 import org.ireader.domain.utils.setDefaultSettings
+import org.ireader.presentation.presentation.reusable_composable.BigSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
-import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
 import org.ireader.presentation.ui.BookDetailScreenSpec
 import tachiyomi.source.HttpSource
 
@@ -261,7 +261,7 @@ fun ScrollableAppBar(
             if (navigationIcon != null) {
                 navigationIcon()
             }
-            TopAppBarTitle(title = title)
+            BigSizeTextComposable(text = title)
         }
     }
 }

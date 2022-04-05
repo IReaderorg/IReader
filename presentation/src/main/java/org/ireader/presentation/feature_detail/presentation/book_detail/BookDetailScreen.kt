@@ -5,8 +5,9 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
@@ -135,61 +136,59 @@ fun BookDetailScreen(
                  * I did this because the buttonbar disappear in the
                  * lazy Column
                  */
-                LazyColumn(state = scrollState) {
-                    item {
-                        BookDetailScreenLoadedComposable(
-                            navController = navController,
-                            onWebView = {
-                                onWebView()
-                            },
-                            onTitle = {
-                                try {
-                                    navController.navigate(GlobalSearchScreenSpec.buildRoute(query = it))
-                                } catch (e: Exception) {
-                                }
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                    BookDetailScreenLoadedComposable(
+                        navController = navController,
+                        onWebView = {
+                            onWebView()
+                        },
+                        onTitle = {
+                            try {
+                                navController.navigate(GlobalSearchScreenSpec.buildRoute(query = it))
+                            } catch (e: Exception) {
+                            }
 
-                            },
-                            onSummaryExpand = {
-                                onSummaryExpand()
-                            },
-                            onRefresh = {
-                                onRefresh()
-                            },
-                            isSummaryExpanded = viewModel.expandedSummary,
-                            book = book,
-                            source = source,
-                        )
+                        },
+                        onSummaryExpand = {
+                            onSummaryExpand()
+                        },
+                        onRefresh = {
+                            onRefresh()
+                        },
+                        isSummaryExpanded = viewModel.expandedSummary,
+                        book = book,
+                        source = source,
+                    )
 
-                    }
-                    item {
-                        CardTileComposable(
-                            modifier = modifier
-                                .padding(horizontal = 8.dp, vertical = 4.dp)
-                                .fillMaxWidth(),
-                            onClick = {
-                                onChapterContent()
-                            },
-                            title = "Contents",
-                            subtitle = "${chapters.size} Chapters",
-                            trailing = {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(
-                                        text = "",
-                                        color = MaterialTheme.colors.onBackground,
-                                        style = MaterialTheme.typography.subtitle2
-                                    )
-                                    if (viewModel.chapterIsLoading) {
-                                        DotsFlashing()
-                                    }
-                                    Icon(
-                                        imageVector = Icons.Default.ChevronRight,
-                                        contentDescription = "Contents Detail",
-                                        tint = MaterialTheme.colors.onBackground,
-                                    )
+                    CardTileComposable(
+                        modifier = modifier
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                            .fillMaxWidth(),
+                        onClick = {
+                            onChapterContent()
+                        },
+                        title = "Contents",
+                        subtitle = "${chapters.size} Chapters",
+                        trailing = {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = "",
+                                    color = MaterialTheme.colors.onBackground,
+                                    style = MaterialTheme.typography.subtitle2
+                                )
+                                if (viewModel.chapterIsLoading) {
+                                    DotsFlashing()
                                 }
-                            })
-                        Spacer(modifier = Modifier.height(60.dp))
-                    }
+                                Icon(
+                                    imageVector = Icons.Default.ChevronRight,
+                                    contentDescription = "Contents Detail",
+                                    tint = MaterialTheme.colors.onBackground,
+                                )
+                            }
+                        })
+                    Spacer(modifier = Modifier.height(60.dp))
+
+
                 }
             }
 

@@ -27,9 +27,9 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 
 @Composable
-fun TopAppBarTitle(
+fun BigSizeTextComposable(
     modifier: Modifier = Modifier,
-    title: String,
+    text: String,
     color: Color? = null,
     style: TextStyle? = null,
     fontWeight: FontWeight? = null,
@@ -38,7 +38,7 @@ fun TopAppBarTitle(
 ) {
     Text(
         modifier = modifier,
-        text = title,
+        text = text,
         color = color ?: MaterialTheme.colors.onBackground,
         style = style ?: MaterialTheme.typography.subtitle1,
         fontWeight = fontWeight ?: FontWeight.Bold,

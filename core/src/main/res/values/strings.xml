@@ -6,6 +6,8 @@
     <string name="setting_screen_label">Setting</string>
     <string name="history_screen_label">History</string>
     <string name="updates_screen_label">Updates</string>
+    <string name="content">Content</string>
+    <string name="settings">Settings</string>
 
 
     <!-- IReader-->

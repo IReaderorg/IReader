@@ -62,7 +62,7 @@ class LibraryUpdatesService @AssistedInject constructor(
                 setAutoCancel(true)
                 setOngoing(true)
                 addAction(R.drawable.baseline_close_24, "Cancel", cancelIntent)
-                setContentIntent(defaultNotificationHelper.openDownloadsPendingIntent)
+
             }
 
         NotificationManagerCompat.from(applicationContext).apply {
@@ -117,7 +117,7 @@ class LibraryUpdatesService @AssistedInject constructor(
                     NotificationCompat.Builder(applicationContext,
                         Notifications.CHANNEL_LIBRARY_ERROR).apply {
                         if (e.localizedMessage == "Job was cancelled") {
-                            setSubText("Download was cancelled")
+                            setSubText("Library Updates was cancelled")
                             setContentTitle("Library Updates was canceled.")
                         } else {
                             setContentTitle("Failed to Check Library Updates.")
@@ -129,7 +129,7 @@ class LibraryUpdatesService @AssistedInject constructor(
                     }.build()
                 )
                 builder.setProgress(0, 0, false)
-                cancel(Notifications.ID_LIBRARY_ERROR)
+                cancel(Notifications.ID_LIBRARY_PROGRESS)
                 withContext(Dispatchers.IO) {
 
                 }
@@ -137,14 +137,14 @@ class LibraryUpdatesService @AssistedInject constructor(
             }
 
             builder.setProgress(0, 0, false)
-            cancel(Notifications.ID_LIBRARY_ERROR)
+            cancel(Notifications.ID_LIBRARY_PROGRESS)
             withContext(Dispatchers.IO) {
 
             }
             notify(
                 Notifications.ID_LIBRARY_PROGRESS,
                 NotificationCompat.Builder(applicationContext,
-                    Notifications.CHANNEL_DOWNLOADER_COMPLETE).apply {
+                    Notifications.CHANNEL_LIBRARY_PROGRESS).apply {
                     setContentTitle("$updatedBookSize book was updated.")
                     setSmallIcon(R.drawable.ic_update)
                     priority = NotificationCompat.PRIORITY_DEFAULT

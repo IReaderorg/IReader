@@ -14,7 +14,7 @@ import org.ireader.presentation.feature_history.viewmodel.HistoryViewModel
 import org.ireader.presentation.presentation.Toolbar
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.AppTextField
-import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
+import org.ireader.presentation.presentation.reusable_composable.BigSizeTextComposable
 
 @Composable
 fun HistoryTopAppBar(
@@ -26,7 +26,7 @@ fun HistoryTopAppBar(
     Toolbar(
         title = {
             if (!vm.searchMode) {
-                TopAppBarTitle(title = "History")
+                BigSizeTextComposable(text = "History")
             } else {
                 AppTextField(
                     query = vm.searchQuery,

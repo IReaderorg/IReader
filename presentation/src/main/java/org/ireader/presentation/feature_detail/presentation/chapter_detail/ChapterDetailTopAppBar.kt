@@ -16,7 +16,7 @@ import org.ireader.core.utils.Constants
 import org.ireader.presentation.feature_detail.presentation.chapter_detail.viewmodel.ChapterDetailState
 import org.ireader.presentation.presentation.Toolbar
 import org.ireader.presentation.presentation.components.CenterTopAppBar
-import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
+import org.ireader.presentation.presentation.reusable_composable.BigSizeTextComposable
 
 
 @Composable
@@ -60,7 +60,7 @@ fun RegularChapterDetailTopAppBar(
             .systemBarsPadding()
             .fillMaxWidth()
             .height(45.dp), title = {
-            TopAppBarTitle(title = "Content")
+            BigSizeTextComposable(text = "Content")
         },
         backgroundColor = MaterialTheme.colors.background,
         contentColor = MaterialTheme.colors.onBackground,
@@ -92,7 +92,7 @@ private fun EditModeChapterDetailTopAppBar(
     onClickInvertSelection: () -> Unit,
 ) {
     Toolbar(
-        title = { TopAppBarTitle(title = "$selectionSize") },
+        title = { BigSizeTextComposable(text = "$selectionSize") },
         navigationIcon = {
             IconButton(onClick = onClickCancelSelection) {
                 Icon(Icons.Default.Close, contentDescription = null)

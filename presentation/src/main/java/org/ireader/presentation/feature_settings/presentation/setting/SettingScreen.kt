@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import org.ireader.presentation.presentation.Toolbar
-import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
+import org.ireader.presentation.presentation.reusable_composable.BigSizeTextComposable
 import org.ireader.presentation.ui.AboutInfoScreenSpec
 import org.ireader.presentation.ui.AdvanceSettingSpec
 import org.ireader.presentation.ui.AppearanceScreenSpec
@@ -50,7 +50,7 @@ fun SettingScreen(
         Scaffold(modifier = Modifier.fillMaxSize(), topBar = {
             Toolbar(
                 title = {
-                    TopAppBarTitle(title = "Setting")
+                    BigSizeTextComposable(text = "Setting")
                 },
                 backgroundColor = MaterialTheme.colors.background,
                 contentColor = MaterialTheme.colors.onBackground,

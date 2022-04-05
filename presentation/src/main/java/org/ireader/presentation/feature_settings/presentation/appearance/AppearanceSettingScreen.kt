@@ -18,9 +18,9 @@ import org.ireader.core.utils.Constants
 import org.ireader.core_ui.theme.ThemeMode
 import org.ireader.domain.view_models.settings.apperance.MainViewModel
 import org.ireader.presentation.presentation.Toolbar
+import org.ireader.presentation.presentation.reusable_composable.BigSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
-import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -39,7 +39,7 @@ fun AppearanceSettingScreen(
         modifier = Modifier.fillMaxSize(), topBar = {
             Toolbar(
                 title = {
-                    TopAppBarTitle(title = "Appearance")
+                    BigSizeTextComposable(text = "Appearance")
                 },
                 backgroundColor = MaterialTheme.colors.background,
                 contentColor = MaterialTheme.colors.onBackground,
@@ -69,7 +69,7 @@ fun AppearanceSettingScreen(
                     openDialog.value = false
                 },
                 title = {
-                    TopAppBarTitle(title = "Night Mode")
+                    BigSizeTextComposable(text = "Night Mode")
                 },
                 buttons = {
                     Column(modifier

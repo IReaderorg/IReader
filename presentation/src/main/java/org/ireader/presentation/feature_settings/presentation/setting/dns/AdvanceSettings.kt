@@ -30,8 +30,8 @@ import org.ireader.presentation.feature_settings.presentation.setting.SettingVie
 import org.ireader.presentation.feature_sources.presentation.extension.composables.TextSection
 import org.ireader.presentation.presentation.Toolbar
 import org.ireader.presentation.presentation.components.ISnackBarHost
+import org.ireader.presentation.presentation.reusable_composable.BigSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
-import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
 import java.io.FileInputStream
 import java.io.FileOutputStream
 
@@ -119,7 +119,7 @@ fun AdvanceSettings(
         topBar = {
             Toolbar(
                 title = {
-                    TopAppBarTitle(title = "Advance Settings")
+                    BigSizeTextComposable(text = "Advance Settings")
                 },
                 backgroundColor = MaterialTheme.colors.background,
                 contentColor = MaterialTheme.colors.onBackground,

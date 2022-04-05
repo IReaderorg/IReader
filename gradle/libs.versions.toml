@@ -7,6 +7,7 @@ hilt = "2.40.5"
 retrofit = "2.9.0"
 aboutLibraries = "10.0.0-b03"
 
+
 [libraries]
 desugarJdkLibs = "com.android.tools:desugar_jdk_libs:1.1.5"
 gradle-tools = "com.android.tools.build:gradle:7.1.2"
@@ -16,6 +17,7 @@ gradle-hilt = "com.google.dagger:hilt-android-gradle-plugin:2.39.1"
 gradle-google = "com.google.gms:google-services:4.3.10"
 gradle-firebaseCrashlytic = "com.google.firebase:firebase-crashlytics-gradle:2.8.1"
 gradle-benmanes = "com.github.ben-manes:gradle-versions-plugin:0.42.0"
+
 
 ktor-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-okhttp = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }

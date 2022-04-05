@@ -4,6 +4,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
@@ -17,6 +18,7 @@ import org.ireader.domain.ui.NavigationArgs
 import org.ireader.presentation.feature_reader.presentation.reader.ReadingScreen
 import org.ireader.presentation.feature_reader.presentation.reader.reverse_swip_refresh.rememberSwipeRefreshState
 import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.ReaderScreenViewModel
+import org.ireader.presentation.feature_ttl.TTSScreen
 import org.ireader.presentation.presentation.EmptyScreenComposable
 
 object ReaderScreenSpec : ScreenSpec {
@@ -54,81 +56,174 @@ object ReaderScreenSpec : ScreenSpec {
         val scrollState = rememberLazyListState()
         val drawerScrollState = rememberLazyListState()
         val swipeState = rememberSwipeRefreshState(isRefreshing = vm.isLoading)
+        val context = LocalContext.current
 
-        TransparentStatusBar {
+        if (source != null) {
+            when {
+                vm.voiceMode -> {
 
+                    TTSScreen(
+                        vm = vm,
+                        onPrev = {
+                            if (currentIndex > 0) {
+                                vm.updateChapterSliderIndex(currentIndex - 1)
+                                scope.launch {
+                                    vm.getChapter(vm.getCurrentChapterByIndex().id,
+                                        source = source)
+                                    scrollState.animateScrollToItem(0, 0)
+                                }
 
-            if (source != null) {
-                ReadingScreen(
-                    navController = navController,
-                    vm = vm,
-                    scrollState = scrollState,
-                    source = source,
-                    onNext = {
-                        if (currentIndex < chapters.lastIndex) {
-                            vm.updateChapterSliderIndex(currentIndex + 1)
+                            } else {
+                                scope.launch {
+                                    vm.showSnackBar(UiText.StringResource(org.ireader.core.R.string.this_is_first_chapter))
+                                }
+                            }
+                        },
+                        onPlay = {
+                            when {
+                                vm.speaker?.isSpeaking == true -> {
+                                    vm.speaker?.stop()
+                                }
+                                else -> {
+                                    vm.readText(context = context)
+                                }
+                            }
+
+                        },
+                        onNext = {
+                            if (currentIndex < chapters.lastIndex) {
+                                vm.updateChapterSliderIndex(currentIndex + 1)
+                                scope.launch {
+                                    vm.getChapter(vm.getCurrentChapterByIndex().id,
+                                        source = source)
+                                    scrollState.animateScrollToItem(0, 0)
+                                }
+
+                            } else {
+                                scope.launch {
+                                    vm.showSnackBar(UiText.StringResource(R.string.this_is_last_chapter))
+
+                                }
+                            }
+                        },
+                        onChapter = { ch ->
                             scope.launch {
-                                vm.getChapter(vm.getCurrentChapterByIndex().id,
+                                vm.getChapter(ch.id,
                                     source = source)
-                                scrollState.animateScrollToItem(0, 0)
                             }
-
-                        } else {
                             scope.launch {
-                                vm.showSnackBar(UiText.StringResource(R.string.this_is_last_chapter))
+                                scrollState.scrollToItem(0, 0)
+                            }
+                            vm.updateChapterSliderIndex(vm.getCurrentIndexOfChapter(
+                                ch))
+                        },
+                        source = source,
+                        navController = navController,
+                        onPrevPar = {
+                            if (vm.currentReadingParagraph > 0) {
+                                vm.speaker?.stop()
+                                vm.currentReadingParagraph -= 1
+                                if (vm.isPlaying) {
+                                    vm.readText(context)
 
+                                }
                             }
-                        }
-                    },
-                    onPrev = {
-                        if (currentIndex > 0) {
-                            vm.updateChapterSliderIndex(currentIndex - 1)
-                            scope.launch {
-                                vm.getChapter(vm.getCurrentChapterByIndex().id,
-                                    source = source)
-                                scrollState.animateScrollToItem(0, 0)
-                            }
+                        },
+                        onNextPar = {
+                            vm.stateChapter?.let { chapter ->
+                                if (vm.currentReadingParagraph < chapter.content.lastIndex) {
+                                    vm.speaker?.stop()
+                                    vm.currentReadingParagraph += 1
+                                    if (vm.isPlaying) {
+                                        vm.readText(context)
 
-                        } else {
-                            scope.launch {
-                                vm.showSnackBar(UiText.StringResource(org.ireader.core.R.string.this_is_first_chapter))
+                                    }
+                                }
                             }
                         }
-                    },
-                    onSliderFinished = {
-                        scope.launch {
-                            vm.showSnackBar(UiText.DynamicString(chapters[vm.currentChapterIndex].title))
-                        }
-                        vm.updateChapterSliderIndex(currentIndex)
-                        scope.launch {
-                            vm.getChapter(chapters[vm.currentChapterIndex].id,
-                                source = source)
-                        }
-                        scope.launch {
-                            scrollState.animateScrollToItem(0, 0)
-                        }
-                    },
-                    onSliderChange = {
-                        vm.updateChapterSliderIndex(it.toInt())
-                    },
-                    swipeState = swipeState,
-                    drawerScrollState = drawerScrollState,
-                    onChapter = { ch ->
-                        scope.launch {
-                            vm.getChapter(ch.id,
-                                source = source)
-                        }
-                        scope.launch {
-                            scrollState.scrollToItem(0, 0)
-                        }
-                        vm.updateChapterSliderIndex(vm.getCurrentIndexOfChapter(
-                            ch))
+                    )
+                }
+                else -> {
+
+
+                    TransparentStatusBar {
+
+                        ReadingScreen(
+                            navController = navController,
+                            vm = vm,
+                            scrollState = scrollState,
+                            source = source,
+                            onNext = {
+                                if (currentIndex < chapters.lastIndex) {
+                                    vm.updateChapterSliderIndex(currentIndex + 1)
+                                    scope.launch {
+                                        vm.getChapter(vm.getCurrentChapterByIndex().id,
+                                            source = source)
+                                        scrollState.animateScrollToItem(0, 0)
+                                    }
+
+                                } else {
+                                    scope.launch {
+                                        vm.showSnackBar(UiText.StringResource(R.string.this_is_last_chapter))
+
+                                    }
+                                }
+                            },
+                            onPrev = {
+                                if (currentIndex > 0) {
+                                    vm.updateChapterSliderIndex(currentIndex - 1)
+                                    scope.launch {
+                                        vm.getChapter(vm.getCurrentChapterByIndex().id,
+                                            source = source)
+                                        scrollState.animateScrollToItem(0, 0)
+                                    }
+
+                                } else {
+                                    scope.launch {
+                                        vm.showSnackBar(UiText.StringResource(org.ireader.core.R.string.this_is_first_chapter))
+                                    }
+                                }
+                            },
+                            onSliderFinished = {
+                                scope.launch {
+                                    vm.showSnackBar(UiText.DynamicString(chapters[vm.currentChapterIndex].title))
+                                }
+                                vm.updateChapterSliderIndex(currentIndex)
+                                scope.launch {
+                                    vm.getChapter(chapters[vm.currentChapterIndex].id,
+                                        source = source)
+                                }
+                                scope.launch {
+                                    scrollState.animateScrollToItem(0, 0)
+                                }
+                            },
+                            onSliderChange = {
+                                vm.updateChapterSliderIndex(it.toInt())
+                            },
+                            swipeState = swipeState,
+                            drawerScrollState = drawerScrollState,
+                            onChapter = { ch ->
+                                scope.launch {
+                                    vm.getChapter(ch.id,
+                                        source = source)
+                                }
+                                scope.launch {
+                                    scrollState.scrollToItem(0, 0)
+                                }
+                                vm.updateChapterSliderIndex(vm.getCurrentIndexOfChapter(
+                                    ch))
+                            }
+                        )
                     }
-                )
-            } else {
-                EmptyScreenComposable(navController = navController,
-                    errorResId = org.ireader.presentation.R.string.something_is_wrong_with_this_book)
+
+
+                }
             }
+
+
+        } else {
+            EmptyScreenComposable(navController = navController,
+                errorResId = org.ireader.presentation.R.string.something_is_wrong_with_this_book)
         }
     }
 }

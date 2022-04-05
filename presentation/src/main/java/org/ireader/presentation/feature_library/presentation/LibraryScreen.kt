@@ -28,6 +28,7 @@ import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
 import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import org.ireader.core.utils.Constants
 import org.ireader.core.utils.UiText
@@ -67,7 +68,19 @@ fun LibraryScreen(
         vm.getLibraryBooks()
     }
 
-    SwipeRefresh(state = swipeState, onRefresh = { vm.refreshUpdate(context) }) {
+    SwipeRefresh(
+        state = swipeState, onRefresh = { vm.refreshUpdate(context) },
+        indicator = { state, trigger ->
+            SwipeRefreshIndicator(
+                state = state,
+                refreshTriggerDistance = trigger,
+                scale = true,
+                backgroundColor = MaterialTheme.colors.background,
+                contentColor = MaterialTheme.colors.primaryVariant,
+                elevation = 8.dp,
+            )
+        }
+    ) {
         ModalBottomSheetLayout(
             modifier = Modifier.systemBarsPadding(),
             sheetContent = {

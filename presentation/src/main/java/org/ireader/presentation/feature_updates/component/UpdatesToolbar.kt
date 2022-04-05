@@ -20,7 +20,7 @@ import androidx.compose.ui.res.stringResource
 import org.ireader.presentation.R
 import org.ireader.presentation.feature_updates.viewmodel.UpdateState
 import org.ireader.presentation.presentation.Toolbar
-import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
+import org.ireader.presentation.presentation.reusable_composable.BigSizeTextComposable
 
 @Composable
 fun UpdatesToolbar(
@@ -60,17 +60,17 @@ private fun UpdatesSelectionToolbar(
     onClickInvertSelection: () -> Unit,
 ) {
     Toolbar(
-        title = { TopAppBarTitle(title = "$selectionSize") },
-      navigationIcon = {
-          IconButton(onClick = onClickCancelSelection) {
-              Icon(Icons.Default.Close, contentDescription = null)
-          }
-      },
-      actions = {
-          IconButton(onClick = onClickSelectAll) {
-              Icon(Icons.Default.SelectAll, contentDescription = null)
-          }
-          IconButton(onClick = onClickInvertSelection) {
+        title = { BigSizeTextComposable(text = "$selectionSize") },
+        navigationIcon = {
+            IconButton(onClick = onClickCancelSelection) {
+                Icon(Icons.Default.Close, contentDescription = null)
+            }
+        },
+        actions = {
+            IconButton(onClick = onClickSelectAll) {
+                Icon(Icons.Default.SelectAll, contentDescription = null)
+            }
+            IconButton(onClick = onClickInvertSelection) {
               Icon(Icons.Default.FlipToBack, contentDescription = null)
           }
       }
@@ -83,7 +83,7 @@ fun UpdatesRegularToolbar(
     onClickDelete: () -> Unit,
 ) {
     Toolbar(
-        title = { TopAppBarTitle(title = stringResource(id = R.string.updates_screen_label)) },
+        title = { BigSizeTextComposable(text = stringResource(id = R.string.updates_screen_label)) },
         actions = {
             IconButton(onClick = onClickRefresh) {
                 Icon(Icons.Default.Refresh, contentDescription = null)
@@ -93,5 +93,5 @@ fun UpdatesRegularToolbar(
             }
 
         }
-  )
+    )
 }

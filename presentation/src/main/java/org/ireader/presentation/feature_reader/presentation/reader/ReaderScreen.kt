@@ -64,6 +64,7 @@ fun ReadingScreen(
 
     DisposableEffect(key1 = true) {
         onDispose {
+            vm.speaker?.shutdown()
             vm.restoreSetting(context, scrollState)
         }
     }
@@ -224,9 +225,9 @@ fun ReadingScreen(
                                     onSliderChange = { onSliderChange(it) },
                                     onSliderFinished = { onSliderFinished() },
                                     onPlay = {
-
-                                        vm.isPlaying = !vm.isPlaying
-                                        vm.readText(context)
+                                        vm.voiceMode = true
+//                                        vm.isPlaying = !vm.isPlaying
+//                                        vm.readText(context)
                                     }
                                 )
                             }

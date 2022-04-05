@@ -15,7 +15,7 @@ object DownloaderScreenSpec : ScreenSpec {
 
     override val deepLinks: List<NavDeepLink> = listOf(
         navDeepLink {
-            uriPattern = "https://www.ireader.com/downloader_route"
+            uriPattern = "ireader/downloader_route"
         }
     )
 

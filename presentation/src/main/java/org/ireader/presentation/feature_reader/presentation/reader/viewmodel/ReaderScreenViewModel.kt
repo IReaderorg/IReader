@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.speech.tts.TextToSpeech
+import android.speech.tts.UtteranceProgressListener
 import android.view.WindowManager
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.ui.graphics.Color
@@ -132,7 +133,7 @@ class ReaderScreenViewModel @Inject constructor(
         toggleLoading(true)
         toggleLocalLoaded(false)
         viewModelScope.launch {
-            speaker?.shutdown()
+            speaker?.stop()
             val resultChapter = getChapterUseCase.findChapterById(
                 chapterId = chapterId,
                 state.book?.id,
@@ -640,22 +641,64 @@ class ReaderScreenViewModel @Inject constructor(
         speaker = TextToSpeech(context) { status ->
             if (status != TextToSpeech.ERROR && speaker != null) {
                 speaker?.let { ttl ->
-                    ttl.language = Locale.US
+                    ttl.language = Locale.UK
                     stateChapter?.let { chapter ->
-                        if (chapter.content.isNotEmpty() && currentReadingParagraph <= chapter.content.size) {
-                            chapter.content.forEach { str ->
-                                ttl.speak(str, TextToSpeech.QUEUE_ADD, null, "")
-                            }
+                        try {
+                            ttl.speak(chapter.content[currentReadingParagraph],
+                                TextToSpeech.QUEUE_FLUSH,
+                                null,
+                                currentReadingParagraph.toString())
 
-                            currentReadingParagraph += 1
+                            ttl.setOnUtteranceProgressListener(object :
+                                UtteranceProgressListener() {
+                                override fun onStop(utteranceId: String?, interrupted: Boolean) {
+                                    super.onStop(utteranceId, interrupted)
+                                    Timber.e("onStop....")
+                                    isPlaying = false
+                                }
+
+                                override fun onStart(p0: String?) {
+                                    Timber.e("OnStart....")
+                                    isPlaying = true
+                                }
+
+                                override fun onDone(p0: String?) {
+                                    currentReadingParagraph += 1
+                                    Timber.e(currentReadingParagraph.toString())
+                                    readText(context)
+                                }
+
+                                override fun onError(p0: String?) {
+                                    Timber.e("onError....")
+                                    isPlaying = false
+                                }
+
+
+                                override fun onBeginSynthesis(
+                                    utteranceId: String?,
+                                    sampleRateInHz: Int,
+                                    audioFormat: Int,
+                                    channelCount: Int,
+                                ) {
+                                    super.onBeginSynthesis(utteranceId,
+                                        sampleRateInHz,
+                                        audioFormat,
+                                        channelCount)
+                                    Timber.e(utteranceId)
+                                }
+                            })
+
+                        } catch (e: Exception) {
+                            Timber.e(e.localizedMessage)
                         }
+
 
                     }
                 }
 
 
             } else {
-                context.toast("Not Initialized")
+                context.toast("Text-to-Speech Not Available")
             }
         }
     }

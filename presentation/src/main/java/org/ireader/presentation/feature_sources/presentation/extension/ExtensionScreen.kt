@@ -28,8 +28,8 @@ import org.ireader.presentation.presentation.Toolbar
 import org.ireader.presentation.presentation.components.ISnackBarHost
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.AppTextField
+import org.ireader.presentation.presentation.reusable_composable.BigSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
-import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
 import org.ireader.presentation.ui.GlobalSearchScreenSpec
 
 
@@ -83,7 +83,7 @@ fun ExtensionScreen(
             Toolbar(
                 title = {
                     if (!searchMode) {
-                        TopAppBarTitle(title = "Extensions")
+                        BigSizeTextComposable(text = "Extensions")
                     } else {
                         AppTextField(
                             query = viewModel.searchQuery ?: "",

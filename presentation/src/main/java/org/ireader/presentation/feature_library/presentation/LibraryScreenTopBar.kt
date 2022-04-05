@@ -17,7 +17,7 @@ import org.ireader.presentation.feature_library.presentation.viewmodel.LibraryVi
 import org.ireader.presentation.presentation.Toolbar
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.AppTextField
-import org.ireader.presentation.presentation.reusable_composable.TopAppBarTitle
+import org.ireader.presentation.presentation.reusable_composable.BigSizeTextComposable
 
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -34,7 +34,7 @@ fun LibraryScreenTopBar(
     Toolbar(
         title = {
             if (!vm.inSearchMode) {
-                TopAppBarTitle(title = "Library")
+                BigSizeTextComposable(text = "Library")
             } else {
                 AppTextField(
                     query = vm.searchQuery,
