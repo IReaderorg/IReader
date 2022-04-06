@@ -1,6 +1,6 @@
 package org.ireader.presentation.feature_ttl
 
-import androidx.activity.OnBackPressedDispatcher
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.TweenSpec
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -22,10 +22,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.NotificationManagerCompat
 import androidx.navigation.NavController
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.ireader.core.R
 import org.ireader.domain.feature_services.io.BookCover
+import org.ireader.domain.feature_services.notification.Notifications
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.presentation.feature_reader.presentation.reader.ReaderScreenDrawer
 import org.ireader.presentation.feature_reader.presentation.reader.components.SettingItemComposable
@@ -39,6 +42,7 @@ import org.ireader.presentation.presentation.reusable_composable.BigSizeTextComp
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.SuperSmallTextComposable
 import tachiyomi.source.Source
+import timber.log.Timber
 import java.math.RoundingMode
 
 
@@ -56,9 +60,11 @@ fun TTSScreen(
     source: Source,
     onChapter: (Chapter) -> Unit,
 ) {
-    navController.setOnBackPressedDispatcher(OnBackPressedDispatcher {
 
-    })
+
+    BackHandler {
+        vm.voiceMode = false
+    }
     val context = LocalContext.current
 
     val drawerScrollState = rememberLazyListState()
@@ -72,9 +78,67 @@ fun TTSScreen(
 
     LaunchedEffect(key1 = scaffoldState.drawerState.targetValue) {
         if (chapter != null && scaffoldState.drawerState.targetValue == DrawerValue.Open && vm.stateChapters.isNotEmpty()) {
-            drawerScrollState.scrollToItem(vm.getCurrentIndexOfChapter(chapter))
+            vm.uiFunc.apply {
+                drawerScrollState.scrollToItem(vm.getCurrentIndexOfChapter(chapter))
+            }
         }
     }
+    LaunchedEffect(key1 = true) {
+        vm.notificationStates.mediaPlayerNotification.collectLatest {
+            Timber.e(it.toString())
+            when (it) {
+                1 -> {
+                    onPrev()
+                }
+                2 -> {
+                    onPrevPar()
+                }
+                3 -> {
+                    onPlay()
+                    chapter?.let {
+                        vm.book?.let { book ->
+                            val notification = when {
+                                vm.isPlaying -> {
+                                    vm.defaultNotificationHelper.basicPlayingTextReaderNotification(
+                                        chapter,
+                                        book,
+                                        false,
+                                        vm.currentReadingParagraph,
+                                        vm.mediaSessionCompat(context))
+                                }
+                                else -> {
+                                    vm.defaultNotificationHelper.basicPlayingTextReaderNotification(
+                                        chapter,
+                                        book,
+                                        true,
+                                        vm.currentReadingParagraph,
+                                        vm.mediaSessionCompat(context))
+
+                                }
+                            }
+                            NotificationManagerCompat.from(context).apply {
+                                notify(Notifications.ID_TEXT_READER_PROGRESS, notification.build())
+                            }
+                        }
+
+                    }
+
+                }
+                4 -> {
+                    onNextPar()
+                }
+                5 -> {
+                    onNext()
+                }
+                6 -> {
+                    NotificationManagerCompat.from(context).apply {
+                        cancel(Notifications.ID_TEXT_READER_PROGRESS)
+                    }
+                }
+            }
+        }
+    }
+
     ModalBottomSheetLayout(
         modifier = Modifier.systemBarsPadding(),
         sheetContent = {
@@ -151,9 +215,13 @@ fun TTSScreen(
                     modifier = Modifier.statusBarsPadding(),
                     onReverseIcon = {
                         if (chapter != null) {
-                            vm.reverseChapters()
-                            scope.launch {
-                                vm.getLocalChaptersByPaging(chapter.bookId)
+                            vm.uiFunc.apply {
+                                vm.reverseChapters()
+                            }
+                            vm.mainFunc.apply {
+                                scope.launch {
+                                    vm.getLocalChaptersByPaging(chapter.bookId)
+                                }
                             }
                         }
                     },
@@ -192,7 +260,7 @@ fun TTSScreen(
                             BigSizeTextComposable(text = chapter.title, align = TextAlign.Center)
                             MidSizeTextComposable(text = book.title, align = TextAlign.Center)
                             vm.stateChapter?.let { chapter ->
-                                SuperSmallTextComposable(text = "${vm.currentReadingParagraph}/${chapter.content.size - 1}")
+                                SuperSmallTextComposable(text = "${vm.currentReadingParagraph}/${chapter.content.size}")
 
                             }
                         }

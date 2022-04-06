@@ -58,7 +58,11 @@ fun BrightnessSliderComposable(
                 imageVector = Icons.Default.Brightness7,
                 contentDescription = "less brightness")
         }
-        OutlinedButton(onClick = { viewModel.toggleAutoBrightness() },
+        OutlinedButton(onClick = {
+            viewModel.prefFunc.apply {
+                viewModel.toggleAutoBrightness()
+            }
+        },
             modifier = Modifier
                 .weight(1F)
                 .padding(8.dp),

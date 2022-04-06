@@ -51,16 +51,16 @@ fun VoiceChip(
                         .clip(RectangleShape)
                         .background(MaterialTheme.colors.background)
                         .border(2.dp,
-                            if (voices[index].name == viewModel.currentVoice) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground.copy(
+                            if (voices[index].locale.displayName == viewModel.currentVoice) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground.copy(
                                 .4f),
                             CircleShape)
                         .clickable {
-                            viewModel.currentVoice = voices[index].name
-                            viewModel.speechPrefUseCases.saveVoice(voices[index].name)
+                            viewModel.currentVoice = voices[index].locale.displayName
+                            viewModel.speechPrefUseCases.saveVoice(voices[index].locale.displayName)
                         },
                         contentAlignment = Alignment.Center
                     ) {
-                        CaptionTextComposable(text = voices[index].name,
+                        CaptionTextComposable(text = voices[index].locale.displayName,
                             maxLine = 1,
                             align = TextAlign.Center,
                             modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp))

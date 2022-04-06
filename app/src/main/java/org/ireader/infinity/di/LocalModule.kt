@@ -1,6 +1,7 @@
 package org.ireader.infinity.di
 
 import android.content.Context
+import android.speech.tts.TextToSpeech
 import androidx.room.Room
 import dagger.Module
 import dagger.Provides
@@ -44,6 +45,15 @@ class LocalModule {
             )
             .fallbackToDestructiveMigration()
             .build()
+    }
+
+
+    @Provides
+    @Singleton
+    fun provideTextToSpeech(context: Context): TextToSpeech {
+        return TextToSpeech(context) {
+
+        }
     }
 
     @Provides

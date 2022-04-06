@@ -59,11 +59,12 @@ fun MainBottomSettingComposable(
         AppIconButton(imageVector = Icons.Default.Menu,
             title = "Chapter List Drawer",
             onClick = { scope.launch { scaffoldState.drawerState.open() } })
-        AppIconButton(imageVector = Icons.Default.Settings,
-            title = "Setting Drawer",
-            onClick = { onSetting() })
         AppIconButton(imageVector = Icons.Default.Headphones,
             title = "Play Text To Speech",
             onClick = { onPlay() })
+        AppIconButton(imageVector = Icons.Default.Settings,
+            title = "Setting Drawer",
+            onClick = { onSetting() })
+
     }
 }

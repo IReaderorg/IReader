@@ -40,7 +40,12 @@ fun ReaderBackgroundComposable(modifier: Modifier = Modifier, viewModel: ReaderS
                     .border(2.dp,
                         MaterialTheme.colors.primary,
                         CircleShape)
-                    .clickable { viewModel.changeBackgroundColor(index) },
+                    .clickable {
+                        viewModel.prefFunc.apply {
+                            viewModel.changeBackgroundColor(index)
+                        }
+
+                    },
                     contentAlignment = Alignment.Center
                 ) {
                     if (viewModel.backgroundColor == readerScreenBackgroundColors[index].color) {

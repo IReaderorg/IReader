@@ -52,6 +52,7 @@ fun ReadingScreen(
     swipeState: SwipeRefreshState,
 ) {
 
+
     val chapters = vm.stateChapters
     val scaffoldState = rememberScaffoldState(rememberDrawerState(DrawerValue.Closed))
     val modalState =
@@ -64,13 +65,16 @@ fun ReadingScreen(
 
     DisposableEffect(key1 = true) {
         onDispose {
-            vm.speaker?.shutdown()
-            vm.restoreSetting(context, scrollState)
+            vm.uiFunc.apply {
+                vm.restoreSetting(context, scrollState)
+            }
         }
     }
     LaunchedEffect(key1 = scaffoldState.drawerState.targetValue) {
         if (chapter != null && scaffoldState.drawerState.targetValue == DrawerValue.Open && vm.stateChapters.isNotEmpty()) {
-            drawerScrollState.scrollToItem(vm.getCurrentIndexOfChapter(chapter))
+            vm.uiFunc.apply {
+                drawerScrollState.scrollToItem(vm.getCurrentIndexOfChapter(chapter))
+            }
         }
     }
     LaunchedEffect(key1 = vm.currentChapterIndex) {
@@ -97,7 +101,9 @@ fun ReadingScreen(
             false -> {
                 scope.launch {
                     if (chapter != null) {
-                        vm.getLocalChaptersByPaging(chapter.bookId)
+                        vm.mainFunc.apply {
+                            vm.getLocalChaptersByPaging(chapter.bookId)
+                        }
                     }
                     modalState.snapTo(ModalBottomSheetValue.Expanded)
                 }
@@ -110,22 +116,24 @@ fun ReadingScreen(
         }
     }
     LaunchedEffect(key1 = vm.autoBrightnessMode) {
-        vm.readBrightness(context)
+        vm.prefFunc.apply {
+            vm.readBrightness(context)
+        }
+
     }
     LaunchedEffect(key1 = vm.initialized) {
         if (chapter != null) {
             scrollState.scrollBy(chapter.progress.toFloat())
         }
     }
-//    LaunchedEffect(key1 = vm.stateChapter) {
-//        if (chapter != null) {
-//            scrollState.scrollBy(chapter.progress.toFloat())
-//        }
-//    }
+
     LaunchedEffect(key1 = true) {
-        vm.readOrientation(context)
-        vm.readBrightness(context)
-        vm.readImmersiveMode(context)
+
+        vm.prefFunc.apply {
+            vm.readOrientation(context)
+            vm.readBrightness(context)
+            vm.readImmersiveMode(context)
+        }
 
 
         vm.eventFlow.collectLatest { event ->
@@ -140,7 +148,9 @@ fun ReadingScreen(
     }
     LaunchedEffect(key1 = chapter) {
         if (chapter != null) {
-            vm.updateChapterSliderIndex(vm.getCurrentIndexOfChapter(chapter))
+            vm.uiFunc.apply {
+                vm.updateChapterSliderIndex(vm.getCurrentIndexOfChapter(chapter))
+            }
         }
     }
 
@@ -153,8 +163,10 @@ fun ReadingScreen(
                 modalBottomSheetValue = modalState.targetValue,
                 onRefresh = {
                     if (chapter != null) {
-                        vm.getReadingContentRemotely(chapter = chapter,
-                            source = source)
+                        vm.mainFunc.apply {
+                            vm.getReadingContentRemotely(chapter = chapter,
+                                source = source)
+                        }
                     }
                 },
                 source = source,
@@ -213,7 +225,9 @@ fun ReadingScreen(
                                     chapters = vm.stateChapters,
                                     currentChapterIndex = vm.currentChapterIndex,
                                     onSetting = {
-                                        vm.toggleSettingMode(true)
+                                        vm.uiFunc.apply {
+                                            vm.toggleSettingMode(true)
+                                        }
                                     },
                                     source = source,
                                     onNext = {
@@ -249,9 +263,13 @@ fun ReadingScreen(
                 modifier = Modifier.statusBarsPadding(),
                 onReverseIcon = {
                     if (chapter != null) {
-                        vm.reverseChapters()
-                        scope.launch {
-                            vm.getLocalChaptersByPaging(chapter.bookId)
+                        vm.uiFunc.apply {
+                            vm.reverseChapters()
+                        }
+                        vm.mainFunc.apply {
+                            scope.launch {
+                                vm.getLocalChaptersByPaging(chapter.bookId)
+                            }
                         }
                     }
                 },

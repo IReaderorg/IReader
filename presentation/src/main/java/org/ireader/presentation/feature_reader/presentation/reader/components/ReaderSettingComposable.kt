@@ -25,6 +25,7 @@ import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 fun ReaderSettingComposable(modifier: Modifier = Modifier, viewModel: ReaderScreenViewModel) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()
+    val func = viewModel.prefFunc
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -42,17 +43,33 @@ fun ReaderSettingComposable(modifier: Modifier = Modifier, viewModel: ReaderScre
         Spacer(modifier = Modifier.height(12.dp))
         SettingItemToggleComposable(text = "Scroll Mode",
             value = viewModel.verticalScrolling,
-            onToggle = { viewModel.toggleScrollMode() })
+            onToggle = {
+                func.apply {
+                    viewModel.toggleScrollMode()
+                }
+            })
 
         SettingItemToggleComposable(text = "Orientation",
             value = viewModel.orientation == Orientation.Landscape,
-            onToggle = { viewModel.saveOrientation(context) })
+            onToggle = {
+                func.apply {
+                    viewModel.saveOrientation(context)
+                }
+            })
         SettingItemToggleComposable(text = "AutoScroll",
             value = viewModel.autoScrollMode,
-            onToggle = { viewModel.toggleAutoScrollMode() })
+            onToggle = {
+                func.apply {
+                    viewModel.toggleAutoScrollMode()
+                }
+            })
         SettingItemToggleComposable(text = "Immersive mode",
             value = viewModel.immersiveMode,
-            onToggle = { viewModel.toggleImmersiveMode(context) })
+            onToggle = {
+                func.apply {
+                    viewModel.toggleImmersiveMode(context)
+                }
+            })
         SettingItemComposable(text = "Font Size",
             value = viewModel.fontSize.toString(),
             onAdd = {
@@ -66,65 +83,94 @@ fun ReaderSettingComposable(modifier: Modifier = Modifier, viewModel: ReaderScre
         SettingItemComposable(text = "Paragraph Indent",
             value = viewModel.paragraphsIndent.toString(),
             onAdd = {
-                viewModel.saveParagraphIndent(true)
+                func.apply {
+                    viewModel.saveParagraphIndent(true)
+                }
 
             },
             onMinus = {
-                viewModel.saveParagraphIndent(false)
+                func.apply {
+                    viewModel.saveParagraphIndent(false)
+                }
             })
 
         SettingItemComposable(text = "Paragraph Distance",
             value = viewModel.distanceBetweenParagraphs.toString(),
             onAdd = {
-                viewModel.saveParagraphDistance(true)
+                func.apply {
+                    viewModel.saveParagraphDistance(true)
+                }
             },
             onMinus = {
-                viewModel.saveParagraphDistance(false)
-
+                func.apply {
+                    viewModel.saveParagraphDistance(false)
+                }
             })
         SettingItemComposable(text = "Line Height",
             value = viewModel.lineHeight.toString(),
             onAdd = {
-                viewModel.saveFontHeight(true)
+                func.apply {
+                    viewModel.saveFontHeight(true)
+                }
             },
             onMinus = {
-                viewModel.saveFontHeight(false)
+                func.apply {
+                    viewModel.saveFontHeight(false)
+                }
+
 
             })
         SettingItemComposable(text = "Autoscroll Interval",
             value = "${viewModel.autoScrollInterval / 1000} second",
             onAdd = {
-                viewModel.setAutoScrollIntervalReader(true)
+                func.apply {
+                    viewModel.setAutoScrollIntervalReader(true)
+                }
             },
             onMinus = {
-                viewModel.setAutoScrollIntervalReader(false)
+                func.apply {
+                    viewModel.setAutoScrollIntervalReader(false)
+                }
 
             })
         SettingItemComposable(text = "Autoscroll Offset",
             value = viewModel.autoScrollOffset.toString(),
             onAdd = {
-                viewModel.setAutoScrollOffsetReader(true)
+                func.apply {
+                    viewModel.setAutoScrollIntervalReader(true)
+                }
             },
             onMinus = {
-                viewModel.setAutoScrollOffsetReader(false)
+                func.apply {
+                    viewModel.setAutoScrollIntervalReader(false)
+                }
+
 
             })
         SettingItemComposable(text = "ScrollIndicator Padding",
             value = viewModel.scrollIndicatorPadding.toString(),
             onAdd = {
-                viewModel.saveScrollIndicatorPadding(true)
+                func.apply {
+                    viewModel.saveScrollIndicatorPadding(true)
+                }
             },
             onMinus = {
-                viewModel.saveScrollIndicatorPadding(false)
+                func.apply {
+                    viewModel.saveScrollIndicatorPadding(false)
+                }
 
             })
         SettingItemComposable(text = "ScrollIndicator Width",
             value = viewModel.scrollIndicatorWith.toString(),
             onAdd = {
-                viewModel.saveScrollIndicatorWidth(true)
+                func.apply {
+                    viewModel.saveScrollIndicatorWidth(true)
+                }
             },
             onMinus = {
-                viewModel.saveScrollIndicatorWidth(false)
+                func.apply {
+                    viewModel.saveScrollIndicatorWidth(false)
+                }
 
             })
 

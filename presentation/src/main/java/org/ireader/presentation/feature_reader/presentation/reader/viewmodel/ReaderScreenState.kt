@@ -1,6 +1,7 @@
 package org.ireader.presentation.feature_reader.presentation.reader.viewmodel
 
 
+import android.speech.tts.TextToSpeech
 import android.speech.tts.Voice
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,6 +56,7 @@ open class ReaderScreenStateImpl @Inject constructor() : ReaderScreenState {
     override var book: Book? by mutableStateOf<Book?>(null)
 
 
+
 }
 
 
@@ -69,6 +71,7 @@ interface TextReaderScreenState {
     var currentLanguage: String
     var pitch: Float
     var speechSpeed: Float
+    var speaker: TextToSpeech?
 }
 
 class TextReaderScreenStateImpl @Inject constructor() : TextReaderScreenState {
@@ -83,6 +86,7 @@ class TextReaderScreenStateImpl @Inject constructor() : TextReaderScreenState {
     override var autoNextChapter by mutableStateOf<Boolean>(false)
     override var pitch by mutableStateOf<Float>(.8f)
     override var speechSpeed by mutableStateOf<Float>(.8f)
+    override var speaker by mutableStateOf<TextToSpeech?>(null)
 }
 
 
@@ -104,6 +108,7 @@ interface ReaderScreenState {
     var stateChapters: List<Chapter>
     var stateChapter: Chapter?
     var book: Book?
+
 }
 
 

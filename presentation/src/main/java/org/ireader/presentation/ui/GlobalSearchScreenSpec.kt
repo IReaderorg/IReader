@@ -30,3 +30,4 @@ object GlobalSearchScreenSpec : ScreenSpec {
     }
 
 }
+

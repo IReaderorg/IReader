@@ -4,6 +4,7 @@ plugins {
     id("kotlin-kapt")
     id("kotlin-parcelize")
     id("kotlinx-serialization")
+    id("dagger.hilt.android.plugin")
 }
 
 android {
@@ -23,7 +24,7 @@ dependencies {
 
     // implementation(Deps.tachiyomi.api)
     implementation(libs.tachiyomi)
-
+    implementation(androidx.media)
 
     implementation(kotlinx.datetime)
     implementation(compose.compose.activity)

@@ -13,6 +13,7 @@
     <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
 
 
+
     <!-- To view extension packages in API 30+ -->
     <uses-permission
         android:name="android.permission.QUERY_ALL_PACKAGES"
@@ -45,6 +46,7 @@
             android:exported="true"
             android:theme="@style/Theme.ISplash"
             android:windowSoftInputMode="adjustResize">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -63,6 +65,7 @@
                     android:host="deeplink"
                     android:scheme="ireader" />
             </intent-filter>
+
         </activity>
         <provider
             android:name="androidx.startup.InitializationProvider"
@@ -77,6 +80,9 @@
                 android:name="androidx.emoji2.text.EmojiCompatInitializer"
                 tools:node="remove" />
         </provider>
+        <receiver
+            android:name="org.ireader.domain.feature_services.notification.TextReaderBroadcastReceiver"
+            android:exported="false" />
         <!--        <provider-->
         <!--            android:name="androidx.startup.InitializationProvider"-->
         <!--            android:authorities="${applicationId}.androidx-startup"-->

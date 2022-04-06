@@ -33,19 +33,24 @@ fun createChannel(context: Context, channel: Channel) {
     }
 }
 
-suspend fun NotificationCompat.Builder.setLargeIcon(
-    context: Context,
-    data: Any?,
-): NotificationCompat.Builder {
-    if (data != null) {
-        val request = ImageRequest.Builder(context)
-            .data(data)
-            .transformations(CircleCropTransformation())
-            .target { setLargeIcon(it.toBitmap()) }
-            .build()
+ suspend fun NotificationCompat.Builder.setLargeIcon(
+     context: Context,
+     data: Any?,
+ ): NotificationCompat.Builder {
+     return try {
+         if (data != null) {
+             val request = ImageRequest.Builder(context)
+                 .data(data)
+                 .transformations(CircleCropTransformation())
+                 .allowHardware(true)
+                 .target { setLargeIcon(it.toBitmap()) }
+                 .size(200)
+                 .build()
+             ImageLoader(context).execute(request)
+         }
+         this
 
-        ImageLoader(context).execute(request)
-    }
-
-    return this
-}
+     } catch (e: Exception) {
+         this
+     }
+ }

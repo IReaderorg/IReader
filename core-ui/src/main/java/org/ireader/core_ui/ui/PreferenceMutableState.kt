@@ -15,9 +15,13 @@ class PreferenceMutableState<T>(
     private val state = mutableStateOf(preference.get())
 
     init {
-        preference.changes()
-            .onEach { state.value = it }
-            .launchIn(scope)
+        try {
+            preference.changes()
+                .onEach { state.value = it }
+                .launchIn(scope)
+        } catch (e: Exception) {
+        }
+
     }
 
     override var value: T

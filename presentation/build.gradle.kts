@@ -3,6 +3,7 @@ plugins {
     id("kotlin-android")
     id("kotlin-kapt")
     id("kotlinx-serialization")
+
 }
 
 android {
@@ -65,6 +66,7 @@ dependencies {
     implementation(libs.tachiyomi)
 
     implementation(androidx.core)
+    implementation(androidx.media)
     implementation(androidx.material)
     implementation(androidx.emoji)
     implementation(androidx.appCompat)

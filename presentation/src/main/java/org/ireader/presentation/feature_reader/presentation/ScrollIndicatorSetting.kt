@@ -25,10 +25,17 @@ fun ScrollIndicatorSetting(
     enable: Boolean = false, vm: ReaderScreenViewModel,
     onDismiss: () -> Unit = {
         vm.scrollIndicatorDialogShown = false
-        vm.scrollIndicatorPadding = vm.readScrollIndicatorPadding()
-        vm.scrollIndicatorWith = vm.readScrollIndicatorWidth()
-        vm.readBackgroundColor()
-        vm.readTextColor()
+        vm.prefFunc.apply {
+            vm.readScrollIndicatorPadding()
+            vm.readScrollIndicatorWidth()
+        }
+        //vm.scrollIndicatorPadding = vm.readScrollIndicatorPadding()
+        //vm.scrollIndicatorWith = vm.readScrollIndicatorWidth()
+        vm.prefFunc.apply {
+            vm.readBackgroundColor()
+            vm.readTextColor()
+
+        }
     },
 ) {
 
@@ -59,7 +66,10 @@ fun ScrollIndicatorSetting(
                             try {
                                 vm.backgroundColor = Color(it.toColorInt())
                             } catch (e: Exception) {
-                                vm.readBackgroundColor()
+                                vm.prefFunc.apply {
+                                    vm.readBackgroundColor()
+
+                                }
                             }
 
                         },
@@ -79,7 +89,10 @@ fun ScrollIndicatorSetting(
                             try {
                                 vm.textColor = Color(it.toColorInt())
                             } catch (e: Exception) {
-                                vm.readTextColor()
+                                vm.prefFunc.apply {
+                                    vm.readTextColor()
+
+                                }
                             }
                         },
                         onConfirm = {
@@ -116,14 +129,20 @@ fun ScrollIndicatorSetting(
 
                         try {
                             if (bgValue.isNotBlank()) {
-                                vm.setReaderBackgroundColor(vm.backgroundColor)
+                                vm.prefFunc.apply {
+                                    vm.setReaderBackgroundColor(vm.backgroundColor)
+                                }
+
                             }
                         } catch (e: Exception) {
                         }
 
                         try {
                             if (txtValue.isNotBlank()) {
-                                vm.setReaderTextColor(vm.textColor)
+                                vm.prefFunc.apply {
+                                    vm.setReaderTextColor(vm.textColor)
+                                }
+
                             }
                         } catch (e: Exception) {
                         }
