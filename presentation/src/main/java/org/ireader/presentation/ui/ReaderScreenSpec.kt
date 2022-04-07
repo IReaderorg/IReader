@@ -55,6 +55,7 @@ object ReaderScreenSpec : ScreenSpec {
         val currentIndex = vm.currentChapterIndex
         val source = vm.source
         val chapters = vm.stateChapters
+        val chapter = vm.stateChapter
         val scope = rememberCoroutineScope()
         val scrollState = rememberLazyListState()
         val drawerScrollState = rememberLazyListState()
@@ -67,8 +68,13 @@ object ReaderScreenSpec : ScreenSpec {
                 vm.mediaSessionCompat(context).release()
                 NotificationManagerCompat.from(context)
                     .cancel(Notifications.ID_TEXT_READER_PROGRESS)
+                vm.uiFunc.apply {
+                    vm.restoreSetting(context, scrollState)
+                }
             }
         }
+
+
         if (source != null) {
             when {
                 vm.voiceMode -> {
@@ -76,22 +82,15 @@ object ReaderScreenSpec : ScreenSpec {
                     TTSScreen(
                         vm = vm,
                         onPrev = {
-                            if (currentIndex > 0) {
-                                vm.uiFunc.apply {
-                                    vm.updateChapterSliderIndex(currentIndex - 1)
-
-                                }
-                                vm.mainFunc.apply {
-                                    vm.uiFunc.apply {
-                                        scope.launch {
-                                            vm.getChapter(vm.getCurrentChapterByIndex().id,
-                                                source = source)
-                                            scrollState.animateScrollToItem(0, 0)
-                                        }
+                            if (vm.currentChapterIndex > 0) {
+                                vm.apply {
+                                    currentChapterIndex -= 1
+                                    scope.launch {
+                                        vm.getChapter(vm.getCurrentChapterByIndex().id,
+                                            source = source)
+                                        scrollState.animateScrollToItem(0, 0)
                                     }
                                 }
-
-
                             } else {
                                 scope.launch {
                                     vm.showSnackBar(UiText.StringResource(org.ireader.core.R.string.this_is_first_chapter))
@@ -109,22 +108,33 @@ object ReaderScreenSpec : ScreenSpec {
                                     }
                                 }
                             }
-
+                            scope.launch {
+                                vm.state.stateChapter?.let { chapter ->
+                                    vm.state.book?.let { book ->
+                                        val notification =
+                                            vm.defaultNotificationHelper.basicPlayingTextReaderNotification(
+                                                chapter,
+                                                book,
+                                                vm.isPlaying,
+                                                vm.currentReadingParagraph,
+                                                vm.mediaSessionCompat(context))
+                                        NotificationManagerCompat.from(context)
+                                            .notify(Notifications.ID_TEXT_READER_PROGRESS,
+                                                notification.build())
+                                    }
+                                }
+                            }
                         },
                         onNext = {
                             if (currentIndex < chapters.lastIndex) {
-                                vm.uiFunc.apply {
-
-                                    vm.updateChapterSliderIndex(currentIndex + 1)
-                                }
-                                vm.mainFunc.apply {
-                                    vm.uiFunc.apply {
-                                        scope.launch {
-                                            vm.getChapter(vm.getCurrentChapterByIndex().id,
-                                                source = source)
-                                            scrollState.animateScrollToItem(0, 0)
-                                        }
+                                vm.apply {
+                                    currentChapterIndex += 1
+                                    scope.launch {
+                                        vm.getChapter(vm.getCurrentChapterByIndex().id,
+                                            source = source)
+                                        scrollState.animateScrollToItem(0, 0)
                                     }
+
                                 }
 
                             } else {
@@ -177,6 +187,18 @@ object ReaderScreenSpec : ScreenSpec {
                                     }
                                 }
                             }
+                        },
+                        onValueChange = {
+                            vm.speaker?.stop()
+                            vm.currentReadingParagraph = it.toInt()
+                        },
+                        onValueChangeFinished = {
+                            if (vm.isPlaying) {
+                                vm.textReaderManager.apply {
+                                    vm.readText(context, vm.mediaSessionCompat(context))
+                                }
+                            }
+
                         }
                     )
                 }

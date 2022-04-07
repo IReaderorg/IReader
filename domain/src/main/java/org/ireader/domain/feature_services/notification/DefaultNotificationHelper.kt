@@ -5,10 +5,10 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.media.MediaMetadata
-import android.media.session.PlaybackState
 import android.os.Build
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
+import android.support.v4.media.session.PlaybackStateCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toUri
@@ -176,9 +176,10 @@ class DefaultNotificationHelper @Inject constructor(
             setMetadata(MediaMetadataCompat.Builder().apply {
                 putText(MediaMetadata.METADATA_KEY_TITLE, chapter.title)
             }.build())
-            val actions =
-                PlaybackState.ACTION_PLAY_PAUSE or PlaybackState.ACTION_STOP or PlaybackState.ACTION_SKIP_TO_NEXT or PlaybackState.ACTION_SKIP_TO_PREVIOUS
+            setPlaybackState(PlaybackStateCompat.Builder().apply {
+                setActions(PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_STOP or PlaybackStateCompat.ACTION_SKIP_TO_NEXT or PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)
 
+            }.build())
         }
         return NotificationCompat.Builder(applicationContext,
             Notifications.CHANNEL_TEXT_READER_PROGRESS).apply {
@@ -186,9 +187,8 @@ class DefaultNotificationHelper @Inject constructor(
             setContentText("${progress}/${chapter.content.size}")
             setSmallIcon(org.ireader.core.R.drawable.ic_infinity)
             setOnlyAlertOnce(true)
-            //   setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             setLargeIcon(applicationContext, book.cover)
-            //setShowWhen(false)
             priority = NotificationCompat.PRIORITY_LOW
 
             addAction(R.drawable.ic_baseline_skip_previous,
@@ -213,7 +213,6 @@ class DefaultNotificationHelper @Inject constructor(
                 .setShowActionsInCompactView(1, 2, 3)
             )
             setSubText(book.title)
-            color = applicationContext.resources.getColor(R.color.blue_200)
 
             //setColorized(true)
             //setAutoCancel(true)

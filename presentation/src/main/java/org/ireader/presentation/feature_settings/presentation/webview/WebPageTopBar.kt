@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import org.ireader.core.ChapterParse
 import org.ireader.core.ChaptersParse
 import org.ireader.core.DetailParse
 import org.ireader.domain.FetchType
@@ -103,7 +104,8 @@ fun WebPageTopBar(
                 }) {
                     MidSizeTextComposable(text = stringResource(R.string.go_forward))
                 }
-                if (source is HttpSource && source.getListings().contains(DetailParse())) {
+                if (source is HttpSource && source.getListings().map { it.name }
+                        .contains(DetailParse().name)) {
                     DropdownMenuItem(onClick = {
                         isMenuExpanded = false
                         fetchBook()
@@ -111,7 +113,17 @@ fun WebPageTopBar(
                         MidSizeTextComposable(text = "Fetch Book")
                     }
                 }
-                if (source is HttpSource && source.getListings().contains(ChaptersParse())) {
+                if (source is HttpSource && source.getListings().map { it.name }
+                        .contains(ChaptersParse().name)) {
+                    DropdownMenuItem(onClick = {
+                        isMenuExpanded = false
+                        fetchChapter()
+                    }) {
+                        MidSizeTextComposable(text = "Fetch Chapter")
+                    }
+                }
+                if (source is HttpSource && source.getListings().map { it.name }
+                        .contains(ChapterParse().name)) {
                     DropdownMenuItem(onClick = {
                         isMenuExpanded = false
                         fetchChapter()

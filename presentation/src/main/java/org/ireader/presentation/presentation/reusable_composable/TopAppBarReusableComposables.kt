@@ -35,6 +35,7 @@ fun BigSizeTextComposable(
     fontWeight: FontWeight? = null,
     overflow: TextOverflow? = null,
     align: TextAlign? = null,
+    maxLine: Int = Int.MAX_VALUE,
 ) {
     Text(
         modifier = modifier,
@@ -44,6 +45,7 @@ fun BigSizeTextComposable(
         fontWeight = fontWeight ?: FontWeight.Bold,
         overflow = overflow ?: TextOverflow.Ellipsis,
         textAlign = align ?: TextAlign.Start,
+        maxLines = maxLine
     )
 }
 

@@ -27,6 +27,7 @@ interface ReaderPrefFunctions {
     fun ReaderScreenViewModel.saveOrientation(context: Context)
     fun ReaderScreenViewModel.readImmersiveMode(context: Context)
     fun ReaderScreenViewModel.toggleImmersiveMode(context: Context)
+    fun ReaderScreenViewModel.toggleSelectableMode()
     fun ReaderScreenViewModel.toggleAutoScrollMode()
     fun ReaderScreenViewModel.toggleScrollMode()
     fun ReaderScreenViewModel.saveParagraphDistance(isIncreased: Boolean)
@@ -49,8 +50,8 @@ interface ReaderPrefFunctions {
 
 class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
     override fun ReaderScreenViewModel.readPreferences() {
-        font = readerUseCases.selectedFontStateUseCase.read()
-        readerUseCases.selectedFontStateUseCase.save(0)
+        font = readerUseCases.selectedFontStateUseCase.readFont()
+        readerUseCases.selectedFontStateUseCase.saveFont(0)
 
 
         this.fontSize = readerUseCases.fontSizeStateUseCase.read()
@@ -71,6 +72,8 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
         pitch = speechPrefUseCases.readPitch()
         currentVoice = speechPrefUseCases.readVoice()
         currentLanguage = speechPrefUseCases.readLanguage()
+        selectableMode = readerUseCases.selectedFontStateUseCase.readSelectableText()
+        autoNextChapter = speechPrefUseCases.readAutoNext()
     }
 
     override fun ReaderScreenViewModel.toggleReaderMode(enable: Boolean?) {
@@ -93,7 +96,7 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
 
     override fun ReaderScreenViewModel.saveFont(index: Int) {
         this.font = fonts[index]
-        readerUseCases.selectedFontStateUseCase.save(index)
+        readerUseCases.selectedFontStateUseCase.saveFont(index)
 
     }
 
@@ -194,6 +197,11 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
         }
     }
 
+    override fun ReaderScreenViewModel.toggleSelectableMode() {
+        selectableMode = !selectableMode
+        readerUseCases.selectedFontStateUseCase.saveSelectableText(selectableMode)
+    }
+
     override fun ReaderScreenViewModel.toggleAutoScrollMode() {
         autoScrollMode = !autoScrollMode
     }
@@ -210,7 +218,7 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
             readerUseCases.paragraphDistanceUseCase.save(currentDistance + 1)
             distanceBetweenParagraphs = currentDistance + 1
 
-        } else if (currentDistance > 1 && !isIncreased) {
+        } else if (currentDistance > 0 && !isIncreased) {
             readerUseCases.paragraphDistanceUseCase.save(currentDistance - 1)
             distanceBetweenParagraphs = currentDistance - 1
 

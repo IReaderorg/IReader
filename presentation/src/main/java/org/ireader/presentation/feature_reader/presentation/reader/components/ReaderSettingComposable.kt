@@ -70,6 +70,13 @@ fun ReaderSettingComposable(modifier: Modifier = Modifier, viewModel: ReaderScre
                     viewModel.toggleImmersiveMode(context)
                 }
             })
+        SettingItemToggleComposable(text = "Selectable mode",
+            value = viewModel.selectableMode,
+            onToggle = {
+                func.apply {
+                    viewModel.toggleSelectableMode()
+                }
+            })
         SettingItemComposable(text = "Font Size",
             value = viewModel.fontSize.toString(),
             onAdd = {

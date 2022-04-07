@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -63,13 +62,13 @@ fun ReadingScreen(
     val context = LocalContext.current
 
 
-    DisposableEffect(key1 = true) {
-        onDispose {
-            vm.uiFunc.apply {
-                vm.restoreSetting(context, scrollState)
-            }
-        }
-    }
+//    DisposableEffect(key1 = true) {
+//        onDispose {
+//            vm.uiFunc.apply {
+//                vm.restoreSetting(context, scrollState)
+//            }
+//        }
+//    }
     LaunchedEffect(key1 = scaffoldState.drawerState.targetValue) {
         if (chapter != null && scaffoldState.drawerState.targetValue == DrawerValue.Open && vm.stateChapters.isNotEmpty()) {
             vm.uiFunc.apply {
@@ -194,6 +193,15 @@ fun ReadingScreen(
                         scope.launch {
                             vm.showSnackBar(UiText.ExceptionString(e))
                         }
+                    }
+                },
+                vm = vm,
+                state = vm,
+                scrollState = scrollState,
+                onBookMark = {
+                    vm.uiFunc.apply {
+                        vm.bookmarkChapter()
+
                     }
                 }
             )

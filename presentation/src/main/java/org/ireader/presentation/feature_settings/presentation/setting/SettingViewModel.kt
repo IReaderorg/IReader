@@ -56,7 +56,7 @@ class SettingViewModel @Inject constructor(
 
     fun deleteDefaultSettings() {
         viewModelScope.launchIO {
-            prefUseCases.selectedFontStateUseCase.save(0)
+            prefUseCases.selectedFontStateUseCase.saveFont(0)
             prefUseCases.fontHeightUseCase.save(25)
             prefUseCases.fontSizeStateUseCase.save(18)
             prefUseCases.paragraphDistanceUseCase.save(2)

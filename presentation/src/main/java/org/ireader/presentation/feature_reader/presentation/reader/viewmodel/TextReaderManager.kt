@@ -69,7 +69,7 @@ class TextReaderManager @Inject constructor(
                                     defaultNotificationHelper.basicPlayingTextReaderNotification(
                                         chapter,
                                         book,
-                                        true,
+                                        isPlaying,
                                         currentReadingParagraph,
                                         mediaSessionCompat)
 
@@ -105,16 +105,20 @@ class TextReaderManager @Inject constructor(
                                         //  notify(Notifications.ID_TEXT_READER_PROGRESS, builder.build())
                                         readText(context, mediaSessionCompat)
                                     }
-                                    if (currentReadingParagraph == chapter.content.size) {
+                                    if (currentReadingParagraph == chapter.content.size && speaker != null && !isLoading && !isRemoteLoading) {
                                         isPlaying = false
+                                        speaker?.stop()
                                         if (autoNextChapter) {
                                             source?.let {
                                                 updateChapterSliderIndex(currentChapterIndex + 1)
                                                 viewModelScope.launch {
                                                     getChapter(getCurrentChapterByIndex().id,
-                                                        source = it)
-                                                    readText(context = context, mediaSessionCompat)
-                                                    isPlaying = true
+                                                        source = it) {
+                                                        if (chapter.content.isNotEmpty() && !isLoading && !isRemoteLoading) {
+                                                            readText(context = context,
+                                                                mediaSessionCompat)
+                                                        }
+                                                    }
                                                 }
 
                                             }

@@ -7,6 +7,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetState
@@ -19,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -100,21 +102,42 @@ fun ReaderText(
                     state = scrollState,
                     modifier = Modifier
                 ) {
-                    item {
-                        Text(
-                            modifier = modifier
-                                .fillMaxSize()
-                                .padding(horizontal = vm.paragraphsIndent.dp,
-                                    vertical = 4.dp),
-                            text = "\n\n" + chapter.content.map { it.trimStart() }
-                                .joinToString("\n".repeat(vm.distanceBetweenParagraphs)),
-                            fontSize = vm.fontSize.sp,
-                            fontFamily = vm.font.fontFamily,
-                            textAlign = TextAlign.Start,
-                            color = vm.textColor,
-                            lineHeight = vm.lineHeight.sp,
-                        )
+                    items(count = chapter.content.size) { index ->
+                        TextSelectionContainer(selectable = vm.selectableMode) {
+                            Text(
+                                modifier = modifier
+                                    .padding(horizontal = vm.paragraphsIndent.dp, vertical = 4.dp)
+                                    .background(if (index in vm.queriedTextIndex) vm.textColor.copy(
+                                        .1f) else Color.Transparent),
+                                text = if (index == 0) "\n\n" + chapter.content[index].plus("\n".repeat(
+                                    vm.distanceBetweenParagraphs)) else chapter.content[index].plus(
+                                    "\n".repeat(vm.distanceBetweenParagraphs)),
+                                fontSize = vm.fontSize.sp,
+                                fontFamily = vm.font.fontFamily,
+                                textAlign = TextAlign.Start,
+                                color = vm.textColor,
+                                lineHeight = vm.lineHeight.sp,
+                            )
+                        }
                     }
+//                    item {
+//                        TextSelectionContainer(selectable = vm.selectableMode) {
+//                            Text(
+//                                modifier = modifier
+//                                    .fillMaxSize()
+//                                    .padding(horizontal = vm.paragraphsIndent.dp,
+//                                        vertical = 4.dp),
+//                                text = "\n\n" + chapter.content.map { it.trimStart() }
+//                                    .joinToString("\n".repeat(vm.distanceBetweenParagraphs)),
+//                                fontSize = vm.fontSize.sp,
+//                                fontFamily = vm.font.fontFamily,
+//                                textAlign = TextAlign.Start,
+//                                color = vm.textColor,
+//                                lineHeight = vm.lineHeight.sp,
+//                            )
+//                        }
+//
+//                    }
 
                 }
 
@@ -196,4 +219,20 @@ fun ReaderText(
 fun LazyListState.isScrolledToTheEnd(): Boolean {
     val lastItem = layoutInfo.visibleItemsInfo.lastOrNull()
     return lastItem == null || lastItem.size + lastItem.offset <= layoutInfo.viewportEndOffset
+}
+
+@Composable
+fun TextSelectionContainer(
+    modifier: Modifier = Modifier,
+    selectable: Boolean,
+    content: @Composable () -> Unit,
+) {
+    when (selectable) {
+        true -> SelectionContainer {
+            content()
+        }
+        else -> {
+            content()
+        }
+    }
 }

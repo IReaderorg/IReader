@@ -9,7 +9,6 @@ import androidx.core.app.NotificationCompat
 import androidx.core.graphics.drawable.toBitmap
 import coil.ImageLoader
 import coil.request.ImageRequest
-import coil.transform.CircleCropTransformation
 
 data class Channel(
     val name: String,
@@ -41,10 +40,9 @@ fun createChannel(context: Context, channel: Channel) {
          if (data != null) {
              val request = ImageRequest.Builder(context)
                  .data(data)
-                 .transformations(CircleCropTransformation())
                  .allowHardware(true)
                  .target { setLargeIcon(it.toBitmap()) }
-                 .size(200)
+                 .size(512)
                  .build()
              ImageLoader(context).execute(request)
          }

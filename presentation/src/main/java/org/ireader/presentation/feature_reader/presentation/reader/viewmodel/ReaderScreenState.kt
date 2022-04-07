@@ -4,8 +4,10 @@ package org.ireader.presentation.feature_reader.presentation.reader.viewmodel
 import android.speech.tts.TextToSpeech
 import android.speech.tts.Voice
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.graphics.Color
 import org.ireader.core.utils.UiText
 import org.ireader.core_ui.theme.BackgroundColor
@@ -134,7 +136,13 @@ open class ReaderScreenPreferencesStateImpl @Inject constructor() : ReaderScreen
     override var autoScrollMode by mutableStateOf<Boolean>(false)
     override var autoBrightnessMode by mutableStateOf<Boolean>(false)
     override var immersiveMode by mutableStateOf<Boolean>(false)
+    override var selectableMode by mutableStateOf<Boolean>(false)
     override var initialized by mutableStateOf<Boolean>(false)
+    override var searchMode by mutableStateOf<Boolean>(false)
+    override var expandTopMenu by mutableStateOf<Boolean>(false)
+    override var searchQuery by mutableStateOf<String>("")
+    override var queriedTextIndex: SnapshotStateList<Int> = mutableStateListOf()
+    override var currentViewingSearchResultIndex by mutableStateOf<Int>(0)
 
 }
 
@@ -161,7 +169,13 @@ interface ReaderScreenPreferencesState {
     var autoScrollMode: Boolean
     var autoBrightnessMode: Boolean
     var immersiveMode: Boolean
+    var selectableMode: Boolean
     var initialized: Boolean
+    var searchMode: Boolean
+    var expandTopMenu: Boolean
+    var searchQuery: String
+    var queriedTextIndex: SnapshotStateList<Int>
+    var currentViewingSearchResultIndex: Int
 
 }
 

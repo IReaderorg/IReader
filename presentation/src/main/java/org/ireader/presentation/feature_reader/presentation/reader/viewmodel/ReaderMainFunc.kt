@@ -19,6 +19,7 @@ interface ReaderMainFunctions {
     suspend fun ReaderScreenViewModel.getChapter(
         chapterId: Long,
         source: Source,
+        onSuccess: () -> Unit = {},
     )
 
     suspend fun ReaderScreenViewModel.getLocalBookById(
@@ -30,13 +31,22 @@ interface ReaderMainFunctions {
     suspend fun ReaderScreenViewModel.insertChapter(chapter: Chapter)
     suspend fun ReaderScreenViewModel.insertBook(book: Book)
 
-    fun ReaderScreenViewModel.getReadingContentRemotely(chapter: Chapter, source: Source)
+    fun ReaderScreenViewModel.getReadingContentRemotely(
+        chapter: Chapter,
+        source: Source,
+        onSuccess: () -> Unit = {},
+    )
+
     fun ReaderScreenViewModel.updateLastReadTime(chapter: Chapter)
     fun ReaderScreenViewModel.getLocalChaptersByPaging(bookId: Long)
 }
 
 class ReaderMainFunctionsImpl @Inject constructor() : ReaderMainFunctions {
-    override suspend fun ReaderScreenViewModel.getChapter(chapterId: Long, source: Source) {
+    override suspend fun ReaderScreenViewModel.getChapter(
+        chapterId: Long,
+        source: Source,
+        onSuccess: () -> Unit,
+    ) {
         toggleLoading(true)
         toggleLocalLoaded(false)
         viewModelScope.launch {
@@ -61,13 +71,16 @@ class ReaderMainFunctionsImpl @Inject constructor() : ReaderMainFunctions {
                     !state.isRemoteLoading &&
                     !state.isLoading
                 ) {
-                    getReadingContentRemotely(chapter = chapter, source = source)
+                    getReadingContentRemotely(chapter = chapter, source = source) {
+
+                    }
                 }
                 updateLastReadTime(resultChapter)
                 updateChapterSliderIndex(getCurrentIndexOfChapter(resultChapter))
                 if (!initialized) {
                     initialized = true
                 }
+                onSuccess()
             } else {
                 toggleLoading(false)
                 toggleLocalLoaded(false)
@@ -121,7 +134,11 @@ class ReaderMainFunctionsImpl @Inject constructor() : ReaderMainFunctions {
         insertUseCases.insertBook(book)
     }
 
-    override fun ReaderScreenViewModel.getReadingContentRemotely(chapter: Chapter, source: Source) {
+    override fun ReaderScreenViewModel.getReadingContentRemotely(
+        chapter: Chapter,
+        source: Source,
+        onSuccess: () -> Unit,
+    ) {
         clearError()
         toggleLocalLoaded(false)
         toggleRemoteLoading(true)
@@ -144,7 +161,7 @@ class ReaderMainFunctionsImpl @Inject constructor() : ReaderMainFunctions {
                         toggleRemoteLoaded(true)
                         clearError()
                         getChapter(chapter.id, source = source)
-
+                        onSuccess()
                     } else {
                         showSnackBar(UiText.StringResource(R.string.something_is_wrong_with_this_chapter))
                     }

@@ -5,6 +5,8 @@ import android.content.pm.ActivityInfo
 import android.view.WindowManager
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.ireader.core.utils.UiText
 import org.ireader.core.utils.findComponentActivity
@@ -29,6 +31,8 @@ interface ReaderUiFunctions {
     fun ReaderScreenViewModel.getCurrentIndex(): Int
     fun ReaderScreenViewModel.getCurrentChapterByIndex(): Chapter
     fun ReaderScreenViewModel.reverseChapters()
+    fun ReaderScreenViewModel.bookmarkChapter()
+
 }
 
 
@@ -129,5 +133,16 @@ class ReaderUiFunctionsImpl @Inject constructor() : ReaderUiFunctions {
 
     override fun ReaderScreenViewModel.reverseChapters() {
         toggleIsAsc(!prefState.isAsc)
+    }
+
+    override fun ReaderScreenViewModel.bookmarkChapter() {
+        stateChapter?.let { chapter ->
+            viewModelScope.launch(Dispatchers.IO) {
+                stateChapter = chapter.copy(bookmark = !chapter.bookmark)
+                insertUseCases.insertChapter(chapter.copy(bookmark = !chapter.bookmark))
+
+            }
+
+        }
     }
 }

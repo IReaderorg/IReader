@@ -123,4 +123,12 @@ class TextReaderPrefUseCase @Inject constructor(
         return appPreferences.speechVoice().get()
     }
 
+    fun saveAutoNext(value: Boolean) {
+        appPreferences.readerAutoNext().set(value)
+    }
+
+    fun readAutoNext(): Boolean {
+        return appPreferences.readerAutoNext().get()
+    }
+
 }

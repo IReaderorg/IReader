@@ -31,12 +31,14 @@ class AppPreferences @Inject constructor(
         const val AUTO_SCROLL_MODE_OFFSET = "auto_scroll_mode_offset"
         const val SCROLL_INDICATOR_PADDING = "scroll_indicator_padding"
         const val SCROLL_INDICATOR_WIDTH = "scroll_indicator_width"
+        const val SELECTABLE_TEXT = "selectable_text"
 
 
         const val TEXT_READER_SPEECH_RATE = "text_reader_speech_rate"
         const val TEXT_READER_SPEECH_PITCH = "text_reader_speech_pitch"
         const val TEXT_READER_SPEECH_LANGUAGE = "text_reader_speech_language"
         const val TEXT_READER_SPEECH_VOICE = "text_reader_speech_voice"
+        const val TEXT_READER_AUTO_NEXT = "text_reader_auto_next"
 
         /** Services **/
         const val Last_UPDATE_CHECK = "last_update_check"
@@ -108,6 +110,10 @@ class AppPreferences @Inject constructor(
         return preferenceStore.getBoolean(SCROLL_MODE, true)
     }
 
+    fun selectableText(): Preference<Boolean> {
+        return preferenceStore.getBoolean(SELECTABLE_TEXT, true)
+    }
+
     fun autoScrollInterval(): Preference<Long> {
         return preferenceStore.getLong(AUTO_SCROLL_MODE_INTERVAL, 5000L)
     }
@@ -134,6 +140,10 @@ class AppPreferences @Inject constructor(
 
     fun speechRate(): Preference<Float> {
         return preferenceStore.getFloat(TEXT_READER_SPEECH_RATE, .8f)
+    }
+
+    fun readerAutoNext(): Preference<Boolean> {
+        return preferenceStore.getBoolean(TEXT_READER_AUTO_NEXT, false)
     }
 
     fun speechPitch(): Preference<Float> {
