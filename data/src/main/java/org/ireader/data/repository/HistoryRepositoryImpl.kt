@@ -4,7 +4,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapLatest
 import org.ireader.data.local.dao.HistoryDao
-import org.ireader.domain.feature_services.io.HistoryWithRelations
+import org.ireader.domain.feature_service.io.HistoryWithRelations
 import org.ireader.domain.models.entities.History
 import org.ireader.domain.repository.HistoryRepository
 

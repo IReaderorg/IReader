@@ -1,4 +1,4 @@
-package org.ireader.domain.feature_services.io.coil
+package org.ireader.domain.feature_service.io.coil
 
 import coil.map.Mapper
 import okhttp3.HttpUrl

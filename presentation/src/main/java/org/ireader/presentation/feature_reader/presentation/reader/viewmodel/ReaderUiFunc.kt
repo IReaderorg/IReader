@@ -27,10 +27,10 @@ interface ReaderUiFunctions {
     fun ReaderScreenViewModel.restoreSetting(context: Context, scrollState: LazyListState)
     fun ReaderScreenViewModel.toggleSettingMode(enable: Boolean, returnToMain: Boolean? = null)
     fun ReaderScreenViewModel.getCurrentIndexOfChapter(chapter: Chapter): Int
-    fun ReaderScreenViewModel.updateChapterSliderIndex(index: Int)
-    fun ReaderScreenViewModel.getCurrentIndex(): Int
+    fun ReaderScreenViewModel.updateChapterSliderIndex(index: Int, increase: Boolean? = null)
     fun ReaderScreenViewModel.getCurrentChapterByIndex(): Chapter
     fun ReaderScreenViewModel.reverseChapters()
+    fun ReaderScreenViewModel.getCurrentIndex(): Int
     fun ReaderScreenViewModel.bookmarkChapter()
 
 }
@@ -107,8 +107,13 @@ class ReaderUiFunctionsImpl @Inject constructor() : ReaderUiFunctions {
         return if (selectedChapter != -1) selectedChapter else 0
     }
 
-    override fun ReaderScreenViewModel.updateChapterSliderIndex(index: Int) {
-        currentChapterIndex = index
+
+    override fun ReaderScreenViewModel.updateChapterSliderIndex(index: Int, increase: Boolean?) {
+        currentChapterIndex = when (increase) {
+            true -> index + 1
+            false -> index - 1
+            else -> index
+        }
     }
 
     override fun ReaderScreenViewModel.getCurrentIndex(): Int {
@@ -127,7 +132,7 @@ class ReaderUiFunctionsImpl @Inject constructor() : ReaderUiFunctions {
         return try {
             state.stateChapters[getCurrentIndex()]
         } catch (e: Exception) {
-            state.stateChapters[0]
+            throw Exception()
         }
     }
 

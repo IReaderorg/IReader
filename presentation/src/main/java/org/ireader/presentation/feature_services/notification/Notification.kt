@@ -1,4 +1,4 @@
-package org.ireader.domain.feature_services.notification
+package org.ireader.presentation.feature_services.notification
 
 import android.content.Context
 import androidx.core.app.NotificationManagerCompat

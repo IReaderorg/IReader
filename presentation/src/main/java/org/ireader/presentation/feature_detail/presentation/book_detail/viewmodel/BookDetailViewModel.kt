@@ -17,8 +17,6 @@ import org.ireader.core.utils.UiText
 import org.ireader.core.utils.removeSameItemsFromList
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.catalog.interactor.GetLocalCatalog
-import org.ireader.domain.feature_services.downloaderService.DownloadService
-import org.ireader.domain.feature_services.downloaderService.DownloadService.Companion.DOWNLOADER_SERVICE_NAME
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.entities.updateBook
@@ -28,6 +26,8 @@ import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
+import org.ireader.presentation.feature_services.downloaderService.DownloadService
+import org.ireader.presentation.feature_services.downloaderService.DownloadService.Companion.DOWNLOADER_SERVICE_NAME
 import tachiyomi.source.Source
 import timber.log.Timber
 import java.util.*

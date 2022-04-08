@@ -18,7 +18,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.items
-import org.ireader.domain.feature_services.io.BookCover
+import org.ireader.domain.feature_service.io.BookCover
 import org.ireader.domain.models.entities.Book
 import org.ireader.presentation.presentation.components.BookImageComposable
 

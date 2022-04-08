@@ -52,10 +52,9 @@ android {
 
 
 dependencies {
-    implementation("androidx.core:core-splashscreen:1.0.0-beta01")
 
 
-    implementation(androidx.emoji)
+implementation(androidx.emoji)
     implementation(androidx.material)
 
     implementation(project(Modules.coreUi))

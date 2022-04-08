@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
-import org.ireader.domain.feature_services.io.HistoryWithRelations
+import org.ireader.domain.feature_service.io.HistoryWithRelations
 import org.ireader.presentation.feature_history.viewmodel.HistoryState
 import org.ireader.presentation.feature_sources.presentation.extension.composables.TextSection
 

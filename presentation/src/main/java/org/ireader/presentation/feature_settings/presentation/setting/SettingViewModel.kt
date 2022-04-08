@@ -12,7 +12,7 @@ import kotlinx.serialization.json.encodeToJsonElement
 import org.ireader.core.utils.convertLongToTime
 import org.ireader.core_ui.theme.OrientationMode
 import org.ireader.core_ui.viewmodel.BaseViewModel
-import org.ireader.domain.feature_services.io.LibraryCovers
+import org.ireader.domain.feature_service.io.LibraryCovers
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.use_cases.local.DeleteUseCase

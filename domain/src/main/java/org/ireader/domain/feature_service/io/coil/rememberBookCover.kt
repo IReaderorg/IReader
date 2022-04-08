@@ -6,12 +6,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.ireader.domain.feature_services.io.coil
+package org.ireader.domain.feature_service.io.coil
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import org.ireader.domain.feature_services.io.BookCover
-import org.ireader.domain.feature_services.io.HistoryWithRelations
+import org.ireader.domain.feature_service.io.BookCover
+import org.ireader.domain.feature_service.io.HistoryWithRelations
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.UpdateWithInfo
 

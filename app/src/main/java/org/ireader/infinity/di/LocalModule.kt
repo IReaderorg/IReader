@@ -17,7 +17,7 @@ import org.ireader.data.local.MIGRATION_8_9
 import org.ireader.data.local.dao.*
 import org.ireader.data.repository.DownloadRepositoryImpl
 import org.ireader.data.repository.UpdatesRepositoryImpl
-import org.ireader.domain.feature_services.io.LibraryCovers
+import org.ireader.domain.feature_service.io.LibraryCovers
 import org.ireader.domain.repository.DownloadRepository
 import org.ireader.domain.repository.UpdatesRepository
 import tachiyomi.core.prefs.PreferenceStore

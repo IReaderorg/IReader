@@ -1,7 +1,7 @@
 package org.ireader.data.local.dao
 
 import androidx.room.*
-import org.ireader.domain.feature_services.io.HistoryWithRelations
+import org.ireader.domain.feature_service.io.HistoryWithRelations
 import org.ireader.domain.models.entities.History
 
 @Dao

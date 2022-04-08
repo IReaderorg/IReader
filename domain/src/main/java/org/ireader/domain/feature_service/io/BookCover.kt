@@ -1,4 +1,4 @@
-package org.ireader.domain.feature_services.io
+package org.ireader.domain.feature_service.io
 
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.UpdateWithInfo

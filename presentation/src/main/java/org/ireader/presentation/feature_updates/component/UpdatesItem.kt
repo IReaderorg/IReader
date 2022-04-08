@@ -24,7 +24,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.ireader.core_ui.modifier.selectedBackground
-import org.ireader.domain.feature_services.io.coil.rememberBookCover
+import org.ireader.domain.feature_service.io.coil.rememberBookCover
 import org.ireader.domain.models.entities.UpdateWithInfo
 import org.ireader.presentation.feature_history.*
 

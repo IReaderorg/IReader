@@ -1,7 +1,7 @@
 package org.ireader.domain.repository
 
 import kotlinx.coroutines.flow.Flow
-import org.ireader.domain.feature_services.io.HistoryWithRelations
+import org.ireader.domain.feature_service.io.HistoryWithRelations
 import org.ireader.domain.models.entities.History
 
 interface HistoryRepository {

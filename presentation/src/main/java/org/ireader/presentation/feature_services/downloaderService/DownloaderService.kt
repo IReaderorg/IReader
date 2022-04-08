@@ -1,4 +1,4 @@
-package org.ireader.domain.feature_services.downloaderService
+package org.ireader.presentation.feature_services.downloaderService
 
 import android.content.Context
 import androidx.core.app.NotificationCompat
@@ -14,12 +14,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import org.ireader.core.R
 import org.ireader.domain.catalog.service.CatalogStore
-import org.ireader.domain.feature_services.notification.DefaultNotificationHelper
-import org.ireader.domain.feature_services.notification.Notifications
-import org.ireader.domain.feature_services.notification.Notifications.CHANNEL_DOWNLOADER_PROGRESS
-import org.ireader.domain.feature_services.notification.Notifications.ID_DOWNLOAD_CHAPTER_COMPLETE
-import org.ireader.domain.feature_services.notification.Notifications.ID_DOWNLOAD_CHAPTER_ERROR
-import org.ireader.domain.feature_services.notification.Notifications.ID_DOWNLOAD_CHAPTER_PROGRESS
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.entities.SavedDownload
 import org.ireader.domain.repository.LocalBookRepository
@@ -27,6 +21,12 @@ import org.ireader.domain.repository.LocalChapterRepository
 import org.ireader.domain.use_cases.download.DownloadUseCases
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
+import org.ireader.presentation.feature_services.notification.DefaultNotificationHelper
+import org.ireader.presentation.feature_services.notification.Notifications
+import org.ireader.presentation.feature_services.notification.Notifications.CHANNEL_DOWNLOADER_PROGRESS
+import org.ireader.presentation.feature_services.notification.Notifications.ID_DOWNLOAD_CHAPTER_COMPLETE
+import org.ireader.presentation.feature_services.notification.Notifications.ID_DOWNLOAD_CHAPTER_ERROR
+import org.ireader.presentation.feature_services.notification.Notifications.ID_DOWNLOAD_CHAPTER_PROGRESS
 import timber.log.Timber
 
 

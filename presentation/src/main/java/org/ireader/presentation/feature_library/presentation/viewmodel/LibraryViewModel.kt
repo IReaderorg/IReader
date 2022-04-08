@@ -10,9 +10,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.ireader.core_ui.viewmodel.BaseViewModel
-import org.ireader.domain.feature_services.LibraryUpdatesService
-import org.ireader.domain.feature_services.downloaderService.DownloadService
-import org.ireader.domain.feature_services.downloaderService.DownloadService.Companion.DOWNLOADER_BOOKS_IDS
 import org.ireader.domain.models.DisplayMode
 import org.ireader.domain.models.FilterType
 import org.ireader.domain.models.SortType
@@ -25,6 +22,9 @@ import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.preferences.reader_preferences.LibraryLayoutTypeUseCase
 import org.ireader.domain.use_cases.preferences.reader_preferences.SortersDescUseCase
 import org.ireader.domain.use_cases.preferences.reader_preferences.SortersUseCase
+import org.ireader.presentation.feature_services.LibraryUpdatesService
+import org.ireader.presentation.feature_services.downloaderService.DownloadService
+import org.ireader.presentation.feature_services.downloaderService.DownloadService.Companion.DOWNLOADER_BOOKS_IDS
 import javax.inject.Inject
 
 

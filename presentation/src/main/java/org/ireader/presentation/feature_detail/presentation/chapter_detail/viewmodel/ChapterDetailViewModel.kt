@@ -15,14 +15,14 @@ import kotlinx.coroutines.launch
 import org.ireader.core.R
 import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
-import org.ireader.domain.feature_services.downloaderService.DownloadService
-import org.ireader.domain.feature_services.downloaderService.DownloadService.Companion.DOWNLOADER_Chapters_IDS
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
+import org.ireader.presentation.feature_services.downloaderService.DownloadService
+import org.ireader.presentation.feature_services.downloaderService.DownloadService.Companion.DOWNLOADER_Chapters_IDS
 import javax.inject.Inject
 
 
@@ -78,6 +78,18 @@ class ChapterDetailViewModel @Inject constructor(
         }
 
         //  lastRead = getChapterUseCase.findLastReadChapter(book.id)?.id
+    }
+
+    fun getLastChapterIndex(): Int {
+        val index = chapters.indexOfFirst { it.id == lastRead }
+        return when (index) {
+            -1 -> {
+                throw Exception("chapter not found")
+            }
+            else -> {
+                index
+            }
+        }
     }
 
     fun reverseChapterInDB() {

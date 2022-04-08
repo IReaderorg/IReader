@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import org.ireader.core.utils.copyToClipboard
-import org.ireader.domain.feature_services.io.BookCover
+import org.ireader.domain.feature_service.io.BookCover
 import org.ireader.domain.models.entities.Book
 import org.ireader.presentation.feature_detail.presentation.book_detail.components.BookSummary
 import org.ireader.presentation.presentation.components.BookImageComposable

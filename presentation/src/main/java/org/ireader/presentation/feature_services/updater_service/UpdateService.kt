@@ -1,4 +1,4 @@
-package org.ireader.domain.feature_services.updater_service
+package org.ireader.presentation.feature_services.updater_service
 
 import android.app.PendingIntent
 import android.content.Context
@@ -13,12 +13,12 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import org.ireader.core.BuildConfig
 import org.ireader.domain.R
-import org.ireader.domain.feature_services.notification.Notifications.CHANNEL_APP_UPDATE
-import org.ireader.domain.feature_services.notification.Notifications.ID_APP_UPDATER
-import org.ireader.domain.feature_services.updater_service.models.Release
-import org.ireader.domain.feature_services.updater_service.models.Version
 import org.ireader.domain.use_cases.preferences.services.LastUpdateTime
 import org.ireader.infinity.feature_services.flags
+import org.ireader.presentation.feature_services.notification.Notifications.CHANNEL_APP_UPDATE
+import org.ireader.presentation.feature_services.notification.Notifications.ID_APP_UPDATER
+import org.ireader.presentation.feature_services.updater_service.models.Release
+import org.ireader.presentation.feature_services.updater_service.models.Version
 import java.util.*
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration

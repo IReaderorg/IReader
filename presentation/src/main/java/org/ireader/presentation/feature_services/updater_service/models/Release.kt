@@ -1,4 +1,4 @@
-package org.ireader.domain.feature_services.updater_service.models
+package org.ireader.presentation.feature_services.updater_service.models
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass

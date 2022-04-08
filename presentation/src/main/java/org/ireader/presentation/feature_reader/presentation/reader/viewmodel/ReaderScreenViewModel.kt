@@ -2,10 +2,10 @@ package org.ireader.presentation.feature_reader.presentation.reader.viewmodel
 
 
 import android.content.Context
-import android.support.v4.media.session.MediaSessionCompat
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.work.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -13,8 +13,6 @@ import org.ireader.core.R
 import org.ireader.core.utils.UiText
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.catalog.service.CatalogStore
-import org.ireader.domain.feature_services.notification.DefaultNotificationHelper
-import org.ireader.domain.feature_services.notification.NotificationStates
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.domain.use_cases.history.HistoryUseCase
@@ -23,6 +21,14 @@ import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.preferences.reader_preferences.ReaderPrefUseCases
 import org.ireader.domain.use_cases.preferences.reader_preferences.TextReaderPrefUseCase
 import org.ireader.domain.use_cases.remote.RemoteUseCases
+import org.ireader.presentation.feature_services.notification.DefaultNotificationHelper
+import org.ireader.presentation.feature_services.notification.NotificationStates
+import org.ireader.presentation.feature_ttl.TTSService
+import org.ireader.presentation.feature_ttl.TTSService.Companion.COMMAND
+import org.ireader.presentation.feature_ttl.TTSService.Companion.TTS_BOOK_ID
+import org.ireader.presentation.feature_ttl.TTSService.Companion.TTS_Chapter_ID
+import org.ireader.presentation.feature_ttl.TTSState
+import org.ireader.presentation.feature_ttl.TTSStateImpl
 import tachiyomi.source.Source
 import javax.inject.Inject
 
@@ -39,7 +45,6 @@ class ReaderScreenViewModel @Inject constructor(
     val prefState: ReaderScreenPreferencesStateImpl,
     val state: ReaderScreenStateImpl,
     val textReaderManager: TextReaderManager,
-    val speakerState: TextReaderScreenStateImpl,
     val prefFunc: ReaderPrefFunctionsImpl,
     val uiFunc: ReaderUiFunctionsImpl,
     val mainFunc: ReaderMainFunctionsImpl,
@@ -47,44 +52,51 @@ class ReaderScreenViewModel @Inject constructor(
     val savedStateHandle: SavedStateHandle,
     val defaultNotificationHelper: DefaultNotificationHelper,
     val notificationStates: NotificationStates,
+    val ttsState: TTSStateImpl,
 ) : BaseViewModel(),
     ReaderScreenPreferencesState by prefState,
     ReaderScreenState by state,
     ReaderPrefFunctions by prefFunc,
     ReaderUiFunctions by uiFunc,
     ReaderMainFunctions by mainFunc,
-    TextReaderScreenState by speakerState {
+    TTSState by ttsState {
 
 
-    fun mediaSessionCompat(context: Context) =
-        MediaSessionCompat(context, "mediaPlayer", null, null)
 
     init {
 
         val sourceId = savedStateHandle.get<Long>(NavigationArgs.sourceId.name)
         val chapterId = savedStateHandle.get<Long>(NavigationArgs.chapterId.name)
         val bookId = savedStateHandle.get<Long>(NavigationArgs.bookId.name)
-        if (bookId != null && chapterId != null && sourceId != null) {
-            val source = catalogStore.get(sourceId)?.source
-            if (source != null) {
-                this.source = source
-                viewModelScope.launch {
-                    getLocalBookById(bookId, chapterId, source = source)
-                    readPreferences()
+        if (ttsState.ttsChapter != null && ttsState.ttsBook?.id == bookId) {
+            ttsState.voiceMode = true
+            state.stateChapter = ttsChapter
+            state.book = ttsBook
+            state.stateChapters = ttsChapters
+            stateChapter?.let { updateLastReadTime(it) }
+        } else {
+            if (bookId != null && chapterId != null && sourceId != null) {
+                val source = catalogStore.get(sourceId)?.source
+                if (source != null) {
+                    ttsState.ttsSource = source
+                    viewModelScope.launch {
+                        getLocalBookById(bookId, chapterId, source = source)
+                        readPreferences()
+                    }
+
+
+                } else {
+                    viewModelScope.launch {
+                        showSnackBar(UiText.StringResource(org.ireader.core.R.string.the_source_is_not_found))
+                    }
                 }
-
-
-
             } else {
                 viewModelScope.launch {
-                    showSnackBar(UiText.StringResource(org.ireader.core.R.string.the_source_is_not_found))
+                    showSnackBar(UiText.StringResource(org.ireader.core.R.string.something_is_wrong_with_this_book))
                 }
             }
-        } else {
-            viewModelScope.launch {
-                showSnackBar(UiText.StringResource(org.ireader.core.R.string.something_is_wrong_with_this_book))
-            }
         }
+
     }
 
 
@@ -112,22 +124,46 @@ class ReaderScreenViewModel @Inject constructor(
     var getChapterJob: Job? = null
 
 
+    lateinit var ttsWork: OneTimeWorkRequest
+    fun runTTSService(context: Context, command: Int = -1) {
+        ttsWork =
+            OneTimeWorkRequestBuilder<TTSService>().apply {
+                stateChapter?.let { chapter ->
+                    book?.let { book ->
+                        setInputData(
+                            Data.Builder().apply {
+                                putLong(TTS_Chapter_ID, chapter.id)
+                                putLong(TTS_BOOK_ID, book.id)
+                                putInt(COMMAND, command)
+                            }.build()
+                        )
 
+                    }
+                }
+                addTag(TTSService.TTS_SERVICE_NAME)
+
+            }.build()
+        WorkManager.getInstance(context).enqueueUniqueWork(
+            TTSService.TTS_SERVICE_NAME,
+            ExistingWorkPolicy.REPLACE,
+            ttsWork
+        )
+    }
 
     override fun onDestroy() {
         enable = false
         getChapterJob?.cancel()
         getContentJob?.cancel()
-        speaker?.shutdown()
+        // ttsStateImpl.tts.shutdown()
         super.onDestroy()
 
     }
 
 
     fun onNextVoice() {
-        speaker?.stop()
-        isPlaying = false
-        currentReadingParagraph = 0
+        ttsState.tts.stop()
+        ttsState.isPlaying = false
+        ttsState.currentReadingParagraph = 0
     }
 
     fun onNext(
@@ -138,7 +174,7 @@ class ReaderScreenViewModel @Inject constructor(
     ) {
         if (currentIndex < chapters.lastIndex) {
             uiFunc.apply {
-                updateChapterSliderIndex(currentIndex + 1)
+                updateChapterSliderIndex(currentIndex, true)
             }
             mainFunc.apply {
                 uiFunc.apply {

@@ -8,9 +8,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.catalog.interactor.GetLocalCatalog
-import org.ireader.domain.feature_services.LibraryUpdatesService
-import org.ireader.domain.feature_services.LibraryUpdatesService.Companion.LibraryUpdateTag
-import org.ireader.domain.feature_services.downloaderService.DownloadService
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.entities.UpdateWithInfo
 import org.ireader.domain.models.entities.UpdateWithInfo.Companion.toUpdate
@@ -20,6 +17,9 @@ import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import org.ireader.domain.utils.launchIO
+import org.ireader.presentation.feature_services.LibraryUpdatesService
+import org.ireader.presentation.feature_services.LibraryUpdatesService.Companion.LibraryUpdateTag
+import org.ireader.presentation.feature_services.downloaderService.DownloadService
 import javax.inject.Inject
 
 @HiltViewModel

@@ -1,6 +1,5 @@
 package org.ireader.presentation.feature_ttl
 
-import android.speech.tts.TextToSpeech
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.TweenSpec
 import androidx.compose.foundation.border
@@ -28,17 +27,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.NotificationManagerCompat
 import androidx.navigation.NavController
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.ireader.core.R
-import org.ireader.core.utils.toast
-import org.ireader.domain.feature_services.io.BookCover
-import org.ireader.domain.feature_services.notification.Notifications
+import org.ireader.domain.feature_service.io.BookCover
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.presentation.feature_reader.presentation.reader.ReaderScreenDrawer
 import org.ireader.presentation.feature_reader.presentation.reader.components.SettingItemComposable
 import org.ireader.presentation.feature_reader.presentation.reader.components.SettingItemToggleComposable
 import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.ReaderScreenViewModel
+import org.ireader.presentation.feature_services.notification.Notifications
 import org.ireader.presentation.presentation.Toolbar
 import org.ireader.presentation.presentation.components.BookImageComposable
 import org.ireader.presentation.presentation.components.showLoading
@@ -47,7 +44,6 @@ import org.ireader.presentation.presentation.reusable_composable.BigSizeTextComp
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.SuperSmallTextComposable
 import tachiyomi.source.Source
-import timber.log.Timber
 import java.math.RoundingMode
 
 
@@ -90,30 +86,45 @@ fun TTSScreen(
             }
         }
     }
-    LaunchedEffect(key1 = true) {
-        vm.apply {
-            if (speaker == null) {
-                speaker = TextToSpeech(context) { status ->
-                    isLoading = true
-                    if (status == TextToSpeech.ERROR) {
-                        context.toast("Text-to-Speech Not Available")
-                        isLoading = false
-                        return@TextToSpeech
-                    }
-                    isLoading = false
-                }
-            }
+
+    LaunchedEffect(key1 = vm.state.stateChapter, vm.state.book) {
+        vm.state.stateChapter?.let {
+            vm.ttsState.ttsChapter = it
+
+        }
+        vm.state.book?.let {
+            vm.ttsState.ttsBook = it
         }
     }
-    LaunchedEffect(key1 = vm.stateChapter, vm.isPlaying, vm.currentReadingParagraph) {
+
+    LaunchedEffect(key1 = vm.ttsState.ttsChapter,
+        vm.ttsState.isPlaying,
+        vm.ttsState.currentReadingParagraph) {
+        vm.stateChapter = vm.ttsState.ttsChapter
+//        vm.state.stateChapter?.let { chapter ->
+//            vm.state.book?.let { book ->
+//                val notification = vm.defaultNotificationHelper.basicPlayingTextReaderNotification(
+//                    chapter,
+//                    book,
+//                    vm.ttsState.isPlaying,
+//                    vm.ttsState.currentReadingParagraph,
+//                    vm.ttsState.mediaSession)
+//                NotificationManagerCompat.from(context)
+//                    .notify(Notifications.ID_TEXT_READER_PROGRESS, notification.build())
+//            }
+//
+//        }
+    }
+    LaunchedEffect(key1 = vm.state.stateChapter) {
+        vm.ttsState.ttsChapter = vm.state.stateChapter
         vm.state.stateChapter?.let { chapter ->
             vm.state.book?.let { book ->
                 val notification = vm.defaultNotificationHelper.basicPlayingTextReaderNotification(
                     chapter,
                     book,
-                    vm.isPlaying,
-                    vm.currentReadingParagraph,
-                    vm.mediaSessionCompat(context))
+                    vm.ttsState.isPlaying,
+                    vm.ttsState.currentReadingParagraph,
+                    vm.ttsState.mediaSession)
                 NotificationManagerCompat.from(context)
                     .notify(Notifications.ID_TEXT_READER_PROGRESS, notification.build())
             }
@@ -122,50 +133,49 @@ fun TTSScreen(
     }
 
 
-    LaunchedEffect(key1 = true) {
-        vm.notificationStates.mediaPlayerNotification.collectLatest {
-            Timber.e(it.toString())
-            when (it) {
-                1 -> {
-                    onPrev()
-                }
-                2 -> {
-                    onPrevPar()
-                }
-                3 -> {
-                    onPlay()
-                    chapter?.let {
-                        vm.book?.let { book ->
-//                            val notification = vm.defaultNotificationHelper.basicPlayingTextReaderNotification(
-//                                        chapter,
-//                                        book,
-//                                        !vm.isPlaying,
-//                                        vm.currentReadingParagraph,
-//                                        vm.mediaSessionCompat(context))
+//    LaunchedEffect(key1 = true) {
+//        vm.notificationStates.mediaPlayerNotification.collectLatest {
+//            when (it) {
+//                1 -> {
+//                    onPrev()
+//                }
+//                2 -> {
+//                    onPrevPar()
+//                }
+//                3 -> {
+//                    onPlay()
+//                    chapter?.let {
+//                        vm.ttsBook?.let { book ->
+////                            val notification = vm.defaultNotificationHelper.basicPlayingTextReaderNotification(
+////                                        chapter,
+////                                        book,
+////                                        !vm.isPlaying,
+////                                        vm.currentReadingParagraph,
+////                                        vm.mediaSessionCompat(context))
+////
+////
+////                            NotificationManagerCompat.from(context).apply {
+////                                notify(Notifications.ID_TEXT_READER_PROGRESS, notification.build())
+////                            }
+//                        }
 //
+//                    }
 //
-//                            NotificationManagerCompat.from(context).apply {
-//                                notify(Notifications.ID_TEXT_READER_PROGRESS, notification.build())
-//                            }
-                        }
-
-                    }
-
-                }
-                4 -> {
-                    onNextPar()
-                }
-                5 -> {
-                    onNext()
-                }
-                6 -> {
-                    NotificationManagerCompat.from(context).apply {
-                        cancel(Notifications.ID_TEXT_READER_PROGRESS)
-                    }
-                }
-            }
-        }
-    }
+//                }
+//                4 -> {
+//                    onNextPar()
+//                }
+//                5 -> {
+//                    onNext()
+//                }
+//                6 -> {
+//                    NotificationManagerCompat.from(context).apply {
+//                        cancel(Notifications.ID_TEXT_READER_PROGRESS)
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     ModalBottomSheetLayout(
         modifier = Modifier.systemBarsPadding(),
@@ -460,7 +470,7 @@ private fun TTLScreenPlay(
                     .border(1.dp, MaterialTheme.colors.onBackground.copy(.4f), CircleShape),
                     contentAlignment = Alignment.Center) {
                     when {
-                        vm.isLoading || vm.isRemoteLoading -> {
+                        vm.ttsIsLoading || vm.isRemoteLoading -> {
                             showLoading()
                         }
                         vm.isPlaying -> {

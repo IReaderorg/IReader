@@ -36,7 +36,7 @@ object BookDetailScreenSpec : ScreenSpec {
 
     override val deepLinks: List<NavDeepLink> = listOf(
         navDeepLink {
-            uriPattern = "ireader/book_detail_route/{bookId}/{sourceId}"
+            uriPattern = "https://www.ireader.org/book_detail_route/{bookId}/{sourceId}"
             NavigationArgs.bookId
             NavigationArgs.sourceId
         }

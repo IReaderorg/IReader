@@ -3,7 +3,7 @@ plugins {
     id("kotlin-android")
     id("kotlin-kapt")
     id("kotlinx-serialization")
-
+    id("dagger.hilt.android.plugin")
 }
 
 android {
@@ -23,6 +23,7 @@ android {
 }
 
 dependencies {
+    implementation("androidx.core:core-splashscreen:1.0.0-beta02")
     implementation(project(Modules.domain))
     implementation(project(Modules.core))
     implementation(project(Modules.coreUi))

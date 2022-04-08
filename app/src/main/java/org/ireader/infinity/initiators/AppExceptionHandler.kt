@@ -55,9 +55,9 @@ class AppExceptionHandler(
     }
 
 
-    override fun uncaughtException(t: Thread?, e: Throwable) {
+    override fun uncaughtException(t: Thread, e: Throwable) {
         Timber.e(e)
-
+        crashlyticsHandler.uncaughtException(t, e)
         lastStartedActivity?.let { activity ->
             val isRestarted = activity.intent
                 .getBooleanExtra(RESTARTED, false)

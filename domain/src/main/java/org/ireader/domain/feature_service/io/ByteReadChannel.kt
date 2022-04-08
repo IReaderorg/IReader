@@ -1,4 +1,4 @@
-package org.ireader.domain.feature_services.io
+package org.ireader.domain.feature_service.io
 
 import io.ktor.utils.io.*
 import kotlinx.coroutines.Dispatchers

@@ -1,7 +1,7 @@
 package org.ireader.infinity.initiators
 
 import android.app.Application
-import org.ireader.domain.feature_services.notification.Notifications
+import org.ireader.presentation.feature_services.notification.Notifications
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton

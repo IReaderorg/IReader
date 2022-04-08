@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
-import org.ireader.domain.feature_services.io.BookCover
+import org.ireader.domain.feature_service.io.BookCover
 import org.ireader.presentation.R
 
 @OptIn(ExperimentalCoilApi::class)

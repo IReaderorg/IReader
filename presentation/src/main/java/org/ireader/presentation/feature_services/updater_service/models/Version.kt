@@ -1,4 +1,4 @@
-package org.ireader.domain.feature_services.updater_service.models
+package org.ireader.presentation.feature_services.updater_service.models
 
 data class Version(
     val version: String,

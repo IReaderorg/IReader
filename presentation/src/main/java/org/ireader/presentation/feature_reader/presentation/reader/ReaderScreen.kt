@@ -44,7 +44,7 @@ fun ReadingScreen(
     scrollState: LazyListState,
     drawerScrollState: LazyListState,
     onNext: () -> Unit,
-    onPrev: () -> Unit,
+    onPrev: (scrollToEnd: Boolean) -> Unit,
     onChapter: (Chapter) -> Unit,
     onSliderFinished: () -> Unit,
     onSliderChange: (index: Float) -> Unit,
@@ -72,14 +72,16 @@ fun ReadingScreen(
     LaunchedEffect(key1 = scaffoldState.drawerState.targetValue) {
         if (chapter != null && scaffoldState.drawerState.targetValue == DrawerValue.Open && vm.stateChapters.isNotEmpty()) {
             vm.uiFunc.apply {
-                drawerScrollState.scrollToItem(vm.getCurrentIndexOfChapter(chapter))
+                drawerScrollState.scrollToItem(vm.getCurrentIndexOfChapter(chapter),
+                    -drawerScrollState.layoutInfo.viewportEndOffset / 2)
             }
         }
     }
     LaunchedEffect(key1 = vm.currentChapterIndex) {
         val index = vm.currentChapterIndex
         if (index != -1) {
-            drawerScrollState.scrollToItem(vm.currentChapterIndex, -500)
+            drawerScrollState.scrollToItem(vm.currentChapterIndex,
+                -drawerScrollState.layoutInfo.viewportEndOffset / 2)
         }
     }
     LaunchedEffect(key1 = vm.autoScrollMode) {
@@ -242,7 +244,7 @@ fun ReadingScreen(
                                         onNext()
                                     },
                                     onPrev = {
-                                        onPrev()
+                                        onPrev(false)
                                     },
                                     onSliderChange = { onSliderChange(it) },
                                     onSliderFinished = { onSliderFinished() },
@@ -299,7 +301,7 @@ fun ReadingScreen(
                         chapter = chapter,
                         onNext = onNext,
                         swipeState = swipeState,
-                        onPrev = onPrev,
+                        onPrev = { onPrev(true) },
                         scrollState = scrollState,
                         modalState = modalState
                     )

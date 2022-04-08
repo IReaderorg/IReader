@@ -11,7 +11,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.ireader.domain.feature_services.io.BookCover
+import org.ireader.domain.feature_service.io.BookCover
 import org.ireader.domain.models.entities.Book
 import org.ireader.presentation.presentation.components.BookImageComposable
 

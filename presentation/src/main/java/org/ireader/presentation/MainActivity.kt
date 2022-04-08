@@ -1,4 +1,4 @@
-package org.ireader.infinity.presentation
+package org.ireader.presentation
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -10,6 +10,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.scopes.ActivityScoped
+import org.ireader.infinity.presentation.ScreenContent
 import org.ireader.presentation.ui.AppTheme
 
 

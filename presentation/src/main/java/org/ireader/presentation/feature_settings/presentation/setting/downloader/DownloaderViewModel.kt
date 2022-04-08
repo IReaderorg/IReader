@@ -20,13 +20,13 @@ import kotlinx.coroutines.launch
 import org.ireader.core.utils.Constants
 import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
-import org.ireader.domain.feature_services.downloaderService.DownloadService
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.entities.SavedDownload
 import org.ireader.domain.use_cases.download.DownloadUseCases
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
+import org.ireader.presentation.feature_services.downloaderService.DownloadService
 import javax.inject.Inject
 
 

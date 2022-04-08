@@ -14,7 +14,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import coil.compose.rememberImagePainter
-import org.ireader.domain.feature_services.io.BookCover
+import org.ireader.domain.feature_service.io.BookCover
 
 @Composable
 fun BookListItem(

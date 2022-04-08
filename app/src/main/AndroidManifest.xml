@@ -42,7 +42,7 @@
         android:theme="@style/Theme.ISplash"
         android:usesCleartextTraffic="true">
         <activity
-            android:name="org.ireader.infinity.presentation.MainActivity"
+            android:name="org.ireader.presentation.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.ISplash"
             android:windowSoftInputMode="adjustResize">
@@ -54,7 +54,7 @@
             </intent-filter>
             <intent-filter>
                 <data
-                    android:host="ireader"
+                    android:host="www.ireader.org"
                     android:scheme="https" />
             </intent-filter>
             <intent-filter>
@@ -81,21 +81,8 @@
                 tools:node="remove" />
         </provider>
         <receiver
-            android:name="org.ireader.domain.feature_services.notification.TextReaderBroadcastReceiver"
+            android:name="org.ireader.presentation.feature_services.notification.TextReaderBroadcastReceiver"
             android:exported="false" />
-        <!--        <provider-->
-        <!--            android:name="androidx.startup.InitializationProvider"-->
-        <!--            android:authorities="${applicationId}.androidx-startup"-->
-        <!--            tools:node="remove" />-->
-        <!--        <provider-->
-        <!--            android:name="androidx.startup.InitializationProvider"-->
-        <!--            android:authorities="${applicationId}.androidx-startup"-->
-        <!--            android:exported="false"-->
-        <!--            tools:node="merge">-->
-        <!--            <meta-data-->
-        <!--                android:name="androidx.emoji2.text.EmojiCompatInitializer"-->
-        <!--                tools:node="remove" />-->
-        <!--        </provider>-->
     </application>
 
 </manifest>

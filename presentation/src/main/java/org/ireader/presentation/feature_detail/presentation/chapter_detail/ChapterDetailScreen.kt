@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
@@ -32,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import kotlinx.coroutines.launch
 import org.ireader.core.utils.UiText
 import org.ireader.core_ui.ui.EmptyScreen
 import org.ireader.core_ui.ui.LoadingScreen
@@ -65,6 +67,7 @@ fun ChapterDetailScreen(
             vm.getLastReadChapter(book)
         }
     }
+    val scope = rememberCoroutineScope()
     Scaffold(
         modifier = Modifier.systemBarsPadding(),
         topBar = {
@@ -107,7 +110,24 @@ fun ChapterDetailScreen(
                     MidSizeTextComposable(text = "Reverse Chapters in DB")
                 }
             }
-        }
+        },
+        floatingActionButtonPosition = FabPosition.End,
+        floatingActionButton = {
+            FloatingActionButton(onClick = {
+                scope.launch {
+                    try {
+
+                        scrollState.scrollToItem(vm.getLastChapterIndex(),
+                            -scrollState.layoutInfo.viewportEndOffset / 2)
+
+                    } catch (e: Exception) {
+
+                    }
+                }
+            }) {
+                Icon(Icons.Filled.Map, "", tint = MaterialTheme.colors.onSecondary)
+            }
+        },
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column {

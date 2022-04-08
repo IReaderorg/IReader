@@ -28,7 +28,7 @@ data class Chapter(
 
     val isRecognizedNumber get() = number >= 0
     fun isChapterNotEmpty(): Boolean {
-        return content.joinToString().length > 10
+        return content.joinToString().length > 1
     }
 
 

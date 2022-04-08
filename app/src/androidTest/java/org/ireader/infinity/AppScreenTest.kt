@@ -9,7 +9,7 @@ import dagger.hilt.android.testing.UninstallModules
 import org.ireader.infinity.di.AppModule
 import org.ireader.infinity.di.LocalModule
 import org.ireader.infinity.di.NetworkModule
-import org.ireader.infinity.presentation.MainActivity
+import org.ireader.presentation.MainActivity
 import org.ireader.presentation.ui.ReaderScreenSpec
 import org.junit.Before
 import org.junit.Rule

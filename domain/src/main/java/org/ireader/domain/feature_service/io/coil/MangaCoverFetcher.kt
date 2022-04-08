@@ -1,4 +1,4 @@
-package org.ireader.domain.feature_services.io.coil
+package org.ireader.domain.feature_service.io.coil
 
 import coil.bitmap.BitmapPool
 import coil.decode.DataSource
@@ -19,8 +19,8 @@ import okhttp3.Request
 import okio.buffer
 import okio.source
 import org.ireader.domain.catalog.interactor.GetLocalCatalog
-import org.ireader.domain.feature_services.io.BookCover
-import org.ireader.domain.feature_services.io.LibraryCovers
+import org.ireader.domain.feature_service.io.BookCover
+import org.ireader.domain.feature_service.io.LibraryCovers
 import tachiyomi.core.http.okhttp
 import tachiyomi.core.io.saveTo
 import tachiyomi.source.HttpSource

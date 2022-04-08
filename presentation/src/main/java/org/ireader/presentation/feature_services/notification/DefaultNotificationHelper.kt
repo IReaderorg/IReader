@@ -1,4 +1,4 @@
-package org.ireader.domain.feature_services.notification
+package org.ireader.presentation.feature_services.notification
 
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
@@ -12,18 +12,20 @@ import android.support.v4.media.session.PlaybackStateCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toUri
-import androidx.work.WorkManager
+import androidx.work.*
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.launch
 import org.ireader.core.R
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.infinity.feature_services.flags
+import org.ireader.presentation.MainActivity
+import org.ireader.presentation.feature_ttl.TTSService
+import timber.log.Timber
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -47,9 +49,9 @@ class DefaultNotificationHelper @Inject constructor(
     ): Intent {
         return Intent(
             Intent.ACTION_VIEW,
-            "ireader/book_detail_route/$bookId/$sourceId".toUri(),
+            "https://www.ireader.org/book_detail_route/$bookId/$sourceId".toUri(),
             applicationContext,
-            applicationContext::class.java
+            MainActivity::class.java
         )
     }
 
@@ -64,9 +66,9 @@ class DefaultNotificationHelper @Inject constructor(
 
     val openDownloadIntent = Intent(
         Intent.ACTION_VIEW,
-        "ireader/downloader_route".toUri(),
+        "www.ireader/downloader_route".toUri(),
         applicationContext,
-        applicationContext::class.java
+        MainActivity::class.java
     )
 
 
@@ -163,6 +165,21 @@ class DefaultNotificationHelper @Inject constructor(
         pendingIntentFlags
     )
 
+    fun openReaderScreenIntent(
+        chapter: Chapter,
+        book: Book,
+    ): PendingIntent = PendingIntent.getActivity(
+        applicationContext.applicationContext,
+        5,
+        Intent(
+            Intent.ACTION_VIEW,
+            "https://www.ireader.org/reader_screen_route/${book.id}/${chapter.id}/${book.sourceId}".toUri(),
+            applicationContext,
+            MainActivity::class.java
+        ),
+        flags
+    )
+
 
     suspend fun basicPlayingTextReaderNotification(
         chapter: Chapter,
@@ -176,6 +193,15 @@ class DefaultNotificationHelper @Inject constructor(
             setMetadata(MediaMetadataCompat.Builder().apply {
                 putText(MediaMetadata.METADATA_KEY_TITLE, chapter.title)
             }.build())
+            val stateBuilder = PlaybackStateCompat.Builder()
+            stateBuilder.addCustomAction(
+                PlaybackStateCompat.CustomAction.Builder(
+                    "PLAY",
+                    "Play",
+                    R.drawable.ic_baseline_play_arrow
+                ).build()
+            )
+            stateBuilder.setActions(PlaybackStateCompat.ACTION_PLAY_PAUSE)
             setPlaybackState(PlaybackStateCompat.Builder().apply {
                 setActions(PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_STOP or PlaybackStateCompat.ACTION_SKIP_TO_NEXT or PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)
 
@@ -191,6 +217,7 @@ class DefaultNotificationHelper @Inject constructor(
             setLargeIcon(applicationContext, book.cover)
             priority = NotificationCompat.PRIORITY_LOW
 
+            setContentIntent(openReaderScreenIntent(chapter, book))
             addAction(R.drawable.ic_baseline_skip_previous,
                 "Previous Chapter",
                 skipPrev)
@@ -230,15 +257,26 @@ class TextReaderBroadcastReceiver : BroadcastReceiver() {
     lateinit var state: NotificationStates
 
     val scope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
+    lateinit var ttsWork: OneTimeWorkRequest
+    override fun onReceive(context: Context, intent: Intent) {
+        intent.getIntExtra("PLAYER", -1).let { command ->
+            Timber.e("Command is : $command")
 
-    override fun onReceive(p0: Context?, intent: Intent?) {
-        intent?.getIntExtra("PLAYER", -1)?.let {
-            scope.launch {
-                state.mediaPlayerNotification.emit(it)
-            }
+            ttsWork = OneTimeWorkRequestBuilder<TTSService>().apply {
+                setInputData(
+                    Data.Builder().apply {
+                        putInt(TTSService.COMMAND, command)
+                    }.build()
+                )
+                addTag(TTSService.TTS_SERVICE_NAME)
+
+            }.build()
+            WorkManager.getInstance(context).enqueueUniqueWork(
+                TTSService.TTS_SERVICE_NAME,
+                ExistingWorkPolicy.REPLACE,
+                ttsWork
+            )
         }
-
-
     }
 
 }

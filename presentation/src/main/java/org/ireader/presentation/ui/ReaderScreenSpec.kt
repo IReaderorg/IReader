@@ -6,17 +6,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.app.NotificationManagerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NamedNavArgument
-import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavController
+import androidx.navigation.*
 import com.google.accompanist.pager.ExperimentalPagerApi
 import kotlinx.coroutines.launch
 import org.ireader.core.R
 import org.ireader.core.utils.UiText
 import org.ireader.core_ui.theme.TransparentStatusBar
-import org.ireader.domain.feature_services.notification.Notifications
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.presentation.feature_reader.presentation.reader.ReadingScreen
 import org.ireader.presentation.feature_reader.presentation.reader.reverse_swip_refresh.rememberSwipeRefreshState
@@ -42,6 +38,15 @@ object ReaderScreenSpec : ScreenSpec {
         return "reader_screen_route/$bookId/$chapterId/$sourceId"
     }
 
+    override val deepLinks: List<NavDeepLink> = listOf(
+        navDeepLink {
+            uriPattern =
+                "https://www.ireader.org/reader_screen_route/{bookId}/{chapterId}/{sourceId}"
+            NavigationArgs.bookId
+            NavigationArgs.chapterId
+            NavigationArgs.sourceId
+        }
+    )
 
     @OptIn(ExperimentalPagerApi::class, androidx.compose.animation.ExperimentalAnimationApi::class,
         androidx.compose.material.ExperimentalMaterialApi::class)
@@ -53,26 +58,39 @@ object ReaderScreenSpec : ScreenSpec {
     ) {
         val vm: ReaderScreenViewModel = hiltViewModel()
         val currentIndex = vm.currentChapterIndex
-        val source = vm.source
+        val source = vm.ttsSource
         val chapters = vm.stateChapters
         val chapter = vm.stateChapter
         val scope = rememberCoroutineScope()
         val scrollState = rememberLazyListState()
         val drawerScrollState = rememberLazyListState()
-        val swipeState = rememberSwipeRefreshState(isRefreshing = vm.isLoading)
+        val swipeState = rememberSwipeRefreshState(isRefreshing = vm.ttsIsLoading)
         val context = LocalContext.current
 
         DisposableEffect(key1 = true) {
             onDispose {
-                vm.speaker?.shutdown()
-                vm.mediaSessionCompat(context).release()
-                NotificationManagerCompat.from(context)
-                    .cancel(Notifications.ID_TEXT_READER_PROGRESS)
                 vm.uiFunc.apply {
                     vm.restoreSetting(context, scrollState)
                 }
             }
         }
+
+//        LaunchedEffect(key1 = vm.currentReadingParagraph == chapter?.content?.size) {
+//            if (!vm.isLoading && !vm.isRemoteLoading && vm.autoNextChapter) {
+//                vm.apply {
+//                    source?.let {
+//                        getChapter(getCurrentChapterByIndex().id,
+//                            source = source) {
+//                            if (chapter?.content?.isNotEmpty() == true && !ttsIsLoading && !isRemoteLoading) {
+//                                vm.runTTSService(context)
+//                            }
+//                        }
+//                    }
+//
+//                }
+//
+//            }
+//        }
 
 
         if (source != null) {
@@ -85,9 +103,12 @@ object ReaderScreenSpec : ScreenSpec {
                             if (vm.currentChapterIndex > 0) {
                                 vm.apply {
                                     currentChapterIndex -= 1
+                                    ttsCurrentChapterIndex = currentChapterIndex
                                     scope.launch {
                                         vm.getChapter(vm.getCurrentChapterByIndex().id,
-                                            source = source)
+                                            source = source) {
+                                            vm.runTTSService(context)
+                                        }
                                         scrollState.animateScrollToItem(0, 0)
                                     }
                                 }
@@ -98,40 +119,18 @@ object ReaderScreenSpec : ScreenSpec {
                             }
                         },
                         onPlay = {
-                            when {
-                                vm.isPlaying -> {
-                                    vm.speaker?.stop()
-                                }
-                                else -> {
-                                    vm.textReaderManager.apply {
-                                        vm.readText(context, vm.mediaSessionCompat(context))
-                                    }
-                                }
-                            }
-                            scope.launch {
-                                vm.state.stateChapter?.let { chapter ->
-                                    vm.state.book?.let { book ->
-                                        val notification =
-                                            vm.defaultNotificationHelper.basicPlayingTextReaderNotification(
-                                                chapter,
-                                                book,
-                                                vm.isPlaying,
-                                                vm.currentReadingParagraph,
-                                                vm.mediaSessionCompat(context))
-                                        NotificationManagerCompat.from(context)
-                                            .notify(Notifications.ID_TEXT_READER_PROGRESS,
-                                                notification.build())
-                                    }
-                                }
-                            }
+                            vm.runTTSService(context)
                         },
                         onNext = {
                             if (currentIndex < chapters.lastIndex) {
                                 vm.apply {
                                     currentChapterIndex += 1
+                                    ttsCurrentChapterIndex = currentChapterIndex
                                     scope.launch {
                                         vm.getChapter(vm.getCurrentChapterByIndex().id,
-                                            source = source)
+                                            source = source) {
+                                            vm.runTTSService(context)
+                                        }
                                         scrollState.animateScrollToItem(0, 0)
                                     }
 
@@ -148,7 +147,9 @@ object ReaderScreenSpec : ScreenSpec {
                             scope.launch {
                                 vm.mainFunc.apply {
                                     vm.getChapter(ch.id,
-                                        source = source)
+                                        source = source) {
+                                        vm.runTTSService(context)
+                                    }
                                 }
 
                             }
@@ -164,11 +165,12 @@ object ReaderScreenSpec : ScreenSpec {
                         navController = navController,
                         onPrevPar = {
                             if (vm.currentReadingParagraph > 0) {
-                                vm.speaker?.stop()
+                                vm.ttsState.tts.stop()
                                 vm.currentReadingParagraph -= 1
                                 if (vm.isPlaying) {
                                     vm.textReaderManager.apply {
-                                        vm.readText(context, vm.mediaSessionCompat(context))
+                                        vm.runTTSService(context)
+                                        // vm.readText(context, vm.mediaSessionCompat(context))
                                     }
 
                                 }
@@ -177,11 +179,12 @@ object ReaderScreenSpec : ScreenSpec {
                         onNextPar = {
                             vm.stateChapter?.let { chapter ->
                                 if (vm.currentReadingParagraph < chapter.content.lastIndex) {
-                                    vm.speaker?.stop()
+                                    vm.ttsState.tts.stop()
                                     vm.currentReadingParagraph += 1
                                     if (vm.isPlaying) {
                                         vm.textReaderManager.apply {
-                                            vm.readText(context, vm.mediaSessionCompat(context))
+                                            vm.runTTSService(context)
+                                            //vm.readText(context, vm.mediaSessionCompat(context))
                                         }
 
                                     }
@@ -189,13 +192,14 @@ object ReaderScreenSpec : ScreenSpec {
                             }
                         },
                         onValueChange = {
-                            vm.speaker?.stop()
+                            vm.ttsState.tts.stop()
                             vm.currentReadingParagraph = it.toInt()
                         },
                         onValueChangeFinished = {
                             if (vm.isPlaying) {
                                 vm.textReaderManager.apply {
-                                    vm.readText(context, vm.mediaSessionCompat(context))
+                                    vm.runTTSService(context)
+                                    //vm.readText(context, vm.mediaSessionCompat(context))
                                 }
                             }
 
@@ -216,11 +220,12 @@ object ReaderScreenSpec : ScreenSpec {
                                 if (currentIndex < chapters.lastIndex) {
                                     vm.uiFunc.apply {
                                         vm.mainFunc.apply {
-                                            vm.updateChapterSliderIndex(currentIndex + 1)
+                                            vm.updateChapterSliderIndex(currentIndex, true)
                                             scope.launch {
                                                 vm.getChapter(vm.getCurrentChapterByIndex().id,
                                                     source = source)
-                                                scrollState.animateScrollToItem(0, 0)
+                                                //scrollState.animateScrollToItem(0, 0)
+                                                scrollState.scrollToItem(0, 0)
                                             }
                                         }
                                     }
@@ -232,15 +237,26 @@ object ReaderScreenSpec : ScreenSpec {
                                     }
                                 }
                             },
-                            onPrev = {
+                            onPrev = { scrollToEnd ->
                                 if (currentIndex > 0) {
                                     vm.uiFunc.apply {
                                         vm.mainFunc.apply {
-                                            vm.updateChapterSliderIndex(currentIndex - 1)
+                                            vm.updateChapterSliderIndex(currentIndex, false)
                                             scope.launch {
                                                 vm.getChapter(vm.getCurrentChapterByIndex().id,
                                                     source = source)
-                                                scrollState.animateScrollToItem(0, 0)
+                                                when (scrollToEnd) {
+                                                    true -> {
+                                                        if (chapter != null) {
+                                                            scrollState.scrollToItem(chapter.content.lastIndex,
+                                                                Int.MAX_VALUE)
+                                                        }
+                                                    }
+                                                    else -> {
+                                                        scrollState.scrollToItem(0, 0)
+                                                    }
+                                                }
+
                                             }
                                         }
                                     }

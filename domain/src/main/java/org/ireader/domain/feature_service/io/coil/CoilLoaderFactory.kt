@@ -1,4 +1,4 @@
-package org.ireader.domain.feature_services.io.coil
+package org.ireader.domain.feature_service.io.coil
 
 
 import android.app.Application
@@ -6,8 +6,7 @@ import coil.ImageLoader
 import coil.util.CoilUtils
 import org.ireader.domain.catalog.interactor.GetLocalCatalog
 import org.ireader.domain.catalog.service.CatalogStore
-import org.ireader.domain.feature_services.io.LibraryCovers
-import org.ireader.domain.feature_services.io.LibraryMangaFetcher
+import org.ireader.domain.feature_service.io.LibraryCovers
 import tachiyomi.core.http.HttpClients
 import tachiyomi.core.http.okhttp
 import javax.inject.Inject

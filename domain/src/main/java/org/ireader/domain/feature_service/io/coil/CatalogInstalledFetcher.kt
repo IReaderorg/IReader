@@ -1,4 +1,4 @@
-package org.ireader.domain.feature_services.io.coil
+package org.ireader.domain.feature_service.io.coil
 
 import android.app.Application
 import coil.bitmap.BitmapPool

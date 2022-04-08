@@ -230,7 +230,7 @@ fun AppTextField(
                 keyboardActions = keyboardActions,
                 singleLine = true,
                 textStyle = TextStyle(color = MaterialTheme.colors.onBackground),
-                cursorBrush = SolidColor(MaterialTheme.colors.primary)
+                cursorBrush = SolidColor(MaterialTheme.colors.primary),
             )
         } else if (mode == 1) {
             OutlinedTextField(

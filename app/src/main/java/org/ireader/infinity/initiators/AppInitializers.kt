@@ -8,6 +8,6 @@ class AppInitializers @Inject constructor(
     crashHandler: CrashHandler,
     timberInitializer: TimberInitializer,
     firebaseInitializer: FirebaseInitializer,
-    updateService: UpdateService,
+    updateServiceInitializer: UpdateServiceInitializer,
     catalogStoreInitializer: CatalogStoreInitializer,
 )
