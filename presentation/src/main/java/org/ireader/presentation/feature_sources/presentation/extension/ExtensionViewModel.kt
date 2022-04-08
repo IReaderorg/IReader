@@ -5,8 +5,6 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.ireader.core.utils.UiText
 import org.ireader.core_ui.viewmodel.BaseViewModel
@@ -56,17 +54,24 @@ class ExtensionViewModel @Inject constructor(
         }
 
         // Update catalogs whenever the query changes or there's a new update from the backend
-        snapshotFlow { state.allPinnedCatalogs.filteredByQuery(searchQuery) }
-            .onEach { state.pinnedCatalogs = it }
-            .launchIn(scope)
-        snapshotFlow { state.allUnpinnedCatalogs.filteredByQuery(searchQuery) }
-            .onEach { state.unpinnedCatalogs = it }
-            .launchIn(scope)
-        snapshotFlow {
-            state.allRemoteCatalogs.filteredByQuery(searchQuery).filteredByChoice(selectedLanguage)
+        viewModelScope.launch {
+            snapshotFlow { state.allPinnedCatalogs.filteredByQuery(searchQuery) }
+                .collect { state.pinnedCatalogs = it }
         }
-            .onEach { state.remoteCatalogs = it }
-            .launchIn(scope)
+        viewModelScope.launch {
+            snapshotFlow { state.allUnpinnedCatalogs.filteredByQuery(searchQuery) }
+                .collect { state.unpinnedCatalogs = it }
+
+
+        }
+        viewModelScope.launch {
+            snapshotFlow {
+                state.allRemoteCatalogs.filteredByQuery(searchQuery)
+                    .filteredByChoice(selectedLanguage)
+            }
+                .collect { state.remoteCatalogs = it }
+
+        }
 
     }
 
@@ -75,6 +80,7 @@ class ExtensionViewModel @Inject constructor(
             deleteAllExploredBook()
             convertExploredTOLibraryBooks()
             deleteNotInLibraryChapters()
+            // deleteUseCase.deleteAllRemoteKeys()
         }
     }
 

@@ -3,9 +3,7 @@ package org.ireader.presentation.feature_explore.presentation.browse.viewmodel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.ExperimentalPagingApi
 import androidx.paging.PagingData
-import androidx.paging.cachedIn
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -13,20 +11,27 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
-import org.ireader.core.utils.Constants
+import kotlinx.coroutines.withContext
+import org.ireader.core.DefaultPaginator
+import org.ireader.core.exceptions.EmptyQuery
+import org.ireader.core.exceptions.SourceNotFoundException
 import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
 import org.ireader.domain.R
 import org.ireader.domain.catalog.service.CatalogStore
 import org.ireader.domain.models.DisplayMode
-import org.ireader.domain.models.LayoutType
+import org.ireader.domain.models.RemoteKeys
 import org.ireader.domain.models.entities.Book
+import org.ireader.domain.models.entities.toBook
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.preferences.reader_preferences.BrowseLayoutTypeUseCase
 import org.ireader.domain.use_cases.remote.RemoteUseCases
+import org.ireader.domain.use_cases.remote.key.RemoteKeyUseCase
+import org.ireader.domain.utils.launchIO
 import tachiyomi.source.CatalogSource
 import tachiyomi.source.model.Filter
-import tachiyomi.source.model.Listing
+import tachiyomi.source.model.MangasPageInfo
+import timber.log.Timber
 import javax.inject.Inject
 
 
@@ -37,29 +42,35 @@ class ExploreViewModel @Inject constructor(
     private val deleteUseCase: DeleteUseCase,
     private val catalogStore: CatalogStore,
     private val browseLayoutTypeUseCase: BrowseLayoutTypeUseCase,
+    private val remoteKeyUseCase: RemoteKeyUseCase,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel(), ExploreState by state {
-
+    private val _books = MutableStateFlow<PagingData<Book>>(PagingData.empty())
+    val books = _books
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
+
 
     init {
         val sourceId = savedStateHandle.get<Long>("sourceId")
         val query = savedStateHandle.get<String>("query")
         val source =
             catalogStore.catalogs.find { it.source.id == sourceId }?.source
+        loadBooks()
         if (sourceId != null && source is CatalogSource) {
             state.source = source
             if (!query.isNullOrBlank()) {
                 toggleSearchMode(true)
                 searchQuery = query
-                getBooks(filters = listOf(Filter.Title().apply { this.value = query }),
-                    source = source)
+                loadItems()
+//                getBooks(filters = listOf(Filter.Title().apply { this.value = query }),
+//                    source = source)
             } else {
                 val listings = source.getListings()
                 if (listings.isNotEmpty()) {
-                    state.exploreType = source.getListings().first()
-                    getBooks(source = source, listing = source.getListings().first())
+                    state.stateListing = source.getListings().first()
+                    loadItems()
+                    //getBooks(source = source, listing = source.getListings().first())
                     readLayoutType()
                 } else {
                     viewModelScope.launch {
@@ -76,10 +87,6 @@ class ExploreViewModel @Inject constructor(
     }
 
 
-    private val _books = MutableStateFlow<PagingData<Book>>(PagingData.empty())
-    val books = _books
-
-
     fun onEvent(event: ExploreScreenEvents) {
         when (event) {
             is ExploreScreenEvents.OnLayoutTypeChnage -> {
@@ -94,28 +101,140 @@ class ExploreViewModel @Inject constructor(
         }
     }
 
-    private var getBooksJob: Job? = null
+    fun loadBooks() {
+        viewModelScope.launch {
+            remoteKeyUseCase.subScribeAllPagedExploreBooks().collect {
+                stateItems = it
+            }
 
-    @OptIn(ExperimentalPagingApi::class)
-    fun getBooks(
-        query: String? = null, listing: Listing? = null,
-        filters: List<Filter<*>>? = null, source: CatalogSource,
-    ) {
-        getBooksJob?.cancel()
-        getBooksJob = viewModelScope.launch(Dispatchers.Main) {
-            remoteUseCases.getRemoteBookByPaginationUseCase(
-                source,
-                listing,
-                query = query,
-                filters = filters,
-                pageSize = if (layout == LayoutType.GridLayout) 15 else 6,
-                maxSize = Constants.MAX_PAGE_SIZE
-            ).cachedIn(viewModelScope)
-                .collect { snapshot ->
-                    _books.value = snapshot
-                }
         }
     }
+
+    fun loadItems(reset: Boolean = false) {
+        getBooksJob?.cancel()
+        if (reset) {
+            page = 1
+        }
+        if (page == 1) {
+            viewModelScope.launchIO {
+
+                Timber.e("Init Started")
+                //val res  = remoteKeyUseCase.findDeleteAllExploredBook()
+                //deleteUseCase.deleteBooks(res)
+                withContext(Dispatchers.IO) {
+                    deleteUseCase.deleteAllExploreBook()
+                    deleteUseCase.deleteAllRemoteKeys()
+                }
+
+                Timber.e("Init Finished")
+            }
+        }
+        getBooksJob = viewModelScope.launch {
+            DefaultPaginator<Int, MangasPageInfo>(
+                initialKey = state.page,
+                onLoadUpdated = {
+                    isLoading = it
+                },
+                onRequest = { nextPage ->
+                    try {
+                        error = null
+
+                        Timber.e("Request was made; $nextPage")
+                        val query = searchQuery
+                        val filters = stateFilters
+                        val listing = stateListing
+                        val source = source
+                        if (source != null) {
+                            val result = if (searchQuery != null) {
+                                if (query != null && query.isNotBlank()) {
+                                    source.getMangaList(filters = listOf(Filter.Title()
+                                        .apply { this.value = query }), page = page)
+                                } else {
+                                    throw EmptyQuery()
+                                }
+                            } else if (filters != null) {
+                                source.getMangaList(filters = filters, page)
+                            } else {
+                                source.getMangaList(sort = listing, page)
+                            }
+                            Result.success(result)
+                        } else {
+                            throw SourceNotFoundException()
+                        }
+                    } catch (e: Exception) {
+                        Result.failure(e)
+                    }
+
+                },
+                getNextKey = {
+                    state.page + 1
+                },
+                onError = {
+                    endReached = true
+                    error = when (it) {
+                        is EmptyQuery -> UiText.StringResource(R.string.query_must_not_be_empty)
+                        is SourceNotFoundException -> UiText.StringResource(R.string.the_source_is_not_found)
+                        else -> it?.let { it1 -> UiText.ExceptionString(it1) }
+                    }
+                },
+                onSuccess = { items, newKey ->
+                    val keys = items.mangas.map { book ->
+                        RemoteKeys(
+                            title = book.title,
+                            prevPage = newKey - 1,
+                            nextPage = newKey + 1,
+                            sourceId = source?.id ?: 0
+                        )
+                    }
+                    remoteKeyUseCase.insertAllExploredBook(items.mangas.map {
+                        it.toBook(source?.id ?: 0,
+                            tableId = 1)
+                    })
+                    remoteKeyUseCase.insertAllRemoteKeys(keys)
+                    remoteKeyUseCase.findAllPagedExploreBooks()
+                    page = newKey
+                    endReached = !items.hasNextPage
+                },
+                onInit = {
+
+                }
+            ).loadNextItems()
+
+        }
+//        getBooksJob?.cancel()
+//        getBooksJob = viewModelScope.launch(Dispatchers.IO) {
+//            remoteUseCases.getRemoteBookByPaginationUseCase(
+//                source,
+//                listing,
+//                query = query,
+//                filters = filters,
+//            ).cachedIn(viewModelScope)
+//                .collect { snapshot ->
+//                    _books.value = snapshot
+//                }
+//        }
+    }
+
+    private var getBooksJob: Job? = null
+
+//    @OptIn(ExperimentalPagingApi::class)
+//    fun getBooks(
+//        query: String? = null, listing: Listing? = null,
+//        filters: List<Filter<*>>? = null, source: CatalogSource,
+//    ) {
+//        getBooksJob?.cancel()
+//        getBooksJob = viewModelScope.launch(Dispatchers.IO) {
+//            remoteUseCases.getRemoteBookByPaginationUseCase(
+//                source,
+//                listing,
+//                query = query,
+//                filters = filters,
+//            ).cachedIn(viewModelScope)
+//                .collect { snapshot ->
+//                    _books.value = snapshot
+//                }
+//        }
+//    }
 
     private fun onQueryChange(query: String) {
         state.searchQuery = query
@@ -126,9 +245,11 @@ class ExploreViewModel @Inject constructor(
 
         if (!inSearchMode && source != null) {
             exitSearchedMode()
-            getBooks(source = source,
-                filters = state.modifiedFilter,
-                listing = source.getListings().first())
+            searchQuery?.let { query ->
+                stateFilters = listOf(Filter.Title().apply { this.value = query })
+                loadItems()
+            }
+
         }
     }
 
@@ -137,7 +258,7 @@ class ExploreViewModel @Inject constructor(
         state.apply {
             searchQuery = ""
             isLoading = false
-            error = UiText.StringResource(R.string.no_error)
+            error = null
         }
     }
 

@@ -18,15 +18,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.paging.ExperimentalPagingApi
-import androidx.paging.LoadState
-import androidx.paging.compose.collectAsLazyPagingItems
 import kotlinx.coroutines.launch
 import org.ireader.domain.FetchType
 import org.ireader.domain.models.DisplayMode
 import org.ireader.domain.models.LayoutType
 import org.ireader.presentation.feature_explore.presentation.browse.viewmodel.ExploreViewModel
 import org.ireader.presentation.feature_library.presentation.components.LayoutComposable
-import org.ireader.presentation.presentation.components.handlePagingResult
+import org.ireader.presentation.presentation.components.showLoading
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.ErrorTextWithEmojis
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
@@ -35,6 +33,7 @@ import org.ireader.presentation.ui.BookDetailScreenSpec
 import org.ireader.presentation.ui.WebViewScreenSpec
 import tachiyomi.source.CatalogSource
 import tachiyomi.source.HttpSource
+import tachiyomi.source.Source
 import tachiyomi.source.model.Filter
 import tachiyomi.source.model.Listing
 
@@ -61,7 +60,7 @@ fun ExploreScreen(
     val scrollState = rememberLazyListState()
     val context = LocalContext.current
 
-    val books = vm.books.collectAsLazyPagingItems()
+    //val books = vm.books.collectAsLazyPagingItems()
 
     val gridState = rememberLazyGridState()
     val bottomSheetState =
@@ -89,26 +88,27 @@ fun ExploreScreen(
             when (result) {
                 SnackbarResult.ActionPerformed -> {
                     setShowSnackBar(false)
-                    books.retry()
+                    vm.loadItems()
+                    //books.retry()
                 }
             }
         }
     }
-    val error = when {
-        books.loadState.refresh is LoadState.Error -> books.loadState.refresh as LoadState.Error
-        books.loadState.prepend is LoadState.Error -> books.loadState.prepend as LoadState.Error
-        books.loadState.append is LoadState.Error -> books.loadState.append as LoadState.Error
-        else -> null
-    }
-    LaunchedEffect(key1 = error?.error != null) {
-        val error = error?.error?.localizedMessage
-        if (error != null && error.isNotBlank() && books.itemCount > 0) {
-            setShowSnackBar(true)
-            setSnackBarText(error)
 
-        }
-
-    }
+//    val error = when {
+//        books.loadState.refresh is LoadState.Error -> books.loadState.refresh as LoadState.Error
+//        books.loadState.prepend is LoadState.Error -> books.loadState.prepend as LoadState.Error
+//        books.loadState.append is LoadState.Error -> books.loadState.append as LoadState.Error
+//        else -> null
+//    }
+//    LaunchedEffect(key1 = vm.error != null) {
+//        val errors = vm.error
+//        if (errors != null && errors.asString(context).isNotBlank() && vm.stateItems.size > 0) {
+//            setShowSnackBar(true)
+//            setSnackBarText(errors.asString(context))
+//
+//        }
+//    }
     ModalBottomSheetLayout(
         modifier = Modifier.statusBarsPadding(),
         sheetState = bottomSheetState,
@@ -116,7 +116,10 @@ fun ExploreScreen(
             FilterBottomSheet(
                 onApply = {
                     val mFilters = vm.modifiedFilter.filterNot { it.isDefaultValue() }
-                    vm.getBooks(filters = mFilters, source = source)
+                    vm.stateFilters = mFilters
+                    vm.searchQuery = null
+                    vm.loadItems(true)
+                    //vm.getBooks(filters = mFilters, source = source)
                 },
                 filters = vm.modifiedFilter,
                 onReset = {
@@ -175,83 +178,74 @@ fun ExploreScreen(
                     }
                 )
             },
-        ) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                val result = handlePagingResult(books = books,
-                    onEmptyResult = {},
-                    onErrorResult = { error ->
-                        Column(
-                            modifier = modifier
-                                .fillMaxSize()
-                                .align(Alignment.Center)
-                                .padding(bottom = 30.dp),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                        ) {
-                            ErrorTextWithEmojis(
-                                error = error,
-                                modifier = Modifier
-                                    .padding(20.dp)
-                            )
-                            Row(Modifier
-                                .fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceEvenly,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Column(Modifier
-                                    .weight(.5f)
-                                    .wrapContentSize(Alignment.Center),
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    AppIconButton(imageVector = Icons.Default.Refresh,
-                                        title = "Retry",
-                                        onClick = { getBooks(null, null, emptyList()) })
-                                    SmallTextComposable(text = "Retry")
-                                }
-                                Column(Modifier
-                                    .weight(.5f)
-                                    .wrapContentSize(Alignment.Center),
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    if (source is HttpSource) {
-                                        AppIconButton(imageVector = Icons.Default.Public,
-                                            title = "Open in WebView",
-                                            onClick = {
-                                                navController.navigate(WebViewScreenSpec.buildRoute(
-                                                    sourceId = source.id,
-                                                    fetchType = FetchType.LatestFetchType.index,
-                                                    url = source.baseUrl
-                                                )
-                                                )
-                                            })
-                                    }
-                                    SmallTextComposable(text = "Open in WebView")
-                                }
+        ) { paddingValue ->
+            Box(modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValue)) {
+//                val result = handlePagingResult(books = books,
+//                    onEmptyResult = {},
+//                    onErrorResult = { error ->
+//
+//                        ExploreScreenErrorComposable(
+//                            error = error,
+//                            source = source,
+//                            onRefresh = { getBooks(null, null, emptyList()) },
+//                            onWebView = {
+//                                navController.navigate(WebViewScreenSpec.buildRoute(
+//                                    sourceId = source.id,
+//                                    fetchType = FetchType.LatestFetchType.index,
+//                                    url = it.baseUrl
+//                                )
+//                                )
+//                            }
+//                        )
+//
+//                    })
 
+                when {
+                    vm.isLoading && vm.stateItems.isEmpty() -> {
+                        showLoading()
+                    }
+                    vm.error != null && vm.stateItems.isEmpty() -> {
+                        ExploreScreenErrorComposable(
+                            error = vm.error!!.asString(context),
+                            source = source,
+                            onRefresh = { getBooks(null, null, emptyList()) },
+                            onWebView = {
+                                navController.navigate(WebViewScreenSpec.buildRoute(
+                                    sourceId = source.id,
+                                    fetchType = FetchType.LatestFetchType.index,
+                                    url = it.baseUrl
+                                )
+                                )
                             }
-
-                        }
-
-                    })
-                if (result) {
-                    LayoutComposable(
-                        lazyBook = books,
-                        layout = vm.layout,
-                        scrollState = scrollState,
-                        source = source,
-                        navController = navController,
-                        isLocal = false,
-                        gridState = gridState,
-                        onClick = { book ->
-                            navController.navigate(
-                                route = BookDetailScreenSpec.buildRoute(sourceId = book.sourceId,
-                                    bookId = book.id)
-                            )
-                        },
-                        isLoading = books.loadState.refresh is LoadState.Loading,
-                        error = error?.error?.message ?: "Unknown Error Happened"
-                    )
+                        )
+                    }
+                    else -> {
+                        LayoutComposable(
+                            books = vm.stateItems,
+                            layout = vm.layout,
+                            scrollState = scrollState,
+                            source = source,
+                            navController = navController,
+                            isLocal = false,
+                            gridState = gridState,
+                            onClick = { book ->
+                                navController.navigate(
+                                    route = BookDetailScreenSpec.buildRoute(sourceId = book.sourceId,
+                                        bookId = book.id)
+                                )
+                            },
+                            isLoading = vm.isLoading,
+                            onEndReachValidator = { index ->
+                                if (index >= vm.stateItems.lastIndex && !vm.endReached && !vm.isLoading) {
+                                    vm.loadItems()
+                                }
+                            }
+                        )
+                    }
                 }
+
             }
 
 
@@ -260,3 +254,61 @@ fun ExploreScreen(
 
 }
 
+@Composable
+private fun BoxScope.ExploreScreenErrorComposable(
+    modifier: Modifier = Modifier,
+    error: String,
+    onRefresh: () -> Unit,
+    source: Source,
+    onWebView: (HttpSource) -> Unit,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .align(Alignment.Center)
+            .padding(bottom = 30.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        ErrorTextWithEmojis(
+            error = error,
+            modifier = Modifier
+                .padding(20.dp)
+        )
+        Row(Modifier
+            .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(Modifier
+                .weight(.5f)
+                .wrapContentSize(Alignment.Center),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                AppIconButton(imageVector = Icons.Default.Refresh,
+                    title = "Retry",
+                    onClick = {
+
+                        onRefresh()
+                    })
+                SmallTextComposable(text = "Retry")
+            }
+            Column(Modifier
+                .weight(.5f)
+                .wrapContentSize(Alignment.Center),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                if (source is HttpSource) {
+                    AppIconButton(imageVector = Icons.Default.Public,
+                        title = "Open in WebView",
+                        onClick = {
+                            onWebView(source)
+                        })
+                }
+                SmallTextComposable(text = "Open in WebView")
+            }
+
+        }
+
+    }
+}

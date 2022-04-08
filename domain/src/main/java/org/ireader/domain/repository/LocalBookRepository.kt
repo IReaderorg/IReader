@@ -55,7 +55,7 @@ interface LocalBookRepository {
     suspend fun deleteNotInLibraryChapters()
 
     suspend fun deleteAllExploreBook()
-
+    suspend fun deleteBooks(book: List<Book>)
 
     suspend fun deleteBookById(id: Long)
 

@@ -8,7 +8,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import dagger.hilt.android.qualifiers.ApplicationContext
-import org.ireader.core.utils.toast
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import tachiyomi.source.Source
@@ -35,6 +34,8 @@ interface TTSState {
     var ttsSource: Source?
     var ttsChapters: List<Chapter>
     var ttsCurrentChapterIndex: Int
+
+
 }
 
 @Singleton
@@ -61,7 +62,7 @@ open class TTSStateImpl @Inject constructor(@ApplicationContext context: Context
     val tts = TextToSpeech(context) { status ->
         ttsIsLoading = true
         if (status == TextToSpeech.ERROR) {
-            context.toast("Text-to-Speech Not Available")
+            //context.toast("Text-to-Speech Not Available")
             Timber.e("Text-to-Speech Not Available")
             ttsIsLoading = false
             return@TextToSpeech

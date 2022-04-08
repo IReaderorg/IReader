@@ -31,7 +31,7 @@ fun LayoutComposable(
     isLocal: Boolean,
     goToLatestChapter: (book: Book) -> Unit = {},
     isLoading: Boolean = false,
-    error: String = "",
+    onEndReachValidator: (itemIndex: Int) -> Unit = {},
 ) {
 
     //TODO: Add an item change position animation
@@ -49,6 +49,8 @@ fun LayoutComposable(
                 isLocal = isLocal,
                 goToLatestChapter = { goToLatestChapter(it) },
                 histories = histories,
+                onEndReach = onEndReachValidator,
+                isLoading = isLoading
             )
         }
         is LayoutType.ListLayout -> {
@@ -59,7 +61,10 @@ fun LayoutComposable(
                 selection = selection,
                 onLongClick = { onLongClick(it) },
                 lazyBooks = lazyBook,
-                goToLatestChapter = { goToLatestChapter(it) })
+                goToLatestChapter = { goToLatestChapter(it) },
+                onEndReach = onEndReachValidator,
+                isLoading = isLoading
+            )
         }
         is LayoutType.CompactGrid -> {
             CompactGridLayoutComposable(
@@ -71,7 +76,11 @@ fun LayoutComposable(
                 selection = selection,
                 onLongClick = { onLongClick(it) },
                 lazyBooks = lazyBook,
-                goToLatestChapter = { goToLatestChapter(it) }, histories = histories)
+                goToLatestChapter = { goToLatestChapter(it) },
+                histories = histories,
+                onEndReach = onEndReachValidator,
+                isLoading = isLoading
+            )
 
         }
     }

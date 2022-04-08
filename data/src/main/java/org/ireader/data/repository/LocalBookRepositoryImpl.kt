@@ -141,6 +141,10 @@ class LocalBookRepositoryImpl(
         return remoteKeysDao.insertAllExploredBook(book)
     }
 
+    override suspend fun deleteBooks(book: List<Book>) {
+        remoteKeysDao.deleteBooks(book)
+    }
+
     override suspend fun findFavoriteSourceIds(): List<Long> {
         return bookDao.findFavoriteSourceIds()
     }

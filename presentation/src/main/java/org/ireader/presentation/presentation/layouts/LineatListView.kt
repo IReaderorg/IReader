@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -70,6 +71,8 @@ fun LinearListDisplay(
     scrollState: LazyListState = rememberLazyListState(),
     isLocal: Boolean,
     goToLatestChapter: (book: Book) -> Unit,
+    isLoading: Boolean = false,
+    onEndReach: (itemIndex: Int) -> Unit = {},
 ) {
     LazyColumn(modifier = Modifier.fillMaxSize(), state = scrollState) {
         if (lazyBooks != null) {
@@ -89,6 +92,7 @@ fun LinearListDisplay(
             }
         } else {
             items(count = books.size) { index ->
+                onEndReach(index)
                 LinearBookItem(
                     title = books[index].title,
                     book = books[index],
@@ -99,9 +103,19 @@ fun LinearListDisplay(
                     selected = books[index].id in selection
                 )
             }
+            item {
+                if (isLoading) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+            }
         }
-
-
     }
 }
 

@@ -102,6 +102,7 @@ class ReaderUiFunctionsImpl @Inject constructor() : ReaderUiFunctions {
 
     override fun ReaderScreenViewModel.getCurrentIndexOfChapter(chapter: Chapter): Int {
 
+
         val selectedChapter =
             state.stateChapters.indexOfFirst { it.id == chapter.id && it.title == chapter.title }
         return if (selectedChapter != -1) selectedChapter else 0

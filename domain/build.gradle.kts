@@ -84,7 +84,7 @@ dependencies {
     implementation(libs.timber)
 
     /** LifeCycle **/
-    implementation(kotlinx.lifecycle.viewModel)
+   //  implementation(kotlinx.lifecycle.viewModel)
     implementation(androidx.lifecycle.runtime)
 
     implementation(kotlinx.stdlib)

@@ -1,5 +1,5 @@
 [versions]
-accompanist = "0.24.3-alpha"
+accompanist = "0.23.1"
 
 [libraries]
 pager = { module = "com.google.accompanist:accompanist-pager", version.ref ="accompanist" }
@@ -9,4 +9,4 @@ systemUiController = { module = "com.google.accompanist:accompanist-systemuicont
 swipeRefresh = { module = "com.google.accompanist:accompanist-swiperefresh", version.ref = "accompanist" }
 navAnimation = { module = "com.google.accompanist:accompanist-navigation-animation", version.ref = "accompanist" }
 navMaterial = { module = "com.google.accompanist:accompanist-navigation-material", version.ref = "accompanist" }
-web = { module = "com.google.accompanist:accompanist-webview", version.ref = "accompanist" }
+web = { module = "com.google.accompanist:accompanist-webview", version = "0.24.6-alpha" }

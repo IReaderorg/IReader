@@ -68,12 +68,17 @@ object ExploreScreenSpec : ScreenSpec {
                         layoutType = layout))
                 },
                 onSearch = {
-                    if (state.searchQuery.isNotBlank())
-                        vm.getBooks(
-                            query = state.searchQuery,
-                            source = source
-                        ) else {
-                        vm.getBooks(listing = source.getListings().first(), source = source)
+                    val query = state.searchQuery
+                    if (query != null && query.isNotBlank()) {
+                        vm.searchQuery = query
+                        vm.loadItems(true)
+//                        vm.getBooks(
+//                            query = state.searchQuery,
+//                            source = source
+                    } else {
+                        // vm.getBooks(listing = source.getListings().first(), source = source)
+                        vm.stateListing = source.getListings().first()
+                        vm.loadItems()
                         scope.launch {
                             vm.showSnackBar(UiText.StringResource(R.string.query_must_not_be_empty))
                         }
@@ -97,10 +102,14 @@ object ExploreScreenSpec : ScreenSpec {
                     ))
                 },
                 getBooks = { query, listing, filters ->
-                    vm.getBooks(source = source,
-                        query = query,
-                        listing = listing,
-                        filters = filters)
+                    state.searchQuery = query
+                    state.stateListing = listing
+                    state.stateFilters = filters
+                    vm.loadItems()
+//                    vm.getBooks(source = source,
+//                        query = query,
+//                        listing = listing,
+//                        filters = filters)
                 }
             )
         } else {

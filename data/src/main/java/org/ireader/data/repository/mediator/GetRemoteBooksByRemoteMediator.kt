@@ -30,7 +30,7 @@ class GetRemoteBooksByRemoteMediator(
             config = PagingConfig(pageSize = pageSize,
                 maxSize = maxSize),
             pagingSourceFactory = {
-                remoteRepository.getAllExploreBookByPaging(source, listing, filters, query)
+                remoteRepository.getAllExploreBookByPaging()
             },
             remoteMediator = ExploreRemoteMediator(
                 source = source,

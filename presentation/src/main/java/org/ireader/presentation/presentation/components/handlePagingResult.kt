@@ -103,3 +103,12 @@ fun handlePagingChapterResult(
         }
     }
 }
+
+fun LazyPagingItems<Any>.isPagingError(): LoadState.Error? {
+    return when {
+        loadState.refresh is LoadState.Error -> loadState.refresh as LoadState.Error
+        loadState.prepend is LoadState.Error -> loadState.prepend as LoadState.Error
+        loadState.append is LoadState.Error -> loadState.append as LoadState.Error
+        else -> null
+    }
+}

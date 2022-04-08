@@ -39,10 +39,6 @@ class RemoteRepositoryImpl(
 
     @OptIn(ExperimentalPagingApi::class)
     override fun getAllExploreBookByPaging(
-        source: CatalogSource,
-        listing: Listing?,
-        filters: List<Filter<*>>?,
-        query: String?,
     ): PagingSource<Int, Book> {
         return remoteKeysDao.getAllExploreBookByPaging()
     }
@@ -84,17 +80,6 @@ class RemoteRepositoryImpl(
         }
     }
 
-//    @OptIn(ExperimentalPagingApi::class)
-//    override fun getExploreMediator(
-//        source: Source,
-//        exploreType: ExploreType,
-//        query: String?,
-//    ): RemoteMediator<Int, Book> {
-//        return ExploreRemoteMediator(source = source,
-//            query = query,
-//            exploreType = exploreType,
-//            database = database)
-//    }
 
     @OptIn(ExperimentalPagingApi::class)
     override fun getRemoteBooksByRemoteMediator(

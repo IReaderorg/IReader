@@ -46,7 +46,7 @@ fun BrowseTopAppBar(
                 BigSizeTextComposable(text = source.name)
             } else {
                 AppTextField(
-                    query = state.searchQuery,
+                    query = state.searchQuery ?: "",
                     onValueChange = {
                         onValueChange(it)
                     },

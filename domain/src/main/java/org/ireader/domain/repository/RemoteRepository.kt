@@ -23,13 +23,7 @@ interface RemoteRepository {
     ): MangaInfo
 
 
-    fun getAllExploreBookByPaging(
-        source: CatalogSource,
-        listing: Listing?,
-        filters: List<Filter<*>>?,
-        query: String? = null,
-    ): PagingSource<Int, Book>
-
+    fun getAllExploreBookByPaging(): PagingSource<Int, Book>
 
     fun getRemoteReadingContentUseCase(
         chapter: Chapter,

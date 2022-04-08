@@ -16,6 +16,10 @@ class RemoteKeyRepositoryImpl(private val dao: RemoteKeysDao) : RemoteKeyReposit
         return dao.deleteAllExploredBook()
     }
 
+    override suspend fun findDeleteAllExploredBook(): List<Book> {
+        return dao.findDeleteAllExploredBook()
+    }
+
     override suspend fun deleteAllSearchedBook() {
         return dao.deleteAllSearchedBook()
     }
@@ -34,6 +38,14 @@ class RemoteKeyRepositoryImpl(private val dao: RemoteKeysDao) : RemoteKeyReposit
 
     override fun getAllExploreBookByPaging(): PagingSource<Int, Book> {
         return dao.getAllExploreBookByPaging()
+    }
+
+    override suspend fun findPagedExploreBooks(): List<Book> {
+        return dao.findPagedExploreBooks()
+    }
+
+    override fun subscribePagedExploreBooks(): kotlinx.coroutines.flow.Flow<List<Book>> {
+        return dao.subscribePagedExploreBooks()
     }
 
     override suspend fun insertAllRemoteKeys(remoteKeys: List<RemoteKeys>) {

@@ -1,10 +1,7 @@
 package org.ireader.data.local.dao
 
 import androidx.paging.PagingSource
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 import org.ireader.domain.models.RemoteKeys
 import org.ireader.domain.models.entities.Book
@@ -23,6 +20,22 @@ interface RemoteKeysDao {
     """)
     fun getAllExploreBookByPaging(): PagingSource<Int, Book>
 
+    @Query("""
+        SELECT DISTINCT library.* FROM library 
+        JOIN  page_key_table ON library.title = page_key_table.title AND library.sourceId = page_key_table.sourceId AND tableId != 2
+        GROUP BY  page_key_table.id
+        ORDER BY page_key_table.id
+    """)
+    suspend fun findPagedExploreBooks(): List<Book>
+
+    @Query("""
+        SELECT DISTINCT library.* FROM library 
+        JOIN  page_key_table ON library.title = page_key_table.title AND library.sourceId = page_key_table.sourceId AND tableId != 2
+        GROUP BY  page_key_table.id
+        ORDER BY page_key_table.id
+    """)
+    fun subscribePagedExploreBooks(): Flow<List<Book>>
+
 
     @Query("SELECT DISTINCT library.* FROM library JOIN  page_key_table ON library.title = page_key_table.id AND library.sourceId = page_key_table.sourceId  OR tableId = 1 GROUP BY  library.title ORDER BY id")
     fun getAllExploreBook(): List<Book>?
@@ -36,12 +49,17 @@ interface RemoteKeysDao {
     @Query("DELETE FROM page_key_table")
     suspend fun deleteAllRemoteKeys()
 
+    @Delete
+    suspend fun deleteBooks(books: List<Book>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAllExploredBook(bookEntity: List<Book>): List<Long>
 
     @Query("DELETE FROM library WHERE favorite = 0 AND tableId = 1")
     suspend fun deleteAllExploredBook()
+
+    @Query("SELECT * FROM library WHERE favorite = 0 AND tableId = 1")
+    suspend fun findDeleteAllExploredBook(): List<Book>
 
     @Query("DELETE FROM library WHERE favorite = 0 AND tableId = 2")
     suspend fun deleteAllSearchedBook()

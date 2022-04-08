@@ -1,3 +1,4 @@
+import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
@@ -48,13 +49,22 @@ android {
     }
 }
 
+tasks.withType<DependencyUpdatesTask> {
+    rejectVersionIf {
+        isNonStable(candidate.version)
+    }
+}
 
-
-
+fun isNonStable(version: String): Boolean {
+    val stableKeyword = listOf("RELEASE", "FINAL", "GA").any { version.toUpperCase().contains(it) }
+    val regex = "^[0-9,.v-]+(-r)?$".toRegex()
+    val isStable = stableKeyword || regex.matches(version)
+    return isStable.not()
+}
 dependencies {
 
 
-implementation(androidx.emoji)
+    implementation(androidx.emoji)
     implementation(androidx.material)
 
     implementation(project(Modules.coreUi))
@@ -160,6 +170,8 @@ fun runCommand(command: String): String {
     }
     return String(byteOut.toByteArray()).trim()
 }
+
+
 //configurations.all {
 //    resolutionStrategy.dependencySubstitution {
 //        substitute(module("org.tachiyomi:core-desktop:1.2-SNAPSHOT"))

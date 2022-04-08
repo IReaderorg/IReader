@@ -1,9 +1,9 @@
 [versions]
 ktor = "1.6.7"
-room = "2.4.1"
-okhttp = "5.0.0-alpha.4"
+room = "2.4.2"
+okhttp = "4.9.3"
 moshi = "1.13.0"
-hilt = "2.40.5"
+hilt = "2.41"
 retrofit = "2.9.0"
 aboutLibraries = "10.0.0-b03"
 
