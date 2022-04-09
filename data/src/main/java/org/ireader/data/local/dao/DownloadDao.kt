@@ -1,32 +1,18 @@
 package org.ireader.data.local.dao
 
-import androidx.paging.PagingSource
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 import org.ireader.domain.models.entities.SavedDownload
 
 @Dao
-interface DownloadDao {
+interface DownloadDao : BaseDao<SavedDownload> {
 
     @Query("SELECT * FROM download")
-    fun getAllDownloads(): Flow<List<SavedDownload>>
-
-    @Query("SELECT * FROM  download")
-    fun getAllDownloadsByPaging(): PagingSource<Int, SavedDownload>
+    fun findAllDownloads(): Flow<List<SavedDownload>>
 
     @Query("SELECT * FROM download WHERE bookId = :bookId")
-    fun getOneDownloads(bookId: Long): Flow<SavedDownload?>
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertDownload(savedDownload: SavedDownload): Long
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertDownloads(savedDownloads: List<SavedDownload>): List<Long>
-
-
-    @Delete
-    suspend fun deleteSavedDownload(savedDownload: SavedDownload)
-
+    fun findDownload(bookId: Long): Flow<SavedDownload?>
 
     @Query("DELETE FROM download WHERE bookId = :bookId ")
     suspend fun deleteSavedDownloadByBookId(bookId: Long)
@@ -36,3 +22,4 @@ interface DownloadDao {
 
 
 }
+

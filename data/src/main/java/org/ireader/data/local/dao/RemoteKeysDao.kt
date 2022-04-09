@@ -7,7 +7,7 @@ import org.ireader.domain.models.RemoteKeys
 import org.ireader.domain.models.entities.Book
 
 @Dao
-interface RemoteKeysDao {
+interface RemoteKeysDao : BaseDao<Book> {
 
     @Query("SELECT * FROM library WHERE id =:id")
     fun getExploreBookById(id: Int): Flow<Book?>
@@ -43,20 +43,32 @@ interface RemoteKeysDao {
     @Query("SELECT * FROM page_key_table WHERE title = :title")
     suspend fun getRemoteKeys(title: String): RemoteKeys
 
+    @Transaction
+    fun prepareExploreMode(reset: Boolean, list: List<Book>, keys: List<RemoteKeys>) {
+        if (reset) {
+            deleteAllRemoteKeys()
+            deleteAllExploredBook()
+        }
+        insertAllExploredBook(list)
+        insertAllRemoteKeys(keys)
+
+    }
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAllRemoteKeys(remoteKeys: List<RemoteKeys>)
+    fun insertAllRemoteKeys(remoteKeys: List<RemoteKeys>)
 
     @Query("DELETE FROM page_key_table")
-    suspend fun deleteAllRemoteKeys()
+    fun deleteAllRemoteKeys()
 
     @Delete
     suspend fun deleteBooks(books: List<Book>)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAllExploredBook(bookEntity: List<Book>): List<Long>
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    fun insertAllExploredBook(bookEntity: List<Book>): List<Long>
+
 
     @Query("DELETE FROM library WHERE favorite = 0 AND tableId = 1")
-    suspend fun deleteAllExploredBook()
+    fun deleteAllExploredBook()
 
     @Query("SELECT * FROM library WHERE favorite = 0 AND tableId = 1")
     suspend fun findDeleteAllExploredBook(): List<Book>

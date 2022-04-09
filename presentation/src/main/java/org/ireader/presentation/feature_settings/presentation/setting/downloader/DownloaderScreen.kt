@@ -16,8 +16,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.items
 import androidx.work.WorkManager
 import kotlinx.coroutines.flow.collectLatest
 import org.ireader.core.utils.UiEvent
@@ -50,10 +48,9 @@ fun DownloaderScreen(
             }
         }
     }
-    val downloads = viewModel.savedDownload.collectAsLazyPagingItems()
+    val downloads = viewModel.savedDownload
 
-    val chapters = viewModel.chapters.collectAsLazyPagingItems()
-    viewModel.updateChapters(chapters.itemSnapshotList.items)
+
     Scaffold(
         topBar = {
             DownloaderTopAppBar(
@@ -73,11 +70,12 @@ fun DownloaderScreen(
         },
         scaffoldState = scaffoldState,
         snackbarHost = { ISnackBarHost(snackBarHostState = it) },
-    ) {
+    ) { padding ->
         LazyColumn {
-            items(items = downloads) { download ->
-                if (download != null) {
-                    Timber.e(download.progress.toString())
+            items(count = downloads.size) { index ->
+                val download = downloads[index]
+                if (downloads != null) {
+                    Timber.e(downloads[index].progress.toString())
                     Card(
                         modifier = Modifier,
                         backgroundColor = MaterialTheme.colors.background,
@@ -86,8 +84,8 @@ fun DownloaderScreen(
                         onClick = {
                             navController.navigate(
                                 BookDetailScreenSpec.buildRoute(
-                                    sourceId = download.sourceId,
-                                    bookId = download.bookId
+                                    sourceId = downloads[index].sourceId,
+                                    bookId = downloads[index].bookId
                                 )
                             )
                         }

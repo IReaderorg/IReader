@@ -1,6 +1,5 @@
 package org.ireader.data.repository
 
-import androidx.paging.PagingSource
 import kotlinx.coroutines.flow.Flow
 import org.ireader.data.local.dao.LibraryChapterDao
 import org.ireader.domain.models.entities.Chapter
@@ -11,12 +10,6 @@ class LocalChapterRepositoryImpl @Inject constructor(private val daoLibrary: Lib
     LocalChapterRepository {
 
 
-    override fun findLocalChaptersByPaging(
-        bookId: Long, isAsc: Boolean, query: String,
-    ): PagingSource<Int, Chapter> {
-        return daoLibrary.getChaptersForPaging(bookId = bookId, isAsc = isAsc, query)
-
-    }
 
     override suspend fun findChapterByIdByBatch(
         chapterId: List<Long>,

@@ -4,6 +4,7 @@ plugins {
     id("kotlin-kapt")
     id("kotlin-parcelize")
     kotlin("plugin.serialization")
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -70,7 +71,8 @@ dependencies {
 
 
     implementation(libs.room.runtime)
-    kapt(libs.room.compiler)
+    ksp(libs.room.compiler)
+    annotationProcessor(libs.room.compiler)
     implementation(libs.room.ktx)
     implementation(libs.room.paging)
     androidTestImplementation(libs.room.testing)

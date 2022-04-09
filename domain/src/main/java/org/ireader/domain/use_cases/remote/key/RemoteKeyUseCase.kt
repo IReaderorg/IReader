@@ -10,4 +10,5 @@ data class RemoteKeyUseCase @Inject constructor(
     val insertAllRemoteKeys: InsertAllRemoteKeys,
     val findAllPagedExploreBooks: FindAllPagedExploreBooks,
     val subScribeAllPagedExploreBooks: SubScribeAllPagedExploreBooks,
+    val prepareExploreMode: PrepareExploreMode,
 )

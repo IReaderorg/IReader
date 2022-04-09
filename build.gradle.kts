@@ -16,6 +16,7 @@ buildscript {
         classpath(libs.gradle.google)
         classpath(libs.gradle.firebaseCrashlytic)
         classpath(libs.gradle.benmanes)
+        classpath(libs.ksp.gradle)
     }
 }
 

@@ -1,6 +1,5 @@
 package org.ireader.domain.repository
 
-import androidx.paging.PagingSource
 import kotlinx.coroutines.flow.Flow
 import org.ireader.domain.models.entities.Chapter
 
@@ -50,10 +49,6 @@ interface LocalChapterRepository {
         chapters: List<Chapter>,
     ): List<Long>
 
-
-    fun findLocalChaptersByPaging(
-        bookId: Long, isAsc: Boolean, query: String,
-    ): PagingSource<Int, Chapter>
 
 
     suspend fun deleteChaptersByBookId(

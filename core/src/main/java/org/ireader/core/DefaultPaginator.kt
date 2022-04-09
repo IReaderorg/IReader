@@ -2,7 +2,7 @@ package org.ireader.core
 
 class DefaultPaginator<Key, Item>(
     private val initialKey: Key,
-    private inline val onInit: suspend () -> Unit,
+    private inline val onInit: suspend () -> Unit = {},
     private inline val onLoadUpdated: (Boolean) -> Unit,
     private inline val onRequest: suspend (nextKey: Key) -> Result<Item>,
     private inline val getNextKey: suspend (Item) -> Key,

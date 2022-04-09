@@ -78,6 +78,9 @@ fun ExploreScreen(
     val (snackBarText, setSnackBarText) = remember {
         mutableStateOf("")
     }
+    LaunchedEffect(key1 = vm.stateItems) {
+        //vm.insertBooks(vm.stateItems)
+    }
     if (showSnackBar) {
         LaunchedEffect(scaffoldState.snackbarHostState) {
             val result = scaffoldState.snackbarHostState.showSnackbar(
@@ -88,27 +91,21 @@ fun ExploreScreen(
             when (result) {
                 SnackbarResult.ActionPerformed -> {
                     setShowSnackBar(false)
+                    vm.endReached = false
                     vm.loadItems()
                     //books.retry()
                 }
             }
         }
     }
+    LaunchedEffect(key1 = vm.error != null) {
+        val errors = vm.error
+        if (errors != null && errors.asString(context).isNotBlank() && vm.page > 1) {
+            setShowSnackBar(true)
+            setSnackBarText(errors.asString(context))
 
-//    val error = when {
-//        books.loadState.refresh is LoadState.Error -> books.loadState.refresh as LoadState.Error
-//        books.loadState.prepend is LoadState.Error -> books.loadState.prepend as LoadState.Error
-//        books.loadState.append is LoadState.Error -> books.loadState.append as LoadState.Error
-//        else -> null
-//    }
-//    LaunchedEffect(key1 = vm.error != null) {
-//        val errors = vm.error
-//        if (errors != null && errors.asString(context).isNotBlank() && vm.stateItems.size > 0) {
-//            setShowSnackBar(true)
-//            setSnackBarText(errors.asString(context))
-//
-//        }
-//    }
+        }
+    }
     ModalBottomSheetLayout(
         modifier = Modifier.statusBarsPadding(),
         sheetState = bottomSheetState,
@@ -182,31 +179,11 @@ fun ExploreScreen(
             Box(modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValue)) {
-//                val result = handlePagingResult(books = books,
-//                    onEmptyResult = {},
-//                    onErrorResult = { error ->
-//
-//                        ExploreScreenErrorComposable(
-//                            error = error,
-//                            source = source,
-//                            onRefresh = { getBooks(null, null, emptyList()) },
-//                            onWebView = {
-//                                navController.navigate(WebViewScreenSpec.buildRoute(
-//                                    sourceId = source.id,
-//                                    fetchType = FetchType.LatestFetchType.index,
-//                                    url = it.baseUrl
-//                                )
-//                                )
-//                            }
-//                        )
-//
-//                    })
-
                 when {
-                    vm.isLoading && vm.stateItems.isEmpty() -> {
+                    vm.isLoading && vm.page == 1 -> {
                         showLoading()
                     }
-                    vm.error != null && vm.stateItems.isEmpty() -> {
+                    vm.error != null && vm.page == 1 -> {
                         ExploreScreenErrorComposable(
                             error = vm.error!!.asString(context),
                             source = source,

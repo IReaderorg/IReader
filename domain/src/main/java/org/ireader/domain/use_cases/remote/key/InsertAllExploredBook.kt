@@ -1,6 +1,7 @@
 package org.ireader.domain.use_cases.remote.key
 
 import kotlinx.coroutines.flow.Flow
+import org.ireader.domain.models.RemoteKeys
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.repository.RemoteKeyRepository
 import javax.inject.Inject
@@ -20,5 +21,11 @@ class FindAllPagedExploreBooks @Inject constructor(private val remoteKeyReposito
 class SubScribeAllPagedExploreBooks @Inject constructor(private val remoteKeyRepository: RemoteKeyRepository) {
     suspend operator fun invoke(): Flow<List<Book>> {
         return remoteKeyRepository.subscribePagedExploreBooks()
+    }
+}
+
+class PrepareExploreMode @Inject constructor(private val remoteKeyRepository: RemoteKeyRepository) {
+    suspend operator fun invoke(reset: Boolean, list: List<Book>, keys: List<RemoteKeys>) {
+        return remoteKeyRepository.prepareExploreMode(reset, list, keys)
     }
 }

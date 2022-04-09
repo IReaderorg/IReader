@@ -109,8 +109,9 @@ fun ReaderText(
                                     .padding(horizontal = vm.paragraphsIndent.dp, vertical = 4.dp)
                                     .background(if (index in vm.queriedTextIndex) vm.textColor.copy(
                                         .1f) else Color.Transparent),
-                                text = if (index == 0) "\n\n" + chapter.content[index].plus("\n".repeat(
-                                    vm.distanceBetweenParagraphs)) else chapter.content[index].plus(
+                                text = if (index == 0) "\n\n" + chapter.content.map { it.trim() }[index].plus(
+                                    "\n".repeat(
+                                        vm.distanceBetweenParagraphs)) else chapter.content[index].plus(
                                     "\n".repeat(vm.distanceBetweenParagraphs)),
                                 fontSize = vm.fontSize.sp,
                                 fontFamily = vm.font.fontFamily,

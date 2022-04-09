@@ -77,7 +77,6 @@ class ExtensionViewModel @Inject constructor(
 
     fun deleteAllExploredBookOnInit() {
         viewModelScope.launchIO {
-            deleteAllExploredBook()
             convertExploredTOLibraryBooks()
             deleteNotInLibraryChapters()
             // deleteUseCase.deleteAllRemoteKeys()

@@ -7,7 +7,7 @@ import org.ireader.domain.models.entities.Chapter
 
 
 @Dao
-interface LibraryChapterDao {
+interface LibraryChapterDao : BaseDao<Chapter> {
 
     @Query("SELECT * FROM chapter WHERE id = :chapterId Limit 1")
     fun subscribeChapterById(
@@ -119,8 +119,14 @@ interface LibraryChapterDao {
     @Query("DELETE FROM chapter ")
     suspend fun deleteAllChapters()
 
+    @Transaction
+    suspend fun deleteNotInLibraryChapters() {
+        val chapters = findNotInLibraryChapters()
+        delete(chapters)
+    }
+
     @Query("""
-        DELETE FROM chapter
+        SELECT * FROM chapter
         WHERE bookId IN (
         SELECT chapter.ROWID FROM chapter a
         INNER JOIN library b
@@ -128,5 +134,5 @@ interface LibraryChapterDao {
          WHERE b.favorite = 1
         )
     """)
-    suspend fun deleteNotInLibraryChapters()
+    suspend fun findNotInLibraryChapters(): List<Chapter>
 }

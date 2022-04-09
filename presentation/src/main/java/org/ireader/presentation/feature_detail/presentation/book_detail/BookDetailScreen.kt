@@ -113,7 +113,7 @@ fun BookDetailScreen(
                         }
                     )
                 }
-            }) {
+            }) { padding ->
 
             SwipeRefresh(
                 state = swipeRefreshState,

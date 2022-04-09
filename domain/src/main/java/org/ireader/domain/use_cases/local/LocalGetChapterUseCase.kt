@@ -13,7 +13,6 @@ data class LocalGetChapterUseCase @Inject constructor(
     val subscribeLastReadChapter: SubscribeLastReadChapter,
     val findLastReadChapter: FindLastReadChapter,
     val findFirstChapter: FindFirstChapter,
-    val getLocalChaptersByPaging: GetLocalChaptersByPaging,
     val findChapterByKey: FindChapterByKey,
     val findChaptersByKey: FindChaptersByKey,
 )

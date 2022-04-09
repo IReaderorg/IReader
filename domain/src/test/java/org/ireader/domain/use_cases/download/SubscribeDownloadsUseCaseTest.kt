@@ -6,20 +6,20 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.ireader.domain.models.entities.SavedDownload
 import org.ireader.domain.repository.FakeDownloadRepository
-import org.ireader.domain.use_cases.download.get.GetAllDownloadsUseCase
+import org.ireader.domain.use_cases.download.get.SubscribeDownloadsUseCase
 import org.junit.Before
 import org.junit.Test
 
 
-class GetAllDownloadsUseCaseTest {
+class SubscribeDownloadsUseCaseTest {
 
-    private lateinit var getDownloads: GetAllDownloadsUseCase
+    private lateinit var getDownloads: SubscribeDownloadsUseCase
     private var totalSize: Int = 0
 
     @Before
     fun setUp() {
         val fakeRepository = FakeDownloadRepository()
-        getDownloads = GetAllDownloadsUseCase(fakeRepository)
+        getDownloads = SubscribeDownloadsUseCase(fakeRepository)
 
         val downloadsToInsert = mutableListOf<SavedDownload>()
         ('a'..'z').forEachIndexed { index, c ->

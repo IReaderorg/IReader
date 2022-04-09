@@ -32,10 +32,10 @@ class LocalModule {
     @Provides
     @Singleton
     fun provideBookDatabase(
-        @ApplicationContext appContext: Context,
+        @ApplicationContext app: Context,
     ): AppDatabase {
         return Room.databaseBuilder(
-            appContext,
+            app,
             AppDatabase::class.java,
             AppDatabase.DATABASE_NAME
         )

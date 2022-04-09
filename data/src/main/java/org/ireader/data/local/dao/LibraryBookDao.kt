@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 import org.ireader.domain.models.entities.Book
 
 @Dao
-interface LibraryBookDao {
+interface LibraryBookDao : BaseDao<Book> {
 
 
     @RewriteQueriesToDropUnusedColumns

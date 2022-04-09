@@ -1,17 +1,15 @@
 package org.ireader.presentation.feature_explore.presentation.browse.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.PagingData
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.ireader.core.DefaultPaginator
 import org.ireader.core.exceptions.EmptyQuery
 import org.ireader.core.exceptions.SourceNotFoundException
@@ -21,13 +19,13 @@ import org.ireader.domain.R
 import org.ireader.domain.catalog.service.CatalogStore
 import org.ireader.domain.models.DisplayMode
 import org.ireader.domain.models.RemoteKeys
-import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.toBook
 import org.ireader.domain.use_cases.local.DeleteUseCase
+import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.preferences.reader_preferences.BrowseLayoutTypeUseCase
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import org.ireader.domain.use_cases.remote.key.RemoteKeyUseCase
-import org.ireader.domain.utils.launchIO
+import org.ireader.domain.utils.withIOContext
 import tachiyomi.source.CatalogSource
 import tachiyomi.source.model.Filter
 import tachiyomi.source.model.MangasPageInfo
@@ -43,10 +41,11 @@ class ExploreViewModel @Inject constructor(
     private val catalogStore: CatalogStore,
     private val browseLayoutTypeUseCase: BrowseLayoutTypeUseCase,
     private val remoteKeyUseCase: RemoteKeyUseCase,
+    private val insertUseCases: LocalInsertUseCases,
+    @ApplicationContext private val context: Context,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel(), ExploreState by state {
-    private val _books = MutableStateFlow<PagingData<Book>>(PagingData.empty())
-    val books = _books
+
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
 
@@ -57,6 +56,7 @@ class ExploreViewModel @Inject constructor(
         val source =
             catalogStore.catalogs.find { it.source.id == sourceId }?.source
         loadBooks()
+
         if (sourceId != null && source is CatalogSource) {
             state.source = source
             if (!query.isNullOrBlank()) {
@@ -103,9 +103,9 @@ class ExploreViewModel @Inject constructor(
 
     fun loadBooks() {
         viewModelScope.launch {
-            remoteKeyUseCase.subScribeAllPagedExploreBooks().collect {
+            remoteKeyUseCase.subScribeAllPagedExploreBooks().distinctUntilChanged().onEach {
                 stateItems = it
-            }
+            }.launchIn(viewModelScope)
 
         }
     }
@@ -114,20 +114,6 @@ class ExploreViewModel @Inject constructor(
         getBooksJob?.cancel()
         if (reset) {
             page = 1
-        }
-        if (page == 1) {
-            viewModelScope.launchIO {
-
-                Timber.e("Init Started")
-                //val res  = remoteKeyUseCase.findDeleteAllExploredBook()
-                //deleteUseCase.deleteBooks(res)
-                withContext(Dispatchers.IO) {
-                    deleteUseCase.deleteAllExploreBook()
-                    deleteUseCase.deleteAllRemoteKeys()
-                }
-
-                Timber.e("Init Finished")
-            }
         }
         getBooksJob = viewModelScope.launch {
             DefaultPaginator<Int, MangasPageInfo>(
@@ -138,7 +124,6 @@ class ExploreViewModel @Inject constructor(
                 onRequest = { nextPage ->
                     try {
                         error = null
-
                         Timber.e("Request was made; $nextPage")
                         val query = searchQuery
                         val filters = stateFilters
@@ -186,55 +171,24 @@ class ExploreViewModel @Inject constructor(
                             sourceId = source?.id ?: 0
                         )
                     }
-                    remoteKeyUseCase.insertAllExploredBook(items.mangas.map {
+                    val books = items.mangas.map {
                         it.toBook(source?.id ?: 0,
                             tableId = 1)
-                    })
-                    remoteKeyUseCase.insertAllRemoteKeys(keys)
-                    remoteKeyUseCase.findAllPagedExploreBooks()
+                    }
+                    withIOContext {
+                        remoteKeyUseCase.prepareExploreMode(page == 1, books, keys)
+                    }
                     page = newKey
                     endReached = !items.hasNextPage
+                    Timber.e("Request was finished")
                 },
-                onInit = {
-
-                }
             ).loadNextItems()
 
         }
-//        getBooksJob?.cancel()
-//        getBooksJob = viewModelScope.launch(Dispatchers.IO) {
-//            remoteUseCases.getRemoteBookByPaginationUseCase(
-//                source,
-//                listing,
-//                query = query,
-//                filters = filters,
-//            ).cachedIn(viewModelScope)
-//                .collect { snapshot ->
-//                    _books.value = snapshot
-//                }
-//        }
     }
 
     private var getBooksJob: Job? = null
 
-//    @OptIn(ExperimentalPagingApi::class)
-//    fun getBooks(
-//        query: String? = null, listing: Listing? = null,
-//        filters: List<Filter<*>>? = null, source: CatalogSource,
-//    ) {
-//        getBooksJob?.cancel()
-//        getBooksJob = viewModelScope.launch(Dispatchers.IO) {
-//            remoteUseCases.getRemoteBookByPaginationUseCase(
-//                source,
-//                listing,
-//                query = query,
-//                filters = filters,
-//            ).cachedIn(viewModelScope)
-//                .collect { snapshot ->
-//                    _books.value = snapshot
-//                }
-//        }
-//    }
 
     private fun onQueryChange(query: String) {
         state.searchQuery = query

@@ -6,14 +6,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.PagingData
-import androidx.paging.cachedIn
 import androidx.work.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -38,10 +35,10 @@ class DownloaderViewModel @Inject constructor(
     private val downloadUseCases: DownloadUseCases,
 ) : ViewModel() {
 
-    var savedDownload = MutableStateFlow<PagingData<SavedDownload>>(PagingData.empty())
-        private set
-    var chapters = MutableStateFlow<PagingData<Chapter>>(PagingData.empty())
-        private set
+    var savedDownload by mutableStateOf<List<SavedDownload>>(emptyList())
+
+    var chapters = mutableStateOf<List<Chapter>>(emptyList())
+
     lateinit var work: OneTimeWorkRequest
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
@@ -49,7 +46,7 @@ class DownloaderViewModel @Inject constructor(
         private set
 
     init {
-        getLocalChaptersByPaging()
+        subscribeDownloads()
     }
 
     fun showSnackBar(text: UiText) {
@@ -68,11 +65,11 @@ class DownloaderViewModel @Inject constructor(
 
 
     private var getBooksJob: Job? = null
-    private fun getLocalChaptersByPaging() {
+    private fun subscribeDownloads() {
         getBooksJob?.cancel()
         getBooksJob = viewModelScope.launch {
-            downloadUseCases.getAllDownloadsUseCaseByPaging().cachedIn(viewModelScope).collect {
-                savedDownload.value = it
+            downloadUseCases.subscribeDownloadsUseCase().collect {
+                savedDownload = it
             }
 
         }
@@ -121,21 +118,9 @@ class DownloaderViewModel @Inject constructor(
 
     fun getChapters(book: Book) {
         viewModelScope.launch {
-            getChapterUseCase.getLocalChaptersByPaging(bookId = book.id, isAsc = true)
-                .cachedIn(viewModelScope)
+            getChapterUseCase.subscribeChaptersByBookId(bookId = book.id, isAsc = true)
                 .collect { snapshot ->
                     chapters.value = snapshot
-                    try {
-//                        state =
-//                            state.copy(progress = ((state.chapters.filter {
-//                                it.content.joinToString().isNotBlank()
-//                            }
-//                                .size * 100) / state.chapters.size).toFloat(),
-//                                downloadBookId = book.id)
-                    } catch (e: Exception) {
-
-                    }
-
                 }
 
         }

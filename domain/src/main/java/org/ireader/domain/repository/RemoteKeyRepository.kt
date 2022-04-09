@@ -16,7 +16,7 @@ interface RemoteKeyRepository {
     suspend fun findDeleteAllExploredBook(): List<Book>
 
     suspend fun addAllRemoteKeys(remoteKeys: List<RemoteKeys>)
-
+    suspend fun prepareExploreMode(reset: Boolean, list: List<Book>, keys: List<RemoteKeys>)
     suspend fun getRemoteKeys(id: String): RemoteKeys
 
     fun getAllExploreBookByPaging(): PagingSource<Int, Book>

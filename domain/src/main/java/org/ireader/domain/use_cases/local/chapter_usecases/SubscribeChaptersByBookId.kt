@@ -1,11 +1,7 @@
 package org.ireader.domain.use_cases.local.chapter_usecases
 
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import org.ireader.core.utils.Constants
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.repository.LocalChapterRepository
 import javax.inject.Inject
@@ -33,24 +29,5 @@ class FindChaptersByBookId @Inject constructor(private val localChapterRepositor
         isAsc: Boolean = true,
     ): List<Chapter> {
         return localChapterRepository.findChaptersByBookId(bookId = bookId, isAsc)
-    }
-}
-
-
-class GetLocalChaptersByPaging @Inject constructor(private val localChapterRepository: LocalChapterRepository) {
-    operator fun invoke(
-        bookId: Long,
-        isAsc: Boolean,
-        query: String = "",
-    ): Flow<PagingData<Chapter>> {
-        return Pager(
-            config = PagingConfig(pageSize = Constants.DEFAULT_BIG_PAGE_SIZE,
-                maxSize = Constants.MAX_BIG_PAGE_SIZE, enablePlaceholders = true),
-            pagingSourceFactory = {
-                localChapterRepository.findLocalChaptersByPaging(bookId = bookId,
-                    isAsc = isAsc,
-                    query)
-            }
-        ).flow
     }
 }

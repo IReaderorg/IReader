@@ -1,11 +1,12 @@
 package org.ireader.data.local.dao
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Query
 import org.ireader.domain.feature_service.io.HistoryWithRelations
 import org.ireader.domain.models.entities.History
 
 @Dao
-interface HistoryDao {
+interface HistoryDao : BaseDao<History> {
 
     @Query("SELECT * FROM history WHERE chapterId = :id LIMIT 1")
     suspend fun findHistory(id: Long): History?
@@ -26,14 +27,6 @@ interface HistoryDao {
     ORDER BY history.readAt DESC""")
     fun findHistoriesPaging(query: String): kotlinx.coroutines.flow.Flow<List<HistoryWithRelations>>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertHistory(history: History): Long
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertHistories(history: List<History>): List<Long>
-
-    @Delete
-    suspend fun deleteHistories(history: List<History>)
 
     @Query("DELETE FROM history WHERE chapterId = :id")
     suspend fun deleteHistory(id: Long)

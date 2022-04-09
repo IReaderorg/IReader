@@ -35,7 +35,7 @@ class SyncRemoteCatalogs @Inject constructor(
                 withContext(Dispatchers.IO) {
                     val newCatalogs = catalogRemoteApi.fetchCatalogs()
                     catalogRemoteRepository.deleteAllRemoteCatalogs()
-                    catalogRemoteRepository.setRemoteCatalogs(newCatalogs)
+                    catalogRemoteRepository.insertRemoteCatalogs(newCatalogs)
                     lastCheckPref.set(Calendar.getInstance().timeInMillis)
                 }
                 return true

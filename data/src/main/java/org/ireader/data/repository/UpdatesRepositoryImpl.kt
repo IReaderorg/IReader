@@ -20,19 +20,19 @@ class UpdatesRepositoryImpl @Inject constructor(private val updatesDao: UpdatesD
     }
 
     override suspend fun insertUpdates(update: List<Update>) {
-        return updatesDao.insertUpdates(update)
+         updatesDao.insert(update)
     }
 
     override suspend fun insertUpdate(update: Update) {
-        return updatesDao.insertUpdate(update)
+        updatesDao.insert(update)
     }
 
     override suspend fun deleteUpdate(update: Update) {
-        updatesDao.deleteUpdate(update)
+        updatesDao.delete(update)
     }
 
     override suspend fun deleteUpdates(update: List<Update>) {
-        updatesDao.deleteUpdates(update)
+        updatesDao.delete(update)
 
     }
 

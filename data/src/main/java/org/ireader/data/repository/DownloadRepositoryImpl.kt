@@ -1,6 +1,5 @@
 package org.ireader.data.repository
 
-import androidx.paging.PagingSource
 import kotlinx.coroutines.flow.Flow
 import org.ireader.data.local.dao.DownloadDao
 import org.ireader.domain.models.entities.SavedDownload
@@ -10,27 +9,23 @@ class DownloadRepositoryImpl(private val dao: DownloadDao) : DownloadRepository 
 
 
     override fun findAllDownloads(): Flow<List<SavedDownload>> {
-        return dao.getAllDownloads()
-    }
-
-    override fun findAllDownloadsByPaging(): PagingSource<Int, SavedDownload> {
-        return dao.getAllDownloadsByPaging()
+        return dao.findAllDownloads()
     }
 
     override fun findOneSavedDownload(bookId: Long): Flow<SavedDownload?> {
-        return dao.getOneDownloads(bookId)
+        return dao.findDownload(bookId)
     }
 
     override suspend fun insertDownload(savedDownload: SavedDownload): Long {
-        return dao.insertDownload(savedDownload = savedDownload)
+        return dao.insert(savedDownload)
     }
 
     override suspend fun insertDownloads(savedDownloads: List<SavedDownload>): List<Long> {
-        return dao.insertDownloads(savedDownloads)
+        return dao.insert(savedDownloads)
     }
 
     override suspend fun deleteSavedDownload(savedDownload: SavedDownload) {
-        dao.deleteSavedDownload(savedDownload)
+        dao.delete(savedDownload)
     }
 
     override suspend fun deleteSavedDownloadByBookId(bookId: Long) {
