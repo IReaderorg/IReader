@@ -1,6 +1,6 @@
 [versions]
 ktor = "1.6.7"
-room = "2.5.0-alpha01"
+room = "2.4.2"
 okhttp = "4.9.3"
 moshi = "1.13.0"
 hilt = "2.41"
@@ -27,6 +27,7 @@ ktor-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-okhttp = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-serialization = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-jsoup = "com.tfowl.ktor:ktor-jsoup:1.6.4"
+
 
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }

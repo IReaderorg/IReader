@@ -78,9 +78,7 @@ fun ExploreScreen(
     val (snackBarText, setSnackBarText) = remember {
         mutableStateOf("")
     }
-    LaunchedEffect(key1 = vm.stateItems) {
-        //vm.insertBooks(vm.stateItems)
-    }
+
     if (showSnackBar) {
         LaunchedEffect(scaffoldState.snackbarHostState) {
             val result = scaffoldState.snackbarHostState.showSnackbar(

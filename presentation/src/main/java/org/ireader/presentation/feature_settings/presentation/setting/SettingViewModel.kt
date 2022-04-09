@@ -5,7 +5,6 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToJsonElement
@@ -113,16 +112,17 @@ class SettingViewModel @Inject constructor(
                 chapters.filter { it.bookId == book.id }
             ))
         }
+
         return Json.Default.encodeToJsonElement(list).toString()
     }
 
-    fun insertBackup(list: List<BackUpBook>) {
-        viewModelScope.launch {
-            val books = list.map { it.book }
-            val chapters = list.map { it.chapters }.flatten()
-            insertUseCases.insertBooks(books)
-            insertUseCases.insertChapters(chapters)
-        }
+    suspend fun insertBackup(list: List<BackUpBook>) {
+        val books = list.map { it.book }
+
+        val chapters = list.map { it.chapters }.flatten()
+
+        insertUseCases.insertBookAndChapters(books, chapters)
+
 
     }
 

@@ -108,7 +108,7 @@ class BookDetailViewModel @Inject constructor(
                 clearBookError()
                 setDetailBook(book)
                 toggleInLibrary(book.favorite)
-                if (book.lastUpdated < 1L && !state.detailIsRemoteLoaded && source != null) {
+                if ((book.lastUpdated < 1L) && !state.detailIsRemoteLoaded && source != null) {
                     getRemoteBookDetail(book, source)
                     getRemoteChapterDetail(book, source)
                 }

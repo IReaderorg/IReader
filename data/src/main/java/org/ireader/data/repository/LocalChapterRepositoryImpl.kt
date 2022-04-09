@@ -1,20 +1,23 @@
 package org.ireader.data.repository
 
 import kotlinx.coroutines.flow.Flow
-import org.ireader.data.local.dao.LibraryChapterDao
+import org.ireader.data.local.dao.chapterDao
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.repository.LocalChapterRepository
 import javax.inject.Inject
 
-class LocalChapterRepositoryImpl @Inject constructor(private val daoLibrary: LibraryChapterDao) :
+class LocalChapterRepositoryImpl @Inject constructor(private val daoLibrary: chapterDao) :
     LocalChapterRepository {
-
 
 
     override suspend fun findChapterByIdByBatch(
         chapterId: List<Long>,
     ): List<Chapter> {
         return daoLibrary.findChapterByIdByBatch(chapterId = chapterId)
+    }
+
+    override suspend fun findAllChapters(): List<Chapter> {
+        return daoLibrary.findAllChapters()
     }
 
     override fun subscribeChapterById(chapterId: Long): Flow<Chapter?> {
@@ -90,9 +93,6 @@ class LocalChapterRepositoryImpl @Inject constructor(private val daoLibrary: Lib
         return daoLibrary.deleteChapter(chapter)
     }
 
-    override suspend fun deleteNotInLibraryChapters() {
-        return daoLibrary.deleteNotInLibraryChapters()
-    }
 
     override suspend fun deleteAllChapters() {
         return daoLibrary.deleteAllChapters()

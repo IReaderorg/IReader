@@ -163,10 +163,7 @@ class LibraryViewModel @Inject constructor(
 
     fun deleteBooks() {
         viewModelScope.launch(Dispatchers.IO) {
-            selection.forEach { bookId ->
-                deleteUseCase.deleteBookById(bookId)
-                deleteUseCase.deleteChaptersByBookId(bookId)
-            }
+            deleteUseCase.deleteBookAndChapterByBookIds(selection)
             selection.clear()
         }
 

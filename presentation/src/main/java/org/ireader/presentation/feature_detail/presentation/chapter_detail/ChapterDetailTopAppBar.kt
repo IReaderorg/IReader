@@ -16,6 +16,7 @@ import org.ireader.core.utils.Constants
 import org.ireader.presentation.feature_detail.presentation.chapter_detail.viewmodel.ChapterDetailState
 import org.ireader.presentation.presentation.Toolbar
 import org.ireader.presentation.presentation.components.CenterTopAppBar
+import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.BigSizeTextComposable
 
 
@@ -27,6 +28,7 @@ fun ChapterDetailTopAppBar(
     onClickFlipSelection: () -> Unit,
     onReverseClick: () -> Unit,
     onPopBackStack: () -> Unit,
+    onMap: () -> Unit,
 ) {
     Box(modifier = Modifier.fillMaxWidth()) {
         when {
@@ -41,7 +43,8 @@ fun ChapterDetailTopAppBar(
             else -> {
                 RegularChapterDetailTopAppBar(
                     onReverseClick = onReverseClick,
-                    onPopBackStack = onPopBackStack
+                    onPopBackStack = onPopBackStack,
+                    onMap = onMap
                 )
             }
         }
@@ -54,6 +57,7 @@ fun ChapterDetailTopAppBar(
 fun RegularChapterDetailTopAppBar(
     onReverseClick: () -> Unit,
     onPopBackStack: () -> Unit,
+    onMap: () -> Unit,
 ) {
     CenterTopAppBar(
         modifier = Modifier
@@ -66,6 +70,7 @@ fun RegularChapterDetailTopAppBar(
         contentColor = MaterialTheme.colors.onBackground,
         elevation = Constants.DEFAULT_ELEVATION,
         actions = {
+            AppIconButton(imageVector = Icons.Filled.Place, title = "", onClick = onMap)
             IconButton(onClick = onReverseClick) {
                 Icon(
                     imageVector = Icons.Default.Sort,
@@ -80,6 +85,7 @@ fun RegularChapterDetailTopAppBar(
                     contentDescription = "Back Icon"
                 )
             }
+
         }
     )
 }

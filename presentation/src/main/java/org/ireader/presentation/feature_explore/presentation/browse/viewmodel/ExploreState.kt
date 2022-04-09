@@ -5,7 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import org.ireader.core.utils.UiText
 import org.ireader.domain.models.LayoutType
-import org.ireader.domain.models.entities.Book
+import org.ireader.domain.models.entities.BookItem
 import tachiyomi.source.CatalogSource
 import tachiyomi.source.model.Filter
 import tachiyomi.source.model.Listing
@@ -26,7 +26,7 @@ interface ExploreState {
 
 
     var page: Int
-    var stateItems: List<Book>
+    var stateItems: List<BookItem>
     var endReached: Boolean
 
     var stateFilters: List<Filter<*>>?
@@ -44,7 +44,7 @@ open class ExploreStateImpl @Inject constructor() : ExploreState {
     override var topMenuEnable: Boolean by mutableStateOf<Boolean>(false)
     override var modifiedFilter by mutableStateOf(emptyList<Filter<*>>())
     override var page by mutableStateOf<Int>(1)
-    override var stateItems by mutableStateOf<List<Book>>(emptyList())
+    override var stateItems by mutableStateOf<List<BookItem>>(emptyList())
     override var endReached by mutableStateOf(false)
     override var stateFilters by mutableStateOf<List<Filter<*>>?>(null)
     override var stateListing by mutableStateOf<Listing?>(null)

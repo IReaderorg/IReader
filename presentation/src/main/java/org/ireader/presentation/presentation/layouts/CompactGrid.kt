@@ -14,25 +14,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.paging.compose.LazyPagingItems
-import org.ireader.domain.models.entities.Book
-import org.ireader.domain.models.entities.History
-import org.ireader.presentation.utils.items
+import org.ireader.domain.models.entities.BookItem
 
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CompactGridLayoutComposable(
     modifier: Modifier = Modifier,
-    lazyBooks: LazyPagingItems<Book>?,
-    books: List<Book>,
-    histories: List<History>,
+    books: List<BookItem>,
     selection: List<Long> = emptyList(),
-    onClick: (book: Book) -> Unit,
-    onLongClick: (book: Book) -> Unit = {},
+    onClick: (book: BookItem) -> Unit,
+    onLongClick: (book: BookItem) -> Unit = {},
     scrollState: LazyGridState = rememberLazyGridState(),
     isLocal: Boolean,
-    goToLatestChapter: (book: Book) -> Unit,
+    goToLatestChapter: (book: BookItem) -> Unit,
     onEndReach: (itemIndex: Int) -> Unit = {},
     isLoading: Boolean = false,
 ) {
@@ -45,26 +40,6 @@ fun CompactGridLayoutComposable(
             columns = GridCells.Fixed(2),
             contentPadding = PaddingValues(8.dp),
             content = {
-                if (lazyBooks != null) {
-                    items(lazyBooks) { book ->
-                        if (book != null) {
-                            BookImage(
-                                onClick = { onClick(book) }, book = book, ratio = 6f / 9f,
-                                selected = book.id in selection,
-                                onLongClick = { onLongClick(book) },
-                            ) {
-                                if (isLocal && histories.find { it.bookId == book.id }?.readAt != 0L) {
-                                    GoToLastReadComposable(onClick = { goToLatestChapter(book) })
-                                }
-                                if (!isLocal && book.favorite) {
-                                    TextBadge(text = "in Library")
-                                }
-                            }
-
-                        }
-
-                    }
-                } else {
                     items(count = books.size) { index ->
                         onEndReach(index)
                         BookImage(
@@ -74,7 +49,7 @@ fun CompactGridLayoutComposable(
                             selected = books[index].id in selection,
                             onLongClick = { onLongClick(books[index]) },
                         ) {
-                            if (isLocal && histories.find { it.bookId == books[index].id }?.readAt != 0L) {
+                            if (books[index].totalDownload != 0) {
                                 GoToLastReadComposable(onClick = { goToLatestChapter(books[index]) })
                             }
                             if (!isLocal && books[index].favorite) {
@@ -82,9 +57,6 @@ fun CompactGridLayoutComposable(
                             }
                         }
                     }
-                }
-
-
             })
         if (isLoading) {
             CircularProgressIndicator(modifier = Modifier

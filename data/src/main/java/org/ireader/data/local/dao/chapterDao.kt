@@ -7,7 +7,7 @@ import org.ireader.domain.models.entities.Chapter
 
 
 @Dao
-interface LibraryChapterDao : BaseDao<Chapter> {
+interface chapterDao : BaseDao<Chapter> {
 
     @Query("SELECT * FROM chapter WHERE id = :chapterId Limit 1")
     fun subscribeChapterById(
@@ -19,17 +19,20 @@ interface LibraryChapterDao : BaseDao<Chapter> {
         chapterId: Long,
     ): Chapter?
 
+    @Query("SELECT * FROM chapter")
+    suspend fun findAllChapters(): List<Chapter>
+
     @Query("SELECT * FROM chapter WHERE id in (:chapterId)")
     suspend fun findChapterByIdByBatch(
         chapterId: List<Long>,
     ): List<Chapter>
 
-    @RewriteQueriesToDropUnusedColumns
     @Query("""
         SELECT *
         FROM chapter 
-        LEFT JOIN library ON library.id = chapter.bookId 
-        WHERE library.favorite = 1
+        WHERE bookId IN (
+        SELECT library.id FROM library
+        WHERE favorite = 1)
     """)
     suspend fun findAllInLibraryChapters(): List<Chapter>
 
@@ -70,7 +73,6 @@ interface LibraryChapterDao : BaseDao<Chapter> {
         bookId: Int,
     ): PagingSource<Int, Chapter>
 
-    @RewriteQueriesToDropUnusedColumns
     @Query("""
         SELECT *
         from chapter
@@ -81,7 +83,6 @@ interface LibraryChapterDao : BaseDao<Chapter> {
     """)
     fun subscribeLastReadChapter(bookId: Long): Flow<Chapter?>
 
-    @RewriteQueriesToDropUnusedColumns
     @Query("""
         SELECT *
         from chapter
@@ -119,20 +120,5 @@ interface LibraryChapterDao : BaseDao<Chapter> {
     @Query("DELETE FROM chapter ")
     suspend fun deleteAllChapters()
 
-    @Transaction
-    suspend fun deleteNotInLibraryChapters() {
-        val chapters = findNotInLibraryChapters()
-        delete(chapters)
-    }
 
-    @Query("""
-        SELECT * FROM chapter
-        WHERE bookId IN (
-        SELECT chapter.ROWID FROM chapter a
-        INNER JOIN library b
-         ON (a.bookId=b.id)
-         WHERE b.favorite = 1
-        )
-    """)
-    suspend fun findNotInLibraryChapters(): List<Chapter>
 }

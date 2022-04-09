@@ -19,3 +19,9 @@ class DeleteBooks @Inject constructor(private val localBookRepository: LocalBook
     }
 }
 
+class DeleteBookAndChapterByBookIds @Inject constructor(private val localBookRepository: LocalBookRepository) {
+    suspend operator fun invoke(bookIds: List<Long>) {
+        localBookRepository.deleteBookAndChapterByBookIds(bookIds)
+    }
+}
+

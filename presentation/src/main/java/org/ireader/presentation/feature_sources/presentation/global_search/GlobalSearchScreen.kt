@@ -17,7 +17,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.pager.ExperimentalPagerApi
-import org.ireader.domain.models.entities.Book
+import org.ireader.domain.models.entities.BaseBook
 import org.ireader.presentation.feature_detail.presentation.book_detail.components.DotsFlashing
 import org.ireader.presentation.feature_sources.presentation.global_search.viewmodel.GlobalSearchViewModel
 import org.ireader.presentation.feature_sources.presentation.global_search.viewmodel.SearchItem
@@ -52,7 +52,7 @@ fun GlobalSearchScreen(
                 query = query
             )
         }
-    ) {
+    ) { padding ->
         LazyColumn(state = scrollState) {
             items(vm.searchItems.size) { index ->
                 GlobalSearchBookInfo(
@@ -98,7 +98,7 @@ fun GlobalSearchScreen(
 @Composable
 fun GlobalSearchBookInfo(
     book: SearchItem,
-    onBook: (Book) -> Unit,
+    onBook: (BaseBook) -> Unit,
     goToExplore: () -> Unit,
 ) {
     val modifier = when (book.items.isNotEmpty()) {

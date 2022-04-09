@@ -17,12 +17,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.ireader.core.utils.*
+import org.ireader.domain.utils.launchIO
 import org.ireader.presentation.R
 import org.ireader.presentation.feature_detail.presentation.book_detail.components.AdvanceSettingItem
 import org.ireader.presentation.feature_settings.presentation.setting.BackUpBook
@@ -51,7 +51,7 @@ fun AdvanceSettings(
     val onBackup =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultIntent ->
             if (resultIntent.resultCode == Activity.RESULT_OK && resultIntent.data != null) {
-                scope.launch {
+                scope.launchIO {
                     try {
                         val contentResolver = context.findComponentActivity()!!.contentResolver
                         val uri = resultIntent.data!!.data!!
@@ -74,7 +74,7 @@ fun AdvanceSettings(
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultIntent ->
             if (resultIntent.resultCode == Activity.RESULT_OK && resultIntent.data != null) {
                 try {
-                    scope.launch {
+                    scope.launchIO {
                         val contentResolver = context.findComponentActivity()!!.contentResolver
                         val uri = resultIntent.data!!.data!!
                         contentResolver
@@ -129,7 +129,7 @@ fun AdvanceSettings(
         },
         snackbarHost = { ISnackBarHost(snackBarHostState = it) },
         scaffoldState = scaffoldState
-    ) {
+    ) { padding ->
         Column {
             TextSection(text = "Data", toUpper = false)
             AdvanceSettingItem(title = "Clear All Database") {

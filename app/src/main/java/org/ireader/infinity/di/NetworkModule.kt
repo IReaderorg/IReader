@@ -24,7 +24,6 @@ class NetworkModule {
     ): RemoteKeyRepository {
         return RemoteKeyRepositoryImpl(
             dao = remoteKeysDao,
-            appDatabase = appDatabase
         )
     }
 

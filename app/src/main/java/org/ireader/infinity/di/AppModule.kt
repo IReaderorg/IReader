@@ -9,8 +9,8 @@ import dagger.hilt.components.SingletonComponent
 import org.ireader.data.local.AppDatabase
 import org.ireader.data.local.dao.HistoryDao
 import org.ireader.data.local.dao.LibraryBookDao
-import org.ireader.data.local.dao.LibraryChapterDao
 import org.ireader.data.local.dao.RemoteKeysDao
+import org.ireader.data.local.dao.chapterDao
 import org.ireader.data.repository.HistoryRepositoryImpl
 import org.ireader.data.repository.LocalBookRepositoryImpl
 import org.ireader.data.repository.LocalChapterRepositoryImpl
@@ -26,11 +26,10 @@ import javax.inject.Singleton
 class AppModule {
 
 
-
     @Provides
     @Singleton
-    fun providesLocalChapterRepository(libraryChapterDao: LibraryChapterDao): LocalChapterRepository {
-        return LocalChapterRepositoryImpl(libraryChapterDao)
+    fun providesLocalChapterRepository(chapterDao: chapterDao): LocalChapterRepository {
+        return LocalChapterRepositoryImpl(chapterDao)
     }
 
 
@@ -38,12 +37,12 @@ class AppModule {
     @Singleton
     fun providesLibraryRepository(
         libraryBookDao: LibraryBookDao,
-        libraryChapterDao: LibraryChapterDao,
+        chapterDao: chapterDao,
         database: AppDatabase,
         remoteKeysDao: RemoteKeysDao,
     ): LocalBookRepository {
         return LocalBookRepositoryImpl(libraryBookDao,
-            libraryChapterDao,
+            chapterDao,
             database,
             remoteKeysDao = remoteKeysDao)
     }
@@ -54,7 +53,7 @@ class AppModule {
         keysDao: RemoteKeysDao,
         database: AppDatabase,
     ): RemoteRepository {
-        return RemoteRepositoryImpl(remoteKeysDao = keysDao, database = database)
+        return RemoteRepositoryImpl()
     }
 
     @Provides

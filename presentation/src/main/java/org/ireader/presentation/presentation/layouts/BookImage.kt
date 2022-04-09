@@ -19,16 +19,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.ireader.domain.feature_service.io.BookCover
-import org.ireader.domain.models.entities.Book
+import org.ireader.domain.models.entities.BaseBook
 import org.ireader.presentation.presentation.components.BookImageComposable
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BookImage(
     modifier: Modifier = Modifier,
-    onClick: (Book) -> Unit = {},
-    onLongClick: (Book) -> Unit = {},
-    book: Book,
+    onClick: (BaseBook) -> Unit = {},
+    onLongClick: (BaseBook) -> Unit = {},
+    book: BaseBook,
     ratio: Float = 3f / 4f,
     selected: Boolean = false,
     badge: @Composable BoxScope.() -> Unit,

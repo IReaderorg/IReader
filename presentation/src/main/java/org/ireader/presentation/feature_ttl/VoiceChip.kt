@@ -30,19 +30,22 @@ fun VoiceChip(
 ) {
 
     Row(modifier = Modifier
-        .fillMaxWidth(),
+        .fillMaxWidth()
+        .height(50.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically) {
         Text(
             modifier = Modifier
-                .width(100.dp)
-                .height(50.dp),
+                .width(100.dp),
             text = "Voices",
+            textAlign = TextAlign.Start,
             fontSize = 12.sp,
             style = TextStyle(fontWeight = FontWeight.W400)
         )
 
-        LazyRow {
+        LazyRow(modifier = Modifier,
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start) {
             items(count = viewModel.voices.size) { index ->
                 viewModel.voices.filter { !it.isNetworkConnectionRequired }.let { voices ->
                     Spacer(modifier = modifier.width(10.dp))
@@ -82,13 +85,13 @@ fun LanguageChip(
 ) {
     val context = LocalContext.current
     Row(modifier = Modifier
+        .height(50.dp)
         .fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically) {
         Text(
             modifier = Modifier
-                .width(100.dp)
-                .height(50.dp),
+                .width(100.dp),
             text = "Languages",
             fontSize = 12.sp,
             style = TextStyle(fontWeight = FontWeight.W400)

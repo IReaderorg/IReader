@@ -1,6 +1,5 @@
 package org.ireader.domain.models.entities
 
-import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
@@ -12,39 +11,23 @@ import java.util.*
 @Entity(tableName = BOOK_TABLE)
 data class Book(
     @PrimaryKey(autoGenerate = true)
-    @ColumnInfo("id", defaultValue = "0")
-    val id: Long = 0,
-    @ColumnInfo("tableId", defaultValue = "0")
+    override val id: Long = 0,
     val tableId: Long = 0,
-    @ColumnInfo("sourceId")
-    val sourceId: Long,
-    @ColumnInfo("link")
+    override val sourceId: Long,
     val link: String,
-    @ColumnInfo("title")
-    val title: String,
-    @ColumnInfo("author", defaultValue = "")
-    val author: String = "",
-    @ColumnInfo("description", defaultValue = "")
+    override val title: String,
+    override val author: String = "",
     val description: String = "",
-    @ColumnInfo("genres", defaultValue = "[]")
     val genres: List<String> = emptyList(),
-    @ColumnInfo("status", defaultValue = "0")
     val status: Int = 0,
-    @ColumnInfo("cover", defaultValue = "")
-    val cover: String = "",
-    @ColumnInfo("customCover", defaultValue = "")
-    val customCover: String = "",
-    @ColumnInfo("favorite", defaultValue = "0")
-    val favorite: Boolean = false,
-    @ColumnInfo("lastUpdated", defaultValue = "0")
+    override val cover: String = "",
+    override val customCover: String = "",
+    override val favorite: Boolean = false,
     val lastUpdated: Long = 0,
-    @ColumnInfo("dataAdded", defaultValue = "0")
     val dataAdded: Long = 0,
-    @ColumnInfo("viewer", defaultValue = "0")
     val viewer: Int = 0,
-    @ColumnInfo("flags", defaultValue = "0")
     val flags: Int = 0,
-) {
+) : BaseBook {
 
     companion object {
         fun Book.toBookInfo(sourceId: Long): MangaInfo {
@@ -58,6 +41,7 @@ data class Book(
                 author = this.author,
             )
         }
+
 
         const val UNKNOWN = 0
         const val ONGOING = 1
@@ -181,3 +165,27 @@ fun BookWithInfo.toBook(): Book {
         author = this.author,
     )
 }
+
+
+interface BaseBook {
+    val id: Long
+    val sourceId: Long
+    val title: String
+    val author: String
+    val favorite: Boolean
+    val cover: String
+    val customCover: String
+}
+
+data class BookItem(
+    override val id: Long = 0,
+    override val sourceId: Long,
+    override val title: String,
+    override val author: String = "",
+    override val favorite: Boolean = false,
+    override val cover: String = "",
+    override val customCover: String = "",
+    val totalDownload: Int = 0,
+) : BaseBook
+
+

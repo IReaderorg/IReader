@@ -26,7 +26,7 @@ import org.ireader.domain.models.entities.*
 @TypeConverters(DatabaseConverter::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract val libraryBookDao: LibraryBookDao
-    abstract val libraryChapterDao: LibraryChapterDao
+    abstract val chapterDao: chapterDao
     abstract val remoteKeysDao: RemoteKeysDao
     abstract val downloadDao: DownloadDao
     abstract val catalogDao: CatalogDao

@@ -52,11 +52,6 @@ fun ExtensionScreen(
     val context = LocalContext.current
 
     LaunchedEffect(key1 = true) {
-        viewModel.deleteAllExploredBookOnInit()
-    }
-
-
-    LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
                 is UiEvent.ShowSnackbar -> {
@@ -68,6 +63,10 @@ fun ExtensionScreen(
             }
         }
     }
+    LaunchedEffect(key1 = true) {
+        viewModel.clearExploreMode()
+    }
+
 
     val pages = listOf<String>(
         "Sources",

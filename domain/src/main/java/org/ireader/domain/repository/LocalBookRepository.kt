@@ -4,12 +4,14 @@ import androidx.paging.PagingSource
 import kotlinx.coroutines.flow.Flow
 import org.ireader.domain.models.SortType
 import org.ireader.domain.models.entities.Book
+import org.ireader.domain.models.entities.BookItem
+import org.ireader.domain.models.entities.Chapter
 
 interface LocalBookRepository {
 
 
     /** Local GetUseCase**/
-
+    suspend fun findAllBooks(): List<Book>
     fun subscribeBookById(id: Long): Flow<Book?>
     suspend fun findBookById(id: Long): Book?
 
@@ -25,7 +27,7 @@ interface LocalBookRepository {
 
     fun getBooksByQueryPagingSource(query: String): PagingSource<Int, Book>
 
-    
+
     fun subscribeAllInLibrary(
         sortByAbs: Boolean,
         sortByDateAdded: Boolean,
@@ -36,15 +38,14 @@ interface LocalBookRepository {
         latestChapter: Boolean,
         lastChecked: Boolean,
         desc: Boolean,
-    ): Flow<List<Book>>
+    ): Flow<List<BookItem>>
 
-    suspend fun findUnreadBooks(): List<Book>
+    suspend fun findUnreadBooks(): List<BookItem>
 
-    suspend fun findCompletedBooks(): List<Book>
+    suspend fun findCompletedBooks(): List<BookItem>
 
-    suspend fun findDownloadedBooks(): List<Book>
+    suspend fun findDownloadedBooks(): List<BookItem>
 
-    fun getAllExploreBookPagingSource(): PagingSource<Int, Book>
 
     suspend fun findBookByKey(key: String): Book?
 
@@ -52,11 +53,12 @@ interface LocalBookRepository {
 
     /****************************************************/
 
-    suspend fun deleteNotInLibraryChapters()
 
     suspend fun deleteAllExploreBook()
 
     suspend fun deleteBooks(book: List<Book>)
+    suspend fun deleteBookAndChapterByBookIds(bookIds: List<Long>)
+    suspend fun insertBooksAndChapters(books: List<Book>, chapters: List<Chapter>)
 
     suspend fun deleteBookById(id: Long)
 
@@ -69,13 +71,10 @@ interface LocalBookRepository {
     suspend fun insertBook(book: Book): Long
     suspend fun insertBooks(book: List<Book>): List<Long>
 
+
     /**************************************************/
 
     suspend fun findFavoriteSourceIds(): List<Long>
-
-    suspend fun deleteAllExploredBook()
-
-    suspend fun convertExploredTOLibraryBooks()
 
 }
 

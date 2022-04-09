@@ -1,9 +1,6 @@
 package org.ireader.domain.use_cases.local
 
-import org.ireader.domain.use_cases.local.insert_usecases.InsertBook
-import org.ireader.domain.use_cases.local.insert_usecases.InsertBooks
-import org.ireader.domain.use_cases.local.insert_usecases.InsertChapter
-import org.ireader.domain.use_cases.local.insert_usecases.InsertChapters
+import org.ireader.domain.use_cases.local.insert_usecases.*
 import javax.inject.Inject
 
 data class LocalInsertUseCases @Inject constructor(
@@ -11,6 +8,7 @@ data class LocalInsertUseCases @Inject constructor(
     val insertBooks: InsertBooks,
     val insertChapter: InsertChapter,
     val insertChapters: InsertChapters,
+    val insertBookAndChapters: InsertBookAndChapters,
 )
 
 

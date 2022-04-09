@@ -6,19 +6,24 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import org.ireader.data.local.AppDatabase
 import org.ireader.data.local.dao.LibraryBookDao
-import org.ireader.data.local.dao.LibraryChapterDao
 import org.ireader.data.local.dao.RemoteKeysDao
+import org.ireader.data.local.dao.chapterDao
 import org.ireader.domain.models.SortType
 import org.ireader.domain.models.entities.Book
+import org.ireader.domain.models.entities.BookItem
+import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.repository.LocalBookRepository
 import timber.log.Timber
 
 class LocalBookRepositoryImpl(
     private val bookDao: LibraryBookDao,
-    private val libraryChapterDao: LibraryChapterDao,
+    private val chapterDao: chapterDao,
     private val appDatabase: AppDatabase,
     private val remoteKeysDao: RemoteKeysDao,
 ) : LocalBookRepository {
+    override suspend fun findAllBooks(): List<Book> {
+        return bookDao.findAllBooks()
+    }
 
     override fun subscribeBookById(id: Long): Flow<Book?> = flow {
         Timber.d("Timber: GetExploreBookByIdUseCase was Called")
@@ -44,15 +49,15 @@ class LocalBookRepositoryImpl(
         return bookDao.findBookByIds(id)
     }
 
-    override suspend fun findUnreadBooks(): List<Book> {
+    override suspend fun findUnreadBooks(): List<BookItem> {
         return bookDao.findUnreadBooks()
     }
 
-    override suspend fun findCompletedBooks(): List<Book> {
+    override suspend fun findCompletedBooks(): List<BookItem> {
         return bookDao.findCompletedBooks()
     }
 
-    override suspend fun findDownloadedBooks(): List<Book> {
+    override suspend fun findDownloadedBooks(): List<BookItem> {
         return bookDao.findDownloadedBooks()
     }
 
@@ -66,7 +71,7 @@ class LocalBookRepositoryImpl(
         latestChapter: Boolean,
         lastChecked: Boolean,
         desc: Boolean,
-    ): Flow<List<Book>> {
+    ): Flow<List<BookItem>> {
         return when {
             sortByLastRead -> bookDao.subscribeLatestRead(desc)
             sortByTotalChapters -> bookDao.subscribeTotalChapter(desc)
@@ -106,9 +111,6 @@ class LocalBookRepositoryImpl(
     }
 
     /*******************GET **************************************/
-    override suspend fun deleteNotInLibraryChapters() {
-        libraryChapterDao.deleteNotInLibraryChapters()
-    }
 
     override suspend fun deleteAllExploreBook() {
         return remoteKeysDao.deleteAllExploredBook()
@@ -124,10 +126,6 @@ class LocalBookRepositoryImpl(
     }
 
 
-    override fun getAllExploreBookPagingSource(): PagingSource<Int, Book> {
-        return remoteKeysDao.getAllExploreBookByPaging()
-    }
-
     override suspend fun findBookByKey(key: String): Book? {
         return bookDao.findBookByKey(key = key)
     }
@@ -138,24 +136,26 @@ class LocalBookRepositoryImpl(
 
 
     override suspend fun insertBooks(book: List<Book>): List<Long> {
-        return remoteKeysDao.insertAllExploredBook(book)
+        return remoteKeysDao.insert(book)
     }
 
+
     override suspend fun deleteBooks(book: List<Book>) {
-        remoteKeysDao.deleteBooks(book)
+        remoteKeysDao.delete(book)
+    }
+
+    override suspend fun deleteBookAndChapterByBookIds(bookIds: List<Long>) {
+        bookDao.deleteBooksByIds(bookIds)
+    }
+
+    override suspend fun insertBooksAndChapters(books: List<Book>, chapters: List<Chapter>) {
+        bookDao.insertBooksAndChapters(books, chapters)
     }
 
     override suspend fun findFavoriteSourceIds(): List<Long> {
         return bookDao.findFavoriteSourceIds()
     }
 
-    override suspend fun deleteAllExploredBook() {
-        return bookDao.deleteExploredBooks()
-    }
-
-    override suspend fun convertExploredTOLibraryBooks() {
-        return bookDao.convertExploredTOLibraryBooks()
-    }
 
     override suspend fun insertBook(book: Book): Long {
         return bookDao.insertBook(book)

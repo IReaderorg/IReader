@@ -65,8 +65,8 @@ class LocalModule {
 
     @Provides
     @Singleton
-    fun provideChapterDao(db: AppDatabase): LibraryChapterDao {
-        return db.libraryChapterDao
+    fun provideChapterDao(db: AppDatabase): chapterDao {
+        return db.chapterDao
     }
 
     @Provides

@@ -1,11 +1,9 @@
 package org.ireader.presentation.feature_explore.presentation.browse.viewmodel
 
-import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
@@ -42,7 +40,6 @@ class ExploreViewModel @Inject constructor(
     private val browseLayoutTypeUseCase: BrowseLayoutTypeUseCase,
     private val remoteKeyUseCase: RemoteKeyUseCase,
     private val insertUseCases: LocalInsertUseCases,
-    @ApplicationContext private val context: Context,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel(), ExploreState by state {
 

@@ -17,23 +17,19 @@ object Constants {
 
     const val KODEIN_MODULE = "kodein_module"
 
-    const val ImageKeyTable = "images_key_table"
+    const val ImageKeyTable = "images"
     const val BOOK_TABLE = "library"
     const val CHAPTER_TABLE = "chapter"
+    const val REMOTE_TABLE = "remote"
     const val DOWNLOAD_TABLE = "download"
-    const val CATALOG_REMOTE = "catalog_remote"
+    const val CATALOG_REMOTE = "catalog"
     const val UPDATE_TABLE = "updates"
     const val HISTORY_TABLE = "history"
     const val CATEGORY_TABLE = "category"
 
     const val EXPLORE_BOOK_TABLE = "explore"
 
-    const val PAGE_KET_TABLE = "page_key_table"
-
-    const val DEFAULT_PAGE_SIZE = 6
-    const val DEFAULT_BIG_PAGE_SIZE = 150
-    const val MAX_PAGE_SIZE = 200
-    const val MAX_BIG_PAGE_SIZE = 450
+    const val PAGE_KET_TABLE = "page"
 
 
     const val ARG_HIDE_BOTTOM_BAR = "ARG_HIDE_BOTTOM_BAR"

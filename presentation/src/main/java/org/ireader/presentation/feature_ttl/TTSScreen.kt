@@ -27,6 +27,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.NotificationManagerCompat
 import androidx.navigation.NavController
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.launch
 import org.ireader.core.R
 import org.ireader.domain.feature_service.io.BookCover
@@ -47,7 +50,7 @@ import tachiyomi.source.Source
 import java.math.RoundingMode
 
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalPagerApi::class)
 @Composable
 fun TTSScreen(
     navController: NavController,
@@ -69,9 +72,10 @@ fun TTSScreen(
         vm.voiceMode = false
     }
     val context = LocalContext.current
+    val pagerState = rememberPagerState()
 
     val drawerScrollState = rememberLazyListState()
-    val scrollState = rememberLazyListState()
+    val textScroll = rememberScrollState()
     val chapter = vm.stateChapter
     val chapters = vm.stateChapters
     val scope = rememberCoroutineScope()
@@ -85,6 +89,9 @@ fun TTSScreen(
                 drawerScrollState.scrollToItem(vm.getCurrentIndexOfChapter(chapter))
             }
         }
+    }
+    LaunchedEffect(key1 = true) {
+        textScroll.animateScrollTo(0)
     }
 
     LaunchedEffect(key1 = vm.state.stateChapter, vm.state.book) {
@@ -101,19 +108,6 @@ fun TTSScreen(
         vm.ttsState.isPlaying,
         vm.ttsState.currentReadingParagraph) {
         vm.stateChapter = vm.ttsState.ttsChapter
-//        vm.state.stateChapter?.let { chapter ->
-//            vm.state.book?.let { book ->
-//                val notification = vm.defaultNotificationHelper.basicPlayingTextReaderNotification(
-//                    chapter,
-//                    book,
-//                    vm.ttsState.isPlaying,
-//                    vm.ttsState.currentReadingParagraph,
-//                    vm.ttsState.mediaSession)
-//                NotificationManagerCompat.from(context)
-//                    .notify(Notifications.ID_TEXT_READER_PROGRESS, notification.build())
-//            }
-//
-//        }
     }
     LaunchedEffect(key1 = vm.state.stateChapter) {
         vm.ttsState.ttsChapter = vm.state.stateChapter
@@ -131,51 +125,15 @@ fun TTSScreen(
 
         }
     }
+    LaunchedEffect(key1 = vm.ttsState.currentReadingParagraph) {
+        pagerState.scrollToPage(vm.ttsState.currentReadingParagraph)
+    }
+    LaunchedEffect(key1 = pagerState.currentPage) {
+        vm.currentReadingParagraph = pagerState.targetPage
+
+    }
 
 
-//    LaunchedEffect(key1 = true) {
-//        vm.notificationStates.mediaPlayerNotification.collectLatest {
-//            when (it) {
-//                1 -> {
-//                    onPrev()
-//                }
-//                2 -> {
-//                    onPrevPar()
-//                }
-//                3 -> {
-//                    onPlay()
-//                    chapter?.let {
-//                        vm.ttsBook?.let { book ->
-////                            val notification = vm.defaultNotificationHelper.basicPlayingTextReaderNotification(
-////                                        chapter,
-////                                        book,
-////                                        !vm.isPlaying,
-////                                        vm.currentReadingParagraph,
-////                                        vm.mediaSessionCompat(context))
-////
-////
-////                            NotificationManagerCompat.from(context).apply {
-////                                notify(Notifications.ID_TEXT_READER_PROGRESS, notification.build())
-////                            }
-//                        }
-//
-//                    }
-//
-//                }
-//                4 -> {
-//                    onNextPar()
-//                }
-//                5 -> {
-//                    onNext()
-//                }
-//                6 -> {
-//                    NotificationManagerCompat.from(context).apply {
-//                        cancel(Notifications.ID_TEXT_READER_PROGRESS)
-//                    }
-//                }
-//            }
-//        }
-//    }
 
     ModalBottomSheetLayout(
         modifier = Modifier.systemBarsPadding(),
@@ -274,7 +232,7 @@ fun TTSScreen(
                 )
 
             }
-        ) {
+        ) { padding ->
             Column(modifier = Modifier
                 .fillMaxSize(),
                 verticalArrangement = Arrangement.SpaceBetween,
@@ -307,25 +265,28 @@ fun TTSScreen(
                                 maxLine = 1,
                                 overflow = TextOverflow.Ellipsis)
                             vm.stateChapter?.let { chapter ->
-                                SuperSmallTextComposable(text = "${vm.currentReadingParagraph}/${chapter.content.size}")
+                                SuperSmallTextComposable(text = "${vm.currentReadingParagraph}/${chapter.content.lastIndex}")
 
                             }
                         }
-                        Text(
-                            modifier = modifier
-                                .padding(horizontal = vm.paragraphsIndent.dp, vertical = 4.dp)
-                                .fillMaxWidth()
-                                .height(160.dp)
-                                .verticalScroll(rememberScrollState())
-                                .align(Alignment.CenterHorizontally),
-                            text = if (chapter.content.isNotEmpty() && vm.currentReadingParagraph != chapter.content.size) chapter.content[vm.currentReadingParagraph] else "",
-                            fontSize = vm.fontSize.sp,
-                            fontFamily = vm.font.fontFamily,
-                            textAlign = TextAlign.Start,
-                            color = MaterialTheme.colors.onBackground,
-                            lineHeight = vm.lineHeight.sp,
-                            maxLines = 12,
-                        )
+                        HorizontalPager(count = chapter.content.size, state = pagerState) { index ->
+                            Text(
+                                modifier = modifier
+                                    .padding(horizontal = vm.paragraphsIndent.dp, vertical = 4.dp)
+                                    .fillMaxWidth()
+                                    .height(180.dp)
+                                    .verticalScroll(textScroll)
+                                    .align(Alignment.CenterHorizontally),
+                                text = chapter.content[index],
+                                fontSize = vm.fontSize.sp,
+                                fontFamily = vm.font.fontFamily,
+                                textAlign = TextAlign.Start,
+                                color = MaterialTheme.colors.onBackground,
+                                lineHeight = vm.lineHeight.sp,
+                                maxLines = 12,
+                            )
+                        }
+
                         Column(modifier = Modifier
                             .fillMaxWidth(),
                             verticalArrangement = Arrangement.Center,

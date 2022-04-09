@@ -8,16 +8,16 @@ import org.ireader.domain.models.DisplayMode
 import org.ireader.domain.models.FilterType
 import org.ireader.domain.models.LayoutType
 import org.ireader.domain.models.SortType
-import org.ireader.domain.models.entities.Book
+import org.ireader.domain.models.entities.BookItem
 import org.ireader.domain.models.entities.History
 import javax.inject.Inject
 
 
 interface LibraryState {
     var isLoading: Boolean
-    var books: List<Book>
+    var books: List<BookItem>
     val isEmpty: Boolean
-    var searchedBook: List<Book>
+    var searchedBook: List<BookItem>
     var error: UiText
     var layout: LayoutType
     var inSearchMode: Boolean
@@ -33,9 +33,9 @@ interface LibraryState {
 
 open class LibraryStateImpl @Inject constructor() : LibraryState {
     override var isLoading by mutableStateOf<Boolean>(false)
-    override var books by mutableStateOf<List<Book>>(emptyList())
+    override var books by mutableStateOf<List<BookItem>>(emptyList())
     override val isEmpty: Boolean by derivedStateOf { books.isEmpty() }
-    override var searchedBook by mutableStateOf<List<Book>>(emptyList())
+    override var searchedBook by mutableStateOf<List<BookItem>>(emptyList())
     override var error by mutableStateOf<UiText>(UiText.StringResource(R.string.no_error))
     override var layout by mutableStateOf<LayoutType>(DisplayMode.GridLayout.layout)
     override var inSearchMode by mutableStateOf<Boolean>(false)

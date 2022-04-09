@@ -89,7 +89,19 @@ fun ChapterDetailScreen(
                 onReverseClick = {
                     vm.onEvent(ChapterDetailEvent.ToggleOrder)
                 },
-                onPopBackStack = { navController.popBackStack() }
+                onPopBackStack = { navController.popBackStack() },
+                onMap = {
+                    scope.launch {
+                        try {
+
+                            scrollState.scrollToItem(vm.getLastChapterIndex(),
+                                -scrollState.layoutInfo.viewportEndOffset / 2)
+
+                        } catch (e: Exception) {
+
+                        }
+                    }
+                }
             )
         },
         drawerGesturesEnabled = true,
@@ -111,24 +123,7 @@ fun ChapterDetailScreen(
                 }
             }
         },
-        floatingActionButtonPosition = FabPosition.End,
-        floatingActionButton = {
-            FloatingActionButton(onClick = {
-                scope.launch {
-                    try {
-
-                        scrollState.scrollToItem(vm.getLastChapterIndex(),
-                            -scrollState.layoutInfo.viewportEndOffset / 2)
-
-                    } catch (e: Exception) {
-
-                    }
-                }
-            }) {
-                Icon(Icons.Filled.Map, "", tint = MaterialTheme.colors.onSecondary)
-            }
-        },
-    ) {
+    ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
             Column {
                 CustomTextField(modifier = Modifier

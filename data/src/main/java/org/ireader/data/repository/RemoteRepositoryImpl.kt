@@ -1,16 +1,10 @@
 package org.ireader.data.repository
 
-import androidx.paging.ExperimentalPagingApi
-import androidx.paging.PagingData
-import androidx.paging.PagingSource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.ireader.core.utils.Constants
 import org.ireader.core.utils.UiText
 import org.ireader.data.R
-import org.ireader.data.local.AppDatabase
-import org.ireader.data.local.dao.RemoteKeysDao
-import org.ireader.data.repository.mediator.GetRemoteBooksByRemoteMediator
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Book.Companion.toBookInfo
 import org.ireader.domain.models.entities.Chapter
@@ -20,29 +14,17 @@ import org.ireader.domain.utils.Resource
 import retrofit2.HttpException
 import tachiyomi.source.CatalogSource
 import tachiyomi.source.Source
-import tachiyomi.source.model.Filter
-import tachiyomi.source.model.Listing
 import tachiyomi.source.model.MangaInfo
 import tachiyomi.source.model.Text
 import timber.log.Timber
 import java.io.IOException
 
-class RemoteRepositoryImpl(
-    private val remoteKeysDao: RemoteKeysDao,
-    private val database: AppDatabase,
-) : RemoteRepository {
+class RemoteRepositoryImpl : RemoteRepository {
 
 
     override suspend fun getRemoteBookDetail(book: Book, source: Source): MangaInfo {
         return source.getMangaDetails(book.toBookInfo(source.id))
     }
-
-    @OptIn(ExperimentalPagingApi::class)
-    override fun getAllExploreBookByPaging(
-    ): PagingSource<Int, Book> {
-        return remoteKeysDao.getAllExploreBookByPaging()
-    }
-
 
     override fun getRemoteReadingContentUseCase(
         chapter: Chapter,
@@ -78,20 +60,6 @@ class RemoteRepositoryImpl(
         } catch (e: Exception) {
             emit(Resource.Error<List<String>>(uiText = UiText.ExceptionString(e)))
         }
-    }
-
-
-    @OptIn(ExperimentalPagingApi::class)
-    override fun getRemoteBooksByRemoteMediator(
-        source: CatalogSource,
-        listing: Listing?,
-        filters: List<Filter<*>>?,
-        query: String?,
-        pageSize: Int,
-        maxSize: Int,
-    ): Flow<PagingData<Book>> {
-        return GetRemoteBooksByRemoteMediator(database = database,
-            remoteRepository = this@RemoteRepositoryImpl).invoke(source, listing, filters, query)
     }
 
 

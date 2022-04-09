@@ -14,10 +14,7 @@ import org.ireader.domain.models.entities.Catalog
 import org.ireader.domain.models.entities.CatalogInstalled
 import org.ireader.domain.models.entities.CatalogLocal
 import org.ireader.domain.models.entities.CatalogRemote
-import org.ireader.domain.use_cases.local.DeleteUseCase
-import org.ireader.domain.use_cases.local.delete_usecases.book.ConvertExploredTOLibraryBooks
-import org.ireader.domain.use_cases.local.delete_usecases.book.DeleteAllExploredBooks
-import org.ireader.domain.use_cases.local.delete_usecases.chapter.DeleteNotInLibraryChapters
+import org.ireader.domain.use_cases.remote.key.RemoteKeyUseCase
 import org.ireader.domain.utils.launchIO
 import org.ireader.presentation.R
 import javax.inject.Inject
@@ -32,10 +29,7 @@ class ExtensionViewModel @Inject constructor(
     private val uninstallCatalog: UninstallCatalog,
     private val togglePinnedCatalog: TogglePinnedCatalog,
     private val syncRemoteCatalogs: SyncRemoteCatalogs,
-    private val convertExploredTOLibraryBooks: ConvertExploredTOLibraryBooks,
-    private val deleteAllExploredBook: DeleteAllExploredBooks,
-    private val deleteNotInLibraryChapters: DeleteNotInLibraryChapters,
-    private val deleteUseCase: DeleteUseCase,
+    private val remoteKeyUseCase: RemoteKeyUseCase,
 ) : BaseViewModel(), CatalogsState by state {
 
 
@@ -74,15 +68,6 @@ class ExtensionViewModel @Inject constructor(
         }
 
     }
-
-    fun deleteAllExploredBookOnInit() {
-        viewModelScope.launchIO {
-            convertExploredTOLibraryBooks()
-            deleteNotInLibraryChapters()
-            // deleteUseCase.deleteAllRemoteKeys()
-        }
-    }
-
 
     fun installCatalog(catalog: Catalog) {
         scope.launch {
@@ -176,6 +161,12 @@ class ExtensionViewModel @Inject constructor(
                 val codes = choice.languages.map { it.code }
                 filter { it.lang in codes }
             }
+        }
+    }
+
+    fun clearExploreMode() {
+        viewModelScope.launchIO {
+            remoteKeyUseCase.clearExploreMode()
         }
     }
 

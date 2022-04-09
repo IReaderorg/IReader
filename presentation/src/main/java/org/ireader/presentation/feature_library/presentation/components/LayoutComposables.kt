@@ -4,10 +4,8 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
-import androidx.paging.compose.LazyPagingItems
 import org.ireader.domain.models.LayoutType
-import org.ireader.domain.models.entities.Book
-import org.ireader.domain.models.entities.History
+import org.ireader.domain.models.entities.BookItem
 import org.ireader.presentation.presentation.layouts.CompactGridLayoutComposable
 import org.ireader.presentation.presentation.layouts.GridLayoutComposable
 import org.ireader.presentation.presentation.layouts.LinearListDisplay
@@ -18,18 +16,16 @@ import tachiyomi.source.Source
 @Composable
 fun LayoutComposable(
     navController: NavController,
-    books: List<Book> = emptyList(),
-    lazyBook: LazyPagingItems<Book>? = null,
-    histories: List<History> = emptyList(),
-    onClick: (book: Book) -> Unit,
-    onLongClick: (Book) -> Unit = {},
+    books: List<BookItem> = emptyList(),
+    onClick: (book: BookItem) -> Unit,
+    onLongClick: (BookItem) -> Unit = {},
     selection: List<Long> = emptyList<Long>(),
     layout: LayoutType,
     scrollState: LazyListState,
     gridState: androidx.compose.foundation.lazy.grid.LazyGridState,
     source: Source? = null,
     isLocal: Boolean,
-    goToLatestChapter: (book: Book) -> Unit = {},
+    goToLatestChapter: (book: BookItem) -> Unit = {},
     isLoading: Boolean = false,
     onEndReachValidator: (itemIndex: Int) -> Unit = {},
 ) {
@@ -39,7 +35,6 @@ fun LayoutComposable(
         is LayoutType.GridLayout -> {
             GridLayoutComposable(
                 books = books,
-                lazyBooks = lazyBook,
                 onClick = { book ->
                     onClick(book)
                 },
@@ -48,7 +43,6 @@ fun LayoutComposable(
                 scrollState = gridState,
                 isLocal = isLocal,
                 goToLatestChapter = { goToLatestChapter(it) },
-                histories = histories,
                 onEndReach = onEndReachValidator,
                 isLoading = isLoading
             )
@@ -60,7 +54,6 @@ fun LayoutComposable(
                 isLocal = isLocal,
                 selection = selection,
                 onLongClick = { onLongClick(it) },
-                lazyBooks = lazyBook,
                 goToLatestChapter = { goToLatestChapter(it) },
                 onEndReach = onEndReachValidator,
                 isLoading = isLoading
@@ -75,9 +68,7 @@ fun LayoutComposable(
                 isLocal = isLocal,
                 selection = selection,
                 onLongClick = { onLongClick(it) },
-                lazyBooks = lazyBook,
                 goToLatestChapter = { goToLatestChapter(it) },
-                histories = histories,
                 onEndReach = onEndReachValidator,
                 isLoading = isLoading
             )

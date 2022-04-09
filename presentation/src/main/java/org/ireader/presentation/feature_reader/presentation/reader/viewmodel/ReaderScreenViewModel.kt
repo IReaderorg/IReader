@@ -69,7 +69,7 @@ class ReaderScreenViewModel @Inject constructor(
         val chapterId = savedStateHandle.get<Long>(NavigationArgs.chapterId.name)
         val bookId = savedStateHandle.get<Long>(NavigationArgs.bookId.name)
         if (ttsState.ttsChapter != null && ttsState.ttsBook?.id == bookId) {
-            ttsState.voiceMode = true
+            //ttsState.voiceMode = true
             state.stateChapter = ttsChapter
             state.book = ttsBook
             state.stateChapters = ttsChapters

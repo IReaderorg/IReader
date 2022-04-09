@@ -65,7 +65,8 @@ fun BookDetailScreenLoadedComposable(
                 ),
                 contentDescription = null,
                 modifier = Modifier
-                    .fillMaxSize()
+                    .fillMaxWidth()
+                    .height(300.dp)
                     .alpha(fadeInImage),
                 contentScale = ContentScale.Crop,
             )

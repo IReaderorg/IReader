@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import org.ireader.domain.models.FilterType
 import org.ireader.domain.models.SortType
-import org.ireader.domain.models.entities.Book
+import org.ireader.domain.models.entities.BookItem
 import org.ireader.domain.repository.LocalBookRepository
 import javax.inject.Inject
 
@@ -15,7 +15,7 @@ class SubscribeInLibraryBooks @Inject constructor(private val localBookRepositor
         sortType: SortType,
         desc: Boolean,
         filter: List<FilterType>,
-    ): Flow<List<Book>> = flow {
+    ): Flow<List<BookItem>> = flow {
         localBookRepository.subscribeAllInLibrary(
             sortByLastRead = sortType == SortType.LastRead,
             sortByAbs = sortType == SortType.Alphabetically,
@@ -27,7 +27,7 @@ class SubscribeInLibraryBooks @Inject constructor(private val localBookRepositor
             latestChapter = sortType == SortType.LatestChapter,
             lastChecked = sortType == SortType.LastChecked
         ).collect { books ->
-            val filteredBooks = mutableListOf<Book>()
+            val filteredBooks = mutableListOf<BookItem>()
 
             withContext(Dispatchers.IO) {
                 if (filter.contains(FilterType.Unread)) {

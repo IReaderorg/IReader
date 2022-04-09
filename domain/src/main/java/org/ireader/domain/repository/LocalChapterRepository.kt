@@ -18,6 +18,8 @@ interface LocalChapterRepository {
         chapterId: List<Long>,
     ): List<Chapter>
 
+    suspend fun findAllChapters(): List<Chapter>
+
     suspend fun findAllInLibraryChapter(): List<Chapter>
 
     fun subscribeChaptersByBookId(
@@ -55,13 +57,13 @@ interface LocalChapterRepository {
         bookId: Long,
     )
 
+
     suspend fun deleteChapters(chapters: List<Chapter>)
 
     suspend fun deleteChapterByChapter(
         chapter: Chapter,
     )
 
-    suspend fun deleteNotInLibraryChapters()
 
     suspend fun deleteAllChapters()
 

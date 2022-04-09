@@ -4,17 +4,21 @@ import androidx.paging.PagingSource
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 import org.ireader.domain.models.entities.Book
+import org.ireader.domain.models.entities.BookItem
+import org.ireader.domain.models.entities.Chapter
 
 @Dao
 interface LibraryBookDao : BaseDao<Book> {
 
+    @Query("SELECT * FROM library")
+    suspend fun findAllBooks(): List<Book>
 
     @RewriteQueriesToDropUnusedColumns
     @Query("""SELECT  * FROM library WHERE favorite = 1 """)
     fun subscribeAllLocalBooks(): Flow<List<Book>>
 
     @RewriteQueriesToDropUnusedColumns
-    @Query("""SELECT  library.*, 
+    @Query("""SELECT  library.* ,
         MAX(chapter.readAt) as lastRead,
         COUNT(DISTINCT chapter.id) AS totalChapters,
         SUM(chapter.read) as isRead,
@@ -48,11 +52,13 @@ interface LibraryBookDao : BaseDao<Book> {
         dateAdded: Boolean = false,
         lastChecked: Boolean = false,
         desc: Boolean = false,
-    ): Flow<List<Book>>
+    ): Flow<List<BookItem>>
 
     @RewriteQueriesToDropUnusedColumns
     @Query("""
-    SELECT library.*, MAX(history.readAt) AS max
+    SELECT library.*,
+    MAX(history.readAt) AS max,
+    SUM(length(chapter.content) > 10) AS totalDownload
     FROM library
     LEFT JOIN chapter
     ON library.id = chapter.bookId
@@ -64,11 +70,12 @@ interface LibraryBookDao : BaseDao<Book> {
     CASE WHEN :desc = 1 THEN  max END DESC,
     CASE WHEN :desc = 0 THEN  max END ASC
 """)
-    fun subscribeLatestRead(desc: Boolean): Flow<List<Book>>
+    fun subscribeLatestRead(desc: Boolean): Flow<List<BookItem>>
 
     @RewriteQueriesToDropUnusedColumns
     @Query("""
-    SELECT library.*, MAX(chapter.dateUpload) AS max
+    SELECT library.*, MAX(chapter.dateUpload) AS max,
+    SUM(length(chapter.content) > 10) AS totalDownload
     FROM library
     LEFT JOIN chapter
     ON library.id = chapter.bookId
@@ -77,11 +84,12 @@ interface LibraryBookDao : BaseDao<Book> {
     CASE WHEN :desc = 1 THEN  max END DESC,
     CASE WHEN :desc = 0 THEN  max END ASC
 """)
-    fun subscribeLatestChapter(desc: Boolean): Flow<List<Book>>
+    fun subscribeLatestChapter(desc: Boolean): Flow<List<BookItem>>
 
     @RewriteQueriesToDropUnusedColumns
     @Query("""
-    SELECT library.*, SUM(CASE WHEN chapter.read == 0 THEN 1 ELSE 0 END) AS unread
+    SELECT library.*, SUM(CASE WHEN chapter.read == 0 THEN 1 ELSE 0 END) AS unread,
+    SUM(length(chapter.content) > 10) AS totalDownload
     FROM library
     JOIN chapter
     ON library.id = chapter.bookId
@@ -91,11 +99,12 @@ interface LibraryBookDao : BaseDao<Book> {
     CASE WHEN :desc = 1 THEN  COUNT(*) END DESC,
     CASE WHEN :desc = 0 THEN  COUNT(*) END ASC
 """)
-    fun subscribeTotalChapter(desc: Boolean): Flow<List<Book>>
+    fun subscribeTotalChapter(desc: Boolean): Flow<List<BookItem>>
 
     @RewriteQueriesToDropUnusedColumns
     @Query("""
     SELECT library.*, 
+    SUM(length(chapter.content) > 10) AS totalDownload,
     SUM(CASE WHEN chapter.read == 0 THEN 1 ELSE 0 END) AS unread,
     COUNT(*) AS total
     FROM library
@@ -104,12 +113,13 @@ interface LibraryBookDao : BaseDao<Book> {
     GROUP BY library.id
     HAVING library.favorite = 1 AND unread == total
 """)
-    suspend fun findUnreadBooks(): List<Book>
+    suspend fun findUnreadBooks(): List<BookItem>
 
     @RewriteQueriesToDropUnusedColumns
     @Query("""
     SELECT library.*, 
     SUM(length(chapter.content) > 10) as total_download,
+    SUM(length(chapter.content) > 10) AS totalDownload,
     COUNT(*) AS total
     FROM library
     LEFT JOIN chapter
@@ -117,11 +127,12 @@ interface LibraryBookDao : BaseDao<Book> {
     GROUP BY library.id
     HAVING library.favorite = 1 AND total_download == total
 """)
-    suspend fun findCompletedBooks(): List<Book>
+    suspend fun findCompletedBooks(): List<BookItem>
 
     @RewriteQueriesToDropUnusedColumns
     @Query("""
     SELECT library.*, 
+    SUM(length(chapter.content) > 10) AS totalDownload,
     SUM(CASE WHEN chapter.read == 0 THEN 1 ELSE 0 END) AS unread,
     COUNT(*) AS total
     FROM library
@@ -130,7 +141,7 @@ interface LibraryBookDao : BaseDao<Book> {
     GROUP BY library.id
     HAVING library.favorite = 1 AND unread == 0
 """)
-    suspend fun findDownloadedBooks(): List<Book>
+    suspend fun findDownloadedBooks(): List<BookItem>
 
 
     @Query("SELECT * FROM library WHERE favorite = 1")
@@ -173,13 +184,33 @@ interface LibraryBookDao : BaseDao<Book> {
     @Query("SELECT sourceId FROM library GROUP BY sourceId ORDER BY COUNT(sourceId) DESC")
     suspend fun findFavoriteSourceIds(): List<Long>
 
-    @Query("""
-        DELETE  FROM library 
-        WHERE favorite = 0
-    """)
-    suspend fun deleteExploredBooks()
+    @Transaction
+    suspend fun deleteBookAndChapterByBookIds(bookIds: List<Long>) {
+        deleteChaptersByBookIds(bookIds)
+        deleteBooksByIds(bookIds)
+        deleteAllUpdates(bookIds)
+    }
 
-    @Query("UPDATE library SET tableId = 0 WHERE tableId != 0 AND favorite = 1")
-    suspend fun convertExploredTOLibraryBooks()
+    @Query("Delete FROM updates WHERE bookId in (:bookIds)")
+    suspend fun deleteAllUpdates(bookIds: List<Long>)
+
+    @Transaction
+    suspend fun insertBooksAndChapters(books: List<Book>, chapters: List<Chapter>) {
+        insert(books)
+        insertChapters(chapters)
+    }
+
+    @Insert(entity = Chapter::class, onConflict = OnConflictStrategy.REPLACE)
+    fun insertChapters(chapters: List<Chapter>)
+
+    @Query("""
+        DELETE FROM library
+        WHERE id in (:bookIds)
+    """)
+    suspend fun deleteBooksByIds(bookIds: List<Long>)
+
+    @Query("DELETE FROM chapter WHERE bookId in (:bookIds)")
+    suspend fun deleteChaptersByBookIds(bookIds: List<Long>)
+
 }
 

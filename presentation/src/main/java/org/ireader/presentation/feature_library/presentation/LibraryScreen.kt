@@ -102,7 +102,7 @@ fun LibraryScreen(
             ) {
                 LibraryScreenTopBar(
                     navController = navController,
-                    vm = vm,
+                    state = vm,
                     coroutineScope = coroutineScope,
                     bottomSheetState = bottomSheetState)
                 Box(modifier = Modifier
@@ -150,7 +150,6 @@ fun LibraryScreen(
                                 onLongClick = {
                                     vm.selection.add(it.id)
                                 },
-                                histories = vm.histories
                             )
                         }
                     }

@@ -17,10 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.items
 import org.ireader.domain.feature_service.io.BookCover
-import org.ireader.domain.models.entities.Book
+import org.ireader.domain.models.entities.BookItem
 import org.ireader.presentation.presentation.components.BookImageComposable
 
 
@@ -29,7 +27,7 @@ fun LinearBookItem(
     modifier: Modifier = Modifier,
     title: String,
     selected: Boolean = false,
-    book: Book,
+    book: BookItem,
 ) {
 
     Box(
@@ -63,34 +61,17 @@ fun LinearBookItem(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun LinearListDisplay(
-    lazyBooks: LazyPagingItems<Book>?,
-    books: List<Book>,
+    books: List<BookItem>,
     selection: List<Long> = emptyList(),
-    onClick: (book: Book) -> Unit,
-    onLongClick: (book: Book) -> Unit = {},
+    onClick: (book: BookItem) -> Unit,
+    onLongClick: (book: BookItem) -> Unit = {},
     scrollState: LazyListState = rememberLazyListState(),
     isLocal: Boolean,
-    goToLatestChapter: (book: Book) -> Unit,
+    goToLatestChapter: (book: BookItem) -> Unit,
     isLoading: Boolean = false,
     onEndReach: (itemIndex: Int) -> Unit = {},
 ) {
     LazyColumn(modifier = Modifier.fillMaxSize(), state = scrollState) {
-        if (lazyBooks != null) {
-            items(lazyBooks) { book ->
-                if (book != null) {
-                    LinearBookItem(
-                        title = book.title,
-                        book = book,
-                        modifier = Modifier.combinedClickable(
-                            onClick = { onClick(book) },
-                            onLongClick = { onLongClick(book) },
-                        ),
-                        selected = book.id in selection
-                    )
-                }
-
-            }
-        } else {
             items(count = books.size) { index ->
                 onEndReach(index)
                 LinearBookItem(
@@ -116,6 +97,5 @@ fun LinearListDisplay(
                 }
             }
         }
-    }
 }
 
