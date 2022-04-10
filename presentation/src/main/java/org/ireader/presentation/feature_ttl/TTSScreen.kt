@@ -261,7 +261,7 @@ fun TTSScreen(
             ) {
                 vm.book?.let { book ->
                     vm.stateChapter?.let { chapter ->
-                        vm.content?.value?.let { content ->
+                        vm.ttsContent?.value?.let { content ->
                             Column(modifier = Modifier
                                 .fillMaxWidth(),
                                 verticalArrangement = Arrangement.SpaceBetween,
@@ -286,7 +286,7 @@ fun TTSScreen(
                                     align = TextAlign.Center,
                                     maxLine = 1,
                                     overflow = TextOverflow.Ellipsis)
-                                vm.content?.value?.let { content ->
+                                vm.ttsContent?.value?.let { content ->
                                     SuperSmallTextComposable(text = "${vm.currentReadingParagraph + 1}/${content.size}")
 
                                 }
@@ -361,7 +361,6 @@ private fun TTLScreenSetting(
     onContent: () -> Unit,
 ) {
     Row(modifier = Modifier
-        .padding(horizontal = 8.dp)
         .fillMaxWidth()
         .height(80.dp)
         .border(width = 1.dp, color = MaterialTheme.colors.onBackground.copy(.1f)),

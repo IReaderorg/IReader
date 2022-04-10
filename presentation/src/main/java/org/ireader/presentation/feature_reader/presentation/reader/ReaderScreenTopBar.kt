@@ -71,12 +71,12 @@ fun ReaderScreenTopBar(
                             onValueChange = { query ->
                                 vm.searchQuery = query
                                 vm.queriedTextIndex.clear()
-                                state.stateChapter?.let { chapter ->
-                                    chapter.content.filter { cont ->
+                                state.stateContent?.value?.let { content ->
+                                    content.filter { cont ->
                                         cont.contains(query,
                                             ignoreCase = true)
                                     }.forEach { str ->
-                                        val index = chapter.content.indexOf(str)
+                                        val index = content.indexOf(str)
                                         if (index != -1) {
                                             vm.queriedTextIndex.add(index)
                                         }

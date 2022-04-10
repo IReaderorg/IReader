@@ -17,7 +17,7 @@ import javax.inject.Singleton
 interface TTSState {
     var ttsIsLoading: Boolean
     var isPlaying: Boolean
-    var content: State<List<String>?>?
+    var ttsContent: State<List<String>?>?
 
     var currentReadingParagraph: Int
     var prevPar: Int
@@ -59,7 +59,7 @@ open class TTSStateImpl @Inject constructor(@ApplicationContext context: Context
     override var currentLanguage by mutableStateOf<String>("")
     override var prevLanguage by mutableStateOf<String>("")
     override var isPlaying by mutableStateOf<Boolean>(false)
-    override var content: State<List<String>?>? =
+    override var ttsContent: State<List<String>?>? =
         derivedStateOf { ttsChapter?.content?.filter { it.isNotBlank() }?.map { it.trim() } }
     override var voiceMode by mutableStateOf<Boolean>(false)
     override var autoNextChapter by mutableStateOf<Boolean>(false)

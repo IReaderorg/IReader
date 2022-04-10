@@ -160,7 +160,7 @@ class TTSService @AssistedInject constructor(
                                     }
                                 }
                                 PREV_PAR -> {
-                                    state.content?.value?.let { content ->
+                                    state.ttsContent?.value?.let { content ->
                                         if (state.currentReadingParagraph > 0 && state.currentReadingParagraph in 0..content.lastIndex) {
                                             state.currentReadingParagraph -= 1
                                             updateNotification(chapter, book)
@@ -188,7 +188,7 @@ class TTSService @AssistedInject constructor(
 
                                 }
                                 NEXT_PAR -> {
-                                    state.content?.value?.let { content ->
+                                    state.ttsContent?.value?.let { content ->
                                         if (state.currentReadingParagraph > 0 && state.currentReadingParagraph < content.size) {
                                             if (state.currentReadingParagraph < content.lastIndex) {
                                                 state.currentReadingParagraph += 1
@@ -283,7 +283,7 @@ class TTSService @AssistedInject constructor(
             }
 
             ttsChapter?.let { chapter ->
-                content?.value?.let { content ->
+                ttsContent?.value?.let { content ->
                     state.ttsBook?.let { book ->
                         try {
 
@@ -301,10 +301,14 @@ class TTSService @AssistedInject constructor(
                                     notify(Notifications.ID_TEXT_READER_PROGRESS,
                                         builder.build())
                                 }
-                                tts.speak(content[currentReadingParagraph],
-                                    TextToSpeech.QUEUE_FLUSH,
-                                    null,
-                                    currentReadingParagraph.toString())
+                                if (state.utteranceId != (currentReadingParagraph).toString()) {
+                                    tts.speak(content[currentReadingParagraph],
+                                        TextToSpeech.QUEUE_FLUSH,
+                                        null,
+                                        currentReadingParagraph.toString())
+                                }
+
+
 
                                 tts.setOnUtteranceProgressListener(object :
                                     UtteranceProgressListener() {
@@ -313,8 +317,8 @@ class TTSService @AssistedInject constructor(
                                         interrupted: Boolean,
                                     ) {
                                         super.onStop(utteranceId, interrupted)
+                                        state.utteranceId = ""
 
-                                        //isPlaying = false
                                     }
 
                                     override fun onStart(p0: String) {
@@ -336,11 +340,8 @@ class TTSService @AssistedInject constructor(
                                                 } else {
                                                     isFinished = true
                                                 }
-                                                if (p0 == currentReadingParagraph.toString() && voiceMode) {
-                                                    readText(context, mediaSessionCompat)
-                                                } else {
-                                                    readText(context, mediaSessionCompat)
-                                                }
+
+                                                readText(context, mediaSessionCompat)
 
 
 //                                                if (voiceMode) {

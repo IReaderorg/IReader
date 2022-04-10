@@ -69,11 +69,13 @@ class ReaderScreenViewModel @Inject constructor(
         val sourceId = savedStateHandle.get<Long>(NavigationArgs.sourceId.name)
         val chapterId = savedStateHandle.get<Long>(NavigationArgs.chapterId.name)
         val bookId = savedStateHandle.get<Long>(NavigationArgs.bookId.name)
+        state.isReaderModeEnable = true
         if (ttsState.ttsChapter != null && ttsState.ttsBook?.id == bookId) {
             //ttsState.voiceMode = true
             state.stateChapter = ttsChapter
             state.book = ttsBook
             state.stateChapters = ttsChapters
+            isLocalLoaded = true
             stateChapter?.let { updateLastReadTime(it) }
         } else {
             if (bookId != null && chapterId != null && sourceId != null) {

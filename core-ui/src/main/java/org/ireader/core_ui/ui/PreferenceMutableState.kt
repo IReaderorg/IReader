@@ -1,10 +1,12 @@
 package org.ireader.core_ui.ui
 
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import tachiyomi.core.prefs.Preference
 
 class PreferenceMutableState<T>(
@@ -15,11 +17,13 @@ class PreferenceMutableState<T>(
     private val state = mutableStateOf(preference.get())
 
     init {
-        scope.launch(Dispatchers.Main) {
-            preference.changes()
-                .collect {
-                    state.value = it
-                }
+        try {
+            preference.changes().distinctUntilChanged()
+                .onEach { value ->
+                    state.value = value
+                }.launchIn(scope)
+        } catch (e: Exception) {
+            Log.e("PreferenceMutableState", e.toString())
         }
     }
 

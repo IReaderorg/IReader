@@ -98,52 +98,35 @@ fun ReaderText(
                 ),
             )
             {
-                LazyColumn(
-                    state = scrollState,
-                    modifier = Modifier
-                ) {
-                    items(count = chapter.content.size) { index ->
-                        TextSelectionContainer(selectable = vm.selectableMode) {
-                            Text(
-                                modifier = modifier
-                                    .padding(horizontal = vm.paragraphsIndent.dp)
-                                    .background(if (index in vm.queriedTextIndex) vm.textColor.copy(
-                                        .1f) else Color.Transparent),
-                                text = if (index == 0) "\n\n" + chapter.content.filter { it.isNotBlank() }
-                                    .map { it.trim() }[index].plus(
-                                    "\n".repeat(
-                                        vm.distanceBetweenParagraphs)) else chapter.content.filter { it.isNotBlank() }
-                                    .map { it.trim() }[index].plus(
-                                    "\n".repeat(vm.distanceBetweenParagraphs)),
-                                fontSize = vm.fontSize.sp,
-                                fontFamily = vm.font.fontFamily,
-                                textAlign = TextAlign.Start,
-                                color = vm.textColor,
-                                lineHeight = vm.lineHeight.sp,
-                            )
+                vm.stateContent?.value?.let { content ->
+
+
+                    LazyColumn(
+                        state = scrollState,
+                        modifier = Modifier
+                    ) {
+                        items(count = content.size) { index ->
+                            TextSelectionContainer(selectable = vm.selectableMode) {
+                                Text(
+                                    modifier = modifier
+                                        .padding(horizontal = vm.paragraphsIndent.dp)
+                                        .background(if (index in vm.queriedTextIndex) vm.textColor.copy(
+                                            .1f) else Color.Transparent),
+                                    text = if (index == 0) "\n\n" + content[index].plus(
+                                        "\n".repeat(
+                                            vm.distanceBetweenParagraphs)) else content[index].plus(
+                                        "\n".repeat(vm.distanceBetweenParagraphs)),
+                                    fontSize = vm.fontSize.sp,
+                                    fontFamily = vm.font.fontFamily,
+                                    textAlign = TextAlign.Start,
+                                    color = vm.textColor,
+                                    lineHeight = vm.lineHeight.sp,
+                                )
+                            }
                         }
+
                     }
-//                    item {
-//                        TextSelectionContainer(selectable = vm.selectableMode) {
-//                            Text(
-//                                modifier = modifier
-//                                    .fillMaxSize()
-//                                    .padding(horizontal = vm.paragraphsIndent.dp,
-//                                        vertical = 4.dp),
-//                                text = "\n\n" + chapter.content.map { it.trimStart() }
-//                                    .joinToString("\n".repeat(vm.distanceBetweenParagraphs)),
-//                                fontSize = vm.fontSize.sp,
-//                                fontFamily = vm.font.fontFamily,
-//                                textAlign = TextAlign.Start,
-//                                color = vm.textColor,
-//                                lineHeight = vm.lineHeight.sp,
-//                            )
-//                        }
-//
-//                    }
-
                 }
-
 
             }
 
