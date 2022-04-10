@@ -62,13 +62,7 @@ fun ReadingScreen(
     val context = LocalContext.current
 
 
-//    DisposableEffect(key1 = true) {
-//        onDispose {
-//            vm.uiFunc.apply {
-//                vm.restoreSetting(context, scrollState)
-//            }
-//        }
-//    }
+
     LaunchedEffect(key1 = scaffoldState.drawerState.targetValue) {
         if (chapter != null && scaffoldState.drawerState.targetValue == DrawerValue.Open && vm.stateChapters.isNotEmpty()) {
             vm.uiFunc.apply {
@@ -250,6 +244,7 @@ fun ReadingScreen(
                                     onSliderFinished = { onSliderFinished() },
                                     onPlay = {
                                         vm.voiceMode = true
+                                        vm.state.isReaderModeEnable = true
 //                                        vm.isPlaying = !vm.isPlaying
 //                                        vm.readText(context)
                                     }
@@ -291,7 +286,7 @@ fun ReadingScreen(
             )
 
         }
-    ) {
+    ) { padding ->
         ScrollIndicatorSetting(enable = vm.scrollIndicatorDialogShown, vm)
         if (chapter != null) {
             Box(modifier = modifier.fillMaxSize()) {

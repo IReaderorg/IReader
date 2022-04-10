@@ -15,10 +15,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.paging.ExperimentalPagingApi
 import kotlinx.coroutines.launch
+import org.ireader.core_ui.ui.kaomojis
 import org.ireader.domain.FetchType
 import org.ireader.domain.models.DisplayMode
 import org.ireader.domain.models.LayoutType
@@ -26,7 +29,6 @@ import org.ireader.presentation.feature_explore.presentation.browse.viewmodel.Ex
 import org.ireader.presentation.feature_library.presentation.components.LayoutComposable
 import org.ireader.presentation.presentation.components.showLoading
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
-import org.ireader.presentation.presentation.reusable_composable.ErrorTextWithEmojis
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.SmallTextComposable
 import org.ireader.presentation.ui.BookDetailScreenSpec
@@ -237,6 +239,7 @@ private fun BoxScope.ExploreScreenErrorComposable(
     source: Source,
     onWebView: (HttpSource) -> Unit,
 ) {
+    val kaomoji = remember { kaomojis.random() }
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -245,11 +248,25 @@ private fun BoxScope.ExploreScreenErrorComposable(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        ErrorTextWithEmojis(
-            error = error,
-            modifier = Modifier
-                .padding(20.dp)
+
+        Text(
+            text = kaomoji,
+            style = MaterialTheme.typography.body2.copy(
+                color = LocalContentColor.current.copy(alpha = ContentAlpha.medium),
+                fontSize = 48.sp
+            ),
         )
+        Text(
+            text = error,
+            style = MaterialTheme.typography.body2.copy(
+                color = LocalContentColor.current.copy(alpha = ContentAlpha.medium)
+            ),
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .padding(top = 16.dp)
+                .padding(horizontal = 16.dp)
+        )
+
         Row(Modifier
             .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly,

@@ -60,7 +60,8 @@ class ReaderMainFunctionsImpl @Inject constructor() : ReaderMainFunctions {
                 clearError()
                 toggleLoading(false)
                 toggleLocalLoaded(true)
-                setChapter(resultChapter.copy(content = resultChapter.content,
+                setChapter(resultChapter.copy(
+                    content = resultChapter.content,
                     read = true,
                     readAt = Clock.System.now().toEpochMilliseconds()))
                 val chapter = state.stateChapter
@@ -153,6 +154,8 @@ class ReaderMainFunctionsImpl @Inject constructor() : ReaderMainFunctions {
                         insertChapter(content.copy(
                             dateFetch = Clock.System.now()
                                 .toEpochMilliseconds(),
+                            read = true, readAt = Clock.System.now()
+                                .toEpochMilliseconds()
                         ))
                         setChapter(content)
                         toggleLoading(false)

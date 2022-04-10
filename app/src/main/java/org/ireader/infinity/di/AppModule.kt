@@ -14,11 +14,9 @@ import org.ireader.data.local.dao.chapterDao
 import org.ireader.data.repository.HistoryRepositoryImpl
 import org.ireader.data.repository.LocalBookRepositoryImpl
 import org.ireader.data.repository.LocalChapterRepositoryImpl
-import org.ireader.data.repository.RemoteRepositoryImpl
 import org.ireader.domain.repository.HistoryRepository
 import org.ireader.domain.repository.LocalBookRepository
 import org.ireader.domain.repository.LocalChapterRepository
-import org.ireader.domain.repository.RemoteRepository
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
@@ -45,15 +43,6 @@ class AppModule {
             chapterDao,
             database,
             remoteKeysDao = remoteKeysDao)
-    }
-
-    @Provides
-    @Singleton
-    fun providesRemoteBookRepository(
-        keysDao: RemoteKeysDao,
-        database: AppDatabase,
-    ): RemoteRepository {
-        return RemoteRepositoryImpl()
     }
 
     @Provides

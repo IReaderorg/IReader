@@ -25,6 +25,13 @@ import org.ireader.domain.models.entities.Chapter
 import org.ireader.infinity.feature_services.flags
 import org.ireader.presentation.MainActivity
 import org.ireader.presentation.feature_ttl.TTSService
+import org.ireader.presentation.feature_ttl.TTSService.Companion.CANCEL
+import org.ireader.presentation.feature_ttl.TTSService.Companion.NEXT_PAR
+import org.ireader.presentation.feature_ttl.TTSService.Companion.PAUSE
+import org.ireader.presentation.feature_ttl.TTSService.Companion.PLAY
+import org.ireader.presentation.feature_ttl.TTSService.Companion.PREV_PAR
+import org.ireader.presentation.feature_ttl.TTSService.Companion.SKIP_NEXT
+import org.ireader.presentation.feature_ttl.TTSService.Companion.SKIP_PREV
 import timber.log.Timber
 import java.util.*
 import javax.inject.Inject
@@ -117,50 +124,58 @@ class DefaultNotificationHelper @Inject constructor(
 
     val skipPrev = PendingIntent.getBroadcast(
         applicationContext.applicationContext,
-        0,
+        SKIP_PREV,
         Intent(applicationContext, TextReaderBroadcastReceiver::class.java).apply {
-            putExtra("PLAYER", 1)
+            putExtra("PLAYER", SKIP_PREV)
         },
         pendingIntentFlags
     )
     val rewind = PendingIntent.getBroadcast(
         applicationContext.applicationContext,
-        1,
+        PREV_PAR,
         Intent(applicationContext.applicationContext,
             TextReaderBroadcastReceiver::class.java).apply {
-            putExtra("PLAYER", 2)
+            putExtra("PLAYER", PREV_PAR)
         },
         pendingIntentFlags
     )
     val pause = PendingIntent.getBroadcast(
         applicationContext.applicationContext,
-        2,
+        PAUSE,
         Intent(applicationContext, TextReaderBroadcastReceiver::class.java).apply {
-            putExtra("PLAYER", 3)
+            putExtra("PLAYER", PAUSE)
+        },
+        pendingIntentFlags
+    )
+    val play = PendingIntent.getBroadcast(
+        applicationContext.applicationContext,
+        PLAY,
+        Intent(applicationContext, TextReaderBroadcastReceiver::class.java).apply {
+            putExtra("PLAYER", PLAY)
         },
         pendingIntentFlags
     )
     val next = PendingIntent.getBroadcast(
         applicationContext.applicationContext,
-        3,
+        NEXT_PAR,
         Intent(applicationContext, TextReaderBroadcastReceiver::class.java).apply {
-            putExtra("PLAYER", 4)
+            putExtra("PLAYER", NEXT_PAR)
         },
         pendingIntentFlags
     )
     val skipNext = PendingIntent.getBroadcast(
         applicationContext.applicationContext,
-        4,
+        SKIP_NEXT,
         Intent(applicationContext, TextReaderBroadcastReceiver::class.java).apply {
-            putExtra("PLAYER", 5)
+            putExtra("PLAYER", SKIP_NEXT)
         },
         pendingIntentFlags
     )
     val cancelMediaPlater = PendingIntent.getBroadcast(
         applicationContext.applicationContext,
-        5,
+        CANCEL,
         Intent(applicationContext, TextReaderBroadcastReceiver::class.java).apply {
-            putExtra("PLAYER", 6)
+            putExtra("PLAYER", CANCEL)
         },
         pendingIntentFlags
     )
@@ -187,7 +202,15 @@ class DefaultNotificationHelper @Inject constructor(
         playing: Boolean,
         progress: Int,
         mediaSessionCompat: MediaSessionCompat,
+        isLoading: Boolean = false,
+        isError: Boolean = false,
     ): NotificationCompat.Builder {
+        val contentText =
+            when {
+                isLoading -> "Loading..."
+                isError -> "ERROR"
+                else -> "${progress}/${chapter.content.lastIndex}"
+            }
         mediaSessionCompat.apply {
             isActive = true
             setMetadata(MediaMetadataCompat.Builder().apply {
@@ -210,7 +233,7 @@ class DefaultNotificationHelper @Inject constructor(
         return NotificationCompat.Builder(applicationContext,
             Notifications.CHANNEL_TEXT_READER_PROGRESS).apply {
             setContentTitle(chapter.title)
-            setContentText("${progress}/${chapter.content.size}")
+            setContentText(contentText)
             setSmallIcon(org.ireader.core.R.drawable.ic_infinity)
             setOnlyAlertOnce(true)
             setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
@@ -229,7 +252,7 @@ class DefaultNotificationHelper @Inject constructor(
             if (playing) {
                 addAction(R.drawable.ic_baseline_pause, "Pause", pause)
             } else {
-                addAction(R.drawable.ic_baseline_play_arrow, "Start", pause)
+                addAction(R.drawable.ic_baseline_play_arrow, "Start", play)
 
             }
             addAction(R.drawable.ic_baseline_fast_forward, "Next Paragraph", next)

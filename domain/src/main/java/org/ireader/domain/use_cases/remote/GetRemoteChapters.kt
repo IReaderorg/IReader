@@ -7,12 +7,11 @@ import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Book.Companion.toBookInfo
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.entities.toChapter
-import org.ireader.domain.repository.RemoteRepository
 import tachiyomi.source.Source
 import timber.log.Timber
 import javax.inject.Inject
 
-class GetRemoteChapters @Inject constructor(private val remoteRepository: RemoteRepository) {
+class GetRemoteChapters @Inject constructor() {
     suspend operator fun invoke(
         book: Book,
         source: Source,

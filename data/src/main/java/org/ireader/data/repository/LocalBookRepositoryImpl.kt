@@ -2,8 +2,6 @@ package org.ireader.data.repository
 
 import androidx.paging.PagingSource
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flow
 import org.ireader.data.local.AppDatabase
 import org.ireader.data.local.dao.LibraryBookDao
 import org.ireader.data.local.dao.RemoteKeysDao
@@ -13,7 +11,6 @@ import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.BookItem
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.repository.LocalBookRepository
-import timber.log.Timber
 
 class LocalBookRepositoryImpl(
     private val bookDao: LibraryBookDao,
@@ -25,21 +22,11 @@ class LocalBookRepositoryImpl(
         return bookDao.findAllBooks()
     }
 
-    override fun subscribeBookById(id: Long): Flow<Book?> = flow {
-        Timber.d("Timber: GetExploreBookByIdUseCase was Called")
-        bookDao.subscribeBookById(bookId = id)
-            .first { book ->
-                if (book != null) {
-                    emit(book)
-                    true
-                } else {
-                    emit(null)
-                    true
-                }
-            }
-        Timber.d("Timber: GetExploreBookByIdUseCase was Finished Successfully")
+    override fun subscribeBookById(id: Long): Flow<Book?> {
+        return bookDao.subscribeBookById(bookId = id)
 
     }
+
 
     override suspend fun findBookById(id: Long): Book? {
         return bookDao.findBookById(id)

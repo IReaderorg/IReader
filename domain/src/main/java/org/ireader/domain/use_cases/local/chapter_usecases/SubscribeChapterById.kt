@@ -1,6 +1,7 @@
 package org.ireader.domain.use_cases.local.chapter_usecases
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import org.ireader.core.utils.Constants
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.repository.LocalChapterRepository
@@ -15,6 +16,7 @@ class SubscribeChapterById @Inject constructor(private val localChapterRepositor
         chapterId: Long,
     ): Flow<Chapter?> {
         return localChapterRepository.subscribeChapterById(chapterId = chapterId)
+            .distinctUntilChanged()
     }
 }
 

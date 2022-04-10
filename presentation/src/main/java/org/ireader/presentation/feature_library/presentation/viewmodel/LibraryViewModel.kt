@@ -7,7 +7,6 @@ import androidx.work.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.models.DisplayMode
@@ -94,7 +93,7 @@ class LibraryViewModel @Inject constructor(
                 sortType,
                 desc = desc,
                 filters
-            ).collectLatest {
+            ).collect {
                 books = it.filter { it.title.contains(searchQuery, true) }
             }
         }

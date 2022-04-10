@@ -6,13 +6,12 @@ import org.ireader.core.utils.exceptionHandler
 import org.ireader.domain.R
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.entities.toChapterInfo
-import org.ireader.domain.repository.RemoteRepository
 import tachiyomi.source.Source
 import tachiyomi.source.model.Text
 import timber.log.Timber
 import javax.inject.Inject
 
-class GetRemoteReadingContent @Inject constructor(private val remoteRepository: RemoteRepository) {
+class GetRemoteReadingContent @Inject constructor() {
     suspend operator fun invoke(
         chapter: Chapter,
         source: Source,

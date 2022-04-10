@@ -5,7 +5,10 @@ import android.content.Context
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.work.*
+import androidx.work.Data
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -22,11 +25,11 @@ import org.ireader.domain.use_cases.preferences.reader_preferences.ReaderPrefUse
 import org.ireader.domain.use_cases.preferences.reader_preferences.TextReaderPrefUseCase
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import org.ireader.presentation.feature_services.notification.DefaultNotificationHelper
-import org.ireader.presentation.feature_services.notification.NotificationStates
 import org.ireader.presentation.feature_ttl.TTSService
 import org.ireader.presentation.feature_ttl.TTSService.Companion.COMMAND
 import org.ireader.presentation.feature_ttl.TTSService.Companion.TTS_BOOK_ID
 import org.ireader.presentation.feature_ttl.TTSService.Companion.TTS_Chapter_ID
+import org.ireader.presentation.feature_ttl.TTSService.Companion.ttsWork
 import org.ireader.presentation.feature_ttl.TTSState
 import org.ireader.presentation.feature_ttl.TTSStateImpl
 import tachiyomi.source.Source
@@ -44,14 +47,12 @@ class ReaderScreenViewModel @Inject constructor(
     val readerUseCases: ReaderPrefUseCases,
     val prefState: ReaderScreenPreferencesStateImpl,
     val state: ReaderScreenStateImpl,
-    val textReaderManager: TextReaderManager,
     val prefFunc: ReaderPrefFunctionsImpl,
     val uiFunc: ReaderUiFunctionsImpl,
     val mainFunc: ReaderMainFunctionsImpl,
     val speechPrefUseCases: TextReaderPrefUseCase,
     val savedStateHandle: SavedStateHandle,
     val defaultNotificationHelper: DefaultNotificationHelper,
-    val notificationStates: NotificationStates,
     val ttsState: TTSStateImpl,
 ) : BaseViewModel(),
     ReaderScreenPreferencesState by prefState,
@@ -124,7 +125,6 @@ class ReaderScreenViewModel @Inject constructor(
     var getChapterJob: Job? = null
 
 
-    lateinit var ttsWork: OneTimeWorkRequest
     fun runTTSService(context: Context, command: Int = -1) {
         ttsWork =
             OneTimeWorkRequestBuilder<TTSService>().apply {
@@ -165,6 +165,7 @@ class ReaderScreenViewModel @Inject constructor(
         ttsState.isPlaying = false
         ttsState.currentReadingParagraph = 0
     }
+
 
     fun onNext(
         scrollState: LazyListState,

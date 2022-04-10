@@ -4,14 +4,14 @@ import kotlinx.coroutines.CancellationException
 import org.ireader.core.utils.UiText
 import org.ireader.core.utils.exceptionHandler
 import org.ireader.domain.models.entities.Book
+import org.ireader.domain.models.entities.Book.Companion.toBookInfo
 import org.ireader.domain.models.entities.toBook
 import org.ireader.domain.models.entities.updateBook
-import org.ireader.domain.repository.RemoteRepository
 import tachiyomi.source.Source
 import timber.log.Timber
 import javax.inject.Inject
 
-class GetBookDetail @Inject constructor(private val remoteRepository: RemoteRepository) {
+class GetBookDetail @Inject constructor() {
     suspend operator fun invoke(
         book: Book,
         source: Source,
@@ -20,7 +20,7 @@ class GetBookDetail @Inject constructor(private val remoteRepository: RemoteRepo
     ) {
         try {
             Timber.d("Timber: Remote Book Detail for ${book.title} Was called")
-            val bookDetail = remoteRepository.getRemoteBookDetail(book = book, source = source)
+            val bookDetail = source.getMangaDetails(book.toBookInfo(source.id))
                 .toBook(source.id)
             onSuccess(updateBook(bookDetail, book))
         } catch (e: CancellationException) {

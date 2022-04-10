@@ -10,7 +10,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.ireader.core.R
 import org.ireader.core.utils.UiEvent
@@ -69,20 +68,11 @@ class ChapterDetailViewModel @Inject constructor(
     fun getLastReadChapter(book: Book) {
         viewModelScope.launch {
             lastRead = getChapterUseCase.findLastReadChapter(book.id)?.id
-//            getChapterUseCase.subscribeLastReadChapter(book.id)
-//                .collect {
-//                    it?.let { chapter ->
-//                        lastRead = chapter.id
-//                    }
-//                }
         }
-
-        //  lastRead = getChapterUseCase.findLastReadChapter(book.id)?.id
     }
 
     fun getLastChapterIndex(): Int {
-        val index = chapters.indexOfFirst { it.id == lastRead }
-        return when (index) {
+        return when (val index = chapters.indexOfFirst { it.id == lastRead }) {
             -1 -> {
                 throw Exception("chapter not found")
             }
@@ -106,15 +96,12 @@ class ChapterDetailViewModel @Inject constructor(
 
     private suspend fun getLocalBookById(id: Long) {
         viewModelScope.launch {
-            getBookUseCases.subscribeBookById(id = id).first { book ->
-                if (book != null) {
-                    this@ChapterDetailViewModel.book = book
-                    getLocalChaptersByPaging(isAsc = isAsc)
-                    getLastReadChapter(book)
-                    true
-                } else {
-                    false
-                }
+            val book = getBookUseCases.findBookById(id = id)
+            if (book != null) {
+                this@ChapterDetailViewModel.book = book
+                getLocalChaptersByPaging(isAsc = isAsc)
+                getLastReadChapter(book)
+
             }
         }
 

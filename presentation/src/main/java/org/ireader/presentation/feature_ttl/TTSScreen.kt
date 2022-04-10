@@ -39,6 +39,7 @@ import org.ireader.presentation.feature_reader.presentation.reader.components.Se
 import org.ireader.presentation.feature_reader.presentation.reader.components.SettingItemToggleComposable
 import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.ReaderScreenViewModel
 import org.ireader.presentation.feature_services.notification.Notifications
+import org.ireader.presentation.feature_ttl.TTSService.Companion.PLAY
 import org.ireader.presentation.presentation.Toolbar
 import org.ireader.presentation.presentation.components.BookImageComposable
 import org.ireader.presentation.presentation.components.showLoading
@@ -47,6 +48,7 @@ import org.ireader.presentation.presentation.reusable_composable.BigSizeTextComp
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.SuperSmallTextComposable
 import tachiyomi.source.Source
+import timber.log.Timber
 import java.math.RoundingMode
 
 
@@ -71,6 +73,7 @@ fun TTSScreen(
     BackHandler {
         vm.voiceMode = false
     }
+
     val context = LocalContext.current
     val pagerState = rememberPagerState()
 
@@ -89,9 +92,6 @@ fun TTSScreen(
                 drawerScrollState.scrollToItem(vm.getCurrentIndexOfChapter(chapter))
             }
         }
-    }
-    LaunchedEffect(key1 = true) {
-        textScroll.animateScrollTo(0)
     }
 
     LaunchedEffect(key1 = vm.state.stateChapter, vm.state.book) {
@@ -124,12 +124,33 @@ fun TTSScreen(
             }
 
         }
+
     }
+
+
     LaunchedEffect(key1 = vm.ttsState.currentReadingParagraph) {
-        pagerState.scrollToPage(vm.ttsState.currentReadingParagraph)
+        try {
+            if (vm.currentReadingParagraph != pagerState.targetPage && vm.currentReadingParagraph != vm.prevPar && vm.ttsState.currentReadingParagraph < pagerState.pageCount) {
+
+                pagerState.scrollToPage(vm.ttsState.currentReadingParagraph)
+                if (vm.isPlaying) {
+                    vm.runTTSService(context, PLAY)
+                }
+            }
+        } catch (e: Exception) {
+            Timber.e(e)
+        }
+
     }
     LaunchedEffect(key1 = pagerState.currentPage) {
-        vm.currentReadingParagraph = pagerState.targetPage
+        if (vm.currentReadingParagraph != pagerState.currentPage) {
+            vm.currentReadingParagraph = pagerState.currentPage
+            vm.prevPar = pagerState.currentPage
+            if (vm.isPlaying) {
+                vm.ttsState.tts.stop()
+                vm.runTTSService(context, PLAY)
+            }
+        }
 
     }
 
@@ -240,84 +261,88 @@ fun TTSScreen(
             ) {
                 vm.book?.let { book ->
                     vm.stateChapter?.let { chapter ->
-                        Column(modifier = Modifier
-                            .fillMaxWidth(),
-                            verticalArrangement = Arrangement.SpaceBetween,
-                            horizontalAlignment = Alignment.CenterHorizontally) {
-                            BookImageComposable(
-                                image = BookCover.from(book),
-                                modifier = Modifier
-                                    .padding(8.dp)
-                                    .height(180.dp)
-                                    .width(120.dp)
-                                    .clip(MaterialTheme.shapes.medium)
-                                    .border(2.dp,
-                                        MaterialTheme.colors.onBackground.copy(alpha = .2f)),
-                                contentScale = ContentScale.Crop,
-                            )
+                        vm.content?.value?.let { content ->
+                            Column(modifier = Modifier
+                                .fillMaxWidth(),
+                                verticalArrangement = Arrangement.SpaceBetween,
+                                horizontalAlignment = Alignment.CenterHorizontally) {
+                                BookImageComposable(
+                                    image = BookCover.from(book),
+                                    modifier = Modifier
+                                        .padding(8.dp)
+                                        .height(180.dp)
+                                        .width(120.dp)
+                                        .clip(MaterialTheme.shapes.medium)
+                                        .border(2.dp,
+                                            MaterialTheme.colors.onBackground.copy(alpha = .2f)),
+                                    contentScale = ContentScale.Crop,
+                                )
 
-                            BigSizeTextComposable(text = chapter.title,
-                                align = TextAlign.Center,
-                                maxLine = 1,
-                                overflow = TextOverflow.Ellipsis)
-                            MidSizeTextComposable(text = book.title,
-                                align = TextAlign.Center,
-                                maxLine = 1,
-                                overflow = TextOverflow.Ellipsis)
-                            vm.stateChapter?.let { chapter ->
-                                SuperSmallTextComposable(text = "${vm.currentReadingParagraph}/${chapter.content.lastIndex}")
+                                BigSizeTextComposable(text = chapter.title,
+                                    align = TextAlign.Center,
+                                    maxLine = 1,
+                                    overflow = TextOverflow.Ellipsis)
+                                MidSizeTextComposable(text = book.title,
+                                    align = TextAlign.Center,
+                                    maxLine = 1,
+                                    overflow = TextOverflow.Ellipsis)
+                                vm.content?.value?.let { content ->
+                                    SuperSmallTextComposable(text = "${vm.currentReadingParagraph + 1}/${content.size}")
 
-                            }
-                        }
-                        HorizontalPager(count = chapter.content.size, state = pagerState) { index ->
-                            Text(
-                                modifier = modifier
-                                    .padding(horizontal = vm.paragraphsIndent.dp, vertical = 4.dp)
-                                    .fillMaxWidth()
-                                    .height(180.dp)
-                                    .verticalScroll(textScroll)
-                                    .align(Alignment.CenterHorizontally),
-                                text = chapter.content[index],
-                                fontSize = vm.fontSize.sp,
-                                fontFamily = vm.font.fontFamily,
-                                textAlign = TextAlign.Start,
-                                color = MaterialTheme.colors.onBackground,
-                                lineHeight = vm.lineHeight.sp,
-                                maxLines = 12,
-                            )
-                        }
-
-                        Column(modifier = Modifier
-                            .fillMaxWidth(),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally) {
-                            TTLScreenSetting(
-                                onSetting = {
-                                    scope.launch {
-                                        bottomSheetState.show()
-                                    }
-                                },
-                                onContent = {
-                                    scope.launch {
-                                        scaffoldState.drawerState.animateTo(DrawerValue.Open,
-                                            TweenSpec())
-                                    }
                                 }
-                            )
-                            TTLScreenPlay(
-                                onPlay = onPlay,
-                                onNext = onNext,
-                                onPrev = onPrev,
-                                vm = vm,
-                                onNextPar = onNextPar,
-                                onPrevPar = onPrevPar,
-                                chapter = chapter,
-                                onValueChange = onValueChange,
-                                onValueChangeFinished = onValueChangeFinished
-                            )
+                            }
+                            HorizontalPager(count = chapter.content.size, state = pagerState) { index ->
+                                Text(
+                                    modifier = modifier
+                                        .padding(horizontal = vm.paragraphsIndent.dp,
+                                            vertical = 4.dp)
+                                        .fillMaxWidth()
+                                        .height(200.dp)
+                                        .verticalScroll(textScroll)
+                                        .align(Alignment.CenterHorizontally),
+                                    text = if (content.isNotEmpty() && vm.currentReadingParagraph <= content.lastIndex && index <= content.lastIndex) content[index] else "",
+                                    fontSize = vm.fontSize.sp,
+                                    fontFamily = vm.font.fontFamily,
+                                    textAlign = TextAlign.Start,
+                                    color = MaterialTheme.colors.onBackground,
+                                    lineHeight = vm.lineHeight.sp,
+                                    maxLines = 12,
+                                )
+                            }
+
+
+                            Column(modifier = Modifier
+                                .fillMaxWidth(),
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally) {
+                                TTLScreenSetting(
+                                    onSetting = {
+                                        scope.launch {
+                                            bottomSheetState.show()
+                                        }
+                                    },
+                                    onContent = {
+                                        scope.launch {
+                                            scaffoldState.drawerState.animateTo(DrawerValue.Open,
+                                                TweenSpec())
+                                        }
+                                    }
+                                )
+                                TTLScreenPlay(
+                                    onPlay = onPlay,
+                                    onNext = onNext,
+                                    onPrev = onPrev,
+                                    vm = vm,
+                                    onNextPar = onNextPar,
+                                    onPrevPar = onPrevPar,
+                                    content = content,
+                                    onValueChange = onValueChange,
+                                    onValueChangeFinished = onValueChangeFinished
+                                )
+                            }
+
+
                         }
-
-
                     }
                 }
 
@@ -374,7 +399,7 @@ private fun TTLScreenSetting(
 private fun TTLScreenPlay(
     modifier: Modifier = Modifier,
     vm: ReaderScreenViewModel,
-    chapter: Chapter?,
+    content: List<String>?,
     onPrev: () -> Unit,
     onPlay: () -> Unit,
     onNext: () -> Unit,
@@ -384,19 +409,19 @@ private fun TTLScreenPlay(
     onValueChangeFinished: () -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        chapter?.let { chapter ->
+        content?.let { chapter ->
             Slider(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 8.dp),
-                value = if (chapter.content.isEmpty()) 0F else vm.currentReadingParagraph.toFloat(),
+                value = if (content.isEmpty() && vm.currentChapterIndex < content.size) 0F else vm.currentReadingParagraph.toFloat(),
                 onValueChange = {
                     onValueChange(it)
                 },
                 onValueChangeFinished = {
                     onValueChangeFinished()
                 },
-                valueRange = 0f..(if (chapter.content.isNotEmpty()) chapter.content.size - 1 else 0).toFloat(),
+                valueRange = 0f..(if (content.isNotEmpty()) content.lastIndex else 0).toFloat(),
                 colors = SliderDefaults.colors(
                     thumbColor = MaterialTheme.colors.primary,
                     activeTrackColor = MaterialTheme.colors.primary.copy(alpha = .6f),

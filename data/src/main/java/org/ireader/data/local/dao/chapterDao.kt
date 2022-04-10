@@ -87,7 +87,7 @@ interface chapterDao : BaseDao<Chapter> {
         SELECT *
         from chapter
         GROUP BY id
-        HAVING chapter.bookId == :bookId
+        HAVING chapter.bookId == :bookId AND chapter.readAt != 0 
         ORDER BY readAt DESC
         LIMIT 1
     """)

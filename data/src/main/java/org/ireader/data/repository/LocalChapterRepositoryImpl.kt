@@ -1,6 +1,7 @@
 package org.ireader.data.repository
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import org.ireader.data.local.dao.chapterDao
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.repository.LocalChapterRepository
@@ -21,7 +22,7 @@ class LocalChapterRepositoryImpl @Inject constructor(private val daoLibrary: cha
     }
 
     override fun subscribeChapterById(chapterId: Long): Flow<Chapter?> {
-        return daoLibrary.subscribeChapterById(chapterId = chapterId)
+        return daoLibrary.subscribeChapterById(chapterId = chapterId).distinctUntilChanged()
     }
 
     override suspend fun findChapterById(chapterId: Long): Chapter? {
@@ -34,6 +35,7 @@ class LocalChapterRepositoryImpl @Inject constructor(private val daoLibrary: cha
 
     override fun subscribeChaptersByBookId(bookId: Long, isAsc: Boolean): Flow<List<Chapter>> {
         return daoLibrary.subscribeChaptersByBookId(bookId = bookId, isAsc = isAsc)
+            .distinctUntilChanged()
     }
 
     override suspend fun findChaptersByBookId(bookId: Long, isAsc: Boolean): List<Chapter> {
@@ -50,7 +52,7 @@ class LocalChapterRepositoryImpl @Inject constructor(private val daoLibrary: cha
 
 
     override fun subscribeLastReadChapter(bookId: Long): Flow<Chapter?> {
-        return daoLibrary.subscribeLastReadChapter(bookId)
+        return daoLibrary.subscribeLastReadChapter(bookId).distinctUntilChanged()
     }
 
     override suspend fun findLastReadChapter(bookId: Long): Chapter? {
@@ -58,7 +60,7 @@ class LocalChapterRepositoryImpl @Inject constructor(private val daoLibrary: cha
     }
 
     override fun subscribeFirstChapter(bookId: Long): Flow<Chapter?> {
-        return daoLibrary.subscribeFirstChapter(bookId)
+        return daoLibrary.subscribeFirstChapter(bookId).distinctUntilChanged()
     }
 
     override suspend fun findFirstChapter(bookId: Long): Chapter? {

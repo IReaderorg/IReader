@@ -39,6 +39,7 @@ class GlobalSearchViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 deleteAllSearchedBooks()
             }
+
             catalogStore.catalogs.map { it.source }.forEachIndexed { index, source ->
                 try {
                     if (source is CatalogSource) {

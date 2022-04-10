@@ -4,7 +4,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import tachiyomi.core.prefs.Preference
 
@@ -18,7 +17,9 @@ class PreferenceMutableState<T>(
     init {
         scope.launch(Dispatchers.Main) {
             preference.changes()
-                .collectLatest { state.value = it }
+                .collect {
+                    state.value = it
+                }
         }
     }
 

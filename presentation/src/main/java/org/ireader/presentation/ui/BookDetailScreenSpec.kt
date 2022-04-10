@@ -72,7 +72,7 @@ object BookDetailScreenSpec : ScreenSpec {
                 },
                 onRead = {
                     if (source != null) {
-                        if (viewModel.lastRead != 0L && viewModel.chapters.isNotEmpty()) {
+                        if (viewModel.chapters.any { it.readAt != 0L } && viewModel.chapters.isNotEmpty()) {
                             navController.navigate(ReaderScreenSpec.buildRoute(
                                 bookId = book.id,
                                 sourceId = source.id,

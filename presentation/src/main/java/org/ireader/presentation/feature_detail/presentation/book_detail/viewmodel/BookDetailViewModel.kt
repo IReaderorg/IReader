@@ -83,10 +83,6 @@ class BookDetailViewModel @Inject constructor(
         }
     }
 
-    suspend fun getHistory(bookId: Long) {
-        lastRead = historyUseCase.findHistoryByBookId(bookId)?.readAt
-    }
-
     fun onEvent(event: BookDetailEvent) {
         when (event) {
             is BookDetailEvent.ToggleSummary -> {
@@ -103,7 +99,6 @@ class BookDetailViewModel @Inject constructor(
         viewModelScope.launch {
             val book = getBookUseCases.findBookById(bookId)
             if (book != null) {
-                getHistory(book.id)
                 toggleLocalLoading(false)
                 clearBookError()
                 setDetailBook(book)

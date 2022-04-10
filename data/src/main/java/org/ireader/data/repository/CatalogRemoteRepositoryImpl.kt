@@ -1,6 +1,7 @@
 package org.ireader.data.repository
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import org.ireader.data.local.dao.CatalogDao
 import org.ireader.domain.catalog.service.CatalogRemoteRepository
 import org.ireader.domain.models.entities.CatalogRemote
@@ -15,7 +16,7 @@ class CatalogRemoteRepositoryImpl @Inject constructor(
     }
 
     override fun getRemoteCatalogsFlow(): Flow<List<CatalogRemote>> {
-        return dao.subscribeAll()
+        return dao.subscribeAll().distinctUntilChanged()
     }
 
 

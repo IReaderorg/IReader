@@ -8,16 +8,7 @@ import org.ireader.domain.models.entities.Book
 import tachiyomi.source.Source
 import javax.inject.Inject
 
-//data class DetailState(
-//    val source: Source? = null,
-//    val book: Book? = null,
-//    val inLibrary: Boolean = false,
-//    val isLocalLoading: Boolean = false,
-//    val isRemoteLoading: Boolean = false,
-//    val isLocalLoaded: Boolean = false,
-//    val error: UiText = UiText.DynamicString(""),
-//    val isRemoteLoaded: Boolean = false,
-//)
+
 open class DetailStateImpl @Inject constructor() : DetailState {
     override var source by mutableStateOf<Source?>(null)
     override var book by mutableStateOf<Book?>(null)

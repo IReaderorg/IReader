@@ -106,12 +106,14 @@ fun ReaderText(
                         TextSelectionContainer(selectable = vm.selectableMode) {
                             Text(
                                 modifier = modifier
-                                    .padding(horizontal = vm.paragraphsIndent.dp, vertical = 4.dp)
+                                    .padding(horizontal = vm.paragraphsIndent.dp)
                                     .background(if (index in vm.queriedTextIndex) vm.textColor.copy(
                                         .1f) else Color.Transparent),
-                                text = if (index == 0) "\n\n" + chapter.content.map { it.trim() }[index].plus(
+                                text = if (index == 0) "\n\n" + chapter.content.filter { it.isNotBlank() }
+                                    .map { it.trim() }[index].plus(
                                     "\n".repeat(
-                                        vm.distanceBetweenParagraphs)) else chapter.content[index].plus(
+                                        vm.distanceBetweenParagraphs)) else chapter.content.filter { it.isNotBlank() }
+                                    .map { it.trim() }[index].plus(
                                     "\n".repeat(vm.distanceBetweenParagraphs)),
                                 fontSize = vm.fontSize.sp,
                                 fontFamily = vm.font.fontFamily,

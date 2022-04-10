@@ -111,7 +111,7 @@ class AppPreferences @Inject constructor(
     }
 
     fun selectableText(): Preference<Boolean> {
-        return preferenceStore.getBoolean(SELECTABLE_TEXT, true)
+        return preferenceStore.getBoolean(SELECTABLE_TEXT, false)
     }
 
     fun autoScrollInterval(): Preference<Long> {
