@@ -149,7 +149,11 @@ class TTSService @AssistedInject constructor(
                                     val index = getChapterIndex(chapter, chapters)
                                     if (index > 0) {
                                         val id = chapters[index - 1].id
-                                        getRemoteChapter(chapterId = id, source, state)
+                                        getRemoteChapter(chapterId = id, source, state) {
+                                            if (state.isPlaying) {
+                                                readText(context, state.mediaSession)
+                                            }
+                                        }
                                     }
                                     state.currentReadingParagraph = 0
                                     updateNotification(chapter, book)
@@ -176,7 +180,11 @@ class TTSService @AssistedInject constructor(
                                     val index = getChapterIndex(chapter, chapters)
                                     if (index != chapters.lastIndex) {
                                         val id = chapters[index + 1].id
-                                        getRemoteChapter(chapterId = id, source, state)
+                                        getRemoteChapter(chapterId = id, source, state) {
+                                            if (state.isPlaying) {
+                                                readText(context, state.mediaSession)
+                                            }
+                                        }
                                     }
                                     state.currentReadingParagraph = 0
                                     updateNotification(chapter, book)
@@ -374,14 +382,18 @@ class TTSService @AssistedInject constructor(
                                                                     val id = chapters[index + 1].id
                                                                     getRemoteChapter(chapterId = id,
                                                                         source,
-                                                                        state)
+                                                                        state) {
+                                                                        state.currentReadingParagraph =
+                                                                            0
+                                                                        updateNotification(chapter,
+                                                                            book)
+
+                                                                        readText(context,
+                                                                            state.mediaSession)
+
+                                                                    }
                                                                 }
-                                                                state.currentReadingParagraph = 0
-                                                                updateNotification(chapter, book)
-                                                                if (state.isPlaying) {
-                                                                    readText(context,
-                                                                        state.mediaSession)
-                                                                }
+
                                                             }
                                                         }
 
@@ -428,6 +440,7 @@ class TTSService @AssistedInject constructor(
         chapterId: Long,
         source: Source,
         ttsState: TTSState,
+        onSuccess: suspend () -> Unit,
     ) {
         try {
 
@@ -455,6 +468,7 @@ class TTSService @AssistedInject constructor(
                     readAt = Clock.System.now()
                         .toEpochMilliseconds(),
                 ))
+                onSuccess()
             } else {
                 if (localChapter != null) {
                     remoteUseCases.getRemoteReadingContent(
@@ -478,6 +492,7 @@ class TTSService @AssistedInject constructor(
                                 ttsState.ttsBook?.let { book ->
                                     updateNotification(chapter = localChapter, book = book)
                                 }
+                                onSuccess()
                             }
                         }, onError = {
                             ttsState.ttsIsLoading = false
