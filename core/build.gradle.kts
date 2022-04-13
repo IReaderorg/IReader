@@ -37,4 +37,9 @@ dependencies {
     implementation(libs.ktor.jsoup)
 
     implementation(libs.timber)
+    implementation(test.junit4)
+    implementation(test.extJunit)
+    implementation(test.espresso)
+    implementation(test.junitAndroidExt)
+    implementation(test.truth)
 }

@@ -53,7 +53,7 @@ fun LibraryScreen(
 ) {
 
 
-    val coroutineScope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope()
 
 
     val pagerState = rememberPagerState()
@@ -89,7 +89,7 @@ fun LibraryScreen(
                         viewModel = vm,
                         pagerState = pagerState,
                         navController = navController,
-                        scope = coroutineScope)
+                        scope = scope)
 
                 }
             },
@@ -103,7 +103,7 @@ fun LibraryScreen(
                 LibraryScreenTopBar(
                     navController = navController,
                     state = vm,
-                    coroutineScope = coroutineScope,
+                    coroutineScope = scope,
                     bottomSheetState = bottomSheetState)
                 Box(modifier = Modifier
                     .fillMaxSize()) {
@@ -205,6 +205,7 @@ fun LibraryScreen(
     }
 
 }
+
 
 
 

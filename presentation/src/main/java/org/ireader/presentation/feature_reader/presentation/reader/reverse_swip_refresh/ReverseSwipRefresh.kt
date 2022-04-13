@@ -1,5 +1,6 @@
 package org.ireader.presentation.feature_reader.presentation.reader.reverse_swip_refresh
 
+import androidx.annotation.Keep
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.MutatePriority
 import androidx.compose.foundation.MutatorMutex
@@ -215,6 +216,7 @@ private class SwipeRefreshNestedScrollConnection(
  * @param content The content containing a scroll composable.
  */
 
+@Keep
 data class ISwipeRefreshIndicator(
     val enable: Boolean,
     val alignment: Alignment,

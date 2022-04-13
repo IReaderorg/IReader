@@ -1,5 +1,6 @@
 package org.ireader.presentation.feature_sources.presentation.global_search.viewmodel
 
+import androidx.annotation.Keep
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -18,6 +19,7 @@ open class GlobalSearchStateImpl @Inject constructor() : GlobalSearchState {
     override var query: String by mutableStateOf("")
 }
 
+@Keep
 data class SearchItem(
     val source: Source,
     val items: List<Book> = emptyList(),

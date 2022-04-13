@@ -1,5 +1,8 @@
 package org.ireader.presentation.feature_services.updater_service.models
 
+import androidx.annotation.Keep
+
+@Keep
 data class Version(
     val version: String,
 ) {

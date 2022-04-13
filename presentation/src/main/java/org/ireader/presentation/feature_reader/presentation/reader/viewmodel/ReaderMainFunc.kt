@@ -19,7 +19,7 @@ interface ReaderMainFunctions {
     suspend fun ReaderScreenViewModel.getChapter(
         chapterId: Long,
         source: Source,
-        onSuccess: () -> Unit = {},
+        onSuccess: suspend () -> Unit = {},
     )
 
     suspend fun ReaderScreenViewModel.getLocalBookById(
@@ -45,7 +45,7 @@ class ReaderMainFunctionsImpl @Inject constructor() : ReaderMainFunctions {
     override suspend fun ReaderScreenViewModel.getChapter(
         chapterId: Long,
         source: Source,
-        onSuccess: () -> Unit,
+        onSuccess: suspend () -> Unit,
     ) {
         toggleLoading(true)
         toggleLocalLoaded(false)

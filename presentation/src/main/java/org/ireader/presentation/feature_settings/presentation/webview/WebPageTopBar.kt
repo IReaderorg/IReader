@@ -40,6 +40,7 @@ fun WebPageTopBar(
     goForward: () -> Unit,
     fetchBook: () -> Unit,
     fetchChapter: () -> Unit,
+    fetchChapters: () -> Unit,
 ) {
     var isMenuExpanded by remember {
         mutableStateOf(false)
@@ -117,9 +118,9 @@ fun WebPageTopBar(
                         .contains(ChaptersParse().name)) {
                     DropdownMenuItem(onClick = {
                         isMenuExpanded = false
-                        fetchChapter()
+                        fetchChapters()
                     }) {
-                        MidSizeTextComposable(text = "Fetch Chapter")
+                        MidSizeTextComposable(text = "Fetch Chapters")
                     }
                 }
                 if (source is HttpSource && source.getListings().map { it.name }

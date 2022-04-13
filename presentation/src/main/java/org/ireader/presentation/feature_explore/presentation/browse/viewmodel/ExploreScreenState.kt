@@ -1,5 +1,6 @@
 package org.ireader.presentation.feature_explore.presentation.browse.viewmodel
 
+import androidx.annotation.Keep
 import org.ireader.core.LatestListing
 
 import org.ireader.core.utils.UiText
@@ -10,6 +11,7 @@ import tachiyomi.source.CatalogSource
 import tachiyomi.source.model.Listing
 import tachiyomi.source.model.MangasPageInfo
 
+@Keep
 data class ExploreScreenState(
     val isLoading: Boolean = false,
     val books: List<Book> = emptyList(),

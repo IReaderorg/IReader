@@ -1,5 +1,6 @@
 package org.ireader.presentation.feature_reader.presentation.reader.reverse_swip_refresh
 
+import androidx.annotation.Keep
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animate
@@ -34,6 +35,7 @@ import androidx.compose.ui.unit.dp
  * @param arrowHeight The height of the arrow.
  */
 @Immutable
+@Keep
 private data class SwipeRefreshIndicatorSizes(
     val size: Dp,
     val arcRadius: Dp,

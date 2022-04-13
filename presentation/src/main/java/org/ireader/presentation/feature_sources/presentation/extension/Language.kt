@@ -8,8 +8,11 @@
 
 package org.ireader.presentation.feature_sources.presentation.extension
 
+import androidx.annotation.Keep
 
-/* inline */ data class Language(val code: String) {
+
+/* inline */ @Keep
+data class Language(val code: String) {
 
     fun toEmoji(): String? {
         val country = when (code) {

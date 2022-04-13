@@ -165,6 +165,9 @@ interface LibraryBookDao : BaseDao<Book> {
     @Query("SELECT * FROM library WHERE link = :key")
     suspend fun findBooksByKey(key: String): List<Book>
 
+    @Query("SELECT * FROM library WHERE link = :key or title = :title")
+    fun subscribeBooksByKey(key: String, title: String): Flow<List<Book>>
+
     @Query("SELECT * FROM library WHERE title LIKE '%' || :query || '%' AND favorite = 1")
     fun searchBook(query: String): PagingSource<Int, Book>
 
@@ -211,6 +214,7 @@ interface LibraryBookDao : BaseDao<Book> {
 
     @Query("DELETE FROM chapter WHERE bookId in (:bookIds)")
     suspend fun deleteChaptersByBookIds(bookIds: List<Long>)
+
 
 }
 

@@ -52,6 +52,61 @@ fun <T> merge(first: List<T>, second: List<T>): List<T> {
     }
 }
 
+@Throws(IndexIsInvalidException::class,
+    IndexLessThanZeroException::class,
+    IndexGreaterThanCollectionSizeException::class)
+inline fun <T, K> List<T>.next(mapBy: (T) -> K, currentItem: K): Pair<Int, T> {
+    val items = this.map(mapBy)
+
+    val index = items.indexOf(currentItem)
+    return when {
+        index == null -> {
+            throw NullPointerException("index is $index")
+        }
+        index == -1 -> {
+            throw IndexIsInvalidException("index is $index")
+        }
+        index < 0 -> {
+            throw IndexLessThanZeroException("index is $index")
+        }
+        index > this.lastIndex -> {
+            throw IndexGreaterThanCollectionSizeException("index is $index")
+        }
+        else -> {
+            Pair(index + 1, this[index + 1])
+        }
+    }
+}
+
+class IndexLessThanZeroException(override val message: String? = null) : Exception(message)
+
+class IndexGreaterThanCollectionSizeException(override val message: String? = null) :
+    Exception(message)
+
+class IndexIsInvalidException(override val message: String? = null) : Exception(message)
+
+@Throws(IndexIsInvalidException::class,
+    IndexLessThanZeroException::class,
+    IndexGreaterThanCollectionSizeException::class)
+inline fun <T, K> List<T>.previous(item: K, mapBy: (T) -> K): Pair<Int, T> {
+    val items = this.map(mapBy)
+    val index = items.indexOf(item)
+    return when {
+        index == -1 -> {
+            throw IndexIsInvalidException("index is $index")
+        }
+        index < 0 -> {
+            throw IndexLessThanZeroException("index is $index")
+        }
+        index > this.lastIndex -> {
+            throw IndexGreaterThanCollectionSizeException("index is $index")
+        }
+        else -> {
+            Pair(index - 1, this[index - 1])
+        }
+    }
+}
+
 
 /**
  * Returns first index of [element], or -1 if the collection does not contain element.

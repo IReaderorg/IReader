@@ -2,6 +2,7 @@ package org.ireader.infinity.di
 
 import android.content.Context
 import android.speech.tts.TextToSpeech
+import android.webkit.WebView
 import androidx.room.Room
 import dagger.Module
 import dagger.Provides
@@ -129,6 +130,12 @@ class LocalModule {
     @Singleton
     fun providePreferencesStore(@ApplicationContext context: Context): PreferenceStore {
         return AndroidPreferenceStore(context = context, "ui")
+    }
+
+    @Provides
+    @Singleton
+    fun provideWebView(@ApplicationContext context: Context): WebView {
+        return WebView(context)
     }
 
 }

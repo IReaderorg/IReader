@@ -1,5 +1,6 @@
 package org.ireader.presentation.utils.scroll
 
+import androidx.annotation.Keep
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.SpringSpec
 import androidx.compose.foundation.MutatePriority
@@ -297,6 +298,7 @@ private fun Modifier.scroll(
     }
 )
 
+@Keep
 private data class ScrollingLayoutModifier(
     val scrollerState: CarouselScrollState,
     val isReversed: Boolean,

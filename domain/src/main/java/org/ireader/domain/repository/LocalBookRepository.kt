@@ -51,6 +51,8 @@ interface LocalBookRepository {
 
     suspend fun findBooksByKey(key: String): List<Book>
 
+    suspend fun subscribeBooksByKey(key: String, title: String): Flow<List<Book>>
+
     /****************************************************/
 
 

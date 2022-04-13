@@ -1,7 +1,9 @@
 package org.ireader.domain.use_cases.remote.key
 
+import androidx.annotation.Keep
 import javax.inject.Inject
 
+@Keep
 data class RemoteKeyUseCase @Inject constructor(
     val deleteAllExploredBook: DeleteAllExploredBook,
     val deleteAllRemoteKeys: DeleteAllRemoteKeys,

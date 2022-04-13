@@ -1,5 +1,6 @@
 package org.ireader.domain.models.entities
 
+import androidx.annotation.Keep
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
@@ -9,6 +10,7 @@ import tachiyomi.source.model.ChapterInfo
 
 @Serializable
 @Entity(tableName = CHAPTER_TABLE)
+@Keep
 data class Chapter(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,

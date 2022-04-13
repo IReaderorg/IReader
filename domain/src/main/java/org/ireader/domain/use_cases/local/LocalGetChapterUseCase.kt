@@ -1,8 +1,10 @@
 package org.ireader.domain.use_cases.local
 
+import androidx.annotation.Keep
 import org.ireader.domain.use_cases.local.chapter_usecases.*
 import javax.inject.Inject
 
+@Keep
 data class LocalGetChapterUseCase @Inject constructor(
     val subscribeChapterById: SubscribeChapterById,
     val findChapterById: FindChapterById,

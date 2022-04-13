@@ -181,11 +181,14 @@ fun TTSScreen(
                             vm.speechPrefUseCases.saveRate(vm.speechSpeed)
                         },
                         onMinus = {
-                            vm.speechSpeed -= .1f
-                            vm.speechSpeed =
-                                vm.speechSpeed.toBigDecimal().setScale(1, RoundingMode.FLOOR)
-                                    .toFloat()
-                            vm.speechPrefUseCases.saveRate(vm.speechSpeed)
+                            if (vm.speechSpeed != 0F) {
+                                vm.speechSpeed -= .1f
+                                vm.speechSpeed =
+                                    vm.speechSpeed.toBigDecimal().setScale(1, RoundingMode.FLOOR)
+                                        .toFloat()
+                                vm.speechPrefUseCases.saveRate(vm.speechSpeed)
+                            }
+
                         })
 
                     SettingItemComposable(text = "Pitch",
@@ -197,11 +200,13 @@ fun TTSScreen(
                             vm.speechPrefUseCases.savePitch(vm.speechSpeed)
                         },
                         onMinus = {
-                            vm.pitch -= .1f
-                            vm.pitch =
-                                vm.pitch.toBigDecimal().setScale(1, RoundingMode.FLOOR).toFloat()
-                            vm.speechPrefUseCases.savePitch(vm.speechSpeed)
-
+                            if (vm.pitch != 0F) {
+                                vm.pitch -= .1f
+                                vm.pitch =
+                                    vm.pitch.toBigDecimal().setScale(1, RoundingMode.FLOOR)
+                                        .toFloat()
+                                vm.speechPrefUseCases.savePitch(vm.speechSpeed)
+                            }
                         })
 
                 }

@@ -1,8 +1,10 @@
 package org.ireader.presentation.feature_services.updater_service.models
 
+import androidx.annotation.Keep
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
+@Keep
 @JsonClass(generateAdapter = true)
 data class Release(
     @Json(name = "id")

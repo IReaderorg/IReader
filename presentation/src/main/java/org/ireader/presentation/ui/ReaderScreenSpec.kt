@@ -90,49 +90,12 @@ object ReaderScreenSpec : ScreenSpec {
                         vm = vm,
                         onPrev = {
                             vm.runTTSService(context, SKIP_PREV)
-//                            if (vm.currentChapterIndex > 0) {
-//                                vm.apply {
-//                                    currentChapterIndex -= 1
-//                                    ttsCurrentChapterIndex = currentChapterIndex
-//                                    scope.launch {
-//                                        vm.getChapter(vm.getCurrentChapterByIndex().id,
-//                                            source = source) {
-//                                            vm.runTTSService(context)
-//                                        }
-//                                        scrollState.animateScrollToItem(0, 0)
-//                                    }
-//                                }
-//                            } else {
-//                                scope.launch {
-//                                    vm.showSnackBar(UiText.StringResource(org.ireader.core.R.string.this_is_first_chapter))
-//                                }
-//                            }
                         },
                         onPlay = {
                             vm.runTTSService(context, PLAY_PAUSE)
                         },
                         onNext = {
                             vm.runTTSService(context, SKIP_NEXT)
-//                            if (currentIndex < chapters.lastIndex) {
-//                                vm.apply {
-//                                    currentChapterIndex += 1
-//                                    ttsCurrentChapterIndex = currentChapterIndex
-//                                    scope.launch {
-//                                        vm.getChapter(vm.getCurrentChapterByIndex().id,
-//                                            source = source) {
-//                                            vm.runTTSService(context, SKIP_NEXT)
-//                                        }
-//                                        scrollState.animateScrollToItem(0, 0)
-//                                    }
-//
-//                                }
-//
-//                            } else {
-//                                scope.launch {
-//                                    vm.showSnackBar(UiText.StringResource(R.string.this_is_last_chapter))
-//
-//                                }
-//                            }
                         },
                         onChapter = { ch ->
                             scope.launch {
@@ -156,23 +119,9 @@ object ReaderScreenSpec : ScreenSpec {
                         navController = navController,
                         onPrevPar = {
                             vm.runTTSService(context, PREV_PAR)
-//                            if (vm.currentReadingParagraph > 0) {
-//                                vm.currentReadingParagraph -= 1
-//                                if (vm.isPlaying) {
-//                                    vm.runTTSService(context)
-//                                }
-//                            }
                         },
                         onNextPar = {
                             vm.runTTSService(context, NEXT_PAR)
-//                            vm.stateChapter?.let { chapter ->
-//                                if (vm.currentReadingParagraph < chapter.content.lastIndex) {
-//                                    vm.currentReadingParagraph += 1
-//                                    if (vm.isPlaying) {
-//                                        vm.runTTSService(context,NEXT_PAR)
-//                                    }
-//                                }
-//                            }
                         },
                         onValueChange = {
                             vm.ttsState.tts.stop()
@@ -180,11 +129,8 @@ object ReaderScreenSpec : ScreenSpec {
                         },
                         onValueChangeFinished = {
                             if (vm.isPlaying) {
-
                                 vm.runTTSService(context)
-                                //vm.readText(context, vm.mediaSessionCompat(context))
                             }
-
                         }
                     )
                 }
@@ -206,7 +152,6 @@ object ReaderScreenSpec : ScreenSpec {
                                             scope.launch {
                                                 vm.getChapter(vm.getCurrentChapterByIndex().id,
                                                     source = source)
-                                                //scrollState.animateScrollToItem(0, 0)
                                                 scrollState.scrollToItem(0, 0)
                                             }
                                         }

@@ -83,12 +83,12 @@ class LocalChapterRepositoryImpl @Inject constructor(private val daoLibrary: cha
     /**************************************************************/
 
     override suspend fun deleteChaptersByBookId(bookId: Long) {
-        return daoLibrary.deleteChaptersById(bookId)
+        return daoLibrary.deleteChaptersByBookId(bookId)
     }
 
 
     override suspend fun deleteChapters(chapters: List<Chapter>) {
-        return daoLibrary.deleteChaptersById(chapters)
+        return daoLibrary.deleteChaptersByBookId(chapters)
     }
 
     override suspend fun deleteChapterByChapter(chapter: Chapter) {
@@ -98,5 +98,9 @@ class LocalChapterRepositoryImpl @Inject constructor(private val daoLibrary: cha
 
     override suspend fun deleteAllChapters() {
         return daoLibrary.deleteAllChapters()
+    }
+
+    override suspend fun updateChapters(bookId: Long, chapters: List<Chapter>) {
+        daoLibrary.updateChapters(bookId, chapters)
     }
 }

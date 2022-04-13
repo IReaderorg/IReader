@@ -1,5 +1,6 @@
 package org.ireader.presentation.feature_library.presentation.components
 
+import androidx.annotation.Keep
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -41,6 +42,7 @@ fun FilterScreen(viewModel: LibraryViewModel) {
     }
 }
 
+@Keep
 private data class FilterItem(
     val name: String,
     val type: FilterType,

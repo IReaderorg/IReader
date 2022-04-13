@@ -10,7 +10,7 @@ fun mapFetcher(fetcher: Int): FetchType {
         FetchType.SearchFetchType.index -> FetchType.SearchFetchType
         FetchType.LatestFetchType.index -> FetchType.LatestFetchType
         FetchType.PopularFetchType.index -> FetchType.PopularFetchType
-        FetchType.ChapterFetchType.index -> FetchType.ChapterFetchType
+        FetchType.ChaptersFetchType.index -> FetchType.ChaptersFetchType
         else -> FetchType.SearchFetchType
     }
 }

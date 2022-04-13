@@ -1,5 +1,6 @@
 package org.ireader.domain.feature_service.io
 
+import androidx.annotation.Keep
 import org.ireader.domain.models.entities.BaseBook
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.UpdateWithInfo
@@ -32,6 +33,7 @@ class BookCover(
 
 }
 
+@Keep
 data class HistoryWithRelations(
     val bookId: Long,
     val chapterId: Long,

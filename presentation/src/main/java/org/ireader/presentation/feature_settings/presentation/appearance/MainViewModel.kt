@@ -1,5 +1,6 @@
 package org.ireader.domain.view_models.settings.apperance
 
+import androidx.annotation.Keep
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,6 +22,7 @@ class MainViewModel @Inject constructor(
     }
 }
 
+@Keep
 data class MainScreenState(
     val darkMode: Boolean = true,
 )

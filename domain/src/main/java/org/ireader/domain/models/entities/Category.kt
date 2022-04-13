@@ -1,10 +1,12 @@
 package org.ireader.domain.models.entities
 
+import androidx.annotation.Keep
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import org.ireader.core.utils.Constants.CATEGORY_TABLE
 
 @Entity(tableName = CATEGORY_TABLE)
+@Keep
 data class Category(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,

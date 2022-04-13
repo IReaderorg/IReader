@@ -6,7 +6,7 @@ fun mappingFetcherTypeWithIndex(index: Int): FetchType {
         FetchType.PopularFetchType.index -> FetchType.PopularFetchType
         FetchType.SearchFetchType.index -> FetchType.SearchFetchType
         FetchType.DetailFetchType.index -> FetchType.DetailFetchType
-        FetchType.ChapterFetchType.index -> FetchType.ChapterFetchType
+        FetchType.ChaptersFetchType.index -> FetchType.ChaptersFetchType
         FetchType.ContentFetchType.index -> FetchType.ContentFetchType
         else -> FetchType.LatestFetchType
     }

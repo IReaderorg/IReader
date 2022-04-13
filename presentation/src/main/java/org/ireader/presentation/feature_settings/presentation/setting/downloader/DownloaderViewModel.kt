@@ -1,6 +1,7 @@
 package org.ireader.presentation.feature_settings.presentation.setting.downloader
 
 import android.content.Context
+import androidx.annotation.Keep
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -141,6 +142,7 @@ class DownloaderViewModel @Inject constructor(
     }
 }
 
+@Keep
 data class DownloaderState(
     val downloadBookId: Long = Constants.NULL_VALUE,
     val chapters: List<Chapter> = emptyList(),

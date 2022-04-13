@@ -2,6 +2,7 @@ package org.ireader.presentation.feature_settings.presentation
 
 import android.content.Intent
 import android.net.Uri
+import androidx.annotation.Keep
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -47,7 +48,7 @@ fun AboutSettingScreen(
                 TopAppBarBackButton(navController = navController)
             }
         )
-    }) {
+    }) { padding ->
         val list = listOf<AboutTile>(
             AboutTile.Version(versionCode),
             AboutTile.WhatsNew,
@@ -98,6 +99,7 @@ fun AboutSettingScreen(
 }
 
 sealed class AboutTile(val title: String, val subtitle: String, val intent: Intent) {
+    @Keep
     data class Version(val version: String) : AboutTile("Version",
         version,
         Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/kazemcodes/Infinity/releases")))

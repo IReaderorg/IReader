@@ -45,7 +45,7 @@ dependencies {
     implementation(libs.room.ktx)
     implementation(libs.room.paging)
     ksp(libs.room.compiler)
-    annotationProcessor(libs.room.compiler)
+
 
 
     /** Coroutine **/
@@ -94,6 +94,9 @@ dependencies {
     implementation(libs.ktor.serialization)
     implementation(libs.ktor.okhttp)
     implementation(libs.ktor.jsoup)
+
+
+
 
 
     testImplementation(test.junit4)

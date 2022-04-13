@@ -13,6 +13,8 @@
         <entry key="../../../../../../../layout/compose-model-1648205757800.xml" value="0.1" />
         <entry key="../../../../../../../layout/compose-model-1649060997359.xml" value="0.46651785714285715" />
         <entry key="../../../../../../../layout/compose-model-1649061735196.xml" value="1.0" />
+        <entry key="../../../../../../../layout/compose-model-1649752446350.xml" value="0.1" />
+        <entry key="../../../../../../../layout/compose-model-1649752455929.xml" value="0.22" />
         <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.124" />
         <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/drawable/baseline_close_24.xml" value="0.27025641025641023" />
         <entry key="..\:/Programming/AndroidWorks/MyReleaseProjects/infinite-reader/Infinite_reader/app/src/main/res/drawable/baseline_info_20.xml" value="0.27025641025641023" />
@@ -55,7 +57,7 @@
       <item index="0" class="java.lang.String" itemvalue="androidx.compose.runtime.Composable" />
     </list>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="11" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_16" project-jdk-name="11" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
   <component name="ProjectType">

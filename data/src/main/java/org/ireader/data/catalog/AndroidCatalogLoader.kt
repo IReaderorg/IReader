@@ -13,6 +13,7 @@ import android.app.Application
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.NameNotFoundException
+import androidx.annotation.Keep
 import dalvik.system.DexClassLoader
 import dalvik.system.PathClassLoader
 import kotlinx.coroutines.Dispatchers
@@ -242,14 +243,15 @@ class AndroidCatalogLoader @Inject constructor(
     }
   }
 
-  private data class ValidatedData(
-      val versionCode: Int,
-      val versionName: String,
-      val description: String,
-      val nsfw: Boolean,
-      val classToLoad: String,
-      val dependencies: Dependencies,
-  )
+    @Keep
+    private data class ValidatedData(
+        val versionCode: Int,
+        val versionName: String,
+        val description: String,
+        val nsfw: Boolean,
+        val classToLoad: String,
+        val dependencies: Dependencies,
+    )
 
   private companion object {
       const val EXTENSION_FEATURE = "ireader"

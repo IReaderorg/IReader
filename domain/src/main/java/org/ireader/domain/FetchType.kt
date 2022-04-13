@@ -6,5 +6,5 @@ sealed class FetchType(val index: Int) {
     object SearchFetchType : FetchType(2)
     object DetailFetchType : FetchType(3)
     object ContentFetchType : FetchType(4)
-    object ChapterFetchType : FetchType(5)
+    object ChaptersFetchType : FetchType(5)
 }

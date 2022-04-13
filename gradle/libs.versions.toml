@@ -11,7 +11,7 @@ ksp = "1.6.10-1.0.2"
 
 [libraries]
 desugarJdkLibs = "com.android.tools:desugar_jdk_libs:1.1.5"
-gradle-tools = "com.android.tools.build:gradle:7.1.2"
+gradle-tools = "com.android.tools.build:gradle:7.1.3"
 gradle-kotlin = "org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.10"
 gradle-kotlinSerialization = "org.jetbrains.kotlin:kotlin-serialization:1.6.10"
 gradle-hilt = "com.google.dagger:hilt-android-gradle-plugin:2.39.1"
@@ -27,6 +27,7 @@ ktor-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-okhttp = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-serialization = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-jsoup = "com.tfowl.ktor:ktor-jsoup:1.6.4"
+
 
 
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }

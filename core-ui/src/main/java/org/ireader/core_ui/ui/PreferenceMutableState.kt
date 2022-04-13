@@ -16,16 +16,6 @@ class PreferenceMutableState<T>(
 
     private val state = mutableStateOf(preference.get())
 
-    init {
-        try {
-            preference.changes().distinctUntilChanged()
-                .onEach { value ->
-                    state.value = value
-                }.launchIn(scope)
-        } catch (e: Exception) {
-            Log.e("PreferenceMutableState", e.toString())
-        }
-    }
 
     override var value: T
         get() = state.value
@@ -41,6 +31,20 @@ class PreferenceMutableState<T>(
         return { preference.set(it) }
     }
 
+    init {
+        try {
+            preference.changes().distinctUntilChanged()
+                .onEach { value ->
+                    try {
+                        state.value = value
+
+                    } catch (e: Exception) {
+                    }
+                }.launchIn(scope)
+        } catch (e: Exception) {
+            Log.e("PreferenceMutableState", e.toString())
+        }
+    }
 }
 
 fun <T> Preference<T>.asStateIn(scope: CoroutineScope): PreferenceMutableState<T> {

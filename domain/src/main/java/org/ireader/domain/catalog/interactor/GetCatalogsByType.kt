@@ -8,6 +8,7 @@
 
 package org.ireader.domain.catalog.interactor
 
+import androidx.annotation.Keep
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import org.ireader.domain.catalog.model.CatalogSort
@@ -47,6 +48,7 @@ class GetCatalogsByType @Inject constructor(
         }
     }
 
+    @Keep
     data class Catalogs(
         val pinned: List<CatalogLocal>,
         val unpinned: List<CatalogLocal>,

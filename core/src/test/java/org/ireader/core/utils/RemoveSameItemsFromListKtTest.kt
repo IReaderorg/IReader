@@ -27,7 +27,7 @@ class RemoveSameItemsFromListKtTest {
 
     @Test
     fun `diff based on id`() {
-        data class Book(val id: Int)
+      data class Book(val id: Int)
 
         val old = listOf(Book(1), Book(2))
         val new = listOf(Book(2), Book(3), Book(4), Book(1), Book(2))

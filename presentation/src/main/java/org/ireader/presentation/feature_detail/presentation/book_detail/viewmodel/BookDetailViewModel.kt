@@ -187,16 +187,16 @@ class BookDetailViewModel @Inject constructor(
                 },
                 onSuccess = { result ->
                     val uniqueList =
+
                         removeSameItemsFromList(chapterState.chapters,
                             result) {
-                            it.title
+                            it.link
                         }
                     setStateChapters(chapters = uniqueList)
                     clearChapterError()
                     if (uniqueList.isNotEmpty()) {
                         withContext(Dispatchers.IO) {
-                            deleteUseCase.deleteChaptersByBookId(book.id)
-                            insertChaptersToLocal(uniqueList, book.id)
+                            localInsertUseCases.updateChaptersUseCase(book.id, uniqueList)
                             getLocalChaptersByBookId(bookId = book.id)
                         }
 

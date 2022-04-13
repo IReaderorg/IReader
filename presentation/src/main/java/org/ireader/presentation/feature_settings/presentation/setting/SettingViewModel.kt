@@ -1,6 +1,7 @@
 package org.ireader.presentation.feature_settings.presentation.setting
 
 import android.content.Intent
+import androidx.annotation.Keep
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
@@ -129,6 +130,7 @@ class SettingViewModel @Inject constructor(
 }
 
 @Serializable
+@Keep
 data class BackUpBook(
     val book: Book,
     val chapters: List<Chapter>,

@@ -108,11 +108,11 @@ interface chapterDao : BaseDao<Chapter> {
 
 
     @Query("DELETE FROM chapter WHERE bookId = :bookId")
-    suspend fun deleteChaptersById(bookId: Long)
+    suspend fun deleteChaptersByBookId(bookId: Long)
 
 
     @Delete
-    suspend fun deleteChaptersById(chapters: List<Chapter>)
+    suspend fun deleteChaptersByBookId(chapters: List<Chapter>)
 
     @Delete
     suspend fun deleteChapter(chapter: Chapter)
@@ -120,5 +120,10 @@ interface chapterDao : BaseDao<Chapter> {
     @Query("DELETE FROM chapter ")
     suspend fun deleteAllChapters()
 
+    @Transaction
+    suspend fun updateChapters(bookId: Long, chapters: List<Chapter>) {
+        deleteChaptersByBookId(bookId)
+        insertChapters(chapters)
+    }
 
 }

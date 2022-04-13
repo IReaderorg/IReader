@@ -1,10 +1,12 @@
 package org.ireader.domain.models.entities
 
+import androidx.annotation.Keep
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import org.ireader.core.utils.Constants.REMOTE_TABLE
 
 @Entity(tableName = REMOTE_TABLE)
+@Keep
 data class RemoteRepository(
     @PrimaryKey(autoGenerate = true)
     val id: Long,

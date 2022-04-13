@@ -85,7 +85,7 @@ class LibraryUpdatesService @AssistedInject constructor(
                         }, onError = {})
 
                     val newChapters =
-                        remoteChapters.filter { chapter -> chapter.title !in chapters.map { it.title } }
+                        remoteChapters.filter { chapter -> chapter.link !in chapters.map { it.link } }
 
                     if (newChapters.isNotEmpty()) {
                         updatedBookSize += 1

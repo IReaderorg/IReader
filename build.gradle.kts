@@ -24,7 +24,7 @@ buildscript {
 subprojects {
     tasks.withType<org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompile> {
         kotlinOptions {
-            jvmTarget = JavaVersion.VERSION_1_8.toString()
+            jvmTarget = "11"
             freeCompilerArgs = freeCompilerArgs + listOf(
                 "-Xjvm-default=compatibility",
                 "-Xopt-in=kotlin.RequiresOptIn",
@@ -45,24 +45,9 @@ subprojects {
                 versionCode = ProjectConfig.versionCode
                 versionName = ProjectConfig.versionName
             }
-            when (this) {
-                is com.android.build.gradle.LibraryExtension -> {
-                    defaultConfig {
-                        // apply the pro guard rules for library
-                        consumerProguardFiles("consumer-rules.pro")
-                    }
-                }
 
-                is com.android.build.gradle.AppExtension -> {
-                    buildTypes {
-                        getByName("release") {
-                            isMinifyEnabled = false
-                            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"),
-                                "proguard-rules.pro")
-                        }
-                    }
-                }
-            }
+
+
             compileOptions {
                 isCoreLibraryDesugaringEnabled = true
                 sourceCompatibility(JavaVersion.VERSION_11)

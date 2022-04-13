@@ -1,5 +1,6 @@
 package org.ireader.domain.models.entities
 
+import androidx.annotation.Keep
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
@@ -9,6 +10,7 @@ import java.util.*
 
 @Serializable
 @Entity(tableName = BOOK_TABLE)
+@Keep
 data class Book(
     @PrimaryKey(autoGenerate = true)
     override val id: Long = 0,
@@ -120,7 +122,7 @@ fun MangaInfo.fromBookInfo(sourceId: Long): Book {
         author = this.author,
     )
 }
-
+@Keep
 data class BookWithInfo(
     val id: Long = 0,
     val title: String,
@@ -177,6 +179,7 @@ interface BaseBook {
     val customCover: String
 }
 
+@Keep
 data class BookItem(
     override val id: Long = 0,
     override val sourceId: Long,

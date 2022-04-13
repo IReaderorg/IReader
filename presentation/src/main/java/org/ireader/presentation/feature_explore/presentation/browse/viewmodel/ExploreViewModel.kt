@@ -23,7 +23,6 @@ import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.preferences.reader_preferences.BrowseLayoutTypeUseCase
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import org.ireader.domain.use_cases.remote.key.RemoteKeyUseCase
-import org.ireader.domain.utils.withIOContext
 import tachiyomi.source.CatalogSource
 import tachiyomi.source.model.Filter
 import tachiyomi.source.model.MangasPageInfo
@@ -127,18 +126,28 @@ class ExploreViewModel @Inject constructor(
                         val listing = stateListing
                         val source = source
                         if (source != null) {
-                            val result = if (searchQuery != null) {
-                                if (query != null && query.isNotBlank()) {
-                                    source.getMangaList(filters = listOf(Filter.Title()
-                                        .apply { this.value = query }), page = page)
-                                } else {
-                                    throw EmptyQuery()
-                                }
-                            } else if (filters != null) {
-                                source.getMangaList(filters = filters, page)
-                            } else {
-                                source.getMangaList(sort = listing, page)
-                            }
+                            var result = MangasPageInfo(emptyList(), false)
+//                            val result = if (searchQuery != null) {
+//                                if (query != null && query.isNotBlank()) {
+//                                    source.getMangaList(filters = listOf(Filter.Title()
+//                                        .apply { this.value = query }), page = page)
+//                                } else {
+//                                    throw EmptyQuery()
+//                                }
+//                            } else if (filters != null) {
+//                                source.getMangaList(filters = filters, page)
+//                            } else {
+//                                source.getMangaList(sort = listing, page)
+//                            }
+                            remoteUseCases.getRemoteBooks(searchQuery,
+                                listing,
+                                filters,
+                                source,
+                                page,
+                                onError = {},
+                                onSuccess = { res ->
+                                    result = res
+                                })
                             Result.success(result)
                         } else {
                             throw SourceNotFoundException()
@@ -172,9 +181,9 @@ class ExploreViewModel @Inject constructor(
                         it.toBook(source?.id ?: 0,
                             tableId = 1)
                     }
-                    withIOContext {
-                        remoteKeyUseCase.prepareExploreMode(page == 1, books, keys)
-                    }
+
+                    remoteKeyUseCase.prepareExploreMode(page == 1, books, keys)
+
                     page = newKey
                     endReached = !items.hasNextPage
                     Timber.e("Request was finished")

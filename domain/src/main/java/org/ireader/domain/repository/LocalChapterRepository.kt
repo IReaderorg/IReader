@@ -67,5 +67,7 @@ interface LocalChapterRepository {
 
     suspend fun deleteAllChapters()
 
+    suspend fun updateChapters(bookId: Long, chapters: List<Chapter>)
+
 
 }

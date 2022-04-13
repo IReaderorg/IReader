@@ -36,7 +36,9 @@ android {
             "META-INF/LGPL2.1",
             "**/attach_hotspot_windows.dll",
             "META-INF/licenses/ASM",
-            "META-INF/gradle/incremental.annotation.processors"
+            "META-INF/gradle/incremental.annotation.processors",
+            "META-INF/DEPENDENCIES",
+            "mozilla/public-suffix-list.txt",
         ))
     }
     kotlinOptions {
@@ -47,6 +49,17 @@ android {
     }
     composeOptions {
         kotlinCompilerExtensionVersion = compose.versions.compose.get()
+    }
+    buildTypes {
+        getByName("release") {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+                "proguard-shrink-only.txt",
+                "proguard-project.txt",
+            )
+        }
     }
 }
 
@@ -123,7 +136,6 @@ dependencies {
     implementation(libs.room.ktx)
     implementation(libs.room.paging)
     ksp(libs.room.compiler)
-    annotationProcessor(libs.room.compiler)
 
 
     /** Coil **/
@@ -172,12 +184,3 @@ fun runCommand(command: String): String {
     }
     return String(byteOut.toByteArray()).trim()
 }
-
-
-//configurations.all {
-//    resolutionStrategy.dependencySubstitution {
-//        substitute(module("org.tachiyomi:core-desktop:1.2-SNAPSHOT"))
-//            .using(module("org.tachiyomi:core-jvm:1.2-SNAPSHOT"))
-//            .withoutClassifier()
-//    }
-//}

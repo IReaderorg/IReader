@@ -121,6 +121,10 @@ class LocalBookRepositoryImpl(
         return bookDao.findBooksByKey(key = key)
     }
 
+    override suspend fun subscribeBooksByKey(key: String, title: String): Flow<List<Book>> {
+        return bookDao.subscribeBooksByKey(key, title)
+    }
+
 
     override suspend fun insertBooks(book: List<Book>): List<Long> {
         return remoteKeysDao.insert(book)

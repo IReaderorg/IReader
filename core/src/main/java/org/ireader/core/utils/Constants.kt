@@ -46,7 +46,7 @@ object Constants {
     const val PARSE_CONTENT = "PARSE_CONTENT"
     const val PARSE_DETAIL = "PARSE_DETAIL"
     const val PARSE_CHAPTERS = "PARSE_CHAPTERS"
-
+    const val PARSE_BOOKS = "PARSE_BOOKS"
 
 }
 
