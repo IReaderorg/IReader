@@ -1,8 +1,10 @@
 package org.ireader.domain.use_cases.remote
 
+import android.content.Context
 import android.webkit.WebView
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -22,7 +24,7 @@ import tachiyomi.source.model.MangaInfo
 import timber.log.Timber
 import javax.inject.Inject
 
-class GetBookDetail @Inject constructor(private val webview: WebView) {
+class GetBookDetail @Inject constructor(@ApplicationContext private val context: Context) {
     suspend operator fun invoke(
         book: Book,
         source: Source,
@@ -34,7 +36,7 @@ class GetBookDetail @Inject constructor(private val webview: WebView) {
             Timber.d("Timber: Remote Book Detail for ${book.title} Was called")
             var bookDetail = source.getMangaDetails(book.toBookInfo(source.id))
 
-            bookDetail = fetchDetailDataFromWebView(webview, source, bookDetail)
+            bookDetail = fetchDetailDataFromWebView(context, source, bookDetail)
 
             onSuccess(updateBook(bookDetail.toBook(source.id), book))
         } catch (e: CancellationException) {
@@ -45,7 +47,7 @@ class GetBookDetail @Inject constructor(private val webview: WebView) {
 }
 
 private suspend fun fetchDetailDataFromWebView(
-    webview: WebView,
+    context : Context,
     source: Source,
     book: MangaInfo,
 ): MangaInfo {
@@ -56,7 +58,7 @@ private suspend fun fetchDetailDataFromWebView(
     if (cmd != null) {
         if (key.contains(WEBVIEW_PARSE)) {
             withContext(Dispatchers.Main) {
-                val htmls = getHtmlFromWebView(webViewer = webview,
+                val htmls = getHtmlFromWebView(context = context,
                     cmd.urL,
                     ajaxSelector = cmd.ajaxSelector,
                     cloudflareBypass = cmd.cloudflareBypass ?: "0",

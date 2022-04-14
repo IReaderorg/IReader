@@ -112,17 +112,18 @@ fun TTSScreen(
     LaunchedEffect(key1 = vm.state.stateChapter) {
         vm.ttsState.ttsChapter = vm.state.stateChapter
         vm.state.stateChapter?.let { chapter ->
-            vm.state.book?.let { book ->
-                val notification = vm.defaultNotificationHelper.basicPlayingTextReaderNotification(
-                    chapter,
-                    book,
-                    vm.ttsState.isPlaying,
-                    vm.ttsState.currentReadingParagraph,
-                    vm.ttsState.mediaSession)
-                NotificationManagerCompat.from(context)
-                    .notify(Notifications.ID_TEXT_READER_PROGRESS, notification.build())
+            vm.ttsState.mediaSession?.let { mediaSession ->
+                vm.state.book?.let { book ->
+                    val notification = vm.defaultNotificationHelper.basicPlayingTextReaderNotification(
+                        chapter,
+                        book,
+                        vm.ttsState.isPlaying,
+                        vm.ttsState.currentReadingParagraph,
+                        mediaSession)
+                    NotificationManagerCompat.from(context)
+                        .notify(Notifications.ID_TEXT_READER_PROGRESS, notification.build())
+                }
             }
-
         }
 
     }
@@ -147,7 +148,7 @@ fun TTSScreen(
             vm.currentReadingParagraph = pagerState.currentPage
             vm.prevPar = pagerState.currentPage
             if (vm.isPlaying) {
-                vm.ttsState.tts.stop()
+                vm.ttsState.tts?.stop()
                 vm.runTTSService(context, PLAY)
             }
         }

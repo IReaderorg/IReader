@@ -163,7 +163,7 @@ class ReaderScreenViewModel @Inject constructor(
 
 
     fun onNextVoice() {
-        ttsState.tts.stop()
+        ttsState.tts?.stop()
         ttsState.isPlaying = false
         ttsState.currentReadingParagraph = 0
     }

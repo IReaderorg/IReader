@@ -82,10 +82,31 @@ class ChapterDetailViewModel @Inject constructor(
         }
     }
 
+    fun autoSortChapterInDB() {
+        val list = state.chapters.sortedWith(object : Comparator<Chapter> {
+            override fun compare(o1: Chapter, o2: Chapter): Int {
+                return extractInt(o1) - extractInt(o2)
+            }
+
+            fun extractInt(s: Chapter): Int {
+                val num = s.title.replace("\\D".toRegex(), "")
+                // return 0 if no digits found
+                return if (num.isEmpty()) 0 else Integer.parseInt(num)
+            }
+        }
+        )
+        viewModelScope.launch(Dispatchers.IO)
+        {
+            deleteUseCase.deleteChapters(list)
+            insertUseCases.insertChapters(list)
+        }
+    }
+
     fun reverseChapterInDB() {
         toggleAsc()
         book?.let { getLocalChaptersByPaging(isAsc = isAsc) }
         viewModelScope.launch(Dispatchers.IO) {
+            deleteUseCase.deleteChapters(chapters)
             insertUseCases.insertChapters(chapters.reversed())
         }
     }
@@ -107,7 +128,8 @@ class ChapterDetailViewModel @Inject constructor(
 
     }
 
-    private var getChapterJob: Job? = null
+    private
+    var getChapterJob: Job? = null
     fun getLocalChaptersByPaging(isAsc: Boolean = true) {
         val book = state.book
         getChapterJob?.cancel()
@@ -153,7 +175,8 @@ class ChapterDetailViewModel @Inject constructor(
         }
     }
 
-    lateinit var work: OneTimeWorkRequest
+    lateinit
+    var work: OneTimeWorkRequest
     fun downloadChapters(context: Context) {
 
         book?.let { book ->
@@ -163,7 +186,8 @@ class ChapterDetailViewModel @Inject constructor(
                         Data.Builder().apply {
                             putLongArray(DOWNLOADER_Chapters_IDS,
                                 this@ChapterDetailViewModel.selection.toLongArray())
-                            putLongArray(DownloadService.DOWNLOADER_BOOKS_IDS, longArrayOf(book.id))
+                            putLongArray(DownloadService.DOWNLOADER_BOOKS_IDS,
+                                longArrayOf(book.id))
                         }.build()
                     )
                     addTag(DownloadService.DOWNLOADER_SERVICE_NAME)

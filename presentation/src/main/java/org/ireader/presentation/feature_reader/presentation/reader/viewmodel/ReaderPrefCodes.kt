@@ -129,7 +129,7 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
         if (increase) {
             scrollIndicatorWith += 1
             readerUseCases.scrollIndicatorUseCase.saveWidth(scrollIndicatorWith + 1)
-        } else {
+        } else if (scrollIndicatorWith > 0){
             scrollIndicatorWith -= 1
             readerUseCases.scrollIndicatorUseCase.saveWidth(scrollIndicatorWith - 1)
         }
@@ -140,7 +140,7 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
             scrollIndicatorPadding += 1
 
             readerUseCases.scrollIndicatorUseCase.savePadding(scrollIndicatorPadding + 1)
-        } else {
+        } else if (scrollIndicatorPadding > 0) {
             scrollIndicatorPadding -= 1
             readerUseCases.scrollIndicatorUseCase.savePadding(scrollIndicatorPadding - 1)
         }
@@ -303,7 +303,7 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
         if (increase) {
             autoScrollInterval += 500
             readerUseCases.autoScrollMode.saveInterval(autoScrollInterval + 500)
-        } else {
+        } else if (autoScrollInterval > 0){
             autoScrollInterval -= 500
             readerUseCases.autoScrollMode.saveInterval(autoScrollInterval - 500)
         }
@@ -313,7 +313,7 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
         if (increase) {
             autoScrollOffset += 50
             readerUseCases.autoScrollMode.saveOffset(autoScrollOffset + 50)
-        } else {
+        } else if (autoScrollOffset > 0) {
             autoScrollOffset -= 50
             readerUseCases.autoScrollMode.saveOffset(autoScrollOffset - 50)
         }

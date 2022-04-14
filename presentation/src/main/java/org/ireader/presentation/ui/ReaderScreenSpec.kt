@@ -124,7 +124,7 @@ object ReaderScreenSpec : ScreenSpec {
                             vm.runTTSService(context, NEXT_PAR)
                         },
                         onValueChange = {
-                            vm.ttsState.tts.stop()
+                            vm.ttsState.tts?.stop()
                             vm.currentReadingParagraph = it.toInt()
                         },
                         onValueChangeFinished = {

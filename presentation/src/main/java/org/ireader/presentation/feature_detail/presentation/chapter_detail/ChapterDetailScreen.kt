@@ -121,6 +121,10 @@ fun ChapterDetailScreen(
                     onClick = { vm.reverseChapterInDB() }) {
                     MidSizeTextComposable(text = "Reverse Chapters in DB")
                 }
+                TextButton(modifier = Modifier.fillMaxWidth(),
+                    onClick = { vm.autoSortChapterInDB() }) {
+                    MidSizeTextComposable(text = "Auto Sort Chapters in DB")
+                }
             }
         },
     ) { padding ->

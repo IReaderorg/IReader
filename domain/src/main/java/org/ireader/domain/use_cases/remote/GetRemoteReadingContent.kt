@@ -1,8 +1,10 @@
 package org.ireader.domain.use_cases.remote
 
+import android.content.Context
 import android.webkit.WebView
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.ireader.core.utils.Constants.PARSE_CONTENT
@@ -23,7 +25,7 @@ import tachiyomi.source.model.Text
 import timber.log.Timber
 import javax.inject.Inject
 
-class GetRemoteReadingContent @Inject constructor(private val webview: WebView) {
+class GetRemoteReadingContent @Inject constructor(@ApplicationContext private val context: Context)  {
     suspend operator fun invoke(
         chapter: Chapter,
         source: Source,
@@ -36,7 +38,7 @@ class GetRemoteReadingContent @Inject constructor(private val webview: WebView) 
             val content = mutableListOf<String>()
             var page = source.getPageList(chapter.toChapterInfo())
 
-            page = fetchReaderDataFromWebView(webview, source, chapter.toChapterInfo(), page)
+            page = fetchReaderDataFromWebView(context, source, chapter.toChapterInfo(), page)
 
 
 
@@ -69,7 +71,7 @@ class GetRemoteReadingContent @Inject constructor(private val webview: WebView) 
 }
 
 private suspend fun fetchReaderDataFromWebView(
-    webview: WebView,
+    context : Context,
     source: Source,
     chapter: ChapterInfo,
     page: List<Page>,
@@ -81,7 +83,7 @@ private suspend fun fetchReaderDataFromWebView(
     if (cmd != null) {
         if (first.contains(WEBVIEW_PARSE)) {
             withContext(Dispatchers.Main) {
-                val htmls = getHtmlFromWebView(webViewer = webview,
+                val htmls = getHtmlFromWebView(context = context,
                     cmd.urL,
                     ajaxSelector = cmd.ajaxSelector,
                     cloudflareBypass = cmd.cloudflareBypass ?: "0",

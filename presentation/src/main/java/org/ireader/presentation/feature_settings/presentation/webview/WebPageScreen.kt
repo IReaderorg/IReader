@@ -53,7 +53,7 @@ fun WebPageScreen(
     val scaffoldState = rememberScaffoldState()
     val context = LocalContext.current
     var webView by remember {
-        mutableStateOf<WebView?>(viewModel.webView)
+        mutableStateOf<WebView?>(null)
     }
     val bottomSheetState =
         rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
@@ -61,11 +61,11 @@ fun WebPageScreen(
     val source = viewModel.source
     val scope = rememberCoroutineScope()
 
-//    DisposableEffect(key1 = true) {
-//        onDispose {
-//            webView?.destroy()
-//        }
-//    }
+    DisposableEffect(key1 = true) {
+        onDispose {
+            webView?.destroy()
+        }
+    }
     LaunchedEffect(key1 = true) {
         viewModel.uiFLow.collectLatest { event ->
             when (event) {

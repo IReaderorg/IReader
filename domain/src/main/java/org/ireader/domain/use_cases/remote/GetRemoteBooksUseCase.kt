@@ -1,8 +1,10 @@
 package org.ireader.domain.use_cases.remote
 
+import android.content.Context
 import android.webkit.WebView
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -20,7 +22,7 @@ import tachiyomi.source.model.MangasPageInfo
 import timber.log.Timber
 import javax.inject.Inject
 
-class GetRemoteBooksUseCase @Inject constructor(private val webview: WebView) {
+class GetRemoteBooksUseCase @Inject constructor(@ApplicationContext private val context: Context)  {
     suspend operator fun invoke(
         query: String? = null,
         listing: Listing?,
@@ -48,7 +50,7 @@ class GetRemoteBooksUseCase @Inject constructor(private val webview: WebView) {
                 item = source.getMangaList(sort = listing, page)
             }
             if (item.mangas.isNotEmpty()) {
-                item = fetchBooksDataFromWebView(webview, source, item)
+                item = fetchBooksDataFromWebView(context, source, item)
 
             }
             onSuccess(item.copy(mangas = item.mangas.filter { it.title.isNotBlank() }))
@@ -60,7 +62,7 @@ class GetRemoteBooksUseCase @Inject constructor(private val webview: WebView) {
 }
 
 private suspend fun fetchBooksDataFromWebView(
-    webview: WebView,
+    context: Context,
     source: CatalogSource,
     book: MangasPageInfo,
 ): MangasPageInfo {
@@ -71,7 +73,7 @@ private suspend fun fetchBooksDataFromWebView(
     if (cmd != null) {
         if (key.contains(WEBVIEW_PARSE)) {
             withContext(Dispatchers.Main) {
-                val htmls = getHtmlFromWebView(webViewer = webview,
+                val htmls = getHtmlFromWebView(context = context,
                     urL = cmd.urL,
                     ajaxSelector = cmd.ajaxSelector,
                     cloudflareBypass = cmd.cloudflareBypass ?: "0",

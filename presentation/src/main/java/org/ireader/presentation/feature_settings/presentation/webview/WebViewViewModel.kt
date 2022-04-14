@@ -1,7 +1,6 @@
 package org.ireader.presentation.feature_settings.presentation.webview
 
 import android.annotation.SuppressLint
-import android.webkit.WebView
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.SavedStateHandle
@@ -26,8 +25,6 @@ import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.entities.toBook
 import org.ireader.domain.models.entities.toChapter
 import org.ireader.domain.ui.NavigationArgs
-import org.ireader.domain.use_cases.fetchers.FetchUseCase
-import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import tachiyomi.source.CatalogSource
@@ -44,14 +41,11 @@ import javax.inject.Inject
 @HiltViewModel
 class WebViewPageModel @Inject constructor(
     private val insertUseCases: LocalInsertUseCases,
-    private val deleteUseCase: DeleteUseCase,
     private val getBookUseCases: org.ireader.domain.use_cases.local.LocalGetBookUseCases,
     private val getChapterUseCase: LocalGetChapterUseCase,
-    private val fetcherUseCase: FetchUseCase,
     private val savedStateHandle: SavedStateHandle,
     private val extensions: CatalogStore,
     private val webpageImpl: WebViewPageStateImpl,
-    val webView: WebView,
 ) : BaseViewModel(), WebViewPageState by webpageImpl {
 
 

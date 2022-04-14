@@ -132,10 +132,4 @@ class LocalModule {
         return AndroidPreferenceStore(context = context, "ui")
     }
 
-    @Provides
-    @Singleton
-    fun provideWebView(@ApplicationContext context: Context): WebView {
-        return WebView(context)
-    }
-
 }

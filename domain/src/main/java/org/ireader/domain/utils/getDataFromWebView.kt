@@ -1,6 +1,7 @@
 package org.ireader.domain.utils
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.webkit.WebView
 import kotlinx.coroutines.*
 import org.ireader.core.utils.getHtml
@@ -13,59 +14,62 @@ val scope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
 @SuppressLint("SetJavaScriptEnabled")
 @OptIn(ExperimentalCoroutinesApi::class)
 suspend fun getHtmlFromWebView(
-    webViewer: WebView,
+    context: Context,
     urL: String,
     ajaxSelector: String? = null,
     cloudflareBypass: String = "0",
     timeout: Long = 5000L,
     userAgent: String? = null,
 ): Document {
-    val webView = webViewer
-    var currentTime = 0
-    webView.setDefaultSettings()
-    webView.settings.javaScriptEnabled = true
-    webView.loadUrl(urL)
-    try {
-        webView.settings.userAgentString = userAgent
-            ?: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.88 Safari/537.36"
-    } catch (e: Exception) {
-        Timber.e(e)
-    }
-
-
     var html: Document = Document("No Data was Found")
-    var isLoadUp: Boolean = false
+    withUIContext {
+        val webView = WebView(context)
+        var currentTime = 0
+        webView.setDefaultSettings()
+        webView.settings.javaScriptEnabled = true
+        webView.loadUrl(urL)
+        try {
+            webView.settings.userAgentString = userAgent
+                ?: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.88 Safari/537.36"
+        } catch (e: Exception) {
+            Timber.e(e)
+        }
 
-    webView.webViewClient = object : WebViewClientCompat() {
-        override fun onPageFinished(view: WebView, url: String) {
-            scope.launch {
-                html = Jsoup.parse(webView.getHtml())
-                if (ajaxSelector != null) {
-                    while (html.select(ajaxSelector).text().isEmpty()) {
-                        html = Jsoup.parse(webView.getHtml())
+
+        var isLoadUp: Boolean = false
+
+        webView.webViewClient = object : WebViewClientCompat() {
+            override fun onPageFinished(view: WebView, url: String) {
+                scope.launch {
+                    html = Jsoup.parse(webView.getHtml())
+                    if (ajaxSelector != null) {
+                        while (html.select(ajaxSelector).text().isEmpty()) {
+                            html = Jsoup.parse(webView.getHtml())
+                        }
+                        isLoadUp = true
+                    } else {
+                        isLoadUp = true
                     }
-                    isLoadUp = true
-                } else {
-                    isLoadUp = true
                 }
             }
-        }
 
-        override fun onReceivedErrorCompat(
-            view: WebView,
-            errorCode: Int,
-            description: String?,
-            failingUrl: String,
-            isMainFrame: Boolean,
-        ) {
-            isLoadUp = true
-            Timber.e("WebView: Not shown")
+            override fun onReceivedErrorCompat(
+                view: WebView,
+                errorCode: Int,
+                description: String?,
+                failingUrl: String,
+                isMainFrame: Boolean,
+            ) {
+                isLoadUp = true
+                Timber.e("WebView: Not shown")
+            }
         }
-    }
-    html = Jsoup.parse(webView.getHtml())
-    while (!isLoadUp && currentTime < timeout) {
-        delay(200)
-        currentTime += 200
+        html = Jsoup.parse(webView.getHtml())
+        while (!isLoadUp && currentTime < timeout) {
+            delay(200)
+            currentTime += 200
+        }
+        webView.destroy()
     }
 
 
@@ -88,9 +92,10 @@ fun buildWebViewCommand(
     page: String? = "null",
     maxPage: String? = "null",
     reverseList: String? = "null",
+    enable: String? = "null",
     html: String? = "null",
 ): String {
-    return "https://www.ireader.org/$urL${commandSeparator()}$cloudflareBypass${commandSeparator()}$ajaxSelector${commandSeparator()}$timeout${commandSeparator()}$default${commandSeparator()}$userAgent${commandSeparator()}$mode${commandSeparator()}${page}${commandSeparator()}$maxPage${commandSeparator()}$reverseList${commandSeparator()}$html"
+    return "https://www.ireader.org/$urL${commandSeparator()}$cloudflareBypass${commandSeparator()}$ajaxSelector${commandSeparator()}$timeout${commandSeparator()}$default${commandSeparator()}$userAgent${commandSeparator()}$mode${commandSeparator()}${page}${commandSeparator()}$maxPage${commandSeparator()}$reverseList${commandSeparator()}${enable}${commandSeparator()}$html"
 }
 
 fun parseWebViewCommand(
@@ -109,7 +114,8 @@ fun parseWebViewCommand(
             page = if (cmd[7] == "null") null else cmd[7],
             maxPage = if (cmd[8] == "null") null else cmd[8],
             reverseList = if (cmd[9] == "null") null else cmd[9],
-            html = if (cmd[10] == "null") null else cmd[10],
+            enable = if (cmd[10] == "null") null else cmd[10],
+            html = if (cmd[11] == "null") null else cmd[11],
         )
     } else {
         null
@@ -117,7 +123,7 @@ fun parseWebViewCommand(
 }
 
 fun WebViewCommand.update(mode: String, html: String?, clear: Boolean = false): String {
-    return "https://www.ireader.org/${if (clear) "null" else urL}${commandSeparator()}$cloudflareBypass${commandSeparator()}$ajaxSelector${commandSeparator()}$timeout${commandSeparator()}$default${commandSeparator()}$userAgent${commandSeparator()}${mode}${commandSeparator()}${page}${commandSeparator()}$maxPage${commandSeparator()}$reverseList${commandSeparator()}$html"
+    return "https://www.ireader.org/${if (clear) "null" else urL}${commandSeparator()}$cloudflareBypass${commandSeparator()}$ajaxSelector${commandSeparator()}$timeout${commandSeparator()}$default${commandSeparator()}$userAgent${commandSeparator()}${mode}${commandSeparator()}${page}${commandSeparator()}$maxPage${commandSeparator()}$reverseList${commandSeparator()}$enable${commandSeparator()}$html"
 }
 
 data class WebViewCommand(
@@ -131,5 +137,6 @@ data class WebViewCommand(
     val page: String? = "null",
     val maxPage: String? = "null",
     val reverseList: String? = "null",
+    val enable: String? = "null",
     val html: String? = "null",
 )
