@@ -11,6 +11,8 @@ import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import org.ireader.core_api.source.CatalogSource
+import org.ireader.core_api.source.model.Filter
 import org.ireader.domain.models.DisplayMode
 import org.ireader.domain.models.LayoutType
 import org.ireader.domain.models.layouts
@@ -21,8 +23,6 @@ import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.AppTextField
 import org.ireader.presentation.presentation.reusable_composable.BigSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
-import tachiyomi.source.CatalogSource
-import tachiyomi.source.model.Filter
 
 @Composable
 fun BrowseTopAppBar(

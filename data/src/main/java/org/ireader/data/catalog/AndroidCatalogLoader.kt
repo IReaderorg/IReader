@@ -21,17 +21,17 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import org.ireader.core.BuildConfig
-import org.ireader.core.prefs.AndroidPreferenceStore
+import org.ireader.core_api.http.HttpClients
+import org.ireader.core_api.log.Log
+import org.ireader.core_api.prefs.AndroidPreferenceStore
+import org.ireader.core_api.prefs.PrefixedPreferenceStore
+import org.ireader.core_api.source.Dependencies
+import org.ireader.core_api.source.Source
+import org.ireader.core_api.source.TestSource
 import org.ireader.domain.catalog.service.CatalogLoader
 import org.ireader.domain.models.entities.CatalogBundled
 import org.ireader.domain.models.entities.CatalogInstalled
 import org.ireader.domain.models.entities.CatalogLocal
-import tachiyomi.core.http.HttpClients
-import tachiyomi.core.log.Log
-import tachiyomi.core.prefs.PrefixedPreferenceStore
-import tachiyomi.source.Dependencies
-import tachiyomi.source.Source
-import tachiyomi.source.TestSource
 import java.io.File
 import javax.inject.Inject
 

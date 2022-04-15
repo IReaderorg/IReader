@@ -41,7 +41,8 @@ android {
 
 
 dependencies {
-    implementation(libs.tachiyomi)
+
+    implementation(project(Modules.coreApi))
     implementation(project(Modules.core))
     implementation(project(Modules.domain))
 

@@ -23,9 +23,9 @@ import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.preferences.reader_preferences.BrowseLayoutTypeUseCase
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import org.ireader.domain.use_cases.remote.key.RemoteKeyUseCase
-import tachiyomi.source.CatalogSource
-import tachiyomi.source.model.Filter
-import tachiyomi.source.model.MangasPageInfo
+import org.ireader.core_api.source.CatalogSource
+import org.ireader.core_api.source.model.Filter
+import org.ireader.core_api.source.model.MangasPageInfo
 import timber.log.Timber
 import javax.inject.Inject
 

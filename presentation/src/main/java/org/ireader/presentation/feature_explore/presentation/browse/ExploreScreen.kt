@@ -21,6 +21,11 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.paging.ExperimentalPagingApi
 import kotlinx.coroutines.launch
+import org.ireader.core_api.source.CatalogSource
+import org.ireader.core_api.source.HttpSource
+import org.ireader.core_api.source.Source
+import org.ireader.core_api.source.model.Filter
+import org.ireader.core_api.source.model.Listing
 import org.ireader.core_ui.ui.kaomojis
 import org.ireader.domain.FetchType
 import org.ireader.domain.models.DisplayMode
@@ -33,11 +38,6 @@ import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComp
 import org.ireader.presentation.presentation.reusable_composable.SmallTextComposable
 import org.ireader.presentation.ui.BookDetailScreenSpec
 import org.ireader.presentation.ui.WebViewScreenSpec
-import tachiyomi.source.CatalogSource
-import tachiyomi.source.HttpSource
-import tachiyomi.source.Source
-import tachiyomi.source.model.Filter
-import tachiyomi.source.model.Listing
 
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)

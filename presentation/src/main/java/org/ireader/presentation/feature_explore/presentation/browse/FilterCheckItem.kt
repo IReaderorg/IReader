@@ -7,7 +7,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
-import tachiyomi.source.model.Filter
+import org.ireader.core_api.source.model.Filter
 
 @Composable
 fun FilterCheckItem(

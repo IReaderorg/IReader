@@ -8,7 +8,7 @@ import androidx.compose.runtime.*
 import dagger.hilt.android.qualifiers.ApplicationContext
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
-import tachiyomi.source.Source
+import org.ireader.core_api.source.Source
 import timber.log.Timber
 import java.util.*
 import javax.inject.Inject

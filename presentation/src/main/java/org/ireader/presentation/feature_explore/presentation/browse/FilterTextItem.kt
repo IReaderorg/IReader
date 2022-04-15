@@ -10,7 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
-import tachiyomi.source.model.Filter
+import org.ireader.core_api.source.model.Filter
 
 @Composable
 fun FilterTextItem(

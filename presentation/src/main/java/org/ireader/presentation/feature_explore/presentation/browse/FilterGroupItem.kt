@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.dp
 import org.ireader.core.utils.replace
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
-import tachiyomi.source.model.Filter
+import org.ireader.core_api.source.model.Filter
 
 @Composable
 fun FilterGroupItem(

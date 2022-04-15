@@ -6,7 +6,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.ireader.core.os
+package org.ireader.core_api.os
 
 import android.app.Application
 import android.app.PendingIntent
@@ -14,25 +14,24 @@ import android.content.*
 import android.content.pm.PackageInstaller
 import android.content.pm.PackageInstaller.SessionParams.MODE_FULL_INSTALL
 import android.os.SystemClock
+import android.util.Log
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import tachiyomi.core.BuildConfig
-import tachiyomi.core.log.Log
 import java.io.File
 import javax.inject.Inject
 
 class PackageInstaller @Inject constructor(
-    private val context: Application,
+  private val context: Application
 ) {
 
-    private val packageInstaller = context.packageManager.packageInstaller
+  private val packageInstaller = context.packageManager.packageInstaller
 
-    @Suppress("BlockingMethodInNonBlockingContext")
-    suspend fun install(file: File, packageName: String): Boolean {
-        return withInstallReceiver { sender ->
-            withContext(Dispatchers.IO) {
-                val params = PackageInstaller.SessionParams(MODE_FULL_INSTALL)
+  @Suppress("BlockingMethodInNonBlockingContext")
+  suspend fun install(file: File, packageName: String): Boolean {
+    return withInstallReceiver { sender ->
+      withContext(Dispatchers.IO) {
+        val params = PackageInstaller.SessionParams(MODE_FULL_INSTALL)
         params.setAppPackageName(packageName)
         val sessionId = packageInstaller.createSession(params)
         packageInstaller.openSession(sessionId).use { session ->
@@ -59,7 +58,7 @@ class PackageInstaller @Inject constructor(
     val deferred = CompletableDeferred<Boolean>()
     val receiver = InstallResultReceiver(context, deferred)
     val uid = SystemClock.elapsedRealtime()
-    val action = "${BuildConfig.LIBRARY_PACKAGE_NAME}.INSTALL_APK_$uid"
+    val action = "core-api.INSTALL_APK_$uid"
     val broadcast = PendingIntent.getBroadcast(context, 0, Intent(action), 0)
 
     context.registerReceiver(receiver, IntentFilter(action))
@@ -74,7 +73,7 @@ class PackageInstaller @Inject constructor(
 
   private class InstallResultReceiver(
     val context: Application,
-    val deferred: CompletableDeferred<Boolean>,
+    val deferred: CompletableDeferred<Boolean>
   ) : BroadcastReceiver() {
 
     override fun onReceive(ctx: Context?, intent: Intent?) {
@@ -93,7 +92,7 @@ class PackageInstaller @Inject constructor(
             // receive the result callback
             deferred.complete(true)
           } catch (e: Exception) {
-            Log.warn(e, "Error while (un)installing package")
+            Log.w("Error while (un)installing package",e)
             deferred.complete(false)
           }
         }

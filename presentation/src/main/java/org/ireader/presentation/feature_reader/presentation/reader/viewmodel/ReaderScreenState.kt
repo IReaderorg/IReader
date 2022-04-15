@@ -9,7 +9,7 @@ import org.ireader.core_ui.theme.BackgroundColor
 import org.ireader.core_ui.theme.FontType
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
-import tachiyomi.source.Source
+import org.ireader.core_api.source.Source
 import javax.inject.Inject
 
 

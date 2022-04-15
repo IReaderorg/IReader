@@ -25,7 +25,7 @@ import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import org.ireader.presentation.feature_services.notification.DefaultNotificationHelper
 import org.ireader.presentation.feature_services.notification.Notifications
-import tachiyomi.source.Source
+import org.ireader.core_api.source.Source
 import timber.log.Timber
 
 @HiltWorker

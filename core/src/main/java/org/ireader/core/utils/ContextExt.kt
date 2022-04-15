@@ -36,7 +36,7 @@ import androidx.core.graphics.green
 import androidx.core.graphics.red
 import androidx.core.net.toUri
 import org.ireader.core.R
-import org.ireader.core.io.calculateSizeRecursively
+import java.io.File
 import kotlin.math.roundToInt
 
 
@@ -79,6 +79,9 @@ fun getCacheSize(context: Context): String {
         else -> "${size / (1024 * 1024)} Mb"
     }
 
+}
+fun File.calculateSizeRecursively(): Long {
+    return walkBottomUp().fold(0L) { acc, file -> acc + file.length() }
 }
 
 fun Context.findAppCompatAcivity(): AppCompatActivity? = when (this) {

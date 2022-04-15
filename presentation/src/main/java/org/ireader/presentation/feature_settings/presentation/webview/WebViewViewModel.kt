@@ -27,10 +27,11 @@ import org.ireader.domain.models.entities.toChapter
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
-import tachiyomi.source.CatalogSource
-import tachiyomi.source.model.ChapterInfo
-import tachiyomi.source.model.MangaInfo
-import tachiyomi.source.model.Text
+import org.ireader.core_api.source.CatalogSource
+import org.ireader.core_api.source.model.ChapterInfo
+import org.ireader.core_api.source.model.Filter
+import org.ireader.core_api.source.model.MangaInfo
+import org.ireader.core_api.source.model.Text
 import timber.log.Timber
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets

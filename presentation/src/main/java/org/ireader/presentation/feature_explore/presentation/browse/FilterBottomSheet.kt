@@ -11,10 +11,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.ireader.core_api.source.CatalogSource
+import org.ireader.core_api.source.TestSource
+import org.ireader.core_api.source.model.Filter
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
-import tachiyomi.source.CatalogSource
-import tachiyomi.source.TestSource
-import tachiyomi.source.model.Filter
 
 @Composable
 fun FilterBottomSheet(

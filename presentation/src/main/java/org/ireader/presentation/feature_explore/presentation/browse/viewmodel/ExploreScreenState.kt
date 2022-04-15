@@ -7,9 +7,10 @@ import org.ireader.core.utils.UiText
 import org.ireader.core.utils.emptyMangaInfoPage
 import org.ireader.domain.models.LayoutType
 import org.ireader.domain.models.entities.Book
-import tachiyomi.source.CatalogSource
-import tachiyomi.source.model.Listing
-import tachiyomi.source.model.MangasPageInfo
+import org.ireader.core_api.source.CatalogSource
+import org.ireader.core_api.source.model.Listing
+import org.ireader.core_api.source.model.MangasPageInfo
+
 
 @Keep
 data class ExploreScreenState(

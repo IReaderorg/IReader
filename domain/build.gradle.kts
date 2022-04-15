@@ -23,8 +23,7 @@ dependencies {
     implementation(project(Modules.coreUi))
 
 
-    // implementation(Deps.tachiyomi.api)
-    implementation(libs.tachiyomi)
+    implementation(project(Modules.coreApi))
     implementation(androidx.media)
 
     implementation(kotlinx.datetime)
@@ -91,9 +90,9 @@ dependencies {
 
     implementation(kotlinx.stdlib)
     implementation(libs.ktor.core)
-    implementation(libs.ktor.serialization)
+    implementation(libs.ktor.contentNegotiation)
     implementation(libs.ktor.okhttp)
-    implementation(libs.ktor.jsoup)
+
 
 
 

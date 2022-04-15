@@ -16,7 +16,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
-import tachiyomi.source.Source
+import org.ireader.core_api.source.Source
 
 @Composable
 fun MainBottomSettingComposable(

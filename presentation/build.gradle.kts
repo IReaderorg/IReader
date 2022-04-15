@@ -63,8 +63,7 @@ dependencies {
     implementation(accompanist.web)
 
 
-    //  compileOnly(Deps.tachiyomi.api)
-    implementation(libs.tachiyomi)
+    implementation(project(Modules.coreApi))
 
     implementation(androidx.core)
     implementation(androidx.media)

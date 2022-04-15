@@ -5,6 +5,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import org.ireader.core_api.http.HttpClients
 import org.ireader.data.catalog.AndroidCatalogInstallationChanges
 import org.ireader.data.catalog.AndroidCatalogInstaller
 import org.ireader.data.catalog.AndroidCatalogLoader
@@ -13,7 +14,6 @@ import org.ireader.data.local.AppDatabase
 import org.ireader.data.local.dao.CatalogDao
 import org.ireader.data.repository.CatalogRemoteRepositoryImpl
 import org.ireader.domain.catalog.service.*
-import tachiyomi.core.http.HttpClients
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)

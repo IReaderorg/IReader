@@ -9,7 +9,7 @@ import org.ireader.domain.models.entities.BookItem
 import org.ireader.presentation.presentation.layouts.CompactGridLayoutComposable
 import org.ireader.presentation.presentation.layouts.GridLayoutComposable
 import org.ireader.presentation.presentation.layouts.LinearListDisplay
-import tachiyomi.source.Source
+import org.ireader.core_api.source.Source
 
 
 @OptIn(ExperimentalFoundationApi::class)

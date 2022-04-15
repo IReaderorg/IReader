@@ -1,7 +1,6 @@
 package org.ireader.domain.use_cases.remote
 
 import android.content.Context
-import android.webkit.WebView
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -11,14 +10,14 @@ import kotlinx.coroutines.withContext
 import org.ireader.core.exceptions.EmptyQuery
 import org.ireader.core.utils.UiText
 import org.ireader.core.utils.exceptionHandler
+import org.ireader.core_api.source.CatalogSource
+import org.ireader.core_api.source.model.Filter
+import org.ireader.core_api.source.model.Listing
+import org.ireader.core_api.source.model.MangasPageInfo
 import org.ireader.domain.utils.WEBVIEW_PARSE
 import org.ireader.domain.utils.buildWebViewCommand
 import org.ireader.domain.utils.getHtmlFromWebView
 import org.ireader.domain.utils.parseWebViewCommand
-import tachiyomi.source.CatalogSource
-import tachiyomi.source.model.Filter
-import tachiyomi.source.model.Listing
-import tachiyomi.source.model.MangasPageInfo
 import timber.log.Timber
 import javax.inject.Inject
 

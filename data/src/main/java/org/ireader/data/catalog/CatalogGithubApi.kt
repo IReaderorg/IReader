@@ -1,13 +1,14 @@
 package org.ireader.data.catalog
 
 import androidx.annotation.Keep
+import io.ktor.client.call.*
 import io.ktor.client.request.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import org.ireader.core_api.http.HttpClients
 import org.ireader.domain.catalog.service.CatalogRemoteApi
 import org.ireader.domain.models.entities.CatalogRemote
-import tachiyomi.core.http.HttpClients
 import javax.inject.Inject
 
 class CatalogGithubApi @Inject constructor(
@@ -18,7 +19,7 @@ class CatalogGithubApi @Inject constructor(
         "https://raw.githubusercontent.com/kazemcodes/IReader-Sources/main"
 
     override suspend fun fetchCatalogs(): List<CatalogRemote> {
-        val response = httpClient.default.get<String>("$repoUrl/index.json")
+        val response : String = httpClient.default.get("$repoUrl/index.json").body()
         val catalogs = Json.Default.decodeFromString<List<CatalogRemoteApiModel>>(response)
         return catalogs.map { catalog ->
             CatalogRemote(

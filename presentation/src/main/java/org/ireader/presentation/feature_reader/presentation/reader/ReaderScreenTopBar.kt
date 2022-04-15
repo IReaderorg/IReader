@@ -28,7 +28,7 @@ import org.ireader.presentation.presentation.Toolbar
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.AppTextField
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
-import tachiyomi.source.Source
+import org.ireader.core_api.source.Source
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable

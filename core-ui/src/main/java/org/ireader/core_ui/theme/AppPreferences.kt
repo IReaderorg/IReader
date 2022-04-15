@@ -1,8 +1,8 @@
 package org.ireader.core_ui.theme
 
-import tachiyomi.core.prefs.Preference
-import tachiyomi.core.prefs.PreferenceStore
-import tachiyomi.core.prefs.getEnum
+import org.ireader.core_api.prefs.Preference
+import org.ireader.core_api.prefs.PreferenceStore
+import org.ireader.core_api.prefs.getEnum
 import javax.inject.Inject
 
 

@@ -8,9 +8,9 @@ import kotlinx.coroutines.flow.*
 import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
 import org.ireader.core.utils.showSnackBar
+import org.ireader.core_api.prefs.Preference
 import org.ireader.core_ui.R
 import org.ireader.core_ui.ui.PreferenceMutableState
-import tachiyomi.core.prefs.Preference
 
 
 abstract class BaseViewModel : androidx.lifecycle.ViewModel() {

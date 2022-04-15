@@ -4,6 +4,7 @@ object Modules {
     const val data = ":data"
     const val domain = ":domain"
     const val core = ":core"
+    const val coreApi = ":core-api"
     const val presentation = ":presentation"
-    const val source = ":source"
+
 }

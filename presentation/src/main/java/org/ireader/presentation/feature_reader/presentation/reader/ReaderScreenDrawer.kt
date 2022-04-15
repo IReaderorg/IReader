@@ -17,7 +17,7 @@ import org.ireader.presentation.presentation.components.ChapterListItemComposabl
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.BigSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.ErrorTextWithEmojis
-import tachiyomi.source.Source
+import org.ireader.core_api.source.Source
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable

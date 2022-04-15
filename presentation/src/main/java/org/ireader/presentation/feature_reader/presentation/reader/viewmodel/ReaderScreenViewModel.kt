@@ -32,7 +32,7 @@ import org.ireader.presentation.feature_ttl.TTSService.Companion.TTS_Chapter_ID
 import org.ireader.presentation.feature_ttl.TTSService.Companion.ttsWork
 import org.ireader.presentation.feature_ttl.TTSState
 import org.ireader.presentation.feature_ttl.TTSStateImpl
-import tachiyomi.source.Source
+import org.ireader.core_api.source.Source
 import javax.inject.Inject
 
 

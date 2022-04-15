@@ -24,8 +24,8 @@ import org.ireader.presentation.presentation.Toolbar
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
-import tachiyomi.source.HttpSource
-import tachiyomi.source.Source
+import org.ireader.core_api.source.HttpSource
+import org.ireader.core_api.source.Source
 
 @Composable
 fun WebPageTopBar(

@@ -9,16 +9,17 @@
 package org.ireader.data.catalog
 
 import android.app.Application
+import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.utils.io.*
 import kotlinx.coroutines.flow.flow
+import org.ireader.core_api.http.HttpClients
+import org.ireader.core_api.io.saveTo
+import org.ireader.core_api.log.Log
 import org.ireader.domain.catalog.model.InstallStep
 import org.ireader.domain.catalog.service.CatalogInstaller
 import org.ireader.domain.models.entities.CatalogRemote
-import tachiyomi.core.http.HttpClients
-import tachiyomi.core.io.saveTo
-import tachiyomi.core.log.Log
 import java.io.File
 import javax.inject.Inject
 
@@ -50,14 +51,14 @@ class AndroidCatalogInstaller @Inject constructor(
         val tmpApkFile = File(context.cacheDir, "${catalog.pkgName}.apk")
         val tmpIconFile = File(context.cacheDir, "${catalog.pkgName}.png")
         try {
-            val apkResponse = client.get<ByteReadChannel>(catalog.pkgUrl) {
+            val apkResponse : ByteReadChannel = client.get(catalog.pkgUrl) {
                 headers.append(HttpHeaders.CacheControl, "no-store")
-            }
+            }.body()
             apkResponse.saveTo(tmpApkFile)
 
-            val iconResponse = client.get<ByteReadChannel>(catalog.iconUrl) {
+            val iconResponse : ByteReadChannel = client.get(catalog.iconUrl) {
                 headers.append(HttpHeaders.CacheControl, "no-store")
-            }
+            }.body()
             iconResponse.saveTo(tmpIconFile)
 
             emit(InstallStep.Installing)

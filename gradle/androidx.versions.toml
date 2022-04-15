@@ -24,5 +24,7 @@ lifecycle-viewmodelktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx"
 lifecycle-viewModel = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 lifecycle-hiltviewModel = { module = "androidx.hilt:hilt-lifecycle-viewmodel", version = "1.0.0-alpha03" }
 
+lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "lifecycle" }
+
 work-runtime = { module = "androidx.work:work-runtime-ktx", version.ref = "work" }
 work-hilt = "androidx.hilt:hilt-work:1.0.0"

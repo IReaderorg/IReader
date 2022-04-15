@@ -8,8 +8,8 @@
 
 package org.ireader.domain.catalog.service
 
-import tachiyomi.core.prefs.Preference
-import tachiyomi.core.prefs.PreferenceStore
+import org.ireader.core_api.prefs.Preference
+import org.ireader.core_api.prefs.PreferenceStore
 import javax.inject.Inject
 
 class CatalogPreferences @Inject constructor(private val store: PreferenceStore) {

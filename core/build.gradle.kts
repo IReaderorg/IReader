@@ -6,10 +6,9 @@ plugins {
 }
 
 dependencies {
+    implementation(project(Modules.coreApi))
 
     implementation(androidx.appCompat)
-
-    implementation(libs.tachiyomi)
 
     implementation(compose.compose.ui)
     implementation(compose.compose.coil)
@@ -32,9 +31,9 @@ dependencies {
     implementation(kotlinx.stdlib)
 
     implementation(libs.ktor.core)
-    implementation(libs.ktor.serialization)
+    implementation(libs.ktor.core.android)
+    implementation(libs.ktor.contentNegotiation)
     implementation(libs.ktor.okhttp)
-    implementation(libs.ktor.jsoup)
 
     implementation(libs.timber)
     implementation(test.junit4)

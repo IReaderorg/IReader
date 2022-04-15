@@ -12,7 +12,7 @@ import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.entities.History
 import org.ireader.domain.utils.withIOContext
-import tachiyomi.source.Source
+import org.ireader.core_api.source.Source
 import javax.inject.Inject
 
 interface ReaderMainFunctions {

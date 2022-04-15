@@ -39,7 +39,7 @@ import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.BigSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 import org.ireader.presentation.ui.BookDetailScreenSpec
-import tachiyomi.source.HttpSource
+import org.ireader.core_api.source.HttpSource
 
 
 @OptIn(ExperimentalMaterialApi::class)

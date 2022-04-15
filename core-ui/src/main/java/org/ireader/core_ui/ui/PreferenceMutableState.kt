@@ -7,7 +7,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import tachiyomi.core.prefs.Preference
+import org.ireader.core_api.prefs.Preference
+
 
 class PreferenceMutableState<T>(
     private val preference: Preference<T>,

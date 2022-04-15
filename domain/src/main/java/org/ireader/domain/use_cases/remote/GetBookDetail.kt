@@ -1,7 +1,6 @@
 package org.ireader.domain.use_cases.remote
 
 import android.content.Context
-import android.webkit.WebView
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -11,6 +10,8 @@ import kotlinx.coroutines.withContext
 import org.ireader.core.utils.Constants
 import org.ireader.core.utils.UiText
 import org.ireader.core.utils.exceptionHandler
+import org.ireader.core_api.source.Source
+import org.ireader.core_api.source.model.MangaInfo
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Book.Companion.toBookInfo
 import org.ireader.domain.models.entities.toBook
@@ -19,8 +20,6 @@ import org.ireader.domain.utils.WEBVIEW_PARSE
 import org.ireader.domain.utils.getHtmlFromWebView
 import org.ireader.domain.utils.parseWebViewCommand
 import org.ireader.domain.utils.update
-import tachiyomi.source.Source
-import tachiyomi.source.model.MangaInfo
 import timber.log.Timber
 import javax.inject.Inject
 

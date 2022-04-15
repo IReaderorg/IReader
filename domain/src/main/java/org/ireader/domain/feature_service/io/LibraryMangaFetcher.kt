@@ -20,10 +20,10 @@ import okhttp3.Request
 import okio.Path
 import okio.buffer
 import okio.source
+import org.ireader.core_api.http.okhttp
+import org.ireader.core_api.io.saveTo
+import org.ireader.core_api.source.HttpSource
 import org.ireader.domain.catalog.interactor.GetLocalCatalog
-import tachiyomi.core.http.okhttp
-import tachiyomi.core.io.saveTo
-import tachiyomi.source.HttpSource
 import java.io.File
 import java.util.*
 

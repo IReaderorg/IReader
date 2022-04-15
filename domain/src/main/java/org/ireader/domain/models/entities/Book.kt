@@ -5,7 +5,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 import org.ireader.core.utils.Constants.BOOK_TABLE
-import tachiyomi.source.model.MangaInfo
+import org.ireader.core_api.source.model.MangaInfo
 import java.util.*
 
 @Serializable

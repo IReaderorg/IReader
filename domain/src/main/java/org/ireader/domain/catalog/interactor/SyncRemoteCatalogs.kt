@@ -10,10 +10,10 @@ package org.ireader.domain.catalog.interactor
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.ireader.core_api.log.Log
 import org.ireader.domain.catalog.service.CatalogPreferences
 import org.ireader.domain.catalog.service.CatalogRemoteApi
 import org.ireader.domain.catalog.service.CatalogRemoteRepository
-import tachiyomi.core.log.Log
 import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject

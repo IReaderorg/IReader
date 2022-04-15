@@ -4,7 +4,7 @@ import androidx.annotation.Keep
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import org.ireader.core.utils.Constants
-import tachiyomi.source.Source
+import org.ireader.core_api.source.Source
 import java.io.File
 
 @Entity(tableName = Constants.CATALOG_REMOTE)

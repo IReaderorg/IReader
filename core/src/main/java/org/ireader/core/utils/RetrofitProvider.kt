@@ -1,10 +1,10 @@
 package org.ireader.core.utils
 
 import com.squareup.moshi.Moshi
+import org.ireader.core_api.http.HttpClients
+import org.ireader.core_api.http.okhttp
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
-import tachiyomi.core.http.HttpClients
-import tachiyomi.core.http.okhttp
 import javax.inject.Inject
 
 class RetrofitProvider @Inject constructor(

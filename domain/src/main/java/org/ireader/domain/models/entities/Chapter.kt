@@ -5,7 +5,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 import org.ireader.core.utils.Constants.CHAPTER_TABLE
-import tachiyomi.source.model.ChapterInfo
+import org.ireader.core_api.source.model.ChapterInfo
 
 
 @Serializable

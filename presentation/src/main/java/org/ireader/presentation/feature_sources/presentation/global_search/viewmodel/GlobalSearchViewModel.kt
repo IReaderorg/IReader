@@ -12,8 +12,8 @@ import org.ireader.domain.catalog.service.CatalogStore
 import org.ireader.domain.models.entities.toBook
 import org.ireader.domain.use_cases.remote.key.DeleteAllSearchedBook
 import org.ireader.domain.use_cases.remote.key.RemoteKeyUseCase
-import tachiyomi.source.CatalogSource
-import tachiyomi.source.model.Filter
+import org.ireader.core_api.source.CatalogSource
+import org.ireader.core_api.source.model.Filter
 import javax.inject.Inject
 
 @HiltViewModel

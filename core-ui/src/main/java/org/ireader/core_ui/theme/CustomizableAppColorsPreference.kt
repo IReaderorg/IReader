@@ -4,9 +4,9 @@ import androidx.annotation.Keep
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import kotlinx.coroutines.CoroutineScope
+import org.ireader.core_api.prefs.Preference
 import org.ireader.core_ui.ui.PreferenceMutableState
 import org.ireader.core_ui.ui.asStateIn
-import tachiyomi.core.prefs.Preference
 
 @Keep
 data class CustomizableAppColorsPreference(

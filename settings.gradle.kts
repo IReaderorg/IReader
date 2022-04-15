@@ -6,7 +6,7 @@ include(":data")
 include(":domain")
 include(":core")
 include(":presentation")
-
+include(":core-api")
 
 
 pluginManagement {
@@ -45,4 +45,7 @@ dependencyResolutionManagement {
 
     }
 }
+
+
+
 

@@ -29,7 +29,7 @@ import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.Rea
 import org.ireader.presentation.presentation.components.ISnackBarHost
 import org.ireader.presentation.presentation.reusable_composable.ErrorTextWithEmojis
 import org.ireader.presentation.ui.WebViewScreenSpec
-import tachiyomi.source.Source
+import org.ireader.core_api.source.Source
 
 
 @ExperimentalAnimationApi

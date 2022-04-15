@@ -81,13 +81,14 @@ dependencies {
     implementation(androidx.emoji)
     implementation(androidx.material)
 
+    implementation(project(Modules.coreApi))
     implementation(project(Modules.coreUi))
     implementation(project(Modules.data))
     implementation(project(Modules.domain))
     implementation(project(Modules.core))
     implementation(project(Modules.presentation))
 
-    implementation(libs.tachiyomi)
+
 
     implementation(compose.compose.material)
     implementation(compose.compose.hiltNavigation)

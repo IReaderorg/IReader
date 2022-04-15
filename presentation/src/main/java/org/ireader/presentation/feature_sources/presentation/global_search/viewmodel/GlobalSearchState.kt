@@ -5,7 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import org.ireader.domain.models.entities.Book
-import tachiyomi.source.Source
+import org.ireader.core_api.source.Source
 import javax.inject.Inject
 
 interface GlobalSearchState {

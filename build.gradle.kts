@@ -1,4 +1,5 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
+
 buildscript {
     repositories {
         mavenCentral()
@@ -17,6 +18,8 @@ buildscript {
         classpath(libs.gradle.firebaseCrashlytic)
         classpath(libs.gradle.benmanes)
         classpath(libs.ksp.gradle)
+        classpath(libs.gradle.idea.ext)
+        classpath("com.vanniktech:gradle-maven-publish-plugin:0.19.0")
     }
 }
 

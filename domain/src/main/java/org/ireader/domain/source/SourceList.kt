@@ -1,7 +1,7 @@
 //package org.ireader.domain.source
 //
 //
-//import tachiyomi.source.CatalogSource
+//import org.ireader.core_api.source.CatalogSource
 //import tachiyomi.source.Dependencies
 //
 //

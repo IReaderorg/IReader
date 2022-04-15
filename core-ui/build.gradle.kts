@@ -18,6 +18,7 @@ android {
 
 
 dependencies {
+    implementation(project(Modules.coreApi))
     implementation(project(Modules.core))
 
     implementation(compose.compose.foundation)
@@ -38,6 +39,6 @@ dependencies {
     androidTestImplementation(compose.compose.composeTooling)
 
     implementation(accompanist.systemUiController)
-    implementation(libs.tachiyomi)
+
 
 }
