@@ -21,6 +21,9 @@ fun exceptionHandler(e: Throwable): UiText? {
         is Selector.SelectorParseException -> {
             UiText.StringResource(R.string.cant_get_content)
         }
+        is NoSuchMethodError -> {
+            UiText.StringResource(R.string.library_is_out_of_date)
+        }
         else -> {
             UiText.ExceptionString(e)
         }

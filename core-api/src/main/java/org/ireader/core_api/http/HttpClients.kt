@@ -18,25 +18,27 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class HttpClients @Inject internal constructor(context: Application) {
+class HttpClients @Inject internal constructor(context: Application, browseEngine: BrowseEngine) {
 
-  private val cache = run {
-    val dir = File(context.cacheDir, "network_cache")
-    val size = 15L * 1024 * 1024
-    Cache(dir, size)
-  }
-
-  private val cookieJar = WebViewCookieJar()
-
-  private val okhttpClient = OkHttpClient.Builder()
-    .cache(cache)
-    .cookieJar(cookieJar)
-    .build()
-
-  val default = HttpClient(OkHttp) {
-    engine {
-      preconfigured = okhttpClient
+    private val cache = run {
+        val dir = File(context.cacheDir, "network_cache")
+        val size = 15L * 1024 * 1024
+        Cache(dir, size)
     }
-  }
+
+    private val cookieJar = WebViewCookieJar()
+
+    private val okhttpClient = OkHttpClient.Builder()
+        .cache(cache)
+        .cookieJar(cookieJar)
+        .build()
+
+    val browser = browseEngine
+
+    val default = HttpClient(OkHttp) {
+        engine {
+            preconfigured = okhttpClient
+        }
+    }
 
 }

@@ -38,8 +38,7 @@ class LibraryViewModel @Inject constructor(
     private val sortersUseCase: SortersUseCase,
     private val historyUseCase: HistoryUseCase,
     private val libraryState: LibraryStateImpl,
-
-    ) : BaseViewModel(), LibraryState by libraryState {
+) : BaseViewModel(), LibraryState by libraryState {
 
 
     init {

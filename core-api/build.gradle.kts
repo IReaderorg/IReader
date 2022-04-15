@@ -28,6 +28,7 @@ dependencies {
     implementation(androidx.lifecycle.process)
     implementation(androidx.dataStore)
     implementation(libs.quickjsAndroid)
+    compileOnly(libs.jsoup)
     implementation(libs.bundles.tinylog)
     api(libs.ktor.okhttp)
 }

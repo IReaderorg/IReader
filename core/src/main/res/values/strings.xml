@@ -26,6 +26,7 @@
     <string name="no_chapter_is_available">No Chapter is Available.</string>
     <string name="no_data_found_error">No Data was Found.</string>
     <string name="cant_get_content">Can\'t Get The Chapter Content.</string>
+    <string name="library_is_out_of_date">Library is Out of date.</string>
     <string name="did_not_get_anything">I did\'t get anythinh.</string>
     <string name="trying_to_fetch_chapters_content">Trying to fetch chapter\'s content…</string>
     <string name="trying_to_fetch">Trying to fetch…</string>

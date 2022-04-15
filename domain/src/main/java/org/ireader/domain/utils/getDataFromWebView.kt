@@ -3,6 +3,7 @@ package org.ireader.domain.utils
 import android.annotation.SuppressLint
 import android.content.Context
 import android.webkit.WebView
+import io.ktor.http.*
 import kotlinx.coroutines.*
 import org.ireader.core.utils.getHtml
 import org.jsoup.Jsoup
@@ -34,7 +35,6 @@ suspend fun getHtmlFromWebView(
         } catch (e: Exception) {
             Timber.e(e)
         }
-
 
         var isLoadUp: Boolean = false
 
