@@ -14,9 +14,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.ireader.core.R
 import org.ireader.core.utils.UiText
+import org.ireader.core_api.source.Source
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.catalog.service.CatalogStore
 import org.ireader.domain.models.entities.Chapter
+import org.ireader.domain.services.downloaderService.DefaultNotificationHelper
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.domain.use_cases.history.HistoryUseCase
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
@@ -24,15 +26,13 @@ import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.preferences.reader_preferences.ReaderPrefUseCases
 import org.ireader.domain.use_cases.preferences.reader_preferences.TextReaderPrefUseCase
 import org.ireader.domain.use_cases.remote.RemoteUseCases
-import org.ireader.presentation.feature_services.notification.DefaultNotificationHelper
-import org.ireader.presentation.feature_ttl.TTSService
-import org.ireader.presentation.feature_ttl.TTSService.Companion.COMMAND
-import org.ireader.presentation.feature_ttl.TTSService.Companion.TTS_BOOK_ID
-import org.ireader.presentation.feature_ttl.TTSService.Companion.TTS_Chapter_ID
-import org.ireader.presentation.feature_ttl.TTSService.Companion.ttsWork
+import org.ireader.domain.services.tts_service.TTSService
+import org.ireader.domain.services.tts_service.TTSService.Companion.COMMAND
+import org.ireader.domain.services.tts_service.TTSService.Companion.TTS_BOOK_ID
+import org.ireader.domain.services.tts_service.TTSService.Companion.TTS_Chapter_ID
+import org.ireader.domain.services.tts_service.TTSService.Companion.ttsWork
 import org.ireader.presentation.feature_ttl.TTSState
 import org.ireader.presentation.feature_ttl.TTSStateImpl
-import org.ireader.core_api.source.Source
 import javax.inject.Inject
 
 

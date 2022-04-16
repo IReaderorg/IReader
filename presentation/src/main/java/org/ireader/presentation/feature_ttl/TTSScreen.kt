@@ -32,14 +32,15 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.launch
 import org.ireader.core.R
+import org.ireader.core_api.source.Source
 import org.ireader.domain.feature_service.io.BookCover
 import org.ireader.domain.models.entities.Chapter
+import org.ireader.domain.notification.Notifications
+import org.ireader.domain.services.tts_service.Player
 import org.ireader.presentation.feature_reader.presentation.reader.ReaderScreenDrawer
 import org.ireader.presentation.feature_reader.presentation.reader.components.SettingItemComposable
 import org.ireader.presentation.feature_reader.presentation.reader.components.SettingItemToggleComposable
 import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.ReaderScreenViewModel
-import org.ireader.presentation.feature_services.notification.Notifications
-import org.ireader.presentation.feature_ttl.TTSService.Companion.PLAY
 import org.ireader.presentation.presentation.Toolbar
 import org.ireader.presentation.presentation.components.BookImageComposable
 import org.ireader.presentation.presentation.components.showLoading
@@ -47,7 +48,6 @@ import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.BigSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.SuperSmallTextComposable
-import org.ireader.core_api.source.Source
 import timber.log.Timber
 import java.math.RoundingMode
 
@@ -135,7 +135,7 @@ fun TTSScreen(
 
                 pagerState.scrollToPage(vm.ttsState.currentReadingParagraph)
                 if (vm.isPlaying) {
-                    vm.runTTSService(context, PLAY)
+                    vm.runTTSService(context, Player.PLAY)
                 }
             }
         } catch (e: Exception) {
@@ -149,7 +149,7 @@ fun TTSScreen(
             vm.prevPar = pagerState.currentPage
             if (vm.isPlaying) {
                 vm.ttsState.tts?.stop()
-                vm.runTTSService(context, PLAY)
+                vm.runTTSService(context, Player.PLAY)
             }
         }
 
@@ -292,8 +292,8 @@ fun TTSScreen(
                                     align = TextAlign.Center,
                                     maxLine = 1,
                                     overflow = TextOverflow.Ellipsis)
-                                vm.ttsContent?.value?.let { content ->
-                                    SuperSmallTextComposable(text = "${vm.currentReadingParagraph + 1}/${content.size}")
+                                vm.ttsContent?.let { content ->
+                                    SuperSmallTextComposable(text = "${vm.currentReadingParagraph + 1}/${content.value?.size}")
 
                                 }
                             }

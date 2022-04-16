@@ -11,14 +11,13 @@ import kotlinx.coroutines.launch
 import org.ireader.core.utils.Constants
 import org.ireader.core.utils.UiText
 import org.ireader.core.utils.getUrlWithoutDomain
-import org.ireader.domain.FetchType
+import org.ireader.core_api.source.HttpSource
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.presentation.R
 import org.ireader.presentation.feature_detail.presentation.book_detail.BookDetailScreen
 import org.ireader.presentation.feature_detail.presentation.book_detail.viewmodel.BookDetailEvent
 import org.ireader.presentation.feature_detail.presentation.book_detail.viewmodel.BookDetailViewModel
 import org.ireader.presentation.presentation.EmptyScreenComposable
-import org.ireader.core_api.source.HttpSource
 
 object BookDetailScreenSpec : ScreenSpec {
 
@@ -112,9 +111,6 @@ object BookDetailScreenSpec : ScreenSpec {
                             WebViewScreenSpec.buildRoute(
                                 url = (source).baseUrl + getUrlWithoutDomain(
                                     book.link),
-                                sourceId = source.id,
-                                fetchType = FetchType.DetailFetchType.index,
-                                bookId = book.id
                             )
                         )
 

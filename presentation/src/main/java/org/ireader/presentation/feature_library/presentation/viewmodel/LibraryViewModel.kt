@@ -21,9 +21,9 @@ import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.preferences.reader_preferences.LibraryLayoutTypeUseCase
 import org.ireader.domain.use_cases.preferences.reader_preferences.SortersDescUseCase
 import org.ireader.domain.use_cases.preferences.reader_preferences.SortersUseCase
-import org.ireader.presentation.feature_services.LibraryUpdatesService
-import org.ireader.presentation.feature_services.downloaderService.DownloadService
-import org.ireader.presentation.feature_services.downloaderService.DownloadService.Companion.DOWNLOADER_BOOKS_IDS
+import org.ireader.domain.services.library_update_service.LibraryUpdatesService
+import org.ireader.domain.services.downloaderService.DownloadService
+import org.ireader.domain.services.downloaderService.DownloadService.Companion.DOWNLOADER_BOOKS_IDS
 import javax.inject.Inject
 
 

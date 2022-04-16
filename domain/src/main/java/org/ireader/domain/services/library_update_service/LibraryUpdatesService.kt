@@ -1,4 +1,4 @@
-package org.ireader.presentation.feature_services
+package org.ireader.domain.services.library_update_service
 
 import android.content.Context
 import androidx.core.app.NotificationCompat
@@ -16,14 +16,14 @@ import org.ireader.core.R
 import org.ireader.domain.catalog.interactor.GetLocalCatalog
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.entities.Update
+import org.ireader.domain.services.downloaderService.DefaultNotificationHelper
+import org.ireader.domain.notification.Notifications
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetBookUseCases
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.local.updates.InsertUpdatesUseCase
 import org.ireader.domain.use_cases.remote.RemoteUseCases
-import org.ireader.presentation.feature_services.notification.DefaultNotificationHelper
-import org.ireader.presentation.feature_services.notification.Notifications
 import timber.log.Timber
 import kotlin.time.ExperimentalTime
 

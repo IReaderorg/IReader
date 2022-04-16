@@ -13,13 +13,6 @@ class CatalogStoreInitializer @Inject constructor(
 ) {
 
     init {
-        // Create the catalog store in an IO thread, because the expensive initializations are
-        // the extensions which are already created in computation threads and we don't want to waste
-        // one of them waiting for the extensions.
-//    GlobalScope.launch(Dispatchers.IO) {
-//      catalogStoreLazy.getValue()
-//    }
-
         // Also fetch available catalogs on launch
         GlobalScope.launch(Dispatchers.IO) {
             syncRemoteCatalogs.await(forceRefresh = false)

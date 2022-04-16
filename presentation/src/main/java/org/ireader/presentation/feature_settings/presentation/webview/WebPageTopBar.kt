@@ -15,32 +15,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import org.ireader.core.ChapterParse
-import org.ireader.core.ChaptersParse
-import org.ireader.core.DetailParse
-import org.ireader.domain.FetchType
 import org.ireader.presentation.R
 import org.ireader.presentation.presentation.Toolbar
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
-import org.ireader.core_api.source.HttpSource
-import org.ireader.core_api.source.Source
 
 @Composable
 fun WebPageTopBar(
     navController: NavController,
     urlToRender: String,
     onValueChange: (text: String) -> Unit,
-    fetchType: FetchType,
-    source: Source? = null,
     onGo: () -> Unit,
     refresh: () -> Unit,
     goBack: () -> Unit,
     goForward: () -> Unit,
-    fetchBook: () -> Unit,
-    fetchChapter: () -> Unit,
-    fetchChapters: () -> Unit,
 ) {
     var isMenuExpanded by remember {
         mutableStateOf(false)
@@ -104,33 +93,6 @@ fun WebPageTopBar(
                     goForward()
                 }) {
                     MidSizeTextComposable(text = stringResource(R.string.go_forward))
-                }
-                if (source is HttpSource && source.getListings().map { it.name }
-                        .contains(DetailParse().name)) {
-                    DropdownMenuItem(onClick = {
-                        isMenuExpanded = false
-                        fetchBook()
-                    }) {
-                        MidSizeTextComposable(text = "Fetch Book")
-                    }
-                }
-                if (source is HttpSource && source.getListings().map { it.name }
-                        .contains(ChaptersParse().name)) {
-                    DropdownMenuItem(onClick = {
-                        isMenuExpanded = false
-                        fetchChapters()
-                    }) {
-                        MidSizeTextComposable(text = "Fetch Chapters")
-                    }
-                }
-                if (source is HttpSource && source.getListings().map { it.name }
-                        .contains(ChapterParse().name)) {
-                    DropdownMenuItem(onClick = {
-                        isMenuExpanded = false
-                        fetchChapter()
-                    }) {
-                        MidSizeTextComposable(text = "Fetch Chapter")
-                    }
                 }
             }
         },

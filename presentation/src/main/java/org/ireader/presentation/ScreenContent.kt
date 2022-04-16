@@ -1,4 +1,4 @@
-package org.ireader.infinity.presentation
+package org.ireader.presentation
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween

@@ -6,7 +6,6 @@ class AppInitializers @Inject constructor(
     emojiCompatInitializer: EmojiCompatInitializer,
     notificationsInitializer: NotificationsInitializer,
     crashHandler: CrashHandler,
-    timberInitializer: TimberInitializer,
     firebaseInitializer: FirebaseInitializer,
     updateServiceInitializer: UpdateServiceInitializer,
     catalogStoreInitializer: CatalogStoreInitializer,

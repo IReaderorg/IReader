@@ -1,4 +1,4 @@
-package org.ireader.infinity.feature_services
+package org.ireader.domain.notification
 
 import android.app.PendingIntent
 import android.os.Build

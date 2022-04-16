@@ -20,8 +20,8 @@ import org.ireader.domain.ui.NavigationArgs
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
-import org.ireader.presentation.feature_services.downloaderService.DownloadService
-import org.ireader.presentation.feature_services.downloaderService.DownloadService.Companion.DOWNLOADER_Chapters_IDS
+import org.ireader.domain.services.downloaderService.DownloadService
+import org.ireader.domain.services.downloaderService.DownloadService.Companion.DOWNLOADER_Chapters_IDS
 import javax.inject.Inject
 
 

@@ -27,7 +27,6 @@ import org.ireader.core_api.source.Source
 import org.ireader.core_api.source.model.Filter
 import org.ireader.core_api.source.model.Listing
 import org.ireader.core_ui.ui.kaomojis
-import org.ireader.domain.FetchType
 import org.ireader.domain.models.DisplayMode
 import org.ireader.domain.models.LayoutType
 import org.ireader.presentation.feature_explore.presentation.browse.viewmodel.ExploreViewModel
@@ -190,8 +189,6 @@ fun ExploreScreen(
                             onRefresh = { getBooks(null, null, emptyList()) },
                             onWebView = {
                                 navController.navigate(WebViewScreenSpec.buildRoute(
-                                    sourceId = source.id,
-                                    fetchType = FetchType.LatestFetchType.index,
                                     url = it.baseUrl
                                 )
                                 )

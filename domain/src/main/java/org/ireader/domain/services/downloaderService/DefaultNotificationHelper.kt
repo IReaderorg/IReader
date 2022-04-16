@@ -1,7 +1,6 @@
-package org.ireader.presentation.feature_services.notification
+package org.ireader.domain.services.downloaderService
 
 import android.app.PendingIntent
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.media.MediaMetadata
@@ -12,27 +11,16 @@ import android.support.v4.media.session.PlaybackStateCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toUri
-import androidx.work.*
-import dagger.hilt.android.AndroidEntryPoint
+import androidx.work.WorkManager
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableSharedFlow
 import org.ireader.core.R
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
-import org.ireader.infinity.feature_services.flags
-import org.ireader.presentation.MainActivity
-import org.ireader.presentation.feature_ttl.TTSService
-import org.ireader.presentation.feature_ttl.TTSService.Companion.CANCEL
-import org.ireader.presentation.feature_ttl.TTSService.Companion.NEXT_PAR
-import org.ireader.presentation.feature_ttl.TTSService.Companion.PAUSE
-import org.ireader.presentation.feature_ttl.TTSService.Companion.PLAY
-import org.ireader.presentation.feature_ttl.TTSService.Companion.PREV_PAR
-import org.ireader.presentation.feature_ttl.TTSService.Companion.SKIP_NEXT
-import org.ireader.presentation.feature_ttl.TTSService.Companion.SKIP_PREV
-import timber.log.Timber
+import org.ireader.domain.notification.Notifications
+import org.ireader.domain.notification.flags
+import org.ireader.domain.notification.setLargeIcon
+import org.ireader.domain.services.tts_service.Player
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -58,7 +46,7 @@ class DefaultNotificationHelper @Inject constructor(
             Intent.ACTION_VIEW,
             "https://www.ireader.org/book_detail_route/$bookId/$sourceId".toUri(),
             applicationContext,
-            MainActivity::class.java
+            Class.forName("org.ireader.presentation.MainActivity")
         )
     }
 
@@ -75,7 +63,7 @@ class DefaultNotificationHelper @Inject constructor(
         Intent.ACTION_VIEW,
         "www.ireader/downloader_route".toUri(),
         applicationContext,
-        MainActivity::class.java
+        Class.forName("org.ireader.presentation.feature_main.MainActivity")
     )
 
 
@@ -122,79 +110,64 @@ class DefaultNotificationHelper @Inject constructor(
     }
 
 
+
     val skipPrev = PendingIntent.getBroadcast(
-        applicationContext.applicationContext,
-        SKIP_PREV,
-        Intent(applicationContext, TextReaderBroadcastReceiver::class.java).apply {
-            putExtra("PLAYER", SKIP_PREV)
+        applicationContext,
+        Player.SKIP_PREV,
+        Intent(applicationContext, Class.forName("org.ireader.presentation.feature_main.AppBroadcastReceiver")).apply {
+            putExtra("PLAYER", Player.SKIP_PREV)
         },
         pendingIntentFlags
     )
     val rewind = PendingIntent.getBroadcast(
-        applicationContext.applicationContext,
-        PREV_PAR,
+        applicationContext,
+        Player.PREV_PAR,
         Intent(applicationContext.applicationContext,
-            TextReaderBroadcastReceiver::class.java).apply {
-            putExtra("PLAYER", PREV_PAR)
+            Class.forName("org.ireader.presentation.feature_main.AppBroadcastReceiver")).apply {
+            putExtra("PLAYER", Player.PREV_PAR)
         },
         pendingIntentFlags
     )
     val pause = PendingIntent.getBroadcast(
-        applicationContext.applicationContext,
-        PAUSE,
-        Intent(applicationContext, TextReaderBroadcastReceiver::class.java).apply {
-            putExtra("PLAYER", PAUSE)
+        applicationContext,
+        Player.PAUSE,
+        Intent(applicationContext, Class.forName("org.ireader.presentation.feature_main.AppBroadcastReceiver")).apply {
+            putExtra("PLAYER", Player.PAUSE)
         },
         pendingIntentFlags
     )
     val play = PendingIntent.getBroadcast(
-        applicationContext.applicationContext,
-        PLAY,
-        Intent(applicationContext, TextReaderBroadcastReceiver::class.java).apply {
-            putExtra("PLAYER", PLAY)
+        applicationContext,
+        Player.PLAY,
+        Intent(applicationContext, Class.forName("org.ireader.presentation.feature_main.AppBroadcastReceiver")).apply {
+            putExtra("PLAYER", Player.PLAY)
         },
         pendingIntentFlags
     )
     val next = PendingIntent.getBroadcast(
-        applicationContext.applicationContext,
-        NEXT_PAR,
-        Intent(applicationContext, TextReaderBroadcastReceiver::class.java).apply {
-            putExtra("PLAYER", NEXT_PAR)
+        applicationContext,
+        Player.NEXT_PAR,
+        Intent(applicationContext, Class.forName("org.ireader.presentation.feature_main.AppBroadcastReceiver")).apply {
+            putExtra("PLAYER", Player.NEXT_PAR)
         },
         pendingIntentFlags
     )
     val skipNext = PendingIntent.getBroadcast(
-        applicationContext.applicationContext,
-        SKIP_NEXT,
-        Intent(applicationContext, TextReaderBroadcastReceiver::class.java).apply {
-            putExtra("PLAYER", SKIP_NEXT)
+        applicationContext,
+        Player.SKIP_NEXT,
+        Intent(applicationContext, Class.forName("org.ireader.presentation.feature_main.AppBroadcastReceiver")).apply {
+            putExtra("PLAYER", Player.SKIP_NEXT)
         },
         pendingIntentFlags
     )
     val cancelMediaPlater = PendingIntent.getBroadcast(
-        applicationContext.applicationContext,
-        CANCEL,
-        Intent(applicationContext, TextReaderBroadcastReceiver::class.java).apply {
-            putExtra("PLAYER", CANCEL)
+        applicationContext,
+        Player.CANCEL,
+        Intent(applicationContext, Class.forName("org.ireader.presentation.feature_main.AppBroadcastReceiver")).apply {
+            putExtra("PLAYER", Player.CANCEL)
         },
         pendingIntentFlags
     )
-
-    fun openReaderScreenIntent(
-        chapter: Chapter,
-        book: Book,
-    ): PendingIntent = PendingIntent.getActivity(
-        applicationContext.applicationContext,
-        5,
-        Intent(
-            Intent.ACTION_VIEW,
-            "https://www.ireader.org/reader_screen_route/${book.id}/${chapter.id}/${book.sourceId}".toUri(),
-            applicationContext,
-            MainActivity::class.java
-        ),
-        flags
-    )
-
 
     suspend fun basicPlayingTextReaderNotification(
         chapter: Chapter,
@@ -271,38 +244,26 @@ class DefaultNotificationHelper @Inject constructor(
 
 
     }
-}
+    fun openReaderScreenIntent(
+        chapter: Chapter,
+        book: Book,
+    ): PendingIntent = PendingIntent.getActivity(
+        applicationContext.applicationContext,
+        5,
+        Intent(
+            Intent.ACTION_VIEW,
+            "https://www.ireader.org/reader_screen_route/${book.id}/${chapter.id}/${book.sourceId}".toUri(),
+            applicationContext,
+            Class.forName("org.ireader.presentation.feature_main.MainActivity")
+        ),
+        flags
+    )
 
-@AndroidEntryPoint()
-class TextReaderBroadcastReceiver : BroadcastReceiver() {
 
-    @Inject
-    lateinit var state: NotificationStates
-
-    val scope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
-    lateinit var ttsWork: OneTimeWorkRequest
-    override fun onReceive(context: Context, intent: Intent) {
-        intent.getIntExtra("PLAYER", -1).let { command ->
-            Timber.e("Command is : $command")
-
-            ttsWork = OneTimeWorkRequestBuilder<TTSService>().apply {
-                setInputData(
-                    Data.Builder().apply {
-                        putInt(TTSService.COMMAND, command)
-                    }.build()
-                )
-                addTag(TTSService.TTS_SERVICE_NAME)
-
-            }.build()
-            WorkManager.getInstance(context).enqueueUniqueWork(
-                TTSService.TTS_SERVICE_NAME,
-                ExistingWorkPolicy.REPLACE,
-                ttsWork
-            )
-        }
-    }
 
 }
+
+
 
 @Singleton
 class NotificationStates @Inject constructor() {

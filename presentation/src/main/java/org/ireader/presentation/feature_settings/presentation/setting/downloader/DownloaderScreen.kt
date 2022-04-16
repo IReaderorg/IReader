@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.collectLatest
 import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
 import org.ireader.domain.utils.toast
-import org.ireader.presentation.feature_services.downloaderService.DownloadService
+import org.ireader.domain.services.downloaderService.DownloadService
 import org.ireader.presentation.presentation.components.ISnackBarHost
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable

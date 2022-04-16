@@ -1,4 +1,4 @@
-package org.ireader.presentation.feature_ttl
+package org.ireader.domain.services.tts_service
 
 import android.content.Context
 import android.speech.tts.TextToSpeech
@@ -16,16 +16,18 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import org.ireader.core_api.source.Source
 import org.ireader.domain.catalog.service.CatalogStore
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
+import org.ireader.domain.notification.Notifications
 import org.ireader.domain.repository.LocalBookRepository
 import org.ireader.domain.repository.LocalChapterRepository
+import org.ireader.domain.services.downloaderService.DefaultNotificationHelper
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
-import org.ireader.presentation.feature_services.notification.DefaultNotificationHelper
-import org.ireader.presentation.feature_services.notification.Notifications
-import org.ireader.core_api.source.Source
+import org.ireader.presentation.feature_ttl.TTSState
+import org.ireader.presentation.feature_ttl.TTSStateImpl
 import timber.log.Timber
 
 @HiltWorker
@@ -36,7 +38,7 @@ class TTSService @AssistedInject constructor(
     private val chapterRepo: LocalChapterRepository,
     private val remoteUseCases: RemoteUseCases,
     private val extensions: CatalogStore,
-    private val defaultNotificationHelper: DefaultNotificationHelper,
+    private val notificationHelper: DefaultNotificationHelper,
     private val state: TTSStateImpl,
     private val insertUseCases: LocalInsertUseCases,
 ) : CoroutineWorker(context, params) {
@@ -47,14 +49,8 @@ class TTSService @AssistedInject constructor(
         const val TTS_BOOK_ID = "bookId"
 
 
-        const val SKIP_PREV = 1
-        const val PREV_PAR = 2
-        const val PLAY_PAUSE = 3
-        const val NEXT_PAR = 4
-        const val SKIP_NEXT = 5
-        const val PLAY = 6
-        const val PAUSE = 7
-        const val CANCEL = 8
+
+
         lateinit var ttsWork: OneTimeWorkRequest
     }
 
@@ -104,7 +100,7 @@ class TTSService @AssistedInject constructor(
         state.mediaSession?.let { mediaSession ->
             NotificationManagerCompat.from(context).apply {
                 val builder =
-                    defaultNotificationHelper.basicPlayingTextReaderNotification(
+                    notificationHelper.basicPlayingTextReaderNotification(
                         chapter,
                         book,
                         state.isPlaying,
@@ -147,7 +143,7 @@ class TTSService @AssistedInject constructor(
                             state.ttsChapters.let { chapters ->
                                 state.ttsBook?.let { book ->
                                     val notification =
-                                        defaultNotificationHelper.basicPlayingTextReaderNotification(
+                                        notificationHelper.basicPlayingTextReaderNotification(
                                             chapter,
                                             book,
                                             state.isPlaying,
@@ -161,11 +157,11 @@ class TTSService @AssistedInject constructor(
 
 
                                     when (command) {
-                                        CANCEL -> {
+                                        Player.CANCEL -> {
                                             NotificationManagerCompat.from(context)
                                                 .cancel(Notifications.ID_TEXT_READER_PROGRESS)
                                         }
-                                        SKIP_PREV -> {
+                                        Player.SKIP_PREV -> {
                                             tts.stop()
                                             updateNotification(chapter, book)
                                             val index = getChapterIndex(chapter, chapters)
@@ -185,7 +181,7 @@ class TTSService @AssistedInject constructor(
 
                                             }
                                         }
-                                        PREV_PAR -> {
+                                        Player.PREV_PAR -> {
                                             state.ttsContent?.value?.let { content ->
                                                 if (state.currentReadingParagraph > 0 && state.currentReadingParagraph in 0..content.lastIndex) {
                                                     state.currentReadingParagraph -= 1
@@ -196,7 +192,7 @@ class TTSService @AssistedInject constructor(
                                                 }
                                             }
                                         }
-                                        SKIP_NEXT -> {
+                                        Player.SKIP_NEXT -> {
                                             tts.stop()
                                             updateNotification(chapter, book)
                                             val index = getChapterIndex(chapter, chapters)
@@ -217,7 +213,7 @@ class TTSService @AssistedInject constructor(
 
 
                                         }
-                                        NEXT_PAR -> {
+                                        Player.NEXT_PAR -> {
                                             state.ttsContent?.value?.let { content ->
                                                 if (state.currentReadingParagraph > 0 && state.currentReadingParagraph < content.size) {
                                                     if (state.currentReadingParagraph < content.lastIndex) {
@@ -232,18 +228,27 @@ class TTSService @AssistedInject constructor(
 
 
                                         }
-                                        PLAY -> {
+                                        Player.PLAY -> {
                                             state.isPlaying = true
                                             readText(context, mediaSession)
                                         }
-                                        PAUSE -> {
+                                        Player.PAUSE -> {
                                             state.isPlaying = false
                                             tts.stop()
                                             updateNotification(chapter, book)
                                         }
+//                                        Player.PLAY_PAUSE.ordinal -> {
+//                                            if (state.isPlaying) {
+//                                                state.isPlaying = false
+//                                                tts.stop()
+//                                                updateNotification(chapter, book)
+//                                            } else {
+//                                                state.isPlaying = true
+//                                                readText(context, mediaSession)
+//                                            }
+//                                        }
                                         else -> {
                                             if (state.isPlaying) {
-                                                //readText(context, mediaSession)
                                                 state.isPlaying = false
                                                 tts.stop()
                                                 updateNotification(chapter, book)
@@ -322,7 +327,7 @@ class TTSService @AssistedInject constructor(
                             NotificationManagerCompat.from(context).apply {
                                 scope.launch {
                                     val builder =
-                                        defaultNotificationHelper.basicPlayingTextReaderNotification(
+                                        notificationHelper.basicPlayingTextReaderNotification(
                                             chapter,
                                             book,
                                             isPlaying,

@@ -4,8 +4,6 @@ import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.navigation.*
 import com.google.accompanist.pager.ExperimentalPagerApi
-import org.ireader.core.utils.Constants
-import org.ireader.domain.ui.NavigationArgs
 import org.ireader.presentation.feature_settings.presentation.webview.WebPageScreen
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -13,19 +11,9 @@ import java.nio.charset.StandardCharsets
 object WebViewScreenSpec : ScreenSpec {
 
     override val navHostRoute: String =
-        "web_page_route/{fetchType}/{sourceId}/{chapterId}/{bookId}/{url}"
+        "web_page_route/{url}"
 
     override val arguments: List<NamedNavArgument> = listOf(
-        NavigationArgs.sourceId,
-        NavigationArgs.fetchType,
-        navArgument("bookId") {
-            type = NavType.LongType
-            defaultValue = Constants.NULL_VALUE
-        },
-        navArgument("chapterId") {
-            type = NavType.LongType
-            defaultValue = Constants.NULL_VALUE
-        },
         navArgument("url") {
             type = NavType.StringType
             defaultValue = "No_Url"
@@ -33,13 +21,9 @@ object WebViewScreenSpec : ScreenSpec {
     )
 
     fun buildRoute(
-        sourceId: Long,
-        fetchType: Int,
         url: String? = null,
-        bookId: Long? = null,
-        chapterId: Long? = null,
     ): String {
-        return "web_page_route/$fetchType/$sourceId/${chapterId ?: Constants.NULL_VALUE}/${bookId ?: Constants.NULL_VALUE}/${
+        return "web_page_route/${
             URLEncoder.encode(url,
                 StandardCharsets.UTF_8.name())
         }"

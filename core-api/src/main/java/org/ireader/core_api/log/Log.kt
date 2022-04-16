@@ -38,6 +38,7 @@ import org.tinylog.provider.ProviderRegistry
    * Function that produces the message
    */
    fun verbose(message: () -> String) {
+
     if (MINIMUM_LEVEL_COVERS_TRACE) {
       provider.log(STACKTRACE_DEPTH, null, Level.TRACE, null, null, message.asSupplier())
     }

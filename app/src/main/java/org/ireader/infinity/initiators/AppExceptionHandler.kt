@@ -5,7 +5,7 @@ import android.app.Application
 import android.content.Intent
 import android.os.Bundle
 import android.os.Process
-import timber.log.Timber
+import org.ireader.core_api.log.Log
 
 class AppExceptionHandler(
     private val systemHandler: Thread.UncaughtExceptionHandler,
@@ -56,7 +56,7 @@ class AppExceptionHandler(
 
 
     override fun uncaughtException(t: Thread, e: Throwable) {
-        Timber.e(e)
+        Log.error(e,"an error was caught by exception handler")
         crashlyticsHandler.uncaughtException(t, e)
         lastStartedActivity?.let { activity ->
             val isRestarted = activity.intent
@@ -82,7 +82,8 @@ class AppExceptionHandler(
                     }
                 }
             } else {
-                Timber.d("The system exception handler will handle the caught exception.")
+                Log.debug { "The system exception handler will handle the caught exception." }
+
                 killThisProcess { systemHandler.uncaughtException(t, e) }
             }
         } ?: killThisProcess {

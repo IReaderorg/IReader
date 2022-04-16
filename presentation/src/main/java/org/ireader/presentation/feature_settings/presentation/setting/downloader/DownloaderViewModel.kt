@@ -24,7 +24,7 @@ import org.ireader.domain.models.entities.SavedDownload
 import org.ireader.domain.use_cases.download.DownloadUseCases
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
-import org.ireader.presentation.feature_services.downloaderService.DownloadService
+import org.ireader.domain.services.downloaderService.DownloadService
 import javax.inject.Inject
 
 

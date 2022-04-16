@@ -1,4 +1,4 @@
-package org.ireader.presentation.feature_services.updater_service.models
+package org.ireader.domain.models.update_service_models
 
 import androidx.annotation.Keep
 

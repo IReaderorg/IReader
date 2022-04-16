@@ -13,16 +13,12 @@ import kotlinx.coroutines.launch
 import org.ireader.core.R
 import org.ireader.core.utils.UiText
 import org.ireader.core_ui.theme.TransparentStatusBar
+import org.ireader.domain.services.tts_service.Player
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.presentation.feature_reader.presentation.reader.ReadingScreen
 import org.ireader.presentation.feature_reader.presentation.reader.reverse_swip_refresh.rememberSwipeRefreshState
 import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.ReaderScreenViewModel
 import org.ireader.presentation.feature_ttl.TTSScreen
-import org.ireader.presentation.feature_ttl.TTSService.Companion.NEXT_PAR
-import org.ireader.presentation.feature_ttl.TTSService.Companion.PLAY_PAUSE
-import org.ireader.presentation.feature_ttl.TTSService.Companion.PREV_PAR
-import org.ireader.presentation.feature_ttl.TTSService.Companion.SKIP_NEXT
-import org.ireader.presentation.feature_ttl.TTSService.Companion.SKIP_PREV
 import org.ireader.presentation.presentation.EmptyScreenComposable
 
 object ReaderScreenSpec : ScreenSpec {
@@ -89,13 +85,13 @@ object ReaderScreenSpec : ScreenSpec {
                     TTSScreen(
                         vm = vm,
                         onPrev = {
-                            vm.runTTSService(context, SKIP_PREV)
+                            vm.runTTSService(context, Player.SKIP_PREV)
                         },
                         onPlay = {
-                            vm.runTTSService(context, PLAY_PAUSE)
+                            vm.runTTSService(context, Player.PLAY_PAUSE)
                         },
                         onNext = {
-                            vm.runTTSService(context, SKIP_NEXT)
+                            vm.runTTSService(context, Player.SKIP_NEXT)
                         },
                         onChapter = { ch ->
                             scope.launch {
@@ -118,10 +114,10 @@ object ReaderScreenSpec : ScreenSpec {
                         source = source,
                         navController = navController,
                         onPrevPar = {
-                            vm.runTTSService(context, PREV_PAR)
+                            vm.runTTSService(context, Player.PREV_PAR)
                         },
                         onNextPar = {
-                            vm.runTTSService(context, NEXT_PAR)
+                            vm.runTTSService(context, Player.NEXT_PAR)
                         },
                         onValueChange = {
                             vm.ttsState.tts?.stop()

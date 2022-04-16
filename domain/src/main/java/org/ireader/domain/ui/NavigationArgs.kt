@@ -25,10 +25,6 @@ object NavigationArgs {
         type = NavType.StringType
         nullable = true
     }
-    val fetchType = navArgument("fetchType") {
-        type = NavType.IntType
-        defaultValue = 0
-    }
     val query = navArgument("query") {
         type = NavType.StringType
         defaultValue = ""

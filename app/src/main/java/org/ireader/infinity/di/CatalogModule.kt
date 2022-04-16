@@ -41,11 +41,6 @@ class CatalogModule {
         return AndroidCatalogLoader(context = context, httpClients)
     }
 
-//    @Provides
-//    @Singleton
-//    fun provideCatalogsState(): CatalogsStateImpl {
-//        return CatalogsStateImpl()
-//    }
 
     @Provides
     @Singleton

@@ -1,8 +1,8 @@
 package org.ireader.infinity.initiators
 
 import android.app.Application
-import org.ireader.presentation.feature_services.notification.Notifications
-import timber.log.Timber
+import org.ireader.core_api.log.Log
+import org.ireader.domain.notification.Notifications
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -14,7 +14,7 @@ class NotificationsInitializer @Inject constructor(
         try {
             Notifications.createChannels(context)
         } catch (e: Exception) {
-            Timber.e("Failed to modify notification channels")
+            Log.error { "Failed to modify notification channels" }
         }
     }
 

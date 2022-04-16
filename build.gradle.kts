@@ -20,10 +20,13 @@ buildscript {
         classpath(libs.ksp.gradle)
         classpath(libs.gradle.idea.ext)
         classpath("com.vanniktech:gradle-maven-publish-plugin:0.19.0")
+       // classpath("ca.cutterslade.gradle:gradle-dependency-analyze:1.9.0")
     }
 }
 
-
+plugins {
+    id("ca.cutterslade.analyze") version "1.9.0"
+}
 subprojects {
     tasks.withType<org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompile> {
         kotlinOptions {

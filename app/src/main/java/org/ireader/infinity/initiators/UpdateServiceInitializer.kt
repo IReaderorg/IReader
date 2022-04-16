@@ -3,8 +3,8 @@ package org.ireader.infinity.initiators
 import android.app.Application
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import org.ireader.presentation.feature_services.downloaderService.DownloadService
-import org.ireader.presentation.feature_services.updater_service.UpdateService
+import org.ireader.domain.services.downloaderService.DownloadService
+import org.ireader.domain.services.update_service.UpdateService
 import javax.inject.Inject
 
 

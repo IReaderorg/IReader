@@ -17,9 +17,9 @@ import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import org.ireader.domain.utils.launchIO
-import org.ireader.presentation.feature_services.LibraryUpdatesService
-import org.ireader.presentation.feature_services.LibraryUpdatesService.Companion.LibraryUpdateTag
-import org.ireader.presentation.feature_services.downloaderService.DownloadService
+import org.ireader.domain.services.library_update_service.LibraryUpdatesService
+import org.ireader.domain.services.library_update_service.LibraryUpdatesService.Companion.LibraryUpdateTag
+import org.ireader.domain.services.downloaderService.DownloadService
 import javax.inject.Inject
 
 @HiltViewModel

@@ -27,8 +27,8 @@ import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
-import org.ireader.presentation.feature_services.downloaderService.DownloadService
-import org.ireader.presentation.feature_services.downloaderService.DownloadService.Companion.DOWNLOADER_SERVICE_NAME
+import org.ireader.domain.services.downloaderService.DownloadService
+import org.ireader.domain.services.downloaderService.DownloadService.Companion.DOWNLOADER_SERVICE_NAME
 import timber.log.Timber
 import java.util.*
 import javax.inject.Inject

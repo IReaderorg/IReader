@@ -42,7 +42,7 @@
         android:theme="@style/Theme.ISplash"
         android:usesCleartextTraffic="true">
         <activity
-            android:name="org.ireader.presentation.MainActivity"
+            android:name="org.ireader.presentation.feature_main.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.ISplash"
             android:windowSoftInputMode="adjustResize">
@@ -81,7 +81,7 @@
                 tools:node="remove" />
         </provider>
         <receiver
-            android:name="org.ireader.presentation.feature_services.notification.TextReaderBroadcastReceiver"
+            android:name="org.ireader.presentation.feature_main.AppBroadcastReceiver"
             android:exported="false" />
     </application>
 

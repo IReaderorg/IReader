@@ -27,7 +27,7 @@ dependencies {
     implementation(project(Modules.domain))
     implementation(project(Modules.core))
     implementation(project(Modules.coreUi))
-
+    implementation(project(Modules.coreApi))
 
     implementation(compose.compose.foundation)
     implementation(compose.compose.ui)
@@ -63,8 +63,6 @@ dependencies {
     implementation(accompanist.web)
 
 
-    implementation(project(Modules.coreApi))
-
     implementation(androidx.core)
     implementation(androidx.media)
     implementation(androidx.material)
@@ -77,28 +75,17 @@ dependencies {
     implementation(libs.room.ktx)
     implementation(libs.room.paging)
 
-    implementation(libs.moshi.moshi)
-    implementation(libs.moshi.kotlin)
+   // implementation(libs.moshi.moshi)
+   // implementation(libs.moshi.kotlin)
 
     implementation(libs.hilt.worker)
     implementation(libs.hilt.android)
     implementation(libs.hilt.compiler)
     implementation(libs.hilt.androidcompiler)
 
-    implementation(libs.retrofit.retrofit)
+  //  implementation(libs.retrofit.retrofit)
     implementation(libs.ktor.okhttp)
 
-
-
-
-
-
-
-
-
-
-
     implementation(libs.timber)
-
 
 }

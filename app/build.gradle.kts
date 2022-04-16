@@ -41,9 +41,7 @@ android {
             "mozilla/public-suffix-list.txt",
         ))
     }
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
+
     buildFeatures {
         compose = true
     }
@@ -76,8 +74,6 @@ fun isNonStable(version: String): Boolean {
     return isStable.not()
 }
 dependencies {
-
-
     implementation(androidx.emoji)
     implementation(androidx.material)
 
@@ -88,26 +84,6 @@ dependencies {
     implementation(project(Modules.core))
     implementation(project(Modules.presentation))
 
-
-
-    implementation(compose.compose.material)
-    implementation(compose.compose.hiltNavigation)
-
-
-    implementation(libs.timber)
-    implementation(accompanist.systemUiController)
-    implementation(accompanist.navAnimation)
-    implementation(accompanist.navMaterial)
-
-
-    testImplementation(test.junit4)
-    testImplementation(test.extJunit)
-    testImplementation(test.espresso)
-
-
-    /** LifeCycle **/
-    testImplementation(androidx.lifecycle.runtime)
-    testImplementation(androidx.lifecycle.viewModel)
 
 
     /** Firebase **/
@@ -123,36 +99,32 @@ dependencies {
 
 
     /** Hilt **/
-    kapt(libs.hilt.compiler)
+    //kapt(libs.hilt.compiler)
     kapt(libs.hilt.androidcompiler)
+
     implementation(libs.hilt.android)
     implementation(androidx.work.runtime)
     implementation(libs.hilt.worker)
     implementation(libs.hilt.androidtest)
-    androidTestImplementation(libs.hilt.androidtest)
 
+    implementation(compose.compose.runtime)
 
     /** Room **/
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
-    implementation(libs.room.paging)
     ksp(libs.room.compiler)
-
-
-    /** Coil **/
-    implementation(compose.compose.coil)
 
     /** Moshi **/
     implementation(libs.moshi.moshi)
     implementation(libs.moshi.kotlin)
-    kapt(libs.moshi.codegen)
-
 
     /** Network Client - OkHttp**/
-    implementation(libs.okio)
     implementation(libs.okhttp.okhttp3)
-    implementation(libs.okhttp.interceptor)
 
+    testImplementation(test.junit4)
+    testImplementation(test.extJunit)
+    testImplementation(test.espresso)
+    androidTestImplementation(libs.hilt.androidtest)
 
 }
 

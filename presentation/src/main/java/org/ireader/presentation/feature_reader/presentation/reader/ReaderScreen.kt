@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
-import org.ireader.domain.FetchType
+import org.ireader.core_api.source.Source
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.presentation.feature_reader.presentation.ScrollIndicatorSetting
 import org.ireader.presentation.feature_reader.presentation.reader.components.MainBottomSettingComposable
@@ -29,7 +29,6 @@ import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.Rea
 import org.ireader.presentation.presentation.components.ISnackBarHost
 import org.ireader.presentation.presentation.reusable_composable.ErrorTextWithEmojis
 import org.ireader.presentation.ui.WebViewScreenSpec
-import org.ireader.core_api.source.Source
 
 
 @ExperimentalAnimationApi
@@ -172,17 +171,11 @@ fun ReadingScreen(
                         if (chapter != null && !vm.isReaderModeEnable && vm.isLocalLoaded && modalState.targetValue == ModalBottomSheetValue.Expanded) {
                             navController.navigate(WebViewScreenSpec.buildRoute(
                                 url = chapter.link,
-                                sourceId = source.id,
-                                fetchType = FetchType.ContentFetchType.index,
                             )
                             )
                         } else if (chapter != null && !vm.isLocalLoaded) {
                             navController.navigate(WebViewScreenSpec.buildRoute(
                                 url = chapter.link,
-                                sourceId = source.id,
-                                fetchType = FetchType.ContentFetchType.index,
-                                bookId = chapter.bookId,
-                                chapterId = chapter.id
                             ))
                         }
                     } catch (e: Exception) {

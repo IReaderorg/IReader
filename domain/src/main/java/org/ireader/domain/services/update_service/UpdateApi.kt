@@ -1,9 +1,9 @@
-package org.ireader.presentation.feature_services.updater_service
+package org.ireader.domain.services.update_service
 
 import org.ireader.core.utils.Constants.github_api_url
 import org.ireader.core.utils.Constants.repo_url
 import org.ireader.core.utils.RetrofitProvider
-import org.ireader.presentation.feature_services.updater_service.models.Release
+import org.ireader.domain.models.update_service_models.Release
 import retrofit2.http.GET
 import javax.inject.Inject
 
