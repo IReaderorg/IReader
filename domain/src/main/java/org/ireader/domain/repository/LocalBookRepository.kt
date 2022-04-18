@@ -1,6 +1,5 @@
 package org.ireader.domain.repository
 
-import androidx.paging.PagingSource
 import kotlinx.coroutines.flow.Flow
 import org.ireader.domain.models.SortType
 import org.ireader.domain.models.entities.Book
@@ -23,9 +22,8 @@ interface LocalBookRepository {
         unreadFilter: Boolean = false,
     ): List<Book>
 
-    fun getBooksByQueryByPagingSource(query: String): PagingSource<Int, Book>
 
-    fun getBooksByQueryPagingSource(query: String): PagingSource<Int, Book>
+    fun getBooksByQueryPagingSource(query: String): Flow<Book>
 
 
     fun subscribeAllInLibrary(

@@ -271,7 +271,7 @@ private fun BoxScope.ChapterDetailBottomBar(vm: ChapterDetailViewModel, context:
             AppIconButton(imageVector = Icons.Default.GetApp,
                 title = "Download",
                 onClick = {
-                    vm.downloadChapters(context = context)
+                    vm.downloadChapters()
                     vm.selection.clear()
                 })
             AppIconButton(imageVector = Icons.Default.BookmarkBorder,

@@ -46,7 +46,7 @@ class DefaultNotificationHelper @Inject constructor(
             Intent.ACTION_VIEW,
             "https://www.ireader.org/book_detail_route/$bookId/$sourceId".toUri(),
             applicationContext,
-            Class.forName("org.ireader.presentation.MainActivity")
+            Class.forName("org.ireader.infinity.MainActivity")
         )
     }
 
@@ -61,9 +61,9 @@ class DefaultNotificationHelper @Inject constructor(
 
     val openDownloadIntent = Intent(
         Intent.ACTION_VIEW,
-        "www.ireader/downloader_route".toUri(),
+        "https://www.ireader/downloader_route".toUri(),
         applicationContext,
-        Class.forName("org.ireader.presentation.feature_main.MainActivity")
+        Class.forName("org.ireader.infinity.MainActivity")
     )
 
 
@@ -72,15 +72,16 @@ class DefaultNotificationHelper @Inject constructor(
     )
 
     fun baseNotificationDownloader(
-        chapter: Chapter,
-        book: Book,
+        chapter: Chapter? = null,
         workManagerId: UUID,
     ): NotificationCompat.Builder {
         val cancelDownloadIntent = WorkManager.getInstance(applicationContext)
             .createCancelPendingIntent(workManagerId)
         return NotificationCompat.Builder(applicationContext,
             Notifications.CHANNEL_DOWNLOADER_PROGRESS).apply {
-            setContentTitle("Downloading ${book.title}")
+            chapter?.let {
+                setContentTitle("Downloading ${chapter.title}")
+            }
             setSmallIcon(R.drawable.ic_downloading)
             setOnlyAlertOnce(true)
             priority = NotificationCompat.PRIORITY_LOW
@@ -91,30 +92,72 @@ class DefaultNotificationHelper @Inject constructor(
         }
     }
 
-    fun updateDownloaderNotification(
-        chapter: Chapter,
-        book: Book,
-        workManagerId: UUID,
-        index: Int,
-        maxIndex: Int,
-    ) {
-        val notification = baseNotificationDownloader(chapter, book, workManagerId).apply {
-            setContentText(chapter.title)
-            setSubText(index.toString())
-            setProgress(maxIndex, index, false)
-        }.build()
-
-        NotificationManagerCompat.from(applicationContext)
-            .notify(Notifications.ID_DOWNLOAD_CHAPTER_PROGRESS, notification)
-
+    fun baseCancelledNotificationDownloader(
+        bookName: String? = null,
+        e: Exception,
+    ): NotificationCompat.Builder {
+        return NotificationCompat.Builder(applicationContext.applicationContext,
+            Notifications.CHANNEL_DOWNLOADER_ERROR).apply {
+            if (e.localizedMessage == "Job was cancelled") {
+                setSubText("Download was cancelled")
+                setContentTitle("Download of ${bookName} was canceled.")
+            } else {
+                setContentTitle("Failed to download ${bookName}")
+                setSubText(e.localizedMessage)
+            }
+            setSmallIcon(R.drawable.ic_downloading)
+            priority = NotificationCompat.PRIORITY_DEFAULT
+            setAutoCancel(true)
+            setContentIntent(openDownloadsPendingIntent)
+        }
     }
 
+    fun cancelledNotificationDownloader(
+        book: Book,
+        e: Exception,
+    ): NotificationCompat.Builder {
+        return NotificationCompat.Builder(applicationContext,
+            Notifications.CHANNEL_DOWNLOADER_ERROR).apply {
+            if (e.localizedMessage == "Job was cancelled") {
+                setSubText("Download was cancelled")
+                setContentTitle("Download of ${book.title} was canceled.")
+            } else {
+                setContentTitle("Failed to download ${book.title}")
+                setSubText(e.localizedMessage)
+            }
+            setSmallIcon(R.drawable.ic_downloading)
+            priority = NotificationCompat.PRIORITY_DEFAULT
+            setAutoCancel(true)
+            setContentIntent(openBookDetailPendingIntent(
+                book.id,
+                book.sourceId))
+        }
+    }
+
+//    fun updateDownloaderNotification(
+//        chapter: Chapter,
+//        book: Book,
+//        workManagerId: UUID,
+//        index: Int,
+//        maxIndex: Int,
+//    ) {
+//        val notification = baseNotificationDownloader(chapter, book, workManagerId).apply {
+//            setContentText(chapter.title)
+//            setSubText(index.toString())
+//            setProgress(maxIndex, index, false)
+//        }.build()
+//
+//        NotificationManagerCompat.from(applicationContext)
+//            .notify(Notifications.ID_DOWNLOAD_CHAPTER_PROGRESS, notification)
+//
+//    }
 
 
     val skipPrev = PendingIntent.getBroadcast(
         applicationContext,
         Player.SKIP_PREV,
-        Intent(applicationContext, Class.forName("org.ireader.presentation.feature_main.AppBroadcastReceiver")).apply {
+        Intent(applicationContext,
+            Class.forName("org.ireader.domain.services.broadcast_receiver.AppBroadcastReceiver")).apply {
             putExtra("PLAYER", Player.SKIP_PREV)
         },
         pendingIntentFlags
@@ -123,7 +166,7 @@ class DefaultNotificationHelper @Inject constructor(
         applicationContext,
         Player.PREV_PAR,
         Intent(applicationContext.applicationContext,
-            Class.forName("org.ireader.presentation.feature_main.AppBroadcastReceiver")).apply {
+            Class.forName("org.ireader.domain.services.broadcast_receiver.AppBroadcastReceiver")).apply {
             putExtra("PLAYER", Player.PREV_PAR)
         },
         pendingIntentFlags
@@ -131,7 +174,8 @@ class DefaultNotificationHelper @Inject constructor(
     val pause = PendingIntent.getBroadcast(
         applicationContext,
         Player.PAUSE,
-        Intent(applicationContext, Class.forName("org.ireader.presentation.feature_main.AppBroadcastReceiver")).apply {
+        Intent(applicationContext,
+            Class.forName("org.ireader.domain.services.broadcast_receiver.AppBroadcastReceiver")).apply {
             putExtra("PLAYER", Player.PAUSE)
         },
         pendingIntentFlags
@@ -139,7 +183,8 @@ class DefaultNotificationHelper @Inject constructor(
     val play = PendingIntent.getBroadcast(
         applicationContext,
         Player.PLAY,
-        Intent(applicationContext, Class.forName("org.ireader.presentation.feature_main.AppBroadcastReceiver")).apply {
+        Intent(applicationContext,
+            Class.forName("org.ireader.domain.services.broadcast_receiver.AppBroadcastReceiver")).apply {
             putExtra("PLAYER", Player.PLAY)
         },
         pendingIntentFlags
@@ -147,7 +192,8 @@ class DefaultNotificationHelper @Inject constructor(
     val next = PendingIntent.getBroadcast(
         applicationContext,
         Player.NEXT_PAR,
-        Intent(applicationContext, Class.forName("org.ireader.presentation.feature_main.AppBroadcastReceiver")).apply {
+        Intent(applicationContext,
+            Class.forName("org.ireader.domain.services.broadcast_receiver.AppBroadcastReceiver")).apply {
             putExtra("PLAYER", Player.NEXT_PAR)
         },
         pendingIntentFlags
@@ -155,7 +201,8 @@ class DefaultNotificationHelper @Inject constructor(
     val skipNext = PendingIntent.getBroadcast(
         applicationContext,
         Player.SKIP_NEXT,
-        Intent(applicationContext, Class.forName("org.ireader.presentation.feature_main.AppBroadcastReceiver")).apply {
+        Intent(applicationContext,
+            Class.forName("org.ireader.domain.services.broadcast_receiver.AppBroadcastReceiver")).apply {
             putExtra("PLAYER", Player.SKIP_NEXT)
         },
         pendingIntentFlags
@@ -163,7 +210,8 @@ class DefaultNotificationHelper @Inject constructor(
     val cancelMediaPlater = PendingIntent.getBroadcast(
         applicationContext,
         Player.CANCEL,
-        Intent(applicationContext, Class.forName("org.ireader.presentation.feature_main.AppBroadcastReceiver")).apply {
+        Intent(applicationContext,
+            Class.forName("org.ireader.domain.services.broadcast_receiver.AppBroadcastReceiver")).apply {
             putExtra("PLAYER", Player.CANCEL)
         },
         pendingIntentFlags
@@ -244,6 +292,7 @@ class DefaultNotificationHelper @Inject constructor(
 
 
     }
+
     fun openReaderScreenIntent(
         chapter: Chapter,
         book: Book,
@@ -254,15 +303,13 @@ class DefaultNotificationHelper @Inject constructor(
             Intent.ACTION_VIEW,
             "https://www.ireader.org/reader_screen_route/${book.id}/${chapter.id}/${book.sourceId}".toUri(),
             applicationContext,
-            Class.forName("org.ireader.presentation.feature_main.MainActivity")
+            Class.forName("org.ireader.infinity.MainActivity")
         ),
         flags
     )
 
 
-
 }
-
 
 
 @Singleton

@@ -4,13 +4,10 @@ plugins {
     id("kotlin-kapt")
     id("kotlinx-serialization")
     id("dagger.hilt.android.plugin")
+    id("com.google.devtools.ksp")
 }
 
 android {
-
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
     buildFeatures {
         compose = true
     }
@@ -23,7 +20,7 @@ android {
 }
 
 dependencies {
-    implementation("androidx.core:core-splashscreen:1.0.0-beta02")
+
     implementation(project(Modules.domain))
     implementation(project(Modules.core))
     implementation(project(Modules.coreUi))
@@ -36,56 +33,46 @@ dependencies {
 
     implementation(compose.compose.material)
     implementation(compose.compose.uiToolingPreview)
-    implementation(compose.compose.uiTooling)
-    debugImplementation(compose.compose.uiTooling)
+
     implementation(compose.compose.icons)
-    implementation(compose.compose.animations)
     implementation(compose.compose.navigation)
-    implementation(compose.compose.paging)
+    implementation(compose.compose.coil)
     implementation(compose.compose.hiltNavigation)
     implementation(compose.compose.lifecycle)
-    implementation(compose.compose.coil)
+    implementation(compose.compose.animations)
     implementation(androidx.lifecycle.hiltviewModel)
-
-    androidTestImplementation(compose.compose.uiTestManifest)
-    androidTestImplementation(compose.compose.testing)
-    androidTestImplementation(compose.compose.composeTooling)
 
 
 
     implementation(accompanist.flowlayout)
     implementation(accompanist.navAnimation)
-    implementation(accompanist.navMaterial)
-    implementation(accompanist.pager)
     implementation(accompanist.pagerIndicator)
-    implementation(accompanist.swipeRefresh)
     implementation(accompanist.systemUiController)
+    implementation(accompanist.pager)
+    implementation(accompanist.swipeRefresh)
     implementation(accompanist.web)
 
-
-    implementation(androidx.core)
+    implementation(androidx.appCompat)
     implementation(androidx.media)
+    implementation(androidx.core)
     implementation(androidx.material)
     implementation(androidx.emoji)
-    implementation(androidx.appCompat)
-    implementation(libs.jsoup)
+
     implementation(androidx.work.runtime)
+
     implementation(libs.room.runtime)
-    kapt(libs.room.compiler)
     implementation(libs.room.ktx)
-    implementation(libs.room.paging)
+    ksp(libs.room.compiler)
 
-   // implementation(libs.moshi.moshi)
-   // implementation(libs.moshi.kotlin)
-
-    implementation(libs.hilt.worker)
     implementation(libs.hilt.android)
-    implementation(libs.hilt.compiler)
-    implementation(libs.hilt.androidcompiler)
+    kapt(libs.hilt.androidcompiler)
+   // kapt(libs.hilt.compiler)
 
-  //  implementation(libs.retrofit.retrofit)
-    implementation(libs.ktor.okhttp)
 
-    implementation(libs.timber)
-
+    testImplementation(test.bundles.common)
+    androidTestImplementation(test.bundles.common)
+    androidTestImplementation(compose.compose.uiTestManifest)
+    androidTestImplementation(compose.compose.testing)
+    androidTestImplementation(compose.compose.composeTooling)
 }
+

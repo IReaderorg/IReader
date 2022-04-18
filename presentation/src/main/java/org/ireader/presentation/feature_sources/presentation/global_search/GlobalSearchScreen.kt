@@ -17,6 +17,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.pager.ExperimentalPagerApi
+import org.ireader.core_api.log.Log
 import org.ireader.domain.models.entities.BaseBook
 import org.ireader.presentation.feature_detail.presentation.book_detail.components.DotsFlashing
 import org.ireader.presentation.feature_sources.presentation.global_search.viewmodel.GlobalSearchViewModel
@@ -27,7 +28,6 @@ import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComp
 import org.ireader.presentation.presentation.reusable_composable.SmallTextComposable
 import org.ireader.presentation.ui.BookDetailScreenSpec
 import org.ireader.presentation.ui.ExploreScreenSpec
-import timber.log.Timber
 
 @Composable
 fun GlobalSearchScreen(
@@ -67,7 +67,7 @@ fun GlobalSearchScreen(
                             )
 
                         } catch (e: Exception) {
-                            Timber.e(e.localizedMessage)
+                            Log.error(e,"")
                         }
                     },
                     goToExplore = {
@@ -79,7 +79,7 @@ fun GlobalSearchScreen(
                                 )
                             }
                         } catch (e: Exception) {
-                            Timber.e(e.localizedMessage)
+                            Log.error(e,"")
                         }
 
                     }

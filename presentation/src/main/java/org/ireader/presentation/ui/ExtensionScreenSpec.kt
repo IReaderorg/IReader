@@ -9,7 +9,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
-import androidx.paging.ExperimentalPagingApi
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.presentation.R
 import org.ireader.presentation.feature_sources.presentation.extension.ExtensionScreen
@@ -25,7 +24,7 @@ object ExtensionScreenSpec : BottomNavScreenSpec {
     )
 
 
-    @OptIn(ExperimentalPagingApi::class, androidx.compose.material.ExperimentalMaterialApi::class)
+    @OptIn(androidx.compose.material.ExperimentalMaterialApi::class)
     @Composable
     override fun Content(
         navController: NavController,

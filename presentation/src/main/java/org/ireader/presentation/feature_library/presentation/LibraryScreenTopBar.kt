@@ -17,7 +17,6 @@ import androidx.navigation.NavController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.ireader.core.utils.Constants
-import org.ireader.core_ui.theme.AppColors
 import org.ireader.presentation.feature_library.presentation.viewmodel.LibraryEvents
 import org.ireader.presentation.feature_library.presentation.viewmodel.LibraryViewModel
 import org.ireader.presentation.presentation.Toolbar
@@ -91,9 +90,6 @@ private fun RegularTopBar(
                 )
             }
         },
-        backgroundColor = AppColors.current.bars,
-        contentColor = AppColors.current.onBars,
-        elevation = Constants.DEFAULT_ELEVATION,
         actions = {
             if (vm.inSearchMode) {
                 AppIconButton(
@@ -128,7 +124,7 @@ private fun RegularTopBar(
                     imageVector = Icons.Default.Refresh,
                     title = "Refresh",
                     onClick = {
-                        vm.refreshUpdate(context = context)
+                        vm.refreshUpdate()
                     },
                 )
             }

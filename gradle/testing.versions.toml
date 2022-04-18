@@ -16,6 +16,6 @@ testRunner = "androidx.test:runner:1.4.0"
 
 
 [bundles]
-
+common = ["junit4","extJunit","espresso","espresso","junitAndroidExt","truth","testRunner"]
 
 [plugins]

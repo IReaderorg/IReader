@@ -95,9 +95,6 @@ fun ExtensionScreen(
                         )
                     }
                 },
-                backgroundColor = MaterialTheme.colors.background,
-                contentColor = MaterialTheme.colors.onBackground,
-                elevation = DEFAULT_ELEVATION,
                 actions = {
                     if (pagerState.currentPage == 1) {
                         if (searchMode) {
@@ -170,7 +167,6 @@ fun ExtensionScreen(
         },
         scaffoldState = scaffoldState,
         snackbarHost = { ISnackBarHost(snackBarHostState = it) },
-
         ) { padding ->
         // UserSourcesScreen(viewModel, navController)
         Column(modifier = Modifier.fillMaxSize()) {

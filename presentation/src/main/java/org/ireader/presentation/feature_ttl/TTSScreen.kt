@@ -32,6 +32,7 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.launch
 import org.ireader.core.R
+import org.ireader.core_api.log.Log
 import org.ireader.core_api.source.Source
 import org.ireader.domain.feature_service.io.BookCover
 import org.ireader.domain.models.entities.Chapter
@@ -48,7 +49,6 @@ import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.BigSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.SuperSmallTextComposable
-import timber.log.Timber
 import java.math.RoundingMode
 
 
@@ -139,7 +139,7 @@ fun TTSScreen(
                 }
             }
         } catch (e: Exception) {
-            Timber.e(e)
+            Log.error(e,"")
         }
 
     }

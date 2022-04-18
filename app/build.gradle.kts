@@ -13,8 +13,8 @@ plugins {
     id("com.google.gms.google-services")
     kotlin("plugin.serialization")
     id("com.google.firebase.crashlytics")
-    id("com.github.ben-manes.versions")
 }
+
 
 
 android {
@@ -67,6 +67,7 @@ tasks.withType<DependencyUpdatesTask> {
     }
 }
 
+
 fun isNonStable(version: String): Boolean {
     val stableKeyword = listOf("RELEASE", "FINAL", "GA").any { version.toUpperCase().contains(it) }
     val regex = "^[0-9,.v-]+(-r)?$".toRegex()
@@ -77,6 +78,10 @@ dependencies {
     implementation(androidx.emoji)
     implementation(androidx.material)
 
+    implementation(compose.compose.activity)
+    implementation("androidx.core:core-splashscreen:1.0.0-beta02")
+    implementation(compose.compose.material)
+
     implementation(project(Modules.coreApi))
     implementation(project(Modules.coreUi))
     implementation(project(Modules.data))
@@ -84,28 +89,22 @@ dependencies {
     implementation(project(Modules.core))
     implementation(project(Modules.presentation))
 
-
-
     /** Firebase **/
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analyticKtx)
     implementation(libs.firebase.analytic)
     implementation(libs.firebase.crashlytics)
 
-
     /** Coroutine **/
     implementation(kotlinx.coroutines.core)
     implementation(kotlinx.coroutines.android)
 
-
     /** Hilt **/
-    //kapt(libs.hilt.compiler)
     kapt(libs.hilt.androidcompiler)
 
     implementation(libs.hilt.android)
     implementation(androidx.work.runtime)
     implementation(libs.hilt.worker)
-    implementation(libs.hilt.androidtest)
 
     implementation(compose.compose.runtime)
 
@@ -118,14 +117,9 @@ dependencies {
     implementation(libs.moshi.moshi)
     implementation(libs.moshi.kotlin)
 
-    /** Network Client - OkHttp**/
-    implementation(libs.okhttp.okhttp3)
 
-    testImplementation(test.junit4)
-    testImplementation(test.extJunit)
-    testImplementation(test.espresso)
-    androidTestImplementation(libs.hilt.androidtest)
-
+    testImplementation(test.bundles.common)
+    androidTestImplementation(test.bundles.common)
 }
 
 kapt {

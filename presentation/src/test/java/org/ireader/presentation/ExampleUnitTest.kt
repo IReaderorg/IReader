@@ -1,12 +1,5 @@
 package org.ireader.presentation
 
-import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performClick
-import com.google.accompanist.pager.ExperimentalPagerApi
-import org.ireader.presentation.feature_library.presentation.LibraryScreen
-import org.junit.Rule
 import org.junit.Test
 
 /**
@@ -17,19 +10,8 @@ import org.junit.Test
 
 class MyComposeTest {
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
-
-    @OptIn(ExperimentalPagerApi::class, androidx.compose.animation.ExperimentalAnimationApi::class)
     @Test
     fun MyTest() {
-        composeTestRule.setContent {
-            LibraryScreen()
 
-        }
-
-        composeTestRule.onNodeWithText("Library").performClick()
-
-        composeTestRule.onNodeWithText("Library").assertIsDisplayed()
     }
 }

@@ -17,6 +17,7 @@ import javax.inject.Inject
 
 /**This is fake Alert **/
 @SuppressLint("StaticFieldLeak")
+
 @HiltViewModel
 class WebViewPageModel @Inject constructor(
     private val insertUseCases: LocalInsertUseCases,

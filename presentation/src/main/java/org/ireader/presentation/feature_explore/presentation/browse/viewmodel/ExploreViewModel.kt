@@ -13,6 +13,10 @@ import org.ireader.core.exceptions.EmptyQuery
 import org.ireader.core.exceptions.SourceNotFoundException
 import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
+import org.ireader.core_api.log.Log
+import org.ireader.core_api.source.CatalogSource
+import org.ireader.core_api.source.model.Filter
+import org.ireader.core_api.source.model.MangasPageInfo
 import org.ireader.domain.R
 import org.ireader.domain.catalog.service.CatalogStore
 import org.ireader.domain.models.DisplayMode
@@ -23,10 +27,6 @@ import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.preferences.reader_preferences.BrowseLayoutTypeUseCase
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import org.ireader.domain.use_cases.remote.key.RemoteKeyUseCase
-import org.ireader.core_api.source.CatalogSource
-import org.ireader.core_api.source.model.Filter
-import org.ireader.core_api.source.model.MangasPageInfo
-import timber.log.Timber
 import javax.inject.Inject
 
 
@@ -120,25 +120,14 @@ class ExploreViewModel @Inject constructor(
                 onRequest = { nextPage ->
                     try {
                         error = null
-                        Timber.e("Request was made; $nextPage")
+                        Log.error { "Request was made; $nextPage" }
+
                         val query = searchQuery
                         val filters = stateFilters
                         val listing = stateListing
                         val source = source
                         if (source != null) {
                             var result = MangasPageInfo(emptyList(), false)
-//                            val result = if (searchQuery != null) {
-//                                if (query != null && query.isNotBlank()) {
-//                                    source.getMangaList(filters = listOf(Filter.Title()
-//                                        .apply { this.value = query }), page = page)
-//                                } else {
-//                                    throw EmptyQuery()
-//                                }
-//                            } else if (filters != null) {
-//                                source.getMangaList(filters = filters, page)
-//                            } else {
-//                                source.getMangaList(sort = listing, page)
-//                            }
                             remoteUseCases.getRemoteBooks(searchQuery,
                                 listing,
                                 filters,
@@ -186,7 +175,7 @@ class ExploreViewModel @Inject constructor(
 
                     page = newKey
                     endReached = !items.hasNextPage
-                    Timber.e("Request was finished")
+                    Log.debug {"Request was finished"  }
                 },
             ).loadNextItems()
 

@@ -1,27 +1,22 @@
 package org.ireader.presentation.feature_detail.presentation.chapter_detail.viewmodel
 
-import android.content.Context
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.work.*
+import androidx.work.OneTimeWorkRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import org.ireader.core.R
-import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
+import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
-import org.ireader.domain.services.downloaderService.DownloadService
-import org.ireader.domain.services.downloaderService.DownloadService.Companion.DOWNLOADER_Chapters_IDS
+import org.ireader.domain.use_cases.services.ServiceUseCases
 import javax.inject.Inject
 
 
@@ -33,10 +28,9 @@ class ChapterDetailViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val getBookUseCases: org.ireader.domain.use_cases.local.LocalGetBookUseCases,
     private val state: ChapterDetailStateImpl,
-) : ViewModel(), ChapterDetailState by state {
+    private val serviceUseCases: ServiceUseCases,
+) : BaseViewModel(), ChapterDetailState by state {
 
-    private val _eventFlow = MutableSharedFlow<UiEvent>()
-    val eventFlow = _eventFlow.asSharedFlow()
 
 
     init {
@@ -177,37 +171,11 @@ class ChapterDetailViewModel @Inject constructor(
 
     lateinit
     var work: OneTimeWorkRequest
-    fun downloadChapters(context: Context) {
-
+    fun downloadChapters() {
         book?.let { book ->
-            work =
-                OneTimeWorkRequestBuilder<DownloadService>().apply {
-                    setInputData(
-                        Data.Builder().apply {
-                            putLongArray(DOWNLOADER_Chapters_IDS,
-                                this@ChapterDetailViewModel.selection.toLongArray())
-                            putLongArray(DownloadService.DOWNLOADER_BOOKS_IDS,
-                                longArrayOf(book.id))
-                        }.build()
-                    )
-                    addTag(DownloadService.DOWNLOADER_SERVICE_NAME)
-                }.build()
-            WorkManager.getInstance(context).enqueueUniqueWork(
-                DownloadService.DOWNLOADER_SERVICE_NAME.plus(
-                    book.id + book.sourceId),
-                ExistingWorkPolicy.REPLACE,
-                work
-            )
+           serviceUseCases.startDownloadServicesUseCase(chapterIds = this@ChapterDetailViewModel.selection.toLongArray())
         }
 
-    }
-
-    suspend fun showSnackBar(message: UiText?) {
-        _eventFlow.emit(
-            UiEvent.ShowSnackbar(
-                uiText = message ?: UiText.StringResource(R.string.error_unknown)
-            )
-        )
     }
 }
 

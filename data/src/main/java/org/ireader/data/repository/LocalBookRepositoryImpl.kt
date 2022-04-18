@@ -1,6 +1,5 @@
 package org.ireader.data.repository
 
-import androidx.paging.PagingSource
 import kotlinx.coroutines.flow.Flow
 import org.ireader.data.local.AppDatabase
 import org.ireader.data.local.dao.LibraryBookDao
@@ -88,12 +87,7 @@ class LocalBookRepositoryImpl(
         return bookDao.findAllInLibraryBooks()
     }
 
-    override fun getBooksByQueryByPagingSource(query: String):
-            PagingSource<Int, Book> {
-        return getBooksByQueryPagingSource(query)
-    }
-
-    override fun getBooksByQueryPagingSource(query: String): PagingSource<Int, Book> {
+    override fun getBooksByQueryPagingSource(query: String): Flow<Book> {
         return bookDao.searchBook(query)
     }
 

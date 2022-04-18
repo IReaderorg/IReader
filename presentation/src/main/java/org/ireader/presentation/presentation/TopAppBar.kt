@@ -41,7 +41,7 @@ fun Toolbar(
                 actions = actions,
                 backgroundColor = backgroundColor,
                 contentColor = contentColor,
-                elevation = elevation
+                elevation = elevation,
             )
         }
     }

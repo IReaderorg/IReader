@@ -115,46 +115,45 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
     override fun ReaderScreenViewModel.saveParagraphIndent(isIncreased: Boolean) {
         val paragraphsIndent = prefState.paragraphsIndent
         if (isIncreased) {
-            readerUseCases.paragraphIndentUseCase.save(paragraphsIndent + 1)
             this.paragraphsIndent = paragraphsIndent + 1
+            readerUseCases.paragraphIndentUseCase.save(this.paragraphsIndent)
 
 
         } else if (paragraphsIndent > 1 && !isIncreased) {
-            readerUseCases.paragraphIndentUseCase.save(paragraphsIndent - 1)
             this.paragraphsIndent = paragraphsIndent - 1
+            readerUseCases.paragraphIndentUseCase.save( this.paragraphsIndent)
         }
     }
 
     override fun ReaderScreenViewModel.saveScrollIndicatorWidth(increase: Boolean) {
         if (increase) {
             scrollIndicatorWith += 1
-            readerUseCases.scrollIndicatorUseCase.saveWidth(scrollIndicatorWith + 1)
+            readerUseCases.scrollIndicatorUseCase.saveWidth(scrollIndicatorWith)
         } else if (scrollIndicatorWith > 0){
             scrollIndicatorWith -= 1
-            readerUseCases.scrollIndicatorUseCase.saveWidth(scrollIndicatorWith - 1)
+            readerUseCases.scrollIndicatorUseCase.saveWidth(scrollIndicatorWith)
         }
     }
 
     override fun ReaderScreenViewModel.saveScrollIndicatorPadding(increase: Boolean) {
         if (increase) {
             scrollIndicatorPadding += 1
-
-            readerUseCases.scrollIndicatorUseCase.savePadding(scrollIndicatorPadding + 1)
+            readerUseCases.scrollIndicatorUseCase.savePadding(scrollIndicatorPadding)
         } else if (scrollIndicatorPadding > 0) {
             scrollIndicatorPadding -= 1
-            readerUseCases.scrollIndicatorUseCase.savePadding(scrollIndicatorPadding - 1)
+            readerUseCases.scrollIndicatorUseCase.savePadding(scrollIndicatorPadding)
         }
     }
 
     override fun ReaderScreenViewModel.saveFontHeight(isIncreased: Boolean) {
         val currentFontHeight = prefState.lineHeight
         if (isIncreased) {
-            readerUseCases.fontHeightUseCase.save(currentFontHeight + 1)
             lineHeight = currentFontHeight + 1
+            readerUseCases.fontHeightUseCase.save(lineHeight)
 
         } else if (currentFontHeight > 20 && !isIncreased) {
-            readerUseCases.fontHeightUseCase.save(currentFontHeight - 1)
             lineHeight = currentFontHeight - 1
+            readerUseCases.fontHeightUseCase.save(lineHeight)
 
         }
     }

@@ -15,13 +15,13 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import org.ireader.core_api.log.Log
 import org.ireader.domain.models.entities.Catalog
 import org.ireader.domain.models.entities.CatalogInstalled
 import org.ireader.domain.models.entities.CatalogLocal
 import org.ireader.presentation.feature_sources.presentation.extension.CatalogItem
 import org.ireader.presentation.feature_sources.presentation.extension.CatalogsState
 import org.ireader.presentation.feature_sources.presentation.extension.ExtensionViewModel
-import timber.log.Timber
 
 
 @Composable
@@ -46,7 +46,7 @@ fun RemoteSourcesScreen(
                     onUninstall = { onClickUninstall(catalog) }.takeIf { catalog is CatalogInstalled },
                 )
             }.getOrElse {
-                Timber.e(catalog.name + "Throws an error" + it.message)
+                Log.error { catalog.name + "Throws an error" + it.message }
             }
         }
     }
@@ -105,7 +105,8 @@ fun RemoteSourcesScreen(
                         )
                     }
                 }.getOrElse {
-                    Timber.e(it.message)
+                    Log.error(it,"Remote Sources throws an exception")
+                    Log.error { it.message.toString() }
                 }
             }
         }

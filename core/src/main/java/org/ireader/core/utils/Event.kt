@@ -10,6 +10,7 @@ abstract class Event
 sealed class UiEvent : Event() {
     @Keep
     data class ShowSnackbar(val uiText: UiText) : UiEvent()
+
     @Keep
     data class Navigate(val route: String) : UiEvent()
     object NavigateUp : UiEvent()
@@ -20,8 +21,10 @@ sealed class UiEvent : Event() {
 sealed class UiText {
     @Keep
     data class DynamicString(val text: String) : UiText()
+
     @Keep
     data class StringResource(val resId: Int) : UiText()
+
     @Keep
     data class ExceptionString(val e: Throwable) : UiText()
 
@@ -36,5 +39,10 @@ sealed class UiText {
         }
     }
 }
+
+data class ResourceException(
+    val e: Exception,
+    val resId: Int,
+)
 
 

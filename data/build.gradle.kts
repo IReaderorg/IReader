@@ -70,13 +70,9 @@ dependencies {
 
     implementation(kotlinx.stdlib)
 
-
     implementation(libs.room.runtime)
-    ksp(libs.room.compiler)
     implementation(libs.room.ktx)
-    implementation(libs.room.paging)
-    androidTestImplementation(libs.room.testing)
-
+    ksp(libs.room.compiler)
 
     implementation(libs.moshi.moshi)
     implementation(libs.moshi.kotlin)
@@ -90,13 +86,8 @@ dependencies {
     /** Retrofit **/
     implementation(libs.retrofit.retrofit)
     implementation(libs.retrofit.moshiConverter)
-    testImplementation("androidx.test:monitor:1.6.0-alpha01")
 
-    androidTestImplementation(test.junit4)
-    androidTestImplementation(test.junitAndroidExt)
-    androidTestImplementation(test.truth)
-    androidTestImplementation(test.extJunit)
-    androidTestImplementation(test.testRunner)
-    androidTestImplementation(test.espresso)
 
+    testImplementation(test.bundles.common)
+    androidTestImplementation(test.bundles.common)
 }

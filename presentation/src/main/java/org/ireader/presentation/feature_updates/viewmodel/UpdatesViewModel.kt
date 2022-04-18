@@ -2,7 +2,7 @@ package org.ireader.presentation.feature_updates.viewmodel
 
 import android.content.Context
 import androidx.lifecycle.viewModelScope
-import androidx.work.*
+import androidx.work.OneTimeWorkRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -16,10 +16,9 @@ import org.ireader.domain.use_cases.local.LocalGetBookUseCases
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
+
+import org.ireader.domain.use_cases.services.ServiceUseCases
 import org.ireader.domain.utils.launchIO
-import org.ireader.domain.services.library_update_service.LibraryUpdatesService
-import org.ireader.domain.services.library_update_service.LibraryUpdatesService.Companion.LibraryUpdateTag
-import org.ireader.domain.services.downloaderService.DownloadService
 import javax.inject.Inject
 
 @HiltViewModel
@@ -31,9 +30,9 @@ class UpdatesViewModel @Inject constructor(
     private val getChapterUseCase: LocalGetChapterUseCase,
     private val getBookUseCases: LocalGetBookUseCases,
     private val insertUseCases: LocalInsertUseCases,
+    private val serviceUseCases: ServiceUseCases,
 ) : BaseViewModel(), UpdateState by updateStateImpl {
 
-    lateinit var updateWork: OneTimeWorkRequest
 
     init {
         viewModelScope.launch {
@@ -96,38 +95,15 @@ class UpdatesViewModel @Inject constructor(
             val chapterIds =
                 updates.values.flatMap { it }.filter { it.id in selection }.map { it.chapterId }
             //  val books = getBookUseCases.findBookByIds(bookIds)
-            downloadWork =
-                OneTimeWorkRequestBuilder<DownloadService>().apply {
-                    setInputData(
-                        Data.Builder().apply {
-                            putLongArray(DownloadService.DOWNLOADER_Chapters_IDS,
-                                chapterIds.toLongArray())
-                            putLongArray(DownloadService.DOWNLOADER_BOOKS_IDS,
-                                bookIds.toLongArray())
-                        }.build()
-                    )
-                    addTag(DownloadService.DOWNLOADER_SERVICE_NAME)
-                }.build()
-            WorkManager.getInstance(context).enqueueUniqueWork(
-                DownloadService.DOWNLOADER_SERVICE_NAME.plus(
-                    "UpdateServiceDownloader"),
-                ExistingWorkPolicy.REPLACE,
-                downloadWork
+            serviceUseCases.startDownloadServicesUseCase(
+                bookIds = bookIds.toLongArray(),
+                chapterIds =  chapterIds.toLongArray()
             )
-
         }
     }
 
     fun refreshUpdate(context: Context) {
-        updateWork =
-            OneTimeWorkRequestBuilder<LibraryUpdatesService>().apply {
-                addTag(LibraryUpdateTag)
-            }.build()
-        WorkManager.getInstance(context).enqueueUniqueWork(
-            LibraryUpdateTag,
-            ExistingWorkPolicy.REPLACE,
-            updateWork
-        )
+       serviceUseCases.startLibraryUpdateServicesUseCase()
     }
 
     fun deleteUpdate(update: UpdateWithInfo) {

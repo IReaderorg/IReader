@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -69,7 +70,7 @@ fun LibraryScreen(
     }
 
     SwipeRefresh(
-        state = swipeState, onRefresh = { vm.refreshUpdate(context) },
+        state = swipeState, onRefresh = { vm.refreshUpdate() },
         indicator = { state, trigger ->
             SwipeRefreshIndicator(
                 state = state,
@@ -98,7 +99,7 @@ fun LibraryScreen(
             sheetContentColor = MaterialTheme.colors.onBackground,
         ) {
             Column(modifier = Modifier
-                .fillMaxSize()
+                .fillMaxSize(),
             ) {
                 LibraryScreenTopBar(
                     navController = navController,
@@ -158,12 +159,12 @@ fun LibraryScreen(
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(80.dp)
+                                    .padding(horizontal = 12.dp, vertical = 16.dp)
+                                    .height(60.dp)
                                     .align(Alignment.BottomCenter)
-                                    .padding(8.dp)
-                                    .background(MaterialTheme.colors.background)
-                                    .border(width = 1.dp,
-                                        color = MaterialTheme.colors.onBackground.copy(.1f))
+                                    .border(width = 0.dp, color = MaterialTheme.colors.background,
+                                        RoundedCornerShape(8.dp))
+                                    .background(MaterialTheme.colors.surface)
                                     .clickable(enabled = false) {},
                             ) {
                                 Row(modifier = Modifier

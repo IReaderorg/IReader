@@ -3,7 +3,7 @@ package org.ireader.presentation.feature_library.presentation.viewmodel
 
 import android.content.Context
 import androidx.lifecycle.viewModelScope
-import androidx.work.*
+import androidx.work.OneTimeWorkRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -21,9 +21,8 @@ import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.preferences.reader_preferences.LibraryLayoutTypeUseCase
 import org.ireader.domain.use_cases.preferences.reader_preferences.SortersDescUseCase
 import org.ireader.domain.use_cases.preferences.reader_preferences.SortersUseCase
-import org.ireader.domain.services.library_update_service.LibraryUpdatesService
-import org.ireader.domain.services.downloaderService.DownloadService
-import org.ireader.domain.services.downloaderService.DownloadService.Companion.DOWNLOADER_BOOKS_IDS
+
+import org.ireader.domain.use_cases.services.ServiceUseCases
 import javax.inject.Inject
 
 
@@ -38,6 +37,7 @@ class LibraryViewModel @Inject constructor(
     private val sortersUseCase: SortersUseCase,
     private val historyUseCase: HistoryUseCase,
     private val libraryState: LibraryStateImpl,
+    private val serviceUseCases: ServiceUseCases,
 ) : BaseViewModel(), LibraryState by libraryState {
 
 
@@ -115,25 +115,8 @@ class LibraryViewModel @Inject constructor(
 
     lateinit var downloadWork: OneTimeWorkRequest
     fun downloadChapters(context: Context) {
-        downloadWork =
-            OneTimeWorkRequestBuilder<DownloadService>().apply {
-                setInputData(
-                    Data.Builder().apply {
-
-                        putLongArray(DOWNLOADER_BOOKS_IDS, selection.toLongArray())
-                    }.build()
-                )
-                addTag(DownloadService.DOWNLOADER_SERVICE_NAME)
-            }.build()
-        WorkManager.getInstance(context).enqueueUniqueWork(
-            DownloadService.DOWNLOADER_SERVICE_NAME.plus(
-                "Group_Download"),
-            ExistingWorkPolicy.REPLACE,
-            downloadWork
-        )
+        serviceUseCases.startDownloadServicesUseCase(bookIds =  selection.toLongArray())
         selection.clear()
-
-
     }
 
     fun markAsRead() {
@@ -210,16 +193,8 @@ class LibraryViewModel @Inject constructor(
     }
 
     lateinit var work: OneTimeWorkRequest
-    fun refreshUpdate(context: Context) {
-        work =
-            OneTimeWorkRequestBuilder<LibraryUpdatesService>().apply {
-                addTag(LibraryUpdatesService.LibraryUpdateTag)
-            }.build()
-        WorkManager.getInstance(context).enqueueUniqueWork(
-            LibraryUpdatesService.LibraryUpdateTag,
-            ExistingWorkPolicy.REPLACE,
-            work
-        )
+    fun refreshUpdate() {
+      serviceUseCases.startLibraryUpdateServicesUseCase()
     }
 
 

@@ -1,29 +1,69 @@
 package org.ireader.presentation.feature_settings.presentation.setting.downloader
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.FileDownloadOff
-import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.navigation.NavController
+import org.ireader.core.utils.Constants
 import org.ireader.presentation.R
 import org.ireader.presentation.presentation.Toolbar
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
+import org.ireader.presentation.presentation.reusable_composable.BigSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 
 
 @Composable
 fun DownloaderTopAppBar(
-    navController: NavController,
-    onStopAllDownload: () -> Unit,
+    state: DownloadState,
+    onPopBackStack: () -> Unit,
+    onCancelAll: () -> Unit,
     onMenuIcon: () -> Unit,
     onDeleteAllDownload: () -> Unit,
+    onDelete: () -> Unit,
+) {
+    Box(modifier = Modifier.fillMaxWidth()) {
+        when {
+            state.hasSelection -> {
+                EditModeTopAppBar(
+                    selectionSize = state.selection.size,
+                    onClickCancelSelection = { state.selection.clear() },
+                    onClickSelectAll = {
+                        state.selection.clear()
+                        state.selection.addAll(state.downloads.map { it.chapterId })
+                        state.selection.distinct()
+                    },
+                    onClickInvertSelection = {
+                        val ids: List<Long> =
+                            state.downloads.map { it.chapterId }
+                                .filterNot { it in state.selection }.distinct()
+                        state.selection.clear()
+                        state.selection.addAll(ids)
+                    },
+                    onDelete = onDelete)
+            }
+            else -> {
+                RegularTopBar(
+                    onPopBackStack=onPopBackStack,
+                    onCancelAll = onCancelAll,
+
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun RegularTopBar(
+    onPopBackStack: () -> Unit,
+    onCancelAll: () -> Unit,
 ) {
     var isMenuExpanded by remember {
         mutableStateOf(false)
@@ -31,27 +71,18 @@ fun DownloaderTopAppBar(
     Toolbar(
         title = {
             Text(
-                text = "Downloads",
+                text = "Downloads queue",
                 color = MaterialTheme.colors.onBackground,
                 style = MaterialTheme.typography.subtitle1,
                 fontWeight = FontWeight.Bold,
                 overflow = TextOverflow.Ellipsis
             )
         },
-        backgroundColor = MaterialTheme.colors.background,
         actions = {
             AppIconButton(
-                imageVector = Icons.Default.FileDownloadOff,
-                title = "Stop Download Icon",
-                onClick = {
-                    onStopAllDownload()
-                },
-            )
-            AppIconButton(
-                imageVector = Icons.Default.Menu,
+                imageVector = Icons.Default.MoreVert,
                 title = "Menu Icon",
                 onClick = {
-                    onMenuIcon()
                     isMenuExpanded = true
                 },
             )
@@ -64,19 +95,49 @@ fun DownloaderTopAppBar(
             ) {
                 DropdownMenuItem(onClick = {
                     isMenuExpanded = false
-                    onDeleteAllDownload()
+                    onCancelAll()
                 }) {
-                    MidSizeTextComposable(text = stringResource(R.string.delete_all_downloads))
+                    MidSizeTextComposable(text = stringResource(R.string.cancel_all))
                 }
             }
         },
         navigationIcon = {
-            IconButton(onClick = { navController.popBackStack() }) {
+            IconButton(onClick = onPopBackStack ) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
                     contentDescription = "ArrowBack Icon",
                     tint = MaterialTheme.colors.onBackground,
                 )
+            }
+        }
+    )
+}
+
+@Composable
+private fun EditModeTopAppBar(
+    selectionSize: Int,
+    onClickCancelSelection: () -> Unit,
+    onClickSelectAll: () -> Unit,
+    onClickInvertSelection: () -> Unit,
+    onDelete: () -> Unit
+) {
+    Toolbar(
+        title = { BigSizeTextComposable(text = "$selectionSize") },
+        navigationIcon = {
+            IconButton(onClick = onClickCancelSelection) {
+                Icon(Icons.Default.Close, contentDescription = null)
+            }
+        },
+        elevation = Constants.DEFAULT_ELEVATION,
+        actions = {
+            IconButton(onClick = onClickSelectAll) {
+                Icon(Icons.Default.SelectAll, contentDescription = null)
+            }
+            IconButton(onClick = onClickInvertSelection) {
+                Icon(Icons.Default.FlipToBack, contentDescription = null)
+            }
+            IconButton(onClick = onDelete) {
+                Icon(Icons.Default.DeleteForever, contentDescription = null)
             }
         }
     )

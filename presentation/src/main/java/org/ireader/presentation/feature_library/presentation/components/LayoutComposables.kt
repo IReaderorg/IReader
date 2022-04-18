@@ -4,12 +4,12 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
+import org.ireader.core_api.source.Source
 import org.ireader.domain.models.LayoutType
 import org.ireader.domain.models.entities.BookItem
 import org.ireader.presentation.presentation.layouts.CompactGridLayoutComposable
 import org.ireader.presentation.presentation.layouts.GridLayoutComposable
 import org.ireader.presentation.presentation.layouts.LinearListDisplay
-import org.ireader.core_api.source.Source
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -30,7 +30,6 @@ fun LayoutComposable(
     onEndReachValidator: (itemIndex: Int) -> Unit = {},
 ) {
 
-    //TODO: Add an item change position animation
     when (layout) {
         is LayoutType.GridLayout -> {
             GridLayoutComposable(

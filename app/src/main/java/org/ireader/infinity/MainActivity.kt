@@ -1,11 +1,10 @@
-package org.ireader.presentation.feature_main
+package org.ireader.infinity
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
-import androidx.core.app.NotificationManagerCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import dagger.hilt.android.AndroidEntryPoint
@@ -21,10 +20,6 @@ class MainActivity : ComponentActivity() {
         installSplashScreen()
         WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
-
-
-
-
         setContent {
             AppTheme {
                 Surface(
@@ -34,11 +29,9 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-
     }
 
     override fun onDestroy() {
-        NotificationManagerCompat.from(this).cancelAll()
         super.onDestroy()
     }
 

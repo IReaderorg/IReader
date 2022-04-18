@@ -9,16 +9,4 @@ object Player {
     const val PLAY = 6
     const val PAUSE = 7
     const val CANCEL = 8
-
 }
-
-//enum class Player {
-//    SKIP_PREV,
-//    PREV_PAR,
-//    PLAY_PAUSE,
-//    NEXT_PAR,
-//    SKIP_NEXT,
-//    PLAY,
-//    PAUSE,
-//    CANCEL,
-//}

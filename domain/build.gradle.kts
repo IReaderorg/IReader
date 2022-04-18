@@ -78,9 +78,8 @@ dependencies {
     implementation(kotlinx.reflect)
 
 
-
+    kapt(libs.hilt.androidcompiler)
     kapt(libs.hilt.compiler)
-    implementation(libs.hilt.androidcompiler)
     implementation(libs.hilt.android)
     implementation(libs.timber)
 
@@ -117,5 +116,6 @@ dependencies {
     androidTestImplementation("androidx.test.ext:junit:1.1.1")
     androidTestImplementation("org.mockito:mockito-core:2.21.0")
 
-
+    testImplementation(test.bundles.common)
+    androidTestImplementation(test.bundles.common)
 }

@@ -6,12 +6,13 @@ import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import org.ireader.core_ui.theme.ThemeMode
 import org.ireader.core_ui.theme.UiPreferences
+import org.ireader.core_ui.viewmodel.BaseViewModel
 import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val uiPreferences: UiPreferences,
-) : ViewModel() {
+) : BaseViewModel() {
 
     private val _state = mutableStateOf(MainScreenState())
     val state = _state

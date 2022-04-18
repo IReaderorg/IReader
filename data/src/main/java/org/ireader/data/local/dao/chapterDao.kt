@@ -1,6 +1,5 @@
 package org.ireader.data.local.dao
 
-import androidx.paging.PagingSource
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 import org.ireader.domain.models.entities.Chapter
@@ -49,6 +48,9 @@ interface chapterDao : BaseDao<Chapter> {
     """)
     suspend fun findChaptersByBookId(bookId: Long, isAsc: Boolean): List<Chapter>
 
+    @Query("""SELECT * FROM chapter WHERE bookId in (:bookIds)""")
+    suspend fun findChaptersByBookIds(bookIds: List<Long>): List<Chapter>
+
     @Query("""SELECT * FROM chapter WHERE link= :key
     """)
     suspend fun findChaptersByKey(key: String): List<Chapter>
@@ -64,14 +66,14 @@ interface chapterDao : BaseDao<Chapter> {
         bookId: Long,
         isAsc: Boolean,
         query: String,
-    ): PagingSource<Int, Chapter>
+    ): Flow<Chapter>
 
 
     @Query("SELECT * FROM chapter WHERE id = :chapterId AND bookId = :bookId Limit 1")
     fun getOneChapterForPaging(
         chapterId: Int,
         bookId: Int,
-    ): PagingSource<Int, Chapter>
+    ): Flow<Chapter>
 
     @Query("""
         SELECT *

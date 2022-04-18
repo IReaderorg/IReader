@@ -1,10 +1,7 @@
 package org.ireader.presentation.feature_history
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -45,10 +42,14 @@ fun BookListItemImage(
 @Composable
 fun BookListItemColumn(
     modifier: Modifier = Modifier,
+    verticalArrangement: Arrangement.Vertical = Arrangement.Top,
+    horizontalAlignment: Alignment.Horizontal = Alignment.Start,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Column(
-        modifier = modifier
+        modifier = modifier,
+        horizontalAlignment = horizontalAlignment,
+        verticalArrangement = verticalArrangement
     ) {
         content()
     }

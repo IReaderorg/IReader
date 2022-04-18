@@ -7,6 +7,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
@@ -135,8 +136,8 @@ fun ReaderText(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .fillMaxHeight()
-                    .padding(vm.scrollIndicatorPadding.dp)
-                    .width(vm.scrollIndicatorWith.dp),
+                    .padding(if (vm.scrollIndicatorPadding < 0) 0.dp else vm.scrollIndicatorPadding.dp)
+                    .width(if (vm.scrollIndicatorWith < 0) 0.dp else vm.scrollIndicatorWith.dp),
                 colors = CarouselDefaults.colors(
                     thumbColor = MaterialTheme.colors.scrollingThumbColor,
                     scrollingThumbColor = MaterialTheme.colors.scrollingThumbColor,
@@ -205,6 +206,10 @@ fun ReaderText(
 fun LazyListState.isScrolledToTheEnd(): Boolean {
     val lastItem = layoutInfo.visibleItemsInfo.lastOrNull()
     return lastItem == null || lastItem.size + lastItem.offset <= layoutInfo.viewportEndOffset
+}
+fun LazyGridState.isScrolledToTheEnd(): Boolean {
+    val lastItem = layoutInfo.visibleItemsInfo.lastOrNull()
+    return lastItem == null || lastItem.size.height + lastItem.offset.y <= layoutInfo.viewportEndOffset
 }
 
 @Composable

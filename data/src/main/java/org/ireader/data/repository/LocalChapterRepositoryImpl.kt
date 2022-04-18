@@ -42,6 +42,10 @@ class LocalChapterRepositoryImpl @Inject constructor(private val daoLibrary: cha
         return daoLibrary.findChaptersByBookId(bookId, isAsc)
     }
 
+    override suspend fun findChaptersByBookIds(bookIds: List<Long>): List<Chapter> {
+        return daoLibrary.findChaptersByBookIds(bookIds)
+    }
+
     override suspend fun findChaptersByKey(key: String): List<Chapter> {
         return daoLibrary.findChaptersByKey(key = key)
     }

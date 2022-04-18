@@ -19,7 +19,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.paging.ExperimentalPagingApi
 import kotlinx.coroutines.launch
 import org.ireader.core_api.source.CatalogSource
 import org.ireader.core_api.source.HttpSource
@@ -40,7 +39,6 @@ import org.ireader.presentation.ui.WebViewScreenSpec
 
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
-@ExperimentalPagingApi
 @Composable
 fun ExploreScreen(
     modifier: Modifier = Modifier,

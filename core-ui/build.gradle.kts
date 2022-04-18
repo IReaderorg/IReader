@@ -40,5 +40,8 @@ dependencies {
 
     implementation(accompanist.systemUiController)
 
-
+    testImplementation(test.junit4)
+    testImplementation(test.extJunit)
+    testImplementation(test.espresso)
+    androidTestImplementation(libs.hilt.androidtest)
 }

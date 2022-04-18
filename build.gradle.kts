@@ -8,6 +8,7 @@ buildscript {
         maven("https://plugins.gradle.org/m2/")
         maven("https://oss.sonatype.org/content/repositories/snapshots/")
         maven("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+        gradlePluginPortal()
     }
     dependencies {
         classpath(libs.gradle.tools)
@@ -16,17 +17,20 @@ buildscript {
         classpath(libs.gradle.hilt)
         classpath(libs.gradle.google)
         classpath(libs.gradle.firebaseCrashlytic)
-        classpath(libs.gradle.benmanes)
+       // classpath(libs.gradle.benmanes)
         classpath(libs.ksp.gradle)
         classpath(libs.gradle.idea.ext)
         classpath("com.vanniktech:gradle-maven-publish-plugin:0.19.0")
-       // classpath("ca.cutterslade.gradle:gradle-dependency-analyze:1.9.0")
+        classpath("com.android.tools.build:gradle:7.1.3")
+        // classpath("com.autonomousapps:dependency-analysis-gradle-plugin:1.1.0")
     }
 }
 
 plugins {
-    id("ca.cutterslade.analyze") version "1.9.0"
+    id("com.autonomousapps.dependency-analysis") version "1.1.0"
+    id("com.github.ben-manes.versions") version "0.42.0"
 }
+
 subprojects {
     tasks.withType<org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompile> {
         kotlinOptions {
@@ -39,6 +43,7 @@ subprojects {
             )
         }
     }
+
     tasks.withType<Test> {
         useJUnitPlatform()
     }
@@ -65,8 +70,10 @@ subprojects {
             }
         }
     }
+
 }
 
 tasks.register("clean", Delete::class) {
     delete(rootProject.buildDir)
 }
+

@@ -6,7 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.work.*
+import androidx.work.OneTimeWorkRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -15,6 +15,7 @@ import kotlinx.coroutines.withContext
 import org.ireader.core.R
 import org.ireader.core.utils.UiText
 import org.ireader.core.utils.removeSameItemsFromList
+import org.ireader.core_api.log.Log
 import org.ireader.core_api.source.Source
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.catalog.interactor.GetLocalCatalog
@@ -27,9 +28,8 @@ import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
-import org.ireader.domain.services.downloaderService.DownloadService
-import org.ireader.domain.services.downloaderService.DownloadService.Companion.DOWNLOADER_SERVICE_NAME
-import timber.log.Timber
+
+import org.ireader.domain.use_cases.services.ServiceUseCases
 import java.util.*
 import javax.inject.Inject
 
@@ -47,6 +47,7 @@ class BookDetailViewModel @Inject constructor(
     private val getLocalCatalog: GetLocalCatalog,
     private val state: DetailStateImpl,
     private val chapterState: ChapterStateImpl,
+    private val serviceUseCases: ServiceUseCases
 ) : BaseViewModel(), DetailState by state, ChapterState by chapterState {
 
     var isRefreshing by mutableStateOf(false)
@@ -60,7 +61,7 @@ class BookDetailViewModel @Inject constructor(
     var getBookDetailJob: Job? = null
     var getChapterDetailJob: Job? = null
 
-    lateinit var work: OneTimeWorkRequest
+    lateinit var oneTimeWork: OneTimeWorkRequest
 
 
     init {
@@ -145,7 +146,7 @@ class BookDetailViewModel @Inject constructor(
                     toggleRemoteLoading(false)
                     insertBookDetailToLocal(state.book!!)
                     if (message != null) {
-                        Timber.e(message.toString())
+                        Log.error { message.toString() }
                         showSnackBar(message)
                     }
                 },
@@ -181,7 +182,7 @@ class BookDetailViewModel @Inject constructor(
                 book = book,
                 source = source,
                 onError = { message ->
-                    Timber.e(message.toString())
+                    Log.error { message.toString() }
                     showSnackBar(message)
                     toggleChaptersLoading(false)
                 },
@@ -254,20 +255,7 @@ class BookDetailViewModel @Inject constructor(
     }
 
     fun startDownloadService(context: Context, book: Book) {
-        work = OneTimeWorkRequestBuilder<DownloadService>().apply {
-            setInputData(
-                Data.Builder().apply {
-
-                    putLongArray(DownloadService.DOWNLOADER_BOOKS_IDS, longArrayOf(book.id))
-                }.build()
-            )
-            addTag(DOWNLOADER_SERVICE_NAME)
-        }.build()
-        WorkManager.getInstance(context).enqueueUniqueWork(
-            DOWNLOADER_SERVICE_NAME.plus(book.id + book.sourceId),
-            ExistingWorkPolicy.REPLACE,
-            work
-        )
+     serviceUseCases.startDownloadServicesUseCase(bookIds = longArrayOf(book.id))
     }
 
     fun toggleExpandedSummary() {

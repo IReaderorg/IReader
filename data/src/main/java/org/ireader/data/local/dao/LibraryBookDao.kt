@@ -1,6 +1,5 @@
 package org.ireader.data.local.dao
 
-import androidx.paging.PagingSource
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 import org.ireader.domain.models.entities.Book
@@ -169,7 +168,7 @@ interface LibraryBookDao : BaseDao<Book> {
     fun subscribeBooksByKey(key: String, title: String): Flow<List<Book>>
 
     @Query("SELECT * FROM library WHERE title LIKE '%' || :query || '%' AND favorite = 1")
-    fun searchBook(query: String): PagingSource<Int, Book>
+    fun searchBook(query: String): Flow<Book>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertBook(book: Book): Long

@@ -1,31 +1,24 @@
 package org.ireader.presentation.feature_settings.presentation.setting.downloader
 
 import android.content.Context
-import androidx.annotation.Keep
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.work.*
+import androidx.work.OneTimeWorkRequest
+import androidx.work.WorkManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
-import org.ireader.core.utils.Constants
-import org.ireader.core.utils.UiEvent
-import org.ireader.core.utils.UiText
-import org.ireader.domain.models.entities.Book
-import org.ireader.domain.models.entities.Chapter
+import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.models.entities.SavedDownload
+import org.ireader.domain.services.downloaderService.DownloadService
+import org.ireader.domain.services.downloaderService.DownloadServiceStateImpl
 import org.ireader.domain.use_cases.download.DownloadUseCases
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
-import org.ireader.domain.services.downloaderService.DownloadService
+import org.ireader.domain.use_cases.services.ServiceUseCases
 import javax.inject.Inject
+
 
 
 @HiltViewModel
@@ -34,27 +27,19 @@ class DownloaderViewModel @Inject constructor(
     private val getChapterUseCase: LocalGetChapterUseCase,
     private val insertUseCases: LocalInsertUseCases,
     private val downloadUseCases: DownloadUseCases,
-) : ViewModel() {
+    private val serviceUseCases: ServiceUseCases,
+    private val downloadState: DownloadStateImpl,
+    val downloadServiceStateImpl: DownloadServiceStateImpl
+) : BaseViewModel(), DownloadState by downloadState {
 
-    var savedDownload by mutableStateOf<List<SavedDownload>>(emptyList())
-
-    var chapters = mutableStateOf<List<Chapter>>(emptyList())
 
     lateinit var work: OneTimeWorkRequest
-    private val _eventFlow = MutableSharedFlow<UiEvent>()
-    val eventFlow = _eventFlow.asSharedFlow()
-    var state by mutableStateOf<DownloaderState>(DownloaderState())
-        private set
+
 
     init {
         subscribeDownloads()
     }
 
-    fun showSnackBar(text: UiText) {
-        viewModelScope.launch {
-            _eventFlow.emit(UiEvent.ShowSnackbar(text))
-        }
-    }
 
     fun insertSavedDownload(download: SavedDownload) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -69,70 +54,29 @@ class DownloaderViewModel @Inject constructor(
     private fun subscribeDownloads() {
         getBooksJob?.cancel()
         getBooksJob = viewModelScope.launch {
-            downloadUseCases.subscribeDownloadsUseCase().collect {
-                savedDownload = it
+            downloadUseCases.subscribeDownloadsUseCase().distinctUntilChanged().collect {
+                downloads = it.filter { it.chapterId != 0L }
             }
 
         }
     }
 
-    fun startDownloadService(context: Context, bookId: Long, sourceId: Long) {
-        viewModelScope.launch {
-            val book = getBookUseCases.subscribeBookById(bookId).first()
-            if (book != null) {
-                // getChapters(book)
-            }
-        }
-        work =
-            OneTimeWorkRequestBuilder<DownloadService>().apply {
-                setInputData(
-                    Data.Builder().apply {
+    fun startDownloadService(chapterIds: List<Long>) {
+        serviceUseCases.startDownloadServicesUseCase(
+            chapterIds = chapterIds.toLongArray()
+        )
+    }
 
-                        putLongArray(DownloadService.DOWNLOADER_BOOKS_IDS, longArrayOf(bookId))
-                    }.build()
-                )
-                addTag(DownloadService.DOWNLOADER_SERVICE_NAME)
-            }.build()
-        WorkManager.getInstance(context).enqueueUniqueWork(
-            DownloadService.DOWNLOADER_SERVICE_NAME.plus(
-                bookId + sourceId),
-            ExistingWorkPolicy.REPLACE,
-            work
+    fun stopDownloads() {
+        serviceUseCases.stopServicesUseCase(
+            DownloadService.DOWNLOADER_SERVICE_NAME
         )
 
     }
 
-    fun stopDownloads(context: Context, bookId: Long, sourceId: Long) {
-        work =
-            OneTimeWorkRequestBuilder<DownloadService>().apply {
-                setInputData(
-                    Data.Builder().apply {
-                        putLongArray(DownloadService.DOWNLOADER_BOOKS_IDS, longArrayOf(bookId))
-                    }.build()
-                )
-            }.build()
-        WorkManager.getInstance(context).cancelUniqueWork(
-            DownloadService.DOWNLOADER_SERVICE_NAME.plus(
-                bookId + sourceId)
-        )
-    }
-
-    fun getChapters(book: Book) {
-        viewModelScope.launch {
-            getChapterUseCase.subscribeChaptersByBookId(bookId = book.id, isAsc = true)
-                .collect { snapshot ->
-                    chapters.value = snapshot
-                }
-
-        }
-    }
-
-    fun updateChapters(chapters: List<Chapter>) {
-        state = state.copy(chapters = chapters)
-    }
 
     fun toggleExpandMenu(enable: Boolean = true) {
-        state = state.copy(isMenuExpanded = enable)
+        isMenuExpanded = enable
     }
 
     fun deleteAllDownloads() {
@@ -140,11 +84,15 @@ class DownloaderViewModel @Inject constructor(
             downloadUseCases.deleteAllSavedDownload()
         }
     }
+    fun deleteSelectedDownloads(list: List<SavedDownload>) {
+        viewModelScope.launch(Dispatchers.IO) {
+            downloadUseCases.deleteSavedDownloads(list)
+        }
+    }
+
+    fun checkState(context:Context) {
+        WorkManager.getInstance(context).getWorkInfosByTag(DownloadService.DOWNLOADER_SERVICE_NAME).get()
+    }
 }
 
-@Keep
-data class DownloaderState(
-    val downloadBookId: Long = Constants.NULL_VALUE,
-    val chapters: List<Chapter> = emptyList(),
-    val isMenuExpanded: Boolean = false,
-)
+

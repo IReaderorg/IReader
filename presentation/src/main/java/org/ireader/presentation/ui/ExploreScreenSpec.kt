@@ -39,8 +39,7 @@ object ExploreScreenSpec : ScreenSpec {
     }
 
     @OptIn(ExperimentalPagerApi::class, androidx.compose.animation.ExperimentalAnimationApi::class,
-        androidx.compose.material.ExperimentalMaterialApi::class,
-        androidx.paging.ExperimentalPagingApi::class)
+        androidx.compose.material.ExperimentalMaterialApi::class)
     @Composable
     override fun Content(
         navController: NavController,

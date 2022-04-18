@@ -63,6 +63,9 @@ class SettingViewModel @Inject constructor(
             prefUseCases.orientationUseCase.save(OrientationMode.Portrait)
             prefUseCases.paragraphIndentUseCase.save(8)
             prefUseCases.scrollModeUseCase.save(true)
+            prefUseCases.scrollIndicatorUseCase.savePadding(0)
+            prefUseCases.scrollIndicatorUseCase.saveWidth(0)
+
         }
     }
 

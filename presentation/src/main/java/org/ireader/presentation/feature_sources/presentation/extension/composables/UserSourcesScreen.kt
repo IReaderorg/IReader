@@ -9,12 +9,12 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import org.ireader.core_api.log.Log
 import org.ireader.domain.models.entities.Catalog
 import org.ireader.domain.models.entities.CatalogInstalled
 import org.ireader.domain.models.entities.CatalogLocal
 import org.ireader.presentation.feature_sources.presentation.extension.CatalogItem
 import org.ireader.presentation.feature_sources.presentation.extension.CatalogsState
-import timber.log.Timber
 
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -40,7 +40,7 @@ fun UserSourcesScreen(
                 )
             }
         }.getOrElse {
-            Timber.e(catalog.name + "Throws an error" + it.message)
+            Log.error { catalog.name + "Throws an error" + it.message }
         }
     }
     LazyColumn(modifier = modifier
@@ -75,7 +75,7 @@ fun UserSourcesScreen(
 
             }
         }.getOrElse {
-            Timber.e("Throws an error" + it.message)
+            Log.error {"Throws an error" + it.message }
         }
     }
 }

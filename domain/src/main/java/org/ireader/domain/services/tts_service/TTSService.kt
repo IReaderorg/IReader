@@ -7,7 +7,6 @@ import android.support.v4.media.session.MediaSessionCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
-import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -48,10 +47,6 @@ class TTSService @AssistedInject constructor(
         const val COMMAND = "command"
         const val TTS_BOOK_ID = "bookId"
 
-
-
-
-        lateinit var ttsWork: OneTimeWorkRequest
     }
 
 
@@ -78,8 +73,9 @@ class TTSService @AssistedInject constructor(
                 }
             }
 
-
             startService(command)
+
+
 
 
 
@@ -129,6 +125,7 @@ class TTSService @AssistedInject constructor(
                     }
                     state.ttsIsLoading = false
                 }
+                startService(Player.PLAY)
             }
             if (state.mediaSession == null) {
                 state.mediaSession = MediaSessionCompat(context, "mediaPlayer", null, null)
@@ -237,16 +234,16 @@ class TTSService @AssistedInject constructor(
                                             tts.stop()
                                             updateNotification(chapter, book)
                                         }
-//                                        Player.PLAY_PAUSE.ordinal -> {
-//                                            if (state.isPlaying) {
-//                                                state.isPlaying = false
-//                                                tts.stop()
-//                                                updateNotification(chapter, book)
-//                                            } else {
-//                                                state.isPlaying = true
-//                                                readText(context, mediaSession)
-//                                            }
-//                                        }
+                                        Player.PLAY_PAUSE -> {
+                                            if (state.isPlaying) {
+                                                state.isPlaying = false
+                                                tts.stop()
+                                                updateNotification(chapter, book)
+                                            } else {
+                                                state.isPlaying = true
+                                                readText(context, mediaSession)
+                                            }
+                                        }
                                         else -> {
                                             if (state.isPlaying) {
                                                 state.isPlaying = false

@@ -58,14 +58,14 @@ val themes = listOf(
             onPrimary = Colour.black_900,
             secondary = Colour.blue_accent,
             onSecondary = Colour.black_900,
-            background = Colour.black_900,
-            surface = Colour.white_50,
+            background = Color(0xFF121212),
+            surface = Color(0xFF272727),
             onBackground = Colour.white_50,
             onSurface = Colour.white_50,
             error = Colour.red_600,
             onError = Colour.black_900,
         ), ExtraColors(
-            bars = Color.Black,
+            bars = Color(0xFF272727),
             onBars = Color.White
         )
     ), Theme(6, lightColors(

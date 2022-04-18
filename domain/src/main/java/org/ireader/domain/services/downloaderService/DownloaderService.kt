@@ -5,19 +5,15 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
-import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import org.ireader.core.R
 import org.ireader.domain.catalog.service.CatalogStore
-import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.entities.SavedDownload
+import org.ireader.domain.models.entities.buildSavedDownload
 import org.ireader.domain.notification.Notifications
-import org.ireader.domain.notification.Notifications.CHANNEL_DOWNLOADER_PROGRESS
 import org.ireader.domain.notification.Notifications.ID_DOWNLOAD_CHAPTER_COMPLETE
 import org.ireader.domain.notification.Notifications.ID_DOWNLOAD_CHAPTER_ERROR
 import org.ireader.domain.notification.Notifications.ID_DOWNLOAD_CHAPTER_PROGRESS
@@ -26,6 +22,7 @@ import org.ireader.domain.repository.LocalChapterRepository
 import org.ireader.domain.use_cases.download.DownloadUseCases
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
+import org.ireader.domain.utils.launchIO
 import timber.log.Timber
 
 
@@ -40,173 +37,243 @@ class DownloadService @AssistedInject constructor(
     private val insertUseCases: LocalInsertUseCases,
     private val defaultNotificationHelper: DefaultNotificationHelper,
     private val downloadUseCases: DownloadUseCases,
+    private val downloadServiceState: DownloadServiceStateImpl,
 ) : CoroutineWorker(context, params) {
+
+    val scope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
+
     companion object {
         const val DOWNLOADER_SERVICE_NAME = "DOWNLOAD_SERVICE"
         const val DOWNLOADER_Chapters_IDS = "chapterIds"
+        const val DOWNLOADER_MODE = "downloader_mode"
         const val DOWNLOADER_BOOKS_IDS = "booksIds"
     }
 
 
-    lateinit var savedDownload: SavedDownload
+    var savedDownload: SavedDownload = SavedDownload(
+        bookId = 0,
+        priority = 1,
+        chapterName = "",
+        chapterKey = "",
+        translator = "",
+        chapterId = 0,
+        bookName = "",
+        sourceId = 0,
+    )
+
     override suspend fun doWork(): Result {
+        NotificationManagerCompat.from(applicationContext.applicationContext).apply {
+            try {
+                val inputtedChapterIds = inputData.getLongArray(DOWNLOADER_Chapters_IDS)?.distinct()
+                val inputtedBooksIds = inputData.getLongArray(DOWNLOADER_BOOKS_IDS)?.distinct()
+                val inputtedDownloaderMode = inputData.getBoolean(DOWNLOADER_MODE,false)
 
-
-        // val bookId = inputData.getLong("book_id", 0)
-        //val sourceId = inputData.getLong("sourceId", 0)
-        val downloadIds = inputData.getLongArray(DOWNLOADER_Chapters_IDS)?.distinct()
-        val booksIds = inputData.getLongArray(DOWNLOADER_BOOKS_IDS)?.distinct()
-        booksIds?.forEach { bookId ->
-            val bookResource = bookRepo.findBookById(bookId)
-                ?: throw IllegalArgumentException(
-                    "Invalid bookId as argument: $bookId"
-                )
-            //Faking
-            savedDownload = SavedDownload(
-                bookId = bookId,
-                totalChapter = 100,
-                priority = 1,
-                chapterName = "",
-                chapterKey = "",
-                progress = 100,
-                translator = "",
-                chapterId = 0,
-                bookName = bookResource.title,
-                sourceId = bookResource.sourceId,
-            )
-
-            val source = extensions.get(bookResource.sourceId)?.source
-
-            val chapters = mutableListOf<Chapter>()
-
-            if (downloadIds?.isEmpty() == true) {
-                chapters.addAll(chapterRepo.findChaptersByBookId(bookId))
-            } else {
-                chapters.addAll(chapterRepo.findChaptersByBookId(bookId).filter {
-                    if (downloadIds != null) {
-                        it.id in downloadIds
+                val chapters = if (inputtedBooksIds != null) {
+                    chapterRepo.findChaptersByBookIds(inputtedBooksIds)
+                } else {
+                    if (inputtedChapterIds != null) {
+                        chapterRepo.findChapterByIdByBatch(inputtedChapterIds)
                     } else {
-                        true
+                        throw Exception("There is no chapter.")
                     }
-                })
-            }
-
-
-            val cancelDownloadIntent = WorkManager.getInstance(applicationContext)
-                .createCancelPendingIntent(id)
-
-            val builder =
-                NotificationCompat.Builder(applicationContext, CHANNEL_DOWNLOADER_PROGRESS).apply {
-                    setContentTitle("Downloading ${bookResource.title}")
-                    setSmallIcon(R.drawable.ic_downloading)
-                    setOnlyAlertOnce(true)
-                    priority = NotificationCompat.PRIORITY_LOW
-                    setAutoCancel(true)
-                    setOngoing(true)
-                    addAction(R.drawable.baseline_close_24, "Cancel", cancelDownloadIntent)
-                    setContentIntent(defaultNotificationHelper.openDownloadsPendingIntent)
                 }
+                val distinctBookIds = chapters.map { it.bookId }.distinct()
+                val books = bookRepo.findBookByIds(distinctBookIds)
+                val distinctSources = books.map { it.sourceId }.distinct()
+                val sources =
+                    extensions.catalogs.map { it.source }.filter { it.id in distinctSources }
 
+                val mappedChapters =
+                    chapters.filter { it.content.joinToString().length < 10 }.map { chapter ->
+                        val book = books.find { book -> book.id == chapter.bookId }
+                        book?.let { b ->
+                            buildSavedDownload(b, chapter)
+                        }
+                    }.filterNotNull()
 
-            NotificationManagerCompat.from(applicationContext).apply {
+                val downloadIds = downloadUseCases.insertDownloads(mappedChapters)
 
-                builder.setProgress(chapters.size, 0, false)
+                val downloads = downloadUseCases.findDownloadsUseCase(downloadIds)
+                val builder = defaultNotificationHelper.baseNotificationDownloader(
+                    chapter = null,
+                    id
+                )
+                builder.setProgress(downloads.size, 0, true)
                 notify(ID_DOWNLOAD_CHAPTER_PROGRESS, builder.build())
-                try {
-                    chapters.forEachIndexed { index, chapter ->
-                        if (chapter.content.joinToString().length < 10) {
-                            remoteUseCases.getRemoteReadingContent(
-                                chapter = chapter,
-                                source = source!!,
-                                onSuccess = { content ->
-                                    withContext(Dispatchers.IO) {
-                                        insertUseCases.insertChapter(chapter = content)
+                downloadServiceState.downloads = downloads
+                downloadServiceState.isEnable = true
+                downloads.forEachIndexed { index, download ->
+                    chapters.find { it.id == download.chapterId }?.let { chapter ->
+                        sources.find { it.id == download.sourceId }?.let { source ->
+                            if (chapter.content.joinToString().length < 10) {
+                                remoteUseCases.getRemoteReadingContent(
+                                    chapter = chapter,
+                                    source = source,
+                                    onSuccess = { content ->
+                                        withContext(Dispatchers.IO) {
+                                            insertUseCases.insertChapter(chapter = content)
+                                        }
+                                        builder.setContentText(chapter.title)
+                                        builder.setSubText(index.toString())
 
+                                        builder.setProgress(downloads.size, index, false)
+                                        notify(ID_DOWNLOAD_CHAPTER_PROGRESS, builder.build())
+                                        savedDownload = savedDownload.copy(
+                                            bookId = download.bookId,
+                                            priority = 1,
+                                            chapterName = chapter.title,
+                                            chapterKey = chapter.link,
+                                            translator = chapter.translator,
+                                            chapterId = chapter.id,
+                                            bookName = download.chapterName,
+                                            sourceId = download.sourceId,
+                                        )
+                                        withContext(Dispatchers.IO) {
+                                            downloadUseCases.insertDownload(savedDownload.copy(
+                                                priority = 1))
+                                        }
+                                    },
+                                    onError = { message ->
+                                        throw Exception(message?.asString(context))
                                     }
-                                    builder.setContentText(chapter.title)
-                                    builder.setSubText(index.toString())
-                                    builder.setProgress(chapters.size, index, false)
-                                    savedDownload = savedDownload.copy(
-                                        bookId = bookId,
-                                        totalChapter = chapters.size,
-                                        priority = 1,
-                                        chapterName = chapter.title,
-                                        chapterKey = chapter.link,
-                                        progress = index,
-                                        translator = chapter.translator,
-                                        chapterId = chapter.id,
-                                        bookName = bookResource.title,
-                                        sourceId = bookResource.sourceId,
-                                    )
-                                    notify(ID_DOWNLOAD_CHAPTER_PROGRESS, builder.build())
-                                    withContext(Dispatchers.IO) {
-                                        downloadUseCases.insertDownload(savedDownload.copy(priority = 1))
-                                    }
-
-
-                                },
-                                onError = { message ->
-                                    if (message?.asString(context)?.isNotBlank() == true) {
-                                        throw Exception(message.asString(context))
-                                    }
-                                }
-                            )
-                            Timber.d("getNotifications: Successfully to downloaded ${bookResource.title} chapter ${chapter.title}")
-                            delay(1000)
+                                )
+                            }
                         }
                     }
+                    Timber.d("getNotifications: Successfully to downloaded ${savedDownload.bookName} chapter ${savedDownload.chapterName}")
+                    delay(1000)
 
-                } catch (e: Exception) {
-                    Timber.e("getNotifications: Failed to download ${bookResource.title}")
-                    notify(
-                        ID_DOWNLOAD_CHAPTER_ERROR,
-                        NotificationCompat.Builder(applicationContext,
-                            Notifications.CHANNEL_DOWNLOADER_ERROR).apply {
-                            if (e.localizedMessage == "Job was cancelled") {
-                                setSubText("Download was cancelled")
-                                setContentTitle("Download of ${bookResource.title} was canceled.")
-                            } else {
-                                setContentTitle("Failed to download ${bookResource.title}")
-                                setSubText(e.localizedMessage)
-                            }
-                            setSmallIcon(R.drawable.ic_downloading)
-                            priority = NotificationCompat.PRIORITY_DEFAULT
-                            setAutoCancel(true)
-                            setContentIntent(defaultNotificationHelper.openBookDetailPendingIntent(
-                                bookId,
-                                bookResource.sourceId))
-                        }.build()
-                    )
-                    builder.setProgress(0, 0, false)
-                    cancel(ID_DOWNLOAD_CHAPTER_PROGRESS)
-                    withContext(Dispatchers.IO) {
-                        downloadUseCases.insertDownload(savedDownload.copy(priority = 0))
-                    }
-                    return Result.failure()
                 }
 
-                builder.setProgress(0, 0, false)
+            } catch (e: Exception) {
+                Timber.e("getNotifications: Failed to download ${savedDownload.chapterName}")
+                cancel(ID_DOWNLOAD_CHAPTER_PROGRESS)
+                notify(ID_DOWNLOAD_CHAPTER_ERROR,
+                    defaultNotificationHelper.baseCancelledNotificationDownloader(bookName = savedDownload.bookName,
+                        e).build())
+
+                scope.launchIO {
+                    downloadUseCases.insertDownload(savedDownload.copy(priority = 0))
+                }
+                downloadServiceState.downloads = emptyList()
+                downloadServiceState.isEnable = false
+                return Result.failure()
+            }
+
+            withContext(Dispatchers.Main) {
                 cancel(ID_DOWNLOAD_CHAPTER_PROGRESS)
                 withContext(Dispatchers.IO) {
                     downloadUseCases.insertDownload(savedDownload.copy(priority = 0))
                 }
+                val notification = NotificationCompat.Builder(applicationContext.applicationContext,
+                    Notifications.CHANNEL_DOWNLOADER_COMPLETE).apply {
+                    setContentTitle("Download was successfully completed.")
+                    setSmallIcon(R.drawable.ic_downloading)
+                    priority = NotificationCompat.PRIORITY_DEFAULT
+                    setSubText("It was Downloaded Successfully")
+                    setAutoCancel(true)
+                    setContentIntent(defaultNotificationHelper.openDownloadsPendingIntent)
+                }.build()
                 notify(
                     ID_DOWNLOAD_CHAPTER_COMPLETE,
-                    NotificationCompat.Builder(applicationContext,
-                        Notifications.CHANNEL_DOWNLOADER_COMPLETE).apply {
-                        setContentTitle("${bookResource.title} downloaded")
-                        setSmallIcon(R.drawable.ic_downloading)
-                        priority = NotificationCompat.PRIORITY_DEFAULT
-                        setSubText("It was Downloaded Successfully")
-                        setAutoCancel(true)
-                        setContentIntent(defaultNotificationHelper.openBookDetailPendingIntent(
-                            bookId,
-                            bookResource.sourceId))
-                    }.build()
+                    notification
                 )
             }
 
         }
+        downloadServiceState.downloads = emptyList()
+        downloadServiceState.isEnable = false
         return Result.success()
+//
+//
+//
+//            NotificationManagerCompat.from(applicationContext.applicationContext).apply {
+//
+//                builder.setProgress(chapters.size, 0, false)
+//                notify(ID_DOWNLOAD_CHAPTER_PROGRESS, builder.build())
+//                try {
+//                    chapters.forEachIndexed { index, chapter ->
+//                        if (chapter.content.joinToString().length < 10) {
+//                            remoteUseCases.getRemoteReadingContent(
+//                                chapter = chapter,
+//                                source = source!!,
+//                                onSuccess = { content ->
+//                                    withContext(Dispatchers.IO) {
+//                                        insertUseCases.insertChapter(chapter = content)
+//
+//                                    }
+//                                    builder.setContentText(chapter.title)
+//                                    builder.setSubText(index.toString())
+//                                    builder.setProgress(chapters.size, index, false)
+//                                    savedDownload = savedDownload.copy(
+//                                        bookId = bookId,
+//                                        totalChapter = chapters.size,
+//                                        priority = 1,
+//                                        chapterName = chapter.title,
+//                                        chapterKey = chapter.link,
+//                                        progress = index,
+//                                        translator = chapter.translator,
+//                                        chapterId = chapter.id,
+//                                        bookName = bookResource.title,
+//                                        sourceId = bookResource.sourceId,
+//                                    )
+//                                    notify(ID_DOWNLOAD_CHAPTER_PROGRESS, builder.build())
+//                                    withContext(Dispatchers.IO) {
+//                                        downloadUseCases.insertDownload(savedDownload.copy(priority = 1))
+//                                    }
+//
+//
+//                                },
+//                                onError = { message ->
+//                                    if (message?.asString(context)?.isNotBlank() == true) {
+//                                        throw Exception(message.asString(context))
+//                                    }
+//                                }
+//                            )
+//                            Timber.d("getNotifications: Successfully to downloaded ${bookResource.title} chapter ${chapter.title}")
+//                            delay(1000)
+//                        }
+//                    }
+//
+//                } catch (e: Exception) {
+//                    Timber.e("getNotifications: Failed to download ${bookResource.title}")
+//                    cancel(ID_DOWNLOAD_CHAPTER_PROGRESS)
+//                    notify(ID_DOWNLOAD_CHAPTER_ERROR,
+//                        defaultNotificationHelper.baseCancelledNotificationDownloader(book = bookResource,
+//                            e).build())
+//
+//                    scope.launchIO {
+//                        downloadUseCases.insertDownload(savedDownload.copy(priority = 0))
+//                    }
+//                    return Result.failure()
+//                }
+//                withContext(Dispatchers.Main) {
+//
+//                    builder.setProgress(0, 0, false)
+//                    cancel(ID_DOWNLOAD_CHAPTER_PROGRESS)
+//                    withContext(Dispatchers.IO) {
+//                        downloadUseCases.insertDownload(savedDownload.copy(priority = 0))
+//                    }
+//                    notify(
+//                        ID_DOWNLOAD_CHAPTER_COMPLETE,
+//                        NotificationCompat.Builder(applicationContext,
+//                            Notifications.CHANNEL_DOWNLOADER_COMPLETE).apply {
+//                            setContentTitle("${bookResource.title} downloaded")
+//                            setSmallIcon(R.drawable.ic_downloading)
+//                            priority = NotificationCompat.PRIORITY_DEFAULT
+//                            setSubText("It was Downloaded Successfully")
+//                            setAutoCancel(true)
+//                            setContentIntent(defaultNotificationHelper.openBookDetailPendingIntent(
+//                                bookId,
+//                                bookResource.sourceId))
+//                        }.build()
+//                    )
+//                }
+//            }
+//
+//        }
+//        return Result.success()
     }
+
+
 }

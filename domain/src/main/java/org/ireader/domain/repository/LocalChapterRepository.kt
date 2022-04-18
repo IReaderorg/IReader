@@ -32,6 +32,8 @@ interface LocalChapterRepository {
         isAsc: Boolean = true,
     ): List<Chapter>
 
+    suspend fun findChaptersByBookIds(bookIds: List<Long>): List<Chapter>
+
     suspend fun findChaptersByKey(key: String): List<Chapter>
 
     suspend fun findChapterByKey(key: String): Chapter?

@@ -21,7 +21,7 @@ abstract class BaseViewModel : androidx.lifecycle.ViewModel() {
     private val activeScope = MutableStateFlow<CoroutineScope?>(null)
 
     protected val _eventFlow = MutableSharedFlow<UiEvent>()
-    val eventFlow = _eventFlow.asSharedFlow()
+    open val eventFlow = _eventFlow.asSharedFlow()
 
     fun showSnackBar(message: UiText?) {
         viewModelScope.launch {

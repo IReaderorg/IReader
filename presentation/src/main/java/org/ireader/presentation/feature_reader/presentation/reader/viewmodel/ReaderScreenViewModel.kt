@@ -5,10 +5,6 @@ import android.content.Context
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.work.Data
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -26,11 +22,7 @@ import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.preferences.reader_preferences.ReaderPrefUseCases
 import org.ireader.domain.use_cases.preferences.reader_preferences.TextReaderPrefUseCase
 import org.ireader.domain.use_cases.remote.RemoteUseCases
-import org.ireader.domain.services.tts_service.TTSService
-import org.ireader.domain.services.tts_service.TTSService.Companion.COMMAND
-import org.ireader.domain.services.tts_service.TTSService.Companion.TTS_BOOK_ID
-import org.ireader.domain.services.tts_service.TTSService.Companion.TTS_Chapter_ID
-import org.ireader.domain.services.tts_service.TTSService.Companion.ttsWork
+import org.ireader.domain.use_cases.services.ServiceUseCases
 import org.ireader.presentation.feature_ttl.TTSState
 import org.ireader.presentation.feature_ttl.TTSStateImpl
 import javax.inject.Inject
@@ -54,6 +46,7 @@ class ReaderScreenViewModel @Inject constructor(
     val savedStateHandle: SavedStateHandle,
     val defaultNotificationHelper: DefaultNotificationHelper,
     val ttsState: TTSStateImpl,
+    val serviceUseCases : ServiceUseCases,
 ) : BaseViewModel(),
     ReaderScreenPreferencesState by prefState,
     ReaderScreenState by state,
@@ -128,27 +121,10 @@ class ReaderScreenViewModel @Inject constructor(
 
 
     fun runTTSService(context: Context, command: Int = -1) {
-        ttsWork =
-            OneTimeWorkRequestBuilder<TTSService>().apply {
-                stateChapter?.let { chapter ->
-                    book?.let { book ->
-                        setInputData(
-                            Data.Builder().apply {
-                                putLong(TTS_Chapter_ID, chapter.id)
-                                putLong(TTS_BOOK_ID, book.id)
-                                putInt(COMMAND, command)
-                            }.build()
-                        )
-
-                    }
-                }
-                addTag(TTSService.TTS_SERVICE_NAME)
-
-            }.build()
-        WorkManager.getInstance(context).enqueueUniqueWork(
-            TTSService.TTS_SERVICE_NAME,
-            ExistingWorkPolicy.REPLACE,
-            ttsWork
+       serviceUseCases.startTTSServicesUseCase(
+            chapterId = stateChapter?.id,
+            bookId = book?.id,
+            command = command
         )
     }
 

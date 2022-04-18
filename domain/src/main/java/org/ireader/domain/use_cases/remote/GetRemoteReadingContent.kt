@@ -26,8 +26,6 @@ class GetRemoteReadingContent @Inject constructor(@ApplicationContext private va
             val content = mutableListOf<String>()
             val page = source.getPageList(chapter.toChapterInfo())
 
-
-
             page.forEach {
                 when (it) {
                     is Text -> {
@@ -36,10 +34,6 @@ class GetRemoteReadingContent @Inject constructor(@ApplicationContext private va
                     else -> {}
                 }
             }
-
-
-
-
 
             if (content.joinToString().isBlank()) {
                 onError(UiText.StringResource(R.string.cant_get_content))

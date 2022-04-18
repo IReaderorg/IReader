@@ -86,3 +86,5 @@ tinylog-api = { module = "org.tinylog:tinylog-api", version.ref = "tinylog" }
 tinylog = ["tinylog-impl", "tinylog-api"]
 
 [plugins]
+benmens = { id = "com.github.ben-manes.versions", version = "0.42.0" }
+dependencyAnalysis = { id = "com.autonomousapps.dependency-analysis", version = "1.1.0" }
