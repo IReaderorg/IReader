@@ -52,10 +52,8 @@ fun SettingScreen(
                 title = {
                     BigSizeTextComposable(text = "Setting")
                 },
-                backgroundColor = MaterialTheme.colors.background,
-                contentColor = MaterialTheme.colors.onBackground,
             )
-        }) {
+        }) { padding ->
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.Start,

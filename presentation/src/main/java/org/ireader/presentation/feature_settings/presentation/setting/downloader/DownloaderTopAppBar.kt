@@ -1,6 +1,5 @@
 package org.ireader.presentation.feature_settings.presentation.setting.downloader
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.*
@@ -11,12 +10,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import org.ireader.core.utils.Constants
 import org.ireader.presentation.R
 import org.ireader.presentation.presentation.Toolbar
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.BigSizeTextComposable
-import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
+import org.ireader.presentation.presentation.reusable_composable.BuildDropDownMenu
+import org.ireader.presentation.presentation.reusable_composable.DropDownMenuItem
 
 
 @Composable
@@ -86,20 +85,14 @@ private fun RegularTopBar(
                     isMenuExpanded = true
                 },
             )
-            DropdownMenu(
-                modifier = Modifier.background(MaterialTheme.colors.background),
-                expanded = isMenuExpanded,//viewModel.state.isMenuExpanded,
-                onDismissRequest = {
-                    isMenuExpanded = false
-                },
-            ) {
-                DropdownMenuItem(onClick = {
-                    isMenuExpanded = false
-                    onCancelAll()
-                }) {
-                    MidSizeTextComposable(text = stringResource(R.string.cancel_all))
-                }
-            }
+            val list =
+                listOf<DropDownMenuItem>(
+                    DropDownMenuItem(
+                        stringResource(R.string.cancel_all)
+                    ) {
+                        onCancelAll()
+                    })
+            BuildDropDownMenu(list, enable = isMenuExpanded, onEnable = { isMenuExpanded = it })
         },
         navigationIcon = {
             IconButton(onClick = onPopBackStack ) {
@@ -128,7 +121,6 @@ private fun EditModeTopAppBar(
                 Icon(Icons.Default.Close, contentDescription = null)
             }
         },
-        elevation = Constants.DEFAULT_ELEVATION,
         actions = {
             IconButton(onClick = onClickSelectAll) {
                 Icon(Icons.Default.SelectAll, contentDescription = null)

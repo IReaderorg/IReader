@@ -16,9 +16,6 @@ fun EmptyScreenComposable(navController: NavController, errorResId: Int) {
             Toolbar(
                 title = {},
                 navigationIcon = { TopAppBarBackButton(navController = navController) },
-                backgroundColor = MaterialTheme.colors.background,
-                contentColor = MaterialTheme.colors.onBackground,
-                elevation = 8.dp,
             )
         }
     ) { padding ->

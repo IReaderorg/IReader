@@ -83,7 +83,7 @@ fun LibraryScreen(
         }
     ) {
         ModalBottomSheetLayout(
-            modifier = Modifier.systemBarsPadding(),
+            modifier = if (bottomSheetState.targetValue == ModalBottomSheetValue.Expanded) Modifier.statusBarsPadding() else Modifier,
             sheetContent = {
                 Box(modifier.defaultMinSize(minHeight = 1.dp)) {
                     BottomTabComposable(

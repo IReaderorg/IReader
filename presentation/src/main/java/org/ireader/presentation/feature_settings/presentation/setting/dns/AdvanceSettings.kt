@@ -121,9 +121,6 @@ fun AdvanceSettings(
                 title = {
                     BigSizeTextComposable(text = "Advance Settings")
                 },
-                backgroundColor = MaterialTheme.colors.background,
-                contentColor = MaterialTheme.colors.onBackground,
-                elevation = Constants.DEFAULT_ELEVATION,
                 navigationIcon = { TopAppBarBackButton(navController = navController) }
             )
         },

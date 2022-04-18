@@ -56,7 +56,6 @@ fun BrowseTopAppBar(
                 )
             }
         },
-        backgroundColor = MaterialTheme.colors.background,
         actions = {
             if (state.isSearchModeEnable) {
                 AppIconButton(

@@ -125,7 +125,7 @@ class DownloadService @AssistedInject constructor(
                                             chapterKey = chapter.link,
                                             translator = chapter.translator,
                                             chapterId = chapter.id,
-                                            bookName = download.chapterName,
+                                            bookName = download.bookName,
                                             sourceId = download.sourceId,
                                         )
                                         withContext(Dispatchers.IO) {

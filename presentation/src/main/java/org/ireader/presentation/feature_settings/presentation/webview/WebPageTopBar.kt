@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
@@ -18,7 +16,8 @@ import androidx.navigation.NavController
 import org.ireader.presentation.R
 import org.ireader.presentation.presentation.Toolbar
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
-import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
+import org.ireader.presentation.presentation.reusable_composable.BuildDropDownMenu
+import org.ireader.presentation.presentation.reusable_composable.DropDownMenuItem
 import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
 
 @Composable
@@ -63,40 +62,63 @@ fun WebPageTopBar(
                     isMenuExpanded = true
                 },
             )
-            DropdownMenu(
-                modifier = Modifier.background(MaterialTheme.colors.background),
-                expanded = isMenuExpanded,//viewModel.state.isMenuExpanded,
-                onDismissRequest = {
-                    isMenuExpanded = false
-                },
-            ) {
-                DropdownMenuItem(onClick = {
-                    isMenuExpanded = false
-                    onGo()
-                }) {
-                    MidSizeTextComposable(text = stringResource(R.string.Go))
-                }
-                DropdownMenuItem(onClick = {
-                    isMenuExpanded = false
-                    refresh()
-                }) {
-                    MidSizeTextComposable(text = stringResource(R.string.refresh))
-                }
-                DropdownMenuItem(onClick = {
-                    isMenuExpanded = false
-                    goBack()
-                }) {
-                    MidSizeTextComposable(text = stringResource(R.string.go_back))
-                }
-                DropdownMenuItem(onClick = {
-                    isMenuExpanded = false
-                    goForward()
-                }) {
-                    MidSizeTextComposable(text = stringResource(R.string.go_forward))
-                }
-            }
-        },
-        backgroundColor = MaterialTheme.colors.background,
+            val list =
+                listOf<DropDownMenuItem>(
+                    DropDownMenuItem(
+                        stringResource(R.string.Go)
+                    ) {
+                        onGo()
+                    },
+                    DropDownMenuItem(
+                        stringResource(R.string.refresh)
+                    ) {
+                        refresh()
+                    },
+                    DropDownMenuItem(
+                        stringResource(R.string.go_back)
+                    ) {
+                        goBack()
+                    },
+                    DropDownMenuItem(
+                        stringResource(R.string.go_forward)
+                    ) {
+                        goForward()
+                    },
 
+                    )
+            BuildDropDownMenu(list, enable = isMenuExpanded, onEnable = { isMenuExpanded = it })
+//            DropdownMenu(
+//                modifier = Modifier.background(MaterialTheme.colors.background),
+//                expanded = isMenuExpanded,//viewModel.state.isMenuExpanded,
+//                onDismissRequest = {
+//                    isMenuExpanded = false
+//                },
+//            ) {
+//                DropdownMenuItem(onClick = {
+//                    isMenuExpanded = false
+//                    onGo()
+//                }) {
+//                    MidSizeTextComposable(text = stringResource(R.string.Go))
+//                }
+//                DropdownMenuItem(onClick = {
+//                    isMenuExpanded = false
+//                    refresh()
+//                }) {
+//                    MidSizeTextComposable(text = stringResource(R.string.refresh))
+//                }
+//                DropdownMenuItem(onClick = {
+//                    isMenuExpanded = false
+//                    goBack()
+//                }) {
+//                    MidSizeTextComposable(text = stringResource(R.string.go_back))
+//                }
+//                DropdownMenuItem(onClick = {
+//                    isMenuExpanded = false
+//                    goForward()
+//                }) {
+//                    MidSizeTextComposable(text = stringResource(R.string.go_forward))
+//                }
+//            }
+        },
         )
 }

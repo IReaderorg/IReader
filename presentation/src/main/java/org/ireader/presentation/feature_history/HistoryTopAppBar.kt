@@ -8,8 +8,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.navigation.NavController
-import org.ireader.core.utils.Constants
-import org.ireader.core_ui.theme.AppColors
 import org.ireader.presentation.feature_history.viewmodel.HistoryViewModel
 import org.ireader.presentation.presentation.Toolbar
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
@@ -40,9 +38,6 @@ fun HistoryTopAppBar(
                 )
             }
         },
-        backgroundColor = AppColors.current.bars,
-        contentColor = AppColors.current.onBars,
-        elevation = Constants.DEFAULT_ELEVATION,
         actions = {
             if (vm.searchMode) {
                 AppIconButton(

@@ -31,6 +31,8 @@ import org.ireader.domain.utils.toast
 import org.ireader.presentation.R
 import org.ireader.presentation.feature_history.*
 import org.ireader.presentation.presentation.components.ISnackBarHost
+import org.ireader.presentation.presentation.reusable_composable.BuildDropDownMenu
+import org.ireader.presentation.presentation.reusable_composable.DropDownMenuItem
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 import org.ireader.presentation.ui.BookDetailScreenSpec
 
@@ -62,8 +64,7 @@ fun DownloaderScreen(
             DownloaderTopAppBar(
                 onPopBackStack = { navController.popBackStack() },
                 onCancelAll = {
-                    vm.stopDownloads()
-                    context.toast("Downloads were Stopped Successfully")
+                    vm.deleteSelectedDownloads(vm.downloads.map { it.toSavedDownload() })
                 },
                 onMenuIcon = {
                     vm.toggleExpandMenu(enable = true)
@@ -132,7 +133,6 @@ fun DownloaderScreen(
                                     vm.selection.add(vm.downloads[index].chapterId)
                                 }
                             }
-
                         }
                     },
                     onLongClickItem = {
@@ -244,32 +244,3 @@ fun DownloadScreenItem(
 }
 
 
-@Composable
-fun BuildDropDownMenu(
-    items: List<DropDownMenuItem>,
-    enable: Boolean = false,
-    onEnable: (Boolean) -> Unit = {},
-) {
-
-    DropdownMenu(
-        modifier = Modifier.background(MaterialTheme.colors.surface),
-        expanded = enable,
-        onDismissRequest = {
-            onEnable(false)
-        },
-    ) {
-        items.forEachIndexed { _, item ->
-            DropdownMenuItem(onClick = {
-                item.onItem()
-                onEnable(false)
-            }) {
-                MidSizeTextComposable(text = item.text)
-            }
-        }
-    }
-}
-
-data class DropDownMenuItem(
-    val text: String,
-    val onItem: () -> Unit,
-)

@@ -225,6 +225,8 @@ fun TTSScreen(
             topBar = {
                 Toolbar(
                     title = {},
+                    backgroundColor = MaterialTheme.colors.background,
+                    contentColor = MaterialTheme.colors.onBackground,
                     navigationIcon = {
                         AppIconButton(imageVector = Icons.Default.ArrowBack,
                             title = "Return to Reader Screen",

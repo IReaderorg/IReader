@@ -3,16 +3,13 @@ package org.ireader.presentation.feature_detail.presentation.chapter_detail
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import org.ireader.core.utils.Constants
 import org.ireader.presentation.feature_detail.presentation.chapter_detail.viewmodel.ChapterDetailState
 import org.ireader.presentation.presentation.Toolbar
 import org.ireader.presentation.presentation.components.CenterTopAppBar
@@ -61,14 +58,11 @@ fun RegularChapterDetailTopAppBar(
 ) {
     CenterTopAppBar(
         modifier = Modifier
-            .systemBarsPadding()
             .fillMaxWidth()
-            .height(45.dp), title = {
+            .height(86.dp),
+        title = {
             BigSizeTextComposable(text = "Content")
         },
-        backgroundColor = MaterialTheme.colors.background,
-        contentColor = MaterialTheme.colors.onBackground,
-        elevation = Constants.DEFAULT_ELEVATION,
         actions = {
             AppIconButton(imageVector = Icons.Filled.Place, title = "", onClick = onMap)
             IconButton(onClick = onReverseClick) {
@@ -104,7 +98,6 @@ private fun EditModeChapterDetailTopAppBar(
                 Icon(Icons.Default.Close, contentDescription = null)
             }
         },
-        elevation = Constants.DEFAULT_ELEVATION,
         actions = {
             IconButton(onClick = onClickSelectAll) {
                 Icon(Icons.Default.SelectAll, contentDescription = null)

@@ -14,7 +14,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import org.ireader.core.utils.Constants
 import org.ireader.domain.utils.toast
 import org.ireader.presentation.presentation.Toolbar
 import org.ireader.presentation.presentation.reusable_composable.BigSizeTextComposable
@@ -37,13 +36,10 @@ fun AboutSettingScreen(
         }
     Scaffold(modifier = modifier.fillMaxSize(), topBar = {
         Toolbar(
-            modifier = Modifier.systemBarsPadding(),
+            modifier = Modifier,
             title = {
                 BigSizeTextComposable(text = "About", style = MaterialTheme.typography.h6)
             },
-            backgroundColor = MaterialTheme.colors.background,
-            contentColor = MaterialTheme.colors.onBackground,
-            elevation = Constants.DEFAULT_ELEVATION,
             navigationIcon = {
                 TopAppBarBackButton(navController = navController)
             }

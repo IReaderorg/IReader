@@ -44,7 +44,6 @@ import org.ireader.presentation.presentation.components.ChapterListItemComposabl
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.BigSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
-import org.ireader.presentation.ui.ReaderScreenSpec
 
 
 @ExperimentalAnimationApi
@@ -54,6 +53,8 @@ fun ChapterDetailScreen(
     modifier: Modifier = Modifier,
     vm: ChapterDetailViewModel = hiltViewModel(),
     navController: NavController = rememberNavController(),
+    onItemClick: (index:Int) -> Unit,
+    onLongItemClick: (index:Int) -> Unit,
 ) {
     val book = vm.book
     val context = LocalContext.current
@@ -69,7 +70,7 @@ fun ChapterDetailScreen(
     }
     val scope = rememberCoroutineScope()
     Scaffold(
-        modifier = Modifier.systemBarsPadding(),
+        modifier = Modifier,
         topBar = {
             ChapterDetailTopAppBar(
                 state = vm,
@@ -172,30 +173,13 @@ fun ChapterDetailScreen(
                                     ChapterListItemComposable(modifier = modifier,
                                         chapter = vm.chapters[index],
                                         onItemClick = {
-                                            if (vm.selection.isEmpty()) {
-                                                if (book != null) {
-                                                    navController.navigate(ReaderScreenSpec.buildRoute(
-                                                        bookId = book.id,
-                                                        sourceId = book.sourceId,
-                                                        chapterId = vm.chapters[index].id,
-                                                    ))
-                                                }
-                                            } else {
-                                                when (vm.chapters[index].id) {
-                                                    in vm.selection -> {
-                                                        vm.selection.remove(vm.chapters[index].id)
-                                                    }
-                                                    else -> {
-                                                        vm.selection.add(vm.chapters[index].id)
-                                                    }
-                                                }
-
-                                            }
-
+                                            onItemClick(index)
                                         },
                                         isLastRead = vm.chapters[index].id == vm.lastRead,
                                         isSelected = vm.chapters[index].id in vm.selection,
-                                        onLongClick = { vm.selection.add(vm.chapters[index].id) }
+                                        onLongClick = {
+                                            onLongItemClick(index)
+                                        }
                                     )
                                 }
                             }
@@ -205,7 +189,19 @@ fun ChapterDetailScreen(
             }
             when {
                 vm.hasSelection -> {
-                    ChapterDetailBottomBar(vm, context)
+                    ChapterDetailBottomBar(
+                        vm,
+                        context,
+                        onDownload = {
+
+                        },
+                        onBookmark = {
+
+                        },
+                        onMarkAsRead = {
+
+                        }
+                    )
                 }
             }
         }
@@ -251,7 +247,13 @@ fun ChapterDetailScreen(
 }
 
 @Composable
-private fun BoxScope.ChapterDetailBottomBar(vm: ChapterDetailViewModel, context: Context) {
+private fun BoxScope.ChapterDetailBottomBar(
+    vm: ChapterDetailViewModel,
+    context: Context,
+    onDownload: () -> Unit,
+    onBookmark:() -> Unit,
+    onMarkAsRead: () -> Unit
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()

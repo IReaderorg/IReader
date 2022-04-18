@@ -104,7 +104,7 @@ fun ExploreScreen(
         }
     }
     ModalBottomSheetLayout(
-        modifier = Modifier.statusBarsPadding(),
+        modifier = Modifier,
         sheetState = bottomSheetState,
         sheetContent = {
             FilterBottomSheet(

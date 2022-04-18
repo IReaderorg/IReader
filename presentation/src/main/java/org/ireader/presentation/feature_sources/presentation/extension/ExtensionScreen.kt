@@ -172,7 +172,7 @@ fun ExtensionScreen(
         Column(modifier = Modifier.fillMaxSize()) {
             TabRow(
                 selectedTabIndex = pagerState.currentPage,
-                backgroundColor = MaterialTheme.colors.background,
+                backgroundColor = MaterialTheme.colors.surface,
                 contentColor = MaterialTheme.colors.primary,
                 indicator = { tabPositions ->
                     TabRowDefaults.Indicator(

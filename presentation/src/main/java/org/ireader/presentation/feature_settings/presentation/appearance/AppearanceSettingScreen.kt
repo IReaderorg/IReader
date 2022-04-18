@@ -41,15 +41,12 @@ fun AppearanceSettingScreen(
                 title = {
                     BigSizeTextComposable(text = "Appearance")
                 },
-                backgroundColor = MaterialTheme.colors.background,
-                contentColor = MaterialTheme.colors.onBackground,
-                elevation = Constants.DEFAULT_ELEVATION,
                 navigationIcon = {
                     TopAppBarBackButton(navController = navController)
                 }
             )
         }
-    ) {
+    ) { padding ->
         ListItem(modifier = Modifier.clickable {
             openDialog.value = true
         }) {

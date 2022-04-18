@@ -83,7 +83,7 @@ fun ScreenContent() {
             ) {
                 BottomNavigation(
                     modifier = Modifier.fillMaxWidth(),
-                    backgroundColor = MaterialTheme.colors.background,
+                    backgroundColor = MaterialTheme.colors.surface,
                     elevation = 5.dp
                 ) {
                     BottomNavScreenSpec.screens.forEach { bottomNavDestination ->

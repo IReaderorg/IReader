@@ -217,9 +217,8 @@ class BookDetailViewModel @Inject constructor(
 
     private fun updateChaptersEntity(inLibrary: Boolean, bookId: Long) {
         viewModelScope.launch(Dispatchers.IO) {
-            deleteUseCase.deleteChaptersByBookId(bookId)
             localInsertUseCases.insertChapters(chapterState.chapters.map {
-                it.copy(bookId = bookId)
+                it.copy(bookId = bookId,)
             })
         }
     }
