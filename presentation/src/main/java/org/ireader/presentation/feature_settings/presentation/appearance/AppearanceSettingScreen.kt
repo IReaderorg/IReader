@@ -9,14 +9,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
-import org.ireader.core.utils.Constants
 import org.ireader.core_ui.theme.ThemeMode
-import org.ireader.domain.view_models.settings.apperance.MainViewModel
 import org.ireader.presentation.presentation.Toolbar
 import org.ireader.presentation.presentation.reusable_composable.BigSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
@@ -26,14 +21,13 @@ import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackBu
 @Composable
 fun AppearanceSettingScreen(
     modifier: Modifier = Modifier,
-    navController: NavController,
-    viewModel: MainViewModel = hiltViewModel(),
+    onPopBackStack:() -> Unit,
+    saveDarkModePreference:(ThemeMode) -> Unit
 ) {
 
     val openDialog = remember {
         mutableStateOf(false)
     }
-    val context = LocalContext.current
 
     Scaffold(
         modifier = Modifier.fillMaxSize(), topBar = {
@@ -42,7 +36,9 @@ fun AppearanceSettingScreen(
                     BigSizeTextComposable(text = "Appearance")
                 },
                 navigationIcon = {
-                    TopAppBarBackButton(navController = navController)
+                    TopAppBarBackButton() {
+                        onPopBackStack()
+                    }
                 }
             )
         }
@@ -79,7 +75,7 @@ fun AppearanceSettingScreen(
                         )
                         items.forEach { item ->
                             TextButton(onClick = {
-                                viewModel.saveNightModePreferences(item.appTheme)
+                                saveDarkModePreference(item.appTheme)
                                 openDialog.value = false
                             }) {
                                 MidSizeTextComposable(modifier = modifier.fillMaxWidth(),

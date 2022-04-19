@@ -4,7 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -82,20 +81,6 @@ class ExploreViewModel @Inject constructor(
 
     }
 
-
-    fun onEvent(event: ExploreScreenEvents) {
-        when (event) {
-            is ExploreScreenEvents.OnLayoutTypeChnage -> {
-                saveLayoutType(event.layoutType)
-            }
-            is ExploreScreenEvents.ToggleSearchMode -> {
-                toggleSearchMode(event.inSearchMode)
-            }
-            is ExploreScreenEvents.OnQueryChange -> {
-                onQueryChange(event.query)
-            }
-        }
-    }
 
     fun loadBooks() {
         viewModelScope.launch {
@@ -189,7 +174,7 @@ class ExploreViewModel @Inject constructor(
         state.searchQuery = query
     }
 
-    private fun toggleSearchMode(inSearchMode: Boolean) {
+    fun toggleSearchMode(inSearchMode: Boolean) {
         state.isSearchModeEnable = inSearchMode
 
         if (!inSearchMode && source != null) {
@@ -211,7 +196,7 @@ class ExploreViewModel @Inject constructor(
         }
     }
 
-    private fun saveLayoutType(layoutType: DisplayMode) {
+    fun saveLayoutType(layoutType: DisplayMode) {
         state.layout = layoutType.layout
         browseLayoutTypeUseCase.save(layoutType.layoutIndex)
     }
@@ -229,12 +214,6 @@ class ExploreViewModel @Inject constructor(
         )
     }
 
-    fun removeExploreBooks() {
-        viewModelScope.launch(Dispatchers.IO) {
-            deleteUseCase.deleteAllExploreBook()
-            deleteUseCase.deleteAllRemoteKeys()
-        }
-    }
 
     fun toggleFilterMode(enable: Boolean? = null) {
         state.isFilterEnable = enable ?: !state.isFilterEnable

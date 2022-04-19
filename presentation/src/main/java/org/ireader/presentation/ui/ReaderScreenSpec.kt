@@ -11,6 +11,8 @@ import androidx.navigation.*
 import com.google.accompanist.pager.ExperimentalPagerApi
 import kotlinx.coroutines.launch
 import org.ireader.core.R
+import org.ireader.core.extensions.nextAfter
+import org.ireader.core.extensions.prevBefore
 import org.ireader.core.utils.UiText
 import org.ireader.core_ui.theme.TransparentStatusBar
 import org.ireader.domain.services.tts_service.Player
@@ -94,21 +96,23 @@ object ReaderScreenSpec : ScreenSpec {
                             vm.runTTSService(context, Player.SKIP_NEXT)
                         },
                         onChapter = { ch ->
-                            scope.launch {
-                                vm.mainFunc.apply {
-                                    vm.getChapter(ch.id,
-                                        source = source) {
-                                        vm.runTTSService(context)
+                            val index= vm.stateChapters.indexOfFirst { it.id == ch.id }
+                            if (index != -1) {
+                                scope.launch {
+                                    vm.mainFunc.apply {
+                                        vm.getChapter(ch.id,
+                                            source = source) {
+                                            vm.runTTSService(context)
+                                        }
                                     }
-                                }
 
-                            }
-                            scope.launch {
-                                scrollState.scrollToItem(0, 0)
-                            }
-                            vm.uiFunc.apply {
-                                vm.updateChapterSliderIndex(vm.getCurrentIndexOfChapter(
-                                    ch))
+                                }
+                                scope.launch {
+                                    scrollState.scrollToItem(0, 0)
+                                }
+                                vm.uiFunc.apply {
+                                    vm.currentChapterIndex = index
+                                }
                             }
                         },
                         source = source,
@@ -144,12 +148,24 @@ object ReaderScreenSpec : ScreenSpec {
                                 if (currentIndex < chapters.lastIndex) {
                                     vm.uiFunc.apply {
                                         vm.mainFunc.apply {
-                                            vm.updateChapterSliderIndex(currentIndex, true)
-                                            scope.launch {
-                                                vm.getChapter(vm.getCurrentChapterByIndex().id,
-                                                    source = source)
-                                                scrollState.scrollToItem(0, 0)
+                                            val nextChapter =
+                                                vm.stateChapters.nextAfter(currentIndex)
+                                            nextChapter?.let { nch ->
+                                                val indexch =
+                                                    vm.stateChapters.indexOfFirst { it.id == nch.id }
+                                                if (indexch != -1) {
+                                                    vm.currentChapterIndex = indexch
+                                                    scope.launch {
+                                                        vm.getChapter(nch.id,
+                                                            source = source)
+                                                        scrollState.scrollToItem(0, 0)
+                                                    }
+                                                }
                                             }
+
+
+                                            // vm.updateChapterSliderIndex(currentIndex, true)
+
                                         }
                                     }
 
@@ -164,22 +180,30 @@ object ReaderScreenSpec : ScreenSpec {
                                 if (currentIndex > 0) {
                                     vm.uiFunc.apply {
                                         vm.mainFunc.apply {
-                                            vm.updateChapterSliderIndex(currentIndex, false)
-                                            scope.launch {
-                                                vm.getChapter(vm.getCurrentChapterByIndex().id,
-                                                    source = source)
-                                                when (scrollToEnd) {
-                                                    true -> {
-                                                        if (chapter != null) {
-                                                            scrollState.scrollToItem(chapter.content.lastIndex,
-                                                                Int.MAX_VALUE)
+                                            val prevChapter =
+                                                vm.stateChapters.prevBefore(currentIndex)
+                                            prevChapter?.let { prevChapter ->
+                                                val indexch =
+                                                    vm.stateChapters.indexOfFirst { it.id == prevChapter.id }
+                                                if (indexch != -1) {
+                                                    vm.currentChapterIndex = indexch
+                                                    scope.launch {
+                                                        vm.getChapter(prevChapter.id,
+                                                            source = source)
+                                                        when (scrollToEnd) {
+                                                            true -> {
+                                                                if (chapter != null) {
+                                                                    scrollState.scrollToItem(chapter.content.lastIndex,
+                                                                        Int.MAX_VALUE)
+                                                                }
+                                                            }
+                                                            else -> {
+                                                                scrollState.scrollToItem(0, 0)
+                                                            }
                                                         }
                                                     }
-                                                    else -> {
-                                                        scrollState.scrollToItem(0, 0)
-                                                    }
-                                                }
 
+                                                }
                                             }
                                         }
                                     }
@@ -196,7 +220,7 @@ object ReaderScreenSpec : ScreenSpec {
                                 }
                                 vm.uiFunc.apply {
                                     vm.mainFunc.apply {
-                                        vm.updateChapterSliderIndex(currentIndex)
+                                        vm.currentChapterIndex = currentIndex
                                         scope.launch {
                                             vm.getChapter(chapters[vm.currentChapterIndex].id,
                                                 source = source)
@@ -209,26 +233,27 @@ object ReaderScreenSpec : ScreenSpec {
                             },
                             onSliderChange = {
                                 vm.uiFunc.apply {
-                                    vm.updateChapterSliderIndex(it.toInt())
+                                    vm.currentChapterIndex = it.toInt()
                                 }
                             },
                             swipeState = swipeState,
                             drawerScrollState = drawerScrollState,
                             onChapter = { ch ->
-                                vm.uiFunc.apply {
-                                    vm.mainFunc.apply {
-                                        scope.launch {
-                                            vm.getChapter(ch.id,
-                                                source = source)
+                                val index= vm.stateChapters.indexOfFirst { it.id == ch.id }
+                                if (index != -1) {
+                                    vm.uiFunc.apply {
+                                        vm.mainFunc.apply {
+                                            scope.launch {
+                                                vm.getChapter(ch.id,
+                                                    source = source)
+                                            }
+                                            scope.launch {
+                                                scrollState.scrollToItem(0, 0)
+                                            }
+                                            vm.currentChapterIndex = index
                                         }
-                                        scope.launch {
-                                            scrollState.scrollToItem(0, 0)
-                                        }
-                                        vm.updateChapterSliderIndex(vm.getCurrentIndexOfChapter(
-                                            ch))
                                     }
                                 }
-
                             }
                         )
                     }

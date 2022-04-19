@@ -10,15 +10,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.navigation.NavController
-import kotlinx.coroutines.CoroutineScope
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import kotlinx.coroutines.launch
 import org.ireader.core.utils.Constants
-import org.ireader.presentation.feature_library.presentation.viewmodel.LibraryEvents
-import org.ireader.presentation.feature_library.presentation.viewmodel.LibraryViewModel
+import org.ireader.presentation.feature_library.presentation.viewmodel.LibraryState
 import org.ireader.presentation.presentation.Toolbar
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.AppTextField
@@ -28,10 +26,10 @@ import org.ireader.presentation.presentation.reusable_composable.BigSizeTextComp
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun LibraryScreenTopBar(
-    navController: NavController,
-    state: LibraryViewModel,
-    coroutineScope: CoroutineScope,
+    state: LibraryState,
     bottomSheetState: ModalBottomSheetState,
+    onSearch:() -> Unit,
+    refreshUpdate: () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxWidth()) {
         when {
@@ -55,7 +53,10 @@ fun LibraryScreenTopBar(
             }
             else -> {
                 RegularTopBar(
-                    state, bottomSheetState
+                    state,
+                    bottomSheetState,
+                    refreshUpdate = refreshUpdate,
+                    onSearch = onSearch
                 )
             }
         }
@@ -63,15 +64,17 @@ fun LibraryScreenTopBar(
 
 }
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
 @Composable
 private fun RegularTopBar(
-    vm: LibraryViewModel,
+    vm: LibraryState,
     bottomSheetState: ModalBottomSheetState,
+    onSearch:() -> Unit,
+    refreshUpdate: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
     val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
     Toolbar(
         title = {
             if (!vm.inSearchMode) {
@@ -79,12 +82,13 @@ private fun RegularTopBar(
             } else {
                 AppTextField(
                     query = vm.searchQuery,
-                    onValueChange = {
-                        vm.onEvent(LibraryEvents.UpdateSearchInput(it))
-                        vm.onEvent(LibraryEvents.SearchBook(vm.searchQuery))
+                    onValueChange = { query ->
+                        vm.searchQuery = query
+                        onSearch()
                     },
                     onConfirm = {
-                        vm.onEvent(LibraryEvents.SearchBook(vm.searchQuery))
+                        onSearch()
+                        keyboardController?.hide()
                         focusManager.clearFocus()
                     },
                 )
@@ -96,7 +100,9 @@ private fun RegularTopBar(
                     imageVector = Icons.Default.Close,
                     title = "Close",
                     onClick = {
-                        vm.onEvent(LibraryEvents.ToggleSearchMode(false))
+                        vm.inSearchMode = false
+                        vm.searchQuery = ""
+                        onSearch()
                     },
                 )
             } else {
@@ -117,14 +123,14 @@ private fun RegularTopBar(
                     imageVector = Icons.Default.Search,
                     title = "Search",
                     onClick = {
-                        vm.onEvent(LibraryEvents.ToggleSearchMode(true))
+                        vm.inSearchMode = true
                     },
                 )
                 AppIconButton(
                     imageVector = Icons.Default.Refresh,
                     title = "Refresh",
                     onClick = {
-                        vm.refreshUpdate()
+                        refreshUpdate()
                     },
                 )
             }
@@ -134,7 +140,9 @@ private fun RegularTopBar(
             {
                 AppIconButton(imageVector = Icons.Default.ArrowBack,
                     title = "Toggle search mode off",
-                    onClick = { vm.onEvent(LibraryEvents.ToggleSearchMode(false)) })
+                    onClick = {
+                        vm.inSearchMode = false
+                    })
 
             }
         } else null

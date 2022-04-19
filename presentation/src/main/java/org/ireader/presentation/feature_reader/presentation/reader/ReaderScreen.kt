@@ -65,8 +65,11 @@ fun ReadingScreen(
     LaunchedEffect(key1 = scaffoldState.drawerState.targetValue) {
         if (chapter != null && scaffoldState.drawerState.targetValue == DrawerValue.Open && vm.stateChapters.isNotEmpty()) {
             vm.uiFunc.apply {
-                drawerScrollState.scrollToItem(vm.getCurrentIndexOfChapter(chapter),
-                    -drawerScrollState.layoutInfo.viewportEndOffset / 2)
+                val index = vm.stateChapters.indexOfFirst { it.id == chapter.id }
+                if (index != -1) {
+                    drawerScrollState.scrollToItem(index,
+                        -drawerScrollState.layoutInfo.viewportEndOffset / 2)
+                }
             }
         }
     }
@@ -143,7 +146,10 @@ fun ReadingScreen(
     LaunchedEffect(key1 = chapter) {
         if (chapter != null) {
             vm.uiFunc.apply {
-                vm.updateChapterSliderIndex(vm.getCurrentIndexOfChapter(chapter))
+                val index = vm.stateChapters.indexOfFirst { it.id == chapter.id }
+                if (index != -1) {
+                    vm.currentChapterIndex = index
+                }
             }
         }
     }

@@ -1,6 +1,5 @@
 package org.ireader.presentation.feature_updates.viewmodel
 
-import android.content.Context
 import androidx.lifecycle.viewModelScope
 import androidx.work.OneTimeWorkRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -10,13 +9,10 @@ import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.catalog.interactor.GetLocalCatalog
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.entities.UpdateWithInfo
-import org.ireader.domain.models.entities.UpdateWithInfo.Companion.toUpdate
 import org.ireader.domain.repository.UpdatesRepository
-import org.ireader.domain.use_cases.local.LocalGetBookUseCases
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
-
 import org.ireader.domain.use_cases.services.ServiceUseCases
 import org.ireader.domain.utils.launchIO
 import javax.inject.Inject
@@ -24,11 +20,10 @@ import javax.inject.Inject
 @HiltViewModel
 class UpdatesViewModel @Inject constructor(
     private val updateStateImpl: UpdateStateImpl,
-    private val updatesRepository: UpdatesRepository,
+    val updatesRepository: UpdatesRepository,
     private val remoteUseCases: RemoteUseCases,
     private val getLocalCatalog: GetLocalCatalog,
     private val getChapterUseCase: LocalGetChapterUseCase,
-    private val getBookUseCases: LocalGetBookUseCases,
     private val insertUseCases: LocalInsertUseCases,
     private val serviceUseCases: ServiceUseCases,
 ) : BaseViewModel(), UpdateState by updateStateImpl {
@@ -51,7 +46,14 @@ class UpdatesViewModel @Inject constructor(
         }
     }
 
-    fun insertChapters(chapterIds: List<Long>, onChapter: Chapter.() -> Chapter) {
+    /**
+     * update chapter using updateitem
+     */
+    fun updateChapters(onChapter: Chapter.() -> Chapter) {
+        val updateIds =
+            this.updates.values.flatten().map { it.id }.filter { it in selection }
+        val chapterIds = this.updates.values.flatten().filter { it.id in updateIds }
+            .map { it.chapterId }
         viewModelScope.launch(Dispatchers.IO) {
             val chapters = getChapterUseCase.findChapterByIdByBatch(chapterIds).map(onChapter)
             insertUseCases.insertChapters(chapters)
@@ -59,7 +61,6 @@ class UpdatesViewModel @Inject constructor(
     }
 
     fun downloadChapter(update: UpdateWithInfo) {
-
         viewModelScope.launchIO {
             val source = getLocalCatalog.get(update.sourceId)?.source
             if (source != null) {
@@ -86,9 +87,8 @@ class UpdatesViewModel @Inject constructor(
         }
 
     }
-
     lateinit var downloadWork: OneTimeWorkRequest
-    fun downloadChapters(context: Context) {
+    fun downloadChapters() {
         viewModelScope.launch {
             val bookIds =
                 updates.values.flatMap { it }.filter { it.id in selection }.map { it.bookId }
@@ -102,28 +102,7 @@ class UpdatesViewModel @Inject constructor(
         }
     }
 
-    fun refreshUpdate(context: Context) {
+    fun refreshUpdate() {
        serviceUseCases.startLibraryUpdateServicesUseCase()
-    }
-
-    fun deleteUpdate(update: UpdateWithInfo) {
-        viewModelScope.launchIO {
-            updatesRepository.deleteUpdate(update.toUpdate())
-
-        }
-    }
-
-    fun deleteUpdates(update: List<UpdateWithInfo>) {
-        viewModelScope.launchIO {
-            updatesRepository.deleteUpdates(update.map { it.toUpdate() })
-
-        }
-    }
-
-    fun deleteAllUpdates() {
-        viewModelScope.launchIO {
-            updatesRepository.deleteAllUpdates()
-
-        }
     }
 }

@@ -15,7 +15,6 @@ import org.ireader.core.utils.UiText
 import org.ireader.core_api.source.HttpSource
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.presentation.feature_explore.presentation.browse.ExploreScreen
-import org.ireader.presentation.feature_explore.presentation.browse.viewmodel.ExploreScreenEvents
 import org.ireader.presentation.feature_explore.presentation.browse.viewmodel.ExploreViewModel
 import org.ireader.presentation.presentation.EmptyScreenComposable
 
@@ -48,7 +47,6 @@ object ExploreScreenSpec : ScreenSpec {
     ) {
         val vm: ExploreViewModel = hiltViewModel()
         val focusManager = LocalFocusManager.current
-        val state = vm
         val source = vm.source
         val scope = rememberCoroutineScope()
         if (source != null) {
@@ -62,19 +60,14 @@ object ExploreScreenSpec : ScreenSpec {
                 onPop = { navController.popBackStack() },
                 currentLayout = vm.layout,
                 onLayoutTypeSelect = { layout ->
-                    vm.onEvent(ExploreScreenEvents.OnLayoutTypeChnage(
-                        layoutType = layout))
+                    vm.saveLayoutType(layout)
                 },
                 onSearch = {
-                    val query = state.searchQuery
+                    val query = vm.searchQuery
                     if (query != null && query.isNotBlank()) {
                         vm.searchQuery = query
                         vm.loadItems(true)
-//                        vm.getBooks(
-//                            query = state.searchQuery,
-//                            source = source
                     } else {
-                        // vm.getBooks(listing = source.getListings().first(), source = source)
                         vm.stateListing = source.getListings().first()
                         vm.loadItems()
                         scope.launch {
@@ -84,13 +77,13 @@ object ExploreScreenSpec : ScreenSpec {
                     focusManager.clearFocus()
                 },
                 onSearchDisable = {
-                    vm.onEvent(ExploreScreenEvents.ToggleSearchMode(false))
+                    vm.toggleSearchMode(false)
                 },
                 onSearchEnable = {
-                    vm.onEvent(ExploreScreenEvents.ToggleSearchMode(true))
+                    vm.toggleSearchMode(true)
                 },
                 onValueChange = {
-                    vm.onEvent(ExploreScreenEvents.OnQueryChange(it))
+                    vm.searchQuery = it
                 },
                 onWebView = {
                     navController.navigate(WebViewScreenSpec.buildRoute(
@@ -98,14 +91,22 @@ object ExploreScreenSpec : ScreenSpec {
                     ))
                 },
                 getBooks = { query, listing, filters ->
-                    state.searchQuery = query
-                    state.stateListing = listing
-                    state.stateFilters = filters
+                    vm.searchQuery = query
+                    vm.stateListing = listing
+                    vm.stateFilters = filters
                     vm.loadItems()
-//                    vm.getBooks(source = source,
-//                        query = query,
-//                        listing = listing,
-//                        filters = filters)
+                },
+                loadExploreBooks = {
+                    vm.loadBooks()
+                },
+                onBook = { book ->
+                    navController.navigate(
+                        route = BookDetailScreenSpec.buildRoute(sourceId = book.sourceId,
+                            bookId = book.id)
+                    )
+                },
+                onAppbarWebView = {
+                    navController.navigate(WebViewScreenSpec.buildRoute(url = it))
                 }
             )
         } else {

@@ -12,11 +12,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.ireader.domain.models.FilterType
-import org.ireader.presentation.feature_library.presentation.viewmodel.LibraryViewModel
 
 
 @Composable
-fun FilterScreen(viewModel: LibraryViewModel) {
+fun FilterScreen(
+    filters: List<FilterType>,
+    addFilters: (FilterType) -> Unit,
+    removeFilter: (FilterType)-> Unit
+) {
     Column(Modifier
         .fillMaxSize()
         .background(MaterialTheme.colors.background)
@@ -30,11 +33,11 @@ fun FilterScreen(viewModel: LibraryViewModel) {
         )
         items.forEach { filter ->
             CheckBoxWithText(filter.name,
-                viewModel.filters.contains(filter.type)) {
-                if (!viewModel.filters.contains(filter.type)) {
-                    viewModel.addFilters(filter.type)
+                filters.contains(filter.type)) {
+                if (!filters.contains(filter.type)) {
+                    addFilters(filter.type)
                 } else {
-                    viewModel.removeFilters(filter.type)
+                    removeFilter(filter.type)
                 }
             }
         }

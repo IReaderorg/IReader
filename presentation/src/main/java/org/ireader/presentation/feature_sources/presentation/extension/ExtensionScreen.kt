@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.ireader.core.utils.Constants.DEFAULT_ELEVATION
 import org.ireader.core.utils.UiEvent
+import org.ireader.core_ui.theme.AppColors
 import org.ireader.domain.models.entities.Catalog
 import org.ireader.domain.models.entities.CatalogLocal
 import org.ireader.presentation.feature_sources.presentation.extension.composables.RemoteSourcesScreen
@@ -172,8 +173,8 @@ fun ExtensionScreen(
         Column(modifier = Modifier.fillMaxSize()) {
             TabRow(
                 selectedTabIndex = pagerState.currentPage,
-                backgroundColor = MaterialTheme.colors.surface,
-                contentColor = MaterialTheme.colors.primary,
+                backgroundColor = AppColors.current.bars,
+                contentColor = AppColors.current.onBars,
                 indicator = { tabPositions ->
                     TabRowDefaults.Indicator(
                         Modifier.pagerTabIndicatorOffset(pagerState, tabPositions)

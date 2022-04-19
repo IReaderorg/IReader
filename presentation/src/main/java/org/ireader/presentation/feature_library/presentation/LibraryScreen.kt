@@ -21,9 +21,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -31,16 +29,17 @@ import com.google.accompanist.pager.rememberPagerState
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
-import org.ireader.core.utils.Constants
 import org.ireader.core.utils.UiText
 import org.ireader.core_ui.ui.EmptyScreen
 import org.ireader.core_ui.ui.LoadingScreen
+import org.ireader.domain.models.DisplayMode
+import org.ireader.domain.models.FilterType
+import org.ireader.domain.models.SortType
+import org.ireader.domain.models.entities.BookItem
 import org.ireader.presentation.feature_library.presentation.components.BottomTabComposable
 import org.ireader.presentation.feature_library.presentation.components.LayoutComposable
-import org.ireader.presentation.feature_library.presentation.viewmodel.LibraryViewModel
+import org.ireader.presentation.feature_library.presentation.viewmodel.LibraryState
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
-import org.ireader.presentation.ui.BookDetailScreenSpec
-import org.ireader.presentation.ui.ReaderScreenSpec
 
 
 @ExperimentalPagerApi
@@ -50,7 +49,20 @@ import org.ireader.presentation.ui.ReaderScreenSpec
 fun LibraryScreen(
     modifier: Modifier = Modifier,
     navController: NavController = rememberNavController(),
-    vm: LibraryViewModel = hiltViewModel(),
+    vm: LibraryState,
+    goToLatestChapter: (book: BookItem) -> Unit = {},
+    onBook: (book: BookItem) -> Unit,
+    onLongBook: (book: BookItem) -> Unit,
+    onDownload:() -> Unit,
+    onMarkAsRead: () -> Unit,
+    onMarkAsNotRead:() -> Unit,
+    onDelete:() -> Unit,
+    addFilters: (FilterType) -> Unit,
+    removeFilter: (FilterType)-> Unit,
+    onSortSelected:(SortType) -> Unit,
+    onLayoutSelected: (DisplayMode) -> Unit,
+    getLibraryBooks: () -> Unit,
+    refreshUpdate: () -> Unit,
 ) {
 
 
@@ -63,14 +75,14 @@ fun LibraryScreen(
 
     val gridState = rememberLazyGridState()
     val lazyListState = rememberLazyListState()
-    val context = LocalContext.current
+
     val swipeState = rememberSwipeRefreshState(isRefreshing = false)
     LaunchedEffect(key1 = true) {
-        vm.getLibraryBooks()
+        getLibraryBooks()
     }
 
     SwipeRefresh(
-        state = swipeState, onRefresh = { vm.refreshUpdate() },
+        state = swipeState, onRefresh = { refreshUpdate() },
         indicator = { state, trigger ->
             SwipeRefreshIndicator(
                 state = state,
@@ -87,10 +99,18 @@ fun LibraryScreen(
             sheetContent = {
                 Box(modifier.defaultMinSize(minHeight = 1.dp)) {
                     BottomTabComposable(
-                        viewModel = vm,
                         pagerState = pagerState,
                         navController = navController,
-                        scope = scope)
+                        scope = scope,
+                        filters = vm.filters,
+                        addFilters = addFilters,
+                        removeFilter = removeFilter,
+                        onSortSelected = onSortSelected,
+                        sortType = vm.sortType,
+                        isSortDesc = vm.desc,
+                        onLayoutSelected = onLayoutSelected,
+                        layoutType = vm.layout
+                    )
 
                 }
             },
@@ -102,10 +122,12 @@ fun LibraryScreen(
                 .fillMaxSize(),
             ) {
                 LibraryScreenTopBar(
-                    navController = navController,
                     state = vm,
-                    coroutineScope = scope,
-                    bottomSheetState = bottomSheetState)
+                    bottomSheetState = bottomSheetState,
+                    onSearch = getLibraryBooks,
+                    refreshUpdate = refreshUpdate
+
+                    )
                 Box(modifier = Modifier
                     .fillMaxSize()) {
                     Crossfade(targetState = Pair(vm.isLoading,
@@ -122,35 +144,9 @@ fun LibraryScreen(
                                 gridState = gridState,
                                 scrollState = lazyListState,
                                 selection = vm.selection,
-                                goToLatestChapter = { book ->
-                                    navController.navigate(
-                                        ReaderScreenSpec.buildRoute(
-                                            bookId = book.id,
-                                            sourceId = book.sourceId,
-                                            chapterId = Constants.LAST_CHAPTER
-                                        )
-                                    )
-                                },
-                                onClick = { book ->
-                                    if (vm.hasSelection) {
-                                        if (book.id in vm.selection) {
-                                            vm.selection.remove(book.id)
-                                        } else {
-                                            vm.selection.add(book.id)
-                                        }
-
-                                    } else {
-                                        navController.navigate(
-                                            route = BookDetailScreenSpec.buildRoute(
-                                                sourceId = book.sourceId,
-                                                bookId = book.id)
-                                        )
-                                    }
-
-                                },
-                                onLongClick = {
-                                    vm.selection.add(it.id)
-                                },
+                                goToLatestChapter = goToLatestChapter,
+                                onClick = onBook,
+                                onLongClick = onLongBook,
                             )
                         }
                     }
@@ -174,26 +170,16 @@ fun LibraryScreen(
                                 ) {
                                     AppIconButton(imageVector = Icons.Default.GetApp,
                                         title = "Download",
-                                        onClick = {
-                                            vm.downloadChapters(context)
-                                            // vm.selection.clear()
-                                        })
+                                        onClick = onDownload)
                                     AppIconButton(imageVector = Icons.Default.Done,
                                         title = "Mark as read",
-                                        onClick = {
-                                            vm.markAsRead()
-                                            // vm.selection.clear()
-                                        })
+                                        onClick = onMarkAsRead)
                                     AppIconButton(imageVector = Icons.Default.DoneOutline,
                                         title = "Mark as Not read",
-                                        onClick = {
-                                            vm.markAsNotRead()
-                                        })
+                                        onClick = onMarkAsNotRead)
                                     AppIconButton(imageVector = Icons.Default.Delete,
                                         title = "Mark Previous as read",
-                                        onClick = {
-                                            vm.deleteBooks()
-                                        })
+                                        onClick = onDelete)
                                 }
                             }
 

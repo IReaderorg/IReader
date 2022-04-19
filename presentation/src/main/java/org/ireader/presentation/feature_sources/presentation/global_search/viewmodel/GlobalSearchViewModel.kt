@@ -7,13 +7,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ireader.core.utils.replace
+import org.ireader.core_api.source.CatalogSource
+import org.ireader.core_api.source.model.Filter
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.catalog.service.CatalogStore
 import org.ireader.domain.models.entities.toBook
 import org.ireader.domain.use_cases.remote.key.DeleteAllSearchedBook
 import org.ireader.domain.use_cases.remote.key.RemoteKeyUseCase
-import org.ireader.core_api.source.CatalogSource
-import org.ireader.core_api.source.model.Filter
 import javax.inject.Inject
 
 @HiltViewModel
@@ -41,24 +41,25 @@ class GlobalSearchViewModel @Inject constructor(
             }
 
             catalogStore.catalogs.map { it.source }.forEachIndexed { index, source ->
-                try {
-                    if (source is CatalogSource) {
-                        insertSearchItem(SearchItem(source, loading = true))
-                        var items = source.getMangaList(filters = listOf(Filter.Title()
-                            .apply { this.value = query }), 1).mangas.map { it.toBook(source.id) }
-                        withContext(Dispatchers.IO) {
-                            val ids =
-                                insertUseCases.insertAllExploredBook(items.map { it.copy(tableId = 2) })
-                            items.forEachIndexed { index, book ->
-                                items = items.replace(index, book.copy(id = ids[index]))
+                viewModelScope.launch {
+                    try {
+                        if (source is CatalogSource) {
+                            insertSearchItem(SearchItem(source, loading = true))
+                            var items = source.getMangaList(filters = listOf(Filter.Title()
+                                .apply { this.value = query }), 1).mangas.map { it.toBook(source.id) }
+                            withContext(Dispatchers.IO) {
+                                val ids =
+                                    insertUseCases.insertAllExploredBook(items.map { it.copy(tableId = 2) })
+                                items.forEachIndexed { index, book ->
+                                    items = items.replace(index, book.copy(id = ids[index]))
+                                }
                             }
+                            insertSearchItem(SearchItem(source, items = items, loading = false))
                         }
-                        insertSearchItem(SearchItem(source, items = items, loading = false))
+                    } catch (e: Exception) {
+
                     }
-                } catch (e: Exception) {
-
                 }
-
             }
         }
 

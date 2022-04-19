@@ -2,10 +2,12 @@ package org.ireader.presentation.ui
 
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import org.ireader.presentation.feature_settings.presentation.appearance.AppearanceSettingScreen
+import org.ireader.presentation.feature_settings.presentation.appearance.AppearanceViewModel
 
 
 object AppearanceScreenSpec : ScreenSpec {
@@ -21,7 +23,15 @@ object AppearanceScreenSpec : ScreenSpec {
         navBackStackEntry: NavBackStackEntry,
         scaffoldState: ScaffoldState,
     ) {
-        AppearanceSettingScreen(navController = navController)
+        val viewModel: AppearanceViewModel = hiltViewModel()
+        AppearanceSettingScreen(
+            saveDarkModePreference = { theme ->
+                viewModel.saveNightModePreferences(theme)
+            },
+            onPopBackStack = {
+                navController.popBackStack()
+            }
+        )
 
     }
 

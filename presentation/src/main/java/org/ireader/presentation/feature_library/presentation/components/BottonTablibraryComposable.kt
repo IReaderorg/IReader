@@ -11,7 +11,10 @@ import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.pagerTabIndicatorOffset
 import kotlinx.coroutines.launch
 import org.ireader.core_ui.ui.Colour.contentColor
-import org.ireader.presentation.feature_library.presentation.viewmodel.LibraryViewModel
+import org.ireader.domain.models.DisplayMode
+import org.ireader.domain.models.FilterType
+import org.ireader.domain.models.LayoutType
+import org.ireader.domain.models.SortType
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 
 typealias ComposableFun = @Composable () -> Unit
@@ -49,16 +52,38 @@ fun Tabs(libraryTabs: List<TabItem>, pagerState: PagerState) {
 
 @ExperimentalPagerApi
 @Composable
-fun TabsContent(libraryTabs: List<TabItem>, pagerState: PagerState, viewModel: LibraryViewModel) {
+fun TabsContent(
+    libraryTabs: List<TabItem>,
+    pagerState: PagerState,
+    filters: List<FilterType>,
+    addFilters: (FilterType) -> Unit,
+    removeFilter: (FilterType)-> Unit,
+    sortType: SortType,
+    isSortDesc: Boolean,
+    onSortSelected:(SortType) -> Unit,
+    layoutType: LayoutType,
+    onLayoutSelected: (DisplayMode) -> Unit
+) {
     HorizontalPager(
         count = libraryTabs.size,
         state = pagerState,
         modifier = Modifier.fillMaxSize()
     ) { page ->
         when (page) {
-            0 -> FilterScreen(viewModel)
-            1 -> SortScreen(viewModel)
-            2 -> DisplayScreen(viewModel)
+            0 -> FilterScreen(
+                filters,
+                addFilters,
+                removeFilter
+            )
+            1 -> SortScreen(
+                sortType,
+                isSortDesc,
+                onSortSelected
+            )
+            2 -> DisplayScreen(
+                layoutType,
+                onLayoutSelected
+            )
         }
     }
 }

@@ -42,7 +42,6 @@ import org.ireader.presentation.feature_reader.presentation.reader.ReaderScreenD
 import org.ireader.presentation.feature_reader.presentation.reader.components.SettingItemComposable
 import org.ireader.presentation.feature_reader.presentation.reader.components.SettingItemToggleComposable
 import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.ReaderScreenViewModel
-import org.ireader.presentation.presentation.Toolbar
 import org.ireader.presentation.presentation.components.BookImageComposable
 import org.ireader.presentation.presentation.components.showLoading
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
@@ -89,7 +88,10 @@ fun TTSScreen(
     LaunchedEffect(key1 = scaffoldState.drawerState.targetValue) {
         if (chapter != null && scaffoldState.drawerState.targetValue == DrawerValue.Open && vm.stateChapters.isNotEmpty()) {
             vm.uiFunc.apply {
-                drawerScrollState.scrollToItem(vm.getCurrentIndexOfChapter(chapter))
+                val index = vm.stateChapters.indexOfFirst { it.id == chapter.id }
+                if (index != -1) {
+                    drawerScrollState.scrollToItem(index)
+                }
             }
         }
     }
@@ -114,12 +116,13 @@ fun TTSScreen(
         vm.state.stateChapter?.let { chapter ->
             vm.ttsState.mediaSession?.let { mediaSession ->
                 vm.state.book?.let { book ->
-                    val notification = vm.defaultNotificationHelper.basicPlayingTextReaderNotification(
-                        chapter,
-                        book,
-                        vm.ttsState.isPlaying,
-                        vm.ttsState.currentReadingParagraph,
-                        mediaSession)
+                    val notification =
+                        vm.defaultNotificationHelper.basicPlayingTextReaderNotification(
+                            chapter,
+                            book,
+                            vm.ttsState.isPlaying,
+                            vm.ttsState.currentReadingParagraph,
+                            mediaSession)
                     NotificationManagerCompat.from(context)
                         .notify(Notifications.ID_TEXT_READER_PROGRESS, notification.build())
                 }
@@ -139,7 +142,7 @@ fun TTSScreen(
                 }
             }
         } catch (e: Exception) {
-            Log.error(e,"")
+            Log.error(e, "")
         }
 
     }
@@ -222,20 +225,6 @@ fun TTSScreen(
                 .fillMaxSize(),
 
             scaffoldState = scaffoldState,
-            topBar = {
-                Toolbar(
-                    title = {},
-                    backgroundColor = MaterialTheme.colors.background,
-                    contentColor = MaterialTheme.colors.onBackground,
-                    navigationIcon = {
-                        AppIconButton(imageVector = Icons.Default.ArrowBack,
-                            title = "Return to Reader Screen",
-                            onClick = {
-                                vm.voiceMode = false
-                            })
-                    },
-                )
-            },
             drawerGesturesEnabled = true,
             drawerBackgroundColor = MaterialTheme.colors.background,
             drawerContent = {
@@ -262,103 +251,113 @@ fun TTSScreen(
 
             }
         ) { padding ->
-            Column(modifier = Modifier
-                .fillMaxSize(),
-                verticalArrangement = Arrangement.SpaceBetween,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                vm.book?.let { book ->
-                    vm.stateChapter?.let { chapter ->
-                        vm.ttsContent?.value?.let { content ->
-                            Column(modifier = Modifier
-                                .fillMaxWidth(),
-                                verticalArrangement = Arrangement.SpaceBetween,
-                                horizontalAlignment = Alignment.CenterHorizontally) {
-                                BookImageComposable(
-                                    image = BookCover.from(book),
-                                    modifier = Modifier
-                                        .padding(8.dp)
-                                        .height(180.dp)
-                                        .width(120.dp)
-                                        .clip(MaterialTheme.shapes.medium)
-                                        .border(2.dp,
-                                            MaterialTheme.colors.onBackground.copy(alpha = .2f)),
-                                    contentScale = ContentScale.Crop,
-                                )
+            Box(modifier = Modifier.fillMaxSize()) {
+                AppIconButton(
+                    modifier=Modifier.align(Alignment.TopStart).padding(start = 4.dp) ,
+                    imageVector = Icons.Default.ArrowBack,
+                    title = "Return to Reader Screen",
+                    onClick = {
+                        vm.voiceMode = false
+                    })
 
-                                BigSizeTextComposable(text = chapter.title,
-                                    align = TextAlign.Center,
-                                    maxLine = 1,
-                                    overflow = TextOverflow.Ellipsis)
-                                MidSizeTextComposable(text = book.title,
-                                    align = TextAlign.Center,
-                                    maxLine = 1,
-                                    overflow = TextOverflow.Ellipsis)
-                                vm.ttsContent?.let { content ->
-                                    SuperSmallTextComposable(text = "${vm.currentReadingParagraph + 1}/${content.value?.size}")
+                Column(modifier = Modifier
+                    .fillMaxSize(),
+                    verticalArrangement = Arrangement.SpaceBetween,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    vm.book?.let { book ->
+                        vm.stateChapter?.let { chapter ->
+                            vm.ttsContent?.value?.let { content ->
+                                Column(modifier = Modifier
+                                    .fillMaxWidth(),
+                                    verticalArrangement = Arrangement.SpaceBetween,
+                                    horizontalAlignment = Alignment.CenterHorizontally) {
+                                    BookImageComposable(
+                                        image = BookCover.from(book),
+                                        modifier = Modifier
+                                            .padding(8.dp)
+                                            .height(180.dp)
+                                            .width(120.dp)
+                                            .clip(MaterialTheme.shapes.medium)
+                                            .border(2.dp,
+                                                MaterialTheme.colors.onBackground.copy(alpha = .2f)),
+                                        contentScale = ContentScale.Crop,
+                                    )
 
-                                }
-                            }
-                            HorizontalPager(count = chapter.content.size, state = pagerState) { index ->
-                                Text(
-                                    modifier = modifier
-                                        .padding(horizontal = vm.paragraphsIndent.dp,
-                                            vertical = 4.dp)
-                                        .fillMaxWidth()
-                                        .height(200.dp)
-                                        .verticalScroll(textScroll)
-                                        .align(Alignment.CenterHorizontally),
-                                    text = if (content.isNotEmpty() && vm.currentReadingParagraph <= content.lastIndex && index <= content.lastIndex) content[index] else "",
-                                    fontSize = vm.fontSize.sp,
-                                    fontFamily = vm.font.fontFamily,
-                                    textAlign = TextAlign.Start,
-                                    color = MaterialTheme.colors.onBackground,
-                                    lineHeight = vm.lineHeight.sp,
-                                    maxLines = 12,
-                                )
-                            }
+                                    BigSizeTextComposable(text = chapter.title,
+                                        align = TextAlign.Center,
+                                        maxLine = 1,
+                                        overflow = TextOverflow.Ellipsis)
+                                    MidSizeTextComposable(text = book.title,
+                                        align = TextAlign.Center,
+                                        maxLine = 1,
+                                        overflow = TextOverflow.Ellipsis)
+                                    vm.ttsContent?.let { content ->
+                                        SuperSmallTextComposable(text = "${vm.currentReadingParagraph + 1}/${content.value?.size}")
 
-
-                            Column(modifier = Modifier
-                                .fillMaxWidth(),
-                                verticalArrangement = Arrangement.Center,
-                                horizontalAlignment = Alignment.CenterHorizontally) {
-                                TTLScreenSetting(
-                                    onSetting = {
-                                        scope.launch {
-                                            bottomSheetState.show()
-                                        }
-                                    },
-                                    onContent = {
-                                        scope.launch {
-                                            scaffoldState.drawerState.animateTo(DrawerValue.Open,
-                                                TweenSpec())
-                                        }
                                     }
-                                )
-                                TTLScreenPlay(
-                                    onPlay = onPlay,
-                                    onNext = onNext,
-                                    onPrev = onPrev,
-                                    vm = vm,
-                                    onNextPar = onNextPar,
-                                    onPrevPar = onPrevPar,
-                                    content = content,
-                                    onValueChange = onValueChange,
-                                    onValueChangeFinished = onValueChangeFinished
-                                )
+                                }
+                                HorizontalPager(count = chapter.content.size,
+                                    state = pagerState) { index ->
+                                    Text(
+                                        modifier = modifier
+                                            .padding(horizontal = vm.paragraphsIndent.dp,
+                                                vertical = 4.dp)
+                                            .fillMaxWidth()
+                                            .height(200.dp)
+                                            .verticalScroll(textScroll)
+                                            .align(Alignment.CenterHorizontally),
+                                        text = if (content.isNotEmpty() && vm.currentReadingParagraph <= content.lastIndex && index <= content.lastIndex) content[index] else "",
+                                        fontSize = vm.fontSize.sp,
+                                        fontFamily = vm.font.fontFamily,
+                                        textAlign = TextAlign.Start,
+                                        color = MaterialTheme.colors.onBackground,
+                                        lineHeight = vm.lineHeight.sp,
+                                        maxLines = 12,
+                                    )
+                                }
+
+
+                                Column(modifier = Modifier
+                                    .fillMaxWidth(),
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.CenterHorizontally) {
+                                    TTLScreenSetting(
+                                        onSetting = {
+                                            scope.launch {
+                                                bottomSheetState.show()
+                                            }
+                                        },
+                                        onContent = {
+                                            scope.launch {
+                                                scaffoldState.drawerState.animateTo(DrawerValue.Open,
+                                                    TweenSpec())
+                                            }
+                                        }
+                                    )
+                                    TTLScreenPlay(
+                                        onPlay = onPlay,
+                                        onNext = onNext,
+                                        onPrev = onPrev,
+                                        vm = vm,
+                                        onNextPar = onNextPar,
+                                        onPrevPar = onPrevPar,
+                                        content = content,
+                                        onValueChange = onValueChange,
+                                        onValueChangeFinished = onValueChangeFinished
+                                    )
+                                }
+
+
                             }
-
-
                         }
                     }
+
                 }
 
+
             }
-
-
         }
-
     }
 }
 

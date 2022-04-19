@@ -130,7 +130,13 @@ object BookDetailScreenSpec : ScreenSpec {
                     }
                 },
                 book = book,
-                viewModel = viewModel
+                viewModel = viewModel,
+                onTitle = {
+                    try {
+                        navController.navigate(GlobalSearchScreenSpec.buildRoute(query = it))
+                    } catch (e: Exception) {
+                    }
+                }
             )
         } else {
             EmptyScreenComposable(navController = navController,

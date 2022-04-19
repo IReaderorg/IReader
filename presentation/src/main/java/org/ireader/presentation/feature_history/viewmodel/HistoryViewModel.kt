@@ -5,18 +5,14 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.repository.HistoryRepository
-import org.ireader.domain.use_cases.local.DeleteUseCase
 import javax.inject.Inject
 
 
 @HiltViewModel
 class HistoryViewModel @Inject constructor(
     private val state: HistoryStateImpl,
-    private val deleteUseCase: DeleteUseCase,
-    private val historyUseCase: HistoryRepository,
+    val historyUseCase: HistoryRepository,
 ) : BaseViewModel(), HistoryState by state {
-
-
 
     fun getHistoryBooks() {
         viewModelScope.launch {
@@ -26,22 +22,8 @@ class HistoryViewModel @Inject constructor(
         }
 
     }
-
     init {
         getHistoryBooks()
-    }
-
-
-    fun deleteHistory(chapterId: Long) {
-        viewModelScope.launch {
-            historyUseCase.deleteHistory(chapterId)
-        }
-    }
-
-    fun deleteAllHistories() {
-        viewModelScope.launch {
-            historyUseCase.deleteAllHistories()
-        }
     }
 
 }

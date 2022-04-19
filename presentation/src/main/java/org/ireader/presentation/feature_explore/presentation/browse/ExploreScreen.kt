@@ -28,14 +28,13 @@ import org.ireader.core_api.source.model.Listing
 import org.ireader.core_ui.ui.kaomojis
 import org.ireader.domain.models.DisplayMode
 import org.ireader.domain.models.LayoutType
-import org.ireader.presentation.feature_explore.presentation.browse.viewmodel.ExploreViewModel
+import org.ireader.domain.models.entities.BookItem
+import org.ireader.presentation.feature_explore.presentation.browse.viewmodel.ExploreState
 import org.ireader.presentation.feature_library.presentation.components.LayoutComposable
 import org.ireader.presentation.presentation.components.showLoading
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.SmallTextComposable
-import org.ireader.presentation.ui.BookDetailScreenSpec
-import org.ireader.presentation.ui.WebViewScreenSpec
 
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
@@ -43,7 +42,7 @@ import org.ireader.presentation.ui.WebViewScreenSpec
 fun ExploreScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
-    vm: ExploreViewModel,
+    vm: ExploreState,
     source: CatalogSource,
     onFilterClick: () -> Unit,
     onValueChange: (String) -> Unit,
@@ -55,6 +54,9 @@ fun ExploreScreen(
     onLayoutTypeSelect: (DisplayMode) -> Unit,
     currentLayout: LayoutType,
     getBooks: (query: String?, listing: Listing?, filters: List<Filter<*>>) -> Unit,
+    loadExploreBooks: (Boolean) -> Unit,
+    onBook:(BookItem) -> Unit,
+    onAppbarWebView:(url:String) -> Unit,
 ) {
     val scrollState = rememberLazyListState()
     val context = LocalContext.current
@@ -89,7 +91,7 @@ fun ExploreScreen(
                 SnackbarResult.ActionPerformed -> {
                     setShowSnackBar(false)
                     vm.endReached = false
-                    vm.loadItems()
+                    loadExploreBooks(false)
                     //books.retry()
                 }
             }
@@ -112,7 +114,7 @@ fun ExploreScreen(
                     val mFilters = vm.modifiedFilter.filterNot { it.isDefaultValue() }
                     vm.stateFilters = mFilters
                     vm.searchQuery = null
-                    vm.loadItems(true)
+                    loadExploreBooks(true)
                     //vm.getBooks(filters = mFilters, source = source)
                 },
                 filters = vm.modifiedFilter,
@@ -186,10 +188,7 @@ fun ExploreScreen(
                             source = source,
                             onRefresh = { getBooks(null, null, emptyList()) },
                             onWebView = {
-                                navController.navigate(WebViewScreenSpec.buildRoute(
-                                    url = it.baseUrl
-                                )
-                                )
+                                onAppbarWebView(it.baseUrl)
                             }
                         )
                     }
@@ -203,15 +202,12 @@ fun ExploreScreen(
                             isLocal = false,
                             gridState = gridState,
                             onClick = { book ->
-                                navController.navigate(
-                                    route = BookDetailScreenSpec.buildRoute(sourceId = book.sourceId,
-                                        bookId = book.id)
-                                )
+                                onBook(book)
                             },
                             isLoading = vm.isLoading,
                             onEndReachValidator = { index ->
                                 if (index >= vm.stateItems.lastIndex && !vm.endReached && !vm.isLoading) {
-                                    vm.loadItems()
+                                    loadExploreBooks(false)
                                 }
                             }
                         )
@@ -275,7 +271,6 @@ private fun BoxScope.ExploreScreenErrorComposable(
                 AppIconButton(imageVector = Icons.Default.Refresh,
                     title = "Retry",
                     onClick = {
-
                         onRefresh()
                     })
                 SmallTextComposable(text = "Retry")

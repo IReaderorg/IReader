@@ -26,9 +26,6 @@ interface ReaderUiFunctions {
     fun ReaderScreenViewModel.toggleLoading(isLoading: Boolean)
     fun ReaderScreenViewModel.restoreSetting(context: Context, scrollState: LazyListState)
     fun ReaderScreenViewModel.toggleSettingMode(enable: Boolean, returnToMain: Boolean? = null)
-    fun ReaderScreenViewModel.getCurrentIndexOfChapter(chapter: Chapter): Int
-    fun ReaderScreenViewModel.updateChapterSliderIndex(index: Int, increase: Boolean? = null)
-    fun ReaderScreenViewModel.getCurrentChapterByIndex(): Chapter
     fun ReaderScreenViewModel.reverseChapters()
     fun ReaderScreenViewModel.getCurrentIndex(): Int
     fun ReaderScreenViewModel.bookmarkChapter()
@@ -100,23 +97,6 @@ class ReaderUiFunctionsImpl @Inject constructor() : ReaderUiFunctions {
         }
     }
 
-    override fun ReaderScreenViewModel.getCurrentIndexOfChapter(chapter: Chapter): Int {
-
-
-        val selectedChapter =
-            state.stateChapters.indexOfFirst { it.id == chapter.id && it.title == chapter.title }
-        return if (selectedChapter != -1) selectedChapter else 0
-    }
-
-
-    override fun ReaderScreenViewModel.updateChapterSliderIndex(index: Int, increase: Boolean?) {
-        currentChapterIndex = when (increase) {
-            true -> index + 1
-            false -> index - 1
-            else -> index
-        }
-    }
-
     override fun ReaderScreenViewModel.getCurrentIndex(): Int {
         return if (state.currentChapterIndex < 0) {
             0
@@ -129,13 +109,6 @@ class ReaderUiFunctionsImpl @Inject constructor() : ReaderUiFunctions {
         }
     }
 
-    override fun ReaderScreenViewModel.getCurrentChapterByIndex(): Chapter {
-        return try {
-            state.stateChapters[getCurrentIndex()]
-        } catch (e: Exception) {
-            throw Exception()
-        }
-    }
 
     override fun ReaderScreenViewModel.reverseChapters() {
         toggleIsAsc(!prefState.isAsc)

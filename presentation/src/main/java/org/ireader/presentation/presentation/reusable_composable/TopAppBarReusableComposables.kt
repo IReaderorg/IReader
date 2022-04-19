@@ -167,9 +167,9 @@ fun AppIconButton(
 }
 
 @Composable
-fun TopAppBarBackButton(navController: NavController, onClick: (() -> Unit?)? = null) {
+fun TopAppBarBackButton(navController: NavController? = null, onClick: (() -> Unit?)? = null) {
     IconButton(onClick = {
-        navController.popBackStack()
+        navController?.popBackStack()
         if (onClick != null) {
             onClick()
         }

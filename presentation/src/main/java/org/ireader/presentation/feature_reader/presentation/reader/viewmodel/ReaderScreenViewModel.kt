@@ -2,18 +2,14 @@ package org.ireader.presentation.feature_reader.presentation.reader.viewmodel
 
 
 import android.content.Context
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import org.ireader.core.R
 import org.ireader.core.utils.UiText
-import org.ireader.core_api.source.Source
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.catalog.service.CatalogStore
-import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.services.downloaderService.DefaultNotificationHelper
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.domain.use_cases.history.HistoryUseCase
@@ -145,33 +141,6 @@ class ReaderScreenViewModel @Inject constructor(
     }
 
 
-    fun onNext(
-        scrollState: LazyListState,
-        chapters: List<Chapter>,
-        source: Source,
-        currentIndex: Int,
-    ) {
-        if (currentIndex < chapters.lastIndex) {
-            uiFunc.apply {
-                updateChapterSliderIndex(currentIndex, true)
-            }
-            mainFunc.apply {
-                uiFunc.apply {
-                    scope.launch {
-                        getChapter(getCurrentChapterByIndex().id,
-                            source = source)
-                        scrollState.animateScrollToItem(0, 0)
-                    }
-                }
-            }
-
-        } else {
-            scope.launch {
-                showSnackBar(UiText.StringResource(R.string.this_is_last_chapter))
-
-            }
-        }
-    }
 
 
 }

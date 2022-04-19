@@ -4,36 +4,36 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import org.ireader.presentation.feature_sources.presentation.global_search.viewmodel.GlobalSearchState
 import org.ireader.presentation.presentation.Toolbar
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.AppTextField
 
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun GlobalScreenTopBar(
     onSearch: (String) -> Unit,
-    onValueChange: (String) -> Unit,
     onPop: () -> Unit,
-    query: String,
+    state: GlobalSearchState,
 ) {
 
     val focusManager = LocalFocusManager.current
-
-    var searchMode by remember {
-        mutableStateOf(false)
-    }
-
-
+    val keyboardController = LocalSoftwareKeyboardController.current
     Toolbar(
         title = {
             AppTextField(
-                query = query,
-                onValueChange = onValueChange,
+                query = state.query,
+                onValueChange = {
+                    state.query = it
+                },
                 onConfirm = {
-                    onSearch(query)
+                    onSearch(state.query)
+                    keyboardController?.hide()
                     focusManager.clearFocus()
                 },
             )
@@ -43,7 +43,7 @@ fun GlobalScreenTopBar(
                 imageVector = Icons.Default.Search,
                 title = "Search",
                 onClick = {
-                    searchMode = true
+                   state.searchMode = true
                 },
             )
         },

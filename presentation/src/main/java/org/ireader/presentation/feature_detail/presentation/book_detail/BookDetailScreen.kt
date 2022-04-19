@@ -5,7 +5,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
@@ -13,7 +12,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -34,7 +32,6 @@ import org.ireader.presentation.feature_detail.presentation.book_detail.componen
 import org.ireader.presentation.feature_detail.presentation.book_detail.viewmodel.BookDetailViewModel
 import org.ireader.presentation.presentation.components.ISnackBarHost
 import org.ireader.presentation.presentation.components.showLoading
-import org.ireader.presentation.ui.GlobalSearchScreenSpec
 
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -52,6 +49,7 @@ fun BookDetailScreen(
     onWebView: () -> Unit,
     onChapterContent: () -> Unit,
     book: Book,
+    onTitle:(String) -> Unit
 ) {
 
     val scaffoldState = rememberScaffoldState()
@@ -68,17 +66,13 @@ fun BookDetailScreen(
         }
     }
 
-
-    val scope = rememberCoroutineScope()
     val swipeRefreshState =
         rememberSwipeRefreshState(isRefreshing = viewModel.detailIsLocalLoading || viewModel.detailIsRemoteLoading || viewModel.chapterIsLoading)
 
     val source = viewModel.source
-    val state = viewModel
     val chapters = viewModel.chapters
 
-    val scrollState = rememberLazyListState()
-    if (state.detailIsLocalLoading) {
+    if (viewModel.detailIsLocalLoading) {
         showLoading()
     }
     LaunchedEffect(key1 = true) {
@@ -103,7 +97,7 @@ fun BookDetailScreen(
                         onToggleInLibrary = {
                             onToggleLibrary()
                         },
-                        isInLibrary = state.inLibrary,
+                        isInLibrary = viewModel.inLibrary,
                         onDownload = {
                             onDownload()
                         },
@@ -142,19 +136,9 @@ fun BookDetailScreen(
                         onWebView = {
                             onWebView()
                         },
-                        onTitle = {
-                            try {
-                                navController.navigate(GlobalSearchScreenSpec.buildRoute(query = it))
-                            } catch (e: Exception) {
-                            }
-
-                        },
-                        onSummaryExpand = {
-                            onSummaryExpand()
-                        },
-                        onRefresh = {
-                            onRefresh()
-                        },
+                        onTitle = onTitle,
+                        onSummaryExpand =  onSummaryExpand,
+                        onRefresh = onRefresh,
                         isSummaryExpanded = viewModel.expandedSummary,
                         book = book,
                         source = source,
@@ -164,9 +148,7 @@ fun BookDetailScreen(
                         modifier = modifier
                             .padding(horizontal = 8.dp, vertical = 4.dp)
                             .fillMaxWidth(),
-                        onClick = {
-                            onChapterContent()
-                        },
+                        onClick = onChapterContent,
                         title = "Contents",
                         subtitle = "${chapters.size} Chapters",
                         trailing = {

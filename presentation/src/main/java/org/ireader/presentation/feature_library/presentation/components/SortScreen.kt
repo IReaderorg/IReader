@@ -11,11 +11,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.ireader.domain.models.SortType
-import org.ireader.presentation.feature_library.presentation.viewmodel.LibraryViewModel
 
 
 @Composable
-fun SortScreen(viewModel: LibraryViewModel) {
+fun SortScreen(
+    sortType: SortType,
+    isSortDesc: Boolean,
+    onSortSelected:(SortType) -> Unit
+) {
     val items = listOf<SortType>(
         SortType.Alphabetically,
         SortType.LastRead,
@@ -40,10 +43,10 @@ fun SortScreen(viewModel: LibraryViewModel) {
             items.forEach { item ->
 
                 IconWithText(item.name,
-                    if (viewModel.desc) Icons.Default.ArrowDownward else Icons.Default.ArrowUpward,
-                    viewModel.sortType == item,
+                    if (isSortDesc) Icons.Default.ArrowDownward else Icons.Default.ArrowUpward,
+                    sortType == item,
                     onClick = {
-                        viewModel.changeSortIndex(item)
+                        onSortSelected(item)
                     })
                 Spacer(modifier = Modifier.height(8.dp))
             }

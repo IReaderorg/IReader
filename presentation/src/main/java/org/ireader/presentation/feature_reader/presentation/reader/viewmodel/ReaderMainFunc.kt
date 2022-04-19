@@ -7,12 +7,12 @@ import kotlinx.datetime.Clock
 import org.ireader.core.utils.Constants
 import org.ireader.core.utils.UiText
 import org.ireader.core.utils.currentTimeToLong
+import org.ireader.core_api.source.Source
 import org.ireader.domain.R
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.entities.History
 import org.ireader.domain.utils.withIOContext
-import org.ireader.core_api.source.Source
 import javax.inject.Inject
 
 interface ReaderMainFunctions {
@@ -77,7 +77,10 @@ class ReaderMainFunctionsImpl @Inject constructor() : ReaderMainFunctions {
                     }
                 }
                 updateLastReadTime(resultChapter)
-                updateChapterSliderIndex(getCurrentIndexOfChapter(resultChapter))
+                val index = stateChapters.indexOfFirst { it.id == resultChapter.id }
+                if (index != -1) {
+                    currentChapterIndex = index
+                }
                 if (!initialized) {
                     initialized = true
                 }

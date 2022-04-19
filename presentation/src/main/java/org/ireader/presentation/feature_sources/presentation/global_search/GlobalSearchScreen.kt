@@ -20,6 +20,7 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import org.ireader.core_api.log.Log
 import org.ireader.domain.models.entities.BaseBook
 import org.ireader.presentation.feature_detail.presentation.book_detail.components.DotsFlashing
+import org.ireader.presentation.feature_sources.presentation.global_search.viewmodel.GlobalSearchState
 import org.ireader.presentation.feature_sources.presentation.global_search.viewmodel.GlobalSearchViewModel
 import org.ireader.presentation.feature_sources.presentation.global_search.viewmodel.SearchItem
 import org.ireader.presentation.presentation.layouts.BookImage
@@ -31,25 +32,21 @@ import org.ireader.presentation.ui.ExploreScreenSpec
 
 @Composable
 fun GlobalSearchScreen(
-    navController: NavController = rememberNavController(),
-    vm: GlobalSearchViewModel = hiltViewModel(),
-) {
+    vm: GlobalSearchState,
+    onPopBackStack: () -> Unit,
+    onSearch: (query: String) -> Unit,
+    onBook: (BaseBook) -> Unit,
+    onGoToExplore: (Int) -> Unit,
+
+    ) {
 
     val scrollState = rememberLazyListState()
-    val query = vm.query
     Scaffold(
         topBar = {
             GlobalScreenTopBar(
-                onPop = {
-                    navController.popBackStack()
-                },
-                onSearch = {
-                    vm.searchBooks(query = query)
-                },
-                onValueChange = {
-                    vm.query = it
-                },
-                query = query
+                onPop = onPopBackStack,
+                onSearch = onSearch,
+                state = vm
             )
         }
     ) { padding ->
@@ -57,32 +54,8 @@ fun GlobalSearchScreen(
             items(vm.searchItems.size) { index ->
                 GlobalSearchBookInfo(
                     vm.searchItems[index],
-                    onBook = {
-                        try {
-                            navController.navigate(
-                                BookDetailScreenSpec.buildRoute(
-                                    sourceId = it.sourceId,
-                                    bookId = it.id,
-                                )
-                            )
-
-                        } catch (e: Exception) {
-                            Log.error(e,"")
-                        }
-                    },
-                    goToExplore = {
-                        try {
-                            if (query.isNotBlank()) {
-                                navController.navigate(
-                                    ExploreScreenSpec.buildRoute(vm.searchItems[index].source.id,
-                                        query = query)
-                                )
-                            }
-                        } catch (e: Exception) {
-                            Log.error(e,"")
-                        }
-
-                    }
+                    onBook = onBook,
+                    goToExplore = { onGoToExplore(index) }
                 )
             }
 

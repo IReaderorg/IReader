@@ -6,21 +6,24 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.navigation.NavController
-import org.ireader.presentation.feature_history.viewmodel.HistoryViewModel
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import org.ireader.presentation.feature_history.viewmodel.HistoryState
 import org.ireader.presentation.presentation.Toolbar
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.AppTextField
 import org.ireader.presentation.presentation.reusable_composable.BigSizeTextComposable
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun HistoryTopAppBar(
-    navController: NavController,
-    vm: HistoryViewModel,
+    vm: HistoryState,
+    onDeleteAll:() -> Unit,
+    getHistories:() -> Unit
 ) {
     val focusManager = LocalFocusManager.current
-
+    val keyboardController = LocalSoftwareKeyboardController.current
     Toolbar(
         title = {
             if (!vm.searchMode) {
@@ -30,9 +33,10 @@ fun HistoryTopAppBar(
                     query = vm.searchQuery,
                     onValueChange = {
                         vm.searchQuery = it
-                        vm.getHistoryBooks()
+                        getHistories()
                     },
                     onConfirm = {
+                        keyboardController?.hide()
                         focusManager.clearFocus()
                     },
                 )
@@ -46,7 +50,8 @@ fun HistoryTopAppBar(
                     onClick = {
                         vm.searchMode = false
                         vm.searchQuery = ""
-                        vm.getHistoryBooks()
+                        getHistories()
+                        keyboardController?.hide()
                     },
                 )
             }
@@ -61,7 +66,7 @@ fun HistoryTopAppBar(
                 imageVector = Icons.Default.Delete,
                 title = "Delete All Histories",
                 onClick = {
-                    vm.deleteAllHistories()
+                    onDeleteAll()
                 },
             )
 
@@ -71,7 +76,11 @@ fun HistoryTopAppBar(
             {
                 AppIconButton(imageVector = Icons.Default.ArrowBack,
                     title = "Toggle search mode off",
-                    onClick = { vm.searchMode = false })
+                    onClick = {
+                        vm.searchMode = false
+                        vm.searchQuery = ""
+                        keyboardController?.hide()
+                    })
 
             }
         } else null

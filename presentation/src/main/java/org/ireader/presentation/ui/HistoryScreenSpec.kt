@@ -5,13 +5,16 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import com.google.accompanist.pager.ExperimentalPagerApi
+import org.ireader.core.extensions.viewModelIOCoroutine
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.presentation.R
 import org.ireader.presentation.feature_history.HistoryScreen
+import org.ireader.presentation.feature_history.viewmodel.HistoryViewModel
 
 
 object HistoryScreenSpec : BottomNavScreenSpec {
@@ -33,7 +36,40 @@ object HistoryScreenSpec : BottomNavScreenSpec {
         navBackStackEntry: NavBackStackEntry,
         scaffoldState: ScaffoldState,
     ) {
-        HistoryScreen(navController = navController)
+        val vm: HistoryViewModel = hiltViewModel()
+        HistoryScreen(
+            onHistory = { history ->
+                navController.navigate(
+                    BookDetailScreenSpec.buildRoute(
+                        history.sourceId,
+                        history.bookId
+                    )
+                )
+            },
+            onHistoryPlay = { history ->
+                navController.navigate(
+                    ReaderScreenSpec.buildRoute(
+                        history.bookId,
+                        history.sourceId,
+                        history.chapterId
+                    )
+                )
+            },
+            onHistoryDelete = { history ->
+                vm.viewModelIOCoroutine {
+                    vm.historyUseCase.deleteHistory(history.chapterId)
+                }
+            },
+            onAppbarDeleteAll = {
+                vm.viewModelIOCoroutine {
+                    vm.historyUseCase.deleteAllHistories()
+                }
+            },
+            getHistories = {
+                vm.getHistoryBooks()
+            },
+            state = vm
+        )
     }
 
 }
