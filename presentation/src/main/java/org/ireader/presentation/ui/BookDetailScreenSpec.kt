@@ -1,21 +1,24 @@
 package org.ireader.presentation.ui
 
 import androidx.compose.material.ScaffoldState
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.*
 import com.google.accompanist.pager.ExperimentalPagerApi
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.ireader.core.utils.Constants
+import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
 import org.ireader.core.utils.getUrlWithoutDomain
 import org.ireader.core_api.source.HttpSource
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.presentation.R
 import org.ireader.presentation.feature_detail.presentation.book_detail.BookDetailScreen
-import org.ireader.presentation.feature_detail.presentation.book_detail.viewmodel.BookDetailEvent
 import org.ireader.presentation.feature_detail.presentation.book_detail.viewmodel.BookDetailViewModel
 import org.ireader.presentation.presentation.EmptyScreenComposable
 
@@ -50,6 +53,7 @@ object BookDetailScreenSpec : ScreenSpec {
         navBackStackEntry: NavBackStackEntry,
         scaffoldState: ScaffoldState,
     ) {
+        val scaffoldStates = rememberScaffoldState()
         val viewModel: BookDetailViewModel = hiltViewModel()
         val context = LocalContext.current
         val state = viewModel
@@ -95,7 +99,7 @@ object BookDetailScreenSpec : ScreenSpec {
                     }
                 },
                 onSummaryExpand = {
-                    viewModel.onEvent(BookDetailEvent.ToggleSummary)
+                    viewModel.expandedSummary = !viewModel.expandedSummary
                 },
                 onRefresh = {
                     if (source != null) {
@@ -130,17 +134,39 @@ object BookDetailScreenSpec : ScreenSpec {
                     }
                 },
                 book = book,
-                viewModel = viewModel,
+                detailState = viewModel,
                 onTitle = {
                     try {
                         navController.navigate(GlobalSearchScreenSpec.buildRoute(query = it))
                     } catch (e: Exception) {
                     }
-                }
+                },
+                scaffoldState = scaffoldStates,
+                chapterState = viewModel
             )
         } else {
             EmptyScreenComposable(navController = navController,
                 errorResId = R.string.something_is_wrong_with_this_book)
+        }
+        LaunchedEffect(key1 = true) {
+            viewModel.eventFlow.collectLatest { event ->
+                when (event) {
+                    is UiEvent.ShowSnackbar -> {
+                        scaffoldState.snackbarHostState.showSnackbar(
+                            event.uiText.asString(context)
+                        )
+                    }
+                }
+            }
+        }
+        LaunchedEffect(key1 = true) {
+            book?.let {
+                if (source != null) {
+                    viewModel.getLocalBookById(bookId = book.id, source = source)
+                }
+                viewModel.getLocalChaptersByBookId(bookId = book.id)
+            }
+
         }
     }
 

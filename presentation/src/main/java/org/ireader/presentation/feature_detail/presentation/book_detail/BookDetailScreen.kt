@@ -11,10 +11,8 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
@@ -22,14 +20,13 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.collectLatest
-import org.ireader.core.utils.UiEvent
 import org.ireader.core_ui.theme.TransparentStatusBar
 import org.ireader.domain.models.entities.Book
 import org.ireader.presentation.feature_detail.presentation.book_detail.components.BookDetailScreenBottomBar
 import org.ireader.presentation.feature_detail.presentation.book_detail.components.CardTileComposable
 import org.ireader.presentation.feature_detail.presentation.book_detail.components.DotsFlashing
-import org.ireader.presentation.feature_detail.presentation.book_detail.viewmodel.BookDetailViewModel
+import org.ireader.presentation.feature_detail.presentation.book_detail.viewmodel.ChapterState
+import org.ireader.presentation.feature_detail.presentation.book_detail.viewmodel.DetailState
 import org.ireader.presentation.presentation.components.ISnackBarHost
 import org.ireader.presentation.presentation.components.showLoading
 
@@ -39,7 +36,8 @@ import org.ireader.presentation.presentation.components.showLoading
 fun BookDetailScreen(
     modifier: Modifier = Modifier,
     navController: NavController = rememberNavController(),
-    viewModel: BookDetailViewModel,
+    detailState: DetailState,
+    chapterState: ChapterState,
     onToggleLibrary: () -> Unit,
     onDownload: () -> Unit,
     onRead: () -> Unit,
@@ -49,37 +47,17 @@ fun BookDetailScreen(
     onWebView: () -> Unit,
     onChapterContent: () -> Unit,
     book: Book,
-    onTitle:(String) -> Unit
+    onTitle:(String) -> Unit,
+    scaffoldState:ScaffoldState,
 ) {
-
-    val scaffoldState = rememberScaffoldState()
-    val context = LocalContext.current
-    LaunchedEffect(key1 = true) {
-        viewModel.eventFlow.collectLatest { event ->
-            when (event) {
-                is UiEvent.ShowSnackbar -> {
-                    scaffoldState.snackbarHostState.showSnackbar(
-                        event.uiText.asString(context)
-                    )
-                }
-            }
-        }
-    }
-
     val swipeRefreshState =
-        rememberSwipeRefreshState(isRefreshing = viewModel.detailIsLocalLoading || viewModel.detailIsRemoteLoading || viewModel.chapterIsLoading)
+        rememberSwipeRefreshState(isRefreshing = detailState.detailIsLocalLoading || detailState.detailIsRemoteLoading || chapterState.chapterIsLoading)
 
-    val source = viewModel.source
-    val chapters = viewModel.chapters
+    val source = detailState.source
+    val chapters = chapterState.chapters
 
-    if (viewModel.detailIsLocalLoading) {
+    if (detailState.detailIsLocalLoading) {
         showLoading()
-    }
-    LaunchedEffect(key1 = true) {
-        if (source != null) {
-            viewModel.getLocalBookById(bookId = book.id, source = source)
-        }
-        viewModel.getLocalChaptersByBookId(bookId = book.id)
     }
 
     TransparentStatusBar {
@@ -97,11 +75,11 @@ fun BookDetailScreen(
                         onToggleInLibrary = {
                             onToggleLibrary()
                         },
-                        isInLibrary = viewModel.inLibrary,
+                        isInLibrary = detailState.inLibrary,
                         onDownload = {
                             onDownload()
                         },
-                        isRead = viewModel.chapters.any { it.readAt != 0L },
+                        isRead = chapterState.chapters.any { it.readAt != 0L },
                         onRead = {
                             onRead()
                         }
@@ -139,7 +117,7 @@ fun BookDetailScreen(
                         onTitle = onTitle,
                         onSummaryExpand =  onSummaryExpand,
                         onRefresh = onRefresh,
-                        isSummaryExpanded = viewModel.expandedSummary,
+                        isSummaryExpanded = detailState.expandedSummary,
                         book = book,
                         source = source,
                     )
@@ -158,7 +136,7 @@ fun BookDetailScreen(
                                     color = MaterialTheme.colors.onBackground,
                                     style = MaterialTheme.typography.subtitle2
                                 )
-                                if (viewModel.chapterIsLoading) {
+                                if (chapterState.chapterIsLoading) {
                                     DotsFlashing()
                                 }
                                 Icon(

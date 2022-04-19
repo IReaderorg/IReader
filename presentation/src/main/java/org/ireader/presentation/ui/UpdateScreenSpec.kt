@@ -70,9 +70,10 @@ object UpdateScreenSpec : BottomNavScreenSpec {
                     vm.addUpdate(update)
                 } else {
                     navController.navigate(
-                        BookDetailScreenSpec.buildRoute(
+                        ReaderScreenSpec.buildRoute(
+                            update.bookId,
                             update.sourceId,
-                            update.bookId
+                            update.chapterId
                         )
                     )
                 }

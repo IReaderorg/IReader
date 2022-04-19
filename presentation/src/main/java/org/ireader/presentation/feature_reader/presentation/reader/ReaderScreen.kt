@@ -18,7 +18,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.ireader.core.utils.UiEvent
-import org.ireader.core.utils.UiText
 import org.ireader.core_api.source.Source
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.presentation.feature_reader.presentation.ScrollIndicatorSetting
@@ -28,7 +27,6 @@ import org.ireader.presentation.feature_reader.presentation.reader.reverse_swip_
 import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.ReaderScreenViewModel
 import org.ireader.presentation.presentation.components.ISnackBarHost
 import org.ireader.presentation.presentation.reusable_composable.ErrorTextWithEmojis
-import org.ireader.presentation.ui.WebViewScreenSpec
 
 
 @ExperimentalAnimationApi
@@ -48,6 +46,29 @@ fun ReadingScreen(
     onSliderFinished: () -> Unit,
     onSliderChange: (index: Float) -> Unit,
     swipeState: SwipeRefreshState,
+    onDrawerRevereIcon: (Chapter?) -> Unit,
+    onReaderRefresh:(Chapter?) -> Unit,
+    onReaderWebView:(ModalBottomSheetState) -> Unit,
+    onReaderBookmark:() -> Unit,
+    onReaderBottomOnSetting:() -> Unit,
+    onReaderPlay:() -> Unit,
+    onFontSelected:(Int) -> Unit,
+    onToggleScrollMode:(Boolean) -> Unit,
+    onToggleAutoScroll:(Boolean) -> Unit,
+    onToggleOrientation: (Boolean) -> Unit,
+    onToggleImmersiveMode: (Boolean) -> Unit,
+    onToggleSelectedMode: (Boolean) -> Unit,
+    onFontSizeIncrease: (Boolean) -> Unit,
+    onParagraphIndentIncrease: (Boolean) -> Unit,
+    onParagraphDistanceIncrease: (Boolean) -> Unit,
+    onLineHeightIncrease: (Boolean) -> Unit,
+    onAutoscrollIntervalIncrease: (Boolean) -> Unit,
+    onAutoscrollOffsetIncrease: (Boolean) -> Unit,
+    onScrollIndicatorPaddingIncrease: (Boolean) -> Unit,
+    onScrollIndicatorWidthIncrease: (Boolean) -> Unit,
+    onToggleAutoBrightness:() -> Unit,
+    onChangeBrightness:(Float) -> Unit,
+    onBackgroundChange:(Int) -> Unit
 ) {
 
 
@@ -162,43 +183,18 @@ fun ReadingScreen(
                 isLoaded = vm.isLocalLoaded,
                 modalBottomSheetValue = modalState.targetValue,
                 onRefresh = {
-                    if (chapter != null) {
-                        vm.mainFunc.apply {
-                            vm.getReadingContentRemotely(chapter = chapter,
-                                source = source)
-                        }
-                    }
+                    onReaderRefresh(chapter)
                 },
                 source = source,
                 chapter = chapter,
                 navController = navController,
                 onWebView = {
-                    try {
-                        if (chapter != null && !vm.isReaderModeEnable && vm.isLocalLoaded && modalState.targetValue == ModalBottomSheetValue.Expanded) {
-                            navController.navigate(WebViewScreenSpec.buildRoute(
-                                url = chapter.link,
-                            )
-                            )
-                        } else if (chapter != null && !vm.isLocalLoaded) {
-                            navController.navigate(WebViewScreenSpec.buildRoute(
-                                url = chapter.link,
-                            ))
-                        }
-                    } catch (e: Exception) {
-                        scope.launch {
-                            vm.showSnackBar(UiText.ExceptionString(e))
-                        }
-                    }
+                    onReaderWebView(modalState)
                 },
                 vm = vm,
                 state = vm,
                 scrollState = scrollState,
-                onBookMark = {
-                    vm.uiFunc.apply {
-                        vm.bookmarkChapter()
-
-                    }
-                }
+                onBookMark = onReaderBookmark
             )
         },
         scaffoldState = scaffoldState,
@@ -227,30 +223,38 @@ fun ReadingScreen(
                                     chapter = chapter,
                                     chapters = vm.stateChapters,
                                     currentChapterIndex = vm.currentChapterIndex,
-                                    onSetting = {
-                                        vm.uiFunc.apply {
-                                            vm.toggleSettingMode(true)
-                                        }
-                                    },
+                                    onSetting = onReaderBottomOnSetting,
                                     source = source,
-                                    onNext = {
-                                        onNext()
-                                    },
+                                    onNext = onNext,
                                     onPrev = {
                                         onPrev(false)
                                     },
-                                    onSliderChange = { onSliderChange(it) },
-                                    onSliderFinished = { onSliderFinished() },
-                                    onPlay = {
-                                        vm.voiceMode = true
-                                        vm.state.isReaderModeEnable = true
-//                                        vm.isPlaying = !vm.isPlaying
-//                                        vm.readText(context)
-                                    }
+                                    onSliderChange = onSliderChange,
+                                    onSliderFinished = onSliderFinished,
+                                    onPlay = onReaderPlay
                                 )
                             }
                             if (vm.isSettingModeEnable) {
-                                ReaderSettingComposable(viewModel = vm)
+                                ReaderSettingComposable(
+                                    onFontSelected = onFontSelected,
+                                    onAutoscrollIntervalIncrease = onAutoscrollIntervalIncrease,
+                                    onAutoscrollOffsetIncrease = onAutoscrollOffsetIncrease,
+                                    onFontSizeIncrease = onFontSizeIncrease,
+                                    onLineHeightIncrease = onLineHeightIncrease,
+                                    onParagraphDistanceIncrease = onParagraphDistanceIncrease,
+                                    onParagraphIndentIncrease = onParagraphIndentIncrease,
+                                    onScrollIndicatorPaddingIncrease =onScrollIndicatorPaddingIncrease ,
+                                    onScrollIndicatorWidthIncrease = onScrollIndicatorWidthIncrease,
+                                    onToggleAutoScroll = onToggleAutoScroll,
+                                    onToggleImmersiveMode =onToggleImmersiveMode ,
+                                    onToggleOrientation = onToggleOrientation,
+                                    onToggleScrollMode = onToggleScrollMode,
+                                    onToggleSelectedMode =onToggleSelectedMode,
+                                    onChangeBrightness = onChangeBrightness,
+                                    onToggleAutoBrightness = onToggleAutoBrightness,
+                                    onBackgroundChange = onBackgroundChange,
+                                    vm = vm
+                                )
                             }
                         }
                     },
@@ -262,20 +266,10 @@ fun ReadingScreen(
         drawerGesturesEnabled = true,
         drawerBackgroundColor = MaterialTheme.colors.background,
         drawerContent = {
-
             ReaderScreenDrawer(
                 modifier = Modifier.statusBarsPadding(),
                 onReverseIcon = {
-                    if (chapter != null) {
-                        vm.uiFunc.apply {
-                            vm.reverseChapters()
-                        }
-                        vm.mainFunc.apply {
-                            scope.launch {
-                                vm.getLocalChaptersByPaging(chapter.bookId)
-                            }
-                        }
-                    }
+                    onDrawerRevereIcon(chapter)
                 },
                 onChapter = onChapter,
                 chapter = chapter,

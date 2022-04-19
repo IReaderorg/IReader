@@ -18,6 +18,8 @@ open class DetailStateImpl @Inject constructor() : DetailState {
     override var detailIsLocalLoaded by mutableStateOf<Boolean>(false)
     override var detailError: UiText by mutableStateOf<UiText>(UiText.DynamicString(""))
     override var detailIsRemoteLoaded by mutableStateOf<Boolean>(false)
+    override var expandedSummary by mutableStateOf(false)
+    override var isRefreshing by mutableStateOf(false)
 
 }
 
@@ -31,5 +33,7 @@ interface DetailState {
     var detailIsLocalLoaded: Boolean
     var detailError: UiText
     var detailIsRemoteLoaded: Boolean
+    var expandedSummary: Boolean
+    var isRefreshing: Boolean
 }
 

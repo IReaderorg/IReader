@@ -31,7 +31,6 @@ import org.ireader.domain.models.entities.Chapter
 import org.ireader.presentation.feature_reader.presentation.reader.reverse_swip_refresh.ISwipeRefreshIndicator
 import org.ireader.presentation.feature_reader.presentation.reader.reverse_swip_refresh.MultiSwipeRefresh
 import org.ireader.presentation.feature_reader.presentation.reader.reverse_swip_refresh.SwipeRefreshState
-import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.ReaderEvent
 import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.ReaderScreenViewModel
 import org.ireader.presentation.utils.scroll.Carousel
 import org.ireader.presentation.utils.scroll.CarouselDefaults
@@ -58,7 +57,9 @@ fun ReaderText(
         Modifier
             .clickable(interactionSource = interactionSource,
                 indication = null) {
-                vm.onEvent(ReaderEvent.ToggleReaderMode(!vm.isReaderModeEnable))
+                vm.apply {
+                    vm.toggleReaderMode(!vm.isReaderModeEnable)
+                }
             }
             .fillMaxSize()
             .background(vm.backgroundColor)
@@ -175,7 +176,9 @@ fun ReaderText(
                     .weight(1f)
                     .clickable(interactionSource = interactionSource,
                         indication = null) {
-                        vm.onEvent(ReaderEvent.ToggleReaderMode(!vm.isReaderModeEnable))
+                        vm.apply {
+                            vm.toggleReaderMode(!vm.isReaderModeEnable)
+                        }
                     }) {
 
                 }

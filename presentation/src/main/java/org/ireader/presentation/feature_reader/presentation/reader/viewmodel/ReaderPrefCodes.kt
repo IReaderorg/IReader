@@ -214,12 +214,12 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
     override fun ReaderScreenViewModel.saveParagraphDistance(isIncreased: Boolean) {
         val currentDistance = prefState.distanceBetweenParagraphs
         if (isIncreased) {
-            readerUseCases.paragraphDistanceUseCase.save(currentDistance + 1)
             distanceBetweenParagraphs = currentDistance + 1
+            readerUseCases.paragraphDistanceUseCase.save(distanceBetweenParagraphs)
 
-        } else if (currentDistance > 0 && !isIncreased) {
-            readerUseCases.paragraphDistanceUseCase.save(currentDistance - 1)
+        } else if (currentDistance > 0) {
             distanceBetweenParagraphs = currentDistance - 1
+            readerUseCases.paragraphDistanceUseCase.save(distanceBetweenParagraphs)
 
         }
     }

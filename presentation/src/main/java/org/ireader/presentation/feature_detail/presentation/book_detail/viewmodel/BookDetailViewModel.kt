@@ -1,12 +1,8 @@
 package org.ireader.presentation.feature_detail.presentation.book_detail.viewmodel
 
 import android.content.Context
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.work.OneTimeWorkRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -22,13 +18,9 @@ import org.ireader.domain.catalog.interactor.GetLocalCatalog
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.entities.updateBook
-import org.ireader.domain.use_cases.fetchers.FetchUseCase
-import org.ireader.domain.use_cases.history.HistoryUseCase
-import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
-
 import org.ireader.domain.use_cases.services.ServiceUseCases
 import java.util.*
 import javax.inject.Inject
@@ -40,9 +32,6 @@ class BookDetailViewModel @Inject constructor(
     private val getChapterUseCase: LocalGetChapterUseCase,
     private val getBookUseCases: org.ireader.domain.use_cases.local.LocalGetBookUseCases,
     private val remoteUseCases: RemoteUseCases,
-    private val historyUseCase: HistoryUseCase,
-    private val deleteUseCase: DeleteUseCase,
-    private val fetchUseCase: FetchUseCase,
     savedStateHandle: SavedStateHandle,
     private val getLocalCatalog: GetLocalCatalog,
     private val state: DetailStateImpl,
@@ -50,18 +39,9 @@ class BookDetailViewModel @Inject constructor(
     private val serviceUseCases: ServiceUseCases
 ) : BaseViewModel(), DetailState by state, ChapterState by chapterState {
 
-    var isRefreshing by mutableStateOf(false)
-        private set
-
-    var expandedSummary by mutableStateOf(false)
-        private set
-
-
-    var getFromWebViewJob: Job? = null
     var getBookDetailJob: Job? = null
     var getChapterDetailJob: Job? = null
 
-    lateinit var oneTimeWork: OneTimeWorkRequest
 
 
     init {
@@ -83,16 +63,6 @@ class BookDetailViewModel @Inject constructor(
             }
         }
     }
-
-    fun onEvent(event: BookDetailEvent) {
-        when (event) {
-            is BookDetailEvent.ToggleSummary -> {
-                toggleExpandedSummary()
-            }
-
-        }
-    }
-
 
     suspend fun getLocalBookById(bookId: Long, source: Source?) {
         this.toggleLocalLoading(true)
@@ -247,19 +217,11 @@ class BookDetailViewModel @Inject constructor(
     }
 
 
-    private fun insertChaptersToLocal(chapters: List<Chapter>, bookId: Long) {
-        viewModelScope.launch(Dispatchers.IO) {
-            localInsertUseCases.insertChapters(chapters.map { it.copy(bookId = bookId) })
-        }
-    }
 
     fun startDownloadService(context: Context, book: Book) {
      serviceUseCases.startDownloadServicesUseCase(bookIds = longArrayOf(book.id))
     }
 
-    fun toggleExpandedSummary() {
-        expandedSummary = !expandedSummary
-    }
 
     /************************************************************/
 

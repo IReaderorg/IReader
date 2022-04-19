@@ -16,11 +16,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import org.ireader.core_ui.theme.readerScreenBackgroundColors
-import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.ReaderScreenViewModel
+import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.ReaderScreenPreferencesState
 import org.ireader.presentation.presentation.reusable_composable.CaptionTextComposable
 
 @Composable
-fun ReaderBackgroundComposable(modifier: Modifier = Modifier, viewModel: ReaderScreenViewModel) {
+fun ReaderBackgroundComposable(
+    modifier: Modifier = Modifier,
+    viewModel: ReaderScreenPreferencesState,
+    onBackgroundChange:(Int) -> Unit
+) {
 
     Row(modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -41,10 +45,7 @@ fun ReaderBackgroundComposable(modifier: Modifier = Modifier, viewModel: ReaderS
                         MaterialTheme.colors.primary,
                         CircleShape)
                     .clickable {
-                        viewModel.prefFunc.apply {
-                            viewModel.changeBackgroundColor(index)
-                        }
-
+                        onBackgroundChange(index)
                     },
                     contentAlignment = Alignment.Center
                 ) {

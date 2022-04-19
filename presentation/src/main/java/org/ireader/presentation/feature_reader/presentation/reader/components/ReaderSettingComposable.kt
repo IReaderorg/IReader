@@ -10,180 +10,138 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.FontSizeEvent
 import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.Orientation
-import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.ReaderEvent
-import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.ReaderScreenViewModel
+import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.ReaderScreenPreferencesState
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 
 @Composable
-fun ReaderSettingComposable(modifier: Modifier = Modifier, viewModel: ReaderScreenViewModel) {
-    val context = LocalContext.current
+fun ReaderSettingComposable(
+    modifier: Modifier = Modifier,
+    vm: ReaderScreenPreferencesState,
+    onFontSelected: (Int) -> Unit,
+    onToggleScrollMode: (Boolean) -> Unit,
+    onToggleAutoScroll: (Boolean) -> Unit,
+    onToggleOrientation: (Boolean) -> Unit,
+    onToggleImmersiveMode: (Boolean) -> Unit,
+    onToggleSelectedMode: (Boolean) -> Unit,
+    onFontSizeIncrease: (Boolean) -> Unit,
+    onParagraphIndentIncrease: (Boolean) -> Unit,
+    onParagraphDistanceIncrease: (Boolean) -> Unit,
+    onLineHeightIncrease: (Boolean) -> Unit,
+    onAutoscrollIntervalIncrease: (Boolean) -> Unit,
+    onAutoscrollOffsetIncrease: (Boolean) -> Unit,
+    onScrollIndicatorPaddingIncrease: (Boolean) -> Unit,
+    onScrollIndicatorWidthIncrease: (Boolean) -> Unit,
+    onToggleAutoBrightness: () -> Unit,
+    onChangeBrightness: (Float) -> Unit,
+    onBackgroundChange:(Int) -> Unit
+) {
     val scrollState = rememberScrollState()
-    val func = viewModel.prefFunc
     Column(
         modifier = modifier
             .fillMaxSize()
             .padding(4.dp)
             .verticalScroll(scrollState)
     ) {
-        BrightnessSliderComposable(viewModel = viewModel)
+        BrightnessSliderComposable(
+            viewModel = vm,
+            onToggleAutoBrightness = onToggleAutoBrightness,
+            onChangeBrightness = onChangeBrightness
+        )
         Spacer(modifier = Modifier.height(16.dp))
-        ReaderBackgroundComposable(viewModel = viewModel)
+        ReaderBackgroundComposable(viewModel = vm, onBackgroundChange = onBackgroundChange)
         Spacer(modifier = Modifier.height(16.dp))
         /** Font indent and font menu **/
         FontChip(
-            viewModel = viewModel
+            state = vm,
+            onFontSelected = onFontSelected
         )
         Spacer(modifier = Modifier.height(12.dp))
         SettingItemToggleComposable(text = "Scroll Mode",
-            value = viewModel.verticalScrolling,
-            onToggle = {
-                func.apply {
-                    viewModel.toggleScrollMode()
-                }
-            })
+            value = vm.verticalScrolling,
+            onToggle = onToggleScrollMode)
 
         SettingItemToggleComposable(text = "Orientation",
-            value = viewModel.orientation == Orientation.Landscape,
-            onToggle = {
-                func.apply {
-                    viewModel.saveOrientation(context)
-                }
-            })
+            value = vm.orientation == Orientation.Landscape,
+            onToggle = onToggleOrientation)
         SettingItemToggleComposable(text = "AutoScroll",
-            value = viewModel.autoScrollMode,
-            onToggle = {
-                func.apply {
-                    viewModel.toggleAutoScrollMode()
-                }
-            })
+            value = vm.autoScrollMode,
+            onToggle = onToggleAutoScroll)
         SettingItemToggleComposable(text = "Immersive mode",
-            value = viewModel.immersiveMode,
-            onToggle = {
-                func.apply {
-                    viewModel.toggleImmersiveMode(context)
-                }
-            })
+            value = vm.immersiveMode,
+            onToggle = onToggleImmersiveMode)
         SettingItemToggleComposable(text = "Selectable mode",
-            value = viewModel.selectableMode,
-            onToggle = {
-                func.apply {
-                    viewModel.toggleSelectableMode()
-                }
-            })
+            value = vm.selectableMode,
+            onToggle = onToggleSelectedMode)
         SettingItemComposable(text = "Font Size",
-            value = viewModel.fontSize.toString(),
+            value = vm.fontSize.toString(),
             onAdd = {
-                viewModel.onEvent(ReaderEvent.ChangeFontSize(FontSizeEvent.Increase))
+                onFontSizeIncrease(true)
             },
             onMinus = {
-                viewModel.onEvent(
-                    ReaderEvent.ChangeFontSize(FontSizeEvent.Decrease))
-
+                onFontSizeIncrease(false)
             })
         SettingItemComposable(text = "Paragraph Indent",
-            value = viewModel.paragraphsIndent.toString(),
+            value = vm.paragraphsIndent.toString(),
             onAdd = {
-                func.apply {
-                    viewModel.saveParagraphIndent(true)
-                }
-
+                onParagraphIndentIncrease(true)
             },
             onMinus = {
-                func.apply {
-                    viewModel.saveParagraphIndent(false)
-                }
+                onParagraphIndentIncrease(false)
             })
 
         SettingItemComposable(text = "Paragraph Distance",
-            value = viewModel.distanceBetweenParagraphs.toString(),
+            value = vm.distanceBetweenParagraphs.toString(),
             onAdd = {
-                func.apply {
-                    viewModel.saveParagraphDistance(true)
-                }
+                onParagraphDistanceIncrease(true)
             },
             onMinus = {
-                func.apply {
-                    viewModel.saveParagraphDistance(false)
-                }
+                onParagraphDistanceIncrease(false)
             })
         SettingItemComposable(text = "Line Height",
-            value = viewModel.lineHeight.toString(),
+            value = vm.lineHeight.toString(),
             onAdd = {
-                func.apply {
-                    viewModel.saveFontHeight(true)
-                }
+                onLineHeightIncrease(true)
             },
             onMinus = {
-                func.apply {
-                    viewModel.saveFontHeight(false)
-                }
-
-
+                onLineHeightIncrease(false)
             })
         SettingItemComposable(text = "Autoscroll Interval",
-            value = "${viewModel.autoScrollInterval / 1000} second",
+            value = "${vm.autoScrollInterval / 1000} second",
             onAdd = {
-                func.apply {
-                    viewModel.setAutoScrollIntervalReader(true)
-                }
+                onAutoscrollIntervalIncrease(true)
             },
             onMinus = {
-                func.apply {
-                    viewModel.setAutoScrollIntervalReader(false)
-                }
-
+                onAutoscrollIntervalIncrease(false)
             })
         SettingItemComposable(text = "Autoscroll Offset",
-            value = viewModel.autoScrollOffset.toString(),
+            value = vm.autoScrollOffset.toString(),
             onAdd = {
-                func.apply {
-                    viewModel.setAutoScrollIntervalReader(true)
-                }
+                onAutoscrollOffsetIncrease(true)
             },
             onMinus = {
-                func.apply {
-                    viewModel.setAutoScrollIntervalReader(false)
-                }
-
-
+                onAutoscrollOffsetIncrease(false)
             })
         SettingItemComposable(text = "ScrollIndicator Padding",
-            value = viewModel.scrollIndicatorPadding.toString(),
+            value = vm.scrollIndicatorPadding.toString(),
             onAdd = {
-                func.apply {
-                    viewModel.saveScrollIndicatorPadding(true)
-                }
+                onScrollIndicatorPaddingIncrease(true)
             },
             onMinus = {
-                func.apply {
-                    viewModel.saveScrollIndicatorPadding(false)
-                }
-
+                onScrollIndicatorPaddingIncrease(false)
             })
         SettingItemComposable(text = "ScrollIndicator Width",
-            value = viewModel.scrollIndicatorWith.toString(),
+            value = vm.scrollIndicatorWith.toString(),
             onAdd = {
-                func.apply {
-                    viewModel.saveScrollIndicatorWidth(true)
-                }
+                onScrollIndicatorWidthIncrease(true)
             },
             onMinus = {
-                func.apply {
-                    viewModel.saveScrollIndicatorWidth(false)
-                }
-
+                onScrollIndicatorWidthIncrease(false)
             })
-
-
-
-
         Row(modifier = Modifier.fillMaxSize(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween) {
@@ -195,7 +153,7 @@ fun ReaderSettingComposable(modifier: Modifier = Modifier, viewModel: ReaderScre
             )
             AppIconButton(imageVector = Icons.Default.Settings,
                 title = "Advance Setting",
-                onClick = { viewModel.scrollIndicatorDialogShown = true })
+                onClick = { vm.scrollIndicatorDialogShown = true })
         }
 
 

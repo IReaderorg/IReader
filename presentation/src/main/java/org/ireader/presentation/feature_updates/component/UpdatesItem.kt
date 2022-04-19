@@ -16,8 +16,10 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CheckCircleOutline
 import androidx.compose.material.icons.outlined.Download
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
@@ -79,6 +81,16 @@ fun UpdatesItem(
         if (isDownloadable) {
             IconButton(onClick = { onClickDownload(book) }) {
                 Icon(imageVector = Icons.Outlined.Download, contentDescription = "")
+            }
+        } else {
+            Box(
+                modifier = Modifier.width(48.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.CheckCircleOutline,
+                    contentDescription = ""
+                )
             }
         }
 

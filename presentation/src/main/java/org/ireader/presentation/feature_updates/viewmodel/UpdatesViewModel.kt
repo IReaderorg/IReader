@@ -1,7 +1,6 @@
 package org.ireader.presentation.feature_updates.viewmodel
 
 import androidx.lifecycle.viewModelScope
-import androidx.work.OneTimeWorkRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -87,7 +86,6 @@ class UpdatesViewModel @Inject constructor(
         }
 
     }
-    lateinit var downloadWork: OneTimeWorkRequest
     fun downloadChapters() {
         viewModelScope.launch {
             val bookIds =
@@ -96,7 +94,6 @@ class UpdatesViewModel @Inject constructor(
                 updates.values.flatMap { it }.filter { it.id in selection }.map { it.chapterId }
             //  val books = getBookUseCases.findBookByIds(bookIds)
             serviceUseCases.startDownloadServicesUseCase(
-                bookIds = bookIds.toLongArray(),
                 chapterIds =  chapterIds.toLongArray()
             )
         }

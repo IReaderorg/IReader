@@ -92,24 +92,6 @@ class ReaderScreenViewModel @Inject constructor(
     }
 
 
-    fun onEvent(event: ReaderEvent) {
-        when (event) {
-            is ReaderEvent.ChangeBrightness -> {
-                saveBrightness(event.brightness, event.context)
-            }
-            is ReaderEvent.ChangeFontSize -> {
-                saveFontSize(event.fontSizeEvent)
-            }
-            is ReaderEvent.ChangeFont -> {
-                saveFont(event.index)
-            }
-            is ReaderEvent.ToggleReaderMode -> {
-                toggleReaderMode(event.enable)
-            }
-            else -> {}
-        }
-    }
-
     var getContentJob: Job? = null
 
 

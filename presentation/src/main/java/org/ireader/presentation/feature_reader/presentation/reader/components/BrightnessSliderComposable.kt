@@ -12,20 +12,18 @@ import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import org.ireader.core.utils.DEFAULT
-import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.ReaderEvent
-import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.ReaderScreenViewModel
+import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.ReaderScreenPreferencesState
 import org.ireader.presentation.presentation.reusable_composable.CaptionTextComposable
 
 @Composable
 fun BrightnessSliderComposable(
     modifier: Modifier = Modifier,
-    viewModel: ReaderScreenViewModel,
+    viewModel: ReaderScreenPreferencesState,
+    onToggleAutoBrightness:() -> Unit,
+    onChangeBrightness:(Float) -> Unit
 ) {
-
-    val context = LocalContext.current
     Row(modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically) {
@@ -40,7 +38,7 @@ fun BrightnessSliderComposable(
                 contentDescription = "less brightness")
             Slider(
                 viewModel.brightness,
-                onValueChange = { viewModel.onEvent(ReaderEvent.ChangeBrightness(it, context)) },
+                onValueChange = onChangeBrightness,
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(8f),
@@ -58,11 +56,7 @@ fun BrightnessSliderComposable(
                 imageVector = Icons.Default.Brightness7,
                 contentDescription = "less brightness")
         }
-        OutlinedButton(onClick = {
-            viewModel.prefFunc.apply {
-                viewModel.toggleAutoBrightness()
-            }
-        },
+        OutlinedButton(onClick = onToggleAutoBrightness,
             modifier = Modifier
                 .weight(1F)
                 .padding(8.dp),

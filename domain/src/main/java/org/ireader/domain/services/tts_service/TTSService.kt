@@ -125,7 +125,7 @@ class TTSService @AssistedInject constructor(
                     }
                     state.ttsIsLoading = false
                 }
-                startService(Player.PAUSE)
+                //startService(Player.PLAY)
             }
             if (state.mediaSession == null) {
                 state.mediaSession = MediaSessionCompat(context, "mediaPlayer", null, null)

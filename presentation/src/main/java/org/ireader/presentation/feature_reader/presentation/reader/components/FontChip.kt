@@ -20,15 +20,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.ireader.core_ui.theme.fonts
-import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.ReaderEvent
-import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.ReaderScreenViewModel
+import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.ReaderScreenPreferencesState
 import org.ireader.presentation.presentation.reusable_composable.CaptionTextComposable
 
 
 @Composable
 fun FontChip(
     modifier: Modifier = Modifier,
-    viewModel: ReaderScreenViewModel,
+    state: ReaderScreenPreferencesState,
+    onFontSelected: (Int) -> Unit,
 ) {
 
     Row(modifier = Modifier
@@ -50,10 +50,12 @@ fun FontChip(
                     .clip(RectangleShape)
                     .background(MaterialTheme.colors.background)
                     .border(2.dp,
-                        if (fonts[index] == viewModel.font) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground.copy(
+                        if (fonts[index] == state.font) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground.copy(
                             .4f),
                         CircleShape)
-                    .clickable { viewModel.onEvent(ReaderEvent.ChangeFont(index)) },
+                    .clickable {
+                        onFontSelected(index)
+                    },
                     contentAlignment = Alignment.Center
                 ) {
                     CaptionTextComposable(text = fonts[index].fontName,
