@@ -1,6 +1,7 @@
 package org.ireader.presentation.ui
 
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
@@ -15,9 +16,8 @@ import androidx.navigation.*
 import com.google.accompanist.pager.ExperimentalPagerApi
 import kotlinx.coroutines.launch
 import org.ireader.core.R
-import org.ireader.core.extensions.nextAfter
-import org.ireader.core.extensions.prevBefore
 import org.ireader.core.utils.UiText
+import org.ireader.core_api.log.Log
 import org.ireader.core_api.source.Source
 import org.ireader.core_ui.theme.TransparentStatusBar
 import org.ireader.domain.models.entities.Chapter
@@ -52,10 +52,12 @@ object ReaderScreenSpec : ScreenSpec {
     override val deepLinks: List<NavDeepLink> = listOf(
         navDeepLink {
             uriPattern =
-                "https://www.ireader.org/reader_screen_route/{bookId}/{chapterId}/{sourceId}"
+                "https://www.ireader.org/reader_screen_route/{bookId}/{chapterId}/{sourceId}/{${NavigationArgs.readingParagraph.name}}/{${NavigationArgs.voiceMode.name}}"
             NavigationArgs.bookId
             NavigationArgs.chapterId
             NavigationArgs.sourceId
+            NavigationArgs.readingParagraph
+            NavigationArgs.voiceMode
         }
     )
 
@@ -77,6 +79,7 @@ object ReaderScreenSpec : ScreenSpec {
         val drawerScrollState = rememberLazyListState()
         val swipeState = rememberSwipeRefreshState(isRefreshing = vm.ttsIsLoading)
         val context = LocalContext.current
+
 
         DisposableEffect(key1 = true) {
             onDispose {
@@ -133,29 +136,18 @@ object ReaderScreenSpec : ScreenSpec {
                 },
                 onReaderNext = {
                     if (currentIndex < chapters.lastIndex) {
-                        vm.uiFunc.apply {
-                            vm.mainFunc.apply {
-                                val nextChapter =
-                                    vm.stateChapters.nextAfter(currentIndex)
-                                nextChapter?.let { nch ->
-                                    val indexch =
-                                        vm.stateChapters.indexOfFirst { it.id == nch.id }
-                                    if (indexch != -1) {
-                                        vm.currentChapterIndex = indexch
-                                        scope.launch {
-                                            vm.getChapter(nch.id,
-                                                source = source)
-                                            scrollState.scrollToItem(0, 0)
-                                        }
-                                    }
+                        try {
+                            vm.apply {
+                                val nextChapter = vm.nextChapter()
+                                scope.launch {
+                                    vm.getChapter(nextChapter.id,
+                                        source = source)
+                                    scrollState.scrollToItem(0, 0)
                                 }
-
-
-                                // vm.updateChapterSliderIndex(currentIndex, true)
-
                             }
+                        } catch (e: Exception) {
+                            Log.error(e, "Reader Spec failed to go next chapter")
                         }
-
                     } else {
                         scope.launch {
                             vm.showSnackBar(UiText.StringResource(R.string.this_is_last_chapter))
@@ -181,41 +173,33 @@ object ReaderScreenSpec : ScreenSpec {
                     }
                 },
                 onReaderPrev = { scrollToEnd ->
-                    if (currentIndex > 0) {
-                        vm.uiFunc.apply {
+                    try {
+                        if (currentIndex > 0) {
                             vm.mainFunc.apply {
-                                val prevChapter =
-                                    vm.stateChapters.prevBefore(currentIndex)
-                                prevChapter?.let { prevChapter ->
-                                    val indexch =
-                                        vm.stateChapters.indexOfFirst { it.id == prevChapter.id }
-                                    if (indexch != -1) {
-                                        vm.currentChapterIndex = indexch
-                                        scope.launch {
-                                            vm.getChapter(prevChapter.id,
-                                                source = source)
-                                            when (scrollToEnd) {
-                                                true -> {
-                                                    if (chapter != null) {
-                                                        scrollState.scrollToItem(chapter.content.lastIndex,
-                                                            Int.MAX_VALUE)
-                                                    }
-                                                }
-                                                else -> {
-                                                    scrollState.scrollToItem(0, 0)
-                                                }
+                                val prevChapter = vm.prevChapter()
+                                scope.launch {
+                                    vm.getChapter(prevChapter.id,
+                                        source = source)
+                                    when (scrollToEnd) {
+                                        true -> {
+                                            if (chapter != null) {
+                                                scrollState.scrollToItem(chapter.content.lastIndex,
+                                                    Int.MAX_VALUE)
                                             }
                                         }
-
+                                        else -> {
+                                            scrollState.scrollToItem(0, 0)
+                                        }
                                     }
                                 }
                             }
+                        } else {
+                            scope.launch {
+                                vm.showSnackBar(UiText.StringResource(R.string.this_is_first_chapter))
+                            }
                         }
-
-                    } else {
-                        scope.launch {
-                            vm.showSnackBar(UiText.StringResource(R.string.this_is_first_chapter))
-                        }
+                    } catch (e: Exception) {
+                        Log.error(e, "Reader Spec failed to go previous chapter")
                     }
                 },
                 onReaderSliderChange = {
@@ -296,7 +280,21 @@ object ReaderScreenSpec : ScreenSpec {
                     vm.state.isReaderModeEnable = true
                 },
                 vm = vm,
-                navController = navController
+                navController = navController,
+                onMap = { drawer ->
+                    scope.launch {
+                        try {
+                            val index =
+                                vm.stateChapters.indexOfFirst { it.id == vm.stateChapter?.id }
+                            if (index != -1) {
+                                drawer.scrollToItem(index,
+                                    -drawer.layoutInfo.viewportEndOffset / 2)
+                            }
+                        } catch (e: Exception) {
+
+                        }
+                    }
+                }
             )
         } else {
             EmptyScreenComposable(navController = navController,
@@ -334,6 +332,7 @@ fun MainReader(
     onReaderBookmark: () -> Unit,
     onReaderBottomBarSetting: () -> Unit,
     onBottomBarReaderPlay: () -> Unit,
+    onMap:(LazyListState) -> Unit
 ) {
     val scrollState = rememberLazyListState()
     val context = LocalContext.current
@@ -352,7 +351,8 @@ fun MainReader(
                 onPrevPar = onTTTSPrevPar,
                 onNextPar = onTTTSNextPar,
                 onValueChange = onTTTSValueChange,
-                onValueChangeFinished = onTTTSValueChangeFinished
+                onValueChangeFinished = onTTTSValueChangeFinished,
+                onMap = onMap
             )
         }
         else -> {
@@ -471,7 +471,7 @@ fun MainReader(
                     },
                     onFontSizeIncrease = {
                         when (it) {
-                            true ->{
+                            true -> {
                                 vm.apply {
                                     vm.saveFontSize(FontSizeEvent.Increase)
                                 }
@@ -525,7 +525,7 @@ fun MainReader(
                             vm.saveBrightness(it, context)
                         }
                     },
-                    onToggleAutoBrightness =  {
+                    onToggleAutoBrightness = {
                         vm.prefFunc.apply {
                             vm.toggleAutoBrightness()
                         }
@@ -534,7 +534,8 @@ fun MainReader(
                         vm.prefFunc.apply {
                             vm.changeBackgroundColor(index)
                         }
-                    }
+                    },
+                    onMap = onMap
                 )
             }
 

@@ -13,6 +13,7 @@ import org.ireader.presentation.feature_sources.presentation.extension.composabl
 @Composable
 fun HistoryContent(
     state: HistoryState,
+    onBookCover: (HistoryWithRelations) -> Unit,
     onClickItem: (HistoryWithRelations) -> Unit,
     onClickDelete: (HistoryWithRelations) -> Unit,
     onClickPlay: (HistoryWithRelations) -> Unit,
@@ -35,7 +36,8 @@ fun HistoryContent(
                 HistoryItem(history = history[index],
                     onClickItem = onClickItem,
                     onClickDelete = onClickDelete,
-                    onClickPlay = onClickPlay
+                    onClickPlay = onClickPlay,
+                    onBookCover= onBookCover
                 )
             }
         }

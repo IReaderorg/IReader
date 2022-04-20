@@ -40,6 +40,9 @@ fun GlobalSearchScreen(
 
     ) {
 
+    val uiSearch = vm.searchItems.filter { it.items.isNotEmpty() }
+    val emptySearches = vm.searchItems.filter { it.items.isEmpty() }
+    val allSearch = uiSearch + emptySearches
     val scrollState = rememberLazyListState()
     Scaffold(
         topBar = {
@@ -51,9 +54,9 @@ fun GlobalSearchScreen(
         }
     ) { padding ->
         LazyColumn(state = scrollState) {
-            items(vm.searchItems.size) { index ->
+            items(allSearch.size) { index ->
                 GlobalSearchBookInfo(
-                    vm.searchItems[index],
+                    allSearch[index],
                     onBook = onBook,
                     goToExplore = { onGoToExplore(index) }
                 )

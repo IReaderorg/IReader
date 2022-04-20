@@ -147,10 +147,11 @@ class TTSService @AssistedInject constructor(
                                             state.currentReadingParagraph,
                                             mediaSession,
                                             isLoading = state.ttsIsLoading
-                                        )
+                                        ).build()
+
                                     NotificationManagerCompat.from(context)
                                         .notify(Notifications.ID_TEXT_READER_PROGRESS,
-                                            notification.build())
+                                            notification)
 
 
                                     when (command) {

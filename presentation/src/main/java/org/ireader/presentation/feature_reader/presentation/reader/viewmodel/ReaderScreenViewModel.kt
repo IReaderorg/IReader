@@ -42,7 +42,7 @@ class ReaderScreenViewModel @Inject constructor(
     val savedStateHandle: SavedStateHandle,
     val defaultNotificationHelper: DefaultNotificationHelper,
     val ttsState: TTSStateImpl,
-    val serviceUseCases : ServiceUseCases,
+    val serviceUseCases: ServiceUseCases,
 ) : BaseViewModel(),
     ReaderScreenPreferencesState by prefState,
     ReaderScreenState by state,
@@ -58,9 +58,18 @@ class ReaderScreenViewModel @Inject constructor(
         val sourceId = savedStateHandle.get<Long>(NavigationArgs.sourceId.name)
         val chapterId = savedStateHandle.get<Long>(NavigationArgs.chapterId.name)
         val bookId = savedStateHandle.get<Long>(NavigationArgs.bookId.name)
-        state.isReaderModeEnable = true
+        kotlin.runCatching {
+            val readingParagraph =
+                savedStateHandle.get<String>(NavigationArgs.readingParagraph.name)
+            val voiceMode = savedStateHandle.get<String>(NavigationArgs.voiceMode.name) != "0L"
+            state.isReaderModeEnable = true
+            if (readingParagraph != null && readingParagraph.toInt() < ttsState.ttsContent?.value?.lastIndex ?: 0) {
+                ttsState.currentReadingParagraph = readingParagraph.toInt()
+                ttsState.voiceMode = voiceMode
+            }
+        }
+
         if (ttsState.ttsChapter != null && ttsState.ttsBook?.id == bookId) {
-            //ttsState.voiceMode = true
             state.stateChapter = ttsChapter
             state.book = ttsBook
             state.stateChapters = ttsChapters
@@ -99,7 +108,7 @@ class ReaderScreenViewModel @Inject constructor(
 
 
     fun runTTSService(context: Context, command: Int = -1) {
-       serviceUseCases.startTTSServicesUseCase(
+        serviceUseCases.startTTSServicesUseCase(
             chapterId = stateChapter?.id,
             bookId = book?.id,
             command = command
@@ -121,8 +130,6 @@ class ReaderScreenViewModel @Inject constructor(
         ttsState.isPlaying = false
         ttsState.currentReadingParagraph = 0
     }
-
-
 
 
 }

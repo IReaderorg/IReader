@@ -93,7 +93,7 @@ class DownloadService @AssistedInject constructor(
 
                 val downloadIds = downloadUseCases.insertDownloads(mappedChapters)
 
-                val downloads = downloadUseCases.findDownloadsUseCase(downloadIds)
+                val downloads = mappedChapters //downloadUseCases.findDownloadsUseCase(downloadIds)
                 val builder = defaultNotificationHelper.baseNotificationDownloader(
                     chapter = null,
                     id

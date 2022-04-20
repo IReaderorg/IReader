@@ -44,7 +44,7 @@ fun createChannel(context: Context, channel: Channel) {
                  .data(data)
                  .allowHardware(true)
                  .target { setLargeIcon(it.toBitmap()) }
-                 .size(512)
+                 .size(128)
                  .build()
              ImageLoader(context).execute(request)
          }

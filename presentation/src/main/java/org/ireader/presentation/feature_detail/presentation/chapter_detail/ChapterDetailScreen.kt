@@ -94,7 +94,6 @@ fun ChapterDetailScreen(
                 onMap = {
                     scope.launch {
                         try {
-
                             scrollState.scrollToItem(vm.getLastChapterIndex(),
                                 -scrollState.layoutInfo.viewportEndOffset / 2)
 

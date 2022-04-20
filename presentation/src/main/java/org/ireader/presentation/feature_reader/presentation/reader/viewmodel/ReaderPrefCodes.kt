@@ -51,7 +51,7 @@ interface ReaderPrefFunctions {
 class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
     override fun ReaderScreenViewModel.readPreferences() {
         font = readerUseCases.selectedFontStateUseCase.readFont()
-        readerUseCases.selectedFontStateUseCase.saveFont(0)
+       // readerUseCases.selectedFontStateUseCase.saveFont(0)
 
 
         this.fontSize = readerUseCases.fontSizeStateUseCase.read()

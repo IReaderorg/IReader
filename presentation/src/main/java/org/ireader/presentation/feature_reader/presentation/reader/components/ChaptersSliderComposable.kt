@@ -60,7 +60,7 @@ fun ChaptersSliderComposable(
                     inactiveTickColor = MaterialTheme.colors.onBackground.copy(alpha = .6f),
                     inactiveTrackColor = MaterialTheme.colors.onBackground.copy(alpha = .6f),
                     activeTickColor = MaterialTheme.colors.primary.copy(alpha = .6f)
-                )
+                ),
             )
             IconButton(modifier = modifier.weight(1f), onClick = {
                 onNext()

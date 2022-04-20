@@ -7,17 +7,18 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Divider
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Sort
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import org.ireader.core_api.source.Source
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.presentation.presentation.components.ChapterListItemComposable
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.BigSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.ErrorTextWithEmojis
-import org.ireader.core_api.source.Source
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -29,6 +30,7 @@ fun ReaderScreenDrawer(
     chapters: List<Chapter>,
     onReverseIcon: () -> Unit,
     drawerScrollState: LazyListState,
+    onMap:(LazyListState) -> Unit
 ) {
 
     Column(modifier = modifier.fillMaxSize(),
@@ -38,7 +40,7 @@ fun ReaderScreenDrawer(
         Box(modifier = Modifier.fillMaxWidth()) {
             BigSizeTextComposable(text = "Content", modifier = Modifier.align(Alignment.Center))
             Row(verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.End,
                 modifier = modifier.fillMaxWidth()) {
                 Box {}
                 AppIconButton(imageVector = Icons.Default.Sort,
@@ -46,6 +48,9 @@ fun ReaderScreenDrawer(
                     onClick = {
                         onReverseIcon()
                     })
+                AppIconButton(imageVector = Icons.Filled.Place, title = "", onClick = {
+                    onMap(drawerScrollState)
+                })
 
             }
         }

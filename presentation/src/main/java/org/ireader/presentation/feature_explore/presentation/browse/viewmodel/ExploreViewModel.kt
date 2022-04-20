@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -82,8 +83,11 @@ class ExploreViewModel @Inject constructor(
     }
 
 
+    var initExploreJob : Job? = null
+
     fun loadBooks() {
-        viewModelScope.launch {
+        initExploreJob?.cancel()
+        initExploreJob = viewModelScope.launch {
             remoteKeyUseCase.subScribeAllPagedExploreBooks().distinctUntilChanged().onEach {
                 stateItems = it
             }.launchIn(viewModelScope)
@@ -213,7 +217,12 @@ class ExploreViewModel @Inject constructor(
             )
         )
     }
-
+    fun removeExploreBooks() {
+        viewModelScope.launch(Dispatchers.IO) {
+            deleteUseCase.deleteAllExploreBook()
+            deleteUseCase.deleteAllRemoteKeys()
+        }
+    }
 
     fun toggleFilterMode(enable: Boolean? = null) {
         state.isFilterEnable = enable ?: !state.isFilterEnable

@@ -4,6 +4,8 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import org.ireader.core.extensions.nextAfter
+import org.ireader.core.extensions.prevBefore
 import org.ireader.core.utils.Constants
 import org.ireader.core.utils.UiText
 import org.ireader.core.utils.currentTimeToLong
@@ -39,6 +41,8 @@ interface ReaderMainFunctions {
 
     fun ReaderScreenViewModel.updateLastReadTime(chapter: Chapter)
     fun ReaderScreenViewModel.getLocalChaptersByPaging(bookId: Long)
+    fun ReaderScreenViewModel.prevChapter() : Chapter
+    fun ReaderScreenViewModel.nextChapter() : Chapter
 }
 
 class ReaderMainFunctionsImpl @Inject constructor() : ReaderMainFunctions {
@@ -117,10 +121,6 @@ class ReaderMainFunctionsImpl @Inject constructor() : ReaderMainFunctions {
                 if (stateChapters.isNotEmpty()) {
                     state.currentChapterIndex =
                         stateChapters.indexOfFirst { state.stateChapter?.id == it.id }
-
-//                    if (stateChapter == null && state.stateChapters.isNotEmpty()) {
-//                        getChapter(state.stateChapters.first().id, source = source)
-//                    }
                 }
 
 
@@ -207,6 +207,24 @@ class ReaderMainFunctionsImpl @Inject constructor() : ReaderMainFunctions {
                     stateChapters = it
                 }
         }
+    }
+    override fun ReaderScreenViewModel.nextChapter() : Chapter {
+        val chapter = stateChapter
+        val index = stateChapters.indexOfFirst { it.id == chapter?.id  }
+        if (index != -1) {
+            currentChapterIndex = index
+            return stateChapters.nextAfter(index) ?: throw IllegalAccessException("List doesn't contains ${chapter?.title}")
+        }
+        throw IllegalAccessException("List doesn't contains ${chapter?.title}")
+    }
+    override fun ReaderScreenViewModel.prevChapter() : Chapter {
+        val chapter = stateChapter
+        val index = stateChapters.indexOfFirst { it.id == chapter?.id  }
+        if (index != -1) {
+            currentChapterIndex = index
+            return stateChapters.prevBefore(index) ?: throw IllegalAccessException("List doesn't contains ${chapter?.title}")
+        }
+        throw IllegalAccessException("List doesn't contains ${chapter?.title}")
     }
 
 }

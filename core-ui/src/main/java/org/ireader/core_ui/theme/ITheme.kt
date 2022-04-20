@@ -65,7 +65,7 @@ val themes = listOf(
             error = Colour.red_600,
             onError = Colour.black_900,
         ), ExtraColors(
-            bars = Color(0xFF272727),
+            bars = Color(0xFF181818),
             onBars = Color.White
         )
     ), Theme(6, lightColors(

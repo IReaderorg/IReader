@@ -68,7 +68,8 @@ fun ReadingScreen(
     onScrollIndicatorWidthIncrease: (Boolean) -> Unit,
     onToggleAutoBrightness:() -> Unit,
     onChangeBrightness:(Float) -> Unit,
-    onBackgroundChange:(Int) -> Unit
+    onBackgroundChange:(Int) -> Unit,
+    onMap:(LazyListState) -> Unit
 ) {
 
 
@@ -275,7 +276,8 @@ fun ReadingScreen(
                 chapter = chapter,
                 source = source,
                 chapters = chapters,
-                drawerScrollState = drawerScrollState
+                drawerScrollState = drawerScrollState,
+                onMap = onMap
             )
 
         }

@@ -54,7 +54,7 @@ fun ExploreScreen(
     onLayoutTypeSelect: (DisplayMode) -> Unit,
     currentLayout: LayoutType,
     getBooks: (query: String?, listing: Listing?, filters: List<Filter<*>>) -> Unit,
-    loadExploreBooks: (Boolean) -> Unit,
+    loadItems: (Boolean) -> Unit,
     onBook:(BookItem) -> Unit,
     onAppbarWebView:(url:String) -> Unit,
 ) {
@@ -91,7 +91,7 @@ fun ExploreScreen(
                 SnackbarResult.ActionPerformed -> {
                     setShowSnackBar(false)
                     vm.endReached = false
-                    loadExploreBooks(false)
+                    loadItems(false)
                     //books.retry()
                 }
             }
@@ -114,7 +114,7 @@ fun ExploreScreen(
                     val mFilters = vm.modifiedFilter.filterNot { it.isDefaultValue() }
                     vm.stateFilters = mFilters
                     vm.searchQuery = null
-                    loadExploreBooks(true)
+                    loadItems(true)
                     //vm.getBooks(filters = mFilters, source = source)
                 },
                 filters = vm.modifiedFilter,
@@ -207,7 +207,7 @@ fun ExploreScreen(
                             isLoading = vm.isLoading,
                             onEndReachValidator = { index ->
                                 if (index >= vm.stateItems.lastIndex && !vm.endReached && !vm.isLoading) {
-                                    loadExploreBooks(false)
+                                    loadItems(false)
                                 }
                             }
                         )

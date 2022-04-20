@@ -64,13 +64,13 @@ fun RegularChapterDetailTopAppBar(
             BigSizeTextComposable(text = "Content")
         },
         actions = {
-            AppIconButton(imageVector = Icons.Filled.Place, title = "", onClick = onMap)
-            IconButton(onClick = onReverseClick) {
-                Icon(
-                    imageVector = Icons.Default.Sort,
-                    contentDescription = "Sort Icon"
-                )
-            }
+                AppIconButton(imageVector = Icons.Filled.Place, title = "", onClick = onMap)
+                IconButton(onClick = onReverseClick) {
+                    Icon(
+                        imageVector = Icons.Default.Sort,
+                        contentDescription = "Sort Icon"
+                    )
+                }
         },
         navigationIcon = {
             IconButton(onClick = onPopBackStack) {

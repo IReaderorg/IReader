@@ -40,9 +40,10 @@ object HistoryScreenSpec : BottomNavScreenSpec {
         HistoryScreen(
             onHistory = { history ->
                 navController.navigate(
-                    BookDetailScreenSpec.buildRoute(
+                    ReaderScreenSpec.buildRoute(
+                        history.bookId,
                         history.sourceId,
-                        history.bookId
+                        history.chapterId
                     )
                 )
             },
@@ -68,7 +69,15 @@ object HistoryScreenSpec : BottomNavScreenSpec {
             getHistories = {
                 vm.getHistoryBooks()
             },
-            state = vm
+            state = vm,
+            onBookCover = { history ->
+                navController.navigate(
+                    BookDetailScreenSpec.buildRoute(
+                        history.sourceId,
+                        history.bookId
+                    )
+                )
+            }
         )
     }
 

@@ -20,6 +20,7 @@ import org.ireader.domain.feature_service.io.coil.rememberBookCover
 @Composable
 fun HistoryItem(
   history: HistoryWithRelations,
+  onBookCover: (HistoryWithRelations) -> Unit,
   onClickItem: (HistoryWithRelations) -> Unit,
   onClickDelete: (HistoryWithRelations) -> Unit,
   onClickPlay: (HistoryWithRelations) -> Unit,
@@ -36,7 +37,8 @@ fun HistoryItem(
               .fillMaxHeight()
               .aspectRatio(3f / 4f)
               .padding(start = 16.dp, top = 8.dp, bottom = 8.dp)
-              .clip(MaterialTheme.shapes.medium),
+              .clip(MaterialTheme.shapes.medium)
+              .clickable { onBookCover(history) },
           mangaCover = rememberBookCover(history)
       )
       BookListItemColumn(

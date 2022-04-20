@@ -22,6 +22,7 @@ fun HistoryScreen(
     onHistory:(HistoryWithRelations) -> Unit,
     onHistoryDelete: (HistoryWithRelations) -> Unit,
     onHistoryPlay: (HistoryWithRelations) -> Unit,
+    onBookCover: (HistoryWithRelations) -> Unit,
 ) {
 
     Scaffold(
@@ -40,7 +41,8 @@ fun HistoryScreen(
                         state = state,
                         onClickItem = onHistory,
                         onClickDelete = onHistoryDelete,
-                        onClickPlay = onHistoryPlay
+                        onClickPlay = onHistoryPlay,
+                        onBookCover = onBookCover
                     )
                 }
             }

@@ -96,8 +96,8 @@ object ExploreScreenSpec : ScreenSpec {
                     vm.stateFilters = filters
                     vm.loadItems()
                 },
-                loadExploreBooks = {
-                    vm.loadBooks()
+                loadItems = { reset ->
+                    vm.loadItems(reset)
                 },
                 onBook = { book ->
                     navController.navigate(

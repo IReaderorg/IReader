@@ -261,7 +261,7 @@ class DefaultNotificationHelper @Inject constructor(
             setLargeIcon(applicationContext, book.cover)
             priority = NotificationCompat.PRIORITY_LOW
 
-            setContentIntent(openReaderScreenIntent(chapter, book))
+            setContentIntent(openReaderScreenIntent(chapter, book,progress))
             addAction(R.drawable.ic_baseline_skip_previous,
                 "Previous Chapter",
                 skipPrev)
@@ -296,12 +296,13 @@ class DefaultNotificationHelper @Inject constructor(
     fun openReaderScreenIntent(
         chapter: Chapter,
         book: Book,
+        currentReadingParagraph:Int = 0,
     ): PendingIntent = PendingIntent.getActivity(
         applicationContext.applicationContext,
         5,
         Intent(
             Intent.ACTION_VIEW,
-            "https://www.ireader.org/reader_screen_route/${book.id}/${chapter.id}/${book.sourceId}".toUri(),
+            "https://www.ireader.org/reader_screen_route/${book.id}/${chapter.id}/${book.sourceId}/${currentReadingParagraph.toLong()}/1L".toUri(),
             applicationContext,
             Class.forName("org.ireader.infinity.MainActivity")
         ),

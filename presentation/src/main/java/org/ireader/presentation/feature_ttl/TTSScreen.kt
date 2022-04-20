@@ -1,10 +1,13 @@
 package org.ireader.presentation.feature_ttl
 
+import android.speech.tts.TextToSpeech
+import android.support.v4.media.session.MediaSessionCompat
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.TweenSpec
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -66,6 +69,7 @@ fun TTSScreen(
     onChapter: (Chapter) -> Unit,
     onValueChange: (Float) -> Unit,
     onValueChangeFinished: () -> Unit,
+    onMap:(LazyListState) -> Unit
 ) {
 
 
@@ -93,6 +97,24 @@ fun TTSScreen(
                     drawerScrollState.scrollToItem(index)
                 }
             }
+        }
+    }
+
+    LaunchedEffect(key1 = true) {
+        if (vm.tts == null) {
+            vm.tts = TextToSpeech(context) { status ->
+                vm.ttsIsLoading = true
+                if (status == TextToSpeech.ERROR) {
+                    //context.toast("Text-to-Speech Not Available")
+                    Log.error { "Text-to-Speech Not Available" }
+                    vm.ttsIsLoading = false
+                    return@TextToSpeech
+                }
+                vm.ttsIsLoading = false
+            }
+        }
+        if (vm.mediaSession == null) {
+            vm.mediaSession = MediaSessionCompat(context, "mediaPlayer", null, null)
         }
     }
 
@@ -246,14 +268,17 @@ fun TTSScreen(
                     chapter = chapter,
                     source = source,
                     chapters = chapters,
-                    drawerScrollState = drawerScrollState
+                    drawerScrollState = drawerScrollState,
+                    onMap = onMap
                 )
 
             }
         ) { padding ->
             Box(modifier = Modifier.fillMaxSize()) {
                 AppIconButton(
-                    modifier=Modifier.align(Alignment.TopStart).padding(start = 4.dp) ,
+                    modifier= Modifier
+                        .align(Alignment.TopStart)
+                        .padding(start = 4.dp) ,
                     imageVector = Icons.Default.ArrowBack,
                     title = "Return to Reader Screen",
                     onClick = {

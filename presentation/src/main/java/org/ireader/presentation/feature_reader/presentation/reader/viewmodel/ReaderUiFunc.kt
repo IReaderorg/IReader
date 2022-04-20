@@ -27,7 +27,6 @@ interface ReaderUiFunctions {
     fun ReaderScreenViewModel.restoreSetting(context: Context, scrollState: LazyListState)
     fun ReaderScreenViewModel.toggleSettingMode(enable: Boolean, returnToMain: Boolean? = null)
     fun ReaderScreenViewModel.reverseChapters()
-    //fun ReaderScreenViewModel.getCurrentIndex(): Int
     fun ReaderScreenViewModel.bookmarkChapter()
 
 }
@@ -97,17 +96,6 @@ class ReaderUiFunctionsImpl @Inject constructor() : ReaderUiFunctions {
         }
     }
 
-//    override fun ReaderScreenViewModel.getCurrentIndex(): Int {
-//        return if (state.currentChapterIndex < 0) {
-//            0
-//        } else if (state.currentChapterIndex > (state.stateChapters.lastIndex)) {
-//            state.stateChapters.lastIndex
-//        } else if (state.currentChapterIndex == -1) {
-//            0
-//        } else {
-//            state.currentChapterIndex
-//        }
-//    }
 
 
     override fun ReaderScreenViewModel.reverseChapters() {

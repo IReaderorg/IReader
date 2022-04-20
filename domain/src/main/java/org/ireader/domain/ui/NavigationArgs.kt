@@ -9,6 +9,14 @@ object NavigationArgs {
         type = NavType.LongType
         defaultValue = 0L
     }
+    val readingParagraph = navArgument("readingParagraph") {
+        type = NavType.LongType
+        defaultValue = 0L
+    }
+    val voiceMode = navArgument("voiceMode") {
+        type = NavType.LongType
+        defaultValue = 0L
+    }
     val sourceId = navArgument("sourceId") {
         type = NavType.LongType
         defaultValue = 0L
