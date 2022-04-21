@@ -22,6 +22,8 @@ SELECT DISTINCT library.* FROM library
     """)
     suspend fun findPagedExploreBooks(): List<Book>
 
+
+    @RewriteQueriesToDropUnusedColumns
     @Query("""
 SELECT DISTINCT library.*,0 as totalDownload 
 FROM library
@@ -86,10 +88,10 @@ FROM library
 
     @Query("""
         DELETE FROM chapter
-        WHERE bookId IN (
+        WHERE chapter.bookId IN (
         SELECT library.id  FROM library
                 WHERE library.favorite = 0
-        ) OR bookId NOT IN (
+        ) AND bookId NOT IN (
          SELECT history.bookId  FROM history
         )
     """)

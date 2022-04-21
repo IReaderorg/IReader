@@ -2,7 +2,7 @@ package org.ireader.domain.models.update_service_models
 
 import androidx.annotation.Keep
 
-@Keep
+
 data class Version(
     val version: String,
 ) {

@@ -17,6 +17,7 @@ dependencies {
 
     api(libs.ktor.core)
     implementation(libs.ktor.contentNegotiation)
+    implementation(libs.ktor.contentNegotiation.gson)
 
 
 

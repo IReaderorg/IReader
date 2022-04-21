@@ -40,12 +40,12 @@ fun ReadingScreen(
     source: Source,
     scrollState: LazyListState,
     drawerScrollState: LazyListState,
+    swipeState: SwipeRefreshState,
     onNext: () -> Unit,
     onPrev: (scrollToEnd: Boolean) -> Unit,
     onChapter: (Chapter) -> Unit,
     onSliderFinished: () -> Unit,
     onSliderChange: (index: Float) -> Unit,
-    swipeState: SwipeRefreshState,
     onDrawerRevereIcon: (Chapter?) -> Unit,
     onReaderRefresh:(Chapter?) -> Unit,
     onReaderWebView:(ModalBottomSheetState) -> Unit,
@@ -277,7 +277,8 @@ fun ReadingScreen(
                 source = source,
                 chapters = chapters,
                 drawerScrollState = drawerScrollState,
-                onMap = onMap
+                onMap = onMap,
+                readerScreenState = vm
             )
 
         }

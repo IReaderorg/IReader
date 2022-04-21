@@ -8,7 +8,7 @@ import androidx.compose.material.lightColors
 import androidx.compose.ui.graphics.Color
 import org.ireader.core_ui.ui.Colour
 
-@Keep
+
 data class Theme(
     val id: Int,
     val materialColors: Colors,

@@ -5,7 +5,7 @@ import org.ireader.domain.use_cases.local.delete_usecases.chapter.UpdateChapters
 import org.ireader.domain.use_cases.local.insert_usecases.*
 import javax.inject.Inject
 
-@Keep
+
 data class LocalInsertUseCases @Inject constructor(
     val insertBook: InsertBook,
     val insertBooks: InsertBooks,

@@ -57,5 +57,4 @@ class WebViewCookieJar : CookieJar {
   fun removeAll() {
     manager.removeAllCookies {}
   }
-
 }

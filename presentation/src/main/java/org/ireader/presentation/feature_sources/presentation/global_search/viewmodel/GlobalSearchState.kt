@@ -21,7 +21,7 @@ open class GlobalSearchStateImpl @Inject constructor() : GlobalSearchState {
     override var searchMode: Boolean by mutableStateOf(false)
 }
 
-@Keep
+
 data class SearchItem(
     val source: Source,
     val items: List<Book> = emptyList(),

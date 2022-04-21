@@ -11,6 +11,8 @@ package org.ireader.core_api.http
 import android.app.Application
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.serialization.gson.*
 import okhttp3.Cache
 import okhttp3.OkHttpClient
 import java.io.File
@@ -38,6 +40,9 @@ class HttpClients @Inject internal constructor(context: Application, browseEngin
     val default = HttpClient(OkHttp) {
         engine {
             preconfigured = okhttpClient
+        }
+        install(ContentNegotiation) {
+            gson()
         }
     }
 

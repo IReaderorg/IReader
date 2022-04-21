@@ -24,6 +24,9 @@ fun exceptionHandler(e: Throwable): UiText? {
         is NoSuchMethodError -> {
             UiText.StringResource(R.string.library_is_out_of_date)
         }
+        is java.lang.ClassCastException -> {
+            null
+        }
         else -> {
             UiText.ExceptionString(e)
         }

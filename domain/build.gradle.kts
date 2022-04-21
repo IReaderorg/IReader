@@ -52,10 +52,6 @@ dependencies {
     implementation(kotlinx.coroutines.android)
 
 
-    /** Retrofit **/
-    implementation(libs.retrofit.retrofit)
-    implementation(libs.retrofit.moshiConverter)
-
     implementation(libs.okhttp.okhttp3)
     implementation(libs.okhttp.interceptor)
     implementation(libs.okhttp.doh)

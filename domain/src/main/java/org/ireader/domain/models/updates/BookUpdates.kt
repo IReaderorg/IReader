@@ -2,7 +2,7 @@ package org.ireader.domain.models.updates
 
 import androidx.annotation.Keep
 
-@Keep
+
 data class BookUpdates(
     val id: Long = 0,
     val sourceId: Long? = null,

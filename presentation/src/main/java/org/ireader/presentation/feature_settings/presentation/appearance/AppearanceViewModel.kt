@@ -22,7 +22,7 @@ class AppearanceViewModel @Inject constructor(
     }
 }
 
-@Keep
+
 data class MainScreenState(
     val darkMode: Boolean = true,
 )

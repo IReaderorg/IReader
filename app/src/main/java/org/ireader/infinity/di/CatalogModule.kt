@@ -6,6 +6,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import org.ireader.core_api.http.HttpClients
+import org.ireader.core_api.os.PackageInstaller
 import org.ireader.data.catalog.AndroidCatalogInstallationChanges
 import org.ireader.data.catalog.AndroidCatalogInstaller
 import org.ireader.data.catalog.AndroidCatalogLoader
@@ -60,8 +61,9 @@ class CatalogModule {
         context: Application,
         httpClient: HttpClients,
         installationChanges: AndroidCatalogInstallationChanges,
+        packageInstaller: PackageInstaller
     ): CatalogInstaller {
-        return AndroidCatalogInstaller(context, httpClient, installationChanges)
+        return AndroidCatalogInstaller(context, httpClient, installationChanges,packageInstaller)
     }
 
     @Provides

@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.flow
 import org.ireader.core_api.http.HttpClients
 import org.ireader.core_api.io.saveTo
 import org.ireader.core_api.log.Log
+import org.ireader.core_api.os.PackageInstaller
 import org.ireader.domain.catalog.model.InstallStep
 import org.ireader.domain.catalog.service.CatalogInstaller
 import org.ireader.domain.models.entities.CatalogRemote
@@ -33,6 +34,7 @@ class AndroidCatalogInstaller @Inject constructor(
     private val context: Application,
     private val httpClient: HttpClients,
     private val installationChanges: AndroidCatalogInstallationChanges,
+    private val packageInstaller : PackageInstaller
 ) : CatalogInstaller {
 
     /**
@@ -63,13 +65,16 @@ class AndroidCatalogInstaller @Inject constructor(
 
             emit(InstallStep.Installing)
 
-            val extDir = File(context.filesDir, "catalogs/${catalog.pkgName}").apply { mkdirs() }
-            val apkFile = File(extDir, tmpApkFile.name)
-            val iconFile = File(extDir, tmpIconFile.name)
+//            val extDir = File(context.filesDir, "catalogs/${catalog.pkgName}").apply { mkdirs() }
+//            val apkFile = File(extDir, tmpApkFile.name)
+//            val iconFile = File(extDir, tmpIconFile.name)
+            val success = packageInstaller.install(tmpApkFile,catalog.pkgName)
 
-            val apkSuccess = tmpApkFile.renameTo(apkFile)
-            val iconSuccess = tmpIconFile.renameTo(iconFile)
-            val success = apkSuccess && iconSuccess
+            tmpApkFile.deleteRecursively()
+            tmpIconFile.deleteRecursively()
+           // val apkSuccess = tmpApkFile.renameTo(apkFile)
+          //  val iconSuccess = tmpIconFile.renameTo(iconFile)
+         //   val success = apkSuccess && iconSuccess
             if (success) {
                 installationChanges.notifyAppInstall(catalog.pkgName)
             }
@@ -89,10 +94,16 @@ class AndroidCatalogInstaller @Inject constructor(
      * @param pkgName The package name of the extension to uninstall
      */
     override suspend fun uninstall(pkgName: String): Boolean {
-        val file = File(context.filesDir, "catalogs/${pkgName}")
-        val deleted = file.deleteRecursively()
-        installationChanges.notifyAppUninstall(pkgName)
-        return deleted
+        return try {
+            val deleted = packageInstaller.uninstall(pkgName)
+            installationChanges.notifyAppUninstall(pkgName)
+            deleted
+        }catch (e:Exception) {
+            false
+        }
+//        val file = File(context.filesDir, "catalogs/${pkgName}")
+//        val deleted = file.deleteRecursively()
+
     }
 
 }

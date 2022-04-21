@@ -21,12 +21,9 @@ dependencies {
     implementation(libs.okhttp.doh)
     implementation(libs.okio)
 
-    implementation(libs.retrofit.retrofit)
-    implementation(libs.retrofit.moshiConverter)
 
     implementation(libs.hilt.android)
-    implementation(libs.moshi.moshi)
-    implementation(libs.moshi.kotlin)
+
 
     implementation(libs.jsoup)
     implementation(androidx.dataStore)

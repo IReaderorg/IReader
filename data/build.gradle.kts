@@ -74,18 +74,12 @@ dependencies {
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
 
-    implementation(libs.moshi.moshi)
-    implementation(libs.moshi.kotlin)
 
     implementation(libs.okhttp.interceptor)
 
     /** Coroutine **/
     implementation(kotlinx.coroutines.core)
     implementation(kotlinx.coroutines.android)
-
-    /** Retrofit **/
-    implementation(libs.retrofit.retrofit)
-    implementation(libs.retrofit.moshiConverter)
 
 
     testImplementation(test.bundles.common)

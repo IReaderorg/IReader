@@ -302,7 +302,7 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
         if (increase) {
             autoScrollInterval += 500
             readerUseCases.autoScrollMode.saveInterval(autoScrollInterval + 500)
-        } else if (autoScrollInterval > 0){
+        } else if (autoScrollInterval > 1){
             autoScrollInterval -= 500
             readerUseCases.autoScrollMode.saveInterval(autoScrollInterval - 500)
         }
@@ -312,7 +312,7 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
         if (increase) {
             autoScrollOffset += 50
             readerUseCases.autoScrollMode.saveOffset(autoScrollOffset + 50)
-        } else if (autoScrollOffset > 0) {
+        } else if (autoScrollOffset > 50) {
             autoScrollOffset -= 50
             readerUseCases.autoScrollMode.saveOffset(autoScrollOffset - 50)
         }

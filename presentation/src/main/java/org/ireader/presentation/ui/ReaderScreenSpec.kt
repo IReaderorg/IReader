@@ -24,6 +24,7 @@ import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.services.tts_service.Player
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.presentation.feature_reader.presentation.reader.ReadingScreen
+import org.ireader.presentation.feature_reader.presentation.reader.reverse_swip_refresh.SwipeRefreshState
 import org.ireader.presentation.feature_reader.presentation.reader.reverse_swip_refresh.rememberSwipeRefreshState
 import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.FontSizeEvent
 import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.ReaderScreenViewModel
@@ -229,13 +230,13 @@ object ReaderScreenSpec : ScreenSpec {
                 onReaderDrawerRevereIcon = { ch ->
                     if (ch != null) {
                         vm.uiFunc.apply {
-                            vm.reverseChapters()
+                            vm.isDrawerAsc = !vm.isDrawerAsc
                         }
-                        vm.mainFunc.apply {
-                            scope.launch {
-                                vm.getLocalChaptersByPaging(ch.bookId)
-                            }
-                        }
+//                        vm.mainFunc.apply {
+//                            scope.launch {
+//                                vm.getLocalChaptersByPaging(ch.bookId)
+//                            }
+//                        }
                     }
                 },
                 onReaderRefresh = { ch ->
@@ -285,7 +286,7 @@ object ReaderScreenSpec : ScreenSpec {
                     scope.launch {
                         try {
                             val index =
-                                vm.stateChapters.indexOfFirst { it.id == vm.stateChapter?.id }
+                                vm.drawerChapters.value.indexOfFirst { it.id == vm.stateChapter?.id }
                             if (index != -1) {
                                 drawer.scrollToItem(index,
                                     -drawer.layoutInfo.viewportEndOffset / 2)
@@ -294,7 +295,10 @@ object ReaderScreenSpec : ScreenSpec {
 
                         }
                     }
-                }
+                },
+                drawerScrollState = drawerScrollState,
+                scrollState = scrollState,
+                swipeState = swipeState
             )
         } else {
             EmptyScreenComposable(navController = navController,
@@ -313,6 +317,9 @@ fun MainReader(
     ttsState: TTSState,
     source: Source,
     navController: NavController,
+    scrollState: LazyListState,
+    drawerScrollState: LazyListState,
+    swipeState: SwipeRefreshState,
     onTTTSPrev: () -> Unit,
     onTTTSPrevPar: () -> Unit,
     onTTTSNext: () -> Unit,
@@ -334,10 +341,7 @@ fun MainReader(
     onBottomBarReaderPlay: () -> Unit,
     onMap:(LazyListState) -> Unit
 ) {
-    val scrollState = rememberLazyListState()
     val context = LocalContext.current
-    val drawerScrollState = rememberLazyListState()
-    val swipeState = rememberSwipeRefreshState(isRefreshing = ttsState.ttsIsLoading)
     when {
         ttsState.voiceMode -> {
             TTSScreen(

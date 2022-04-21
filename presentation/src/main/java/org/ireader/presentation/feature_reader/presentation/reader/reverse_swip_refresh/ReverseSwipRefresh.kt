@@ -216,7 +216,7 @@ private class SwipeRefreshNestedScrollConnection(
  * @param content The content containing a scroll composable.
  */
 
-@Keep
+
 data class ISwipeRefreshIndicator(
     val enable: Boolean,
     val alignment: Alignment,

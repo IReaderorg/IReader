@@ -97,9 +97,7 @@ fun GlobalSearchBookInfo(
                 SmallTextComposable(text = book.source.lang.uppercase())
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
-                if (book.loading) {
-                    DotsFlashing()
-                }
+                DotsFlashing(book.loading)
                 AppIconButton(imageVector = Icons.Default.ArrowForward,
                     title = "open explore",
                     onClick = goToExplore)

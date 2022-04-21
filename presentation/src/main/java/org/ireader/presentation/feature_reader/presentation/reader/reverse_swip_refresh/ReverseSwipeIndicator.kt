@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.dp
  * @param arrowHeight The height of the arrow.
  */
 @Immutable
-@Keep
+
 private data class SwipeRefreshIndicatorSizes(
     val size: Dp,
     val arcRadius: Dp,

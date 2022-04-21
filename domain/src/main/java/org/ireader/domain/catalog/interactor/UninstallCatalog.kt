@@ -14,6 +14,7 @@ import javax.inject.Inject
 
 class UninstallCatalog @Inject constructor(
     private val catalogInstaller: CatalogInstaller,
+
 ) {
 
     suspend fun await(catalog: CatalogInstalled): Boolean {

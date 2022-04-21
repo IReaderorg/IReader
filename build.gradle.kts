@@ -29,6 +29,7 @@ buildscript {
 plugins {
     id("com.autonomousapps.dependency-analysis") version "1.1.0"
     id("com.github.ben-manes.versions") version "0.42.0"
+    id("com.osacky.doctor") version "0.8.0"
 }
 
 subprojects {
@@ -36,10 +37,7 @@ subprojects {
         kotlinOptions {
             jvmTarget = "11"
             freeCompilerArgs = freeCompilerArgs + listOf(
-                "-Xjvm-default=compatibility",
                 "-Xopt-in=kotlin.RequiresOptIn",
-                "-XXLanguage:+InlineClasses",
-                "-Xallow-result-return-type",
             )
         }
     }
@@ -56,8 +54,6 @@ subprojects {
                 versionCode = ProjectConfig.versionCode
                 versionName = ProjectConfig.versionName
             }
-
-
 
             compileOptions {
                 isCoreLibraryDesugaringEnabled = true

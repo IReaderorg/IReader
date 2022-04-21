@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 import org.ireader.core.utils.Constants.DOWNLOAD_TABLE
 
 @Entity(tableName = DOWNLOAD_TABLE)
-@Keep
+
 data class SavedDownload(
     @PrimaryKey(autoGenerate = false)
     val chapterId: Long,

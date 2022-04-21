@@ -33,7 +33,7 @@ class BookCover(
 
 }
 
-@Keep
+
 data class HistoryWithRelations(
     val bookId: Long,
     val chapterId: Long,

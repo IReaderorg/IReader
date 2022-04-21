@@ -95,7 +95,7 @@ fun AboutSettingScreen(
 }
 
 sealed class AboutTile(val title: String, val subtitle: String, val intent: Intent) {
-    @Keep
+
     data class Version(val version: String) : AboutTile("Version",
         version,
         Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/kazemcodes/Infinity/releases")))

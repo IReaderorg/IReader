@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 import org.ireader.core.utils.Constants.ImageKeyTable
 
 @Entity(tableName = ImageKeyTable)
-@Keep
+
 data class BrowseRemoteKey(
     @PrimaryKey(autoGenerate = false)
     var id: String,

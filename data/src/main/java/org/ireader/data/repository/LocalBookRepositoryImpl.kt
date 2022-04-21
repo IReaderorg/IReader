@@ -1,10 +1,9 @@
 package org.ireader.data.repository
 
 import kotlinx.coroutines.flow.Flow
-import org.ireader.data.local.AppDatabase
+import kotlinx.coroutines.flow.distinctUntilChanged
 import org.ireader.data.local.dao.LibraryBookDao
 import org.ireader.data.local.dao.RemoteKeysDao
-import org.ireader.data.local.dao.chapterDao
 import org.ireader.domain.models.SortType
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.BookItem
@@ -13,8 +12,6 @@ import org.ireader.domain.repository.LocalBookRepository
 
 class LocalBookRepositoryImpl(
     private val bookDao: LibraryBookDao,
-    private val chapterDao: chapterDao,
-    private val appDatabase: AppDatabase,
     private val remoteKeysDao: RemoteKeysDao,
 ) : LocalBookRepository {
     override suspend fun findAllBooks(): List<Book> {
@@ -22,7 +19,7 @@ class LocalBookRepositoryImpl(
     }
 
     override fun subscribeBookById(id: Long): Flow<Book?> {
-        return bookDao.subscribeBookById(bookId = id)
+        return bookDao.subscribeBookById(bookId = id).distinctUntilChanged()
 
     }
 
@@ -116,7 +113,7 @@ class LocalBookRepositoryImpl(
     }
 
     override suspend fun subscribeBooksByKey(key: String, title: String): Flow<List<Book>> {
-        return bookDao.subscribeBooksByKey(key, title)
+        return bookDao.subscribeBooksByKey(key, title).distinctUntilChanged()
     }
 
 

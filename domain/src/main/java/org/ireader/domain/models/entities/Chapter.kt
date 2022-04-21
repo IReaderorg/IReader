@@ -10,7 +10,7 @@ import org.ireader.core_api.source.model.ChapterInfo
 
 @Serializable
 @Entity(tableName = CHAPTER_TABLE)
-@Keep
+
 data class Chapter(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,

@@ -136,9 +136,8 @@ fun BookDetailScreen(
                                     color = MaterialTheme.colors.onBackground,
                                     style = MaterialTheme.typography.subtitle2
                                 )
-                                if (chapterState.chapterIsLoading) {
-                                    DotsFlashing()
-                                }
+                                DotsFlashing(chapterState.chapterIsLoading)
+
                                 Icon(
                                     imageVector = Icons.Default.ChevronRight,
                                     contentDescription = "Contents Detail",

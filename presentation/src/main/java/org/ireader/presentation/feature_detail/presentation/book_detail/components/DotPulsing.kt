@@ -120,53 +120,55 @@ fun DotsElastic() {
 }
 
 @Composable
-fun DotsFlashing() {
-    val minAlpha = 0.1f
+fun DotsFlashing(show:Boolean) {
+    if (show) {
+        val minAlpha = 0.1f
 
-    @Composable
-    fun Dot(
-        alpha: Float,
-    ) = Spacer(
-        Modifier
-            .size(dotSize)
-            .alpha(alpha)
-            .background(
-                color = MaterialTheme.colors.primary,
-                shape = CircleShape
-            )
-    )
-
-    val infiniteTransition = rememberInfiniteTransition()
-
-    @Composable
-    fun animateAlphaWithDelay(delay: Int) = infiniteTransition.animateFloat(
-        initialValue = minAlpha,
-        targetValue = minAlpha,
-        animationSpec = infiniteRepeatable(
-            animation = keyframes {
-                durationMillis = delayUnit * 4
-                minAlpha at delay with LinearEasing
-                1f at delay + delayUnit with LinearEasing
-                minAlpha at delay + delayUnit * 2
-            }
+        @Composable
+        fun Dot(
+            alpha: Float,
+        ) = Spacer(
+            Modifier
+                .size(dotSize)
+                .alpha(alpha)
+                .background(
+                    color = MaterialTheme.colors.primary,
+                    shape = CircleShape
+                )
         )
-    )
 
-    val alpha1 by animateAlphaWithDelay(0)
-    val alpha2 by animateAlphaWithDelay(delayUnit)
-    val alpha3 by animateAlphaWithDelay(delayUnit * 2)
+        val infiniteTransition = rememberInfiniteTransition()
 
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
-    ) {
-        val spaceSize = 2.dp
+        @Composable
+        fun animateAlphaWithDelay(delay: Int) = infiniteTransition.animateFloat(
+            initialValue = minAlpha,
+            targetValue = minAlpha,
+            animationSpec = infiniteRepeatable(
+                animation = keyframes {
+                    durationMillis = delayUnit * 4
+                    minAlpha at delay with LinearEasing
+                    1f at delay + delayUnit with LinearEasing
+                    minAlpha at delay + delayUnit * 2
+                }
+            )
+        )
 
-        Dot(alpha1)
-        Spacer(Modifier.width(spaceSize))
-        Dot(alpha2)
-        Spacer(Modifier.width(spaceSize))
-        Dot(alpha3)
+        val alpha1 by animateAlphaWithDelay(0)
+        val alpha2 by animateAlphaWithDelay(delayUnit)
+        val alpha3 by animateAlphaWithDelay(delayUnit * 2)
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            val spaceSize = 2.dp
+
+            Dot(alpha1)
+            Spacer(Modifier.width(spaceSize))
+            Dot(alpha2)
+            Spacer(Modifier.width(spaceSize))
+            Dot(alpha3)
+        }
     }
 }
 
@@ -309,7 +311,7 @@ fun DotsPreview() = MaterialTheme {
             text = "Dots flashing",
             style = MaterialTheme.typography.h5
         )
-        DotsFlashing()
+        DotsFlashing(true)
 
         Spacer(Modifier.height(spaceSize))
 

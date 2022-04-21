@@ -11,7 +11,7 @@ package org.ireader.presentation.feature_sources.presentation.extension
 import androidx.annotation.Keep
 
 
-/* inline */ @Keep
+/* inline */
 data class Language(val code: String) {
 
     fun toEmoji(): String? {

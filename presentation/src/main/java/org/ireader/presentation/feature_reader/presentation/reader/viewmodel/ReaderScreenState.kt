@@ -5,11 +5,11 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.graphics.Color
 import org.ireader.core.utils.UiText
+import org.ireader.core_api.source.Source
 import org.ireader.core_ui.theme.BackgroundColor
 import org.ireader.core_ui.theme.FontType
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
-import org.ireader.core_api.source.Source
 import javax.inject.Inject
 
 
@@ -21,6 +21,7 @@ open class ReaderScreenStateImpl @Inject constructor() : ReaderScreenState {
     override var isRemoteLoaded by mutableStateOf<Boolean>(false)
     override var enable by mutableStateOf<Boolean>(true)
     override var isDrawerAsc by mutableStateOf<Boolean>(true)
+    override var drawerChapters: State<List<Chapter>> = derivedStateOf {   if (isDrawerAsc) stateChapters else stateChapters.reversed() }
     override var isBookLoaded by mutableStateOf<Boolean>(false)
     override var isReaderModeEnable by mutableStateOf<Boolean>(true)
     override var isSettingModeEnable by mutableStateOf<Boolean>(false)
@@ -46,6 +47,7 @@ interface ReaderScreenState {
     var isRemoteLoaded: Boolean
     var enable: Boolean
     var isDrawerAsc: Boolean
+    var drawerChapters: State<List<Chapter>>
     var isBookLoaded: Boolean
     var isReaderModeEnable: Boolean
     var isSettingModeEnable: Boolean

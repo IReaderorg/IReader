@@ -1,12 +1,9 @@
 package org.ireader.infinity.di
 
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import org.ireader.data.local.AppDatabase
 import org.ireader.data.local.dao.HistoryDao
 import org.ireader.data.local.dao.LibraryBookDao
 import org.ireader.data.local.dao.RemoteKeysDao
@@ -35,13 +32,9 @@ class AppModule {
     @Singleton
     fun providesLibraryRepository(
         libraryBookDao: LibraryBookDao,
-        chapterDao: chapterDao,
-        database: AppDatabase,
         remoteKeysDao: RemoteKeysDao,
     ): LocalBookRepository {
         return LocalBookRepositoryImpl(libraryBookDao,
-            chapterDao,
-            database,
             remoteKeysDao = remoteKeysDao)
     }
 
@@ -51,14 +44,6 @@ class AppModule {
         historyDao: HistoryDao,
     ): HistoryRepository {
         return HistoryRepositoryImpl(historyDao)
-    }
-
-    @Singleton
-    @Provides
-    fun providesMosh(): Moshi {
-        return Moshi.Builder()
-            .add(KotlinJsonAdapterFactory())
-            .build()
     }
 
 

@@ -11,7 +11,7 @@ import androidx.core.graphics.drawable.toBitmap
 import coil.ImageLoader
 import coil.request.ImageRequest
 
-@Keep
+
 data class Channel(
     val name: String,
     val id: String,

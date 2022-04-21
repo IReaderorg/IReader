@@ -1,0 +1,20 @@
+{
+  "version": 3,
+  "artifactType": {
+    "type": "APK",
+    "kind": "Directory"
+  },
+  "applicationId": "ir.kazemcodes.infinityreader",
+  "variantName": "release",
+  "elements": [
+    {
+      "type": "SINGLE",
+      "filters": [],
+      "attributes": [],
+      "versionCode": 24,
+      "versionName": "0.1.19",
+      "outputFile": "app-release.apk"
+    }
+  ],
+  "elementType": "File"
+}

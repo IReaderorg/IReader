@@ -8,7 +8,7 @@ import org.ireader.core_api.prefs.Preference
 import org.ireader.core_ui.ui.PreferenceMutableState
 import org.ireader.core_ui.ui.asStateIn
 
-@Keep
+
 data class CustomizableAppColorsPreference(
     val primary: Preference<Color>,
     val secondary: Preference<Color>,

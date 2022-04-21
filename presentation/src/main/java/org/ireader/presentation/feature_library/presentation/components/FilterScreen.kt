@@ -45,7 +45,7 @@ fun FilterScreen(
     }
 }
 
-@Keep
+
 private data class FilterItem(
     val name: String,
     val type: FilterType,

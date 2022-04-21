@@ -15,17 +15,17 @@ interface CatalogInstallationChanges {
     val flow: SharedFlow<CatalogInstallationChange>
 }
 
-@Keep
+
 sealed class CatalogInstallationChange {
     abstract val pkgName: String
 
-    @Keep
+
     data class SystemInstall(override val pkgName: String) : CatalogInstallationChange()
-    @Keep
+
     data class SystemUninstall(override val pkgName: String) : CatalogInstallationChange()
 
-    @Keep
+
     data class LocalInstall(override val pkgName: String) : CatalogInstallationChange()
-    @Keep
+
     data class LocalUninstall(override val pkgName: String) : CatalogInstallationChange()
 }

@@ -257,11 +257,11 @@ fun TTSScreen(
                             vm.uiFunc.apply {
                                 vm.reverseChapters()
                             }
-                            vm.mainFunc.apply {
-                                scope.launch {
-                                    vm.getLocalChaptersByPaging(chapter.bookId)
-                                }
-                            }
+//                            vm.mainFunc.apply {
+//                                scope.launch {
+//                                    vm.getLocalChaptersByPaging(chapter.bookId)
+//                                }
+//                            }
                         }
                     },
                     onChapter = onChapter,
@@ -269,7 +269,8 @@ fun TTSScreen(
                     source = source,
                     chapters = chapters,
                     drawerScrollState = drawerScrollState,
-                    onMap = onMap
+                    onMap = onMap,
+                    readerScreenState = vm
                 )
 
             }

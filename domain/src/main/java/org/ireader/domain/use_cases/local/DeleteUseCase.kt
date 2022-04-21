@@ -9,7 +9,7 @@ import org.ireader.domain.use_cases.local.delete_usecases.chapter.DeleteChapters
 import org.ireader.domain.use_cases.remote.key.DeleteAllRemoteKeys
 import javax.inject.Inject
 
-@Keep
+
 data class DeleteUseCase @Inject constructor(
     val deleteAllExploreBook: DeleteAllExploreBook,
     val deleteBooks: DeleteBooks,

@@ -12,7 +12,7 @@ import org.ireader.core_api.source.model.Listing
 import org.ireader.core_api.source.model.MangasPageInfo
 
 
-@Keep
+
 data class ExploreScreenState(
     val isLoading: Boolean = false,
     val books: List<Book> = emptyList(),

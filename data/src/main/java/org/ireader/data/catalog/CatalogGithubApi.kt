@@ -1,6 +1,5 @@
 package org.ireader.data.catalog
 
-import androidx.annotation.Keep
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import kotlinx.serialization.Serializable
@@ -37,7 +36,7 @@ class CatalogGithubApi @Inject constructor(
         }
     }
 
-    @Keep
+
     @Serializable
     private data class CatalogRemoteApiModel(
         val name: String,

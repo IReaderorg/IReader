@@ -4,7 +4,7 @@ import androidx.annotation.Keep
 import org.ireader.domain.use_cases.local.book_usecases.*
 import javax.inject.Inject
 
-@Keep
+
 data class LocalGetBookUseCases @Inject constructor(
     val subscribeBookById: SubscribeBookById,
     val findBookById: FindBookById,

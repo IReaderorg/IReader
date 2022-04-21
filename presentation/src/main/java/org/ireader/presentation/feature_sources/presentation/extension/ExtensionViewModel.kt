@@ -99,7 +99,6 @@ class ExtensionViewModel @Inject constructor(
     fun uninstallCatalog(catalog: Catalog) {
         scope.launch {
             uninstallCatalog.await(catalog as CatalogInstalled)
-            showSnackBar(UiText.StringResource(R.string.uninstalled))
         }
     }
 

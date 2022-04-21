@@ -99,7 +99,7 @@ class ReaderUiFunctionsImpl @Inject constructor() : ReaderUiFunctions {
 
 
     override fun ReaderScreenViewModel.reverseChapters() {
-        toggleIsAsc(!prefState.isAsc)
+        toggleIsAsc(!isAsc)
     }
 
     override fun ReaderScreenViewModel.bookmarkChapter() {

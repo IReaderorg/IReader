@@ -243,7 +243,7 @@ class AndroidCatalogLoader @Inject constructor(
     }
   }
 
-    @Keep
+
     private data class ValidatedData(
         val versionCode: Int,
         val versionName: String,

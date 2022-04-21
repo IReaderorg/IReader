@@ -159,15 +159,15 @@ object BookDetailScreenSpec : ScreenSpec {
                 }
             }
         }
-        LaunchedEffect(key1 = true) {
-            book?.let {
-                if (source != null) {
-                    viewModel.getLocalBookById(bookId = book.id, source = source)
-                }
-                viewModel.getLocalChaptersByBookId(bookId = book.id)
-            }
-
-        }
+//        LaunchedEffect(key1 = true) {
+//            book?.let {
+//                if (source != null) {
+//                    viewModel.getLocalBookById(bookId = book.id, source = source)
+//                }
+//                viewModel.getLocalChaptersByBookId(bookId = book.id)
+//            }
+//
+//        }
     }
 
 }

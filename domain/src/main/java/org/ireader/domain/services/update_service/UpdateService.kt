@@ -42,7 +42,7 @@ class UpdateService @AssistedInject constructor(
 
         val release = api.checkRelease()
 
-        val version = Version.create(release.tagName)
+        val version = Version.create(release.tag_name)
 
         BuildConfig.LIBRARY_PACKAGE_NAME
         val versionCode: String =
@@ -53,7 +53,7 @@ class UpdateService @AssistedInject constructor(
             }
         val current = Version.create(versionCode)
 
-        if (Version.isNewVersion(release.tagName, versionCode)) {
+        if (Version.isNewVersion(release.tag_name, versionCode)) {
             lastUpdateTime.save(Calendar.getInstance().timeInMillis)
             with(NotificationManagerCompat.from(applicationContext)) {
                 notify(ID_APP_UPDATER, createNotification(current, version, createIntent(release)))
@@ -75,7 +75,7 @@ class UpdateService @AssistedInject constructor(
     private fun createIntent(release: Release) = PendingIntent.getActivity(
         context.applicationContext,
         release.hashCode(),
-        Intent(Intent.ACTION_VIEW, release.htmlUrl.toUri()),
+        Intent(Intent.ACTION_VIEW, release.html_url.toUri()),
         flags
     )
 

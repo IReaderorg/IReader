@@ -101,8 +101,6 @@ fun ReaderText(
             )
             {
                 vm.stateContent?.value?.let { content ->
-
-
                     LazyColumn(
                         state = scrollState,
                         modifier = Modifier
@@ -210,6 +208,7 @@ fun LazyListState.isScrolledToTheEnd(): Boolean {
     val lastItem = layoutInfo.visibleItemsInfo.lastOrNull()
     return lastItem == null || lastItem.size + lastItem.offset <= layoutInfo.viewportEndOffset
 }
+
 fun LazyGridState.isScrolledToTheEnd(): Boolean {
     val lastItem = layoutInfo.visibleItemsInfo.lastOrNull()
     return lastItem == null || lastItem.size.height + lastItem.offset.y <= layoutInfo.viewportEndOffset

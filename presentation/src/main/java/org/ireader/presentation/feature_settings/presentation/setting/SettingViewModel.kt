@@ -133,7 +133,7 @@ class SettingViewModel @Inject constructor(
 }
 
 @Serializable
-@Keep
+
 data class BackUpBook(
     val book: Book,
     val chapters: List<Chapter>,

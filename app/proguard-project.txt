@@ -1,2 +1,0 @@
--keep class org.ireader.domain.models.** { *; }
--keep class org.ireader.presentation.feature_services.updater_service.models.** { *; }

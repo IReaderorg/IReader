@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 import kotlinx.datetime.Clock
 import org.ireader.core.utils.Constants
 
-@Keep
+
 data class UpdateWithInfo(
     val id: Long = 0,
     val chapterId: Long,
@@ -37,7 +37,7 @@ data class UpdateWithInfo(
 }
 
 @Entity(tableName = Constants.UPDATE_TABLE)
-@Keep
+
 data class Update(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,

@@ -48,7 +48,7 @@ class GetCatalogsByType @Inject constructor(
         }
     }
 
-    @Keep
+
     data class Catalogs(
         val pinned: List<CatalogLocal>,
         val unpinned: List<CatalogLocal>,

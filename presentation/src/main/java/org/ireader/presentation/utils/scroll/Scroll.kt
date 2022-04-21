@@ -298,7 +298,7 @@ private fun Modifier.scroll(
     }
 )
 
-@Keep
+
 private data class ScrollingLayoutModifier(
     val scrollerState: CarouselScrollState,
     val isReversed: Boolean,
