@@ -27,12 +27,12 @@ fun <T> runBlocking(
 ): T {
     return kotlinx.coroutines.runBlocking(context, block)
 }
-
+@kotlinx.coroutines.ObsoleteCoroutinesApi
 class ActorScope<E>(private val actorScope: kotlinx.coroutines.channels.ActorScope<E>) {
     val channel
         get() = actorScope.channel
 }
-
+@kotlinx.coroutines.ObsoleteCoroutinesApi
 fun <E> CoroutineScope.actor(
     context: CoroutineContext,
     capacity: Int,

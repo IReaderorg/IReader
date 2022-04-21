@@ -4,8 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -18,16 +16,13 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import org.ireader.core_api.log.Log
 import org.ireader.domain.models.entities.Catalog
 import org.ireader.domain.models.entities.CatalogInstalled
-import org.ireader.domain.models.entities.CatalogLocal
 import org.ireader.presentation.feature_sources.presentation.extension.CatalogItem
 import org.ireader.presentation.feature_sources.presentation.extension.CatalogsState
-import org.ireader.presentation.feature_sources.presentation.extension.ExtensionViewModel
 
 
 @Composable
 fun RemoteSourcesScreen(
     modifier: Modifier = Modifier,
-    viewModel: ExtensionViewModel,
     state: CatalogsState,
     onRefreshCatalogs: () -> Unit,
     onClickInstall: (Catalog) -> Unit,
@@ -35,24 +30,9 @@ fun RemoteSourcesScreen(
 ) {
     val scrollState = rememberLazyListState()
     val swipeState = rememberSwipeRefreshState(isRefreshing = state.isRefreshing)
-    val all = (state.pinnedCatalogs + state.unpinnedCatalogs)
-    val catalogLocalItem: LazyListScope.(CatalogLocal) -> Unit = { catalog ->
-        item {
-            kotlin.runCatching {
-                CatalogItem(
-                    catalog = catalog,
-                    installStep = if (catalog is CatalogInstalled) state.installSteps[catalog.pkgName] else null,
-                    onInstall = { onClickInstall(catalog) }.takeIf { catalog.hasUpdate },
-                    onUninstall = { onClickUninstall(catalog) }.takeIf { catalog is CatalogInstalled },
-                )
-            }.getOrElse {
-                Log.error { catalog.name + "Throws an error" + it.message }
-            }
-        }
-    }
-
+    val allCatalogs = (state.pinnedCatalogs + state.unpinnedCatalogs)
     SwipeRefresh(state = swipeState,
-        onRefresh = { viewModel.refreshCatalogs() },
+        onRefresh = { onRefreshCatalogs() },
         indicator = { _, trigger ->
             SwipeRefreshIndicator(
                 state = swipeState,
@@ -68,17 +48,21 @@ fun RemoteSourcesScreen(
             state = scrollState,
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally) {
-            if (all.isNotEmpty()) {
+            if (allCatalogs.isNotEmpty()) {
                 item {
                     TextSection(
                         text = "Installed",
                     )
                 }
-
-                for (catalog in all) {
-                    catalogLocalItem(catalog)
+                items(allCatalogs.size) { index ->
+                    val catalog = allCatalogs[index]
+                    CatalogItem(
+                        catalog = catalog,
+                        installStep = if (catalog is CatalogInstalled) state.installSteps[catalog.pkgName] else null,
+                        onInstall = { onClickInstall(catalog) }.takeIf { catalog.hasUpdate },
+                        onUninstall = { onClickUninstall(catalog) }.takeIf { catalog is CatalogInstalled },
+                    )
                 }
-
             }
             if (state.remoteCatalogs.isNotEmpty()) {
                 item {
@@ -97,7 +81,8 @@ fun RemoteSourcesScreen(
                 }
                 //ERROR : this lines may throws anexception
                 kotlin.runCatching {
-                    items(state.remoteCatalogs) { catalog ->
+                    items(state.remoteCatalogs.size) { index ->
+                        val catalog = state.remoteCatalogs[index]
                         CatalogItem(
                             catalog = catalog,
                             installStep = state.installSteps[catalog.pkgName],

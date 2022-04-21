@@ -96,12 +96,6 @@ fun Context.findComponentActivity(): ComponentActivity? = when (this) {
     else -> null
 }
 
-
-fun showInterstitial(context: Context) {
-    val activity = context.findAppCompatAcivity()
-}
-
-
 private const val TABLET_UI_MIN_SCREEN_WIDTH_DP = 720
 
 

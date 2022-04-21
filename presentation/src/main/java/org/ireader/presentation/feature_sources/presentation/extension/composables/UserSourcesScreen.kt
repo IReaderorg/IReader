@@ -3,7 +3,6 @@ package org.ireader.presentation.feature_sources.presentation.extension.composab
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
@@ -26,23 +25,7 @@ fun UserSourcesScreen(
     onClickTogglePinned: (CatalogLocal) -> Unit,
 ) {
     val scrollState = rememberLazyListState()
-
-    val langs = state.unpinnedCatalogs.map { it.source.lang }.distinct()
-
-    val catalogLocalItem: LazyListScope.(CatalogLocal) -> Unit = { catalog ->
-        kotlin.runCatching {
-            item {
-                CatalogItem(
-                    catalog = catalog,
-                    installStep = if (catalog is CatalogInstalled) state.installSteps[catalog.pkgName] else null,
-                    onClick = { onClickCatalog(catalog) },
-                    onPinToggle = { onClickTogglePinned(catalog) }
-                )
-            }
-        }.getOrElse {
-            Log.error { catalog.name + "Throws an error" + it.message }
-        }
-    }
+    val catalogsWithLanguages = state.mappedCatalogs.value
     LazyColumn(modifier = modifier
         .fillMaxSize(),
         state = scrollState,
@@ -55,27 +38,42 @@ fun UserSourcesScreen(
                         text = "Pinned",
                     )
                 }
-                for (catalog in state.pinnedCatalogs) {
-                    catalogLocalItem(catalog)
+                items(state.pinnedCatalogs.size) { index ->
+                    val catalog = state.pinnedCatalogs[index]
+                    CatalogItem(
+                        catalog = catalog,
+                        installStep = if (catalog is CatalogInstalled) state.installSteps[catalog.pkgName] else null,
+                        onClick = { onClickCatalog(catalog) },
+                        onPinToggle = { onClickTogglePinned(catalog) }
+                    )
+
                 }
             }
 
             if (state.unpinnedCatalogs.isNotEmpty()) {
-                for (lang in langs) {
+                catalogsWithLanguages.forEach { (lang, catalogs) ->
                     item {
                         TextSection(
                             text = lang,
                         )
                     }
-                    for (catalog in state.unpinnedCatalogs.filter { it.source.lang == lang }) {
-                        catalogLocalItem(catalog)
+                    items(catalogs.size) { index->
+                        val catalog = catalogs[index]
+                        kotlin.runCatching {
+                        CatalogItem(
+                            catalog = catalog,
+                            installStep = if (catalog is CatalogInstalled) state.installSteps[catalog.pkgName] else null,
+                            onClick = { onClickCatalog(catalog) },
+                            onPinToggle = { onClickTogglePinned(catalog) }
+                        )
+                        }.getOrElse {
+                            Log.error { catalog.name + "Throws an error" + it.message }
+                        }
                     }
                 }
-
-
             }
         }.getOrElse {
-            Log.error {"Throws an error" + it.message }
+            Log.error { "Throws an error" + it.message }
         }
     }
 }

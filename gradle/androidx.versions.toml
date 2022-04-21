@@ -1,10 +1,10 @@
 [versions]
 lifecycle = "2.4.1"
-work = "2.7.1"
+work = "2.8.0-alpha02"
 
 [libraries]
 agp = "com.android.tools.build:gradle:7.1.2"
-core = "androidx.core:core-ktx:1.8.0-alpha05"
+core = "androidx.core:core-ktx:1.9.0-alpha02"
 media = "androidx.media:media:1.6.0"
 appCompat = "androidx.appcompat:appcompat:1.6.0-alpha01"
 browser = "androidx.browser:browser:1.4.0"

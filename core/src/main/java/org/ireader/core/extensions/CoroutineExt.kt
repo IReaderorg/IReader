@@ -38,25 +38,26 @@ val defaultDispatcher = Dispatchers.Default
 val unconfinedDispatcher = Dispatchers.Unconfined
 val ioDispatcher = Dispatchers.IO
 
-
+@OptIn(DelicateCoroutinesApi::class)
 fun <T> ioCoroutineGlobal(coroutineStart: CoroutineStart = CoroutineStart.DEFAULT, block: suspend () -> T): Job =
     GlobalScope.launch(ioDispatcher, coroutineStart) {
         block()
     }
 
-
+@OptIn(DelicateCoroutinesApi::class)
 fun <T> mainCoroutineGlobal(coroutineStart: CoroutineStart = CoroutineStart.DEFAULT, block: suspend () -> T): Job =
     GlobalScope.launch(mainDispatcher, coroutineStart) {
         block()
     }
 
-
+@OptIn(DelicateCoroutinesApi::class)
 fun <T> defaultCoroutineGlobal(coroutineStart: CoroutineStart = CoroutineStart.DEFAULT, block: suspend () -> T): Job =
     GlobalScope.launch(defaultDispatcher, coroutineStart) {
         block()
     }
 
 
+@OptIn(DelicateCoroutinesApi::class)
 fun <T> unconfinedCoroutineGlobal(coroutineStart: CoroutineStart = CoroutineStart.DEFAULT, block: suspend () -> T): Job =
     GlobalScope.launch(unconfinedDispatcher, coroutineStart) {
         block()

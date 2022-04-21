@@ -18,7 +18,7 @@ import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import org.ireader.core.utils.Constants.DEFAULT_ELEVATION
+import org.ireader.core.extensions.viewModelIOCoroutine
 import org.ireader.core.utils.UiEvent
 import org.ireader.core_ui.theme.AppColors
 import org.ireader.domain.models.entities.Catalog
@@ -51,6 +51,7 @@ fun ExtensionScreen(
     val scope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
     val context = LocalContext.current
+
 
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
@@ -168,8 +169,9 @@ fun ExtensionScreen(
         },
         scaffoldState = scaffoldState,
         snackbarHost = { ISnackBarHost(snackBarHostState = it) },
-        ) { padding ->
+    ) { padding ->
         // UserSourcesScreen(viewModel, navController)
+
         Column(modifier = Modifier.fillMaxSize()) {
             TabRow(
                 selectedTabIndex = pagerState.currentPage,
@@ -180,16 +182,17 @@ fun ExtensionScreen(
                         Modifier.pagerTabIndicatorOffset(pagerState, tabPositions)
                     )
                 },
-
                 ) {
-                // Add tabs for all of our pages
                 pages.forEachIndexed { index, title ->
                     Tab(
                         text = {
                             MidSizeTextComposable(text = title, color = Color.Unspecified)
                         },
                         selected = pagerState.currentPage == index,
-                        onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
+                        onClick = {
+                            //TODO: this line throws an exception that is related to compose
+                            //scope.launch { pagerState.animateScrollToPage(index) }
+                        },
                         selectedContentColor = MaterialTheme.colors.primary,
                         unselectedContentColor = MaterialTheme.colors.onBackground,
                     )
@@ -206,12 +209,11 @@ fun ExtensionScreen(
                         UserSourcesScreen(
                             onClickCatalog = onClickCatalog,
                             onClickTogglePinned = onClickTogglePinned,
-                            state = viewModel
+                            state = viewModel,
                         )
                     }
-                    else -> {
+                    1 -> {
                         RemoteSourcesScreen(
-                            viewModel = viewModel,
                             state = viewModel,
                             onRefreshCatalogs = onRefreshCatalogs,
                             onClickInstall = onClickInstall,

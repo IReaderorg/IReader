@@ -17,12 +17,11 @@ buildscript {
         classpath(libs.gradle.hilt)
         classpath(libs.gradle.google)
         classpath(libs.gradle.firebaseCrashlytic)
-       // classpath(libs.gradle.benmanes)
         classpath(libs.ksp.gradle)
         classpath(libs.gradle.idea.ext)
         classpath("com.vanniktech:gradle-maven-publish-plugin:0.19.0")
         classpath("com.android.tools.build:gradle:7.1.3")
-        // classpath("com.autonomousapps:dependency-analysis-gradle-plugin:1.1.0")
+
     }
 }
 
@@ -31,8 +30,18 @@ plugins {
     id("com.github.ben-manes.versions") version "0.42.0"
     id("com.osacky.doctor") version "0.8.0"
 }
-
-subprojects {
+fun isNonStable(version: String): Boolean {
+    val stableKeyword = listOf("RELEASE", "FINAL", "GA").any { version.toUpperCase().contains(it) }
+    val regex = "^[0-9,.v-]+(-r)?$".toRegex()
+    val isStable = stableKeyword || regex.matches(version)
+    return isStable.not()
+}
+allprojects {
+    tasks.withType<com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask> {
+        rejectVersionIf {
+            isNonStable(candidate.version) && !isNonStable(currentVersion)
+        }
+    }
     tasks.withType<org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompile> {
         kotlinOptions {
             jvmTarget = "11"
@@ -41,7 +50,8 @@ subprojects {
             )
         }
     }
-
+}
+subprojects {
     tasks.withType<Test> {
         useJUnitPlatform()
     }
@@ -60,7 +70,11 @@ subprojects {
                 sourceCompatibility(JavaVersion.VERSION_11)
                 targetCompatibility(JavaVersion.VERSION_11)
             }
-
+            tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+                kotlinOptions {
+                    jvmTarget = "11"
+                }
+            }
             dependencies {
                 add("coreLibraryDesugaring", libs.desugarJdkLibs)
             }

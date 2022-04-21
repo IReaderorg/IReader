@@ -1,10 +1,10 @@
 [versions]
 compose = "1.1.1"
-activity = "1.5.0-alpha02"
-lifecycle = "2.4.1"
+activity = "1.6.0-alpha01"
+lifecycle = "2.5.0-beta01"
 
 [libraries]
-compose-runtime = { module = "androidx.compose.runtime:runtime", version.ref = "compose" }
+compose-runtime = { module = "androidx.compose.runtime:runtime", version = "compose" }
 compose-compiler = { module = "androidx.compose.compiler:compiler", version.ref = "compose" }
 compose-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "compose" }
 compose-material = { module = "androidx.compose.material:material", version.ref = "compose" }
@@ -20,7 +20,7 @@ compose-uiTestManifest = { module = "androidx.compose.ui:ui-test-manifest", vers
 compose-uiTesting = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "compose" }
 
 
-compose-navigation = { module = "androidx.navigation:navigation-compose", version = "2.5.0-alpha02" }
+compose-navigation = { module = "androidx.navigation:navigation-compose", version = "2.5.0-beta01" }
 compose-hiltNavigation = { module = "androidx.hilt:hilt-navigation-compose", version = "1.0.0" }
 compose-activity = { module = "androidx.activity:activity-compose", version.ref = "activity" }
 compose-lifecycle = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }

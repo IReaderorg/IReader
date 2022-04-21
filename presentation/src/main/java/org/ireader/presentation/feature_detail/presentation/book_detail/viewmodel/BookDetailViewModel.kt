@@ -86,9 +86,10 @@ class BookDetailViewModel @Inject constructor(
     private fun subscribeBook(bookId: Long, onSuccess:suspend (Book) -> Unit) {
             getBookUseCases.subscribeBookById(bookId)
                 .onEach { snapshot->
-                    snapshot?.let {
-                        setDetailBook(it)
-                        onSuccess(it)
+                    snapshot?.let { book ->
+                        setDetailBook(book)
+                        toggleInLibrary(book.favorite)
+                        onSuccess(book)
                     }
                 }.launchIn(viewModelScope)
     }

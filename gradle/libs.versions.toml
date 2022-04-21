@@ -1,7 +1,7 @@
 [versions]
 ktor = "2.0.0"
-room = "2.4.2"
-okhttp = "4.9.3"
+room = "2.5.0-alpha01"
+okhttp = "5.0.0-alpha.6"
 moshi = "1.13.0"
 hilt = "2.41"
 retrofit = "2.9.0"
@@ -13,8 +13,8 @@ tinylog = "2.4.1"
 [libraries]
 desugarJdkLibs = "com.android.tools:desugar_jdk_libs:1.1.5"
 gradle-tools = "com.android.tools.build:gradle:7.1.3"
-gradle-kotlin = "org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.10"
-gradle-kotlinSerialization = "org.jetbrains.kotlin:kotlin-serialization:1.6.10"
+gradle-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version = "1.6.10" }
+gradle-kotlinSerialization = { module =  "org.jetbrains.kotlin:kotlin-serialization", version = "1.6.10" }
 gradle-hilt = "com.google.dagger:hilt-android-gradle-plugin:2.39.1"
 gradle-google = "com.google.gms:google-services:4.3.10"
 gradle-firebaseCrashlytic = "com.google.firebase:firebase-crashlytics-gradle:2.8.1"
@@ -50,7 +50,7 @@ hilt-worker = "androidx.hilt:hilt-work:1.0.0"
 hilt-androidtest = { module = "com.google.dagger:hilt-android-testing", version.ref = "hilt" }
 
 
-firebase-bom = "com.google.firebase:firebase-bom:29.0.4"
+firebase-bom = "com.google.firebase:firebase-bom:29.3.1"
 firebase-analyticKtx = { module = "com.google.firebase:firebase-analytics-ktx" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 firebase-analytic = { module = "com.google.firebase:firebase-analytics" }

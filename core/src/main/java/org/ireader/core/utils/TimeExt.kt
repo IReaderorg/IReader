@@ -19,8 +19,8 @@ fun currentTimeToLong(): Long {
     return Calendar.getInstance().timeInMillis
 }
 
-fun convertDateToLong(date: String): Long {
+fun convertDateToLong(date: String): Long? {
     val df = SimpleDateFormat("yyyy.MM.dd HH:mm", Locale.US)
-    return df.parse(date).time
+    return df.parse(date)?.time
 }
 

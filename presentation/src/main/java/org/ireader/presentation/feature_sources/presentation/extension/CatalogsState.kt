@@ -1,9 +1,6 @@
 package org.ireader.presentation.feature_sources.presentation.extension
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.referentialEqualityPolicy
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import org.ireader.domain.catalog.model.InstallStep
 import org.ireader.domain.models.entities.CatalogLocal
 import org.ireader.domain.models.entities.CatalogRemote
@@ -19,6 +16,7 @@ interface CatalogsState {
     val installSteps: Map<String, InstallStep>
     val isRefreshing: Boolean
     var searchQuery: String?
+    var mappedCatalogs:  State<Map<String, List<CatalogLocal>>>
 }
 
 fun CatalogsState(): CatalogsState {
@@ -34,6 +32,7 @@ class CatalogsStateImpl @Inject constructor() : CatalogsState {
     override var installSteps by mutableStateOf(emptyMap<String, InstallStep>())
     override var isRefreshing by mutableStateOf(false)
     override var searchQuery by mutableStateOf<String?>(null)
+    override var mappedCatalogs : State<Map<String, List<CatalogLocal>>> = derivedStateOf { unpinnedCatalogs.groupBy { it.source.lang } }
 
     var allPinnedCatalogs by mutableStateOf(
         emptyList<CatalogLocal>(),
