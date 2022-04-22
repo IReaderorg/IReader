@@ -1,6 +1,5 @@
 package org.ireader.presentation.feature_detail.presentation.book_detail.viewmodel
 
-import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -53,18 +52,18 @@ class BookDetailViewModel @Inject constructor(
         if (bookId != null && sourceId != null) {
             val source = getLocalCatalog.get(sourceId)?.source
             this.source = source
-            toggleLocalLoading(true)
-            toggleChaptersLoading(true)
+            toggleBookLoading(true)
+            chapterIsLoading   = true
             subscribeBook(bookId =bookId , onSuccess = { book ->
-                toggleLocalLoading(false)
+                toggleBookLoading(false)
                 if (!initBooks) {
                     initBooks = true
-                    if (book.lastUpdated < 1L && !state.detailIsRemoteLoaded && source != null) {
+                    if (book.lastUpdated < 1L && source != null) {
                         getRemoteBookDetail(book, source)
                         getRemoteChapterDetail(book, source)
                     } else {
-                        toggleLocalLoading(false)
-                        toggleChaptersLoading(false)
+                        toggleBookLoading(false)
+                        chapterIsLoading   = false
                     }
                 }
             })
@@ -88,7 +87,6 @@ class BookDetailViewModel @Inject constructor(
                 .onEach { snapshot->
                     snapshot?.let { book ->
                         setDetailBook(book)
-                        toggleInLibrary(book.favorite)
                         onSuccess(book)
                     }
                 }.launchIn(viewModelScope)
@@ -143,17 +141,14 @@ class BookDetailViewModel @Inject constructor(
 
 
     suspend fun getRemoteBookDetail(book: Book, source: Source) {
-        toggleRemoteLoading(true)
-        clearBookError()
-        isLocalBookLoaded(false)
+        toggleBookLoading(true)
         getBookDetailJob?.cancel()
         getBookDetailJob = viewModelScope.launch(Dispatchers.IO) {
             remoteUseCases.getBookDetail(
                 book = book,
                 source = source,
                 onError = { message ->
-
-                    toggleRemoteLoading(false)
+                    toggleBookLoading(false)
                     insertBookDetailToLocal(state.book!!)
                     if (message != null) {
                         Log.error { message.toString() }
@@ -168,10 +163,7 @@ class BookDetailViewModel @Inject constructor(
                                 book
                             )
                         )
-                        toggleRemoteLoading(false)
-                        clearBookError()
-                        isLocalBookLoaded(true)
-                        isRemoteBookLoaded(true)
+                        toggleBookLoading(false)
                         insertBookDetailToLocal(state.book!!)
                     }
                 }
@@ -183,9 +175,7 @@ class BookDetailViewModel @Inject constructor(
     }
 
     suspend fun getRemoteChapterDetail(book: Book, source: Source) {
-        toggleChaptersLoading(true)
-        clearChapterError()
-        toggleAreChaptersLoaded(false)
+        chapterIsLoading   = true
         getChapterDetailJob?.cancel()
         getChapterDetailJob = viewModelScope.launch {
             remoteUseCases.getRemoteChapters(
@@ -194,25 +184,22 @@ class BookDetailViewModel @Inject constructor(
                 onError = { message ->
                     Log.error { message.toString() }
                     showSnackBar(message)
-                    toggleChaptersLoading(false)
+                    chapterIsLoading   = false
                 },
                 onSuccess = { result ->
                     val uniqueList =
-
                         removeSameItemsFromList(chapterState.chapters,
                             result) {
                             it.link
                         }
-                    setStateChapters(chapters = uniqueList)
-                    clearChapterError()
+                    this@BookDetailViewModel.chapters = uniqueList
                     if (uniqueList.isNotEmpty()) {
                         withContext(Dispatchers.IO) {
                             localInsertUseCases.updateChaptersUseCase(book.id, uniqueList)
-                           //getLocalChaptersByBookId(bookId = book.id)
                         }
 
                     }
-                    toggleChaptersLoading(false)
+                    chapterIsLoading   = false
                 }
             )
         }
@@ -233,10 +220,10 @@ class BookDetailViewModel @Inject constructor(
         }
     }
 
-    fun toggleInLibrary(add: Boolean, book: Book) {
-        this.inLibrary = add
+    fun toggleInLibrary(book: Book) {
+        this.inLibraryLoading = true
         viewModelScope.launch(Dispatchers.IO) {
-            if (add) {
+            if (!book.favorite) {
                 insertBookDetailToLocal(
                     book.copy(
                         id = book.id,
@@ -253,64 +240,24 @@ class BookDetailViewModel @Inject constructor(
                         )))
                 updateChaptersEntity(false, book.id)
             }
+            this@BookDetailViewModel.inLibraryLoading = false
         }
     }
 
 
-    fun startDownloadService(context: Context, book: Book) {
+    fun startDownloadService(book: Book) {
         serviceUseCases.startDownloadServicesUseCase(bookIds = longArrayOf(book.id))
     }
 
-
-    /************************************************************/
-
-
-    private fun toggleChaptersLoading(isLoading: Boolean) {
-        chapterIsLoading = isLoading
+    private fun toggleBookLoading(isLoading: Boolean) {
+        this.detailIsLoading = isLoading
     }
 
-    private fun clearChapterError() {
-        chapterError = null
-    }
-
-    private fun toggleAreChaptersLoaded(loaded: Boolean) {
-        chapterIsLoaded = loaded
-    }
-
-    private fun setStateChapters(chapters: List<Chapter>) {
-        this.chapters = chapters
-    }
-
-
-    /********************************************************/
-    private fun isLocalBookLoaded(loaded: Boolean) {
-        this.detailIsLocalLoaded = loaded
-    }
-
-    private fun isRemoteBookLoaded(loaded: Boolean) {
-        this.detailIsRemoteLoaded = loaded
-    }
-
-    private fun toggleLocalLoading(isLoading: Boolean) {
-        this.detailIsLocalLoading = isLoading
-    }
-
-    private fun toggleRemoteLoading(isLoading: Boolean) {
-        this.detailIsRemoteLoading = isLoading
-    }
-
-
-    private fun toggleInLibrary(enable: Boolean) {
-        this.inLibrary = enable
-    }
 
     private fun setDetailBook(book: Book) {
         this.book = book
     }
 
-    private fun clearBookError() {
-        this.detailError = UiText.DynamicString("")
-    }
 
     override fun onDestroy() {
         getBookDetailJob?.cancel()

@@ -51,12 +51,12 @@ fun BookDetailScreen(
     scaffoldState:ScaffoldState,
 ) {
     val swipeRefreshState =
-        rememberSwipeRefreshState(isRefreshing = detailState.detailIsLocalLoading || detailState.detailIsRemoteLoading || chapterState.chapterIsLoading)
+        rememberSwipeRefreshState(isRefreshing = detailState.detailIsLoading)
 
     val source = detailState.source
     val chapters = chapterState.chapters
 
-    if (detailState.detailIsLocalLoading) {
+    if (detailState.detailIsLoading) {
         showLoading()
     }
 
@@ -75,14 +75,15 @@ fun BookDetailScreen(
                         onToggleInLibrary = {
                             onToggleLibrary()
                         },
-                        isInLibrary = detailState.inLibrary,
+                        isInLibrary = book.favorite,
                         onDownload = {
                             onDownload()
                         },
                         isRead = chapterState.chapters.any { it.readAt != 0L },
                         onRead = {
                             onRead()
-                        }
+                        },
+                        isInLibraryInProgress = detailState.inLibraryLoading
                     )
                 }
             }) { padding ->

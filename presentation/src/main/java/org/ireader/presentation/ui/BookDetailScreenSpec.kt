@@ -64,14 +64,10 @@ object BookDetailScreenSpec : ScreenSpec {
             BookDetailScreen(
                 navController = navController,
                 onToggleLibrary = {
-                    if (!state.inLibrary) {
-                        viewModel.toggleInLibrary(true, book = book)
-                    } else {
-                        viewModel.toggleInLibrary(false, book)
-                    }
+                    viewModel.toggleInLibrary(book = book)
                 },
                 onDownload = {
-                    viewModel.startDownloadService(context, book = book)
+                    viewModel.startDownloadService(book = book)
                 },
                 onRead = {
                     if (source != null) {
