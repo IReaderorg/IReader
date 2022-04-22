@@ -2,9 +2,10 @@ package org.ireader.presentation.feature_sources.presentation.global_search
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
@@ -13,22 +14,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.pager.ExperimentalPagerApi
-import org.ireader.core_api.log.Log
 import org.ireader.domain.models.entities.BaseBook
 import org.ireader.presentation.feature_detail.presentation.book_detail.components.DotsFlashing
 import org.ireader.presentation.feature_sources.presentation.global_search.viewmodel.GlobalSearchState
-import org.ireader.presentation.feature_sources.presentation.global_search.viewmodel.GlobalSearchViewModel
 import org.ireader.presentation.feature_sources.presentation.global_search.viewmodel.SearchItem
 import org.ireader.presentation.presentation.layouts.BookImage
 import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
 import org.ireader.presentation.presentation.reusable_composable.SmallTextComposable
-import org.ireader.presentation.ui.BookDetailScreenSpec
-import org.ireader.presentation.ui.ExploreScreenSpec
 
 @Composable
 fun GlobalSearchScreen(
@@ -53,21 +47,25 @@ fun GlobalSearchScreen(
             )
         }
     ) { padding ->
-        LazyColumn(state = scrollState) {
-            items(allSearch.size) { index ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .verticalScroll(rememberScrollState()),
+        ) {
+            /**
+             * TODO need to wait for this issue to be close before using lazycolumn
+             * https://issuetracker.google.com/issues/229752147
+             */
+            allSearch.forEachIndexed { index, _ ->
                 GlobalSearchBookInfo(
                     allSearch[index],
                     onBook = onBook,
                     goToExplore = { onGoToExplore(index) }
                 )
             }
-
-
         }
-
-
     }
-
 }
 
 @OptIn(ExperimentalPagerApi::class)

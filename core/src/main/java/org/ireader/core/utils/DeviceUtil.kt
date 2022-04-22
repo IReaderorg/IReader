@@ -21,7 +21,7 @@ object DeviceUtil {
             Class.forName("android.miui.AppOpsUtils")
                 .getDeclaredMethod("isXOptMode")
                 .invoke(null) as Boolean
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             false
         }
     }
@@ -36,7 +36,7 @@ object DeviceUtil {
             Class.forName("android.os.SystemProperties")
                 .getDeclaredMethod("get", String::class.java)
                 .invoke(null, key) as String
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             Timber.w("Unable to use SystemProperties.get()")
             null
         }

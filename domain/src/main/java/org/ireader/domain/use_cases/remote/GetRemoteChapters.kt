@@ -3,6 +3,7 @@ package org.ireader.domain.use_cases.remote
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellationException
+import org.ireader.core.extensions.withIOContext
 import org.ireader.core.utils.UiText
 import org.ireader.core.utils.exceptionHandler
 import org.ireader.core_api.source.Source
@@ -20,16 +21,22 @@ class GetRemoteChapters @Inject constructor(@ApplicationContext private val cont
         onSuccess: suspend (List<Chapter>) -> Unit,
         onError: suspend (UiText?) -> Unit,
     ) {
-        try {
-            Timber.d("Timber: GetRemoteChaptersUseCase was Called")
-            val chapters = source.getChapterList(manga = book.toBookInfo(source.id))
+        withIOContext {
+            kotlin.runCatching {
+                try {
+                    Timber.d("Timber: GetRemoteChaptersUseCase was Called")
+                    val chapters = source.getChapterList(manga = book.toBookInfo(source.id))
 
-            onSuccess(chapters.map { it.toChapter(book.id) })
-            Timber.d("Timber: GetRemoteChaptersUseCase was Finished Successfully")
-        } catch (e: CancellationException) {
+                    onSuccess(chapters.map { it.toChapter(book.id) })
+                    Timber.d("Timber: GetRemoteChaptersUseCase was Finished Successfully")
+                } catch (e: CancellationException) {
 
-        } catch (e: Exception) {
-            onError(exceptionHandler(e))
+                } catch (e: Throwable) {
+                    onError(exceptionHandler(e))
+                }
+            }.getOrElse { e ->
+                onError(exceptionHandler(e))
+            }
         }
     }
 }

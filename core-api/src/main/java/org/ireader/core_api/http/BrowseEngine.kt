@@ -33,7 +33,7 @@ class BrowseEngine @Inject constructor(@ApplicationContext private val context: 
             client.loadUrl(url, headers)
             try {
                 client.settings.userAgentString = userAgent
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 Log.error(exception = e, "failed to set user agent")
             }
             var isLoadUp: Boolean = false

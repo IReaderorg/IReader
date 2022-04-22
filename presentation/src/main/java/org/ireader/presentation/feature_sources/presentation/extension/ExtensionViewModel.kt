@@ -80,7 +80,6 @@ class ExtensionViewModel @Inject constructor(
                 catalog.pkgName to installCatalog.await(catalog)
             }
             flow.collect { step ->
-                showSnackBar(UiText.DynamicString(step.toString()))
                 state.installSteps = if (step != InstallStep.Completed) {
                     installSteps + (pkgName to step)
                 } else {

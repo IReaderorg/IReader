@@ -65,7 +65,7 @@ fun ScrollIndicatorSetting(
                             setBGValue(it)
                             try {
                                 vm.backgroundColor = Color(it.toColorInt())
-                            } catch (e: Exception) {
+                            } catch (e: Throwable) {
                                 vm.prefFunc.apply {
                                     vm.readBackgroundColor()
 
@@ -88,7 +88,7 @@ fun ScrollIndicatorSetting(
                             setTxtValue(it)
                             try {
                                 vm.textColor = Color(it.toColorInt())
-                            } catch (e: Exception) {
+                            } catch (e: Throwable) {
                                 vm.prefFunc.apply {
                                     vm.readTextColor()
 
@@ -134,7 +134,7 @@ fun ScrollIndicatorSetting(
                                 }
 
                             }
-                        } catch (e: Exception) {
+                        } catch (e: Throwable) {
                         }
 
                         try {
@@ -144,7 +144,7 @@ fun ScrollIndicatorSetting(
                                 }
 
                             }
-                        } catch (e: Exception) {
+                        } catch (e: Throwable) {
                         }
 
 

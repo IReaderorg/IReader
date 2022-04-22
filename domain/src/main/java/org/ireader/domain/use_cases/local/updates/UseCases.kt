@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import org.ireader.domain.models.entities.Update
 import org.ireader.domain.models.entities.UpdateWithInfo
 import org.ireader.domain.repository.UpdatesRepository
+import org.ireader.domain.utils.withIOContext
 import javax.inject.Inject
 
 class SubscribeUpdates @Inject constructor(private val updatesRepository: UpdatesRepository) {
@@ -14,12 +15,16 @@ class SubscribeUpdates @Inject constructor(private val updatesRepository: Update
 
 class InsertUpdatesUseCase @Inject constructor(private val updatesRepository: UpdatesRepository) {
     suspend operator fun invoke(updates: List<Update>) {
-        return updatesRepository.insertUpdates(updates)
+        return withIOContext {
+            return@withIOContext updatesRepository.insertUpdates(updates)
+        }
     }
 }
 
 class InsertUpdateUseCase @Inject constructor(private val updatesRepository: UpdatesRepository) {
     suspend operator fun invoke(updates: Update) {
-        return updatesRepository.insertUpdate(updates)
+        return withIOContext {
+            return@withIOContext updatesRepository.insertUpdate(updates)
+        }
     }
 }

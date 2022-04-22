@@ -100,24 +100,6 @@ fun TTSScreen(
         }
     }
 
-    LaunchedEffect(key1 = true) {
-        if (vm.tts == null) {
-            vm.tts = TextToSpeech(context) { status ->
-                vm.ttsIsLoading = true
-                if (status == TextToSpeech.ERROR) {
-                    //context.toast("Text-to-Speech Not Available")
-                    Log.error { "Text-to-Speech Not Available" }
-                    vm.ttsIsLoading = false
-                    return@TextToSpeech
-                }
-                vm.ttsIsLoading = false
-            }
-        }
-        if (vm.mediaSession == null) {
-            vm.mediaSession = MediaSessionCompat(context, "mediaPlayer", null, null)
-        }
-    }
-
     LaunchedEffect(key1 = vm.state.stateChapter, vm.state.book) {
         vm.state.stateChapter?.let {
             vm.ttsState.ttsChapter = it
@@ -163,7 +145,7 @@ fun TTSScreen(
                     vm.runTTSService(context, Player.PLAY)
                 }
             }
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             Log.error(e, "")
         }
 

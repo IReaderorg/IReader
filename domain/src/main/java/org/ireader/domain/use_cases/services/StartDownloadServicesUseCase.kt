@@ -43,7 +43,7 @@ class StartDownloadServicesUseCase @Inject constructor(@ApplicationContext priva
         } catch (e: IllegalStateException) {
             context.toast(e.localizedMessage)
 
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             context.toast(e.localizedMessage)
         }
     }

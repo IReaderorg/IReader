@@ -39,10 +39,10 @@ class PreferenceMutableState<T>(
                     try {
                         state.value = value
 
-                    } catch (e: Exception) {
+                    } catch (e: Throwable) {
                     }
                 }.launchIn(scope)
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             Log.e("PreferenceMutableState", e.toString())
         }
     }

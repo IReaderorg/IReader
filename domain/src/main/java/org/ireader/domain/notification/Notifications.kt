@@ -50,7 +50,7 @@ fun createChannel(context: Context, channel: Channel) {
          }
          this
 
-     } catch (e: Exception) {
+     } catch (e: Throwable) {
          this
      }
  }

@@ -56,7 +56,7 @@ class GlobalSearchViewModel @Inject constructor(
                             }
                             insertSearchItem(SearchItem(source, items = items, loading = false))
                         }
-                    } catch (e: Exception) {
+                    } catch (e: Throwable) {
 
                     }
                 }

@@ -47,7 +47,7 @@ object GlobalSearchScreenSpec : ScreenSpec {
                         )
                     )
 
-                } catch (e: Exception) {
+                } catch (e: Throwable) {
                     Log.error(e,"")
                 }
             },
@@ -59,7 +59,7 @@ object GlobalSearchScreenSpec : ScreenSpec {
                                 query = vm.query)
                         )
                     }
-                } catch (e: Exception) {
+                } catch (e: Throwable) {
                     Log.error(e,"")
                 }
 

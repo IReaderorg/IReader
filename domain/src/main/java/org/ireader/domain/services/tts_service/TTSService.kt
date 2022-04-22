@@ -80,7 +80,7 @@ class TTSService @AssistedInject constructor(
 
 
             return Result.success()
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             return Result.failure()
 
         }
@@ -418,7 +418,7 @@ class TTSService @AssistedInject constructor(
 
                                             }
 
-                                        } catch (e: Exception) {
+                                        } catch (e: Throwable) {
                                             Timber.e(e)
                                         }
                                     }
@@ -442,7 +442,7 @@ class TTSService @AssistedInject constructor(
                                     }
                                 })
                             }
-                        } catch (e: Exception) {
+                        } catch (e: Throwable) {
                             Timber.e(e.localizedMessage)
                         }
 

@@ -6,7 +6,9 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import org.ireader.core.DefaultPaginator
 import org.ireader.core.exceptions.EmptyQuery
@@ -27,6 +29,7 @@ import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.preferences.reader_preferences.BrowseLayoutTypeUseCase
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import org.ireader.domain.use_cases.remote.key.RemoteKeyUseCase
+import org.ireader.domain.utils.launchIO
 import javax.inject.Inject
 
 
@@ -83,15 +86,16 @@ class ExploreViewModel @Inject constructor(
     }
 
 
-    var initExploreJob : Job? = null
+    var initExploreJob: Job? = null
 
     fun loadBooks() {
         initExploreJob?.cancel()
         initExploreJob = viewModelScope.launch {
-            remoteKeyUseCase.subScribeAllPagedExploreBooks().distinctUntilChanged().onEach {
-                stateItems = it
-            }.launchIn(viewModelScope)
-
+            remoteKeyUseCase.subScribeAllPagedExploreBooks().distinctUntilChanged().collect() {
+                kotlin.runCatching {
+                    stateItems = it
+                }
+            }
         }
     }
 
@@ -101,73 +105,76 @@ class ExploreViewModel @Inject constructor(
             page = 1
         }
         getBooksJob = viewModelScope.launch {
-            DefaultPaginator<Int, MangasPageInfo>(
-                initialKey = state.page,
-                onLoadUpdated = {
-                    isLoading = it
-                },
-                onRequest = { nextPage ->
-                    try {
-                        error = null
-                        Log.error { "Request was made; $nextPage" }
+            kotlin.runCatching {
+                DefaultPaginator<Int, MangasPageInfo>(
+                    initialKey = state.page,
+                    onLoadUpdated = {
+                        isLoading = it
+                    },
+                    onRequest = { nextPage ->
+                        try {
+                            error = null
+                            Log.error { "Request was made; $nextPage" }
 
-                        val query = searchQuery
-                        val filters = stateFilters
-                        val listing = stateListing
-                        val source = source
-                        if (source != null) {
-                            var result = MangasPageInfo(emptyList(), false)
-                            remoteUseCases.getRemoteBooks(searchQuery,
-                                listing,
-                                filters,
-                                source,
-                                page,
-                                onError = {},
-                                onSuccess = { res ->
-                                    result = res
-                                })
-                            Result.success(result)
-                        } else {
-                            throw SourceNotFoundException()
+                            val query = searchQuery
+                            val filters = stateFilters
+                            val listing = stateListing
+                            val source = source
+                            if (source != null) {
+                                var result = MangasPageInfo(emptyList(), false)
+                                remoteUseCases.getRemoteBooks(searchQuery,
+                                    listing,
+                                    filters,
+                                    source,
+                                    page,
+                                    onError = {},
+                                    onSuccess = { res ->
+                                        result = res
+                                    })
+                                Result.success(result)
+                            } else {
+                                throw SourceNotFoundException()
+                            }
+                        } catch (e: Throwable) {
+                            Result.failure(e)
                         }
-                    } catch (e: Exception) {
-                        Result.failure(e)
-                    }
 
-                },
-                getNextKey = {
-                    state.page + 1
-                },
-                onError = {
-                    endReached = true
-                    error = when (it) {
-                        is EmptyQuery -> UiText.StringResource(R.string.query_must_not_be_empty)
-                        is SourceNotFoundException -> UiText.StringResource(R.string.the_source_is_not_found)
-                        else -> it?.let { it1 -> UiText.ExceptionString(it1) }
-                    }
-                },
-                onSuccess = { items, newKey ->
-                    val keys = items.mangas.map { book ->
-                        RemoteKeys(
-                            title = book.title,
-                            prevPage = newKey - 1,
-                            nextPage = newKey + 1,
-                            sourceId = source?.id ?: 0
-                        )
-                    }
-                    val books = items.mangas.map {
-                        it.toBook(source?.id ?: 0,
-                            tableId = 1)
-                    }
+                    },
+                    getNextKey = {
+                        state.page + 1
+                    },
+                    onError = {
+                        endReached = true
+                        error = when (it) {
+                            is EmptyQuery -> UiText.StringResource(R.string.query_must_not_be_empty)
+                            is SourceNotFoundException -> UiText.StringResource(R.string.the_source_is_not_found)
+                            else -> it?.let { it1 -> UiText.ExceptionString(it1) }
+                        }
+                    },
+                    onSuccess = { items, newKey ->
+                        val keys = items.mangas.map { book ->
+                            RemoteKeys(
+                                title = book.title,
+                                prevPage = newKey - 1,
+                                nextPage = newKey + 1,
+                                sourceId = source?.id ?: 0
+                            )
+                        }
+                        val books = items.mangas.map {
+                            it.toBook(source?.id ?: 0,
+                                tableId = 1)
+                        }
 
-                    remoteKeyUseCase.prepareExploreMode(page == 1, books, keys)
+                        viewModelScope.launchIO {
+                            remoteKeyUseCase.prepareExploreMode(page == 1, books, keys)
+                        }
 
-                    page = newKey
-                    endReached = !items.hasNextPage
-                    Log.debug {"Request was finished"  }
-                },
-            ).loadNextItems()
-
+                        page = newKey
+                        endReached = !items.hasNextPage
+                        Log.debug { "Request was finished" }
+                    },
+                ).loadNextItems()
+            }
         }
     }
 
@@ -217,6 +224,7 @@ class ExploreViewModel @Inject constructor(
             )
         )
     }
+
     fun removeExploreBooks() {
         viewModelScope.launch(Dispatchers.IO) {
             deleteUseCase.deleteAllExploreBook()

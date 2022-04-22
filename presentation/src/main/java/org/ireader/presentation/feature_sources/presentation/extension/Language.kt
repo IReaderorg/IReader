@@ -36,7 +36,7 @@ data class Language(val code: String) {
             val firstLetter = countryCode[0].code - 0x41 + 0x1F1E6
             val secondLetter = countryCode[1].code - 0x41 + 0x1F1E6
             String.fromCodePoints(firstLetter, secondLetter)
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             ""
         }
     }

@@ -48,7 +48,7 @@ class UpdateService @AssistedInject constructor(
         val versionCode: String =
             try {
                 context.packageManager.getPackageInfo(context.packageName, 0).versionName
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 "1.0"
             }
         val current = Version.create(versionCode)

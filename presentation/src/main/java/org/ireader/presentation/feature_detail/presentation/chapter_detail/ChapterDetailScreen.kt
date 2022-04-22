@@ -97,7 +97,7 @@ fun ChapterDetailScreen(
                             scrollState.scrollToItem(vm.getLastChapterIndex(),
                                 -scrollState.layoutInfo.viewportEndOffset / 2)
 
-                        } catch (e: Exception) {
+                        } catch (e: Throwable) {
 
                         }
                     }

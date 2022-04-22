@@ -91,7 +91,7 @@ class PackageInstaller @Inject constructor(
             // Mark installation as completed even if it's not finished because we don't always
             // receive the result callback
             deferred.complete(true)
-          } catch (e: Exception) {
+          } catch (e: Throwable) {
             Log.w("Error while (un)installing package",e)
             deferred.complete(false)
           }

@@ -79,7 +79,7 @@ class AndroidCatalogInstaller @Inject constructor(
                 installationChanges.notifyAppInstall(catalog.pkgName)
             }
             emit(if (success) InstallStep.Completed else InstallStep.Error)
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             Log.warn(e, "Error installing package")
             emit(InstallStep.Error)
         } finally {

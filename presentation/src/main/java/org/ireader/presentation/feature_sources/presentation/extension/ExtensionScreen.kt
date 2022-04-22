@@ -17,8 +17,6 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
-import org.ireader.core.extensions.viewModelIOCoroutine
 import org.ireader.core.utils.UiEvent
 import org.ireader.core_ui.theme.AppColors
 import org.ireader.domain.models.entities.Catalog
@@ -190,7 +188,10 @@ fun ExtensionScreen(
                         },
                         selected = pagerState.currentPage == index,
                         onClick = {
-                            //TODO: this line throws an exception that is related to compose
+                            /**
+                             * TODO need to wait for this issue to be close before using this line
+                             * https://issuetracker.google.com/issues/229752147
+                             */
                             //scope.launch { pagerState.animateScrollToPage(index) }
                         },
                         selectedContentColor = MaterialTheme.colors.primary,

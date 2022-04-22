@@ -5,11 +5,14 @@ import org.ireader.domain.models.RemoteKeys
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.BookItem
 import org.ireader.domain.repository.RemoteKeyRepository
+import org.ireader.domain.utils.withIOContext
 import javax.inject.Inject
 
 class InsertAllExploredBook @Inject constructor(private val remoteKeyRepository: RemoteKeyRepository) {
     suspend operator fun invoke(books: List<Book>): List<Long> {
-        return remoteKeyRepository.insertBooks(books)
+        return withIOContext {
+            return@withIOContext remoteKeyRepository.insertBooks(books)
+        }
     }
 }
 
@@ -27,7 +30,9 @@ class SubScribeAllPagedExploreBooks @Inject constructor(private val remoteKeyRep
 
 class PrepareExploreMode @Inject constructor(private val remoteKeyRepository: RemoteKeyRepository) {
     suspend operator fun invoke(reset: Boolean, list: List<Book>, keys: List<RemoteKeys>) {
-        return remoteKeyRepository.prepareExploreMode(reset, list, keys)
+        return withIOContext {
+            return@withIOContext remoteKeyRepository.prepareExploreMode(reset, list, keys)
+        }
     }
 }
 

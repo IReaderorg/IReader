@@ -63,7 +63,7 @@ fun AdvanceSettings(
                         }
                     } catch (e: SerializationException) {
                         vm.showSnackBar(UiText.ExceptionString(e))
-                    } catch (e: Exception) {
+                    } catch (e: Throwable) {
                         vm.showSnackBar(UiText.ExceptionString(e))
                     }
                 }
@@ -96,7 +96,7 @@ fun AdvanceSettings(
                             }
                         }
                     }
-                } catch (e: Exception) {
+                } catch (e: Throwable) {
                     vm.showSnackBar(UiText.ExceptionString(e))
                 }
 

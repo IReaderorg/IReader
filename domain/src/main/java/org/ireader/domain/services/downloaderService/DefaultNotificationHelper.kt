@@ -94,7 +94,7 @@ class DefaultNotificationHelper @Inject constructor(
 
     fun baseCancelledNotificationDownloader(
         bookName: String? = null,
-        e: Exception,
+        e: Throwable,
     ): NotificationCompat.Builder {
         return NotificationCompat.Builder(applicationContext.applicationContext,
             Notifications.CHANNEL_DOWNLOADER_ERROR).apply {
@@ -292,8 +292,16 @@ class DefaultNotificationHelper @Inject constructor(
 
 
     }
-
-    fun openReaderScreenIntent(
+    fun buildDownloadScreenDeepLink(
+        bookId: Long,
+        sourceId: Long,
+        chapterId: Long,
+        readingParagraph: Long,
+        voiceMode: Long,
+    ): String {
+        return "https://www.ireader.org/reader_screen_route/$bookId/$chapterId/$sourceId/$readingParagraph/$voiceMode"
+    }
+    private fun openReaderScreenIntent(
         chapter: Chapter,
         book: Book,
         currentReadingParagraph:Int = 0,
@@ -302,7 +310,13 @@ class DefaultNotificationHelper @Inject constructor(
         5,
         Intent(
             Intent.ACTION_VIEW,
-            "https://www.ireader.org/reader_screen_route/${book.id}/${chapter.id}/${book.sourceId}/${currentReadingParagraph.toLong()}/1L".toUri(),
+            buildDownloadScreenDeepLink(
+                bookId = book.id,
+                chapterId = chapter.id,
+                sourceId = book.sourceId,
+                readingParagraph = currentReadingParagraph.toLong(),
+                voiceMode = 1L
+            ).toUri(),
             applicationContext,
             Class.forName("org.ireader.infinity.MainActivity")
         ),

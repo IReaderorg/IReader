@@ -52,10 +52,12 @@ FROM library
             deleteAllRemoteKeys()
             deleteAllExploredBook()
         }
-        insert(list)
+        insertBooks(list)
         insertAllRemoteKeys(keys)
 
     }
+    @Insert(onConflict = OnConflictStrategy.REPLACE, entity = Book::class)
+    suspend fun insertBooks(books:List<Book>)
 
     @Transaction
     suspend fun clearExploreMode() {
@@ -63,7 +65,7 @@ FROM library
         deleteUnusedBooks()
     }
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE, entity = RemoteKeys::class)
     fun insertAllRemoteKeys(remoteKeys: List<RemoteKeys>)
 
     @Query("DELETE FROM page")

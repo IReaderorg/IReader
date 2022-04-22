@@ -1,7 +1,6 @@
 package org.ireader.presentation.feature_settings.presentation.setting.downloader
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -27,7 +26,6 @@ import org.ireader.core.utils.UiEvent
 import org.ireader.core_ui.modifier.selectedBackground
 import org.ireader.domain.models.entities.SavedDownload
 import org.ireader.domain.models.entities.toSavedDownload
-import org.ireader.domain.utils.toast
 import org.ireader.presentation.R
 import org.ireader.presentation.feature_history.*
 import org.ireader.presentation.presentation.components.ISnackBarHost

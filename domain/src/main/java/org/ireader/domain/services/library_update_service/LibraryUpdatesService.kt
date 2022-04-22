@@ -110,7 +110,7 @@ class LibraryUpdatesService @AssistedInject constructor(
                     }
                 }
 
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 Timber.e("getNotifications: Failed to Check for Book Update")
                 notify(
                     Notifications.ID_LIBRARY_ERROR,

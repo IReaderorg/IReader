@@ -20,7 +20,7 @@ class DeleteAllSavedDownload @Inject constructor(private val downloadRepository:
             Resource.Error<Resource<List<Book>>>(
                 uiText = UiText.ExceptionString(e)
             )
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             Resource.Error<Resource<List<Book>>>(
                 uiText = UiText.ExceptionString(e)
             )

@@ -30,7 +30,7 @@ import java.util.zip.ZipOutputStream
     outStream.use {
       block(ZipWriterScope(outStream))
     }
-  } catch (e: Exception) {
+  } catch (e: Throwable) {
     delete(destination)
     throw e
   }

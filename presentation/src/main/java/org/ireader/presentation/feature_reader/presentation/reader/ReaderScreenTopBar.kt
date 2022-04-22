@@ -131,7 +131,7 @@ fun ReaderScreenTopBar(
                                                     try {
                                                         vm.currentViewingSearchResultIndex += 1
                                                         scrollState.scrollToItem(vm.queriedTextIndex[index])
-                                                    } catch (e: Exception) {
+                                                    } catch (e: Throwable) {
                                                         vm.currentViewingSearchResultIndex = 0
                                                     }
                                                 }
@@ -155,7 +155,7 @@ fun ReaderScreenTopBar(
                                                 try {
                                                     vm.currentViewingSearchResultIndex -= 1
                                                     scrollState.scrollToItem(vm.queriedTextIndex[index])
-                                                } catch (e: Exception) {
+                                                } catch (e: Throwable) {
                                                     vm.currentViewingSearchResultIndex = 0
                                                 }
                                             }

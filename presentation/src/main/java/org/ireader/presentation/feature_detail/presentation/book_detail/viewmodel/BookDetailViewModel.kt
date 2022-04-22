@@ -18,7 +18,6 @@ import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.catalog.interactor.GetLocalCatalog
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
-import org.ireader.domain.models.entities.updateBook
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
@@ -55,6 +54,7 @@ class BookDetailViewModel @Inject constructor(
             toggleBookLoading(true)
             chapterIsLoading   = true
             subscribeBook(bookId =bookId , onSuccess = { book ->
+                setDetailBook(book)
                 toggleBookLoading(false)
                 if (!initBooks) {
                     initBooks = true
@@ -67,13 +67,9 @@ class BookDetailViewModel @Inject constructor(
                     }
                 }
             })
-            subscribeChapters(bookId =bookId,onSuccess = {
-
+            subscribeChapters(bookId =bookId,onSuccess = { snapshot ->
+                chapters = snapshot
             })
-//            viewModelScope.launch {
-//                getLocalBookById(bookId, source)
-//                getLocalChaptersByBookId(bookId = bookId)
-//            }
 
         } else {
             viewModelScope.launch {
@@ -86,58 +82,19 @@ class BookDetailViewModel @Inject constructor(
             getBookUseCases.subscribeBookById(bookId)
                 .onEach { snapshot->
                     snapshot?.let { book ->
-                        setDetailBook(book)
                         onSuccess(book)
                     }
                 }.launchIn(viewModelScope)
     }
-    private fun subscribeChapters(bookId: Long, onSuccess:suspend (List<Chapter>) -> Unit) {
+    private fun subscribeChapters(bookId: Long, onSuccess:suspend (List<Chapter>) -> Unit = {}) {
             getChapterUseCase.subscribeChaptersByBookId(bookId)
                 .onEach { snapshot->
                     if (snapshot.isNotEmpty()) {
-                        chapters = snapshot
                         onSuccess(snapshot)
                     }
                 }.launchIn(viewModelScope)
 
     }
-
-//    suspend fun getLocalBookById(bookId: Long, source: Source?) {
-//        this.toggleLocalLoading(true)
-//        clearBookError()
-//        viewModelScope.launch {
-//            val book = getBookUseCases.findBookById(bookId)
-//            if (book != null) {
-//                toggleLocalLoading(false)
-//                clearBookError()
-//                setDetailBook(book)
-//                toggleInLibrary(book.favorite)
-//                if ((book.lastUpdated < 1L) && !state.detailIsRemoteLoaded && source != null) {
-//                    getRemoteBookDetail(book, source)
-//                    getRemoteChapterDetail(book, source)
-//                }
-//                isLocalBookLoaded(true)
-//            } else {
-//                toggleLocalLoading(false)
-//                showSnackBar(UiText.StringResource(R.string.no_book_found_error))
-//            }
-//        }
-//    }
-
-
-//    suspend fun getLocalChaptersByBookId(bookId: Long) {
-//        clearChapterError()
-//        this.toggleChaptersLoading(true)
-//        viewModelScope.launch {
-//            val chapters = getChapterUseCase.findChaptersByBookId(bookId)
-//            if (chapters.isNotEmpty()) {
-//                clearChapterError()
-//                setStateChapters(chapters)
-//                toggleAreChaptersLoaded(true)
-//            }
-//            toggleChaptersLoading(false)
-//        }
-//    }
 
 
     suspend fun getRemoteBookDetail(book: Book, source: Source) {
@@ -158,13 +115,10 @@ class BookDetailViewModel @Inject constructor(
                 onSuccess = { resultBook ->
                     if (state.book != null) {
                         setDetailBook(
-                            book = updateBook(
-                                resultBook,
-                                book
-                            )
+                            book = resultBook
                         )
                         toggleBookLoading(false)
-                        insertBookDetailToLocal(state.book!!)
+                        insertBookDetailToLocal(resultBook)
                     }
                 }
 

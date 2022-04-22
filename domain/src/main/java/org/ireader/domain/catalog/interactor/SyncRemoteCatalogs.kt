@@ -39,7 +39,7 @@ class SyncRemoteCatalogs @Inject constructor(
                     lastCheckPref.set(Calendar.getInstance().timeInMillis)
                 }
                 return true
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 Log.warn(e, "Failed to fetch remote catalogs")
             }
         }

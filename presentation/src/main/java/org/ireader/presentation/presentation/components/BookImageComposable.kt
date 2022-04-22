@@ -7,8 +7,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import coil.annotation.ExperimentalCoilApi
-import coil.compose.rememberImagePainter
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import org.ireader.domain.feature_service.io.BookCover
 import org.ireader.presentation.R
 
@@ -23,11 +25,21 @@ fun BookImageComposable(
     @DrawableRes placeholder: Int = R.drawable.ic_no_image_placeholder,
 ) {
 
-    val painter = rememberImagePainter(data = image) {
-        crossfade(durationMillis = 700)
-        placeholder(placeholder)
-        error(placeholder)
-    }
+    val painter = rememberAsyncImagePainter(
+        model = ImageRequest.Builder(LocalContext.current)
+            .data(image)
+            .crossfade(700)
+            .placeholder(placeholder)
+            .error(placeholder)
+            .build(),
+        contentScale = ContentScale.Crop
+    )
+
+//    val painter = rememberImagePainter(data = image) {
+//        crossfade(durationMillis = 700)
+//        placeholder(placeholder)
+//        error(placeholder)
+//    }
 
     Image(
         modifier = modifier.fillMaxSize(),

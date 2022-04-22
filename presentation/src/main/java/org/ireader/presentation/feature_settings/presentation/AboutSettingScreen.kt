@@ -31,7 +31,7 @@ fun AboutSettingScreen(
     val versionCode: String =
         try {
             context.packageManager.getPackageInfo(context.packageName, 0).versionName
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             "Unable to get Package Version"
         }
     Scaffold(modifier = modifier.fillMaxSize(), topBar = {
@@ -68,7 +68,7 @@ fun AboutSettingScreen(
                         .clickable(role = Role.Button) {
                             try {
                                 context.startActivity(it.intent)
-                            } catch (e: Exception) {
+                            } catch (e: Throwable) {
                                 context.toast("Something went wrong. you don't have the required app.")
                             }
                         },

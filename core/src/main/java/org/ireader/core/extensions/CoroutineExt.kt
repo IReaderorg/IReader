@@ -192,7 +192,7 @@ suspend fun ByteArray.toBitmapSuspend(): Bitmap? =
 
 internal inline fun <T> tryOrNull(block: () -> T): T? = try {
     block()
-} catch (e: Exception) {
+} catch (e: Throwable) {
     null
 }
 

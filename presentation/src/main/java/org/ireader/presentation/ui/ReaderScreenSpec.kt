@@ -49,11 +49,20 @@ object ReaderScreenSpec : ScreenSpec {
     ): String {
         return "reader_screen_route/$bookId/$chapterId/$sourceId"
     }
+    fun buildDeepLink(
+        bookId: Long,
+        sourceId: Long,
+        chapterId: Long,
+        readingParagraph: Long,
+        voiceMode: Long,
+    ): String {
+        return "https://www.ireader.org/reader_screen_route/$bookId/$chapterId/$sourceId/$readingParagraph/$voiceMode"
+    }
 
     override val deepLinks: List<NavDeepLink> = listOf(
         navDeepLink {
             uriPattern =
-                "https://www.ireader.org/reader_screen_route/{bookId}/{chapterId}/{sourceId}/{${NavigationArgs.readingParagraph.name}}/{${NavigationArgs.voiceMode.name}}"
+                "https://www.ireader.org/reader_screen_route/{bookId}/{chapterId}/{sourceId}/{readingParagraph}/{voiceMode}"
             NavigationArgs.bookId
             NavigationArgs.chapterId
             NavigationArgs.sourceId
@@ -146,7 +155,7 @@ object ReaderScreenSpec : ScreenSpec {
                                     scrollState.scrollToItem(0, 0)
                                 }
                             }
-                        } catch (e: Exception) {
+                        } catch (e: Throwable) {
                             Log.error(e, "Reader Spec failed to go next chapter")
                         }
                     } else {
@@ -199,7 +208,7 @@ object ReaderScreenSpec : ScreenSpec {
                                 vm.showSnackBar(UiText.StringResource(R.string.this_is_first_chapter))
                             }
                         }
-                    } catch (e: Exception) {
+                    } catch (e: Throwable) {
                         Log.error(e, "Reader Spec failed to go previous chapter")
                     }
                 },
@@ -259,7 +268,7 @@ object ReaderScreenSpec : ScreenSpec {
                                 url = chapter.link,
                             ))
                         }
-                    } catch (e: Exception) {
+                    } catch (e: Throwable) {
                         scope.launch {
                             vm.showSnackBar(UiText.ExceptionString(e))
                         }
@@ -291,7 +300,7 @@ object ReaderScreenSpec : ScreenSpec {
                                 drawer.scrollToItem(index,
                                     -drawer.layoutInfo.viewportEndOffset / 2)
                             }
-                        } catch (e: Exception) {
+                        } catch (e: Throwable) {
 
                         }
                     }

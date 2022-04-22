@@ -17,7 +17,6 @@ import org.ireader.core.utils.UiText
 import org.ireader.core.utils.getUrlWithoutDomain
 import org.ireader.core_api.source.HttpSource
 import org.ireader.domain.ui.NavigationArgs
-import org.ireader.presentation.R
 import org.ireader.presentation.feature_detail.presentation.book_detail.BookDetailScreen
 import org.ireader.presentation.feature_detail.presentation.book_detail.viewmodel.BookDetailViewModel
 import org.ireader.presentation.presentation.EmptyScreenComposable
@@ -85,12 +84,12 @@ object BookDetailScreenSpec : ScreenSpec {
                             ))
                         } else {
                             scope.launch {
-                                viewModel.showSnackBar(UiText.StringResource(R.string.no_chapter_is_available))
+                                viewModel.showSnackBar(UiText.StringResource(org.ireader.core.R.string.no_chapter_is_available))
                             }
                         }
                     } else {
                         scope.launch {
-                            viewModel.showSnackBar(UiText.StringResource(R.string.source_not_available))
+                            viewModel.showSnackBar(UiText.StringResource(org.ireader.core.R.string.source_not_available))
                         }
                     }
                 },
@@ -134,7 +133,7 @@ object BookDetailScreenSpec : ScreenSpec {
                 onTitle = {
                     try {
                         navController.navigate(GlobalSearchScreenSpec.buildRoute(query = it))
-                    } catch (e: Exception) {
+                    } catch (e: Throwable) {
                     }
                 },
                 scaffoldState = scaffoldStates,
@@ -142,7 +141,7 @@ object BookDetailScreenSpec : ScreenSpec {
             )
         } else {
             EmptyScreenComposable(navController = navController,
-                errorResId = R.string.something_is_wrong_with_this_book)
+                errorResId = org.ireader.core.R.string.something_is_wrong_with_this_book)
         }
         LaunchedEffect(key1 = true) {
             viewModel.eventFlow.collectLatest { event ->

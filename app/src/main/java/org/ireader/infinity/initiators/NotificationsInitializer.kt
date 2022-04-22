@@ -13,7 +13,7 @@ class NotificationsInitializer @Inject constructor(
     init {
         try {
             Notifications.createChannels(context)
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             Log.error { "Failed to modify notification channels" }
         }
     }

@@ -145,7 +145,7 @@ class DownloadService @AssistedInject constructor(
 
                 }
 
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 Timber.e("getNotifications: Failed to download ${savedDownload.chapterName}")
                 cancel(ID_DOWNLOAD_CHAPTER_PROGRESS)
                 notify(ID_DOWNLOAD_CHAPTER_ERROR,
@@ -235,7 +235,7 @@ class DownloadService @AssistedInject constructor(
 //                        }
 //                    }
 //
-//                } catch (e: Exception) {
+//                } catch (e: Throwable) {
 //                    Timber.e("getNotifications: Failed to download ${bookResource.title}")
 //                    cancel(ID_DOWNLOAD_CHAPTER_PROGRESS)
 //                    notify(ID_DOWNLOAD_CHAPTER_ERROR,

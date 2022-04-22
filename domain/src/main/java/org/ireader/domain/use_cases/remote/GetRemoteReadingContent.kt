@@ -2,6 +2,7 @@ package org.ireader.domain.use_cases.remote
 
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
+import org.ireader.core.extensions.withIOContext
 import org.ireader.core.utils.UiText
 import org.ireader.core.utils.currentTimeToLong
 import org.ireader.core.utils.exceptionHandler
@@ -20,32 +21,38 @@ class GetRemoteReadingContent @Inject constructor(@ApplicationContext private va
         onError: suspend (message: UiText?) -> Unit,
         onSuccess: suspend (chapter: Chapter) -> Unit,
     ) {
-        try {
-            Timber.d("Timber: GetRemoteReadingContentUseCase was Called")
-            // val page = source.getPageList(chapter.toChapterInfo())
-            val content = mutableListOf<String>()
-            val page = source.getPageList(chapter.toChapterInfo())
+        withIOContext {
+            kotlin.runCatching {
+                try {
+                    Timber.d("Timber: GetRemoteReadingContentUseCase was Called")
+                    // val page = source.getPageList(chapter.toChapterInfo())
+                    val content = mutableListOf<String>()
+                    val page = source.getPageList(chapter.toChapterInfo())
 
-            page.forEach {
-                when (it) {
-                    is Text -> {
-                        content.add(it.text)
+                    page.forEach {
+                        when (it) {
+                            is Text -> {
+                                content.add(it.text)
+                            }
+                            else -> {}
+                        }
                     }
-                    else -> {}
+
+                    if (content.joinToString().isBlank()) {
+                        onError(UiText.StringResource(R.string.cant_get_content))
+
+                    } else {
+                        Timber.d("Timber: GetRemoteReadingContentUseCase was Finished Successfully")
+                        onSuccess(chapter.copy(content = content, dateFetch = currentTimeToLong()))
+
+                    }
+                } catch (e: Throwable) {
+                    onError(exceptionHandler(e))
                 }
+
+            }.getOrElse { e ->
+                onError(exceptionHandler(e))
             }
-
-            if (content.joinToString().isBlank()) {
-                onError(UiText.StringResource(R.string.cant_get_content))
-
-            } else {
-                Timber.d("Timber: GetRemoteReadingContentUseCase was Finished Successfully")
-                onSuccess(chapter.copy(content = content, dateFetch = currentTimeToLong()))
-
-            }
-        } catch (e: Exception) {
-            onError(exceptionHandler(e))
         }
-
     }
 }

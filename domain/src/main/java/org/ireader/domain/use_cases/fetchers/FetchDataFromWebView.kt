@@ -95,7 +95,7 @@ class FetchBookDetailAndChapterDetailFromWebView @Inject constructor() {
 //                emit(Resource.Error(UiText.StringResource(R.string.failed_to_get_content)))
 //
 //            }
-//        } catch (e: Exception) {
+//        } catch (e: Throwable) {
 //            emit(Resource.Error(UiText.StringResource(R.string.failed_to_get_content)))
 //        }
     }

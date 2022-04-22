@@ -1,11 +1,11 @@
 package org.ireader.domain.models.entities
 
-import androidx.annotation.Keep
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 import org.ireader.core.utils.Constants.BOOK_TABLE
 import org.ireader.core_api.source.model.MangaInfo
+import org.ireader.domain.feature_service.io.LibraryCovers
 import java.util.*
 
 @Serializable
@@ -63,7 +63,11 @@ data class Book(
 
 }
 
-fun updateBook(newBook: Book, oldBook: Book): Book {
+fun updateBook(newBook: Book, oldBook: Book, libraryCovers: LibraryCovers): Book {
+    if (newBook.cover.isNotBlank() && newBook.cover != oldBook.cover) {
+        libraryCovers.invalidate(oldBook.id)
+    }
+
     return Book(
         id = oldBook.id,
         sourceId = oldBook.sourceId,
@@ -73,15 +77,31 @@ fun updateBook(newBook: Book, oldBook: Book): Book {
         dataAdded = oldBook.dataAdded,
         lastUpdated = Calendar.getInstance().timeInMillis,
         favorite = oldBook.favorite,
-        title = newBook.title.ifBlank { oldBook.title },
+        title = newBook.title.takeIf(statement = {
+            newBook.title.isNotBlank() && newBook.title != oldBook.title
+        }, oldBook.title),
         status = if (newBook.status != 0) newBook.status else oldBook.status,
         genres = newBook.genres.ifEmpty { oldBook.genres },
-        description = newBook.description.ifBlank { oldBook.description },
-        author = newBook.author.ifBlank { oldBook.author },
-        cover = newBook.cover.ifBlank { oldBook.cover },
+        description = newBook.description.takeIf(statement = {
+            newBook.description.isNotBlank() && newBook.description != oldBook.description
+        },oldBook.description),
+        author = newBook.author.takeIf(statement = {
+            newBook.author.isNotBlank() && newBook.author != oldBook.author
+        },oldBook.author),
+        cover = newBook.cover.takeIf(statement = {
+            newBook.cover.isNotBlank() && newBook.cover != oldBook.cover
+        },oldBook.cover),
         viewer = if (newBook.viewer != 0) newBook.viewer else oldBook.viewer,
         tableId = oldBook.tableId,
     )
+}
+
+fun String.takeIf(statement: () -> Boolean, defaultValue: String): String {
+    return if (!statement()) {
+        defaultValue
+    } else {
+        this
+    }
 }
 
 fun MangaInfo.toBook(sourceId: Long, tableId: Long = 0, lastUpdated: Long = 0): Book {

@@ -4,13 +4,8 @@ import android.webkit.WebView
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -26,19 +21,9 @@ import com.google.accompanist.web.WebContent
 import com.google.accompanist.web.rememberWebViewState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
-import org.ireader.core.ChapterParse
-import org.ireader.core.ChaptersParse
-import org.ireader.core.DetailParse
-import org.ireader.core.utils.DEFAULT_USER_AGENT
 import org.ireader.core.utils.UiEvent
-import org.ireader.core.utils.getHtml
 import org.ireader.domain.utils.setDefaultSettings
-import org.ireader.presentation.presentation.reusable_composable.AppIconButton
 import org.ireader.presentation.presentation.reusable_composable.BigSizeTextComposable
-import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
-import org.ireader.presentation.ui.BookDetailScreenSpec
-import org.ireader.core_api.source.HttpSource
 
 
 @OptIn(ExperimentalMaterialApi::class)

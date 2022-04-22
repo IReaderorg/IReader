@@ -263,7 +263,7 @@ fun Context.openInBrowser(uri: Uri, @ColorInt toolbarColor: Int? = null) {
             )
             .build()
         intent.launchUrl(this, uri)
-    } catch (e: Exception) {
+    } catch (e: Throwable) {
         toast(e.message)
     }
 }
