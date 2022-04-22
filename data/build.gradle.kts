@@ -4,7 +4,6 @@ plugins {
     id("kotlin-kapt")
     id("kotlin-parcelize")
     kotlin("plugin.serialization")
-    id("com.google.devtools.ksp")
 }
 
 android {
@@ -15,7 +14,11 @@ android {
     defaultConfig {
         javaCompileOptions {
             annotationProcessorOptions {
-                arguments += mapOf("room.schemaLocation" to "$projectDir/schemas")
+                arguments += mapOf(
+                    "room.schemaLocation" to "$projectDir/schemas",
+                    "room.incremental" to "true",
+                    "room.expandProjection" to "true"
+                )
             }
         }
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -72,7 +75,7 @@ dependencies {
 
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
-    ksp(libs.room.compiler)
+    kapt(libs.room.compiler)
 
 
     implementation(libs.okhttp.interceptor)

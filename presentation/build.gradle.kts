@@ -4,7 +4,6 @@ plugins {
     id("kotlin-kapt")
     id("kotlinx-serialization")
     id("dagger.hilt.android.plugin")
-    id("com.google.devtools.ksp")
 }
 
 android {
@@ -40,7 +39,7 @@ dependencies {
     implementation(compose.compose.hiltNavigation)
     implementation(compose.compose.lifecycle)
     implementation(compose.compose.animations)
-    implementation(androidx.lifecycle.hiltviewModel)
+
 
 
 
@@ -62,7 +61,7 @@ dependencies {
 
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
-    ksp(libs.room.compiler)
+    kapt(libs.room.compiler)
 
     implementation(libs.hilt.android)
     kapt(libs.hilt.androidcompiler)

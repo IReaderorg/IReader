@@ -7,7 +7,7 @@ plugins {
     id("com.android.application")
     kotlin("android")
     id("kotlin-kapt")
-    id("com.google.devtools.ksp")
+
     id("dagger.hilt.android.plugin")
     id("kotlin-parcelize")
     id("com.google.gms.google-services")
@@ -61,6 +61,8 @@ android {
 
 dependencies {
     implementation(androidx.emoji)
+    implementation(androidx.appCompat)
+    implementation(androidx.core)
     implementation(androidx.material)
 
     implementation(compose.compose.activity)
@@ -96,7 +98,7 @@ dependencies {
     /** Room **/
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
-    ksp(libs.room.compiler)
+    kapt(libs.room.compiler)
 
 
     testImplementation(test.bundles.common)

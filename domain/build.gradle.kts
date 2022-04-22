@@ -5,7 +5,7 @@ plugins {
     id("kotlin-parcelize")
     id("kotlinx-serialization")
     id("dagger.hilt.android.plugin")
-    id("com.google.devtools.ksp")
+
 }
 
 android {
@@ -42,8 +42,8 @@ dependencies {
     /** Room **/
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
-    implementation(libs.room.paging)
-    ksp(libs.room.compiler)
+    //implementation(libs.room.paging)
+    kapt(libs.room.compiler)
 
 
 

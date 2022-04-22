@@ -9,6 +9,7 @@ dependencies {
     implementation(project(Modules.coreApi))
 
     implementation(androidx.appCompat)
+    implementation(androidx.core)
     implementation(kotlinx.coroutines.android)
     implementation(androidx.lifecycle.viewModel)
     implementation(androidx.lifecycle.viewmodelktx)

@@ -105,7 +105,8 @@ private fun WebView.setDefaultSettings() {
         javaScriptEnabled = true
         domStorageEnabled = true
         databaseEnabled = true
-        setAppCacheEnabled(true)
+        // https://stackoverflow.com/questions/9128952/caching-in-android-webview
+        //setAppCacheEnabled(true)
         useWideViewPort = true
         loadWithOverviewMode = true
         cacheMode = WebSettings.LOAD_DEFAULT

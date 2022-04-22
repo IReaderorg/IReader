@@ -331,7 +331,7 @@ fun TTSScreen(
                                                 vertical = 4.dp)
                                             .fillMaxWidth()
                                             .height(200.dp)
-                                            .verticalScroll(textScroll)
+                                            .verticalScroll(rememberScrollState())
                                             .align(Alignment.CenterHorizontally),
                                         text = if (content.isNotEmpty() && vm.currentReadingParagraph <= content.lastIndex && index <= content.lastIndex) content[index] else "",
                                         fontSize = vm.fontSize.sp,

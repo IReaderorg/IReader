@@ -11,13 +11,13 @@ buildscript {
         gradlePluginPortal()
     }
     dependencies {
-        classpath(libs.gradle.tools)
+        classpath("com.android.tools.build:gradle:7.1.3")
+       // classpath(libs.gradle.tools)
         classpath(libs.gradle.kotlin)
         classpath(libs.gradle.kotlinSerialization)
         classpath(libs.gradle.hilt)
         classpath(libs.gradle.google)
         classpath(libs.gradle.firebaseCrashlytic)
-        classpath(libs.ksp.gradle)
         classpath(libs.gradle.idea.ext)
         classpath("com.vanniktech:gradle-maven-publish-plugin:0.19.0")
         classpath("com.android.tools.build:gradle:7.1.3")
@@ -29,6 +29,7 @@ plugins {
     id("com.autonomousapps.dependency-analysis") version "1.1.0"
     id("com.github.ben-manes.versions") version "0.42.0"
     id("com.osacky.doctor") version "0.8.0"
+    //kotlin("jvm") version "1.6.10"
 }
 fun isNonStable(version: String): Boolean {
     val stableKeyword = listOf("RELEASE", "FINAL", "GA").any { version.toUpperCase().contains(it) }
@@ -37,9 +38,17 @@ fun isNonStable(version: String): Boolean {
     return isStable.not()
 }
 allprojects {
+
+    if(this.name == "data") {
+
+
+
+    }
+
+
     tasks.withType<com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask> {
         rejectVersionIf {
-            isNonStable(candidate.version) && !isNonStable(currentVersion)
+            isNonStable(candidate.version)
         }
     }
     tasks.withType<org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompile> {
@@ -70,11 +79,7 @@ subprojects {
                 sourceCompatibility(JavaVersion.VERSION_11)
                 targetCompatibility(JavaVersion.VERSION_11)
             }
-            tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-                kotlinOptions {
-                    jvmTarget = "11"
-                }
-            }
+
             dependencies {
                 add("coreLibraryDesugaring", libs.desugarJdkLibs)
             }
@@ -86,4 +91,3 @@ subprojects {
 tasks.register("clean", Delete::class) {
     delete(rootProject.buildDir)
 }
-

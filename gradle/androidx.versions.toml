@@ -4,13 +4,12 @@ work = "2.8.0-alpha02"
 
 [libraries]
 agp = "com.android.tools.build:gradle:7.1.2"
-core = "androidx.core:core-ktx:1.9.0-alpha02"
+core = "androidx.core:core-ktx:1.7.0"
 media = "androidx.media:media:1.6.0"
-appCompat = "androidx.appcompat:appcompat:1.6.0-alpha01"
+appCompat = "androidx.appcompat:appcompat:1.4.1"
 browser = "androidx.browser:browser:1.4.0"
 webkit = "androidx.webkit:webkit:1.4.0"
 material = "com.google.android.material:material:1.5.0"
-sqlite = "androidx.sqlite:sqlite-ktx:2.3.0-alpha01"
 dataStore = "androidx.datastore:datastore-preferences:1.0.0"
 dataStoreCore = "androidx.datastore:datastore-preferences-core:1.0.0"
 emoji = "androidx.emoji2:emoji2-views:1.1.0"
@@ -22,7 +21,6 @@ compose-gradle = "org.jetbrains.compose:compose-gradle-plugin:1.1.0"
 lifecycle-runtime = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
 lifecycle-viewmodelktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
 lifecycle-viewModel = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
-lifecycle-hiltviewModel = { module = "androidx.hilt:hilt-lifecycle-viewmodel", version = "1.0.0-alpha03" }
 
 lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "lifecycle" }
 

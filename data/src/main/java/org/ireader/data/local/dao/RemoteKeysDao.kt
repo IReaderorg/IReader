@@ -35,7 +35,11 @@ FROM library
     fun subscribePagedExploreBooks(): Flow<List<BookItem>>
 
 
-    @Query("SELECT DISTINCT library.* FROM library JOIN  page ON library.title = page.id AND library.sourceId = page.sourceId  OR tableId = 1 GROUP BY  library.title ORDER BY id")
+    @Query("""
+        SELECT DISTINCT library.* FROM library
+        JOIN  page ON library.title = page.id AND library.sourceId = page.sourceId  OR tableId = 1 
+        GROUP BY  library.title ORDER BY page.id
+    """)
     fun getAllExploreBook(): List<Book>?
 
     @Query("SELECT * FROM page WHERE title = :title")
