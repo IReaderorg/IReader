@@ -12,11 +12,11 @@ interface LibraryBookDao : BaseDao<Book> {
     @Query("SELECT * FROM library")
     suspend fun findAllBooks(): List<Book>
 
-    @RewriteQueriesToDropUnusedColumns
+
     @Query("""SELECT  * FROM library WHERE favorite = 1 """)
     fun subscribeAllLocalBooks(): Flow<List<Book>>
 
-    @RewriteQueriesToDropUnusedColumns
+
     @Query("""SELECT  library.* ,
         MAX(chapter.readAt) as lastRead,
         COUNT(DISTINCT chapter.id) AS totalChapters,
@@ -53,7 +53,7 @@ interface LibraryBookDao : BaseDao<Book> {
         desc: Boolean = false,
     ): Flow<List<BookItem>>
 
-    @RewriteQueriesToDropUnusedColumns
+
     @Query("""
     SELECT library.*,
     MAX(history.readAt) AS max,
@@ -71,7 +71,7 @@ interface LibraryBookDao : BaseDao<Book> {
 """)
     fun subscribeLatestRead(desc: Boolean): Flow<List<BookItem>>
 
-    @RewriteQueriesToDropUnusedColumns
+
     @Query("""
     SELECT library.*, MAX(chapter.dateUpload) AS max,
     SUM(length(chapter.content) > 10) AS totalDownload
@@ -85,7 +85,7 @@ interface LibraryBookDao : BaseDao<Book> {
 """)
     fun subscribeLatestChapter(desc: Boolean): Flow<List<BookItem>>
 
-    @RewriteQueriesToDropUnusedColumns
+
     @Query("""
     SELECT library.*, SUM(CASE WHEN chapter.read == 0 THEN 1 ELSE 0 END) AS unread,
     SUM(length(chapter.content) > 10) AS totalDownload
@@ -100,7 +100,7 @@ interface LibraryBookDao : BaseDao<Book> {
 """)
     fun subscribeTotalChapter(desc: Boolean): Flow<List<BookItem>>
 
-    @RewriteQueriesToDropUnusedColumns
+
     @Query("""
     SELECT library.*, 
     SUM(length(chapter.content) > 10) AS totalDownload,
@@ -114,7 +114,7 @@ interface LibraryBookDao : BaseDao<Book> {
 """)
     suspend fun findUnreadBooks(): List<BookItem>
 
-    @RewriteQueriesToDropUnusedColumns
+
     @Query("""
     SELECT library.*, 
     SUM(length(chapter.content) > 10) as total_download,
@@ -128,7 +128,7 @@ interface LibraryBookDao : BaseDao<Book> {
 """)
     suspend fun findCompletedBooks(): List<BookItem>
 
-    @RewriteQueriesToDropUnusedColumns
+
     @Query("""
     SELECT library.*, 
     SUM(length(chapter.content) > 10) AS totalDownload,

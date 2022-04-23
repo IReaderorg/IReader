@@ -4,6 +4,7 @@ package org.ireader.domain.feature_service.io.coil
 import android.app.Application
 import coil.ComponentRegistry
 import coil.ImageLoader
+import coil.ImageLoaderFactory
 import coil.disk.DiskCache
 import okhttp3.Cache
 import org.ireader.core_api.http.HttpClients
@@ -20,27 +21,27 @@ class CoilLoaderFactory @Inject constructor(
     private val extensions: CatalogStore,
     private val client: HttpClients,
     private val getLocalCatalog: GetLocalCatalog,
-)  {
+)  : ImageLoaderFactory {
 
-    fun create(): ImageLoader {
+    override fun newImageLoader(): ImageLoader {
         val cache = Cache(context.cacheDir.resolve("image_cache"),15L * 1024 * 1024)
 
         val okhttpClient = client.default.okhttp
         //Faking a book cover here
-        val libraryFetcher = LibraryMangaFetcher(
+        val factory  = LibraryMangaFetcherFactory(
             okhttpClient,
             libraryCovers,
             getLocalCatalog,
             cache,
             data = BookCover(0,0,"", false),
-            context = context
         )
 
         return ImageLoader.Builder(context)
             .components(fun ComponentRegistry.Builder.() {
-                add(libraryFetcher)
+                add(factory)
                 add(CatalogRemoteMapper())
                 add(CatalogInstalledFetcher.Factory())
+                add(LibraryMangaFetcherFactoryKeyer(libraryCovers))
             })
             .diskCache {
                 DiskCache.Builder()
@@ -49,6 +50,5 @@ class CoilLoaderFactory @Inject constructor(
             }
             .build()
     }
-
 
 }

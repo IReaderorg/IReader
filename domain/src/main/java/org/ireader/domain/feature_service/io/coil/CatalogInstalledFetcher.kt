@@ -8,6 +8,7 @@ import coil.fetch.DrawableResult
 import coil.fetch.FetchResult
 import coil.fetch.Fetcher
 import coil.fetch.SourceResult
+import coil.key.Keyer
 import coil.request.Options
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -19,7 +20,7 @@ import java.io.File
 class CatalogInstalledFetcher(
     private val context: Context,
     private val  data: CatalogInstalled
-) : Fetcher {
+) : Fetcher, Keyer<CatalogInstalled> {
 
     private val pkgManager = context.packageManager
     override suspend fun fetch(): FetchResult? {
@@ -37,11 +38,12 @@ class CatalogInstalledFetcher(
     }
 
     class Factory : Fetcher.Factory<CatalogInstalled> {
-
         override fun create(data: CatalogInstalled, options: Options, imageLoader: ImageLoader): Fetcher {
             return CatalogInstalledFetcher(options.context, data)
         }
     }
 
-
+    override fun key(data: CatalogInstalled, options: Options): String? {
+        return data.pkgName
+    }
 }

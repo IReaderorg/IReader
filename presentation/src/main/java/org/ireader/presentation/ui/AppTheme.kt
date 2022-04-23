@@ -6,7 +6,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.LocalImageLoader
+import coil.Coil
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import org.ireader.core_ui.theme.AppColors
 import org.ireader.core_ui.theme.LocalTransparentStatusBar
@@ -37,7 +37,7 @@ fun AppTheme(
             darkIcons = darkIcons,
         )
     }
-
+    Coil.setImageLoader(vm.coilLoader)
     AppColors(
         materialColors = materialColors,
         extraColors = customColors,
@@ -46,7 +46,7 @@ fun AppTheme(
     ) {
             CompositionLocalProvider(
                 LocalRippleTheme provides rippleTheme,
-                LocalImageLoader provides vm.coilLoader,
+               // LocalImageLoader provides vm.coilLoader,
                 content = content
             )
     }

@@ -53,16 +53,15 @@ fun BookDetailScreenLoadedComposable(
 
     Box(Modifier.height(IntrinsicSize.Min)) {
         Box {
-
-
             Image(
                 painter = rememberAsyncImagePainter(ImageRequest.Builder(LocalContext.current)
-                    .data(data = book.cover).apply(block = fun ImageRequest.Builder.() {
+                    .data(data = BookCover.from(book)).apply(block = fun ImageRequest.Builder.() {
                         listener(onSuccess = { _, _ ->
                             imageLoaded = true
                         })
                     }).build()),
                 contentDescription = null,
+                alignment = Alignment.TopCenter,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(300.dp)

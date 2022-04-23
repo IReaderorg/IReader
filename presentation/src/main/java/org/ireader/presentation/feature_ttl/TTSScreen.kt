@@ -1,7 +1,5 @@
 package org.ireader.presentation.feature_ttl
 
-import android.speech.tts.TextToSpeech
-import android.support.v4.media.session.MediaSessionCompat
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.TweenSpec
 import androidx.compose.foundation.border
@@ -30,6 +28,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.NotificationManagerCompat
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
@@ -71,7 +71,6 @@ fun TTSScreen(
     onValueChangeFinished: () -> Unit,
     onMap:(LazyListState) -> Unit
 ) {
-
 
     BackHandler {
         vm.voiceMode = false

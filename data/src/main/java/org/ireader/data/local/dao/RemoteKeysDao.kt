@@ -23,7 +23,7 @@ SELECT DISTINCT library.* FROM library
     suspend fun findPagedExploreBooks(): List<Book>
 
 
-    @RewriteQueriesToDropUnusedColumns
+
     @Query("""
 SELECT DISTINCT library.*,0 as totalDownload 
 FROM library

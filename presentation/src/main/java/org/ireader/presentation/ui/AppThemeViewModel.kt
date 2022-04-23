@@ -31,7 +31,8 @@ class AppThemeViewModel @Inject constructor(
 
     private val baseThemeJob = SupervisorJob()
     private val baseThemeScope = CoroutineScope(baseThemeJob)
-    val coilLoader = coilLoaderFactory.create()
+    val coilLoader = coilLoaderFactory.newImageLoader()
+
 
     @Composable
     fun getRippleTheme(): RippleTheme {
