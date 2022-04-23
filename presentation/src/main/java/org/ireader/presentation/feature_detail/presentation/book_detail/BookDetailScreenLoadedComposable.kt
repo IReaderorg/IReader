@@ -21,13 +21,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import coil.compose.rememberImagePainter
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import org.ireader.core.utils.copyToClipboard
+import org.ireader.core_api.source.Source
 import org.ireader.domain.feature_service.io.BookCover
 import org.ireader.domain.models.entities.Book
 import org.ireader.presentation.feature_detail.presentation.book_detail.components.BookSummary
 import org.ireader.presentation.presentation.components.BookImageComposable
-import org.ireader.core_api.source.Source
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -55,14 +56,12 @@ fun BookDetailScreenLoadedComposable(
 
 
             Image(
-                painter = rememberImagePainter(
-                    data = book.cover,
-                    builder = {
+                painter = rememberAsyncImagePainter(ImageRequest.Builder(LocalContext.current)
+                    .data(data = book.cover).apply(block = fun ImageRequest.Builder.() {
                         listener(onSuccess = { _, _ ->
                             imageLoaded = true
                         })
-                    }
-                ),
+                    }).build()),
                 contentDescription = null,
                 modifier = Modifier
                     .fillMaxWidth()

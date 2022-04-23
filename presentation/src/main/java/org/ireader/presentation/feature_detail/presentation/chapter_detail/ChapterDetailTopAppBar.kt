@@ -80,7 +80,8 @@ fun RegularChapterDetailTopAppBar(
                 )
             }
 
-        }
+        },
+        elevation = 0.dp
     )
 }
 

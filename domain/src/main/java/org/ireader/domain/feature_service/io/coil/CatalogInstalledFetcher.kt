@@ -1,14 +1,14 @@
 package org.ireader.domain.feature_service.io.coil
 
-import android.app.Application
-import coil.bitmap.BitmapPool
+import android.content.Context
+import coil.ImageLoader
 import coil.decode.DataSource
-import coil.decode.Options
+import coil.decode.ImageSource
 import coil.fetch.DrawableResult
 import coil.fetch.FetchResult
 import coil.fetch.Fetcher
 import coil.fetch.SourceResult
-import coil.size.Size
+import coil.request.Options
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okio.buffer
@@ -16,16 +16,13 @@ import okio.source
 import org.ireader.domain.models.entities.CatalogInstalled
 import java.io.File
 
-class CatalogInstalledFetcher(context: Application) : Fetcher<CatalogInstalled> {
+class CatalogInstalledFetcher(
+    private val context: Context,
+    private val  data: CatalogInstalled
+) : Fetcher {
 
     private val pkgManager = context.packageManager
-
-    override suspend fun fetch(
-        pool: BitmapPool,
-        data: CatalogInstalled,
-        size: Size,
-        options: Options,
-    ): FetchResult {
+    override suspend fun fetch(): FetchResult? {
         return when (data) {
             is CatalogInstalled.SystemWide -> {
                 val icon = pkgManager.getApplicationIcon(data.pkgName)
@@ -34,13 +31,17 @@ class CatalogInstalledFetcher(context: Application) : Fetcher<CatalogInstalled> 
             is CatalogInstalled.Locally -> {
                 val file = File(data.installDir, "${data.pkgName}.png")
                 val source = withContext(Dispatchers.IO) { file.source().buffer() }
-                SourceResult(source, "image/png", DataSource.DISK)
+                SourceResult(ImageSource(source,context), "image/png", DataSource.DISK)
             }
         }
     }
 
-    override fun key(data: CatalogInstalled): String? {
-        return data.pkgName
+    class Factory : Fetcher.Factory<CatalogInstalled> {
+
+        override fun create(data: CatalogInstalled, options: Options, imageLoader: ImageLoader): Fetcher {
+            return CatalogInstalledFetcher(options.context, data)
+        }
     }
+
 
 }

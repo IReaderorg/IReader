@@ -27,22 +27,19 @@ fun BookImageComposable(
 
     val painter = rememberAsyncImagePainter(
         model = ImageRequest.Builder(LocalContext.current)
-            .data(image)
-            .crossfade(700)
-            .placeholder(placeholder)
-            .error(placeholder)
+            .apply {
+                data(image)
+                crossfade(700)
+                placeholder(placeholder)
+                error(placeholder)
+            }
             .build(),
         contentScale = ContentScale.Crop
     )
 
-//    val painter = rememberImagePainter(data = image) {
-//        crossfade(durationMillis = 700)
-//        placeholder(placeholder)
-//        error(placeholder)
-//    }
-
     Image(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier
+            .fillMaxSize(),
         contentScale = contentScale,
         painter = painter,
         contentDescription = "an image",
