@@ -11,15 +11,14 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import org.ireader.core.DefaultPaginator
-import org.ireader.core.exceptions.EmptyQuery
 import org.ireader.core.exceptions.SourceNotFoundException
 import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
+import org.ireader.core.utils.exceptionHandler
 import org.ireader.core_api.log.Log
 import org.ireader.core_api.source.CatalogSource
 import org.ireader.core_api.source.model.Filter
 import org.ireader.core_api.source.model.MangasPageInfo
-import org.ireader.domain.R
 import org.ireader.domain.catalog.service.CatalogStore
 import org.ireader.domain.models.DisplayMode
 import org.ireader.domain.models.RemoteKeys
@@ -29,7 +28,6 @@ import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.preferences.reader_preferences.BrowseLayoutTypeUseCase
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import org.ireader.domain.use_cases.remote.key.RemoteKeyUseCase
-import org.ireader.domain.utils.launchIO
 import javax.inject.Inject
 
 
@@ -114,7 +112,7 @@ class ExploreViewModel @Inject constructor(
                     onRequest = { nextPage ->
                         try {
                             error = null
-                            Log.error { "Request was made; $nextPage" }
+                            Log.debug { "Explore Request was made - current page:$nextPage" }
 
                             val query = searchQuery
                             val filters = stateFilters
@@ -127,7 +125,9 @@ class ExploreViewModel @Inject constructor(
                                     filters,
                                     source,
                                     page,
-                                    onError = {},
+                                    onError = {
+                                        throw it
+                                    },
                                     onSuccess = { res ->
                                         result = res
                                     })
@@ -143,13 +143,18 @@ class ExploreViewModel @Inject constructor(
                     getNextKey = {
                         state.page + 1
                     },
-                    onError = {
+                    onError = { e ->
+                        remoteKeyUseCase.prepareExploreMode(page == 1, emptyList(), emptyList())
                         endReached = true
-                        error = when (it) {
-                            is EmptyQuery -> UiText.StringResource(R.string.query_must_not_be_empty)
-                            is SourceNotFoundException -> UiText.StringResource(R.string.the_source_is_not_found)
-                            else -> it?.let { it1 -> UiText.ExceptionString(it1) }
+                        e?.let {
+                            error = exceptionHandler(it)
                         }
+//                        error = when (it) {
+//
+//                            is EmptyQuery -> UiText.StringResource(R.string.query_must_not_be_empty)
+//                            is SourceNotFoundException -> UiText.StringResource(R.string.the_source_is_not_found)
+//                            else -> it?.let { it1 -> UiText.ExceptionString(it1) }
+//                        }
                     },
                     onSuccess = { items, newKey ->
                         val keys = items.mangas.map { book ->
@@ -165,9 +170,9 @@ class ExploreViewModel @Inject constructor(
                                 tableId = 1)
                         }
 
-                        viewModelScope.launchIO {
-                            remoteKeyUseCase.prepareExploreMode(page == 1, books, keys)
-                        }
+
+                        remoteKeyUseCase.prepareExploreMode(page == 1, books, keys)
+
 
                         page = newKey
                         endReached = !items.hasNextPage

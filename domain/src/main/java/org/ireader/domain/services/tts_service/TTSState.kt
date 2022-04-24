@@ -39,7 +39,7 @@ interface TTSState {
     var ttsChapters: List<Chapter>
     var ttsCurrentChapterIndex: Int
     var mediaSession: MediaSessionCompat?
-    var tts: TextToSpeech?
+    var player: TextToSpeech?
 
 
 }
@@ -75,7 +75,7 @@ class TTSStateImpl @Inject constructor() : TTSState {
     override var ttsChapters by mutableStateOf<List<Chapter>>(emptyList())
     override var ttsCurrentChapterIndex by mutableStateOf<Int>(-1)
 
-    override var tts : TextToSpeech? = null
+    override var player : TextToSpeech? = null
 
 
     override var utteranceId by mutableStateOf<String>("")

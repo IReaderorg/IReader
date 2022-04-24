@@ -114,18 +114,16 @@ class TTSService @AssistedInject constructor(
 
     suspend fun startService(command: Int) {
         try {
-            if (state.tts == null) {
-                state.tts = TextToSpeech(context) { status ->
+            if (state.player == null) {
+                state.player = TextToSpeech(context) { status ->
                     state.ttsIsLoading = true
                     if (status == TextToSpeech.ERROR) {
-                        //context.toast("Text-to-Speech Not Available")
                         Timber.e("Text-to-Speech Not Available")
                         state.ttsIsLoading = false
                         return@TextToSpeech
                     }
                     state.ttsIsLoading = false
                 }
-                //startService(Player.PLAY)
             }
             if (state.mediaSession == null) {
                 state.mediaSession = MediaSessionCompat(context, "mediaPlayer", null, null)
@@ -133,7 +131,7 @@ class TTSService @AssistedInject constructor(
 
 
 
-            state.tts?.let { tts ->
+            state.player?.let { tts ->
                 state.mediaSession?.let { mediaSession ->
                     state.ttsChapter?.let { chapter ->
                         state.ttsSource?.let { source ->
@@ -213,7 +211,7 @@ class TTSService @AssistedInject constructor(
                                         }
                                         Player.NEXT_PAR -> {
                                             state.ttsContent?.value?.let { content ->
-                                                if (state.currentReadingParagraph > 0 && state.currentReadingParagraph < content.size) {
+                                                if (state.currentReadingParagraph >= 0 && state.currentReadingParagraph < content.size) {
                                                     if (state.currentReadingParagraph < content.lastIndex) {
                                                         state.currentReadingParagraph += 1
                                                     }
@@ -284,37 +282,37 @@ class TTSService @AssistedInject constructor(
 
         state.apply {
             if (state.languages.isEmpty()) {
-                tts?.availableLanguages?.let {
+                player?.availableLanguages?.let {
                     state.languages = it.toList()
                 }
             }
             if (state.voices.isEmpty()) {
-                tts?.voices?.toList()?.let {
+                player?.voices?.toList()?.let {
                     state.voices = it
                 }
             }
             if (currentVoice != prevVoice) {
                 prevVoice = currentVoice
-                tts?.voices?.firstOrNull { it.name == currentVoice }?.let {
-                    tts?.voice = it
+                player?.voices?.firstOrNull { it.name == currentVoice }?.let {
+                    player?.voice = it
                 }
             }
 
             if (currentLanguage != prevLanguage) {
                 prevLanguage = currentLanguage
-                tts?.availableLanguages?.firstOrNull { it.displayName == currentLanguage }
+                player?.availableLanguages?.firstOrNull { it.displayName == currentLanguage }
                     ?.let {
-                        tts?.language = it
+                        player?.language = it
                     }
             }
 
             if (pitch != prevPitch) {
                 prevPitch = pitch
-                tts?.setPitch(pitch)
+                player?.setPitch(pitch)
             }
             if (speechSpeed != prevSpeechSpeed) {
                 prevSpeechSpeed = speechSpeed
-                tts?.setSpeechRate(speechSpeed)
+                player?.setSpeechRate(speechSpeed)
             }
 
             ttsChapter?.let { chapter ->
@@ -337,7 +335,7 @@ class TTSService @AssistedInject constructor(
                                         builder.build())
                                 }
                                 if (state.utteranceId != (currentReadingParagraph).toString()) {
-                                    tts?.speak(content[currentReadingParagraph],
+                                    player?.speak(content[currentReadingParagraph],
                                         TextToSpeech.QUEUE_FLUSH,
                                         null,
                                         currentReadingParagraph.toString())
@@ -345,7 +343,7 @@ class TTSService @AssistedInject constructor(
 
 
 
-                                tts?.setOnUtteranceProgressListener(object :
+                                player?.setOnUtteranceProgressListener(object :
                                     UtteranceProgressListener() {
                                     override fun onStop(
                                         utteranceId: String?,
@@ -383,7 +381,7 @@ class TTSService @AssistedInject constructor(
                                                 isPlaying = false
                                                 currentReadingParagraph = 0
 
-                                                tts?.stop()
+                                                player?.stop()
                                                 if (autoNextChapter) {
                                                     scope.launch {
                                                         state.ttsChapters.let { chapters ->

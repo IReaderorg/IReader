@@ -11,9 +11,6 @@ import org.ireader.data.catalog.AndroidCatalogInstallationChanges
 import org.ireader.data.catalog.AndroidCatalogInstaller
 import org.ireader.data.catalog.AndroidCatalogLoader
 import org.ireader.data.catalog.CatalogGithubApi
-import org.ireader.data.local.AppDatabase
-import org.ireader.data.local.dao.CatalogDao
-import org.ireader.data.repository.CatalogRemoteRepositoryImpl
 import org.ireader.domain.catalog.service.*
 import javax.inject.Singleton
 
@@ -21,17 +18,8 @@ import javax.inject.Singleton
 @Module
 class CatalogModule {
 
-    @Provides
-    @Singleton
-    fun provideCatalogRemoteRepository(catalogDao: CatalogDao): CatalogRemoteRepository {
-        return CatalogRemoteRepositoryImpl(dao = catalogDao)
-    }
 
-    @Provides
-    @Singleton
-    fun provideCatalogDao(db: AppDatabase): CatalogDao {
-        return db.catalogDao
-    }
+
 
     @Provides
     @Singleton

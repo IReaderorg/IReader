@@ -28,8 +28,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.NotificationManagerCompat
 import androidx.navigation.NavController
-import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
@@ -69,7 +67,7 @@ fun TTSScreen(
     onChapter: (Chapter) -> Unit,
     onValueChange: (Float) -> Unit,
     onValueChangeFinished: () -> Unit,
-    onMap:(LazyListState) -> Unit
+    onMap: (LazyListState) -> Unit,
 ) {
 
     BackHandler {
@@ -154,7 +152,7 @@ fun TTSScreen(
             vm.currentReadingParagraph = pagerState.currentPage
             vm.prevPar = pagerState.currentPage
             if (vm.isPlaying) {
-                vm.ttsState.tts?.stop()
+                vm.ttsState.player?.stop()
                 vm.runTTSService(context, Player.PLAY)
             }
         }
@@ -258,9 +256,9 @@ fun TTSScreen(
         ) { padding ->
             Box(modifier = Modifier.fillMaxSize()) {
                 AppIconButton(
-                    modifier= Modifier
+                    modifier = Modifier
                         .align(Alignment.TopStart)
-                        .padding(start = 4.dp) ,
+                        .padding(start = 4.dp),
                     imageVector = Icons.Default.ArrowBack,
                     title = "Return to Reader Screen",
                     onClick = {
@@ -269,15 +267,16 @@ fun TTSScreen(
 
                 Column(modifier = Modifier
                     .fillMaxSize(),
-                    verticalArrangement = Arrangement.SpaceBetween,
+                    verticalArrangement = Arrangement.Top,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     vm.book?.let { book ->
                         vm.stateChapter?.let { chapter ->
                             vm.ttsContent?.value?.let { content ->
                                 Column(modifier = Modifier
-                                    .fillMaxWidth(),
-                                    verticalArrangement = Arrangement.SpaceBetween,
+                                    .fillMaxWidth()
+                                    .weight(5f),
+                                    verticalArrangement = Arrangement.Top,
                                     horizontalAlignment = Alignment.CenterHorizontally) {
                                     BookImageComposable(
                                         image = BookCover.from(book),
@@ -304,7 +303,7 @@ fun TTSScreen(
 
                                     }
                                 }
-                                HorizontalPager(count = chapter.content.size,
+                                HorizontalPager(modifier = Modifier.weight(6f),count = chapter.content.size,
                                     state = pagerState) { index ->
                                     Text(
                                         modifier = modifier
@@ -326,10 +325,12 @@ fun TTSScreen(
 
 
                                 Column(modifier = Modifier
+                                    .weight(6f)
                                     .fillMaxWidth(),
                                     verticalArrangement = Arrangement.Center,
                                     horizontalAlignment = Alignment.CenterHorizontally) {
                                     TTLScreenSetting(
+                                        modifier = Modifier.weight(4f),
                                         onSetting = {
                                             scope.launch {
                                                 bottomSheetState.show()
@@ -342,7 +343,9 @@ fun TTSScreen(
                                             }
                                         }
                                     )
+                                    Spacer(modifier = Modifier.height(32.dp))
                                     TTLScreenPlay(
+                                        modifier = Modifier.weight(8f),
                                         onPlay = onPlay,
                                         onNext = onNext,
                                         onPrev = onPrev,
@@ -371,12 +374,12 @@ fun TTSScreen(
 
 @Composable
 private fun TTLScreenSetting(
+    modifier: Modifier = Modifier,
     onSetting: () -> Unit,
     onContent: () -> Unit,
 ) {
-    Row(modifier = Modifier
+    Row(modifier = modifier
         .fillMaxWidth()
-        .height(80.dp)
         .border(width = 1.dp, color = MaterialTheme.colors.onBackground.copy(.1f)),
         horizontalArrangement = Arrangement.SpaceAround,
         verticalAlignment = Alignment.CenterVertically) {
@@ -421,7 +424,7 @@ private fun TTLScreenPlay(
     onValueChange: (Float) -> Unit,
     onValueChangeFinished: () -> Unit,
 ) {
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = modifier.fillMaxWidth()) {
         content?.let { chapter ->
             Slider(
                 modifier = Modifier
@@ -450,8 +453,7 @@ private fun TTLScreenPlay(
             verticalAlignment = Alignment.CenterVertically) {
             Row(modifier = Modifier
                 .padding(bottom = 16.dp, top = 4.dp)
-                .fillMaxWidth()
-                .height(80.dp),
+                .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceAround) {
                 AppIconButton(modifier = Modifier.size(50.dp),

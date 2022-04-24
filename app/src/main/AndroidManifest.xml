@@ -83,6 +83,7 @@
         <receiver
             android:name="org.ireader.domain.services.broadcast_receiver.AppBroadcastReceiver"
             android:exported="false" />
+
     </application>
 
 </manifest>

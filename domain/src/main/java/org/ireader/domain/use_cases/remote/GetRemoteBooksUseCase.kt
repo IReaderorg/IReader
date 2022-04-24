@@ -2,11 +2,8 @@ package org.ireader.domain.use_cases.remote
 
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.CancellationException
 import org.ireader.core.exceptions.EmptyQuery
 import org.ireader.core.extensions.withIOContext
-import org.ireader.core.utils.UiText
-import org.ireader.core.utils.exceptionHandler
 import org.ireader.core_api.source.CatalogSource
 import org.ireader.core_api.source.model.Filter
 import org.ireader.core_api.source.model.Listing
@@ -20,14 +17,12 @@ class GetRemoteBooksUseCase @Inject constructor(@ApplicationContext private val 
         filters: List<Filter<*>>?,
         source: CatalogSource,
         page: Int,
-        onError: suspend (UiText?) -> Unit,
+        onError: suspend (Throwable) -> Unit,
         onSuccess: suspend (MangasPageInfo) -> Unit,
     ) {
         withIOContext {
             kotlin.runCatching {
-                try {
                     var item: MangasPageInfo = MangasPageInfo(emptyList(), false)
-
                     if (query != null) {
                         if (query != null && query.isNotBlank()) {
                             item = source.getMangaList(filters = listOf(Filter.Title()
@@ -41,12 +36,9 @@ class GetRemoteBooksUseCase @Inject constructor(@ApplicationContext private val 
                         item = source.getMangaList(sort = listing, page)
                     }
                     onSuccess(item.copy(mangas = item.mangas.filter { it.title.isNotBlank() }))
-                } catch (e: CancellationException) {
-                } catch (e: Throwable) {
-                    onError(exceptionHandler(e))
-                }
+
             }.getOrElse { e ->
-                onError(exceptionHandler(e))
+                onError(e)
             }
         }
     }

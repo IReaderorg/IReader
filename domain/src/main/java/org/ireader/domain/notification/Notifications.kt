@@ -5,7 +5,6 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
-import androidx.annotation.Keep
 import androidx.core.app.NotificationCompat
 import androidx.core.graphics.drawable.toBitmap
 import coil.ImageLoader
@@ -44,7 +43,7 @@ fun createChannel(context: Context, channel: Channel) {
                  .data(data)
                  .allowHardware(true)
                  .target { setLargeIcon(it.toBitmap()) }
-                 .size(128)
+                 .size(512)
                  .build()
              ImageLoader(context).execute(request)
          }

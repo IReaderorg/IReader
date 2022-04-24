@@ -1,6 +1,8 @@
 package org.ireader.core.utils
 
 import org.ireader.core.R
+import org.ireader.core.exceptions.EmptyQuery
+import org.ireader.core.exceptions.SourceNotFoundException
 import org.jsoup.select.Selector
 import timber.log.Timber
 import java.io.IOException
@@ -27,6 +29,9 @@ fun exceptionHandler(e: Throwable): UiText? {
         is java.lang.ClassCastException -> {
             null
         }
+        is EmptyQuery -> UiText.StringResource(R.string.query_must_not_be_empty)
+
+        is SourceNotFoundException -> UiText.StringResource(R.string.the_source_is_not_found)
         else -> {
             UiText.ExceptionString(e)
         }

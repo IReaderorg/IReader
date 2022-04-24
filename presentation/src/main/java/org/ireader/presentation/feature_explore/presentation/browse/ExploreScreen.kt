@@ -257,6 +257,7 @@ private fun BoxScope.ExploreScreenErrorComposable(
                 .padding(top = 16.dp)
                 .padding(horizontal = 16.dp)
         )
+        Spacer(modifier = Modifier.height(32.dp))
 
         Row(Modifier
             .fillMaxWidth(),
