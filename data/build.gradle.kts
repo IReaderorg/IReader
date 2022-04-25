@@ -64,7 +64,6 @@ dependencies {
     implementation(libs.hilt.androidcompiler)
     implementation(libs.hilt.android)
 
-    implementation(libs.timber)
     implementation(libs.jsoup)
 
     /** LifeCycle **/

@@ -10,6 +10,7 @@ package org.ireader.core_api.os
 
 import android.app.Application
 import android.app.PendingIntent
+import android.app.PendingIntent.FLAG_MUTABLE
 import android.content.*
 import android.content.pm.PackageInstaller
 import android.content.pm.PackageInstaller.SessionParams.MODE_FULL_INSTALL
@@ -59,7 +60,7 @@ class PackageInstaller @Inject constructor(
     val receiver = InstallResultReceiver(context, deferred)
     val uid = SystemClock.elapsedRealtime()
     val action = "core-api.INSTALL_APK_$uid"
-    val broadcast = PendingIntent.getBroadcast(context, 0, Intent(action), 0)
+    val broadcast = PendingIntent.getBroadcast(context, 0, Intent(action), FLAG_MUTABLE)
 
     context.registerReceiver(receiver, IntentFilter(action))
     return try {

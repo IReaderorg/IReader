@@ -37,7 +37,6 @@ dependencies {
     implementation(libs.ktor.contentNegotiation)
     implementation(libs.ktor.okhttp)
 
-    implementation(libs.timber)
 
     testImplementation(test.bundles.common)
     androidTestImplementation(test.bundles.common)

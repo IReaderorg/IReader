@@ -13,18 +13,18 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import org.ireader.core.R
+import org.ireader.core_api.log.Log
 import org.ireader.domain.catalog.interactor.GetLocalCatalog
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.entities.Update
-import org.ireader.domain.services.downloaderService.DefaultNotificationHelper
 import org.ireader.domain.notification.Notifications
+import org.ireader.domain.services.downloaderService.DefaultNotificationHelper
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetBookUseCases
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.local.updates.InsertUpdatesUseCase
 import org.ireader.domain.use_cases.remote.RemoteUseCases
-import timber.log.Timber
 import kotlin.time.ExperimentalTime
 
 @HiltWorker
@@ -111,7 +111,7 @@ class LibraryUpdatesService @AssistedInject constructor(
                 }
 
             } catch (e: Throwable) {
-                Timber.e("getNotifications: Failed to Check for Book Update")
+                Log.error { "getNotifications: Failed to Check for Book Update" }
                 notify(
                     Notifications.ID_LIBRARY_ERROR,
                     NotificationCompat.Builder(applicationContext,

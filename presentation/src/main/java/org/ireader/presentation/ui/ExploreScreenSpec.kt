@@ -88,9 +88,12 @@ object ExploreScreenSpec : ScreenSpec {
                     vm.searchQuery = it
                 },
                 onWebView = {
-                    navController.navigate(WebViewScreenSpec.buildRoute(
-                        url = (source as HttpSource).baseUrl
-                    ))
+                    if(source is HttpSource) {
+                        navController.navigate(WebViewScreenSpec.buildRoute(
+                            url = (source).baseUrl
+                        ))
+                    }
+
                 },
                 getBooks = { query, listing, filters ->
                     vm.searchQuery = query

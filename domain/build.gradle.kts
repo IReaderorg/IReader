@@ -77,7 +77,7 @@ dependencies {
     kapt(libs.hilt.androidcompiler)
     kapt(libs.hilt.compiler)
     implementation(libs.hilt.android)
-    implementation(libs.timber)
+
 
     /** LifeCycle **/
    //  implementation(kotlinx.lifecycle.viewModel)

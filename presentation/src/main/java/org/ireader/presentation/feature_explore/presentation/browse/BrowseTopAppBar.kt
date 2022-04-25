@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import org.ireader.core_api.source.CatalogSource
+import org.ireader.core_api.source.HttpSource
 import org.ireader.core_api.source.model.Filter
 import org.ireader.domain.models.DisplayMode
 import org.ireader.domain.models.LayoutType
@@ -76,13 +77,15 @@ fun BrowseTopAppBar(
                     },
                 )
             }
-            AppIconButton(
-                imageVector = Icons.Default.Public,
-                title = "WebView",
-                onClick = {
-                    onWebView()
-                },
-            )
+            if(source is HttpSource) {
+                AppIconButton(
+                    imageVector = Icons.Default.Public,
+                    title = "WebView",
+                    onClick = {
+                        onWebView()
+                    },
+                )
+            }
             AppIconButton(
                 imageVector = Icons.Default.GridView,
                 title = "Layout",

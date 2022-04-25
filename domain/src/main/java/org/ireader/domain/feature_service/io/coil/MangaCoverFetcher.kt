@@ -150,11 +150,12 @@ internal class LibraryMangaFetcher(
         val catalog = getLocalCatalog.get(manga.sourceId)
         val source = catalog?.source as? HttpSource
 
+
         val clientAndRequest = source?.getCoverRequest(manga.cover)
 
-        val newClient = (clientAndRequest?.first?.okhttp ?: defaultClient).newBuilder()
-            .cache(coilCache)
-            .build()
+        val newClient = (clientAndRequest?.first?.okhttp ?: defaultClient ).newBuilder()
+                .cache(coilCache)
+                .build()
 
         val request = clientAndRequest?.second?.build()?.convertToOkHttpRequest()
             ?: Request.Builder().url(manga.cover).build()

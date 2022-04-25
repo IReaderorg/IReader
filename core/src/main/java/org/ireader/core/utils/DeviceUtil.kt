@@ -2,7 +2,7 @@ package org.ireader.core.utils
 
 import android.annotation.SuppressLint
 import android.os.Build
-import timber.log.Timber
+import org.ireader.core_api.log.Log
 
 object DeviceUtil {
 
@@ -37,7 +37,7 @@ object DeviceUtil {
                 .getDeclaredMethod("get", String::class.java)
                 .invoke(null, key) as String
         } catch (e: Throwable) {
-            Timber.w("Unable to use SystemProperties.get()")
+            Log.warn { "Unable to use SystemProperties.get()" }
             null
         }
     }

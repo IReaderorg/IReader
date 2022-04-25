@@ -6,7 +6,7 @@ import android.content.pm.PackageManager
 import android.webkit.CookieManager
 import android.webkit.WebSettings
 import android.webkit.WebView
-import timber.log.Timber
+import org.ireader.core_api.log.Log
 
 object WebViewUtil {
     const val REQUESTED_WITH = "com.android.browser"
@@ -19,7 +19,7 @@ object WebViewUtil {
             // is not installed
             CookieManager.getInstance()
         } catch (e: Throwable) {
-            Timber.e("WebViewUtil : $e")
+            Log.error("WebViewUtil : $e")
             return false
         }
 

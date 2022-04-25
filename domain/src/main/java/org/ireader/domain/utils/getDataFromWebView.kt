@@ -3,12 +3,11 @@ package org.ireader.domain.utils
 import android.annotation.SuppressLint
 import android.content.Context
 import android.webkit.WebView
-import io.ktor.http.*
 import kotlinx.coroutines.*
 import org.ireader.core.utils.getHtml
+import org.ireader.core_api.log.Log
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import timber.log.Timber
 
 val scope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
 
@@ -33,7 +32,7 @@ suspend fun getHtmlFromWebView(
             webView.settings.userAgentString = userAgent
                 ?: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.88 Safari/537.36"
         } catch (e: Throwable) {
-            Timber.e(e)
+            Log.error(e.toString())
         }
 
         var isLoadUp: Boolean = false
@@ -61,7 +60,7 @@ suspend fun getHtmlFromWebView(
                 isMainFrame: Boolean,
             ) {
                 isLoadUp = true
-                Timber.e("WebView: Not shown")
+                Log.error("WebView: Not shown")
             }
         }
         html = Jsoup.parse(webView.getHtml())

@@ -10,6 +10,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.*
 import org.ireader.core.R
+import org.ireader.core_api.log.Log
 import org.ireader.domain.catalog.service.CatalogStore
 import org.ireader.domain.models.entities.SavedDownload
 import org.ireader.domain.models.entities.buildSavedDownload
@@ -23,7 +24,6 @@ import org.ireader.domain.use_cases.download.DownloadUseCases
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import org.ireader.domain.utils.launchIO
-import timber.log.Timber
 
 
 @HiltWorker
@@ -140,13 +140,14 @@ class DownloadService @AssistedInject constructor(
                             }
                         }
                     }
-                    Timber.d("getNotifications: Successfully to downloaded ${savedDownload.bookName} chapter ${savedDownload.chapterName}")
+                    Log.debug { "getNotifications: Successfully to downloaded ${savedDownload.bookName} chapter ${savedDownload.chapterName}" }
                     delay(1000)
 
                 }
 
             } catch (e: Throwable) {
-                Timber.e("getNotifications: Failed to download ${savedDownload.chapterName}")
+                Log.error {"getNotifications: Failed to download ${savedDownload.chapterName}"}
+
                 cancel(ID_DOWNLOAD_CHAPTER_PROGRESS)
                 notify(ID_DOWNLOAD_CHAPTER_ERROR,
                     defaultNotificationHelper.baseCancelledNotificationDownloader(bookName = savedDownload.bookName,

@@ -33,8 +33,8 @@ import androidx.core.graphics.blue
 import androidx.core.graphics.green
 import androidx.core.graphics.red
 import androidx.core.net.toUri
+import org.ireader.core_api.log.Log
 import org.ireader.domain.R
-import timber.log.Timber
 import kotlin.math.roundToInt
 
 private const val TABLET_UI_MIN_SCREEN_WIDTH_DP = 720
@@ -85,7 +85,7 @@ fun Context.copyToClipboard(label: String, content: String) {
 
         toast(getString(R.string.copied_to_clipboard))
     } catch (e: Throwable) {
-        Timber.e("copyToClipboard $e")
+        Log.error("copyToClipboard $e")
         toast(R.string.clipboard_copy_error)
     }
 }

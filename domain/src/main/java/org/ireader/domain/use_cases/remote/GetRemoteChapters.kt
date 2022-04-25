@@ -6,12 +6,12 @@ import kotlinx.coroutines.CancellationException
 import org.ireader.core.extensions.withIOContext
 import org.ireader.core.utils.UiText
 import org.ireader.core.utils.exceptionHandler
+import org.ireader.core_api.log.Log
 import org.ireader.core_api.source.Source
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Book.Companion.toBookInfo
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.entities.toChapter
-import timber.log.Timber
 import javax.inject.Inject
 
 class GetRemoteChapters @Inject constructor(@ApplicationContext private val context: Context) {
@@ -24,11 +24,12 @@ class GetRemoteChapters @Inject constructor(@ApplicationContext private val cont
         withIOContext {
             kotlin.runCatching {
                 try {
-                    Timber.d("Timber: GetRemoteChaptersUseCase was Called")
+                    Log.debug { "Timber: GetRemoteChaptersUseCase was Called" }
+
                     val chapters = source.getChapterList(manga = book.toBookInfo(source.id))
 
                     onSuccess(chapters.map { it.toChapter(book.id) })
-                    Timber.d("Timber: GetRemoteChaptersUseCase was Finished Successfully")
+                    Log.debug { "Timber: GetRemoteChaptersUseCase was Finished Successfully" }
                 } catch (e: CancellationException) {
 
                 } catch (e: Throwable) {

@@ -11,11 +11,14 @@ package org.ireader.core_api.http
 import android.app.Application
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
+import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.plugins.cookies.*
 import io.ktor.serialization.gson.*
 import okhttp3.Cache
 import okhttp3.OkHttpClient
 import java.io.File
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -33,16 +36,22 @@ class HttpClients @Inject internal constructor(context: Application, browseEngin
     private val okhttpClient = OkHttpClient.Builder()
         .cache(cache)
         .cookieJar(cookieJar)
+        .readTimeout(30L, TimeUnit.SECONDS)
+        .writeTimeout(30L, TimeUnit.SECONDS)
         .build()
 
     val browser = browseEngine
 
     val default = HttpClient(OkHttp) {
+        BrowserUserAgent()
         engine {
             preconfigured = okhttpClient
         }
         install(ContentNegotiation) {
             gson()
+        }
+        install(HttpCookies) {
+            storage = ConstantCookiesStorage()
         }
     }
 

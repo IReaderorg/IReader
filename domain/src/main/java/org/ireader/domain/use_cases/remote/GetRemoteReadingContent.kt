@@ -11,7 +11,6 @@ import org.ireader.core_api.source.model.Text
 import org.ireader.domain.R
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.models.entities.toChapterInfo
-import timber.log.Timber
 import javax.inject.Inject
 
 class GetRemoteReadingContent @Inject constructor(@ApplicationContext private val context: Context)  {
@@ -24,7 +23,7 @@ class GetRemoteReadingContent @Inject constructor(@ApplicationContext private va
         withIOContext {
             kotlin.runCatching {
                 try {
-                    Timber.d("Timber: GetRemoteReadingContentUseCase was Called")
+                    org.ireader.core_api.log.Log.debug("Timber: GetRemoteReadingContentUseCase was Called")
                     // val page = source.getPageList(chapter.toChapterInfo())
                     val content = mutableListOf<String>()
                     val page = source.getPageList(chapter.toChapterInfo())
@@ -42,7 +41,7 @@ class GetRemoteReadingContent @Inject constructor(@ApplicationContext private va
                         onError(UiText.StringResource(R.string.cant_get_content))
 
                     } else {
-                        Timber.d("Timber: GetRemoteReadingContentUseCase was Finished Successfully")
+                        org.ireader.core_api.log.Log.debug("Timber: GetRemoteReadingContentUseCase was Finished Successfully")
                         onSuccess(chapter.copy(content = content, dateFetch = currentTimeToLong()))
 
                     }

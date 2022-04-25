@@ -30,7 +30,7 @@ class CoilLoaderFactory @Inject constructor(
         //Faking a book cover here
         val factory  = LibraryMangaFetcherFactory(
             okhttpClient,
-            libraryCovers,
+            libraryCovers = libraryCovers,
             getLocalCatalog,
             cache,
             data = BookCover(0,0,"", false),

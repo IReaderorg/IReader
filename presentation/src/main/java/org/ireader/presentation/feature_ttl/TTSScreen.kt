@@ -275,7 +275,8 @@ fun TTSScreen(
                             vm.ttsContent?.value?.let { content ->
                                 Column(modifier = Modifier
                                     .fillMaxWidth()
-                                    .weight(5f),
+                                    .weight(5f)
+                                    .padding(top = 16.dp),
                                     verticalArrangement = Arrangement.Top,
                                     horizontalAlignment = Alignment.CenterHorizontally) {
                                     BookImageComposable(

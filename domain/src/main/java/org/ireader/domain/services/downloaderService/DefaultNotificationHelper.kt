@@ -217,6 +217,7 @@ class DefaultNotificationHelper @Inject constructor(
         pendingIntentFlags
     )
 
+
     suspend fun basicPlayingTextReaderNotification(
         chapter: Chapter,
         book: Book,

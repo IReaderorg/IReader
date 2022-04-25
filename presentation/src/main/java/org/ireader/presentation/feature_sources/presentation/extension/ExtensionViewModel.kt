@@ -16,7 +16,6 @@ import org.ireader.domain.models.entities.CatalogLocal
 import org.ireader.domain.models.entities.CatalogRemote
 import org.ireader.domain.use_cases.remote.key.RemoteKeyUseCase
 import org.ireader.domain.utils.launchIO
-import org.ireader.presentation.R
 import javax.inject.Inject
 
 
@@ -80,6 +79,9 @@ class ExtensionViewModel @Inject constructor(
                 catalog.pkgName to installCatalog.await(catalog)
             }
             flow.collect { step ->
+                if (step == InstallStep.Error ) {
+                    showSnackBar(UiText.DynamicString(step.name))
+                }
                 state.installSteps = if (step != InstallStep.Completed) {
                     installSteps + (pkgName to step)
                 } else {
@@ -105,7 +107,6 @@ class ExtensionViewModel @Inject constructor(
         scope.launch(Dispatchers.IO) {
             state.isRefreshing = true
             syncRemoteCatalogs.await(true)
-            showSnackBar(UiText.StringResource(R.string.Refreshed))
             state.isRefreshing = false
         }
     }

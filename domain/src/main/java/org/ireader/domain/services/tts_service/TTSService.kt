@@ -15,6 +15,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import org.ireader.core_api.log.Log
 import org.ireader.core_api.source.Source
 import org.ireader.domain.catalog.service.CatalogStore
 import org.ireader.domain.models.entities.Book
@@ -27,7 +28,6 @@ import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import org.ireader.presentation.feature_ttl.TTSState
 import org.ireader.presentation.feature_ttl.TTSStateImpl
-import timber.log.Timber
 
 @HiltWorker
 class TTSService @AssistedInject constructor(
@@ -118,7 +118,8 @@ class TTSService @AssistedInject constructor(
                 state.player = TextToSpeech(context) { status ->
                     state.ttsIsLoading = true
                     if (status == TextToSpeech.ERROR) {
-                        Timber.e("Text-to-Speech Not Available")
+                        Log.error { "Text-to-Speech Not Available" }
+
                         state.ttsIsLoading = false
                         return@TextToSpeech
                     }
@@ -262,7 +263,8 @@ class TTSService @AssistedInject constructor(
                 }
             }
         } catch (e: java.lang.Exception) {
-            Timber.e(e)
+            Log.error { e.stackTrace.toString() }
+
             state.ttsChapter?.let { chapter ->
                 state.ttsSource?.let { source ->
                     state.ttsChapters.let { chapters ->
@@ -417,7 +419,8 @@ class TTSService @AssistedInject constructor(
                                             }
 
                                         } catch (e: Throwable) {
-                                            Timber.e(e)
+                                            Log.error { e.stackTrace.toString() }
+
                                         }
                                     }
 
@@ -441,7 +444,7 @@ class TTSService @AssistedInject constructor(
                                 })
                             }
                         } catch (e: Throwable) {
-                            Timber.e(e.localizedMessage)
+                            Log.error { e.stackTrace.toString() }
                         }
 
                     }
@@ -517,7 +520,7 @@ class TTSService @AssistedInject constructor(
             }
             ttsState.ttsIsLoading = false
         } catch (e: java.lang.Exception) {
-            Timber.e(e)
+            Log.error { e.stackTrace.toString() }
             ttsState.ttsChapter?.let { chapter ->
                 ttsState.ttsBook?.let { book ->
                     updateNotification(chapter = chapter,
