@@ -2,9 +2,9 @@ package org.ireader.domain.use_cases.fetchers
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import org.ireader.common_models.entities.Book
+import org.ireader.common_models.entities.Chapter
 import org.ireader.core.utils.UiText
-import org.ireader.domain.models.entities.Book
-import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.utils.Resource

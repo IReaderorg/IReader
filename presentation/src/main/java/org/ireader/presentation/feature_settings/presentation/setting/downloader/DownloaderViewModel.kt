@@ -9,8 +9,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+import org.ireader.common_models.entities.SavedDownload
 import org.ireader.core_ui.viewmodel.BaseViewModel
-import org.ireader.domain.models.entities.SavedDownload
 import org.ireader.domain.services.downloaderService.DownloadService
 import org.ireader.domain.services.downloaderService.DownloadServiceStateImpl
 import org.ireader.domain.use_cases.download.DownloadUseCases

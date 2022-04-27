@@ -18,9 +18,9 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toUri
 import androidx.media.session.MediaButtonReceiver
-import org.ireader.core.utils.K
+import org.ireader.common_resources.K
+import org.ireader.core.io.BookCover
 import org.ireader.domain.R
-import org.ireader.domain.feature_service.io.BookCover
 import org.ireader.domain.notification.Notifications
 import org.ireader.domain.notification.Notifications.CHANNEL_TTS
 import org.ireader.domain.notification.flags

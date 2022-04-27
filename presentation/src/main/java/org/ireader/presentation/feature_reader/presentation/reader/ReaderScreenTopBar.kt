@@ -21,13 +21,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
-import org.ireader.domain.models.entities.Chapter
+import org.ireader.common_models.entities.Chapter
 import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.ReaderScreenPreferencesState
 import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.ReaderScreenState
 import org.ireader.presentation.presentation.Toolbar
-import org.ireader.presentation.presentation.reusable_composable.AppIconButton
-import org.ireader.presentation.presentation.reusable_composable.AppTextField
-import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
+import org.ireader.core_ui.ui_components.reusable_composable.AppIconButton
+import org.ireader.core_ui.ui_components.reusable_composable.AppTextField
+import org.ireader.core_ui.ui_components.reusable_composable.TopAppBarBackButton
 import org.ireader.core_api.source.Source
 
 @OptIn(ExperimentalMaterialApi::class)

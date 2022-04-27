@@ -13,9 +13,10 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import org.ireader.common_models.entities.Catalog
+import org.ireader.common_models.entities.CatalogInstalled
 import org.ireader.core_api.log.Log
-import org.ireader.domain.models.entities.Catalog
-import org.ireader.domain.models.entities.CatalogInstalled
+import org.ireader.core_ui.ui_components.TextSection
 import org.ireader.presentation.feature_sources.presentation.extension.CatalogItem
 import org.ireader.presentation.feature_sources.presentation.extension.CatalogsState
 

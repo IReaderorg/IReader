@@ -3,7 +3,7 @@ package org.ireader.presentation.feature_detail.presentation.book_detail.viewmod
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import org.ireader.domain.models.entities.Chapter
+import org.ireader.common_models.entities.Chapter
 import javax.inject.Inject
 
 open class ChapterStateImpl @Inject constructor() : ChapterState {

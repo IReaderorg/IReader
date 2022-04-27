@@ -20,7 +20,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.ReaderScreenViewModel
-import org.ireader.presentation.presentation.reusable_composable.CaptionTextComposable
+import org.ireader.core_ui.ui_components.reusable_composable.CaptionTextComposable
 
 
 @Composable

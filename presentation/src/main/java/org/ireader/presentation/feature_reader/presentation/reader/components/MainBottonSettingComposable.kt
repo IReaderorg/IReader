@@ -14,8 +14,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import org.ireader.domain.models.entities.Chapter
-import org.ireader.presentation.presentation.reusable_composable.AppIconButton
+import org.ireader.common_models.entities.Chapter
+import org.ireader.core_ui.ui_components.reusable_composable.AppIconButton
 import org.ireader.core_api.source.Source
 
 @Composable

@@ -4,7 +4,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import org.ireader.domain.feature_service.io.HistoryWithRelations
+import org.ireader.common_models.entities.HistoryWithRelations
 import javax.inject.Inject
 
 interface HistoryState {

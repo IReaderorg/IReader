@@ -2,19 +2,19 @@ package org.ireader.data.local.dao
 
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
-import org.ireader.domain.models.entities.Book
-import org.ireader.domain.models.entities.BookItem
-import org.ireader.domain.models.entities.Chapter
+import org.ireader.common_models.entities.Book
+import org.ireader.common_models.entities.BookItem
+import org.ireader.common_models.entities.Chapter
 
 @Dao
-interface LibraryBookDao : BaseDao<Book> {
+interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
 
     @Query("SELECT * FROM library")
-    suspend fun findAllBooks(): List<Book>
+    suspend fun findAllBooks(): List<org.ireader.common_models.entities.Book>
 
 
     @Query("""SELECT  * FROM library WHERE favorite = 1 """)
-    fun subscribeAllLocalBooks(): Flow<List<Book>>
+    fun subscribeAllLocalBooks(): Flow<List<org.ireader.common_models.entities.Book>>
 
 
     @Query("""SELECT  library.* ,
@@ -51,7 +51,7 @@ interface LibraryBookDao : BaseDao<Book> {
         dateAdded: Boolean = false,
         lastChecked: Boolean = false,
         desc: Boolean = false,
-    ): Flow<List<BookItem>>
+    ): Flow<List<org.ireader.common_models.entities.BookItem>>
 
 
     @Query("""
@@ -69,7 +69,7 @@ interface LibraryBookDao : BaseDao<Book> {
     CASE WHEN :desc = 1 THEN  max END DESC,
     CASE WHEN :desc = 0 THEN  max END ASC
 """)
-    fun subscribeLatestRead(desc: Boolean): Flow<List<BookItem>>
+    fun subscribeLatestRead(desc: Boolean): Flow<List<org.ireader.common_models.entities.BookItem>>
 
 
     @Query("""
@@ -83,7 +83,7 @@ interface LibraryBookDao : BaseDao<Book> {
     CASE WHEN :desc = 1 THEN  max END DESC,
     CASE WHEN :desc = 0 THEN  max END ASC
 """)
-    fun subscribeLatestChapter(desc: Boolean): Flow<List<BookItem>>
+    fun subscribeLatestChapter(desc: Boolean): Flow<List<org.ireader.common_models.entities.BookItem>>
 
 
     @Query("""
@@ -98,7 +98,7 @@ interface LibraryBookDao : BaseDao<Book> {
     CASE WHEN :desc = 1 THEN  COUNT(*) END DESC,
     CASE WHEN :desc = 0 THEN  COUNT(*) END ASC
 """)
-    fun subscribeTotalChapter(desc: Boolean): Flow<List<BookItem>>
+    fun subscribeTotalChapter(desc: Boolean): Flow<List<org.ireader.common_models.entities.BookItem>>
 
 
     @Query("""
@@ -112,7 +112,7 @@ interface LibraryBookDao : BaseDao<Book> {
     GROUP BY library.id
     HAVING library.favorite = 1 AND unread == total
 """)
-    suspend fun findUnreadBooks(): List<BookItem>
+    suspend fun findUnreadBooks(): List<org.ireader.common_models.entities.BookItem>
 
 
     @Query("""
@@ -126,7 +126,7 @@ interface LibraryBookDao : BaseDao<Book> {
     GROUP BY library.id
     HAVING library.favorite = 1 AND total_download == total
 """)
-    suspend fun findCompletedBooks(): List<BookItem>
+    suspend fun findCompletedBooks(): List<org.ireader.common_models.entities.BookItem>
 
 
     @Query("""
@@ -140,38 +140,38 @@ interface LibraryBookDao : BaseDao<Book> {
     GROUP BY library.id
     HAVING library.favorite = 1 AND unread == 0
 """)
-    suspend fun findDownloadedBooks(): List<BookItem>
+    suspend fun findDownloadedBooks(): List<org.ireader.common_models.entities.BookItem>
 
 
     @Query("SELECT * FROM library WHERE favorite = 1")
-    suspend fun findAllInLibraryBooks(): List<Book>
+    suspend fun findAllInLibraryBooks(): List<org.ireader.common_models.entities.Book>
 
     @Query("SELECT * FROM library WHERE id = :bookId")
-    fun subscribeLocalBook(bookId: Long): Flow<List<Book>?>
+    fun subscribeLocalBook(bookId: Long): Flow<List<org.ireader.common_models.entities.Book>?>
 
     @Query("SELECT * FROM library WHERE id = :bookId Limit 1")
-    fun subscribeBookById(bookId: Long): Flow<Book?>
+    fun subscribeBookById(bookId: Long): Flow<org.ireader.common_models.entities.Book?>
 
     @Query("SELECT * FROM library WHERE id = :bookId Limit 1")
-    suspend fun findBookById(bookId: Long): Book?
+    suspend fun findBookById(bookId: Long): org.ireader.common_models.entities.Book?
 
     @Query("SELECT * FROM library WHERE id in (:bookIds)")
-    suspend fun findBookByIds(bookIds: List<Long>): List<Book>
+    suspend fun findBookByIds(bookIds: List<Long>): List<org.ireader.common_models.entities.Book>
 
     @Query("SELECT * FROM library WHERE link = :key Limit 1")
-    suspend fun findBookByKey(key: String): Book?
+    suspend fun findBookByKey(key: String): org.ireader.common_models.entities.Book?
 
     @Query("SELECT * FROM library WHERE link = :key")
-    suspend fun findBooksByKey(key: String): List<Book>
+    suspend fun findBooksByKey(key: String): List<org.ireader.common_models.entities.Book>
 
     @Query("SELECT * FROM library WHERE link = :key or title = :title")
-    fun subscribeBooksByKey(key: String, title: String): Flow<List<Book>>
+    fun subscribeBooksByKey(key: String, title: String): Flow<List<org.ireader.common_models.entities.Book>>
 
     @Query("SELECT * FROM library WHERE title LIKE '%' || :query || '%' AND favorite = 1")
-    fun searchBook(query: String): Flow<Book>
+    fun searchBook(query: String): Flow<org.ireader.common_models.entities.Book>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertBook(book: Book): Long
+    suspend fun insertBook(book: org.ireader.common_models.entities.Book): Long
 
 
     @Query("DELETE FROM library WHERE id = :bookId ")
@@ -197,13 +197,13 @@ interface LibraryBookDao : BaseDao<Book> {
     suspend fun deleteAllUpdates(bookIds: List<Long>)
 
     @Transaction
-    suspend fun insertBooksAndChapters(books: List<Book>, chapters: List<Chapter>) {
+    suspend fun insertBooksAndChapters(books: List<org.ireader.common_models.entities.Book>, chapters: List<org.ireader.common_models.entities.Chapter>) {
         insert(books)
         insertChapters(chapters)
     }
 
-    @Insert(entity = Chapter::class, onConflict = OnConflictStrategy.REPLACE)
-    fun insertChapters(chapters: List<Chapter>)
+    @Insert(entity = org.ireader.common_models.entities.Chapter::class, onConflict = OnConflictStrategy.REPLACE)
+    fun insertChapters(chapters: List<org.ireader.common_models.entities.Chapter>)
 
     @Query("""
         DELETE FROM library

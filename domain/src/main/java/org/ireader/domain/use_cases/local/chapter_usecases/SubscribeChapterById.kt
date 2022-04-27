@@ -2,16 +2,15 @@ package org.ireader.domain.use_cases.local.chapter_usecases
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import org.ireader.core.utils.Constants
-import org.ireader.domain.models.entities.Chapter
-import org.ireader.domain.repository.LocalChapterRepository
+import org.ireader.common_models.entities.Chapter
+import org.ireader.common_resources.LAST_CHAPTER
 import javax.inject.Inject
 
 /**
  * get one Chapter using a chapterId
  * note: if nothing is found it return a resource of error
  */
-class SubscribeChapterById @Inject constructor(private val localChapterRepository: LocalChapterRepository) {
+class SubscribeChapterById @Inject constructor(private val localChapterRepository: org.ireader.common_data.repository.LocalChapterRepository) {
     operator fun invoke(
         chapterId: Long,
     ): Flow<Chapter?> {
@@ -20,12 +19,12 @@ class SubscribeChapterById @Inject constructor(private val localChapterRepositor
     }
 }
 
-class FindChapterById @Inject constructor(private val localChapterRepository: LocalChapterRepository) {
+class FindChapterById @Inject constructor(private val localChapterRepository: org.ireader.common_data.repository.LocalChapterRepository) {
     suspend operator fun invoke(
         chapterId: Long,
         bookId: Long?,
     ): Chapter? {
-        return if (chapterId != Constants.LAST_CHAPTER) {
+        return if (chapterId != LAST_CHAPTER) {
             localChapterRepository.findChapterById(chapterId = chapterId)
         } else if (bookId != null) {
             localChapterRepository.findLastReadChapter(bookId)
@@ -33,7 +32,7 @@ class FindChapterById @Inject constructor(private val localChapterRepository: Lo
     }
 }
 
-class FindChapterByIdByBatch @Inject constructor(private val localChapterRepository: LocalChapterRepository) {
+class FindChapterByIdByBatch @Inject constructor(private val localChapterRepository: org.ireader.common_data.repository.LocalChapterRepository) {
     suspend operator fun invoke(
         chapterIds: List<Long>,
     ): List<Chapter> {
@@ -42,7 +41,7 @@ class FindChapterByIdByBatch @Inject constructor(private val localChapterReposit
     }
 }
 
-class FindAllInLibraryChapters @Inject constructor(private val localChapterRepository: LocalChapterRepository) {
+class FindAllInLibraryChapters @Inject constructor(private val localChapterRepository: org.ireader.common_data.repository.LocalChapterRepository) {
     suspend operator fun invoke(
     ): List<Chapter> {
         return localChapterRepository.findAllInLibraryChapter()

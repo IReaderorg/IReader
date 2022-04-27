@@ -5,10 +5,9 @@ import io.ktor.client.statement.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import org.ireader.core.catalog.service.CatalogRemoteApi
 import org.ireader.core.utils.CatalogNotFoundException
 import org.ireader.core_api.http.HttpClients
-import org.ireader.domain.catalog.service.CatalogRemoteApi
-import org.ireader.domain.models.entities.CatalogRemote
 import javax.inject.Inject
 
 class CatalogGithubApi @Inject constructor(
@@ -18,7 +17,7 @@ class CatalogGithubApi @Inject constructor(
     private val repoUrl =
         "https://raw.githubusercontent.com/kazemcodes/IReader-Sources/main"
 
-    override suspend fun fetchCatalogs(): List<CatalogRemote> {
+    override suspend fun fetchCatalogs(): List<org.ireader.common_models.entities.CatalogRemote> {
         val response : String  =
             httpClient.default
             .get("$repoUrl/index.min.json")
@@ -29,7 +28,7 @@ class CatalogGithubApi @Inject constructor(
             throw CatalogNotFoundException()
         }
         return catalogs.map { catalog ->
-            CatalogRemote(
+            org.ireader.common_models.entities.CatalogRemote(
                 name = catalog.name,
                 description = catalog.description,
                 sourceId = catalog.id,

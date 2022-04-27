@@ -2,10 +2,8 @@ package org.ireader.presentation.feature_settings.presentation.setting.downloade
 
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import org.ireader.domain.models.entities.SavedDownload
-import org.ireader.domain.models.entities.SavedDownloadWithInfo
+import org.ireader.common_models.entities.SavedDownloadWithInfo
 import javax.inject.Inject
-import javax.inject.Singleton
 
 
 interface DownloadState {

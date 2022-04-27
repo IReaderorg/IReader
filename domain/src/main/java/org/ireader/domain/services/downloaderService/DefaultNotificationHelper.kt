@@ -14,10 +14,10 @@ import androidx.core.net.toUri
 import androidx.work.WorkManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableSharedFlow
+import org.ireader.common_models.entities.Book
+import org.ireader.common_models.entities.Chapter
+import org.ireader.common_resources.K
 import org.ireader.core.R
-import org.ireader.core.utils.K
-import org.ireader.domain.models.entities.Book
-import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.notification.Notifications
 import org.ireader.domain.notification.flags
 import org.ireader.domain.notification.setLargeIcon

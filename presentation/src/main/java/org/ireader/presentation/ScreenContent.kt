@@ -16,7 +16,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
-import org.ireader.core.utils.Constants.ARG_HIDE_BOTTOM_BAR
+import org.ireader.common_resources.ARG_HIDE_BOTTOM_BAR
 import org.ireader.presentation.ui.BottomNavScreenSpec
 import org.ireader.presentation.ui.ScreenSpec
 

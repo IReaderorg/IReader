@@ -4,11 +4,11 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.ireader.common_models.entities.Chapter
+import org.ireader.common_models.entities.UpdateWithInfo
 import org.ireader.core_ui.viewmodel.BaseViewModel
-import org.ireader.domain.catalog.interactor.GetLocalCatalog
-import org.ireader.domain.models.entities.Chapter
-import org.ireader.domain.models.entities.UpdateWithInfo
-import org.ireader.domain.repository.UpdatesRepository
+import org.ireader.core.catalog.interactor.GetLocalCatalog
+import org.ireader.common_data.repository.UpdatesRepository
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
@@ -19,7 +19,7 @@ import javax.inject.Inject
 @HiltViewModel
 class UpdatesViewModel @Inject constructor(
     private val updateStateImpl: UpdateStateImpl,
-    val updatesRepository: UpdatesRepository,
+    val updatesRepository: org.ireader.common_data.repository.UpdatesRepository,
     private val remoteUseCases: RemoteUseCases,
     private val getLocalCatalog: GetLocalCatalog,
     private val getChapterUseCase: LocalGetChapterUseCase,

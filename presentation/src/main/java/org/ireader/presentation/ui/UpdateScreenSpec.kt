@@ -11,7 +11,7 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import org.ireader.core.extensions.viewModelIOCoroutine
-import org.ireader.domain.models.entities.UpdateWithInfo.Companion.toUpdate
+import org.ireader.common_models.entities.UpdateWithInfo.Companion.toUpdate
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.presentation.R
 import org.ireader.presentation.feature_updates.UpdateScreen

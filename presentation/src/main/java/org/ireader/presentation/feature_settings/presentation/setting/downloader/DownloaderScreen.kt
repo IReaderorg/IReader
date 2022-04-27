@@ -22,16 +22,16 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.flow.collectLatest
+import org.ireader.common_models.entities.SavedDownload
 import org.ireader.core.utils.UiEvent
 import org.ireader.core_ui.modifier.selectedBackground
-import org.ireader.domain.models.entities.SavedDownload
-import org.ireader.domain.models.entities.toSavedDownload
+import org.ireader.common_models.entities.toSavedDownload
 import org.ireader.presentation.R
 import org.ireader.presentation.feature_history.*
-import org.ireader.presentation.presentation.components.ISnackBarHost
-import org.ireader.presentation.presentation.reusable_composable.BuildDropDownMenu
-import org.ireader.presentation.presentation.reusable_composable.DropDownMenuItem
-import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
+import org.ireader.core_ui.ui_components.components.ISnackBarHost
+import org.ireader.core_ui.ui_components.reusable_composable.BuildDropDownMenu
+import org.ireader.core_ui.ui_components.reusable_composable.DropDownMenuItem
+import org.ireader.core_ui.ui_components.reusable_composable.MidSizeTextComposable
 import org.ireader.presentation.ui.BookDetailScreenSpec
 
 @OptIn(ExperimentalMaterialApi::class)

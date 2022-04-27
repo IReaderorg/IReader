@@ -1,8 +1,7 @@
 package org.ireader.presentation.feature_sources.presentation.extension
 
-import androidx.annotation.Keep
+import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.core_api.source.CatalogSource
-import org.ireader.domain.models.entities.CatalogLocal
 
 
 data class ExtensionScreenState(

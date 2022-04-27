@@ -2,6 +2,7 @@ package org.ireader.domain.use_cases.remote
 
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
+import org.ireader.common_models.entities.Chapter
 import org.ireader.core.extensions.withIOContext
 import org.ireader.core.utils.UiText
 import org.ireader.core.utils.currentTimeToLong
@@ -9,8 +10,7 @@ import org.ireader.core.utils.exceptionHandler
 import org.ireader.core_api.source.Source
 import org.ireader.core_api.source.model.Text
 import org.ireader.domain.R
-import org.ireader.domain.models.entities.Chapter
-import org.ireader.domain.models.entities.toChapterInfo
+import org.ireader.common_models.entities.toChapterInfo
 import javax.inject.Inject
 
 class GetRemoteReadingContent @Inject constructor(@ApplicationContext private val context: Context)  {

@@ -9,17 +9,17 @@ import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.*
+import org.ireader.common_models.entities.SavedDownload
+import org.ireader.common_models.entities.buildSavedDownload
 import org.ireader.core.R
 import org.ireader.core_api.log.Log
-import org.ireader.domain.catalog.service.CatalogStore
-import org.ireader.domain.models.entities.SavedDownload
-import org.ireader.domain.models.entities.buildSavedDownload
+import org.ireader.core.catalog.service.CatalogStore
 import org.ireader.domain.notification.Notifications
 import org.ireader.domain.notification.Notifications.ID_DOWNLOAD_CHAPTER_COMPLETE
 import org.ireader.domain.notification.Notifications.ID_DOWNLOAD_CHAPTER_ERROR
 import org.ireader.domain.notification.Notifications.ID_DOWNLOAD_CHAPTER_PROGRESS
-import org.ireader.domain.repository.LocalBookRepository
-import org.ireader.domain.repository.LocalChapterRepository
+import org.ireader.common_data.repository.LocalBookRepository
+import org.ireader.common_data.repository.LocalChapterRepository
 import org.ireader.domain.use_cases.download.DownloadUseCases
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
@@ -30,8 +30,8 @@ import org.ireader.domain.utils.launchIO
 class DownloadService @AssistedInject constructor(
     @Assisted private val context: Context,
     @Assisted params: WorkerParameters,
-    private val bookRepo: LocalBookRepository,
-    private val chapterRepo: LocalChapterRepository,
+    private val bookRepo: org.ireader.common_data.repository.LocalBookRepository,
+    private val chapterRepo: org.ireader.common_data.repository.LocalChapterRepository,
     private val remoteUseCases: RemoteUseCases,
     private val extensions: CatalogStore,
     private val insertUseCases: LocalInsertUseCases,
@@ -54,16 +54,17 @@ class DownloadService @AssistedInject constructor(
     }
 
 
-    var savedDownload: SavedDownload = SavedDownload(
-        bookId = 0,
-        priority = 1,
-        chapterName = "",
-        chapterKey = "",
-        translator = "",
-        chapterId = 0,
-        bookName = "",
-        sourceId = 0,
-    )
+    var savedDownload: SavedDownload =
+        SavedDownload(
+            bookId = 0,
+            priority = 1,
+            chapterName = "",
+            chapterKey = "",
+            translator = "",
+            chapterId = 0,
+            bookName = "",
+            sourceId = 0,
+        )
 
     override suspend fun doWork(): Result {
         NotificationManagerCompat.from(applicationContext.applicationContext).apply {

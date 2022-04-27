@@ -7,10 +7,10 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import org.ireader.common_models.entities.HistoryWithRelations
 import org.ireader.core.utils.UiText
 import org.ireader.core_ui.ui.EmptyScreen
 import org.ireader.core_ui.ui.LoadingScreen
-import org.ireader.domain.feature_service.io.HistoryWithRelations
 import org.ireader.presentation.feature_history.viewmodel.HistoryState
 
 @OptIn(ExperimentalMaterialApi::class)

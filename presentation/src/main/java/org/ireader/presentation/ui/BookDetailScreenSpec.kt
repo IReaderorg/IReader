@@ -11,7 +11,7 @@ import androidx.navigation.*
 import com.google.accompanist.pager.ExperimentalPagerApi
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import org.ireader.core.utils.Constants
+import org.ireader.common_resources.LAST_CHAPTER
 import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
 import org.ireader.core.utils.getUrlWithoutDomain
@@ -74,7 +74,7 @@ object BookDetailScreenSpec : ScreenSpec {
                             navController.navigate(ReaderScreenSpec.buildRoute(
                                 bookId = book.id,
                                 sourceId = source.id,
-                                chapterId = Constants.LAST_CHAPTER,
+                                chapterId = LAST_CHAPTER,
                             ))
                         } else if (viewModel.chapters.isNotEmpty()) {
                             navController.navigate(ReaderScreenSpec.buildRoute(

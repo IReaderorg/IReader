@@ -16,14 +16,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import org.ireader.common_models.entities.UpdateWithInfo
 import org.ireader.core.utils.UiText
 import org.ireader.core_ui.ui.EmptyScreen
 import org.ireader.core_ui.ui.LoadingScreen
-import org.ireader.domain.models.entities.UpdateWithInfo
 import org.ireader.presentation.feature_updates.component.UpdatesContent
 import org.ireader.presentation.feature_updates.component.UpdatesToolbar
 import org.ireader.presentation.feature_updates.viewmodel.UpdateState
-import org.ireader.presentation.presentation.reusable_composable.AppIconButton
+import org.ireader.core_ui.ui_components.reusable_composable.AppIconButton
 
 @Composable
 fun UpdateScreen(

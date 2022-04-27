@@ -13,7 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
-import org.ireader.domain.models.entities.Chapter
+import org.ireader.common_models.entities.Chapter
 
 
 @Composable

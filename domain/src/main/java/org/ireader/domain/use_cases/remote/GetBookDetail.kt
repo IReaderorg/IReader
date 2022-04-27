@@ -1,16 +1,16 @@
 package org.ireader.domain.use_cases.remote
 
 import kotlinx.coroutines.CancellationException
+import org.ireader.common_models.entities.Book
+import org.ireader.common_models.entities.Book.Companion.toBookInfo
+import org.ireader.common_models.entities.toBook
 import org.ireader.core.extensions.withIOContext
+import org.ireader.core.io.LibraryCovers
 import org.ireader.core.utils.UiText
 import org.ireader.core.utils.exceptionHandler
+import org.ireader.core.utils.updateBook
 import org.ireader.core_api.log.Log
 import org.ireader.core_api.source.Source
-import org.ireader.domain.feature_service.io.LibraryCovers
-import org.ireader.domain.models.entities.Book
-import org.ireader.domain.models.entities.Book.Companion.toBookInfo
-import org.ireader.domain.models.entities.toBook
-import org.ireader.domain.models.entities.updateBook
 import javax.inject.Inject
 
 class GetBookDetail @Inject constructor(
@@ -29,7 +29,9 @@ class GetBookDetail @Inject constructor(
 
                     val bookDetail = source.getMangaDetails(book.toBookInfo(source.id))
 
-                    onSuccess(updateBook(bookDetail.toBook(source.id), book, libraryCovers))
+                    onSuccess(updateBook(bookDetail.toBook(source.id),
+                        book,
+                        libraryCovers))
                 } catch (e: CancellationException) {
                 } catch (e: Throwable) {
                     onError(exceptionHandler(e))

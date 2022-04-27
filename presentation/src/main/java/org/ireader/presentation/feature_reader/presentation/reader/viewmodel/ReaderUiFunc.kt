@@ -8,11 +8,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.ireader.common_models.entities.Book
+import org.ireader.common_models.entities.Chapter
 import org.ireader.core.utils.UiText
 import org.ireader.core.utils.findComponentActivity
 import org.ireader.domain.R
-import org.ireader.domain.models.entities.Book
-import org.ireader.domain.models.entities.Chapter
 import javax.inject.Inject
 
 interface ReaderUiFunctions {

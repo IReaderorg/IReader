@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.ireader.core_ui.theme.fonts
 import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.ReaderScreenPreferencesState
-import org.ireader.presentation.presentation.reusable_composable.CaptionTextComposable
+import org.ireader.core_ui.ui_components.reusable_composable.CaptionTextComposable
 
 
 @Composable

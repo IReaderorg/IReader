@@ -2,9 +2,9 @@ package org.ireader.presentation.feature_detail.presentation.chapter_detail.view
 
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import org.ireader.common_models.entities.Book
+import org.ireader.common_models.entities.Chapter
 import org.ireader.core.utils.UiText
-import org.ireader.domain.models.entities.Book
-import org.ireader.domain.models.entities.Chapter
 import javax.inject.Inject
 
 

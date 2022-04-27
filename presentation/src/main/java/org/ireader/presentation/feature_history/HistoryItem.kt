@@ -13,17 +13,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import org.ireader.domain.feature_service.io.HistoryWithRelations
-import org.ireader.domain.feature_service.io.coil.rememberBookCover
+import org.ireader.common_models.entities.HistoryWithRelations
+import org.ireader.core_ui.coil.rememberBookCover
 
 
 @Composable
 fun HistoryItem(
-  history: HistoryWithRelations,
-  onBookCover: (HistoryWithRelations) -> Unit,
-  onClickItem: (HistoryWithRelations) -> Unit,
-  onClickDelete: (HistoryWithRelations) -> Unit,
-  onClickPlay: (HistoryWithRelations) -> Unit,
+    history: HistoryWithRelations,
+    onBookCover: (HistoryWithRelations) -> Unit,
+    onClickItem: (HistoryWithRelations) -> Unit,
+    onClickDelete: (HistoryWithRelations) -> Unit,
+    onClickPlay: (HistoryWithRelations) -> Unit,
 ) {
   BookListItem(
       modifier = Modifier

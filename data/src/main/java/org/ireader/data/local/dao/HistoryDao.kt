@@ -2,20 +2,19 @@ package org.ireader.data.local.dao
 
 import androidx.room.Dao
 import androidx.room.Query
-import org.ireader.domain.feature_service.io.HistoryWithRelations
-import org.ireader.domain.models.entities.History
+import org.ireader.common_models.entities.HistoryWithRelations
 
 @Dao
-interface HistoryDao : BaseDao<History> {
+interface HistoryDao : BaseDao<org.ireader.common_models.entities.History> {
 
     @Query("SELECT * FROM history WHERE chapterId = :id LIMIT 1")
-    suspend fun findHistory(id: Long): History?
+    suspend fun findHistory(id: Long): org.ireader.common_models.entities.History?
 
     @Query("SELECT history.* FROM history GROUP  By history.chapterId HAVING bookId = :bookId  ORDER BY history.readAt DESC LIMIT 1")
-    suspend fun findHistoryByBookId(bookId: Long): History?
+    suspend fun findHistoryByBookId(bookId: Long): org.ireader.common_models.entities.History?
 
     @Query("SELECT * FROM history")
-    suspend fun findHistories(): List<History>
+    suspend fun findHistories(): List<org.ireader.common_models.entities.History>
 
 
     @Query("""SELECT history.*, library.title as bookTitle, library.sourceId, library.cover, library.favorite, chapter.title as chapterTitle,

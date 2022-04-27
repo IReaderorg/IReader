@@ -11,8 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
-import org.ireader.presentation.presentation.reusable_composable.SuperSmallTextComposable
+import org.ireader.core_ui.ui_components.reusable_composable.MidSizeTextComposable
+import org.ireader.core_ui.ui_components.reusable_composable.SuperSmallTextComposable
 
 @Composable
 fun CardTileComposable(

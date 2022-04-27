@@ -1,10 +1,10 @@
 package org.ireader.domain.use_cases.preferences.reader_preferences
 
 
+import org.ireader.common_models.FilterType
+import org.ireader.common_models.SortType
 import org.ireader.core_ui.theme.AppPreferences
 import org.ireader.core_ui.theme.OrientationMode
-import org.ireader.domain.models.FilterType
-import org.ireader.domain.models.SortType
 import javax.inject.Inject
 
 class OrientationUseCase @Inject constructor(

@@ -12,8 +12,8 @@
 //import kotlinx.datetime.Clock
 //import org.ireader.core_api.log.Log
 //import org.ireader.core_api.source.Source
-//import org.ireader.domain.models.entities.Book
-//import org.ireader.domain.models.entities.Chapter
+//import org.ireader.infinity.Book
+//import org.ireader.infinity.Chapter
 //import org.ireader.domain.notification.Notifications
 //import org.ireader.domain.services.tts_service.Player
 //import org.ireader.presentation.feature_ttl.TTSState

@@ -3,17 +3,16 @@ package org.ireader.data.repository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapLatest
+import org.ireader.common_models.entities.HistoryWithRelations
 import org.ireader.data.local.dao.HistoryDao
-import org.ireader.domain.feature_service.io.HistoryWithRelations
-import org.ireader.domain.models.entities.History
-import org.ireader.domain.repository.HistoryRepository
 
-class HistoryRepositoryImpl constructor(private val historyDao: HistoryDao) : HistoryRepository {
-    override suspend fun findHistory(id: Long): History? {
+class HistoryRepositoryImpl constructor(private val historyDao: HistoryDao) :
+    org.ireader.common_data.repository.HistoryRepository {
+    override suspend fun findHistory(id: Long): org.ireader.common_models.entities.History? {
         return historyDao.findHistory(id)
     }
 
-    override suspend fun findHistoryByBookId(bookId: Long): History? {
+    override suspend fun findHistoryByBookId(bookId: Long): org.ireader.common_models.entities.History? {
         return historyDao.findHistoryByBookId(bookId)
     }
 
@@ -25,19 +24,19 @@ class HistoryRepositoryImpl constructor(private val historyDao: HistoryDao) : Hi
         }
     }
 
-    override suspend fun findHistories(): List<History> {
+    override suspend fun findHistories(): List<org.ireader.common_models.entities.History> {
         return historyDao.findHistories()
     }
 
-    override suspend fun insertHistory(history: History): Long {
+    override suspend fun insertHistory(history: org.ireader.common_models.entities.History): Long {
         return historyDao.insert(history)
     }
 
-    override suspend fun insertHistories(histories: List<History>): List<Long> {
+    override suspend fun insertHistories(histories: List<org.ireader.common_models.entities.History>): List<Long> {
         return historyDao.insert(histories)
     }
 
-    override suspend fun deleteHistories(histories: List<History>) {
+    override suspend fun deleteHistories(histories: List<org.ireader.common_models.entities.History>) {
         return historyDao.delete(histories)
     }
 

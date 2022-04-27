@@ -13,8 +13,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import org.ireader.presentation.presentation.reusable_composable.AppIconButton
-import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
+import org.ireader.core_ui.ui_components.reusable_composable.AppIconButton
+import org.ireader.core_ui.ui_components.reusable_composable.MidSizeTextComposable
 
 @Composable
 fun FilterMenuItem(

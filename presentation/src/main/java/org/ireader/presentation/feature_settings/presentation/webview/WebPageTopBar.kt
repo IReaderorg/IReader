@@ -15,10 +15,10 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import org.ireader.presentation.R
 import org.ireader.presentation.presentation.Toolbar
-import org.ireader.presentation.presentation.reusable_composable.AppIconButton
-import org.ireader.presentation.presentation.reusable_composable.BuildDropDownMenu
-import org.ireader.presentation.presentation.reusable_composable.DropDownMenuItem
-import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
+import org.ireader.core_ui.ui_components.reusable_composable.AppIconButton
+import org.ireader.core_ui.ui_components.reusable_composable.BuildDropDownMenu
+import org.ireader.core_ui.ui_components.reusable_composable.DropDownMenuItem
+import org.ireader.core_ui.ui_components.reusable_composable.TopAppBarBackButton
 
 @Composable
 fun WebPageTopBar(

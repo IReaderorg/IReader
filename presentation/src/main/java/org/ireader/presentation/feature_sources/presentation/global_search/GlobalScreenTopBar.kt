@@ -10,8 +10,8 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import org.ireader.presentation.feature_sources.presentation.global_search.viewmodel.GlobalSearchState
 import org.ireader.presentation.presentation.Toolbar
-import org.ireader.presentation.presentation.reusable_composable.AppIconButton
-import org.ireader.presentation.presentation.reusable_composable.AppTextField
+import org.ireader.core_ui.ui_components.reusable_composable.AppIconButton
+import org.ireader.core_ui.ui_components.reusable_composable.AppTextField
 
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)

@@ -5,7 +5,6 @@ import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
@@ -27,11 +26,11 @@ import org.ireader.presentation.R
 import org.ireader.presentation.feature_detail.presentation.book_detail.components.AdvanceSettingItem
 import org.ireader.presentation.feature_settings.presentation.setting.BackUpBook
 import org.ireader.presentation.feature_settings.presentation.setting.SettingViewModel
-import org.ireader.presentation.feature_sources.presentation.extension.composables.TextSection
+import org.ireader.core_ui.ui_components.TextSection
 import org.ireader.presentation.presentation.Toolbar
-import org.ireader.presentation.presentation.components.ISnackBarHost
-import org.ireader.presentation.presentation.reusable_composable.BigSizeTextComposable
-import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
+import org.ireader.core_ui.ui_components.components.ISnackBarHost
+import org.ireader.core_ui.ui_components.reusable_composable.BigSizeTextComposable
+import org.ireader.core_ui.ui_components.reusable_composable.TopAppBarBackButton
 import java.io.FileInputStream
 import java.io.FileOutputStream
 

@@ -8,7 +8,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.ireader.core.utils.UiText
 import org.ireader.core_ui.viewmodel.BaseViewModel
-import org.ireader.domain.catalog.service.CatalogStore
+import org.ireader.core.catalog.service.CatalogStore
 import org.ireader.domain.services.downloaderService.DefaultNotificationHelper
 import org.ireader.domain.services.tts_service.Player
 import org.ireader.domain.ui.NavigationArgs

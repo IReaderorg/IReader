@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+import org.ireader.common_models.DisplayMode
+import org.ireader.common_models.entities.RemoteKeys
 import org.ireader.core.DefaultPaginator
 import org.ireader.core.exceptions.SourceNotFoundException
 import org.ireader.core.utils.UiEvent
@@ -19,10 +21,8 @@ import org.ireader.core_api.log.Log
 import org.ireader.core_api.source.CatalogSource
 import org.ireader.core_api.source.model.Filter
 import org.ireader.core_api.source.model.MangasPageInfo
-import org.ireader.domain.catalog.service.CatalogStore
-import org.ireader.domain.models.DisplayMode
-import org.ireader.domain.models.RemoteKeys
-import org.ireader.domain.models.entities.toBook
+import org.ireader.core.catalog.service.CatalogStore
+import org.ireader.common_models.entities.toBook
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.preferences.reader_preferences.BrowseLayoutTypeUseCase

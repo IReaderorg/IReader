@@ -11,9 +11,9 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import org.ireader.presentation.feature_history.viewmodel.HistoryState
 import org.ireader.presentation.presentation.Toolbar
-import org.ireader.presentation.presentation.reusable_composable.AppIconButton
-import org.ireader.presentation.presentation.reusable_composable.AppTextField
-import org.ireader.presentation.presentation.reusable_composable.BigSizeTextComposable
+import org.ireader.core_ui.ui_components.reusable_composable.AppIconButton
+import org.ireader.core_ui.ui_components.reusable_composable.AppTextField
+import org.ireader.core_ui.ui_components.reusable_composable.BigSizeTextComposable
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable

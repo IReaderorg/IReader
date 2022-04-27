@@ -13,8 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import org.ireader.core_ui.ui_components.reusable_composable.TopAppBarBackButton
 import org.ireader.presentation.presentation.Toolbar
-import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
 
 @Composable
 fun BookDetailTopAppBar(

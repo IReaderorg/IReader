@@ -3,8 +3,8 @@ package org.ireader.presentation.feature_sources.presentation.global_search.view
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import org.ireader.common_models.entities.Book
 import org.ireader.core_api.source.Source
-import org.ireader.domain.models.entities.Book
 import javax.inject.Inject
 
 interface GlobalSearchState {

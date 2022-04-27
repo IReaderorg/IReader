@@ -41,10 +41,10 @@ import org.ireader.core_ui.ui_components.LazyColumnScrollbar
 import org.ireader.presentation.feature_detail.presentation.chapter_detail.viewmodel.ChapterDetailEvent
 import org.ireader.presentation.feature_detail.presentation.chapter_detail.viewmodel.ChapterDetailViewModel
 import org.ireader.presentation.feature_settings.presentation.webview.CustomTextField
-import org.ireader.presentation.presentation.components.ChapterListItemComposable
-import org.ireader.presentation.presentation.reusable_composable.AppIconButton
-import org.ireader.presentation.presentation.reusable_composable.BigSizeTextComposable
-import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
+import org.ireader.core_ui.ui_components.components.ChapterListItemComposable
+import org.ireader.core_ui.ui_components.reusable_composable.AppIconButton
+import org.ireader.core_ui.ui_components.reusable_composable.BigSizeTextComposable
+import org.ireader.core_ui.ui_components.reusable_composable.MidSizeTextComposable
 
 
 @ExperimentalAnimationApi

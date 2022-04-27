@@ -11,10 +11,10 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import org.ireader.common_models.update_service_models.Release
+import org.ireader.common_models.update_service_models.Version
 import org.ireader.core.BuildConfig
 import org.ireader.domain.R
-import org.ireader.domain.models.update_service_models.Release
-import org.ireader.domain.models.update_service_models.Version
 import org.ireader.domain.notification.Notifications.CHANNEL_APP_UPDATE
 import org.ireader.domain.notification.Notifications.ID_APP_UPDATER
 import org.ireader.domain.notification.flags

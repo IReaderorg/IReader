@@ -1,7 +1,7 @@
 package org.ireader.presentation.feature_sources.presentation.extension
 
 import androidx.compose.ui.text.intl.LocaleList
-import org.ireader.domain.models.entities.CatalogLocal
+import org.ireader.common_models.entities.CatalogLocal
 
 
 class UserLanguagesComparator : Comparator<Language> {

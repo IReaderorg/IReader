@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
+import org.ireader.core_ui.ui_components.reusable_composable.MidSizeTextComposable
 import org.ireader.core_api.source.model.Filter
 
 @Composable

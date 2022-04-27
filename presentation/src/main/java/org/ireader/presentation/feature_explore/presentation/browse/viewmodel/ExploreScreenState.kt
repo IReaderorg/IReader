@@ -1,12 +1,11 @@
 package org.ireader.presentation.feature_explore.presentation.browse.viewmodel
 
-import androidx.annotation.Keep
+import org.ireader.common_models.LayoutType
+import org.ireader.common_models.entities.Book
 import org.ireader.core.LatestListing
 
 import org.ireader.core.utils.UiText
 import org.ireader.core.utils.emptyMangaInfoPage
-import org.ireader.domain.models.LayoutType
-import org.ireader.domain.models.entities.Book
 import org.ireader.core_api.source.CatalogSource
 import org.ireader.core_api.source.model.Listing
 import org.ireader.core_api.source.model.MangasPageInfo

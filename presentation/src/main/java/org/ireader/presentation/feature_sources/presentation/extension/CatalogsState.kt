@@ -1,9 +1,9 @@
 package org.ireader.presentation.feature_sources.presentation.extension
 
 import androidx.compose.runtime.*
-import org.ireader.domain.catalog.model.InstallStep
-import org.ireader.domain.models.entities.CatalogLocal
-import org.ireader.domain.models.entities.CatalogRemote
+import org.ireader.common_models.entities.CatalogLocal
+import org.ireader.common_models.entities.CatalogRemote
+import org.ireader.core.catalog.model.InstallStep
 import javax.inject.Inject
 
 

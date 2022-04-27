@@ -3,12 +3,10 @@ package org.ireader.data.local.dao
 import androidx.room.Dao
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
-import org.ireader.domain.models.entities.Update
-import org.ireader.domain.models.entities.UpdateWithInfo
 
 
 @Dao
-interface UpdatesDao : BaseDao<Update> {
+interface UpdatesDao : BaseDao<org.ireader.common_models.entities.Update> {
 
 
     @Query("""
@@ -32,7 +30,7 @@ interface UpdatesDao : BaseDao<Update> {
          JOIN chapter ON chapter.id == updates.chapterId
 
     """)
-    fun subscribeUpdates(): Flow<List<UpdateWithInfo>>
+    fun subscribeUpdates(): Flow<List<org.ireader.common_models.entities.UpdateWithInfo>>
 
 
     @Query("Delete FROM updates")

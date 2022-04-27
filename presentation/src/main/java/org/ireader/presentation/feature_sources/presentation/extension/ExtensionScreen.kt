@@ -17,18 +17,18 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.flow.collectLatest
+import org.ireader.common_models.entities.Catalog
+import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.core.utils.UiEvent
 import org.ireader.core_ui.theme.AppColors
-import org.ireader.domain.models.entities.Catalog
-import org.ireader.domain.models.entities.CatalogLocal
 import org.ireader.presentation.feature_sources.presentation.extension.composables.RemoteSourcesScreen
 import org.ireader.presentation.feature_sources.presentation.extension.composables.UserSourcesScreen
 import org.ireader.presentation.presentation.Toolbar
-import org.ireader.presentation.presentation.components.ISnackBarHost
-import org.ireader.presentation.presentation.reusable_composable.AppIconButton
-import org.ireader.presentation.presentation.reusable_composable.AppTextField
-import org.ireader.presentation.presentation.reusable_composable.BigSizeTextComposable
-import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
+import org.ireader.core_ui.ui_components.components.ISnackBarHost
+import org.ireader.core_ui.ui_components.reusable_composable.AppIconButton
+import org.ireader.core_ui.ui_components.reusable_composable.AppTextField
+import org.ireader.core_ui.ui_components.reusable_composable.BigSizeTextComposable
+import org.ireader.core_ui.ui_components.reusable_composable.MidSizeTextComposable
 import org.ireader.presentation.ui.GlobalSearchScreenSpec
 
 

@@ -1,7 +1,6 @@
 package org.ireader.presentation.feature_settings.presentation.setting
 
 import android.content.Intent
-import androidx.annotation.Keep
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
@@ -9,12 +8,12 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToJsonElement
+import org.ireader.common_models.entities.Book
+import org.ireader.common_models.entities.Chapter
 import org.ireader.core.utils.convertLongToTime
 import org.ireader.core_ui.theme.OrientationMode
 import org.ireader.core_ui.viewmodel.BaseViewModel
-import org.ireader.domain.feature_service.io.LibraryCovers
-import org.ireader.domain.models.entities.Book
-import org.ireader.domain.models.entities.Chapter
+import org.ireader.core.io.LibraryCovers
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetBookUseCases
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase

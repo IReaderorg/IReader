@@ -3,7 +3,7 @@ package org.ireader.domain.use_cases.services
 import android.content.Context
 import android.content.Intent
 import dagger.hilt.android.qualifiers.ApplicationContext
-import org.ireader.core.utils.K
+import org.ireader.common_resources.K
 import org.ireader.domain.services.tts_service.media_player.TTSService
 import org.ireader.domain.services.tts_service.media_player.TTSService.Companion.COMMAND
 import org.ireader.domain.services.tts_service.media_player.TTSService.Companion.TTS_BOOK_ID

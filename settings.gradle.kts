@@ -7,6 +7,10 @@ include(":domain")
 include(":core")
 include(":presentation")
 include(":core-api")
+include(":common_models")
+include(":common-resources")
+include(":ui-library")
+include(":common-data")
 
 
 

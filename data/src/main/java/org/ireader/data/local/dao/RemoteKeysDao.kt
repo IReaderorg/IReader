@@ -2,15 +2,15 @@ package org.ireader.data.local.dao
 
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
-import org.ireader.domain.models.RemoteKeys
-import org.ireader.domain.models.entities.Book
-import org.ireader.domain.models.entities.BookItem
+import org.ireader.common_models.entities.RemoteKeys
+import org.ireader.common_models.entities.Book
+import org.ireader.common_models.entities.BookItem
 
 @Dao
-interface RemoteKeysDao : BaseDao<Book> {
+interface RemoteKeysDao : BaseDao<org.ireader.common_models.entities.Book> {
 
     @Query("SELECT * FROM library WHERE id =:id")
-    fun getExploreBookById(id: Int): Flow<Book?>
+    fun getExploreBookById(id: Int): Flow<org.ireader.common_models.entities.Book?>
 
 
     @Query("""
@@ -20,7 +20,7 @@ SELECT DISTINCT library.* FROM library
         GROUP BY  page.id
         ORDER BY page.id
     """)
-    suspend fun findPagedExploreBooks(): List<Book>
+    suspend fun findPagedExploreBooks(): List<org.ireader.common_models.entities.Book>
 
 
 
@@ -32,7 +32,7 @@ FROM library
         GROUP BY  page.id
         ORDER BY page.id
     """)
-    fun subscribePagedExploreBooks(): Flow<List<BookItem>>
+    fun subscribePagedExploreBooks(): Flow<List<org.ireader.common_models.entities.BookItem>>
 
 
     @Query("""
@@ -40,13 +40,13 @@ FROM library
         JOIN  page ON library.title = page.id AND library.sourceId = page.sourceId  OR tableId = 1 
         GROUP BY  library.title ORDER BY page.id
     """)
-    fun getAllExploreBook(): List<Book>?
+    fun getAllExploreBook(): List<org.ireader.common_models.entities.Book>?
 
     @Query("SELECT * FROM page WHERE title = :title")
     suspend fun getRemoteKeys(title: String): RemoteKeys
 
     @Transaction
-    suspend fun prepareExploreMode(reset: Boolean, list: List<Book>, keys: List<RemoteKeys>) {
+    suspend fun prepareExploreMode(reset: Boolean, list: List<org.ireader.common_models.entities.Book>, keys: List<RemoteKeys>) {
         if (reset) {
             deleteUnUsedChapters()
             deleteAllRemoteKeys()
@@ -56,8 +56,8 @@ FROM library
         insertAllRemoteKeys(keys)
 
     }
-    @Insert(onConflict = OnConflictStrategy.REPLACE, entity = Book::class)
-    suspend fun insertBooks(books:List<Book>)
+    @Insert(onConflict = OnConflictStrategy.REPLACE, entity = org.ireader.common_models.entities.Book::class)
+    suspend fun insertBooks(books:List<org.ireader.common_models.entities.Book>)
 
     @Transaction
     suspend fun clearExploreMode() {

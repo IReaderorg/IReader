@@ -11,11 +11,11 @@ import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import com.google.accompanist.pager.ExperimentalPagerApi
-import org.ireader.core.utils.Constants
+import org.ireader.common_resources.LAST_CHAPTER
 import org.ireader.domain.ui.NavigationArgs
+import org.ireader.library.LibraryScreen
+import org.ireader.library.viewmodel.LibraryViewModel
 import org.ireader.presentation.R
-import org.ireader.presentation.feature_library.presentation.LibraryScreen
-import org.ireader.presentation.feature_library.presentation.viewmodel.LibraryViewModel
 
 object LibraryScreenSpec : BottomNavScreenSpec {
     override val icon: ImageVector = Icons.Default.Book
@@ -69,7 +69,7 @@ object LibraryScreenSpec : BottomNavScreenSpec {
                     ReaderScreenSpec.buildRoute(
                         bookId = book.id,
                         sourceId = book.sourceId,
-                        chapterId = Constants.LAST_CHAPTER
+                        chapterId =LAST_CHAPTER
                     )
                 )
             },

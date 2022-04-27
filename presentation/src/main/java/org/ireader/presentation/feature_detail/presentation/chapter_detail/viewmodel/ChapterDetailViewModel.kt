@@ -7,11 +7,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import org.ireader.common_models.entities.Book
+import org.ireader.common_models.entities.Chapter
 import org.ireader.core.R
 import org.ireader.core.utils.UiText
 import org.ireader.core_ui.viewmodel.BaseViewModel
-import org.ireader.domain.models.entities.Book
-import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase

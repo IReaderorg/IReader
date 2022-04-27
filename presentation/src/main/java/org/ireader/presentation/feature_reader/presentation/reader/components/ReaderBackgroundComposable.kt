@@ -17,7 +17,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import org.ireader.core_ui.theme.readerScreenBackgroundColors
 import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.ReaderScreenPreferencesState
-import org.ireader.presentation.presentation.reusable_composable.CaptionTextComposable
+import org.ireader.core_ui.ui_components.reusable_composable.CaptionTextComposable
 
 @Composable
 fun ReaderBackgroundComposable(

@@ -14,8 +14,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import kotlinx.coroutines.flow.MutableSharedFlow
-import org.ireader.domain.catalog.service.CatalogInstallationChange
-import org.ireader.domain.catalog.service.CatalogInstallationChanges
+import org.ireader.core.catalog.service.CatalogInstallationChange
+import org.ireader.core.catalog.service.CatalogInstallationChanges
 import javax.inject.Inject
 
 class AndroidCatalogInstallationChanges @Inject constructor(

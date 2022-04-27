@@ -24,8 +24,13 @@ dependencies {
     implementation(project(Modules.core))
     implementation(project(Modules.coreUi))
     implementation(project(Modules.coreApi))
+    implementation(project(Modules.commonModels))
+    implementation(project(Modules.commonResources))
+    implementation(project(Modules.commonData))
+    implementation(project(Modules.uiLibrary))
 
     implementation(compose.compose.foundation)
+    implementation(compose.compose.animations)
     implementation(compose.compose.ui)
     implementation(compose.compose.compiler)
     implementation(compose.compose.activity)
@@ -38,7 +43,6 @@ dependencies {
     implementation(compose.compose.coil)
     implementation(compose.compose.hiltNavigation)
     implementation(compose.compose.lifecycle)
-    implementation(compose.compose.animations)
 
 
 
@@ -61,6 +65,7 @@ dependencies {
 
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
+    implementation(project(mapOf("path" to ":common_models")))
     kapt(libs.room.compiler)
 
     implementation(libs.hilt.android)

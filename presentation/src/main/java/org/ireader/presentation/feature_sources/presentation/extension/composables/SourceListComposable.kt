@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
-import org.ireader.domain.models.entities.CatalogLocal
+import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.presentation.feature_sources.presentation.extension.CatalogItem
 import org.ireader.presentation.ui.ExploreScreenSpec
 

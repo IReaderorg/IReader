@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.Orientation
 import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.ReaderScreenPreferencesState
-import org.ireader.presentation.presentation.reusable_composable.AppIconButton
+import org.ireader.core_ui.ui_components.reusable_composable.AppIconButton
 
 @Composable
 fun ReaderSettingComposable(

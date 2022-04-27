@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="org.ireader.infinity">
+    package="org.ireader.library">
 
     <!-- Internet -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -34,7 +34,7 @@
     </queries>
 
     <application
-        android:name="org.ireader.infinity.MyApplication"
+        android:name="org.ireader.library.MyApplication"
         android:allowBackup="true"
         android:configChanges="orientation|screenLayout|screenSize"
         android:fullBackupOnly="true"
@@ -51,7 +51,7 @@
         android:theme="@style/Theme.ISplash"
         android:usesCleartextTraffic="true">
         <activity
-            android:name=".MainActivity"
+            android:name="org.ireader.library.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.ISplash"
             android:windowSoftInputMode="adjustResize">

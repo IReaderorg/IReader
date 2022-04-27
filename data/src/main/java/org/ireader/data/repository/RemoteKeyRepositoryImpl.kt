@@ -1,17 +1,14 @@
 package org.ireader.data.repository
 
+import org.ireader.common_models.entities.RemoteKeys
 import org.ireader.data.local.dao.RemoteKeysDao
-import org.ireader.domain.models.RemoteKeys
-import org.ireader.domain.models.entities.Book
-import org.ireader.domain.models.entities.BookItem
-import org.ireader.domain.repository.RemoteKeyRepository
 
 class RemoteKeyRepositoryImpl(
     private val dao: RemoteKeysDao,
-) : RemoteKeyRepository {
+) : org.ireader.common_data.repository.RemoteKeyRepository {
 
 
-    override suspend fun insertBooks(bookEntity: List<Book>): List<Long> {
+    override suspend fun insertBooks(bookEntity: List<org.ireader.common_models.entities.Book>): List<Long> {
         return dao.insert(bookEntity)
     }
 
@@ -34,7 +31,7 @@ class RemoteKeyRepositoryImpl(
 
     override suspend fun prepareExploreMode(
         reset: Boolean,
-        list: List<Book>,
+        list: List<org.ireader.common_models.entities.Book>,
         keys: List<RemoteKeys>,
     ) {
         dao.prepareExploreMode(reset, list, keys)
@@ -49,11 +46,11 @@ class RemoteKeyRepositoryImpl(
     }
 
 
-    override suspend fun findPagedExploreBooks(): List<Book> {
+    override suspend fun findPagedExploreBooks(): List<org.ireader.common_models.entities.Book> {
         return dao.findPagedExploreBooks()
     }
 
-    override fun subscribePagedExploreBooks(): kotlinx.coroutines.flow.Flow<List<BookItem>> {
+    override fun subscribePagedExploreBooks(): kotlinx.coroutines.flow.Flow<List<org.ireader.common_models.entities.BookItem>> {
         return dao.subscribePagedExploreBooks()
     }
 

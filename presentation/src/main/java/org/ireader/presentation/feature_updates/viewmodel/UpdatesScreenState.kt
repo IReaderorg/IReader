@@ -3,7 +3,7 @@ package org.ireader.presentation.feature_updates.viewmodel
 
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import org.ireader.domain.models.entities.UpdateWithInfo
+import org.ireader.common_models.entities.UpdateWithInfo
 import javax.inject.Inject
 
 

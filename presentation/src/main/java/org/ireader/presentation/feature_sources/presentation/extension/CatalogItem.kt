@@ -25,11 +25,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
-import org.ireader.domain.catalog.model.InstallStep
-import org.ireader.domain.models.entities.*
+import org.ireader.common_models.entities.*
+import org.ireader.core.catalog.model.InstallStep
 import org.ireader.presentation.feature_sources.presentation.extension.composables.LetterIcon
-import org.ireader.presentation.presentation.reusable_composable.AppIconButton
-import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
+import org.ireader.core_ui.ui_components.reusable_composable.AppIconButton
+import org.ireader.core_ui.ui_components.reusable_composable.MidSizeTextComposable
 import java.util.*
 import kotlin.math.max
 

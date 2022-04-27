@@ -2,7 +2,7 @@ package org.ireader.domain.ui
 
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
-import org.ireader.core.utils.Constants.ARG_HIDE_BOTTOM_BAR
+import org.ireader.common_resources.ARG_HIDE_BOTTOM_BAR
 
 object NavigationArgs {
     val bookId = navArgument("bookId") {

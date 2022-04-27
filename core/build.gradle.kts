@@ -7,6 +7,8 @@ plugins {
 
 dependencies {
     implementation(project(Modules.coreApi))
+    implementation(project(Modules.commonModels))
+    implementation(project(Modules.commonData))
 
     implementation(androidx.appCompat)
     implementation(androidx.core)

@@ -4,16 +4,17 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import org.ireader.common_models.entities.Book
+import org.ireader.common_models.entities.Chapter
+import org.ireader.common_models.entities.History
+import org.ireader.common_resources.LAST_CHAPTER
+import org.ireader.common_resources.NO_VALUE
 import org.ireader.core.extensions.nextAfter
 import org.ireader.core.extensions.prevBefore
-import org.ireader.core.utils.Constants
 import org.ireader.core.utils.UiText
 import org.ireader.core.utils.currentTimeToLong
 import org.ireader.core_api.source.Source
 import org.ireader.domain.R
-import org.ireader.domain.models.entities.Book
-import org.ireader.domain.models.entities.Chapter
-import org.ireader.domain.models.entities.History
 import org.ireader.domain.utils.withIOContext
 import javax.inject.Inject
 
@@ -108,7 +109,7 @@ class ReaderMainFunctionsImpl @Inject constructor() : ReaderMainFunctions {
                 toggleBookLoaded(true)
                 getLocalChaptersByPaging(bookId)
                 val last = historyUseCase.findHistoryByBookId(bookId)
-                if (chapterId != Constants.LAST_CHAPTER && chapterId != Constants.NO_VALUE) {
+                if (chapterId != LAST_CHAPTER && chapterId != NO_VALUE) {
                     getChapter(chapterId, source = source)
                 } else if (last != null) {
                     getChapter(chapterId = last.chapterId, source = source)

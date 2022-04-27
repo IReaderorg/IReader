@@ -3,12 +3,12 @@ package org.ireader.presentation.feature_explore.presentation.browse.viewmodel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import org.ireader.common_models.LayoutType
+import org.ireader.common_models.entities.BookItem
 import org.ireader.core.utils.UiText
 import org.ireader.core_api.source.CatalogSource
 import org.ireader.core_api.source.model.Filter
 import org.ireader.core_api.source.model.Listing
-import org.ireader.domain.models.LayoutType
-import org.ireader.domain.models.entities.BookItem
 import javax.inject.Inject
 
 interface ExploreState {

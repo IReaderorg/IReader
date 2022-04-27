@@ -48,6 +48,8 @@ dependencies {
     implementation(project(Modules.coreApi))
     implementation(project(Modules.core))
     implementation(project(Modules.domain))
+    implementation(project(Modules.commonModels))
+    implementation(project(Modules.commonData))
 
     implementation(androidx.core)
     implementation(androidx.appCompat)

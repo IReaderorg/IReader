@@ -4,7 +4,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import org.ireader.core_ui.viewmodel.BaseViewModel
-import org.ireader.domain.repository.HistoryRepository
+import org.ireader.common_data.repository.HistoryRepository
 import javax.inject.Inject
 
 

@@ -10,8 +10,8 @@ import org.ireader.core.utils.replace
 import org.ireader.core_api.source.CatalogSource
 import org.ireader.core_api.source.model.Filter
 import org.ireader.core_ui.viewmodel.BaseViewModel
-import org.ireader.domain.catalog.service.CatalogStore
-import org.ireader.domain.models.entities.toBook
+import org.ireader.core.catalog.service.CatalogStore
+import org.ireader.common_models.entities.toBook
 import org.ireader.domain.use_cases.remote.key.DeleteAllSearchedBook
 import org.ireader.domain.use_cases.remote.key.RemoteKeyUseCase
 import javax.inject.Inject

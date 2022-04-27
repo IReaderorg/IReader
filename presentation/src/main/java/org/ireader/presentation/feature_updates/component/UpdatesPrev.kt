@@ -2,7 +2,7 @@ package org.ireader.presentation.feature_updates.component
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import org.ireader.domain.models.entities.UpdateWithInfo
+import org.ireader.common_models.entities.UpdateWithInfo
 
 private val book
     get() = UpdateWithInfo(

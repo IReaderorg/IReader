@@ -2,7 +2,6 @@ package org.ireader.presentation.feature_settings.presentation
 
 import android.content.Intent
 import android.net.Uri
-import androidx.annotation.Keep
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -16,9 +15,9 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import org.ireader.domain.utils.toast
 import org.ireader.presentation.presentation.Toolbar
-import org.ireader.presentation.presentation.reusable_composable.BigSizeTextComposable
-import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
-import org.ireader.presentation.presentation.reusable_composable.TopAppBarBackButton
+import org.ireader.core_ui.ui_components.reusable_composable.BigSizeTextComposable
+import org.ireader.core_ui.ui_components.reusable_composable.MidSizeTextComposable
+import org.ireader.core_ui.ui_components.reusable_composable.TopAppBarBackButton
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable

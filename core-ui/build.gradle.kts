@@ -31,6 +31,7 @@ dependencies {
     implementation(compose.compose.hiltNavigation)
     implementation(compose.compose.lifecycle)
     implementation(compose.compose.coil)
+    implementation(project(mapOf("path" to ":common_models")))
     androidTestImplementation(compose.compose.uiTestManifest)
     androidTestImplementation(compose.compose.testing)
     androidTestImplementation(compose.compose.composeTooling)

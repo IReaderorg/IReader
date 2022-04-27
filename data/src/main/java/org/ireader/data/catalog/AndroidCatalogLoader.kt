@@ -13,7 +13,6 @@ import android.app.Application
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.NameNotFoundException
-import androidx.annotation.Keep
 import dalvik.system.DexClassLoader
 import dalvik.system.PathClassLoader
 import kotlinx.coroutines.Dispatchers
@@ -21,6 +20,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import org.ireader.core.BuildConfig
+import org.ireader.core.catalog.service.CatalogLoader
 import org.ireader.core_api.http.HttpClients
 import org.ireader.core_api.log.Log
 import org.ireader.core_api.prefs.AndroidPreferenceStore
@@ -28,10 +28,6 @@ import org.ireader.core_api.prefs.PrefixedPreferenceStore
 import org.ireader.core_api.source.Dependencies
 import org.ireader.core_api.source.Source
 import org.ireader.core_api.source.TestSource
-import org.ireader.domain.catalog.service.CatalogLoader
-import org.ireader.domain.models.entities.CatalogBundled
-import org.ireader.domain.models.entities.CatalogInstalled
-import org.ireader.domain.models.entities.CatalogLocal
 import java.io.File
 import javax.inject.Inject
 
@@ -51,10 +47,11 @@ class AndroidCatalogLoader @Inject constructor(
      * Return a list of all the installed catalogs initialized concurrently.
    */
   @SuppressLint("QueryPermissionsNeeded")
-  override fun loadAll(): List<CatalogLocal> {
-      val bundled = mutableListOf<CatalogLocal>()
+  override fun loadAll(): List<org.ireader.common_models.entities.CatalogLocal> {
+      val bundled = mutableListOf<org.ireader.common_models.entities.CatalogLocal>()
       if (BuildConfig.DEBUG) {
-          val testCatalog = CatalogBundled(TestSource(), "Source used for testing")
+          val testCatalog = org.ireader.common_models.entities.CatalogBundled(TestSource(),
+              "Source used for testing")
           bundled.add(testCatalog)
       }
       val systemPkgs = pkgManager.getInstalledPackages(PACKAGE_FLAGS).filter(::isPackageAnExtension)
@@ -86,7 +83,7 @@ class AndroidCatalogLoader @Inject constructor(
    * Attempts to load an catalog from the given package name. It checks if the catalog
    * contains the required feature flag before trying to load it.
    */
-  override fun loadLocalCatalog(pkgName: String): CatalogInstalled.Locally? {
+  override fun loadLocalCatalog(pkgName: String): org.ireader.common_models.entities.CatalogInstalled.Locally? {
     val file = File(context.filesDir, "catalogs/${pkgName}/${pkgName}.apk")
     val pkgInfo = if (file.exists()) {
       pkgManager.getPackageArchiveInfo(file.absolutePath, PACKAGE_FLAGS)
@@ -105,7 +102,7 @@ class AndroidCatalogLoader @Inject constructor(
    * Attempts to load an catalog from the given package name. It checks if the catalog
    * contains the required feature flag before trying to load it.
    */
-  override fun loadSystemCatalog(pkgName: String): CatalogInstalled.SystemWide? {
+  override fun loadSystemCatalog(pkgName: String): org.ireader.common_models.entities.CatalogInstalled.SystemWide? {
     val pkgInfo = try {
         pkgManager.getPackageInfo(pkgName, PACKAGE_FLAGS)
     } catch (error: NameNotFoundException) {
@@ -126,13 +123,13 @@ class AndroidCatalogLoader @Inject constructor(
       pkgName: String,
       pkgInfo: PackageInfo,
       file: File,
-  ): CatalogInstalled.Locally? {
+  ): org.ireader.common_models.entities.CatalogInstalled.Locally? {
     val data = validateMetadata(pkgName, pkgInfo) ?: return null
     val dexOutputDir = context.codeCacheDir.absolutePath
     val loader = DexClassLoader(file.absolutePath, dexOutputDir, null, context.classLoader)
     val source = loadSource(pkgName, loader, data) ?: return null
 
-    return CatalogInstalled.Locally(
+    return org.ireader.common_models.entities.CatalogInstalled.Locally(
       name = source.name,
       description = data.description,
       source = source,
@@ -153,12 +150,12 @@ class AndroidCatalogLoader @Inject constructor(
   private fun loadSystemCatalog(
       pkgName: String,
       pkgInfo: PackageInfo,
-  ): CatalogInstalled.SystemWide? {
+  ): org.ireader.common_models.entities.CatalogInstalled.SystemWide? {
     val data = validateMetadata(pkgName, pkgInfo) ?: return null
     val loader = PathClassLoader(pkgInfo.applicationInfo.sourceDir, null, context.classLoader)
     val source = loadSource(pkgName, loader, data) ?: return null
 
-    return CatalogInstalled.SystemWide(
+    return org.ireader.common_models.entities.CatalogInstalled.SystemWide(
       name = source.name,
       description = data.description,
       source = source,

@@ -3,7 +3,7 @@ package org.ireader.domain.services.downloaderService
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import org.ireader.domain.models.entities.SavedDownload
+import org.ireader.common_models.entities.SavedDownload
 import javax.inject.Inject
 import javax.inject.Singleton
 

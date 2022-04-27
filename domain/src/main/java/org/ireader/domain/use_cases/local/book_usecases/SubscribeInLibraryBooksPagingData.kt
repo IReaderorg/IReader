@@ -4,13 +4,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
-import org.ireader.domain.models.FilterType
-import org.ireader.domain.models.SortType
-import org.ireader.domain.models.entities.BookItem
-import org.ireader.domain.repository.LocalBookRepository
+import org.ireader.common_models.FilterType
+import org.ireader.common_models.SortType
+import org.ireader.common_models.entities.BookItem
+import org.ireader.common_data.repository.LocalBookRepository
 import javax.inject.Inject
 
-class SubscribeInLibraryBooks @Inject constructor(private val localBookRepository: LocalBookRepository) {
+class SubscribeInLibraryBooks @Inject constructor(private val localBookRepository: org.ireader.common_data.repository.LocalBookRepository) {
     operator fun invoke(
         sortType: SortType,
         desc: Boolean,

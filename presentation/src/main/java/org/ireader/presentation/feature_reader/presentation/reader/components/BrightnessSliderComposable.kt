@@ -13,9 +13,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import org.ireader.core.utils.DEFAULT
+import org.ireader.common_resources.DEFAULT
+import org.ireader.core_ui.ui_components.reusable_composable.CaptionTextComposable
 import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.ReaderScreenPreferencesState
-import org.ireader.presentation.presentation.reusable_composable.CaptionTextComposable
 
 @Composable
 fun BrightnessSliderComposable(

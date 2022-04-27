@@ -1,6 +1,8 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
+    var kotlin_version: String by extra
+    kotlin_version = "1.6.20"
     repositories {
         mavenCentral()
         google()
@@ -29,6 +31,7 @@ plugins {
     id("com.autonomousapps.dependency-analysis") version "1.1.0"
     id("com.github.ben-manes.versions") version "0.42.0"
     id("com.osacky.doctor") version "0.8.0"
+    id("com.diffplug.spotless") version "6.3.0"
     //kotlin("jvm") version "1.6.10"
 }
 fun isNonStable(version: String): Boolean {
@@ -38,14 +41,6 @@ fun isNonStable(version: String): Boolean {
     return isStable.not()
 }
 allprojects {
-
-    if(this.name == "data") {
-
-
-
-    }
-
-
     tasks.withType<com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask> {
         rejectVersionIf {
             isNonStable(candidate.version)
@@ -59,8 +54,21 @@ allprojects {
             )
         }
     }
+
 }
+
 subprojects {
+    plugins.apply("com.diffplug.spotless")
+    spotless {
+
+        kotlin {
+            ktlint(libs.versions.ktlint.get())
+            targetExclude("$buildDir/**/*.kt")
+            targetExclude("bin/**/*.kt")
+            licenseHeaderFile(rootProject.file("spotless/copyright.kt"))
+        }
+    }
+
     tasks.withType<Test> {
         useJUnitPlatform()
     }

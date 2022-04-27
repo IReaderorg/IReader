@@ -23,12 +23,12 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
+import org.ireader.common_models.entities.Book
 import org.ireader.core.utils.copyToClipboard
 import org.ireader.core_api.source.Source
-import org.ireader.domain.feature_service.io.BookCover
-import org.ireader.domain.models.entities.Book
+import org.ireader.core.io.BookCover
 import org.ireader.presentation.feature_detail.presentation.book_detail.components.BookSummary
-import org.ireader.presentation.presentation.components.BookImageComposable
+import org.ireader.core_ui.ui_components.components.BookImageComposable
 
 
 @OptIn(ExperimentalFoundationApi::class)

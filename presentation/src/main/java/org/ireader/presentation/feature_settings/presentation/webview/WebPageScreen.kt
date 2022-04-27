@@ -23,7 +23,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collectLatest
 import org.ireader.core.utils.UiEvent
 import org.ireader.domain.utils.setDefaultSettings
-import org.ireader.presentation.presentation.reusable_composable.BigSizeTextComposable
+import org.ireader.core_ui.ui_components.reusable_composable.BigSizeTextComposable
 
 
 @OptIn(ExperimentalMaterialApi::class)

@@ -19,14 +19,14 @@ import androidx.media.session.MediaButtonReceiver
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import kotlinx.datetime.Clock
+import org.ireader.common_models.entities.Book
+import org.ireader.common_models.entities.Chapter
 import org.ireader.core_api.log.Log
 import org.ireader.core_api.source.Source
-import org.ireader.domain.catalog.service.CatalogStore
-import org.ireader.domain.models.entities.Book
-import org.ireader.domain.models.entities.Chapter
+import org.ireader.core.catalog.service.CatalogStore
 import org.ireader.domain.notification.Notifications
-import org.ireader.domain.repository.LocalBookRepository
-import org.ireader.domain.repository.LocalChapterRepository
+import org.ireader.common_data.repository.LocalBookRepository
+import org.ireader.common_data.repository.LocalChapterRepository
 import org.ireader.domain.services.tts_service.Player
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
@@ -42,23 +42,32 @@ private const val TTS_SERVICE = "tts_service"
 class TTSService : MediaBrowserServiceCompat() {
 
     @Inject
-    lateinit var bookRepo: LocalBookRepository
+    lateinit var bookRepoConnection: org.ireader.common_data.repository.LocalBookRepository
+
+    lateinit var bookRepo: org.ireader.common_data.repository.LocalBookRepository
 
     @Inject
-    lateinit var chapterRepo: LocalChapterRepository
+    lateinit var chapterRepoConnection: org.ireader.common_data.repository.LocalChapterRepository
+    lateinit var chapterRepo: org.ireader.common_data.repository.LocalChapterRepository
 
     @Inject
+    lateinit var remoteUseCasesConnection: RemoteUseCases
     lateinit var remoteUseCases: RemoteUseCases
 
     @Inject
+    lateinit var extensionsConnection: CatalogStore
     lateinit var extensions: CatalogStore
 
     lateinit var ttsNotificationBuilder: TTSNotificationBuilder
 
     @Inject
+    lateinit var stateConnection: TTSStateImpl
+
     lateinit var state: TTSStateImpl
 
     @Inject
+    lateinit var insertUseCasesConnection: LocalInsertUseCases
+
     lateinit var insertUseCases: LocalInsertUseCases
 
     lateinit var mediaSession: MediaSessionCompat
@@ -107,6 +116,13 @@ class TTSService : MediaBrowserServiceCompat() {
     override fun onCreate() {
         super.onCreate()
         Log.error { "OnCreate is Called" }
+
+        state = stateConnection
+        insertUseCases = insertUseCasesConnection
+        remoteUseCases = remoteUseCasesConnection
+        extensions = extensionsConnection
+        chapterRepo = chapterRepoConnection
+        bookRepo = bookRepoConnection
 
         val pendingIntentFlags: Int =
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
@@ -328,7 +344,7 @@ class TTSService : MediaBrowserServiceCompat() {
                 Log.error { "onPlaybackStateChanged $state" }
                 scope.launch {
                     notificationManager.notify(Notifications.ID_TTS,
-                        ttsNotificationBuilder.buildNotification(mediaSession.sessionToken))
+                        ttsNotificationBuilder.buildTTSNotification(mediaSession).build())
                 }
             }
         }
@@ -371,7 +387,7 @@ class TTSService : MediaBrowserServiceCompat() {
                             state.ttsSource?.let { source ->
                                 state.ttsChapters.let { chapters ->
                                     state.ttsBook?.let { book ->
-
+                                        setBundle(book, chapter)
                                         val notification =
                                             ttsNotificationBuilder.buildTTSNotification(
                                                 mediaSession,

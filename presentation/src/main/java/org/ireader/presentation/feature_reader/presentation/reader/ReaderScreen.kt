@@ -17,16 +17,16 @@ import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import org.ireader.common_models.entities.Chapter
 import org.ireader.core.utils.UiEvent
 import org.ireader.core_api.source.Source
-import org.ireader.domain.models.entities.Chapter
 import org.ireader.presentation.feature_reader.presentation.ScrollIndicatorSetting
 import org.ireader.presentation.feature_reader.presentation.reader.components.MainBottomSettingComposable
 import org.ireader.presentation.feature_reader.presentation.reader.components.ReaderSettingComposable
 import org.ireader.presentation.feature_reader.presentation.reader.reverse_swip_refresh.SwipeRefreshState
 import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.ReaderScreenViewModel
-import org.ireader.presentation.presentation.components.ISnackBarHost
-import org.ireader.presentation.presentation.reusable_composable.ErrorTextWithEmojis
+import org.ireader.core_ui.ui_components.components.ISnackBarHost
+import org.ireader.core_ui.ui_components.reusable_composable.ErrorTextWithEmojis
 
 
 @ExperimentalAnimationApi

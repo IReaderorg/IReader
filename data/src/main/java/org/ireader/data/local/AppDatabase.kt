@@ -5,9 +5,8 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import org.ireader.common_models.entities.*
 import org.ireader.data.local.dao.*
-import org.ireader.domain.models.RemoteKeys
-import org.ireader.domain.models.entities.*
 
 @Database(
     entities = [

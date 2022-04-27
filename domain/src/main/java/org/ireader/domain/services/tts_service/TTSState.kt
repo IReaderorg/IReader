@@ -2,9 +2,9 @@ package org.ireader.presentation.feature_ttl
 
 import android.speech.tts.Voice
 import androidx.compose.runtime.*
+import org.ireader.common_models.entities.Book
+import org.ireader.common_models.entities.Chapter
 import org.ireader.core_api.source.Source
-import org.ireader.domain.models.entities.Book
-import org.ireader.domain.models.entities.Chapter
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton

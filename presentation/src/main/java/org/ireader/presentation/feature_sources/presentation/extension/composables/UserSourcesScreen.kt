@@ -8,10 +8,11 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import org.ireader.common_models.entities.Catalog
+import org.ireader.common_models.entities.CatalogInstalled
+import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.core_api.log.Log
-import org.ireader.domain.models.entities.Catalog
-import org.ireader.domain.models.entities.CatalogInstalled
-import org.ireader.domain.models.entities.CatalogLocal
+import org.ireader.core_ui.ui_components.TextSection
 import org.ireader.presentation.feature_sources.presentation.extension.CatalogItem
 import org.ireader.presentation.feature_sources.presentation.extension.CatalogsState
 

@@ -4,37 +4,25 @@
     <string name="library_screen_label">Library</string>
     <string name="explore_screen_label">Explore</string>
     <string name="setting_screen_label">Setting</string>
-    <string name="history_screen_label">History</string>
-    <string name="updates_screen_label">Updates</string>
-    <string name="content">Content</string>
-    <string name="settings">Settings</string>
 
 
     <!-- IReader-->
     <string name="error_unknown">An Unknown Error Happened.</string>
-    <string name="catalog_not_found_error">Can\'t found any Extensions.</string>
     <string name="no_error" />
     <string name="no_book_found_error">There is no book with this id.</string>
     <string name="no_chapters_found_error">There is no chapters here.</string>
     <string name="no_chapter_found_error">There is No chapter with this name.</string>
-    <string name="there_was_a_problem_in_getting_chapter">There was a problem in getting the chapter.</string>
-    <string name="something_is_wrong_with_this_chapter">Something is wrong with this chapter.</string>
     <string name="trying_in_few_second">Try again in a few second.</string>
     <string name="failed_to_get_content">Failed to get the content.</string>
     <string name="noInternetError">Could\'t Read Server, Check Your Internet Connection.</string>
-    <string name="restoredSuccessfully">The Backup Restored Successfully.</string>
-
     <string name="no_chapter_is_available">No Chapter is Available.</string>
     <string name="no_data_found_error">No Data was Found.</string>
     <string name="cant_get_content">Can\'t Get The Chapter Content.</string>
-    <string name="library_is_out_of_date">Library is Out of date.</string>
     <string name="did_not_get_anything">I did\'t get anythinh.</string>
     <string name="trying_to_fetch_chapters_content">Trying to fetch chapter\'s content…</string>
     <string name="trying_to_fetch">Trying to fetch…</string>
     <string name="this_is_first_chapter">This is the first chapter</string>
     <string name="this_is_last_chapter">This is the last chapter</string>
-    <string name="the_source_is_not_found">The Source was not found.</string>
-    <string name="something_is_wrong_with_this_book">Something is wrong with this book.</string>
 
     <!-- Download Notification -->
     <string name="download_notifier_downloader_title">Downloader</string>
@@ -56,10 +44,8 @@
     <string name="channel_crash_logs">Crash logs</string>
     <string name="label_backup">restoring from Backup</string>
     <string name="label_library">Checking Library</string>
-    <string name="label_text_reader">Text Reader</string>
     <string name="label_recent_updates">Recent Updates</string>
     <string name="popular_book">Most Popular</string>
-    <string name="latest_book">Latest</string>
     <string name="copied_to_clipboard">Copied to clipboard</string>
     <string name="clipboard_copy_error">can\'t copy this text</string>
     <string name="information_webview_required">need webview to view this content</string>
@@ -67,6 +53,32 @@
     <string name="information_cloudflare_bypass_failure">Can\'t bypass the cloudflare</string>
     <string name="update_notification">Application Updates</string>
     <string name="library_updates_notification">Library Updates</string>
+
+
+
+
+
+    <!--- core -->
+    <string name="history_screen_label">History</string>
+    <string name="updates_screen_label">Updates</string>
+    <string name="content">Content</string>
+    <string name="settings">Settings</string>
+
+
+    <!-- IReader-->
+
+    <string name="catalog_not_found_error">Can\'t found any Extensions.</string>
+    <string name="there_was_a_problem_in_getting_chapter">There was a problem in getting the chapter.</string>
+    <string name="something_is_wrong_with_this_chapter">Something is wrong with this chapter.</string>
+    <string name="restoredSuccessfully">The Backup Restored Successfully.</string>
+
+    <string name="library_is_out_of_date">Library is Out of date.</string>
+    <string name="the_source_is_not_found">The Source was not found.</string>
+    <string name="something_is_wrong_with_this_book">Something is wrong with this book.</string>
+
+    <string name="label_text_reader">Text Reader</string>
+
+    <string name="latest_book">Latest</string>
     <string name="source_not_available">this Source is not available in your device.</string>
     <string name="uninstalled">Uninstalled</string>
     <string name="uninstalled_failed">Uninstalled Failed</string>

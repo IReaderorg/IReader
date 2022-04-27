@@ -15,7 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import org.ireader.presentation.presentation.components.showLoading
+import org.ireader.core_ui.ui_components.components.showLoading
 
 @Composable
 fun BookDetailScreenBottomBar(

@@ -8,7 +8,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.runBlocking
 import org.ireader.data.local.AppDatabase
 import org.ireader.data.local.dao.LibraryBookDao
-import org.ireader.domain.models.entities.Book
+import org.ireader.common_models.entities.Book
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -37,7 +37,8 @@ class SimpleEntityReadWriteTest {
     @Test
     @Throws(Exception::class)
     fun writeUserAndReadInList() = runBlocking {
-        val user: Book = Book(link = "", sourceId = 1L, title = "")
+        val user: org.ireader.common_models.entities.Book =
+            org.ireader.common_models.entities.Book(link = "", sourceId = 1L, title = "")
         bookDao.insertBook(user)
         val byName = bookDao.findBookById(1L)
         assertThat(byName != null).isTrue()

@@ -20,15 +20,15 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import org.ireader.common_models.entities.Book
 import org.ireader.core_ui.theme.TransparentStatusBar
-import org.ireader.domain.models.entities.Book
 import org.ireader.presentation.feature_detail.presentation.book_detail.components.BookDetailScreenBottomBar
 import org.ireader.presentation.feature_detail.presentation.book_detail.components.CardTileComposable
 import org.ireader.presentation.feature_detail.presentation.book_detail.components.DotsFlashing
 import org.ireader.presentation.feature_detail.presentation.book_detail.viewmodel.ChapterState
 import org.ireader.presentation.feature_detail.presentation.book_detail.viewmodel.DetailState
-import org.ireader.presentation.presentation.components.ISnackBarHost
-import org.ireader.presentation.presentation.components.showLoading
+import org.ireader.core_ui.ui_components.components.ISnackBarHost
+import org.ireader.core_ui.ui_components.components.showLoading
 
 
 @OptIn(ExperimentalCoroutinesApi::class)

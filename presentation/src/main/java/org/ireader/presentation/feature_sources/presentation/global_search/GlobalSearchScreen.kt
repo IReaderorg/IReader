@@ -15,14 +15,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.pager.ExperimentalPagerApi
-import org.ireader.domain.models.entities.BaseBook
+import org.ireader.common_models.entities.BaseBook
 import org.ireader.presentation.feature_detail.presentation.book_detail.components.DotsFlashing
 import org.ireader.presentation.feature_sources.presentation.global_search.viewmodel.GlobalSearchState
 import org.ireader.presentation.feature_sources.presentation.global_search.viewmodel.SearchItem
-import org.ireader.presentation.presentation.layouts.BookImage
-import org.ireader.presentation.presentation.reusable_composable.AppIconButton
-import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
-import org.ireader.presentation.presentation.reusable_composable.SmallTextComposable
+import org.ireader.core_ui.ui_components.layouts.BookImage
+import org.ireader.core_ui.ui_components.reusable_composable.AppIconButton
+import org.ireader.core_ui.ui_components.reusable_composable.MidSizeTextComposable
+import org.ireader.core_ui.ui_components.reusable_composable.SmallTextComposable
 
 @Composable
 fun GlobalSearchScreen(

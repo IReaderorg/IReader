@@ -3,17 +3,16 @@ package org.ireader.data.local.dao
 import androidx.room.Dao
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
-import org.ireader.domain.models.entities.CatalogRemote
 
 
 @Dao
-interface CatalogDao : BaseDao<CatalogRemote> {
+interface CatalogDao : BaseDao<org.ireader.common_models.entities.CatalogRemote> {
 
     @Query("SELECT * FROM catalog ORDER BY lang, name")
-    suspend fun findAll(): List<CatalogRemote>
+    suspend fun findAll(): List<org.ireader.common_models.entities.CatalogRemote>
 
     @Query("SELECT * FROM catalog ORDER BY lang, name")
-    fun subscribeAll(): Flow<List<CatalogRemote>>
+    fun subscribeAll(): Flow<List<org.ireader.common_models.entities.CatalogRemote>>
 
     @Query("DELETE FROM catalog")
     fun deleteAll()

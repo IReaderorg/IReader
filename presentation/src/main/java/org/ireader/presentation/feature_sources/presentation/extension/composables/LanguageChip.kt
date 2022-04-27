@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import org.ireader.presentation.feature_sources.presentation.extension.LanguageChoice
-import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
+import org.ireader.core_ui.ui_components.reusable_composable.MidSizeTextComposable
 
 @Composable
 fun LanguageChip(choice: LanguageChoice, isSelected: Boolean, onClick: () -> Unit) {

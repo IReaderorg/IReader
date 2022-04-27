@@ -20,21 +20,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
+import org.ireader.common_models.DisplayMode
+import org.ireader.common_models.LayoutType
+import org.ireader.common_models.entities.BookItem
 import org.ireader.core_api.source.CatalogSource
 import org.ireader.core_api.source.HttpSource
 import org.ireader.core_api.source.Source
 import org.ireader.core_api.source.model.Filter
 import org.ireader.core_api.source.model.Listing
 import org.ireader.core_ui.ui.kaomojis
-import org.ireader.domain.models.DisplayMode
-import org.ireader.domain.models.LayoutType
-import org.ireader.domain.models.entities.BookItem
+import org.ireader.core_ui.ui_components.components.showLoading
+import org.ireader.core_ui.ui_components.reusable_composable.AppIconButton
+import org.ireader.core_ui.ui_components.reusable_composable.MidSizeTextComposable
+import org.ireader.core_ui.ui_components.reusable_composable.SmallTextComposable
+import org.ireader.library.components.LayoutComposable
 import org.ireader.presentation.feature_explore.presentation.browse.viewmodel.ExploreState
-import org.ireader.presentation.feature_library.presentation.components.LayoutComposable
-import org.ireader.presentation.presentation.components.showLoading
-import org.ireader.presentation.presentation.reusable_composable.AppIconButton
-import org.ireader.presentation.presentation.reusable_composable.MidSizeTextComposable
-import org.ireader.presentation.presentation.reusable_composable.SmallTextComposable
 
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
@@ -55,8 +55,8 @@ fun ExploreScreen(
     currentLayout: LayoutType,
     getBooks: (query: String?, listing: Listing?, filters: List<Filter<*>>) -> Unit,
     loadItems: (Boolean) -> Unit,
-    onBook:(BookItem) -> Unit,
-    onAppbarWebView:(url:String) -> Unit,
+    onBook: (BookItem) -> Unit,
+    onAppbarWebView: (url: String) -> Unit,
 ) {
     val scrollState = rememberLazyListState()
     val context = LocalContext.current

@@ -3,21 +3,19 @@ package org.ireader.data.local.dao
 import androidx.room.Dao
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
-import org.ireader.domain.models.entities.SavedDownload
-import org.ireader.domain.models.entities.SavedDownloadWithInfo
 
 @Dao
-interface DownloadDao : BaseDao<SavedDownload> {
+interface DownloadDao : BaseDao<org.ireader.common_models.entities.SavedDownload> {
 
     @Query("""
         SELECT download.*,length(chapter.content) > 10 AS isDownloaded FROM download
         JOIN chapter ON download.chapterId == chapter.id
     """)
-    fun subscribeAllDownloads(): Flow<List<SavedDownloadWithInfo>>
+    fun subscribeAllDownloads(): Flow<List<org.ireader.common_models.entities.SavedDownloadWithInfo>>
 
 
     @Query("SELECT * FROM download")
-    fun findAllDownloads(): List<SavedDownload>
+    fun findAllDownloads(): List<org.ireader.common_models.entities.SavedDownload>
 
     @Query("""
         DELETE FROM download where chapterId in (
@@ -28,10 +26,10 @@ interface DownloadDao : BaseDao<SavedDownload> {
 
 
     @Query("SELECT * FROM download WHERE chapterId in (:downloadIds)")
-    suspend fun findDownloads(downloadIds : List<Long>): List<SavedDownload>
+    suspend fun findDownloads(downloadIds : List<Long>): List<org.ireader.common_models.entities.SavedDownload>
 
     @Query("SELECT * FROM download WHERE bookId = :bookId")
-    fun findDownload(bookId: Long): Flow<SavedDownload?>
+    fun findDownload(bookId: Long): Flow<org.ireader.common_models.entities.SavedDownload?>
 
     @Query("DELETE FROM download WHERE bookId = :bookId ")
     suspend fun deleteSavedDownloadByBookId(bookId: Long)

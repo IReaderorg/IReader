@@ -7,7 +7,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
@@ -26,7 +25,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import org.ireader.core_ui.ui_components.LazyColumnScrollbar
-import org.ireader.domain.models.entities.Chapter
+import org.ireader.common_models.entities.Chapter
+import org.ireader.core_ui.ui_components.isScrolledToTheEnd
 import org.ireader.presentation.feature_reader.presentation.reader.reverse_swip_refresh.ISwipeRefreshIndicator
 import org.ireader.presentation.feature_reader.presentation.reader.reverse_swip_refresh.MultiSwipeRefresh
 import org.ireader.presentation.feature_reader.presentation.reader.reverse_swip_refresh.SwipeRefreshState
@@ -189,15 +189,7 @@ fun ReaderText(
     }
 }
 
-fun LazyListState.isScrolledToTheEnd(): Boolean {
-    val lastItem = layoutInfo.visibleItemsInfo.lastOrNull()
-    return lastItem == null || lastItem.size + lastItem.offset <= layoutInfo.viewportEndOffset
-}
 
-fun LazyGridState.isScrolledToTheEnd(): Boolean {
-    val lastItem = layoutInfo.visibleItemsInfo.lastOrNull()
-    return lastItem == null || lastItem.size.height + lastItem.offset.y <= layoutInfo.viewportEndOffset
-}
 
 @Composable
 fun TextSelectionContainer(

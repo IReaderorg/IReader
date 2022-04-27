@@ -8,6 +8,8 @@ retrofit = "2.9.0"
 aboutLibraries = "10.0.0-b03"
 ksp = "1.6.10-1.0.2"
 tinylog = "2.4.1"
+spotless = "6.3.0"
+ktlint = "0.45.1"
 
 
 [libraries]
@@ -20,6 +22,9 @@ gradle-google = "com.google.gms:google-services:4.3.10"
 gradle-firebaseCrashlytic = "com.google.firebase:firebase-crashlytics-gradle:2.8.1"
 gradle-benmanes = "com.github.ben-manes:gradle-versions-plugin:0.42.0"
 gradle-idea-ext = "gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1.4"
+
+
+
 
 
 ksp-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
@@ -72,3 +77,4 @@ tinylog = ["tinylog-impl", "tinylog-api"]
 [plugins]
 benmens = { id = "com.github.ben-manes.versions", version = "0.42.0" }
 dependencyAnalysis = { id = "com.autonomousapps.dependency-analysis", version = "1.1.0" }
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
