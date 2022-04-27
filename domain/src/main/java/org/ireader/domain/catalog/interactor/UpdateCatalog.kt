@@ -20,14 +20,14 @@ class UpdateCatalog @Inject constructor(
     private val installCatalog: InstallCatalog,
 ) {
 
-    suspend fun await(catalog: CatalogInstalled): Flow<InstallStep> {
+    suspend fun await(catalog: CatalogInstalled , onError: (Throwable) -> Unit): Flow<InstallStep> {
         val catalogs = catalogRemoteRepository.getRemoteCatalogs()
 
         val catalogToUpdate = catalogs.find { it.pkgName == catalog.pkgName }
         return if (catalogToUpdate == null) {
             emptyFlow()
         } else {
-            installCatalog.await(catalogToUpdate)
+            installCatalog.await(catalogToUpdate,onError)
         }
     }
 

@@ -89,9 +89,25 @@
                 android:name="androidx.emoji2.text.EmojiCompatInitializer"
                 tools:node="remove" />
         </provider>
+
         <receiver
             android:name="org.ireader.domain.services.broadcast_receiver.AppBroadcastReceiver"
             android:exported="false" />
+
+        <service
+            android:name="org.ireader.domain.services.tts_service.media_player.TTSService"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.media.browse.MediaBrowserService" />
+            </intent-filter>
+        </service>
+        <receiver android:name="androidx.media.session.MediaButtonReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
 
     </application>
 

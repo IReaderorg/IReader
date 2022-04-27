@@ -6,8 +6,8 @@ import org.ireader.domain.models.entities.CatalogRemote
 
 interface CatalogInstaller {
 
-    fun install(catalog: CatalogRemote): Flow<InstallStep>
+    fun install(catalog: CatalogRemote,onError : (Throwable) -> Unit = {}): Flow<InstallStep>
 
-    suspend fun uninstall(pkgName: String): Boolean
+    suspend fun uninstall(pkgName: String,onError : (Throwable) -> Unit = {}): Boolean
 
 }

@@ -26,7 +26,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.app.NotificationManagerCompat
 import androidx.navigation.NavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
@@ -37,7 +36,6 @@ import org.ireader.core_api.log.Log
 import org.ireader.core_api.source.Source
 import org.ireader.domain.feature_service.io.BookCover
 import org.ireader.domain.models.entities.Chapter
-import org.ireader.domain.notification.Notifications
 import org.ireader.domain.services.tts_service.Player
 import org.ireader.presentation.feature_reader.presentation.reader.ReaderScreenDrawer
 import org.ireader.presentation.feature_reader.presentation.reader.components.SettingItemComposable
@@ -114,21 +112,21 @@ fun TTSScreen(
     }
     LaunchedEffect(key1 = vm.state.stateChapter) {
         vm.ttsState.ttsChapter = vm.state.stateChapter
-        vm.state.stateChapter?.let { chapter ->
-            vm.ttsState.mediaSession?.let { mediaSession ->
-                vm.state.book?.let { book ->
-                    val notification =
-                        vm.defaultNotificationHelper.basicPlayingTextReaderNotification(
-                            chapter,
-                            book,
-                            vm.ttsState.isPlaying,
-                            vm.ttsState.currentReadingParagraph,
-                            mediaSession)
-                    NotificationManagerCompat.from(context)
-                        .notify(Notifications.ID_TEXT_READER_PROGRESS, notification.build())
-                }
-            }
-        }
+//        vm.state.stateChapter?.let { chapter ->
+//            vm.ttsState.mediaSession?.let { mediaSession ->
+//                vm.state.book?.let { book ->
+//                    val notification =
+//                        vm.defaultNotificationHelper.basicPlayingTextReaderNotification(
+//                            chapter,
+//                            book,
+//                            vm.ttsState.isPlaying,
+//                            vm.ttsState.currentReadingParagraph,
+//                            mediaSession)
+//                    NotificationManagerCompat.from(context)
+//                        .notify(Notifications.ID_TTS, notification.build())
+//                }
+//            }
+//        }
 
     }
 
@@ -139,7 +137,7 @@ fun TTSScreen(
 
                 pagerState.scrollToPage(vm.ttsState.currentReadingParagraph)
                 if (vm.isPlaying) {
-                    vm.runTTSService(context, Player.PLAY)
+                    vm.runTTSService( Player.PLAY)
                 }
             }
         } catch (e: Throwable) {
@@ -152,8 +150,7 @@ fun TTSScreen(
             vm.currentReadingParagraph = pagerState.currentPage
             vm.prevPar = pagerState.currentPage
             if (vm.isPlaying) {
-                vm.ttsState.player?.stop()
-                vm.runTTSService(context, Player.PLAY)
+                vm.runTTSService(Player.PLAY)
             }
         }
 
@@ -275,7 +272,7 @@ fun TTSScreen(
                             vm.ttsContent?.value?.let { content ->
                                 Column(modifier = Modifier
                                     .fillMaxWidth()
-                                    .weight(5f)
+                                    .weight(6f)
                                     .padding(top = 16.dp),
                                     verticalArrangement = Arrangement.Top,
                                     horizontalAlignment = Alignment.CenterHorizontally) {
@@ -299,10 +296,8 @@ fun TTSScreen(
                                         align = TextAlign.Center,
                                         maxLine = 1,
                                         overflow = TextOverflow.Ellipsis)
-                                    vm.ttsContent?.let { content ->
-                                        SuperSmallTextComposable(text = "${vm.currentReadingParagraph + 1}/${content.value?.size}")
+                                        SuperSmallTextComposable(text = "${vm.currentReadingParagraph + 1}/${vm.ttsContent?.value?.lastIndex?:0L}")
 
-                                    }
                                 }
                                 HorizontalPager(modifier = Modifier.weight(6f),count = chapter.content.size,
                                     state = pagerState) { index ->

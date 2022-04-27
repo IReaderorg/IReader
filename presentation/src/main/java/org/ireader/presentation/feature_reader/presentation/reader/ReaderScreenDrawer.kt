@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.ireader.core_api.source.Source
+import org.ireader.core_ui.ui_components.LazyColumnScrollbar
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.ReaderScreenState
 import org.ireader.presentation.presentation.components.ChapterListItemComposable
@@ -59,13 +60,15 @@ fun ReaderScreenDrawer(
 
         Spacer(modifier = modifier.height(5.dp))
         Divider(modifier = modifier.fillMaxWidth(), thickness = 1.dp)
-        LazyColumn(modifier = Modifier.fillMaxSize(),
-            state = drawerScrollState) {
-            items(count = readerScreenState.drawerChapters.value.size) { index ->
+        LazyColumnScrollbar(listState = drawerScrollState) {
+            LazyColumn(modifier = Modifier.fillMaxSize(),
+                state = drawerScrollState) {
+                items(count = readerScreenState.drawerChapters.value.size) { index ->
                     ChapterListItemComposable(modifier = modifier,
                         chapter =  readerScreenState.drawerChapters.value[index],
                         onItemClick = { onChapter( readerScreenState.drawerChapters.value[index]) },
                         isLastRead = chapter?.id ==  readerScreenState.drawerChapters.value[index].id)
+                }
             }
         }
         if (chapters.isEmpty()) {

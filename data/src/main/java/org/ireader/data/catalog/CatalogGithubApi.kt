@@ -5,6 +5,7 @@ import io.ktor.client.statement.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import org.ireader.core.utils.CatalogNotFoundException
 import org.ireader.core_api.http.HttpClients
 import org.ireader.domain.catalog.service.CatalogRemoteApi
 import org.ireader.domain.models.entities.CatalogRemote
@@ -24,6 +25,9 @@ class CatalogGithubApi @Inject constructor(
                 .bodyAsText()
 
         val catalogs = Json.Default.decodeFromString<List<CatalogRemoteApiModel>>(response)
+        if (catalogs.isEmpty()) {
+            throw CatalogNotFoundException()
+        }
         return catalogs.map { catalog ->
             CatalogRemote(
                 name = catalog.name,

@@ -29,11 +29,11 @@ object Notifications {
     const val ID_LIBRARY_ERROR = -102
 
 
-    private const val GROUP_TEXT_READER = "group_text_reader"
-    const val CHANNEL_TEXT_READER_PROGRESS = "library_text_reader_channel"
-    const val ID_TEXT_READER_PROGRESS = -601
-    const val CHANNEL_TEXT_READER_ERROR = "library_text_reader_error_channel"
-    const val ID_TEXT_READER_ERROR = -602
+    private const val GROUP_TTS = "group_text_reader"
+    const val CHANNEL_TTS = "library_text_reader_channel"
+    const val ID_TTS = -601
+    const val CHANNEL_TTS_ERROR = "library_text_reader_error_channel"
+    const val ID_TTS_ERROR = -602
 
 
     /**
@@ -118,7 +118,7 @@ object Notifications {
                 buildNotificationChannelGroup(GROUP_LIBRARY) {
                     setName(context.getString(R.string.label_library))
                 },
-                buildNotificationChannelGroup(GROUP_TEXT_READER) {
+                buildNotificationChannelGroup(GROUP_TTS) {
                     setName(context.getString(R.string.label_text_reader))
                 },
                 buildNotificationChannelGroup(GROUP_APK_UPDATES) {
@@ -132,14 +132,14 @@ object Notifications {
                 buildNotificationChannel(CHANNEL_COMMON, IMPORTANCE_LOW) {
                     setName(context.getString(R.string.channel_common))
                 },
-                buildNotificationChannel(CHANNEL_TEXT_READER_PROGRESS, IMPORTANCE_LOW) {
+                buildNotificationChannel(CHANNEL_TTS, IMPORTANCE_LOW) {
                     setName(context.getString(R.string.channel_progress))
-                    setGroup(GROUP_TEXT_READER)
+                    setGroup(GROUP_TTS)
                     setShowBadge(false)
                 },
-                buildNotificationChannel(CHANNEL_TEXT_READER_ERROR, IMPORTANCE_LOW) {
+                buildNotificationChannel(CHANNEL_TTS_ERROR, IMPORTANCE_LOW) {
                     setName(context.getString(R.string.channel_errors))
-                    setGroup(GROUP_TEXT_READER)
+                    setGroup(GROUP_TTS)
                     setShowBadge(false)
                 },
                 buildNotificationChannel(CHANNEL_LIBRARY_PROGRESS, IMPORTANCE_LOW) {

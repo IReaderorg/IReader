@@ -40,7 +40,11 @@ class DownloadService @AssistedInject constructor(
     private val downloadServiceState: DownloadServiceStateImpl,
 ) : CoroutineWorker(context, params) {
 
-    val scope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
+    private val downloadJob = Job()
+
+    val scope = CoroutineScope(Dispatchers.Main.immediate + downloadJob)
+
+
 
     companion object {
         const val DOWNLOADER_SERVICE_NAME = "DOWNLOAD_SERVICE"

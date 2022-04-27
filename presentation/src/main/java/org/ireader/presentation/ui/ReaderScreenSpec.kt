@@ -101,13 +101,13 @@ object ReaderScreenSpec : ScreenSpec {
         if (source != null) {
             MainReader(
                 onTTTSPrev = {
-                    vm.runTTSService(context, Player.SKIP_PREV)
+                    vm.runTTSService(Player.SKIP_PREV)
                 },
                 onTTTSPlay = {
-                    vm.runTTSService(context, Player.PLAY_PAUSE)
+                    vm.runTTSService(Player.PLAY_PAUSE)
                 },
                 onTTTSNext = {
-                    vm.runTTSService(context, Player.SKIP_NEXT)
+                    vm.runTTSService(Player.SKIP_NEXT)
                 },
                 onChapter = { ch ->
                     val index = vm.stateChapters.indexOfFirst { it.id == ch.id }
@@ -116,7 +116,7 @@ object ReaderScreenSpec : ScreenSpec {
                             vm.mainFunc.apply {
                                 vm.getChapter(ch.id,
                                     source = source) {
-                                    vm.runTTSService(context)
+                                    vm.runTTSService(Player.PAUSE)
                                 }
                             }
 
@@ -130,18 +130,18 @@ object ReaderScreenSpec : ScreenSpec {
                     }
                 },
                 onTTTSPrevPar = {
-                    vm.runTTSService(context, Player.PREV_PAR)
+                    vm.runTTSService( Player.PREV_PAR)
                 },
                 onTTTSNextPar = {
-                    vm.runTTSService(context, Player.NEXT_PAR)
+                    vm.runTTSService(Player.NEXT_PAR)
                 },
                 onTTTSValueChange = {
-                    vm.ttsState.player?.stop()
+                    vm.runTTSService(Player.PAUSE)
                     vm.currentReadingParagraph = it.toInt()
                 },
                 onTTTSValueChangeFinished = {
                     if (vm.isPlaying) {
-                        vm.runTTSService(context)
+                        vm.runTTSService(Player.PAUSE)
                     }
                 },
                 onReaderNext = {

@@ -9,7 +9,7 @@ import org.ireader.core_api.log.Log
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 
-val scope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
+
 
 @SuppressLint("SetJavaScriptEnabled")
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -21,6 +21,7 @@ suspend fun getHtmlFromWebView(
     timeout: Long = 5000L,
     userAgent: String? = null,
 ): Document {
+    val scope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
     var html: Document = Document("No Data was Found")
     withUIContext {
         val webView = WebView(context)

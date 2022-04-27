@@ -1,14 +1,10 @@
 package org.ireader.presentation.feature_ttl
 
-import android.speech.tts.TextToSpeech
 import android.speech.tts.Voice
-import android.support.v4.media.session.MediaSessionCompat
 import androidx.compose.runtime.*
-import androidx.work.OneTimeWorkRequest
 import org.ireader.core_api.source.Source
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
-
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -38,8 +34,6 @@ interface TTSState {
     var ttsSource: Source?
     var ttsChapters: List<Chapter>
     var ttsCurrentChapterIndex: Int
-    var mediaSession: MediaSessionCompat?
-    var player: TextToSpeech?
 
 
 }
@@ -48,7 +42,7 @@ interface TTSState {
 class TTSStateImpl @Inject constructor() : TTSState {
 
     //val mediaSession = MediaSessionCompat(context, "mediaPlayer", null, null)
-    override var mediaSession : MediaSessionCompat? = null
+    //override var mediaSession : MediaSessionCompat? = null
     override var ttsIsLoading by mutableStateOf<Boolean>(false)
     override var currentReadingParagraph: Int by mutableStateOf<Int>(0)
     override var prevPar: Int by mutableStateOf<Int>(0)
@@ -75,7 +69,7 @@ class TTSStateImpl @Inject constructor() : TTSState {
     override var ttsChapters by mutableStateOf<List<Chapter>>(emptyList())
     override var ttsCurrentChapterIndex by mutableStateOf<Int>(-1)
 
-    override var player : TextToSpeech? = null
+
 
 
     override var utteranceId by mutableStateOf<String>("")

@@ -1,7 +1,6 @@
 package org.ireader.presentation.feature_reader.presentation.reader.viewmodel
 
 
-import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -11,6 +10,7 @@ import org.ireader.core.utils.UiText
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.catalog.service.CatalogStore
 import org.ireader.domain.services.downloaderService.DefaultNotificationHelper
+import org.ireader.domain.services.tts_service.Player
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.domain.use_cases.history.HistoryUseCase
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
@@ -107,7 +107,7 @@ class ReaderScreenViewModel @Inject constructor(
     var getChapterJob: Job? = null
 
 
-    fun runTTSService(context: Context, command: Int = -1) {
+    fun runTTSService(command: Int = -1) {
         serviceUseCases.startTTSServicesUseCase(
             chapterId = stateChapter?.id,
             bookId = book?.id,
@@ -126,7 +126,7 @@ class ReaderScreenViewModel @Inject constructor(
 
 
     fun onNextVoice() {
-        ttsState.player?.stop()
+        runTTSService(Player.PAUSE)
         ttsState.isPlaying = false
         ttsState.currentReadingParagraph = 0
     }

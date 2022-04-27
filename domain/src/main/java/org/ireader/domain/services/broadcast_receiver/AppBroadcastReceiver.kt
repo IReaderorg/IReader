@@ -24,10 +24,10 @@ class AppBroadcastReceiver : BroadcastReceiver() {
     val scope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
 
     override fun onReceive(context: Context, intent: Intent) {
-        intent.getIntExtra("PLAYER", -1).let { command ->
-            usecase.startTTSServicesUseCase(command)
-
-        }
+//        intent.getIntExtra("PLAYER", -1).let { command ->
+//            usecase.startTTSServicesUseCase(command)
+//
+//        }
     }
 
 }

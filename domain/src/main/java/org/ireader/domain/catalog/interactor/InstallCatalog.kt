@@ -18,8 +18,8 @@ class InstallCatalog @Inject constructor(
     private val catalogInstaller: CatalogInstaller,
 ) {
 
-    fun await(catalog: CatalogRemote): Flow<InstallStep> {
-        return catalogInstaller.install(catalog)
+    fun await(catalog: CatalogRemote, onError: (Throwable) -> Unit): Flow<InstallStep> {
+        return catalogInstaller.install(catalog,onError )
     }
 
 }

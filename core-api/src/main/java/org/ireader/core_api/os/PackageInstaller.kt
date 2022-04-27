@@ -8,12 +8,14 @@
 
 package org.ireader.core_api.os
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.app.PendingIntent
 import android.app.PendingIntent.FLAG_MUTABLE
 import android.content.*
 import android.content.pm.PackageInstaller
 import android.content.pm.PackageInstaller.SessionParams.MODE_FULL_INSTALL
+import android.os.Build
 import android.os.SystemClock
 import android.util.Log
 import kotlinx.coroutines.CompletableDeferred
@@ -55,12 +57,19 @@ class PackageInstaller @Inject constructor(
     }
   }
 
+  @SuppressLint("UnspecifiedImmutableFlag")
   private suspend fun withInstallReceiver(block: suspend (IntentSender) -> Unit): Boolean {
     val deferred = CompletableDeferred<Boolean>()
     val receiver = InstallResultReceiver(context, deferred)
     val uid = SystemClock.elapsedRealtime()
     val action = "core-api.INSTALL_APK_$uid"
-    val broadcast = PendingIntent.getBroadcast(context, 0, Intent(action), FLAG_MUTABLE)
+    // FLAG_MUTABLE is needed for android 12
+    val broadcast = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+      PendingIntent.getBroadcast(context, 0, Intent(action), FLAG_MUTABLE)
+    } else {
+      PendingIntent.getBroadcast(context, 0, Intent(action), 0)
+    }
+
 
     context.registerReceiver(receiver, IntentFilter(action))
     return try {

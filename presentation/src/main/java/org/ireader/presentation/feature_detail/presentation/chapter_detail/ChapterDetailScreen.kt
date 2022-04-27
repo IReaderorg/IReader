@@ -37,6 +37,7 @@ import kotlinx.coroutines.launch
 import org.ireader.core.utils.UiText
 import org.ireader.core_ui.ui.EmptyScreen
 import org.ireader.core_ui.ui.LoadingScreen
+import org.ireader.core_ui.ui_components.LazyColumnScrollbar
 import org.ireader.presentation.feature_detail.presentation.chapter_detail.viewmodel.ChapterDetailEvent
 import org.ireader.presentation.feature_detail.presentation.chapter_detail.viewmodel.ChapterDetailViewModel
 import org.ireader.presentation.feature_settings.presentation.webview.CustomTextField
@@ -166,20 +167,24 @@ fun ChapterDetailScreen(
                         when {
                             isLoading -> LoadingScreen()
                             isEmpty -> EmptyScreen(UiText.DynamicString("There is no chapter."))
-                            else -> LazyColumn(modifier = Modifier
-                                .fillMaxSize(), state = scrollState) {
-                                items(vm.chapters.size) { index ->
-                                    ChapterListItemComposable(modifier = modifier,
-                                        chapter = vm.chapters[index],
-                                        onItemClick = {
-                                            onItemClick(index)
-                                        },
-                                        isLastRead = vm.chapters[index].id == vm.lastRead,
-                                        isSelected = vm.chapters[index].id in vm.selection,
-                                        onLongClick = {
-                                            onLongItemClick(index)
+                            else -> {
+                                LazyColumnScrollbar(listState = scrollState) {
+                                    LazyColumn(modifier = Modifier
+                                        .fillMaxSize(), state = scrollState) {
+                                        items(vm.chapters.size) { index ->
+                                            ChapterListItemComposable(modifier = modifier,
+                                                chapter = vm.chapters[index],
+                                                onItemClick = {
+                                                    onItemClick(index)
+                                                },
+                                                isLastRead = vm.chapters[index].id == vm.lastRead,
+                                                isSelected = vm.chapters[index].id in vm.selection,
+                                                onLongClick = {
+                                                    onLongItemClick(index)
+                                                }
+                                            )
                                         }
-                                    )
+                                    }
                                 }
                             }
                         }

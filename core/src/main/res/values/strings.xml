@@ -12,6 +12,7 @@
 
     <!-- IReader-->
     <string name="error_unknown">An Unknown Error Happened.</string>
+    <string name="catalog_not_found_error">Can\'t found any Extensions.</string>
     <string name="no_error" />
     <string name="no_book_found_error">There is no book with this id.</string>
     <string name="no_chapters_found_error">There is no chapters here.</string>

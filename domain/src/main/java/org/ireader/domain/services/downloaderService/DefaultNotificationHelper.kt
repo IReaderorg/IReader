@@ -15,6 +15,7 @@ import androidx.work.WorkManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableSharedFlow
 import org.ireader.core.R
+import org.ireader.core.utils.K
 import org.ireader.domain.models.entities.Book
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.domain.notification.Notifications
@@ -157,7 +158,7 @@ class DefaultNotificationHelper @Inject constructor(
         applicationContext,
         Player.SKIP_PREV,
         Intent(applicationContext,
-            Class.forName("org.ireader.domain.services.broadcast_receiver.AppBroadcastReceiver")).apply {
+            Class.forName(K.TTSService)).apply {
             putExtra("PLAYER", Player.SKIP_PREV)
         },
         pendingIntentFlags
@@ -166,7 +167,7 @@ class DefaultNotificationHelper @Inject constructor(
         applicationContext,
         Player.PREV_PAR,
         Intent(applicationContext.applicationContext,
-            Class.forName("org.ireader.domain.services.broadcast_receiver.AppBroadcastReceiver")).apply {
+            Class.forName(K.TTSService)).apply {
             putExtra("PLAYER", Player.PREV_PAR)
         },
         pendingIntentFlags
@@ -175,7 +176,7 @@ class DefaultNotificationHelper @Inject constructor(
         applicationContext,
         Player.PAUSE,
         Intent(applicationContext,
-            Class.forName("org.ireader.domain.services.broadcast_receiver.AppBroadcastReceiver")).apply {
+            Class.forName(K.TTSService)).apply {
             putExtra("PLAYER", Player.PAUSE)
         },
         pendingIntentFlags
@@ -184,7 +185,7 @@ class DefaultNotificationHelper @Inject constructor(
         applicationContext,
         Player.PLAY,
         Intent(applicationContext,
-            Class.forName("org.ireader.domain.services.broadcast_receiver.AppBroadcastReceiver")).apply {
+            Class.forName(K.TTSService)).apply {
             putExtra("PLAYER", Player.PLAY)
         },
         pendingIntentFlags
@@ -193,7 +194,7 @@ class DefaultNotificationHelper @Inject constructor(
         applicationContext,
         Player.NEXT_PAR,
         Intent(applicationContext,
-            Class.forName("org.ireader.domain.services.broadcast_receiver.AppBroadcastReceiver")).apply {
+            Class.forName(K.TTSService)).apply {
             putExtra("PLAYER", Player.NEXT_PAR)
         },
         pendingIntentFlags
@@ -202,7 +203,7 @@ class DefaultNotificationHelper @Inject constructor(
         applicationContext,
         Player.SKIP_NEXT,
         Intent(applicationContext,
-            Class.forName("org.ireader.domain.services.broadcast_receiver.AppBroadcastReceiver")).apply {
+            Class.forName(K.TTSService)).apply {
             putExtra("PLAYER", Player.SKIP_NEXT)
         },
         pendingIntentFlags
@@ -211,7 +212,7 @@ class DefaultNotificationHelper @Inject constructor(
         applicationContext,
         Player.CANCEL,
         Intent(applicationContext,
-            Class.forName("org.ireader.domain.services.broadcast_receiver.AppBroadcastReceiver")).apply {
+            Class.forName(K.TTSService)).apply {
             putExtra("PLAYER", Player.CANCEL)
         },
         pendingIntentFlags
@@ -253,7 +254,7 @@ class DefaultNotificationHelper @Inject constructor(
             }.build())
         }
         return NotificationCompat.Builder(applicationContext,
-            Notifications.CHANNEL_TEXT_READER_PROGRESS).apply {
+            Notifications.CHANNEL_TTS).apply {
             setContentTitle(chapter.title)
             setContentText(contentText)
             setSmallIcon(org.ireader.core.R.drawable.ic_infinity)

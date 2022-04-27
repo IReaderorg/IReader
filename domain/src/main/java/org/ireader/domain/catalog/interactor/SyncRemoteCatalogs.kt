@@ -24,7 +24,7 @@ class SyncRemoteCatalogs @Inject constructor(
     private val catalogPreferences: CatalogPreferences,
 ) {
 
-    suspend fun await(forceRefresh: Boolean): Boolean {
+    suspend fun await(forceRefresh: Boolean,onError:(Throwable) -> Unit = {}): Boolean {
         val lastCheckPref = catalogPreferences.lastRemoteCheck()
         val lastCheck = lastCheckPref.get()
         val now = Calendar.getInstance().timeInMillis
@@ -40,6 +40,7 @@ class SyncRemoteCatalogs @Inject constructor(
                 }
                 return true
             } catch (e: Throwable) {
+                onError(e)
                 Log.warn(e, "Failed to fetch remote catalogs")
             }
         }

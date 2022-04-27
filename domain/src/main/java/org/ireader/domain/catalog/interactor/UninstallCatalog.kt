@@ -17,8 +17,8 @@ class UninstallCatalog @Inject constructor(
 
 ) {
 
-    suspend fun await(catalog: CatalogInstalled): Boolean {
-        return catalogInstaller.uninstall(catalog.pkgName)
+    suspend fun await(catalog: CatalogInstalled,onError : (Throwable) -> Unit = {}): Boolean {
+        return catalogInstaller.uninstall(catalog.pkgName,onError)
     }
 
 }

@@ -31,6 +31,9 @@ fun exceptionHandler(e: Throwable): UiText? {
         is java.lang.ClassCastException -> {
             null
         }
+        is CatalogNotFoundException -> {
+            UiText.StringResource(R.string.catalog_not_found_error)
+        }
         is EmptyQuery -> UiText.StringResource(R.string.query_must_not_be_empty)
 
         is SourceNotFoundException -> UiText.StringResource(R.string.the_source_is_not_found)
@@ -39,3 +42,5 @@ fun exceptionHandler(e: Throwable): UiText? {
         }
     }
 }
+
+class CatalogNotFoundException : Exception()

@@ -48,6 +48,17 @@ object Constants {
     const val PARSE_CHAPTERS = "PARSE_CHAPTERS"
     const val PARSE_BOOKS = "PARSE_BOOKS"
 
+
+
+
+
+
+
+}
+
+object K {
+    const val MainActivity = "org.ireader.infinity.MainActivity"
+    const val TTSService = "org.ireader.domain.services.tts_service.media_player.TTSService"
 }
 
 

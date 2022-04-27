@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.ireader.core.utils.UiText
+import org.ireader.core.utils.exceptionHandler
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.catalog.interactor.*
 import org.ireader.domain.catalog.model.InstallStep
@@ -73,13 +74,17 @@ class ExtensionViewModel @Inject constructor(
             val isUpdate = catalog is CatalogInstalled
             val (pkgName, flow) = if (isUpdate) {
                 catalog as CatalogInstalled
-                catalog.pkgName to updateCatalog.await(catalog)
+                catalog.pkgName to updateCatalog.await(catalog) { error ->
+                    showSnackBar(exceptionHandler(error))
+                }
             } else {
                 catalog as CatalogRemote
-                catalog.pkgName to installCatalog.await(catalog)
+                catalog.pkgName to installCatalog.await(catalog) { error ->
+                    showSnackBar(exceptionHandler(error))
+                }
             }
             flow.collect { step ->
-                if (step == InstallStep.Error ) {
+                if (step == InstallStep.Error) {
                     showSnackBar(UiText.DynamicString(step.name))
                 }
                 state.installSteps = if (step != InstallStep.Completed) {
@@ -99,14 +104,20 @@ class ExtensionViewModel @Inject constructor(
 
     fun uninstallCatalog(catalog: Catalog) {
         scope.launch {
-            uninstallCatalog.await(catalog as CatalogInstalled)
+            if (catalog is CatalogInstalled) {
+                uninstallCatalog.await(catalog) { error ->
+                    showSnackBar(exceptionHandler(error))
+                }
+            }
         }
     }
 
     fun refreshCatalogs() {
         scope.launch(Dispatchers.IO) {
             state.isRefreshing = true
-            syncRemoteCatalogs.await(true)
+            syncRemoteCatalogs.await(true, onError = { error ->
+                showSnackBar(exceptionHandler(error))
+            })
             state.isRefreshing = false
         }
     }

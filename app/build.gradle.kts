@@ -64,7 +64,7 @@ dependencies {
     implementation(androidx.appCompat)
     implementation(androidx.core)
     implementation(androidx.material)
-
+    implementation(androidx.media)
     implementation(compose.compose.activity)
     implementation("androidx.core:core-splashscreen:1.0.0-beta02")
     implementation(compose.compose.material)

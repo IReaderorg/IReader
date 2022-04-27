@@ -10,7 +10,6 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -26,14 +25,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
-import org.ireader.core_ui.ui.Colour.scrollingThumbColor
+import org.ireader.core_ui.ui_components.LazyColumnScrollbar
 import org.ireader.domain.models.entities.Chapter
 import org.ireader.presentation.feature_reader.presentation.reader.reverse_swip_refresh.ISwipeRefreshIndicator
 import org.ireader.presentation.feature_reader.presentation.reader.reverse_swip_refresh.MultiSwipeRefresh
 import org.ireader.presentation.feature_reader.presentation.reader.reverse_swip_refresh.SwipeRefreshState
 import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.ReaderScreenViewModel
-import org.ireader.presentation.utils.scroll.Carousel
-import org.ireader.presentation.utils.scroll.CarouselDefaults
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -65,42 +62,45 @@ fun ReaderText(
             .background(vm.backgroundColor)
             .wrapContentSize(Alignment.CenterStart)
     ) {
-        Box(modifier = Modifier
-            .fillMaxSize()
-        ) {
-            MultiSwipeRefresh(
-                modifier = Modifier.fillMaxSize(),
-                state = swipeState,
-                indicators = listOf(
-                    ISwipeRefreshIndicator(scrollState.firstVisibleItemScrollOffset == 0,
-                        alignment = Alignment.TopCenter,
-                        indicator = { state, trigger ->
-                            ArrowIndicator(
-                                icon = Icons.Default.KeyboardArrowUp,
-                                swipeRefreshState = swipeState,
-                                refreshTriggerDistance = 80.dp,
-                                color = vm.textColor
-                            )
-                        }, onRefresh = {
-                            onPrev()
-                        }),
-                    ISwipeRefreshIndicator(scrollState.firstVisibleItemScrollOffset != 0,
-                        alignment = Alignment.BottomCenter,
-                        onRefresh = {
-                            onNext()
-                        },
-                        indicator = { state, trigger ->
-                            ArrowIndicator(
-                                icon = Icons.Default.KeyboardArrowDown,
-                                swipeRefreshState = swipeState,
-                                refreshTriggerDistance = 80.dp,
-                                color = vm.textColor
-                            )
-                        }),
-                ),
-            )
-            {
-                vm.stateContent?.value?.let { content ->
+
+        MultiSwipeRefresh(
+            modifier = Modifier.fillMaxSize(),
+            state = swipeState,
+            indicators = listOf(
+                ISwipeRefreshIndicator(scrollState.firstVisibleItemScrollOffset == 0,
+                    alignment = Alignment.TopCenter,
+                    indicator = { state, trigger ->
+                        ArrowIndicator(
+                            icon = Icons.Default.KeyboardArrowUp,
+                            swipeRefreshState = swipeState,
+                            refreshTriggerDistance = 80.dp,
+                            color = vm.textColor
+                        )
+                    }, onRefresh = {
+                        onPrev()
+                    }),
+                ISwipeRefreshIndicator(scrollState.firstVisibleItemScrollOffset != 0,
+                    alignment = Alignment.BottomCenter,
+                    onRefresh = {
+                        onNext()
+                    },
+                    indicator = { state, trigger ->
+                        ArrowIndicator(
+                            icon = Icons.Default.KeyboardArrowDown,
+                            swipeRefreshState = swipeState,
+                            refreshTriggerDistance = 80.dp,
+                            color = vm.textColor
+                        )
+                    }),
+            ),
+        )
+        {
+            vm.stateContent?.value?.let { content ->
+                LazyColumnScrollbar(
+                    listState = scrollState,
+                    padding = if (vm.scrollIndicatorPadding < 0) 0.dp else vm.scrollIndicatorPadding.dp,
+                    thickness = if (vm.scrollIndicatorWith < 0) 0.dp else vm.scrollIndicatorWith.dp
+                ) {
                     LazyColumn(
                         state = scrollState,
                         modifier = Modifier
@@ -130,24 +130,9 @@ fun ReaderText(
 
             }
 
-            Carousel(
-                state = scrollState,
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .fillMaxHeight()
-                    .padding(if (vm.scrollIndicatorPadding < 0) 0.dp else vm.scrollIndicatorPadding.dp)
-                    .width(if (vm.scrollIndicatorWith < 0) 0.dp else vm.scrollIndicatorWith.dp),
-                colors = CarouselDefaults.colors(
-                    thumbColor = MaterialTheme.colors.scrollingThumbColor,
-                    scrollingThumbColor = MaterialTheme.colors.scrollingThumbColor,
-                    backgroundColor = vm.backgroundColor,
-                    scrollingBackgroundColor = vm.backgroundColor
-                )
-
-            )
-
-
         }
+
+
         if (!vm.verticalScrolling) {
             Row(modifier = Modifier.fillMaxSize()) {
 

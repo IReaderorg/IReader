@@ -1,15 +1,10 @@
-//package org.ireader.domain.services.tts_service
+//package org.ireader.domain.services.tts_service.media_player
 //
 //import android.content.Context
 //import android.speech.tts.TextToSpeech
 //import android.speech.tts.UtteranceProgressListener
 //import android.support.v4.media.session.MediaSessionCompat
 //import androidx.core.app.NotificationManagerCompat
-//import androidx.hilt.work.HiltWorker
-//import androidx.work.CoroutineWorker
-//import androidx.work.WorkerParameters
-//import dagger.assisted.Assisted
-//import dagger.assisted.AssistedInject
 //import kotlinx.coroutines.CoroutineScope
 //import kotlinx.coroutines.Dispatchers
 //import kotlinx.coroutines.Job
@@ -17,85 +12,22 @@
 //import kotlinx.datetime.Clock
 //import org.ireader.core_api.log.Log
 //import org.ireader.core_api.source.Source
-//import org.ireader.domain.catalog.service.CatalogStore
 //import org.ireader.domain.models.entities.Book
 //import org.ireader.domain.models.entities.Chapter
 //import org.ireader.domain.notification.Notifications
-//import org.ireader.domain.repository.LocalBookRepository
-//import org.ireader.domain.repository.LocalChapterRepository
-//import org.ireader.domain.services.downloaderService.DefaultNotificationHelper
-//import org.ireader.domain.use_cases.local.LocalInsertUseCases
-//import org.ireader.domain.use_cases.remote.RemoteUseCases
+//import org.ireader.domain.services.tts_service.Player
 //import org.ireader.presentation.feature_ttl.TTSState
-//import org.ireader.presentation.feature_ttl.TTSStateImpl
 //
-//@HiltWorker
-//class TTSService @AssistedInject constructor(
-//    @Assisted private val context: Context,
-//    @Assisted params: WorkerParameters,
-//    private val bookRepo: LocalBookRepository,
-//    private val chapterRepo: LocalChapterRepository,
-//    private val remoteUseCases: RemoteUseCases,
-//    private val extensions: CatalogStore,
-//    private val notificationHelper: DefaultNotificationHelper,
-//    private val state: TTSStateImpl,
-//    private val insertUseCases: LocalInsertUseCases,
-//) : CoroutineWorker(context, params) {
-//    companion object {
-//        const val TTS_SERVICE_NAME = "TTS_SERVICE"
-//        const val TTS_Chapter_ID = "chapterId"
-//        const val COMMAND = "command"
-//        const val TTS_BOOK_ID = "bookId"
+//class TTSPlayers {
 //
-//    }
-//
-//
-//    override suspend fun doWork(): Result {
-//
-//        try {
-//
-//
-//            val chapterId = inputData.getLong(TTS_Chapter_ID, -1)
-//            val booksId = inputData.getLong(TTS_BOOK_ID, -1)
-//            val command = inputData.getInt(COMMAND, -1)
-//
-//
-//            if (chapterId != -1L && booksId != -1L) {
-//                val book = bookRepo.findBookById(booksId)
-//                val chapter = chapterRepo.findChapterById(chapterId)
-//                val chapters = chapterRepo.findChaptersByBookId(booksId)
-//                val source = book?.sourceId?.let { extensions.get(it)?.source }
-//                if (chapter != null && source != null) {
-//                    state.ttsBook = book
-//                    state.ttsChapter = chapter
-//                    state.ttsChapters = chapters
-//                    state.ttsSource = source
-//                }
-//            }
-//
-//
-//            startService(command)
-//
-//
-//
-//
-//
-//            return Result.success()
-//        } catch (e: Throwable) {
-//            return Result.failure()
-//
-//        }
-//
-//    }
-//
-//    suspend fun updateNotification(
+//    suspend fun TTSService.updateNotification(
 //        chapter: Chapter,
 //        book: Book,
 //        error: Boolean = false,
 //        isLoading: Boolean? = null,
 //    ) {
 //        state.mediaSession?.let { mediaSession ->
-//            NotificationManagerCompat.from(context).apply {
+//            NotificationManagerCompat.from(this).apply {
 //                val builder =
 //                    notificationHelper.basicPlayingTextReaderNotification(
 //                        chapter,
@@ -107,16 +39,16 @@
 //                        isError = error
 //                    )
 //
-//                notify(Notifications.ID_TEXT_READER_PROGRESS,
+//                notify(Notifications.ID_TTS,
 //                    builder.build())
 //            }
 //        }
 //    }
 //
-//    suspend fun startService(command: Int) {
+//    suspend fun TTSService.startService(command: Int) {
 //        try {
 //            if (state.player == null) {
-//                state.player = TextToSpeech(context) { status ->
+//                state.player = TextToSpeech(this) { status ->
 //                    state.ttsIsLoading = true
 //                    if (status == TextToSpeech.ERROR) {
 //                        Log.error { "Text-to-Speech Not Available" }
@@ -128,7 +60,7 @@
 //                }
 //            }
 //            if (state.mediaSession == null) {
-//                state.mediaSession = MediaSessionCompat(context, "mediaPlayer", null, null)
+//                state.mediaSession = MediaSessionCompat(this, "mediaPlayer", null, null)
 //            }
 //
 //
@@ -149,15 +81,15 @@
 //                                            isLoading = state.ttsIsLoading
 //                                        ).build()
 //
-//                                    NotificationManagerCompat.from(context)
-//                                        .notify(Notifications.ID_TEXT_READER_PROGRESS,
+//                                    NotificationManagerCompat.from(this)
+//                                        .notify(Notifications.ID_TTS,
 //                                            notification)
 //
 //
 //                                    when (command) {
 //                                        Player.CANCEL -> {
-//                                            NotificationManagerCompat.from(context)
-//                                                .cancel(Notifications.ID_TEXT_READER_PROGRESS)
+//                                            NotificationManagerCompat.from(this)
+//                                                .cancel(Notifications.ID_TTS)
 //                                        }
 //                                        Player.SKIP_PREV -> {
 //                                            tts.stop()
@@ -167,14 +99,14 @@
 //                                                val id = chapters[index - 1].id
 //                                                getRemoteChapter(chapterId = id, source, state) {
 //                                                    if (state.isPlaying) {
-//                                                        readText(context, mediaSession)
+//                                                        readText(this, mediaSession)
 //                                                    }
 //                                                }
 //                                            }
 //                                            state.currentReadingParagraph = 0
 //                                            updateNotification(chapter, book)
 //                                            if (state.isPlaying) {
-//                                                readText(context, mediaSession)
+//                                                readText(this, mediaSession)
 //                                            } else {
 //
 //                                            }
@@ -185,7 +117,7 @@
 //                                                    state.currentReadingParagraph -= 1
 //                                                    updateNotification(chapter, book)
 //                                                    if (state.isPlaying) {
-//                                                        readText(context, mediaSession)
+//                                                        readText(this, mediaSession)
 //                                                    }
 //                                                }
 //                                            }
@@ -198,14 +130,14 @@
 //                                                val id = chapters[index + 1].id
 //                                                getRemoteChapter(chapterId = id, source, state) {
 //                                                    if (state.isPlaying) {
-//                                                        readText(context, mediaSession)
+//                                                        readText(this, mediaSession)
 //                                                    }
 //                                                }
 //                                            }
 //                                            state.currentReadingParagraph = 0
 //                                            updateNotification(chapter, book)
 //                                            if (state.isPlaying) {
-//                                                readText(context, mediaSession)
+//                                                readText(this, mediaSession)
 //                                            } else {
 //                                            }
 //
@@ -218,7 +150,7 @@
 //                                                        state.currentReadingParagraph += 1
 //                                                    }
 //                                                    if (state.isPlaying) {
-//                                                        readText(context, mediaSession)
+//                                                        readText(this, mediaSession)
 //                                                        updateNotification(chapter, book)
 //                                                    }
 //                                                }
@@ -228,7 +160,7 @@
 //                                        }
 //                                        Player.PLAY -> {
 //                                            state.isPlaying = true
-//                                            readText(context, mediaSession)
+//                                            readText(this, mediaSession)
 //                                        }
 //                                        Player.PAUSE -> {
 //                                            state.isPlaying = false
@@ -242,7 +174,7 @@
 //                                                updateNotification(chapter, book)
 //                                            } else {
 //                                                state.isPlaying = true
-//                                                readText(context, mediaSession)
+//                                                readText(this, mediaSession)
 //                                            }
 //                                        }
 //                                        else -> {
@@ -252,7 +184,7 @@
 //                                                updateNotification(chapter, book)
 //                                            } else {
 //                                                state.isPlaying = true
-//                                                readText(context, mediaSession)
+//                                                readText(this, mediaSession)
 //                                            }
 //                                        }
 //                                    }
@@ -281,7 +213,7 @@
 //
 //    private val ttsJob = Job()
 //    val scope = CoroutineScope(Dispatchers.Main.immediate + ttsJob)
-//    fun readText(context: Context, mediaSessionCompat: MediaSessionCompat) {
+//    fun TTSService.readText(context: Context, mediaSessionCompat: MediaSessionCompat) {
 //
 //
 //        state.apply {
@@ -335,7 +267,7 @@
 //                                            mediaSessionCompat,
 //                                            isLoading = state.ttsIsLoading)
 //
-//                                    notify(Notifications.ID_TEXT_READER_PROGRESS,
+//                                    notify(Notifications.ID_TTS,
 //                                        builder.build())
 //                                }
 //                                if (state.utteranceId != (currentReadingParagraph).toString()) {
@@ -455,7 +387,7 @@
 //        }
 //    }
 //
-//    suspend fun getRemoteChapter(
+//    suspend fun TTSService.getRemoteChapter(
 //        chapterId: Long,
 //        source: Source,
 //        ttsState: TTSState,
@@ -544,6 +476,4 @@
 //            throw Exception("Invalid Id")
 //        }
 //    }
-//
-//
 //}

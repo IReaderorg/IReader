@@ -13,6 +13,7 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.utils.io.*
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.ireader.core_api.http.HttpClients
 import org.ireader.core_api.io.saveTo
@@ -48,7 +49,7 @@ class AndroidCatalogInstaller @Inject constructor(
      *
      * @param catalog The catalog to install.
      */
-    override fun install(catalog: CatalogRemote) = flow {
+    override fun install(catalog: CatalogRemote, onError: (Throwable) -> Unit): Flow<InstallStep> = flow {
         emit(InstallStep.Downloading)
         val tmpApkFile = File(context.cacheDir, "${catalog.pkgName}.apk")
         val tmpIconFile = File(context.cacheDir, "${catalog.pkgName}.png")
@@ -81,6 +82,7 @@ class AndroidCatalogInstaller @Inject constructor(
             emit(if (success) InstallStep.Completed else InstallStep.Error)
         } catch (e: Throwable) {
             Log.warn(e, "Error installing package")
+            onError(e)
             emit(InstallStep.Error)
         } finally {
             tmpApkFile.delete()
@@ -93,12 +95,13 @@ class AndroidCatalogInstaller @Inject constructor(
      *
      * @param pkgName The package name of the extension to uninstall
      */
-    override suspend fun uninstall(pkgName: String): Boolean {
+    override suspend fun uninstall(pkgName: String, onError: (Throwable) -> Unit): Boolean {
         return try {
             val deleted = packageInstaller.uninstall(pkgName)
             installationChanges.notifyAppUninstall(pkgName)
             deleted
-        }catch (e:Exception) {
+        }catch (e:Throwable) {
+            onError(e)
             false
         }
 //        val file = File(context.filesDir, "catalogs/${pkgName}")
