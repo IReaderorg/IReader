@@ -5,7 +5,6 @@ plugins {
     id("kotlin-parcelize")
     id("kotlinx-serialization")
     id("dagger.hilt.android.plugin")
-
 }
 
 android {
@@ -27,7 +26,6 @@ dependencies {
     implementation(project(Modules.commonExtensions))
     implementation(project(Modules.coreCatalogs))
 
-
     implementation(project(Modules.coreApi))
     implementation(androidx.media)
 
@@ -48,23 +46,18 @@ dependencies {
     /** Room **/
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
-    //implementation(libs.room.paging)
+    // implementation(libs.room.paging)
     kapt(libs.room.compiler)
-
-
 
     /** Coroutine **/
     implementation(kotlinx.coroutines.core)
     implementation(kotlinx.coroutines.android)
 
-
     implementation(libs.okhttp.okhttp3)
     implementation(libs.okhttp.interceptor)
     implementation(libs.okhttp.doh)
 
-
     implementation(libs.okhttp.doh)
-
 
     implementation(libs.okio)
     implementation(libs.jsoup)
@@ -79,25 +72,18 @@ dependencies {
     implementation(kotlinx.serialization.json)
     implementation(kotlinx.reflect)
 
-
     kapt(libs.hilt.androidcompiler)
     kapt(libs.hilt.compiler)
     implementation(libs.hilt.android)
 
-
     /** LifeCycle **/
-   //  implementation(kotlinx.lifecycle.viewModel)
+    //  implementation(kotlinx.lifecycle.viewModel)
     implementation(androidx.lifecycle.runtime)
 
     implementation(kotlinx.stdlib)
     implementation(libs.ktor.core)
     implementation(libs.ktor.contentNegotiation)
     implementation(libs.ktor.okhttp)
-
-
-
-
-
 
     testImplementation(test.junit4)
     testImplementation(test.junitAndroidExt)

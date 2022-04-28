@@ -13,7 +13,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.ireader.core_ui.theme.AppColors
 
-
 @Composable
 fun Toolbar(
     title: @Composable () -> Unit,

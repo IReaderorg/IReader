@@ -1,21 +1,33 @@
 package org.ireader.app
 
-
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.DoneOutline
 import androidx.compose.material.icons.filled.GetApp
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
@@ -40,7 +52,6 @@ import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.core_ui.ui.EmptyScreen
 import org.ireader.core_ui.ui.LoadingScreen
 
-
 @ExperimentalPagerApi
 @ExperimentalAnimationApi
 @OptIn(ExperimentalMaterialApi::class, androidx.compose.foundation.ExperimentalFoundationApi::class)
@@ -52,21 +63,19 @@ fun LibraryScreen(
     goToLatestChapter: (book: BookItem) -> Unit = {},
     onBook: (book: BookItem) -> Unit,
     onLongBook: (book: BookItem) -> Unit,
-    onDownload:() -> Unit,
+    onDownload: () -> Unit,
     onMarkAsRead: () -> Unit,
-    onMarkAsNotRead:() -> Unit,
-    onDelete:() -> Unit,
+    onMarkAsNotRead: () -> Unit,
+    onDelete: () -> Unit,
     addFilters: (FilterType) -> Unit,
-    removeFilter: (FilterType)-> Unit,
-    onSortSelected:(SortType) -> Unit,
+    removeFilter: (FilterType) -> Unit,
+    onSortSelected: (SortType) -> Unit,
     onLayoutSelected: (DisplayMode) -> Unit,
     getLibraryBooks: () -> Unit,
     refreshUpdate: () -> Unit,
 ) {
 
-
     val scope = rememberCoroutineScope()
-
 
     val pagerState = rememberPagerState()
     val bottomSheetState =
@@ -110,15 +119,15 @@ fun LibraryScreen(
                         onLayoutSelected = onLayoutSelected,
                         layoutType = vm.layout
                     )
-
                 }
             },
             sheetState = bottomSheetState,
             sheetBackgroundColor = MaterialTheme.colors.background,
             sheetContentColor = MaterialTheme.colors.onBackground,
         ) {
-            Column(modifier = Modifier
-                .fillMaxSize(),
+            Column(
+                modifier = Modifier
+                    .fillMaxSize(),
             ) {
                 LibraryScreenTopBar(
                     state = vm,
@@ -126,15 +135,24 @@ fun LibraryScreen(
                     onSearch = getLibraryBooks,
                     refreshUpdate = refreshUpdate
 
-                    )
-                Box(modifier = Modifier
-                    .fillMaxSize()) {
-                    Crossfade(targetState = Pair(vm.isLoading,
-                        vm.isEmpty)) { (isLoading, isEmpty) ->
+                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                ) {
+                    Crossfade(
+                        targetState = Pair(
+                            vm.isLoading,
+                            vm.isEmpty
+                        )
+                    ) { (isLoading, isEmpty) ->
                         when {
                             isLoading -> LoadingScreen()
-                            isEmpty && vm.filters.isEmpty() -> EmptyScreen(text =  org.ireader.common_extensions.UiText.DynamicString(
-                                "There is no book is Library, you can add books in the Explore screen."))
+                            isEmpty && vm.filters.isEmpty() -> EmptyScreen(
+                                text = org.ireader.common_extensions.UiText.DynamicString(
+                                    "There is no book is Library, you can add books in the Explore screen."
+                                )
+                            )
                             else -> LayoutComposable(
                                 books = vm.books,
                                 layout = vm.layout,
@@ -157,43 +175,45 @@ fun LibraryScreen(
                                     .padding(horizontal = 12.dp, vertical = 16.dp)
                                     .height(60.dp)
                                     .align(Alignment.BottomCenter)
-                                    .border(width = 0.dp, color = MaterialTheme.colors.background,
-                                        RoundedCornerShape(8.dp))
+                                    .border(
+                                        width = 0.dp, color = MaterialTheme.colors.background,
+                                        RoundedCornerShape(8.dp)
+                                    )
                                     .background(MaterialTheme.colors.surface)
                                     .clickable(enabled = false) {},
                             ) {
-                                Row(modifier = Modifier
-                                    .fillMaxSize(),
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxSize(),
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    AppIconButton(imageVector = Icons.Default.GetApp,
+                                    AppIconButton(
+                                        imageVector = Icons.Default.GetApp,
                                         title = "Download",
-                                        onClick = onDownload)
-                                    AppIconButton(imageVector = Icons.Default.Done,
+                                        onClick = onDownload
+                                    )
+                                    AppIconButton(
+                                        imageVector = Icons.Default.Done,
                                         title = "Mark as read",
-                                        onClick = onMarkAsRead)
-                                    AppIconButton(imageVector = Icons.Default.DoneOutline,
+                                        onClick = onMarkAsRead
+                                    )
+                                    AppIconButton(
+                                        imageVector = Icons.Default.DoneOutline,
                                         title = "Mark as Not read",
-                                        onClick = onMarkAsNotRead)
-                                    AppIconButton(imageVector = Icons.Default.Delete,
+                                        onClick = onMarkAsNotRead
+                                    )
+                                    AppIconButton(
+                                        imageVector = Icons.Default.Delete,
                                         title = "Mark Previous as read",
-                                        onClick = onDelete)
+                                        onClick = onDelete
+                                    )
                                 }
                             }
-
                         }
                     }
-
                 }
             }
         }
     }
-
 }
-
-
-
-
-
-

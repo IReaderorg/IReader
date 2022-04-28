@@ -1,11 +1,15 @@
 package org.ireader.sources.extension
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.referentialEqualityPolicy
+import androidx.compose.runtime.setValue
 import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.common_models.entities.CatalogRemote
 import org.ireader.core_catalogs.model.InstallStep
 import javax.inject.Inject
-
 
 interface CatalogsState {
     val pinnedCatalogs: List<CatalogLocal>
@@ -16,7 +20,7 @@ interface CatalogsState {
     val installSteps: Map<String, InstallStep>
     val isRefreshing: Boolean
     var searchQuery: String?
-    var mappedCatalogs:  State<Map<String, List<CatalogLocal>>>
+    var mappedCatalogs: State<Map<String, List<CatalogLocal>>>
 }
 
 fun CatalogsState(): CatalogsState {
@@ -32,7 +36,7 @@ class CatalogsStateImpl @Inject constructor() : CatalogsState {
     override var installSteps by mutableStateOf(emptyMap<String, InstallStep>())
     override var isRefreshing by mutableStateOf(false)
     override var searchQuery by mutableStateOf<String?>(null)
-    override var mappedCatalogs : State<Map<String, List<CatalogLocal>>> = derivedStateOf { unpinnedCatalogs.groupBy { it.source.lang } }
+    override var mappedCatalogs: State<Map<String, List<CatalogLocal>>> = derivedStateOf { unpinnedCatalogs.groupBy { it.source.lang } }
 
     var allPinnedCatalogs by mutableStateOf(
         emptyList<CatalogLocal>(),

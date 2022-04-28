@@ -1,21 +1,17 @@
-package org.ireader.common_resources
 
+
+package org.ireader.common_resources
 
 const val SHARED_PREF_NAME = "shared_pref_name"
 
-
-
-    const val CLOUDFLARE_LOG = "Performance & security by Cloudflare"
+const val CLOUDFLARE_LOG = "Performance & security by Cloudflare"
 
 const val ERROR_LOG = "ERROR_LOG "
 const val DEBUG_LOG = "DEBUG_LOG "
 
-
 const val KODEIN_MODULE = "kodein_module"
 
-
 const val EXPLORE_BOOK_TABLE = "explore"
-
 
 const val ARG_HIDE_BOTTOM_BAR = "ARG_HIDE_BOTTOM_BAR"
 
@@ -33,11 +29,9 @@ const val PARSE_DETAIL = "PARSE_DETAIL"
 const val PARSE_CHAPTERS = "PARSE_CHAPTERS"
 const val PARSE_BOOKS = "PARSE_BOOKS"
 
-
 object K {
     const val TTSService = "org.ireader.domain.services.tts_service.media_player.TTSService"
 }
-
 
 object DEFAULT {
     const val MAX_BRIGHTNESS = .5F

@@ -19,11 +19,8 @@ interface RemoteKeyRepository {
     suspend fun clearExploreMode()
     suspend fun getRemoteKeys(id: String): RemoteKeys
 
-
     suspend fun findPagedExploreBooks(): List<Book>
     fun subscribePagedExploreBooks(): Flow<List<BookItem>>
 
     suspend fun insertAllRemoteKeys(remoteKeys: List<RemoteKeys>)
-
-
 }

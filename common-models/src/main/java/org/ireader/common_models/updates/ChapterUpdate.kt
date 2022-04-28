@@ -1,5 +1,6 @@
-package org.ireader.common_models.updates
 
+
+package org.ireader.common_models.updates
 
 data class ChapterUpdate(
     val id: Long = 0,

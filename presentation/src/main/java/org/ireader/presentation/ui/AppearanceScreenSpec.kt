@@ -9,14 +9,14 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import org.ireader.appearance.AppearanceSettingScreen
 import org.ireader.appearance.AppearanceViewModel
 
-
 object AppearanceScreenSpec : ScreenSpec {
 
     override val navHostRoute: String = "appearance_setting_route"
 
-
-    @OptIn(ExperimentalPagerApi::class, androidx.compose.animation.ExperimentalAnimationApi::class,
-        androidx.compose.material.ExperimentalMaterialApi::class)
+    @OptIn(
+        ExperimentalPagerApi::class, androidx.compose.animation.ExperimentalAnimationApi::class,
+        androidx.compose.material.ExperimentalMaterialApi::class
+    )
     @Composable
     override fun Content(
         navController: NavController,
@@ -32,7 +32,5 @@ object AppearanceScreenSpec : ScreenSpec {
                 navController.popBackStack()
             }
         )
-
     }
-
 }

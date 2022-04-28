@@ -4,7 +4,6 @@ plugins {
     id("kotlin-kapt")
 }
 android {
-
 }
 
 dependencies {

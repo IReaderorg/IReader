@@ -1,4 +1,4 @@
-package org.ireader.bookDetails.components
+package org.ireader.components.text_related
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
@@ -10,7 +10,12 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextLayoutResult
@@ -48,10 +53,12 @@ fun ExpandableText(modifier: Modifier = Modifier, text: String) {
         }
     }
 
-    Column(modifier = modifier
-        .clickable(enabled = isClickable) { isExpanded = !isExpanded }
-        .fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        modifier = modifier
+            .clickable(enabled = isClickable) { isExpanded = !isExpanded }
+            .fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Text(
             text = finalText,
             maxLines = if (isExpanded) Int.MAX_VALUE else MINIMIZED_MAX_LINES,
@@ -69,5 +76,4 @@ fun ExpandableText(modifier: Modifier = Modifier, text: String) {
             )
         }
     }
-
 }

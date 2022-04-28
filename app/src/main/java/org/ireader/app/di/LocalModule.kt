@@ -28,11 +28,9 @@ class LocalModule {
         )
     }
 
-
     @Provides
     @Singleton
     fun providePreferencesStore(@ApplicationContext context: Context): PreferenceStore {
         return AndroidPreferenceStore(context = context, "ui")
     }
-
 }

@@ -7,7 +7,6 @@ class RemoteKeyRepositoryImpl(
     private val dao: RemoteKeysDao,
 ) : org.ireader.common_data.repository.RemoteKeyRepository {
 
-
     override suspend fun insertBooks(bookEntity: List<org.ireader.common_models.entities.Book>): List<Long> {
         return dao.insert(bookEntity)
     }
@@ -15,7 +14,6 @@ class RemoteKeyRepositoryImpl(
     override suspend fun deleteAllExploredBook() {
         return dao.deleteAllExploredBook()
     }
-
 
     override suspend fun deleteAllSearchedBook() {
         return dao.deleteAllSearchedBook()
@@ -45,7 +43,6 @@ class RemoteKeyRepositoryImpl(
         return dao.getRemoteKeys(id)
     }
 
-
     override suspend fun findPagedExploreBooks(): List<org.ireader.common_models.entities.Book> {
         return dao.findPagedExploreBooks()
     }
@@ -57,6 +54,4 @@ class RemoteKeyRepositoryImpl(
     override suspend fun insertAllRemoteKeys(remoteKeys: List<RemoteKeys>) {
         return dao.insertAllRemoteKeys(remoteKeys)
     }
-
-
 }

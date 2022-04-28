@@ -16,7 +16,6 @@ import org.ireader.core_ui.ui_components.TextSection
 import org.ireader.sources.extension.CatalogItem
 import org.ireader.sources.extension.CatalogsState
 
-
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun UserSourcesScreen(
@@ -27,11 +26,13 @@ fun UserSourcesScreen(
 ) {
     val scrollState = rememberLazyListState()
     val catalogsWithLanguages = state.mappedCatalogs.value
-    LazyColumn(modifier = modifier
-        .fillMaxSize(),
+    LazyColumn(
+        modifier = modifier
+            .fillMaxSize(),
         state = scrollState,
         verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally) {
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         kotlin.runCatching {
             if (state.pinnedCatalogs.isNotEmpty()) {
                 item {
@@ -47,7 +48,6 @@ fun UserSourcesScreen(
                         onClick = { onClickCatalog(catalog) },
                         onPinToggle = { onClickTogglePinned(catalog) }
                     )
-
                 }
             }
 
@@ -58,15 +58,15 @@ fun UserSourcesScreen(
                             text = lang,
                         )
                     }
-                    items(catalogs.size) { index->
+                    items(catalogs.size) { index ->
                         val catalog = catalogs[index]
                         kotlin.runCatching {
-                        CatalogItem(
-                            catalog = catalog,
-                            installStep = if (catalog is CatalogInstalled) state.installSteps[catalog.pkgName] else null,
-                            onClick = { onClickCatalog(catalog) },
-                            onPinToggle = { onClickTogglePinned(catalog) }
-                        )
+                            CatalogItem(
+                                catalog = catalog,
+                                installStep = if (catalog is CatalogInstalled) state.installSteps[catalog.pkgName] else null,
+                                onClick = { onClickCatalog(catalog) },
+                                onPinToggle = { onClickTogglePinned(catalog) }
+                            )
                         }.getOrElse {
                             Log.error { catalog.name + "Throws an error" + it.message }
                         }

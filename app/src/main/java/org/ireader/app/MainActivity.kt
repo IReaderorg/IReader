@@ -9,10 +9,8 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.scopes.ActivityScoped
-import org.ireader.core_api.log.Log
 import org.ireader.presentation.ScreenContent
-import org.ireader.presentation.ui.AppTheme
-
+import org.ireader.presentation.theme.AppTheme
 
 @AndroidEntryPoint
 @ActivityScoped
@@ -22,7 +20,6 @@ class MainActivity : ComponentActivity() {
         installSplashScreen()
         WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
-        Log.error { "CLass localClassName " + this.localClassName }
 
         setContent {
             AppTheme {
@@ -34,6 +31,4 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
 }
-

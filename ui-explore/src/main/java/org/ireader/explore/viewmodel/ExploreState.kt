@@ -3,9 +3,9 @@ package org.ireader.explore.viewmodel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import org.ireader.common_extensions.UiText
 import org.ireader.common_models.LayoutType
 import org.ireader.common_models.entities.BookItem
-import org.ireader.common_extensions.UiText
 import org.ireader.core_api.source.CatalogSource
 import org.ireader.core_api.source.model.Filter
 import org.ireader.core_api.source.model.Listing
@@ -21,9 +21,8 @@ interface ExploreState {
     val isFilterEnable: Boolean
     var topMenuEnable: Boolean
 
-    //var listing: Listing?
+    // var listing: Listing?
     var modifiedFilter: List<Filter<*>>
-
 
     var page: Int
     var stateItems: List<BookItem>

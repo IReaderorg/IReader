@@ -11,7 +11,16 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Autorenew
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.ChevronLeft
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Public
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -73,24 +82,22 @@ fun ReaderScreenTopBar(
                                 vm.queriedTextIndex.clear()
                                 state.stateContent?.value?.let { content ->
                                     content.filter { cont ->
-                                        cont.contains(query,
-                                            ignoreCase = true)
+                                        cont.contains(
+                                            query,
+                                            ignoreCase = true
+                                        )
                                     }.forEach { str ->
                                         val index = content.indexOf(str)
                                         if (index != -1) {
                                             vm.queriedTextIndex.add(index)
                                         }
-
                                     }
                                 }
-
                             },
                             onConfirm = {
-
                             },
                         )
                     }
-
                 },
                 backgroundColor = MaterialTheme.colors.background,
                 contentColor = MaterialTheme.colors.onBackground,
@@ -99,13 +106,15 @@ fun ReaderScreenTopBar(
                     if (!vm.searchMode) {
                         TopAppBarBackButton(navController = navController)
                     } else {
-                        AppIconButton(imageVector = Icons.Default.ArrowBack,
+                        AppIconButton(
+                            imageVector = Icons.Default.ArrowBack,
                             title = "Exit search mode",
                             onClick = {
                                 vm.searchQuery = ""
                                 vm.searchMode = false
                                 vm.queriedTextIndex.clear()
-                            })
+                            }
+                        )
                     }
                 },
                 actions = {
@@ -135,13 +144,9 @@ fun ReaderScreenTopBar(
                                                         vm.currentViewingSearchResultIndex = 0
                                                     }
                                                 }
-
                                             }
-
                                         }
                                     }
-
-
                                 },
                             )
                             AppIconButton(
@@ -160,49 +165,53 @@ fun ReaderScreenTopBar(
                                                 }
                                             }
                                         }
-
-
                                     }
                                 },
                             )
                         }
                         else -> {
                             if (chapter != null) {
-                                AppIconButton(imageVector = if (vm.expandTopMenu) Icons.Default.ChevronRight else Icons.Default.ChevronLeft,
+                                AppIconButton(
+                                    imageVector = if (vm.expandTopMenu) Icons.Default.ChevronRight else Icons.Default.ChevronLeft,
                                     title = "Expand Menu",
                                     onClick = {
                                         vm.expandTopMenu = !vm.expandTopMenu
-                                    })
+                                    }
+                                )
                                 if (vm.expandTopMenu) {
-                                    AppIconButton(imageVector = if (chapter.bookmark) Icons.Filled.Bookmark else Icons.Default.Bookmark,
+                                    AppIconButton(
+                                        imageVector = if (chapter.bookmark) Icons.Filled.Bookmark else Icons.Default.Bookmark,
                                         title = "Bookmark",
                                         tint = if (chapter.bookmark) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground,
                                         onClick = {
                                             onBookMark()
-                                        })
-                                    AppIconButton(imageVector = Icons.Default.Search,
+                                        }
+                                    )
+                                    AppIconButton(
+                                        imageVector = Icons.Default.Search,
                                         title = "Search",
                                         onClick = {
                                             vm.searchMode = true
-                                        })
-                                    AppIconButton(imageVector = Icons.Default.Public,
+                                        }
+                                    )
+                                    AppIconButton(
+                                        imageVector = Icons.Default.Public,
                                         title = "WebView",
                                         onClick = {
                                             onWebView()
-                                        })
+                                        }
+                                    )
                                 }
-                                AppIconButton(imageVector = Icons.Default.Autorenew,
+                                AppIconButton(
+                                    imageVector = Icons.Default.Autorenew,
                                     title = "Refresh",
                                     onClick = {
                                         onRefresh()
-                                    })
-
+                                    }
+                                )
                             }
                         }
-
                     }
-
-
                 }
             )
         }
@@ -214,25 +223,27 @@ fun ReaderScreenTopBar(
             backgroundColor = Color.Transparent,
             actions = {
                 if (chapter != null) {
-                    AppIconButton(imageVector = Icons.Default.Autorenew,
+                    AppIconButton(
+                        imageVector = Icons.Default.Autorenew,
                         title = "Refresh",
                         onClick = {
                             onRefresh()
-                        })
+                        }
+                    )
                 }
-                AppIconButton(imageVector = Icons.Default.Public,
+                AppIconButton(
+                    imageVector = Icons.Default.Public,
                     title = "WebView",
                     onClick = {
                         onWebView()
-
-                    })
+                    }
+                )
             },
             navigationIcon = {
 
                 TopAppBarBackButton(navController = navController)
             },
 
-
-            )
+        )
     }
 }

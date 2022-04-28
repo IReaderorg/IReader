@@ -1,8 +1,6 @@
 package org.ireader.domain.use_cases.services
 
-import androidx.annotation.Keep
 import javax.inject.Inject
-
 
 data class ServiceUseCases @Inject constructor(
     val startDownloadServicesUseCase: StartDownloadServicesUseCase,
@@ -10,12 +8,3 @@ data class ServiceUseCases @Inject constructor(
     val startTTSServicesUseCase: StartTTSServicesUseCase,
     val stopServicesUseCase: StopServiceUseCase,
 )
-
-
-
-
-
-
-
-
-

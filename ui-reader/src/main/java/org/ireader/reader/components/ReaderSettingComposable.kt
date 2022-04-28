@@ -1,6 +1,12 @@
 package org.ireader.reader.components
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
@@ -38,7 +44,7 @@ fun ReaderSettingComposable(
     onScrollIndicatorWidthIncrease: (Boolean) -> Unit,
     onToggleAutoBrightness: () -> Unit,
     onChangeBrightness: (Float) -> Unit,
-    onBackgroundChange:(Int) -> Unit
+    onBackgroundChange: (Int) -> Unit
 ) {
     val scrollState = rememberScrollState()
     Column(
@@ -61,102 +67,129 @@ fun ReaderSettingComposable(
             onFontSelected = onFontSelected
         )
         Spacer(modifier = Modifier.height(12.dp))
-        SettingItemToggleComposable(text = "Scroll Mode",
+        SettingItemToggleComposable(
+            text = "Scroll Mode",
             value = vm.verticalScrolling,
-            onToggle = onToggleScrollMode)
+            onToggle = onToggleScrollMode
+        )
 
-        SettingItemToggleComposable(text = "Orientation",
+        SettingItemToggleComposable(
+            text = "Orientation",
             value = vm.orientation == Orientation.Landscape,
-            onToggle = onToggleOrientation)
-        SettingItemToggleComposable(text = "AutoScroll",
+            onToggle = onToggleOrientation
+        )
+        SettingItemToggleComposable(
+            text = "AutoScroll",
             value = vm.autoScrollMode,
-            onToggle = onToggleAutoScroll)
-        SettingItemToggleComposable(text = "Immersive mode",
+            onToggle = onToggleAutoScroll
+        )
+        SettingItemToggleComposable(
+            text = "Immersive mode",
             value = vm.immersiveMode,
-            onToggle = onToggleImmersiveMode)
-        SettingItemToggleComposable(text = "Selectable mode",
+            onToggle = onToggleImmersiveMode
+        )
+        SettingItemToggleComposable(
+            text = "Selectable mode",
             value = vm.selectableMode,
-            onToggle = onToggleSelectedMode)
-        SettingItemComposable(text = "Font Size",
+            onToggle = onToggleSelectedMode
+        )
+        SettingItemComposable(
+            text = "Font Size",
             value = vm.fontSize.toString(),
             onAdd = {
                 onFontSizeIncrease(true)
             },
             onMinus = {
                 onFontSizeIncrease(false)
-            })
-        SettingItemComposable(text = "Paragraph Indent",
+            }
+        )
+        SettingItemComposable(
+            text = "Paragraph Indent",
             value = vm.paragraphsIndent.toString(),
             onAdd = {
                 onParagraphIndentIncrease(true)
             },
             onMinus = {
                 onParagraphIndentIncrease(false)
-            })
+            }
+        )
 
-        SettingItemComposable(text = "Paragraph Distance",
+        SettingItemComposable(
+            text = "Paragraph Distance",
             value = vm.distanceBetweenParagraphs.toString(),
             onAdd = {
                 onParagraphDistanceIncrease(true)
             },
             onMinus = {
                 onParagraphDistanceIncrease(false)
-            })
-        SettingItemComposable(text = "Line Height",
+            }
+        )
+        SettingItemComposable(
+            text = "Line Height",
             value = vm.lineHeight.toString(),
             onAdd = {
                 onLineHeightIncrease(true)
             },
             onMinus = {
                 onLineHeightIncrease(false)
-            })
-        SettingItemComposable(text = "Autoscroll Interval",
+            }
+        )
+        SettingItemComposable(
+            text = "Autoscroll Interval",
             value = "${vm.autoScrollInterval / 1000} second",
             onAdd = {
                 onAutoscrollIntervalIncrease(true)
             },
             onMinus = {
                 onAutoscrollIntervalIncrease(false)
-            })
-        SettingItemComposable(text = "Autoscroll Offset",
+            }
+        )
+        SettingItemComposable(
+            text = "Autoscroll Offset",
             value = vm.autoScrollOffset.toString(),
             onAdd = {
                 onAutoscrollOffsetIncrease(true)
             },
             onMinus = {
                 onAutoscrollOffsetIncrease(false)
-            })
-        SettingItemComposable(text = "ScrollIndicator Padding",
+            }
+        )
+        SettingItemComposable(
+            text = "ScrollIndicator Padding",
             value = vm.scrollIndicatorPadding.toString(),
             onAdd = {
                 onScrollIndicatorPaddingIncrease(true)
             },
             onMinus = {
                 onScrollIndicatorPaddingIncrease(false)
-            })
-        SettingItemComposable(text = "ScrollIndicator Width",
+            }
+        )
+        SettingItemComposable(
+            text = "ScrollIndicator Width",
             value = vm.scrollIndicatorWith.toString(),
             onAdd = {
                 onScrollIndicatorWidthIncrease(true)
             },
             onMinus = {
                 onScrollIndicatorWidthIncrease(false)
-            })
-        Row(modifier = Modifier.fillMaxSize(),
+            }
+        )
+        Row(
+            modifier = Modifier.fillMaxSize(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween) {
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
             Text(
                 text = "Advance Setting",
                 fontSize = 12.sp,
                 style = TextStyle(fontWeight = FontWeight.W400),
                 color = MaterialTheme.colors.onBackground
             )
-            AppIconButton(imageVector = Icons.Default.Settings,
+            AppIconButton(
+                imageVector = Icons.Default.Settings,
                 title = "Advance Setting",
-                onClick = { vm.scrollIndicatorDialogShown = true })
+                onClick = { vm.scrollIndicatorDialogShown = true }
+            )
         }
-
-
     }
 }
-

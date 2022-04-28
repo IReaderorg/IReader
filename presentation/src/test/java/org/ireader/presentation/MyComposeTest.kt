@@ -1,6 +1,5 @@
-package org.ireader.core_ui
+package org.ireader.presentation
 
-import org.junit.Assert.assertEquals
 import org.junit.Test
 
 /**
@@ -8,9 +7,10 @@ import org.junit.Test
  *
  * See [testing documentation](http://d.android.com/tools/testing).
  */
-class ExampleUnitTest {
+
+class MyComposeTest {
+
     @Test
-    fun addition_isCorrect() {
-        assertEquals(4, 2 + 2)
+    fun MyTest() {
     }
 }

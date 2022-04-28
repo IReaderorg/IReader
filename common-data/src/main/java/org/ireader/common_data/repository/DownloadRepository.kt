@@ -8,13 +8,11 @@ interface DownloadRepository {
 
     fun subscribeAllDownloads(): Flow<List<SavedDownloadWithInfo>>
     suspend fun findAllDownloads(): List<SavedDownload>
-    suspend fun findDownloads(downloadIds : List<Long>): List<SavedDownload>
-
+    suspend fun findDownloads(downloadIds: List<Long>): List<SavedDownload>
 
     fun findSavedDownload(bookId: Long): Flow<SavedDownload?>
 
     suspend fun insertDownload(savedDownload: SavedDownload): Long
-
 
     suspend fun insertDownloads(savedDownloads: List<SavedDownload>): List<Long>
 
@@ -25,5 +23,4 @@ interface DownloadRepository {
     suspend fun deleteSavedDownloadByBookId(bookId: Long)
 
     suspend fun deleteAllSavedDownload()
-
 }

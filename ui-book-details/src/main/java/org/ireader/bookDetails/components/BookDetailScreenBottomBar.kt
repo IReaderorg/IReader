@@ -15,8 +15,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import org.ireader.core_ui.ui_components.ClickableTextIcon
 import org.ireader.components.components.showLoading
+import org.ireader.core_ui.ui_components.ClickableTextIcon
 
 @Composable
 fun BookDetailScreenBottomBar(
@@ -86,7 +86,6 @@ fun BookDetailScreenBottomBar(
                         contentDescription = "Download",
                         tint = MaterialTheme.colors.onBackground
                     )
-
                 },
                 onClick = {
                     onDownload()

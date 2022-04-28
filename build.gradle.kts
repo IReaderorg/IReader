@@ -1,8 +1,6 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-    var kotlin_version: String by extra
-    kotlin_version = "1.6.20"
     repositories {
         mavenCentral()
         google()
@@ -64,9 +62,9 @@ subprojects {
         kotlin {
             ktlint(libs.versions.ktlint.get())
                 .userData(mapOf("indent_size" to "2", "continuation_indent_size" to "2"))
+            target("**/*.kt")
             targetExclude("$buildDir/**/*.kt")
             targetExclude("bin/**/*.kt")
-            licenseHeaderFile(rootProject.file("spotless/copyright.kt"))
         }
         kotlinGradle {
             target("*.gradle.kts")

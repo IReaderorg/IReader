@@ -4,7 +4,6 @@ import androidx.room.Dao
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 
-
 @Dao
 interface CatalogDao : BaseDao<org.ireader.common_models.entities.CatalogRemote> {
 
@@ -16,7 +15,4 @@ interface CatalogDao : BaseDao<org.ireader.common_models.entities.CatalogRemote>
 
     @Query("DELETE FROM catalog")
     fun deleteAll()
-
-
 }
-

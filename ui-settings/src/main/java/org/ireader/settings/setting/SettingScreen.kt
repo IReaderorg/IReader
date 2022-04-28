@@ -2,7 +2,15 @@ package org.ireader.settings.setting
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
@@ -41,9 +49,11 @@ fun SettingScreen(
     val a by remember {
         mutableStateOf("")
     }
-    Box(modifier
-        .fillMaxSize()
-        .padding(bottom = 50.dp)) {
+    Box(
+        modifier
+            .fillMaxSize()
+            .padding(bottom = 50.dp)
+    ) {
         Scaffold(modifier = Modifier.fillMaxSize(), topBar = {
             Toolbar(
                 title = {
@@ -57,37 +67,34 @@ fun SettingScreen(
             ) {
 
                 settingItems.forEach { item ->
-                    SettingsItem(title = item.title,
+                    SettingsItem(
+                        title = item.title,
                         imageVector = item.icon,
                         destinationScreenRoute = item.route,
                         navController = navController
 
                     )
                 }
-
             }
-
         }
     }
-
 }
-
 
 sealed class SettingItems(
     val title: String,
     val icon: ImageVector,
     val route: String,
 ) {
-    data class Downloads( val navRoute: String) :
+    data class Downloads(val navRoute: String) :
         SettingItems("Downloads", Icons.Default.Download, navRoute)
 
     data class Appearance(val navRoute: String) :
         SettingItems("Appearance", Icons.Default.Palette, navRoute)
 
-    data class  DnsOverHttp( val navRoute: String) :
+    data class DnsOverHttp(val navRoute: String) :
         SettingItems("Advance Setting", Icons.Default.Settings, navRoute)
 
-    data class  About( val navRoute: String) : SettingItems("About", Icons.Default.Info, navRoute)
+    data class About(val navRoute: String) : SettingItems("About", Icons.Default.Info, navRoute)
 }
 
 @Composable
@@ -104,13 +111,17 @@ fun SettingsItem(
             .fillMaxWidth()
             .padding(16.dp)
             .height(50.dp)
-            .clickable(interactionSource = interactionSource,
-                indication = null) { navController.navigate(destinationScreenRoute) },
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null
+            ) { navController.navigate(destinationScreenRoute) },
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(imageVector = imageVector,
+        Icon(
+            imageVector = imageVector,
             contentDescription = "$title icon",
-            tint = MaterialTheme.colors.primary)
+            tint = MaterialTheme.colors.primary
+        )
         Spacer(modifier = modifier.width(20.dp))
         Text(
             text = title,
@@ -118,8 +129,5 @@ fun SettingsItem(
             color = MaterialTheme.colors.onBackground,
             textAlign = TextAlign.Center
         )
-
-
     }
-
 }

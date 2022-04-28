@@ -5,7 +5,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.*
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedButton
+import androidx.compose.material.Slider
+import androidx.compose.material.SliderDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Brightness7
 import androidx.compose.material.icons.filled.LightMode
@@ -21,21 +26,27 @@ import org.ireader.reader.viewmodel.ReaderScreenPreferencesState
 fun BrightnessSliderComposable(
     modifier: Modifier = Modifier,
     viewModel: ReaderScreenPreferencesState,
-    onToggleAutoBrightness:() -> Unit,
-    onChangeBrightness:(Float) -> Unit
+    onToggleAutoBrightness: () -> Unit,
+    onChangeBrightness: (Float) -> Unit
 ) {
-    Row(modifier = Modifier.fillMaxWidth(),
+    Row(
+        modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically) {
+        verticalAlignment = Alignment.CenterVertically
+    ) {
 
-        Row(modifier = Modifier
-            .fillMaxWidth()
-            .weight(4F),
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(4F),
             horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically) {
-            Icon(modifier = modifier.weight(1f),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                modifier = modifier.weight(1f),
                 imageVector = Icons.Default.LightMode,
-                contentDescription = "less brightness")
+                contentDescription = "less brightness"
+            )
             Slider(
                 viewModel.brightness,
                 onValueChange = onChangeBrightness,
@@ -52,11 +63,14 @@ fun BrightnessSliderComposable(
                 enabled = !viewModel.autoBrightnessMode
 
             )
-            Icon(modifier = modifier.weight(1f),
+            Icon(
+                modifier = modifier.weight(1f),
                 imageVector = Icons.Default.Brightness7,
-                contentDescription = "less brightness")
+                contentDescription = "less brightness"
+            )
         }
-        OutlinedButton(onClick = onToggleAutoBrightness,
+        OutlinedButton(
+            onClick = onToggleAutoBrightness,
             modifier = Modifier
                 .weight(1F)
                 .padding(8.dp),
@@ -66,13 +80,15 @@ fun BrightnessSliderComposable(
             ),
             colors = ButtonDefaults.outlinedButtonColors(
                 backgroundColor = if (viewModel.autoBrightnessMode) MaterialTheme.colors.primary else MaterialTheme.colors.background,
-            )) {
+            )
+        ) {
             CaptionTextComposable(
                 modifier = Modifier.align(Alignment.CenterVertically),
                 color = if (viewModel.autoBrightnessMode) MaterialTheme.colors.onPrimary else MaterialTheme.colors.onBackground,
                 text = "Auto",
                 style = MaterialTheme.typography.caption,
-                maxLine = 1)
+                maxLine = 1
+            )
         }
     }
 }

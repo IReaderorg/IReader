@@ -11,9 +11,10 @@ object AboutInfoScreenSpec : ScreenSpec {
 
     override val navHostRoute: String = "about_screen_route"
 
-
-    @OptIn(ExperimentalPagerApi::class, androidx.compose.animation.ExperimentalAnimationApi::class,
-        androidx.compose.material.ExperimentalMaterialApi::class)
+    @OptIn(
+        ExperimentalPagerApi::class, androidx.compose.animation.ExperimentalAnimationApi::class,
+        androidx.compose.material.ExperimentalMaterialApi::class
+    )
     @Composable
     override fun Content(
         navController: NavController,
@@ -22,5 +23,4 @@ object AboutInfoScreenSpec : ScreenSpec {
     ) {
         AboutSettingScreen(navController = navController)
     }
-
 }

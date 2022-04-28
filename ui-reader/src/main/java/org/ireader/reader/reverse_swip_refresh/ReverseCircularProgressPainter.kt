@@ -18,8 +18,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.dp
 import kotlin.math.min
 
-
-internal class CircularProgressPainter(private val clockwise: Boolean = true) : Painter() {
+internal class ReverseCircularProgressPainter(private val clockwise: Boolean = true) : Painter() {
     var color by mutableStateOf(Color.Unspecified)
     var alpha by mutableStateOf(1f)
     var arcRadius by mutableStateOf(0.dp)

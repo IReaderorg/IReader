@@ -4,7 +4,14 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
@@ -27,19 +34,19 @@ import org.ireader.updates.viewmodel.UpdateState
 @Composable
 fun UpdateScreen(
     state: UpdateState,
-    onAppbarCancelSelection:() -> Unit,
-    onAppbarSelectAll:() -> Unit,
-    onAppbarFilipSelection:() -> Unit,
-    onAppbarRefresh:() -> Unit,
-    onAppbarDeleteAll:() -> Unit,
-    onUpdate:(UpdateWithInfo) -> Unit,
-    onLongUpdate:(UpdateWithInfo) -> Unit,
-    onCoverUpdate:(UpdateWithInfo) -> Unit,
-    onDownloadUpdate:(UpdateWithInfo) -> Unit,
-    onBottomBarDownload:() -> Unit,
-    onBottomBarMarkAsRead:() -> Unit,
-    onBottomBarDelete:() -> Unit,
-    onBottomBookMark:() -> Unit,
+    onAppbarCancelSelection: () -> Unit,
+    onAppbarSelectAll: () -> Unit,
+    onAppbarFilipSelection: () -> Unit,
+    onAppbarRefresh: () -> Unit,
+    onAppbarDeleteAll: () -> Unit,
+    onUpdate: (UpdateWithInfo) -> Unit,
+    onLongUpdate: (UpdateWithInfo) -> Unit,
+    onCoverUpdate: (UpdateWithInfo) -> Unit,
+    onDownloadUpdate: (UpdateWithInfo) -> Unit,
+    onBottomBarDownload: () -> Unit,
+    onBottomBarMarkAsRead: () -> Unit,
+    onBottomBarDelete: () -> Unit,
+    onBottomBookMark: () -> Unit,
 ) {
     Scaffold(
         topBar = {
@@ -85,10 +92,10 @@ fun UpdateScreen(
 @Composable
 private fun BoxScope.UpdateEditBar(
     state: UpdateState,
-    onBottomBarDownload:() -> Unit,
-    onBottomBarMarkAsRead:() -> Unit,
-    onBottomBarDelete:() -> Unit,
-    onBottomBookMark:() -> Unit,
+    onBottomBarDownload: () -> Unit,
+    onBottomBarMarkAsRead: () -> Unit,
+    onBottomBarDelete: () -> Unit,
+    onBottomBookMark: () -> Unit,
 ) {
     Box(
         modifier = Modifier
@@ -97,33 +104,45 @@ private fun BoxScope.UpdateEditBar(
             .align(Alignment.BottomCenter)
             .padding(8.dp)
             .background(MaterialTheme.colors.background)
-            .border(width = 1.dp,
-                color = MaterialTheme.colors.onBackground.copy(.1f))
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colors.onBackground.copy(.1f)
+            )
             .clickable(enabled = false) {},
     ) {
-        Row(modifier = Modifier
-            .fillMaxSize(),
+        Row(
+            modifier = Modifier
+                .fillMaxSize(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (state.selection.any { selectionId ->
-                    selectionId in state.updates.values.flatten().filter { !it.downloaded }.map { it.id }
-                }) {
-                AppIconButton(imageVector = Icons.Default.GetApp,
-                    title = "Download",
-                    onClick = onBottomBarDownload)
+                selectionId in state.updates.values.flatten().filter { !it.downloaded }.map { it.id }
             }
-            AppIconButton(imageVector = Icons.Default.BookmarkBorder,
+            ) {
+                AppIconButton(
+                    imageVector = Icons.Default.GetApp,
+                    title = "Download",
+                    onClick = onBottomBarDownload
+                )
+            }
+            AppIconButton(
+                imageVector = Icons.Default.BookmarkBorder,
                 title = "Bookmark",
-                onClick = onBottomBookMark)
+                onClick = onBottomBookMark
+            )
 
-            AppIconButton(imageVector = Icons.Default.Done,
+            AppIconButton(
+                imageVector = Icons.Default.Done,
                 title = "Mark as read",
-                onClick = onBottomBarMarkAsRead)
+                onClick = onBottomBarMarkAsRead
+            )
 
-            AppIconButton(imageVector = Icons.Default.Delete,
+            AppIconButton(
+                imageVector = Icons.Default.Delete,
                 title = "Delete Update",
-                onClick = onBottomBarDelete)
+                onClick = onBottomBarDelete
+            )
         }
     }
 }

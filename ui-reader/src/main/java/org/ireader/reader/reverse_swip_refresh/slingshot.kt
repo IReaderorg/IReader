@@ -1,6 +1,11 @@
 package org.ireader.reader.reverse_swip_refresh
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -32,9 +37,9 @@ internal fun rememberUpdatedSlingshot(
         0f, min(extraOffset, slingshotDistance * 2) / slingshotDistance
     )
     val tensionPercent = (
-            (tensionSlingshotPercent / 4) -
-                    (tensionSlingshotPercent / 4).pow(2)
-            ) * 2
+        (tensionSlingshotPercent / 4) -
+            (tensionSlingshotPercent / 4).pow(2)
+        ) * 2
     val extraMove = slingshotDistance * tensionPercent * 2
     val targetY = height + ((slingshotDistance * offsetPercent) + extraMove).toInt()
     val offset = targetY - height

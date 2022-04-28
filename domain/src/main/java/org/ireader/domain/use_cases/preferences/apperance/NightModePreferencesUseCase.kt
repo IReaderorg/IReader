@@ -6,7 +6,6 @@ import org.ireader.core_ui.theme.ThemeMode
 import org.ireader.core_ui.theme.UiPreferences
 import javax.inject.Inject
 
-
 class NightModePreferencesUseCase @Inject constructor(
     private val uiPreferences: UiPreferences,
 ) {
@@ -14,7 +13,7 @@ class NightModePreferencesUseCase @Inject constructor(
         uiPreferences.themeMode().set(mode)
     }
 
-    fun read(): Flow<ThemeMode> = flow {
+    suspend fun read(): Flow<ThemeMode> = flow {
         emit(uiPreferences.themeMode().get())
     }
 }

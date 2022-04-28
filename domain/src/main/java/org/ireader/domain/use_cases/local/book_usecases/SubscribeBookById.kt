@@ -25,5 +25,3 @@ class FindBookByIds @Inject constructor(private val localBookRepository: org.ire
         return localBookRepository.findBookByIds(id = id)
     }
 }
-
-

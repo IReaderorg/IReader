@@ -10,13 +10,12 @@ import kotlinx.coroutines.flow.onEach
 import org.ireader.core_api.log.Log
 import org.ireader.core_api.prefs.Preference
 
-
 class PreferenceMutableState<T>(
     private val preference: Preference<T>,
     scope: CoroutineScope,
 ) : MutableState<T> {
 
-    private val state = mutableStateOf(preference.get())
+    private val state = mutableStateOf(preference.defaultValue())
 
 
     override var value: T
@@ -35,7 +34,9 @@ class PreferenceMutableState<T>(
 
     init {
         var isTurnOn = false
-        while (isTurnOn) {
+        var tries = 0
+        val maxTries = 3
+        while (isTurnOn && tries < maxTries) {
             kotlin.runCatching {
                 preference.changes().distinctUntilChanged()
                     .onEach { value ->
@@ -44,12 +45,12 @@ class PreferenceMutableState<T>(
                             isTurnOn = true
                         } catch (e: Throwable) {
                             delay(1000L)
+                            tries++
                             Log.error(e, "Failed to set Preferences")
                         }
                     }.launchIn(scope)
             }
         }
-
     }
 }
 

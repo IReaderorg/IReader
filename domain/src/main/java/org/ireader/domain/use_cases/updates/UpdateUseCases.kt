@@ -12,10 +12,6 @@ data class UpdateUseCases @Inject constructor(
     val deleteAllUpdates: DeleteAllUpdates,
 )
 
-
-
-
-
 class SubscribeUpdates @Inject constructor(private val updatesRepository: UpdatesRepository) {
     suspend operator fun invoke(): Flow<Map<String, List<UpdateWithInfo>>> {
         return updatesRepository.subscribeAllUpdates()
@@ -33,9 +29,3 @@ class DeleteAllUpdates @Inject constructor(private val updatesRepository: Update
         return updatesRepository.deleteAllUpdates()
     }
 }
-
-
-
-
-
-

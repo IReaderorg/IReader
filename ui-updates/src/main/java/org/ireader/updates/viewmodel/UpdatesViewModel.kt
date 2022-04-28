@@ -27,14 +27,12 @@ class UpdatesViewModel @Inject constructor(
     private val serviceUseCases: ServiceUseCases,
 ) : BaseViewModel(), UpdateState by updateStateImpl {
 
-
     init {
         viewModelScope.launch {
             updateUseCases.subscribeUpdates().collect {
                 updates = it
             }
         }
-
     }
 
     fun addUpdate(update: UpdateWithInfo) {
@@ -74,17 +72,12 @@ class UpdatesViewModel @Inject constructor(
                     ),
                     source = source,
                     onSuccess = {
-
                     },
                     onError = {
-
                     }
                 )
-
             }
-
         }
-
     }
     fun downloadChapters() {
         viewModelScope.launch {
@@ -94,12 +87,12 @@ class UpdatesViewModel @Inject constructor(
                 updates.values.flatMap { it }.filter { it.id in selection }.map { it.chapterId }
             //  val books = getBookUseCases.findBookByIds(bookIds)
             serviceUseCases.startDownloadServicesUseCase(
-                chapterIds =  chapterIds.toLongArray()
+                chapterIds = chapterIds.toLongArray()
             )
         }
     }
 
     fun refreshUpdate() {
-       serviceUseCases.startLibraryUpdateServicesUseCase()
+        serviceUseCases.startLibraryUpdateServicesUseCase()
     }
 }

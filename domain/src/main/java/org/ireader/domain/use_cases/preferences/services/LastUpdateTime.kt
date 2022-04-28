@@ -10,9 +10,7 @@ class LastUpdateTime @Inject constructor(
         appPreferences.lastUpdateCheck().set(time)
     }
 
-    fun read(): Long {
+    suspend fun read(): Long {
         return appPreferences.lastUpdateCheck().get()
     }
-
 }
-

@@ -28,7 +28,6 @@ class LibraryCovers @Inject constructor(
     fun deleteAll() {
         fileSystem.delete(path)
     }
-
 }
 
 fun Path.setLastModified(epoch: Long) {

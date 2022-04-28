@@ -8,7 +8,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -35,21 +39,22 @@ fun WebPageTopBar(
     }
     Toolbar(
         title = {
-            CustomTextField(modifier = Modifier
-                .padding(horizontal = 8.dp, vertical = 4.dp)
-                .fillMaxHeight(.7f)
-                .fillMaxWidth()
-                .background(
-                    color = MaterialTheme.colors.onBackground.copy(.2f),
-                    shape = CircleShape
-                ),
+            CustomTextField(
+                modifier = Modifier
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                    .fillMaxHeight(.7f)
+                    .fillMaxWidth()
+                    .background(
+                        color = MaterialTheme.colors.onBackground.copy(.2f),
+                        shape = CircleShape
+                    ),
                 value = urlToRender,
                 onValueChange = {
                     onValueChange(it)
                 },
                 onValueConfirm = {
-
-                })
+                }
+            )
         },
         navigationIcon = {
             TopAppBarBackButton(navController = navController)
@@ -85,7 +90,7 @@ fun WebPageTopBar(
                         goForward()
                     },
 
-                    )
+                )
             BuildDropDownMenu(list, enable = isMenuExpanded, onEnable = { isMenuExpanded = it })
 //            DropdownMenu(
 //                modifier = Modifier.background(MaterialTheme.colors.background),
@@ -120,5 +125,5 @@ fun WebPageTopBar(
 //                }
 //            }
         },
-        )
+    )
 }

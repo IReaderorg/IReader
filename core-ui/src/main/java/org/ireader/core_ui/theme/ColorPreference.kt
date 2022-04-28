@@ -3,7 +3,11 @@ package org.ireader.core_ui.theme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import org.ireader.core_api.prefs.Preference
 
 class ColorPreference(
@@ -14,7 +18,7 @@ class ColorPreference(
         return preference.key()
     }
 
-    override fun get(): Color {
+    override suspend fun get(): Color {
         return if (isSet()) {
             Color(preference.get())
         } else {
@@ -47,10 +51,9 @@ class ColorPreference(
             .map { get() }
     }
 
-    override fun stateIn(scope: CoroutineScope): StateFlow<Color> {
+    override suspend fun stateIn(scope: CoroutineScope): StateFlow<Color> {
         return preference.changes().map { get() }.stateIn(scope, SharingStarted.Eagerly, get())
     }
-
 }
 
 fun Preference<Int>.asColor(): ColorPreference {

@@ -7,7 +7,6 @@ import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.use_cases.history.HistoryUseCase
 import javax.inject.Inject
 
-
 @HiltViewModel
 class HistoryViewModel @Inject constructor(
     private val state: HistoryStateImpl,
@@ -20,10 +19,8 @@ class HistoryViewModel @Inject constructor(
                 history = histories
             }
         }
-
     }
     init {
         getHistoryBooks()
     }
-
 }

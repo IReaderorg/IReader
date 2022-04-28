@@ -1,6 +1,5 @@
 package org.ireader.domain.services.tts_service.media_player
 
-
 import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
@@ -19,7 +18,6 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toUri
 import androidx.media.session.MediaButtonReceiver
 import org.ireader.common_resources.K
-
 import org.ireader.domain.R
 import org.ireader.domain.notification.Notifications
 import org.ireader.domain.notification.Notifications.CHANNEL_TTS
@@ -41,20 +39,22 @@ class TTSNotificationBuilder constructor(
     private val pendingIntentFlags =
         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
 
-
     val skipPrevActionButton = NotificationCompat.Action(
         org.ireader.core.R.drawable.ic_baseline_skip_previous,
         context.getString(R.string.previous_chapter),
-        MediaButtonReceiver.buildMediaButtonPendingIntent(context,
-            PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)
+        MediaButtonReceiver.buildMediaButtonPendingIntent(
+            context,
+            PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
+        )
     )
     val rewindAction = NotificationCompat.Action(
         org.ireader.core.R.drawable.ic_baseline_fast_rewind,
         context.getString(R.string.previous_paragraph),
-        MediaButtonReceiver.buildMediaButtonPendingIntent(context,
-            PlaybackStateCompat.ACTION_REWIND)
+        MediaButtonReceiver.buildMediaButtonPendingIntent(
+            context,
+            PlaybackStateCompat.ACTION_REWIND
+        )
     )
-
 
     val pauseAction = NotificationCompat.Action(
         org.ireader.core.R.drawable.ic_baseline_pause,
@@ -62,47 +62,48 @@ class TTSNotificationBuilder constructor(
         MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_STOP)
     )
 
-
     val play = NotificationCompat.Action(
         org.ireader.core.R.drawable.ic_baseline_play_arrow,
         context.getString(R.string.play),
         MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_PLAY)
     )
 
-
     val next = NotificationCompat.Action(
         org.ireader.core.R.drawable.ic_baseline_fast_forward,
         context.getString(R.string.next_chapter),
-        MediaButtonReceiver.buildMediaButtonPendingIntent(context,
-            PlaybackStateCompat.ACTION_FAST_FORWARD)
+        MediaButtonReceiver.buildMediaButtonPendingIntent(
+            context,
+            PlaybackStateCompat.ACTION_FAST_FORWARD
+        )
     )
-
 
     val skipNext =
         NotificationCompat.Action(
             org.ireader.core.R.drawable.ic_baseline_skip_next,
             context.getString(R.string.next_chapter),
-            MediaButtonReceiver.buildMediaButtonPendingIntent(context,
-                PlaybackStateCompat.ACTION_SKIP_TO_NEXT)
+            MediaButtonReceiver.buildMediaButtonPendingIntent(
+                context,
+                PlaybackStateCompat.ACTION_SKIP_TO_NEXT
+            )
         )
     val cancelMediaPlater =
         PendingIntent.getBroadcast(
             context,
             Player.CANCEL,
-            Intent(context,
-                Class.forName(K.TTSService)).apply {
+            Intent(
+                context,
+                Class.forName(K.TTSService)
+            ).apply {
                 putExtra("PLAYER", Player.CANCEL)
             },
             pendingIntentFlags
         )
-
 
     @SuppressLint("WrongConstant")
     suspend fun buildNotification(sessionToken: MediaSessionCompat.Token): Notification {
         if (shouldCreateNowPlayingChannel()) {
             createNowPlayingChannel(context)
         }
-
 
         val controller = MediaControllerCompat(context, sessionToken)
         val description = controller.metadata?.description
@@ -121,11 +122,10 @@ class TTSNotificationBuilder constructor(
         builder.addAction(next)
         builder.addAction(skipNext)
 
-
         val mediaStyle = androidx.media.app.NotificationCompat.DecoratedMediaCustomViewStyle()
             .setCancelButtonIntent(cancelMediaPlater)
             .setMediaSession(sessionToken)
-            .setShowActionsInCompactView(2,3,4)
+            .setShowActionsInCompactView(2, 3, 4)
             .setShowCancelButton(true)
 
         return builder.setContentIntent(controller.sessionActivity)
@@ -139,8 +139,6 @@ class TTSNotificationBuilder constructor(
             .setOnlyAlertOnce(true)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .build()
-
-
     }
 
     fun buildReaderScreenDeepLink(
@@ -161,28 +159,27 @@ class TTSNotificationBuilder constructor(
     ): PendingIntent = PendingIntent.getActivity(
         context,
         5,
-        Intent(
-            Intent.ACTION_VIEW,
-            buildReaderScreenDeepLink(
-                bookId = bookId,
-                chapterId = chapterId,
-                sourceId = sourceId,
-                readingParagraph = currentReadingParagraph.toLong(),
-                voiceMode = 1L
-            ).toUri(),
-            context,
-            Class.forName("org.ireader.infinity.MainActivity")
-        ),
+        org.ireader.common_extensions.launchMainActivityIntent(context)
+            .apply {
+                action = Intent.ACTION_VIEW
+                data =buildReaderScreenDeepLink(
+                    bookId = bookId,
+                    chapterId = chapterId,
+                    sourceId = sourceId,
+                    readingParagraph = currentReadingParagraph.toLong(),
+                    voiceMode = 1L
+                ).toUri()
+
+            },
         flags
     )
-
 
     suspend fun buildTTSNotification(
         mediaSessionCompat: MediaSessionCompat,
         isLoading: Boolean = false,
         isError: Boolean = false,
     ): NotificationCompat.Builder {
-        val controller = MediaControllerCompat(context,mediaSessionCompat.sessionToken)
+        val controller = MediaControllerCompat(context, mediaSessionCompat.sessionToken)
 
         val bookName = controller.metadata.getText(TTSService.NOVEL_TITLE)
         val bookId = controller.metadata.getLong(TTSService.NOVEL_ID)
@@ -200,14 +197,18 @@ class TTSNotificationBuilder constructor(
             when {
                 isLoading -> "Loading..."
                 isError -> "ERROR"
-                else -> "${progress}/${lastPar}"
+                else -> "$progress/$lastPar"
             }
-        val bookCover = BookCover(id = bookId,
+        val bookCover = BookCover(
+            id = bookId,
             sourceId = sourceId,
             cover = cover.toString(),
-            favorite = favorite == 1L)
-        return NotificationCompat.Builder(context,
-            Notifications.CHANNEL_TTS).apply {
+            favorite = favorite == 1L
+        )
+        return NotificationCompat.Builder(
+            context,
+            Notifications.CHANNEL_TTS
+        ).apply {
             setContentTitle(chapterTitle)
             setContentText(contentText)
             setSmallIcon(org.ireader.core.R.drawable.ic_infinity)
@@ -216,11 +217,14 @@ class TTSNotificationBuilder constructor(
             setLargeIcon(context, cover)
             priority = NotificationCompat.PRIORITY_LOW
 
-            setContentIntent(openReaderScreenIntent(
-                chapterId = chapterId,
-                bookId = bookId,
-                sourceId = sourceId,
-                currentReadingParagraph = progress.toInt()))
+            setContentIntent(
+                openReaderScreenIntent(
+                    chapterId = chapterId,
+                    bookId = bookId,
+                    sourceId = sourceId,
+                    currentReadingParagraph = progress.toInt()
+                )
+            )
             addAction(skipPrevActionButton)
             addAction(rewindAction)
 
@@ -231,15 +235,16 @@ class TTSNotificationBuilder constructor(
             }
             addAction(next)
             addAction(skipNext)
-            setStyle(androidx.media.app.NotificationCompat.MediaStyle()
-                .setCancelButtonIntent(cancelMediaPlater)
-                .setMediaSession(mediaSessionCompat.sessionToken)
-                .setShowActionsInCompactView(1, 2, 3)
+            setStyle(
+                androidx.media.app.NotificationCompat.MediaStyle()
+                    .setCancelButtonIntent(cancelMediaPlater)
+                    .setMediaSession(mediaSessionCompat.sessionToken)
+                    .setShowActionsInCompactView(1, 2, 3)
             )
             setSubText(bookName)
 
-            //setColorized(true)
-            //setAutoCancel(true)
+            // setColorized(true)
+            // setAutoCancel(true)
             setOngoing(false)
         }
     }
@@ -262,8 +267,7 @@ class TTSNotificationBuilder constructor(
                 description = ""
                 setSound(null, null)
                 enableVibration(false)
-            })
+            }
+        )
     }
 }
-
-

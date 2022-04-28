@@ -27,9 +27,7 @@ interface ReaderUiFunctions {
     fun ReaderScreenViewModel.toggleSettingMode(enable: Boolean, returnToMain: Boolean? = null)
     fun ReaderScreenViewModel.reverseChapters()
     fun ReaderScreenViewModel.bookmarkChapter()
-
 }
-
 
 class ReaderUiFunctionsImpl @Inject constructor() : ReaderUiFunctions {
     override fun ReaderScreenViewModel.toggleLocalLoaded(loaded: Boolean) {
@@ -88,14 +86,11 @@ class ReaderUiFunctionsImpl @Inject constructor() : ReaderUiFunctions {
         if (returnToMain == null) {
             isSettingModeEnable = enable
             isMainBottomModeEnable = false
-
         } else {
             isSettingModeEnable = false
             isMainBottomModeEnable = true
         }
     }
-
-
 
     override fun ReaderScreenViewModel.reverseChapters() {
         toggleIsAsc(!isAsc)
@@ -106,9 +101,7 @@ class ReaderUiFunctionsImpl @Inject constructor() : ReaderUiFunctions {
             viewModelScope.launch(Dispatchers.IO) {
                 stateChapter = chapter.copy(bookmark = !chapter.bookmark)
                 insertUseCases.insertChapter(chapter.copy(bookmark = !chapter.bookmark))
-
             }
-
         }
     }
 }

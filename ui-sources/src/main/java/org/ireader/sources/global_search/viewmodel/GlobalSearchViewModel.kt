@@ -45,8 +45,13 @@ class GlobalSearchViewModel @Inject constructor(
                     try {
                         if (source is CatalogSource) {
                             insertSearchItem(SearchItem(source, loading = true))
-                            var items = source.getMangaList(filters = listOf(Filter.Title()
-                                .apply { this.value = query }), 1).mangas.map { it.toBook(source.id) }
+                            var items = source.getMangaList(
+                                filters = listOf(
+                                    Filter.Title()
+                                        .apply { this.value = query }
+                                ),
+                                1
+                            ).mangas.map { it.toBook(source.id) }
                             withContext(Dispatchers.IO) {
                                 val ids =
                                     insertUseCases.insertAllExploredBook(items.map { it.copy(tableId = 2) })
@@ -57,12 +62,10 @@ class GlobalSearchViewModel @Inject constructor(
                             insertSearchItem(SearchItem(source, items = items, loading = false))
                         }
                     } catch (e: Throwable) {
-
                     }
                 }
             }
         }
-
     }
 
     fun insertSearchItem(searchItem: SearchItem) {
@@ -73,8 +76,5 @@ class GlobalSearchViewModel @Inject constructor(
         } else {
             searchItems = searchItems + searchItem
         }
-
     }
-
-
 }

@@ -23,7 +23,8 @@ class MigrationTest {
 
     // Array of all migrations
     private val ALL_MIGRATIONS = arrayOf(
-        MIGRATION_11_12, MIGRATION_10_11)
+        MIGRATION_11_12, MIGRATION_10_11
+    )
 
     @get:Rule
     val helper: MigrationTestHelper = MigrationTestHelper(
@@ -32,32 +33,30 @@ class MigrationTest {
         FrameworkSQLiteOpenHelperFactory()
     )
 
-
     @Test
     fun migrate11to12() {
         database = helper.createDatabase(TEST_DB, 11).apply {
 
-            //(id,sourceId,link,title,author,description,genres,status,cover,customCover,favorite,lastUpdated,lastRead,dataAdded,viewer,flags)
-            execSQL("""
+            // (id,sourceId,link,title,author,description,genres,status,cover,customCover,favorite,lastUpdated,lastRead,dataAdded,viewer,flags)
+            execSQL(
+                """
                 INSERT INTO library  VALUES (0,0,'google.com','test book','myself','this is test','',0,'','',0,0,0,0,0,0)
-            """.trimIndent())
-
+                """.trimIndent()
+            )
 
             close()
         }
 
-        //ADDED a tableId
+        // ADDED a tableId
         database = helper.runMigrationsAndValidate(TEST_DB, 12, true, MIGRATION_11_12)
         val resultCursor = database.query("SELECT * FROM library")
         assertTrue(resultCursor.moveToFirst())
 
         val tableIdIndex = resultCursor.getColumnIndex("tableId")
 
-
         val tableIdFromDatabase = resultCursor.getLong(tableIdIndex)
         assertThat(tableIdFromDatabase).isEqualTo(0)
     }
-
 
     @Test
     fun migrateAll() {

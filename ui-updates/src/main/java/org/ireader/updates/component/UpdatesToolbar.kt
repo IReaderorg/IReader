@@ -1,10 +1,4 @@
-/*
- * Copyright (C) 2018 The Tachiyomi Open Source Project
- *
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- */
+
 
 package org.ireader.updates.component
 
@@ -13,7 +7,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.DeleteForever
+import androidx.compose.material.icons.filled.FlipToBack
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -49,7 +47,6 @@ fun UpdatesToolbar(
             }
         }
     }
-
 }
 
 @Composable
@@ -71,10 +68,10 @@ private fun UpdatesSelectionToolbar(
                 Icon(Icons.Default.SelectAll, contentDescription = null)
             }
             IconButton(onClick = onClickInvertSelection) {
-              Icon(Icons.Default.FlipToBack, contentDescription = null)
-          }
-      }
-  )
+                Icon(Icons.Default.FlipToBack, contentDescription = null)
+            }
+        }
+    )
 }
 
 @Composable
@@ -91,7 +88,6 @@ fun UpdatesRegularToolbar(
             IconButton(onClick = onClickDelete) {
                 Icon(Icons.Default.DeleteForever, contentDescription = null)
             }
-
         }
     )
 }

@@ -14,8 +14,6 @@ interface HistoryState {
     var searchMode: Boolean
     var searchQuery: String
     var history: Map<String, List<HistoryWithRelations>>
-
-
 }
 
 open class HistoryStateImpl @Inject constructor() : HistoryState {
@@ -24,6 +22,4 @@ open class HistoryStateImpl @Inject constructor() : HistoryState {
     override var searchMode by mutableStateOf<Boolean>(false)
     override var searchQuery by mutableStateOf<String>("")
     override var history: Map<String, List<HistoryWithRelations>> by mutableStateOf(emptyMap())
-
-
 }

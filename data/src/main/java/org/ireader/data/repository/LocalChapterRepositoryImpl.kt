@@ -2,14 +2,11 @@ package org.ireader.data.repository
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import org.ireader.data.local.dao.chapterDao
-import org.ireader.common_models.entities.Chapter
-import org.ireader.common_data.repository.LocalChapterRepository
+import org.ireader.data.local.dao.ChapterDao
 import javax.inject.Inject
 
-class LocalChapterRepositoryImpl @Inject constructor(private val daoLibrary: chapterDao) :
+class LocalChapterRepositoryImpl @Inject constructor(private val daoLibrary: ChapterDao) :
     org.ireader.common_data.repository.LocalChapterRepository {
-
 
     override suspend fun findChapterByIdByBatch(
         chapterId: List<Long>,
@@ -54,7 +51,6 @@ class LocalChapterRepositoryImpl @Inject constructor(private val daoLibrary: cha
         return daoLibrary.findChapterByKey(key = key)
     }
 
-
     override fun subscribeLastReadChapter(bookId: Long): Flow<org.ireader.common_models.entities.Chapter?> {
         return daoLibrary.subscribeLastReadChapter(bookId).distinctUntilChanged()
     }
@@ -71,13 +67,11 @@ class LocalChapterRepositoryImpl @Inject constructor(private val daoLibrary: cha
         return daoLibrary.findFirstChapter(bookId)
     }
 
-
     /******************************Insert******************************/
     override suspend fun insertChapters(
         chapters: List<org.ireader.common_models.entities.Chapter>,
     ): List<Long> {
         return daoLibrary.insertChapters(chapters = chapters)
-
     }
 
     override suspend fun insertChapter(chapter: org.ireader.common_models.entities.Chapter): Long {
@@ -90,7 +84,6 @@ class LocalChapterRepositoryImpl @Inject constructor(private val daoLibrary: cha
         return daoLibrary.deleteChaptersByBookId(bookId)
     }
 
-
     override suspend fun deleteChapters(chapters: List<org.ireader.common_models.entities.Chapter>) {
         return daoLibrary.deleteChaptersByBookId(chapters)
     }
@@ -98,7 +91,6 @@ class LocalChapterRepositoryImpl @Inject constructor(private val daoLibrary: cha
     override suspend fun deleteChapterByChapter(chapter: org.ireader.common_models.entities.Chapter) {
         return daoLibrary.deleteChapter(chapter)
     }
-
 
     override suspend fun deleteAllChapters() {
         return daoLibrary.deleteAllChapters()

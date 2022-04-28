@@ -8,7 +8,11 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import org.ireader.common_extensions.launchIO
 import org.ireader.common_models.entities.SavedDownload
 import org.ireader.common_models.entities.buildSavedDownload
@@ -23,9 +27,8 @@ import org.ireader.domain.use_cases.download.DownloadUseCases
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 
-
 @HiltWorker
-class DownloadService @AssistedInject constructor(
+class DownloaderService @AssistedInject constructor(
     @Assisted private val context: Context,
     @Assisted params: WorkerParameters,
     private val bookRepo: org.ireader.common_data.repository.LocalBookRepository,
@@ -42,15 +45,12 @@ class DownloadService @AssistedInject constructor(
 
     val scope = CoroutineScope(Dispatchers.Main.immediate + downloadJob)
 
-
-
     companion object {
         const val DOWNLOADER_SERVICE_NAME = "DOWNLOAD_SERVICE"
         const val DOWNLOADER_Chapters_IDS = "chapterIds"
         const val DOWNLOADER_MODE = "downloader_mode"
         const val DOWNLOADER_BOOKS_IDS = "booksIds"
     }
-
 
     var savedDownload: SavedDownload =
         SavedDownload(
@@ -69,7 +69,7 @@ class DownloadService @AssistedInject constructor(
             try {
                 val inputtedChapterIds = inputData.getLongArray(DOWNLOADER_Chapters_IDS)?.distinct()
                 val inputtedBooksIds = inputData.getLongArray(DOWNLOADER_BOOKS_IDS)?.distinct()
-                val inputtedDownloaderMode = inputData.getBoolean(DOWNLOADER_MODE,false)
+                val inputtedDownloaderMode = inputData.getBoolean(DOWNLOADER_MODE, false)
 
                 val chapters = if (inputtedBooksIds != null) {
                     chapterRepo.findChaptersByBookIds(inputtedBooksIds)
@@ -96,7 +96,7 @@ class DownloadService @AssistedInject constructor(
 
                 val downloadIds = downloadUseCases.insertDownloads(mappedChapters)
 
-                val downloads = mappedChapters //downloadUseCases.findDownloadsUseCase(downloadIds)
+                val downloads = mappedChapters // downloadUseCases.findDownloadsUseCase(downloadIds)
                 val builder = defaultNotificationHelper.baseNotificationDownloader(
                     chapter = null,
                     id
@@ -132,8 +132,11 @@ class DownloadService @AssistedInject constructor(
                                             sourceId = download.sourceId,
                                         )
                                         withContext(Dispatchers.IO) {
-                                            downloadUseCases.insertDownload(savedDownload.copy(
-                                                priority = 1))
+                                            downloadUseCases.insertDownload(
+                                                savedDownload.copy(
+                                                    priority = 1
+                                                )
+                                            )
                                         }
                                     },
                                     onError = { message ->
@@ -145,16 +148,18 @@ class DownloadService @AssistedInject constructor(
                     }
                     Log.debug { "getNotifications: Successfully to downloaded ${savedDownload.bookName} chapter ${savedDownload.chapterName}" }
                     delay(1000)
-
                 }
-
             } catch (e: Throwable) {
-                Log.error {"getNotifications: Failed to download ${savedDownload.chapterName}"}
+                Log.error { "getNotifications: Failed to download ${savedDownload.chapterName}" }
 
                 cancel(ID_DOWNLOAD_CHAPTER_PROGRESS)
-                notify(ID_DOWNLOAD_CHAPTER_ERROR,
-                    defaultNotificationHelper.baseCancelledNotificationDownloader(bookName = savedDownload.bookName,
-                        e).build())
+                notify(
+                    ID_DOWNLOAD_CHAPTER_ERROR,
+                    defaultNotificationHelper.baseCancelledNotificationDownloader(
+                        bookName = savedDownload.bookName,
+                        e
+                    ).build()
+                )
 
                 scope.launchIO {
                     downloadUseCases.insertDownload(savedDownload.copy(priority = 0))
@@ -169,8 +174,10 @@ class DownloadService @AssistedInject constructor(
                 withContext(Dispatchers.IO) {
                     downloadUseCases.insertDownload(savedDownload.copy(priority = 0))
                 }
-                val notification = NotificationCompat.Builder(applicationContext.applicationContext,
-                    Notifications.CHANNEL_DOWNLOADER_COMPLETE).apply {
+                val notification = NotificationCompat.Builder(
+                    applicationContext.applicationContext,
+                    Notifications.CHANNEL_DOWNLOADER_COMPLETE
+                ).apply {
                     setContentTitle("Download was successfully completed.")
                     setSmallIcon(R.drawable.ic_downloading)
                     priority = NotificationCompat.PRIORITY_DEFAULT
@@ -183,7 +190,6 @@ class DownloadService @AssistedInject constructor(
                     notification
                 )
             }
-
         }
         downloadServiceState.downloads = emptyList()
         downloadServiceState.isEnable = false
@@ -278,6 +284,4 @@ class DownloadService @AssistedInject constructor(
 //        }
 //        return Result.success()
     }
-
-
 }

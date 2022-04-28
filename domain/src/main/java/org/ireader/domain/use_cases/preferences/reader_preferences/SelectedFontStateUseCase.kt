@@ -15,7 +15,7 @@ class SelectedFontStateUseCase @Inject constructor(
     /**
      * fontIndex is the index of font which is in fonts list inside the Type package
      */
-    fun readFont(): FontType {
+    suspend fun readFont(): FontType {
         val fontType = appPreferences.font().get()
         return fonts[fontType]
     }
@@ -24,9 +24,7 @@ class SelectedFontStateUseCase @Inject constructor(
         appPreferences.selectableText().set(value)
     }
 
-    fun readSelectableText(): Boolean {
+    suspend fun readSelectableText(): Boolean {
         return appPreferences.selectableText().get()
     }
-
-
 }

@@ -1,24 +1,24 @@
-//package org.ireader.domain.services.tts_service.media_player
+// package org.ireader.domain.services.tts_service.media_player
 //
-//import android.content.Context
-//import android.speech.tts.TextToSpeech
-//import android.speech.tts.UtteranceProgressListener
-//import android.support.v4.media.session.MediaSessionCompat
-//import androidx.core.app.NotificationManagerCompat
-//import kotlinx.coroutines.CoroutineScope
-//import kotlinx.coroutines.Dispatchers
-//import kotlinx.coroutines.Job
-//import kotlinx.coroutines.launch
-//import kotlinx.datetime.Clock
-//import org.ireader.core_api.log.Log
-//import org.ireader.core_api.source.Source
-//import org.ireader.infinity.Book
-//import org.ireader.infinity.Chapter
-//import org.ireader.domain.notification.Notifications
-//import org.ireader.domain.services.tts_service.Player
-//import org.ireader.presentation.feature_ttl.TTSState
+// import android.content.Context
+// import android.speech.tts.TextToSpeech
+// import android.speech.tts.UtteranceProgressListener
+// import android.support.v4.media.session.MediaSessionCompat
+// import androidx.core.app.NotificationManagerCompat
+// import kotlinx.coroutines.CoroutineScope
+// import kotlinx.coroutines.Dispatchers
+// import kotlinx.coroutines.Job
+// import kotlinx.coroutines.launch
+// import kotlinx.datetime.Clock
+// import org.ireader.core_api.log.Log
+// import org.ireader.core_api.source.Source
+// import org.ireader.infinity.Book
+// import org.ireader.infinity.Chapter
+// import org.ireader.domain.notification.Notifications
+// import org.ireader.domain.services.tts_service.Player
+// import org.ireader.presentation.feature_ttl.TTSState
 //
-//class TTSPlayers {
+// class TTSPlayers {
 //
 //    suspend fun TTSService.updateNotification(
 //        chapter: Chapter,
@@ -476,4 +476,4 @@
 //            throw Exception("Invalid Id")
 //        }
 //    }
-//}
+// }

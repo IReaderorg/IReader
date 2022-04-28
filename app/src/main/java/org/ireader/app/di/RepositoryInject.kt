@@ -5,10 +5,21 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import org.ireader.core_catalogs.service.CatalogRemoteRepository
-import org.ireader.data.local.dao.*
-import org.ireader.data.repository.*
+import org.ireader.data.local.dao.CatalogDao
+import org.ireader.data.local.dao.DownloadDao
+import org.ireader.data.local.dao.HistoryDao
+import org.ireader.data.local.dao.LibraryBookDao
+import org.ireader.data.local.dao.RemoteKeysDao
+import org.ireader.data.local.dao.UpdatesDao
+import org.ireader.data.local.dao.ChapterDao
+import org.ireader.data.repository.CatalogRemoteRepositoryImpl
+import org.ireader.data.repository.DownloadRepositoryImpl
+import org.ireader.data.repository.HistoryRepositoryImpl
+import org.ireader.data.repository.LocalBookRepositoryImpl
+import org.ireader.data.repository.LocalChapterRepositoryImpl
+import org.ireader.data.repository.RemoteKeyRepositoryImpl
+import org.ireader.data.repository.UpdatesRepositoryImpl
 import javax.inject.Singleton
-
 
 @InstallIn(SingletonComponent::class)
 @Module
@@ -48,10 +59,9 @@ class RepositoryInject {
 
     @Provides
     @Singleton
-    fun providesLocalChapterRepository(chapterDao: chapterDao): org.ireader.common_data.repository.LocalChapterRepository {
-        return LocalChapterRepositoryImpl(chapterDao)
+    fun providesLocalChapterRepository(ChapterDao: ChapterDao): org.ireader.common_data.repository.LocalChapterRepository {
+        return LocalChapterRepositoryImpl(ChapterDao)
     }
-
 
     @Provides
     @Singleton
@@ -59,8 +69,10 @@ class RepositoryInject {
         libraryBookDao: LibraryBookDao,
         remoteKeysDao: RemoteKeysDao,
     ): org.ireader.common_data.repository.LocalBookRepository {
-        return LocalBookRepositoryImpl(libraryBookDao,
-            remoteKeysDao = remoteKeysDao)
+        return LocalBookRepositoryImpl(
+            libraryBookDao,
+            remoteKeysDao = remoteKeysDao
+        )
     }
 
     @Provides
@@ -70,5 +82,4 @@ class RepositoryInject {
     ): org.ireader.common_data.repository.HistoryRepository {
         return HistoryRepositoryImpl(historyDao)
     }
-
 }

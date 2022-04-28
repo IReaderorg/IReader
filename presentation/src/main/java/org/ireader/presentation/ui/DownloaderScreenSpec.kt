@@ -21,26 +21,28 @@ object DownloaderScreenSpec : ScreenSpec {
         }
     )
 
-    @OptIn(ExperimentalPagerApi::class, androidx.compose.animation.ExperimentalAnimationApi::class,
-        androidx.compose.material.ExperimentalMaterialApi::class)
+    @OptIn(
+        ExperimentalPagerApi::class, androidx.compose.animation.ExperimentalAnimationApi::class,
+        androidx.compose.material.ExperimentalMaterialApi::class
+    )
     @Composable
     override fun Content(
         navController: NavController,
         navBackStackEntry: NavBackStackEntry,
         scaffoldState: ScaffoldState,
     ) {
-        val vm : DownloaderViewModel = hiltViewModel()
-       DownloaderScreen(navController = navController,
-       onDownloadItem = { item ->
-           navController.navigate(
-               BookDetailScreenSpec.buildRoute(
-                   sourceId = item.sourceId,
-                   bookId = item.bookId
-               )
-           )
-       },
-           vm = vm
-       )
+        val vm: DownloaderViewModel = hiltViewModel()
+        DownloaderScreen(
+            navController = navController,
+            onDownloadItem = { item ->
+                navController.navigate(
+                    BookDetailScreenSpec.buildRoute(
+                        sourceId = item.sourceId,
+                        bookId = item.bookId
+                    )
+                )
+            },
+            vm = vm
+        )
     }
-
 }

@@ -8,14 +8,34 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.*
+import androidx.compose.material.Divider
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.DoneOutline
+import androidx.compose.material.icons.filled.GetApp
+import androidx.compose.material.icons.filled.PlaylistAddCheck
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -42,9 +62,8 @@ import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.core_ui.ui.EmptyScreen
 import org.ireader.core_ui.ui.LoadingScreen
-import org.ireader.core_ui.ui_components.LazyColumnScrollbar
+import org.ireader.components.list.scrollbars.LazyColumnScrollbar
 import org.ireader.explore.webview.CustomTextField
-
 
 @ExperimentalAnimationApi
 @OptIn(ExperimentalMaterialApi::class)
@@ -53,8 +72,8 @@ fun ChapterDetailScreen(
     modifier: Modifier = Modifier,
     vm: ChapterDetailViewModel,
     navController: NavController = rememberNavController(),
-    onItemClick: (index:Int) -> Unit,
-    onLongItemClick: (index:Int) -> Unit,
+    onItemClick: (index: Int) -> Unit,
+    onLongItemClick: (index: Int) -> Unit,
 ) {
     val book = vm.book
     val context = LocalContext.current
@@ -94,11 +113,11 @@ fun ChapterDetailScreen(
                 onMap = {
                     scope.launch {
                         try {
-                            scrollState.scrollToItem(vm.getLastChapterIndex(),
-                                -scrollState.layoutInfo.viewportEndOffset / 2)
-
+                            scrollState.scrollToItem(
+                                vm.getLastChapterIndex(),
+                                -scrollState.layoutInfo.viewportEndOffset / 2
+                            )
                         } catch (e: Throwable) {
-
                         }
                     }
                 }
@@ -107,22 +126,28 @@ fun ChapterDetailScreen(
         drawerGesturesEnabled = true,
         drawerBackgroundColor = MaterialTheme.colors.background,
         drawerContent = {
-            Column(modifier = modifier
-                .fillMaxSize()
-                .systemBarsPadding(),
+            Column(
+                modifier = modifier
+                    .fillMaxSize()
+                    .systemBarsPadding(),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Top) {
+                verticalArrangement = Arrangement.Top
+            ) {
                 Spacer(modifier = modifier.height(5.dp))
                 BigSizeTextComposable(text = "Advance Setting")
 
                 Spacer(modifier = modifier.height(5.dp))
                 Divider(modifier = modifier.fillMaxWidth(), thickness = 1.dp)
-                TextButton(modifier = Modifier.fillMaxWidth(),
-                    onClick = { vm.reverseChapterInDB() }) {
+                TextButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { vm.reverseChapterInDB() }
+                ) {
                     MidSizeTextComposable(text = "Reverse Chapters in DB")
                 }
-                TextButton(modifier = Modifier.fillMaxWidth(),
-                    onClick = { vm.autoSortChapterInDB() }) {
+                TextButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { vm.autoSortChapterInDB() }
+                ) {
                     MidSizeTextComposable(text = "Auto Sort Chapters in DB")
                 }
             }
@@ -130,14 +155,15 @@ fun ChapterDetailScreen(
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
             Column {
-                CustomTextField(modifier = Modifier
-                    .padding(horizontal = 8.dp, vertical = 8.dp)
-                    .height(35.dp)
-                    .fillMaxWidth()
-                    .background(
-                        color = MaterialTheme.colors.onBackground.copy(.1f),
-                        shape = CircleShape
-                    ),
+                CustomTextField(
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp, vertical = 8.dp)
+                        .height(35.dp)
+                        .fillMaxWidth()
+                        .background(
+                            color = MaterialTheme.colors.onBackground.copy(.1f),
+                            shape = CircleShape
+                        ),
                     hint = "Search...",
                     value = vm.query,
                     onValueChange = {
@@ -151,27 +177,37 @@ fun ChapterDetailScreen(
                     paddingLeadingIconEnd = 8.dp,
                     trailingIcon = {
                         if (vm.query.isNotBlank()) {
-                            AppIconButton(imageVector = Icons.Default.Close,
+                            AppIconButton(
+                                imageVector = Icons.Default.Close,
                                 title = "Exit search",
                                 onClick = {
                                     vm.query = ""
                                     vm.getLocalChaptersByPaging(vm.isAsc)
-                                })
+                                }
+                            )
                         }
                     }
                 )
                 Box(modifier.fillMaxSize()) {
-                    Crossfade(targetState = Pair(vm.isLoading,
-                        vm.isEmpty)) { (isLoading, isEmpty) ->
+                    Crossfade(
+                        targetState = Pair(
+                            vm.isLoading,
+                            vm.isEmpty
+                        )
+                    ) { (isLoading, isEmpty) ->
                         when {
                             isLoading -> LoadingScreen()
                             isEmpty -> EmptyScreen(text = UiText.DynamicString("There is no chapter."))
                             else -> {
                                 LazyColumnScrollbar(listState = scrollState) {
-                                    LazyColumn(modifier = Modifier
-                                        .fillMaxSize(), state = scrollState) {
+                                    LazyColumn(
+                                        modifier = Modifier
+                                            .fillMaxSize(),
+                                        state = scrollState
+                                    ) {
                                         items(vm.chapters.size) { index ->
-                                            ChapterListItemComposable(modifier = modifier,
+                                            ChapterListItemComposable(
+                                                modifier = modifier,
                                                 chapter = vm.chapters[index],
                                                 onItemClick = {
                                                     onItemClick(index)
@@ -196,20 +232,15 @@ fun ChapterDetailScreen(
                         vm,
                         context,
                         onDownload = {
-
                         },
                         onBookmark = {
-
                         },
                         onMarkAsRead = {
-
                         }
                     )
                 }
             }
         }
-
-
     }
 
     @Composable
@@ -254,7 +285,7 @@ private fun BoxScope.ChapterDetailBottomBar(
     vm: ChapterDetailViewModel,
     context: Context,
     onDownload: () -> Unit,
-    onBookmark:() -> Unit,
+    onBookmark: () -> Unit,
     onMarkAsRead: () -> Unit
 ) {
     Box(
@@ -264,51 +295,71 @@ private fun BoxScope.ChapterDetailBottomBar(
             .align(Alignment.BottomCenter)
             .padding(8.dp)
             .background(MaterialTheme.colors.background)
-            .border(width = 1.dp,
-                color = MaterialTheme.colors.onBackground.copy(.1f))
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colors.onBackground.copy(.1f)
+            )
             .clickable(enabled = false) {},
     ) {
-        Row(modifier = Modifier
-            .fillMaxSize(),
+        Row(
+            modifier = Modifier
+                .fillMaxSize(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            AppIconButton(imageVector = Icons.Default.GetApp,
+            AppIconButton(
+                imageVector = Icons.Default.GetApp,
                 title = "Download",
                 onClick = {
                     vm.downloadChapters()
                     vm.selection.clear()
-                })
-            AppIconButton(imageVector = Icons.Default.BookmarkBorder,
+                }
+            )
+            AppIconButton(
+                imageVector = Icons.Default.BookmarkBorder,
                 title = "Bookmark",
                 onClick = {
-                    vm.insertChapters(vm.chapters.filter { it.id in vm.selection }
-                        .map { it.copy(bookmark = !it.bookmark) })
+                    vm.insertChapters(
+                        vm.chapters.filter { it.id in vm.selection }
+                            .map { it.copy(bookmark = !it.bookmark) }
+                    )
                     vm.selection.clear()
-                })
+                }
+            )
 
-            AppIconButton(imageVector = if (vm.chapters.filter { it.read }
+            AppIconButton(
+                imageVector = if (vm.chapters.filter { it.read }
                     .map { it.id }
-                    .containsAll(vm.selection)) Icons.Default.DoneOutline else Icons.Default.Done,
+                    .containsAll(vm.selection)
+                ) Icons.Default.DoneOutline else Icons.Default.Done,
                 title = "Mark as read",
                 onClick = {
-                    vm.insertChapters(vm.chapters.filter { it.id in vm.selection }
-                        .map { it.copy(read = !it.read) })
+                    vm.insertChapters(
+                        vm.chapters.filter { it.id in vm.selection }
+                            .map { it.copy(read = !it.read) }
+                    )
                     vm.selection.clear()
-                })
-            AppIconButton(imageVector = Icons.Default.PlaylistAddCheck,
+                }
+            )
+            AppIconButton(
+                imageVector = Icons.Default.PlaylistAddCheck,
                 title = "Mark Previous as read",
                 onClick = {
-                    vm.insertChapters(vm.chapters.filter { it.id <= vm.selection.maxOrNull() ?: 0 }
-                        .map { it.copy(read = true) })
+                    vm.insertChapters(
+                        vm.chapters.filter { it.id <= vm.selection.maxOrNull() ?: 0 }
+                            .map { it.copy(read = true) }
+                    )
                     vm.selection.clear()
-                })
-            AppIconButton(imageVector = Icons.Default.Delete,
+                }
+            )
+            AppIconButton(
+                imageVector = Icons.Default.Delete,
                 title = "Delete",
                 onClick = {
                     vm.deleteChapters(vm.chapters.filter { it.id in vm.selection })
                     vm.selection.clear()
-                })
+                }
+            )
         }
     }
 }

@@ -11,10 +11,10 @@ import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import com.google.accompanist.pager.ExperimentalPagerApi
-import org.ireader.common_resources.LAST_CHAPTER
-import org.ireader.domain.ui.NavigationArgs
 import org.ireader.app.LibraryScreen
 import org.ireader.app.viewmodel.LibraryViewModel
+import org.ireader.common_resources.LAST_CHAPTER
+import org.ireader.domain.ui.NavigationArgs
 import org.ireader.presentation.R
 
 object LibraryScreenSpec : BottomNavScreenSpec {
@@ -22,21 +22,21 @@ object LibraryScreenSpec : BottomNavScreenSpec {
     override val label: Int = R.string.library_screen_label
     override val navHostRoute: String = "library"
 
-
     override val arguments: List<NamedNavArgument> = listOf(
         NavigationArgs.showBottomNav
     )
 
-
-    @OptIn(ExperimentalPagerApi::class, androidx.compose.animation.ExperimentalAnimationApi::class,
-        androidx.compose.material.ExperimentalMaterialApi::class)
+    @OptIn(
+        ExperimentalPagerApi::class, androidx.compose.animation.ExperimentalAnimationApi::class,
+        androidx.compose.material.ExperimentalMaterialApi::class
+    )
     @Composable
     override fun Content(
         navController: NavController,
         navBackStackEntry: NavBackStackEntry,
         scaffoldState: ScaffoldState,
     ) {
-        val vm : LibraryViewModel = hiltViewModel()
+        val vm: LibraryViewModel = hiltViewModel()
         val context = LocalContext.current
         LibraryScreen(
             navController = navController,
@@ -49,13 +49,13 @@ object LibraryScreenSpec : BottomNavScreenSpec {
             onSortSelected = {
                 vm.changeSortIndex(it)
             },
-            onLayoutSelected = { layout->
+            onLayoutSelected = { layout ->
                 vm.onLayoutTypeChange(layout)
-            } ,
+            },
             onMarkAsRead = {
                 vm.markAsRead()
             },
-            onDownload =  {
+            onDownload = {
                 vm.downloadChapters()
             },
             onMarkAsNotRead = {
@@ -69,7 +69,7 @@ object LibraryScreenSpec : BottomNavScreenSpec {
                     ReaderScreenSpec.buildRoute(
                         bookId = book.id,
                         sourceId = book.sourceId,
-                        chapterId =LAST_CHAPTER
+                        chapterId = LAST_CHAPTER
                     )
                 )
             },
@@ -80,15 +80,14 @@ object LibraryScreenSpec : BottomNavScreenSpec {
                     } else {
                         vm.selection.add(book.id)
                     }
-
                 } else {
                     navController.navigate(
                         route = BookDetailScreenSpec.buildRoute(
                             sourceId = book.sourceId,
-                            bookId = book.id)
+                            bookId = book.id
+                        )
                     )
                 }
-
             },
             onLongBook = {
                 vm.selection.add(it.id)
@@ -102,5 +101,4 @@ object LibraryScreenSpec : BottomNavScreenSpec {
             },
         )
     }
-
 }

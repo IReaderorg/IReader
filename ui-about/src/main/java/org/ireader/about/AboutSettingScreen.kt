@@ -3,8 +3,16 @@ package org.ireader.about
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Divider
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ListItem
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,7 +59,6 @@ fun AboutSettingScreen(
             AboutTile.Github,
         )
 
-
         Column(
             modifier = modifier
                 .padding(12.dp)
@@ -73,42 +80,58 @@ fun AboutSettingScreen(
                         },
                     singleLineSecondaryText = false,
                     secondaryText = {
-                        MidSizeTextComposable(modifier
-                            .fillMaxWidth()
-                            .align(Alignment.Start), text = it.subtitle,
-                            color = MaterialTheme.colors.onBackground)
+                        MidSizeTextComposable(
+                            modifier
+                                .fillMaxWidth()
+                                .align(Alignment.Start),
+                            text = it.subtitle,
+                            color = MaterialTheme.colors.onBackground
+                        )
                     },
                     text = {
-                        BigSizeTextComposable(modifier = modifier
-                            .fillMaxWidth()
-                            .align(Alignment.Start), text = it.title)
+                        BigSizeTextComposable(
+                            modifier = modifier
+                                .fillMaxWidth()
+                                .align(Alignment.Start),
+                            text = it.title
+                        )
                     },
                 )
-                Divider(modifier = modifier.fillMaxWidth(),
-                    color = MaterialTheme.colors.onBackground.copy(alpha = .1f))
+                Divider(
+                    modifier = modifier.fillMaxWidth(),
+                    color = MaterialTheme.colors.onBackground.copy(alpha = .1f)
+                )
             }
-
-
         }
     }
 }
 
 sealed class AboutTile(val title: String, val subtitle: String, val intent: Intent) {
 
-    data class Version(val version: String) : AboutTile("Version",
+    data class Version(val version: String) : AboutTile(
+        "Version",
         version,
-        Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/kazemcodes/Infinity/releases")))
+        Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/kazemcodes/Infinity/releases"))
+    )
 
-    object WhatsNew : AboutTile("Whats New",
+    object WhatsNew : AboutTile(
+        "Whats New",
         "Check the Update",
-        Intent(Intent.ACTION_VIEW,
-            Uri.parse("https://github.com/kazemcodes/IReader/releases/latest")))
+        Intent(
+            Intent.ACTION_VIEW,
+            Uri.parse("https://github.com/kazemcodes/IReader/releases/latest")
+        )
+    )
 
-    object Discord : AboutTile("Discord",
+    object Discord : AboutTile(
+        "Discord",
         "https://discord.gg/HBU6zD8c5v",
-        Intent(Intent.ACTION_VIEW, Uri.parse("https://discord.gg/HBU6zD8c5v")))
+        Intent(Intent.ACTION_VIEW, Uri.parse("https://discord.gg/HBU6zD8c5v"))
+    )
 
-    object Github : AboutTile("Github",
+    object Github : AboutTile(
+        "Github",
         "https://github.com/kazemcodes/IReader",
-        Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/kazemcodes/Infinity")))
+        Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/kazemcodes/Infinity"))
+    )
 }

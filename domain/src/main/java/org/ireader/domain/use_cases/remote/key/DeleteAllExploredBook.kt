@@ -9,10 +9,8 @@ class DeleteAllExploredBook @Inject constructor(private val remoteKeyRepository:
     }
 }
 
-
 class DeleteAllSearchedBook @Inject constructor(private val remoteKeyRepository: org.ireader.common_data.repository.RemoteKeyRepository) {
     suspend operator fun invoke() {
         remoteKeyRepository.deleteAllSearchedBook()
     }
 }
-

@@ -2,15 +2,33 @@ package org.ireader.downloader
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.*
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ExtendedFloatingActionButton
+import androidx.compose.material.FabPosition
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.LinearProgressIndicator
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.CheckCircleOutline
 import androidx.compose.material.icons.outlined.MoreVert
-import androidx.compose.runtime.*
+import androidx.compose.material.rememberScaffoldState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,8 +59,9 @@ fun DownloaderScreen(
     modifier: Modifier = Modifier,
     navController: NavController = rememberNavController(),
     vm: DownloaderViewModel,
-    onDownloadItem : (item:
-                      SavedDownloadWithInfo
+    onDownloadItem: (
+        item:
+            SavedDownloadWithInfo
     ) -> Unit
 ) {
     val context = LocalContext.current
@@ -59,7 +78,6 @@ fun DownloaderScreen(
         }
     }
     val downloads = vm.downloads
-
 
     Scaffold(
         topBar = {
@@ -103,12 +121,16 @@ fun DownloaderScreen(
                 },
                 icon = {
                     when (vm.downloadServiceStateImpl.isEnable) {
-                        true -> Icon(Icons.Filled.Pause,
+                        true -> Icon(
+                            Icons.Filled.Pause,
                             "",
-                            tint = MaterialTheme.colors.onSecondary)
-                        else -> Icon(Icons.Filled.PlayArrow,
+                            tint = MaterialTheme.colors.onSecondary
+                        )
+                        else -> Icon(
+                            Icons.Filled.PlayArrow,
                             "",
-                            tint = MaterialTheme.colors.onSecondary)
+                            tint = MaterialTheme.colors.onSecondary
+                        )
                     }
                 }
             )
@@ -151,12 +173,9 @@ fun DownloaderScreen(
                         vm.deleteSelectedDownloads(list = listOf(item))
                     },
                 )
-
             }
         }
-
     }
-
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -203,9 +222,11 @@ fun DownloadScreenItem(
                 fontWeight = FontWeight.SemiBold
             )
             Spacer(modifier = Modifier.height(8.dp))
-            Column(modifier = Modifier.fillMaxWidth(),
+            Column(
+                modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.Start) {
+                horizontalAlignment = Alignment.Start
+            ) {
                 BookListItemSubtitle(
                     text = item.chapterName
                 )
@@ -215,7 +236,6 @@ fun DownloadScreenItem(
                     LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                 }
             }
-
         }
         if (isDownloaded) {
             IconButton(onClick = { isMenuExpanded = true }) {
@@ -237,13 +257,10 @@ fun DownloadScreenItem(
                             "Cancel all for this series"
                         ) {
                             onCancelAllFromThisSeries(item)
-                        })
+                        }
+                    )
                 BuildDropDownMenu(list, enable = isMenuExpanded, onEnable = { isMenuExpanded = it })
             }
         }
-
-
     }
 }
-
-

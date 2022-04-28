@@ -12,13 +12,17 @@ import org.ireader.common_models.entities.Catalog
 import org.ireader.common_models.entities.CatalogInstalled
 import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.common_models.entities.CatalogRemote
-import org.ireader.core_catalogs.interactor.*
+import org.ireader.core_catalogs.interactor.GetCatalogsByType
+import org.ireader.core_catalogs.interactor.InstallCatalog
+import org.ireader.core_catalogs.interactor.SyncRemoteCatalogs
+import org.ireader.core_catalogs.interactor.TogglePinnedCatalog
+import org.ireader.core_catalogs.interactor.UninstallCatalog
+import org.ireader.core_catalogs.interactor.UpdateCatalog
 import org.ireader.core_catalogs.model.InstallStep
 import org.ireader.core_ui.exceptionHandler
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.use_cases.remote.key.RemoteKeyUseCase
 import javax.inject.Inject
-
 
 @HiltViewModel
 class ExtensionViewModel @Inject constructor(
@@ -31,7 +35,6 @@ class ExtensionViewModel @Inject constructor(
     private val syncRemoteCatalogs: SyncRemoteCatalogs,
     private val remoteKeyUseCase: RemoteKeyUseCase,
 ) : BaseViewModel(), CatalogsState by state {
-
 
     var getCatalogJob: Job? = null
 
@@ -55,8 +58,6 @@ class ExtensionViewModel @Inject constructor(
         viewModelScope.launch {
             snapshotFlow { state.allUnpinnedCatalogs.filteredByQuery(searchQuery) }
                 .collect { state.unpinnedCatalogs = it }
-
-
         }
         viewModelScope.launch {
             snapshotFlow {
@@ -64,9 +65,7 @@ class ExtensionViewModel @Inject constructor(
                     .filteredByChoice(selectedLanguage)
             }
                 .collect { state.remoteCatalogs = it }
-
         }
-
     }
 
     fun installCatalog(catalog: Catalog) {
@@ -179,7 +178,4 @@ class ExtensionViewModel @Inject constructor(
             remoteKeyUseCase.clearExploreMode()
         }
     }
-
 }
-
-

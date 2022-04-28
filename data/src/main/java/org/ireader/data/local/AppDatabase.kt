@@ -5,8 +5,21 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
-import org.ireader.common_models.entities.*
-import org.ireader.data.local.dao.*
+import org.ireader.common_models.entities.Book
+import org.ireader.common_models.entities.CatalogRemote
+import org.ireader.common_models.entities.Category
+import org.ireader.common_models.entities.Chapter
+import org.ireader.common_models.entities.History
+import org.ireader.common_models.entities.RemoteKeys
+import org.ireader.common_models.entities.SavedDownload
+import org.ireader.common_models.entities.Update
+import org.ireader.data.local.dao.CatalogDao
+import org.ireader.data.local.dao.DownloadDao
+import org.ireader.data.local.dao.HistoryDao
+import org.ireader.data.local.dao.LibraryBookDao
+import org.ireader.data.local.dao.RemoteKeysDao
+import org.ireader.data.local.dao.UpdatesDao
+import org.ireader.data.local.dao.ChapterDao
 
 @Database(
     entities = [
@@ -25,7 +38,7 @@ import org.ireader.data.local.dao.*
 @TypeConverters(DatabaseConverter::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract val libraryBookDao: LibraryBookDao
-    abstract val chapterDao: chapterDao
+    abstract val chapterDao: ChapterDao
     abstract val remoteKeysDao: RemoteKeysDao
     abstract val downloadDao: DownloadDao
     abstract val catalogDao: CatalogDao
@@ -35,7 +48,6 @@ abstract class AppDatabase : RoomDatabase() {
     companion object {
         const val DATABASE_NAME = "infinity_db"
     }
-
 }
 
 val MIGRATION_8_9 = object : Migration(8, 9) {

@@ -17,5 +17,4 @@ class NotificationsInitializer @Inject constructor(
             Log.error { "Failed to modify notification channels" }
         }
     }
-
 }

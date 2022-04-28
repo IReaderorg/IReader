@@ -10,12 +10,18 @@ import dagger.hilt.components.SingletonComponent
 import org.ireader.data.local.AppDatabase
 import org.ireader.data.local.MIGRATION_11_12
 import org.ireader.data.local.MIGRATION_8_9
-import org.ireader.data.local.dao.*
+import org.ireader.data.local.dao.CatalogDao
+import org.ireader.data.local.dao.DownloadDao
+import org.ireader.data.local.dao.HistoryDao
+import org.ireader.data.local.dao.LibraryBookDao
+import org.ireader.data.local.dao.RemoteKeysDao
+import org.ireader.data.local.dao.UpdatesDao
+import org.ireader.data.local.dao.ChapterDao
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
 @Module
-object RoomDatabaseModule {
+object DatabaseInject {
     @Provides
     @Singleton
     fun provideBookDatabase(
@@ -43,12 +49,11 @@ object RoomDatabaseModule {
             return db.libraryBookDao
         }
 
+        @Provides
+        fun provideChapterDao(db: AppDatabase): ChapterDao = db.chapterDao
 
         @Provides
-        fun provideChapterDao(db: AppDatabase): chapterDao =  db.chapterDao
-
-        @Provides
-        fun provideRemoteKeyDao(db: AppDatabase): RemoteKeysDao  =  db.remoteKeysDao
+        fun provideRemoteKeyDao(db: AppDatabase): RemoteKeysDao = db.remoteKeysDao
 
         @Provides
         fun provideHistoryDao(db: AppDatabase): HistoryDao = db.historyDao
@@ -63,6 +68,5 @@ object RoomDatabaseModule {
 
         @Provides
         fun provideCatalogDao(db: AppDatabase): CatalogDao = db.catalogDao
-
     }
 }

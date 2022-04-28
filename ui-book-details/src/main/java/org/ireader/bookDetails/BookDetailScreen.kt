@@ -1,13 +1,22 @@
 package org.ireader.bookDetails
 
-
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.ScaffoldState
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.runtime.Composable
@@ -21,15 +30,14 @@ import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.ireader.bookDetails.components.BookDetailScreenBottomBar
-import org.ireader.core_ui.ui_components.CardTile
-import org.ireader.core_ui.ui_components.DotsFlashing
 import org.ireader.bookDetails.viewmodel.ChapterState
 import org.ireader.bookDetails.viewmodel.DetailState
 import org.ireader.common_models.entities.Book
-import org.ireader.core_ui.theme.TransparentStatusBar
 import org.ireader.components.components.ISnackBarHost
 import org.ireader.components.components.showLoading
-
+import org.ireader.core_ui.theme.TransparentStatusBar
+import org.ireader.core_ui.ui_components.CardTile
+import org.ireader.core_ui.ui_components.DotsFlashing
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @Composable
@@ -47,8 +55,8 @@ fun BookDetailScreen(
     onWebView: () -> Unit,
     onChapterContent: () -> Unit,
     book: Book,
-    onTitle:(String) -> Unit,
-    scaffoldState:ScaffoldState,
+    onTitle: (String) -> Unit,
+    scaffoldState: ScaffoldState,
 ) {
     val swipeRefreshState =
         rememberSwipeRefreshState(isRefreshing = detailState.detailIsLoading)
@@ -86,7 +94,8 @@ fun BookDetailScreen(
                         isInLibraryInProgress = detailState.inLibraryLoading
                     )
                 }
-            }) { padding ->
+            }
+        ) { padding ->
 
             SwipeRefresh(
                 state = swipeRefreshState,
@@ -116,7 +125,7 @@ fun BookDetailScreen(
                             onWebView()
                         },
                         onTitle = onTitle,
-                        onSummaryExpand =  onSummaryExpand,
+                        onSummaryExpand = onSummaryExpand,
                         onRefresh = onRefresh,
                         isSummaryExpanded = detailState.expandedSummary,
                         book = book,
@@ -145,19 +154,11 @@ fun BookDetailScreen(
                                     tint = MaterialTheme.colors.onBackground,
                                 )
                             }
-                        })
+                        }
+                    )
                     Spacer(modifier = Modifier.height(60.dp))
-
-
                 }
             }
-
         }
     }
 }
-
-
-
-
-
-

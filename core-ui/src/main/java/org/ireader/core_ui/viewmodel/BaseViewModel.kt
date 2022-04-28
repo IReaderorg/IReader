@@ -3,14 +3,28 @@ package org.ireader.core_ui.viewmodel
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import org.ireader.common_extensions.UiEvent
 import org.ireader.common_extensions.UiText
 import org.ireader.core_api.prefs.Preference
 import org.ireader.core_ui.R
 import org.ireader.core_ui.ui.PreferenceMutableState
-
 
 abstract class BaseViewModel : androidx.lifecycle.ViewModel() {
 
@@ -19,7 +33,7 @@ abstract class BaseViewModel : androidx.lifecycle.ViewModel() {
 
     private val activeScope = MutableStateFlow<CoroutineScope?>(null)
 
-    protected val _eventFlow = MutableSharedFlow<org.ireader.common_extensions.UiEvent>()
+    protected val _eventFlow = MutableSharedFlow<UiEvent>()
     open val eventFlow = _eventFlow.asSharedFlow()
 
     fun showSnackBar(message: org.ireader.common_extensions.UiText?) {
@@ -93,7 +107,6 @@ abstract class BaseViewModel : androidx.lifecycle.ViewModel() {
         currScope?.cancel()
         activeScope.value = null
     }
-
 }
 suspend fun MutableSharedFlow<UiEvent>.showSnackBar(message: UiText?) {
     this.emit(

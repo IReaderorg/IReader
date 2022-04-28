@@ -36,13 +36,14 @@ fun LanguageChip(choice: LanguageChoice, isSelected: Boolean, onClick: () -> Uni
             is LanguageChoice.One -> choice.language.code
             is LanguageChoice.Others -> "Others"
         }
-        MidSizeTextComposable(text = text.uppercase(),
+        MidSizeTextComposable(
+            text = text.uppercase(),
             modifier = Modifier.wrapContentSize(Alignment.Center),
             color = if (isSelected) {
                 MaterialTheme.colors.onBackground
             } else {
                 MaterialTheme.colors.onBackground.copy(.5f)
-            })
-
+            }
+        )
     }
 }

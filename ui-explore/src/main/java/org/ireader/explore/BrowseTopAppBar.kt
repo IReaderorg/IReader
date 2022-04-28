@@ -1,5 +1,6 @@
 package org.ireader.explore
 
+
 import androidx.compose.foundation.background
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
@@ -9,7 +10,11 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import org.ireader.common_models.DisplayMode
 import org.ireader.common_models.LayoutType
@@ -19,10 +24,10 @@ import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.AppTextField
 import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.components.reusable_composable.TopAppBarBackButton
+import org.ireader.components.text_related.RadioButton
 import org.ireader.core_api.source.CatalogSource
 import org.ireader.core_api.source.HttpSource
 import org.ireader.core_api.source.model.Filter
-import org.ireader.core_ui.ui_components.RadioButton
 import org.ireader.explore.viewmodel.ExploreState
 
 @Composable
@@ -67,7 +72,7 @@ fun BrowseTopAppBar(
                     },
                 )
             } else if (source.getFilters()
-                    .find { it is Filter.Title } != null
+                .find { it is Filter.Title } != null
             ) {
                 AppIconButton(
                     imageVector = Icons.Default.Search,
@@ -77,7 +82,7 @@ fun BrowseTopAppBar(
                     },
                 )
             }
-            if(source is HttpSource) {
+            if (source is HttpSource) {
                 AppIconButton(
                     imageVector = Icons.Default.Public,
                     title = "WebView",
@@ -121,8 +126,6 @@ fun BrowseTopAppBar(
             TopAppBarBackButton {
                 onPop()
             }
-
         },
     )
 }
-

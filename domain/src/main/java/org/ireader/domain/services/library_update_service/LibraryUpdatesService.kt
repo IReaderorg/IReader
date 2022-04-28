@@ -17,7 +17,6 @@ import org.ireader.common_models.entities.Update
 import org.ireader.core.R
 import org.ireader.core_api.log.Log
 import org.ireader.core_catalogs.interactor.GetLocalCatalog
-
 import org.ireader.domain.notification.Notifications
 import org.ireader.domain.services.downloaderService.DefaultNotificationHelper
 import org.ireader.domain.use_cases.local.DeleteUseCase
@@ -54,8 +53,10 @@ class LibraryUpdatesService @AssistedInject constructor(
         val cancelIntent = WorkManager.getInstance(applicationContext)
             .createCancelPendingIntent(id)
         val builder =
-            NotificationCompat.Builder(applicationContext,
-                Notifications.CHANNEL_LIBRARY_PROGRESS).apply {
+            NotificationCompat.Builder(
+                applicationContext,
+                Notifications.CHANNEL_LIBRARY_PROGRESS
+            ).apply {
                 setContentTitle("Checking Updates")
                 setSmallIcon(R.drawable.ic_update)
                 setOnlyAlertOnce(true)
@@ -63,7 +64,6 @@ class LibraryUpdatesService @AssistedInject constructor(
                 setAutoCancel(true)
                 setOngoing(true)
                 addAction(R.drawable.baseline_close_24, "Cancel", cancelIntent)
-
             }
 
         NotificationManagerCompat.from(applicationContext).apply {
@@ -83,7 +83,8 @@ class LibraryUpdatesService @AssistedInject constructor(
                             builder.setProgress(libraryBooks.size, index, false)
                             notify(Notifications.ID_LIBRARY_PROGRESS, builder.build())
                             remoteChapters.addAll(it)
-                        }, onError = {})
+                        }, onError = {}
+                    )
 
                     val newChapters =
                         remoteChapters.filter { chapter -> chapter.link !in chapters.map { it.link } }
@@ -93,30 +94,39 @@ class LibraryUpdatesService @AssistedInject constructor(
                     }
                     withContext(Dispatchers.IO) {
 
-                        val chapterIds = insertUseCases.insertChapters(newChapters.map {
-                            it.copy(
-                                bookId = book.id,
-                                dateFetch = Clock.System.now().toEpochMilliseconds(),
+                        val chapterIds = insertUseCases.insertChapters(
+                            newChapters.map {
+                                it.copy(
+                                    bookId = book.id,
+                                    dateFetch = Clock.System.now().toEpochMilliseconds(),
+                                )
+                            }
+                        )
+                        insertUseCases.insertBook(
+                            book.copy(
+                                lastUpdated = Clock.System.now()
+                                    .toEpochMilliseconds()
                             )
-                        })
-                        insertUseCases.insertBook(book.copy(lastUpdated = Clock.System.now()
-                            .toEpochMilliseconds()))
-                        updatesUseCase(newChapters.mapIndexed { index, chapter ->
-                            Update(
-                                chapterId = chapterIds[index],
-                                bookId = chapter.bookId,
-                                date = Clock.System.now().toEpochMilliseconds()
-                            )
-                        })
+                        )
+                        updatesUseCase(
+                            newChapters.mapIndexed { index, chapter ->
+                                Update(
+                                    chapterId = chapterIds[index],
+                                    bookId = chapter.bookId,
+                                    date = Clock.System.now().toEpochMilliseconds()
+                                )
+                            }
+                        )
                     }
                 }
-
             } catch (e: Throwable) {
                 Log.error { "getNotifications: Failed to Check for Book Update" }
                 notify(
                     Notifications.ID_LIBRARY_ERROR,
-                    NotificationCompat.Builder(applicationContext,
-                        Notifications.CHANNEL_LIBRARY_ERROR).apply {
+                    NotificationCompat.Builder(
+                        applicationContext,
+                        Notifications.CHANNEL_LIBRARY_ERROR
+                    ).apply {
                         if (e.localizedMessage == "Job was cancelled") {
                             setSubText("Library Updates was cancelled")
                             setContentTitle("Library Updates was canceled.")
@@ -132,7 +142,6 @@ class LibraryUpdatesService @AssistedInject constructor(
                 builder.setProgress(0, 0, false)
                 cancel(Notifications.ID_LIBRARY_PROGRESS)
                 withContext(Dispatchers.IO) {
-
                 }
                 return Result.failure()
             }
@@ -140,23 +149,22 @@ class LibraryUpdatesService @AssistedInject constructor(
             builder.setProgress(0, 0, false)
             cancel(Notifications.ID_LIBRARY_PROGRESS)
             withContext(Dispatchers.IO) {
-
             }
             notify(
                 Notifications.ID_LIBRARY_PROGRESS,
-                NotificationCompat.Builder(applicationContext,
-                    Notifications.CHANNEL_LIBRARY_PROGRESS).apply {
+                NotificationCompat.Builder(
+                    applicationContext,
+                    Notifications.CHANNEL_LIBRARY_PROGRESS
+                ).apply {
                     setContentTitle("$updatedBookSize book was updated.")
                     setSmallIcon(R.drawable.ic_update)
                     priority = NotificationCompat.PRIORITY_DEFAULT
                     setSubText("It was Updated Successfully")
                     setAutoCancel(true)
-
                 }.build()
             )
         }
 
         return Result.success()
     }
-
 }

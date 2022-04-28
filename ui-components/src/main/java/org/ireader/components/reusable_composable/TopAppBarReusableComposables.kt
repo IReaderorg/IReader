@@ -7,7 +7,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.*
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Text
+import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
@@ -106,7 +111,7 @@ fun SuperSmallTextComposable(
     maxLine: Int = Int.MAX_VALUE,
     align: TextAlign? = null,
 
-    ) {
+) {
     Text(
         modifier = modifier,
         text = text,
@@ -259,7 +264,5 @@ fun AppTextField(
                 textStyle = TextStyle(color = MaterialTheme.colors.onBackground),
             )
         }
-
-
     }
 }

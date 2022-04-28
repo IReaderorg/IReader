@@ -4,7 +4,13 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -21,7 +27,6 @@ import androidx.compose.ui.unit.dp
 import org.ireader.common_models.entities.BaseBook
 import org.ireader.components.components.BookImageComposable
 import org.ireader.image_loader.BookCover
-
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -42,16 +47,18 @@ fun BookImage(
                 onClick = { onClick(book) },
                 onLongClick = { onLongClick(book) }
             )
-            .border(3.dp,
+            .border(
+                3.dp,
                 if (selected) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground.copy(
-                    alpha = .1f)),
+                    alpha = .1f
+                )
+            ),
     ) {
         BookImageComposable(
             modifier = Modifier
                 .aspectRatio(ratio)
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(4.dp))
-
                 .align(Alignment.Center),
             image = BookCover.from(book),
         )
@@ -62,7 +69,7 @@ fun BookImage(
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(Color.Transparent, Color.Black),
-                        startY = 3f,  // 1/3
+                        startY = 3f, // 1/3
                         endY = 80F
                     )
                 )
@@ -84,5 +91,4 @@ fun BookImage(
         }
         badge()
     }
-
 }

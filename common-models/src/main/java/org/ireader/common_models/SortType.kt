@@ -1,3 +1,5 @@
+
+
 package org.ireader.common_models
 
 sealed class SortType(val name: String, val index: Int) {

@@ -1,9 +1,24 @@
+
 package org.ireader.presentation
 
-import androidx.compose.animation.*
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.BottomNavigation
+import androidx.compose.material.BottomNavigationItem
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -27,30 +42,34 @@ fun ScreenContent() {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
     val scaffoldState = rememberScaffoldState()
-    val modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val screenSpec = ScreenSpec.allScreens[currentDestination?.route]
 
-
     val hideBottomBar = navBackStackEntry?.arguments?.getBoolean(ARG_HIDE_BOTTOM_BAR)
-    Box(Modifier
-        .fillMaxSize()
-        .navigationBarsPadding()) {
+    Box(
+        Modifier
+            .fillMaxSize()
+            .navigationBarsPadding()
+    ) {
 
-        Box(modifier = Modifier
-            .fillMaxWidth()
-            .align(Alignment.TopCenter)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.TopCenter)
         ) {
 
             if (navBackStackEntry != null) {
-                screenSpec?.TopBar(navController,
+                screenSpec?.TopBar(
+                    navController,
                     navBackStackEntry!!,
-                    scaffoldState = scaffoldState)
+                    scaffoldState = scaffoldState
+                )
             }
-
         }
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .padding(bottom = if (hideBottomBar == null || hideBottomBar == true) 45.dp else 0.dp)) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = if (hideBottomBar == null || hideBottomBar == true) 45.dp else 0.dp)
+        ) {
             AnimatedNavHost(
                 navController = navController,
                 startDestination = BottomNavScreenSpec.screens[0].navHostRoute,
@@ -114,4 +133,3 @@ fun ScreenContent() {
         }
     }
 }
-

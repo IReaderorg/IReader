@@ -10,9 +10,7 @@ class FontHeightUseCase @Inject constructor(
         appPreferences.lineHeight().set(fontHeight)
     }
 
-    fun read(): Int {
+    suspend  fun read(): Int {
         return appPreferences.lineHeight().get()
     }
-
-
 }

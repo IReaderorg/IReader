@@ -1,7 +1,8 @@
+
+
 package org.ireader.common_models.update_service_models
 
 import kotlinx.serialization.Serializable
-
 
 @Serializable
 data class Release(

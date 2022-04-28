@@ -6,9 +6,7 @@ plugins {
 }
 
 android {
-
 }
 
 dependencies {
-
 }

@@ -1,7 +1,7 @@
 package org.ireader.domain.use_cases.local.insert_usecases
 
-import org.ireader.common_models.entities.Chapter
 import org.ireader.common_extensions.withIOContext
+import org.ireader.common_models.entities.Chapter
 import javax.inject.Inject
 
 class InsertChapter @Inject constructor(private val localChapterRepository: org.ireader.common_data.repository.LocalChapterRepository) {
@@ -11,4 +11,3 @@ class InsertChapter @Inject constructor(private val localChapterRepository: org.
         }
     }
 }
-

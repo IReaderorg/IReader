@@ -1,7 +1,9 @@
 package org.ireader.common_extensions
 
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 fun convertLongToTime(time: Long): String {
     val date = Date(time)
@@ -23,4 +25,3 @@ fun convertDateToLong(date: String): Long? {
     val df = SimpleDateFormat("yyyy.MM.dd HH:mm", Locale.US)
     return df.parse(date)?.time
 }
-

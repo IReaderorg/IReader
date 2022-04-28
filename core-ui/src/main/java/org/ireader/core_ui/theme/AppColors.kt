@@ -3,7 +3,16 @@ package org.ireader.core_ui.theme
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Shapes
 import androidx.compose.material.Typography
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.runtime.structuralEqualityPolicy
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.material.Colors as MaterialColors
@@ -43,7 +52,6 @@ class AppColors(
             @ReadOnlyComposable
             get() = LocalAppColors.current
     }
-
 }
 
 /**
@@ -65,7 +73,7 @@ fun AppColors(
         colors = materialColors,
         typography = typography,
         shapes = shape,
-        ) {
+    ) {
         CompositionLocalProvider(
             LocalAppColors provides rememberedAppColors,
             content = content
@@ -99,5 +107,4 @@ class ExtraColors(
         onBars = other.onBars
         isBarLight = other.isBarLight
     }
-
 }

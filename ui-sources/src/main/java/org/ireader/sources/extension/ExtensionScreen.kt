@@ -1,13 +1,28 @@
 package org.ireader.sources.extension
 
-
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.*
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Tab
+import androidx.compose.material.TabRow
+import androidx.compose.material.TabRowDefaults
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.TravelExplore
+import androidx.compose.material.rememberScaffoldState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -30,7 +45,6 @@ import org.ireader.core_ui.theme.AppColors
 import org.ireader.sources.extension.composables.RemoteSourcesScreen
 import org.ireader.sources.extension.composables.UserSourcesScreen
 
-
 @ExperimentalMaterialApi
 @OptIn(ExperimentalPagerApi::class)
 @Composable
@@ -43,13 +57,12 @@ fun ExtensionScreen(
     onClickInstall: (Catalog) -> Unit,
     onClickUninstall: (Catalog) -> Unit,
     onClickTogglePinned: (CatalogLocal) -> Unit,
-    onSearchNavigate:()-> Unit
+    onSearchNavigate: () -> Unit
 ) {
     val pagerState = rememberPagerState()
     val scope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
     val context = LocalContext.current
-
 
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
@@ -66,7 +79,6 @@ fun ExtensionScreen(
     LaunchedEffect(key1 = true) {
         viewModel.clearExploreMode()
     }
-
 
     val pages = listOf<String>(
         "Sources",
@@ -152,13 +164,14 @@ fun ExtensionScreen(
                 },
                 navigationIcon = if (searchMode) {
                     {
-                        AppIconButton(imageVector = Icons.Default.ArrowBack,
+                        AppIconButton(
+                            imageVector = Icons.Default.ArrowBack,
                             title = "Disable Search",
                             onClick = {
                                 searchMode = false
                                 viewModel.searchQuery = ""
-                            })
-
+                            }
+                        )
                     }
                 } else null
             )
@@ -178,7 +191,7 @@ fun ExtensionScreen(
                         Modifier.pagerTabIndicatorOffset(pagerState, tabPositions)
                     )
                 },
-                ) {
+            ) {
                 pages.forEachIndexed { index, title ->
                     Tab(
                         text = {
@@ -190,7 +203,7 @@ fun ExtensionScreen(
                              * TODO need to wait for this issue to be close before using this line
                              * https://issuetracker.google.com/issues/229752147
                              */
-                            //scope.launch { pagerState.animateScrollToPage(index) }
+                            // scope.launch { pagerState.animateScrollToPage(index) }
                         },
                         selectedContentColor = MaterialTheme.colors.primary,
                         unselectedContentColor = MaterialTheme.colors.onBackground,
@@ -224,5 +237,3 @@ fun ExtensionScreen(
         }
     }
 }
-
-

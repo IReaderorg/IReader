@@ -6,7 +6,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.FlipToBack
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.SelectAll
+import androidx.compose.material.icons.filled.Sort
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -15,7 +20,6 @@ import org.ireader.components.components.CenterTopAppBar
 import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.BigSizeTextComposable
-
 
 @Composable
 fun ChapterDetailTopAppBar(
@@ -46,9 +50,7 @@ fun ChapterDetailTopAppBar(
             }
         }
     }
-
 }
-
 
 @Composable
 fun RegularChapterDetailTopAppBar(
@@ -64,13 +66,13 @@ fun RegularChapterDetailTopAppBar(
             BigSizeTextComposable(text = "Content")
         },
         actions = {
-                AppIconButton(imageVector = Icons.Filled.Place, title = "", onClick = onMap)
-                IconButton(onClick = onReverseClick) {
-                    Icon(
-                        imageVector = Icons.Default.Sort,
-                        contentDescription = "Sort Icon"
-                    )
-                }
+            AppIconButton(imageVector = Icons.Filled.Place, title = "", onClick = onMap)
+            IconButton(onClick = onReverseClick) {
+                Icon(
+                    imageVector = Icons.Default.Sort,
+                    contentDescription = "Sort Icon"
+                )
+            }
         },
         navigationIcon = {
             IconButton(onClick = onPopBackStack) {
@@ -79,7 +81,6 @@ fun RegularChapterDetailTopAppBar(
                     contentDescription = "Back Icon"
                 )
             }
-
         },
         elevation = 0.dp
     )

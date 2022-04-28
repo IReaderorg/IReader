@@ -9,8 +9,6 @@ plugins {
 android {
     compileSdk = ProjectConfig.compileSdk
 
-
-
     defaultConfig {
         javaCompileOptions {
             annotationProcessorOptions {
@@ -27,21 +25,22 @@ android {
         getByName("androidTest").assets.srcDir("$projectDir/schemas")
     }
     packagingOptions {
-        resources.excludes.addAll(listOf(
-            "LICENSE.txt",
-            "META-INF/LICENSE",
-            "META-INF/LICENSE.txt",
-            "META-INF/README.md",
-            "META-INF/AL2.0",
-            "META-INF/LGPL2.1",
-            "**/attach_hotspot_windows.dll",
-            "META-INF/licenses/ASM",
-            "META-INF/*",
-            "META-INF/gradle/incremental.annotation.processors"
-        ))
+        resources.excludes.addAll(
+            listOf(
+                "LICENSE.txt",
+                "META-INF/LICENSE",
+                "META-INF/LICENSE.txt",
+                "META-INF/README.md",
+                "META-INF/AL2.0",
+                "META-INF/LGPL2.1",
+                "**/attach_hotspot_windows.dll",
+                "META-INF/licenses/ASM",
+                "META-INF/*",
+                "META-INF/gradle/incremental.annotation.processors"
+            )
+        )
     }
 }
-
 
 dependencies {
 
@@ -81,14 +80,16 @@ dependencies {
     implementation(libs.room.ktx)
     kapt(libs.room.compiler)
 
-
     implementation(libs.okhttp.interceptor)
 
     /** Coroutine **/
     implementation(kotlinx.coroutines.core)
     implementation(kotlinx.coroutines.android)
 
-
     testImplementation(test.bundles.common)
+    testImplementation(libs.hilt.androidtest)
+    testImplementation(libs.room.testing)
+    androidTestImplementation(libs.hilt.androidtest)
+    androidTestImplementation(libs.room.testing)
     androidTestImplementation(test.bundles.common)
 }

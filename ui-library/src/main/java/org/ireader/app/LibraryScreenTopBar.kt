@@ -7,7 +7,13 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.FlipToBack
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.SelectAll
+import androidx.compose.material.icons.filled.Sort
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -22,13 +28,12 @@ import org.ireader.components.reusable_composable.AppTextField
 import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.core_ui.ui.DEFAULT_ELEVATION
 
-
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun LibraryScreenTopBar(
     state: LibraryState,
     bottomSheetState: ModalBottomSheetState,
-    onSearch:() -> Unit,
+    onSearch: () -> Unit,
     refreshUpdate: () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxWidth()) {
@@ -61,7 +66,6 @@ fun LibraryScreenTopBar(
             }
         }
     }
-
 }
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
@@ -69,7 +73,7 @@ fun LibraryScreenTopBar(
 private fun RegularTopBar(
     vm: LibraryState,
     bottomSheetState: ModalBottomSheetState,
-    onSearch:() -> Unit,
+    onSearch: () -> Unit,
     refreshUpdate: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -134,16 +138,16 @@ private fun RegularTopBar(
                     },
                 )
             }
-
         },
         navigationIcon = if (vm.inSearchMode) {
             {
-                AppIconButton(imageVector = Icons.Default.ArrowBack,
+                AppIconButton(
+                    imageVector = Icons.Default.ArrowBack,
                     title = "Toggle search mode off",
                     onClick = {
                         vm.inSearchMode = false
-                    })
-
+                    }
+                )
             }
         } else null
 

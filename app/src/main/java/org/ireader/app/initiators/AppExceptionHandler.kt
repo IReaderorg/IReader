@@ -54,9 +54,8 @@ class AppExceptionHandler(
             })
     }
 
-
     override fun uncaughtException(t: Thread, e: Throwable) {
-        Log.error(e,"an error was caught by exception handler")
+        Log.error(e, "an error was caught by exception handler")
         crashlyticsHandler.uncaughtException(t, e)
         lastStartedActivity?.let { activity ->
             val isRestarted = activity.intent
@@ -73,8 +72,10 @@ class AppExceptionHandler(
                     val intent = activity.intent
                         .putExtra(RESTARTED, true)
                         .putExtra(LAST_EXCEPTION, e)
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or
-                                Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                        .addFlags(
+                            Intent.FLAG_ACTIVITY_NEW_TASK or
+                                Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        )
 
                     with(activity) {
                         finish()
@@ -102,8 +103,8 @@ class AppExceptionHandler(
         if (lastException == null) return false
 
         return originalException.javaClass == lastException.javaClass &&
-                originalException.stackTrace[0] == originalException.stackTrace[0] &&
-                originalException.message == lastException.message
+            originalException.stackTrace[0] == originalException.stackTrace[0] &&
+            originalException.message == lastException.message
     }
 
     private fun killThisProcess(action: () -> Unit = {}) {

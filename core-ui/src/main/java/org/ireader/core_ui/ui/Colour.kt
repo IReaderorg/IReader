@@ -1,10 +1,8 @@
 package org.ireader.core_ui.ui
 
-
 import androidx.compose.material.Colors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-
 
 object Colour {
     val blue_200 = Color(0xFF90CAF9)
@@ -14,11 +12,9 @@ object Colour {
 
     val blue_accent = Color(0xFF2979FF)
 
-
     val light_blue_a_200 = Color(0xFF40c4ff)
 
     val light_blue_a_400 = Color(0xFF00b0ff)
-
 
     val red_200 = Color(0xFFcf6679)
 
@@ -50,5 +46,4 @@ object Colour {
     val Colors.scrollingThumbColor
         @Composable
         get() = if (isLight) blue_accent else blue_accent
-
 }

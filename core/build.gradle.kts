@@ -24,13 +24,10 @@ dependencies {
     implementation(libs.okhttp.doh)
     implementation(libs.okio)
 
-
     implementation(libs.hilt.android)
-
 
     implementation(libs.jsoup)
     implementation(androidx.dataStore)
-
 
     implementation(kotlinx.stdlib)
 
@@ -39,8 +36,6 @@ dependencies {
     implementation(libs.ktor.contentNegotiation)
     implementation(libs.ktor.okhttp)
 
-
     testImplementation(test.bundles.common)
     androidTestImplementation(test.bundles.common)
-
 }

@@ -1,5 +1,4 @@
-package org.ireader.presentation.ui
-
+package org.ireader.presentation.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.Colors
@@ -12,12 +11,20 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.takeOrElse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
-import org.ireader.core_ui.theme.*
+import org.ireader.core_ui.theme.AppRippleTheme
+import org.ireader.core_ui.theme.ExtraColors
+import org.ireader.core_ui.theme.Theme
+import org.ireader.core_ui.theme.ThemeMode
+import org.ireader.core_ui.theme.UiPreferences
+import org.ireader.core_ui.theme.asState
+import org.ireader.core_ui.theme.getDarkColors
+import org.ireader.core_ui.theme.getLightColors
+import org.ireader.core_ui.theme.themes
 import org.ireader.core_ui.viewmodel.BaseViewModel
-import org.ireader.image_loader.coil.CoilLoaderFactory
 import javax.inject.Inject
 
 @HiltViewModel
@@ -30,9 +37,8 @@ class AppThemeViewModel @Inject constructor(
     private val darkTheme by uiPreferences.darkTheme().asState()
 
     private val baseThemeJob = SupervisorJob()
-    private val baseThemeScope = CoroutineScope(baseThemeJob)
+    private val baseThemeScope = CoroutineScope(baseThemeJob + Dispatchers.Main.immediate)
     val coilLoader = coilLoaderFactory.newImageLoader()
-
 
     @Composable
     fun getRippleTheme(): RippleTheme {
@@ -110,5 +116,4 @@ class AppThemeViewModel @Inject constructor(
     override fun onDestroy() {
         baseThemeScope.cancel()
     }
-
 }

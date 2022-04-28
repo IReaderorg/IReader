@@ -23,7 +23,6 @@ object ExtensionScreenSpec : BottomNavScreenSpec {
         NavigationArgs.showBottomNav
     )
 
-
     @OptIn(androidx.compose.material.ExperimentalMaterialApi::class)
     @Composable
     override fun Content(
@@ -36,9 +35,11 @@ object ExtensionScreenSpec : BottomNavScreenSpec {
             navController = navController,
             viewModel = viewModel,
             onClickCatalog = {
-                navController.navigate(ExploreScreenSpec.buildRoute(
-                    sourceId = it.sourceId,
-                ))
+                navController.navigate(
+                    ExploreScreenSpec.buildRoute(
+                        sourceId = it.sourceId,
+                    )
+                )
             },
             onRefreshCatalogs = { viewModel.refreshCatalogs() },
             onClickInstall = { viewModel.installCatalog(it) },
@@ -51,6 +52,4 @@ object ExtensionScreenSpec : BottomNavScreenSpec {
             }
         )
     }
-
-
 }

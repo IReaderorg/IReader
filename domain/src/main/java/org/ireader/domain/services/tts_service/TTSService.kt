@@ -1,36 +1,36 @@
-//package org.ireader.domain.services.tts_service
+// package org.ireader.domain.services.tts_service
 //
-//import android.content.Context
-//import android.speech.tts.TextToSpeech
-//import android.speech.tts.UtteranceProgressListener
-//import android.support.v4.media.session.MediaSessionCompat
-//import androidx.core.app.NotificationManagerCompat
-//import androidx.hilt.work.HiltWorker
-//import androidx.work.CoroutineWorker
-//import androidx.work.WorkerParameters
-//import dagger.assisted.Assisted
-//import dagger.assisted.AssistedInject
-//import kotlinx.coroutines.CoroutineScope
-//import kotlinx.coroutines.Dispatchers
-//import kotlinx.coroutines.Job
-//import kotlinx.coroutines.launch
-//import kotlinx.datetime.Clock
-//import org.ireader.core_api.log.Log
-//import org.ireader.core_api.source.Source
+// import android.content.Context
+// import android.speech.tts.TextToSpeech
+// import android.speech.tts.UtteranceProgressListener
+// import android.support.v4.media.session.MediaSessionCompat
+// import androidx.core.app.NotificationManagerCompat
+// import androidx.hilt.work.HiltWorker
+// import androidx.work.CoroutineWorker
+// import androidx.work.WorkerParameters
+// import dagger.assisted.Assisted
+// import dagger.assisted.AssistedInject
+// import kotlinx.coroutines.CoroutineScope
+// import kotlinx.coroutines.Dispatchers
+// import kotlinx.coroutines.Job
+// import kotlinx.coroutines.launch
+// import kotlinx.datetime.Clock
+// import org.ireader.core_api.log.Log
+// import org.ireader.core_api.source.Source
 //
-//import org.ireader.infinity.Book
-//import org.ireader.infinity.Chapter
-//import org.ireader.domain.notification.Notifications
-//import org.ireader.domain.repository.LocalBookRepository
-//import org.ireader.domain.repository.LocalChapterRepository
-//import org.ireader.domain.services.downloaderService.DefaultNotificationHelper
-//import org.ireader.domain.use_cases.local.LocalInsertUseCases
-//import org.ireader.domain.use_cases.remote.RemoteUseCases
-//import org.ireader.presentation.feature_ttl.TTSState
-//import org.ireader.presentation.feature_ttl.TTSStateImpl
+// import org.ireader.infinity.Book
+// import org.ireader.infinity.Chapter
+// import org.ireader.domain.notification.Notifications
+// import org.ireader.domain.repository.LocalBookRepository
+// import org.ireader.domain.repository.LocalChapterRepository
+// import org.ireader.domain.services.downloaderService.DefaultNotificationHelper
+// import org.ireader.domain.use_cases.local.LocalInsertUseCases
+// import org.ireader.domain.use_cases.remote.RemoteUseCases
+// import org.ireader.presentation.feature_ttl.TTSState
+// import org.ireader.presentation.feature_ttl.TTSStateImpl
 //
-//@HiltWorker
-//class TTSService @AssistedInject constructor(
+// @HiltWorker
+// class TTSService @AssistedInject constructor(
 //    @Assisted private val context: Context,
 //    @Assisted params: WorkerParameters,
 //    private val bookRepo: LocalBookRepository,
@@ -40,7 +40,7 @@
 //    private val notificationHelper: DefaultNotificationHelper,
 //    private val state: TTSStateImpl,
 //    private val insertUseCases: LocalInsertUseCases,
-//) : CoroutineWorker(context, params) {
+// ) : CoroutineWorker(context, params) {
 //    companion object {
 //        const val TTS_SERVICE_NAME = "TTS_SERVICE"
 //        const val TTS_Chapter_ID = "chapterId"
@@ -546,4 +546,4 @@
 //    }
 //
 //
-//}
+// }

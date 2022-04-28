@@ -10,7 +10,7 @@ class BrightnessStateUseCase @Inject constructor(
         return appPreferences.brightness().set(brightness)
     }
 
-    fun readBrightness(): Float {
+    suspend fun readBrightness(): Float {
         return appPreferences.brightness().get()
     }
 
@@ -18,10 +18,9 @@ class BrightnessStateUseCase @Inject constructor(
         return appPreferences.autoBrightness().set(brightness)
     }
 
-    fun readAutoBrightness(): Boolean {
+    suspend fun readAutoBrightness(): Boolean {
         return appPreferences.autoBrightness().get()
     }
-
 }
 
 class ScrollModeUseCase @Inject constructor(
@@ -31,10 +30,9 @@ class ScrollModeUseCase @Inject constructor(
         return appPreferences.scrollMode().set(mode)
     }
 
-    fun read(): Boolean {
+    suspend fun read(): Boolean {
         return appPreferences.scrollMode().get()
     }
-
 }
 
 class ImmersiveModeUseCase @Inject constructor(
@@ -44,10 +42,9 @@ class ImmersiveModeUseCase @Inject constructor(
         return appPreferences.immersiveMode().set(mode)
     }
 
-    fun read(): Boolean {
+    suspend  fun read(): Boolean {
         return appPreferences.immersiveMode().get()
     }
-
 }
 
 class ScrollIndicatorUseCase @Inject constructor(
@@ -59,22 +56,19 @@ class ScrollIndicatorUseCase @Inject constructor(
         }
     }
 
-    fun readWidth(): Int {
+    suspend fun readWidth(): Int {
         return appPreferences.scrollIndicatorWith().get()
     }
 
     fun savePadding(value: Int) {
         if (value > 0) {
             return appPreferences.scrollIndicatorPadding().set(value)
-
         }
     }
 
-    fun readPadding(): Int {
+    suspend fun readPadding(): Int {
         return appPreferences.scrollIndicatorPadding().get()
-
     }
-
 }
 
 class AutoScrollMode @Inject constructor(
@@ -84,7 +78,7 @@ class AutoScrollMode @Inject constructor(
         return appPreferences.autoScrollInterval().set(value)
     }
 
-    fun readInterval(): Long {
+    suspend fun readInterval(): Long {
         return appPreferences.autoScrollInterval().get()
     }
 
@@ -92,9 +86,7 @@ class AutoScrollMode @Inject constructor(
         return appPreferences.autoScrollOffset().set(value)
     }
 
-    fun readOffset(): Int {
+    suspend fun readOffset(): Int {
         return appPreferences.autoScrollOffset().get()
     }
-
-
 }

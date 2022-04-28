@@ -3,8 +3,8 @@ package org.ireader.domain.use_cases.local.chapter_usecases
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
-import org.ireader.common_models.entities.Chapter
 import org.ireader.common_data.repository.LocalChapterRepository
+import org.ireader.common_models.entities.Chapter
 import javax.inject.Inject
 
 /**
@@ -27,7 +27,6 @@ class SubscribeLastReadChapter @Inject constructor(private val localChapterRepos
             }
             true
         }
-
     }
 }
 
@@ -44,7 +43,6 @@ class SubscribeFirstChapter @Inject constructor(private val localChapterReposito
         bookId: Long,
     ): Flow<Chapter?> {
         return localChapterRepository.subscribeFirstChapter(bookId)
-
     }
 }
 
@@ -53,10 +51,5 @@ class FindFirstChapter @Inject constructor(private val localChapterRepository: o
         bookId: Long,
     ): Chapter? {
         return localChapterRepository.findFirstChapter(bookId)
-
     }
 }
-
-
-
-

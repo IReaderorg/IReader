@@ -4,11 +4,9 @@ plugins {
     id("kotlin-android")
 }
 android {
-
 }
 
 dependencies {
     implementation(project(Modules.commonModels))
     implementation(kotlinx.coroutines.android)
-
 }

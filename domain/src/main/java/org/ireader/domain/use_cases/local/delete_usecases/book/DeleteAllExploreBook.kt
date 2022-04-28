@@ -1,7 +1,7 @@
 package org.ireader.domain.use_cases.local.delete_usecases.book
 
-import org.ireader.common_models.entities.Book
 import org.ireader.common_data.repository.LocalBookRepository
+import org.ireader.common_models.entities.Book
 import javax.inject.Inject
 
 /**
@@ -24,4 +24,3 @@ class DeleteBookAndChapterByBookIds @Inject constructor(private val localBookRep
         localBookRepository.deleteBookAndChapterByBookIds(bookIds)
     }
 }
-

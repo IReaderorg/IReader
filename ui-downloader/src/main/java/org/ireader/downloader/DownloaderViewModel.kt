@@ -8,15 +8,13 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import org.ireader.common_models.entities.SavedDownload
 import org.ireader.core_ui.viewmodel.BaseViewModel
-import org.ireader.domain.services.downloaderService.DownloadService
 import org.ireader.domain.services.downloaderService.DownloadServiceStateImpl
+import org.ireader.domain.services.downloaderService.DownloaderService
 import org.ireader.domain.use_cases.download.DownloadUseCases
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.services.ServiceUseCases
 import javax.inject.Inject
-
-
 
 @HiltViewModel
 class DownloaderViewModel @Inject constructor(
@@ -29,12 +27,9 @@ class DownloaderViewModel @Inject constructor(
     val downloadServiceStateImpl: DownloadServiceStateImpl
 ) : BaseViewModel(), DownloadState by downloadState {
 
-
-
     init {
         subscribeDownloads()
     }
-
 
     fun insertSavedDownload(download: SavedDownload) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -44,7 +39,6 @@ class DownloaderViewModel @Inject constructor(
         }
     }
 
-
     private var getBooksJob: Job? = null
     private fun subscribeDownloads() {
         getBooksJob?.cancel()
@@ -52,7 +46,6 @@ class DownloaderViewModel @Inject constructor(
             downloadUseCases.subscribeDownloadsUseCase().distinctUntilChanged().collect {
                 downloads = it.filter { it.chapterId != 0L }
             }
-
         }
     }
 
@@ -64,11 +57,9 @@ class DownloaderViewModel @Inject constructor(
 
     fun stopDownloads() {
         serviceUseCases.stopServicesUseCase(
-            DownloadService.DOWNLOADER_SERVICE_NAME
+            DownloaderService.DOWNLOADER_SERVICE_NAME
         )
-
     }
-
 
     fun toggleExpandMenu(enable: Boolean = true) {
         isMenuExpanded = enable
@@ -84,8 +75,4 @@ class DownloaderViewModel @Inject constructor(
             downloadUseCases.deleteSavedDownloads(list)
         }
     }
-
-
 }
-
-

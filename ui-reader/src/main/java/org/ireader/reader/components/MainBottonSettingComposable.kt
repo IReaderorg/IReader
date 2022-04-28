@@ -15,8 +15,8 @@ import androidx.compose.ui.Modifier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.ireader.common_models.entities.Chapter
-import org.ireader.core_api.source.Source
 import org.ireader.components.reusable_composable.AppIconButton
+import org.ireader.core_api.source.Source
 
 @Composable
 fun MainBottomSettingComposable(
@@ -53,18 +53,25 @@ fun MainBottomSettingComposable(
         currentChapter = chapter,
         currentChapterIndex = currentChapterIndex
     )
-    Row(modifier = modifier.fillMaxWidth(),
+    Row(
+        modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalAlignment = Alignment.CenterVertically) {
-        AppIconButton(imageVector = Icons.Default.Menu,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        AppIconButton(
+            imageVector = Icons.Default.Menu,
             title = "Chapter List Drawer",
-            onClick = { scope.launch { scaffoldState.drawerState.open() } })
-        AppIconButton(imageVector = Icons.Default.Headphones,
+            onClick = { scope.launch { scaffoldState.drawerState.open() } }
+        )
+        AppIconButton(
+            imageVector = Icons.Default.Headphones,
             title = "Play Text To Speech",
-            onClick = { onPlay() })
-        AppIconButton(imageVector = Icons.Default.Settings,
+            onClick = { onPlay() }
+        )
+        AppIconButton(
+            imageVector = Icons.Default.Settings,
             title = "Setting Drawer",
-            onClick = { onSetting() })
-
+            onClick = { onSetting() }
+        )
     }
 }

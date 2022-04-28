@@ -6,13 +6,12 @@ import org.ireader.data.local.dao.DownloadDao
 class DownloadRepositoryImpl(private val dao: DownloadDao) :
     org.ireader.common_data.repository.DownloadRepository {
 
-
     override fun subscribeAllDownloads(): Flow<List<org.ireader.common_models.entities.SavedDownloadWithInfo>> {
         return dao.subscribeAllDownloads()
     }
 
     override suspend fun findAllDownloads(): List<org.ireader.common_models.entities.SavedDownload> {
-       return dao.findAllDownloads()
+        return dao.findAllDownloads()
     }
 
     override suspend fun findDownloads(downloadIds: List<Long>): List<org.ireader.common_models.entities.SavedDownload> {
@@ -26,7 +25,6 @@ class DownloadRepositoryImpl(private val dao: DownloadDao) :
     override suspend fun insertDownload(savedDownload: org.ireader.common_models.entities.SavedDownload): Long {
         return dao.insert(savedDownload)
     }
-
 
     override suspend fun insertDownloads(savedDownloads: List<org.ireader.common_models.entities.SavedDownload>): List<Long> {
         return dao.insert(savedDownloads)
@@ -47,5 +45,4 @@ class DownloadRepositoryImpl(private val dao: DownloadDao) :
     override suspend fun deleteAllSavedDownload() {
         dao.deleteAllSavedDownload()
     }
-
 }

@@ -1,14 +1,14 @@
-//package org.ireader.domain.repository
+// package org.ireader.domain.repository
 //
-//import android.content.SharedPreferences
-//import com.fredporciuncula.flow.preferences.FlowSharedPreferences
-//import kotlinx.coroutines.ExperimentalCoroutinesApi
-//import javax.inject.Inject
+// import android.content.SharedPreferences
+// import com.fredporciuncula.flow.preferences.FlowSharedPreferences
+// import kotlinx.coroutines.ExperimentalCoroutinesApi
+// import javax.inject.Inject
 //
-//@OptIn(ExperimentalCoroutinesApi::class)
-//class PreferencesHelper @Inject constructor(
+// @OptIn(ExperimentalCoroutinesApi::class)
+// class PreferencesHelper @Inject constructor(
 //    prefs: SharedPreferences,
-//) {
+// ) {
 //    companion object PreferenceKeys {
 //        const val SAVED_FONT_SIZE_PREFERENCES = "reader_font_size"
 //        const val SAVED_FONT_PREFERENCES = "reader_font_family"
@@ -60,4 +60,4 @@
 //    /**
 //     * save the index of font according to position of font in fonts list.
 //     */
-//}
+// }

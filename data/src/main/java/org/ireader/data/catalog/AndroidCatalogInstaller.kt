@@ -1,18 +1,10 @@
-/*
- * Copyright (C) 2018 The Tachiyomi Open Source Project
- *
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- */
-
 package org.ireader.data.catalog
 
 import android.app.Application
-import io.ktor.client.call.*
-import io.ktor.client.request.*
-import io.ktor.http.*
-import io.ktor.utils.io.*
+import io.ktor.client.call.body
+import io.ktor.client.request.get
+import io.ktor.http.HttpHeaders
+import io.ktor.utils.io.ByteReadChannel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.ireader.core_api.http.HttpClients
@@ -34,7 +26,7 @@ class AndroidCatalogInstaller @Inject constructor(
     private val context: Application,
     private val httpClient: HttpClients,
     private val installationChanges: AndroidCatalogInstallationChanges,
-    private val packageInstaller : PackageInstaller
+    private val packageInstaller: PackageInstaller
 ) : CatalogInstaller {
 
     /**
@@ -53,12 +45,12 @@ class AndroidCatalogInstaller @Inject constructor(
         val tmpApkFile = File(context.cacheDir, "${catalog.pkgName}.apk")
         val tmpIconFile = File(context.cacheDir, "${catalog.pkgName}.png")
         try {
-            val apkResponse : ByteReadChannel = client.get(catalog.pkgUrl) {
+            val apkResponse: ByteReadChannel = client.get(catalog.pkgUrl) {
                 headers.append(HttpHeaders.CacheControl, "no-store")
             }.body()
             apkResponse.saveTo(tmpApkFile)
 
-            val iconResponse : ByteReadChannel = client.get(catalog.iconUrl) {
+            val iconResponse: ByteReadChannel = client.get(catalog.iconUrl) {
                 headers.append(HttpHeaders.CacheControl, "no-store")
             }.body()
             iconResponse.saveTo(tmpIconFile)
@@ -68,13 +60,13 @@ class AndroidCatalogInstaller @Inject constructor(
 //            val extDir = File(context.filesDir, "catalogs/${catalog.pkgName}").apply { mkdirs() }
 //            val apkFile = File(extDir, tmpApkFile.name)
 //            val iconFile = File(extDir, tmpIconFile.name)
-            val success = packageInstaller.install(tmpApkFile,catalog.pkgName)
+            val success = packageInstaller.install(tmpApkFile, catalog.pkgName)
 
             tmpApkFile.deleteRecursively()
             tmpIconFile.deleteRecursively()
-           // val apkSuccess = tmpApkFile.renameTo(apkFile)
-          //  val iconSuccess = tmpIconFile.renameTo(iconFile)
-         //   val success = apkSuccess && iconSuccess
+            // val apkSuccess = tmpApkFile.renameTo(apkFile)
+            //  val iconSuccess = tmpIconFile.renameTo(iconFile)
+            //   val success = apkSuccess && iconSuccess
             if (success) {
                 installationChanges.notifyAppInstall(catalog.pkgName)
             }
@@ -99,13 +91,11 @@ class AndroidCatalogInstaller @Inject constructor(
             val deleted = packageInstaller.uninstall(pkgName)
             installationChanges.notifyAppUninstall(pkgName)
             deleted
-        }catch (e:Throwable) {
+        } catch (e: Throwable) {
             onError(e)
             false
         }
 //        val file = File(context.filesDir, "catalogs/${pkgName}")
 //        val deleted = file.deleteRecursively()
-
     }
-
 }

@@ -3,9 +3,27 @@ package org.ireader.web
 import android.webkit.WebView
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.LinearProgressIndicator
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Snackbar
+import androidx.compose.material.SnackbarHost
+import androidx.compose.material.Surface
+import androidx.compose.material.rememberScaffoldState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -23,7 +41,6 @@ import kotlinx.coroutines.flow.collectLatest
 import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.domain.utils.setDefaultSettings
 
-
 @OptIn(ExperimentalMaterialApi::class)
 @ExperimentalCoroutinesApi
 @Composable
@@ -37,6 +54,7 @@ fun WebPageScreen(
     var webView by remember {
         mutableStateOf<WebView?>(null)
     }
+
     DisposableEffect(key1 = true) {
         onDispose {
             webView?.destroy()
@@ -53,18 +71,14 @@ fun WebPageScreen(
                 else -> {}
             }
         }
-
     }
     val webUrl = remember {
         mutableStateOf(viewModel.webUrl)
     }
 
-
     val webViewState = rememberWebViewState(url = webUrl.value)
 
-
     val refreshState = rememberSwipeRefreshState(isRefreshing = viewModel.isLoading)
-
 
     Scaffold(
         topBar = {
@@ -78,7 +92,6 @@ fun WebPageScreen(
                 },
                 refresh = {
                     webView?.reload()
-
                 },
                 goBack = {
                     webView?.goBack()
@@ -106,49 +119,49 @@ fun WebPageScreen(
     ) { padding ->
         Box(modifier = Modifier.padding(padding)) {
 
+            SwipeRefresh(
+                state = refreshState,
+                onRefresh = {
+                    webView?.reload()
+                    viewModel.toggleLoading(true)
+                },
+                indicator = { state, trigger ->
+                    SwipeRefreshIndicator(
+                        state = state,
+                        refreshTriggerDistance = trigger,
+                        scale = true,
+                        backgroundColor = MaterialTheme.colors.background,
+                        contentColor = MaterialTheme.colors.primaryVariant,
+                        elevation = 8.dp
+                    )
+                }
+            ) {
+                if (webViewState.isLoading) {
+                    LinearProgressIndicator(
+                        Modifier
+                            .fillMaxWidth()
+                    )
+                }
 
-        SwipeRefresh(
-            state = refreshState,
-            onRefresh = {
-                webView?.reload()
-                viewModel.toggleLoading(true)
-            },
-            indicator = { state, trigger ->
-                SwipeRefreshIndicator(
-                    state = state,
-                    refreshTriggerDistance = trigger,
-                    scale = true,
-                    backgroundColor = MaterialTheme.colors.background,
-                    contentColor = MaterialTheme.colors.primaryVariant,
-                    elevation = 8.dp
+                WebView(
+                    modifier = Modifier.fillMaxSize(),
+                    state = webViewState,
+                    captureBackPresses = false,
+                    isLoading = {
+                        viewModel.toggleLoading(it)
+                    },
+                    onCreated = {
+                        webView = it
+                        it.setDefaultSettings()
+                    },
+                    updateUrl = {
+                        viewModel.updateUrl(it)
+                    },
                 )
             }
-        ) {
-            if (webViewState.isLoading) {
-                LinearProgressIndicator(Modifier.fillMaxWidth())
-            }
-
-            WebView(
-                modifier = Modifier.fillMaxSize(),
-                state = webViewState,
-                captureBackPresses = false,
-                isLoading = {
-                    viewModel.toggleLoading(it)
-                },
-                onCreated = {
-                    webView = it
-                    it.setDefaultSettings()
-                },
-                updateUrl = {
-                    viewModel.updateUrl(it)
-                },
-            )
         }
     }
-    }
-
 }
-
 
 @Composable
 fun ScrollableAppBar(

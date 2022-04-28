@@ -5,10 +5,9 @@ import org.ireader.common_models.entities.CatalogLocal
 
 interface CatalogLoader {
 
-    fun loadAll(): List<CatalogLocal>
+    suspend fun loadAll(): List<CatalogLocal>
 
     fun loadLocalCatalog(pkgName: String): CatalogInstalled.Locally?
 
     fun loadSystemCatalog(pkgName: String): CatalogInstalled.SystemWide?
-
 }

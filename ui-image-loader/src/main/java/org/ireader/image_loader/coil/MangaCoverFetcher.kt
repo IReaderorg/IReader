@@ -9,10 +9,10 @@ import coil.fetch.Fetcher
 import coil.fetch.SourceResult
 import coil.key.Keyer
 import coil.request.Options
-import io.ktor.client.engine.*
-import io.ktor.client.request.*
-import io.ktor.http.*
-import io.ktor.util.*
+import io.ktor.client.engine.mergeHeaders
+import io.ktor.client.request.HttpRequestData
+import io.ktor.http.HttpHeaders
+import io.ktor.util.InternalAPI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.Cache
@@ -28,7 +28,7 @@ import org.ireader.core_catalogs.interactor.GetLocalCatalog
 import org.ireader.image_loader.BookCover
 import org.ireader.image_loader.LibraryCovers
 import java.io.File
-import java.util.*
+import java.util.Calendar
 
 internal class LibraryMangaFetcherFactory(
     private val defaultClient: OkHttpClient,
@@ -47,7 +47,6 @@ internal class LibraryMangaFetcherFactory(
             context = options.context
         )
     }
-
 }
 internal class LibraryMangaFetcherFactoryKeyer(
     private val libraryCovers: LibraryCovers,
@@ -59,7 +58,7 @@ internal class LibraryMangaFetcherFactoryKeyer(
                 val cover = File(data.cover.substringAfter("file://"))
                 "${data.cover}_${cover.lastModified()}"
             }
-           Type.URL -> {
+            Type.URL -> {
                 val cover = libraryCovers.find(data.id).toFile()
                 if (data.favorite && (!cover.exists() || cover.lastModified() == 0L)) {
                     null
@@ -70,7 +69,6 @@ internal class LibraryMangaFetcherFactoryKeyer(
             null -> null
         }
     }
-
 }
 
 internal class LibraryMangaFetcher(
@@ -82,7 +80,6 @@ internal class LibraryMangaFetcher(
     val data: BookCover,
 ) : Fetcher {
 
-
     override suspend fun fetch(): FetchResult? {
         return when (getResourceType(data.cover)) {
             Type.File -> getFileLoader(data)
@@ -90,7 +87,6 @@ internal class LibraryMangaFetcher(
             null -> null
         }
     }
-
 
     private fun getFileLoader(manga: BookCover): SourceResult {
         val file = File(manga.cover.substringAfter("file://"))
@@ -137,7 +133,6 @@ internal class LibraryMangaFetcher(
             }
         }
 
-
         // Fallback to image from source
         return SourceResult(
             source = ImageSource(body.source(), context),
@@ -150,22 +145,17 @@ internal class LibraryMangaFetcher(
         val catalog = getLocalCatalog.get(manga.sourceId)
         val source = catalog?.source as? HttpSource
 
-
         val clientAndRequest = source?.getCoverRequest(manga.cover)
 
-        val newClient = (clientAndRequest?.first?.okhttp ?: defaultClient ).newBuilder()
-                .cache(coilCache)
-                .build()
+        val newClient = (clientAndRequest?.first?.okhttp ?: defaultClient).newBuilder()
+            .cache(coilCache)
+            .build()
 
         val request = clientAndRequest?.second?.build()?.convertToOkHttpRequest()
             ?: Request.Builder().url(manga.cover).build()
 
         return newClient.newCall(request)
     }
-
-
-
-
 }
 
 /**
@@ -202,16 +192,12 @@ private enum class Type {
     File, URL;
 }
 
-
-
-
-
-//internal class LibraryMangaFetcher(
+// internal class LibraryMangaFetcher(
 //    private val defaultClient: OkHttpClient,
 //    private val libraryCovers: LibraryCovers,
 //    private val getLocalCatalog: GetLocalCatalog,
 //    private val coilCache: Cache,
-//) : Fetcher<BookCover> {
+// ) : Fetcher<BookCover> {
 //
 //    override fun key(data: BookCover): String? {
 //        return when (getResourceType(data.cover)) {
@@ -326,15 +312,15 @@ private enum class Type {
 //        File, URL;
 //    }
 //
-//}
+// }
 //
-///**
+// /**
 // * Converts a ktor request to okhttp. Note that it does not support sending a request body. If we
 // * ever need it we could use reflection to call this other method instead:
 // * https://github.com/ktorio/ktor/blob/1.6.4/ktor-client/ktor-client-okhttp/jvm/src/io/ktor/client/engine/okhttp/OkHttpEngine.kt#L180
 // */
-//@OptIn(InternalAPI::class)
-//private fun HttpRequestData.convertToOkHttpRequest(): Request {
+// @OptIn(InternalAPI::class)
+// private fun HttpRequestData.convertToOkHttpRequest(): Request {
 //    val builder = Request.Builder()
 //
 //    with(builder) {
@@ -348,4 +334,4 @@ private enum class Type {
 //    }
 //
 //    return builder.build()
-//}
+// }

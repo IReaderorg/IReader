@@ -1,15 +1,45 @@
 package org.ireader.explore
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.*
+import androidx.compose.material.ContentAlpha
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ExtendedFloatingActionButton
+import androidx.compose.material.FabPosition
+import androidx.compose.material.Icon
+import androidx.compose.material.LocalContentColor
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Snackbar
+import androidx.compose.material.SnackbarDuration
+import androidx.compose.material.SnackbarHost
+import androidx.compose.material.SnackbarResult
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.runtime.*
+import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material.rememberScaffoldState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,20 +53,19 @@ import kotlinx.coroutines.launch
 import org.ireader.common_models.DisplayMode
 import org.ireader.common_models.LayoutType
 import org.ireader.common_models.entities.BookItem
+import org.ireader.components.components.showLoading
+import org.ireader.components.list.LayoutComposable
+import org.ireader.components.reusable_composable.AppIconButton
+import org.ireader.components.reusable_composable.MidSizeTextComposable
+import org.ireader.components.reusable_composable.SmallTextComposable
 import org.ireader.core_api.source.CatalogSource
 import org.ireader.core_api.source.HttpSource
 import org.ireader.core_api.source.Source
 import org.ireader.core_api.source.model.Filter
 import org.ireader.core_api.source.model.Listing
 import org.ireader.core_ui.ui.kaomojis
-import org.ireader.components.list.LayoutComposable
-import org.ireader.components.components.showLoading
-import org.ireader.components.reusable_composable.AppIconButton
-import org.ireader.components.reusable_composable.MidSizeTextComposable
-import org.ireader.components.reusable_composable.SmallTextComposable
 import org.ireader.explore.viewmodel.ExploreState
 import org.ireader.ui_explore.R
-
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
 @Composable
@@ -62,7 +91,7 @@ fun ExploreScreen(
     val scrollState = rememberLazyListState()
     val context = LocalContext.current
 
-    //val books = vm.books.collectAsLazyPagingItems()
+    // val books = vm.books.collectAsLazyPagingItems()
 
     val gridState = rememberLazyGridState()
     val bottomSheetState =
@@ -93,7 +122,7 @@ fun ExploreScreen(
                     setShowSnackBar(false)
                     vm.endReached = false
                     loadItems(false)
-                    //books.retry()
+                    // books.retry()
                 }
             }
         }
@@ -103,7 +132,6 @@ fun ExploreScreen(
         if (errors != null && errors.asString(context).isNotBlank() && vm.page > 1) {
             setShowSnackBar(true)
             setSnackBarText(errors.asString(context))
-
         }
     }
     ModalBottomSheetLayout(
@@ -116,7 +144,7 @@ fun ExploreScreen(
                     vm.stateFilters = mFilters
                     vm.searchQuery = null
                     loadItems(true)
-                    //vm.getBooks(filters = mFilters, source = source)
+                    // vm.getBooks(filters = mFilters, source = source)
                 },
                 filters = vm.modifiedFilter,
                 onReset = {
@@ -129,7 +157,7 @@ fun ExploreScreen(
         },
         sheetBackgroundColor = MaterialTheme.colors.background,
 
-        ) {
+    ) {
         Scaffold(
             topBar = {
                 BrowseTopAppBar(
@@ -176,9 +204,11 @@ fun ExploreScreen(
                 )
             },
         ) { paddingValue ->
-            Box(modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValue)) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValue)
+            ) {
                 when {
                     vm.isLoading && vm.page == 1 -> {
                         showLoading()
@@ -214,13 +244,9 @@ fun ExploreScreen(
                         )
                     }
                 }
-
             }
-
-
         }
     }
-
 }
 
 @Composable
@@ -260,39 +286,44 @@ private fun BoxScope.ExploreScreenErrorComposable(
         )
         Spacer(modifier = Modifier.height(32.dp))
 
-        Row(Modifier
-            .fillMaxWidth(),
+        Row(
+            Modifier
+                .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(Modifier
-                .weight(.5f)
-                .wrapContentSize(Alignment.Center),
+            Column(
+                Modifier
+                    .weight(.5f)
+                    .wrapContentSize(Alignment.Center),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                AppIconButton(imageVector = Icons.Default.Refresh,
+                AppIconButton(
+                    imageVector = Icons.Default.Refresh,
                     title = "Retry",
                     onClick = {
                         onRefresh()
-                    })
+                    }
+                )
                 SmallTextComposable(text = "Retry")
             }
-            Column(Modifier
-                .weight(.5f)
-                .wrapContentSize(Alignment.Center),
+            Column(
+                Modifier
+                    .weight(.5f)
+                    .wrapContentSize(Alignment.Center),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 if (source is HttpSource) {
-                    AppIconButton(imageVector = Icons.Default.Public,
+                    AppIconButton(
+                        imageVector = Icons.Default.Public,
                         title = "Open in WebView",
                         onClick = {
                             onWebView(source)
-                        })
+                        }
+                    )
                 }
                 SmallTextComposable(text = "Open in WebView")
             }
-
         }
-
     }
 }

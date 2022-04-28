@@ -24,17 +24,19 @@ import org.ireader.components.reusable_composable.SuperSmallTextComposable
 @Composable
 fun GoToLastReadComposable(onClick: () -> Unit) {
     Box {
-        OutlinedButton(onClick = {},
+        OutlinedButton(
+            onClick = {},
             modifier = Modifier
                 .padding(5.dp)
                 .size(40.dp),
             shape = CircleShape,
             border = BorderStroke(1.dp, MaterialTheme.colors.background.copy(alpha = .3f)),
-            contentPadding = PaddingValues(0.dp),  //avoid the little icon
+            contentPadding = PaddingValues(0.dp), // avoid the little icon
             colors = ButtonDefaults.outlinedButtonColors(
                 contentColor = MaterialTheme.colors.background,
                 backgroundColor = MaterialTheme.colors.onBackground.copy(
-                    alpha = .4f)
+                    alpha = .4f
+                )
             )
         ) {
             AppIconButton(
@@ -46,7 +48,6 @@ fun GoToLastReadComposable(onClick: () -> Unit) {
                 tint = MaterialTheme.colors.background.copy(alpha = .4f)
             )
         }
-
     }
 }
 
@@ -59,9 +60,11 @@ fun TextBadge(modifier: Modifier = Modifier, text: String) {
             .background(MaterialTheme.colors.primary),
         contentAlignment = Alignment.Center,
     ) {
-        SuperSmallTextComposable(text = text,
+        SuperSmallTextComposable(
+            text = text,
             color = Color.White,
             maxLine = 1,
-            overflow = TextOverflow.Ellipsis)
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }

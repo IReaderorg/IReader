@@ -14,7 +14,6 @@ import androidx.compose.ui.unit.dp
 import org.ireader.common_models.entities.BookItem
 import org.ireader.core_ui.ui_components.isScrolledToTheEnd
 
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun GridLayoutComposable(
@@ -52,12 +51,14 @@ fun GridLayoutComposable(
                         }
                     }
                 }
-            })
+            }
+        )
         if (isLoading && scrollState.isScrolledToTheEnd()) {
-            CircularProgressIndicator(modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 16.dp))
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 16.dp)
+            )
         }
     }
-
 }

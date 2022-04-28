@@ -17,9 +17,7 @@ class LocalBookRepositoryImpl(
 
     override fun subscribeBookById(id: Long): Flow<org.ireader.common_models.entities.Book?> {
         return bookDao.subscribeBookById(bookId = id).distinctUntilChanged()
-
     }
-
 
     override suspend fun findBookById(id: Long): org.ireader.common_models.entities.Book? {
         return bookDao.findBookById(id)
@@ -68,10 +66,8 @@ class LocalBookRepositoryImpl(
                     lastChecked = lastChecked
                 )
             }
-
         }
     }
-
 
     override suspend fun findAllInLibraryBooks(
         sortType: SortType,
@@ -91,7 +87,6 @@ class LocalBookRepositoryImpl(
         return remoteKeysDao.deleteAllExploredBook()
     }
 
-
     override suspend fun deleteBookById(id: Long) {
         return bookDao.deleteBook(bookId = id)
     }
@@ -99,7 +94,6 @@ class LocalBookRepositoryImpl(
     override suspend fun deleteAllBooks() {
         return bookDao.deleteAllBook()
     }
-
 
     override suspend fun findBookByKey(key: String): org.ireader.common_models.entities.Book? {
         return bookDao.findBookByKey(key = key)
@@ -113,11 +107,9 @@ class LocalBookRepositoryImpl(
         return bookDao.subscribeBooksByKey(key, title).distinctUntilChanged()
     }
 
-
     override suspend fun insertBooks(book: List<org.ireader.common_models.entities.Book>): List<Long> {
         return remoteKeysDao.insert(book)
     }
-
 
     override suspend fun deleteBooks(book: List<org.ireader.common_models.entities.Book>) {
         remoteKeysDao.delete(book)
@@ -134,7 +126,6 @@ class LocalBookRepositoryImpl(
     override suspend fun findFavoriteSourceIds(): List<Long> {
         return bookDao.findFavoriteSourceIds()
     }
-
 
     override suspend fun insertBook(book: org.ireader.common_models.entities.Book): Long {
         return bookDao.insertBook(book)

@@ -1,6 +1,5 @@
 package org.ireader.reader.viewmodel
 
-
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -8,7 +7,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.ireader.core_catalogs.CatalogStore
 import org.ireader.core_ui.viewmodel.BaseViewModel
-
 import org.ireader.domain.services.downloaderService.DefaultNotificationHelper
 import org.ireader.domain.services.tts_service.Player
 import org.ireader.domain.ui.NavigationArgs
@@ -22,7 +20,6 @@ import org.ireader.domain.use_cases.services.ServiceUseCases
 import org.ireader.presentation.feature_ttl.TTSState
 import org.ireader.presentation.feature_ttl.TTSStateImpl
 import javax.inject.Inject
-
 
 @HiltViewModel
 class ReaderScreenViewModel @Inject constructor(
@@ -50,8 +47,6 @@ class ReaderScreenViewModel @Inject constructor(
     ReaderUiFunctions by uiFunc,
     ReaderMainFunctions by mainFunc,
     TTSState by ttsState {
-
-
 
     init {
 
@@ -84,8 +79,6 @@ class ReaderScreenViewModel @Inject constructor(
                         getLocalBookById(bookId, chapterId, source = source)
                         readPreferences()
                     }
-
-
                 } else {
                     viewModelScope.launch {
                         showSnackBar(org.ireader.common_extensions.UiText.StringResource(org.ireader.core.R.string.the_source_is_not_found))
@@ -97,15 +90,11 @@ class ReaderScreenViewModel @Inject constructor(
                 }
             }
         }
-
     }
-
 
     var getContentJob: Job? = null
 
-
     var getChapterJob: Job? = null
-
 
     fun runTTSService(command: Int = -1) {
         serviceUseCases.startTTSServicesUseCase(
@@ -121,15 +110,11 @@ class ReaderScreenViewModel @Inject constructor(
         getContentJob?.cancel()
         // ttsStateImpl.tts.shutdown()
         super.onDestroy()
-
     }
-
 
     fun onNextVoice() {
         runTTSService(Player.PAUSE)
         ttsState.isPlaying = false
         ttsState.currentReadingParagraph = 0
     }
-
-
 }

@@ -5,7 +5,6 @@ import org.ireader.core_api.prefs.PreferenceStore
 import org.ireader.core_api.prefs.getEnum
 import javax.inject.Inject
 
-
 class AppPreferences @Inject constructor(
     private val preferenceStore: PreferenceStore,
 ) {
@@ -32,7 +31,6 @@ class AppPreferences @Inject constructor(
         const val SCROLL_INDICATOR_PADDING = "scroll_indicator_padding"
         const val SCROLL_INDICATOR_WIDTH = "scroll_indicator_width"
         const val SELECTABLE_TEXT = "selectable_text"
-
 
         const val TEXT_READER_SPEECH_RATE = "text_reader_speech_rate"
         const val TEXT_READER_SPEECH_PITCH = "text_reader_speech_pitch"
@@ -161,9 +159,7 @@ class AppPreferences @Inject constructor(
     fun lastUpdateCheck(): Preference<Long> {
         return preferenceStore.getLong(Last_UPDATE_CHECK, 0)
     }
-
 }
-
 
 class UiPreferences @Inject constructor(private val preferenceStore: PreferenceStore) {
 
@@ -226,6 +222,4 @@ class UiPreferences @Inject constructor(private val preferenceStore: PreferenceS
     fun incognitoMode(): Preference<Boolean> {
         return preferenceStore.getBoolean("incognito_mode", false)
     }
-
 }
-

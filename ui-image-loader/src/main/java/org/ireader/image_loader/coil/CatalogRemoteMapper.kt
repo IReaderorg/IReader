@@ -11,5 +11,4 @@ class CatalogRemoteMapper : Mapper<CatalogRemote, HttpUrl> {
     override fun map(data: CatalogRemote, options: Options): HttpUrl? {
         return data.iconUrl.toHttpUrl()
     }
-
 }

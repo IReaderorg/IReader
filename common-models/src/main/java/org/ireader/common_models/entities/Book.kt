@@ -41,7 +41,6 @@ data class Book(
             )
         }
 
-
         const val UNKNOWN = 0
         const val ONGOING = 1
         const val COMPLETED = 2
@@ -57,9 +56,7 @@ data class Book(
             else -> "UNKNOWN"
         }
     }
-
 }
-
 
 fun String.takeIf(statement: () -> Boolean, defaultValue: String): String {
     return if (!statement()) {
@@ -153,7 +150,6 @@ fun BookWithInfo.toBook(): Book {
     )
 }
 
-
 interface BaseBook {
     val id: Long
     val sourceId: Long
@@ -163,7 +159,6 @@ interface BaseBook {
     val cover: String
     val customCover: String
 }
-
 
 data class BookItem(
     override val id: Long = 0,
@@ -175,5 +170,3 @@ data class BookItem(
     override val customCover: String = "",
     val totalDownload: Int = 0,
 ) : BaseBook
-
-

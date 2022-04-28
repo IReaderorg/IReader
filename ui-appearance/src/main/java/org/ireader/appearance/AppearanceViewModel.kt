@@ -15,14 +15,11 @@ class AppearanceViewModel @Inject constructor(
     private val _state = mutableStateOf(MainScreenState())
     val state = _state
 
-
     fun saveNightModePreferences(mode: ThemeMode) {
         uiPreferences.themeMode().set(mode)
     }
 }
 
-
 data class MainScreenState(
     val darkMode: Boolean = true,
 )
-

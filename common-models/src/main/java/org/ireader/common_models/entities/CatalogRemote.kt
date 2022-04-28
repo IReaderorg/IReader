@@ -1,3 +1,4 @@
+
 package org.ireader.common_models.entities
 
 import androidx.room.Entity
@@ -6,7 +7,6 @@ import org.ireader.core_api.source.Source
 import java.io.File
 
 @Entity(tableName = CATALOG_REMOTE)
-
 data class CatalogRemote(
     @PrimaryKey(autoGenerate = false)
     override val sourceId: Long,
@@ -21,13 +21,11 @@ data class CatalogRemote(
     val nsfw: Boolean,
 ) : Catalog()
 
-
 sealed class Catalog {
     abstract val name: String
     abstract val description: String
     abstract val sourceId: Long
 }
-
 
 sealed class CatalogLocal : Catalog() {
     abstract val source: Source
@@ -37,7 +35,6 @@ sealed class CatalogLocal : Catalog() {
     open val hasUpdate: Boolean = false
 }
 
-
 data class CatalogBundled(
     override val source: Source,
     override val description: String = "",
@@ -46,12 +43,10 @@ data class CatalogBundled(
     override val isPinned: Boolean = false,
 ) : CatalogLocal()
 
-
 sealed class CatalogInstalled : CatalogLocal() {
     abstract val pkgName: String
     abstract val versionName: String
     abstract val versionCode: Int
-
 
     data class SystemWide(
         override val name: String,
@@ -64,7 +59,6 @@ sealed class CatalogInstalled : CatalogLocal() {
         override val isPinned: Boolean = false,
         override val hasUpdate: Boolean = false,
     ) : CatalogInstalled()
-
 
     data class Locally(
         override val name: String,
@@ -79,4 +73,3 @@ sealed class CatalogInstalled : CatalogLocal() {
         override val hasUpdate: Boolean = false,
     ) : CatalogInstalled()
 }
-

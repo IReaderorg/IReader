@@ -89,7 +89,6 @@ fun <T> MutableList<T>.moveDown(item: T): Boolean {
     return true
 }
 
-
 /**
  * Moves first element **T** up an index that satisfies the given **predicate**, unless its already at the top
  */
@@ -114,7 +113,6 @@ inline fun <T> MutableList<T>.moveDownAll(crossinline predicate: (T) -> Boolean)
     .filter { predicate.invoke(it.value) }
     .forEach { moveDownAt(it.index) }
 
-
 fun <E> List<E>.indexOf(item: E?): Int = if (item == null) -1 else indexOf(item)
 
 fun <E> List<E>.isLast(element: E): Boolean = indexOf(element) == size - 1
@@ -127,7 +125,6 @@ fun <E> List<E>.nextAfter(element: E): E? =
         size - 1 -> null
         else -> this[index + 1]
     }
-
 
 fun <E> List<E>.prevBefore(index: Int): E? = if (index == 0) null else this[index - 1]
 

@@ -11,7 +11,7 @@ import org.ireader.core_ui.exceptionHandler
 import org.ireader.domain.R
 import javax.inject.Inject
 
-class GetRemoteReadingContent @Inject constructor(@ApplicationContext private val context: Context)  {
+class GetRemoteReadingContent @Inject constructor(@ApplicationContext private val context: Context) {
     suspend operator fun invoke(
         chapter: Chapter,
         source: Source,
@@ -37,16 +37,13 @@ class GetRemoteReadingContent @Inject constructor(@ApplicationContext private va
 
                     if (content.joinToString().isBlank()) {
                         onError(org.ireader.common_extensions.UiText.StringResource(R.string.cant_get_content))
-
                     } else {
                         org.ireader.core_api.log.Log.debug("Timber: GetRemoteReadingContentUseCase was Finished Successfully")
                         onSuccess(chapter.copy(content = content, dateFetch = org.ireader.common_extensions.currentTimeToLong()))
-
                     }
                 } catch (e: Throwable) {
                     onError(exceptionHandler(e))
                 }
-
             }.getOrElse { e ->
                 onError(exceptionHandler(e))
             }

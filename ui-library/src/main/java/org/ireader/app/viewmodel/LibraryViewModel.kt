@@ -1,6 +1,5 @@
 package org.ireader.app.viewmodel
 
-
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -20,7 +19,6 @@ import org.ireader.domain.use_cases.preferences.reader_preferences.SortersUseCas
 import org.ireader.domain.use_cases.services.ServiceUseCases
 import javax.inject.Inject
 
-
 @HiltViewModel
 class LibraryViewModel @Inject constructor(
     private val localGetBookUseCases: LocalGetBookUseCases,
@@ -33,7 +31,6 @@ class LibraryViewModel @Inject constructor(
     private val libraryState: LibraryStateImpl,
     private val serviceUseCases: ServiceUseCases,
 ) : BaseViewModel(), LibraryState by libraryState {
-
 
     init {
         readLayoutTypeAndFilterTypeAndSortType()
@@ -59,7 +56,7 @@ class LibraryViewModel @Inject constructor(
         this.layout = layoutType.layout
     }
     fun downloadChapters() {
-        serviceUseCases.startDownloadServicesUseCase(bookIds =  selection.toLongArray())
+        serviceUseCases.startDownloadServicesUseCase(bookIds = selection.toLongArray())
         selection.clear()
     }
 
@@ -68,7 +65,6 @@ class LibraryViewModel @Inject constructor(
             selection.forEach { bookId ->
                 val chapters = localGetChapterUseCase.findChaptersByBookId(bookId)
                 insertUseCases.insertChapters(chapters.map { it.copy(read = true) })
-
             }
             selection.clear()
         }
@@ -89,18 +85,17 @@ class LibraryViewModel @Inject constructor(
             deleteUseCase.deleteBookAndChapterByBookIds(selection)
             selection.clear()
         }
-
-
     }
 
     private fun readLayoutTypeAndFilterTypeAndSortType() {
-        val sortType = sortersUseCase.read()
-        val layoutType = libraryLayoutUseCase.read().layout
-        val sortBy = sortersDescUseCase.read()
-        this.layout = layoutType
-        this.sortType = sortType
-        this.desc = sortBy
-
+        viewModelScope.launch {
+            val sortType = sortersUseCase.read()
+            val layoutType = libraryLayoutUseCase.read().layout
+            val sortBy = sortersDescUseCase.read()
+            this@LibraryViewModel.layout = layoutType
+            this@LibraryViewModel.sortType = sortType
+            this@LibraryViewModel.desc = sortBy
+        }
     }
 
     fun changeSortIndex(sortType: SortType) {
@@ -127,10 +122,7 @@ class LibraryViewModel @Inject constructor(
         getLibraryBooks()
     }
 
-
     fun refreshUpdate() {
-      serviceUseCases.startLibraryUpdateServicesUseCase()
+        serviceUseCases.startLibraryUpdateServicesUseCase()
     }
-
-
 }

@@ -3,7 +3,6 @@ package org.ireader.sources.extension
 import androidx.compose.ui.text.intl.LocaleList
 import org.ireader.common_models.entities.CatalogLocal
 
-
 class UserLanguagesComparator : Comparator<Language> {
 
     private val userLanguages = mutableMapOf<String, Int>()
@@ -22,7 +21,6 @@ class UserLanguagesComparator : Comparator<Language> {
 
         return langTwoPosition.compareTo(langOnePosition)
     }
-
 }
 
 class InstalledLanguagesComparator(
@@ -39,5 +37,4 @@ class InstalledLanguagesComparator(
 
         return langTwoPosition.compareTo(langOnePosition)
     }
-
 }

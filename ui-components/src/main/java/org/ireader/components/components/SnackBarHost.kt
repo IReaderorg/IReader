@@ -16,5 +16,4 @@ fun ISnackBarHost(snackBarHostState: SnackbarHostState) {
             contentColor = MaterialTheme.colors.onBackground,
         )
     }
-
 }

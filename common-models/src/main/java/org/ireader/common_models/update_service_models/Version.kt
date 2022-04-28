@@ -1,5 +1,6 @@
-package org.ireader.common_models.update_service_models
 
+
+package org.ireader.common_models.update_service_models
 
 data class Version(
     val version: String,
@@ -17,5 +18,4 @@ data class Version(
             return newVersion != currentVersion
         }
     }
-
 }

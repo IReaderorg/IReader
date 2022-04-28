@@ -7,7 +7,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import org.ireader.core_ui.R
 
-
 // Set of Material typography styles to start with
 val poppins = FontFamily(
     Font(R.font.poppins_regular, weight = FontWeight.Normal),

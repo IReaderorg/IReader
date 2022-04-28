@@ -1,7 +1,15 @@
 package org.ireader.sources.global_search
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
@@ -32,7 +40,7 @@ fun GlobalSearchScreen(
     onBook: (BaseBook) -> Unit,
     onGoToExplore: (Int) -> Unit,
 
-    ) {
+) {
 
     val uiSearch = vm.searchItems.filter { it.items.isNotEmpty() }
     val emptySearches = vm.searchItems.filter { it.items.isEmpty() }
@@ -76,31 +84,36 @@ fun GlobalSearchBookInfo(
     goToExplore: () -> Unit,
 ) {
     val modifier = when (book.items.isNotEmpty()) {
-        true -> Modifier
-            .fillMaxWidth()
-            .animateContentSize()
+        true ->
+            Modifier
+                .fillMaxWidth()
+                .animateContentSize()
         else -> Modifier
     }
     Column(modifier = modifier) {
-        Row(modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp),
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween) {
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
 
             Column(
                 verticalArrangement = Arrangement.SpaceEvenly,
-                horizontalAlignment = Alignment.Start) {
+                horizontalAlignment = Alignment.Start
+            ) {
                 MidSizeTextComposable(text = book.source.name, fontWeight = FontWeight.Bold)
                 SmallTextComposable(text = book.source.lang.uppercase())
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 DotsFlashing(book.loading)
-                AppIconButton(imageVector = Icons.Default.ArrowForward,
+                AppIconButton(
+                    imageVector = Icons.Default.ArrowForward,
                     title = "open explore",
-                    onClick = goToExplore)
+                    onClick = goToExplore
+                )
             }
-
         }
         Spacer(modifier = Modifier.height(20.dp))
         LazyRow {
@@ -112,11 +125,10 @@ fun GlobalSearchBookInfo(
                     onClick = {
                         onBook(it)
                     },
-                    book = book.items[index]) {
+                    book = book.items[index]
+                ) {
                 }
             }
         }
     }
-
-
 }

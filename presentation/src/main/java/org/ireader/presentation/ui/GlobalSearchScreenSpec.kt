@@ -3,7 +3,11 @@ package org.ireader.presentation.ui
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.*
+import androidx.navigation.NamedNavArgument
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavController
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import org.ireader.core_api.log.Log
 import org.ireader.sources.global_search.GlobalSearchScreen
 import org.ireader.sources.global_search.viewmodel.GlobalSearchViewModel
@@ -34,7 +38,7 @@ object GlobalSearchScreenSpec : ScreenSpec {
             onPopBackStack = {
                 navController.popBackStack()
             },
-            onSearch = { query->
+            onSearch = { query ->
                 vm.searchBooks(query = query)
             },
             vm = vm,
@@ -46,26 +50,24 @@ object GlobalSearchScreenSpec : ScreenSpec {
                             bookId = it.id,
                         )
                     )
-
                 } catch (e: Throwable) {
-                    Log.error(e,"")
+                    Log.error(e, "")
                 }
             },
-            onGoToExplore = { index->
+            onGoToExplore = { index ->
                 try {
                     if (vm.query.isNotBlank()) {
                         navController.navigate(
-                            ExploreScreenSpec.buildRoute(vm.searchItems[index].source.id,
-                                query = vm.query)
+                            ExploreScreenSpec.buildRoute(
+                                vm.searchItems[index].source.id,
+                                query = vm.query
+                            )
                         )
                     }
                 } catch (e: Throwable) {
-                    Log.error(e,"")
+                    Log.error(e, "")
                 }
-
             },
         )
     }
-
 }
-

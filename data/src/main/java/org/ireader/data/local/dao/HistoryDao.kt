@@ -16,16 +16,16 @@ interface HistoryDao : BaseDao<org.ireader.common_models.entities.History> {
     @Query("SELECT * FROM history")
     suspend fun findHistories(): List<org.ireader.common_models.entities.History>
 
-
-    @Query("""SELECT history.*, library.title as bookTitle, library.sourceId, library.cover, library.favorite, chapter.title as chapterTitle,
+    @Query(
+        """SELECT history.*, library.title as bookTitle, library.sourceId, library.cover, library.favorite, chapter.title as chapterTitle,
     date(ROUND(history.readAt / 1000), 'unixepoch', 'localtime') AS date,chapter.number as chapterNumber
     FROM history
     JOIN library ON history.bookId = library.id
     JOIN chapter ON history.chapterId = chapter.id
     WHERE bookTitle LIKE '%' || :query || '%' 
-    ORDER BY history.readAt DESC""")
+    ORDER BY history.readAt DESC"""
+    )
     fun findHistoriesPaging(query: String): kotlinx.coroutines.flow.Flow<List<HistoryWithRelations>>
-
 
     @Query("DELETE FROM history WHERE chapterId = :id")
     suspend fun deleteHistory(id: Long)

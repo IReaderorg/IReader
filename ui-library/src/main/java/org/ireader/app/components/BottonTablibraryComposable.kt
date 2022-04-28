@@ -1,7 +1,12 @@
 package org.ireader.app.components
 
+
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.*
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Tab
+import androidx.compose.material.TabRow
+import androidx.compose.material.TabRowDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -14,11 +19,10 @@ import org.ireader.common_models.DisplayMode
 import org.ireader.common_models.FilterType
 import org.ireader.common_models.LayoutType
 import org.ireader.common_models.SortType
-import org.ireader.core_ui.ui.Colour.contentColor
 import org.ireader.components.reusable_composable.MidSizeTextComposable
+import org.ireader.core_ui.ui.Colour.contentColor
 
 typealias ComposableFun = @Composable () -> Unit
-
 
 @ExperimentalPagerApi
 @ExperimentalMaterialApi
@@ -35,8 +39,9 @@ fun Tabs(libraryTabs: List<TabItem>, pagerState: PagerState) {
                 Modifier.pagerTabIndicatorOffset(pagerState, tabPositions),
                 color = MaterialTheme.colors.primary,
 
-                )
-        }) {
+            )
+        }
+    ) {
         libraryTabs.forEachIndexed { index, tab ->
             Tab(
                 text = { MidSizeTextComposable(text = tab.title) },
@@ -49,7 +54,6 @@ fun Tabs(libraryTabs: List<TabItem>, pagerState: PagerState) {
     }
 }
 
-
 @ExperimentalPagerApi
 @Composable
 fun TabsContent(
@@ -57,10 +61,10 @@ fun TabsContent(
     pagerState: PagerState,
     filters: List<FilterType>,
     addFilters: (FilterType) -> Unit,
-    removeFilter: (FilterType)-> Unit,
+    removeFilter: (FilterType) -> Unit,
     sortType: SortType,
     isSortDesc: Boolean,
-    onSortSelected:(SortType) -> Unit,
+    onSortSelected: (SortType) -> Unit,
     layoutType: LayoutType,
     onLayoutSelected: (DisplayMode) -> Unit
 ) {

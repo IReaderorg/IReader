@@ -1,10 +1,11 @@
+
+
 package org.ireader.common_models.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 import org.ireader.core_api.source.model.ChapterInfo
-
 
 @Serializable
 @Entity(tableName = CHAPTER_TABLE)
@@ -30,8 +31,6 @@ data class Chapter(
     fun isChapterNotEmpty(): Boolean {
         return content.joinToString().length > 1
     }
-
-
 }
 
 fun Chapter.toChapterInfo(): ChapterInfo {
@@ -43,7 +42,6 @@ fun Chapter.toChapterInfo(): ChapterInfo {
         number = this.number,
     )
 }
-
 
 fun ChapterInfo.toChapter(bookId: Long): Chapter {
     return Chapter(

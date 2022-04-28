@@ -3,7 +3,7 @@ package org.ireader.domain.utils
 import okhttp3.Cookie
 import okhttp3.CookieJar
 import okhttp3.HttpUrl
-import java.util.*
+import java.util.Calendar
 
 class MemoryCookieJar : CookieJar {
     private val cache = mutableSetOf<WrappedCookie>()
@@ -51,10 +51,10 @@ class WrappedCookie private constructor(val cookie: Cookie) {
         if (other !is WrappedCookie) return false
 
         return other.cookie.name == cookie.name &&
-                other.cookie.domain == cookie.domain &&
-                other.cookie.path == cookie.path &&
-                other.cookie.secure == cookie.secure &&
-                other.cookie.hostOnly == cookie.hostOnly
+            other.cookie.domain == cookie.domain &&
+            other.cookie.path == cookie.path &&
+            other.cookie.secure == cookie.secure &&
+            other.cookie.hostOnly == cookie.hostOnly
     }
 
     override fun hashCode(): Int {

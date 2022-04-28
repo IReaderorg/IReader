@@ -4,10 +4,21 @@ import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.content.Context
 import android.os.Build
-import android.webkit.*
+import android.webkit.CookieManager
+import android.webkit.WebResourceError
+import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
+import android.webkit.WebSettings
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.annotation.RequiresApi
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import org.ireader.core_api.log.Log
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -73,7 +84,6 @@ class BrowseEngine @Inject constructor(@ApplicationContext private val context: 
                     responseHeader = req
                     return req
                 }
-
             }
             var currentTime = 0
             while (!isLoadUp && currentTime < timeout) {
@@ -95,9 +105,7 @@ class BrowseEngine @Inject constructor(@ApplicationContext private val context: 
             mimeType = responseHeader?.mimeType
         )
     }
-
 }
-
 
 @SuppressLint("SetJavaScriptEnabled")
 private fun WebView.setDefaultSettings() {
@@ -106,17 +114,15 @@ private fun WebView.setDefaultSettings() {
         domStorageEnabled = true
         databaseEnabled = true
         // https://stackoverflow.com/questions/9128952/caching-in-android-webview
-        //setAppCacheEnabled(true)
+        // setAppCacheEnabled(true)
         useWideViewPort = true
         loadWithOverviewMode = true
         cacheMode = WebSettings.LOAD_DEFAULT
     }
 }
 
-
 @Suppress("OverridingDeprecatedMember")
 private abstract class WebViewClientCompat : WebViewClient() {
-
 
     open fun shouldOverrideUrlCompat(view: WebView, url: String): Boolean {
         return false
@@ -201,7 +207,6 @@ private abstract class WebViewClientCompat : WebViewClient() {
     }
 }
 
-
 @SuppressLint("SetJavaScriptEnabled")
 @OptIn(ExperimentalCoroutinesApi::class)
 private suspend fun WebView.getHtml(): String = suspendCancellableCoroutine { continuation ->
@@ -219,7 +224,6 @@ private suspend fun WebView.getHtml(): String = suspendCancellableCoroutine { co
                 .replace("\\\"", "\"")
                 .replace("<hr />", "")
         ) {
-
         }
     }
 }

@@ -11,7 +11,7 @@ import javax.inject.Inject
 class StartLibraryUpdateServicesUseCase @Inject constructor(@ApplicationContext private val context: Context) {
     operator fun invoke() {
 
-        val work  =
+        val work =
             OneTimeWorkRequestBuilder<LibraryUpdatesService>().apply {
                 addTag(LibraryUpdatesService.LibraryUpdateTag)
             }.build()
@@ -22,5 +22,3 @@ class StartLibraryUpdateServicesUseCase @Inject constructor(@ApplicationContext 
         )
     }
 }
-
-

@@ -1,20 +1,14 @@
-/*
- * Copyright (C) 2018 The Tachiyomi Open Source Project
- *
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- */
-
 package org.ireader.core_catalogs
 
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import org.ireader.common_models.entities.CatalogBundled
 import org.ireader.common_models.entities.CatalogInstalled
 import org.ireader.common_models.entities.CatalogLocal
@@ -24,7 +18,6 @@ import org.ireader.core_catalogs.service.CatalogInstallationChange
 import org.ireader.core_catalogs.service.CatalogInstallationChanges
 import org.ireader.core_catalogs.service.CatalogLoader
 import org.ireader.core_catalogs.service.CatalogRemoteRepository
-
 
 class CatalogStore(
     private val loader: CatalogLoader,
@@ -60,47 +53,58 @@ class CatalogStore(
     private val lock = Mutex()
 
     init {
-        val loadedCatalogs = loader.loadAll()
-        val pinnedCatalogIds = pinnedCatalogsPreference.get()
-        catalogs = loadedCatalogs.map { catalog ->
-            if (catalog.sourceId.toString() in pinnedCatalogIds) {
-                catalog.copy(isPinned = true)
-            } else {
-                catalog
+        scope.launch {
+            val loadedCatalogs = loader.loadAll()
+            val pinnedCatalogIds = pinnedCatalogsPreference.get()
+            catalogs = loadedCatalogs.map { catalog ->
+                if (catalog.sourceId.toString() in pinnedCatalogIds) {
+                    catalog.copy(isPinned = true)
+                } else {
+                    catalog
+                }
             }
         }
-
-        installationChanges.flow
-            .onEach { change ->
-                when (change) {
-                    is CatalogInstallationChange.SystemInstall -> onInstalled(change.pkgName,
-                        false)
-                    is CatalogInstallationChange.SystemUninstall -> onUninstalled(change.pkgName,
-                        false)
-                    is CatalogInstallationChange.LocalInstall -> onInstalled(change.pkgName,
-                        true)
-                    is CatalogInstallationChange.LocalUninstall -> onUninstalled(change.pkgName,
-                        true)
-                }
-            }
-            .launchIn(scope)
-
-        catalogRemoteRepository.getRemoteCatalogsFlow()
-            .onEach {
-                remoteCatalogs = it
-                lock.withLock {
-                    catalogs = catalogs.map { catalog ->
-                        if (catalog is CatalogInstalled) {
-                            val hasUpdate = catalog.checkHasUpdate()
-                            if (catalog.hasUpdate != hasUpdate) {
-                                return@map catalog.copy(hasUpdate = hasUpdate)
-                            }
-                        }
-                        catalog
+        scope.launch {
+            installationChanges.flow
+                .collect { change ->
+                    when (change) {
+                        is CatalogInstallationChange.SystemInstall -> onInstalled(
+                            change.pkgName,
+                            false
+                        )
+                        is CatalogInstallationChange.SystemUninstall -> onUninstalled(
+                            change.pkgName,
+                            false
+                        )
+                        is CatalogInstallationChange.LocalInstall -> onInstalled(
+                            change.pkgName,
+                            true
+                        )
+                        is CatalogInstallationChange.LocalUninstall -> onUninstalled(
+                            change.pkgName,
+                            true
+                        )
                     }
                 }
-            }
-            .launchIn(scope)
+
+        }
+        scope.launch {
+            catalogRemoteRepository.getRemoteCatalogsFlow()
+                .collect {
+                    remoteCatalogs = it
+                    lock.withLock {
+                        catalogs = catalogs.map { catalog ->
+                            if (catalog is CatalogInstalled) {
+                                val hasUpdate = catalog.checkHasUpdate()
+                                if (catalog.hasUpdate != hasUpdate) {
+                                    return@map catalog.copy(hasUpdate = hasUpdate)
+                                }
+                            }
+                            catalog
+                        }
+                    }
+                }
+        }
     }
 
     fun get(sourceId: Long): CatalogLocal? {
@@ -194,5 +198,4 @@ class CatalogStore(
             is CatalogInstalled.SystemWide -> copy(isPinned = isPinned, hasUpdate = hasUpdate)
         }
     }
-
 }

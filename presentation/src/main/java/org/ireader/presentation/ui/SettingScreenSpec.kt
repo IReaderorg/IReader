@@ -22,9 +22,10 @@ object SettingScreenSpec : BottomNavScreenSpec {
         NavigationArgs.showBottomNav
     )
 
-
-    @OptIn(ExperimentalPagerApi::class, androidx.compose.animation.ExperimentalAnimationApi::class,
-        androidx.compose.material.ExperimentalMaterialApi::class)
+    @OptIn(
+        ExperimentalPagerApi::class, androidx.compose.animation.ExperimentalAnimationApi::class,
+        androidx.compose.material.ExperimentalMaterialApi::class
+    )
     @Composable
     override fun Content(
         navController: NavController,
@@ -40,7 +41,5 @@ object SettingScreenSpec : BottomNavScreenSpec {
                 AboutInfoScreenSpec.navHostRoute
             )
         )
-
     }
-
 }

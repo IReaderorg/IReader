@@ -5,7 +5,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.material.*
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Slider
+import androidx.compose.material.SliderDefaults
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
@@ -14,7 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import org.ireader.common_models.entities.Chapter
-
 
 @Composable
 fun ChaptersSliderComposable(
@@ -29,17 +33,20 @@ fun ChaptersSliderComposable(
     onSliderDragFinished: () -> Unit,
 ) {
     Column(modifier = modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(text = if (chapters.isNotEmpty() && currentChapterIndex != -1) chapters[currentChapterIndex].title else currentChapter.title,
+        Text(
+            text = if (chapters.isNotEmpty() && currentChapterIndex != -1) chapters[currentChapterIndex].title else currentChapter.title,
             color = MaterialTheme.colors.onBackground,
             style = MaterialTheme.typography.subtitle2,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
         Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            IconButton(modifier = modifier.weight(1f),
+            IconButton(
+                modifier = modifier.weight(1f),
                 onClick = {
                     onPrev()
-                }) {
+                }
+            ) {
                 Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Previous Chapter")
             }
             Slider(

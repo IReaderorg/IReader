@@ -8,7 +8,6 @@ import org.ireader.common_models.entities.Chapter
 
 interface LocalBookRepository {
 
-
     /** Local GetUseCase**/
     suspend fun findAllBooks(): List<Book>
     fun subscribeBookById(id: Long): Flow<Book?>
@@ -22,9 +21,7 @@ interface LocalBookRepository {
         unreadFilter: Boolean = false,
     ): List<Book>
 
-
     fun getBooksByQueryPagingSource(query: String): Flow<Book>
-
 
     fun subscribeAllInLibrary(
         sortByAbs: Boolean,
@@ -44,7 +41,6 @@ interface LocalBookRepository {
 
     suspend fun findDownloadedBooks(): List<BookItem>
 
-
     suspend fun findBookByKey(key: String): Book?
 
     suspend fun findBooksByKey(key: String): List<Book>
@@ -52,7 +48,6 @@ interface LocalBookRepository {
     suspend fun subscribeBooksByKey(key: String, title: String): Flow<List<Book>>
 
     /****************************************************/
-
 
     suspend fun deleteAllExploreBook()
 
@@ -62,19 +57,14 @@ interface LocalBookRepository {
 
     suspend fun deleteBookById(id: Long)
 
-
     suspend fun deleteAllBooks()
-
 
     /****************************************************/
 
     suspend fun insertBook(book: Book): Long
     suspend fun insertBooks(book: List<Book>): List<Long>
 
-
     /**************************************************/
 
     suspend fun findFavoriteSourceIds(): List<Long>
-
 }
-

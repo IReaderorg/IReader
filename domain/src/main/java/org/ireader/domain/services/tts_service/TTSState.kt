@@ -1,11 +1,15 @@
 package org.ireader.presentation.feature_ttl
 
 import android.speech.tts.Voice
-import androidx.compose.runtime.*
+import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.Chapter
 import org.ireader.core_api.source.Source
-import java.util.*
+import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -34,21 +38,18 @@ interface TTSState {
     var ttsSource: Source?
     var ttsChapters: List<Chapter>
     var ttsCurrentChapterIndex: Int
-
-
 }
 
 @Singleton
 class TTSStateImpl @Inject constructor() : TTSState {
 
-    //val mediaSession = MediaSessionCompat(context, "mediaPlayer", null, null)
-    //override var mediaSession : MediaSessionCompat? = null
+    // val mediaSession = MediaSessionCompat(context, "mediaPlayer", null, null)
+    // override var mediaSession : MediaSessionCompat? = null
     override var ttsIsLoading by mutableStateOf<Boolean>(false)
     override var currentReadingParagraph: Int by mutableStateOf<Int>(0)
     override var prevPar: Int by mutableStateOf<Int>(0)
     override var languages by mutableStateOf<List<Locale>>(emptyList())
     override var voices by mutableStateOf<List<Voice>>(emptyList())
-
 
     override var currentVoice by mutableStateOf<String>("")
     override var prevVoice by mutableStateOf<String>("")
@@ -68,9 +69,6 @@ class TTSStateImpl @Inject constructor() : TTSState {
     override var ttsChapter by mutableStateOf<Chapter?>(null)
     override var ttsChapters by mutableStateOf<List<Chapter>>(emptyList())
     override var ttsCurrentChapterIndex by mutableStateOf<Int>(-1)
-
-
-
 
     override var utteranceId by mutableStateOf<String>("")
 }

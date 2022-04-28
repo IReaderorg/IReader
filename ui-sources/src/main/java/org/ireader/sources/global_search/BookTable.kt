@@ -16,13 +16,14 @@ fun BookTable() {
     Column {
         Row(modifier = Modifier.fillMaxSize()) {
             MidSizeTextComposable(text = "Book Name")
-            AppIconButton(imageVector = Icons.Default.ArrowForward,
+            AppIconButton(
+                imageVector = Icons.Default.ArrowForward,
                 title = "Open Explore Screen",
-                onClick = { /*TODO*/ })
+                onClick = { /*TODO*/ }
+            )
         }
     }
 }
-
 
 @Preview
 @Composable

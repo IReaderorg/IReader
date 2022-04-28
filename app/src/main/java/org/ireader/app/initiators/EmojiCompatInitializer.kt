@@ -23,5 +23,4 @@ class EmojiCompatInitializer @Inject constructor(context: Application) {
         )
         EmojiCompat.init(config.setReplaceAll(true))
     }
-
 }

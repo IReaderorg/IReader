@@ -1,10 +1,4 @@
-/*
- * Copyright (C) 2018 The Tachiyomi Open Source Project
- *
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- */
+
 
 package org.ireader.core_api.source.model
 
@@ -18,54 +12,59 @@ package org.ireader.core_api.source.model
 @Suppress("unused")
 sealed class Filter<V>(val name: String, val initialValue: V) {
 
-  /**
-   * The value of this filter, with the initial value set.
-   */
-  var value = initialValue
+    /**
+     * The value of this filter, with the initial value set.
+     */
+    var value = initialValue
 
-  /**
-   * Whether this filter has been updated. If this method returns true, the catalog won't receive
-   * this filter when performing a search.
-   */
-  open fun isDefaultValue(): Boolean {
-    return initialValue == value
-  }
+    /**
+     * Whether this filter has been updated. If this method returns true, the catalog won't receive
+     * this filter when performing a search.
+     */
+    open fun isDefaultValue(): Boolean {
+        return initialValue == value
+    }
 
-  /**
-   * Base filters.
-   */
+    /**
+     * Base filters.
+     */
 
-  class Note(name: String) : Filter<Unit>(name, Unit)
+    class Note(name: String) : Filter<Unit>(name, Unit)
 
-  open class Text(name: String, value: String = "") : Filter<String>(name, value)
+    open class Text(name: String, value: String = "") : Filter<String>(name, value)
 
-  open class Check(
-    name: String, val allowsExclusion: Boolean = false, value: Boolean? = null
-  ) : Filter<Boolean?>(name, value)
+    open class Check(
+        name: String,
+        val allowsExclusion: Boolean = false,
+        value: Boolean? = null
+    ) : Filter<Boolean?>(name, value)
 
-  open class Select(
-    name: String, val options: Array<String>, value: Int = 0
-  ) : Filter<Int>(name, value)
+    open class Select(
+        name: String,
+        val options: Array<String>,
+        value: Int = 0
+    ) : Filter<Int>(name, value)
 
-  open class Group(name: String, val filters: List<Filter<*>>) : Filter<Unit>(name, Unit)
+    open class Group(name: String, val filters: List<Filter<*>>) : Filter<Unit>(name, Unit)
 
-  open class Sort(
-    name: String, val options: Array<String>, value: Selection? = null
-  ) : Filter<Sort.Selection?>(name, value) {
+    open class Sort(
+        name: String,
+        val options: Array<String>,
+        value: Selection? = null
+    ) : Filter<Sort.Selection?>(name, value) {
 
-    data class Selection(val index: Int, val ascending: Boolean)
-  }
+        data class Selection(val index: Int, val ascending: Boolean)
+    }
 
-  /**
-   * Common filters.
-   */
+    /**
+     * Common filters.
+     */
 
-  class Title(name: String = "Title") : Text(name)
+    class Title(name: String = "Title") : Text(name)
 
-  class Author(name: String = "Author") : Text(name)
+    class Author(name: String = "Author") : Text(name)
 
-  class Artist(name: String = "Artist") : Text(name)
+    class Artist(name: String = "Artist") : Text(name)
 
-  class Genre(name: String, allowsExclusion: Boolean = false) : Check(name, allowsExclusion)
-
+    class Genre(name: String, allowsExclusion: Boolean = false) : Check(name, allowsExclusion)
 }

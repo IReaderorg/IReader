@@ -20,7 +20,6 @@ import org.ireader.core_ui.ui_components.TextSection
 import org.ireader.sources.extension.CatalogItem
 import org.ireader.sources.extension.CatalogsState
 
-
 @Composable
 fun RemoteSourcesScreen(
     modifier: Modifier = Modifier,
@@ -32,7 +31,8 @@ fun RemoteSourcesScreen(
     val scrollState = rememberLazyListState()
     val swipeState = rememberSwipeRefreshState(isRefreshing = state.isRefreshing)
     val allCatalogs = (state.pinnedCatalogs + state.unpinnedCatalogs)
-    SwipeRefresh(state = swipeState,
+    SwipeRefresh(
+        state = swipeState,
         onRefresh = { onRefreshCatalogs() },
         indicator = { _, trigger ->
             SwipeRefreshIndicator(
@@ -43,12 +43,15 @@ fun RemoteSourcesScreen(
                 contentColor = MaterialTheme.colors.primaryVariant,
                 elevation = 8.dp,
             )
-        }) {
-        LazyColumn(modifier = modifier
-            .fillMaxSize(),
+        }
+    ) {
+        LazyColumn(
+            modifier = modifier
+                .fillMaxSize(),
             state = scrollState,
             verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally) {
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             if (allCatalogs.isNotEmpty()) {
                 item {
                     TextSection(
@@ -80,7 +83,7 @@ fun RemoteSourcesScreen(
                         modifier = Modifier.padding(8.dp)
                     )
                 }
-                //ERROR : this lines may throws anexception
+                // ERROR : this lines may throws anexception
                 kotlin.runCatching {
                     items(state.remoteCatalogs.size) { index ->
                         val catalog = state.remoteCatalogs[index]
@@ -91,7 +94,7 @@ fun RemoteSourcesScreen(
                         )
                     }
                 }.getOrElse {
-                    Log.error(it,"Remote Sources throws an exception")
+                    Log.error(it, "Remote Sources throws an exception")
                     Log.error { it.message.toString() }
                 }
             }

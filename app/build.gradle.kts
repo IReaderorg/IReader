@@ -1,7 +1,11 @@
 
 import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.TimeZone
+
+
+
 
 plugins {
     id("com.android.application")
@@ -15,8 +19,6 @@ plugins {
     id("com.google.firebase.crashlytics")
 }
 
-
-
 android {
     compileSdk = ProjectConfig.compileSdk
     defaultConfig {
@@ -27,19 +29,21 @@ android {
         versionName = ProjectConfig.versionName
     }
     packagingOptions {
-        resources.excludes.addAll(listOf(
-            "LICENSE.txt",
-            "META-INF/LICENSE",
-            "META-INF/LICENSE.txt",
-            "META-INF/README.md",
-            "META-INF/AL2.0",
-            "META-INF/LGPL2.1",
-            "**/attach_hotspot_windows.dll",
-            "META-INF/licenses/ASM",
-            "META-INF/gradle/incremental.annotation.processors",
-            "META-INF/DEPENDENCIES",
-            "mozilla/public-suffix-list.txt",
-        ))
+        resources.excludes.addAll(
+            listOf(
+                "LICENSE.txt",
+                "META-INF/LICENSE",
+                "META-INF/LICENSE.txt",
+                "META-INF/README.md",
+                "META-INF/AL2.0",
+                "META-INF/LGPL2.1",
+                "**/attach_hotspot_windows.dll",
+                "META-INF/licenses/ASM",
+                "META-INF/gradle/incremental.annotation.processors",
+                "META-INF/DEPENDENCIES",
+                "mozilla/public-suffix-list.txt",
+            )
+        )
     }
 
     buildFeatures {
@@ -52,12 +56,13 @@ android {
     buildTypes {
         getByName("release") {
             isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 }
-
 
 dependencies {
     implementation(androidx.emoji)
@@ -107,8 +112,11 @@ dependencies {
     implementation(libs.room.ktx)
     kapt(libs.room.compiler)
 
-
     testImplementation(test.bundles.common)
+    testImplementation(libs.hilt.androidtest)
+    testImplementation(libs.room.testing)
+    androidTestImplementation(libs.hilt.androidtest)
+    androidTestImplementation(libs.room.testing)
     androidTestImplementation(test.bundles.common)
 }
 

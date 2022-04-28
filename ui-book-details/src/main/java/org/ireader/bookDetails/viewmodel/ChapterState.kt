@@ -11,7 +11,6 @@ open class ChapterStateImpl @Inject constructor() : ChapterState {
     override var chapters by mutableStateOf<List<Chapter>>(emptyList())
 }
 
-
 interface ChapterState {
     var chapterIsLoading: Boolean
     var chapters: List<Chapter>

@@ -6,7 +6,15 @@ import androidx.compose.foundation.MutatorMutex
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
@@ -112,7 +120,8 @@ private class SwipeRefreshNestedScrollConnection(
         // If the user is swiping and there's y remaining, handle it
         scrollFromTop && source == NestedScrollSource.Drag && available.y < 0f -> onScroll(available)
         !scrollFromTop && source == NestedScrollSource.Drag && available.y > 0f -> onScroll(
-            available)
+            available
+        )
         else -> Offset.Zero
     }
 
@@ -128,7 +137,8 @@ private class SwipeRefreshNestedScrollConnection(
         // If the user is swiping and there's y remaining, handle it
         scrollFromTop && source == NestedScrollSource.Drag && available.y > 0f -> onScroll(available)
         !scrollFromTop && source == NestedScrollSource.Drag && available.y < 0f -> onScroll(
-            available)
+            available
+        )
         else -> Offset.Zero
     }
 
@@ -215,7 +225,6 @@ private class SwipeRefreshNestedScrollConnection(
  * @param content The content containing a scroll composable.
  */
 
-
 data class ISwipeRefreshIndicator(
     val enable: Boolean,
     val alignment: Alignment,
@@ -223,7 +232,7 @@ data class ISwipeRefreshIndicator(
         SwipeRefreshIndicator(
             state = s,
             refreshTriggerDistance = trigger,
-            clockwise = true//(alignment as BiasAlignment).verticalBias != 1f
+            clockwise = true // (alignment as BiasAlignment).verticalBias != 1f
         )
     },
     val onRefresh: () -> Unit,
@@ -236,12 +245,11 @@ fun MultiSwipeRefresh(
     swipeEnabled: Boolean = true,
     refreshTriggerDistance: Dp = 80.dp,
     indicators: List<ISwipeRefreshIndicator>,
-    //indicatorAlignment: Alignment = Alignment.TopCenter,
+    // indicatorAlignment: Alignment = Alignment.TopCenter,
     indicatorPadding: PaddingValues = PaddingValues(0.dp),
     clipIndicatorToPadding: Boolean = true,
     content: @Composable () -> Unit,
 ) {
-
 
     // Our LaunchedEffect, which animates the indicator to its resting position
     LaunchedEffect(state.isSwipeInProgress) {
@@ -293,5 +301,4 @@ fun MultiSwipeRefresh(
             }
         }
     }
-
 }

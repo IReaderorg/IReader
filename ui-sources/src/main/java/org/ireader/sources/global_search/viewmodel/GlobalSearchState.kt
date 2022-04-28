@@ -12,7 +12,6 @@ interface GlobalSearchState {
     var items: List<SearchItem>
     var query: String
     var searchMode: Boolean
-
 }
 
 open class GlobalSearchStateImpl @Inject constructor() : GlobalSearchState {
@@ -23,7 +22,6 @@ open class GlobalSearchStateImpl @Inject constructor() : GlobalSearchState {
     override var query: String by mutableStateOf("")
     override var searchMode: Boolean by mutableStateOf(false)
 }
-
 
 data class SearchItem(
     val source: Source,

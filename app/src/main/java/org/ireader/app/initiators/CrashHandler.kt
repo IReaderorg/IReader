@@ -31,9 +31,9 @@ class CrashHandler @Inject constructor(private val context: Application) {
                 AppExceptionHandler(
                     systemHandler,
                     fabricExceptionHandler,
-                    context))
+                    context
+                )
+            )
         }
-
     }
-
 }

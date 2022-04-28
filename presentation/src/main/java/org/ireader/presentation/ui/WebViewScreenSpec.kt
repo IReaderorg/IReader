@@ -3,7 +3,11 @@ package org.ireader.presentation.ui
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.*
+import androidx.navigation.NamedNavArgument
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavController
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import com.google.accompanist.pager.ExperimentalPagerApi
 import org.ireader.web.WebPageScreen
 import org.ireader.web.WebViewPageModel
@@ -26,26 +30,28 @@ object WebViewScreenSpec : ScreenSpec {
         url: String? = null,
     ): String {
         return "web_page_route/${
-            URLEncoder.encode(url,
-                StandardCharsets.UTF_8.name())
+        URLEncoder.encode(
+            url,
+            StandardCharsets.UTF_8.name()
+        )
         }"
     }
 
-
-    @OptIn(ExperimentalPagerApi::class, androidx.compose.animation.ExperimentalAnimationApi::class,
+    @OptIn(
+        ExperimentalPagerApi::class, androidx.compose.animation.ExperimentalAnimationApi::class,
         androidx.compose.material.ExperimentalMaterialApi::class,
-        kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+        kotlinx.coroutines.ExperimentalCoroutinesApi::class
+    )
     @Composable
     override fun Content(
         navController: NavController,
         navBackStackEntry: NavBackStackEntry,
         scaffoldState: ScaffoldState,
     ) {
-        val vm : WebViewPageModel  = hiltViewModel()
+        val vm: WebViewPageModel = hiltViewModel()
         WebPageScreen(
             navController = navController,
             viewModel = vm
         )
     }
-
 }

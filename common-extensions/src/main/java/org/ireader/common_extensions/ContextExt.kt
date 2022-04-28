@@ -4,7 +4,10 @@ import android.app.ActivityManager
 import android.app.KeyguardManager
 import android.app.Notification
 import android.app.NotificationManager
-import android.content.*
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.ContextWrapper
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.Color
@@ -38,7 +41,6 @@ import androidx.core.net.toUri
 import org.ireader.core.R
 import java.io.File
 import kotlin.math.roundToInt
-
 
 fun Context.copyToClipboard(label: String, content: String) {
     if (content.isBlank()) return
@@ -78,7 +80,6 @@ fun getCacheSize(context: Context): String {
         in 1024..1048576 -> "${size / 1024} Kb"
         else -> "${size / (1024 * 1024)} Mb"
     }
-
 }
 fun File.calculateSizeRecursively(): Long {
     return walkBottomUp().fold(0L) { acc, file -> acc + file.length() }
@@ -97,7 +98,6 @@ fun Context.findComponentActivity(): ComponentActivity? = when (this) {
 }
 
 private const val TABLET_UI_MIN_SCREEN_WIDTH_DP = 720
-
 
 /**
  * Helper method to create a notification builder.
@@ -196,9 +196,9 @@ val Int.dpToPx: Int
  */
 val Float.dpToPxEnd: Float
     get() = (
-            this * Resources.getSystem().displayMetrics.density *
-                    if (Resources.getSystem().isLTR) 1 else -1
-            )
+        this * Resources.getSystem().displayMetrics.density *
+            if (Resources.getSystem().isLTR) 1 else -1
+        )
 
 val Resources.isLTR
     get() = configuration.layoutDirection == View.LAYOUT_DIRECTION_LTR
@@ -230,9 +230,11 @@ val Context.displayCompat: Display?
  * @see Settings.Global.ANIMATOR_DURATION_SCALE
  */
 val Context.animatorDurationScale: Float
-    get() = Settings.Global.getFloat(this.contentResolver,
+    get() = Settings.Global.getFloat(
+        this.contentResolver,
         Settings.Global.ANIMATOR_DURATION_SCALE,
-        1f)
+        1f
+    )
 
 /**
  * Convenience method to acquire a partial wake lock.
@@ -242,7 +244,6 @@ fun Context.acquireWakeLock(tag: String): PowerManager.WakeLock {
     wakeLock.acquire()
     return wakeLock
 }
-
 
 /**
  * Returns true if the given service class is running.

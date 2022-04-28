@@ -1,5 +1,4 @@
-package org.ireader.core_ui.ui_components
-
+package org.ireader.components.list.scrollbars
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -7,10 +6,21 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.absoluteOffset
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -42,8 +52,7 @@ fun LazyColumnScrollbar(
     thumbSelectedColor: Color = Color(0xFF5281CA),
     thumbShape: Shape = CircleShape,
     content: @Composable () -> Unit
-)
-{
+) {
     Box {
         content()
         LazyColumnScrollbar(
@@ -119,14 +128,18 @@ fun LazyColumnScrollbar(
 
     val alpha by animateFloatAsState(
         targetValue = if (isInAction) 1f else 0f,
-        animationSpec = tween(durationMillis = if (isInAction) 75 else 500,
-            delayMillis = if (isInAction) 0 else 500)
+        animationSpec = tween(
+            durationMillis = if (isInAction) 75 else 500,
+            delayMillis = if (isInAction) 0 else 500
+        )
     )
 
     val displacement by animateFloatAsState(
         targetValue = if (isInAction) 0f else 14f,
-        animationSpec = tween(durationMillis = if (isInAction) 75 else 500,
-            delayMillis = if (isInAction) 0 else 500)
+        animationSpec = tween(
+            durationMillis = if (isInAction) 75 else 500,
+            delayMillis = if (isInAction) 0 else 500
+        )
     )
 
     BoxWithConstraints(Modifier.fillMaxWidth()) {

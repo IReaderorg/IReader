@@ -1,9 +1,11 @@
 package org.ireader.data.local.dao
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
-import org.ireader.common_models.entities.Book
-import org.ireader.common_models.entities.BookItem
 import org.ireader.common_models.entities.Chapter
 
 @Dao
@@ -12,12 +14,11 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
     @Query("SELECT * FROM library")
     suspend fun findAllBooks(): List<org.ireader.common_models.entities.Book>
 
-
     @Query("""SELECT  * FROM library WHERE favorite = 1 """)
     fun subscribeAllLocalBooks(): Flow<List<org.ireader.common_models.entities.Book>>
 
-
-    @Query("""SELECT  library.* ,
+    @Query(
+        """SELECT  library.* ,
         MAX(chapter.readAt) as lastRead,
         COUNT(DISTINCT chapter.id) AS totalChapters,
         SUM(chapter.read) as isRead,
@@ -41,7 +42,8 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
         CASE WHEN :desc = 0 AND :sortByTotalChapter = 1 THEN  totalChapters END ASC,
         CASE WHEN :desc = 1 AND :lastChecked = 1 THEN  lastUpdated END DESC,
         CASE WHEN :desc = 0 AND :lastChecked = 1 THEN  lastUpdated END ASC
-        """)
+        """
+    )
     fun subscribeAllInLibraryBooks(
         sortByAbs: Boolean = false,
         sortByDateAdded: Boolean = false,
@@ -53,8 +55,8 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
         desc: Boolean = false,
     ): Flow<List<org.ireader.common_models.entities.BookItem>>
 
-
-    @Query("""
+    @Query(
+        """
     SELECT library.*,
     MAX(history.readAt) AS max,
     SUM(length(chapter.content) > 10) AS totalDownload
@@ -68,11 +70,12 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
     ORDER BY
     CASE WHEN :desc = 1 THEN  max END DESC,
     CASE WHEN :desc = 0 THEN  max END ASC
-""")
+"""
+    )
     fun subscribeLatestRead(desc: Boolean): Flow<List<org.ireader.common_models.entities.BookItem>>
 
-
-    @Query("""
+    @Query(
+        """
     SELECT library.*, MAX(chapter.dateUpload) AS max,
     SUM(length(chapter.content) > 10) AS totalDownload
     FROM library
@@ -82,11 +85,12 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
     ORDER by
     CASE WHEN :desc = 1 THEN  max END DESC,
     CASE WHEN :desc = 0 THEN  max END ASC
-""")
+"""
+    )
     fun subscribeLatestChapter(desc: Boolean): Flow<List<org.ireader.common_models.entities.BookItem>>
 
-
-    @Query("""
+    @Query(
+        """
     SELECT library.*, SUM(CASE WHEN chapter.read == 0 THEN 1 ELSE 0 END) AS unread,
     SUM(length(chapter.content) > 10) AS totalDownload
     FROM library
@@ -97,11 +101,12 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
     ORDER by 
     CASE WHEN :desc = 1 THEN  COUNT(*) END DESC,
     CASE WHEN :desc = 0 THEN  COUNT(*) END ASC
-""")
+"""
+    )
     fun subscribeTotalChapter(desc: Boolean): Flow<List<org.ireader.common_models.entities.BookItem>>
 
-
-    @Query("""
+    @Query(
+        """
     SELECT library.*, 
     SUM(length(chapter.content) > 10) AS totalDownload,
     SUM(CASE WHEN chapter.read == 0 THEN 1 ELSE 0 END) AS unread,
@@ -111,11 +116,12 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
     ON library.id = chapter.bookId
     GROUP BY library.id
     HAVING library.favorite = 1 AND unread == total
-""")
+"""
+    )
     suspend fun findUnreadBooks(): List<org.ireader.common_models.entities.BookItem>
 
-
-    @Query("""
+    @Query(
+        """
     SELECT library.*, 
     SUM(length(chapter.content) > 10) as total_download,
     SUM(length(chapter.content) > 10) AS totalDownload,
@@ -125,11 +131,12 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
     ON library.id = chapter.bookId
     GROUP BY library.id
     HAVING library.favorite = 1 AND total_download == total
-""")
+"""
+    )
     suspend fun findCompletedBooks(): List<org.ireader.common_models.entities.BookItem>
 
-
-    @Query("""
+    @Query(
+        """
     SELECT library.*, 
     SUM(length(chapter.content) > 10) AS totalDownload,
     SUM(CASE WHEN chapter.read == 0 THEN 1 ELSE 0 END) AS unread,
@@ -139,9 +146,9 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
     ON library.id = chapter.bookId
     GROUP BY library.id
     HAVING library.favorite = 1 AND unread == 0
-""")
+"""
+    )
     suspend fun findDownloadedBooks(): List<org.ireader.common_models.entities.BookItem>
-
 
     @Query("SELECT * FROM library WHERE favorite = 1")
     suspend fun findAllInLibraryBooks(): List<org.ireader.common_models.entities.Book>
@@ -172,7 +179,6 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertBook(book: org.ireader.common_models.entities.Book): Long
-
 
     @Query("DELETE FROM library WHERE id = :bookId ")
     suspend fun deleteBook(bookId: Long)
@@ -205,15 +211,14 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
     @Insert(entity = org.ireader.common_models.entities.Chapter::class, onConflict = OnConflictStrategy.REPLACE)
     fun insertChapters(chapters: List<org.ireader.common_models.entities.Chapter>)
 
-    @Query("""
+    @Query(
+        """
         DELETE FROM library
         WHERE id in (:bookIds)
-    """)
+    """
+    )
     suspend fun deleteBooksByIds(bookIds: List<Long>)
 
     @Query("DELETE FROM chapter WHERE bookId in (:bookIds)")
     suspend fun deleteChaptersByBookIds(bookIds: List<Long>)
-
-
 }
-

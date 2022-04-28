@@ -16,20 +16,19 @@ import org.ireader.history.HistoryScreen
 import org.ireader.history.viewmodel.HistoryViewModel
 import org.ireader.presentation.R
 
-
 object HistoryScreenSpec : BottomNavScreenSpec {
     override val icon: ImageVector = Icons.Default.History
     override val label: Int = R.string.history_screen_label
     override val navHostRoute: String = "history"
 
-
     override val arguments: List<NamedNavArgument> = listOf(
         NavigationArgs.showBottomNav
     )
 
-
-    @OptIn(ExperimentalPagerApi::class, androidx.compose.animation.ExperimentalAnimationApi::class,
-        androidx.compose.material.ExperimentalMaterialApi::class)
+    @OptIn(
+        ExperimentalPagerApi::class, androidx.compose.animation.ExperimentalAnimationApi::class,
+        androidx.compose.material.ExperimentalMaterialApi::class
+    )
     @Composable
     override fun Content(
         navController: NavController,
@@ -80,5 +79,4 @@ object HistoryScreenSpec : BottomNavScreenSpec {
             }
         )
     }
-
 }

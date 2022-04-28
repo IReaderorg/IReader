@@ -1,7 +1,7 @@
 package org.ireader.data.catalog
 
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
+import io.ktor.client.request.get
+import io.ktor.client.statement.bodyAsText
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
@@ -18,9 +18,9 @@ class CatalogGithubApi @Inject constructor(
         "https://raw.githubusercontent.com/kazemcodes/IReader-Sources/main"
 
     override suspend fun fetchCatalogs(): List<org.ireader.common_models.entities.CatalogRemote> {
-        val response : String  =
+        val response: String =
             httpClient.default
-            .get("$repoUrl/index.min.json")
+                .get("$repoUrl/index.min.json")
                 .bodyAsText()
 
         val catalogs = Json.Default.decodeFromString<List<CatalogRemoteApiModel>>(response)
@@ -43,7 +43,6 @@ class CatalogGithubApi @Inject constructor(
         }
     }
 
-
     @Serializable
     private data class CatalogRemoteApiModel(
         val name: String,
@@ -56,5 +55,4 @@ class CatalogGithubApi @Inject constructor(
         val description: String,
         val nsfw: Boolean,
     )
-
 }

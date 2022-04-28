@@ -20,7 +20,6 @@ import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.unit.dp
 
-
 private const val COLLAPSED_MAX_LINES = 3
 
 @Composable
@@ -44,7 +43,7 @@ fun BookSummaryDescription(
                 val iconPlaceable = measurables.first { it.layoutId == "icon" }.measure(constraints)
 
                 val layoutHeight = textPlaceable.height +
-                        if (isExpanded) iconPlaceable.height else iconPlaceable.height / 2
+                    if (isExpanded) iconPlaceable.height else iconPlaceable.height / 2
 
                 val scrimPlaceable = measurables.find { it.layoutId == "scrim" }
                     ?.measure(constraints.copy(maxHeight = layoutHeight / 2))
@@ -91,8 +90,10 @@ fun BookSummaryDescription(
                     onClick = onClickToggle,
                     modifier = Modifier.layoutId("icon")
                 ) {
-                    Icon(if (!isExpanded) Icons.Outlined.ExpandMore else Icons.Outlined.ExpandLess,
-                        null)
+                    Icon(
+                        if (!isExpanded) Icons.Outlined.ExpandMore else Icons.Outlined.ExpandLess,
+                        null
+                    )
                 }
             }
         }

@@ -1,7 +1,6 @@
 package org.ireader.core_ui
 
 import org.ireader.common_extensions.UiText
-import org.ireader.common_resources.R
 import org.ireader.core.exceptions.EmptyQuery
 import org.ireader.core.exceptions.SourceNotFoundException
 import org.ireader.core_api.log.Log
@@ -9,7 +8,7 @@ import java.io.IOException
 import java.net.SocketTimeoutException
 
 fun exceptionHandler(e: Throwable): UiText? {
-    Log.error(e,"exceptionHandler catch an exception")
+    Log.error(e, "exceptionHandler catch an exception")
 
     return when (e) {
         is IOException -> {

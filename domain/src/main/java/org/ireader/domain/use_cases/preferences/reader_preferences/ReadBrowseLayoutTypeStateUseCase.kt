@@ -5,7 +5,6 @@ import org.ireader.common_models.layouts
 import org.ireader.core_ui.theme.AppPreferences
 import javax.inject.Inject
 
-
 class LibraryLayoutTypeUseCase @Inject constructor(
     private val appPreferences: AppPreferences,
 ) {
@@ -13,7 +12,7 @@ class LibraryLayoutTypeUseCase @Inject constructor(
         appPreferences.libraryLayoutType().set(layoutIndex)
     }
 
-    fun read(): DisplayMode {
+    suspend fun read(): DisplayMode {
         return layouts[appPreferences.libraryLayoutType().get()]
     }
 }
@@ -25,8 +24,7 @@ class BrowseLayoutTypeUseCase @Inject constructor(
         appPreferences.exploreLayoutType().set(layoutIndex)
     }
 
-    fun read(): DisplayMode {
+    suspend fun read(): DisplayMode {
         return layouts[appPreferences.exploreLayoutType().get()]
     }
 }
-

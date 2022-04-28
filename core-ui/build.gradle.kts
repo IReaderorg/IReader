@@ -13,7 +13,6 @@ android {
     }
 }
 
-
 dependencies {
     implementation(project(Modules.coreApi))
     implementation(project(Modules.core))

@@ -10,7 +10,7 @@ class BackgroundColorUseCase @Inject constructor(
         appPreferences.backgroundColorReader().set(value)
     }
 
-    fun read(): Int {
+    suspend fun read(): Int {
         return appPreferences.backgroundColorReader().get()
     }
 }
@@ -22,7 +22,7 @@ class TextColorUseCase @Inject constructor(
         appPreferences.textColorReader().set(value)
     }
 
-    fun read(): Int {
+    suspend  fun read(): Int {
         return appPreferences.textColorReader().get()
     }
 }

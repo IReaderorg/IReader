@@ -70,5 +70,5 @@ fun UpdatesItemSelectedAndReadPreview() {
         onClickCover = {},
         onClickDownload = {},
 
-        )
+    )
 }

@@ -1,4 +1,4 @@
-package org.ireader.presentation.ui
+package org.ireader.presentation.theme
 
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.runtime.Composable
@@ -12,7 +12,6 @@ import org.ireader.core_ui.theme.AppColors
 import org.ireader.core_ui.theme.LocalTransparentStatusBar
 import org.ireader.core_ui.theme.Shapes
 import org.ireader.core_ui.theme.Typography
-
 
 @Composable
 fun AppTheme(
@@ -44,11 +43,9 @@ fun AppTheme(
         typography = Typography,
         shape = Shapes
     ) {
-            CompositionLocalProvider(
-                LocalRippleTheme provides rippleTheme,
-               // LocalImageLoader provides vm.coilLoader,
-                content = content
-            )
+        CompositionLocalProvider(
+            LocalRippleTheme provides rippleTheme,
+            content = content
+        )
     }
-
 }

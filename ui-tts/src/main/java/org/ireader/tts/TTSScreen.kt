@@ -4,15 +4,49 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.TweenSpec
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
+import androidx.compose.material.Divider
+import androidx.compose.material.DrawerValue
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Slider
+import androidx.compose.material.SliderDefaults
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.FastForward
+import androidx.compose.material.icons.filled.FastRewind
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.SkipNext
+import androidx.compose.material.icons.filled.SkipPrevious
+import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
@@ -48,7 +82,6 @@ import org.ireader.reader.components.SettingItemComposable
 import org.ireader.reader.components.SettingItemToggleComposable
 import org.ireader.reader.viewmodel.ReaderScreenViewModel
 import java.math.RoundingMode
-
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalPagerApi::class)
 @Composable
@@ -98,16 +131,17 @@ fun TTSScreen(
     LaunchedEffect(key1 = vm.state.stateChapter, vm.state.book) {
         vm.state.stateChapter?.let {
             vm.ttsState.ttsChapter = it
-
         }
         vm.state.book?.let {
             vm.ttsState.ttsBook = it
         }
     }
 
-    LaunchedEffect(key1 = vm.ttsState.ttsChapter,
+    LaunchedEffect(
+        key1 = vm.ttsState.ttsChapter,
         vm.ttsState.isPlaying,
-        vm.ttsState.currentReadingParagraph) {
+        vm.ttsState.currentReadingParagraph
+    ) {
         vm.stateChapter = vm.ttsState.ttsChapter
     }
     LaunchedEffect(key1 = vm.state.stateChapter) {
@@ -127,9 +161,7 @@ fun TTSScreen(
 //                }
 //            }
 //        }
-
     }
-
 
     LaunchedEffect(key1 = vm.ttsState.currentReadingParagraph) {
         try {
@@ -137,13 +169,12 @@ fun TTSScreen(
 
                 pagerState.scrollToPage(vm.ttsState.currentReadingParagraph)
                 if (vm.isPlaying) {
-                    vm.runTTSService( Player.PLAY)
+                    vm.runTTSService(Player.PLAY)
                 }
             }
         } catch (e: Throwable) {
             Log.error(e, "")
         }
-
     }
     LaunchedEffect(key1 = pagerState.currentPage) {
         if (vm.currentReadingParagraph != pagerState.currentPage) {
@@ -153,27 +184,29 @@ fun TTSScreen(
                 vm.runTTSService(Player.PLAY)
             }
         }
-
     }
-
-
 
     ModalBottomSheetLayout(
         modifier = Modifier.systemBarsPadding(),
         sheetContent = {
             Box(modifier.defaultMinSize(minHeight = 1.dp)) {
-                Column(modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp)
+                ) {
                     VoiceChip(viewModel = vm, modifier = Modifier.height(32.dp))
                     LanguageChip(viewModel = vm, modifier = Modifier.height(32.dp))
-                    SettingItemToggleComposable(text = "Auto Next Chapter",
+                    SettingItemToggleComposable(
+                        text = "Auto Next Chapter",
                         value = vm.autoNextChapter,
                         onToggle = {
                             vm.autoNextChapter = !vm.autoNextChapter
                             vm.speechPrefUseCases.saveAutoNext(vm.autoNextChapter)
-                        })
-                    SettingItemComposable(text = "Speech Rate",
+                        }
+                    )
+                    SettingItemComposable(
+                        text = "Speech Rate",
                         value = vm.speechSpeed.toString(),
                         onAdd = {
                             vm.speechSpeed += .1f
@@ -190,10 +223,11 @@ fun TTSScreen(
                                         .toFloat()
                                 vm.speechPrefUseCases.saveRate(vm.speechSpeed)
                             }
+                        }
+                    )
 
-                        })
-
-                    SettingItemComposable(text = "Pitch",
+                    SettingItemComposable(
+                        text = "Pitch",
                         value = vm.pitch.toString(),
                         onAdd = {
                             vm.pitch += .1f
@@ -209,8 +243,8 @@ fun TTSScreen(
                                         .toFloat()
                                 vm.speechPrefUseCases.savePitch(vm.speechSpeed)
                             }
-                        })
-
+                        }
+                    )
                 }
             }
         },
@@ -248,7 +282,6 @@ fun TTSScreen(
                     onMap = onMap,
                     readerScreenState = vm
                 )
-
             }
         ) { padding ->
             Box(modifier = Modifier.fillMaxSize()) {
@@ -260,22 +293,26 @@ fun TTSScreen(
                     title = "Return to Reader Screen",
                     onClick = {
                         vm.voiceMode = false
-                    })
+                    }
+                )
 
-                Column(modifier = Modifier
-                    .fillMaxSize(),
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize(),
                     verticalArrangement = Arrangement.Top,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     vm.book?.let { book ->
                         vm.stateChapter?.let { chapter ->
                             vm.ttsContent?.value?.let { content ->
-                                Column(modifier = Modifier
-                                    .fillMaxWidth()
-                                    .weight(6f)
-                                    .padding(top = 16.dp),
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .weight(6f)
+                                        .padding(top = 16.dp),
                                     verticalArrangement = Arrangement.Top,
-                                    horizontalAlignment = Alignment.CenterHorizontally) {
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
                                     BookImageComposable(
                                         image = BookCover.from(book),
                                         modifier = Modifier
@@ -283,28 +320,37 @@ fun TTSScreen(
                                             .height(180.dp)
                                             .width(120.dp)
                                             .clip(MaterialTheme.shapes.medium)
-                                            .border(2.dp,
-                                                MaterialTheme.colors.onBackground.copy(alpha = .2f)),
+                                            .border(
+                                                2.dp,
+                                                MaterialTheme.colors.onBackground.copy(alpha = .2f)
+                                            ),
                                         contentScale = ContentScale.Crop,
                                     )
 
-                                    BigSizeTextComposable(text = chapter.title,
+                                    BigSizeTextComposable(
+                                        text = chapter.title,
                                         align = TextAlign.Center,
                                         maxLine = 1,
-                                        overflow = TextOverflow.Ellipsis)
-                                    MidSizeTextComposable(text = book.title,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    MidSizeTextComposable(
+                                        text = book.title,
                                         align = TextAlign.Center,
                                         maxLine = 1,
-                                        overflow = TextOverflow.Ellipsis)
-                                        SuperSmallTextComposable(text = "${vm.currentReadingParagraph + 1}/${vm.ttsContent?.value?.lastIndex?:0L}")
-
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    SuperSmallTextComposable(text = "${vm.currentReadingParagraph + 1}/${vm.ttsContent?.value?.lastIndex ?: 0L}")
                                 }
-                                HorizontalPager(modifier = Modifier.weight(6f),count = chapter.content.size,
-                                    state = pagerState) { index ->
+                                HorizontalPager(
+                                    modifier = Modifier.weight(6f), count = chapter.content.size,
+                                    state = pagerState
+                                ) { index ->
                                     Text(
                                         modifier = modifier
-                                            .padding(horizontal = vm.paragraphsIndent.dp,
-                                                vertical = 4.dp)
+                                            .padding(
+                                                horizontal = vm.paragraphsIndent.dp,
+                                                vertical = 4.dp
+                                            )
                                             .fillMaxWidth()
                                             .height(200.dp)
                                             .verticalScroll(rememberScrollState())
@@ -319,12 +365,13 @@ fun TTSScreen(
                                     )
                                 }
 
-
-                                Column(modifier = Modifier
-                                    .weight(6f)
-                                    .fillMaxWidth(),
+                                Column(
+                                    modifier = Modifier
+                                        .weight(6f)
+                                        .fillMaxWidth(),
                                     verticalArrangement = Arrangement.Center,
-                                    horizontalAlignment = Alignment.CenterHorizontally) {
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
                                     TTLScreenSetting(
                                         modifier = Modifier.weight(4f),
                                         onSetting = {
@@ -334,8 +381,10 @@ fun TTSScreen(
                                         },
                                         onContent = {
                                             scope.launch {
-                                                scaffoldState.drawerState.animateTo(DrawerValue.Open,
-                                                    TweenSpec())
+                                                scaffoldState.drawerState.animateTo(
+                                                    DrawerValue.Open,
+                                                    TweenSpec()
+                                                )
                                             }
                                         }
                                     )
@@ -353,20 +402,14 @@ fun TTSScreen(
                                         onValueChangeFinished = onValueChangeFinished
                                     )
                                 }
-
-
                             }
                         }
                     }
-
                 }
-
-
             }
         }
     }
 }
-
 
 @Composable
 private fun TTLScreenSetting(
@@ -374,33 +417,45 @@ private fun TTLScreenSetting(
     onSetting: () -> Unit,
     onContent: () -> Unit,
 ) {
-    Row(modifier = modifier
-        .fillMaxWidth()
-        .border(width = 1.dp, color = MaterialTheme.colors.onBackground.copy(.1f)),
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .border(width = 1.dp, color = MaterialTheme.colors.onBackground.copy(.1f)),
         horizontalArrangement = Arrangement.SpaceAround,
-        verticalAlignment = Alignment.CenterVertically) {
-        Row(modifier = Modifier
-            .clickable { onContent() }
-            .weight(1f)
-            .fillMaxHeight(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            modifier = Modifier
+                .clickable { onContent() }
+                .weight(1f)
+                .fillMaxHeight(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center) {
-            Icon(modifier = Modifier.size(40.dp), imageVector = Icons.Default.List,
-                contentDescription = stringResource(id = R.string.content).uppercase())
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                modifier = Modifier.size(40.dp), imageVector = Icons.Default.List,
+                contentDescription = stringResource(id = R.string.content).uppercase()
+            )
             Spacer(modifier = Modifier.width(16.dp))
             MidSizeTextComposable(text = stringResource(id = R.string.content).uppercase())
         }
-        Divider(modifier = Modifier
-            .width(1.dp)
-            .fillMaxHeight())
-        Row(modifier = Modifier
-            .clickable { onSetting() }
-            .weight(1f)
-            .fillMaxHeight(),
+        Divider(
+            modifier = Modifier
+                .width(1.dp)
+                .fillMaxHeight()
+        )
+        Row(
+            modifier = Modifier
+                .clickable { onSetting() }
+                .weight(1f)
+                .fillMaxHeight(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center) {
-            Icon(modifier = Modifier.size(40.dp), imageVector = Icons.Default.Settings,
-                contentDescription = stringResource(id = R.string.settings).uppercase())
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                modifier = Modifier.size(40.dp), imageVector = Icons.Default.Settings,
+                contentDescription = stringResource(id = R.string.settings).uppercase()
+            )
             Spacer(modifier = Modifier.width(16.dp))
             MidSizeTextComposable(text = stringResource(id = R.string.settings).uppercase())
         }
@@ -444,65 +499,78 @@ private fun TTLScreenPlay(
             )
         }
 
-        Row(modifier = modifier.fillMaxWidth(),
+        Row(
+            modifier = modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceAround,
-            verticalAlignment = Alignment.CenterVertically) {
-            Row(modifier = Modifier
-                .padding(bottom = 16.dp, top = 4.dp)
-                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(
+                modifier = Modifier
+                    .padding(bottom = 16.dp, top = 4.dp)
+                    .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceAround) {
-                AppIconButton(modifier = Modifier.size(50.dp),
+                horizontalArrangement = Arrangement.SpaceAround
+            ) {
+                AppIconButton(
+                    modifier = Modifier.size(50.dp),
                     imageVector = Icons.Filled.SkipPrevious,
                     title = "Previous Paragraph",
                     onClick = onPrev,
-                    tint = MaterialTheme.colors.onBackground)
-                AppIconButton(modifier = Modifier.size(50.dp),
+                    tint = MaterialTheme.colors.onBackground
+                )
+                AppIconButton(
+                    modifier = Modifier.size(50.dp),
                     imageVector = Icons.Filled.FastRewind,
                     title = "Previous",
                     onClick = onPrevPar,
-                    tint = MaterialTheme.colors.onBackground)
-                Box(modifier = Modifier
-                    .size(80.dp)
-                    .border(1.dp, MaterialTheme.colors.onBackground.copy(.4f), CircleShape),
-                    contentAlignment = Alignment.Center) {
+                    tint = MaterialTheme.colors.onBackground
+                )
+                Box(
+                    modifier = Modifier
+                        .size(80.dp)
+                        .border(1.dp, MaterialTheme.colors.onBackground.copy(.4f), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
                     when {
                         vm.ttsIsLoading || vm.isRemoteLoading -> {
                             showLoading()
                         }
                         vm.isPlaying -> {
-                            AppIconButton(modifier = Modifier.size(80.dp),
+                            AppIconButton(
+                                modifier = Modifier.size(80.dp),
                                 imageVector = Icons.Filled.Pause,
                                 title = "Play",
                                 onClick = onPlay,
-                                tint = MaterialTheme.colors.onBackground)
+                                tint = MaterialTheme.colors.onBackground
+                            )
                         }
                         else -> {
-                            AppIconButton(modifier = Modifier.size(80.dp),
+                            AppIconButton(
+                                modifier = Modifier.size(80.dp),
                                 imageVector = Icons.Filled.PlayArrow,
                                 title = "Play",
                                 onClick = onPlay,
-                                tint = MaterialTheme.colors.onBackground)
+                                tint = MaterialTheme.colors.onBackground
+                            )
                         }
                     }
-
                 }
 
-                AppIconButton(modifier = Modifier.size(50.dp),
+                AppIconButton(
+                    modifier = Modifier.size(50.dp),
                     imageVector = Icons.Filled.FastForward,
                     title = "Next Paragraph",
                     onClick = onNextPar,
-                    tint = MaterialTheme.colors.onBackground)
-                AppIconButton(modifier = Modifier.size(50.dp),
+                    tint = MaterialTheme.colors.onBackground
+                )
+                AppIconButton(
+                    modifier = Modifier.size(50.dp),
                     imageVector = Icons.Filled.SkipNext,
                     title = "Next",
                     onClick = onNext,
-                    tint = MaterialTheme.colors.onBackground)
-
-
+                    tint = MaterialTheme.colors.onBackground
+                )
             }
         }
     }
-
 }
-

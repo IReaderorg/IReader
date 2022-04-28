@@ -7,7 +7,6 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import dagger.hilt.android.lifecycle.HiltViewModel
 import org.ireader.core_catalogs.CatalogStore
-
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
@@ -29,17 +28,14 @@ class WebViewPageModel @Inject constructor(
     private val webpageImpl: WebViewPageStateImpl,
 ) : BaseViewModel(), WebViewPageState by webpageImpl {
 
-
-
     init {
-        val url = URLDecoder.decode(savedStateHandle.get<String>(NavigationArgs.url.name),
-            StandardCharsets.UTF_8.name())
+        val url = URLDecoder.decode(
+            savedStateHandle.get<String>(NavigationArgs.url.name),
+            StandardCharsets.UTF_8.name()
+        )
         updateUrl(url)
         updateWebUrl(url = url)
     }
-
-
-
 
     fun toggleLoading(loading: Boolean) {
         isLoading = loading
@@ -51,17 +47,13 @@ class WebViewPageModel @Inject constructor(
 
     fun updateWebUrl(url: String) {
         webUrl = url
-
     }
-
-
 }
 
 interface WebViewPageState {
     var url: String
     var webUrl: String
     var isLoading: Boolean
-
 }
 
 open class WebViewPageStateImpl @Inject constructor() : WebViewPageState {
@@ -69,7 +61,4 @@ open class WebViewPageStateImpl @Inject constructor() : WebViewPageState {
     override var webUrl: String by mutableStateOf("")
 
     override var isLoading: Boolean by mutableStateOf(false)
-
-
 }
-

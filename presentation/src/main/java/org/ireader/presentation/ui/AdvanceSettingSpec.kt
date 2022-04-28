@@ -13,20 +13,20 @@ object AdvanceSettingSpec : ScreenSpec {
 
     override val navHostRoute: String = "advance_setting_route"
 
-
-    @OptIn(ExperimentalPagerApi::class, androidx.compose.animation.ExperimentalAnimationApi::class,
-        androidx.compose.material.ExperimentalMaterialApi::class)
+    @OptIn(
+        ExperimentalPagerApi::class, androidx.compose.animation.ExperimentalAnimationApi::class,
+        androidx.compose.material.ExperimentalMaterialApi::class
+    )
     @Composable
     override fun Content(
         navController: NavController,
         navBackStackEntry: NavBackStackEntry,
         scaffoldState: ScaffoldState,
     ) {
-        val vm : SettingViewModel = hiltViewModel()
+        val vm: SettingViewModel = hiltViewModel()
         AdvanceSettings(
             navController = navController,
             vm = vm
         )
     }
-
 }

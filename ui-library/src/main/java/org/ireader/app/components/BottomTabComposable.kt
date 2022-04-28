@@ -24,22 +24,24 @@ fun BottomTabComposable(
     navController: NavController,
     filters: List<FilterType>,
     addFilters: (FilterType) -> Unit,
-    removeFilter: (FilterType)-> Unit,
+    removeFilter: (FilterType) -> Unit,
     sortType: SortType,
     isSortDesc: Boolean,
-    onSortSelected:(SortType) -> Unit,
+    onSortSelected: (SortType) -> Unit,
     layoutType: LayoutType,
     onLayoutSelected: (DisplayMode) -> Unit
 ) {
-    val tabs = listOf(TabItem.Filter(
-        filters, addFilters, removeFilter
-    ),
+    val tabs = listOf(
+        TabItem.Filter(
+            filters, addFilters, removeFilter
+        ),
         TabItem.Sort(
             sortType, isSortDesc, onSortSelected
         ),
         TabItem.Display(
             layoutType, onLayoutSelected
-        ))
+        )
+    )
 
     /** There is Some issue here were sheet content is not need , not sure why**/
     Column(modifier = modifier.fillMaxSize()) {
@@ -56,11 +58,5 @@ fun BottomTabComposable(
             layoutType,
             onLayoutSelected
         )
-
     }
-
-
 }
-
-
-

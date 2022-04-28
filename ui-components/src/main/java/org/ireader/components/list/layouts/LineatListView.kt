@@ -3,7 +3,16 @@ package org.ireader.components.list.layouts
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -21,7 +30,6 @@ import org.ireader.common_models.entities.BookItem
 import org.ireader.components.components.BookImageComposable
 import org.ireader.image_loader.BookCover
 
-
 @Composable
 fun LinearBookItem(
     modifier: Modifier = Modifier,
@@ -35,17 +43,23 @@ fun LinearBookItem(
             .padding(vertical = 8.dp, horizontal = 8.dp),
         contentAlignment = Alignment.Center,
     ) {
-        Row(modifier = Modifier
-            .fillMaxWidth()
-            .height(40.dp)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(40.dp)
+        ) {
             BookImageComposable(
                 image = BookCover.from(book),
                 modifier = modifier
                     .aspectRatio(3f / 4f)
                     .clip(RoundedCornerShape(4.dp))
-                    .border(.2.dp,
+                    .border(
+                        .2.dp,
                         if (selected) MaterialTheme.colors.primary.copy(alpha = .5f) else MaterialTheme.colors.onBackground.copy(
-                            alpha = .1f)))
+                            alpha = .1f
+                        )
+                    )
+            )
             Spacer(modifier = Modifier.width(15.dp))
             Text(
                 text = title,
@@ -55,7 +69,6 @@ fun LinearBookItem(
             )
         }
     }
-
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -72,31 +85,30 @@ fun LinearListDisplay(
     onEndReach: (itemIndex: Int) -> Unit = {},
 ) {
     LazyColumn(modifier = Modifier.fillMaxSize(), state = scrollState) {
-            items(count = books.size) { index ->
-                onEndReach(index)
-                LinearBookItem(
-                    title = books[index].title,
-                    book = books[index],
-                    modifier = Modifier.combinedClickable(
-                        onClick = { onClick(books[index]) },
-                        onLongClick = { onClick(books[index]) },
-                    ),
-                    selected = books[index].id in selection
-                )
-            }
-            item {
-                    Spacer(modifier = Modifier.height(25.dp) )
-                if (isLoading) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        CircularProgressIndicator()
-                    }
+        items(count = books.size) { index ->
+            onEndReach(index)
+            LinearBookItem(
+                title = books[index].title,
+                book = books[index],
+                modifier = Modifier.combinedClickable(
+                    onClick = { onClick(books[index]) },
+                    onLongClick = { onClick(books[index]) },
+                ),
+                selected = books[index].id in selection
+            )
+        }
+        item {
+            Spacer(modifier = Modifier.height(25.dp))
+            if (isLoading) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    CircularProgressIndicator()
                 }
             }
         }
+    }
 }
-

@@ -1,3 +1,5 @@
+
+
 package org.ireader.core
 
 class DefaultPaginator<Key, Item>(
@@ -38,7 +40,6 @@ class DefaultPaginator<Key, Item>(
         currentKey = initialKey
     }
 }
-
 
 interface Paginator<Key, Item> {
     suspend fun loadNextItems()

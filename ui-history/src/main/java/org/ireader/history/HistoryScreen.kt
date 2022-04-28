@@ -16,20 +16,22 @@ import org.ireader.history.viewmodel.HistoryState
 @Composable
 fun HistoryScreen(
     state: HistoryState,
-    onAppbarDeleteAll:() -> Unit,
-    getHistories:() -> Unit,
-    onHistory:(HistoryWithRelations) -> Unit,
+    onAppbarDeleteAll: () -> Unit,
+    getHistories: () -> Unit,
+    onHistory: (HistoryWithRelations) -> Unit,
     onHistoryDelete: (HistoryWithRelations) -> Unit,
     onHistoryPlay: (HistoryWithRelations) -> Unit,
     onBookCover: (HistoryWithRelations) -> Unit,
 ) {
 
     Scaffold(
-        topBar = { HistoryTopAppBar(
-            vm = state,
-            getHistories = getHistories,
-            onDeleteAll = onAppbarDeleteAll,
-        ) }
+        topBar = {
+            HistoryTopAppBar(
+                vm = state,
+                getHistories = getHistories,
+                onDeleteAll = onAppbarDeleteAll,
+            )
+        }
     ) { padding ->
         Box(modifier = Modifier.padding(padding)) {
             Crossfade(targetState = Pair(state.isLoading, state.isEmpty)) { (isLoading, isEmpty) ->

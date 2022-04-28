@@ -41,11 +41,10 @@ fun AdvanceSettings(
     navController: NavController = rememberNavController(),
     vm: SettingViewModel,
 
-    ) {
+) {
     val context = LocalContext.current
     val scaffoldState = rememberScaffoldState()
     val scope = rememberCoroutineScope()
-
 
     val onBackup =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultIntent ->
@@ -86,8 +85,11 @@ fun AdvanceSettings(
                             FileInputStream(pfd.fileDescriptor).use { stream ->
                                 val txt = stream.readBytes().decodeToString()
                                 kotlin.runCatching {
-                                    vm.insertBackup(Json.Default.decodeFromString<List<BackUpBook>>(
-                                        txt))
+                                    vm.insertBackup(
+                                        Json.Default.decodeFromString<List<BackUpBook>>(
+                                            txt
+                                        )
+                                    )
                                     vm.showSnackBar(org.ireader.common_extensions.UiText.StringResource(R.string.restoredSuccessfully))
                                 }.getOrElse { e ->
                                     vm.showSnackBar(org.ireader.common_extensions.UiText.ExceptionString(e))
@@ -98,7 +100,6 @@ fun AdvanceSettings(
                 } catch (e: Throwable) {
                     vm.showSnackBar(org.ireader.common_extensions.UiText.ExceptionString(e))
                 }
-
             }
         }
 
@@ -138,8 +139,10 @@ fun AdvanceSettings(
                 vm.deleteAllChapters()
                 vm.showSnackBar(org.ireader.common_extensions.UiText.DynamicString("Chapters was cleared."))
             }
-            AdvanceSettingItem(title = "Clear All Cache",
-                subtitle = org.ireader.common_extensions.getCacheSize(context = context)) {
+            AdvanceSettingItem(
+                title = "Clear All Cache",
+                subtitle = org.ireader.common_extensions.getCacheSize(context = context)
+            ) {
                 context.cacheDir.deleteRecursively()
                 vm.showSnackBar(org.ireader.common_extensions.UiText.DynamicString("Clear was cleared."))
             }
@@ -152,7 +155,6 @@ fun AdvanceSettings(
                             onBackup.launch(intent)
                         }
                     }
-
             }
             AdvanceSettingItem(title = "Restore") {
                 context.findComponentActivity()
@@ -167,9 +169,5 @@ fun AdvanceSettings(
                 vm.deleteDefaultSettings()
             }
         }
-
-
     }
 }
-
-

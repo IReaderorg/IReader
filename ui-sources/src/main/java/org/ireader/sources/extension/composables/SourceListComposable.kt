@@ -21,11 +21,13 @@ fun SourceListComposable(
     navController: NavController,
     onExploreNavigation: (index: Int) -> Unit,
 ) {
-    LazyColumn(modifier = modifier
-        .fillMaxSize(),
+    LazyColumn(
+        modifier = modifier
+            .fillMaxSize(),
         state = scrollState,
         verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally) {
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         items(sources.size) { index ->
             CatalogItem(
                 catalog = sources[index],
@@ -34,7 +36,8 @@ fun SourceListComposable(
 //                    navController.navigate(ExploreScreenSpec.buildRoute(
 //                        sourceId = sources[index].sourceId,
 //                    ))
-                })
+                }
+            )
 //            ListItem(
 //                modifier = Modifier
 //                    .clickable {
@@ -69,7 +72,6 @@ fun SourceListComposable(
 //                }
 //            )
         }
-
     }
 }
 

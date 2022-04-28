@@ -37,13 +37,11 @@ class FindChapterByIdByBatch @Inject constructor(private val localChapterReposit
         chapterIds: List<Long>,
     ): List<Chapter> {
         return localChapterRepository.findChapterByIdByBatch(chapterId = chapterIds)
-
     }
 }
 
 class FindAllInLibraryChapters @Inject constructor(private val localChapterRepository: org.ireader.common_data.repository.LocalChapterRepository) {
-    suspend operator fun invoke(
-    ): List<Chapter> {
+    suspend operator fun invoke(): List<Chapter> {
         return localChapterRepository.findAllInLibraryChapter()
     }
 }

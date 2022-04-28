@@ -30,16 +30,17 @@ object ChapterScreenSpec : ScreenSpec {
         return "chapter_detail_route/$bookId/$sourceId"
     }
 
-
-    @OptIn(ExperimentalPagerApi::class, androidx.compose.animation.ExperimentalAnimationApi::class,
-        androidx.compose.material.ExperimentalMaterialApi::class)
+    @OptIn(
+        ExperimentalPagerApi::class, androidx.compose.animation.ExperimentalAnimationApi::class,
+        androidx.compose.material.ExperimentalMaterialApi::class
+    )
     @Composable
     override fun Content(
         navController: NavController,
         navBackStackEntry: NavBackStackEntry,
         scaffoldState: ScaffoldState,
     ) {
-        val  vm: ChapterDetailViewModel = hiltViewModel()
+        val vm: ChapterDetailViewModel = hiltViewModel()
         val book = vm.book
         val context = LocalContext.current
         val scrollState = rememberLazyListState()
@@ -49,11 +50,13 @@ object ChapterScreenSpec : ScreenSpec {
             onItemClick = { index ->
                 if (vm.selection.isEmpty()) {
                     if (book != null) {
-                        navController.navigate(ReaderScreenSpec.buildRoute(
-                            bookId = book.id,
-                            sourceId = book.sourceId,
-                            chapterId = vm.chapters[index].id,
-                        ))
+                        navController.navigate(
+                            ReaderScreenSpec.buildRoute(
+                                bookId = book.id,
+                                sourceId = book.sourceId,
+                                chapterId = vm.chapters[index].id,
+                            )
+                        )
                     }
                 } else {
                     when (vm.chapters[index].id) {
@@ -64,7 +67,6 @@ object ChapterScreenSpec : ScreenSpec {
                             vm.selection.add(vm.chapters[index].id)
                         }
                     }
-
                 }
             },
             onLongItemClick = { index ->
@@ -80,5 +82,4 @@ object ChapterScreenSpec : ScreenSpec {
             vm = vm
         )
     }
-
 }

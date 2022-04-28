@@ -2,7 +2,6 @@ package org.ireader.common_data.repository
 
 import kotlinx.coroutines.flow.Flow
 
-
 interface DataStoreHelper {
 
     suspend fun saveSelectedFontState(fontIndex: Int)
@@ -35,10 +34,7 @@ interface DataStoreHelper {
      */
     suspend fun saveBrowseLayoutTypeStateUseCase(layoutIndex: Int)
 
-
     suspend fun saveDohPrefUseCase(dohPref: Int)
 
     fun readDohPrefUseCase(): Flow<Int>
-
 }
-

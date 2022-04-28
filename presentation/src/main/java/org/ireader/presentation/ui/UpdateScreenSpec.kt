@@ -17,21 +17,20 @@ import org.ireader.presentation.R
 import org.ireader.updates.UpdateScreen
 import org.ireader.updates.viewmodel.UpdatesViewModel
 
-
 object UpdateScreenSpec : BottomNavScreenSpec {
     override val icon: ImageVector = Icons.Default.NewReleases
 
     override val label: Int = R.string.updates_screen_label
     override val navHostRoute: String = "updates"
 
-
     override val arguments: List<NamedNavArgument> = listOf(
         NavigationArgs.showBottomNav
     )
 
-
-    @OptIn(ExperimentalPagerApi::class, androidx.compose.animation.ExperimentalAnimationApi::class,
-        androidx.compose.material.ExperimentalMaterialApi::class)
+    @OptIn(
+        ExperimentalPagerApi::class, androidx.compose.animation.ExperimentalAnimationApi::class,
+        androidx.compose.material.ExperimentalMaterialApi::class
+    )
     @Composable
     override fun Content(
         navController: NavController,
@@ -52,8 +51,10 @@ object UpdateScreenSpec : BottomNavScreenSpec {
             },
             onAppbarFilipSelection = {
                 val ids: List<Long> =
-                    (vm.updates.flatMap { update -> update.value.map { it.id } }
-                        .filterNot { it in vm.selection }).distinct()
+                    (
+                        vm.updates.flatMap { update -> update.value.map { it.id } }
+                            .filterNot { it in vm.selection }
+                        ).distinct()
                 vm.selection.clear()
                 vm.selection.addAll(ids)
             },
@@ -82,10 +83,12 @@ object UpdateScreenSpec : BottomNavScreenSpec {
                 vm.addUpdate(it)
             },
             onCoverUpdate = { update ->
-                navController.navigate(BookDetailScreenSpec.buildRoute(
-                    update.sourceId,
-                    update.bookId
-                ))
+                navController.navigate(
+                    BookDetailScreenSpec.buildRoute(
+                        update.sourceId,
+                        update.bookId
+                    )
+                )
             },
             onDownloadUpdate = {
                 vm.addUpdate(it)
@@ -94,8 +97,10 @@ object UpdateScreenSpec : BottomNavScreenSpec {
             },
             onBottomBarDelete = {
                 vm.viewModelIOCoroutine {
-                    vm.updateUseCases.deleteUpdates(vm.updates.values.flatten()
-                        .filter { it.id in vm.selection }.map { it.toUpdate() })
+                    vm.updateUseCases.deleteUpdates(
+                        vm.updates.values.flatten()
+                            .filter { it.id in vm.selection }.map { it.toUpdate() }
+                    )
                 }
                 vm.selection.clear()
             },
@@ -117,5 +122,4 @@ object UpdateScreenSpec : BottomNavScreenSpec {
             }
         )
     }
-
 }

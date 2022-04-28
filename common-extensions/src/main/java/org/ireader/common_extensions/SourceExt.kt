@@ -25,7 +25,6 @@ suspend fun WebView.getHtml(): String = suspendCancellableCoroutine { continuati
                 .replace("\\\"", "\"")
                 .replace("<hr />", "")
         ) {
-
         }
     }
 }
@@ -46,11 +45,9 @@ fun getUrlWithoutDomain(orig: String): String {
     }
 }
 
-
 fun String.getHtml(): String {
     return this.replace("\\<.*?>", "")
 }
-
 
 fun emptyMangaInfoPage(): MangasPageInfo {
     return MangasPageInfo(emptyList(), false)
@@ -59,10 +56,9 @@ fun emptyMangaInfoPage(): MangasPageInfo {
 const val DEFAULT_USER_AGENT =
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0"
 
-
-//@SuppressLint("SetJavaScriptEnabled")
-//@ExperimentalCoroutinesApi
-//suspend fun WebView.getHtml(): String = suspendCancellableCoroutine { continuation ->
+// @SuppressLint("SetJavaScriptEnabled")
+// @ExperimentalCoroutinesApi
+// suspend fun WebView.getHtml(): String = suspendCancellableCoroutine { continuation ->
 //    settings.javaScriptEnabled = true
 //    if (!settings.javaScriptEnabled)
 //        throw IllegalStateException("Javascript is disabled")
@@ -80,9 +76,9 @@ const val DEFAULT_USER_AGENT =
 //
 //        }
 //    }
-//}
+// }
 //
-//fun getUrlWithoutDomain(orig: String): String {
+// fun getUrlWithoutDomain(orig: String): String {
 //    return try {
 //        val uri = URI(orig.replace(" ", "%20"))
 //        var out = uri.path
@@ -96,9 +92,9 @@ const val DEFAULT_USER_AGENT =
 //    } catch (e: URISyntaxException) {
 //        orig
 //    }
-//}
+// }
 //
 //
-//fun String.getHtml(): String {
+// fun String.getHtml(): String {
 //    return this.replace("\\<.*?>", "")
-//}
+// }

@@ -1,6 +1,5 @@
 package org.ireader.image_loader.coil
 
-
 import android.app.Application
 import coil.ComponentRegistry
 import coil.ImageLoader
@@ -19,19 +18,19 @@ class CoilLoaderFactory @Inject constructor(
     private val libraryCovers: LibraryCovers,
     private val client: HttpClients,
     private val getLocalCatalog: GetLocalCatalog,
-)  : ImageLoaderFactory {
+) : ImageLoaderFactory {
 
     override fun newImageLoader(): ImageLoader {
-        val cache = Cache(context.cacheDir.resolve("image_cache"),15L * 1024 * 1024)
+        val cache = Cache(context.cacheDir.resolve("image_cache"), 15L * 1024 * 1024)
 
         val okhttpClient = client.default.okhttp
-        //Faking a book cover here
-        val factory  = LibraryMangaFetcherFactory(
+        // Faking a book cover here
+        val factory = LibraryMangaFetcherFactory(
             okhttpClient,
             libraryCovers = libraryCovers,
             getLocalCatalog,
             cache,
-            data = BookCover(0,0,"", false),
+            data = BookCover(0, 0, "", false),
         )
 
         return ImageLoader.Builder(context)
@@ -48,5 +47,4 @@ class CoilLoaderFactory @Inject constructor(
             }
             .build()
     }
-
 }

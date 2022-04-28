@@ -1,10 +1,16 @@
 package org.ireader.reader.components
 
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.MaterialTheme
@@ -19,10 +25,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.ireader.core_ui.theme.fonts
 import org.ireader.components.reusable_composable.CaptionTextComposable
+import org.ireader.core_ui.theme.fonts
 import org.ireader.reader.viewmodel.ReaderScreenPreferencesState
-
 
 @Composable
 fun FontChip(
@@ -31,11 +36,13 @@ fun FontChip(
     onFontSelected: (Int) -> Unit,
 ) {
 
-    Row(modifier = Modifier
-        .fillMaxWidth()
-        .height(32.dp),
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(32.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically) {
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Text(
             modifier = Modifier.width(100.dp),
             text = "Font",
@@ -45,30 +52,31 @@ fun FontChip(
         LazyRow {
             items(count = fonts.size) { index ->
                 Spacer(modifier = modifier.width(10.dp))
-                Box(modifier = modifier
-                    .height(30.dp)
-                    .clip(RectangleShape)
-                    .background(MaterialTheme.colors.background)
-                    .border(2.dp,
-                        if (fonts[index] == state.font) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground.copy(
-                            .4f),
-                        CircleShape)
-                    .clickable {
-                        onFontSelected(index)
-                    },
+                Box(
+                    modifier = modifier
+                        .height(30.dp)
+                        .clip(RectangleShape)
+                        .background(MaterialTheme.colors.background)
+                        .border(
+                            2.dp,
+                            if (fonts[index] == state.font) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground.copy(
+                                .4f
+                            ),
+                            CircleShape
+                        )
+                        .clickable {
+                            onFontSelected(index)
+                        },
                     contentAlignment = Alignment.Center
                 ) {
-                    CaptionTextComposable(text = fonts[index].fontName,
+                    CaptionTextComposable(
+                        text = fonts[index].fontName,
                         maxLine = 1,
                         align = TextAlign.Center,
-                        modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp))
+                        modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp)
+                    )
                 }
             }
         }
-
     }
-
-
 }
-
-

@@ -13,17 +13,12 @@ dependencies {
     api(kotlinx.datetime)
     api(kotlinx.serialization.json)
 
-
-
     api(libs.ktor.core)
     implementation(libs.ktor.contentNegotiation)
     implementation(libs.ktor.contentNegotiation.gson)
 
-
-
     api(libs.okio)
     api(libs.hilt.android)
-
 
     implementation(androidx.core)
     implementation(androidx.lifecycle.process)
@@ -33,7 +28,6 @@ dependencies {
     implementation(libs.bundles.tinylog)
     api(libs.ktor.okhttp)
 }
-
 
 val packageVersion = "1.2-SNAPSHOT"
 mavenPublish {

@@ -1,4 +1,7 @@
+
+
 package org.ireader.common_models
+
 
 sealed class DisplayMode(val title: String, val layout: LayoutType, val layoutIndex: Int) {
     object CompactModel : DisplayMode("Compact Layout", layout = LayoutType.CompactGrid, 0)

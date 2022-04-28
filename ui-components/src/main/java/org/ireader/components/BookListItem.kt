@@ -1,7 +1,11 @@
 package org.ireader.components
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -18,8 +22,6 @@ sealed class BookListItem(val name: String) {
 
     data class Item(val book: Book) : BookListItem(book.title)
 }
-
-
 
 @Composable
 fun BookListItem(

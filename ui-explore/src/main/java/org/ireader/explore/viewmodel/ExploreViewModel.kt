@@ -28,7 +28,6 @@ import org.ireader.domain.use_cases.remote.RemoteUseCases
 import org.ireader.domain.use_cases.remote.key.RemoteKeyUseCase
 import javax.inject.Inject
 
-
 @HiltViewModel
 class ExploreViewModel @Inject constructor(
     private val state: ExploreStateImpl,
@@ -43,7 +42,6 @@ class ExploreViewModel @Inject constructor(
 
     private val _eventFlow = MutableSharedFlow<org.ireader.common_extensions.UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
-
 
     init {
         val sourceId = savedStateHandle.get<Long>("sourceId")
@@ -65,8 +63,10 @@ class ExploreViewModel @Inject constructor(
                 if (listings.isNotEmpty()) {
                     state.stateListing = source.getListings().first()
                     loadItems()
-                    //getBooks(source = source, listing = source.getListings().first())
-                    readLayoutType()
+                    // getBooks(source = source, listing = source.getListings().first())
+                    viewModelScope.launch {
+                        readLayoutType()
+                    }
                 } else {
                     viewModelScope.launch {
                         showSnackBar(org.ireader.common_extensions.UiText.StringResource(org.ireader.core.R.string.the_source_is_not_found))
@@ -78,9 +78,7 @@ class ExploreViewModel @Inject constructor(
                 showSnackBar(org.ireader.common_extensions.UiText.StringResource(org.ireader.core.R.string.the_source_is_not_found))
             }
         }
-
     }
-
 
     var initExploreJob: Job? = null
 
@@ -118,7 +116,8 @@ class ExploreViewModel @Inject constructor(
                             val source = source
                             if (source != null) {
                                 var result = MangasPageInfo(emptyList(), false)
-                                remoteUseCases.getRemoteBooks(searchQuery,
+                                remoteUseCases.getRemoteBooks(
+                                    searchQuery,
                                     listing,
                                     filters,
                                     source,
@@ -128,7 +127,8 @@ class ExploreViewModel @Inject constructor(
                                     },
                                     onSuccess = { res ->
                                         result = res
-                                    })
+                                    }
+                                )
                                 Result.success(result)
                             } else {
                                 throw SourceNotFoundException()
@@ -136,7 +136,6 @@ class ExploreViewModel @Inject constructor(
                         } catch (e: Throwable) {
                             Result.failure(e)
                         }
-
                     },
                     getNextKey = {
                         state.page + 1
@@ -164,13 +163,13 @@ class ExploreViewModel @Inject constructor(
                             )
                         }
                         val books = items.mangas.map {
-                            it.toBook(source?.id ?: 0,
-                                tableId = 1)
+                            it.toBook(
+                                source?.id ?: 0,
+                                tableId = 1
+                            )
                         }
 
-
                         remoteKeyUseCase.prepareExploreMode(page == 1, books, keys)
-
 
                         page = newKey
                         endReached = !items.hasNextPage
@@ -182,7 +181,6 @@ class ExploreViewModel @Inject constructor(
     }
 
     private var getBooksJob: Job? = null
-
 
     private fun onQueryChange(query: String) {
         state.searchQuery = query
@@ -197,7 +195,6 @@ class ExploreViewModel @Inject constructor(
                 stateFilters = listOf(Filter.Title().apply { this.value = query })
                 loadItems()
             }
-
         }
     }
 
@@ -215,15 +212,15 @@ class ExploreViewModel @Inject constructor(
         browseLayoutTypeUseCase.save(layoutType.layoutIndex)
     }
 
-    private fun readLayoutType() {
+    private suspend fun readLayoutType() {
         state.layout = browseLayoutTypeUseCase.read().layout
     }
-
 
     suspend fun showSnackBar(message: org.ireader.common_extensions.UiText?) {
         _eventFlow.emit(
             org.ireader.common_extensions.UiEvent.ShowSnackbar(
-                uiText = message ?: org.ireader.common_extensions.UiText.StringResource(org.ireader.core.R.string.error_unknown)
+                uiText = message
+                    ?: org.ireader.common_extensions.UiText.StringResource(org.ireader.core.R.string.error_unknown)
             )
         )
     }
@@ -238,5 +235,4 @@ class ExploreViewModel @Inject constructor(
     fun toggleFilterMode(enable: Boolean? = null) {
         state.isFilterEnable = enable ?: !state.isFilterEnable
     }
-
 }

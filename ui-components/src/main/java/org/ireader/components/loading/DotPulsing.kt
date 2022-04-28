@@ -1,8 +1,20 @@
 package org.ireader.core_ui.ui_components
 
-import androidx.compose.animation.core.*
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.keyframes
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -120,7 +132,7 @@ fun DotsElastic() {
 }
 
 @Composable
-fun DotsFlashing(show:Boolean) {
+fun DotsFlashing(show: Boolean) {
     if (show) {
         val minAlpha = 0.1f
 
@@ -283,7 +295,6 @@ fun DotsCollision() {
         Dot(offsetRight)
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable

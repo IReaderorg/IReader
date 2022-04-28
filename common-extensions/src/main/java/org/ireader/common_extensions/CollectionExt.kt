@@ -52,9 +52,11 @@ fun <T> merge(first: List<T>, second: List<T>): List<T> {
     }
 }
 
-@Throws(IndexIsInvalidException::class,
+@Throws(
+    IndexIsInvalidException::class,
     IndexLessThanZeroException::class,
-    IndexGreaterThanCollectionSizeException::class)
+    IndexGreaterThanCollectionSizeException::class
+)
 inline fun <T, K> List<T>.next(mapBy: (T) -> K, currentItem: K): Pair<Int, T> {
     val items = this.map(mapBy)
 
@@ -85,9 +87,11 @@ class IndexGreaterThanCollectionSizeException(override val message: String? = nu
 
 class IndexIsInvalidException(override val message: String? = null) : Exception(message)
 
-@Throws(IndexIsInvalidException::class,
+@Throws(
+    IndexIsInvalidException::class,
     IndexLessThanZeroException::class,
-    IndexGreaterThanCollectionSizeException::class)
+    IndexGreaterThanCollectionSizeException::class
+)
 inline fun <T, K> List<T>.previous(item: K, mapBy: (T) -> K): Pair<Int, T> {
     val items = this.map(mapBy)
     val index = items.indexOf(item)
@@ -106,7 +110,6 @@ inline fun <T, K> List<T>.previous(item: K, mapBy: (T) -> K): Pair<Int, T> {
         }
     }
 }
-
 
 /**
  * Returns first index of [element], or -1 if the collection does not contain element.
@@ -133,7 +136,6 @@ fun <T, K> removeSameItemsFromList(
     val uniqueList = sum.distinctBy {
         differentiateBy(it)
     }
-
 
     return uniqueList
 }

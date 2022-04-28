@@ -5,14 +5,12 @@ plugins {
     id("kotlinx-serialization")
 }
 android {
-
 }
 
 dependencies {
 
     compileOnly(project(Modules.coreApi))
     compileOnly(project(Modules.commonResources))
-
 
     implementation(kotlinx.datetime)
 
@@ -22,6 +20,4 @@ dependencies {
 
 //    implementation(kotlinx.reflect)
 //    implementation(kotlinx.stdlib)
-
-
 }

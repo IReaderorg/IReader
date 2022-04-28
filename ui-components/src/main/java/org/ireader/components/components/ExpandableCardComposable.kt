@@ -13,7 +13,11 @@ import androidx.compose.material.Card
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -23,7 +27,6 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.ireader.core_ui.theme.Shapes
-
 
 @ExperimentalMaterialApi
 @Composable
@@ -36,8 +39,7 @@ fun ExpandableCardComposable(
     maxLine: Int = 5,
     durationMillis: Int = 500,
 
-
-    ) {
+) {
     var isExpanded by remember { mutableStateOf(false) }
 
     Card(
@@ -71,8 +73,7 @@ fun ExpandableCardComposable(
                 softWrap = true, fontSize = fontSize,
                 fontWeight = fontWeight,
 
-                )
-
+            )
 
             Text(
                 text = "Show More",
@@ -90,17 +91,17 @@ fun ExpandableCardComposable(
 //                    maxLines = maxLine
 //                )
 //            }
-
         }
     }
 }
-
 
 @ExperimentalMaterialApi
 @Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
 @Composable
 fun ExpandableCardComposablePrev() {
-    ExpandableCardComposable(title = "Summary", description = """This is a brand new story.
+    ExpandableCardComposable(
+        title = "Summary",
+        description = """This is a brand new story.
 Survive the darkness, see the light
 There is no right or wrong, it just depends on which side you are standing on.
 To be a god, or to be a man.
@@ -111,5 +112,6 @@ After a great catastrophe struck, the world was set back many years and humanity
 With time, society started building up again and people were now living in walled strongholds and fringe towns across the land.
 Humans have also become distrustful and ruthless in an unforgiving society where the strong survive and the weak are eliminated.
 Growing up in such an era, Ren Xiaosu had to fend for himself.
-After an incident, he gained supernatural powers…""")
+After an incident, he gained supernatural powers…"""
+    )
 }

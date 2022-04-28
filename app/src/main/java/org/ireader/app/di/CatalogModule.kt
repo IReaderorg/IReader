@@ -9,7 +9,11 @@ import org.ireader.core_api.http.HttpClients
 import org.ireader.core_api.os.PackageInstaller
 import org.ireader.core_catalogs.CatalogPreferences
 import org.ireader.core_catalogs.CatalogStore
-import org.ireader.core_catalogs.service.*
+import org.ireader.core_catalogs.service.CatalogInstallationChanges
+import org.ireader.core_catalogs.service.CatalogInstaller
+import org.ireader.core_catalogs.service.CatalogLoader
+import org.ireader.core_catalogs.service.CatalogRemoteApi
+import org.ireader.core_catalogs.service.CatalogRemoteRepository
 import org.ireader.data.catalog.AndroidCatalogInstallationChanges
 import org.ireader.data.catalog.AndroidCatalogInstaller
 import org.ireader.data.catalog.AndroidCatalogLoader
@@ -20,9 +24,6 @@ import javax.inject.Singleton
 @Module
 class CatalogModule {
 
-
-
-
     @Provides
     @Singleton
     fun provideCatalogLoader(
@@ -31,7 +32,6 @@ class CatalogModule {
     ): CatalogLoader {
         return AndroidCatalogLoader(context = context, httpClients)
     }
-
 
     @Provides
     @Singleton
@@ -53,7 +53,7 @@ class CatalogModule {
         installationChanges: AndroidCatalogInstallationChanges,
         packageInstaller: PackageInstaller
     ): CatalogInstaller {
-        return AndroidCatalogInstaller(context, httpClient, installationChanges,packageInstaller)
+        return AndroidCatalogInstaller(context, httpClient, installationChanges, packageInstaller)
     }
 
     @Provides
@@ -64,8 +64,6 @@ class CatalogModule {
         return CatalogGithubApi(httpClient)
     }
 
-
-
     @Provides
     @Singleton
     fun providesCatalogStore(
@@ -74,12 +72,11 @@ class CatalogModule {
         catalogRemoteRepository: CatalogRemoteRepository,
         installationChanges: AndroidCatalogInstallationChanges,
     ): CatalogStore {
-        return CatalogStore(loader,
+        return CatalogStore(
+            loader,
             catalogPreferences,
             catalogRemoteRepository,
-            installationChanges)
+            installationChanges
+        )
     }
-
-
-
 }

@@ -5,7 +5,6 @@ import org.ireader.common_models.entities.Chapter
 
 interface LocalChapterRepository {
 
-
     fun subscribeChapterById(
         chapterId: Long,
     ): Flow<Chapter?>
@@ -44,21 +43,15 @@ interface LocalChapterRepository {
     fun subscribeFirstChapter(bookId: Long): Flow<Chapter?>
     suspend fun findFirstChapter(bookId: Long): Chapter?
 
-
-
-
     suspend fun insertChapter(chapter: Chapter): Long
 
     suspend fun insertChapters(
         chapters: List<Chapter>,
     ): List<Long>
 
-
-
     suspend fun deleteChaptersByBookId(
         bookId: Long,
     )
-
 
     suspend fun deleteChapters(chapters: List<Chapter>)
 
@@ -66,10 +59,7 @@ interface LocalChapterRepository {
         chapter: Chapter,
     )
 
-
     suspend fun deleteAllChapters()
 
     suspend fun updateChapters(bookId: Long, chapters: List<Chapter>)
-
-
 }

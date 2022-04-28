@@ -6,7 +6,6 @@ import org.ireader.common_extensions.withIOContext
 import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.Book.Companion.toBookInfo
 import org.ireader.common_models.entities.toBook
-
 import org.ireader.core.utils.updateBook
 import org.ireader.core_api.log.Log
 import org.ireader.core_api.source.Source
@@ -30,9 +29,13 @@ class GetBookDetail @Inject constructor(
 
                     val bookDetail = source.getMangaDetails(book.toBookInfo(source.id))
 
-                    onSuccess(updateBook(bookDetail.toBook(source.id),
-                        book,
-                        libraryCovers))
+                    onSuccess(
+                        updateBook(
+                            bookDetail.toBook(source.id),
+                            book,
+                            libraryCovers
+                        )
+                    )
                 } catch (e: CancellationException) {
                 } catch (e: Throwable) {
                     onError(exceptionHandler(e))
@@ -43,4 +46,3 @@ class GetBookDetail @Inject constructor(
         }
     }
 }
-

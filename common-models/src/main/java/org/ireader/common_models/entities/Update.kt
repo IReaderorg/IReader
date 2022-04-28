@@ -1,8 +1,9 @@
+
+
 package org.ireader.common_models.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-
 
 data class UpdateWithInfo(
     val id: Long = 0,
@@ -29,7 +30,6 @@ data class UpdateWithInfo(
                 date = kotlinx.datetime.Clock.System.now().toEpochMilliseconds(),
             )
         }
-
     }
 }
 
@@ -60,7 +60,5 @@ data class Update(
 //                downloaded = chapter.content.joinToString().isNotEmpty()
 //            )
 //        }
-
     }
-
 }

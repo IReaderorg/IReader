@@ -1,6 +1,14 @@
 package org.ireader.explore
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -11,10 +19,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.core_api.source.CatalogSource
 import org.ireader.core_api.source.TestSource
 import org.ireader.core_api.source.model.Filter
-import org.ireader.components.reusable_composable.MidSizeTextComposable
 
 @Composable
 fun FilterBottomSheet(
@@ -24,10 +32,11 @@ fun FilterBottomSheet(
     filters: List<Filter<*>>,
 ) {
     val scrollState = rememberScrollState()
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .padding(8.dp)
-        .verticalScroll(scrollState)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(8.dp)
+            .verticalScroll(scrollState)
     ) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             TextButton(onClick = {

@@ -11,7 +11,6 @@ import androidx.compose.ui.platform.LocalContext
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
-
 import org.ireader.core_ui.R
 import org.ireader.image_loader.BookCover
 
@@ -27,16 +26,16 @@ fun BookImageComposable(
 ) {
 
     val painter = rememberAsyncImagePainter(
-            model = ImageRequest.Builder(LocalContext.current)
-                .apply {
-                    data(image)
-                    crossfade(700)
-                    placeholder(placeholder)
-                    error(placeholder)
-                }
-                .build(),
-            contentScale = ContentScale.Crop
-        )
+        model = ImageRequest.Builder(LocalContext.current)
+            .apply {
+                data(image)
+                crossfade(700)
+                placeholder(placeholder)
+                error(placeholder)
+            }
+            .build(),
+        contentScale = ContentScale.Crop
+    )
 
     Image(
         modifier = modifier

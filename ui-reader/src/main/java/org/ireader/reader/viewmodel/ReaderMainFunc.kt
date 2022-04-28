@@ -39,8 +39,8 @@ interface ReaderMainFunctions {
 
     fun ReaderScreenViewModel.updateLastReadTime(chapter: Chapter)
     fun ReaderScreenViewModel.getLocalChaptersByPaging(bookId: Long)
-    fun ReaderScreenViewModel.prevChapter() : Chapter
-    fun ReaderScreenViewModel.nextChapter() : Chapter
+    fun ReaderScreenViewModel.prevChapter(): Chapter
+    fun ReaderScreenViewModel.nextChapter(): Chapter
 }
 
 class ReaderMainFunctionsImpl @Inject constructor() : ReaderMainFunctions {
@@ -62,10 +62,13 @@ class ReaderMainFunctionsImpl @Inject constructor() : ReaderMainFunctions {
                 clearError()
                 toggleLoading(false)
                 toggleLocalLoaded(true)
-                setChapter(resultChapter.copy(
-                    content = resultChapter.content,
-                    read = true,
-                    readAt = Clock.System.now().toEpochMilliseconds()))
+                setChapter(
+                    resultChapter.copy(
+                        content = resultChapter.content,
+                        read = true,
+                        readAt = Clock.System.now().toEpochMilliseconds()
+                    )
+                )
                 val chapter = state.stateChapter
                 if (
                     chapter != null &&
@@ -75,7 +78,6 @@ class ReaderMainFunctionsImpl @Inject constructor() : ReaderMainFunctions {
                     !state.isLoading
                 ) {
                     getReadingContentRemotely(chapter = chapter, source = source) {
-
                     }
                 }
                 updateLastReadTime(resultChapter)
@@ -120,8 +122,6 @@ class ReaderMainFunctionsImpl @Inject constructor() : ReaderMainFunctions {
                     state.currentChapterIndex =
                         stateChapters.indexOfFirst { state.stateChapter?.id == it.id }
                 }
-
-
             }
         }
     }
@@ -152,12 +152,15 @@ class ReaderMainFunctionsImpl @Inject constructor() : ReaderMainFunctions {
                 source = source,
                 onSuccess = { content ->
                     if (content != null) {
-                        insertChapter(content.copy(
-                            dateFetch = Clock.System.now()
-                                .toEpochMilliseconds(),
-                            read = true, readAt = Clock.System.now()
-                                .toEpochMilliseconds()
-                        ))
+                        insertChapter(
+                            content.copy(
+                                dateFetch = Clock.System.now()
+                                    .toEpochMilliseconds(),
+                                read = true,
+                                readAt = Clock.System.now()
+                                    .toEpochMilliseconds()
+                            )
+                        )
                         setChapter(content)
                         toggleLoading(false)
                         toggleRemoteLoading(false)
@@ -186,43 +189,49 @@ class ReaderMainFunctionsImpl @Inject constructor() : ReaderMainFunctions {
     override fun ReaderScreenViewModel.updateLastReadTime(chapter: Chapter) {
         viewModelScope.launch(Dispatchers.IO) {
             insertUseCases.insertChapter(
-                chapter = chapter.copy(read = true,
-                    readAt = Clock.System.now().toEpochMilliseconds())
+                chapter = chapter.copy(
+                    read = true,
+                    readAt = Clock.System.now().toEpochMilliseconds()
+                )
             )
-            historyUseCase.insertHistory(History(
-                bookId = chapter.bookId,
-                chapterId = chapter.id,
-                readAt = org.ireader.common_extensions.currentTimeToLong()))
+            historyUseCase.insertHistory(
+                History(
+                    bookId = chapter.bookId,
+                    chapterId = chapter.id,
+                    readAt = org.ireader.common_extensions.currentTimeToLong()
+                )
+            )
         }
     }
 
     override fun ReaderScreenViewModel.getLocalChaptersByPaging(bookId: Long) {
         getChapterJob?.cancel()
         getChapterJob = viewModelScope.launch {
-            getChapterUseCase.subscribeChaptersByBookId(bookId = bookId,
-                isAsc = prefState.isAsc, "")
+            getChapterUseCase.subscribeChaptersByBookId(
+                bookId = bookId,
+                isAsc = prefState.isAsc, ""
+            )
                 .collect {
                     stateChapters = it
                 }
         }
     }
-    override fun ReaderScreenViewModel.nextChapter() : Chapter {
+    override fun ReaderScreenViewModel.nextChapter(): Chapter {
         val chapter = stateChapter
-        val index = stateChapters.indexOfFirst { it.id == chapter?.id  }
+        val index = stateChapters.indexOfFirst { it.id == chapter?.id }
         if (index != -1) {
             currentChapterIndex = index
             return stateChapters.nextAfter(index) ?: throw IllegalAccessException("List doesn't contains ${chapter?.title}")
         }
         throw IllegalAccessException("List doesn't contains ${chapter?.title}")
     }
-    override fun ReaderScreenViewModel.prevChapter() : Chapter {
+    override fun ReaderScreenViewModel.prevChapter(): Chapter {
         val chapter = stateChapter
-        val index = stateChapters.indexOfFirst { it.id == chapter?.id  }
+        val index = stateChapters.indexOfFirst { it.id == chapter?.id }
         if (index != -1) {
             currentChapterIndex = index
             return stateChapters.prevBefore(index) ?: throw IllegalAccessException("List doesn't contains ${chapter?.title}")
         }
         throw IllegalAccessException("List doesn't contains ${chapter?.title}")
     }
-
 }

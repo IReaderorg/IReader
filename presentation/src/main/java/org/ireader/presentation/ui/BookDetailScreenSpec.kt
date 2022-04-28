@@ -7,7 +7,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.*
+import androidx.navigation.NamedNavArgument
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavController
+import androidx.navigation.NavDeepLink
+import androidx.navigation.navDeepLink
 import com.google.accompanist.pager.ExperimentalPagerApi
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -41,9 +45,10 @@ object BookDetailScreenSpec : ScreenSpec {
         }
     )
 
-
-    @OptIn(ExperimentalPagerApi::class, androidx.compose.animation.ExperimentalAnimationApi::class,
-        androidx.compose.material.ExperimentalMaterialApi::class)
+    @OptIn(
+        ExperimentalPagerApi::class, androidx.compose.animation.ExperimentalAnimationApi::class,
+        androidx.compose.material.ExperimentalMaterialApi::class
+    )
     @Composable
     override fun Content(
         navController: NavController,
@@ -69,17 +74,21 @@ object BookDetailScreenSpec : ScreenSpec {
                 onRead = {
                     if (source != null) {
                         if (viewModel.chapters.any { it.readAt != 0L } && viewModel.chapters.isNotEmpty()) {
-                            navController.navigate(ReaderScreenSpec.buildRoute(
-                                bookId = book.id,
-                                sourceId = source.id,
-                                chapterId = LAST_CHAPTER,
-                            ))
+                            navController.navigate(
+                                ReaderScreenSpec.buildRoute(
+                                    bookId = book.id,
+                                    sourceId = source.id,
+                                    chapterId = LAST_CHAPTER,
+                                )
+                            )
                         } else if (viewModel.chapters.isNotEmpty()) {
-                            navController.navigate(ReaderScreenSpec.buildRoute(
-                                bookId = book.id,
-                                sourceId = source.id,
-                                chapterId = viewModel.chapters.first().id,
-                            ))
+                            navController.navigate(
+                                ReaderScreenSpec.buildRoute(
+                                    bookId = book.id,
+                                    sourceId = source.id,
+                                    chapterId = viewModel.chapters.first().id,
+                                )
+                            )
                         } else {
                             scope.launch {
                                 viewModel.showSnackBar(org.ireader.common_extensions.UiText.StringResource(org.ireader.core.R.string.no_chapter_is_available))
@@ -107,23 +116,26 @@ object BookDetailScreenSpec : ScreenSpec {
                         navController.navigate(
                             WebViewScreenSpec.buildRoute(
                                 url = (source).baseUrl + getUrlWithoutDomain(
-                                    book.link),
+                                    book.link
+                                ),
                             )
                         )
-
                 },
                 onSwipeRefresh = {
                     source?.let {
                         scope.launch {
                             viewModel.getRemoteChapterDetail(book, source)
-
                         }
                     }
                 },
                 onChapterContent = {
                     if (source != null) {
-                        navController.navigate(ChapterScreenSpec.buildRoute(bookId = book.id,
-                            sourceId = source.id))
+                        navController.navigate(
+                            ChapterScreenSpec.buildRoute(
+                                bookId = book.id,
+                                sourceId = source.id
+                            )
+                        )
                     }
                 },
                 book = book,
@@ -138,8 +150,10 @@ object BookDetailScreenSpec : ScreenSpec {
                 chapterState = viewModel
             )
         } else {
-            EmptyScreenComposable(navController = navController,
-                errorResId = org.ireader.core.R.string.something_is_wrong_with_this_book)
+            EmptyScreenComposable(
+                navController = navController,
+                errorResId = org.ireader.core.R.string.something_is_wrong_with_this_book
+            )
         }
         LaunchedEffect(key1 = true) {
             viewModel.eventFlow.collectLatest { event ->
@@ -162,5 +176,4 @@ object BookDetailScreenSpec : ScreenSpec {
 //
 //        }
     }
-
 }

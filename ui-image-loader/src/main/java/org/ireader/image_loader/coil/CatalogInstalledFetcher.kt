@@ -19,7 +19,7 @@ import java.io.File
 
 class CatalogInstalledFetcher(
     private val context: Context,
-    private val  data: CatalogInstalled
+    private val data: CatalogInstalled
 ) : Fetcher, Keyer<CatalogInstalled> {
 
     private val pkgManager = context.packageManager
@@ -32,7 +32,7 @@ class CatalogInstalledFetcher(
             is CatalogInstalled.Locally -> {
                 val file = File(data.installDir, "${data.pkgName}.png")
                 val source = withContext(Dispatchers.IO) { file.source().buffer() }
-                SourceResult(ImageSource(source,context), "image/png", DataSource.DISK)
+                SourceResult(ImageSource(source, context), "image/png", DataSource.DISK)
             }
         }
     }

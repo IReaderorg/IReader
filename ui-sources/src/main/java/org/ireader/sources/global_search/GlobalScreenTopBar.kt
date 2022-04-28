@@ -13,7 +13,6 @@ import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.AppTextField
 import org.ireader.sources.global_search.viewmodel.GlobalSearchState
 
-
 @OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun GlobalScreenTopBar(
@@ -43,16 +42,18 @@ fun GlobalScreenTopBar(
                 imageVector = Icons.Default.Search,
                 title = "Search",
                 onClick = {
-                   state.searchMode = true
+                    state.searchMode = true
                 },
             )
         },
         navigationIcon = {
-            AppIconButton(imageVector = Icons.Default.ArrowBack,
+            AppIconButton(
+                imageVector = Icons.Default.ArrowBack,
                 title = "Toggle search mode off",
                 onClick = {
                     onPop()
-                })
+                }
+            )
         }
 
     )

@@ -23,12 +23,16 @@ fun ClickableTextIcon(
     contentDescription: String = "an Icon",
     onClick: () -> Unit,
 ) {
-    Button(modifier = modifier,
+    Button(
+        modifier = modifier,
         onClick = { onClick() },
         border = BorderStroke(0.dp, MaterialTheme.colors.background),
-        colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.background)) {
-        Column(verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally) {
+        colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.background)
+    ) {
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             icon(this)
             Text(
                 text = text,
@@ -38,8 +42,7 @@ fun ClickableTextIcon(
                 maxLines = 1,
                 textAlign = TextAlign.Center,
 
-                )
-
+            )
         }
     }
 }

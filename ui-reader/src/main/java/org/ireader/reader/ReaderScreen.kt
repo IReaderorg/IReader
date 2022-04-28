@@ -2,9 +2,29 @@ package org.ireader.reader
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.gestures.scrollBy
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.material.*
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Divider
+import androidx.compose.material.DrawerValue
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetState
+import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.Scaffold
+import androidx.compose.material.rememberDrawerState
+import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
@@ -26,10 +46,11 @@ import org.ireader.reader.components.ReaderSettingComposable
 import org.ireader.reader.reverse_swip_refresh.SwipeRefreshState
 import org.ireader.reader.viewmodel.ReaderScreenViewModel
 
-
 @ExperimentalAnimationApi
-@OptIn(ExperimentalMaterialApi::class, com.google.accompanist.pager.ExperimentalPagerApi::class,
-    dev.chrisbanes.snapper.ExperimentalSnapperApi::class)
+@OptIn(
+    ExperimentalMaterialApi::class, com.google.accompanist.pager.ExperimentalPagerApi::class,
+    dev.chrisbanes.snapper.ExperimentalSnapperApi::class
+)
 @Composable
 fun ReadingScreen(
     modifier: Modifier = Modifier,
@@ -45,14 +66,14 @@ fun ReadingScreen(
     onSliderFinished: () -> Unit,
     onSliderChange: (index: Float) -> Unit,
     onDrawerRevereIcon: (Chapter?) -> Unit,
-    onReaderRefresh:(Chapter?) -> Unit,
-    onReaderWebView:(ModalBottomSheetState) -> Unit,
-    onReaderBookmark:() -> Unit,
-    onReaderBottomOnSetting:() -> Unit,
-    onReaderPlay:() -> Unit,
-    onFontSelected:(Int) -> Unit,
-    onToggleScrollMode:(Boolean) -> Unit,
-    onToggleAutoScroll:(Boolean) -> Unit,
+    onReaderRefresh: (Chapter?) -> Unit,
+    onReaderWebView: (ModalBottomSheetState) -> Unit,
+    onReaderBookmark: () -> Unit,
+    onReaderBottomOnSetting: () -> Unit,
+    onReaderPlay: () -> Unit,
+    onFontSelected: (Int) -> Unit,
+    onToggleScrollMode: (Boolean) -> Unit,
+    onToggleAutoScroll: (Boolean) -> Unit,
     onToggleOrientation: (Boolean) -> Unit,
     onToggleImmersiveMode: (Boolean) -> Unit,
     onToggleSelectedMode: (Boolean) -> Unit,
@@ -64,12 +85,11 @@ fun ReadingScreen(
     onAutoscrollOffsetIncrease: (Boolean) -> Unit,
     onScrollIndicatorPaddingIncrease: (Boolean) -> Unit,
     onScrollIndicatorWidthIncrease: (Boolean) -> Unit,
-    onToggleAutoBrightness:() -> Unit,
-    onChangeBrightness:(Float) -> Unit,
-    onBackgroundChange:(Int) -> Unit,
-    onMap:(LazyListState) -> Unit
+    onToggleAutoBrightness: () -> Unit,
+    onChangeBrightness: (Float) -> Unit,
+    onBackgroundChange: (Int) -> Unit,
+    onMap: (LazyListState) -> Unit
 ) {
-
 
     val chapters = vm.stateChapters
     val scaffoldState = rememberScaffoldState(rememberDrawerState(DrawerValue.Closed))
@@ -80,15 +100,15 @@ fun ReadingScreen(
     val chapter = vm.stateChapter
     val context = LocalContext.current
 
-
-
     LaunchedEffect(key1 = scaffoldState.drawerState.targetValue) {
         if (chapter != null && scaffoldState.drawerState.targetValue == DrawerValue.Open && vm.stateChapters.isNotEmpty()) {
             vm.uiFunc.apply {
                 val index = vm.stateChapters.indexOfFirst { it.id == chapter.id }
                 if (index != -1) {
-                    drawerScrollState.scrollToItem(index,
-                        -drawerScrollState.layoutInfo.viewportEndOffset / 2)
+                    drawerScrollState.scrollToItem(
+                        index,
+                        -drawerScrollState.layoutInfo.viewportEndOffset / 2
+                    )
                 }
             }
         }
@@ -96,8 +116,10 @@ fun ReadingScreen(
     LaunchedEffect(key1 = vm.currentChapterIndex) {
         val index = vm.currentChapterIndex
         if (index != -1) {
-            drawerScrollState.scrollToItem(vm.currentChapterIndex,
-                -drawerScrollState.layoutInfo.viewportEndOffset / 2)
+            drawerScrollState.scrollToItem(
+                vm.currentChapterIndex,
+                -drawerScrollState.layoutInfo.viewportEndOffset / 2
+            )
         }
     }
     LaunchedEffect(key1 = vm.autoScrollMode) {
@@ -136,7 +158,6 @@ fun ReadingScreen(
         vm.prefFunc.apply {
             vm.readBrightness(context)
         }
-
     }
     LaunchedEffect(key1 = vm.initialized) {
         if (chapter != null) {
@@ -151,7 +172,6 @@ fun ReadingScreen(
             vm.readBrightness(context)
             vm.readImmersiveMode(context)
         }
-
 
         vm.eventFlow.collectLatest { event ->
             when (event) {
@@ -210,9 +230,11 @@ fun ReadingScreen(
                     sheetState = modalState,
                     sheetContent = {
                         Column(modifier.fillMaxSize()) {
-                            Divider(modifier = modifier.fillMaxWidth(),
+                            Divider(
+                                modifier = modifier.fillMaxWidth(),
                                 color = MaterialTheme.colors.onBackground.copy(alpha = .2f),
-                                thickness = 1.dp)
+                                thickness = 1.dp
+                            )
                             Spacer(modifier = modifier.height(5.dp))
                             if (vm.isMainBottomModeEnable) {
                                 MainBottomSettingComposable(
@@ -242,13 +264,13 @@ fun ReadingScreen(
                                     onLineHeightIncrease = onLineHeightIncrease,
                                     onParagraphDistanceIncrease = onParagraphDistanceIncrease,
                                     onParagraphIndentIncrease = onParagraphIndentIncrease,
-                                    onScrollIndicatorPaddingIncrease =onScrollIndicatorPaddingIncrease ,
+                                    onScrollIndicatorPaddingIncrease = onScrollIndicatorPaddingIncrease,
                                     onScrollIndicatorWidthIncrease = onScrollIndicatorWidthIncrease,
                                     onToggleAutoScroll = onToggleAutoScroll,
-                                    onToggleImmersiveMode =onToggleImmersiveMode ,
+                                    onToggleImmersiveMode = onToggleImmersiveMode,
                                     onToggleOrientation = onToggleOrientation,
                                     onToggleScrollMode = onToggleScrollMode,
-                                    onToggleSelectedMode =onToggleSelectedMode,
+                                    onToggleSelectedMode = onToggleSelectedMode,
                                     onChangeBrightness = onChangeBrightness,
                                     onToggleAutoBrightness = onToggleAutoBrightness,
                                     onBackgroundChange = onBackgroundChange,
@@ -259,7 +281,6 @@ fun ReadingScreen(
                     },
                     content = {}
                 )
-
             }
         },
         drawerGesturesEnabled = true,
@@ -278,7 +299,6 @@ fun ReadingScreen(
                 onMap = onMap,
                 readerScreenState = vm
             )
-
         }
     ) { padding ->
         ScrollIndicatorSetting(enable = vm.scrollIndicatorDialogShown, vm)
@@ -295,7 +315,6 @@ fun ReadingScreen(
                         modalState = modalState
                     )
                 }
-
 
                 if (vm.error.asString(context).isNotBlank()) {
                     ErrorTextWithEmojis(
@@ -317,6 +336,4 @@ fun ReadingScreen(
             }
         }
     }
-
 }
-

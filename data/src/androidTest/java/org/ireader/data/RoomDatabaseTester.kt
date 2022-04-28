@@ -8,7 +8,6 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.runBlocking
 import org.ireader.data.local.AppDatabase
 import org.ireader.data.local.dao.LibraryBookDao
-import org.ireader.common_models.entities.Book
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -16,7 +15,7 @@ import org.junit.runner.RunWith
 import java.io.IOException
 
 @RunWith(AndroidJUnit4::class)
-class SimpleEntityReadWriteTest {
+class RoomDatabaseTester {
     private lateinit var bookDao: LibraryBookDao
     private lateinit var db: AppDatabase
 
@@ -24,7 +23,8 @@ class SimpleEntityReadWriteTest {
     fun createDb() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         db = Room.inMemoryDatabaseBuilder(
-            context, AppDatabase::class.java).build()
+            context, AppDatabase::class.java
+        ).build()
         bookDao = db.libraryBookDao
     }
 

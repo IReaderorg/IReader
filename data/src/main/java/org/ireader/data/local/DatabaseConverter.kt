@@ -2,7 +2,6 @@ package org.ireader.data.local
 
 import androidx.room.TypeConverter
 
-
 class DatabaseConverter {
 
     /**
@@ -18,6 +17,4 @@ class DatabaseConverter {
     fun toString(stringList: List<String>): String {
         return stringList.joinToString(separator = "$%&$")
     }
-
-
 }

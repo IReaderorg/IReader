@@ -1,8 +1,6 @@
 package org.ireader.domain.use_cases.preferences.reader_preferences
 
-import androidx.annotation.Keep
 import javax.inject.Inject
-
 
 data class ReaderPrefUseCases @Inject constructor(
     val selectedFontStateUseCase: SelectedFontStateUseCase,

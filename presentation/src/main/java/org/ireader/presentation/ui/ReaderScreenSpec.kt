@@ -12,7 +12,11 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.*
+import androidx.navigation.NamedNavArgument
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavController
+import androidx.navigation.NavDeepLink
+import androidx.navigation.navDeepLink
 import com.google.accompanist.pager.ExperimentalPagerApi
 import kotlinx.coroutines.launch
 import org.ireader.common_models.entities.Chapter
@@ -23,13 +27,13 @@ import org.ireader.core_api.source.Source
 import org.ireader.core_ui.theme.TransparentStatusBar
 import org.ireader.domain.services.tts_service.Player
 import org.ireader.domain.ui.NavigationArgs
-import org.ireader.tts.TTSScreen
 import org.ireader.presentation.feature_ttl.TTSState
 import org.ireader.reader.ReadingScreen
 import org.ireader.reader.reverse_swip_refresh.SwipeRefreshState
 import org.ireader.reader.reverse_swip_refresh.rememberSwipeRefreshState
 import org.ireader.reader.viewmodel.FontSizeEvent
 import org.ireader.reader.viewmodel.ReaderScreenViewModel
+import org.ireader.tts.TTSScreen
 
 object ReaderScreenSpec : ScreenSpec {
 
@@ -59,6 +63,7 @@ object ReaderScreenSpec : ScreenSpec {
     }
 
     override val deepLinks: List<NavDeepLink> = listOf(
+
         navDeepLink {
             uriPattern =
                 "https://www.ireader.org/reader_screen_route/{bookId}/{chapterId}/{sourceId}/{readingParagraph}/{voiceMode}"
@@ -70,8 +75,10 @@ object ReaderScreenSpec : ScreenSpec {
         }
     )
 
-    @OptIn(ExperimentalPagerApi::class, androidx.compose.animation.ExperimentalAnimationApi::class,
-        androidx.compose.material.ExperimentalMaterialApi::class)
+    @OptIn(
+        ExperimentalPagerApi::class, androidx.compose.animation.ExperimentalAnimationApi::class,
+        androidx.compose.material.ExperimentalMaterialApi::class
+    )
     @Composable
     override fun Content(
         navController: NavController,
@@ -88,7 +95,6 @@ object ReaderScreenSpec : ScreenSpec {
         val drawerScrollState = rememberLazyListState()
         val swipeState = rememberSwipeRefreshState(isRefreshing = vm.ttsIsLoading)
         val context = LocalContext.current
-
 
         DisposableEffect(key1 = true) {
             onDispose {
@@ -113,12 +119,13 @@ object ReaderScreenSpec : ScreenSpec {
                     if (index != -1) {
                         scope.launch {
                             vm.mainFunc.apply {
-                                vm.getChapter(ch.id,
-                                    source = source) {
+                                vm.getChapter(
+                                    ch.id,
+                                    source = source
+                                ) {
                                     vm.runTTSService(Player.PAUSE)
                                 }
                             }
-
                         }
                         scope.launch {
                             scrollState.scrollToItem(0, 0)
@@ -129,7 +136,7 @@ object ReaderScreenSpec : ScreenSpec {
                     }
                 },
                 onTTTSPrevPar = {
-                    vm.runTTSService( Player.PREV_PAR)
+                    vm.runTTSService(Player.PREV_PAR)
                 },
                 onTTTSNextPar = {
                     vm.runTTSService(Player.NEXT_PAR)
@@ -149,8 +156,10 @@ object ReaderScreenSpec : ScreenSpec {
                             vm.apply {
                                 val nextChapter = vm.nextChapter()
                                 scope.launch {
-                                    vm.getChapter(nextChapter.id,
-                                        source = source)
+                                    vm.getChapter(
+                                        nextChapter.id,
+                                        source = source
+                                    )
                                     scrollState.scrollToItem(0, 0)
                                 }
                             }
@@ -160,7 +169,6 @@ object ReaderScreenSpec : ScreenSpec {
                     } else {
                         scope.launch {
                             vm.showSnackBar(org.ireader.common_extensions.UiText.StringResource(R.string.this_is_last_chapter))
-
                         }
                     }
                 },
@@ -170,8 +178,10 @@ object ReaderScreenSpec : ScreenSpec {
                         vm.uiFunc.apply {
                             vm.mainFunc.apply {
                                 scope.launch {
-                                    vm.getChapter(ch.id,
-                                        source = source)
+                                    vm.getChapter(
+                                        ch.id,
+                                        source = source
+                                    )
                                 }
                                 scope.launch {
                                     scrollState.scrollToItem(0, 0)
@@ -187,13 +197,17 @@ object ReaderScreenSpec : ScreenSpec {
                             vm.mainFunc.apply {
                                 val prevChapter = vm.prevChapter()
                                 scope.launch {
-                                    vm.getChapter(prevChapter.id,
-                                        source = source)
+                                    vm.getChapter(
+                                        prevChapter.id,
+                                        source = source
+                                    )
                                     when (scrollToEnd) {
                                         true -> {
                                             if (chapter != null) {
-                                                scrollState.scrollToItem(chapter.content.lastIndex,
-                                                    Int.MAX_VALUE)
+                                                scrollState.scrollToItem(
+                                                    chapter.content.lastIndex,
+                                                    Int.MAX_VALUE
+                                                )
                                             }
                                         }
                                         else -> {
@@ -224,8 +238,10 @@ object ReaderScreenSpec : ScreenSpec {
                         vm.mainFunc.apply {
                             vm.currentChapterIndex = currentIndex
                             scope.launch {
-                                vm.getChapter(chapters[vm.currentChapterIndex].id,
-                                    source = source)
+                                vm.getChapter(
+                                    chapters[vm.currentChapterIndex].id,
+                                    source = source
+                                )
                             }
                         }
                     }
@@ -250,22 +266,27 @@ object ReaderScreenSpec : ScreenSpec {
                 onReaderRefresh = { ch ->
                     if (ch != null) {
                         vm.mainFunc.apply {
-                            vm.getReadingContentRemotely(chapter = ch,
-                                source = source)
+                            vm.getReadingContentRemotely(
+                                chapter = ch,
+                                source = source
+                            )
                         }
                     }
                 },
                 onReaderWebView = { modalState ->
                     try {
                         if (chapter != null && !vm.isReaderModeEnable && vm.isLocalLoaded && modalState.targetValue == ModalBottomSheetValue.Expanded) {
-                            navController.navigate(WebViewScreenSpec.buildRoute(
-                                url = chapter.link,
-                            )
+                            navController.navigate(
+                                WebViewScreenSpec.buildRoute(
+                                    url = chapter.link,
+                                )
                             )
                         } else if (chapter != null && !vm.isLocalLoaded) {
-                            navController.navigate(WebViewScreenSpec.buildRoute(
-                                url = chapter.link,
-                            ))
+                            navController.navigate(
+                                WebViewScreenSpec.buildRoute(
+                                    url = chapter.link,
+                                )
+                            )
                         }
                     } catch (e: Throwable) {
                         scope.launch {
@@ -276,7 +297,6 @@ object ReaderScreenSpec : ScreenSpec {
                 onReaderBookmark = {
                     vm.uiFunc.apply {
                         vm.bookmarkChapter()
-
                     }
                 },
                 onReaderBottomBarSetting = {
@@ -296,11 +316,12 @@ object ReaderScreenSpec : ScreenSpec {
                             val index =
                                 vm.drawerChapters.value.indexOfFirst { it.id == vm.stateChapter?.id }
                             if (index != -1) {
-                                drawer.scrollToItem(index,
-                                    -drawer.layoutInfo.viewportEndOffset / 2)
+                                drawer.scrollToItem(
+                                    index,
+                                    -drawer.layoutInfo.viewportEndOffset / 2
+                                )
                             }
                         } catch (e: Throwable) {
-
                         }
                     }
                 },
@@ -309,14 +330,13 @@ object ReaderScreenSpec : ScreenSpec {
                 swipeState = swipeState
             )
         } else {
-            EmptyScreenComposable(navController = navController,
-                errorResId = org.ireader.presentation.R.string.something_is_wrong_with_this_book)
+            EmptyScreenComposable(
+                navController = navController,
+                errorResId = org.ireader.presentation.R.string.something_is_wrong_with_this_book
+            )
         }
-
-
     }
 }
-
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalMaterialApi::class)
 @Composable
@@ -347,7 +367,7 @@ fun MainReader(
     onReaderBookmark: () -> Unit,
     onReaderBottomBarSetting: () -> Unit,
     onBottomBarReaderPlay: () -> Unit,
-    onMap:(LazyListState) -> Unit
+    onMap: (LazyListState) -> Unit
 ) {
     val context = LocalContext.current
     when {
@@ -368,7 +388,6 @@ fun MainReader(
             )
         }
         else -> {
-
 
             TransparentStatusBar {
 
@@ -550,10 +569,6 @@ fun MainReader(
                     onMap = onMap
                 )
             }
-
-
         }
     }
-
-
 }

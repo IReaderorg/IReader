@@ -2,10 +2,23 @@ package org.ireader.downloader
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.*
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.DeleteForever
+import androidx.compose.material.icons.filled.FlipToBack
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.SelectAll
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -16,7 +29,6 @@ import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.components.reusable_composable.BuildDropDownMenu
 import org.ireader.components.reusable_composable.DropDownMenuItem
 import org.ireader.ui_downloader.R
-
 
 @Composable
 fun DownloaderTopAppBar(
@@ -45,11 +57,12 @@ fun DownloaderTopAppBar(
                         state.selection.clear()
                         state.selection.addAll(ids)
                     },
-                    onDelete = onDelete)
+                    onDelete = onDelete
+                )
             }
             else -> {
                 RegularTopBar(
-                    onPopBackStack=onPopBackStack,
+                    onPopBackStack = onPopBackStack,
                     onCancelAll = onCancelAll,
 
                 )
@@ -91,11 +104,12 @@ private fun RegularTopBar(
                         stringResource(R.string.cancel_all)
                     ) {
                         onCancelAll()
-                    })
+                    }
+                )
             BuildDropDownMenu(list, enable = isMenuExpanded, onEnable = { isMenuExpanded = it })
         },
         navigationIcon = {
-            IconButton(onClick = onPopBackStack ) {
+            IconButton(onClick = onPopBackStack) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
                     contentDescription = "ArrowBack Icon",

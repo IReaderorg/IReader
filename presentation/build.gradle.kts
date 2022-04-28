@@ -60,9 +60,6 @@ dependencies {
     implementation(compose.compose.hiltNavigation)
     implementation(compose.compose.lifecycle)
 
-
-
-
     implementation(accompanist.flowlayout)
     implementation(accompanist.navAnimation)
     implementation(accompanist.pagerIndicator)
@@ -86,8 +83,7 @@ dependencies {
 
     implementation(libs.hilt.android)
     kapt(libs.hilt.androidcompiler)
-   // kapt(libs.hilt.compiler)
-
+    // kapt(libs.hilt.compiler)
 
     testImplementation(test.bundles.common)
     androidTestImplementation(test.bundles.common)
@@ -95,4 +91,3 @@ dependencies {
     androidTestImplementation(compose.compose.testing)
     androidTestImplementation(compose.compose.composeTooling)
 }
-

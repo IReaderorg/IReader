@@ -10,12 +10,10 @@ import javax.inject.Singleton
 interface DownloadServiceState {
     var downloads: List<SavedDownload>
     var isEnable: Boolean
-    
 }
 
 @Singleton
 class DownloadServiceStateImpl @Inject constructor() : DownloadServiceState {
     override var downloads: List<SavedDownload> by mutableStateOf(emptyList())
     override var isEnable: Boolean by mutableStateOf(false)
-   
 }

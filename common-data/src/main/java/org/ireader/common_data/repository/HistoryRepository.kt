@@ -11,7 +11,6 @@ interface HistoryRepository {
 
     fun findHistoriesPaging(query: String): Flow<Map<String, List<HistoryWithRelations>>>
 
-
     suspend fun findHistories(): List<History>
 
     suspend fun insertHistory(history: History): Long

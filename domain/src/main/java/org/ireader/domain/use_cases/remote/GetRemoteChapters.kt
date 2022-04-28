@@ -30,7 +30,6 @@ class GetRemoteChapters @Inject constructor(@ApplicationContext private val cont
                     onSuccess(chapters.map { it.toChapter(book.id) })
                     Log.debug { "Timber: GetRemoteChaptersUseCase was Finished Successfully" }
                 } catch (e: CancellationException) {
-
                 } catch (e: Throwable) {
                     onError(exceptionHandler(e))
                 }

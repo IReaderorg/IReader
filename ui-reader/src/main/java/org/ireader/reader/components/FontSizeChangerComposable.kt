@@ -20,7 +20,6 @@ import androidx.compose.ui.unit.sp
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.MidSizeTextComposable
 
-
 @Composable
 fun SettingItemComposable(
     text: String,
@@ -45,17 +44,20 @@ fun SettingItemComposable(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            AppIconButton(imageVector = Icons.Default.Remove,
+            AppIconButton(
+                imageVector = Icons.Default.Remove,
                 tint = MaterialTheme.colors.onBackground,
                 title = "Decrease $text",
-                onClick = { onMinus() })
+                onClick = { onMinus() }
+            )
             MidSizeTextComposable(text = value)
-            AppIconButton(imageVector = Icons.Default.Add,
+            AppIconButton(
+                imageVector = Icons.Default.Add,
                 tint = MaterialTheme.colors.onBackground,
                 title = "Increase $text",
-                onClick = { onAdd() })
+                onClick = { onAdd() }
+            )
         }
-
     }
 }
 
@@ -78,6 +80,5 @@ fun SettingItemToggleComposable(
             color = MaterialTheme.colors.onBackground
         )
         Switch(checked = value, onCheckedChange = onToggle)
-
     }
 }

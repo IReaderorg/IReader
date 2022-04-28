@@ -7,42 +7,54 @@ import android.support.v4.media.session.PlaybackStateCompat
  */
 inline val PlaybackStateCompat.isPrepared
     get() = (state == PlaybackStateCompat.STATE_BUFFERING) ||
-            (state == PlaybackStateCompat.STATE_PLAYING) ||
-            (state == PlaybackStateCompat.STATE_PAUSED)
+        (state == PlaybackStateCompat.STATE_PLAYING) ||
+        (state == PlaybackStateCompat.STATE_PAUSED)
 
 inline val PlaybackState.isPrepared
     get() = (state == PlaybackState.STATE_BUFFERING) ||
-            (state == PlaybackState.STATE_PLAYING) ||
-            (state == PlaybackState.STATE_PAUSED)
+        (state == PlaybackState.STATE_PLAYING) ||
+        (state == PlaybackState.STATE_PAUSED)
 
 inline val PlaybackStateCompat.isPlaying
     get() = (state == PlaybackStateCompat.STATE_BUFFERING) ||
-            (state == PlaybackStateCompat.STATE_PLAYING)
+        (state == PlaybackStateCompat.STATE_PLAYING)
 
 inline val PlaybackState.isPlaying
     get() = (state == PlaybackState.STATE_BUFFERING) ||
-            (state == PlaybackState.STATE_PLAYING)
+        (state == PlaybackState.STATE_PLAYING)
 
 inline val PlaybackStateCompat.isPlayEnabled
     get() = (actions and PlaybackStateCompat.ACTION_PLAY != 0L) ||
-            ((actions and PlaybackStateCompat.ACTION_PLAY_PAUSE != 0L) &&
-                    (state == PlaybackStateCompat.STATE_PAUSED))
+        (
+            (actions and PlaybackStateCompat.ACTION_PLAY_PAUSE != 0L) &&
+                (state == PlaybackStateCompat.STATE_PAUSED)
+            )
 
 inline val PlaybackState.isPlayEnabled
     get() = (actions and PlaybackState.ACTION_PLAY != 0L) ||
-            ((actions and PlaybackState.ACTION_PLAY_PAUSE != 0L) &&
-                    (state == PlaybackState.STATE_PAUSED))
+        (
+            (actions and PlaybackState.ACTION_PLAY_PAUSE != 0L) &&
+                (state == PlaybackState.STATE_PAUSED)
+            )
 
 inline val PlaybackStateCompat.isPauseEnabled
     get() = (actions and PlaybackStateCompat.ACTION_PAUSE != 0L) ||
-            ((actions and PlaybackStateCompat.ACTION_PLAY_PAUSE != 0L) &&
-                    (state == PlaybackStateCompat.STATE_BUFFERING ||
-                            state == PlaybackStateCompat.STATE_PLAYING))
+        (
+            (actions and PlaybackStateCompat.ACTION_PLAY_PAUSE != 0L) &&
+                (
+                    state == PlaybackStateCompat.STATE_BUFFERING ||
+                        state == PlaybackStateCompat.STATE_PLAYING
+                    )
+            )
 inline val PlaybackState.isPauseEnabled
     get() = (actions and PlaybackState.ACTION_PAUSE != 0L) ||
-            ((actions and PlaybackState.ACTION_PLAY_PAUSE != 0L) &&
-                    (state == PlaybackState.STATE_BUFFERING ||
-                            state == PlaybackState.STATE_PLAYING))
+        (
+            (actions and PlaybackState.ACTION_PLAY_PAUSE != 0L) &&
+                (
+                    state == PlaybackState.STATE_BUFFERING ||
+                        state == PlaybackState.STATE_PLAYING
+                    )
+            )
 
 inline val PlaybackStateCompat.isSkipToNextEnabled
     get() = actions and PlaybackStateCompat.ACTION_SKIP_TO_NEXT != 0L
@@ -79,4 +91,3 @@ inline val PlaybackState.stateName
         PlaybackState.STATE_ERROR -> "STATE_ERROR"
         else -> "UNKNOWN_STATE"
     }
-

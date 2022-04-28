@@ -1,21 +1,29 @@
-/*
- * Copyright (C) 2018 The Tachiyomi Open Source Project
- *
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- */
+
 
 package org.ireader.sources.extension
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.ContentAlpha
+import androidx.compose.material.LocalContentAlpha
+import androidx.compose.material.LocalContentColor
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.outlined.PushPin
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layoutId
@@ -25,12 +33,16 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
-import org.ireader.common_models.entities.*
+import org.ireader.common_models.entities.Catalog
+import org.ireader.common_models.entities.CatalogBundled
+import org.ireader.common_models.entities.CatalogInstalled
+import org.ireader.common_models.entities.CatalogLocal
+import org.ireader.common_models.entities.CatalogRemote
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.core_catalogs.model.InstallStep
 import org.ireader.sources.extension.composables.LetterIcon
-import java.util.*
+import java.util.Locale
 import kotlin.math.max
 
 @Composable
@@ -133,8 +145,11 @@ private fun CatalogPic(catalog: Catalog, modifier: Modifier = Modifier) {
         is CatalogInstalled -> {
             runCatching {
                 Image(
-                    painter = rememberAsyncImagePainter(LocalContext.current.packageManager.getApplicationIcon(
-                        catalog.pkgName)),
+                    painter = rememberAsyncImagePainter(
+                        LocalContext.current.packageManager.getApplicationIcon(
+                            catalog.pkgName
+                        )
+                    ),
                     contentDescription = null,
                     modifier = modifier
                 )
@@ -145,7 +160,6 @@ private fun CatalogPic(catalog: Catalog, modifier: Modifier = Modifier) {
                     modifier = modifier
                 )
             }
-
         }
         is CatalogRemote -> {
             Image(
@@ -184,15 +198,18 @@ private fun CatalogButtons(
                 )
             } else if (onInstall != null) {
                 if (catalog is CatalogLocal) {
-                    MidSizeTextComposable(text = "Update",
+                    MidSizeTextComposable(
+                        text = "Update",
                         color = MaterialTheme.colors.primary,
-                        modifier = Modifier.clickable { onInstall() })
+                        modifier = Modifier.clickable { onInstall() }
+                    )
                 } else if (catalog is CatalogRemote) {
-                    MidSizeTextComposable(text = "Install",
+                    MidSizeTextComposable(
+                        text = "Install",
                         color = MaterialTheme.colors.primary,
-                        modifier = Modifier.clickable { onInstall() })
+                        modifier = Modifier.clickable { onInstall() }
+                    )
                 }
-
             }
             if (catalog !is CatalogRemote) {
                 CatalogMenuButton(
@@ -219,20 +236,24 @@ internal fun CatalogMenuButton(
                     imageVector = Icons.Filled.PushPin,
                     tint = MaterialTheme.colors.primary,
                     title = "Pin",
-                    onClick = onPinToggle)
+                    onClick = onPinToggle
+                )
             } else {
                 AppIconButton(
                     imageVector = Icons.Outlined.PushPin,
                     tint = MaterialTheme.colors.onBackground.copy(.5f),
                     title = "UnPin",
-                    onClick = onPinToggle)
+                    onClick = onPinToggle
+                )
             }
         } else {
             Spacer(modifier = Modifier.padding(horizontal = 4.dp))
             if (onUninstall != null && catalog is CatalogLocal) {
-                MidSizeTextComposable(text = "Uninstall",
+                MidSizeTextComposable(
+                    text = "Uninstall",
                     color = MaterialTheme.colors.primary,
-                    modifier = Modifier.clickable { onUninstall() })
+                    modifier = Modifier.clickable { onUninstall() }
+                )
             }
             Spacer(modifier = Modifier.padding(horizontal = 4.dp))
         }

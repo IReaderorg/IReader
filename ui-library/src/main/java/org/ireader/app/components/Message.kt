@@ -7,7 +7,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import java.util.*
 
-
 data class Message(val id: Long, @StringRes val messageId: Int)
 
 /**

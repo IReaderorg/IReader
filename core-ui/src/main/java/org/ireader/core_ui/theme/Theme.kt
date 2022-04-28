@@ -4,7 +4,6 @@ import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import org.ireader.core_ui.ui.Colour
 
-
 val DarkColorPalette = darkColors(
     primary = Colour.blue_200,
     primaryVariant = Colour.blue_600,
@@ -32,11 +31,11 @@ val LightColorPalette = lightColors(
     onError = Colour.white_50,
 )
 
-//@Composable
-//fun InfinityTheme(
+// @Composable
+// fun InfinityTheme(
 //    darkTheme: Boolean = isSystemInDarkTheme(),
 //    content: @Composable() () -> Unit,
-//) {
+// ) {
 //    val vm : AppThemeViewModel = hiltViewModel()
 //    val colors = if (darkTheme) {
 //        DarkColorPalette
@@ -82,4 +81,4 @@ val LightColorPalette = lightColors(
 //        shapes = Shapes,
 //        content = content
 //    )
-//}
+// }

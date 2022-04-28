@@ -11,9 +11,8 @@ import androidx.compose.ui.unit.dp
 import org.ireader.common_models.DisplayMode
 import org.ireader.common_models.LayoutType
 import org.ireader.common_models.layouts
-import org.ireader.core_ui.ui_components.RadioButton
+import org.ireader.components.text_related.RadioButton
 import org.ireader.core_ui.ui_components.TextSection
-
 
 @Composable
 fun DisplayScreen(

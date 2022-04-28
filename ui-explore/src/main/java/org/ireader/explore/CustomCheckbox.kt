@@ -6,7 +6,11 @@ import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
@@ -28,8 +32,7 @@ fun UnCheckedCheckBox(
     }
     Box(
         contentAlignment = Alignment.Center,
-    )
-    {
+    ) {
         Checkbox(
             checked = isChecked != null,
             onCheckedChange = {
@@ -43,7 +46,6 @@ fun UnCheckedCheckBox(
         if (isChecked == false) {
             Icon(imageVector = Icons.Default.Close, contentDescription = "", tint = Color.White)
         }
-
     }
 }
 
@@ -60,5 +62,6 @@ fun CheckBoxPrev() {
         onChecked = {
             state = it
         },
-        isNullable = true)
+        isNullable = true
+    )
 }

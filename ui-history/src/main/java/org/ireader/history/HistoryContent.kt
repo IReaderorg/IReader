@@ -33,11 +33,12 @@ fun HistoryContent(
             items(
                 count = history.size,
             ) { index ->
-                HistoryItem(history = history[index],
+                HistoryItem(
+                    history = history[index],
                     onClickItem = onClickItem,
                     onClickDelete = onClickDelete,
                     onClickPlay = onClickPlay,
-                    onBookCover= onBookCover
+                    onBookCover = onBookCover
                 )
             }
         }

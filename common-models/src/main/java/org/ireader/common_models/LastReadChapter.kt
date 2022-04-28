@@ -1,3 +1,4 @@
+
 package org.ireader.common_models
 
 import kotlinx.serialization.Serializable
@@ -10,4 +11,3 @@ data class LastReadChapter(
     val chapterLink: String,
     val chapterTitle: String,
 )
-

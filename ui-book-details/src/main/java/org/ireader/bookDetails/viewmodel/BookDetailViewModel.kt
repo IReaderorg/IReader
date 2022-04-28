@@ -24,7 +24,6 @@ import org.ireader.domain.use_cases.services.ServiceUseCases
 import java.util.*
 import javax.inject.Inject
 
-
 @HiltViewModel
 class BookDetailViewModel @Inject constructor(
     private val localInsertUseCases: LocalInsertUseCases,
@@ -41,7 +40,6 @@ class BookDetailViewModel @Inject constructor(
     var getBookDetailJob: Job? = null
     var getChapterDetailJob: Job? = null
 
-
     var initBooks = false
     var initChapters = false
     init {
@@ -51,8 +49,8 @@ class BookDetailViewModel @Inject constructor(
             val source = getLocalCatalog.get(sourceId)?.source
             this.source = source
             toggleBookLoading(true)
-            chapterIsLoading   = true
-            subscribeBook(bookId =bookId , onSuccess = { book ->
+            chapterIsLoading = true
+            subscribeBook(bookId = bookId, onSuccess = { book ->
                 setDetailBook(book)
                 toggleBookLoading(false)
                 if (!initBooks) {
@@ -62,14 +60,13 @@ class BookDetailViewModel @Inject constructor(
                         getRemoteChapterDetail(book, source)
                     } else {
                         toggleBookLoading(false)
-                        chapterIsLoading   = false
+                        chapterIsLoading = false
                     }
                 }
             })
-            subscribeChapters(bookId =bookId,onSuccess = { snapshot ->
+            subscribeChapters(bookId = bookId, onSuccess = { snapshot ->
                 chapters = snapshot
             })
-
         } else {
             viewModelScope.launch {
                 showSnackBar(org.ireader.common_extensions.UiText.StringResource(R.string.something_is_wrong_with_this_book))
@@ -77,24 +74,22 @@ class BookDetailViewModel @Inject constructor(
         }
     }
 
-    private fun subscribeBook(bookId: Long, onSuccess:suspend (Book) -> Unit) {
-            getBookUseCases.subscribeBookById(bookId)
-                .onEach { snapshot->
-                    snapshot?.let { book ->
-                        onSuccess(book)
-                    }
-                }.launchIn(viewModelScope)
+    private fun subscribeBook(bookId: Long, onSuccess: suspend (Book) -> Unit) {
+        getBookUseCases.subscribeBookById(bookId)
+            .onEach { snapshot ->
+                snapshot?.let { book ->
+                    onSuccess(book)
+                }
+            }.launchIn(viewModelScope)
     }
-    private fun subscribeChapters(bookId: Long, onSuccess:suspend (List<Chapter>) -> Unit = {}) {
-            getChapterUseCase.subscribeChaptersByBookId(bookId)
-                .onEach { snapshot->
-                    if (snapshot.isNotEmpty()) {
-                        onSuccess(snapshot)
-                    }
-                }.launchIn(viewModelScope)
-
+    private fun subscribeChapters(bookId: Long, onSuccess: suspend (List<Chapter>) -> Unit = {}) {
+        getChapterUseCase.subscribeChaptersByBookId(bookId)
+            .onEach { snapshot ->
+                if (snapshot.isNotEmpty()) {
+                    onSuccess(snapshot)
+                }
+            }.launchIn(viewModelScope)
     }
-
 
     suspend fun getRemoteBookDetail(book: Book, source: Source) {
         toggleBookLoading(true)
@@ -123,12 +118,10 @@ class BookDetailViewModel @Inject constructor(
 
             )
         }
-
-
     }
 
     suspend fun getRemoteChapterDetail(book: Book, source: Source) {
-        chapterIsLoading   = true
+        chapterIsLoading = true
         getChapterDetailJob?.cancel()
         getChapterDetailJob = viewModelScope.launch {
             remoteUseCases.getRemoteChapters(
@@ -137,12 +130,14 @@ class BookDetailViewModel @Inject constructor(
                 onError = { message ->
                     Log.error { message.toString() }
                     showSnackBar(message)
-                    chapterIsLoading   = false
+                    chapterIsLoading = false
                 },
                 onSuccess = { result ->
                     val uniqueList =
-                        removeSameItemsFromList(chapterState.chapters,
-                            result) {
+                        removeSameItemsFromList(
+                            chapterState.chapters,
+                            result
+                        ) {
                             it.link
                         }
                     this@BookDetailViewModel.chapters = uniqueList
@@ -150,14 +145,12 @@ class BookDetailViewModel @Inject constructor(
                         withContext(Dispatchers.IO) {
                             localInsertUseCases.updateChaptersUseCase(book.id, uniqueList)
                         }
-
                     }
-                    chapterIsLoading   = false
+                    chapterIsLoading = false
                 }
             )
         }
     }
-
 
     private fun insertBookDetailToLocal(book: Book) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -167,9 +160,11 @@ class BookDetailViewModel @Inject constructor(
 
     private fun updateChaptersEntity(inLibrary: Boolean, bookId: Long) {
         viewModelScope.launch(Dispatchers.IO) {
-            localInsertUseCases.insertChapters(chapterState.chapters.map {
-                it.copy(bookId = bookId)
-            })
+            localInsertUseCases.insertChapters(
+                chapterState.chapters.map {
+                    it.copy(bookId = bookId)
+                }
+            )
         }
     }
 
@@ -186,17 +181,19 @@ class BookDetailViewModel @Inject constructor(
                 )
                 updateChaptersEntity(true, book.id)
             } else {
-                insertBookDetailToLocal((
+                insertBookDetailToLocal(
+                    (
                         book.copy(
                             id = book.id,
                             favorite = false,
-                        )))
+                        )
+                        )
+                )
                 updateChaptersEntity(false, book.id)
             }
             this@BookDetailViewModel.inLibraryLoading = false
         }
     }
-
 
     fun startDownloadService(book: Book) {
         serviceUseCases.startDownloadServicesUseCase(bookIds = longArrayOf(book.id))
@@ -206,16 +203,12 @@ class BookDetailViewModel @Inject constructor(
         this.detailIsLoading = isLoading
     }
 
-
     private fun setDetailBook(book: Book) {
         this.book = book
     }
-
 
     override fun onDestroy() {
         getBookDetailJob?.cancel()
         super.onDestroy()
     }
 }
-
-

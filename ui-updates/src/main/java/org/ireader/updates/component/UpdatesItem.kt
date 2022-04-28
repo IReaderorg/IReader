@@ -1,17 +1,17 @@
-/*
- * Copyright (C) 2018 The Tachiyomi Open Source Project
- *
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- */
+
 
 package org.ireader.updates.component
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -26,7 +26,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.ireader.common_models.entities.UpdateWithInfo
-import org.ireader.components.*
+import org.ireader.components.BookListItem
+import org.ireader.components.BookListItemColumn
+import org.ireader.components.BookListItemImage
+import org.ireader.components.BookListItemSubtitle
+import org.ireader.components.BookListItemTitle
 import org.ireader.core_ui.coil.rememberBookCover
 import org.ireader.core_ui.modifier.selectedBackground
 
@@ -93,6 +97,5 @@ fun UpdatesItem(
                 )
             }
         }
-
     }
 }

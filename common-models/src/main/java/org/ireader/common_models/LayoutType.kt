@@ -1,3 +1,4 @@
+
 package org.ireader.common_models
 
 sealed class LayoutType {

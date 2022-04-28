@@ -31,7 +31,6 @@ class UpdateService @AssistedInject constructor(
     private val api: UpdateApi,
 ) : CoroutineWorker(context, params) {
 
-
     override suspend fun doWork(): Result {
         val last = lastUpdateTime.read()
         val time = lastUpdateTime.read() + 1.toDuration(DurationUnit.HOURS).inWholeMilliseconds
@@ -80,6 +79,5 @@ class UpdateService @AssistedInject constructor(
     )
 
     private val Version.simpleText: String
-        get() = "v${version}"
-
+        get() = "v$version"
 }

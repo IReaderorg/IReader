@@ -1,3 +1,5 @@
+
+
 package org.ireader.common_models.entities
 
 import androidx.room.Entity
@@ -17,7 +19,6 @@ data class SavedDownload(
     val translator: String,
 )
 
-
 data class SavedDownloadWithInfo(
     @PrimaryKey(autoGenerate = false)
     val chapterId: Long,
@@ -28,10 +29,10 @@ data class SavedDownloadWithInfo(
     val chapterKey: String,
     val chapterName: String,
     val translator: String,
-    val isDownloaded:Boolean
+    val isDownloaded: Boolean
 )
 
-fun SavedDownloadWithInfo.toSavedDownload() : SavedDownload {
+fun SavedDownloadWithInfo.toSavedDownload(): SavedDownload {
     return SavedDownload(
         bookId = bookId,
         priority = 1,
@@ -44,9 +45,7 @@ fun SavedDownloadWithInfo.toSavedDownload() : SavedDownload {
     )
 }
 
-
-
-fun buildSavedDownload(book: Book, chapter: Chapter) : SavedDownload {
+fun buildSavedDownload(book: Book, chapter: Chapter): SavedDownload {
     return SavedDownload(
         bookId = book.id,
         priority = 1,
@@ -58,4 +57,3 @@ fun buildSavedDownload(book: Book, chapter: Chapter) : SavedDownload {
         sourceId = book.sourceId,
     )
 }
-

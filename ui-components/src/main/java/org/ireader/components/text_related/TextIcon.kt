@@ -1,7 +1,12 @@
-package org.ireader.app.components
+package org.ireader.components.text_related
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -10,9 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import org.ireader.core_ui.ui.Colour.iconColor
 import org.ireader.components.reusable_composable.MidSizeTextComposable
-
+import org.ireader.core_ui.ui.Colour.iconColor
 
 @Composable
 fun TextIcon(title: String, icon: ImageVector, isEnable: Boolean, onClick: () -> Unit) {
@@ -24,9 +28,11 @@ fun TextIcon(title: String, icon: ImageVector, isEnable: Boolean, onClick: () ->
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(imageVector = icon,
+        Icon(
+            imageVector = icon,
             contentDescription = "$title icon",
-            tint = if (isEnable) MaterialTheme.colors.iconColor else Color.Transparent)
+            tint = if (isEnable) MaterialTheme.colors.iconColor else Color.Transparent
+        )
         Spacer(modifier = Modifier.width(8.dp))
         MidSizeTextComposable(text = title)
     }

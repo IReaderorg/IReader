@@ -16,7 +16,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.ireader.reader.reverse_swip_refresh.SwipeRefreshState
 
-
 @Composable
 fun ArrowIndicator(
     icon: ImageVector,
@@ -28,8 +27,6 @@ fun ArrowIndicator(
     Box {
         if (swipeRefreshState.isRefreshing) {
             // If we're refreshing, show an indeterminate progress indicator
-
-
         } else {
             // Otherwise we display a determinate progress indicator with the current swipe progress
             val trigger = with(LocalDensity.current) { refreshTriggerDistance.toPx() }

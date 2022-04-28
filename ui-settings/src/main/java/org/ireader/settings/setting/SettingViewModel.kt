@@ -32,10 +32,9 @@ class SettingViewModel @Inject constructor(
     private val insertUseCases: LocalInsertUseCases,
     private val prefUseCases: ReaderPrefUseCases,
 
-    ) : BaseViewModel() {
+) : BaseViewModel() {
     private val _state = mutableStateOf(SettingState())
     val state: State<SettingState> = _state
-
 
     fun deleteAllDatabase() {
         viewModelScope.launchIO {
@@ -44,7 +43,6 @@ class SettingViewModel @Inject constructor(
             deleteUseCase.deleteAllRemoteKeys()
             deleteUseCase.deleteAllExploreBook()
         }
-
     }
 
     fun deleteAllChapters() {
@@ -64,7 +62,6 @@ class SettingViewModel @Inject constructor(
             prefUseCases.scrollModeUseCase.save(true)
             prefUseCases.scrollIndicatorUseCase.savePadding(0)
             prefUseCases.scrollIndicatorUseCase.saveWidth(0)
-
         }
     }
 
@@ -73,7 +70,6 @@ class SettingViewModel @Inject constructor(
             libraryCovers.deleteAll()
         }
     }
-
 
     fun onLocalBackupRequested(onStart: (Intent) -> Unit) {
         val mimeTypes = arrayOf("text/plain")
@@ -87,7 +83,6 @@ class SettingViewModel @Inject constructor(
             )
 
         onStart(intent)
-
     }
 
     fun onRestoreBackupRequested(onStart: (Intent) -> Unit) {
@@ -99,9 +94,7 @@ class SettingViewModel @Inject constructor(
             .addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
             .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
 
-
         onStart(intent)
-
     }
 
     suspend fun getAllBooks(): String {
@@ -110,10 +103,12 @@ class SettingViewModel @Inject constructor(
 
         val chapters = chapterUseCase.findAllInLibraryChapters()
         books.forEach { book ->
-            list.add(BackUpBook(
-                book = book,
-                chapters.filter { it.bookId == book.id }
-            ))
+            list.add(
+                BackUpBook(
+                    book = book,
+                    chapters.filter { it.bookId == book.id }
+                )
+            )
         }
 
         return Json.Default.encodeToJsonElement(list).toString()
@@ -125,10 +120,7 @@ class SettingViewModel @Inject constructor(
         val chapters = list.map { it.chapters }.flatten()
 
         insertUseCases.insertBookAndChapters(books, chapters)
-
-
     }
-
 }
 
 @Serializable

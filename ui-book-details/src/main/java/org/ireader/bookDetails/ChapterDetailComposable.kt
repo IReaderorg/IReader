@@ -1,6 +1,12 @@
 package org.ireader.bookDetails
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -16,14 +22,18 @@ fun ChapterDetailComposable(
     dateUploaded: String,
 ) {
 
-    Box(modifier = modifier
-        .fillMaxWidth()
-        .height(40.dp)
-        .padding(8.dp)) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(40.dp)
+            .padding(8.dp)
+    ) {
         Row(modifier = modifier.fillMaxSize(), horizontalArrangement = Arrangement.SpaceBetween) {
 
-            Text(text = if (name.contains(chapterNumber)) name else chapterNumber,
-                style = MaterialTheme.typography.body2)
+            Text(
+                text = if (name.contains(chapterNumber)) name else chapterNumber,
+                style = MaterialTheme.typography.body2
+            )
             Text(text = dateUploaded, style = MaterialTheme.typography.body2)
         }
     }
@@ -32,7 +42,9 @@ fun ChapterDetailComposable(
 @Preview(showBackground = true)
 @Composable
 fun ChapterDetailPrev() {
-    ChapterDetailComposable(name = "1-CHAPTER One - Cat And Dog",
+    ChapterDetailComposable(
+        name = "1-CHAPTER One - Cat And Dog",
         chapterNumber = "1-",
-        dateUploaded = "3 min ago")
+        dateUploaded = "3 min ago"
+    )
 }

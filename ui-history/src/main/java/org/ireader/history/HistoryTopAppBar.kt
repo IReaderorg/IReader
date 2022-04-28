@@ -19,8 +19,8 @@ import org.ireader.history.viewmodel.HistoryState
 @Composable
 fun HistoryTopAppBar(
     vm: HistoryState,
-    onDeleteAll:() -> Unit,
-    getHistories:() -> Unit
+    onDeleteAll: () -> Unit,
+    getHistories: () -> Unit
 ) {
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -69,19 +69,18 @@ fun HistoryTopAppBar(
                     onDeleteAll()
                 },
             )
-
-
         },
         navigationIcon = if (vm.searchMode) {
             {
-                AppIconButton(imageVector = Icons.Default.ArrowBack,
+                AppIconButton(
+                    imageVector = Icons.Default.ArrowBack,
                     title = "Toggle search mode off",
                     onClick = {
                         vm.searchMode = false
                         vm.searchQuery = ""
                         keyboardController?.hide()
-                    })
-
+                    }
+                )
             }
         } else null
 

@@ -7,7 +7,6 @@ import kotlinx.coroutines.withContext
 import org.ireader.common_models.FilterType
 import org.ireader.common_models.SortType
 import org.ireader.common_models.entities.BookItem
-import org.ireader.common_data.repository.LocalBookRepository
 import javax.inject.Inject
 
 class SubscribeInLibraryBooks @Inject constructor(private val localBookRepository: org.ireader.common_data.repository.LocalBookRepository) {
@@ -40,14 +39,15 @@ class SubscribeInLibraryBooks @Inject constructor(private val localBookRepositor
                     filteredBooks.addAll(localBookRepository.findDownloadedBooks())
                 }
             }
-            emit(books.filter { book ->
-                if (filter.isNotEmpty()) {
-                    book in filteredBooks
-                } else {
-                    true
+            emit(
+                books.filter { book ->
+                    if (filter.isNotEmpty()) {
+                        book in filteredBooks
+                    } else {
+                        true
+                    }
                 }
-            })
-
+            )
 
 //            if (filter.isNotEmpty()) {
 //                emit(books.filter { it.title.contains(query, true) }.filter { it in filteredBooks })

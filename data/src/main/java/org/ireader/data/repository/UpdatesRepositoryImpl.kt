@@ -15,14 +15,16 @@ class UpdatesRepositoryImpl @Inject constructor(private val updatesDao: UpdatesD
     override fun subscribeAllUpdates(): Flow<Map<String, List<org.ireader.common_models.entities.UpdateWithInfo>>> {
         return updatesDao.subscribeUpdates().mapLatest { updates ->
             updates.groupBy { update ->
-                convertLongToTime(update.date,
-                    "yyyy/MM/dd")
+                convertLongToTime(
+                    update.date,
+                    "yyyy/MM/dd"
+                )
             }
         }.distinctUntilChanged()
     }
 
     override suspend fun insertUpdates(update: List<org.ireader.common_models.entities.Update>) {
-         updatesDao.insert(update)
+        updatesDao.insert(update)
     }
 
     override suspend fun insertUpdate(update: org.ireader.common_models.entities.Update) {
@@ -35,11 +37,9 @@ class UpdatesRepositoryImpl @Inject constructor(private val updatesDao: UpdatesD
 
     override suspend fun deleteUpdates(update: List<Update>) {
         updatesDao.delete(update)
-
     }
 
     override suspend fun deleteAllUpdates() {
         updatesDao.deleteAllUpdates()
-
     }
 }

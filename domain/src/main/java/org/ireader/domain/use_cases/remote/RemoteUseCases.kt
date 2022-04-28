@@ -1,8 +1,6 @@
 package org.ireader.domain.use_cases.remote
 
-import androidx.annotation.Keep
 import javax.inject.Inject
-
 
 data class RemoteUseCases @Inject constructor(
     val getBookDetail: GetBookDetail,
@@ -10,12 +8,3 @@ data class RemoteUseCases @Inject constructor(
     val getRemoteChapters: GetRemoteChapters,
     val getRemoteBooks: GetRemoteBooksUseCase,
 )
-
-
-
-
-
-
-
-
-

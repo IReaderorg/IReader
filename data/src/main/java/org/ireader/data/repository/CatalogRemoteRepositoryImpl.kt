@@ -18,11 +18,9 @@ class CatalogRemoteRepositoryImpl @Inject constructor(
         return dao.subscribeAll().distinctUntilChanged()
     }
 
-
     override suspend fun insertRemoteCatalogs(catalogs: List<org.ireader.common_models.entities.CatalogRemote>) {
         dao.insert(catalogs)
     }
-
 
     override suspend fun deleteAllRemoteCatalogs() {
         return dao.deleteAll()

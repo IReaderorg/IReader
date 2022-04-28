@@ -19,9 +19,12 @@ fun CardTile(
     trailing: @Composable RowScope.() -> Unit = {},
     onClick: () -> Unit,
 ) {
-    Column(verticalArrangement = Arrangement.Center, modifier = modifier.clickable {
-        onClick()
-    }) {
+    Column(
+        verticalArrangement = Arrangement.Center,
+        modifier = modifier.clickable {
+            onClick()
+        }
+    ) {
         Text(
             modifier = modifier,
             text = title,
@@ -38,4 +41,3 @@ fun CardTile(
         }
     }
 }
-

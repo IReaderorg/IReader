@@ -17,14 +17,17 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.Chapter
 import org.ireader.core_api.log.Log
 import org.ireader.core_api.source.Source
 import org.ireader.core_catalogs.CatalogStore
-
 import org.ireader.domain.notification.Notifications
 import org.ireader.domain.services.tts_service.Player
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
@@ -33,7 +36,6 @@ import org.ireader.domain.utils.notificationManager
 import org.ireader.presentation.feature_ttl.TTSState
 import org.ireader.presentation.feature_ttl.TTSStateImpl
 import javax.inject.Inject
-
 
 private const val TTS_SERVICE = "tts_service"
 
@@ -80,13 +82,11 @@ class TTSService : MediaBrowserServiceCompat() {
 
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
-
     companion object {
         const val TTS_SERVICE_NAME = "TTS_SERVICE"
         const val TTS_Chapter_ID = "chapterId"
         const val COMMAND = "command"
         const val TTS_BOOK_ID = "bookId"
-
 
         const val ACTION_STOP = "actionStop"
         const val ACTION_PAUSE = "actionPause"
@@ -97,7 +97,6 @@ class TTSService : MediaBrowserServiceCompat() {
 
         const val ACTION_UPDATE = "actionUpdate"
 
-
         const val NOVEL_ID = "novel_id"
         const val SOURCE_ID = "source_id"
         const val FAVORITE = "favorite"
@@ -107,10 +106,7 @@ class TTSService : MediaBrowserServiceCompat() {
         const val LAST_PARAGRAPH = "last_paragraph"
         const val CHAPTER_TITLE = "chapter_title"
         const val CHAPTER_ID = "chapter_id"
-
-
     }
-
 
     override fun onCreate() {
         super.onCreate()
@@ -143,12 +139,14 @@ class TTSService : MediaBrowserServiceCompat() {
          * setting the possible actions for mediabuttons
          */
         stateBuilder = PlaybackStateCompat.Builder()
-            .setActions(PlaybackStateCompat.ACTION_PLAY or
+            .setActions(
+                PlaybackStateCompat.ACTION_PLAY or
                     PlaybackStateCompat.ACTION_STOP or
                     PlaybackStateCompat.ACTION_SKIP_TO_NEXT or
                     PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS or
                     PlaybackStateCompat.ACTION_FAST_FORWARD or
-                    PlaybackStateCompat.ACTION_REWIND)
+                    PlaybackStateCompat.ACTION_REWIND
+            )
         mediaSession.setPlaybackState(stateBuilder.build())
         /**
          * setting a callbacks
@@ -159,12 +157,14 @@ class TTSService : MediaBrowserServiceCompat() {
          * setting MediaButtonReceiver
          */
         val mediaReceiverPendingIntent =
-            PendingIntent.getService(this@TTSService,
+            PendingIntent.getService(
+                this@TTSService,
                 0,
                 Intent(this@TTSService, TTSService::class.java).apply {
                     action = ACTION_PLAY_PAUSE
                 },
-                pendingIntentFlags)
+                pendingIntentFlags
+            )
         mediaSession.setMediaButtonReceiver(mediaReceiverPendingIntent)
         /**
          *  Media session need to be active before using media buttons
@@ -174,7 +174,8 @@ class TTSService : MediaBrowserServiceCompat() {
             mediaSession.isActive = true
         } catch (e: NullPointerException) {
             mediaSession.isActive = false
-            mediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or
+            mediaSession.setFlags(
+                MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or
                     MediaSessionCompat.FLAG_HANDLES_QUEUE_COMMANDS or
                     MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS
             )
@@ -198,8 +199,6 @@ class TTSService : MediaBrowserServiceCompat() {
             state.ttsIsLoading = false
         }
         notificationController = NotificationController()
-
-
     }
 
     override fun onGetRoot(
@@ -209,7 +208,6 @@ class TTSService : MediaBrowserServiceCompat() {
     ): BrowserRoot {
         return BrowserRoot("NONE", null)
     }
-
 
     override fun onLoadChildren(
         parentId: String,
@@ -249,7 +247,6 @@ class TTSService : MediaBrowserServiceCompat() {
         return super.onStartCommand(intent, flags, startId)
     }
 
-
     override fun onDestroy() {
         player.shutdown()
         Log.error { "onDestroy" }
@@ -271,13 +268,12 @@ class TTSService : MediaBrowserServiceCompat() {
                 putLong(CHAPTER_ID, chapter.id)
                 putText(NOVEL_COVER, book.cover)
                 putLong(PROGRESS, state.currentReadingParagraph.toLong())
-                putLong(LAST_PARAGRAPH, state.ttsContent?.value?.lastIndex?.toLong()?:1L)
+                putLong(LAST_PARAGRAPH, state.ttsContent?.value?.lastIndex?.toLong() ?: 1L)
                 putText(MediaMetadata.METADATA_KEY_TITLE, chapter.title)
                 putText(MediaMetadata.METADATA_KEY_AUTHOR, book.author)
             }.build()
         mediaSession.setMetadata(data)
     }
-
 
     private inner class TTSSessionCallback : MediaSessionCompat.Callback() {
 
@@ -288,8 +284,6 @@ class TTSService : MediaBrowserServiceCompat() {
             } else {
                 startService(Player.PLAY)
             }
-
-
         }
 
         override fun onStop() {
@@ -297,33 +291,25 @@ class TTSService : MediaBrowserServiceCompat() {
             startService(Player.PAUSE)
         }
 
-
         override fun onRewind() {
             Log.error { "onRewind" }
             startService(Player.PREV_PAR)
-
         }
 
         override fun onFastForward() {
             Log.error { "onFastForward" }
             startService(Player.NEXT_PAR)
-
         }
-
 
         override fun onSkipToNext() {
             Log.error { "onSkipToNext" }
             startService(Player.SKIP_NEXT)
-
         }
 
         override fun onSkipToPrevious() {
             Log.error { "onSkipToPrevious" }
             startService(Player.SKIP_PREV)
-
         }
-
-
     }
 
     private inner class NotificationController : MediaControllerCompat.Callback() {
@@ -342,8 +328,10 @@ class TTSService : MediaBrowserServiceCompat() {
             if (state != null && mediaSession.controller.metadata != null) {
                 Log.error { "onPlaybackStateChanged $state" }
                 scope.launch {
-                    notificationManager.notify(Notifications.ID_TTS,
-                        ttsNotificationBuilder.buildTTSNotification(mediaSession).build())
+                    notificationManager.notify(
+                        Notifications.ID_TTS,
+                        ttsNotificationBuilder.buildTTSNotification(mediaSession).build()
+                    )
                 }
             }
         }
@@ -370,12 +358,13 @@ class TTSService : MediaBrowserServiceCompat() {
                         isError = error
                     )
 
-                notify(Notifications.ID_TTS,
-                    builder.build())
+                notify(
+                    Notifications.ID_TTS,
+                    builder.build()
+                )
             }
         }
     }
-
 
     fun startService(command: Int) {
         serviceJob = scope.launch {
@@ -394,9 +383,10 @@ class TTSService : MediaBrowserServiceCompat() {
                                             ).build()
 
                                         NotificationManagerCompat.from(this@TTSService)
-                                            .notify(Notifications.ID_TTS,
-                                                notification)
-
+                                            .notify(
+                                                Notifications.ID_TTS,
+                                                notification
+                                            )
 
                                         when (command) {
                                             Player.CANCEL -> {
@@ -409,9 +399,11 @@ class TTSService : MediaBrowserServiceCompat() {
                                                 val index = getChapterIndex(chapter, chapters)
                                                 if (index > 0) {
                                                     val id = chapters[index - 1].id
-                                                    getRemoteChapter(chapterId = id,
+                                                    getRemoteChapter(
+                                                        chapterId = id,
                                                         source,
-                                                        state) {
+                                                        state
+                                                    ) {
                                                         if (state.isPlaying) {
                                                             readText(this@TTSService, mediaSession)
                                                         }
@@ -422,7 +414,6 @@ class TTSService : MediaBrowserServiceCompat() {
                                                 if (state.isPlaying) {
                                                     readText(this@TTSService, mediaSession)
                                                 } else {
-
                                                 }
                                             }
                                             Player.PREV_PAR -> {
@@ -442,9 +433,11 @@ class TTSService : MediaBrowserServiceCompat() {
                                                 val index = getChapterIndex(chapter, chapters)
                                                 if (index != chapters.lastIndex) {
                                                     val id = chapters[index + 1].id
-                                                    getRemoteChapter(chapterId = id,
+                                                    getRemoteChapter(
+                                                        chapterId = id,
                                                         source,
-                                                        state) {
+                                                        state
+                                                    ) {
                                                         if (state.isPlaying) {
                                                             readText(this@TTSService, mediaSession)
                                                         }
@@ -456,8 +449,6 @@ class TTSService : MediaBrowserServiceCompat() {
                                                     readText(this@TTSService, mediaSession)
                                                 } else {
                                                 }
-
-
                                             }
                                             Player.NEXT_PAR -> {
                                                 state.ttsContent?.value?.let { content ->
@@ -471,8 +462,6 @@ class TTSService : MediaBrowserServiceCompat() {
                                                         }
                                                     }
                                                 }
-
-
                                             }
                                             Player.PLAY -> {
                                                 setPlaybackState(PlaybackStateCompat.STATE_PLAYING)
@@ -511,7 +500,6 @@ class TTSService : MediaBrowserServiceCompat() {
                                     }
                                 }
                             }
-
                         }
                     }
                 }
@@ -527,16 +515,13 @@ class TTSService : MediaBrowserServiceCompat() {
                         }
                     }
                 }
-
             }
         }
-
     }
 
     private val ttsJob = Job()
     val scope = CoroutineScope(Dispatchers.Main.immediate + ttsJob)
     fun readText(context: Context, mediaSessionCompat: MediaSessionCompat) {
-
 
         state.apply {
             if (state.languages.isEmpty()) {
@@ -585,120 +570,117 @@ class TTSService : MediaBrowserServiceCompat() {
                                         isLoading = state.ttsIsLoading
                                     )
 
-                                    notify(Notifications.ID_TTS,
-                                        notification.build())
+                                    notify(
+                                        Notifications.ID_TTS,
+                                        notification.build()
+                                    )
                                 }
                                 if (state.utteranceId != (currentReadingParagraph).toString()) {
-                                    player.speak(content[currentReadingParagraph],
+                                    player.speak(
+                                        content[currentReadingParagraph],
                                         TextToSpeech.QUEUE_FLUSH,
                                         null,
-                                        currentReadingParagraph.toString())
+                                        currentReadingParagraph.toString()
+                                    )
                                 }
 
-
-
                                 player.setOnUtteranceProgressListener(object :
-                                    UtteranceProgressListener() {
-                                    override fun onStop(
-                                        utteranceId: String?,
-                                        interrupted: Boolean,
-                                    ) {
-                                        super.onStop(utteranceId, interrupted)
-                                        state.utteranceId = ""
+                                        UtteranceProgressListener() {
+                                        override fun onStop(
+                                            utteranceId: String?,
+                                            interrupted: Boolean,
+                                        ) {
+                                            super.onStop(utteranceId, interrupted)
+                                            state.utteranceId = ""
+                                        }
 
-                                    }
+                                        override fun onStart(p0: String) {
+                                            // showTextReaderNotification(context)
+                                            isPlaying = true
+                                            utteranceId = p0
+                                        }
 
-                                    override fun onStart(p0: String) {
-                                        // showTextReaderNotification(context)
-                                        isPlaying = true
-                                        utteranceId = p0
+                                        override fun onDone(p0: String) {
+                                            try {
+                                                var isFinished = false
 
-                                    }
-
-                                    override fun onDone(p0: String) {
-                                        try {
-                                            var isFinished = false
-
-
-
-                                            if (currentReadingParagraph < content.size) {
-                                                if (currentReadingParagraph < content.lastIndex) {
-                                                    currentReadingParagraph += 1
-                                                } else {
-                                                    isFinished = true
+                                                if (currentReadingParagraph < content.size) {
+                                                    if (currentReadingParagraph < content.lastIndex) {
+                                                        currentReadingParagraph += 1
+                                                    } else {
+                                                        isFinished = true
+                                                    }
+                                                    readText(context, mediaSessionCompat)
                                                 }
-                                                readText(context, mediaSessionCompat)
-                                            }
 
+                                                if (currentReadingParagraph == content.lastIndex && !ttsIsLoading && isFinished) {
+                                                    isPlaying = false
+                                                    currentReadingParagraph = 0
 
-                                            if (currentReadingParagraph == content.lastIndex && !ttsIsLoading && isFinished) {
-                                                isPlaying = false
-                                                currentReadingParagraph = 0
+                                                    player.stop()
+                                                    if (autoNextChapter) {
+                                                        scope.launch {
+                                                            state.ttsChapters.let { chapters ->
+                                                                state.ttsSource?.let { source ->
+                                                                    val index =
+                                                                        getChapterIndex(
+                                                                            chapter,
+                                                                            chapters
+                                                                        )
+                                                                    if (index != chapters.lastIndex) {
+                                                                        val id = chapters[index + 1].id
+                                                                        getRemoteChapter(
+                                                                            chapterId = id,
+                                                                            source,
+                                                                            state
+                                                                        ) {
+                                                                            state.currentReadingParagraph =
+                                                                                0
+                                                                            updateNotification(
+                                                                                chapter,
+                                                                                book
+                                                                            )
 
-                                                player.stop()
-                                                if (autoNextChapter) {
-                                                    scope.launch {
-                                                        state.ttsChapters.let { chapters ->
-                                                            state.ttsSource?.let { source ->
-                                                                val index =
-                                                                    getChapterIndex(chapter,
-                                                                        chapters)
-                                                                if (index != chapters.lastIndex) {
-                                                                    val id = chapters[index + 1].id
-                                                                    getRemoteChapter(chapterId = id,
-                                                                        source,
-                                                                        state) {
-                                                                        state.currentReadingParagraph =
-                                                                            0
-                                                                        updateNotification(chapter,
-                                                                            book)
-
-                                                                        mediaSession.let { mediaSession ->
-                                                                            readText(context,
-                                                                                mediaSession)
+                                                                            mediaSession.let { mediaSession ->
+                                                                                readText(
+                                                                                    context,
+                                                                                    mediaSession
+                                                                                )
+                                                                            }
                                                                         }
-
-
                                                                     }
                                                                 }
-
                                                             }
                                                         }
-
                                                     }
                                                 }
-
+                                            } catch (e: Throwable) {
+                                                Log.error { e.stackTrace.toString() }
                                             }
-
-                                        } catch (e: Throwable) {
-                                            Log.error { e.stackTrace.toString() }
-
                                         }
-                                    }
 
-                                    override fun onError(p0: String) {
-                                        isPlaying = false
+                                        override fun onError(p0: String) {
+                                            isPlaying = false
+                                        }
 
-                                    }
-
-
-                                    override fun onBeginSynthesis(
-                                        utteranceId: String?,
-                                        sampleRateInHz: Int,
-                                        audioFormat: Int,
-                                        channelCount: Int,
-                                    ) {
-                                        super.onBeginSynthesis(utteranceId,
-                                            sampleRateInHz,
-                                            audioFormat,
-                                            channelCount)
-                                    }
-                                })
+                                        override fun onBeginSynthesis(
+                                            utteranceId: String?,
+                                            sampleRateInHz: Int,
+                                            audioFormat: Int,
+                                            channelCount: Int,
+                                        ) {
+                                            super.onBeginSynthesis(
+                                                utteranceId,
+                                                sampleRateInHz,
+                                                audioFormat,
+                                                channelCount
+                                            )
+                                        }
+                                    })
                             }
                         } catch (e: Throwable) {
                             Log.error { e.stackTrace.toString() }
                         }
-
                     }
                 }
             }
@@ -712,7 +694,6 @@ class TTSService : MediaBrowserServiceCompat() {
         onSuccess: suspend () -> Unit,
     ) {
         try {
-
 
             ttsState.ttsChapter?.let { chapter ->
                 ttsState.ttsBook?.let { book ->
@@ -730,13 +711,14 @@ class TTSService : MediaBrowserServiceCompat() {
                 ttsState.ttsIsLoading = false
                 ttsState.ttsBook?.let { book ->
                     updateNotification(chapter = localChapter, book = book)
-
                 }
-                insertUseCases.insertChapter(localChapter.copy(
-                    read = true,
-                    readAt = Clock.System.now()
-                        .toEpochMilliseconds(),
-                ))
+                insertUseCases.insertChapter(
+                    localChapter.copy(
+                        read = true,
+                        readAt = Clock.System.now()
+                            .toEpochMilliseconds(),
+                    )
+                )
                 onSuccess()
             } else {
                 if (localChapter != null) {
@@ -746,13 +728,15 @@ class TTSService : MediaBrowserServiceCompat() {
                         onSuccess = { result ->
                             if (result.content.joinToString().length > 1) {
                                 state.ttsChapter = result
-                                insertUseCases.insertChapter(result.copy(
-                                    dateFetch = Clock.System.now()
-                                        .toEpochMilliseconds(),
-                                    read = true,
-                                    readAt = Clock.System.now()
-                                        .toEpochMilliseconds(),
-                                ))
+                                insertUseCases.insertChapter(
+                                    result.copy(
+                                        dateFetch = Clock.System.now()
+                                            .toEpochMilliseconds(),
+                                        read = true,
+                                        readAt = Clock.System.now()
+                                            .toEpochMilliseconds(),
+                                    )
+                                )
                                 chapterRepo.findChaptersByBookId(result.bookId).let { res ->
                                     state.ttsChapters = res
                                 }
@@ -765,7 +749,6 @@ class TTSService : MediaBrowserServiceCompat() {
                             }
                         }, onError = {
                             ttsState.ttsIsLoading = false
-
                         }
                     )
                 }
@@ -775,10 +758,12 @@ class TTSService : MediaBrowserServiceCompat() {
             Log.error { e.stackTrace.toString() }
             ttsState.ttsChapter?.let { chapter ->
                 ttsState.ttsBook?.let { book ->
-                    updateNotification(chapter = chapter,
+                    updateNotification(
+                        chapter = chapter,
                         book = book,
                         isLoading = false,
-                        error = true)
+                        error = true
+                    )
                 }
             }
         }
@@ -794,5 +779,4 @@ class TTSService : MediaBrowserServiceCompat() {
             throw Exception("Invalid Id")
         }
     }
-
 }

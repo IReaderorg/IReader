@@ -12,7 +12,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -29,7 +33,6 @@ fun BookSummary(
     var isExpandable by remember {
         mutableStateOf<Boolean?>(null)
     }
-
 
     val modifier = when (isExpandable) {
         true -> Modifier.animateContentSize()
@@ -81,7 +84,9 @@ private fun GenreChip(genre: String) {
         border = BorderStroke(1.dp, MaterialTheme.colors.onBackground.copy(alpha = .5f)),
         color = MaterialTheme.colors.background
     ) {
-        MidSizeTextComposable(text = genre,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
+        MidSizeTextComposable(
+            text = genre,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+        )
     }
 }

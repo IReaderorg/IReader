@@ -1,18 +1,19 @@
 package org.ireader.reader.viewmodel
 
-
-import androidx.compose.runtime.*
+import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.graphics.Color
 import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.Chapter
-import org.ireader.common_extensions.UiText
 import org.ireader.core_api.source.Source
 import org.ireader.core_ui.theme.BackgroundColor
 import org.ireader.core_ui.theme.FontType
 import javax.inject.Inject
-
-
 
 open class ReaderScreenStateImpl @Inject constructor() : ReaderScreenState {
     override var isLoading by mutableStateOf<Boolean>(false)
@@ -21,7 +22,7 @@ open class ReaderScreenStateImpl @Inject constructor() : ReaderScreenState {
     override var isRemoteLoaded by mutableStateOf<Boolean>(false)
     override var enable by mutableStateOf<Boolean>(true)
     override var isDrawerAsc by mutableStateOf<Boolean>(true)
-    override var drawerChapters: State<List<Chapter>> = derivedStateOf {   if (isDrawerAsc) stateChapters else stateChapters.reversed() }
+    override var drawerChapters: State<List<Chapter>> = derivedStateOf { if (isDrawerAsc) stateChapters else stateChapters.reversed() }
     override var isBookLoaded by mutableStateOf<Boolean>(false)
     override var isReaderModeEnable by mutableStateOf<Boolean>(true)
     override var isSettingModeEnable by mutableStateOf<Boolean>(false)
@@ -29,17 +30,15 @@ open class ReaderScreenStateImpl @Inject constructor() : ReaderScreenState {
     override var currentChapterIndex: Int by mutableStateOf<Int>(0)
     override var source: Source? by mutableStateOf<Source?>(null)
     override var error: org.ireader.common_extensions.UiText by mutableStateOf<org.ireader.common_extensions.UiText>(
-        org.ireader.common_extensions.UiText.DynamicString(""))
+        org.ireader.common_extensions.UiText.DynamicString("")
+    )
     override var stateChapters: List<Chapter> by mutableStateOf<List<Chapter>>(emptyList())
     override var stateChapter: Chapter? by mutableStateOf<Chapter?>(null)
 
     override var book: Book? by mutableStateOf<Book?>(null)
     override var stateContent: State<List<String>?>? =
         derivedStateOf { stateChapter?.content?.filter { it.isNotBlank() }?.map { it.trim() } }
-
-
 }
-
 
 interface ReaderScreenState {
     var isLoading: Boolean
@@ -60,9 +59,7 @@ interface ReaderScreenState {
     var stateChapter: Chapter?
     var book: Book?
     var stateContent: State<List<String>?>?
-
 }
-
 
 open class ReaderScreenPreferencesStateImpl @Inject constructor() : ReaderScreenPreferencesState {
     override var isAsc by mutableStateOf<Boolean>(true)
@@ -93,9 +90,7 @@ open class ReaderScreenPreferencesStateImpl @Inject constructor() : ReaderScreen
     override var searchQuery by mutableStateOf<String>("")
     override var queriedTextIndex: SnapshotStateList<Int> = mutableStateListOf()
     override var currentViewingSearchResultIndex by mutableStateOf<Int>(0)
-
 }
-
 
 interface ReaderScreenPreferencesState {
     var isAsc: Boolean
@@ -126,7 +121,6 @@ interface ReaderScreenPreferencesState {
     var searchQuery: String
     var queriedTextIndex: SnapshotStateList<Int>
     var currentViewingSearchResultIndex: Int
-
 }
 
 sealed class Orientation(val index: Int) {

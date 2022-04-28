@@ -15,7 +15,7 @@ import org.ireader.core_ui.theme.readerScreenBackgroundColors
 import javax.inject.Inject
 
 interface ReaderPrefFunctions {
-    fun ReaderScreenViewModel.readPreferences()
+    suspend fun ReaderScreenViewModel.readPreferences()
     fun ReaderScreenViewModel.toggleReaderMode(enable: Boolean? = null)
     fun ReaderScreenViewModel.saveBrightness(brightness: Float, context: Context)
     fun ReaderScreenViewModel.saveFont(index: Int)
@@ -25,18 +25,18 @@ interface ReaderPrefFunctions {
     fun ReaderScreenViewModel.saveScrollIndicatorPadding(increase: Boolean)
     fun ReaderScreenViewModel.saveFontHeight(isIncreased: Boolean)
     fun ReaderScreenViewModel.saveOrientation(context: Context)
-    fun ReaderScreenViewModel.readImmersiveMode(context: Context)
+    suspend fun ReaderScreenViewModel.readImmersiveMode(context: Context)
     fun ReaderScreenViewModel.toggleImmersiveMode(context: Context)
     fun ReaderScreenViewModel.toggleSelectableMode()
     fun ReaderScreenViewModel.toggleAutoScrollMode()
     fun ReaderScreenViewModel.toggleScrollMode()
     fun ReaderScreenViewModel.saveParagraphDistance(isIncreased: Boolean)
-    fun ReaderScreenViewModel.readScrollIndicatorPadding(): Int
-    fun ReaderScreenViewModel.readScrollIndicatorWidth(): Int
-    fun ReaderScreenViewModel.readBrightness(context: Context)
-    fun ReaderScreenViewModel.readBackgroundColor(): Color
-    fun ReaderScreenViewModel.readTextColor(): Color
-    fun ReaderScreenViewModel.readOrientation(context: Context)
+    suspend fun ReaderScreenViewModel.readScrollIndicatorPadding(): Int
+    suspend fun ReaderScreenViewModel.readScrollIndicatorWidth(): Int
+    suspend fun ReaderScreenViewModel.readBrightness(context: Context)
+    suspend fun ReaderScreenViewModel.readBackgroundColor(): Color
+    suspend fun ReaderScreenViewModel.readTextColor(): Color
+    suspend fun ReaderScreenViewModel.readOrientation(context: Context)
     fun ReaderScreenViewModel.changeBackgroundColor(colorIndex: Int)
     fun ReaderScreenViewModel.setReaderBackgroundColor(color: Color)
     fun ReaderScreenViewModel.setReaderTextColor(color: Color)
@@ -49,10 +49,9 @@ interface ReaderPrefFunctions {
 }
 
 class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
-    override fun ReaderScreenViewModel.readPreferences() {
+    override suspend fun ReaderScreenViewModel.readPreferences() {
         font = readerUseCases.selectedFontStateUseCase.readFont()
-       // readerUseCases.selectedFontStateUseCase.saveFont(0)
-
+        // readerUseCases.selectedFontStateUseCase.saveFont(0)
 
         this.fontSize = readerUseCases.fontSizeStateUseCase.read()
 
@@ -97,7 +96,6 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
     override fun ReaderScreenViewModel.saveFont(index: Int) {
         this.font = fonts[index]
         readerUseCases.selectedFontStateUseCase.saveFont(index)
-
     }
 
     override fun ReaderScreenViewModel.saveFontSize(event: FontSizeEvent) {
@@ -117,11 +115,9 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
         if (isIncreased) {
             this.paragraphsIndent = paragraphsIndent + 1
             readerUseCases.paragraphIndentUseCase.save(this.paragraphsIndent)
-
-
         } else if (paragraphsIndent > 1 && !isIncreased) {
             this.paragraphsIndent = paragraphsIndent - 1
-            readerUseCases.paragraphIndentUseCase.save( this.paragraphsIndent)
+            readerUseCases.paragraphIndentUseCase.save(this.paragraphsIndent)
         }
     }
 
@@ -129,7 +125,7 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
         if (increase) {
             scrollIndicatorWith += 1
             readerUseCases.scrollIndicatorUseCase.saveWidth(scrollIndicatorWith)
-        } else if (scrollIndicatorWith > 0){
+        } else if (scrollIndicatorWith > 0) {
             scrollIndicatorWith -= 1
             readerUseCases.scrollIndicatorUseCase.saveWidth(scrollIndicatorWith)
         }
@@ -150,11 +146,9 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
         if (isIncreased) {
             lineHeight = currentFontHeight + 1
             readerUseCases.fontHeightUseCase.save(lineHeight)
-
         } else if (currentFontHeight > 20 && !isIncreased) {
             lineHeight = currentFontHeight - 1
             readerUseCases.fontHeightUseCase.save(lineHeight)
-
         }
     }
 
@@ -166,7 +160,6 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
                     activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                     orientation = Orientation.Portrait
                     readerUseCases.orientationUseCase.save(OrientationMode.Portrait)
-
                 }
                 is Orientation.Portrait -> {
                     activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
@@ -177,7 +170,7 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
         }
     }
 
-    override fun ReaderScreenViewModel.readImmersiveMode(context: Context) {
+    override suspend fun ReaderScreenViewModel.readImmersiveMode(context: Context) {
         immersiveMode = readerUseCases.immersiveModeUseCase.read()
         if (immersiveMode) {
             hideSystemBars(context = context)
@@ -208,7 +201,6 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
     override fun ReaderScreenViewModel.toggleScrollMode() {
         verticalScrolling = !verticalScrolling
         readerUseCases.scrollModeUseCase.save(verticalScrolling)
-
     }
 
     override fun ReaderScreenViewModel.saveParagraphDistance(isIncreased: Boolean) {
@@ -216,23 +208,21 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
         if (isIncreased) {
             distanceBetweenParagraphs = currentDistance + 1
             readerUseCases.paragraphDistanceUseCase.save(distanceBetweenParagraphs)
-
         } else if (currentDistance > 0) {
             distanceBetweenParagraphs = currentDistance - 1
             readerUseCases.paragraphDistanceUseCase.save(distanceBetweenParagraphs)
-
         }
     }
 
-    override fun ReaderScreenViewModel.readScrollIndicatorPadding(): Int {
+    override suspend fun ReaderScreenViewModel.readScrollIndicatorPadding(): Int {
         return readerUseCases.scrollIndicatorUseCase.readPadding()
     }
 
-    override fun ReaderScreenViewModel.readScrollIndicatorWidth(): Int {
+    override suspend fun ReaderScreenViewModel.readScrollIndicatorWidth(): Int {
         return readerUseCases.scrollIndicatorUseCase.readWidth()
     }
 
-    override fun ReaderScreenViewModel.readBrightness(context: Context) {
+    override suspend fun ReaderScreenViewModel.readBrightness(context: Context) {
         val brightness = readerUseCases.brightnessStateUseCase.readBrightness()
         val activity = context.findComponentActivity()
         if (activity != null) {
@@ -252,26 +242,25 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
         }
     }
 
-    override fun ReaderScreenViewModel.readBackgroundColor(): Color {
+    override suspend fun ReaderScreenViewModel.readBackgroundColor(): Color {
         val color = Color(readerUseCases.backgroundColorUseCase.read())
         this.backgroundColor = color
         return color
     }
 
-    override fun ReaderScreenViewModel.readTextColor(): Color {
+    override suspend fun ReaderScreenViewModel.readTextColor(): Color {
         val textColor = Color(readerUseCases.textColorUseCase.read())
         this.textColor = textColor
         return textColor
     }
 
-    override fun ReaderScreenViewModel.readOrientation(context: Context) {
+    override suspend fun ReaderScreenViewModel.readOrientation(context: Context) {
         val activity = context.findComponentActivity()
         if (activity != null) {
             when (readerUseCases.orientationUseCase.read()) {
                 OrientationMode.Portrait -> {
                     activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                     orientation = Orientation.Portrait
-
                 }
                 OrientationMode.Landscape -> {
                     activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
@@ -302,7 +291,7 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
         if (increase) {
             autoScrollInterval += 500
             readerUseCases.autoScrollMode.saveInterval(autoScrollInterval + 500)
-        } else if (autoScrollInterval > 1){
+        } else if (autoScrollInterval > 1) {
             autoScrollInterval -= 500
             readerUseCases.autoScrollMode.saveInterval(autoScrollInterval - 500)
         }
@@ -326,9 +315,7 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
             autoBrightnessMode = true
             readerUseCases.brightnessStateUseCase.saveAutoBrightness(true)
         }
-
     }
-
 
     override fun ReaderScreenViewModel.toggleRemoteLoaded(loaded: Boolean) {
         state.isRemoteLoaded = loaded
@@ -344,9 +331,8 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
             windowInsetsController.systemBarsBehavior =
                 WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 
-
             // Hide both the status bar and the navigation bar
-            //windowInsetsController.show(WindowInsetsCompat.Type.systemBars())
+            // windowInsetsController.show(WindowInsetsCompat.Type.systemBars())
             windowInsetsController.show(WindowInsetsCompat.Type.systemBars())
         }
     }
@@ -366,5 +352,4 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
             //  windowInsetsController.hide(WindowInsetsCompat.Type.navigationBars())
         }
     }
-
 }

@@ -11,6 +11,4 @@ interface CatalogRemoteRepository {
 
     suspend fun insertRemoteCatalogs(catalogs: List<CatalogRemote>)
     suspend fun deleteAllRemoteCatalogs()
-
 }
-

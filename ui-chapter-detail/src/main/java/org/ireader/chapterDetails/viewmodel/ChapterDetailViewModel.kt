@@ -6,10 +6,10 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import org.ireader.common_extensions.UiText
 import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.Chapter
 import org.ireader.core.R
-import org.ireader.common_extensions.UiText
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.domain.use_cases.local.DeleteUseCase
@@ -17,7 +17,6 @@ import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.services.ServiceUseCases
 import javax.inject.Inject
-
 
 @HiltViewModel
 class ChapterDetailViewModel @Inject constructor(
@@ -30,15 +29,12 @@ class ChapterDetailViewModel @Inject constructor(
     private val serviceUseCases: ServiceUseCases,
 ) : BaseViewModel(), ChapterDetailState by state {
 
-
-
     init {
         val sourceId = savedStateHandle.get<Long>(NavigationArgs.sourceId.name)
         val bookId = savedStateHandle.get<Long>(NavigationArgs.bookId.name)
         if (bookId != null && sourceId != null) {
             viewModelScope.launch {
                 getLocalBookById(bookId)
-
             }
         } else {
             viewModelScope.launch {
@@ -54,7 +50,6 @@ class ChapterDetailViewModel @Inject constructor(
                 toggleAsc()
                 book?.let { getLocalChaptersByPaging(isAsc = isAsc) }
             }
-
         }
     }
 
@@ -88,8 +83,7 @@ class ChapterDetailViewModel @Inject constructor(
             }
         }
         )
-        viewModelScope.launch(Dispatchers.IO)
-        {
+        viewModelScope.launch(Dispatchers.IO) {
             deleteUseCase.deleteChapters(list)
             insertUseCases.insertChapters(list)
         }
@@ -115,10 +109,8 @@ class ChapterDetailViewModel @Inject constructor(
                 this@ChapterDetailViewModel.book = book
                 getLocalChaptersByPaging(isAsc = isAsc)
                 getLastReadChapter(book)
-
             }
         }
-
     }
 
     private
@@ -144,9 +136,7 @@ class ChapterDetailViewModel @Inject constructor(
                 ).collect { chapters ->
                     this@ChapterDetailViewModel.chapters = chapters.distinctBy { it.id }
                 }
-
             }
-
         }
     }
 
@@ -168,12 +158,9 @@ class ChapterDetailViewModel @Inject constructor(
         }
     }
 
-
     fun downloadChapters() {
         book?.let { book ->
-           serviceUseCases.startDownloadServicesUseCase(chapterIds = this@ChapterDetailViewModel.selection.toLongArray())
+            serviceUseCases.startDownloadServicesUseCase(chapterIds = this@ChapterDetailViewModel.selection.toLongArray())
         }
-
     }
 }
-

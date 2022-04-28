@@ -21,12 +21,10 @@ object ExploreScreenSpec : ScreenSpec {
 
     override val navHostRoute: String = "explore_route/{sourceId}?query={query}"
 
-
     override val arguments: List<NamedNavArgument> = listOf(
         NavigationArgs.query,
         NavigationArgs.sourceId
     )
-
 
     fun buildRoute(sourceId: Long, query: String? = null): String {
         return if (query != null) {
@@ -36,8 +34,10 @@ object ExploreScreenSpec : ScreenSpec {
         }
     }
 
-    @OptIn(ExperimentalPagerApi::class, androidx.compose.animation.ExperimentalAnimationApi::class,
-        androidx.compose.material.ExperimentalMaterialApi::class)
+    @OptIn(
+        ExperimentalPagerApi::class, androidx.compose.animation.ExperimentalAnimationApi::class,
+        androidx.compose.material.ExperimentalMaterialApi::class
+    )
     @Composable
     override fun Content(
         navController: NavController,
@@ -77,7 +77,7 @@ object ExploreScreenSpec : ScreenSpec {
                 },
                 onSearchDisable = {
                     vm.toggleSearchMode(false)
-                    vm.searchQuery  = null
+                    vm.searchQuery = null
                     vm.loadItems(true)
                 },
                 onSearchEnable = {
@@ -87,12 +87,13 @@ object ExploreScreenSpec : ScreenSpec {
                     vm.searchQuery = it
                 },
                 onWebView = {
-                    if(source is HttpSource) {
-                        navController.navigate(WebViewScreenSpec.buildRoute(
-                            url = (source).baseUrl
-                        ))
+                    if (source is HttpSource) {
+                        navController.navigate(
+                            WebViewScreenSpec.buildRoute(
+                                url = (source).baseUrl
+                            )
+                        )
                     }
-
                 },
                 getBooks = { query, listing, filters ->
                     vm.searchQuery = query
@@ -105,8 +106,10 @@ object ExploreScreenSpec : ScreenSpec {
                 },
                 onBook = { book ->
                     navController.navigate(
-                        route = BookDetailScreenSpec.buildRoute(sourceId = book.sourceId,
-                            bookId = book.id)
+                        route = BookDetailScreenSpec.buildRoute(
+                            sourceId = book.sourceId,
+                            bookId = book.id
+                        )
                     )
                 },
                 onAppbarWebView = {
@@ -117,5 +120,4 @@ object ExploreScreenSpec : ScreenSpec {
             EmptyScreenComposable(navController, R.string.source_not_available)
         }
     }
-
 }

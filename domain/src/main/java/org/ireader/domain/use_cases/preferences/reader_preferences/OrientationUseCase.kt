@@ -1,6 +1,5 @@
 package org.ireader.domain.use_cases.preferences.reader_preferences
 
-
 import org.ireader.common_models.FilterType
 import org.ireader.common_models.SortType
 import org.ireader.core_ui.theme.AppPreferences
@@ -14,11 +13,10 @@ class OrientationUseCase @Inject constructor(
         appPreferences.orientation().set(orientation)
     }
 
-    fun read(): OrientationMode {
+    suspend fun read(): OrientationMode {
         return appPreferences.orientation().get()
     }
 }
-
 
 class SortersUseCase @Inject constructor(
     private val appPreferences: AppPreferences,
@@ -27,10 +25,9 @@ class SortersUseCase @Inject constructor(
         appPreferences.sortLibraryScreen().set(value)
     }
 
-    fun read(): SortType {
+    suspend fun read(): SortType {
         return mapSortType(appPreferences.sortLibraryScreen().get())
     }
-
 }
 
 class SortersDescUseCase @Inject constructor(
@@ -40,10 +37,9 @@ class SortersDescUseCase @Inject constructor(
         appPreferences.sortDescLibraryScreen().set(value)
     }
 
-    fun read(): Boolean {
+    suspend fun read(): Boolean {
         return appPreferences.sortDescLibraryScreen().get()
     }
-
 }
 
 fun mapSortType(input: Int): SortType {
@@ -75,7 +71,6 @@ fun mapSortType(input: Int): SortType {
     }
 }
 
-
 fun mapFilterType(input: Int): FilterType {
     return when (input) {
         0 -> {
@@ -87,7 +82,6 @@ fun mapFilterType(input: Int): FilterType {
     }
 }
 
-
 class TextReaderPrefUseCase @Inject constructor(
     private val appPreferences: AppPreferences,
 ) {
@@ -95,7 +89,7 @@ class TextReaderPrefUseCase @Inject constructor(
         appPreferences.speechRate().set(value)
     }
 
-    fun readPitch(): Float {
+    suspend  fun readPitch(): Float {
         return appPreferences.speechRate().get()
     }
 
@@ -103,7 +97,7 @@ class TextReaderPrefUseCase @Inject constructor(
         appPreferences.speechPitch().set(value)
     }
 
-    fun readRate(): Float {
+    suspend fun readRate(): Float {
         return appPreferences.speechPitch().get()
     }
 
@@ -111,7 +105,7 @@ class TextReaderPrefUseCase @Inject constructor(
         appPreferences.speechLanguage().set(value)
     }
 
-    fun readLanguage(): String {
+    suspend fun readLanguage(): String {
         return appPreferences.speechLanguage().get()
     }
 
@@ -119,7 +113,7 @@ class TextReaderPrefUseCase @Inject constructor(
         appPreferences.speechVoice().set(value)
     }
 
-    fun readVoice(): String {
+    suspend  fun readVoice(): String {
         return appPreferences.speechVoice().get()
     }
 
@@ -127,8 +121,7 @@ class TextReaderPrefUseCase @Inject constructor(
         appPreferences.readerAutoNext().set(value)
     }
 
-    fun readAutoNext(): Boolean {
+    suspend  fun readAutoNext(): Boolean {
         return appPreferences.readerAutoNext().get()
     }
-
 }

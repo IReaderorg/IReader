@@ -1,8 +1,20 @@
 package org.ireader.appearance
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.ListItem
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ModeNight
 import androidx.compose.runtime.Composable
@@ -21,8 +33,8 @@ import org.ireader.core_ui.theme.ThemeMode
 @Composable
 fun AppearanceSettingScreen(
     modifier: Modifier = Modifier,
-    onPopBackStack:() -> Unit,
-    saveDarkModePreference:(ThemeMode) -> Unit
+    onPopBackStack: () -> Unit,
+    saveDarkModePreference: (ThemeMode) -> Unit
 ) {
 
     val openDialog = remember {
@@ -43,17 +55,20 @@ fun AppearanceSettingScreen(
             )
         }
     ) { padding ->
-        ListItem(modifier = Modifier.clickable {
-            openDialog.value = true
-        }) {
+        ListItem(
+            modifier = Modifier.clickable {
+                openDialog.value = true
+            }
+        ) {
             Row {
-                Icon(imageVector = Icons.Default.ModeNight,
+                Icon(
+                    imageVector = Icons.Default.ModeNight,
                     contentDescription = "Night Mode",
-                    tint = MaterialTheme.colors.primary)
+                    tint = MaterialTheme.colors.primary
+                )
                 Spacer(modifier = Modifier.width(16.dp))
                 MidSizeTextComposable(text = "Dark Mode")
             }
-
         }
 
         if (openDialog.value) {
@@ -65,9 +80,11 @@ fun AppearanceSettingScreen(
                     BigSizeTextComposable(text = "Night Mode")
                 },
                 buttons = {
-                    Column(modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)) {
+                    Column(
+                        modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
                         val items = listOf(
                             AppearanceItems.Day,
                             AppearanceItems.Night,
@@ -78,9 +95,11 @@ fun AppearanceSettingScreen(
                                 saveDarkModePreference(item.appTheme)
                                 openDialog.value = false
                             }) {
-                                MidSizeTextComposable(modifier = modifier.fillMaxWidth(),
+                                MidSizeTextComposable(
+                                    modifier = modifier.fillMaxWidth(),
                                     text = item.text,
-                                    align = TextAlign.Start)
+                                    align = TextAlign.Start
+                                )
                             }
                         }
                     }
@@ -89,8 +108,6 @@ fun AppearanceSettingScreen(
                 contentColor = MaterialTheme.colors.onBackground,
             )
         }
-
-
     }
 }
 

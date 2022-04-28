@@ -1,9 +1,11 @@
 package org.ireader.domain.use_cases.local
 
-import androidx.annotation.Keep
-import org.ireader.domain.use_cases.local.book_usecases.*
+import org.ireader.domain.use_cases.local.book_usecases.FindAllInLibraryBooks
+import org.ireader.domain.use_cases.local.book_usecases.FindBookById
+import org.ireader.domain.use_cases.local.book_usecases.FindBookByIds
+import org.ireader.domain.use_cases.local.book_usecases.SubscribeBookById
+import org.ireader.domain.use_cases.local.book_usecases.SubscribeInLibraryBooks
 import javax.inject.Inject
-
 
 data class LocalGetBookUseCases @Inject constructor(
     val subscribeBookById: SubscribeBookById,
@@ -15,18 +17,3 @@ data class LocalGetBookUseCases @Inject constructor(
     val findBooksByKey: FindBooksByKey,
     val subscribeBooksByKey: SubscribeBooksByKey,
 )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

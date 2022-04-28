@@ -5,7 +5,6 @@ import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.HistoryWithRelations
 import org.ireader.common_models.entities.UpdateWithInfo
 
-
 class BookCover(
     val id: Long,
     val sourceId: Long,
@@ -31,7 +30,4 @@ class BookCover(
             return BookCover(update.bookId, update.sourceId, update.cover, update.favorite)
         }
     }
-
 }
-
-
