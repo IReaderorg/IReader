@@ -23,12 +23,12 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
-import org.ireader.common_models.entities.Book
-import org.ireader.core.utils.copyToClipboard
-import org.ireader.core_api.source.Source
-import org.ireader.core.io.BookCover
 import org.ireader.bookDetails.components.BookSummary
-import org.ireader.core_ui.ui_components.components.BookImageComposable
+import org.ireader.common_models.entities.Book
+import org.ireader.components.components.BookImageComposable
+import org.ireader.core_api.source.Source
+import org.ireader.domain.utils.copyToClipboard
+import org.ireader.image_loader.BookCover
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -102,7 +102,7 @@ fun BookDetailScreenLoadedComposable(
                 /** Book Image **/
                 /** Book Image **/
                 BookImageComposable(
-                    image = BookCover.from(book),
+                    image =BookCover.from(book),
                     modifier = modifier
                         .padding(8.dp)
                         .weight(0.40f)

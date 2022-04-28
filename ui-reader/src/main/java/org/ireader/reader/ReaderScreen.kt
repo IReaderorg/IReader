@@ -18,10 +18,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.ireader.common_models.entities.Chapter
-import org.ireader.core.utils.UiEvent
+import org.ireader.components.components.ISnackBarHost
+import org.ireader.components.text_related.ErrorTextWithEmojis
 import org.ireader.core_api.source.Source
-import org.ireader.core_ui.ui_components.components.ISnackBarHost
-import org.ireader.core_ui.ui_components.reusable_composable.ErrorTextWithEmojis
 import org.ireader.reader.components.MainBottomSettingComposable
 import org.ireader.reader.components.ReaderSettingComposable
 import org.ireader.reader.reverse_swip_refresh.SwipeRefreshState
@@ -156,7 +155,7 @@ fun ReadingScreen(
 
         vm.eventFlow.collectLatest { event ->
             when (event) {
-                is UiEvent.ShowSnackbar -> {
+                is org.ireader.common_extensions.UiEvent.ShowSnackbar -> {
                     scaffoldState.snackbarHostState.showSnackbar(
                         event.uiText.asString(context)
                     )

@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import org.ireader.core.utils.findComponentActivity
+import org.ireader.common_extensions.findComponentActivity
 
 fun hideSystemBars(context: Context) {
     val activity = context.findComponentActivity()

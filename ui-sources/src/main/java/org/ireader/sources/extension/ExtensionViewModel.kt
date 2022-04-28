@@ -6,17 +6,17 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import org.ireader.common_extensions.UiText
+import org.ireader.common_extensions.launchIO
 import org.ireader.common_models.entities.Catalog
 import org.ireader.common_models.entities.CatalogInstalled
 import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.common_models.entities.CatalogRemote
-import org.ireader.core.catalog.interactor.*
-import org.ireader.core.catalog.model.InstallStep
-import org.ireader.core.utils.UiText
-import org.ireader.core.utils.exceptionHandler
+import org.ireader.core_catalogs.interactor.*
+import org.ireader.core_catalogs.model.InstallStep
+import org.ireader.core_ui.exceptionHandler
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.use_cases.remote.key.RemoteKeyUseCase
-import org.ireader.domain.utils.launchIO
 import javax.inject.Inject
 
 

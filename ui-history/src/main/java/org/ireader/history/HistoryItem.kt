@@ -14,8 +14,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.ireader.common_models.entities.HistoryWithRelations
+import org.ireader.components.*
 import org.ireader.core_ui.coil.rememberBookCover
-import org.ireader.core_ui.ui_components.*
 
 
 @Composable

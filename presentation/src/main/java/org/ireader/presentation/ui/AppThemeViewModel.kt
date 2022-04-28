@@ -17,13 +17,13 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
 import org.ireader.core_ui.theme.*
 import org.ireader.core_ui.viewmodel.BaseViewModel
-import org.ireader.core.io.coil.CoilLoaderFactory
+import org.ireader.image_loader.coil.CoilLoaderFactory
 import javax.inject.Inject
 
 @HiltViewModel
 class AppThemeViewModel @Inject constructor(
     private val uiPreferences: UiPreferences,
-    coilLoaderFactory: CoilLoaderFactory,
+    coilLoaderFactory: org.ireader.image_loader.coil.CoilLoaderFactory,
 ) : BaseViewModel() {
     private val themeMode by uiPreferences.themeMode().asState()
     private val lightTheme by uiPreferences.lightTheme().asState()

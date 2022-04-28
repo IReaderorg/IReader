@@ -24,16 +24,15 @@ import kotlinx.coroutines.flow.collectLatest
 import org.ireader.common_models.entities.SavedDownload
 import org.ireader.common_models.entities.SavedDownloadWithInfo
 import org.ireader.common_models.entities.toSavedDownload
-import org.ireader.core.utils.UiEvent
+import org.ireader.components.BookListItem
+import org.ireader.components.BookListItemColumn
+import org.ireader.components.BookListItemSubtitle
+import org.ireader.components.BookListItemTitle
+import org.ireader.components.components.ISnackBarHost
+import org.ireader.components.reusable_composable.BuildDropDownMenu
+import org.ireader.components.reusable_composable.DropDownMenuItem
+import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.core_ui.modifier.selectedBackground
-import org.ireader.core_ui.ui_components.BookListItem
-import org.ireader.core_ui.ui_components.BookListItemColumn
-import org.ireader.core_ui.ui_components.BookListItemSubtitle
-import org.ireader.core_ui.ui_components.BookListItemTitle
-import org.ireader.core_ui.ui_components.components.ISnackBarHost
-import org.ireader.core_ui.ui_components.reusable_composable.BuildDropDownMenu
-import org.ireader.core_ui.ui_components.reusable_composable.DropDownMenuItem
-import org.ireader.core_ui.ui_components.reusable_composable.MidSizeTextComposable
 import org.ireader.ui_downloader.R
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -51,7 +50,7 @@ fun DownloaderScreen(
     LaunchedEffect(key1 = true) {
         vm.eventFlow.collectLatest { event ->
             when (event) {
-                is UiEvent.ShowSnackbar -> {
+                is org.ireader.common_extensions.UiEvent.ShowSnackbar -> {
                     scaffoldState.snackbarHostState.showSnackbar(
                         event.uiText.asString(context = context)
                     )

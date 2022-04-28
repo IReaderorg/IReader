@@ -16,7 +16,8 @@ import org.ireader.common_models.entities.Chapter
 import org.ireader.common_models.entities.Update
 import org.ireader.core.R
 import org.ireader.core_api.log.Log
-import org.ireader.core.catalog.interactor.GetLocalCatalog
+import org.ireader.core_catalogs.interactor.GetLocalCatalog
+
 import org.ireader.domain.notification.Notifications
 import org.ireader.domain.services.downloaderService.DefaultNotificationHelper
 import org.ireader.domain.use_cases.local.DeleteUseCase

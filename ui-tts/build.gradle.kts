@@ -18,6 +18,8 @@ dependencies {
     implementation(project(Modules.core))
     implementation(project(Modules.coreApi))
     compileOnly(project(Modules.uiReader))
+    implementation(project(Modules.uiComponents))
+    implementation(project(Modules.uiImageLoader))
 
     implementation(compose.compose.icons)
     implementation(compose.compose.navigation)

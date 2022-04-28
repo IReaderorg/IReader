@@ -4,7 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.webkit.WebView
 import kotlinx.coroutines.*
-import org.ireader.core.utils.getHtml
+import org.ireader.common_extensions.getHtml
 import org.ireader.core_api.log.Log
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -23,7 +23,7 @@ suspend fun getHtmlFromWebView(
 ): Document {
     val scope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
     var html: Document = Document("No Data was Found")
-    withUIContext {
+    org.ireader.common_extensions.withUIContext {
         val webView = WebView(context)
         var currentTime = 0
         webView.setDefaultSettings()

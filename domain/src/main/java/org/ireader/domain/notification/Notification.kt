@@ -4,8 +4,8 @@ import android.content.Context
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.NotificationManagerCompat.*
 import org.ireader.core.R
-import org.ireader.core.utils.buildNotificationChannel
-import org.ireader.core.utils.buildNotificationChannelGroup
+import org.ireader.common_extensions.buildNotificationChannel
+import org.ireader.common_extensions.buildNotificationChannelGroup
 
 
 /**
@@ -109,19 +109,19 @@ object Notifications {
 
         notificationService.createNotificationChannelGroupsCompat(
             listOf(
-                buildNotificationChannelGroup(GROUP_BACKUP_RESTORE) {
+                org.ireader.common_extensions.buildNotificationChannelGroup(GROUP_BACKUP_RESTORE) {
                     setName(context.getString(R.string.label_backup))
                 },
-                buildNotificationChannelGroup(GROUP_DOWNLOADER) {
+                org.ireader.common_extensions.buildNotificationChannelGroup(GROUP_DOWNLOADER) {
                     setName(context.getString(R.string.download_notifier_downloader_title))
                 },
-                buildNotificationChannelGroup(GROUP_LIBRARY) {
+                org.ireader.common_extensions.buildNotificationChannelGroup(GROUP_LIBRARY) {
                     setName(context.getString(R.string.label_library))
                 },
-                buildNotificationChannelGroup(GROUP_TTS) {
+                org.ireader.common_extensions.buildNotificationChannelGroup(GROUP_TTS) {
                     setName(context.getString(R.string.label_text_reader))
                 },
-                buildNotificationChannelGroup(GROUP_APK_UPDATES) {
+                org.ireader.common_extensions.buildNotificationChannelGroup(GROUP_APK_UPDATES) {
                     setName(context.getString(R.string.label_recent_updates))
                 },
             )
@@ -129,67 +129,83 @@ object Notifications {
 
         notificationService.createNotificationChannelsCompat(
             listOf(
-                buildNotificationChannel(CHANNEL_COMMON, IMPORTANCE_LOW) {
+                org.ireader.common_extensions.buildNotificationChannel(CHANNEL_COMMON,
+                    IMPORTANCE_LOW) {
                     setName(context.getString(R.string.channel_common))
                 },
-                buildNotificationChannel(CHANNEL_TTS, IMPORTANCE_LOW) {
+                org.ireader.common_extensions.buildNotificationChannel(CHANNEL_TTS,
+                    IMPORTANCE_LOW) {
                     setName(context.getString(R.string.channel_progress))
                     setGroup(GROUP_TTS)
                     setShowBadge(false)
                 },
-                buildNotificationChannel(CHANNEL_TTS_ERROR, IMPORTANCE_LOW) {
+                org.ireader.common_extensions.buildNotificationChannel(CHANNEL_TTS_ERROR,
+                    IMPORTANCE_LOW) {
                     setName(context.getString(R.string.channel_errors))
                     setGroup(GROUP_TTS)
                     setShowBadge(false)
                 },
-                buildNotificationChannel(CHANNEL_LIBRARY_PROGRESS, IMPORTANCE_LOW) {
+                org.ireader.common_extensions.buildNotificationChannel(CHANNEL_LIBRARY_PROGRESS,
+                    IMPORTANCE_LOW) {
                     setName(context.getString(R.string.channel_progress))
                     setGroup(GROUP_LIBRARY)
                     setShowBadge(false)
                 },
-                buildNotificationChannel(CHANNEL_LIBRARY_ERROR, IMPORTANCE_LOW) {
+                org.ireader.common_extensions.buildNotificationChannel(CHANNEL_LIBRARY_ERROR,
+                    IMPORTANCE_LOW) {
                     setName(context.getString(R.string.channel_errors))
                     setGroup(GROUP_LIBRARY)
                     setShowBadge(false)
                 },
 
-                buildNotificationChannel(CHANNEL_NEW_CHAPTERS, IMPORTANCE_DEFAULT) {
+                org.ireader.common_extensions.buildNotificationChannel(CHANNEL_NEW_CHAPTERS,
+                    IMPORTANCE_DEFAULT) {
                     setName(context.getString(R.string.channel_new_chapters))
                 },
-                buildNotificationChannel(CHANNEL_DOWNLOADER_PROGRESS, IMPORTANCE_LOW) {
+                org.ireader.common_extensions.buildNotificationChannel(CHANNEL_DOWNLOADER_PROGRESS,
+                    IMPORTANCE_LOW) {
                     setName(context.getString(R.string.channel_progress))
                     setGroup(GROUP_DOWNLOADER)
                     setShowBadge(false)
                 },
-                buildNotificationChannel(CHANNEL_DOWNLOADER_COMPLETE, IMPORTANCE_LOW) {
+                org.ireader.common_extensions.buildNotificationChannel(CHANNEL_DOWNLOADER_COMPLETE,
+                    IMPORTANCE_LOW) {
                     setName(context.getString(R.string.channel_complete))
                     setGroup(GROUP_DOWNLOADER)
                     setShowBadge(false)
                 },
-                buildNotificationChannel(CHANNEL_DOWNLOADER_ERROR, IMPORTANCE_LOW) {
+                org.ireader.common_extensions.buildNotificationChannel(CHANNEL_DOWNLOADER_ERROR,
+                    IMPORTANCE_LOW) {
                     setName(context.getString(R.string.channel_errors))
                     setGroup(GROUP_DOWNLOADER)
                     setShowBadge(false)
                 },
-                buildNotificationChannel(CHANNEL_BACKUP_RESTORE_PROGRESS, IMPORTANCE_LOW) {
+                org.ireader.common_extensions.buildNotificationChannel(
+                    CHANNEL_BACKUP_RESTORE_PROGRESS,
+                    IMPORTANCE_LOW) {
                     setName(context.getString(R.string.channel_progress))
                     setGroup(GROUP_BACKUP_RESTORE)
                     setShowBadge(false)
                 },
-                buildNotificationChannel(CHANNEL_BACKUP_RESTORE_COMPLETE, IMPORTANCE_HIGH) {
+                org.ireader.common_extensions.buildNotificationChannel(
+                    CHANNEL_BACKUP_RESTORE_COMPLETE,
+                    IMPORTANCE_HIGH) {
                     setName(context.getString(R.string.channel_complete))
                     setGroup(GROUP_BACKUP_RESTORE)
                     setShowBadge(false)
                     setSound(null, null)
                 },
-                buildNotificationChannel(CHANNEL_CRASH_LOGS, IMPORTANCE_HIGH) {
+                org.ireader.common_extensions.buildNotificationChannel(CHANNEL_CRASH_LOGS,
+                    IMPORTANCE_HIGH) {
                     setName(context.getString(R.string.channel_crash_logs))
                 },
-                buildNotificationChannel(CHANNEL_APP_UPDATE, IMPORTANCE_DEFAULT) {
+                org.ireader.common_extensions.buildNotificationChannel(CHANNEL_APP_UPDATE,
+                    IMPORTANCE_DEFAULT) {
                     setGroup(GROUP_APK_UPDATES)
                     setName(context.getString(R.string.channel_app_updates))
                 },
-                buildNotificationChannel(CHANNEL_EXTENSIONS_UPDATE, IMPORTANCE_DEFAULT) {
+                org.ireader.common_extensions.buildNotificationChannel(CHANNEL_EXTENSIONS_UPDATE,
+                    IMPORTANCE_DEFAULT) {
                     setGroup(GROUP_APK_UPDATES)
                     setName(context.getString(R.string.channel_ext_updates))
                 },

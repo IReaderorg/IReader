@@ -10,7 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.ireader.core_api.source.model.Filter
-import org.ireader.core_ui.ui_components.reusable_composable.MidSizeTextComposable
+import org.ireader.components.reusable_composable.MidSizeTextComposable
 
 @Composable
 fun FilterTextItem(

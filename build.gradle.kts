@@ -50,7 +50,7 @@ allprojects {
         kotlinOptions {
             jvmTarget = "11"
             freeCompilerArgs = freeCompilerArgs + listOf(
-                "-Xopt-in=kotlin.RequiresOptIn",
+                "-opt-in=kotlin.RequiresOptIn",
             )
         }
     }
@@ -59,13 +59,18 @@ allprojects {
 
 subprojects {
     plugins.apply("com.diffplug.spotless")
-    spotless {
 
+    spotless {
         kotlin {
             ktlint(libs.versions.ktlint.get())
+                .userData(mapOf("indent_size" to "2", "continuation_indent_size" to "2"))
             targetExclude("$buildDir/**/*.kt")
             targetExclude("bin/**/*.kt")
             licenseHeaderFile(rootProject.file("spotless/copyright.kt"))
+        }
+        kotlinGradle {
+            target("*.gradle.kts")
+            ktlint()
         }
     }
 

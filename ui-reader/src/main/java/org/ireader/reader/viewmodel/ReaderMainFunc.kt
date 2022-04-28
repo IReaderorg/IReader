@@ -4,18 +4,15 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import org.ireader.common_extensions.async.nextAfter
+import org.ireader.common_extensions.async.prevBefore
 import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.Chapter
 import org.ireader.common_models.entities.History
 import org.ireader.common_resources.LAST_CHAPTER
 import org.ireader.common_resources.NO_VALUE
-import org.ireader.core.extensions.nextAfter
-import org.ireader.core.extensions.prevBefore
-import org.ireader.core.utils.UiText
-import org.ireader.core.utils.currentTimeToLong
 import org.ireader.core_api.source.Source
 import org.ireader.domain.R
-import org.ireader.domain.utils.withIOContext
 import javax.inject.Inject
 
 interface ReaderMainFunctions {
@@ -130,7 +127,7 @@ class ReaderMainFunctionsImpl @Inject constructor() : ReaderMainFunctions {
     }
 
     override suspend fun ReaderScreenViewModel.insertChapter(chapter: Chapter) {
-        withIOContext {
+        org.ireader.common_extensions.withIOContext {
             insertUseCases.insertChapter(chapter)
         }
     }
@@ -170,7 +167,7 @@ class ReaderMainFunctionsImpl @Inject constructor() : ReaderMainFunctions {
                         getChapter(chapter.id, source = source)
                         onSuccess()
                     } else {
-                        showSnackBar(UiText.StringResource(R.string.something_is_wrong_with_this_chapter))
+                        showSnackBar(org.ireader.common_extensions.UiText.StringResource(R.string.something_is_wrong_with_this_chapter))
                     }
                 },
                 onError = { message ->
@@ -195,7 +192,7 @@ class ReaderMainFunctionsImpl @Inject constructor() : ReaderMainFunctions {
             historyUseCase.insertHistory(History(
                 bookId = chapter.bookId,
                 chapterId = chapter.id,
-                readAt = currentTimeToLong()))
+                readAt = org.ireader.common_extensions.currentTimeToLong()))
         }
     }
 

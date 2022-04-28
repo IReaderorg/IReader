@@ -17,10 +17,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.ireader.common_models.entities.UpdateWithInfo
-import org.ireader.core.utils.UiText
+import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.core_ui.ui.EmptyScreen
 import org.ireader.core_ui.ui.LoadingScreen
-import org.ireader.core_ui.ui_components.reusable_composable.AppIconButton
 import org.ireader.updates.component.UpdatesContent
 import org.ireader.updates.component.UpdatesToolbar
 import org.ireader.updates.viewmodel.UpdateState
@@ -58,7 +57,7 @@ fun UpdateScreen(
             Crossfade(targetState = Pair(state.isLoading, state.isEmpty)) { (isLoading, isEmpty) ->
                 when {
                     isLoading -> LoadingScreen()
-                    isEmpty -> EmptyScreen(UiText.DynamicString("No New Updates is Available."))
+                    isEmpty -> EmptyScreen(text = org.ireader.common_extensions.UiText.DynamicString("No New Updates is Available."))
                     else -> UpdatesContent(
                         state = state,
                         onClickItem = onUpdate,

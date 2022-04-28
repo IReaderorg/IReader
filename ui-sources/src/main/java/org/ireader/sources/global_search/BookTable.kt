@@ -8,8 +8,8 @@ import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import org.ireader.core_ui.ui_components.reusable_composable.AppIconButton
-import org.ireader.core_ui.ui_components.reusable_composable.MidSizeTextComposable
+import org.ireader.components.reusable_composable.AppIconButton
+import org.ireader.components.reusable_composable.MidSizeTextComposable
 
 @Composable
 fun BookTable() {

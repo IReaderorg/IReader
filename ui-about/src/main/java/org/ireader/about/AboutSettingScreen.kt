@@ -13,11 +13,11 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import org.ireader.core_ui.ui_components.reusable_composable.BigSizeTextComposable
-import org.ireader.core_ui.ui_components.reusable_composable.MidSizeTextComposable
-import org.ireader.core_ui.ui_components.reusable_composable.TopAppBarBackButton
+import org.ireader.components.components.Toolbar
+import org.ireader.components.reusable_composable.BigSizeTextComposable
+import org.ireader.components.reusable_composable.MidSizeTextComposable
+import org.ireader.components.reusable_composable.TopAppBarBackButton
 import org.ireader.domain.utils.toast
-import org.ireader.presentation.presentation.Toolbar
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable

@@ -41,6 +41,9 @@ dependencies {
     implementation(project(Modules.uiAbout))
     implementation(project(Modules.uiDownloader))
     implementation(project(Modules.uiTTS))
+    implementation(project(Modules.uiImageLoader))
+    implementation(project(Modules.commonExtensions))
+    implementation(project(Modules.uiComponents))
 
     implementation(compose.compose.foundation)
     implementation(compose.compose.animations)
@@ -78,7 +81,7 @@ dependencies {
 
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
-    implementation(project(mapOf("path" to ":common_models")))
+    implementation(project(mapOf("path" to ":common-models")))
     kapt(libs.room.compiler)
 
     implementation(libs.hilt.android)

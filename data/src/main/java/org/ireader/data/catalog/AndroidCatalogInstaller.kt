@@ -15,12 +15,12 @@ import io.ktor.http.*
 import io.ktor.utils.io.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import org.ireader.core.catalog.model.InstallStep
-import org.ireader.core.catalog.service.CatalogInstaller
 import org.ireader.core_api.http.HttpClients
 import org.ireader.core_api.io.saveTo
 import org.ireader.core_api.log.Log
 import org.ireader.core_api.os.PackageInstaller
+import org.ireader.core_catalogs.model.InstallStep
+import org.ireader.core_catalogs.service.CatalogInstaller
 import java.io.File
 import javax.inject.Inject
 

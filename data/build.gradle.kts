@@ -50,6 +50,8 @@ dependencies {
     implementation(project(Modules.domain))
     implementation(project(Modules.commonModels))
     implementation(project(Modules.commonData))
+    implementation(project(Modules.coreCatalogs))
+    implementation(project(Modules.commonExtensions))
 
     implementation(androidx.core)
     implementation(androidx.appCompat)
@@ -61,6 +63,7 @@ dependencies {
     implementation(kotlinx.datetime)
     implementation(kotlinx.serialization.json)
     implementation(compose.compose.activity)
+    implementation(project(mapOf("path" to ":core-ui")))
 
     kapt(libs.hilt.compiler)
     implementation(libs.hilt.androidcompiler)

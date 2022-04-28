@@ -8,7 +8,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import org.ireader.core.utils.findComponentActivity
+import org.ireader.common_extensions.findComponentActivity
 import org.ireader.core_ui.theme.OrientationMode
 import org.ireader.core_ui.theme.fonts
 import org.ireader.core_ui.theme.readerScreenBackgroundColors

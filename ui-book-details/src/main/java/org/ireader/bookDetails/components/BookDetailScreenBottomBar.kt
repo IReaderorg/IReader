@@ -15,8 +15,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import org.ireader.core_ui.ui_components.ButtonWithIconAndText
-import org.ireader.core_ui.ui_components.components.showLoading
+import org.ireader.core_ui.ui_components.ClickableTextIcon
+import org.ireader.components.components.showLoading
 
 @Composable
 fun BookDetailScreenBottomBar(
@@ -41,7 +41,7 @@ fun BookDetailScreenBottomBar(
             verticalAlignment = Alignment.CenterVertically
 
         ) {
-            ButtonWithIconAndText(
+            ClickableTextIcon(
                 modifier = Modifier.weight(1F),
                 text = if (!isInLibrary) "Add to Library" else "Added To Library",
                 icon = {
@@ -62,7 +62,7 @@ fun BookDetailScreenBottomBar(
                 },
             )
 
-            ButtonWithIconAndText(
+            ClickableTextIcon(
                 modifier = Modifier.weight(1F),
                 text = if (isRead) "Continue Reading" else "Read",
                 icon = {
@@ -77,7 +77,7 @@ fun BookDetailScreenBottomBar(
                 }
             )
 
-            ButtonWithIconAndText(
+            ClickableTextIcon(
                 modifier = Modifier.weight(1F),
                 text = "Download",
                 icon = {

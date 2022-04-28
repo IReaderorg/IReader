@@ -19,7 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.ireader.core_ui.ui_components.reusable_composable.CaptionTextComposable
+import org.ireader.components.reusable_composable.CaptionTextComposable
 import org.ireader.reader.viewmodel.ReaderScreenViewModel
 
 

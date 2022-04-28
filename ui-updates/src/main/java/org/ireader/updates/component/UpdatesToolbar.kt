@@ -17,8 +17,8 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import org.ireader.core_ui.ui_components.reusable_composable.BigSizeTextComposable
-import org.ireader.presentation.presentation.Toolbar
+import org.ireader.components.components.Toolbar
+import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.ui_updates.R
 import org.ireader.updates.viewmodel.UpdateState
 

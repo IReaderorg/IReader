@@ -2,8 +2,8 @@ package org.ireader.domain.use_cases.remote
 
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
+import org.ireader.common_extensions.withIOContext
 import org.ireader.core.exceptions.EmptyQuery
-import org.ireader.core.extensions.withIOContext
 import org.ireader.core_api.source.CatalogSource
 import org.ireader.core_api.source.model.Filter
 import org.ireader.core_api.source.model.Listing

@@ -3,8 +3,7 @@ package org.ireader.domain.use_cases.local.updates
 import kotlinx.coroutines.flow.Flow
 import org.ireader.common_models.entities.Update
 import org.ireader.common_models.entities.UpdateWithInfo
-import org.ireader.common_data.repository.UpdatesRepository
-import org.ireader.domain.utils.withIOContext
+import org.ireader.common_extensions.withIOContext
 import javax.inject.Inject
 
 class SubscribeUpdates @Inject constructor(private val updatesRepository: org.ireader.common_data.repository.UpdatesRepository) {
@@ -15,7 +14,7 @@ class SubscribeUpdates @Inject constructor(private val updatesRepository: org.ir
 
 class InsertUpdatesUseCase @Inject constructor(private val updatesRepository: org.ireader.common_data.repository.UpdatesRepository) {
     suspend operator fun invoke(updates: List<Update>) {
-        return withIOContext {
+        return org.ireader.common_extensions.withIOContext {
             return@withIOContext updatesRepository.insertUpdates(updates)
         }
     }
@@ -23,7 +22,7 @@ class InsertUpdatesUseCase @Inject constructor(private val updatesRepository: or
 
 class InsertUpdateUseCase @Inject constructor(private val updatesRepository: org.ireader.common_data.repository.UpdatesRepository) {
     suspend operator fun invoke(updates: Update) {
-        return withIOContext {
+        return org.ireader.common_extensions.withIOContext {
             return@withIOContext updatesRepository.insertUpdate(updates)
         }
     }

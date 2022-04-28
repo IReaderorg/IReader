@@ -35,14 +35,14 @@ import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 import org.ireader.chapterDetails.viewmodel.ChapterDetailEvent
 import org.ireader.chapterDetails.viewmodel.ChapterDetailViewModel
-import org.ireader.core.utils.UiText
+import org.ireader.common_extensions.UiText
+import org.ireader.components.components.ChapterListItemComposable
+import org.ireader.components.reusable_composable.AppIconButton
+import org.ireader.components.reusable_composable.BigSizeTextComposable
+import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.core_ui.ui.EmptyScreen
 import org.ireader.core_ui.ui.LoadingScreen
 import org.ireader.core_ui.ui_components.LazyColumnScrollbar
-import org.ireader.core_ui.ui_components.components.ChapterListItemComposable
-import org.ireader.core_ui.ui_components.reusable_composable.AppIconButton
-import org.ireader.core_ui.ui_components.reusable_composable.BigSizeTextComposable
-import org.ireader.core_ui.ui_components.reusable_composable.MidSizeTextComposable
 import org.ireader.explore.webview.CustomTextField
 
 
@@ -165,7 +165,7 @@ fun ChapterDetailScreen(
                         vm.isEmpty)) { (isLoading, isEmpty) ->
                         when {
                             isLoading -> LoadingScreen()
-                            isEmpty -> EmptyScreen(UiText.DynamicString("There is no chapter."))
+                            isEmpty -> EmptyScreen(text = UiText.DynamicString("There is no chapter."))
                             else -> {
                                 LazyColumnScrollbar(listState = scrollState) {
                                     LazyColumn(modifier = Modifier

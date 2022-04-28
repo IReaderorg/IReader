@@ -4,16 +4,16 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.ireader.common_extensions.launchIO
 import org.ireader.common_models.entities.Chapter
 import org.ireader.common_models.entities.UpdateWithInfo
-import org.ireader.core.catalog.interactor.GetLocalCatalog
+import org.ireader.core_catalogs.interactor.GetLocalCatalog
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import org.ireader.domain.use_cases.services.ServiceUseCases
 import org.ireader.domain.use_cases.updates.UpdateUseCases
-import org.ireader.domain.utils.launchIO
 import javax.inject.Inject
 
 @HiltViewModel

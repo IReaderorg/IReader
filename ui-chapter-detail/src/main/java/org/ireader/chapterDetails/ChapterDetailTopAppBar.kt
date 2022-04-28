@@ -11,10 +11,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.ireader.chapterDetails.viewmodel.ChapterDetailState
-import org.ireader.core_ui.ui_components.components.CenterTopAppBar
-import org.ireader.core_ui.ui_components.reusable_composable.AppIconButton
-import org.ireader.core_ui.ui_components.reusable_composable.BigSizeTextComposable
-import org.ireader.presentation.presentation.Toolbar
+import org.ireader.components.components.CenterTopAppBar
+import org.ireader.components.components.Toolbar
+import org.ireader.components.reusable_composable.AppIconButton
+import org.ireader.components.reusable_composable.BigSizeTextComposable
 
 
 @Composable

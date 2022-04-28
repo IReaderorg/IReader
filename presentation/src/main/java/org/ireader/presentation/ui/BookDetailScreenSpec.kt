@@ -13,13 +13,11 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.ireader.bookDetails.BookDetailScreen
 import org.ireader.bookDetails.viewmodel.BookDetailViewModel
+import org.ireader.common_extensions.getUrlWithoutDomain
 import org.ireader.common_resources.LAST_CHAPTER
-import org.ireader.core.utils.UiEvent
-import org.ireader.core.utils.UiText
-import org.ireader.core.utils.getUrlWithoutDomain
+import org.ireader.components.components.EmptyScreenComposable
 import org.ireader.core_api.source.HttpSource
 import org.ireader.domain.ui.NavigationArgs
-import org.ireader.presentation.presentation.EmptyScreenComposable
 
 object BookDetailScreenSpec : ScreenSpec {
 
@@ -84,12 +82,12 @@ object BookDetailScreenSpec : ScreenSpec {
                             ))
                         } else {
                             scope.launch {
-                                viewModel.showSnackBar(UiText.StringResource(org.ireader.core.R.string.no_chapter_is_available))
+                                viewModel.showSnackBar(org.ireader.common_extensions.UiText.StringResource(org.ireader.core.R.string.no_chapter_is_available))
                             }
                         }
                     } else {
                         scope.launch {
-                            viewModel.showSnackBar(UiText.StringResource(org.ireader.core.R.string.source_not_available))
+                            viewModel.showSnackBar(org.ireader.common_extensions.UiText.StringResource(org.ireader.core.R.string.source_not_available))
                         }
                     }
                 },
@@ -146,7 +144,7 @@ object BookDetailScreenSpec : ScreenSpec {
         LaunchedEffect(key1 = true) {
             viewModel.eventFlow.collectLatest { event ->
                 when (event) {
-                    is UiEvent.ShowSnackbar -> {
+                    is org.ireader.common_extensions.UiEvent.ShowSnackbar -> {
                         scaffoldState.snackbarHostState.showSnackbar(
                             event.uiText.asString(context)
                         )

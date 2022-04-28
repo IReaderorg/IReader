@@ -23,10 +23,9 @@ import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.Chapter
 import org.ireader.core_api.log.Log
 import org.ireader.core_api.source.Source
-import org.ireader.core.catalog.service.CatalogStore
+import org.ireader.core_catalogs.CatalogStore
+
 import org.ireader.domain.notification.Notifications
-import org.ireader.common_data.repository.LocalBookRepository
-import org.ireader.common_data.repository.LocalChapterRepository
 import org.ireader.domain.services.tts_service.Player
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases

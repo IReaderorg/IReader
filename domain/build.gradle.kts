@@ -23,6 +23,9 @@ dependencies {
     implementation(project(Modules.coreUi))
     implementation(project(Modules.commonData))
     implementation(project(Modules.commonResources))
+    implementation(project(Modules.uiImageLoader))
+    implementation(project(Modules.commonExtensions))
+    implementation(project(Modules.coreCatalogs))
 
 
     implementation(project(Modules.coreApi))
@@ -36,7 +39,7 @@ dependencies {
     implementation(compose.compose.material)
     implementation(compose.compose.coil)
     implementation(compose.compose.paging)
-    implementation(project(mapOf("path" to ":common_models")))
+    implementation(project(mapOf("path" to ":common-models")))
     debugImplementation(compose.compose.uiTestManifest)
 
     implementation(androidx.work.runtime)

@@ -9,7 +9,7 @@ import kotlinx.coroutines.launch
 import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.Chapter
 import org.ireader.core.R
-import org.ireader.core.utils.UiText
+import org.ireader.common_extensions.UiText
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.domain.use_cases.local.DeleteUseCase
@@ -42,7 +42,7 @@ class ChapterDetailViewModel @Inject constructor(
             }
         } else {
             viewModelScope.launch {
-                showSnackBar(UiText.StringResource(R.string.the_source_is_not_found))
+                showSnackBar(org.ireader.common_extensions.UiText.StringResource(R.string.the_source_is_not_found))
             }
         }
     }

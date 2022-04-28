@@ -3,7 +3,7 @@ package org.ireader.sources.extension
 import androidx.compose.runtime.*
 import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.common_models.entities.CatalogRemote
-import org.ireader.core.catalog.model.InstallStep
+import org.ireader.core_catalogs.model.InstallStep
 import javax.inject.Inject
 
 

@@ -14,7 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.ireader.common_resources.DEFAULT
-import org.ireader.core_ui.ui_components.reusable_composable.CaptionTextComposable
+import org.ireader.components.reusable_composable.CaptionTextComposable
 import org.ireader.reader.viewmodel.ReaderScreenPreferencesState
 
 @Composable

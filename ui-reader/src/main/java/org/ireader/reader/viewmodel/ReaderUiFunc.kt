@@ -8,10 +8,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.ireader.common_extensions.findComponentActivity
 import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.Chapter
-import org.ireader.core.utils.UiText
-import org.ireader.core.utils.findComponentActivity
 import org.ireader.domain.R
 import javax.inject.Inject
 
@@ -50,7 +49,7 @@ class ReaderUiFunctionsImpl @Inject constructor() : ReaderUiFunctions {
     }
 
     override fun ReaderScreenViewModel.clearError() {
-        state.error = UiText.StringResource(R.string.no_error)
+        state.error = org.ireader.common_extensions.UiText.StringResource(R.string.no_error)
     }
 
     override fun ReaderScreenViewModel.setStateChapter(book: Book) {

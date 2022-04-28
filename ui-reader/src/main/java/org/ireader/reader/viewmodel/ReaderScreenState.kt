@@ -6,7 +6,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.graphics.Color
 import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.Chapter
-import org.ireader.core.utils.UiText
+import org.ireader.common_extensions.UiText
 import org.ireader.core_api.source.Source
 import org.ireader.core_ui.theme.BackgroundColor
 import org.ireader.core_ui.theme.FontType
@@ -28,7 +28,8 @@ open class ReaderScreenStateImpl @Inject constructor() : ReaderScreenState {
     override var isMainBottomModeEnable by mutableStateOf<Boolean>(false)
     override var currentChapterIndex: Int by mutableStateOf<Int>(0)
     override var source: Source? by mutableStateOf<Source?>(null)
-    override var error: UiText by mutableStateOf<UiText>(UiText.DynamicString(""))
+    override var error: org.ireader.common_extensions.UiText by mutableStateOf<org.ireader.common_extensions.UiText>(
+        org.ireader.common_extensions.UiText.DynamicString(""))
     override var stateChapters: List<Chapter> by mutableStateOf<List<Chapter>>(emptyList())
     override var stateChapter: Chapter? by mutableStateOf<Chapter?>(null)
 
@@ -54,7 +55,7 @@ interface ReaderScreenState {
     var isMainBottomModeEnable: Boolean
     var currentChapterIndex: Int
     var source: Source?
-    var error: UiText
+    var error: org.ireader.common_extensions.UiText
     var stateChapters: List<Chapter>
     var stateChapter: Chapter?
     var book: Book?

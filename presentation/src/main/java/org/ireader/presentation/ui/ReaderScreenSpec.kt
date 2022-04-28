@@ -16,16 +16,15 @@ import androidx.navigation.*
 import com.google.accompanist.pager.ExperimentalPagerApi
 import kotlinx.coroutines.launch
 import org.ireader.common_models.entities.Chapter
+import org.ireader.components.components.EmptyScreenComposable
 import org.ireader.core.R
-import org.ireader.core.utils.UiText
 import org.ireader.core_api.log.Log
 import org.ireader.core_api.source.Source
 import org.ireader.core_ui.theme.TransparentStatusBar
 import org.ireader.domain.services.tts_service.Player
 import org.ireader.domain.ui.NavigationArgs
-import org.ireader.presentation.feature_ttl.TTSScreen
+import org.ireader.tts.TTSScreen
 import org.ireader.presentation.feature_ttl.TTSState
-import org.ireader.presentation.presentation.EmptyScreenComposable
 import org.ireader.reader.ReadingScreen
 import org.ireader.reader.reverse_swip_refresh.SwipeRefreshState
 import org.ireader.reader.reverse_swip_refresh.rememberSwipeRefreshState
@@ -160,7 +159,7 @@ object ReaderScreenSpec : ScreenSpec {
                         }
                     } else {
                         scope.launch {
-                            vm.showSnackBar(UiText.StringResource(R.string.this_is_last_chapter))
+                            vm.showSnackBar(org.ireader.common_extensions.UiText.StringResource(R.string.this_is_last_chapter))
 
                         }
                     }
@@ -205,7 +204,7 @@ object ReaderScreenSpec : ScreenSpec {
                             }
                         } else {
                             scope.launch {
-                                vm.showSnackBar(UiText.StringResource(R.string.this_is_first_chapter))
+                                vm.showSnackBar(org.ireader.common_extensions.UiText.StringResource(R.string.this_is_first_chapter))
                             }
                         }
                     } catch (e: Throwable) {
@@ -219,7 +218,7 @@ object ReaderScreenSpec : ScreenSpec {
                 },
                 onReaderSliderFinished = {
                     scope.launch {
-                        vm.showSnackBar(UiText.DynamicString(chapters[vm.currentChapterIndex].title))
+                        vm.showSnackBar(org.ireader.common_extensions.UiText.DynamicString(chapters[vm.currentChapterIndex].title))
                     }
                     vm.uiFunc.apply {
                         vm.mainFunc.apply {
@@ -270,7 +269,7 @@ object ReaderScreenSpec : ScreenSpec {
                         }
                     } catch (e: Throwable) {
                         scope.launch {
-                            vm.showSnackBar(UiText.ExceptionString(e))
+                            vm.showSnackBar(org.ireader.common_extensions.UiText.ExceptionString(e))
                         }
                     }
                 },

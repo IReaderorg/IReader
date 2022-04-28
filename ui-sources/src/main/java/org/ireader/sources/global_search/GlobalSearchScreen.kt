@@ -16,11 +16,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.pager.ExperimentalPagerApi
 import org.ireader.common_models.entities.BaseBook
+import org.ireader.components.list.layouts.BookImage
+import org.ireader.components.reusable_composable.AppIconButton
+import org.ireader.components.reusable_composable.MidSizeTextComposable
+import org.ireader.components.reusable_composable.SmallTextComposable
 import org.ireader.core_ui.ui_components.DotsFlashing
-import org.ireader.core_ui.ui_components.layouts.BookImage
-import org.ireader.core_ui.ui_components.reusable_composable.AppIconButton
-import org.ireader.core_ui.ui_components.reusable_composable.MidSizeTextComposable
-import org.ireader.core_ui.ui_components.reusable_composable.SmallTextComposable
 import org.ireader.sources.global_search.viewmodel.GlobalSearchState
 import org.ireader.sources.global_search.viewmodel.SearchItem
 

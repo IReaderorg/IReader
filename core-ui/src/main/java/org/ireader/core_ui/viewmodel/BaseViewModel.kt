@@ -5,9 +5,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import org.ireader.core.utils.UiEvent
-import org.ireader.core.utils.UiText
-import org.ireader.core.utils.showSnackBar
+import org.ireader.common_extensions.UiEvent
+import org.ireader.common_extensions.UiText
 import org.ireader.core_api.prefs.Preference
 import org.ireader.core_ui.R
 import org.ireader.core_ui.ui.PreferenceMutableState
@@ -20,12 +19,12 @@ abstract class BaseViewModel : androidx.lifecycle.ViewModel() {
 
     private val activeScope = MutableStateFlow<CoroutineScope?>(null)
 
-    protected val _eventFlow = MutableSharedFlow<UiEvent>()
+    protected val _eventFlow = MutableSharedFlow<org.ireader.common_extensions.UiEvent>()
     open val eventFlow = _eventFlow.asSharedFlow()
 
-    fun showSnackBar(message: UiText?) {
+    fun showSnackBar(message: org.ireader.common_extensions.UiText?) {
         viewModelScope.launch {
-            _eventFlow.showSnackBar(message ?: UiText.StringResource(R.string.error_unknown))
+            _eventFlow.showSnackBar(message ?: org.ireader.common_extensions.UiText.StringResource(R.string.error_unknown))
         }
     }
 
@@ -95,4 +94,11 @@ abstract class BaseViewModel : androidx.lifecycle.ViewModel() {
         activeScope.value = null
     }
 
+}
+suspend fun MutableSharedFlow<UiEvent>.showSnackBar(message: UiText?) {
+    this.emit(
+        UiEvent.ShowSnackbar(
+            uiText = message ?: UiText.StringResource(org.ireader.core.R.string.error_unknown)
+        )
+    )
 }

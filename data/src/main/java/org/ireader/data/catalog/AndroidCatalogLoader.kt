@@ -20,7 +20,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import org.ireader.core.BuildConfig
-import org.ireader.core.catalog.service.CatalogLoader
 import org.ireader.core_api.http.HttpClients
 import org.ireader.core_api.log.Log
 import org.ireader.core_api.prefs.AndroidPreferenceStore
@@ -28,6 +27,7 @@ import org.ireader.core_api.prefs.PrefixedPreferenceStore
 import org.ireader.core_api.source.Dependencies
 import org.ireader.core_api.source.Source
 import org.ireader.core_api.source.TestSource
+import org.ireader.core_catalogs.service.CatalogLoader
 import java.io.File
 import javax.inject.Inject
 

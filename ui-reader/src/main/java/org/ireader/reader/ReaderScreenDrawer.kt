@@ -13,12 +13,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.ireader.common_models.entities.Chapter
+import org.ireader.components.components.ChapterListItemComposable
+import org.ireader.components.reusable_composable.AppIconButton
+import org.ireader.components.reusable_composable.BigSizeTextComposable
+import org.ireader.components.text_related.ErrorTextWithEmojis
 import org.ireader.core_api.source.Source
 import org.ireader.core_ui.ui_components.LazyColumnScrollbar
-import org.ireader.core_ui.ui_components.components.ChapterListItemComposable
-import org.ireader.core_ui.ui_components.reusable_composable.AppIconButton
-import org.ireader.core_ui.ui_components.reusable_composable.BigSizeTextComposable
-import org.ireader.core_ui.ui_components.reusable_composable.ErrorTextWithEmojis
 import org.ireader.reader.viewmodel.ReaderScreenState
 
 @OptIn(ExperimentalAnimationApi::class)

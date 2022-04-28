@@ -1,7 +1,6 @@
-package org.ireader.core.utils
+package org.ireader.common_extensions
 
 import android.content.Context
-import androidx.annotation.Keep
 import org.ireader.core.R
 
 abstract class Event

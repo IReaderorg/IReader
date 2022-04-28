@@ -8,9 +8,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import org.ireader.presentation.presentation.Toolbar
-import org.ireader.core_ui.ui_components.reusable_composable.AppIconButton
-import org.ireader.core_ui.ui_components.reusable_composable.AppTextField
+import org.ireader.components.components.Toolbar
+import org.ireader.components.reusable_composable.AppIconButton
+import org.ireader.components.reusable_composable.AppTextField
 import org.ireader.sources.global_search.viewmodel.GlobalSearchState
 
 

@@ -13,8 +13,8 @@ import androidx.navigation.NavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import org.ireader.common_resources.LAST_CHAPTER
 import org.ireader.domain.ui.NavigationArgs
-import org.ireader.library.LibraryScreen
-import org.ireader.library.viewmodel.LibraryViewModel
+import org.ireader.app.LibraryScreen
+import org.ireader.app.viewmodel.LibraryViewModel
 import org.ireader.presentation.R
 
 object LibraryScreenSpec : BottomNavScreenSpec {

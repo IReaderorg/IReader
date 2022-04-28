@@ -19,13 +19,14 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toUri
 import androidx.media.session.MediaButtonReceiver
 import org.ireader.common_resources.K
-import org.ireader.core.io.BookCover
+
 import org.ireader.domain.R
 import org.ireader.domain.notification.Notifications
 import org.ireader.domain.notification.Notifications.CHANNEL_TTS
 import org.ireader.domain.notification.flags
 import org.ireader.domain.notification.setLargeIcon
 import org.ireader.domain.services.tts_service.Player
+import org.ireader.image_loader.BookCover
 
 /**
  * Helper class to encapsulate code for building notifications.
@@ -201,7 +202,10 @@ class TTSNotificationBuilder constructor(
                 isError -> "ERROR"
                 else -> "${progress}/${lastPar}"
             }
-        val bookCover = BookCover(id = bookId, sourceId =sourceId ,cover = cover.toString(), favorite = favorite == 1L)
+        val bookCover = BookCover(id = bookId,
+            sourceId = sourceId,
+            cover = cover.toString(),
+            favorite = favorite == 1L)
         return NotificationCompat.Builder(context,
             Notifications.CHANNEL_TTS).apply {
             setContentTitle(chapterTitle)

@@ -26,9 +26,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import org.ireader.common_models.entities.*
-import org.ireader.core.catalog.model.InstallStep
-import org.ireader.core_ui.ui_components.reusable_composable.AppIconButton
-import org.ireader.core_ui.ui_components.reusable_composable.MidSizeTextComposable
+import org.ireader.components.reusable_composable.AppIconButton
+import org.ireader.components.reusable_composable.MidSizeTextComposable
+import org.ireader.core_catalogs.model.InstallStep
 import org.ireader.sources.extension.composables.LetterIcon
 import java.util.*
 import kotlin.math.max

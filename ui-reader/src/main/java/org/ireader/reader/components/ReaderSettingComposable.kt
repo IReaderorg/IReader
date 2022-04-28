@@ -14,7 +14,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.ireader.core_ui.ui_components.reusable_composable.AppIconButton
+import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.reader.viewmodel.Orientation
 import org.ireader.reader.viewmodel.ReaderScreenPreferencesState
 

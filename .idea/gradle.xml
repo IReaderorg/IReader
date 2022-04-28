@@ -14,10 +14,12 @@
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/buildSrc" />
             <option value="$PROJECT_DIR$/common-data" />
+            <option value="$PROJECT_DIR$/common-extensions" />
+            <option value="$PROJECT_DIR$/common-models" />
             <option value="$PROJECT_DIR$/common-resources" />
-            <option value="$PROJECT_DIR$/common_models" />
             <option value="$PROJECT_DIR$/core" />
             <option value="$PROJECT_DIR$/core-api" />
+            <option value="$PROJECT_DIR$/core-catalogs" />
             <option value="$PROJECT_DIR$/core-ui" />
             <option value="$PROJECT_DIR$/data" />
             <option value="$PROJECT_DIR$/domain" />
@@ -26,9 +28,11 @@
             <option value="$PROJECT_DIR$/ui-appearance" />
             <option value="$PROJECT_DIR$/ui-book-details" />
             <option value="$PROJECT_DIR$/ui-chapter-detail" />
+            <option value="$PROJECT_DIR$/ui-components" />
             <option value="$PROJECT_DIR$/ui-downloader" />
             <option value="$PROJECT_DIR$/ui-explore" />
             <option value="$PROJECT_DIR$/ui-history" />
+            <option value="$PROJECT_DIR$/ui-image-loader" />
             <option value="$PROJECT_DIR$/ui-library" />
             <option value="$PROJECT_DIR$/ui-reader" />
             <option value="$PROJECT_DIR$/ui-settings" />

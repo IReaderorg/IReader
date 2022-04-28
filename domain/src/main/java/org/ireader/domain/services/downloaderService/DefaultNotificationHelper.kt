@@ -18,6 +18,7 @@ import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.Chapter
 import org.ireader.common_resources.K
 import org.ireader.core.R
+import org.ireader.common_extensions.launchMainActivityIntent
 import org.ireader.domain.notification.Notifications
 import org.ireader.domain.notification.flags
 import org.ireader.domain.notification.setLargeIcon
@@ -43,12 +44,11 @@ class DefaultNotificationHelper @Inject constructor(
         bookId: Long,
         sourceId: Long,
     ): Intent {
-        return Intent(
-            Intent.ACTION_VIEW,
-            "https://www.ireader.org/book_detail_route/$bookId/$sourceId".toUri(),
-            applicationContext,
-            Class.forName("org.ireader.infinity.MainActivity")
-        )
+        return org.ireader.common_extensions.launchMainActivityIntent(applicationContext)
+            .apply {
+                action = Intent.ACTION_VIEW
+                data = "https://www.ireader.org/book_detail_route/$bookId/$sourceId".toUri()
+            }
     }
 
     fun openBookDetailPendingIntent(
@@ -60,12 +60,12 @@ class DefaultNotificationHelper @Inject constructor(
         )
     }
 
-    val openDownloadIntent = Intent(
-        Intent.ACTION_VIEW,
-        "https://www.ireader/downloader_route".toUri(),
-        applicationContext,
-        Class.forName("org.ireader.infinity.MainActivity")
-    )
+    val openDownloadIntent = org.ireader.common_extensions.launchMainActivityIntent(
+        applicationContext)
+        .apply {
+            action = Intent.ACTION_VIEW
+            data = "https://www.ireader/downloader_route".toUri()
+        }
 
 
     val openDownloadsPendingIntent: PendingIntent = PendingIntent.getActivity(
@@ -263,7 +263,7 @@ class DefaultNotificationHelper @Inject constructor(
             setLargeIcon(applicationContext, book.cover)
             priority = NotificationCompat.PRIORITY_LOW
 
-            setContentIntent(openReaderScreenIntent(chapter, book,progress))
+            setContentIntent(openReaderScreenIntent(chapter, book, progress))
             addAction(R.drawable.ic_baseline_skip_previous,
                 "Previous Chapter",
                 skipPrev)
@@ -294,6 +294,7 @@ class DefaultNotificationHelper @Inject constructor(
 
 
     }
+
     fun buildDownloadScreenDeepLink(
         bookId: Long,
         sourceId: Long,
@@ -303,25 +304,25 @@ class DefaultNotificationHelper @Inject constructor(
     ): String {
         return "https://www.ireader.org/reader_screen_route/$bookId/$chapterId/$sourceId/$readingParagraph/$voiceMode"
     }
+
     private fun openReaderScreenIntent(
         chapter: Chapter,
         book: Book,
-        currentReadingParagraph:Int = 0,
+        currentReadingParagraph: Int = 0,
     ): PendingIntent = PendingIntent.getActivity(
         applicationContext.applicationContext,
         5,
-        Intent(
-            Intent.ACTION_VIEW,
-            buildDownloadScreenDeepLink(
-                bookId = book.id,
-                chapterId = chapter.id,
-                sourceId = book.sourceId,
-                readingParagraph = currentReadingParagraph.toLong(),
-                voiceMode = 1L
-            ).toUri(),
-            applicationContext,
-            Class.forName("org.ireader.infinity.MainActivity")
-        ),
+        org.ireader.common_extensions.launchMainActivityIntent(applicationContext)
+            .apply {
+                action = Intent.ACTION_VIEW
+                data = buildDownloadScreenDeepLink(
+                    bookId = book.id,
+                    chapterId = chapter.id,
+                    sourceId = book.sourceId,
+                    readingParagraph = currentReadingParagraph.toLong(),
+                    voiceMode = 1L
+                ).toUri()
+            },
         flags
     )
 

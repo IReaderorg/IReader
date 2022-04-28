@@ -2,7 +2,7 @@ package org.ireader.core.utils
 
 import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.takeIf
-import org.ireader.core.io.LibraryCovers
+import org.ireader.image_loader.LibraryCovers
 import java.util.*
 
 fun updateBook(newBook: Book, oldBook: Book, libraryCovers: LibraryCovers): Book {

@@ -16,8 +16,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
-import org.ireader.core_ui.ui_components.reusable_composable.AppTextField
-import org.ireader.core_ui.ui_components.reusable_composable.MidSizeTextComposable
+import org.ireader.components.reusable_composable.AppTextField
+import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.reader.viewmodel.ReaderScreenViewModel
 
 @Composable

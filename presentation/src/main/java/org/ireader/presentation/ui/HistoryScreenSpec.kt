@@ -10,7 +10,7 @@ import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import com.google.accompanist.pager.ExperimentalPagerApi
-import org.ireader.core.extensions.viewModelIOCoroutine
+import org.ireader.common_extensions.async.viewModelIOCoroutine
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.history.HistoryScreen
 import org.ireader.history.viewmodel.HistoryViewModel

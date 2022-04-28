@@ -1,4 +1,4 @@
-package org.ireader.presentation.feature_ttl
+package org.ireader.tts
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.TweenSpec
@@ -32,23 +32,21 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.launch
 import org.ireader.common_models.entities.Chapter
+import org.ireader.components.components.BookImageComposable
+import org.ireader.components.components.showLoading
+import org.ireader.components.reusable_composable.AppIconButton
+import org.ireader.components.reusable_composable.BigSizeTextComposable
+import org.ireader.components.reusable_composable.MidSizeTextComposable
+import org.ireader.components.reusable_composable.SuperSmallTextComposable
 import org.ireader.core.R
 import org.ireader.core_api.log.Log
 import org.ireader.core_api.source.Source
-import org.ireader.core.io.BookCover
 import org.ireader.domain.services.tts_service.Player
+import org.ireader.image_loader.BookCover
+import org.ireader.reader.ReaderScreenDrawer
 import org.ireader.reader.components.SettingItemComposable
 import org.ireader.reader.components.SettingItemToggleComposable
 import org.ireader.reader.viewmodel.ReaderScreenViewModel
-import org.ireader.core_ui.ui_components.components.BookImageComposable
-import org.ireader.core_ui.ui_components.components.showLoading
-import org.ireader.core_ui.ui_components.reusable_composable.AppIconButton
-import org.ireader.core_ui.ui_components.reusable_composable.BigSizeTextComposable
-import org.ireader.core_ui.ui_components.reusable_composable.MidSizeTextComposable
-import org.ireader.core_ui.ui_components.reusable_composable.SuperSmallTextComposable
-import org.ireader.reader.ReaderScreenDrawer
-import org.ireader.tts.LanguageChip
-import org.ireader.tts.VoiceChip
 import java.math.RoundingMode
 
 

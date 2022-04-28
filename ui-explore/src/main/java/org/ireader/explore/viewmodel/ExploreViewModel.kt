@@ -12,17 +12,15 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import org.ireader.common_models.DisplayMode
 import org.ireader.common_models.entities.RemoteKeys
+import org.ireader.common_models.entities.toBook
 import org.ireader.core.DefaultPaginator
 import org.ireader.core.exceptions.SourceNotFoundException
-import org.ireader.core.utils.UiEvent
-import org.ireader.core.utils.UiText
-import org.ireader.core.utils.exceptionHandler
 import org.ireader.core_api.log.Log
 import org.ireader.core_api.source.CatalogSource
 import org.ireader.core_api.source.model.Filter
 import org.ireader.core_api.source.model.MangasPageInfo
-import org.ireader.core.catalog.service.CatalogStore
-import org.ireader.common_models.entities.toBook
+import org.ireader.core_catalogs.CatalogStore
+import org.ireader.core_ui.exceptionHandler
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.preferences.reader_preferences.BrowseLayoutTypeUseCase
@@ -43,7 +41,7 @@ class ExploreViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
 ) : ViewModel(), ExploreState by state {
 
-    private val _eventFlow = MutableSharedFlow<UiEvent>()
+    private val _eventFlow = MutableSharedFlow<org.ireader.common_extensions.UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
 
 
@@ -71,13 +69,13 @@ class ExploreViewModel @Inject constructor(
                     readLayoutType()
                 } else {
                     viewModelScope.launch {
-                        showSnackBar(UiText.StringResource(org.ireader.core.R.string.the_source_is_not_found))
+                        showSnackBar(org.ireader.common_extensions.UiText.StringResource(org.ireader.core.R.string.the_source_is_not_found))
                     }
                 }
             }
         } else {
             viewModelScope.launch {
-                showSnackBar(UiText.StringResource(org.ireader.core.R.string.the_source_is_not_found))
+                showSnackBar(org.ireader.common_extensions.UiText.StringResource(org.ireader.core.R.string.the_source_is_not_found))
             }
         }
 
@@ -222,10 +220,10 @@ class ExploreViewModel @Inject constructor(
     }
 
 
-    suspend fun showSnackBar(message: UiText?) {
+    suspend fun showSnackBar(message: org.ireader.common_extensions.UiText?) {
         _eventFlow.emit(
-            UiEvent.ShowSnackbar(
-                uiText = message ?: UiText.StringResource(org.ireader.core.R.string.error_unknown)
+            org.ireader.common_extensions.UiEvent.ShowSnackbar(
+                uiText = message ?: org.ireader.common_extensions.UiText.StringResource(org.ireader.core.R.string.error_unknown)
             )
         )
     }

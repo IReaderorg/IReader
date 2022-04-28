@@ -21,14 +21,14 @@ import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.ireader.bookDetails.components.BookDetailScreenBottomBar
-import org.ireader.core_ui.ui_components.CardTileComposable
+import org.ireader.core_ui.ui_components.CardTile
 import org.ireader.core_ui.ui_components.DotsFlashing
 import org.ireader.bookDetails.viewmodel.ChapterState
 import org.ireader.bookDetails.viewmodel.DetailState
 import org.ireader.common_models.entities.Book
 import org.ireader.core_ui.theme.TransparentStatusBar
-import org.ireader.core_ui.ui_components.components.ISnackBarHost
-import org.ireader.core_ui.ui_components.components.showLoading
+import org.ireader.components.components.ISnackBarHost
+import org.ireader.components.components.showLoading
 
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -123,7 +123,7 @@ fun BookDetailScreen(
                         source = source,
                     )
 
-                    CardTileComposable(
+                    CardTile(
                         modifier = modifier
                             .padding(horizontal = 8.dp, vertical = 4.dp)
                             .fillMaxWidth(),

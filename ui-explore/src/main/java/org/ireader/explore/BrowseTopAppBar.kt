@@ -14,16 +14,16 @@ import androidx.compose.ui.Modifier
 import org.ireader.common_models.DisplayMode
 import org.ireader.common_models.LayoutType
 import org.ireader.common_models.layouts
+import org.ireader.components.components.Toolbar
+import org.ireader.components.reusable_composable.AppIconButton
+import org.ireader.components.reusable_composable.AppTextField
+import org.ireader.components.reusable_composable.BigSizeTextComposable
+import org.ireader.components.reusable_composable.TopAppBarBackButton
 import org.ireader.core_api.source.CatalogSource
 import org.ireader.core_api.source.HttpSource
 import org.ireader.core_api.source.model.Filter
-import org.ireader.core_ui.ui_components.RadioButtonWithTitleComposable
-import org.ireader.core_ui.ui_components.reusable_composable.AppIconButton
-import org.ireader.core_ui.ui_components.reusable_composable.AppTextField
-import org.ireader.core_ui.ui_components.reusable_composable.BigSizeTextComposable
-import org.ireader.core_ui.ui_components.reusable_composable.TopAppBarBackButton
+import org.ireader.core_ui.ui_components.RadioButton
 import org.ireader.explore.viewmodel.ExploreState
-import org.ireader.presentation.presentation.Toolbar
 
 @Composable
 fun BrowseTopAppBar(
@@ -105,7 +105,7 @@ fun BrowseTopAppBar(
                         onLayoutTypeSelect(layout)
                         topMenu = false
                     }) {
-                        RadioButtonWithTitleComposable(
+                        RadioButton(
                             text = layout.title,
                             selected = currentLayout == layout.layout,
                             onClick = {

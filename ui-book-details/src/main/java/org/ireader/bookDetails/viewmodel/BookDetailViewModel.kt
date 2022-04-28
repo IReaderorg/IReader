@@ -9,15 +9,14 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.ireader.common_extensions.removeSameItemsFromList
 import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.Chapter
 import org.ireader.core.R
-import org.ireader.core.utils.UiText
-import org.ireader.core.utils.removeSameItemsFromList
 import org.ireader.core_api.log.Log
 import org.ireader.core_api.source.Source
+import org.ireader.core_catalogs.interactor.GetLocalCatalog
 import org.ireader.core_ui.viewmodel.BaseViewModel
-import org.ireader.core.catalog.interactor.GetLocalCatalog
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
@@ -73,7 +72,7 @@ class BookDetailViewModel @Inject constructor(
 
         } else {
             viewModelScope.launch {
-                showSnackBar(UiText.StringResource(R.string.something_is_wrong_with_this_book))
+                showSnackBar(org.ireader.common_extensions.UiText.StringResource(R.string.something_is_wrong_with_this_book))
             }
         }
     }

@@ -10,11 +10,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import org.ireader.core_ui.ui_components.reusable_composable.AppIconButton
-import org.ireader.core_ui.ui_components.reusable_composable.BigSizeTextComposable
-import org.ireader.core_ui.ui_components.reusable_composable.BuildDropDownMenu
-import org.ireader.core_ui.ui_components.reusable_composable.DropDownMenuItem
-import org.ireader.presentation.presentation.Toolbar
+import org.ireader.components.components.Toolbar
+import org.ireader.components.reusable_composable.AppIconButton
+import org.ireader.components.reusable_composable.BigSizeTextComposable
+import org.ireader.components.reusable_composable.BuildDropDownMenu
+import org.ireader.components.reusable_composable.DropDownMenuItem
 import org.ireader.ui_downloader.R
 
 

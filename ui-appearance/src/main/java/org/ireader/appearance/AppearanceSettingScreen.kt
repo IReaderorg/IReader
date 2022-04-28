@@ -11,11 +11,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import org.ireader.components.components.Toolbar
+import org.ireader.components.reusable_composable.BigSizeTextComposable
+import org.ireader.components.reusable_composable.MidSizeTextComposable
+import org.ireader.components.reusable_composable.TopAppBarBackButton
 import org.ireader.core_ui.theme.ThemeMode
-import org.ireader.core_ui.ui_components.reusable_composable.BigSizeTextComposable
-import org.ireader.core_ui.ui_components.reusable_composable.MidSizeTextComposable
-import org.ireader.core_ui.ui_components.reusable_composable.TopAppBarBackButton
-import org.ireader.presentation.presentation.Toolbar
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable

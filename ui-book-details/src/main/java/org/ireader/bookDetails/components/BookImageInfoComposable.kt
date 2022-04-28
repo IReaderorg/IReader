@@ -12,8 +12,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.ireader.common_models.entities.Book
-import org.ireader.core.io.BookCover
-import org.ireader.core_ui.ui_components.components.BookImageComposable
+
+import org.ireader.components.components.BookImageComposable
+import org.ireader.image_loader.BookCover
 
 @Composable
 fun BookImageInfoComposable(modifier: Modifier = Modifier, book: Book) {

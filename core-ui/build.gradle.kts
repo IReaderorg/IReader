@@ -17,6 +17,9 @@ android {
 dependencies {
     implementation(project(Modules.coreApi))
     implementation(project(Modules.core))
+    implementation(project(Modules.commonModels))
+    implementation(project(Modules.commonResources))
+    implementation(project(Modules.uiImageLoader))
 
     implementation(compose.compose.foundation)
     implementation(compose.compose.ui)
@@ -31,7 +34,7 @@ dependencies {
     implementation(compose.compose.hiltNavigation)
     implementation(compose.compose.lifecycle)
     implementation(compose.compose.coil)
-    implementation(project(mapOf("path" to ":common_models")))
+    implementation(libs.jsoup)
     androidTestImplementation(compose.compose.uiTestManifest)
     androidTestImplementation(compose.compose.testing)
     androidTestImplementation(compose.compose.composeTooling)

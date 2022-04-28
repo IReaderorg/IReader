@@ -35,7 +35,6 @@ const val PARSE_BOOKS = "PARSE_BOOKS"
 
 
 object K {
-    const val MainActivity = "org.ireader.infinity.MainActivity"
     const val TTSService = "org.ireader.domain.services.tts_service.media_player.TTSService"
 }
 

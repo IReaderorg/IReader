@@ -79,6 +79,9 @@ dependencies {
     implementation(project(Modules.commonModels))
     implementation(project(Modules.commonData))
     implementation(project(Modules.uiLibrary))
+    implementation(project(Modules.coreCatalogs))
+    implementation(project(Modules.commonExtensions))
+    implementation(project(Modules.uiImageLoader))
 
     /** Firebase **/
     implementation(platform(libs.firebase.bom))

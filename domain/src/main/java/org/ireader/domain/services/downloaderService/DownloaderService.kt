@@ -9,21 +9,19 @@ import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.*
+import org.ireader.common_extensions.launchIO
 import org.ireader.common_models.entities.SavedDownload
 import org.ireader.common_models.entities.buildSavedDownload
 import org.ireader.core.R
 import org.ireader.core_api.log.Log
-import org.ireader.core.catalog.service.CatalogStore
+import org.ireader.core_catalogs.CatalogStore
 import org.ireader.domain.notification.Notifications
 import org.ireader.domain.notification.Notifications.ID_DOWNLOAD_CHAPTER_COMPLETE
 import org.ireader.domain.notification.Notifications.ID_DOWNLOAD_CHAPTER_ERROR
 import org.ireader.domain.notification.Notifications.ID_DOWNLOAD_CHAPTER_PROGRESS
-import org.ireader.common_data.repository.LocalBookRepository
-import org.ireader.common_data.repository.LocalChapterRepository
 import org.ireader.domain.use_cases.download.DownloadUseCases
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
-import org.ireader.domain.utils.launchIO
 
 
 @HiltWorker

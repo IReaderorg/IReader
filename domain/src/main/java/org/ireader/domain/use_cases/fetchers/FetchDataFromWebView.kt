@@ -4,7 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.Chapter
-import org.ireader.core.utils.UiText
+import org.ireader.common_extensions.UiText
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.utils.Resource
@@ -22,7 +22,7 @@ class FetchBookDetailAndChapterDetailFromWebView @Inject constructor() {
         insertUseCases: LocalInsertUseCases,
         deleteUseCase: DeleteUseCase,
         url: String? = null,
-    ): Flow<Resource<UiText.DynamicString>> = flow {
+    ): Flow<Resource<org.ireader.common_extensions.UiText.DynamicString>> = flow {
         //TODO fix this part later
 //        try {
 //            val bookFromPageSource = source.detailParse(Jsoup.parse(pageSource))

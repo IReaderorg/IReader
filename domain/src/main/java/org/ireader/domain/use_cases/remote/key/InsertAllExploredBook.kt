@@ -4,13 +4,12 @@ import kotlinx.coroutines.flow.Flow
 import org.ireader.common_models.entities.RemoteKeys
 import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.BookItem
-import org.ireader.common_data.repository.RemoteKeyRepository
-import org.ireader.domain.utils.withIOContext
+import org.ireader.common_extensions.withIOContext
 import javax.inject.Inject
 
 class InsertAllExploredBook @Inject constructor(private val remoteKeyRepository: org.ireader.common_data.repository.RemoteKeyRepository) {
     suspend operator fun invoke(books: List<Book>): List<Long> {
-        return withIOContext {
+        return org.ireader.common_extensions.withIOContext {
             return@withIOContext remoteKeyRepository.insertBooks(books)
         }
     }
@@ -30,7 +29,7 @@ class SubScribeAllPagedExploreBooks @Inject constructor(private val remoteKeyRep
 
 class PrepareExploreMode @Inject constructor(private val remoteKeyRepository: org.ireader.common_data.repository.RemoteKeyRepository) {
     suspend operator fun invoke(reset: Boolean, list: List<Book>, keys: List<RemoteKeys>) {
-        return withIOContext {
+        return org.ireader.common_extensions.withIOContext {
             return@withIOContext remoteKeyRepository.prepareExploreMode(reset, list, keys)
         }
     }

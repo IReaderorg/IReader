@@ -6,9 +6,9 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import org.ireader.core.utils.UiText
+import org.ireader.core_catalogs.CatalogStore
 import org.ireader.core_ui.viewmodel.BaseViewModel
-import org.ireader.core.catalog.service.CatalogStore
+
 import org.ireader.domain.services.downloaderService.DefaultNotificationHelper
 import org.ireader.domain.services.tts_service.Player
 import org.ireader.domain.ui.NavigationArgs
@@ -88,12 +88,12 @@ class ReaderScreenViewModel @Inject constructor(
 
                 } else {
                     viewModelScope.launch {
-                        showSnackBar(UiText.StringResource(org.ireader.core.R.string.the_source_is_not_found))
+                        showSnackBar(org.ireader.common_extensions.UiText.StringResource(org.ireader.core.R.string.the_source_is_not_found))
                     }
                 }
             } else {
                 viewModelScope.launch {
-                    showSnackBar(UiText.StringResource(org.ireader.core.R.string.something_is_wrong_with_this_book))
+                    showSnackBar(org.ireader.common_extensions.UiText.StringResource(org.ireader.core.R.string.something_is_wrong_with_this_book))
                 }
             }
         }

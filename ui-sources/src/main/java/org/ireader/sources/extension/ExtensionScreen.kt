@@ -20,14 +20,13 @@ import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.flow.collectLatest
 import org.ireader.common_models.entities.Catalog
 import org.ireader.common_models.entities.CatalogLocal
-import org.ireader.core.utils.UiEvent
+import org.ireader.components.components.ISnackBarHost
+import org.ireader.components.components.Toolbar
+import org.ireader.components.reusable_composable.AppIconButton
+import org.ireader.components.reusable_composable.AppTextField
+import org.ireader.components.reusable_composable.BigSizeTextComposable
+import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.core_ui.theme.AppColors
-import org.ireader.core_ui.ui_components.components.ISnackBarHost
-import org.ireader.core_ui.ui_components.reusable_composable.AppIconButton
-import org.ireader.core_ui.ui_components.reusable_composable.AppTextField
-import org.ireader.core_ui.ui_components.reusable_composable.BigSizeTextComposable
-import org.ireader.core_ui.ui_components.reusable_composable.MidSizeTextComposable
-import org.ireader.presentation.presentation.Toolbar
 import org.ireader.sources.extension.composables.RemoteSourcesScreen
 import org.ireader.sources.extension.composables.UserSourcesScreen
 
@@ -55,7 +54,7 @@ fun ExtensionScreen(
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
-                is UiEvent.ShowSnackbar -> {
+                is org.ireader.common_extensions.UiEvent.ShowSnackbar -> {
                     scaffoldState.snackbarHostState.showSnackbar(
                         event.uiText.asString(context)
                     )
