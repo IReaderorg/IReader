@@ -5,7 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import com.google.accompanist.pager.ExperimentalPagerApi
-import org.ireader.presentation.feature_settings.presentation.AboutSettingScreen
+import org.ireader.about.AboutSettingScreen
 
 object AboutInfoScreenSpec : ScreenSpec {
 

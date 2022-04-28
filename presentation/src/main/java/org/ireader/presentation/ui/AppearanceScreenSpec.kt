@@ -6,8 +6,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import com.google.accompanist.pager.ExperimentalPagerApi
-import org.ireader.presentation.feature_settings.presentation.appearance.AppearanceSettingScreen
-import org.ireader.presentation.feature_settings.presentation.appearance.AppearanceViewModel
+import org.ireader.appearance.AppearanceSettingScreen
+import org.ireader.appearance.AppearanceViewModel
 
 
 object AppearanceScreenSpec : ScreenSpec {

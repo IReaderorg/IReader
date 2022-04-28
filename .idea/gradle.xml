@@ -22,7 +22,20 @@
             <option value="$PROJECT_DIR$/data" />
             <option value="$PROJECT_DIR$/domain" />
             <option value="$PROJECT_DIR$/presentation" />
+            <option value="$PROJECT_DIR$/ui-about" />
+            <option value="$PROJECT_DIR$/ui-appearance" />
+            <option value="$PROJECT_DIR$/ui-book-details" />
+            <option value="$PROJECT_DIR$/ui-chapter-detail" />
+            <option value="$PROJECT_DIR$/ui-downloader" />
+            <option value="$PROJECT_DIR$/ui-explore" />
+            <option value="$PROJECT_DIR$/ui-history" />
             <option value="$PROJECT_DIR$/ui-library" />
+            <option value="$PROJECT_DIR$/ui-reader" />
+            <option value="$PROJECT_DIR$/ui-settings" />
+            <option value="$PROJECT_DIR$/ui-sources" />
+            <option value="$PROJECT_DIR$/ui-tts" />
+            <option value="$PROJECT_DIR$/ui-updates" />
+            <option value="$PROJECT_DIR$/ui-web" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

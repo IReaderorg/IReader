@@ -38,7 +38,7 @@ import org.ireader.core_ui.ui.EmptyScreen
 import org.ireader.core_ui.ui.LoadingScreen
 import org.ireader.core_ui.ui_components.reusable_composable.AppIconButton
 import org.ireader.library.components.BottomTabComposable
-import org.ireader.library.components.LayoutComposable
+import org.ireader.core_ui.ui_components.LayoutComposable
 import org.ireader.library.viewmodel.LibraryState
 
 

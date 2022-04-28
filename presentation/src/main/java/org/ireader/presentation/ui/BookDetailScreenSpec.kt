@@ -11,14 +11,14 @@ import androidx.navigation.*
 import com.google.accompanist.pager.ExperimentalPagerApi
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import org.ireader.bookDetails.BookDetailScreen
+import org.ireader.bookDetails.viewmodel.BookDetailViewModel
 import org.ireader.common_resources.LAST_CHAPTER
 import org.ireader.core.utils.UiEvent
 import org.ireader.core.utils.UiText
 import org.ireader.core.utils.getUrlWithoutDomain
 import org.ireader.core_api.source.HttpSource
 import org.ireader.domain.ui.NavigationArgs
-import org.ireader.presentation.feature_detail.presentation.book_detail.BookDetailScreen
-import org.ireader.presentation.feature_detail.presentation.book_detail.viewmodel.BookDetailViewModel
 import org.ireader.presentation.presentation.EmptyScreenComposable
 
 object BookDetailScreenSpec : ScreenSpec {

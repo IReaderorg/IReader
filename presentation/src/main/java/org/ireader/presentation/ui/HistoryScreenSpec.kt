@@ -12,9 +12,9 @@ import androidx.navigation.NavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import org.ireader.core.extensions.viewModelIOCoroutine
 import org.ireader.domain.ui.NavigationArgs
+import org.ireader.history.HistoryScreen
+import org.ireader.history.viewmodel.HistoryViewModel
 import org.ireader.presentation.R
-import org.ireader.presentation.feature_history.HistoryScreen
-import org.ireader.presentation.feature_history.viewmodel.HistoryViewModel
 
 
 object HistoryScreenSpec : BottomNavScreenSpec {

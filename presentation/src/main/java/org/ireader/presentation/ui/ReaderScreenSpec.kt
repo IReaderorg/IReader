@@ -23,14 +23,14 @@ import org.ireader.core_api.source.Source
 import org.ireader.core_ui.theme.TransparentStatusBar
 import org.ireader.domain.services.tts_service.Player
 import org.ireader.domain.ui.NavigationArgs
-import org.ireader.presentation.feature_reader.presentation.reader.ReadingScreen
-import org.ireader.presentation.feature_reader.presentation.reader.reverse_swip_refresh.SwipeRefreshState
-import org.ireader.presentation.feature_reader.presentation.reader.reverse_swip_refresh.rememberSwipeRefreshState
-import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.FontSizeEvent
-import org.ireader.presentation.feature_reader.presentation.reader.viewmodel.ReaderScreenViewModel
 import org.ireader.presentation.feature_ttl.TTSScreen
 import org.ireader.presentation.feature_ttl.TTSState
 import org.ireader.presentation.presentation.EmptyScreenComposable
+import org.ireader.reader.ReadingScreen
+import org.ireader.reader.reverse_swip_refresh.SwipeRefreshState
+import org.ireader.reader.reverse_swip_refresh.rememberSwipeRefreshState
+import org.ireader.reader.viewmodel.FontSizeEvent
+import org.ireader.reader.viewmodel.ReaderScreenViewModel
 
 object ReaderScreenSpec : ScreenSpec {
 

@@ -14,8 +14,8 @@ import org.ireader.core.R
 import org.ireader.core.utils.UiText
 import org.ireader.core_api.source.HttpSource
 import org.ireader.domain.ui.NavigationArgs
-import org.ireader.presentation.feature_explore.presentation.browse.ExploreScreen
-import org.ireader.presentation.feature_explore.presentation.browse.viewmodel.ExploreViewModel
+import org.ireader.explore.ExploreScreen
+import org.ireader.explore.viewmodel.ExploreViewModel
 import org.ireader.presentation.presentation.EmptyScreenComposable
 
 object ExploreScreenSpec : ScreenSpec {

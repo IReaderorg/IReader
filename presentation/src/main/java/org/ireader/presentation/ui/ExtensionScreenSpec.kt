@@ -11,8 +11,8 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.presentation.R
-import org.ireader.presentation.feature_sources.presentation.extension.ExtensionScreen
-import org.ireader.presentation.feature_sources.presentation.extension.ExtensionViewModel
+import org.ireader.sources.extension.ExtensionScreen
+import org.ireader.sources.extension.ExtensionViewModel
 
 object ExtensionScreenSpec : BottomNavScreenSpec {
     override val icon: ImageVector = Icons.Default.Explore
@@ -43,7 +43,12 @@ object ExtensionScreenSpec : BottomNavScreenSpec {
             onRefreshCatalogs = { viewModel.refreshCatalogs() },
             onClickInstall = { viewModel.installCatalog(it) },
             onClickTogglePinned = { viewModel.togglePinnedCatalog(it) },
-            onClickUninstall = { viewModel.uninstallCatalog(it) }
+            onClickUninstall = { viewModel.uninstallCatalog(it) },
+            onSearchNavigate = {
+                navController.navigate(
+                    GlobalSearchScreenSpec.navHostRoute
+                )
+            }
         )
     }
 

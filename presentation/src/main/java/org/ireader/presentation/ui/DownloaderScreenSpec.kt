@@ -2,12 +2,14 @@ package org.ireader.presentation.ui
 
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavDeepLink
 import androidx.navigation.navDeepLink
 import com.google.accompanist.pager.ExperimentalPagerApi
-import org.ireader.presentation.feature_settings.presentation.setting.downloader.DownloaderScreen
+import org.ireader.downloader.DownloaderScreen
+import org.ireader.downloader.DownloaderViewModel
 
 object DownloaderScreenSpec : ScreenSpec {
 
@@ -27,7 +29,18 @@ object DownloaderScreenSpec : ScreenSpec {
         navBackStackEntry: NavBackStackEntry,
         scaffoldState: ScaffoldState,
     ) {
-        DownloaderScreen(navController = navController)
+        val vm : DownloaderViewModel = hiltViewModel()
+       DownloaderScreen(navController = navController,
+       onDownloadItem = { item ->
+           navController.navigate(
+               BookDetailScreenSpec.buildRoute(
+                   sourceId = item.sourceId,
+                   bookId = item.bookId
+               )
+           )
+       },
+           vm = vm
+       )
     }
 
 }

@@ -5,8 +5,8 @@ import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.*
 import org.ireader.core_api.log.Log
-import org.ireader.presentation.feature_sources.presentation.global_search.GlobalSearchScreen
-import org.ireader.presentation.feature_sources.presentation.global_search.viewmodel.GlobalSearchViewModel
+import org.ireader.sources.global_search.GlobalSearchScreen
+import org.ireader.sources.global_search.viewmodel.GlobalSearchViewModel
 
 object GlobalSearchScreenSpec : ScreenSpec {
 
@@ -63,7 +63,7 @@ object GlobalSearchScreenSpec : ScreenSpec {
                     Log.error(e,"")
                 }
 
-            }
+            },
         )
     }
 

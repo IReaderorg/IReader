@@ -10,9 +10,9 @@ import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import com.google.accompanist.pager.ExperimentalPagerApi
+import org.ireader.chapterDetails.ChapterDetailScreen
+import org.ireader.chapterDetails.viewmodel.ChapterDetailViewModel
 import org.ireader.domain.ui.NavigationArgs
-import org.ireader.presentation.feature_detail.presentation.chapter_detail.ChapterDetailScreen
-import org.ireader.presentation.feature_detail.presentation.chapter_detail.viewmodel.ChapterDetailViewModel
 
 object ChapterScreenSpec : ScreenSpec {
 
@@ -76,7 +76,8 @@ object ChapterScreenSpec : ScreenSpec {
                         vm.selection.add(vm.chapters[index].id)
                     }
                 }
-            }
+            },
+            vm = vm
         )
     }
 

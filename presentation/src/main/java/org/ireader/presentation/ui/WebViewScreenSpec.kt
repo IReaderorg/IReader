@@ -2,9 +2,11 @@ package org.ireader.presentation.ui
 
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.*
 import com.google.accompanist.pager.ExperimentalPagerApi
-import org.ireader.presentation.feature_settings.presentation.webview.WebPageScreen
+import org.ireader.web.WebPageScreen
+import org.ireader.web.WebViewPageModel
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
@@ -39,7 +41,11 @@ object WebViewScreenSpec : ScreenSpec {
         navBackStackEntry: NavBackStackEntry,
         scaffoldState: ScaffoldState,
     ) {
-        WebPageScreen(navController = navController)
+        val vm : WebViewPageModel  = hiltViewModel()
+        WebPageScreen(
+            navController = navController,
+            viewModel = vm
+        )
     }
 
 }

@@ -10,12 +10,12 @@ import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import com.google.accompanist.pager.ExperimentalPagerApi
-import org.ireader.core.extensions.viewModelIOCoroutine
 import org.ireader.common_models.entities.UpdateWithInfo.Companion.toUpdate
+import org.ireader.core.extensions.viewModelIOCoroutine
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.presentation.R
-import org.ireader.presentation.feature_updates.UpdateScreen
-import org.ireader.presentation.feature_updates.viewmodel.UpdatesViewModel
+import org.ireader.updates.UpdateScreen
+import org.ireader.updates.viewmodel.UpdatesViewModel
 
 
 object UpdateScreenSpec : BottomNavScreenSpec {
@@ -62,7 +62,7 @@ object UpdateScreenSpec : BottomNavScreenSpec {
             },
             onAppbarDeleteAll = {
                 vm.viewModelIOCoroutine {
-                    vm.updatesRepository.deleteAllUpdates()
+                    vm.updateUseCases.deleteAllUpdates()
                 }
             },
             onUpdate = { update ->
@@ -94,7 +94,7 @@ object UpdateScreenSpec : BottomNavScreenSpec {
             },
             onBottomBarDelete = {
                 vm.viewModelIOCoroutine {
-                    vm.updatesRepository.deleteUpdates(vm.updates.values.flatten()
+                    vm.updateUseCases.deleteUpdates(vm.updates.values.flatten()
                         .filter { it.id in vm.selection }.map { it.toUpdate() })
                 }
                 vm.selection.clear()

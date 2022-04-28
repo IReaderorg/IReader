@@ -11,7 +11,7 @@ import androidx.navigation.NavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.presentation.R
-import org.ireader.presentation.feature_settings.presentation.setting.SettingScreen
+import org.ireader.settings.setting.SettingScreen
 
 object SettingScreenSpec : BottomNavScreenSpec {
     override val icon: ImageVector = Icons.Default.Settings
@@ -31,7 +31,16 @@ object SettingScreenSpec : BottomNavScreenSpec {
         navBackStackEntry: NavBackStackEntry,
         scaffoldState: ScaffoldState,
     ) {
-        SettingScreen(navController = navController)
+        SettingScreen(
+            navController = navController,
+            itemsRoutes = listOf(
+                DownloaderScreenSpec.navHostRoute,
+                AppearanceScreenSpec.navHostRoute,
+                AdvanceSettingSpec.navHostRoute,
+                AboutInfoScreenSpec.navHostRoute
+            )
+        )
+
     }
 
 }
