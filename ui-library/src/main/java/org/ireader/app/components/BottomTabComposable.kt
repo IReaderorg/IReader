@@ -8,7 +8,6 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.PagerState
-import kotlinx.coroutines.CoroutineScope
 import org.ireader.common_models.DisplayMode
 import org.ireader.common_models.FilterType
 import org.ireader.common_models.LayoutType
@@ -20,7 +19,6 @@ import org.ireader.common_models.SortType
 fun BottomTabComposable(
     modifier: Modifier = Modifier,
     pagerState: PagerState,
-    scope: CoroutineScope,
     navController: NavController,
     filters: List<FilterType>,
     addFilters: (FilterType) -> Unit,

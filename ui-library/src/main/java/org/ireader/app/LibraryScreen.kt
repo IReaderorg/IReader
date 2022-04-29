@@ -7,7 +7,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,6 +21,7 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
@@ -29,8 +29,6 @@ import androidx.compose.material.icons.filled.DoneOutline
 import androidx.compose.material.icons.filled.GetApp
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -75,8 +73,6 @@ fun LibraryScreen(
     refreshUpdate: () -> Unit,
 ) {
 
-    val scope = rememberCoroutineScope()
-
     val pagerState = rememberPagerState()
     val bottomSheetState =
         rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
@@ -85,59 +81,59 @@ fun LibraryScreen(
     val lazyListState = rememberLazyListState()
 
     val swipeState = rememberSwipeRefreshState(isRefreshing = false)
-    LaunchedEffect(key1 = true) {
-        getLibraryBooks()
-    }
 
-    SwipeRefresh(
-        state = swipeState, onRefresh = { refreshUpdate() },
-        indicator = { state, trigger ->
-            SwipeRefreshIndicator(
-                state = state,
-                refreshTriggerDistance = trigger,
-                scale = true,
-                backgroundColor = MaterialTheme.colors.background,
-                contentColor = MaterialTheme.colors.primaryVariant,
-                elevation = 8.dp,
-            )
-        }
+    ModalBottomSheetLayout(
+        modifier = if (bottomSheetState.targetValue == ModalBottomSheetValue.Expanded) Modifier.statusBarsPadding() else Modifier,
+        sheetContent = {
+            Box(modifier.defaultMinSize(minHeight = 1.dp)) {
+                BottomTabComposable(
+                    pagerState = pagerState,
+                    navController = navController,
+                    filters = vm.filters,
+                    addFilters = addFilters,
+                    removeFilter = removeFilter,
+                    onSortSelected = onSortSelected,
+                    sortType = vm.sortType,
+                    isSortDesc = vm.desc,
+                    onLayoutSelected = onLayoutSelected,
+                    layoutType = vm.layout
+                )
+            }
+        },
+        sheetState = bottomSheetState,
+        sheetBackgroundColor = MaterialTheme.colors.background,
+        sheetContentColor = MaterialTheme.colors.onBackground,
     ) {
-        ModalBottomSheetLayout(
-            modifier = if (bottomSheetState.targetValue == ModalBottomSheetValue.Expanded) Modifier.statusBarsPadding() else Modifier,
-            sheetContent = {
-                Box(modifier.defaultMinSize(minHeight = 1.dp)) {
-                    BottomTabComposable(
-                        pagerState = pagerState,
-                        navController = navController,
-                        scope = scope,
-                        filters = vm.filters,
-                        addFilters = addFilters,
-                        removeFilter = removeFilter,
-                        onSortSelected = onSortSelected,
-                        sortType = vm.sortType,
-                        isSortDesc = vm.desc,
-                        onLayoutSelected = onLayoutSelected,
-                        layoutType = vm.layout
-                    )
-                }
-            },
-            sheetState = bottomSheetState,
-            sheetBackgroundColor = MaterialTheme.colors.background,
-            sheetContentColor = MaterialTheme.colors.onBackground,
+
+        SwipeRefresh(
+            state = swipeState, onRefresh = { refreshUpdate() },
+            indicator = { state, trigger ->
+                SwipeRefreshIndicator(
+                    state = state,
+                    refreshTriggerDistance = trigger,
+                    scale = true,
+                    backgroundColor = MaterialTheme.colors.background,
+                    contentColor = MaterialTheme.colors.primaryVariant,
+                    elevation = 8.dp,
+                )
+            }
         ) {
-            Column(
+            Scaffold(
                 modifier = Modifier
                     .fillMaxSize(),
-            ) {
-                LibraryScreenTopBar(
-                    state = vm,
-                    bottomSheetState = bottomSheetState,
-                    onSearch = getLibraryBooks,
-                    refreshUpdate = refreshUpdate
+                topBar = {
+                    LibraryScreenTopBar(
+                        state = vm,
+                        bottomSheetState = bottomSheetState,
+                        onSearch = getLibraryBooks,
+                        refreshUpdate = refreshUpdate
 
-                )
+                    )
+                }
+            ) { padding ->
                 Box(
                     modifier = Modifier
+                        .padding(padding)
                         .fillMaxSize()
                 ) {
                     Crossfade(

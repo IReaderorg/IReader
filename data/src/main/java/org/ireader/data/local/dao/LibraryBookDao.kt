@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
+import org.ireader.common_models.entities.BookItem
 import org.ireader.common_models.entities.Chapter
 
 @Dao
@@ -16,6 +17,69 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
 
     @Query("""SELECT  * FROM library WHERE favorite = 1 """)
     fun subscribeAllLocalBooks(): Flow<List<org.ireader.common_models.entities.Book>>
+
+    @Query(
+        """SELECT  library.* ,
+        MAX(chapter.readAt) as lastRead
+        FROM  library
+        LEFT JOIN chapter ON library.id = chapter.bookId
+        GROUP BY library.id
+        HAVING library.favorite = 1
+        """
+    )
+    fun subscribeBookByLatest(): Flow<List<BookItem>>
+
+    @Query(
+        """SELECT  library.*
+        FROM  library
+        WHERE library.favorite = 1
+        ORDER BY library.title
+        """
+    )
+    fun subscribeBookByAlphabets(): Flow<List<BookItem>>
+
+    @Query(
+        """SELECT  library.*
+        FROM  library
+        WHERE library.favorite = 1
+        ORDER BY library.dataAdded
+        """
+    )
+    fun subscribeBookByDateAdded(): Flow<List<BookItem>>
+
+    @Query(
+        """SELECT  library.*
+        FROM  library
+        LEFT JOIN chapter ON library.id = chapter.bookId 
+        GROUP BY library.id
+        HAVING library.favorite = 1 AND chapter.dateFetch == (
+            SELECT MAX(chapter.dateFetch) FROM chapter as ch1 WHERE ch1.id = chapter.id
+        )
+        ORDER BY chapter.dateFetch
+        """
+    )
+    fun subscribeBookByDateFetched(): Flow<List<BookItem>>
+
+    @Query(
+        """SELECT  library.*,
+                    COUNT(DISTINCT chapter.id) AS totalChapters
+        FROM  library
+        LEFT JOIN chapter ON library.id = chapter.bookId
+                GROUP BY library.id
+        HAVING library.favorite = 1
+        ORDER BY totalChapters
+        """
+    )
+    fun subscribeBookByTotalChapter(): Flow<List<BookItem>>
+
+    @Query(
+        """SELECT  library.*
+        FROM  library
+        WHERE library.favorite = 1
+        ORDER BY library.lastUpdated
+        """
+    )
+    fun subscribeBookByLastUpdate(): Flow<List<BookItem>>
 
     @Query(
         """SELECT  library.* ,
@@ -172,7 +236,10 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
     suspend fun findBooksByKey(key: String): List<org.ireader.common_models.entities.Book>
 
     @Query("SELECT * FROM library WHERE link = :key or title = :title")
-    fun subscribeBooksByKey(key: String, title: String): Flow<List<org.ireader.common_models.entities.Book>>
+    fun subscribeBooksByKey(
+        key: String,
+        title: String
+    ): Flow<List<org.ireader.common_models.entities.Book>>
 
     @Query("SELECT * FROM library WHERE title LIKE '%' || :query || '%' AND favorite = 1")
     fun searchBook(query: String): Flow<org.ireader.common_models.entities.Book>
@@ -203,12 +270,18 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
     suspend fun deleteAllUpdates(bookIds: List<Long>)
 
     @Transaction
-    suspend fun insertBooksAndChapters(books: List<org.ireader.common_models.entities.Book>, chapters: List<org.ireader.common_models.entities.Chapter>) {
+    suspend fun insertBooksAndChapters(
+        books: List<org.ireader.common_models.entities.Book>,
+        chapters: List<org.ireader.common_models.entities.Chapter>
+    ) {
         insert(books)
         insertChapters(chapters)
     }
 
-    @Insert(entity = org.ireader.common_models.entities.Chapter::class, onConflict = OnConflictStrategy.REPLACE)
+    @Insert(
+        entity = org.ireader.common_models.entities.Chapter::class,
+        onConflict = OnConflictStrategy.REPLACE
+    )
     fun insertChapters(chapters: List<org.ireader.common_models.entities.Chapter>)
 
     @Query(

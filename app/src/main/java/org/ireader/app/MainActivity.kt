@@ -17,10 +17,9 @@ import org.ireader.presentation.theme.AppTheme
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        installSplashScreen()
-        WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
-
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        installSplashScreen()
         setContent {
             AppTheme {
                 Surface(

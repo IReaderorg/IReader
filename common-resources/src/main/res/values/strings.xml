@@ -14,7 +14,27 @@
     <string name="pause">Pause</string>
     <string name="resume">Resume</string>
 
+
+
+
+
+
+
     <!-- IReader-->
+
+
+    <!-- Detail-->
+    <string name="start">Start</string>
+
+
+
+
+
+
+
+
+
+
     <string name="error_unknown">An Unknown Error Happened.</string>
     <string name="no_error" />
     <string name="no_book_found_error">There is no book with this id.</string>

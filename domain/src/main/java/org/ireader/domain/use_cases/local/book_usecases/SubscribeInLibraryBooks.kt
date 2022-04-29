@@ -15,7 +15,8 @@ class SubscribeInLibraryBooks @Inject constructor(private val localBookRepositor
         desc: Boolean,
         filter: List<FilterType>,
     ): Flow<List<BookItem>> = flow {
-        localBookRepository.subscribeAllInLibrary(
+        localBookRepository.
+        subscribeAllInLibrary(
             sortByLastRead = sortType == SortType.LastRead,
             sortByAbs = sortType == SortType.Alphabetically,
             sortByDateAdded = sortType == SortType.DateAdded,

@@ -2,6 +2,7 @@ package org.ireader.data.repository
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import org.ireader.common_models.SortType
 import org.ireader.common_models.entities.BookItem
 import org.ireader.data.local.dao.LibraryBookDao
@@ -50,23 +51,36 @@ class LocalBookRepositoryImpl(
         lastChecked: Boolean,
         desc: Boolean,
     ): Flow<List<org.ireader.common_models.entities.BookItem>> {
-        return when {
-            sortByLastRead -> bookDao.subscribeLatestRead(desc)
-            sortByTotalChapters -> bookDao.subscribeTotalChapter(desc)
-            latestChapter -> bookDao.subscribeLatestChapter(desc)
-            else -> {
-                bookDao.subscribeAllInLibraryBooks(
-                    sortByAbs = sortByAbs,
-                    sortByDateAdded = sortByDateAdded,
-                    sortByLastRead = sortByLastRead,
-                    desc = desc,
-                    dateFetched = dateFetched,
-                    dateAdded = dateAdded,
-                    sortByTotalChapter = sortByTotalChapters,
-                    lastChecked = lastChecked
-                )
-            }
-        }
+        return  when {
+            sortByAbs -> bookDao.subscribeBookByAlphabets()
+            sortByDateAdded -> bookDao.subscribeBookByDateAdded()
+            sortByLastRead -> bookDao.subscribeBookByLatest()
+            dateFetched -> bookDao.subscribeBookByDateFetched()
+            sortByTotalChapters -> bookDao.subscribeBookByTotalChapter()
+            dateAdded -> bookDao.subscribeBookByDateAdded()
+            latestChapter -> bookDao.subscribeBookByLatest()
+            lastChecked -> bookDao.subscribeBookByLastUpdate()
+            else -> bookDao.subscribeBookByLatest()
+        }.distinctUntilChanged().map { if (desc) it.reversed() else it }
+
+
+//        return when {
+//            sortByLastRead -> bookDao.subscribeLatestRead(desc)
+//            sortByTotalChapters -> bookDao.subscribeTotalChapter(desc)
+//            latestChapter -> bookDao.subscribeLatestChapter(desc)
+//            else -> {
+//                bookDao.subscribeAllInLibraryBooks(
+//                    sortByAbs = sortByAbs,
+//                    sortByDateAdded = sortByDateAdded,
+//                    sortByLastRead = sortByLastRead,
+//                    desc = desc,
+//                    dateFetched = dateFetched,
+//                    dateAdded = dateAdded,
+//                    sortByTotalChapter = sortByTotalChapters,
+//                    lastChecked = lastChecked
+//                )
+//            }
+//        }
     }
 
     override suspend fun findAllInLibraryBooks(

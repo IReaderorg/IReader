@@ -5,7 +5,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
@@ -37,7 +36,6 @@ object LibraryScreenSpec : BottomNavScreenSpec {
         scaffoldState: ScaffoldState,
     ) {
         val vm: LibraryViewModel = hiltViewModel()
-        val context = LocalContext.current
         LibraryScreen(
             navController = navController,
             addFilters = {

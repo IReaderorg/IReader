@@ -168,5 +168,5 @@ data class BookItem(
     override val favorite: Boolean = false,
     override val cover: String = "",
     override val customCover: String = "",
-    val totalDownload: Int = 0,
+    val totalDownload: Int? = 0,
 ) : BaseBook

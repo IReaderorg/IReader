@@ -16,6 +16,7 @@ class MyApplication : Application(), Configuration.Provider {
     @Inject
     lateinit var initializers: AppInitializers
 
+
     override fun getWorkManagerConfiguration(): Configuration {
         return Configuration.Builder()
             .setWorkerFactory(workerFactory)
