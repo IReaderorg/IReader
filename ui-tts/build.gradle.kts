@@ -20,6 +20,8 @@ dependencies {
     compileOnly(project(Modules.uiReader))
     implementation(project(Modules.uiComponents))
     implementation(project(Modules.uiImageLoader))
+    implementation(project(Modules.coreCatalogs))
+    implementation(project(Modules.commonExtensions))
 
     implementation(compose.compose.icons)
     implementation(compose.compose.navigation)
@@ -33,4 +35,5 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(project(mapOf("path" to ":domain")))
     kapt(libs.hilt.androidcompiler)
+    implementation(androidx.media)
 }

@@ -9,9 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
@@ -37,7 +35,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.ireader.common_models.entities.Chapter
 import org.ireader.components.components.ISnackBarHost
-import org.ireader.components.text_related.ErrorTextWithEmojis
 import org.ireader.core_api.source.Source
 import org.ireader.reader.components.MainBottomSettingComposable
 import org.ireader.reader.components.ReaderSettingComposable
@@ -100,25 +97,16 @@ fun ReadingScreen(
 
     LaunchedEffect(key1 = scaffoldState.drawerState.targetValue) {
         if (chapter != null && scaffoldState.drawerState.targetValue == DrawerValue.Open && vm.stateChapters.isNotEmpty()) {
-            vm.uiFunc.apply {
                 val index = vm.stateChapters.indexOfFirst { it.id == chapter.id }
                 if (index != -1) {
-                    drawerScrollState.scrollToItem(
-                        index,
-                        -drawerScrollState.layoutInfo.viewportEndOffset / 2
-                    )
+                    scope.launch {
+                        drawerScrollState.scrollToItem(
+                            index,
+                            -drawerScrollState.layoutInfo.viewportEndOffset / 2
+                        )
+                    }
                 }
             }
-        }
-    }
-    LaunchedEffect(key1 = vm.currentChapterIndex) {
-        val index = vm.currentChapterIndex
-        if (index != -1) {
-            drawerScrollState.scrollToItem(
-                vm.currentChapterIndex,
-                -drawerScrollState.layoutInfo.viewportEndOffset / 2
-            )
-        }
     }
     LaunchedEffect(key1 = vm.autoScrollMode) {
         while (vm.autoScrollInterval != 0L && vm.autoScrollMode) {
@@ -137,11 +125,6 @@ fun ReadingScreen(
         when (vm.isReaderModeEnable) {
             false -> {
                 scope.launch {
-                    if (chapter != null) {
-                        vm.mainFunc.apply {
-                            vm.getLocalChaptersByPaging(chapter.bookId)
-                        }
-                    }
                     modalState.snapTo(ModalBottomSheetValue.Expanded)
                 }
             }
@@ -158,10 +141,11 @@ fun ReadingScreen(
         }
     }
     LaunchedEffect(key1 = vm.initialized) {
-        if (chapter != null) {
-            scrollState.scrollBy(chapter.progress.toFloat())
+        kotlin.runCatching {
+            scrollState.scrollToItem(chapter?.progress ?: 1)
         }
     }
+
 
     LaunchedEffect(key1 = true) {
 
@@ -178,16 +162,7 @@ fun ReadingScreen(
                         event.uiText.asString(context)
                     )
                 }
-            }
-        }
-    }
-    LaunchedEffect(key1 = chapter) {
-        if (chapter != null) {
-            vm.uiFunc.apply {
-                val index = vm.stateChapters.indexOfFirst { it.id == chapter.id }
-                if (index != -1) {
-                    vm.currentChapterIndex = index
-                }
+                else -> {}
             }
         }
     }
@@ -197,7 +172,7 @@ fun ReadingScreen(
         topBar = {
             ReaderScreenTopBar(
                 isReaderModeEnable = vm.isReaderModeEnable,
-                isLoaded = vm.isLocalLoaded,
+                isLoaded = vm.isChapterLoaded.value,
                 modalBottomSheetValue = modalState.targetValue,
                 onRefresh = {
                     onReaderRefresh(chapter)
@@ -292,17 +267,16 @@ fun ReadingScreen(
                 onChapter = onChapter,
                 chapter = chapter,
                 source = source,
-                chapters = chapters,
+                chapters = vm.drawerChapters.value,
                 drawerScrollState = drawerScrollState,
                 onMap = onMap,
-                readerScreenState = vm
             )
         }
     ) { padding ->
         ScrollIndicatorSetting(enable = vm.scrollIndicatorDialogShown, vm)
         if (chapter != null) {
             Box(modifier = modifier.fillMaxSize()) {
-                if (chapter.isChapterNotEmpty() && !vm.isLoading) {
+                if (!chapter.isEmpty() && !vm.isLoading) {
                     ReaderText(
                         vm = vm,
                         chapter = chapter,
@@ -311,17 +285,6 @@ fun ReadingScreen(
                         onPrev = { onPrev(true) },
                         scrollState = scrollState,
                         modalState = modalState
-                    )
-                }
-
-                if (vm.error.asString(context).isNotBlank()) {
-                    ErrorTextWithEmojis(
-                        error = vm.error.asString(context),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(20.dp)
-                            .wrapContentSize(Alignment.Center)
-                            .align(Alignment.Center),
                     )
                 }
 

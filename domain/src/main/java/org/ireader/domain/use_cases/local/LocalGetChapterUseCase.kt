@@ -12,7 +12,9 @@ import org.ireader.domain.use_cases.local.chapter_usecases.SubscribeChapterById
 import org.ireader.domain.use_cases.local.chapter_usecases.SubscribeChaptersByBookId
 import org.ireader.domain.use_cases.local.chapter_usecases.SubscribeLastReadChapter
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 data class LocalGetChapterUseCase @Inject constructor(
     val subscribeChapterById: SubscribeChapterById,
     val findChapterById: FindChapterById,

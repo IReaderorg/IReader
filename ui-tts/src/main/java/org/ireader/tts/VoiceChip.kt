@@ -27,12 +27,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.ireader.components.reusable_composable.CaptionTextComposable
-import org.ireader.reader.viewmodel.ReaderScreenViewModel
 
 @Composable
 fun VoiceChip(
     modifier: Modifier = Modifier,
-    viewModel: ReaderScreenViewModel,
+    viewModel: TTSViewModel,
 ) {
 
     Row(
@@ -93,7 +92,7 @@ fun VoiceChip(
 @Composable
 fun LanguageChip(
     modifier: Modifier = Modifier,
-    viewModel: ReaderScreenViewModel,
+    viewModel: TTSViewModel,
 ) {
     val context = LocalContext.current
     Row(

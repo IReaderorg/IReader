@@ -27,13 +27,11 @@ import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.components.text_related.ErrorTextWithEmojis
 import org.ireader.core_api.source.Source
-import org.ireader.reader.viewmodel.ReaderScreenState
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun ReaderScreenDrawer(
     modifier: Modifier = Modifier,
-    readerScreenState: ReaderScreenState,
     chapter: Chapter?,
     source: Source,
     onChapter: (chapter: Chapter) -> Unit,
@@ -78,12 +76,12 @@ fun ReaderScreenDrawer(
                 modifier = Modifier.fillMaxSize(),
                 state = drawerScrollState
             ) {
-                items(count = readerScreenState.drawerChapters.value.size) { index ->
+                items(count = chapters.size) { index ->
                     ChapterListItemComposable(
                         modifier = modifier,
-                        chapter = readerScreenState.drawerChapters.value[index],
-                        onItemClick = { onChapter(readerScreenState.drawerChapters.value[index]) },
-                        isLastRead = chapter?.id == readerScreenState.drawerChapters.value[index].id
+                        chapter = chapters[index],
+                        onItemClick = { onChapter(chapters[index]) },
+                        isLastRead = chapter?.id ==chapters[index].id
                     )
                 }
             }

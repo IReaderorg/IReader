@@ -4,7 +4,9 @@ import kotlinx.coroutines.flow.Flow
 import org.ireader.common_models.entities.History
 import org.ireader.common_models.entities.HistoryWithRelations
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class HistoryUseCase @Inject constructor(private val historyRepository: org.ireader.common_data.repository.HistoryRepository) {
 
     suspend fun findHistory(chapterId: Long): History? {

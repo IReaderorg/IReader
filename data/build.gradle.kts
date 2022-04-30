@@ -4,7 +4,6 @@ plugins {
     id("kotlin-kapt")
     id("kotlin-parcelize")
     kotlin("plugin.serialization")
-    id("com.google.devtools.ksp").version("1.6.20-1.0.5")
 }
 
 android {
@@ -65,7 +64,6 @@ dependencies {
     implementation(compose.compose.activity)
     implementation(project(mapOf("path" to ":core-ui")))
 
-    //ksp(libs.moshi.codegen)
 
     kapt(libs.hilt.compiler)
     implementation(libs.hilt.androidcompiler)

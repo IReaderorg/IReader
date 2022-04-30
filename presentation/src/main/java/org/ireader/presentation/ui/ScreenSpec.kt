@@ -3,7 +3,6 @@ package org.ireader.presentation.ui
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
-import androidx.lifecycle.ViewModel
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
@@ -31,6 +30,7 @@ sealed interface ScreenSpec {
             WebViewScreenSpec,
             ExploreScreenSpec,
             GlobalSearchScreenSpec,
+            TTSScreenSpec
         ).associateBy { it.navHostRoute }
     }
 

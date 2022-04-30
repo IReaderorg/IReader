@@ -6,11 +6,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import dagger.hilt.android.lifecycle.HiltViewModel
-import org.ireader.core_catalogs.CatalogStore
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.ui.NavigationArgs
-import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
-import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 import javax.inject.Inject
@@ -20,11 +17,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class WebViewPageModel @Inject constructor(
-    private val insertUseCases: LocalInsertUseCases,
-    private val getBookUseCases: org.ireader.domain.use_cases.local.LocalGetBookUseCases,
-    private val getChapterUseCase: LocalGetChapterUseCase,
     private val savedStateHandle: SavedStateHandle,
-    private val extensions: CatalogStore,
     private val webpageImpl: WebViewPageStateImpl,
 ) : BaseViewModel(), WebViewPageState by webpageImpl {
 

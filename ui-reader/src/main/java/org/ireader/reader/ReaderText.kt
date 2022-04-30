@@ -7,6 +7,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -118,6 +119,7 @@ fun ReaderText(
                                 Text(
                                     modifier = modifier
                                         .padding(horizontal = vm.paragraphsIndent.dp)
+                                        .fillMaxWidth()
                                         .background(
                                             if (index in vm.queriedTextIndex) vm.textColor.copy(
                                                 .1f

@@ -1,4 +1,4 @@
-package org.ireader.presentation.feature_ttl
+package org.ireader.domain.services.tts_service
 
 import android.speech.tts.Voice
 import androidx.compose.runtime.State
@@ -9,18 +9,18 @@ import androidx.compose.runtime.setValue
 import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.Chapter
 import org.ireader.core_api.source.Source
+import org.ireader.core_ui.theme.FontType
 import java.util.Locale
 import javax.inject.Inject
-import javax.inject.Singleton
 
 interface TTSState {
+
     var ttsIsLoading: Boolean
     var isPlaying: Boolean
     var ttsContent: State<List<String>?>?
 
     var currentReadingParagraph: Int
     var prevPar: Int
-    var voiceMode: Boolean
     var autoNextChapter: Boolean
     var languages: List<Locale>
     var voices: List<Voice>
@@ -38,13 +38,19 @@ interface TTSState {
     var ttsSource: Source?
     var ttsChapters: List<Chapter>
     var ttsCurrentChapterIndex: Int
+    var font: FontType
+    var fontSize: Int
+    var lineHeight: Int
+    var isServiceConnected: Boolean
+
+
 }
 
-@Singleton
 class TTSStateImpl @Inject constructor() : TTSState {
-
-    // val mediaSession = MediaSessionCompat(context, "mediaPlayer", null, null)
-    // override var mediaSession : MediaSessionCompat? = null
+    override var font by mutableStateOf<FontType>(FontType.Poppins)
+    override var lineHeight by mutableStateOf<Int>(25)
+    override var isServiceConnected by mutableStateOf<Boolean>(false)
+    override var fontSize by mutableStateOf<Int>(18)
     override var ttsIsLoading by mutableStateOf<Boolean>(false)
     override var currentReadingParagraph: Int by mutableStateOf<Int>(0)
     override var prevPar: Int by mutableStateOf<Int>(0)
@@ -58,7 +64,6 @@ class TTSStateImpl @Inject constructor() : TTSState {
     override var isPlaying by mutableStateOf<Boolean>(false)
     override var ttsContent: State<List<String>?>? =
         derivedStateOf { ttsChapter?.content?.filter { it.isNotBlank() }?.map { it.trim() } }
-    override var voiceMode by mutableStateOf<Boolean>(false)
     override var autoNextChapter by mutableStateOf<Boolean>(false)
     override var pitch by mutableStateOf<Float>(.8f)
     override var prevPitch by mutableStateOf<Float>(.8f)

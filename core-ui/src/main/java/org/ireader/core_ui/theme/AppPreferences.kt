@@ -30,6 +30,7 @@ class AppPreferences @Inject constructor(
         const val AUTO_SCROLL_MODE_OFFSET = "auto_scroll_mode_offset"
         const val SCROLL_INDICATOR_PADDING = "scroll_indicator_padding"
         const val SCROLL_INDICATOR_WIDTH = "scroll_indicator_width"
+        const val SCROLL_INDICATOR_IS_ENABLE = "scroll_indicator_is_enable"
         const val SELECTABLE_TEXT = "selectable_text"
 
         const val TEXT_READER_SPEECH_RATE = "text_reader_speech_rate"
@@ -106,6 +107,9 @@ class AppPreferences @Inject constructor(
 
     fun scrollMode(): Preference<Boolean> {
         return preferenceStore.getBoolean(SCROLL_MODE, true)
+    }
+    fun scrollIndicator(): Preference<Boolean> {
+        return preferenceStore.getBoolean(SCROLL_INDICATOR_IS_ENABLE, true)
     }
 
     fun selectableText(): Preference<Boolean> {

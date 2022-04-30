@@ -22,7 +22,7 @@ class SubscribeChapterById @Inject constructor(private val localChapterRepositor
 class FindChapterById @Inject constructor(private val localChapterRepository: org.ireader.common_data.repository.LocalChapterRepository) {
     suspend operator fun invoke(
         chapterId: Long,
-        bookId: Long?,
+        bookId: Long? = null,
     ): Chapter? {
         return if (chapterId != LAST_CHAPTER) {
             localChapterRepository.findChapterById(chapterId = chapterId)

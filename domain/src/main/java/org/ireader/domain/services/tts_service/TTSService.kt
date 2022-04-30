@@ -26,8 +26,8 @@
 // import org.ireader.domain.services.downloaderService.DefaultNotificationHelper
 // import org.ireader.domain.use_cases.local.LocalInsertUseCases
 // import org.ireader.domain.use_cases.remote.RemoteUseCases
-// import org.ireader.presentation.feature_ttl.TTSState
-// import org.ireader.presentation.feature_ttl.TTSStateImpl
+// import org.ireader.domain.services.tts_service.TTSState
+// import org.ireader.domain.services.tts_service.TTSStateImpl
 //
 // @HiltWorker
 // class TTSService @AssistedInject constructor(

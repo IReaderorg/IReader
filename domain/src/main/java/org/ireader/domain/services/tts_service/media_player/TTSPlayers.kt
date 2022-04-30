@@ -16,7 +16,7 @@
 // import org.ireader.infinity.Chapter
 // import org.ireader.domain.notification.Notifications
 // import org.ireader.domain.services.tts_service.Player
-// import org.ireader.presentation.feature_ttl.TTSState
+// import org.ireader.domain.services.tts_service.TTSState
 //
 // class TTSPlayers {
 //

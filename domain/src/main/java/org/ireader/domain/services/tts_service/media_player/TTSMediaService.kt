@@ -5,7 +5,9 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.media.MediaMetadata
+import android.media.MediaPlayer
 import android.os.Bundle
+import android.os.ResultReceiver
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.support.v4.media.MediaBrowserCompat
@@ -28,51 +30,44 @@ import org.ireader.common_models.entities.Chapter
 import org.ireader.core_api.log.Log
 import org.ireader.core_api.source.Source
 import org.ireader.core_catalogs.CatalogStore
+import org.ireader.domain.R
 import org.ireader.domain.notification.Notifications
 import org.ireader.domain.services.tts_service.Player
+import org.ireader.domain.services.tts_service.TTSState
+import org.ireader.domain.services.tts_service.TTSStateImpl
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import org.ireader.domain.utils.notificationManager
-import org.ireader.presentation.feature_ttl.TTSState
-import org.ireader.presentation.feature_ttl.TTSStateImpl
 import javax.inject.Inject
 
-private const val TTS_SERVICE = "tts_service"
 
 @AndroidEntryPoint
 class TTSService : MediaBrowserServiceCompat() {
 
     @Inject
-    lateinit var bookRepoConnection: org.ireader.common_data.repository.LocalBookRepository
-
     lateinit var bookRepo: org.ireader.common_data.repository.LocalBookRepository
 
     @Inject
-    lateinit var chapterRepoConnection: org.ireader.common_data.repository.LocalChapterRepository
     lateinit var chapterRepo: org.ireader.common_data.repository.LocalChapterRepository
 
     @Inject
-    lateinit var remoteUseCasesConnection: RemoteUseCases
     lateinit var remoteUseCases: RemoteUseCases
 
     @Inject
-    lateinit var extensionsConnection: CatalogStore
     lateinit var extensions: CatalogStore
 
     lateinit var ttsNotificationBuilder: TTSNotificationBuilder
 
-    @Inject
-    lateinit var stateConnection: TTSStateImpl
-
     lateinit var state: TTSStateImpl
 
-    @Inject
-    lateinit var insertUseCasesConnection: LocalInsertUseCases
 
+    @Inject
     lateinit var insertUseCases: LocalInsertUseCases
+
 
     lateinit var mediaSession: MediaSessionCompat
     lateinit var stateBuilder: PlaybackStateCompat.Builder
+
     private lateinit var mediaCallback: TTSSessionCallback
     private lateinit var notificationController: NotificationController
 
@@ -107,17 +102,12 @@ class TTSService : MediaBrowserServiceCompat() {
         const val CHAPTER_TITLE = "chapter_title"
         const val CHAPTER_ID = "chapter_id"
     }
-
+    lateinit var silence: MediaPlayer
     override fun onCreate() {
         super.onCreate()
         Log.error { "OnCreate is Called" }
 
-        state = stateConnection
-        insertUseCases = insertUseCasesConnection
-        remoteUseCases = remoteUseCasesConnection
-        extensions = extensionsConnection
-        chapterRepo = chapterRepoConnection
-        bookRepo = bookRepoConnection
+        state = TTSStateImpl()
 
         val pendingIntentFlags: Int =
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
@@ -189,16 +179,19 @@ class TTSService : MediaBrowserServiceCompat() {
          * Initializing the player
          */
         player = TextToSpeech(this) { status ->
-            state.ttsIsLoading = true
             if (status == TextToSpeech.ERROR) {
                 Log.error { "Text-to-Speech Not Available" }
 
                 state.ttsIsLoading = false
                 return@TextToSpeech
             }
-            state.ttsIsLoading = false
         }
         notificationController = NotificationController()
+        silence = MediaPlayer.create(this, R.raw.silence).apply {
+            isLooping = true
+        }
+
+        silence.start()
     }
 
     override fun onGetRoot(
@@ -218,6 +211,7 @@ class TTSService : MediaBrowserServiceCompat() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Log.debug { "Start Command" }
         when (intent?.action) {
             Intent.ACTION_MEDIA_BUTTON -> MediaButtonReceiver.handleIntent(mediaSession, intent)
             ACTION_UPDATE -> {
@@ -231,11 +225,12 @@ class TTSService : MediaBrowserServiceCompat() {
                         val chapters = chapterRepo.findChaptersByBookId(bookId)
                         val source = book?.sourceId?.let { extensions.get(it)?.source }
                         if (chapter != null && source != null) {
-                            setBundle(book, chapter)
                             state.ttsBook = book
                             state.ttsChapter = chapter
                             state.ttsChapters = chapters
                             state.ttsSource = source
+                            state.currentReadingParagraph = 0
+                            setBundle(book, chapter)
                             startService(command)
                         }
                     }
@@ -286,6 +281,11 @@ class TTSService : MediaBrowserServiceCompat() {
             }
         }
 
+        override fun onPause() {
+            Log.error { "onPause" }
+            startService(Player.PAUSE)
+        }
+
         override fun onStop() {
             Log.error { "onStop" }
             startService(Player.PAUSE)
@@ -309,6 +309,20 @@ class TTSService : MediaBrowserServiceCompat() {
         override fun onSkipToPrevious() {
             Log.error { "onSkipToPrevious" }
             startService(Player.SKIP_PREV)
+        }
+
+        override fun onSeekTo(pos: Long) {
+            state.currentReadingParagraph = pos.toInt()
+            if (state.isPlaying) {
+                startService(Player.PLAY)
+            } else {
+                //startService(Player.PLAY)
+            }
+        }
+
+        override fun onCommand(command: String?, extras: Bundle?, cb: ResultReceiver?) {
+            super.onCommand(command, extras, cb)
+
         }
     }
 
@@ -705,7 +719,7 @@ class TTSService : MediaBrowserServiceCompat() {
             state.currentReadingParagraph = 0
             val localChapter = chapterRepo.findChapterById(chapterId)
 
-            if (localChapter?.isChapterNotEmpty() == true) {
+            if (localChapter?.isEmpty() == true) {
                 state.ttsChapter = localChapter
                 state.currentReadingParagraph = 0
                 ttsState.ttsIsLoading = false

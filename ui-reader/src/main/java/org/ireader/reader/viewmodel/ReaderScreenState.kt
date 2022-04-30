@@ -17,23 +17,16 @@ import javax.inject.Inject
 
 open class ReaderScreenStateImpl @Inject constructor() : ReaderScreenState {
     override var isLoading by mutableStateOf<Boolean>(false)
-    override var isRemoteLoading by mutableStateOf<Boolean>(false)
-    override var isLocalLoaded by mutableStateOf<Boolean>(false)
-    override var isRemoteLoaded by mutableStateOf<Boolean>(false)
-    override var enable by mutableStateOf<Boolean>(true)
     override var isDrawerAsc by mutableStateOf<Boolean>(true)
     override var drawerChapters: State<List<Chapter>> = derivedStateOf { if (isDrawerAsc) stateChapters else stateChapters.reversed() }
-    override var isBookLoaded by mutableStateOf<Boolean>(false)
     override var isReaderModeEnable by mutableStateOf<Boolean>(true)
     override var isSettingModeEnable by mutableStateOf<Boolean>(false)
     override var isMainBottomModeEnable by mutableStateOf<Boolean>(false)
     override var currentChapterIndex: Int by mutableStateOf<Int>(0)
     override var source: Source? by mutableStateOf<Source?>(null)
-    override var error: org.ireader.common_extensions.UiText by mutableStateOf<org.ireader.common_extensions.UiText>(
-        org.ireader.common_extensions.UiText.DynamicString("")
-    )
     override var stateChapters: List<Chapter> by mutableStateOf<List<Chapter>>(emptyList())
     override var stateChapter: Chapter? by mutableStateOf<Chapter?>(null)
+    override var isChapterLoaded: State<Boolean> = derivedStateOf { stateChapter?.isEmpty() == false }
 
     override var book: Book? by mutableStateOf<Book?>(null)
     override var stateContent: State<List<String>?>? =
@@ -42,21 +35,18 @@ open class ReaderScreenStateImpl @Inject constructor() : ReaderScreenState {
 
 interface ReaderScreenState {
     var isLoading: Boolean
-    var isRemoteLoading: Boolean
-    var isLocalLoaded: Boolean
-    var isRemoteLoaded: Boolean
-    var enable: Boolean
     var isDrawerAsc: Boolean
     var drawerChapters: State<List<Chapter>>
-    var isBookLoaded: Boolean
+
     var isReaderModeEnable: Boolean
     var isSettingModeEnable: Boolean
     var isMainBottomModeEnable: Boolean
+
     var currentChapterIndex: Int
     var source: Source?
-    var error: org.ireader.common_extensions.UiText
     var stateChapters: List<Chapter>
     var stateChapter: Chapter?
+    var isChapterLoaded: State<Boolean>
     var book: Book?
     var stateContent: State<List<String>?>?
 }

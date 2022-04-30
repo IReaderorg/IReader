@@ -1,6 +1,5 @@
 package org.ireader.tts
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.TweenSpec
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -74,19 +73,18 @@ import org.ireader.components.reusable_composable.SuperSmallTextComposable
 import org.ireader.core.R
 import org.ireader.core_api.log.Log
 import org.ireader.core_api.source.Source
-import org.ireader.domain.services.tts_service.Player
+import org.ireader.domain.services.tts_service.TTSState
 import org.ireader.image_loader.BookCover
 import org.ireader.reader.ReaderScreenDrawer
 import org.ireader.reader.components.SettingItemComposable
 import org.ireader.reader.components.SettingItemToggleComposable
-import org.ireader.reader.viewmodel.ReaderScreenViewModel
 import java.math.RoundingMode
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalPagerApi::class)
 @Composable
 fun TTSScreen(
     modifier: Modifier = Modifier,
-    vm: ReaderScreenViewModel,
+    vm: TTSViewModel,
     onPrev: () -> Unit,
     onNextPar: () -> Unit,
     onPrevPar: () -> Unit,
@@ -97,78 +95,39 @@ fun TTSScreen(
     onValueChange: (Float) -> Unit,
     onValueChangeFinished: () -> Unit,
     onMap: (LazyListState) -> Unit,
+    onPopStack:() -> Unit,
 ) {
-
-    BackHandler {
-        vm.voiceMode = false
-    }
 
     val context = LocalContext.current
     val pagerState = rememberPagerState()
 
     val drawerScrollState = rememberLazyListState()
     val textScroll = rememberScrollState()
-    val chapter = vm.stateChapter
-    val chapters = vm.stateChapters
+    val chapter = vm.ttsChapter
+    val chapters = vm.ttsChapters
     val scope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
     val bottomSheetState =
         rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
 
+
+
     LaunchedEffect(key1 = scaffoldState.drawerState.targetValue) {
-        if (chapter != null && scaffoldState.drawerState.targetValue == DrawerValue.Open && vm.stateChapters.isNotEmpty()) {
-            vm.uiFunc.apply {
-                val index = vm.stateChapters.indexOfFirst { it.id == chapter.id }
-                if (index != -1) {
-                    drawerScrollState.scrollToItem(index)
-                }
+        if (chapter != null && scaffoldState.drawerState.targetValue == DrawerValue.Open && vm.ttsChapters.isNotEmpty()) {
+
+            val index = vm.ttsChapters.indexOfFirst { it.id == chapter.id }
+            if (index != -1) {
+                drawerScrollState.scrollToItem(index)
             }
         }
     }
 
-    LaunchedEffect(key1 = vm.state.stateChapter, vm.state.book) {
-        vm.state.stateChapter?.let {
-            vm.ttsState.ttsChapter = it
-        }
-        vm.state.book?.let {
-            vm.ttsState.ttsBook = it
-        }
-    }
-
-    LaunchedEffect(
-        key1 = vm.ttsState.ttsChapter,
-        vm.ttsState.isPlaying,
-        vm.ttsState.currentReadingParagraph
-    ) {
-        vm.stateChapter = vm.ttsState.ttsChapter
-    }
-    LaunchedEffect(key1 = vm.state.stateChapter) {
-        vm.ttsState.ttsChapter = vm.state.stateChapter
-//        vm.state.stateChapter?.let { chapter ->
-//            vm.ttsState.mediaSession?.let { mediaSession ->
-//                vm.state.book?.let { book ->
-//                    val notification =
-//                        vm.defaultNotificationHelper.basicPlayingTextReaderNotification(
-//                            chapter,
-//                            book,
-//                            vm.ttsState.isPlaying,
-//                            vm.ttsState.currentReadingParagraph,
-//                            mediaSession)
-//                    NotificationManagerCompat.from(context)
-//                        .notify(Notifications.ID_TTS, notification.build())
-//                }
-//            }
-//        }
-    }
 
     LaunchedEffect(key1 = vm.ttsState.currentReadingParagraph) {
         try {
             if (vm.currentReadingParagraph != pagerState.targetPage && vm.currentReadingParagraph != vm.prevPar && vm.ttsState.currentReadingParagraph < pagerState.pageCount) {
-
                 pagerState.scrollToPage(vm.ttsState.currentReadingParagraph)
-                if (vm.isPlaying) {
-                    vm.runTTSService(Player.PLAY)
-                }
+                    vm.controller?.transportControls?.seekTo(vm.ttsState.currentReadingParagraph.toLong())
             }
         } catch (e: Throwable) {
             Log.error(e, "")
@@ -176,12 +135,10 @@ fun TTSScreen(
     }
     LaunchedEffect(key1 = pagerState.currentPage) {
         if (vm.currentReadingParagraph != pagerState.currentPage) {
-            vm.currentReadingParagraph = pagerState.currentPage
+          //  vm.currentReadingParagraph = pagerState.currentPage
             vm.prevPar = pagerState.currentPage
-            if (vm.isPlaying) {
-                vm.runTTSService(Player.PLAY)
+                vm.controller?.transportControls?.seekTo(pagerState.currentPage.toLong())
             }
-        }
     }
 
     ModalBottomSheetLayout(
@@ -262,14 +219,7 @@ fun TTSScreen(
                     modifier = Modifier.statusBarsPadding(),
                     onReverseIcon = {
                         if (chapter != null) {
-                            vm.uiFunc.apply {
-                                vm.reverseChapters()
-                            }
-//                            vm.mainFunc.apply {
-//                                scope.launch {
-//                                    vm.getLocalChaptersByPaging(chapter.bookId)
-//                                }
-//                            }
+
                         }
                     },
                     onChapter = onChapter,
@@ -278,7 +228,6 @@ fun TTSScreen(
                     chapters = chapters,
                     drawerScrollState = drawerScrollState,
                     onMap = onMap,
-                    readerScreenState = vm
                 )
             }
         ) { padding ->
@@ -289,9 +238,7 @@ fun TTSScreen(
                         .padding(start = 4.dp),
                     imageVector = Icons.Default.ArrowBack,
                     title = "Return to Reader Screen",
-                    onClick = {
-                        vm.voiceMode = false
-                    }
+                    onClick = onPopStack
                 )
 
                 Column(
@@ -300,8 +247,8 @@ fun TTSScreen(
                     verticalArrangement = Arrangement.Top,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    vm.book?.let { book ->
-                        vm.stateChapter?.let { chapter ->
+                    vm.ttsBook?.let { book ->
+                        vm.ttsChapter?.let { chapter ->
                             vm.ttsContent?.value?.let { content ->
                                 Column(
                                     modifier = Modifier
@@ -346,8 +293,8 @@ fun TTSScreen(
                                     Text(
                                         modifier = modifier
                                             .padding(
-                                                horizontal = vm.paragraphsIndent.dp,
-                                                vertical = 4.dp
+                                                horizontal = 16.dp,
+                                                vertical = 8.dp
                                             )
                                             .fillMaxWidth()
                                             .height(200.dp)
@@ -463,7 +410,7 @@ private fun TTLScreenSetting(
 @Composable
 private fun TTLScreenPlay(
     modifier: Modifier = Modifier,
-    vm: ReaderScreenViewModel,
+    vm: TTSState,
     content: List<String>?,
     onPrev: () -> Unit,
     onPlay: () -> Unit,
@@ -476,10 +423,11 @@ private fun TTLScreenPlay(
     Column(modifier = modifier.fillMaxWidth()) {
         content?.let { chapter ->
             Slider(
+
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 8.dp),
-                value = if (content.isEmpty() && vm.currentChapterIndex < content.size) 0F else vm.currentReadingParagraph.toFloat(),
+                value = if (content.isEmpty()) 0F else vm.currentReadingParagraph.toFloat(),
                 onValueChange = {
                     onValueChange(it)
                 },
@@ -530,7 +478,7 @@ private fun TTLScreenPlay(
                     contentAlignment = Alignment.Center
                 ) {
                     when {
-                        vm.ttsIsLoading || vm.isRemoteLoading -> {
+                        vm.ttsIsLoading -> {
                             showLoading()
                         }
                         vm.isPlaying -> {

@@ -24,15 +24,11 @@ import org.ireader.core.R
 import org.ireader.core_api.log.Log
 import org.ireader.core_api.source.Source
 import org.ireader.core_ui.theme.TransparentStatusBar
-import org.ireader.domain.services.tts_service.Player
 import org.ireader.domain.ui.NavigationArgs
-import org.ireader.presentation.feature_ttl.TTSState
 import org.ireader.reader.ReadingScreen
 import org.ireader.reader.reverse_swip_refresh.SwipeRefreshState
 import org.ireader.reader.reverse_swip_refresh.rememberSwipeRefreshState
-import org.ireader.reader.viewmodel.FontSizeEvent
 import org.ireader.reader.viewmodel.ReaderScreenViewModel
-import org.ireader.tts.TTSScreen
 
 object ReaderScreenSpec : ScreenSpec {
 
@@ -51,26 +47,25 @@ object ReaderScreenSpec : ScreenSpec {
     ): String {
         return "reader_screen_route/$bookId/$chapterId/$sourceId"
     }
+
     fun buildDeepLink(
         bookId: Long,
         sourceId: Long,
         chapterId: Long,
         readingParagraph: Long,
-        voiceMode: Long,
     ): String {
-        return "https://www.ireader.org/reader_screen_route/$bookId/$chapterId/$sourceId/$readingParagraph/$voiceMode"
+        return "https://www.ireader.org/reader_screen_route/$bookId/$chapterId/$sourceId/$readingParagraph"
     }
 
     override val deepLinks: List<NavDeepLink> = listOf(
 
         navDeepLink {
             uriPattern =
-                "https://www.ireader.org/reader_screen_route/{bookId}/{chapterId}/{sourceId}/{readingParagraph}/{voiceMode}"
+                "https://www.ireader.org/reader_screen_route/{bookId}/{chapterId}/{sourceId}/{readingParagraph}}"
             NavigationArgs.bookId
             NavigationArgs.chapterId
             NavigationArgs.sourceId
             NavigationArgs.readingParagraph
-            NavigationArgs.voiceMode
         }
     )
 
@@ -85,67 +80,33 @@ object ReaderScreenSpec : ScreenSpec {
     ) {
         val vm: ReaderScreenViewModel = hiltViewModel()
         val currentIndex = vm.currentChapterIndex
-        val source = vm.ttsSource
+        val source = vm.source
         val chapters = vm.stateChapters
         val chapter = vm.stateChapter
         val scope = rememberCoroutineScope()
         val scrollState = rememberLazyListState()
         val drawerScrollState = rememberLazyListState()
-        val swipeState = rememberSwipeRefreshState(isRefreshing = vm.ttsIsLoading)
+        val swipeState = rememberSwipeRefreshState(isRefreshing = false)
         val context = LocalContext.current
 
         DisposableEffect(key1 = true) {
             onDispose {
-                vm.uiFunc.apply {
-                    vm.restoreSetting(context, scrollState)
-                }
+                vm.restoreSetting(context, scrollState)
+
             }
         }
         if (source != null) {
             MainReader(
-                onTTTSPrev = {
-                    vm.runTTSService(Player.SKIP_PREV)
-                },
-                onTTTSPlay = {
-                    vm.runTTSService(Player.PLAY_PAUSE)
-                },
-                onTTTSNext = {
-                    vm.runTTSService(Player.SKIP_NEXT)
-                },
                 onChapter = { ch ->
                     val index = vm.stateChapters.indexOfFirst { it.id == ch.id }
                     if (index != -1) {
                         scope.launch {
-                            vm.mainFunc.apply {
-                                vm.getChapter(
-                                    ch.id,
-                                    source = source
-                                ) {
-                                    vm.runTTSService(Player.PAUSE)
-                                }
-                            }
+                            vm.getLocalChapter(ch.id)
                         }
                         scope.launch {
                             scrollState.scrollToItem(0, 0)
                         }
-                        vm.uiFunc.apply {
-                            vm.currentChapterIndex = index
-                        }
-                    }
-                },
-                onTTTSPrevPar = {
-                    vm.runTTSService(Player.PREV_PAR)
-                },
-                onTTTSNextPar = {
-                    vm.runTTSService(Player.NEXT_PAR)
-                },
-                onTTTSValueChange = {
-                    vm.runTTSService(Player.PAUSE)
-                    vm.currentReadingParagraph = it.toInt()
-                },
-                onTTTSValueChangeFinished = {
-                    if (vm.isPlaying) {
-                        vm.runTTSService(Player.PAUSE)
+                        vm.currentChapterIndex = index
                     }
                 },
                 onReaderNext = {
@@ -154,9 +115,8 @@ object ReaderScreenSpec : ScreenSpec {
                             vm.apply {
                                 val nextChapter = vm.nextChapter()
                                 scope.launch {
-                                    vm.getChapter(
+                                    vm.getLocalChapter(
                                         nextChapter.id,
-                                        source = source
                                     )
                                     scrollState.scrollToItem(0, 0)
                                 }
@@ -173,50 +133,44 @@ object ReaderScreenSpec : ScreenSpec {
                 onReaderChapter = { ch ->
                     val index = vm.stateChapters.indexOfFirst { it.id == ch.id }
                     if (index != -1) {
-                        vm.uiFunc.apply {
-                            vm.mainFunc.apply {
-                                scope.launch {
-                                    vm.getChapter(
-                                        ch.id,
-                                        source = source
-                                    )
-                                }
-                                scope.launch {
-                                    scrollState.scrollToItem(0, 0)
-                                }
-                                vm.currentChapterIndex = index
-                            }
+                        vm.getLocalChapter(
+                            ch.id,
+                        )
+                        scope.launch {
+                            scrollState.scrollToItem(0, 0)
                         }
+                        vm.currentChapterIndex = index
                     }
                 },
                 onReaderPrev = { scrollToEnd ->
                     try {
                         if (currentIndex > 0) {
-                            vm.mainFunc.apply {
-                                val prevChapter = vm.prevChapter()
-                                scope.launch {
-                                    vm.getChapter(
-                                        prevChapter.id,
-                                        source = source
-                                    )
-                                    when (scrollToEnd) {
-                                        true -> {
-                                            if (chapter != null) {
-                                                scrollState.scrollToItem(
-                                                    chapter.content.lastIndex,
-                                                    Int.MAX_VALUE
-                                                )
-                                            }
+                            val prevChapter = vm.prevChapter()
+                            scope.launch {
+                                vm.getLocalChapter(
+                                    prevChapter.id,
+                                )
+                                when (scrollToEnd) {
+                                    true -> {
+                                        if (chapter != null) {
+                                            scrollState.scrollToItem(
+                                                chapter.content.lastIndex,
+                                                Int.MAX_VALUE
+                                            )
                                         }
-                                        else -> {
-                                            scrollState.scrollToItem(0, 0)
-                                        }
+                                    }
+                                    else -> {
+                                        scrollState.scrollToItem(0, 0)
                                     }
                                 }
                             }
                         } else {
                             scope.launch {
-                                vm.showSnackBar(org.ireader.common_extensions.UiText.StringResource(R.string.this_is_first_chapter))
+                                vm.showSnackBar(
+                                    org.ireader.common_extensions.UiText.StringResource(
+                                        R.string.this_is_first_chapter
+                                    )
+                                )
                             }
                         }
                     } catch (e: Throwable) {
@@ -224,62 +178,45 @@ object ReaderScreenSpec : ScreenSpec {
                     }
                 },
                 onReaderSliderChange = {
-                    vm.uiFunc.apply {
-                        vm.currentChapterIndex = it.toInt()
-                    }
+                    vm.currentChapterIndex = it.toInt()
                 },
                 onReaderSliderFinished = {
                     scope.launch {
                         vm.showSnackBar(org.ireader.common_extensions.UiText.DynamicString(chapters[vm.currentChapterIndex].title))
                     }
-                    vm.uiFunc.apply {
-                        vm.mainFunc.apply {
-                            vm.currentChapterIndex = currentIndex
-                            scope.launch {
-                                vm.getChapter(
-                                    chapters[vm.currentChapterIndex].id,
-                                    source = source
-                                )
-                            }
-                        }
+                    vm.currentChapterIndex = currentIndex
+                    scope.launch {
+                        vm.getLocalChapter(
+                            chapters[vm.currentChapterIndex].id,
+                        )
                     }
+
                     scope.launch {
                         scrollState.animateScrollToItem(0, 0)
                     }
                 },
                 source = source,
-                ttsState = vm,
                 onReaderDrawerRevereIcon = { ch ->
                     if (ch != null) {
-                        vm.uiFunc.apply {
-                            vm.isDrawerAsc = !vm.isDrawerAsc
-                        }
-//                        vm.mainFunc.apply {
-//                            scope.launch {
-//                                vm.getLocalChaptersByPaging(ch.bookId)
-//                            }
-//                        }
+                        vm.isDrawerAsc = !vm.isDrawerAsc
                     }
                 },
                 onReaderRefresh = { ch ->
                     if (ch != null) {
-                        vm.mainFunc.apply {
-                            vm.getReadingContentRemotely(
-                                chapter = ch,
-                                source = source
-                            )
-                        }
+                        vm.getLocalChapter(
+                            ch.id
+                        )
                     }
                 },
                 onReaderWebView = { modalState ->
                     try {
-                        if (chapter != null && !vm.isReaderModeEnable && vm.isLocalLoaded && modalState.targetValue == ModalBottomSheetValue.Expanded) {
+                        if (chapter != null && !vm.isReaderModeEnable && modalState.targetValue == ModalBottomSheetValue.Expanded) {
                             navController.navigate(
                                 WebViewScreenSpec.buildRoute(
                                     url = chapter.link,
                                 )
                             )
-                        } else if (chapter != null && !vm.isLocalLoaded) {
+                        } else if (chapter != null) {
                             navController.navigate(
                                 WebViewScreenSpec.buildRoute(
                                     url = chapter.link,
@@ -293,18 +230,25 @@ object ReaderScreenSpec : ScreenSpec {
                     }
                 },
                 onReaderBookmark = {
-                    vm.uiFunc.apply {
-                        vm.bookmarkChapter()
-                    }
+                    vm.bookmarkChapter()
                 },
                 onReaderBottomBarSetting = {
-                    vm.uiFunc.apply {
-                        vm.toggleSettingMode(true)
-                    }
+                    vm.toggleSettingMode(true, null)
                 },
                 onBottomBarReaderPlay = {
-                    vm.voiceMode = true
-                    vm.state.isReaderModeEnable = true
+                    vm.book?.let { book ->
+                        vm.stateChapter?.let { chapter ->
+                            navController.navigate(
+                                TTSScreenSpec.buildRoute(
+                                    book.id,
+                                    book.sourceId,
+                                    chapterId = chapter.id
+                                )
+                            )
+
+                        }
+                    }
+
                 },
                 vm = vm,
                 onMap = { drawer ->
@@ -344,19 +288,11 @@ object ReaderScreenSpec : ScreenSpec {
 @Composable
 fun MainReader(
     vm: ReaderScreenViewModel,
-    ttsState: TTSState,
     source: Source,
     onPopBackStack: () -> Unit,
     scrollState: LazyListState,
     drawerScrollState: LazyListState,
     swipeState: SwipeRefreshState,
-    onTTTSPrev: () -> Unit,
-    onTTTSPrevPar: () -> Unit,
-    onTTTSNext: () -> Unit,
-    onTTTSNextPar: () -> Unit,
-    onTTTSPlay: () -> Unit,
-    onTTTSValueChange: (Float) -> Unit,
-    onTTTSValueChangeFinished: () -> Unit,
     onChapter: (Chapter) -> Unit,
     onReaderNext: () -> Unit,
     onReaderPrev: (scrollToEnd: Boolean) -> Unit,
@@ -369,207 +305,187 @@ fun MainReader(
     onReaderBookmark: () -> Unit,
     onReaderBottomBarSetting: () -> Unit,
     onBottomBarReaderPlay: () -> Unit,
-    onMap: (LazyListState) -> Unit
+    onMap: (LazyListState) -> Unit,
 ) {
     val context = LocalContext.current
-    when {
-        ttsState.voiceMode -> {
-            TTSScreen(
-                vm = vm,
-                onPrev = onTTTSPrev,
-                onPlay = onTTTSPlay,
-                onNext = onTTTSNext,
-                onChapter = onChapter,
-                source = source,
-                onPrevPar = onTTTSPrevPar,
-                onNextPar = onTTTSNextPar,
-                onValueChange = onTTTSValueChange,
-                onValueChangeFinished = onTTTSValueChangeFinished,
-                onMap = onMap
-            )
-        }
-        else -> {
+    TransparentStatusBar {
 
-            TransparentStatusBar {
-
-                ReadingScreen(
-                    vm = vm,
-                    scrollState = scrollState,
-                    source = source,
-                    onNext = onReaderNext,
-                    onPrev = onReaderPrev,
-                    onSliderFinished = onReaderSliderFinished,
-                    onSliderChange = onReaderSliderChange,
-                    swipeState = swipeState,
-                    drawerScrollState = drawerScrollState,
-                    onChapter = onReaderChapter,
-                    onDrawerRevereIcon = onReaderDrawerRevereIcon,
-                    onReaderRefresh = onReaderRefresh,
-                    onToggleScrollMode = {
+        ReadingScreen(
+            vm = vm,
+            scrollState = scrollState,
+            source = source,
+            onNext = onReaderNext,
+            onPrev = onReaderPrev,
+            onSliderFinished = onReaderSliderFinished,
+            onSliderChange = onReaderSliderChange,
+            swipeState = swipeState,
+            drawerScrollState = drawerScrollState,
+            onChapter = onReaderChapter,
+            onDrawerRevereIcon = onReaderDrawerRevereIcon,
+            onReaderRefresh = onReaderRefresh,
+            onToggleScrollMode = {
+                vm.prefFunc.apply {
+                    vm.toggleScrollMode()
+                }
+            },
+            onToggleSelectedMode = {
+                vm.prefFunc.apply {
+                    vm.toggleSelectableMode()
+                }
+            },
+            onToggleOrientation = {
+                vm.prefFunc.apply {
+                    vm.saveOrientation(context)
+                }
+            },
+            onToggleImmersiveMode = {
+                vm.prefFunc.apply {
+                    vm.toggleImmersiveMode(context)
+                }
+            },
+            onToggleAutoScroll = {
+                vm.prefFunc.apply {
+                    vm.toggleAutoScrollMode()
+                }
+            },
+            onScrollIndicatorWidthIncrease = {
+                when (it) {
+                    true -> {
                         vm.prefFunc.apply {
-                            vm.toggleScrollMode()
+                            vm.saveScrollIndicatorWidth(true)
                         }
-                    },
-                    onToggleSelectedMode = {
+                    }
+                    else -> {
                         vm.prefFunc.apply {
-                            vm.toggleSelectableMode()
+                            vm.saveScrollIndicatorWidth(false)
                         }
-                    },
-                    onToggleOrientation = {
+                    }
+                }
+            },
+            onScrollIndicatorPaddingIncrease = {
+                when (it) {
+                    true -> {
                         vm.prefFunc.apply {
-                            vm.saveOrientation(context)
+                            vm.saveScrollIndicatorPadding(true)
                         }
-                    },
-                    onToggleImmersiveMode = {
-                        vm.prefFunc.apply {
-                            vm.toggleImmersiveMode(context)
-                        }
-                    },
-                    onToggleAutoScroll = {
-                        vm.prefFunc.apply {
-                            vm.toggleAutoScrollMode()
-                        }
-                    },
-                    onScrollIndicatorWidthIncrease = {
-                        when (it) {
-                            true -> {
-                                vm.prefFunc.apply {
-                                    vm.saveScrollIndicatorWidth(true)
-                                }
-                            }
-                            else -> {
-                                vm.prefFunc.apply {
-                                    vm.saveScrollIndicatorWidth(false)
-                                }
-                            }
-                        }
-                    },
-                    onScrollIndicatorPaddingIncrease = {
-                        when (it) {
-                            true -> {
-                                vm.prefFunc.apply {
-                                    vm.saveScrollIndicatorPadding(true)
-                                }
-                            }
-                            else -> {
-                                vm.apply {
-                                    vm.saveScrollIndicatorPadding(false)
-                                }
-                            }
-                        }
-                    },
-                    onParagraphIndentIncrease = {
-                        when (it) {
-                            true -> {
-                                vm.prefFunc.apply {
-                                    vm.saveParagraphIndent(true)
-                                }
-                            }
-                            else -> {
-                                vm.prefFunc.apply {
-                                    vm.saveParagraphIndent(false)
-                                }
-                            }
-                        }
-                    },
-                    onParagraphDistanceIncrease = {
-                        when (it) {
-                            true -> {
-                                vm.prefFunc.apply {
-                                    vm.saveParagraphDistance(true)
-                                }
-                            }
-                            else -> {
-                                vm.prefFunc.apply {
-                                    vm.saveParagraphDistance(false)
-                                }
-                            }
-                        }
-                    },
-                    onLineHeightIncrease = {
-                        when (it) {
-                            true -> {
-                                vm.prefFunc.apply {
-                                    vm.saveFontHeight(true)
-                                }
-                            }
-                            else -> {
-                                vm.prefFunc.apply {
-                                    vm.saveFontHeight(false)
-                                }
-                            }
-                        }
-                    },
-                    onFontSizeIncrease = {
-                        when (it) {
-                            true -> {
-                                vm.apply {
-                                    vm.saveFontSize(FontSizeEvent.Increase)
-                                }
-                            }
-                            else -> {
-                                vm.apply {
-                                    vm.saveFontSize(FontSizeEvent.Decrease)
-                                }
-                            }
-                        }
-                    },
-                    onAutoscrollOffsetIncrease = {
-                        when (it) {
-                            true -> {
-                                vm.prefFunc.apply {
-                                    vm.setAutoScrollOffsetReader(true)
-                                }
-                            }
-                            else -> {
-                                vm.prefFunc.apply {
-                                    vm.setAutoScrollOffsetReader(false)
-                                }
-                            }
-                        }
-                    },
-                    onAutoscrollIntervalIncrease = {
-                        when (it) {
-                            true -> {
-                                vm.prefFunc.apply {
-                                    vm.setAutoScrollIntervalReader(true)
-                                }
-                            }
-                            else -> {
-                                vm.prefFunc.apply {
-                                    vm.setAutoScrollIntervalReader(false)
-                                }
-                            }
-                        }
-                    },
-                    onFontSelected = { index ->
+                    }
+                    else -> {
                         vm.apply {
-                            vm.saveFont(index)
+                            vm.saveScrollIndicatorPadding(false)
                         }
-                    },
-                    onReaderPlay = onBottomBarReaderPlay,
-                    onReaderBottomOnSetting = onReaderBottomBarSetting,
-                    onReaderBookmark = onReaderBookmark,
-                    onReaderWebView = onReaderWebView,
-                    onChangeBrightness = {
+                    }
+                }
+            },
+            onParagraphIndentIncrease = {
+                when (it) {
+                    true -> {
+                        vm.prefFunc.apply {
+                            vm.saveParagraphIndent(true)
+                        }
+                    }
+                    else -> {
+                        vm.prefFunc.apply {
+                            vm.saveParagraphIndent(false)
+                        }
+                    }
+                }
+            },
+            onParagraphDistanceIncrease = {
+                when (it) {
+                    true -> {
+                        vm.prefFunc.apply {
+                            vm.saveParagraphDistance(true)
+                        }
+                    }
+                    else -> {
+                        vm.prefFunc.apply {
+                            vm.saveParagraphDistance(false)
+                        }
+                    }
+                }
+            },
+            onLineHeightIncrease = {
+                when (it) {
+                    true -> {
+                        vm.prefFunc.apply {
+                            vm.saveFontHeight(true)
+                        }
+                    }
+                    else -> {
+                        vm.prefFunc.apply {
+                            vm.saveFontHeight(false)
+                        }
+                    }
+                }
+            },
+            onFontSizeIncrease = {
+                when (it) {
+                    true -> {
                         vm.apply {
-                            vm.saveBrightness(it, context)
+                            vm.saveFontSize(true)
                         }
-                    },
-                    onToggleAutoBrightness = {
+                    }
+                    else -> {
+                        vm.apply {
+                            vm.saveFontSize(false)
+                        }
+                    }
+                }
+            },
+            onAutoscrollOffsetIncrease = {
+                when (it) {
+                    true -> {
                         vm.prefFunc.apply {
-                            vm.toggleAutoBrightness()
+                            vm.setAutoScrollOffsetReader(true)
                         }
-                    },
-                    onBackgroundChange = { index ->
+                    }
+                    else -> {
                         vm.prefFunc.apply {
-                            vm.changeBackgroundColor(index)
+                            vm.setAutoScrollOffsetReader(false)
                         }
-                    },
-                    onMap = onMap,
-                    onPopBackStack = onPopBackStack
-                )
-            }
-        }
+                    }
+                }
+            },
+            onAutoscrollIntervalIncrease = {
+                when (it) {
+                    true -> {
+                        vm.prefFunc.apply {
+                            vm.setAutoScrollIntervalReader(true)
+                        }
+                    }
+                    else -> {
+                        vm.prefFunc.apply {
+                            vm.setAutoScrollIntervalReader(false)
+                        }
+                    }
+                }
+            },
+            onFontSelected = { index ->
+                vm.apply {
+                    vm.saveFont(index)
+                }
+            },
+            onReaderPlay = onBottomBarReaderPlay,
+            onReaderBottomOnSetting = onReaderBottomBarSetting,
+            onReaderBookmark = onReaderBookmark,
+            onReaderWebView = onReaderWebView,
+            onChangeBrightness = {
+                vm.apply {
+                    vm.saveBrightness(it, context)
+                }
+            },
+            onToggleAutoBrightness = {
+                vm.prefFunc.apply {
+                    vm.toggleAutoBrightness()
+                }
+            },
+            onBackgroundChange = { index ->
+                vm.prefFunc.apply {
+                    vm.changeBackgroundColor(index)
+                }
+            },
+            onMap = onMap,
+            onPopBackStack = onPopBackStack
+        )
     }
 }

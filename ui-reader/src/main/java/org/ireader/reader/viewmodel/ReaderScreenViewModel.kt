@@ -1,24 +1,33 @@
 package org.ireader.reader.viewmodel
 
+import android.content.Context
+import android.content.pm.ActivityInfo
+import android.view.WindowManager
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import org.ireader.core_catalogs.CatalogStore
+import kotlinx.datetime.Clock
+import org.ireader.common_extensions.async.nextAfter
+import org.ireader.common_extensions.async.prevBefore
+import org.ireader.common_extensions.currentTimeToLong
+import org.ireader.common_extensions.findComponentActivity
+import org.ireader.common_models.entities.Chapter
+import org.ireader.common_models.entities.History
+import org.ireader.common_resources.LAST_CHAPTER
+import org.ireader.common_resources.NO_VALUE
+import org.ireader.core_catalogs.interactor.GetLocalCatalog
 import org.ireader.core_ui.viewmodel.BaseViewModel
-import org.ireader.domain.services.downloaderService.DefaultNotificationHelper
-import org.ireader.domain.services.tts_service.Player
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.domain.use_cases.history.HistoryUseCase
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.preferences.reader_preferences.ReaderPrefUseCases
-import org.ireader.domain.use_cases.preferences.reader_preferences.TextReaderPrefUseCase
 import org.ireader.domain.use_cases.remote.RemoteUseCases
-import org.ireader.domain.use_cases.services.ServiceUseCases
-import org.ireader.presentation.feature_ttl.TTSState
-import org.ireader.presentation.feature_ttl.TTSStateImpl
 import javax.inject.Inject
 
 @HiltViewModel
@@ -28,93 +37,195 @@ class ReaderScreenViewModel @Inject constructor(
     val remoteUseCases: RemoteUseCases,
     val insertUseCases: LocalInsertUseCases,
     val historyUseCase: HistoryUseCase,
-    private val catalogStore: CatalogStore,
+    val getLocalCatalog: GetLocalCatalog,
     val readerUseCases: ReaderPrefUseCases,
     val prefState: ReaderScreenPreferencesStateImpl,
     val state: ReaderScreenStateImpl,
     val prefFunc: ReaderPrefFunctionsImpl,
-    val uiFunc: ReaderUiFunctionsImpl,
-    val mainFunc: ReaderMainFunctionsImpl,
-    val speechPrefUseCases: TextReaderPrefUseCase,
     val savedStateHandle: SavedStateHandle,
-    val defaultNotificationHelper: DefaultNotificationHelper,
-    val ttsState: TTSStateImpl,
-    val serviceUseCases: ServiceUseCases,
 ) : BaseViewModel(),
     ReaderScreenPreferencesState by prefState,
     ReaderScreenState by state,
-    ReaderPrefFunctions by prefFunc,
-    ReaderUiFunctions by uiFunc,
-    ReaderMainFunctions by mainFunc,
-    TTSState by ttsState {
+    ReaderPrefFunctions by prefFunc {
 
     init {
 
         val sourceId = savedStateHandle.get<Long>(NavigationArgs.sourceId.name)
         val chapterId = savedStateHandle.get<Long>(NavigationArgs.chapterId.name)
         val bookId = savedStateHandle.get<Long>(NavigationArgs.bookId.name)
-        kotlin.runCatching {
-            val readingParagraph =
-                savedStateHandle.get<String>(NavigationArgs.readingParagraph.name)
-            val voiceMode = savedStateHandle.get<String>(NavigationArgs.voiceMode.name) != "0L"
-            state.isReaderModeEnable = true
-            if (readingParagraph != null && readingParagraph.toInt() < ttsState.ttsContent?.value?.lastIndex ?: 0) {
-                ttsState.currentReadingParagraph = readingParagraph.toInt()
-                ttsState.voiceMode = voiceMode
-            }
-        }
 
-        if (ttsState.ttsChapter != null && ttsState.ttsBook?.id == bookId) {
-            state.stateChapter = ttsChapter
-            state.book = ttsBook
-            state.stateChapters = ttsChapters
-            isLocalLoaded = true
-            stateChapter?.let { updateLastReadTime(it) }
-        } else {
-            if (bookId != null && chapterId != null && sourceId != null) {
-                val source = catalogStore.get(sourceId)?.source
-                if (source != null) {
-                    ttsState.ttsSource = source
-                    viewModelScope.launch {
-                        getLocalBookById(bookId, chapterId, source = source)
-                        readPreferences()
-                    }
-                } else {
-                    viewModelScope.launch {
-                        showSnackBar(org.ireader.common_extensions.UiText.StringResource(org.ireader.core.R.string.the_source_is_not_found))
-                    }
+        if (bookId != null && chapterId != null && sourceId != null) {
+            val source = getLocalCatalog.get(sourceId)?.source
+            if (source != null) {
+                state.source = source
+                subscribeChapters(bookId)
+                viewModelScope.launch {
+                    state.book = getBookUseCases.findBookById(bookId)
+                    setupChapters(bookId, chapterId)
+                    readPreferences()
                 }
             } else {
                 viewModelScope.launch {
-                    showSnackBar(org.ireader.common_extensions.UiText.StringResource(org.ireader.core.R.string.something_is_wrong_with_this_book))
+                    showSnackBar(org.ireader.common_extensions.UiText.StringResource(org.ireader.core.R.string.the_source_is_not_found))
                 }
             }
+        } else {
+            viewModelScope.launch {
+                showSnackBar(org.ireader.common_extensions.UiText.StringResource(org.ireader.core.R.string.something_is_wrong_with_this_book))
+            }
+        }
+    }
+
+    private suspend fun setupChapters(bookId: Long, chapterId: Long) {
+        val last = historyUseCase.findHistoryByBookId(bookId)
+        if (chapterId != LAST_CHAPTER && chapterId != NO_VALUE) {
+            getLocalChapter(chapterId)
+        } else if (last != null) {
+            getLocalChapter(chapterId = last.chapterId)
+        } else {
+            val chapters = getChapterUseCase.findChaptersByBookId(bookId)
+            if (chapters.isNotEmpty()) {
+                getLocalChapter(chapters.first().id)
+            }
+        }
+    }
+
+    fun getLocalChapter(chapterId: Long) {
+        viewModelScope.launch {
+            isLoading = true
+            val chapter = getChapterUseCase.findChapterById(chapterId)
+            stateChapter = chapter
+            if (chapter?.isEmpty() == true) {
+                state.source?.let { source -> getRemoteChapter(chapter, source) }
+            }
+            stateChapter?.let { ch -> updateLastReadTime(ch) }
+            val index = stateChapters.indexOfFirst { it.id == chapter?.id }
+            if (index != -1) {
+                currentChapterIndex = index
+            }
+
+            isLoading = false
+            initialized = true
+
+        }
+    }
+
+    private suspend fun getRemoteChapter(
+        chapter: Chapter,
+        source: org.ireader.core_api.source.Source
+    ) {
+        remoteUseCases.getRemoteReadingContent(
+            chapter,
+            source,
+            onSuccess = { result ->
+                state.stateChapter = result
+            },
+            onError = { message ->
+                if (message != null) {
+                    showSnackBar(message)
+                }
+            }
+        )
+    }
+
+    private fun subscribeChapters(bookId: Long) {
+        getChapterJob?.cancel()
+        getChapterJob = viewModelScope.launch {
+            getChapterUseCase.subscribeChaptersByBookId(
+                bookId = bookId,
+                isAsc = prefState.isAsc, ""
+            )
+                .collect {
+                    stateChapters = it
+                }
+        }
+    }
+
+    private fun updateLastReadTime(chapter: Chapter) {
+        viewModelScope.launch(Dispatchers.IO) {
+            insertUseCases.insertChapter(
+                chapter = chapter.copy(
+                    read = true,
+                    readAt = Clock.System.now().toEpochMilliseconds()
+                )
+            )
+            historyUseCase.insertHistory(
+                History(
+                    bookId = chapter.bookId,
+                    chapterId = chapter.id,
+                    readAt = currentTimeToLong()
+                )
+            )
         }
     }
 
     var getContentJob: Job? = null
-
     var getChapterJob: Job? = null
 
-    fun runTTSService(command: Int = -1) {
-        serviceUseCases.startTTSServicesUseCase(
-            chapterId = stateChapter?.id,
-            bookId = book?.id,
-            command = command
-        )
+    fun nextChapter(): Chapter {
+        val chapter = stateChapter
+        val index = stateChapters.indexOfFirst { it.id == chapter?.id }
+        if (index != -1) {
+            currentChapterIndex = index
+            return stateChapters.nextAfter(index)
+                ?: throw IllegalAccessException("List doesn't contains ${chapter?.title}")
+        }
+        throw IllegalAccessException("List doesn't contains ${chapter?.title}")
+    }
+
+    fun prevChapter(): Chapter {
+        val chapter = stateChapter
+        val index = stateChapters.indexOfFirst { it.id == chapter?.id }
+        if (index != -1) {
+            currentChapterIndex = index
+            return stateChapters.prevBefore(index)
+                ?: throw IllegalAccessException("List doesn't contains ${chapter?.title}")
+        }
+        throw IllegalAccessException("List doesn't contains ${chapter?.title}")
+    }
+
+    fun restoreSetting(
+        context: Context,
+        scrollState: LazyListState,
+    ) {
+        val activity = context.findComponentActivity()
+        if (activity != null) {
+            val window = activity.window
+            val layoutParams: WindowManager.LayoutParams = window.attributes
+            showSystemBars(context = context)
+            layoutParams.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
+            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+            window.attributes = layoutParams
+            stateChapter?.let { chapter ->
+                activity.lifecycleScope.launch {
+                    insertUseCases.insertChapter(chapter.copy(progress = scrollState.firstVisibleItemIndex))
+                }
+            }
+        }
+    }
+
+    fun toggleSettingMode(enable: Boolean, returnToMain: Boolean?) {
+        if (returnToMain == null) {
+            isSettingModeEnable = enable
+            isMainBottomModeEnable = false
+        } else {
+            isSettingModeEnable = false
+            isMainBottomModeEnable = true
+        }
+    }
+
+    fun bookmarkChapter() {
+        stateChapter?.let { chapter ->
+            viewModelScope.launch(Dispatchers.IO) {
+                stateChapter = chapter.copy(bookmark = !chapter.bookmark)
+                insertUseCases.insertChapter(chapter.copy(bookmark = !chapter.bookmark))
+            }
+        }
     }
 
     override fun onDestroy() {
-        enable = false
         getChapterJob?.cancel()
         getContentJob?.cancel()
-        // ttsStateImpl.tts.shutdown()
         super.onDestroy()
-    }
-
-    fun onNextVoice() {
-        runTTSService(Player.PAUSE)
-        ttsState.isPlaying = false
-        ttsState.currentReadingParagraph = 0
     }
 }

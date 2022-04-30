@@ -1,7 +1,9 @@
 package org.ireader.domain.use_cases.preferences.reader_preferences
 
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 data class ReaderPrefUseCases @Inject constructor(
     val selectedFontStateUseCase: SelectedFontStateUseCase,
     val brightnessStateUseCase: BrightnessStateUseCase,

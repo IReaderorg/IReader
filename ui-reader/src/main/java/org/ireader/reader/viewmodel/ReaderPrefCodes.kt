@@ -19,7 +19,7 @@ interface ReaderPrefFunctions {
     fun ReaderScreenViewModel.toggleReaderMode(enable: Boolean? = null)
     fun ReaderScreenViewModel.saveBrightness(brightness: Float, context: Context)
     fun ReaderScreenViewModel.saveFont(index: Int)
-    fun ReaderScreenViewModel.saveFontSize(event: FontSizeEvent)
+    fun ReaderScreenViewModel.saveFontSize(isIncreased: Boolean)
     fun ReaderScreenViewModel.saveParagraphIndent(isIncreased: Boolean)
     fun ReaderScreenViewModel.saveScrollIndicatorWidth(increase: Boolean)
     fun ReaderScreenViewModel.saveScrollIndicatorPadding(increase: Boolean)
@@ -43,7 +43,6 @@ interface ReaderPrefFunctions {
     fun ReaderScreenViewModel.setAutoScrollIntervalReader(increase: Boolean)
     fun ReaderScreenViewModel.setAutoScrollOffsetReader(increase: Boolean)
     fun ReaderScreenViewModel.toggleAutoBrightness()
-    fun ReaderScreenViewModel.toggleRemoteLoaded(loaded: Boolean)
     fun ReaderScreenViewModel.showSystemBars(context: Context)
     fun ReaderScreenViewModel.hideSystemBars(context: Context)
 }
@@ -51,13 +50,9 @@ interface ReaderPrefFunctions {
 class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
     override suspend fun ReaderScreenViewModel.readPreferences() {
         font = readerUseCases.selectedFontStateUseCase.readFont()
-        // readerUseCases.selectedFontStateUseCase.saveFont(0)
-
         this.fontSize = readerUseCases.fontSizeStateUseCase.read()
-
         readBackgroundColor()
         readTextColor()
-
         lineHeight = readerUseCases.fontHeightUseCase.read()
         distanceBetweenParagraphs = readerUseCases.paragraphDistanceUseCase.read()
         paragraphsIndent = readerUseCases.paragraphIndentUseCase.read()
@@ -67,12 +62,8 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
         autoScrollInterval = readerUseCases.autoScrollMode.readInterval()
         autoScrollOffset = readerUseCases.autoScrollMode.readOffset()
         autoBrightnessMode = readerUseCases.brightnessStateUseCase.readAutoBrightness()
-        speechSpeed = speechPrefUseCases.readRate()
-        pitch = speechPrefUseCases.readPitch()
-        currentVoice = speechPrefUseCases.readVoice()
-        currentLanguage = speechPrefUseCases.readLanguage()
         selectableMode = readerUseCases.selectedFontStateUseCase.readSelectableText()
-        autoNextChapter = speechPrefUseCases.readAutoNext()
+
     }
 
     override fun ReaderScreenViewModel.toggleReaderMode(enable: Boolean?) {
@@ -98,8 +89,8 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
         readerUseCases.selectedFontStateUseCase.saveFont(index)
     }
 
-    override fun ReaderScreenViewModel.saveFontSize(event: FontSizeEvent) {
-        if (event == FontSizeEvent.Increase) {
+    override fun ReaderScreenViewModel.saveFontSize(isIncreased: Boolean) {
+        if (isIncreased) {
             this.fontSize = this.fontSize + 1
             readerUseCases.fontSizeStateUseCase.save(prefState.fontSize)
         } else {
@@ -315,10 +306,6 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
             autoBrightnessMode = true
             readerUseCases.brightnessStateUseCase.saveAutoBrightness(true)
         }
-    }
-
-    override fun ReaderScreenViewModel.toggleRemoteLoaded(loaded: Boolean) {
-        state.isRemoteLoaded = loaded
     }
 
     override fun ReaderScreenViewModel.showSystemBars(context: Context) {

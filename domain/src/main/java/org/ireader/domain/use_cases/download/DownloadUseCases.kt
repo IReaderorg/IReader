@@ -11,7 +11,9 @@ import org.ireader.domain.use_cases.download.get.SubscribeOneSavedDownload
 import org.ireader.domain.use_cases.download.insert.InsertDownload
 import org.ireader.domain.use_cases.download.insert.InsertDownloads
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 data class DownloadUseCases @Inject constructor(
     val subscribeDownloadsUseCase: SubscribeDownloadsUseCase,
     val findAllDownloadsUseCase: FindAllDownloadsUseCase,
