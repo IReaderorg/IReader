@@ -11,7 +11,6 @@ plugins {
     id("com.android.application")
     kotlin("android")
     id("kotlin-kapt")
-
     id("dagger.hilt.android.plugin")
     id("kotlin-parcelize")
     id("com.google.gms.google-services")
@@ -53,13 +52,13 @@ android {
         kotlinCompilerExtensionVersion = compose.versions.compose.get()
     }
 
+
+
     buildTypes {
         getByName("release") {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+            isShrinkResources = true
+            isMinifyEnabled = true
+            proguardFiles("proguard-rules.pro")
         }
     }
 }
@@ -73,6 +72,7 @@ dependencies {
     implementation(compose.compose.activity)
     implementation("androidx.core:core-splashscreen:1.0.0-beta02")
     implementation(compose.compose.material)
+    implementation(compose.compose.coil)
 
     implementation(project(Modules.coreApi))
     implementation(project(Modules.coreUi))

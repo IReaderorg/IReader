@@ -51,7 +51,7 @@
         android:theme="@style/Theme.ISplash"
         android:usesCleartextTraffic="true">
         <activity
-            android:name="org.ireader.app.MainActivity"
+            android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/Theme.ISplash"
             android:windowSoftInputMode="adjustResize">
@@ -89,7 +89,6 @@
                 android:name="androidx.emoji2.text.EmojiCompatInitializer"
                 tools:node="remove" />
         </provider>
-
         <receiver
             android:name="org.ireader.domain.services.broadcast_receiver.AppBroadcastReceiver"
             android:exported="false" />

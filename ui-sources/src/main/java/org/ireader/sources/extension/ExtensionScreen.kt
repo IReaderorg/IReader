@@ -9,25 +9,17 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
 import androidx.compose.material.TabRowDefaults
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.TravelExplore
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.navigation.NavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.pagerTabIndicatorOffset
@@ -36,10 +28,6 @@ import kotlinx.coroutines.flow.collectLatest
 import org.ireader.common_models.entities.Catalog
 import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.components.components.ISnackBarHost
-import org.ireader.components.components.Toolbar
-import org.ireader.components.reusable_composable.AppIconButton
-import org.ireader.components.reusable_composable.AppTextField
-import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.core_ui.theme.AppColors
 import org.ireader.sources.extension.composables.RemoteSourcesScreen
@@ -50,7 +38,6 @@ import org.ireader.sources.extension.composables.UserSourcesScreen
 @Composable
 fun ExtensionScreen(
     modifier: Modifier = Modifier,
-    navController: NavController,
     viewModel: ExtensionViewModel,
     onRefreshCatalogs: () -> Unit,
     onClickCatalog: (Catalog) -> Unit,
@@ -60,7 +47,6 @@ fun ExtensionScreen(
     onSearchNavigate: () -> Unit
 ) {
     val pagerState = rememberPagerState()
-    val scope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
     val context = LocalContext.current
 
@@ -91,89 +77,31 @@ fun ExtensionScreen(
     val focusManager = LocalFocusManager.current
     Scaffold(
         topBar = {
-            Toolbar(
-                title = {
-                    if (!searchMode) {
-                        BigSizeTextComposable(text = "Extensions")
-                    } else {
-                        AppTextField(
-                            query = viewModel.searchQuery ?: "",
-                            onValueChange = {
-                                viewModel.searchQuery = it
-                            },
-                            onConfirm = {
-                                focusManager.clearFocus()
-                            },
-                        )
-                    }
+            ExtensionScreenTopAppBar(
+                searchMode = searchMode,
+                query = viewModel.searchQuery ?: "",
+                onValueChange = {
+                    viewModel.searchQuery = it
                 },
-                actions = {
-                    if (pagerState.currentPage == 1) {
-                        if (searchMode) {
-                            AppIconButton(
-                                imageVector = Icons.Default.Close,
-                                title = "Close",
-                                onClick = {
-                                    searchMode = false
-                                    viewModel.searchQuery = ""
-                                },
-                            )
-                        } else {
-                            AppIconButton(
-                                imageVector = Icons.Default.Search,
-                                title = "Search",
-                                onClick = {
-                                    searchMode = true
-                                },
-                            )
-                        }
-                        AppIconButton(
-                            imageVector = Icons.Default.Refresh,
-                            title = "Refresh",
-                            onClick = {
-                                viewModel.refreshCatalogs()
-                            },
-                        )
-                    } else {
-                        if (searchMode) {
-                            AppIconButton(
-                                imageVector = Icons.Default.Close,
-                                title = "Close",
-                                onClick = {
-                                    searchMode = false
-                                    viewModel.searchQuery = ""
-                                },
-                            )
-                        } else {
-                            AppIconButton(
-                                imageVector = Icons.Default.Search,
-                                title = "Search",
-                                onClick = {
-                                    searchMode = true
-                                },
-                            )
-                            AppIconButton(
-                                imageVector = Icons.Default.TravelExplore,
-                                title = "Search",
-                                onClick = {
-                                    onSearchNavigate()
-                                },
-                            )
-                        }
-                    }
+                onConfirm = {
+                    focusManager.clearFocus()
                 },
-                navigationIcon = if (searchMode) {
-                    {
-                        AppIconButton(
-                            imageVector = Icons.Default.ArrowBack,
-                            title = "Disable Search",
-                            onClick = {
-                                searchMode = false
-                                viewModel.searchQuery = ""
-                            }
-                        )
-                    }
-                } else null
+                pagerState = pagerState,
+                onClose = {
+                    searchMode = false
+                    viewModel.searchQuery = ""
+                },
+                onSearchDisable = {
+                    searchMode = false
+                    viewModel.searchQuery = ""
+                },
+                onRefresh = {
+                    viewModel.refreshCatalogs()
+                },
+                onSearchEnable = {
+                    searchMode = true
+                },
+                onSearchNavigate = onSearchNavigate
             )
         },
         scaffoldState = scaffoldState,

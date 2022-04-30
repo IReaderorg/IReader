@@ -7,7 +7,6 @@ import org.ireader.core_api.source.model.MangaInfo
 
 @Serializable
 @Entity(tableName = BOOK_TABLE)
-
 data class Book(
     @PrimaryKey(autoGenerate = true)
     override val id: Long = 0,

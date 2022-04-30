@@ -12,16 +12,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.TopAppBarBackButton
 
 @Composable
 fun BookDetailTopAppBar(
     modifier: Modifier = Modifier,
-    navController: NavController,
     onWebView: () -> Unit,
     onRefresh: () -> Unit,
+    onPopBackStack: () -> Unit
 ) {
     Toolbar(
         title = {},
@@ -52,7 +51,7 @@ fun BookDetailTopAppBar(
             }
         },
         navigationIcon = {
-            TopAppBarBackButton(navController = navController)
+            TopAppBarBackButton(onClick = onPopBackStack)
         }
     )
 }

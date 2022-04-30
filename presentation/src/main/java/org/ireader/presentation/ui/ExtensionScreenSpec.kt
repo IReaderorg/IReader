@@ -1,6 +1,5 @@
 package org.ireader.presentation.ui
 
-import androidx.compose.material.ScaffoldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.runtime.Composable
@@ -28,11 +27,9 @@ object ExtensionScreenSpec : BottomNavScreenSpec {
     override fun Content(
         navController: NavController,
         navBackStackEntry: NavBackStackEntry,
-        scaffoldState: ScaffoldState,
     ) {
         val viewModel: ExtensionViewModel = hiltViewModel()
         ExtensionScreen(
-            navController = navController,
             viewModel = viewModel,
             onClickCatalog = {
                 navController.navigate(

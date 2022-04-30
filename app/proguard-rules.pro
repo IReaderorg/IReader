@@ -1,61 +1,195 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# This is a configuration file for R8
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+-dontobfuscate
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# Keep extension's common dependencies
+-keep,allowoptimization class org.ireader.** { public protected *; }
+-keep,allowoptimization class kotlinx.coroutines.** { public protected *; }
+-keep,allowoptimization class okhttp3.** { public protected *; }
+-keep,allowoptimization class okio.** { public protected *; }
+-keep,allowoptimization class org.jsoup.** { public protected *; }
+-keep,allowoptimization class kotlin.** { public protected *; }
+-keep,allowoptimization class io.ktor.** { public protected *; }
+-keep,allowoptimization class androidx.room.** { public protected *; }
+-keep,allowoptimization class com.google.dagger.** { public protected *; }
+-keep,allowoptimization class com.google.gson.** { public protected *; }
+-keep,allowoptimization class androidx.lifecycle.** { public protected *; }
+-keep,allowoptimization class androidx.work.** { public protected *; }
+-keep,allowoptimization class androidx.hilt.** { public protected *; }
+-keep,allowoptimization class androidx.datastore.** { public protected *; }
+-keep,allowoptimization class org.jetbrains.kotlinx.** { public protected *; }
+-keep,allowoptimization class app.cash.quickjs.** { public protected *; }
+-keep,allowoptimization class com.google.accompanist.** { public protected *; }
+-keep,allowoptimization class androidx.compose.** { public protected *; }
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
 
-# Keep `Companion` object fields of serializable classes.
-# This avoids serializer lookup through `getDeclaredClasses` as done for named companion objects.
--if @kotlinx.serialization.Serializable class **
--keepclassmembers class <1> {
-    static <1>$Companion Companion;
+-dontwarn android.support.**
+-dontwarn androidx.**
+
+-keepattributes SourceFile,
+                LineNumberTable,
+                RuntimeVisibleAnnotations,
+                RuntimeVisibleParameterAnnotations,
+                RuntimeVisibleTypeAnnotations,
+                AnnotationDefault
+
+-renamesourcefileattribute SourceFile
+
+-dontwarn org.conscrypt.**
+
+# Dagger
+-dontwarn com.google.errorprone.annotations.*
+-keepnames @dagger.hilt.android.lifecycle.HiltViewModel class * extends androidx.lifecycle.ViewModel
+
+
+
+##---------------Begin: proguard configuration for couroutines  ----------
+# When editing this file, update the following files as well:
+# - META-INF/com.android.tools/proguard/coroutines.pro
+# - META-INF/com.android.tools/r8/coroutines.pro
+
+# ServiceLoader support
+-keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}
+-keepnames class kotlinx.coroutines.CoroutineExceptionHandler {}
+
+# Most of volatile fields are updated with AFU and should not be mangled
+-keepclassmembers class kotlinx.coroutines.** {
+    volatile <fields>;
 }
 
-# Keep `serializer()` on companion objects (both default and named) of serializable classes.
--if @kotlinx.serialization.Serializable class ** {
-    static **$* *;
+# Same story for the standard library's SafeContinuation that also uses AtomicReferenceFieldUpdater
+-keepclassmembers class kotlin.coroutines.SafeContinuation {
+    volatile <fields>;
 }
--keepclassmembers class <1>$<3> {
+
+# These classes are only required by kotlinx.coroutines.debug.AgentPremain, which is only loaded when
+# kotlinx-coroutines-core is used as a Java agent, so these are not needed in contexts where ProGuard is used.
+-dontwarn java.lang.instrument.ClassFileTransformer
+-dontwarn sun.misc.SignalHandler
+-dontwarn java.lang.instrument.Instrumentation
+-dontwarn sun.misc.Signal
+
+# Only used in `kotlinx.coroutines.internal.ExceptionsConstructor`.
+# The case when it is not available is hidden in a `try`-`catch`, as well as a check for Android.
+-dontwarn java.lang.ClassValue
+
+# An annotation used for build tooling, won't be directly accessed.
+-dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
+
+
+##---------------End: proguard configuration for Couroutines  ----------
+
+##---------------Begin: proguard configuration for Okhttp  ----------
+#Okhttp
+# JSR 305 annotations are for embedding nullability information.
+-dontwarn javax.annotation.**
+
+# A resource is loaded with a relative path so the package of this class must be preserved.
+-adaptresourcefilenames okhttp3/internal/publicsuffix/PublicSuffixDatabase.gz
+
+# Animal Sniffer compileOnly dependency to ensure APIs are compatible with older versions of Java.
+-dontwarn org.codehaus.mojo.animal_sniffer.*
+
+# OkHttp platform used only on JVM and when Conscrypt and other security providers are available.
+-dontwarn okhttp3.internal.platform.**
+-dontwarn org.conscrypt.**
+-dontwarn org.bouncycastle.**
+-dontwarn org.openjsse.**
+
+##---------------End: proguard configuration for Okhttp  ----------
+##---------------Begin: proguard configuration for okio  ----------
+
+# Animal Sniffer compileOnly dependency to ensure APIs are compatible with older versions of Java.
+-dontwarn org.codehaus.mojo.animal_sniffer.*
+##---------------End: proguard configuration for okio  ----------
+
+##---------------Begin: proguard configuration for Ktor  ----------
+# Ktor
+-keep class io.ktor.** { *; }
+-keep class kotlinx.coroutines.** { *; }
+-dontwarn kotlinx.atomicfu.**
+-dontwarn io.netty.**
+-dontwarn com.typesafe.**
+-dontwarn org.slf4j.**
+##---------------End: proguard configuration for Ktor  ----------
+
+#runtime issue
+
+-dontwarn org.jetbrains.kotlin.compiler.plugin.CommandLineProcessor
+-dontwarn org.jetbrains.kotlin.compiler.plugin.ComponentRegistrar
+-dontwarn org.jetbrains.kotlin.diagnostics.rendering.DefaultErrorMessages
+
+
+
+#---------
+# Keep trakt-java and tmdb-java entity names (for GSON)
+-keep class org.ireader.common_models.*.entities.** {
+    <fields>;
+    <init>(...);
+}
+-keep class org.ireader.common_models.*.entities.** {
+    <fields>;
+    <init>(...);
+}
+
+-keep class org.ireader.data.catalog.** {
+    kotlinx.serialization.KSerializer serializer(...);
+    <fields>;
+    <init>(...);
+}
+-keep class org.ireader.common_models.** {
+    kotlinx.serialization.KSerializer serializer(...);
+    <fields>;
+    <init>(...);
+}
+
+
+##---------------Begin: proguard configuration for Gson  ----------
+# Gson uses generic type information stored in a class file when working with fields. Proguard
+# removes such information by default, so configure it to keep all of it.
+-keepattributes Signature
+
+# For using GSON @Expose annotation
+-keepattributes *Annotation*
+
+# Gson specific classes
+-dontwarn sun.misc.**
+
+# Prevent proguard from stripping interface information from TypeAdapter, TypeAdapterFactory,
+# JsonSerializer, JsonDeserializer instances (so they can be used in @JsonAdapter)
+-keep class * extends com.google.gson.TypeAdapter
+-keep class * implements com.google.gson.TypeAdapterFactory
+-keep class * implements com.google.gson.JsonSerializer
+-keep class * implements com.google.gson.JsonDeserializer
+
+# Prevent R8 from leaving Data object members always null
+-keepclassmembers,allowobfuscation class * {
+  @com.google.gson.annotations.SerializedName <fields>;
+}
+##---------------End: proguard configuration for Gson  ----------
+
+##---------------Begin: proguard configuration for kotlinx.serialization  ----------
+-keepattributes *Annotation*, InnerClasses
+-dontnote kotlinx.serialization.AnnotationsKt # core serialization annotations
+
+# kotlinx-serialization-json specific.
+-keepclassmembers class kotlinx.serialization.json.** {
+    *** Companion;
+}
+-keepclasseswithmembers class kotlinx.serialization.json.** {
     kotlinx.serialization.KSerializer serializer(...);
 }
 
-# Keep `INSTANCE.serializer()` of serializable objects.
--if @kotlinx.serialization.Serializable class ** {
-    public static ** INSTANCE;
+-keep,includedescriptorclasses class eu.kanade.tachiyomi.**$$serializer { *; }
+-keepclassmembers class eu.kanade.tachiyomi.** {
+    *** Companion;
 }
--keepclassmembers class <1> {
-    public static <1> INSTANCE;
+-keepclasseswithmembers class eu.kanade.tachiyomi.** {
     kotlinx.serialization.KSerializer serializer(...);
 }
 
-# @Serializable and @Polymorphic are used at runtime for polymorphic serialization.
--keepattributes RuntimeVisibleAnnotations,AnnotationDefault
-
-# Serializer for classes with named companion objects are retrieved using `getDeclaredClasses`.
-# If you have any, uncomment and replace classes with those containing named companion objects.
-#-keepattributes InnerClasses # Needed for `getDeclaredClasses`.
-#-if @kotlinx.serialization.Serializable class
-#com.example.myapplication.HasNamedCompanion, # <-- List serializable classes with named companions.
-#com.example.myapplication.HasNamedCompanion2
-#{
-#    static **$* *;
-#}
-#-keepnames class <1>$$serializer { # -keepnames suffices; class is kept when serializer() is kept.
-#    static <1>$$serializer INSTANCE;
-#}
+-keep class kotlinx.serialization.**
+-keepclassmembers class kotlinx.serialization.** {
+    <methods>;
+}
+##---------------End: proguard configuration for kotlinx.serialization  ----------

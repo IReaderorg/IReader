@@ -1,12 +1,15 @@
 package org.ireader.presentation.ui
 
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.ViewModel
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavDeepLink
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.compose.composable
 
 @OptIn(ExperimentalMaterialApi::class)
 sealed interface ScreenSpec {
@@ -37,26 +40,22 @@ sealed interface ScreenSpec {
 
     val deepLinks: List<NavDeepLink> get() = emptyList()
 
-    @Composable
-    fun TopBar(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        scaffoldState: ScaffoldState,
+    @OptIn(ExperimentalAnimationApi::class)
+    fun NavGraphBuilder.AddDestination(
+        navController: NavController
     ) {
-    }
-
-    @Composable
-    fun IBottomBar(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        scaffoldState: ScaffoldState,
-    ) {
+        composable(
+            route = navHostRoute,
+            deepLinks = deepLinks,
+            arguments = arguments,
+        ) { navBackStackEntry ->
+            Content(navController, navBackStackEntry)
+        }
     }
 
     @Composable
     fun Content(
         navController: NavController,
         navBackStackEntry: NavBackStackEntry,
-        scaffoldState: ScaffoldState,
     )
 }

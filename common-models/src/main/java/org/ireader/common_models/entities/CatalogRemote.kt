@@ -1,11 +1,13 @@
 
 package org.ireader.common_models.entities
 
+import androidx.annotation.Keep
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import org.ireader.core_api.source.Source
 import java.io.File
 
+@Keep
 @Entity(tableName = CATALOG_REMOTE)
 data class CatalogRemote(
     @PrimaryKey(autoGenerate = false)

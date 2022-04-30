@@ -29,8 +29,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
@@ -46,8 +44,8 @@ import org.ireader.domain.utils.setDefaultSettings
 @Composable
 fun WebPageScreen(
     modifier: Modifier = Modifier,
-    navController: NavController = rememberNavController(),
     viewModel: WebViewPageModel,
+    onPopBackStack: () -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
     val context = LocalContext.current
@@ -83,7 +81,6 @@ fun WebPageScreen(
     Scaffold(
         topBar = {
             WebPageTopBar(
-                navController = navController,
                 urlToRender = viewModel.url,
                 onGo = {
                     webViewState.content = WebContent.Url(viewModel.url)
@@ -101,7 +98,8 @@ fun WebPageScreen(
                 },
                 onValueChange = {
                     viewModel.updateUrl(it)
-                }
+                },
+                onPopBackStack = onPopBackStack
             )
         },
         scaffoldState = scaffoldState,

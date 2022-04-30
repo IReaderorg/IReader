@@ -6,7 +6,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.rememberCoroutineScope
@@ -83,7 +82,6 @@ object ReaderScreenSpec : ScreenSpec {
     override fun Content(
         navController: NavController,
         navBackStackEntry: NavBackStackEntry,
-        scaffoldState: ScaffoldState,
     ) {
         val vm: ReaderScreenViewModel = hiltViewModel()
         val currentIndex = vm.currentChapterIndex
@@ -309,7 +307,6 @@ object ReaderScreenSpec : ScreenSpec {
                     vm.state.isReaderModeEnable = true
                 },
                 vm = vm,
-                navController = navController,
                 onMap = { drawer ->
                     scope.launch {
                         try {
@@ -327,11 +324,16 @@ object ReaderScreenSpec : ScreenSpec {
                 },
                 drawerScrollState = drawerScrollState,
                 scrollState = scrollState,
-                swipeState = swipeState
+                swipeState = swipeState,
+                onPopBackStack = {
+                    navController.popBackStack()
+                }
             )
         } else {
             EmptyScreenComposable(
-                navController = navController,
+                onPopBackStack = {
+                    navController.popBackStack()
+                },
                 errorResId = org.ireader.presentation.R.string.something_is_wrong_with_this_book
             )
         }
@@ -344,7 +346,7 @@ fun MainReader(
     vm: ReaderScreenViewModel,
     ttsState: TTSState,
     source: Source,
-    navController: NavController,
+    onPopBackStack: () -> Unit,
     scrollState: LazyListState,
     drawerScrollState: LazyListState,
     swipeState: SwipeRefreshState,
@@ -379,7 +381,6 @@ fun MainReader(
                 onNext = onTTTSNext,
                 onChapter = onChapter,
                 source = source,
-                navController = navController,
                 onPrevPar = onTTTSPrevPar,
                 onNextPar = onTTTSNextPar,
                 onValueChange = onTTTSValueChange,
@@ -392,7 +393,6 @@ fun MainReader(
             TransparentStatusBar {
 
                 ReadingScreen(
-                    navController = navController,
                     vm = vm,
                     scrollState = scrollState,
                     source = source,
@@ -566,7 +566,8 @@ fun MainReader(
                             vm.changeBackgroundColor(index)
                         }
                     },
-                    onMap = onMap
+                    onMap = onMap,
+                    onPopBackStack = onPopBackStack
                 )
             }
         }

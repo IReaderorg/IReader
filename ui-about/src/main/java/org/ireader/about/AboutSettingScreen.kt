@@ -19,8 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.components.reusable_composable.MidSizeTextComposable
@@ -31,7 +29,7 @@ import org.ireader.domain.utils.toast
 @Composable
 fun AboutSettingScreen(
     modifier: Modifier = Modifier,
-    navController: NavController = rememberNavController(),
+    onPopBackStack:() -> Unit
 ) {
 
     val context = LocalContext.current
@@ -48,7 +46,9 @@ fun AboutSettingScreen(
                 BigSizeTextComposable(text = "About", style = MaterialTheme.typography.h6)
             },
             navigationIcon = {
-                TopAppBarBackButton(navController = navController)
+                TopAppBarBackButton(onClick = {
+                    onPopBackStack()
+                })
             }
         )
     }) { padding ->

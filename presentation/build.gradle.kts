@@ -16,10 +16,16 @@ android {
     lint {
         baseline = file("lint-baseline.xml")
     }
+    libraryVariants.all {
+        kotlin.sourceSets {
+            getByName(name) {
+                kotlin.srcDir("build/generated/ksp/$name/kotlin")
+            }
+        }
+    }
 }
 
 dependencies {
-
     implementation(project(Modules.domain))
     implementation(project(Modules.core))
     implementation(project(Modules.coreUi))
@@ -45,6 +51,7 @@ dependencies {
     implementation(project(Modules.commonExtensions))
     implementation(project(Modules.uiComponents))
 
+    implementation("androidx.core:core-splashscreen:1.0.0-beta02")
     implementation(compose.compose.foundation)
     implementation(compose.compose.animations)
     implementation(compose.compose.ui)

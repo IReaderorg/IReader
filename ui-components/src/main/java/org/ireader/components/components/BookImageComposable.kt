@@ -25,7 +25,35 @@ fun BookImageComposable(
     @DrawableRes placeholder: Int = R.drawable.ic_no_image_placeholder,
 ) {
 
-    val painter = rememberAsyncImagePainter(
+//    val painter = rememberAsyncImagePainter(
+//        model = ImageRequest.Builder(LocalContext.current)
+//            .apply {
+//                data(image)
+//                crossfade(700)
+//                placeholder(placeholder)
+//                error(placeholder)
+//            }
+//            .build(),
+//        contentScale = ContentScale.Crop
+//    )
+//    SubcomposeAsyncImage(
+//        model = ImageRequest.Builder(LocalContext.current)
+//            .apply {
+//                data(image)
+//                crossfade(700)
+//                placeholder(placeholder)
+//                error(placeholder)
+//            }
+//            .build(),
+//        contentDescription = "image",
+//    )
+
+
+    Image(
+        modifier = modifier
+            .fillMaxSize(),
+        contentScale = contentScale,
+        painter = rememberAsyncImagePainter(
         model = ImageRequest.Builder(LocalContext.current)
             .apply {
                 data(image)
@@ -35,13 +63,7 @@ fun BookImageComposable(
             }
             .build(),
         contentScale = ContentScale.Crop
-    )
-
-    Image(
-        modifier = modifier
-            .fillMaxSize(),
-        contentScale = contentScale,
-        painter = painter,
+    ),
         contentDescription = "an image",
         alignment = alignment,
     )

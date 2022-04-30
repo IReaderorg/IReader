@@ -9,7 +9,6 @@ import org.ireader.core_api.http.HttpClients
 import org.ireader.core_api.os.PackageInstaller
 import org.ireader.core_catalogs.CatalogPreferences
 import org.ireader.core_catalogs.CatalogStore
-import org.ireader.core_catalogs.service.CatalogInstallationChanges
 import org.ireader.core_catalogs.service.CatalogInstaller
 import org.ireader.core_catalogs.service.CatalogLoader
 import org.ireader.core_catalogs.service.CatalogRemoteApi
@@ -39,11 +38,6 @@ class CatalogModule {
         return AndroidCatalogInstallationChanges(context)
     }
 
-    @Provides
-    @Singleton
-    fun provideCatalogInstallationChanges(context: Application): CatalogInstallationChanges {
-        return AndroidCatalogInstallationChanges(context)
-    }
 
     @Provides
     @Singleton

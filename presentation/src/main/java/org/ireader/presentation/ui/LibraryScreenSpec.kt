@@ -1,6 +1,6 @@
 package org.ireader.presentation.ui
 
-import androidx.compose.material.ScaffoldState
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.runtime.Composable
@@ -25,19 +25,16 @@ object LibraryScreenSpec : BottomNavScreenSpec {
         NavigationArgs.showBottomNav
     )
 
-    @OptIn(
-        ExperimentalPagerApi::class, androidx.compose.animation.ExperimentalAnimationApi::class,
-        androidx.compose.material.ExperimentalMaterialApi::class
-    )
+    private const val route = "library"
+
+    @OptIn(ExperimentalPagerApi::class, ExperimentalAnimationApi::class)
     @Composable
     override fun Content(
         navController: NavController,
         navBackStackEntry: NavBackStackEntry,
-        scaffoldState: ScaffoldState,
     ) {
         val vm: LibraryViewModel = hiltViewModel()
         LibraryScreen(
-            navController = navController,
             addFilters = {
                 vm.addFilters(it)
             },

@@ -25,7 +25,6 @@ fun UserSourcesScreen(
     onClickTogglePinned: (CatalogLocal) -> Unit,
 ) {
     val scrollState = rememberLazyListState()
-    val catalogsWithLanguages = state.mappedCatalogs.value
     LazyColumn(
         modifier = modifier
             .fillMaxSize(),
@@ -52,7 +51,7 @@ fun UserSourcesScreen(
             }
 
             if (state.unpinnedCatalogs.isNotEmpty()) {
-                catalogsWithLanguages.forEach { (lang, catalogs) ->
+                state.mappedCatalogs.value.forEach { (lang, catalogs) ->
                     item {
                         TextSection(
                             text = lang,

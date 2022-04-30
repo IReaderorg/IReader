@@ -28,7 +28,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 import org.ireader.common_models.entities.Chapter
 import org.ireader.components.components.Toolbar
@@ -48,12 +47,12 @@ fun ReaderScreenTopBar(
     state: ReaderScreenState,
     modalBottomSheetValue: ModalBottomSheetValue,
     chapter: Chapter?,
-    navController: NavController,
     onRefresh: () -> Unit,
     source: Source,
     onWebView: () -> Unit,
     onBookMark: () -> Unit,
     scrollState: LazyListState,
+    onPopBackStack: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     if (!isReaderModeEnable && isLoaded) {
@@ -104,7 +103,9 @@ fun ReaderScreenTopBar(
                 elevation = 0.dp,
                 navigationIcon = {
                     if (!vm.searchMode) {
-                        TopAppBarBackButton(navController = navController)
+                        TopAppBarBackButton(
+                            onClick = { onPopBackStack() }
+                        )
                     } else {
                         AppIconButton(
                             imageVector = Icons.Default.ArrowBack,
@@ -241,7 +242,9 @@ fun ReaderScreenTopBar(
             },
             navigationIcon = {
 
-                TopAppBarBackButton(navController = navController)
+                TopAppBarBackButton(onClick = {
+                    onPopBackStack()
+                })
             },
 
         )

@@ -29,7 +29,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 
 @Composable
 fun BigSizeTextComposable(
@@ -171,21 +170,6 @@ fun AppIconButton(
     }
 }
 
-@Composable
-fun TopAppBarBackButton(navController: NavController? = null, onClick: (() -> Unit?)? = null) {
-    IconButton(onClick = {
-        navController?.popBackStack()
-        if (onClick != null) {
-            onClick()
-        }
-    }) {
-        Icon(
-            imageVector = Icons.Default.ArrowBack,
-            contentDescription = "ArrowBack Icon",
-            tint = MaterialTheme.colors.onBackground,
-        )
-    }
-}
 
 @Composable
 fun TopAppBarBackButton(onClick: () -> Unit) {

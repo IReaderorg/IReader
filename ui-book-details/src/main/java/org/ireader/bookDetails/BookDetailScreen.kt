@@ -23,8 +23,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
@@ -43,7 +41,6 @@ import org.ireader.core_ui.ui_components.DotsFlashing
 @Composable
 fun BookDetailScreen(
     modifier: Modifier = Modifier,
-    navController: NavController = rememberNavController(),
     detailState: DetailState,
     chapterState: ChapterState,
     onToggleLibrary: () -> Unit,
@@ -57,18 +54,34 @@ fun BookDetailScreen(
     book: Book,
     onTitle: (String) -> Unit,
     scaffoldState: ScaffoldState,
+    onPopBackStack:() -> Unit
 ) {
     val swipeRefreshState =
         rememberSwipeRefreshState(isRefreshing = detailState.detailIsLoading)
-
-    val source = detailState.source
-    val chapters = chapterState.chapters
 
     if (detailState.detailIsLoading) {
         showLoading()
     }
 
+
     TransparentStatusBar {
+        SwipeRefresh(
+            state = swipeRefreshState,
+            onRefresh = {
+                onSwipeRefresh()
+            },
+            indicatorPadding = PaddingValues(vertical = 40.dp),
+            indicator = { state, trigger ->
+                SwipeRefreshIndicator(
+                    state = state,
+                    refreshTriggerDistance = trigger,
+                    scale = true,
+                    backgroundColor = MaterialTheme.colors.background,
+                    contentColor = MaterialTheme.colors.primaryVariant,
+                    elevation = 8.dp,
+                )
+            }
+        ) {
         Scaffold(
             topBar = {},
             scaffoldState = scaffoldState,
@@ -96,31 +109,8 @@ fun BookDetailScreen(
                 }
             }
         ) { padding ->
-
-            SwipeRefresh(
-                state = swipeRefreshState,
-                onRefresh = {
-                    onSwipeRefresh()
-                },
-                indicatorPadding = PaddingValues(vertical = 40.dp),
-                indicator = { state, trigger ->
-                    SwipeRefreshIndicator(
-                        state = state,
-                        refreshTriggerDistance = trigger,
-                        scale = true,
-                        backgroundColor = MaterialTheme.colors.background,
-                        contentColor = MaterialTheme.colors.primaryVariant,
-                        elevation = 8.dp,
-                    )
-                }
-            ) {
-                /**
-                 * I did this because the buttonbar disappear in the
-                 * lazy Column
-                 */
                 Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                     BookDetailScreenLoadedComposable(
-                        navController = navController,
                         onWebView = {
                             onWebView()
                         },
@@ -129,7 +119,8 @@ fun BookDetailScreen(
                         onRefresh = onRefresh,
                         isSummaryExpanded = detailState.expandedSummary,
                         book = book,
-                        source = source,
+                        source = detailState.source,
+                        onPopBackStack = onPopBackStack
                     )
 
                     CardTile(
@@ -138,7 +129,7 @@ fun BookDetailScreen(
                             .fillMaxWidth(),
                         onClick = onChapterContent,
                         title = "Contents",
-                        subtitle = "${chapters.size} Chapters",
+                        subtitle = "${chapterState.chapters.size} Chapters",
                         trailing = {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(

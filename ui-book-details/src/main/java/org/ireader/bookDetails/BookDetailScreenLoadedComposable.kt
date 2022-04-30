@@ -11,7 +11,6 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -39,7 +38,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import org.ireader.bookDetails.components.BookSummary
@@ -53,7 +51,6 @@ import org.ireader.image_loader.BookCover
 @Composable
 fun BookDetailScreenLoadedComposable(
     modifier: Modifier = Modifier,
-    navController: NavController,
     book: Book,
     source: Source?,
     onWebView: () -> Unit,
@@ -61,6 +58,7 @@ fun BookDetailScreenLoadedComposable(
     onRefresh: () -> Unit,
     onSummaryExpand: () -> Unit,
     isSummaryExpanded: Boolean,
+    onPopBackStack:() -> Unit
 ) {
     val context = LocalContext.current
     var imageLoaded by remember { mutableStateOf(false) }
@@ -69,7 +67,7 @@ fun BookDetailScreenLoadedComposable(
         if (imageLoaded) 0.2f else 0f, tween(easing = LinearOutSlowInEasing)
     )
 
-    Box(Modifier.height(IntrinsicSize.Min)) {
+    Box() {
         Box {
             Image(
                 painter = rememberAsyncImagePainter(
@@ -105,13 +103,13 @@ fun BookDetailScreenLoadedComposable(
         }
         Column {
             BookDetailTopAppBar(
-                navController = navController,
                 onWebView = {
                     onWebView()
                 },
                 onRefresh = {
                     onRefresh()
                 },
+                onPopBackStack = onPopBackStack
             )
             Row(
                 modifier = modifier

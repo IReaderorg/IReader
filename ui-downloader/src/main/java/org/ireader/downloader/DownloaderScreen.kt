@@ -36,8 +36,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.flow.collectLatest
 import org.ireader.common_models.entities.SavedDownload
 import org.ireader.common_models.entities.SavedDownloadWithInfo
@@ -57,12 +55,12 @@ import org.ireader.ui_downloader.R
 @Composable
 fun DownloaderScreen(
     modifier: Modifier = Modifier,
-    navController: NavController = rememberNavController(),
     vm: DownloaderViewModel,
     onDownloadItem: (
         item:
             SavedDownloadWithInfo
-    ) -> Unit
+    ) -> Unit,
+    onPopBackStack: () -> Unit,
 ) {
     val context = LocalContext.current
     val scaffoldState = rememberScaffoldState()
@@ -82,7 +80,7 @@ fun DownloaderScreen(
     Scaffold(
         topBar = {
             DownloaderTopAppBar(
-                onPopBackStack = { navController.popBackStack() },
+                onPopBackStack = onPopBackStack,
                 onCancelAll = {
                     vm.deleteSelectedDownloads(vm.downloads.map { it.toSavedDownload() })
                 },

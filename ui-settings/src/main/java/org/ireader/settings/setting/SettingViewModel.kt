@@ -5,13 +5,11 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToJsonElement
 import org.ireader.common_extensions.convertLongToTime
 import org.ireader.common_extensions.launchIO
-import org.ireader.common_models.entities.Book
-import org.ireader.common_models.entities.Chapter
+import org.ireader.common_models.BackUpBook
 import org.ireader.core_ui.theme.OrientationMode
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.use_cases.local.DeleteUseCase
@@ -20,7 +18,7 @@ import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.preferences.reader_preferences.ReaderPrefUseCases
 import org.ireader.image_loader.LibraryCovers
-import java.util.*
+import java.util.Calendar
 import javax.inject.Inject
 
 @HiltViewModel
@@ -123,9 +121,4 @@ class SettingViewModel @Inject constructor(
     }
 }
 
-@Serializable
 
-data class BackUpBook(
-    val book: Book,
-    val chapters: List<Chapter>,
-)

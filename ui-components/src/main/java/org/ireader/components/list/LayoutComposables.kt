@@ -3,7 +3,6 @@ package org.ireader.components.list
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavController
 import org.ireader.common_models.LayoutType
 import org.ireader.common_models.entities.BookItem
 import org.ireader.components.list.layouts.CompactGridLayoutComposable
@@ -14,7 +13,6 @@ import org.ireader.core_api.source.Source
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun LayoutComposable(
-    navController: NavController,
     books: List<BookItem> = emptyList(),
     onClick: (book: BookItem) -> Unit,
     onLongClick: (BookItem) -> Unit = {},

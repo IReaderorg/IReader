@@ -60,7 +60,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
@@ -86,7 +85,6 @@ import java.math.RoundingMode
 @OptIn(ExperimentalMaterialApi::class, ExperimentalPagerApi::class)
 @Composable
 fun TTSScreen(
-    navController: NavController,
     modifier: Modifier = Modifier,
     vm: ReaderScreenViewModel,
     onPrev: () -> Unit,

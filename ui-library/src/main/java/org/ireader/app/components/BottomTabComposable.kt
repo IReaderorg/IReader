@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.PagerState
 import org.ireader.common_models.DisplayMode
@@ -19,7 +18,6 @@ import org.ireader.common_models.SortType
 fun BottomTabComposable(
     modifier: Modifier = Modifier,
     pagerState: PagerState,
-    navController: NavController,
     filters: List<FilterType>,
     addFilters: (FilterType) -> Unit,
     removeFilter: (FilterType) -> Unit,

@@ -37,7 +37,7 @@ class AndroidCatalogInstallationChanges @Inject constructor(
         flow.tryEmit(CatalogInstallationChange.LocalUninstall(pkgName))
     }
 
-    private inner class Receiver : BroadcastReceiver() {
+    inner class Receiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent == null) return
 

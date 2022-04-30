@@ -1,6 +1,5 @@
 package org.ireader.presentation.ui
 
-import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalFocusManager
@@ -42,7 +41,6 @@ object ExploreScreenSpec : ScreenSpec {
     override fun Content(
         navController: NavController,
         navBackStackEntry: NavBackStackEntry,
-        scaffoldState: ScaffoldState,
     ) {
         val vm: ExploreViewModel = hiltViewModel()
         val focusManager = LocalFocusManager.current
@@ -50,7 +48,6 @@ object ExploreScreenSpec : ScreenSpec {
         val scope = rememberCoroutineScope()
         if (source != null) {
             ExploreScreen(
-                navController = navController,
                 vm = vm,
                 onFilterClick = {
                     vm.toggleFilterMode()
@@ -114,10 +111,16 @@ object ExploreScreenSpec : ScreenSpec {
                 },
                 onAppbarWebView = {
                     navController.navigate(WebViewScreenSpec.buildRoute(url = it))
+                },
+                onPopBackStack = {
+                    navController.popBackStack()
                 }
             )
         } else {
-            EmptyScreenComposable(navController, R.string.source_not_available)
+            EmptyScreenComposable( R.string.source_not_available,
+                onPopBackStack = {
+                    navController.popBackStack()
+                })
         }
     }
 }

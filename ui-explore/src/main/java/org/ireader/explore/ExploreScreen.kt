@@ -71,7 +71,6 @@ import org.ireader.ui_explore.R
 @Composable
 fun ExploreScreen(
     modifier: Modifier = Modifier,
-    navController: NavController,
     vm: ExploreState,
     source: CatalogSource,
     onFilterClick: () -> Unit,
@@ -87,6 +86,7 @@ fun ExploreScreen(
     loadItems: (Boolean) -> Unit,
     onBook: (BookItem) -> Unit,
     onAppbarWebView: (url: String) -> Unit,
+    onPopBackStack: () -> Unit,
 ) {
     val scrollState = rememberLazyListState()
     val context = LocalContext.current
@@ -229,7 +229,6 @@ fun ExploreScreen(
                             layout = vm.layout,
                             scrollState = scrollState,
                             source = source,
-                            navController = navController,
                             isLocal = false,
                             gridState = gridState,
                             onClick = { book ->

@@ -17,11 +17,10 @@ import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
-import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -33,6 +32,7 @@ import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import org.ireader.common_resources.ARG_HIDE_BOTTOM_BAR
 import org.ireader.presentation.ui.BottomNavScreenSpec
+import org.ireader.presentation.ui.LibraryScreenSpec
 import org.ireader.presentation.ui.ScreenSpec
 
 @OptIn(ExperimentalMaterialApi::class, androidx.compose.animation.ExperimentalAnimationApi::class)
@@ -41,60 +41,13 @@ fun ScreenContent() {
     val navController = rememberAnimatedNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
-    val scaffoldState = rememberScaffoldState()
     val screenSpec = ScreenSpec.allScreens[currentDestination?.route]
-
     val hideBottomBar = navBackStackEntry?.arguments?.getBoolean(ARG_HIDE_BOTTOM_BAR)
-    Box(
-        Modifier
+    Scaffold(
+        modifier = Modifier
             .fillMaxSize()
-            .navigationBarsPadding()
-    ) {
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.TopCenter)
-        ) {
-
-            if (navBackStackEntry != null) {
-                screenSpec?.TopBar(
-                    navController,
-                    navBackStackEntry!!,
-                    scaffoldState = scaffoldState
-                )
-            }
-        }
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = if (hideBottomBar == null || hideBottomBar == true) 45.dp else 0.dp)
-        ) {
-            AnimatedNavHost(
-                navController = navController,
-                startDestination = BottomNavScreenSpec.screens[0].navHostRoute,
-                modifier = Modifier
-                    .fillMaxSize(),
-                enterTransition = { fadeIn(animationSpec = tween(300)) },
-                exitTransition = { fadeOut(animationSpec = tween(300)) },
-            ) {
-                ScreenSpec.allScreens.values.forEach { screen ->
-                    composable(
-                        route = screen.navHostRoute,
-                        arguments = screen.arguments,
-                        deepLinks = screen.deepLinks,
-                    ) { navBackStackEntry ->
-                        screen.Content(
-                            navController = navController,
-                            navBackStackEntry = navBackStackEntry,
-                            scaffoldState = scaffoldState,
-                        )
-                    }
-                }
-            }
-        }
-        Box(modifier = Modifier.align(Alignment.BottomCenter)) {
-
+            .navigationBarsPadding(),
+        bottomBar = {
             AnimatedVisibility(
                 visible = hideBottomBar == null || hideBottomBar == true,
                 enter = slideInVertically(initialOffsetY = { it }),
@@ -126,6 +79,34 @@ fun ScreenContent() {
                                     restoreState = true
                                 }
                             },
+                        )
+                    }
+                }
+            }
+        }
+    ) { padding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = if (hideBottomBar == null || hideBottomBar == true) 45.dp else 0.dp)
+        ) {
+            AnimatedNavHost(
+                navController = navController,
+                startDestination = LibraryScreenSpec.navHostRoute,
+                modifier = Modifier
+                    .fillMaxSize(),
+                enterTransition = { fadeIn(animationSpec = tween(500)) },
+                exitTransition = { fadeOut(animationSpec = tween(500)) },
+            ) {
+                ScreenSpec.allScreens.values.forEach { screen ->
+                    composable(
+                        route = screen.navHostRoute,
+                        arguments = screen.arguments,
+                        deepLinks = screen.deepLinks,
+                    ) { navBackStackEntry ->
+                        screen.Content(
+                            navController = navController,
+                            navBackStackEntry = navBackStackEntry,
                         )
                     }
                 }

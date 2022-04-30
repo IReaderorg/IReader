@@ -1,6 +1,5 @@
 package org.ireader.presentation.ui
 
-import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
@@ -46,12 +45,13 @@ object WebViewScreenSpec : ScreenSpec {
     override fun Content(
         navController: NavController,
         navBackStackEntry: NavBackStackEntry,
-        scaffoldState: ScaffoldState,
     ) {
         val vm: WebViewPageModel = hiltViewModel()
         WebPageScreen(
-            navController = navController,
-            viewModel = vm
+            viewModel = vm,
+            onPopBackStack = {
+                navController.popBackStack()
+            }
         )
     }
 }

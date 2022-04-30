@@ -29,15 +29,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.BigSizeTextComposable
 
 @Composable
 fun SettingScreen(
     modifier: Modifier = Modifier,
-    navController: NavController = rememberNavController(),
+    onItemClick: (destinationScreenRoute: String) -> Unit,
     itemsRoutes: List<String>
 ) {
     val settingItems = listOf(
@@ -62,7 +60,9 @@ fun SettingScreen(
             )
         }) { padding ->
             Column(
-                modifier = Modifier.fillMaxSize().padding(padding),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
                 horizontalAlignment = Alignment.Start,
             ) {
 
@@ -71,7 +71,7 @@ fun SettingScreen(
                         title = item.title,
                         imageVector = item.icon,
                         destinationScreenRoute = item.route,
-                        navController = navController
+                        onClick =onItemClick
 
                     )
                 }
@@ -102,8 +102,8 @@ fun SettingsItem(
     modifier: Modifier = Modifier,
     title: String,
     imageVector: ImageVector,
-    navController: NavController,
     destinationScreenRoute: String,
+    onClick: (destinationScreenRoute: String) -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     Row(
@@ -114,7 +114,7 @@ fun SettingsItem(
             .clickable(
                 interactionSource = interactionSource,
                 indication = null
-            ) { navController.navigate(destinationScreenRoute) },
+            ) { onClick(destinationScreenRoute) },
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(

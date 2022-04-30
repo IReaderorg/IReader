@@ -8,7 +8,6 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavController
 import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.sources.extension.CatalogItem
 
@@ -18,7 +17,6 @@ fun SourceListComposable(
     modifier: Modifier = Modifier,
     sources: List<CatalogLocal>,
     scrollState: LazyListState,
-    navController: NavController,
     onExploreNavigation: (index: Int) -> Unit,
 ) {
     LazyColumn(

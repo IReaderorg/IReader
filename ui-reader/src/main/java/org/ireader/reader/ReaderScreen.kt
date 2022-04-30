@@ -32,8 +32,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -54,7 +52,6 @@ import org.ireader.reader.viewmodel.ReaderScreenViewModel
 @Composable
 fun ReadingScreen(
     modifier: Modifier = Modifier,
-    navController: NavController = rememberNavController(),
     vm: ReaderScreenViewModel,
     source: Source,
     scrollState: LazyListState,
@@ -88,7 +85,8 @@ fun ReadingScreen(
     onToggleAutoBrightness: () -> Unit,
     onChangeBrightness: (Float) -> Unit,
     onBackgroundChange: (Int) -> Unit,
-    onMap: (LazyListState) -> Unit
+    onMap: (LazyListState) -> Unit,
+    onPopBackStack: () -> Unit,
 ) {
 
     val chapters = vm.stateChapters
@@ -206,14 +204,14 @@ fun ReadingScreen(
                 },
                 source = source,
                 chapter = chapter,
-                navController = navController,
                 onWebView = {
                     onReaderWebView(modalState)
                 },
                 vm = vm,
                 state = vm,
                 scrollState = scrollState,
-                onBookMark = onReaderBookmark
+                onBookMark = onReaderBookmark,
+                onPopBackStack = onPopBackStack
             )
         },
         scaffoldState = scaffoldState,

@@ -38,6 +38,10 @@ fun isNonStable(version: String): Boolean {
     val isStable = stableKeyword || regex.matches(version)
     return isStable.not()
 }
+doctor {
+    warnWhenNotUsingParallelGC.set(false)
+}
+
 allprojects {
     tasks.withType<com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask> {
         rejectVersionIf {

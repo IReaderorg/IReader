@@ -13,8 +13,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerializationException
@@ -22,13 +20,13 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.ireader.common_extensions.findComponentActivity
 import org.ireader.common_extensions.launchIO
+import org.ireader.common_models.BackUpBook
 import org.ireader.components.AdvanceSettingItem
 import org.ireader.components.components.ISnackBarHost
 import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.components.reusable_composable.TopAppBarBackButton
 import org.ireader.core_ui.ui_components.TextSection
-import org.ireader.settings.setting.BackUpBook
 import org.ireader.settings.setting.SettingViewModel
 import org.ireader.ui_settings.R
 import java.io.FileInputStream
@@ -38,8 +36,8 @@ import java.io.FileOutputStream
 @Composable
 fun AdvanceSettings(
     modifier: Modifier = Modifier,
-    navController: NavController = rememberNavController(),
     vm: SettingViewModel,
+    onBackStack:() -> Unit
 
 ) {
     val context = LocalContext.current
@@ -121,7 +119,7 @@ fun AdvanceSettings(
                 title = {
                     BigSizeTextComposable(text = "Advance Settings")
                 },
-                navigationIcon = { TopAppBarBackButton(navController = navController) }
+                navigationIcon = { TopAppBarBackButton(onClick =onBackStack ) }
             )
         },
         snackbarHost = { ISnackBarHost(snackBarHostState = it) },

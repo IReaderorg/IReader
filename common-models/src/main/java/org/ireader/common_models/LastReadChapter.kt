@@ -3,7 +3,6 @@ package org.ireader.common_models
 
 import kotlinx.serialization.Serializable
 
-@Serializable
 
 data class LastReadChapter(
     val bookName: String,

@@ -1,5 +1,5 @@
 [versions]
-ktor = "2.0.0"
+ktor = "2.0.1"
 room = "2.4.2"
 okhttp = "4.9.3"
 moshi = "1.13.0"
@@ -29,6 +29,9 @@ gradle-idea-ext = "gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-ide
 
 ksp-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
 ksp-gradle = { module = "com.google.devtools.ksp:symbol-processing-gradle-plugin", version.ref = "ksp" }
+
+moshi-codegen = { module = "com.squareup.moshi:moshi-kotlin-codegen", version.ref = "moshi" }
+
 
 ktor-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-core-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }

@@ -1,7 +1,6 @@
 package org.ireader.presentation.ui
 
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -19,8 +18,8 @@ object ChapterScreenSpec : ScreenSpec {
     override val navHostRoute: String = "chapter_detail_route/{bookId}/{sourceId}"
 
     override val arguments: List<NamedNavArgument> = listOf(
-        NavigationArgs.sourceId,
         NavigationArgs.bookId,
+        NavigationArgs.sourceId,
     )
 
     fun buildRoute(
@@ -38,7 +37,6 @@ object ChapterScreenSpec : ScreenSpec {
     override fun Content(
         navController: NavController,
         navBackStackEntry: NavBackStackEntry,
-        scaffoldState: ScaffoldState,
     ) {
         val vm: ChapterDetailViewModel = hiltViewModel()
         val book = vm.book
@@ -46,7 +44,6 @@ object ChapterScreenSpec : ScreenSpec {
         val scrollState = rememberLazyListState()
         val focusManager = LocalFocusManager.current
         ChapterDetailScreen(
-            navController = navController,
             onItemClick = { index ->
                 if (vm.selection.isEmpty()) {
                     if (book != null) {
@@ -79,7 +76,10 @@ object ChapterScreenSpec : ScreenSpec {
                     }
                 }
             },
-            vm = vm
+            vm = vm,
+            onPopBackStack = {
+                navController.popBackStack()
+            }
         )
     }
 }

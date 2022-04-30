@@ -32,8 +32,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
 import com.google.accompanist.swiperefresh.SwipeRefresh
@@ -56,7 +54,6 @@ import org.ireader.core_ui.ui.LoadingScreen
 @Composable
 fun LibraryScreen(
     modifier: Modifier = Modifier,
-    navController: NavController = rememberNavController(),
     vm: LibraryState,
     goToLatestChapter: (book: BookItem) -> Unit = {},
     onBook: (book: BookItem) -> Unit,
@@ -73,6 +70,7 @@ fun LibraryScreen(
     refreshUpdate: () -> Unit,
 ) {
 
+
     val pagerState = rememberPagerState()
     val bottomSheetState =
         rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
@@ -85,10 +83,10 @@ fun LibraryScreen(
     ModalBottomSheetLayout(
         modifier = if (bottomSheetState.targetValue == ModalBottomSheetValue.Expanded) Modifier.statusBarsPadding() else Modifier,
         sheetContent = {
+
             Box(modifier.defaultMinSize(minHeight = 1.dp)) {
                 BottomTabComposable(
                     pagerState = pagerState,
-                    navController = navController,
                     filters = vm.filters,
                     addFilters = addFilters,
                     removeFilter = removeFilter,
@@ -127,7 +125,6 @@ fun LibraryScreen(
                         bottomSheetState = bottomSheetState,
                         onSearch = getLibraryBooks,
                         refreshUpdate = refreshUpdate
-
                     )
                 }
             ) { padding ->
@@ -152,7 +149,6 @@ fun LibraryScreen(
                             else -> LayoutComposable(
                                 books = vm.books,
                                 layout = vm.layout,
-                                navController = navController,
                                 isLocal = true,
                                 gridState = gridState,
                                 scrollState = lazyListState,

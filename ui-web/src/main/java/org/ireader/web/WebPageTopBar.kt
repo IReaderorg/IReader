@@ -16,7 +16,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.BuildDropDownMenu
@@ -26,13 +25,13 @@ import org.ireader.explore.webview.CustomTextField
 
 @Composable
 fun WebPageTopBar(
-    navController: NavController,
     urlToRender: String,
     onValueChange: (text: String) -> Unit,
     onGo: () -> Unit,
     refresh: () -> Unit,
     goBack: () -> Unit,
     goForward: () -> Unit,
+    onPopBackStack: () -> Unit,
 ) {
     var isMenuExpanded by remember {
         mutableStateOf(false)
@@ -57,7 +56,7 @@ fun WebPageTopBar(
             )
         },
         navigationIcon = {
-            TopAppBarBackButton(navController = navController)
+            TopAppBarBackButton(onClick = onPopBackStack)
         },
         actions = {
             AppIconButton(

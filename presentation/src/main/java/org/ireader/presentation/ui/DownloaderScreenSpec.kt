@@ -1,6 +1,5 @@
 package org.ireader.presentation.ui
 
-import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavBackStackEntry
@@ -29,11 +28,9 @@ object DownloaderScreenSpec : ScreenSpec {
     override fun Content(
         navController: NavController,
         navBackStackEntry: NavBackStackEntry,
-        scaffoldState: ScaffoldState,
     ) {
         val vm: DownloaderViewModel = hiltViewModel()
         DownloaderScreen(
-            navController = navController,
             onDownloadItem = { item ->
                 navController.navigate(
                     BookDetailScreenSpec.buildRoute(
@@ -42,7 +39,10 @@ object DownloaderScreenSpec : ScreenSpec {
                     )
                 )
             },
-            vm = vm
+            vm = vm,
+            onPopBackStack = {
+                navController.popBackStack()
+            }
         )
     }
 }

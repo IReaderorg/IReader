@@ -1,6 +1,5 @@
 package org.ireader.presentation.ui
 
-import androidx.compose.material.ScaffoldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
@@ -30,16 +29,17 @@ object SettingScreenSpec : BottomNavScreenSpec {
     override fun Content(
         navController: NavController,
         navBackStackEntry: NavBackStackEntry,
-        scaffoldState: ScaffoldState,
     ) {
         SettingScreen(
-            navController = navController,
             itemsRoutes = listOf(
                 DownloaderScreenSpec.navHostRoute,
                 AppearanceScreenSpec.navHostRoute,
                 AdvanceSettingSpec.navHostRoute,
                 AboutInfoScreenSpec.navHostRoute
-            )
+            ),
+            onItemClick = { route ->
+                navController.navigate(route)
+            }
         )
     }
 }

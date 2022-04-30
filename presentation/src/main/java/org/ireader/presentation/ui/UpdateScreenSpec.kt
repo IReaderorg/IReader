@@ -1,6 +1,5 @@
 package org.ireader.presentation.ui
 
-import androidx.compose.material.ScaffoldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.NewReleases
 import androidx.compose.runtime.Composable
@@ -35,7 +34,6 @@ object UpdateScreenSpec : BottomNavScreenSpec {
     override fun Content(
         navController: NavController,
         navBackStackEntry: NavBackStackEntry,
-        scaffoldState: ScaffoldState,
     ) {
         val vm: UpdatesViewModel = hiltViewModel()
         UpdateScreen(

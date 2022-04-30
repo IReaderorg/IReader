@@ -1,9 +1,7 @@
 package org.ireader.presentation.ui
 
-import androidx.compose.material.ScaffoldState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -13,7 +11,6 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDeepLink
 import androidx.navigation.navDeepLink
 import com.google.accompanist.pager.ExperimentalPagerApi
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.ireader.bookDetails.BookDetailScreen
 import org.ireader.bookDetails.viewmodel.BookDetailViewModel
@@ -53,7 +50,6 @@ object BookDetailScreenSpec : ScreenSpec {
     override fun Content(
         navController: NavController,
         navBackStackEntry: NavBackStackEntry,
-        scaffoldState: ScaffoldState,
     ) {
         val scaffoldStates = rememberScaffoldState()
         val viewModel: BookDetailViewModel = hiltViewModel()
@@ -64,7 +60,6 @@ object BookDetailScreenSpec : ScreenSpec {
         val scope = rememberCoroutineScope()
         if (book != null) {
             BookDetailScreen(
-                navController = navController,
                 onToggleLibrary = {
                     viewModel.toggleInLibrary(book = book)
                 },
@@ -147,33 +142,19 @@ object BookDetailScreenSpec : ScreenSpec {
                     }
                 },
                 scaffoldState = scaffoldStates,
-                chapterState = viewModel
+                chapterState = viewModel,
+                onPopBackStack = {
+                    navController.popBackStack()
+                }
             )
         } else {
             EmptyScreenComposable(
-                navController = navController,
-                errorResId = org.ireader.core.R.string.something_is_wrong_with_this_book
+
+                errorResId = org.ireader.core.R.string.something_is_wrong_with_this_book,
+                onPopBackStack = {
+                    navController.popBackStack()
+                }
             )
         }
-        LaunchedEffect(key1 = true) {
-            viewModel.eventFlow.collectLatest { event ->
-                when (event) {
-                    is org.ireader.common_extensions.UiEvent.ShowSnackbar -> {
-                        scaffoldState.snackbarHostState.showSnackbar(
-                            event.uiText.asString(context)
-                        )
-                    }
-                }
-            }
-        }
-//        LaunchedEffect(key1 = true) {
-//            book?.let {
-//                if (source != null) {
-//                    viewModel.getLocalBookById(bookId = book.id, source = source)
-//                }
-//                viewModel.getLocalChaptersByBookId(bookId = book.id)
-//            }
-//
-//        }
     }
 }

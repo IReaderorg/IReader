@@ -50,19 +50,17 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 import org.ireader.chapterDetails.viewmodel.ChapterDetailEvent
 import org.ireader.chapterDetails.viewmodel.ChapterDetailViewModel
 import org.ireader.common_extensions.UiText
 import org.ireader.components.components.ChapterListItemComposable
+import org.ireader.components.list.scrollbars.LazyColumnScrollbar
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.core_ui.ui.EmptyScreen
 import org.ireader.core_ui.ui.LoadingScreen
-import org.ireader.components.list.scrollbars.LazyColumnScrollbar
 import org.ireader.explore.webview.CustomTextField
 
 @ExperimentalAnimationApi
@@ -71,9 +69,9 @@ import org.ireader.explore.webview.CustomTextField
 fun ChapterDetailScreen(
     modifier: Modifier = Modifier,
     vm: ChapterDetailViewModel,
-    navController: NavController = rememberNavController(),
     onItemClick: (index: Int) -> Unit,
     onLongItemClick: (index: Int) -> Unit,
+    onPopBackStack: () -> Unit,
 ) {
     val book = vm.book
     val context = LocalContext.current
@@ -109,7 +107,7 @@ fun ChapterDetailScreen(
                 onReverseClick = {
                     vm.onEvent(ChapterDetailEvent.ToggleOrder)
                 },
-                onPopBackStack = { navController.popBackStack() },
+                onPopBackStack =  onPopBackStack,
                 onMap = {
                     scope.launch {
                         try {
