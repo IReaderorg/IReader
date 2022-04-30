@@ -1,0 +1,235 @@
+package org.ireader.tts
+
+import android.content.ComponentName
+import android.content.Context
+import android.os.Bundle
+import android.support.v4.media.MediaBrowserCompat
+import android.support.v4.media.MediaMetadataCompat
+import android.support.v4.media.session.MediaControllerCompat
+import android.support.v4.media.session.PlaybackStateCompat
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
+import org.ireader.common_extensions.findComponentActivity
+import org.ireader.common_models.entities.Chapter
+import org.ireader.core_catalogs.interactor.GetLocalCatalog
+import org.ireader.core_ui.viewmodel.BaseViewModel
+import org.ireader.domain.services.tts_service.Player
+import org.ireader.domain.services.tts_service.TTSState
+import org.ireader.domain.services.tts_service.TTSStateImpl
+import org.ireader.domain.services.tts_service.media_player.TTSService
+import org.ireader.domain.ui.NavigationArgs
+import org.ireader.domain.use_cases.local.LocalGetBookUseCases
+import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
+import org.ireader.domain.use_cases.preferences.reader_preferences.ReaderPrefUseCases
+import org.ireader.domain.use_cases.preferences.reader_preferences.TextReaderPrefUseCase
+import org.ireader.domain.use_cases.remote.RemoteUseCases
+import org.ireader.domain.use_cases.services.ServiceUseCases
+import javax.inject.Inject
+
+@HiltViewModel
+class TTSViewModel @Inject constructor(
+    val ttsState: TTSStateImpl,
+    private val savedStateHandle: SavedStateHandle,
+    private val serviceUseCases: ServiceUseCases,
+    private val getBookUseCases: LocalGetBookUseCases,
+    private val getChapterUseCase: LocalGetChapterUseCase,
+    private val remoteUseCases: RemoteUseCases,
+    private val getLocalCatalog: GetLocalCatalog,
+    val speechPrefUseCases: TextReaderPrefUseCase,
+    private val readerUseCases: ReaderPrefUseCases
+) : BaseViewModel(),
+    TTSState by ttsState {
+
+    private var  chapterId: Long = -1
+    private var  initialize: Boolean = false
+
+    init {
+        val sourceId = savedStateHandle.get<Long>(NavigationArgs.sourceId.name)
+        val chapterId = savedStateHandle.get<Long>(NavigationArgs.chapterId.name)
+        val bookId = savedStateHandle.get<Long>(NavigationArgs.bookId.name)
+
+        kotlin.runCatching {
+            val readingParagraph =
+                savedStateHandle.get<String>(NavigationArgs.readingParagraph.name)
+            if (readingParagraph != null && readingParagraph.toInt() < ttsState.ttsContent?.value?.lastIndex ?: 0) {
+                ttsState.currentReadingParagraph = readingParagraph.toInt()
+            }
+
+        }
+
+        if (sourceId != null && chapterId != null && bookId != null) {
+            this.chapterId = chapterId
+            ttsSource = getLocalCatalog.get(sourceId = sourceId)?.source
+            viewModelScope.launch {
+                val book = getBookUseCases.findBookById(bookId)
+                ttsBook = book
+            }
+
+            getLocalChapter(chapterId)
+            subscribeChapters(bookId)
+            readPreferences()
+            if (ttsChapter?.id != chapterId)  {
+                runTTSService(Player.PAUSE)
+            }
+            initialize = true
+        }
+    }
+
+    fun readPreferences() {
+        viewModelScope.launch {
+            speechSpeed = speechPrefUseCases.readRate()
+            pitch = speechPrefUseCases.readPitch()
+            currentVoice = speechPrefUseCases.readVoice()
+            currentLanguage = speechPrefUseCases.readLanguage()
+            autoNextChapter = speechPrefUseCases.readAutoNext()
+            font = readerUseCases.selectedFontStateUseCase.readFont()
+            lineHeight = readerUseCases.fontHeightUseCase.read()
+        }
+    }
+
+    var controller: MediaControllerCompat? = null
+    private val ctrlCallback = TTSController()
+    fun initMedia(context: Context) {
+        browser = MediaBrowserCompat(
+            context,
+            ComponentName(context, TTSService::class.java),
+            connCallback(context),
+            null
+        )
+        browser.connect()
+    }
+
+    override fun onDestroy() {
+        browser.disconnect()
+        super.onDestroy()
+    }
+
+    lateinit var browser: MediaBrowserCompat
+    private fun connCallback(context: Context) = object : MediaBrowserCompat.ConnectionCallback() {
+        override fun onConnected() {
+            isServiceConnected = true
+            browser.sessionToken.also { token ->
+                controller = MediaControllerCompat(context, token)
+                context.findComponentActivity()?.let { activity ->
+                    MediaControllerCompat.setMediaController(
+                        activity,
+                        controller
+                    )
+                }
+            }
+            initController()
+        }
+
+        override fun onConnectionSuspended() {
+            isServiceConnected = false
+            controller?.unregisterCallback(ctrlCallback)
+            controller = null
+        }
+    }
+
+    fun initController() {
+        controller?.registerCallback(ctrlCallback)
+        ctrlCallback.onMetadataChanged(controller?.metadata)
+        ctrlCallback.onPlaybackStateChanged(controller?.playbackState)
+    }
+
+    private inner class TTSController : MediaControllerCompat.Callback() {
+
+        override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
+            super.onMetadataChanged(metadata)
+            if (metadata == null || !initialize) return
+            val novelId = metadata.getLong(TTSService.NOVEL_ID)
+            val currentParagraph = metadata.getLong(TTSService.PROGRESS)
+            val chapterId = metadata.getLong(TTSService.CHAPTER_ID)
+            if (ttsBook?.id != novelId) {
+                viewModelScope.launch {
+                    ttsBook = getBookUseCases.findBookById(novelId)
+                }
+            }
+            if (currentParagraph != currentReadingParagraph.toLong()) {
+                currentReadingParagraph = currentParagraph.toInt()
+            }
+            if (chapterId != ttsChapter?.id) {
+                viewModelScope.launch {
+                    ttsChapter = getChapterUseCase.findChapterById(chapterId)
+                }
+            }
+
+        }
+
+        override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
+            super.onPlaybackStateChanged(state)
+            if (state == null) return
+            when (state.state) {
+                PlaybackStateCompat.STATE_PLAYING -> {
+                    isPlaying = true
+                }
+                PlaybackStateCompat.STATE_PAUSED -> {
+                    isPlaying = false
+                }
+                PlaybackStateCompat.STATE_NONE -> {
+                    isPlaying = false
+                }
+                PlaybackStateCompat.STATE_BUFFERING -> {
+                    isPlaying = false
+                }
+                else -> {}
+            }
+        }
+
+        override fun onSessionEvent(event: String?, extras: Bundle?) {
+            super.onSessionEvent(event, extras)
+            if (extras == null) return
+        }
+    }
+
+    fun runTTSService(command: Int = -1) {
+        serviceUseCases.startTTSServicesUseCase(
+            chapterId = ttsChapter?.id,
+            bookId = ttsBook?.id,
+            command = command
+        )
+    }
+
+    fun getLocalChapter(chapterId: Long) {
+        viewModelScope.launch {
+            ttsIsLoading = true
+            val chapter = getChapterUseCase.findChapterById(chapterId)
+            ttsChapter = chapter
+            if (chapter?.isEmpty() == true) {
+                ttsSource?.let { source -> getRemoteChapter(chapter, source) }
+            }
+            runTTSService(Player.PAUSE)
+            ttsIsLoading = false
+        }
+    }
+
+    fun subscribeChapters(bookId:Long) {
+        viewModelScope.launch {
+            getChapterUseCase.subscribeChaptersByBookId(
+                bookId
+            ).collect {
+                ttsChapters = it
+            }
+        }
+
+    }
+
+    private suspend fun getRemoteChapter(
+        chapter: Chapter,
+        source: org.ireader.core_api.source.Source
+    ) {
+        remoteUseCases.getRemoteReadingContent(
+            chapter,
+            source,
+            onSuccess = { result ->
+                ttsChapter = result
+            },
+            onError = {
+
+            }
+        )
+    }
+}
