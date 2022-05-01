@@ -129,16 +129,9 @@ object TTSScreenSpec : ScreenSpec {
                     vm.controller?.transportControls?.fastForward()
                 },
                 onValueChange = {
-                    // vm.currentReadingParagraph = it.toInt()
-                    //  vm.controller?.transportControls?.stop()
                     vm.controller?.transportControls?.seekTo(it.toLong())
                 },
-                onValueChangeFinished = {
-                    if (vm.isPlaying) {
-                        //  vm.controller?.transportControls?.stop()
-                        //vm.controller?.transportControls?.seekTo(vm.currentReadingParagraph.toLong())
-                    }
-                },
+                onValueChangeFinished = {},
                 onMap = { drawer ->
                     scope.launch {
                         try {

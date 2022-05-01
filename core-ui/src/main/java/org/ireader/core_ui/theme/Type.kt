@@ -24,8 +24,47 @@ val sourceSansPro = FontFamily(
 )
 val supermercadoOne = FontFamily(
     listOf(
-
         Font(R.font.supermercado_one_regular, weight = FontWeight.Normal),
+    )
+)
+val pt_serif = FontFamily(
+    listOf(
+        Font(R.font.ptserif_regular, weight = FontWeight.Normal),
+    )
+)
+val arbutus_slab = FontFamily(
+    listOf(
+        Font(R.font.arbutusslab_regular, weight = FontWeight.Normal),
+    )
+)
+val domine = FontFamily(
+    listOf(
+        Font(R.font.domine_regular, weight = FontWeight.Normal),
+    )
+)
+val lora = FontFamily(
+    listOf(
+        Font(R.font.lora_regular, weight = FontWeight.Normal),
+    )
+)
+val nunito = FontFamily(
+    listOf(
+        Font(R.font.nunito_regular, weight = FontWeight.Normal),
+    )
+)
+val noto = FontFamily(
+    listOf(
+        Font(R.font.noto_sans_regular, weight = FontWeight.Normal),
+    )
+)
+val openSans = FontFamily(
+    listOf(
+        Font(R.font.opensans_regular, weight = FontWeight.Normal),
+    )
+)
+val roboto_serif = FontFamily(
+    listOf(
+        Font(R.font.robotoserif_regular, weight = FontWeight.Normal),
     )
 )
 val comfortaa = FontFamily(
@@ -45,7 +84,15 @@ val fonts = listOf<FontType>(
     FontType.Poppins,
     FontType.SourceSansPro,
     FontType.SupermercadoOne,
-    FontType.Comfortaa
+    FontType.Comfortaa,
+    FontType.PTSerif,
+    FontType.ArbutusSlab,
+    FontType.Domine,
+    FontType.Lora,
+    FontType.Nunito,
+    FontType.Noto,
+    FontType.OpenSand,
+    FontType.RobotoSerif,
 )
 
 val readerScreenBackgroundColors = listOf<BackgroundColor>(

@@ -63,7 +63,15 @@ import org.ireader.domain.use_cases.remote.GetRemoteBooksUseCase
 import org.ireader.domain.use_cases.remote.GetRemoteChapters
 import org.ireader.domain.use_cases.remote.GetRemoteReadingContent
 import org.ireader.domain.use_cases.remote.RemoteUseCases
+import org.ireader.domain.use_cases.remote.key.ClearExploreMode
+import org.ireader.domain.use_cases.remote.key.DeleteAllExploredBook
 import org.ireader.domain.use_cases.remote.key.DeleteAllRemoteKeys
+import org.ireader.domain.use_cases.remote.key.FindAllPagedExploreBooks
+import org.ireader.domain.use_cases.remote.key.InsertAllExploredBook
+import org.ireader.domain.use_cases.remote.key.InsertAllRemoteKeys
+import org.ireader.domain.use_cases.remote.key.PrepareExploreMode
+import org.ireader.domain.use_cases.remote.key.RemoteKeyUseCase
+import org.ireader.domain.use_cases.remote.key.SubScribeAllPagedExploreBooks
 import org.ireader.image_loader.LibraryCovers
 import org.ireader.sources.extension.CatalogsStateImpl
 import javax.inject.Singleton
@@ -158,6 +166,24 @@ class UseCasesInject {
             deleteChaptersByBookId = DeleteChaptersByBookId(localChapterRepository)
         )
     }
+
+    @Provides
+    @Singleton
+    fun providesRemoteKeyUseCase(
+        remoteKeyRepository: RemoteKeyRepository
+    ): RemoteKeyUseCase {
+        return RemoteKeyUseCase(
+            deleteAllExploredBook = DeleteAllExploredBook(remoteKeyRepository),
+            clearExploreMode = ClearExploreMode(remoteKeyRepository),
+            deleteAllRemoteKeys = DeleteAllRemoteKeys(remoteKeyRepository),
+            findAllPagedExploreBooks = FindAllPagedExploreBooks(remoteKeyRepository),
+            insertAllExploredBook = InsertAllExploredBook(remoteKeyRepository),
+            insertAllRemoteKeys = InsertAllRemoteKeys(remoteKeyRepository),
+            prepareExploreMode = PrepareExploreMode(remoteKeyRepository),
+            subScribeAllPagedExploreBooks = SubScribeAllPagedExploreBooks(remoteKeyRepository),
+        )
+    }
+
 
     /*** Catalog UseCase **/
     @Provides
