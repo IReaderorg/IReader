@@ -10,9 +10,8 @@ import org.ireader.core_catalogs.service.CatalogRemoteApi
 import org.ireader.core_catalogs.service.CatalogRemoteRepository
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
 
-class SyncRemoteCatalogs @Inject constructor(
+class SyncRemoteCatalogs(
     private val catalogRemoteRepository: CatalogRemoteRepository,
     private val catalogRemoteApi: CatalogRemoteApi,
     private val catalogPreferences: CatalogPreferences,

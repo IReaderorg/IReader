@@ -1,7 +1,5 @@
 package org.ireader.domain.use_cases.remote
 
-import android.content.Context
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellationException
 import org.ireader.common_extensions.async.withIOContext
 import org.ireader.common_models.entities.Book
@@ -13,7 +11,7 @@ import org.ireader.core_api.source.Source
 import org.ireader.core_ui.exceptionHandler
 import javax.inject.Inject
 
-class GetRemoteChapters @Inject constructor(@ApplicationContext private val context: Context) {
+class GetRemoteChapters @Inject constructor() {
     suspend operator fun invoke(
         book: Book,
         source: Source,

@@ -7,9 +7,8 @@ import kotlinx.coroutines.flow.emptyFlow
 import org.ireader.common_models.entities.CatalogInstalled
 import org.ireader.core_catalogs.model.InstallStep
 import org.ireader.core_catalogs.service.CatalogRemoteRepository
-import javax.inject.Inject
 
-class UpdateCatalog @Inject constructor(
+class UpdateCatalog(
     private val catalogRemoteRepository: CatalogRemoteRepository,
     private val installCatalog: InstallCatalog,
 ) {

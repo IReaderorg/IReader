@@ -3,6 +3,7 @@ package org.ireader.tts
 import android.content.ComponentName
 import android.content.Context
 import android.os.Bundle
+import android.speech.tts.TextToSpeech
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
@@ -42,8 +43,8 @@ class TTSViewModel @Inject constructor(
 ) : BaseViewModel(),
     TTSState by ttsState {
 
-    private var  chapterId: Long = -1
-    private var  initialize: Boolean = false
+    private var chapterId: Long = -1
+    private var initialize: Boolean = false
 
     init {
         val sourceId = savedStateHandle.get<Long>(NavigationArgs.sourceId.name)
@@ -70,7 +71,7 @@ class TTSViewModel @Inject constructor(
             getLocalChapter(chapterId)
             subscribeChapters(bookId)
             readPreferences()
-            if (ttsChapter?.id != chapterId)  {
+            if (ttsChapter?.id != chapterId) {
                 runTTSService(Player.PAUSE)
             }
             initialize = true
@@ -91,6 +92,7 @@ class TTSViewModel @Inject constructor(
 
     var controller: MediaControllerCompat? = null
     private val ctrlCallback = TTSController()
+    private lateinit var textReader: TextToSpeech
     fun initMedia(context: Context) {
         browser = MediaBrowserCompat(
             context,
@@ -99,6 +101,15 @@ class TTSViewModel @Inject constructor(
             null
         )
         browser.connect()
+        textReader = TextToSpeech(context) { status ->
+            if (status == TextToSpeech.SUCCESS) {
+                this.
+                ttsState.languages = textReader.availableLanguages.toList()
+                ttsState.voices = textReader.voices.toList()
+            }
+
+        }
+
     }
 
     override fun onDestroy() {
@@ -139,24 +150,26 @@ class TTSViewModel @Inject constructor(
 
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
             super.onMetadataChanged(metadata)
+            meta = metadata
             if (metadata == null || !initialize) return
             val novelId = metadata.getLong(TTSService.NOVEL_ID)
             val currentParagraph = metadata.getLong(TTSService.PROGRESS)
             val chapterId = metadata.getLong(TTSService.CHAPTER_ID)
-            if (ttsBook?.id != novelId) {
+            val isLoading = metadata.getLong(TTSService.IS_LOADING)
+            val error = metadata.getLong(TTSService.ERROR)
+            if (ttsBook?.id != novelId && novelId != -1L) {
                 viewModelScope.launch {
                     ttsBook = getBookUseCases.findBookById(novelId)
                 }
             }
-            if (currentParagraph != currentReadingParagraph.toLong()) {
+            if (currentParagraph != currentReadingParagraph.toLong() && currentParagraph != -1L) {
                 currentReadingParagraph = currentParagraph.toInt()
             }
-            if (chapterId != ttsChapter?.id) {
+            if (chapterId != ttsChapter?.id && chapterId != -1L) {
                 viewModelScope.launch {
                     ttsChapter = getChapterUseCase.findChapterById(chapterId)
                 }
             }
-
         }
 
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
@@ -195,18 +208,16 @@ class TTSViewModel @Inject constructor(
 
     fun getLocalChapter(chapterId: Long) {
         viewModelScope.launch {
-            ttsIsLoading = true
             val chapter = getChapterUseCase.findChapterById(chapterId)
             ttsChapter = chapter
             if (chapter?.isEmpty() == true) {
                 ttsSource?.let { source -> getRemoteChapter(chapter, source) }
             }
             runTTSService(Player.PAUSE)
-            ttsIsLoading = false
         }
     }
 
-    fun subscribeChapters(bookId:Long) {
+    fun subscribeChapters(bookId: Long) {
         viewModelScope.launch {
             getChapterUseCase.subscribeChaptersByBookId(
                 bookId
@@ -214,7 +225,6 @@ class TTSViewModel @Inject constructor(
                 ttsChapters = it
             }
         }
-
     }
 
     private suspend fun getRemoteChapter(

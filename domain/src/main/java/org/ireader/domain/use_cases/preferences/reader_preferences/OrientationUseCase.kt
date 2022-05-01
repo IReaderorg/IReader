@@ -86,19 +86,19 @@ class TextReaderPrefUseCase @Inject constructor(
     private val appPreferences: AppPreferences,
 ) {
     fun savePitch(value: Float) {
-        appPreferences.speechRate().set(value)
-    }
-
-    suspend  fun readPitch(): Float {
-        return appPreferences.speechRate().get()
-    }
-
-    fun saveRate(value: Float) {
         appPreferences.speechPitch().set(value)
     }
 
-    suspend fun readRate(): Float {
+    suspend  fun readPitch(): Float {
         return appPreferences.speechPitch().get()
+    }
+
+    fun saveRate(value: Float) {
+        appPreferences.speechRate().set(value)
+    }
+
+    suspend fun readRate(): Float {
+        return appPreferences.speechRate().get()
     }
 
     fun saveLanguage(value: String) {

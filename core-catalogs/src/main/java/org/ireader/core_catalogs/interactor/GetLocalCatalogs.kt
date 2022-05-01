@@ -8,9 +8,8 @@ import org.ireader.common_data.repository.LocalBookRepository
 import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.core_catalogs.CatalogStore
 import org.ireader.core_catalogs.model.CatalogSort
-import javax.inject.Inject
 
-class GetLocalCatalogs @Inject constructor(
+class GetLocalCatalogs(
     private val catalogStore: CatalogStore,
     private val libraryRepository: LocalBookRepository,
 ) {

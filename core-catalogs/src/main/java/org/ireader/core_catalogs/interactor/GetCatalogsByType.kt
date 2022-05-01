@@ -8,9 +8,8 @@ import org.ireader.common_models.entities.CatalogInstalled
 import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.common_models.entities.CatalogRemote
 import org.ireader.core_catalogs.model.CatalogSort
-import javax.inject.Inject
 
-class GetCatalogsByType @Inject constructor(
+class GetCatalogsByType(
     private val localCatalogs: GetLocalCatalogs,
     private val remoteCatalogs: GetRemoteCatalogs,
 ) {

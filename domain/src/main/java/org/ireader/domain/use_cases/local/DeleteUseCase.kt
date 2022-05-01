@@ -10,11 +10,9 @@ import org.ireader.domain.use_cases.local.delete_usecases.chapter.DeleteChapterB
 import org.ireader.domain.use_cases.local.delete_usecases.chapter.DeleteChapters
 import org.ireader.domain.use_cases.local.delete_usecases.chapter.DeleteChaptersByBookId
 import org.ireader.domain.use_cases.remote.key.DeleteAllRemoteKeys
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-data class DeleteUseCase @Inject constructor(
+
+data class DeleteUseCase(
     val deleteAllExploreBook: DeleteAllExploreBook,
     val deleteBooks: DeleteBooks,
     val deleteBookAndChapterByBookIds: DeleteBookAndChapterByBookIds,

@@ -7,6 +7,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import org.ireader.core_api.http.HttpClients
 import org.ireader.core_api.os.PackageInstaller
+import org.ireader.core_api.prefs.PreferenceStore
 import org.ireader.core_catalogs.CatalogPreferences
 import org.ireader.core_catalogs.CatalogStore
 import org.ireader.core_catalogs.service.CatalogInstaller
@@ -56,6 +57,13 @@ class CatalogModule {
         httpClient: HttpClients,
     ): CatalogRemoteApi {
         return CatalogGithubApi(httpClient)
+    }
+    @Provides
+    @Singleton
+    fun provideCatalogPreferences(
+        store: PreferenceStore
+    ): CatalogPreferences {
+        return CatalogPreferences(store)
     }
 
     @Provides

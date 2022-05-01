@@ -1,7 +1,5 @@
 package org.ireader.domain.use_cases.remote
 
-import android.content.Context
-import dagger.hilt.android.qualifiers.ApplicationContext
 import org.ireader.common_extensions.async.withIOContext
 import org.ireader.common_models.entities.Chapter
 import org.ireader.common_models.entities.toChapterInfo
@@ -11,7 +9,7 @@ import org.ireader.core_ui.exceptionHandler
 import org.ireader.domain.R
 import javax.inject.Inject
 
-class GetRemoteReadingContent @Inject constructor(@ApplicationContext private val context: Context) {
+class GetRemoteReadingContent @Inject constructor() {
     suspend operator fun invoke(
         chapter: Chapter,
         source: Source,

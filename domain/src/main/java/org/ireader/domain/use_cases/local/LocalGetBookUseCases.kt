@@ -5,11 +5,9 @@ import org.ireader.domain.use_cases.local.book_usecases.FindBookById
 import org.ireader.domain.use_cases.local.book_usecases.FindBookByIds
 import org.ireader.domain.use_cases.local.book_usecases.SubscribeBookById
 import org.ireader.domain.use_cases.local.book_usecases.SubscribeInLibraryBooks
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-data class LocalGetBookUseCases @Inject constructor(
+
+data class LocalGetBookUseCases(
     val subscribeBookById: SubscribeBookById,
     val findBookById: FindBookById,
     val findBookByIds: FindBookByIds,

@@ -1,8 +1,10 @@
 package org.ireader.tts
 
+import android.speech.tts.Voice
 import androidx.compose.animation.core.TweenSpec
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,7 +21,6 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -29,8 +30,9 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.Scaffold
+import androidx.compose.material.ScaffoldState
 import androidx.compose.material.Slider
 import androidx.compose.material.SliderDefaults
 import androidx.compose.material.Text
@@ -44,10 +46,7 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
-import androidx.compose.material.rememberModalBottomSheetState
-import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,7 +60,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.rememberPagerState
+import com.google.accompanist.pager.PagerState
 import kotlinx.coroutines.launch
 import org.ireader.common_models.entities.Chapter
 import org.ireader.components.components.BookImageComposable
@@ -71,20 +70,19 @@ import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.components.reusable_composable.SuperSmallTextComposable
 import org.ireader.core.R
-import org.ireader.core_api.log.Log
 import org.ireader.core_api.source.Source
 import org.ireader.domain.services.tts_service.TTSState
 import org.ireader.image_loader.BookCover
 import org.ireader.reader.ReaderScreenDrawer
 import org.ireader.reader.components.SettingItemComposable
 import org.ireader.reader.components.SettingItemToggleComposable
-import java.math.RoundingMode
+import java.util.Locale
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalPagerApi::class)
 @Composable
 fun TTSScreen(
     modifier: Modifier = Modifier,
-    vm: TTSViewModel,
+    vm: TTSState,
     onPrev: () -> Unit,
     onNextPar: () -> Unit,
     onPrevPar: () -> Unit,
@@ -95,51 +93,21 @@ fun TTSScreen(
     onValueChange: (Float) -> Unit,
     onValueChangeFinished: () -> Unit,
     onMap: (LazyListState) -> Unit,
-    onPopStack:() -> Unit,
+    onPopStack: () -> Unit,
+    sliderInteractionSource: MutableInteractionSource,
+    bottomSheetState : ModalBottomSheetState,
+    scaffoldState:ScaffoldState,
+    drawerScrollState:LazyListState,
+    pagerState:PagerState,
+    onAutoNextChapterToggle:(Boolean) -> Unit,
+    onVoice:(Voice) -> Unit,
+    onLanguage:(Locale) -> Unit,
+    onSpeechRateChange:(isIncreased: Boolean) -> Unit,
+    onSpeechPitchChange:(isIncreased: Boolean) -> Unit,
+    onDrawerReverseIcon:() -> Unit
 ) {
-
-    val context = LocalContext.current
-    val pagerState = rememberPagerState()
-
-    val drawerScrollState = rememberLazyListState()
-    val textScroll = rememberScrollState()
-    val chapter = vm.ttsChapter
-    val chapters = vm.ttsChapters
     val scope = rememberCoroutineScope()
-    val scaffoldState = rememberScaffoldState()
-    val bottomSheetState =
-        rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
-
-
-
-    LaunchedEffect(key1 = scaffoldState.drawerState.targetValue) {
-        if (chapter != null && scaffoldState.drawerState.targetValue == DrawerValue.Open && vm.ttsChapters.isNotEmpty()) {
-
-            val index = vm.ttsChapters.indexOfFirst { it.id == chapter.id }
-            if (index != -1) {
-                drawerScrollState.scrollToItem(index)
-            }
-        }
-    }
-
-
-    LaunchedEffect(key1 = vm.ttsState.currentReadingParagraph) {
-        try {
-            if (vm.currentReadingParagraph != pagerState.targetPage && vm.currentReadingParagraph != vm.prevPar && vm.ttsState.currentReadingParagraph < pagerState.pageCount) {
-                pagerState.scrollToPage(vm.ttsState.currentReadingParagraph)
-                    vm.controller?.transportControls?.seekTo(vm.ttsState.currentReadingParagraph.toLong())
-            }
-        } catch (e: Throwable) {
-            Log.error(e, "")
-        }
-    }
-    LaunchedEffect(key1 = pagerState.currentPage) {
-        if (vm.currentReadingParagraph != pagerState.currentPage) {
-          //  vm.currentReadingParagraph = pagerState.currentPage
-            vm.prevPar = pagerState.currentPage
-                vm.controller?.transportControls?.seekTo(pagerState.currentPage.toLong())
-            }
-    }
+    val context = LocalContext.current
 
     ModalBottomSheetLayout(
         modifier = Modifier.systemBarsPadding(),
@@ -150,34 +118,30 @@ fun TTSScreen(
                         .fillMaxSize()
                         .padding(16.dp)
                 ) {
-                    VoiceChip(viewModel = vm, modifier = Modifier.height(32.dp))
-                    LanguageChip(viewModel = vm, modifier = Modifier.height(32.dp))
+                    VoiceChip(
+                        viewModel = vm,
+                        modifier = Modifier.height(32.dp),
+                        onVoice = onVoice
+                    )
+                    LanguageChip(
+                        viewModel = vm,
+                        modifier = Modifier.height(32.dp),
+                        onLanguage = onLanguage
+                    )
                     SettingItemToggleComposable(
                         text = "Auto Next Chapter",
                         value = vm.autoNextChapter,
-                        onToggle = {
-                            vm.autoNextChapter = !vm.autoNextChapter
-                            vm.speechPrefUseCases.saveAutoNext(vm.autoNextChapter)
-                        }
+                        onToggle = onAutoNextChapterToggle
                     )
                     SettingItemComposable(
                         text = "Speech Rate",
                         value = vm.speechSpeed.toString(),
                         onAdd = {
-                            vm.speechSpeed += .1f
-                            vm.speechSpeed =
-                                vm.speechSpeed.toBigDecimal().setScale(1, RoundingMode.FLOOR)
-                                    .toFloat()
-                            vm.speechPrefUseCases.saveRate(vm.speechSpeed)
+                            onSpeechRateChange(true)
+
                         },
                         onMinus = {
-                            if (vm.speechSpeed != 0F) {
-                                vm.speechSpeed -= .1f
-                                vm.speechSpeed =
-                                    vm.speechSpeed.toBigDecimal().setScale(1, RoundingMode.FLOOR)
-                                        .toFloat()
-                                vm.speechPrefUseCases.saveRate(vm.speechSpeed)
-                            }
+                            onSpeechRateChange(false)
                         }
                     )
 
@@ -185,19 +149,10 @@ fun TTSScreen(
                         text = "Pitch",
                         value = vm.pitch.toString(),
                         onAdd = {
-                            vm.pitch += .1f
-                            vm.pitch =
-                                vm.pitch.toBigDecimal().setScale(1, RoundingMode.FLOOR).toFloat()
-                            vm.speechPrefUseCases.savePitch(vm.speechSpeed)
+                            onSpeechPitchChange(true)
                         },
                         onMinus = {
-                            if (vm.pitch != 0F) {
-                                vm.pitch -= .1f
-                                vm.pitch =
-                                    vm.pitch.toBigDecimal().setScale(1, RoundingMode.FLOOR)
-                                        .toFloat()
-                                vm.speechPrefUseCases.savePitch(vm.speechSpeed)
-                            }
+                            onSpeechPitchChange(false)
                         }
                     )
                 }
@@ -217,15 +172,11 @@ fun TTSScreen(
             drawerContent = {
                 ReaderScreenDrawer(
                     modifier = Modifier.statusBarsPadding(),
-                    onReverseIcon = {
-                        if (chapter != null) {
-
-                        }
-                    },
+                    onReverseIcon = onDrawerReverseIcon,
                     onChapter = onChapter,
-                    chapter = chapter,
+                    chapter = vm.ttsChapter,
                     source = source,
-                    chapters = chapters,
+                    chapters = vm.uiChapters.value,
                     drawerScrollState = drawerScrollState,
                     onMap = onMap,
                 )
@@ -284,7 +235,7 @@ fun TTSScreen(
                                         maxLine = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
-                                    SuperSmallTextComposable(text = "${vm.currentReadingParagraph + 1}/${vm.ttsContent?.value?.lastIndex ?: 0L}")
+                                    SuperSmallTextComposable(text = "${vm.currentReadingParagraph + 1}/${vm.ttsContent?.value?.size ?: 0L}")
                                 }
                                 HorizontalPager(
                                     modifier = Modifier.weight(6f), count = chapter.content.size,
@@ -344,7 +295,8 @@ fun TTSScreen(
                                         onPrevPar = onPrevPar,
                                         content = content,
                                         onValueChange = onValueChange,
-                                        onValueChangeFinished = onValueChangeFinished
+                                        onValueChangeFinished = onValueChangeFinished,
+                                        sliderInteractionSource = sliderInteractionSource
                                     )
                                 }
                             }
@@ -419,6 +371,7 @@ private fun TTLScreenPlay(
     onPrevPar: () -> Unit,
     onValueChange: (Float) -> Unit,
     onValueChangeFinished: () -> Unit,
+    sliderInteractionSource: MutableInteractionSource
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         content?.let { chapter ->
@@ -427,7 +380,7 @@ private fun TTLScreenPlay(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 8.dp),
-                value = if (content.isEmpty()) 0F else vm.currentReadingParagraph.toFloat(),
+                value = if (content.isEmpty()) 0F else vm.uiPage.value.toFloat(),
                 onValueChange = {
                     onValueChange(it)
                 },
@@ -441,7 +394,8 @@ private fun TTLScreenPlay(
                     inactiveTickColor = MaterialTheme.colors.onBackground.copy(alpha = .6f),
                     inactiveTrackColor = MaterialTheme.colors.onBackground.copy(alpha = .6f),
                     activeTickColor = MaterialTheme.colors.primary.copy(alpha = .6f)
-                )
+                ),
+                interactionSource = sliderInteractionSource
             )
         }
 
@@ -478,7 +432,7 @@ private fun TTLScreenPlay(
                     contentAlignment = Alignment.Center
                 ) {
                     when {
-                        vm.ttsIsLoading -> {
+                        vm.isLoading.value -> {
                             showLoading()
                         }
                         vm.isPlaying -> {

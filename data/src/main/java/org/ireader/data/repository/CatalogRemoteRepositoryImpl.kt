@@ -4,9 +4,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import org.ireader.core_catalogs.service.CatalogRemoteRepository
 import org.ireader.data.local.dao.CatalogDao
-import javax.inject.Inject
 
-class CatalogRemoteRepositoryImpl @Inject constructor(
+class CatalogRemoteRepositoryImpl(
     private val dao: CatalogDao,
 ) : CatalogRemoteRepository {
 

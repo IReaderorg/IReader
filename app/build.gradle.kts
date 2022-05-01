@@ -87,6 +87,7 @@ dependencies {
     implementation(project(Modules.coreCatalogs))
     implementation(project(Modules.commonExtensions))
     implementation(project(Modules.uiImageLoader))
+    implementation(project(Modules.uiSources))
 
     /** Firebase **/
     implementation(platform(libs.firebase.bom))

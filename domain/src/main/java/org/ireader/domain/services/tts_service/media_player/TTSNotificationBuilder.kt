@@ -24,7 +24,6 @@ import org.ireader.domain.notification.Notifications.CHANNEL_TTS
 import org.ireader.domain.notification.flags
 import org.ireader.domain.notification.setLargeIcon
 import org.ireader.domain.services.tts_service.Player
-import org.ireader.image_loader.BookCover
 
 /**
  * Helper class to encapsulate code for building notifications.
@@ -176,8 +175,6 @@ class TTSNotificationBuilder constructor(
 
     suspend fun buildTTSNotification(
         mediaSessionCompat: MediaSessionCompat,
-        isLoading: Boolean = false,
-        isError: Boolean = false,
     ): NotificationCompat.Builder {
         val controller = MediaControllerCompat(context, mediaSessionCompat.sessionToken)
 
@@ -190,6 +187,8 @@ class TTSNotificationBuilder constructor(
         val cover = controller.metadata.getText(TTSService.NOVEL_COVER)
         val progress = controller.metadata.getLong(TTSService.PROGRESS)
         val lastPar = controller.metadata.getLong(TTSService.LAST_PARAGRAPH)
+        val isLoading : Boolean = controller.metadata.getLong(TTSService.IS_LOADING) == 1L
+        val isError : Boolean = controller.metadata.getLong(TTSService.ERROR) == 1L
 
         val playbackState = controller.playbackState
 
@@ -197,14 +196,8 @@ class TTSNotificationBuilder constructor(
             when {
                 isLoading -> "Loading..."
                 isError -> "ERROR"
-                else -> "$progress/$lastPar"
+                else -> "${progress + 1}/${lastPar + 1}"
             }
-        val bookCover = BookCover(
-            id = bookId,
-            sourceId = sourceId,
-            cover = cover.toString(),
-            favorite = favorite == 1L
-        )
         return NotificationCompat.Builder(
             context,
             Notifications.CHANNEL_TTS

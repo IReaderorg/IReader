@@ -6,12 +6,12 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import org.ireader.core_catalogs.service.CatalogRemoteRepository
 import org.ireader.data.local.dao.CatalogDao
+import org.ireader.data.local.dao.ChapterDao
 import org.ireader.data.local.dao.DownloadDao
 import org.ireader.data.local.dao.HistoryDao
 import org.ireader.data.local.dao.LibraryBookDao
 import org.ireader.data.local.dao.RemoteKeysDao
 import org.ireader.data.local.dao.UpdatesDao
-import org.ireader.data.local.dao.ChapterDao
 import org.ireader.data.repository.CatalogRemoteRepositoryImpl
 import org.ireader.data.repository.DownloadRepositoryImpl
 import org.ireader.data.repository.HistoryRepositoryImpl
@@ -82,4 +82,8 @@ class RepositoryInject {
     ): org.ireader.common_data.repository.HistoryRepository {
         return HistoryRepositoryImpl(historyDao)
     }
+
+
+
+
 }
