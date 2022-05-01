@@ -1,5 +1,6 @@
 package org.ireader.tts
 
+import android.speech.tts.Voice
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -27,11 +28,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.ireader.components.reusable_composable.CaptionTextComposable
+import org.ireader.domain.services.tts_service.TTSState
+import java.util.Locale
 
 @Composable
 fun VoiceChip(
     modifier: Modifier = Modifier,
-    viewModel: TTSViewModel,
+    viewModel: TTSState,
+    onVoice:(Voice) -> Unit
 ) {
 
     Row(
@@ -71,8 +75,7 @@ fun VoiceChip(
                                 CircleShape
                             )
                             .clickable {
-                                viewModel.currentVoice = voices[index].locale.displayName
-                                viewModel.speechPrefUseCases.saveVoice(voices[index].locale.displayName)
+                                onVoice(voices[index])
                             },
                         contentAlignment = Alignment.Center
                     ) {
@@ -92,7 +95,8 @@ fun VoiceChip(
 @Composable
 fun LanguageChip(
     modifier: Modifier = Modifier,
-    viewModel: TTSViewModel,
+    viewModel: TTSState,
+    onLanguage:(Locale) -> Unit
 ) {
     val context = LocalContext.current
     Row(
@@ -127,8 +131,7 @@ fun LanguageChip(
                                 CircleShape
                             )
                             .clickable {
-                                viewModel.currentLanguage = language[index].displayName
-                                viewModel.speechPrefUseCases.saveLanguage(language[index].displayName)
+                                onLanguage(language[index])
                             },
                         contentAlignment = Alignment.Center
                     ) {

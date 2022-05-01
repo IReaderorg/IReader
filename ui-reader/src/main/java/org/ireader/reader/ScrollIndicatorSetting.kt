@@ -20,39 +20,22 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.core.graphics.toColorInt
-import org.ireader.common_extensions.async.viewModelIOCoroutine
 import org.ireader.components.reusable_composable.AppTextField
 import org.ireader.components.reusable_composable.MidSizeTextComposable
-import org.ireader.reader.viewmodel.ReaderScreenViewModel
+import org.ireader.reader.viewmodel.ReaderScreenPreferencesState
 
 @Composable
 fun ScrollIndicatorSetting(
     enable: Boolean = false,
-    vm: ReaderScreenViewModel,
-    onDismiss: () -> Unit = {
-        vm.scrollIndicatorDialogShown = false
-        vm.prefFunc.apply {
-            vm.viewModelIOCoroutine {
-                vm.readScrollIndicatorPadding()
-                vm.readScrollIndicatorWidth()
-            }
-
-        }
-        // vm.scrollIndicatorPadding = vm.readScrollIndicatorPadding()
-        // vm.scrollIndicatorWith = vm.readScrollIndicatorWidth()
-        vm.prefFunc.apply {
-            vm.viewModelIOCoroutine {
-                vm.readBackgroundColor()
-                vm.readTextColor()
-            }
-        }
-    },
+    vm: ReaderScreenPreferencesState,
+    onDismiss: () -> Unit,
+    onBackgroundColorValueChange:(String) -> Unit,
+    onTextColorValueChange:(String) -> Unit,
+    onBackgroundColorAndTextColorApply:(bgColor:String,txtColor:String) -> Unit
 ) {
 
     val (bgValue, setBGValue) = remember { mutableStateOf<String>("") }
@@ -80,15 +63,7 @@ fun ScrollIndicatorSetting(
                         query = bgValue,
                         onValueChange = {
                             setBGValue(it)
-                            try {
-                                vm.backgroundColor = Color(it.toColorInt())
-                            } catch (e: Throwable) {
-                                vm.prefFunc.apply {
-                                    vm.viewModelIOCoroutine {
-                                        vm.readBackgroundColor()
-                                    }
-                                }
-                            }
+                            onBackgroundColorValueChange(it)
                         },
                         onConfirm = {
                             focusManager.clearFocus()
@@ -105,15 +80,7 @@ fun ScrollIndicatorSetting(
                         query = txtValue,
                         onValueChange = {
                             setTxtValue(it)
-                            try {
-                                vm.textColor = Color(it.toColorInt())
-                            } catch (e: Throwable) {
-                                vm.prefFunc.apply {
-                                    vm.viewModelIOCoroutine {
-                                        vm.readTextColor()
-                                    }
-                                }
-                            }
+                            onTextColorValueChange(it)
                         },
                         onConfirm = {
                             focusManager.clearFocus()
@@ -151,24 +118,7 @@ fun ScrollIndicatorSetting(
                     Button(
                         onClick = {
                             vm.scrollIndicatorDialogShown = false
-
-                            try {
-                                if (bgValue.isNotBlank()) {
-                                    vm.prefFunc.apply {
-                                        vm.setReaderBackgroundColor(vm.backgroundColor)
-                                    }
-                                }
-                            } catch (e: Throwable) {
-                            }
-
-                            try {
-                                if (txtValue.isNotBlank()) {
-                                    vm.prefFunc.apply {
-                                        vm.setReaderTextColor(vm.textColor)
-                                    }
-                                }
-                            } catch (e: Throwable) {
-                            }
+                            onBackgroundColorAndTextColorApply(bgValue,txtValue)
                         },
                         colors = ButtonDefaults.textButtonColors(
                             backgroundColor = MaterialTheme.colors.primary,

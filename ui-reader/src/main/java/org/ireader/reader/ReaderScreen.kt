@@ -1,7 +1,6 @@
 package org.ireader.reader
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -9,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.CircularProgressIndicator
@@ -20,18 +20,14 @@ import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Scaffold
-import androidx.compose.material.rememberDrawerState
+import androidx.compose.material.ScaffoldState
 import androidx.compose.material.rememberModalBottomSheetState
-import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.ireader.common_models.entities.Chapter
 import org.ireader.components.components.ISnackBarHost
@@ -39,7 +35,8 @@ import org.ireader.core_api.source.Source
 import org.ireader.reader.components.MainBottomSettingComposable
 import org.ireader.reader.components.ReaderSettingComposable
 import org.ireader.reader.reverse_swip_refresh.SwipeRefreshState
-import org.ireader.reader.viewmodel.ReaderScreenViewModel
+import org.ireader.reader.viewmodel.ReaderScreenPreferencesState
+import org.ireader.reader.viewmodel.ReaderScreenState
 
 @ExperimentalAnimationApi
 @OptIn(
@@ -49,7 +46,7 @@ import org.ireader.reader.viewmodel.ReaderScreenViewModel
 @Composable
 fun ReadingScreen(
     modifier: Modifier = Modifier,
-    vm: ReaderScreenViewModel,
+    vm: ReaderScreenState,
     source: Source,
     scrollState: LazyListState,
     drawerScrollState: LazyListState,
@@ -84,16 +81,20 @@ fun ReadingScreen(
     onBackgroundChange: (Int) -> Unit,
     onMap: (LazyListState) -> Unit,
     onPopBackStack: () -> Unit,
+    readerScreenPreferencesState: ReaderScreenPreferencesState,
+    toggleReaderMode:() -> Unit,
+    onDismiss: () -> Unit,
+    onBackgroundValueChange:(String) -> Unit,
+    onTextColorValueChange:(String) -> Unit,
+    onBackgroundColorAndTextColorApply:(bgColor:String,txtColor:String) -> Unit,
+    scaffoldState: ScaffoldState
 ) {
 
-    val chapters = vm.stateChapters
-    val scaffoldState = rememberScaffoldState(rememberDrawerState(DrawerValue.Closed))
+
     val modalState =
         rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
     val scope = rememberCoroutineScope()
-
     val chapter = vm.stateChapter
-    val context = LocalContext.current
 
     LaunchedEffect(key1 = scaffoldState.drawerState.targetValue) {
         if (chapter != null && scaffoldState.drawerState.targetValue == DrawerValue.Open && vm.stateChapters.isNotEmpty()) {
@@ -108,12 +109,7 @@ fun ReadingScreen(
                 }
             }
     }
-    LaunchedEffect(key1 = vm.autoScrollMode) {
-        while (vm.autoScrollInterval != 0L && vm.autoScrollMode) {
-            scrollState.scrollBy(vm.autoScrollOffset.toFloat())
-            delay(vm.autoScrollInterval)
-        }
-    }
+
     LaunchedEffect(key1 = modalState.currentValue) {
         when (modalState.currentValue) {
             ModalBottomSheetValue.Expanded -> vm.isReaderModeEnable = false
@@ -135,37 +131,10 @@ fun ReadingScreen(
             }
         }
     }
-    LaunchedEffect(key1 = vm.autoBrightnessMode) {
-        vm.prefFunc.apply {
-            vm.readBrightness(context)
-        }
-    }
-    LaunchedEffect(key1 = vm.initialized) {
-        kotlin.runCatching {
-            scrollState.scrollToItem(chapter?.progress ?: 1)
-        }
-    }
 
 
-    LaunchedEffect(key1 = true) {
 
-        vm.prefFunc.apply {
-            vm.readOrientation(context)
-            vm.readBrightness(context)
-            vm.readImmersiveMode(context)
-        }
 
-        vm.eventFlow.collectLatest { event ->
-            when (event) {
-                is org.ireader.common_extensions.UiEvent.ShowSnackbar -> {
-                    scaffoldState.snackbarHostState.showSnackbar(
-                        event.uiText.asString(context)
-                    )
-                }
-                else -> {}
-            }
-        }
-    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -182,7 +151,7 @@ fun ReadingScreen(
                 onWebView = {
                     onReaderWebView(modalState)
                 },
-                vm = vm,
+                vm = readerScreenPreferencesState,
                 state = vm,
                 scrollState = scrollState,
                 onBookMark = onReaderBookmark,
@@ -247,7 +216,7 @@ fun ReadingScreen(
                                     onChangeBrightness = onChangeBrightness,
                                     onToggleAutoBrightness = onToggleAutoBrightness,
                                     onBackgroundChange = onBackgroundChange,
-                                    vm = vm
+                                    vm = readerScreenPreferencesState
                                 )
                             }
                         }
@@ -273,18 +242,27 @@ fun ReadingScreen(
             )
         }
     ) { padding ->
-        ScrollIndicatorSetting(enable = vm.scrollIndicatorDialogShown, vm)
+        ScrollIndicatorSetting(
+            enable = readerScreenPreferencesState.scrollIndicatorDialogShown,
+            readerScreenPreferencesState,
+            onDismiss = onDismiss,
+            onBackgroundColorValueChange = onBackgroundValueChange,
+            onTextColorValueChange = onTextColorValueChange,
+            onBackgroundColorAndTextColorApply = onBackgroundColorAndTextColorApply,
+        )
         if (chapter != null) {
-            Box(modifier = modifier.fillMaxSize()) {
+            Box(modifier = modifier.fillMaxSize().padding(padding)) {
                 if (!chapter.isEmpty() && !vm.isLoading) {
                     ReaderText(
-                        vm = vm,
+                        vm = readerScreenPreferencesState,
                         chapter = chapter,
                         onNext = onNext,
                         swipeState = swipeState,
                         onPrev = { onPrev(true) },
                         scrollState = scrollState,
-                        modalState = modalState
+                        modalState = modalState,
+                        toggleReaderMode = toggleReaderMode,
+                        uiState = vm
                     )
                 }
 

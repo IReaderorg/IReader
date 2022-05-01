@@ -35,19 +35,22 @@ import org.ireader.core_ui.ui_components.isScrolledToTheEnd
 import org.ireader.reader.reverse_swip_refresh.ISwipeRefreshIndicator
 import org.ireader.reader.reverse_swip_refresh.MultiSwipeRefresh
 import org.ireader.reader.reverse_swip_refresh.SwipeRefreshState
-import org.ireader.reader.viewmodel.ReaderScreenViewModel
+import org.ireader.reader.viewmodel.ReaderScreenPreferencesState
+import org.ireader.reader.viewmodel.ReaderScreenState
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ReaderText(
     modifier: Modifier = Modifier,
-    vm: ReaderScreenViewModel,
+    vm: ReaderScreenPreferencesState,
+    uiState: ReaderScreenState,
     chapter: Chapter,
     onNext: () -> Unit,
     onPrev: () -> Unit,
     swipeState: SwipeRefreshState,
     scrollState: LazyListState,
     modalState: ModalBottomSheetState,
+    toggleReaderMode:() -> Unit
 ) {
 
     val scope = rememberCoroutineScope()
@@ -60,9 +63,7 @@ fun ReaderText(
                 interactionSource = interactionSource,
                 indication = null
             ) {
-                vm.apply {
-                    vm.toggleReaderMode(!vm.isReaderModeEnable)
-                }
+                toggleReaderMode()
             }
             .fillMaxSize()
             .background(vm.backgroundColor)
@@ -104,7 +105,7 @@ fun ReaderText(
                 ),
             ),
         ) {
-            vm.stateContent?.value?.let { content ->
+            uiState.stateContent?.value?.let { content ->
                 LazyColumnScrollbar(
                     listState = scrollState,
                     padding = if (vm.scrollIndicatorPadding < 0) 0.dp else vm.scrollIndicatorPadding.dp,
@@ -175,9 +176,7 @@ fun ReaderText(
                             interactionSource = interactionSource,
                             indication = null
                         ) {
-                            vm.apply {
-                                vm.toggleReaderMode(!vm.isReaderModeEnable)
-                            }
+                            toggleReaderMode()
                         }
                 ) {
                 }
