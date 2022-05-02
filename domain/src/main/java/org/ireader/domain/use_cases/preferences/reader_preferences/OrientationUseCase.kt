@@ -4,6 +4,7 @@ import org.ireader.common_models.FilterType
 import org.ireader.common_models.SortType
 import org.ireader.core_ui.theme.AppPreferences
 import org.ireader.core_ui.theme.OrientationMode
+import org.ireader.core_ui.ui.TextAlign
 import javax.inject.Inject
 
 class OrientationUseCase @Inject constructor(
@@ -15,6 +16,17 @@ class OrientationUseCase @Inject constructor(
 
     suspend fun read(): OrientationMode {
         return appPreferences.orientation().get()
+    }
+}
+class TextAlignmentUseCase @Inject constructor(
+    private val appPreferences: AppPreferences,
+) {
+    fun save(textAlign: TextAlign) {
+        appPreferences.textAlign().set(textAlign)
+    }
+
+    suspend fun read(): TextAlign {
+        return appPreferences.textAlign().get()
     }
 }
 

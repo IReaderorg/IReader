@@ -533,11 +533,16 @@ object ReaderScreenSpec : ScreenSpec {
                             }
                         },
                         onShowScrollIndicator = {
-                            vm.showScrollIndictor = it
+                            vm.showScrollIndicator = it
                             vm.apply {
                                 vm.setShowScrollIndicator(it)
                             }
+                        },
+                        onTextAlign = {
+                            vm.textAlignment = it
+                            vm.readerUseCases.textAlignmentUseCase.save(it)
                         }
+
                     )
 
             }

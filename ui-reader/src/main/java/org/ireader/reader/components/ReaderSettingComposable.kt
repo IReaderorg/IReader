@@ -5,8 +5,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
@@ -16,6 +18,10 @@ import androidx.compose.material.TabRow
 import androidx.compose.material.TabRowDefaults
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FormatAlignCenter
+import androidx.compose.material.icons.filled.FormatAlignJustify
+import androidx.compose.material.icons.filled.FormatAlignLeft
+import androidx.compose.material.icons.filled.FormatAlignRight
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -32,6 +38,7 @@ import com.google.accompanist.pager.rememberPagerState
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.core_ui.ui.Colour.contentColor
+import org.ireader.core_ui.ui.TextAlign
 import org.ireader.reader.viewmodel.Orientation
 import org.ireader.reader.viewmodel.ReaderScreenPreferencesState
 
@@ -55,7 +62,8 @@ fun ReaderSettingComposable(
     onScrollIndicatorWidthIncrease: (Boolean) -> Unit,
     onToggleAutoBrightness: () -> Unit,
     onChangeBrightness: (Float) -> Unit,
-    onBackgroundChange: (Int) -> Unit
+    onBackgroundChange: (Int) -> Unit,
+
 ) {
     val scrollState = rememberScrollState()
     Column(
@@ -227,6 +235,7 @@ fun ReaderSettingMainLayout(    modifier: Modifier = Modifier,
     onChangeBrightness: (Float) -> Unit,
     onBackgroundChange: (Int) -> Unit,
     onShowScrollIndicator : (Boolean) -> Unit,
+    onTextAlign: (TextAlign) -> Unit
 ) {
     val pagerState = rememberPagerState()
     val tabs = listOf<TabItem>(
@@ -254,7 +263,59 @@ fun ReaderSettingMainLayout(    modifier: Modifier = Modifier,
                     onFontSelected = onFontSelected
                 )
                 Spacer(modifier = Modifier.height(12.dp))
+                Row(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        modifier = Modifier.width(100.dp),
+                        text = "Text Align",
+                        fontSize = 12.sp,
+                        style = TextStyle(fontWeight = FontWeight.W400),
+                        color = MaterialTheme.colors.onBackground
+                    )
+                    Row(
+                        modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Start,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        AppIconButton(
+                            imageVector = Icons.Default.FormatAlignLeft,
+                            title = "ext Align Left",
+                            onClick = {
+                                onTextAlign(TextAlign.Left)
+                            },
+                            tint = if ( vm.textAlignment == TextAlign.Left) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground
+                        )
+                        AppIconButton(
+                            imageVector = Icons.Default.FormatAlignCenter,
+                            title = "Text Align Center",
+                            onClick = {
+                                onTextAlign(TextAlign.Center)
+                            },
+                            tint = if ( vm.textAlignment == TextAlign.Center) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground
+                        )
+                        AppIconButton(
+                            imageVector = Icons.Default.FormatAlignJustify,
+                            title = "Text Align Justify",
+                            onClick = {
+                                onTextAlign(TextAlign.Justify)
+                            },
+                            tint = if ( vm.textAlignment == TextAlign.Justify) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground
+                        )
+                        AppIconButton(
+                            imageVector = Icons.Default.FormatAlignRight,
+                            title = "Text Align Right",
+                            onClick = {
+                                onTextAlign(TextAlign.Right)
+                            },
+                            tint = if ( vm.textAlignment == TextAlign.Right) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground
+                        )
 
+                    }
+
+                }
                 SettingItemComposable(
                     text = "Font Size",
                     value = vm.fontSize.toString(),
@@ -336,6 +397,7 @@ fun ReaderSettingMainLayout(    modifier: Modifier = Modifier,
                         onScrollIndicatorWidthIncrease(false)
                     }
                 )
+
                 Row(
                     modifier = Modifier.fillMaxSize(),
                     verticalAlignment = Alignment.CenterVertically,
@@ -369,7 +431,7 @@ fun ReaderSettingMainLayout(    modifier: Modifier = Modifier,
                 )
                 SettingItemToggleComposable(
                     text = "Show Scrollbar",
-                    value = vm.showScrollIndictor,
+                    value = vm.showScrollIndicator,
                     onToggle = onShowScrollIndicator
                 )
 

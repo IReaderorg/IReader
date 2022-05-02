@@ -32,6 +32,7 @@ import kotlinx.coroutines.launch
 import org.ireader.common_models.entities.Chapter
 import org.ireader.components.components.ISnackBarHost
 import org.ireader.core_api.source.Source
+import org.ireader.core_ui.ui.TextAlign
 import org.ireader.reader.components.MainBottomSettingComposable
 import org.ireader.reader.components.ReaderSettingMainLayout
 import org.ireader.reader.reverse_swip_refresh.SwipeRefreshState
@@ -89,6 +90,7 @@ fun ReadingScreen(
     onBackgroundColorAndTextColorApply:(bgColor:String,txtColor:String) -> Unit,
     scaffoldState: ScaffoldState,
     onShowScrollIndicator : (Boolean) -> Unit,
+    onTextAlign: (TextAlign) -> Unit
 ) {
 
 
@@ -218,7 +220,8 @@ fun ReadingScreen(
                                     onToggleAutoBrightness = onToggleAutoBrightness,
                                     onBackgroundChange = onBackgroundChange,
                                     vm = readerScreenPreferencesState,
-                                    onShowScrollIndicator = onShowScrollIndicator
+                                    onShowScrollIndicator = onShowScrollIndicator,
+                                    onTextAlign = onTextAlign
                                 )
 //                                ReaderSettingComposable(
 //                                    onFontSelected = onFontSelected,

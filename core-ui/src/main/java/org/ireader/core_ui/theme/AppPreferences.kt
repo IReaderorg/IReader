@@ -32,6 +32,7 @@ class AppPreferences @Inject constructor(
         const val SCROLL_INDICATOR_WIDTH = "scroll_indicator_width"
         const val SCROLL_INDICATOR_IS_ENABLE = "scroll_indicator_is_enable"
         const val SELECTABLE_TEXT = "selectable_text"
+        const val TEXT_ALIGNMENT = "text_alignment"
 
         const val TEXT_READER_SPEECH_RATE = "text_reader_speech_rate"
         const val TEXT_READER_SPEECH_PITCH = "text_reader_speech_pitch"
@@ -101,6 +102,10 @@ class AppPreferences @Inject constructor(
         return preferenceStore.getEnum(SAVED_ORIENTATION, OrientationMode.Portrait)
     }
 
+    fun textAlign(): Preference<org.ireader.core_ui.ui.TextAlign> {
+        return preferenceStore.getEnum(TEXT_ALIGNMENT, org.ireader.core_ui.ui.TextAlign.Right)
+    }
+
     fun paragraphIndent(): Preference<Int> {
         return preferenceStore.getInt(SAVED_PARAGRAPH_INDENT, 8)
     }
@@ -108,6 +113,7 @@ class AppPreferences @Inject constructor(
     fun scrollMode(): Preference<Boolean> {
         return preferenceStore.getBoolean(SCROLL_MODE, true)
     }
+
     fun showScrollIndicator(): Preference<Boolean> {
         return preferenceStore.getBoolean(SCROLL_INDICATOR_IS_ENABLE, true)
     }

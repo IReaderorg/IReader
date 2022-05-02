@@ -67,7 +67,8 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
         autoScrollOffset = readerUseCases.autoScrollMode.readOffset()
         autoBrightnessMode = readerUseCases.brightnessStateUseCase.readAutoBrightness()
         selectableMode = readerUseCases.selectedFontStateUseCase.readSelectableText()
-        showScrollIndictor = readerUseCases.scrollIndicatorUseCase.isShow()
+        showScrollIndicator = readerUseCases.scrollIndicatorUseCase.isShow()
+        textAlignment = readerUseCases.textAlignmentUseCase.read()
     }
 
     override fun ReaderScreenViewModel.toggleReaderMode(enable: Boolean?) {

@@ -26,12 +26,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import org.ireader.common_models.entities.Chapter
 import org.ireader.components.list.scrollbars.LazyColumnScrollbar
+import org.ireader.core_ui.ui.mapTextAlign
 import org.ireader.core_ui.ui_components.isScrolledToTheEnd
 import org.ireader.reader.reverse_swip_refresh.ISwipeRefreshIndicator
 import org.ireader.reader.reverse_swip_refresh.MultiSwipeRefresh
@@ -111,7 +111,7 @@ fun ReaderText(
                     listState = scrollState,
                     padding = if (vm.scrollIndicatorPadding < 0) 0.dp else vm.scrollIndicatorPadding.dp,
                     thickness = if (vm.scrollIndicatorWith < 0) 0.dp else vm.scrollIndicatorWith.dp,
-                    enable = vm.showScrollIndictor
+                    enable = vm.showScrollIndicator
                 ) {
                     LazyColumn(
                         state = scrollState,
@@ -137,7 +137,7 @@ fun ReaderText(
                                     ),
                                     fontSize = vm.fontSize.sp,
                                     fontFamily = vm.font.fontFamily,
-                                    textAlign = TextAlign.Start,
+                                    textAlign = mapTextAlign(vm.textAlignment),
                                     color = vm.textColor,
                                     lineHeight = vm.lineHeight.sp,
                                 )
