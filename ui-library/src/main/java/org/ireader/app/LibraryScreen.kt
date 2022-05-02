@@ -151,7 +151,6 @@ fun LibraryScreen(
                                 LazyColumnScrollbar(
                                     listState = lazyListState,
                                 ) {
-
                                         LayoutComposable(
                                             books = vm.books,
                                             layout = vm.layout,

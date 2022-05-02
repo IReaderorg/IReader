@@ -61,7 +61,7 @@ fun ChapterListItemComposable(
         },
         trailing = {
             if (isLoading) {
-                showLoading()
+                ShowLoading()
             }
             if (chapter.content.joinToString(" , ").length > 10) {
                 Icon(

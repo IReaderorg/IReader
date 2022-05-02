@@ -61,6 +61,7 @@ fun BookImage(
                 .clip(RoundedCornerShape(4.dp))
                 .align(Alignment.Center),
             image = BookCover.from(book),
+            showLoading = true
         )
 
         Box(

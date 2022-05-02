@@ -15,7 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import org.ireader.components.components.showLoading
+import org.ireader.components.components.ShowLoading
 import org.ireader.core_ui.ui_components.ClickableTextIcon
 
 @Composable
@@ -46,7 +46,7 @@ fun BookDetailScreenBottomBar(
                 text = if (!isInLibrary) "Add to Library" else "Added To Library",
                 icon = {
                     if (isInLibraryInProgress) {
-                        showLoading()
+                        ShowLoading()
                     } else {
                         Icon(
                             imageVector = if (!isInLibrary) Icons.Default.AddCircleOutline else Icons.Default.Check,

@@ -64,7 +64,7 @@ import com.google.accompanist.pager.PagerState
 import kotlinx.coroutines.launch
 import org.ireader.common_models.entities.Chapter
 import org.ireader.components.components.BookImageComposable
-import org.ireader.components.components.showLoading
+import org.ireader.components.components.ShowLoading
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.components.reusable_composable.MidSizeTextComposable
@@ -433,7 +433,7 @@ private fun TTLScreenPlay(
                 ) {
                     when {
                         vm.isLoading.value -> {
-                            showLoading()
+                            ShowLoading()
                         }
                         vm.isPlaying -> {
                             AppIconButton(

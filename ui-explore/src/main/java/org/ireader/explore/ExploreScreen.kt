@@ -48,12 +48,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 import org.ireader.common_models.DisplayMode
 import org.ireader.common_models.LayoutType
 import org.ireader.common_models.entities.BookItem
-import org.ireader.components.components.showLoading
+import org.ireader.components.components.ShowLoading
 import org.ireader.components.list.LayoutComposable
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.MidSizeTextComposable
@@ -211,7 +210,7 @@ fun ExploreScreen(
             ) {
                 when {
                     vm.isLoading && vm.page == 1 -> {
-                        showLoading()
+                        ShowLoading()
                     }
                     vm.error != null && vm.page == 1 -> {
                         ExploreScreenErrorComposable(

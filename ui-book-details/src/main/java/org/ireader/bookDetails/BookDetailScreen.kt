@@ -32,7 +32,7 @@ import org.ireader.bookDetails.viewmodel.ChapterState
 import org.ireader.bookDetails.viewmodel.DetailState
 import org.ireader.common_models.entities.Book
 import org.ireader.components.components.ISnackBarHost
-import org.ireader.components.components.showLoading
+import org.ireader.components.components.ShowLoading
 import org.ireader.core_ui.theme.TransparentStatusBar
 import org.ireader.core_ui.ui_components.CardTile
 import org.ireader.core_ui.ui_components.DotsFlashing
@@ -60,7 +60,7 @@ fun BookDetailScreen(
         rememberSwipeRefreshState(isRefreshing = detailState.detailIsLoading)
 
     if (detailState.detailIsLoading) {
-        showLoading()
+        ShowLoading()
     }
 
 
