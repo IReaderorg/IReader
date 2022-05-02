@@ -56,7 +56,7 @@ object TTSScreenSpec : ScreenSpec {
 
         navDeepLink {
             uriPattern =
-                "https://www.ireader.org/tts_screen_route/{bookId}/{chapterId}/{sourceId}/{readingParagraph}}"
+                "https://www.ireader.org/tts_screen_route/{bookId}/{chapterId}/{sourceId}/{readingParagraph}"
             NavigationArgs.bookId
             NavigationArgs.chapterId
             NavigationArgs.sourceId

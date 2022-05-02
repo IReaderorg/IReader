@@ -16,12 +16,12 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableSharedFlow
 import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.Chapter
-import org.ireader.common_resources.K
 import org.ireader.core.R
 import org.ireader.domain.notification.Notifications
 import org.ireader.domain.notification.flags
 import org.ireader.domain.notification.setLargeIcon
 import org.ireader.domain.services.tts_service.Player
+import org.ireader.domain.services.tts_service.media_player.TTSService
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -165,7 +165,7 @@ class DefaultNotificationHelper @Inject constructor(
         Player.SKIP_PREV,
         Intent(
             applicationContext,
-            Class.forName(K.TTSService)
+            TTSService::class.java
         ).apply {
             putExtra("PLAYER", Player.SKIP_PREV)
         },
@@ -176,7 +176,7 @@ class DefaultNotificationHelper @Inject constructor(
         Player.PREV_PAR,
         Intent(
             applicationContext.applicationContext,
-            Class.forName(K.TTSService)
+                     TTSService::class.java
         ).apply {
             putExtra("PLAYER", Player.PREV_PAR)
         },
@@ -187,7 +187,7 @@ class DefaultNotificationHelper @Inject constructor(
         Player.PAUSE,
         Intent(
             applicationContext,
-            Class.forName(K.TTSService)
+                     TTSService::class.java
         ).apply {
             putExtra("PLAYER", Player.PAUSE)
         },
@@ -198,7 +198,7 @@ class DefaultNotificationHelper @Inject constructor(
         Player.PLAY,
         Intent(
             applicationContext,
-            Class.forName(K.TTSService)
+                     TTSService::class.java
         ).apply {
             putExtra("PLAYER", Player.PLAY)
         },
@@ -209,7 +209,7 @@ class DefaultNotificationHelper @Inject constructor(
         Player.NEXT_PAR,
         Intent(
             applicationContext,
-            Class.forName(K.TTSService)
+                     TTSService::class.java
         ).apply {
             putExtra("PLAYER", Player.NEXT_PAR)
         },
@@ -220,7 +220,7 @@ class DefaultNotificationHelper @Inject constructor(
         Player.SKIP_NEXT,
         Intent(
             applicationContext,
-            Class.forName(K.TTSService)
+                     TTSService::class.java
         ).apply {
             putExtra("PLAYER", Player.SKIP_NEXT)
         },
@@ -231,7 +231,7 @@ class DefaultNotificationHelper @Inject constructor(
         Player.CANCEL,
         Intent(
             applicationContext,
-            Class.forName(K.TTSService)
+                     TTSService::class.java
         ).apply {
             putExtra("PLAYER", Player.CANCEL)
         },

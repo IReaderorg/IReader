@@ -29,9 +29,6 @@ const val PARSE_DETAIL = "PARSE_DETAIL"
 const val PARSE_CHAPTERS = "PARSE_CHAPTERS"
 const val PARSE_BOOKS = "PARSE_BOOKS"
 
-object K {
-    const val TTSService = "org.ireader.domain.services.tts_service.media_player.TTSService"
-}
 
 object DEFAULT {
     const val MAX_BRIGHTNESS = .5F

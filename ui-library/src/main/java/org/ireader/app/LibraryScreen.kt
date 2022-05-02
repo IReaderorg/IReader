@@ -44,6 +44,7 @@ import org.ireader.common_models.FilterType
 import org.ireader.common_models.SortType
 import org.ireader.common_models.entities.BookItem
 import org.ireader.components.list.LayoutComposable
+import org.ireader.components.list.scrollbars.LazyColumnScrollbar
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.core_ui.ui.EmptyScreen
 import org.ireader.core_ui.ui.LoadingScreen
@@ -84,19 +85,19 @@ fun LibraryScreen(
         modifier = if (bottomSheetState.targetValue == ModalBottomSheetValue.Expanded) Modifier.statusBarsPadding() else Modifier,
         sheetContent = {
 
-            Box(modifier.defaultMinSize(minHeight = 1.dp)) {
-                BottomTabComposable(
-                    pagerState = pagerState,
-                    filters = vm.filters,
-                    addFilters = addFilters,
-                    removeFilter = removeFilter,
-                    onSortSelected = onSortSelected,
-                    sortType = vm.sortType,
-                    isSortDesc = vm.desc,
-                    onLayoutSelected = onLayoutSelected,
-                    layoutType = vm.layout
-                )
-            }
+                Box(modifier.defaultMinSize(minHeight = 1.dp)) {
+                    BottomTabComposable(
+                        pagerState = pagerState,
+                        filters = vm.filters,
+                        addFilters = addFilters,
+                        removeFilter = removeFilter,
+                        onSortSelected = onSortSelected,
+                        sortType = vm.sortType,
+                        isSortDesc = vm.desc,
+                        onLayoutSelected = onLayoutSelected,
+                        layoutType = vm.layout
+                    )
+                }
         },
         sheetState = bottomSheetState,
         sheetBackgroundColor = MaterialTheme.colors.background,
@@ -146,17 +147,25 @@ fun LibraryScreen(
                                     "There is no book is Library, you can add books in the Explore screen."
                                 )
                             )
-                            else -> LayoutComposable(
-                                books = vm.books,
-                                layout = vm.layout,
-                                isLocal = true,
-                                gridState = gridState,
-                                scrollState = lazyListState,
-                                selection = vm.selection,
-                                goToLatestChapter = goToLatestChapter,
-                                onClick = onBook,
-                                onLongClick = onLongBook,
-                            )
+                            else -> {
+                                LazyColumnScrollbar(
+                                    listState = lazyListState,
+                                ) {
+
+                                        LayoutComposable(
+                                            books = vm.books,
+                                            layout = vm.layout,
+                                            isLocal = true,
+                                            gridState = gridState,
+                                            scrollState = lazyListState,
+                                            selection = vm.selection,
+                                            goToLatestChapter = goToLatestChapter,
+                                            onClick = onBook,
+                                            onLongClick = onLongBook,
+                                        )
+                                }
+
+                            }
                         }
                     }
                     when {

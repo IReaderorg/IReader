@@ -3,7 +3,6 @@ package org.ireader.domain.use_cases.services
 import android.content.Context
 import android.content.Intent
 import dagger.hilt.android.qualifiers.ApplicationContext
-import org.ireader.common_resources.K
 import org.ireader.domain.services.tts_service.media_player.TTSService
 import org.ireader.domain.services.tts_service.media_player.TTSService.Companion.COMMAND
 import org.ireader.domain.services.tts_service.media_player.TTSService.Companion.TTS_BOOK_ID
@@ -17,7 +16,7 @@ class StartTTSServicesUseCase @Inject constructor(@ApplicationContext private va
         chapterId: Long? = null,
     ) {
 
-        val intent = Intent(context, Class.forName(K.TTSService)).apply {
+        val intent = Intent(context, TTSService::class.java).apply {
             action = TTSService.ACTION_UPDATE
             if (chapterId != null) {
                 putExtra(TTS_Chapter_ID, chapterId)

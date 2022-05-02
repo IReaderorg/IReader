@@ -1,18 +1,18 @@
 [versions]
-compose = "1.2.0-alpha08"
+compose = "1.1.1"
 activity = "1.4.0"
 lifecycle = "2.4.1"
 
 [libraries]
 compose-runtime = { module = "androidx.compose.runtime:runtime", version = "compose" }
 compose-compiler = { module = "androidx.compose.compiler:compiler", version.ref = "compose" }
-compose-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "compose" }
+compose-foundation = { module = "androidx.compose.foundation:foundation", version = "1.2.0-alpha08" }
 compose-material = { module = "androidx.compose.material:material", version.ref = "compose" }
 compose-material3 = { module = "androidx.compose.material3:material3", version = "1.0.0-alpha09" }
 compose-icons = { module = "androidx.compose.material:material-icons-extended", version.ref = "compose" }
 compose-ui = { module = "androidx.compose.ui:ui", version.ref = "compose" }
 compose-uiToolingPreview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "compose" }
-compose-uiTooling = { module = "androidx.compose.ui:ui-tooling", version = "1.1.1" }
+compose-uiTooling = { module = "androidx.compose.ui:ui-tooling", version = "compose" }
 compose-paging = { module = "androidx.paging:paging-compose", version = "1.0.0-alpha14" }
 compose-animations = { module = "androidx.compose.animation:animation", version.ref = "compose" }
 compose-testing = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "compose" }

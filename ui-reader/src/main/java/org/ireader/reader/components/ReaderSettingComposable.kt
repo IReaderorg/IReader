@@ -20,6 +20,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.accompanist.pager.ExperimentalPagerApi
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.reader.viewmodel.Orientation
 import org.ireader.reader.viewmodel.ReaderScreenPreferencesState
@@ -192,4 +193,11 @@ fun ReaderSettingComposable(
             )
         }
     }
+}
+
+@OptIn(ExperimentalPagerApi::class)
+@Composable
+fun ReaderSettingMainLayout() {
+   
+     // TODO create this later
 }

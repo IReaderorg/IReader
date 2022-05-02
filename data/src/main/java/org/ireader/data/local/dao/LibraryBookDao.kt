@@ -25,6 +25,7 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
         LEFT JOIN chapter ON library.id = chapter.bookId
         GROUP BY library.id
         HAVING library.favorite = 1
+        ORDER BY lastRead
         """
     )
     fun subscribeBookByLatest(): Flow<List<BookItem>>

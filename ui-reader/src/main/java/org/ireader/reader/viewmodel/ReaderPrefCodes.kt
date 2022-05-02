@@ -49,7 +49,9 @@ interface ReaderPrefFunctions {
 
 class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
     override suspend fun ReaderScreenViewModel.readPreferences() {
-        font = readerUseCases.selectedFontStateUseCase.readFont()
+        kotlin.runCatching {
+            this.font = readerUseCases.selectedFontStateUseCase.readFont()
+        }
         this.fontSize = readerUseCases.fontSizeStateUseCase.read()
         readBackgroundColor()
         readTextColor()
@@ -63,7 +65,6 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
         autoScrollOffset = readerUseCases.autoScrollMode.readOffset()
         autoBrightnessMode = readerUseCases.brightnessStateUseCase.readAutoBrightness()
         selectableMode = readerUseCases.selectedFontStateUseCase.readSelectableText()
-
     }
 
     override fun ReaderScreenViewModel.toggleReaderMode(enable: Boolean?) {

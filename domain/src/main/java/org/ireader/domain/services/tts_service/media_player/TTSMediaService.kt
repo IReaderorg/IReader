@@ -80,6 +80,7 @@ class TTSService : MediaBrowserServiceCompat() {
     private lateinit var player: TextToSpeech
 
     private var serviceJob: Job? = null
+    private var isPlayerDispose = false
 
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
@@ -100,6 +101,7 @@ class TTSService : MediaBrowserServiceCompat() {
         const val PAGE = "page"
 
         const val ACTION_UPDATE = "actionUpdate"
+        const val ACTION_CANCEL = "actionCancel"
 
         const val NOVEL_ID = "novel_id"
         const val SOURCE_ID = "source_id"
@@ -179,6 +181,8 @@ class TTSService : MediaBrowserServiceCompat() {
             .setActions(
                 PlaybackStateCompat.ACTION_PLAY or
                     PlaybackStateCompat.ACTION_STOP or
+                    PlaybackStateCompat.ACTION_PAUSE or
+                    PlaybackStateCompat.ACTION_PLAY_PAUSE or
                     PlaybackStateCompat.ACTION_SKIP_TO_NEXT or
                     PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS or
                     PlaybackStateCompat.ACTION_FAST_FORWARD or
@@ -226,6 +230,39 @@ class TTSService : MediaBrowserServiceCompat() {
         /**
          * Initializing the player
          */
+        initPlayer()
+
+
+        notificationController = NotificationController()
+        notificationController.start()
+        silence = MediaPlayer.create(this, R.raw.silence).apply {
+            isLooping = true
+        }
+
+        silence.start()
+    }
+
+    var isNotificationForeground = false
+
+    fun hookNotification() {
+        if (!isNotificationForeground) {
+            startService(Intent(applicationContext, TTSService::class.java))
+            scope.launch {
+                startForeground(
+                    Notifications.ID_TTS,
+                    ttsNotificationBuilder.buildNotification(mediaSession.sessionToken)
+                )
+                isNotificationForeground = true
+            }
+        }
+    }
+
+    fun unhookNotification() {
+        stopForeground(true)
+        isNotificationForeground = false
+    }
+
+    private fun initPlayer() {
         player = TextToSpeech(this) { status ->
             if (status == TextToSpeech.ERROR) {
                 Log.error { "Text-to-Speech Not Available" }
@@ -233,19 +270,12 @@ class TTSService : MediaBrowserServiceCompat() {
                 return@TextToSpeech
             }
             if (status == TextToSpeech.SUCCESS) {
-                state.voices = player.voices.toList()
-                state.languages = player.availableLanguages.toList()
+                state.voices = player.voices?.toList() ?: emptyList()
+                state.languages = player.availableLanguages?.toList() ?: emptyList()
                 readPrefs()
             }
         }
-
-
-        notificationController = NotificationController()
-        silence = MediaPlayer.create(this, R.raw.silence).apply {
-            isLooping = true
-        }
-
-        silence.start()
+        isPlayerDispose = false
     }
 
     override fun onGetRoot(
@@ -265,7 +295,7 @@ class TTSService : MediaBrowserServiceCompat() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Log.debug { "Start Command" }
+        Log.error { "Start Command" }
         when (intent?.action) {
             Intent.ACTION_MEDIA_BUTTON -> MediaButtonReceiver.handleIntent(mediaSession, intent)
             ACTION_UPDATE -> {
@@ -290,6 +320,16 @@ class TTSService : MediaBrowserServiceCompat() {
                     }
                 }
             }
+            ACTION_CANCEL -> {
+                this.stopSelf()
+                notificationController.stop()
+                player.shutdown()
+                isPlayerDispose = true
+                setPlaybackState(PlaybackStateCompat.STATE_NONE)
+                Log.error { "Service was cancelled" }
+
+                return START_STICKY
+            }
             null -> {}
             else -> Log.error { "Unknown Intent $intent" }
         }
@@ -298,6 +338,8 @@ class TTSService : MediaBrowserServiceCompat() {
 
     override fun onDestroy() {
         player.shutdown()
+        notificationController.stop()
+        unhookNotification()
         Log.error { "onDestroy" }
         super.onDestroy()
     }
@@ -344,21 +386,19 @@ class TTSService : MediaBrowserServiceCompat() {
 
         override fun onPlay() {
             Log.error { "onPlay" }
-            if (state.isPlaying) {
-                startService(Player.PAUSE)
-            } else {
-                startService(Player.PLAY)
-            }
+            startService(Player.PLAY)
         }
 
         override fun onPause() {
             Log.error { "onPause" }
             startService(Player.PAUSE)
+            player.stop()
         }
 
         override fun onStop() {
             Log.error { "onStop" }
             startService(Player.PAUSE)
+            player.stop()
         }
 
         override fun onRewind() {
@@ -408,7 +448,6 @@ class TTSService : MediaBrowserServiceCompat() {
 
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
             if (state != null && mediaSession.controller.metadata != null) {
-                Log.error { "onPlaybackStateChanged $state" }
                 scope.launch {
                     notificationManager.notify(
                         Notifications.ID_TTS,
@@ -448,6 +487,9 @@ class TTSService : MediaBrowserServiceCompat() {
     }
 
     fun startService(command: Int) {
+        if (isPlayerDispose) {
+            initPlayer()
+        }
         serviceJob = scope.launch {
             try {
                 player.let { tts ->
@@ -457,16 +499,16 @@ class TTSService : MediaBrowserServiceCompat() {
                                 state.ttsChapters.let { chapters ->
                                     state.ttsBook?.let { book ->
                                         setBundle(book, chapter)
-                                        val notification =
-                                            ttsNotificationBuilder.buildTTSNotification(
-                                                mediaSession,
-                                            ).build()
-
-                                        NotificationManagerCompat.from(this@TTSService)
-                                            .notify(
-                                                Notifications.ID_TTS,
-                                                notification
-                                            )
+//                                        val notification =
+//                                            ttsNotificationBuilder.buildTTSNotification(
+//                                                mediaSession,
+//                                            ).build()
+                                        hookNotification()
+//                                        NotificationManagerCompat.from(this@TTSService)
+//                                            .notify(
+//                                                Notifications.ID_TTS,
+//                                                notification
+//                                            )
 
                                         when (command) {
                                             Player.CANCEL -> {
@@ -644,87 +686,78 @@ class TTSService : MediaBrowserServiceCompat() {
                     state.ttsBook?.let { book ->
                         try {
 
-                            NotificationManagerCompat.from(context).apply {
-                                scope.launch {
-                                    val notification = ttsNotificationBuilder.buildTTSNotification(
-                                        mediaSessionCompat,
-                                    )
+                            scope.launch {
+                                updateNotification()
+                            }
+                            if (state.utteranceId != (currentReadingParagraph).toString()) {
+                                player.speak(
+                                    content[currentReadingParagraph],
+                                    TextToSpeech.QUEUE_FLUSH,
+                                    null,
+                                    currentReadingParagraph.toString()
+                                )
+                            }
 
-                                    notify(
-                                        Notifications.ID_TTS,
-                                        notification.build()
-                                    )
+                            player.setOnUtteranceProgressListener(object :
+                                UtteranceProgressListener() {
+                                override fun onStop(
+                                    utteranceId: String?,
+                                    interrupted: Boolean,
+                                ) {
+                                    super.onStop(utteranceId, interrupted)
+                                    state.utteranceId = ""
                                 }
-                                if (state.utteranceId != (currentReadingParagraph).toString()) {
-                                    player.speak(
-                                        content[currentReadingParagraph],
-                                        TextToSpeech.QUEUE_FLUSH,
-                                        null,
-                                        currentReadingParagraph.toString()
-                                    )
+
+                                override fun onStart(p0: String) {
+                                    // showTextReaderNotification(context)
+                                    isPlaying = true
+                                    utteranceId = p0
                                 }
 
-                                player.setOnUtteranceProgressListener(object :
-                                    UtteranceProgressListener() {
-                                    override fun onStop(
-                                        utteranceId: String?,
-                                        interrupted: Boolean,
-                                    ) {
-                                        super.onStop(utteranceId, interrupted)
-                                        state.utteranceId = ""
-                                    }
+                                override fun onDone(p0: String) {
+                                    try {
+                                        var isFinished = false
 
-                                    override fun onStart(p0: String) {
-                                        // showTextReaderNotification(context)
-                                        isPlaying = true
-                                        utteranceId = p0
-                                    }
-
-                                    override fun onDone(p0: String) {
-                                        try {
-                                            var isFinished = false
-
-                                            if (currentReadingParagraph < content.size) {
-                                                if (currentReadingParagraph < content.lastIndex) {
-                                                    currentReadingParagraph += 1
-                                                } else {
-                                                    isFinished = true
-                                                }
-                                                readText(context, mediaSessionCompat)
+                                        if (currentReadingParagraph < content.size) {
+                                            if (currentReadingParagraph < content.lastIndex) {
+                                                currentReadingParagraph += 1
+                                            } else {
+                                                isFinished = true
                                             }
+                                            readText(context, mediaSessionCompat)
+                                        }
 
-                                            if (currentReadingParagraph == content.lastIndex && controller.playbackState.isPlaying && isFinished) {
-                                                isPlaying = false
-                                                currentReadingParagraph = 0
+                                        if (currentReadingParagraph == content.lastIndex && controller.playbackState.isPlaying && isFinished) {
+                                            isPlaying = false
+                                            currentReadingParagraph = 0
 
-                                                player.stop()
-                                                if (autoNextChapter) {
-                                                    scope.launch {
-                                                        state.ttsChapters.let { chapters ->
-                                                            state.ttsSource?.let { source ->
-                                                                val index =
-                                                                    getChapterIndex(
-                                                                        chapter,
-                                                                        chapters
+                                            player.stop()
+                                            if (autoNextChapter) {
+                                                scope.launch {
+                                                    state.ttsChapters.let { chapters ->
+                                                        state.ttsSource?.let { source ->
+                                                            val index =
+                                                                getChapterIndex(
+                                                                    chapter,
+                                                                    chapters
+                                                                )
+                                                            if (index != chapters.lastIndex) {
+                                                                val id = chapters[index + 1].id
+                                                                getRemoteChapter(
+                                                                    chapterId = id,
+                                                                    source,
+                                                                    state
+                                                                ) {
+                                                                    state.currentReadingParagraph =
+                                                                        0
+                                                                    updateNotification(
                                                                     )
-                                                                if (index != chapters.lastIndex) {
-                                                                    val id = chapters[index + 1].id
-                                                                    getRemoteChapter(
-                                                                        chapterId = id,
-                                                                        source,
-                                                                        state
-                                                                    ) {
-                                                                        state.currentReadingParagraph =
-                                                                            0
-                                                                        updateNotification(
-                                                                        )
 
-                                                                        mediaSession.let { mediaSession ->
-                                                                            readText(
-                                                                                context,
-                                                                                mediaSession
-                                                                            )
-                                                                        }
+                                                                    mediaSession.let { mediaSession ->
+                                                                        readText(
+                                                                            context,
+                                                                            mediaSession
+                                                                        )
                                                                     }
                                                                 }
                                                             }
@@ -732,30 +765,30 @@ class TTSService : MediaBrowserServiceCompat() {
                                                     }
                                                 }
                                             }
-                                        } catch (e: Throwable) {
-                                            Log.error { e.stackTrace.toString() }
                                         }
+                                    } catch (e: Throwable) {
+                                        Log.error { e.stackTrace.toString() }
                                     }
+                                }
 
-                                    override fun onError(p0: String) {
-                                        isPlaying = false
-                                    }
+                                override fun onError(p0: String) {
+                                    isPlaying = false
+                                }
 
-                                    override fun onBeginSynthesis(
-                                        utteranceId: String?,
-                                        sampleRateInHz: Int,
-                                        audioFormat: Int,
-                                        channelCount: Int,
-                                    ) {
-                                        super.onBeginSynthesis(
-                                            utteranceId,
-                                            sampleRateInHz,
-                                            audioFormat,
-                                            channelCount
-                                        )
-                                    }
-                                })
-                            }
+                                override fun onBeginSynthesis(
+                                    utteranceId: String?,
+                                    sampleRateInHz: Int,
+                                    audioFormat: Int,
+                                    channelCount: Int,
+                                ) {
+                                    super.onBeginSynthesis(
+                                        utteranceId,
+                                        sampleRateInHz,
+                                        audioFormat,
+                                        channelCount
+                                    )
+                                }
+                            })
                         } catch (e: Throwable) {
                             Log.error { e.stackTrace.toString() }
                         }

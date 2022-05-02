@@ -2,6 +2,7 @@ package org.ireader.components.list
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.runtime.Composable
 import org.ireader.common_models.LayoutType
 import org.ireader.common_models.entities.BookItem
@@ -19,7 +20,7 @@ fun LayoutComposable(
     selection: List<Long> = emptyList<Long>(),
     layout: LayoutType,
     scrollState: LazyListState,
-    gridState: androidx.compose.foundation.lazy.grid.LazyGridState,
+    gridState: LazyGridState,
     source: Source? = null,
     isLocal: Boolean,
     goToLatestChapter: (book: BookItem) -> Unit = {},
