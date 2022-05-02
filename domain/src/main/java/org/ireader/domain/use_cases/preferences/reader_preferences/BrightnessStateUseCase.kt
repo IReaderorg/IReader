@@ -69,6 +69,12 @@ class ScrollIndicatorUseCase @Inject constructor(
     suspend fun readPadding(): Int {
         return appPreferences.scrollIndicatorPadding().get()
     }
+    suspend fun isShow(): Boolean {
+        return appPreferences.showScrollIndicator().get()
+    }
+    fun setIsShown(show:Boolean) {
+        return appPreferences.showScrollIndicator().set(show)
+    }
 }
 
 class AutoScrollMode @Inject constructor(

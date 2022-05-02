@@ -52,20 +52,24 @@ fun LazyColumnScrollbar(
     thumbColor: Color = Color(0xFF2A59B6),
     thumbSelectedColor: Color = Color(0xFF5281CA),
     thumbShape: Shape = CircleShape,
-    content: @Composable () -> Unit
+    enable:Boolean = true,
+    content: @Composable () -> Unit,
 ) {
     Box {
         content()
-        LazyColumnScrollbar(
-            listState = listState,
-            rightSide = rightSide,
-            thickness = thickness,
-            padding = padding,
-            thumbMinHeight = thumbMinHeight,
-            thumbColor = thumbColor,
-            thumbSelectedColor = thumbSelectedColor,
-            thumbShape = thumbShape,
-        )
+        if (enable) {
+            LazyColumnScrollbar(
+                listState = listState,
+                rightSide = rightSide,
+                thickness = thickness,
+                padding = padding,
+                thumbMinHeight = thumbMinHeight,
+                thumbColor = thumbColor,
+                thumbSelectedColor = thumbSelectedColor,
+                thumbShape = thumbShape,
+            )
+        }
+
     }
 }
 

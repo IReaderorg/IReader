@@ -110,7 +110,8 @@ fun ReaderText(
                 LazyColumnScrollbar(
                     listState = scrollState,
                     padding = if (vm.scrollIndicatorPadding < 0) 0.dp else vm.scrollIndicatorPadding.dp,
-                    thickness = if (vm.scrollIndicatorWith < 0) 0.dp else vm.scrollIndicatorWith.dp
+                    thickness = if (vm.scrollIndicatorWith < 0) 0.dp else vm.scrollIndicatorWith.dp,
+                    enable = vm.showScrollIndictor
                 ) {
                     LazyColumn(
                         state = scrollState,

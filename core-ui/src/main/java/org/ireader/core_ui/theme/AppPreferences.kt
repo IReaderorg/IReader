@@ -108,7 +108,7 @@ class AppPreferences @Inject constructor(
     fun scrollMode(): Preference<Boolean> {
         return preferenceStore.getBoolean(SCROLL_MODE, true)
     }
-    fun scrollIndicator(): Preference<Boolean> {
+    fun showScrollIndicator(): Preference<Boolean> {
         return preferenceStore.getBoolean(SCROLL_INDICATOR_IS_ENABLE, true)
     }
 

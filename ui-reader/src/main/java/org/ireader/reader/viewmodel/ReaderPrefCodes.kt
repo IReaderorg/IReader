@@ -32,6 +32,7 @@ interface ReaderPrefFunctions {
     fun ReaderScreenViewModel.toggleScrollMode()
     fun ReaderScreenViewModel.saveParagraphDistance(isIncreased: Boolean)
     suspend fun ReaderScreenViewModel.readScrollIndicatorPadding(): Int
+    suspend fun ReaderScreenViewModel.readShowScrollIndicator(): Boolean
     suspend fun ReaderScreenViewModel.readScrollIndicatorWidth(): Int
     suspend fun ReaderScreenViewModel.readBrightness(context: Context)
     suspend fun ReaderScreenViewModel.readBackgroundColor(): Color
@@ -40,6 +41,7 @@ interface ReaderPrefFunctions {
     fun ReaderScreenViewModel.changeBackgroundColor(colorIndex: Int)
     fun ReaderScreenViewModel.setReaderBackgroundColor(color: Color)
     fun ReaderScreenViewModel.setReaderTextColor(color: Color)
+    fun ReaderScreenViewModel.setShowScrollIndicator(show:Boolean)
     fun ReaderScreenViewModel.setAutoScrollIntervalReader(increase: Boolean)
     fun ReaderScreenViewModel.setAutoScrollOffsetReader(increase: Boolean)
     fun ReaderScreenViewModel.toggleAutoBrightness()
@@ -65,6 +67,7 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
         autoScrollOffset = readerUseCases.autoScrollMode.readOffset()
         autoBrightnessMode = readerUseCases.brightnessStateUseCase.readAutoBrightness()
         selectableMode = readerUseCases.selectedFontStateUseCase.readSelectableText()
+        showScrollIndictor = readerUseCases.scrollIndicatorUseCase.isShow()
     }
 
     override fun ReaderScreenViewModel.toggleReaderMode(enable: Boolean?) {
@@ -210,6 +213,10 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
         return readerUseCases.scrollIndicatorUseCase.readPadding()
     }
 
+    override suspend fun ReaderScreenViewModel.readShowScrollIndicator(): Boolean {
+       return readerUseCases.scrollIndicatorUseCase.isShow()
+    }
+
     override suspend fun ReaderScreenViewModel.readScrollIndicatorWidth(): Int {
         return readerUseCases.scrollIndicatorUseCase.readWidth()
     }
@@ -277,6 +284,10 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
 
     override fun ReaderScreenViewModel.setReaderTextColor(color: Color) {
         readerUseCases.textColorUseCase.save(color.toArgb())
+    }
+
+    override fun ReaderScreenViewModel.setShowScrollIndicator(show: Boolean) {
+        readerUseCases.scrollIndicatorUseCase.setIsShown(show = show)
     }
 
     override fun ReaderScreenViewModel.setAutoScrollIntervalReader(increase: Boolean) {

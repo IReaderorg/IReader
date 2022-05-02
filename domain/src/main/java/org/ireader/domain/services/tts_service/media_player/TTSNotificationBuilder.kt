@@ -250,14 +250,12 @@ class TTSNotificationBuilder constructor(
             }
             addAction(next)
             addAction(skipNext)
-            addAction(close)
-            addAction(openTTSScreen(bookId, sourceId, chapterId))
             setStyle(
                 androidx.media.app.NotificationCompat.MediaStyle()
                     .setMediaSession(mediaSessionCompat.sessionToken)
                     .setShowCancelButton(true)
                     .setCancelButtonIntent(cancelMediaPlayer())
-                    .setShowActionsInCompactView(2,5,6)
+                    .setShowActionsInCompactView(1,2,3)
 
             )
 

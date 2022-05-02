@@ -33,7 +33,7 @@ import org.ireader.common_models.entities.Chapter
 import org.ireader.components.components.ISnackBarHost
 import org.ireader.core_api.source.Source
 import org.ireader.reader.components.MainBottomSettingComposable
-import org.ireader.reader.components.ReaderSettingComposable
+import org.ireader.reader.components.ReaderSettingMainLayout
 import org.ireader.reader.reverse_swip_refresh.SwipeRefreshState
 import org.ireader.reader.viewmodel.ReaderScreenPreferencesState
 import org.ireader.reader.viewmodel.ReaderScreenState
@@ -87,7 +87,8 @@ fun ReadingScreen(
     onBackgroundValueChange:(String) -> Unit,
     onTextColorValueChange:(String) -> Unit,
     onBackgroundColorAndTextColorApply:(bgColor:String,txtColor:String) -> Unit,
-    scaffoldState: ScaffoldState
+    scaffoldState: ScaffoldState,
+    onShowScrollIndicator : (Boolean) -> Unit,
 ) {
 
 
@@ -198,8 +199,8 @@ fun ReadingScreen(
                                 )
                             }
                             if (vm.isSettingModeEnable) {
-                                ReaderSettingComposable(
-                                    onFontSelected = onFontSelected,
+                                ReaderSettingMainLayout(
+                                                                        onFontSelected = onFontSelected,
                                     onAutoscrollIntervalIncrease = onAutoscrollIntervalIncrease,
                                     onAutoscrollOffsetIncrease = onAutoscrollOffsetIncrease,
                                     onFontSizeIncrease = onFontSizeIncrease,
@@ -216,8 +217,29 @@ fun ReadingScreen(
                                     onChangeBrightness = onChangeBrightness,
                                     onToggleAutoBrightness = onToggleAutoBrightness,
                                     onBackgroundChange = onBackgroundChange,
-                                    vm = readerScreenPreferencesState
+                                    vm = readerScreenPreferencesState,
+                                    onShowScrollIndicator = onShowScrollIndicator
                                 )
+//                                ReaderSettingComposable(
+//                                    onFontSelected = onFontSelected,
+//                                    onAutoscrollIntervalIncrease = onAutoscrollIntervalIncrease,
+//                                    onAutoscrollOffsetIncrease = onAutoscrollOffsetIncrease,
+//                                    onFontSizeIncrease = onFontSizeIncrease,
+//                                    onLineHeightIncrease = onLineHeightIncrease,
+//                                    onParagraphDistanceIncrease = onParagraphDistanceIncrease,
+//                                    onParagraphIndentIncrease = onParagraphIndentIncrease,
+//                                    onScrollIndicatorPaddingIncrease = onScrollIndicatorPaddingIncrease,
+//                                    onScrollIndicatorWidthIncrease = onScrollIndicatorWidthIncrease,
+//                                    onToggleAutoScroll = onToggleAutoScroll,
+//                                    onToggleImmersiveMode = onToggleImmersiveMode,
+//                                    onToggleOrientation = onToggleOrientation,
+//                                    onToggleScrollMode = onToggleScrollMode,
+//                                    onToggleSelectedMode = onToggleSelectedMode,
+//                                    onChangeBrightness = onChangeBrightness,
+//                                    onToggleAutoBrightness = onToggleAutoBrightness,
+//                                    onBackgroundChange = onBackgroundChange,
+//                                    vm = readerScreenPreferencesState
+//                                )
                             }
                         }
                     },

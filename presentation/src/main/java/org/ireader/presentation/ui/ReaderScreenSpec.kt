@@ -531,6 +531,12 @@ object ReaderScreenSpec : ScreenSpec {
                                 }
                             } catch (e: Throwable) {
                             }
+                        },
+                        onShowScrollIndicator = {
+                            vm.showScrollIndictor = it
+                            vm.apply {
+                                vm.setShowScrollIndicator(it)
+                            }
                         }
                     )
 

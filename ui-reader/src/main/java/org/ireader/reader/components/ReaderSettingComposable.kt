@@ -9,7 +9,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Tab
+import androidx.compose.material.TabRow
+import androidx.compose.material.TabRowDefaults
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
@@ -21,7 +25,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.PagerState
+import com.google.accompanist.pager.pagerTabIndicatorOffset
+import com.google.accompanist.pager.rememberPagerState
 import org.ireader.components.reusable_composable.AppIconButton
+import org.ireader.components.reusable_composable.MidSizeTextComposable
+import org.ireader.core_ui.ui.Colour.contentColor
 import org.ireader.reader.viewmodel.Orientation
 import org.ireader.reader.viewmodel.ReaderScreenPreferencesState
 
@@ -195,9 +205,258 @@ fun ReaderSettingComposable(
     }
 }
 
-@OptIn(ExperimentalPagerApi::class)
+@OptIn(ExperimentalPagerApi::class, ExperimentalMaterialApi::class)
 @Composable
-fun ReaderSettingMainLayout() {
-   
-     // TODO create this later
+fun ReaderSettingMainLayout(    modifier: Modifier = Modifier,
+    vm: ReaderScreenPreferencesState,
+    onFontSelected: (Int) -> Unit,
+    onToggleScrollMode: (Boolean) -> Unit,
+    onToggleAutoScroll: (Boolean) -> Unit,
+    onToggleOrientation: (Boolean) -> Unit,
+    onToggleImmersiveMode: (Boolean) -> Unit,
+    onToggleSelectedMode: (Boolean) -> Unit,
+    onFontSizeIncrease: (Boolean) -> Unit,
+    onParagraphIndentIncrease: (Boolean) -> Unit,
+    onParagraphDistanceIncrease: (Boolean) -> Unit,
+    onLineHeightIncrease: (Boolean) -> Unit,
+    onAutoscrollIntervalIncrease: (Boolean) -> Unit,
+    onAutoscrollOffsetIncrease: (Boolean) -> Unit,
+    onScrollIndicatorPaddingIncrease: (Boolean) -> Unit,
+    onScrollIndicatorWidthIncrease: (Boolean) -> Unit,
+    onToggleAutoBrightness: () -> Unit,
+    onChangeBrightness: (Float) -> Unit,
+    onBackgroundChange: (Int) -> Unit,
+    onShowScrollIndicator : (Boolean) -> Unit,
+) {
+    val pagerState = rememberPagerState()
+    val tabs = listOf<TabItem>(
+        TabItem(
+            "Reader"
+        ) {
+            val scrollState = rememberScrollState()
+            Column(
+                modifier = modifier
+                    .fillMaxSize()
+                    .padding(4.dp)
+                    .verticalScroll(scrollState)
+            ) {
+                BrightnessSliderComposable(
+                    viewModel = vm,
+                    onToggleAutoBrightness = onToggleAutoBrightness,
+                    onChangeBrightness = onChangeBrightness
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                ReaderBackgroundComposable(viewModel = vm, onBackgroundChange = onBackgroundChange)
+                Spacer(modifier = Modifier.height(16.dp))
+                /** Font indent and font menu **/
+                FontChip(
+                    state = vm,
+                    onFontSelected = onFontSelected
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+
+                SettingItemComposable(
+                    text = "Font Size",
+                    value = vm.fontSize.toString(),
+                    onAdd = {
+                        onFontSizeIncrease(true)
+                    },
+                    onMinus = {
+                        onFontSizeIncrease(false)
+                    }
+                )
+                SettingItemComposable(
+                    text = "Paragraph Indent",
+                    value = vm.paragraphsIndent.toString(),
+                    onAdd = {
+                        onParagraphIndentIncrease(true)
+                    },
+                    onMinus = {
+                        onParagraphIndentIncrease(false)
+                    }
+                )
+
+                SettingItemComposable(
+                    text = "Paragraph Distance",
+                    value = vm.distanceBetweenParagraphs.toString(),
+                    onAdd = {
+                        onParagraphDistanceIncrease(true)
+                    },
+                    onMinus = {
+                        onParagraphDistanceIncrease(false)
+                    }
+                )
+                SettingItemComposable(
+                    text = "Line Height",
+                    value = vm.lineHeight.toString(),
+                    onAdd = {
+                        onLineHeightIncrease(true)
+                    },
+                    onMinus = {
+                        onLineHeightIncrease(false)
+                    }
+                )
+                SettingItemComposable(
+                    text = "Autoscroll Interval",
+                    value = "${vm.autoScrollInterval / 1000} second",
+                    onAdd = {
+                        onAutoscrollIntervalIncrease(true)
+                    },
+                    onMinus = {
+                        onAutoscrollIntervalIncrease(false)
+                    }
+                )
+                SettingItemComposable(
+                    text = "Autoscroll Offset",
+                    value = vm.autoScrollOffset.toString(),
+                    onAdd = {
+                        onAutoscrollOffsetIncrease(true)
+                    },
+                    onMinus = {
+                        onAutoscrollOffsetIncrease(false)
+                    }
+                )
+                SettingItemComposable(
+                    text = "ScrollIndicator Padding",
+                    value = vm.scrollIndicatorPadding.toString(),
+                    onAdd = {
+                        onScrollIndicatorPaddingIncrease(true)
+                    },
+                    onMinus = {
+                        onScrollIndicatorPaddingIncrease(false)
+                    }
+                )
+                SettingItemComposable(
+                    text = "ScrollIndicator Width",
+                    value = vm.scrollIndicatorWith.toString(),
+                    onAdd = {
+                        onScrollIndicatorWidthIncrease(true)
+                    },
+                    onMinus = {
+                        onScrollIndicatorWidthIncrease(false)
+                    }
+                )
+                Row(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Advance Setting",
+                        fontSize = 12.sp,
+                        style = TextStyle(fontWeight = FontWeight.W400),
+                        color = MaterialTheme.colors.onBackground
+                    )
+                    AppIconButton(
+                        imageVector = Icons.Default.Settings,
+                        title = "Advance Setting",
+                        onClick = { vm.scrollIndicatorDialogShown = true }
+                    )
+                }
+            }
+
+        },
+        TabItem(
+            "General"
+        ) {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState())
+            ) {
+                SettingItemToggleComposable(
+                    text = "Scroll Mode",
+                    value = vm.verticalScrolling,
+                    onToggle = onToggleScrollMode
+                )
+                SettingItemToggleComposable(
+                    text = "Show Scrollbar",
+                    value = vm.showScrollIndictor,
+                    onToggle = onShowScrollIndicator
+                )
+
+                SettingItemToggleComposable(
+                    text = "Orientation",
+                    value = vm.orientation == Orientation.Landscape,
+                    onToggle = onToggleOrientation
+                )
+                SettingItemToggleComposable(
+                    text = "AutoScroll",
+                    value = vm.autoScrollMode,
+                    onToggle = onToggleAutoScroll
+                )
+                SettingItemToggleComposable(
+                    text = "Immersive mode",
+                    value = vm.immersiveMode,
+                    onToggle = onToggleImmersiveMode
+                )
+                SettingItemToggleComposable(
+                    text = "Selectable mode",
+                    value = vm.selectableMode,
+                    onToggle = onToggleSelectedMode
+                )
+            }
+
+        },
+
+        )
+
+    /** There is Some issue here were sheet content is not need , not sure why**/
+    Column(modifier = Modifier.fillMaxSize()) {
+        Tabs(libraryTabs = tabs, pagerState = pagerState)
+        TabsContent(
+            libraryTabs = tabs,
+            pagerState = pagerState,
+        )
+    }
 }
+
+data class TabItem(
+    val name: String,
+    val screen: @Composable () -> Unit
+)
+
+@ExperimentalPagerApi
+@ExperimentalMaterialApi
+@Composable
+fun Tabs(libraryTabs: List<TabItem>, pagerState: PagerState) {
+    TabRow(
+        selectedTabIndex = pagerState.currentPage,
+        backgroundColor = MaterialTheme.colors.background,
+        contentColor = MaterialTheme.colors.contentColor,
+        indicator = { tabPositions ->
+            TabRowDefaults.Indicator(
+                Modifier.pagerTabIndicatorOffset(pagerState, tabPositions),
+                color = MaterialTheme.colors.primary,
+
+                )
+        }
+    ) {
+        libraryTabs.forEachIndexed { index, tab ->
+            Tab(
+                text = { MidSizeTextComposable(text = tab.name) },
+                selected = pagerState.currentPage == index,
+                unselectedContentColor = MaterialTheme.colors.onBackground,
+                selectedContentColor = MaterialTheme.colors.primary,
+                onClick = {
+                          //TODO need to uncomment this on compose next update
+                    //scope.launch { pagerState.animateScrollToPage(index) }
+                },
+            )
+        }
+    }
+}
+
+@ExperimentalPagerApi
+@Composable
+fun TabsContent(
+    libraryTabs: List<TabItem>,
+    pagerState: PagerState,
+) {
+    HorizontalPager(
+        count = libraryTabs.size,
+        state = pagerState,
+        modifier = Modifier.fillMaxSize()
+    ) { page ->
+        libraryTabs[page].screen()
+    }
+}
+
