@@ -3,6 +3,7 @@ package org.ireader.domain.use_cases.remote
 import org.ireader.common_extensions.async.withIOContext
 import org.ireader.common_models.entities.Chapter
 import org.ireader.common_models.entities.toChapterInfo
+import org.ireader.common_resources.UiText
 import org.ireader.core_api.source.Source
 import org.ireader.core_api.source.model.Text
 import org.ireader.core_ui.exceptionHandler
@@ -13,7 +14,7 @@ class GetRemoteReadingContent @Inject constructor() {
     suspend operator fun invoke(
         chapter: Chapter,
         source: Source,
-        onError: suspend (message: org.ireader.common_extensions.UiText?) -> Unit,
+        onError: suspend (message: UiText?) -> Unit,
         onSuccess: suspend (chapter: Chapter) -> Unit,
     ) {
         withIOContext {
@@ -34,7 +35,7 @@ class GetRemoteReadingContent @Inject constructor() {
                     }
 
                     if (content.joinToString().isBlank()) {
-                        onError(org.ireader.common_extensions.UiText.StringResource(R.string.cant_get_content))
+                        onError(UiText.StringResource(R.string.cant_get_content))
                     } else {
                         org.ireader.core_api.log.Log.debug("Timber: GetRemoteReadingContentUseCase was Finished Successfully")
                         onSuccess(chapter.copy(content = content, dateFetch = org.ireader.common_extensions.currentTimeToLong()))

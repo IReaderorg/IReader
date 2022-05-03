@@ -43,6 +43,7 @@ import org.ireader.common_models.DisplayMode
 import org.ireader.common_models.FilterType
 import org.ireader.common_models.SortType
 import org.ireader.common_models.entities.BookItem
+import org.ireader.common_resources.UiText
 import org.ireader.components.list.LayoutComposable
 import org.ireader.components.list.scrollbars.LazyColumnScrollbar
 import org.ireader.components.reusable_composable.AppIconButton
@@ -143,7 +144,7 @@ fun LibraryScreen(
                         when {
                             isLoading -> LoadingScreen()
                             isEmpty && vm.filters.isEmpty() -> EmptyScreen(
-                                text = org.ireader.common_extensions.UiText.DynamicString(
+                                text = UiText.DynamicString(
                                     "There is no book is Library, you can add books in the Explore screen."
                                 )
                             )

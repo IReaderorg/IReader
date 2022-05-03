@@ -12,8 +12,8 @@ fun ISnackBarHost(snackBarHostState: SnackbarHostState) {
         Snackbar(
             actionColor = MaterialTheme.colors.primary,
             snackbarData = data,
-            backgroundColor = MaterialTheme.colors.background,
-            contentColor = MaterialTheme.colors.onBackground,
+            backgroundColor = MaterialTheme.colors.surface,
+            contentColor = MaterialTheme.colors.onSurface,
         )
     }
 }

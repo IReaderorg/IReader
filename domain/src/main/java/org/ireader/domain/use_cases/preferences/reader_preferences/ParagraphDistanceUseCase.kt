@@ -1,9 +1,8 @@
 package org.ireader.domain.use_cases.preferences.reader_preferences
 
 import org.ireader.core_ui.theme.AppPreferences
-import javax.inject.Inject
 
-class ParagraphDistanceUseCase @Inject constructor(
+class ParagraphDistanceUseCase(
     private val appPreferences: AppPreferences,
 ) {
     fun save(paragraphDistance: Int) {
@@ -15,7 +14,7 @@ class ParagraphDistanceUseCase @Inject constructor(
     }
 }
 
-class ParagraphIndentUseCase @Inject constructor(
+class ParagraphIndentUseCase(
     private val appPreferences: AppPreferences,
 ) {
     fun save(paragraphIndent: Int) {

@@ -6,6 +6,7 @@ import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.Book.Companion.toBookInfo
 import org.ireader.common_models.entities.Chapter
 import org.ireader.common_models.entities.toChapter
+import org.ireader.common_resources.UiText
 import org.ireader.core_api.log.Log
 import org.ireader.core_api.source.Source
 import org.ireader.core_ui.exceptionHandler
@@ -16,7 +17,7 @@ class GetRemoteChapters @Inject constructor() {
         book: Book,
         source: Source,
         onSuccess: suspend (List<Chapter>) -> Unit,
-        onError: suspend (org.ireader.common_extensions.UiText?) -> Unit,
+        onError: suspend (UiText?) -> Unit,
     ) {
         withIOContext {
             kotlin.runCatching {

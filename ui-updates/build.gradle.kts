@@ -21,7 +21,7 @@ dependencies {
     implementation(project(Modules.coreCatalogs))
     implementation(project(Modules.commonExtensions))
     implementation(project(Modules.uiImageLoader))
-
+    implementation(project(Modules.commonResources))
     implementation(compose.compose.icons)
     implementation(compose.compose.navigation)
     implementation(compose.compose.foundation)

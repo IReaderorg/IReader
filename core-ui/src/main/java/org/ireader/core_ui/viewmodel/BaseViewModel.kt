@@ -20,8 +20,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import org.ireader.common_extensions.UiEvent
-import org.ireader.common_extensions.UiText
+import org.ireader.common_resources.UiEvent
+import org.ireader.common_resources.UiText
 import org.ireader.core_api.prefs.Preference
 import org.ireader.core_ui.R
 import org.ireader.core_ui.ui.PreferenceMutableState
@@ -36,9 +36,9 @@ abstract class BaseViewModel : androidx.lifecycle.ViewModel() {
     protected val _eventFlow = MutableSharedFlow<UiEvent>()
     open val eventFlow = _eventFlow.asSharedFlow()
 
-    fun showSnackBar(message: org.ireader.common_extensions.UiText?) {
+    fun showSnackBar(message: UiText?) {
         viewModelScope.launch {
-            _eventFlow.showSnackBar(message ?: org.ireader.common_extensions.UiText.StringResource(R.string.error_unknown))
+            _eventFlow.showSnackBar(message ?: UiText.StringResource(R.string.error_unknown))
         }
     }
 

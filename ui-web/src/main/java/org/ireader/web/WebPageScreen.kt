@@ -36,6 +36,7 @@ import com.google.accompanist.web.WebContent
 import com.google.accompanist.web.rememberWebViewState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collectLatest
+import org.ireader.common_resources.UiEvent
 import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.domain.utils.setDefaultSettings
 
@@ -61,7 +62,7 @@ fun WebPageScreen(
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
-                is org.ireader.common_extensions.UiEvent.ShowSnackbar -> {
+                is UiEvent.ShowSnackbar -> {
                     scaffoldState.snackbarHostState.showSnackbar(
                         event.uiText.asString(context)
                     )

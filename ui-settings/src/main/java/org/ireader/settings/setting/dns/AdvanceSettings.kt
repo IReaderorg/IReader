@@ -21,11 +21,13 @@ import kotlinx.serialization.json.Json
 import org.ireader.common_extensions.findComponentActivity
 import org.ireader.common_extensions.launchIO
 import org.ireader.common_models.BackUpBook
+import org.ireader.common_resources.UiEvent
 import org.ireader.components.AdvanceSettingItem
 import org.ireader.components.components.ISnackBarHost
 import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.components.reusable_composable.TopAppBarBackButton
+import org.ireader.common_resources.UiText
 import org.ireader.core_ui.ui_components.TextSection
 import org.ireader.settings.setting.SettingViewModel
 import org.ireader.ui_settings.R
@@ -58,9 +60,9 @@ fun AdvanceSettings(
                             }
                         }
                     } catch (e: SerializationException) {
-                        vm.showSnackBar(org.ireader.common_extensions.UiText.ExceptionString(e))
+                        vm.showSnackBar(UiText.ExceptionString(e))
                     } catch (e: Throwable) {
-                        vm.showSnackBar(org.ireader.common_extensions.UiText.ExceptionString(e))
+                        vm.showSnackBar(UiText.ExceptionString(e))
                     }
                 }
             }
@@ -88,15 +90,15 @@ fun AdvanceSettings(
                                             txt
                                         )
                                     )
-                                    vm.showSnackBar(org.ireader.common_extensions.UiText.StringResource(R.string.restoredSuccessfully))
+                                    vm.showSnackBar(UiText.StringResource(R.string.restoredSuccessfully))
                                 }.getOrElse { e ->
-                                    vm.showSnackBar(org.ireader.common_extensions.UiText.ExceptionString(e))
+                                    vm.showSnackBar(UiText.ExceptionString(e))
                                 }
                             }
                         }
                     }
                 } catch (e: Throwable) {
-                    vm.showSnackBar(org.ireader.common_extensions.UiText.ExceptionString(e))
+                    vm.showSnackBar(UiText.ExceptionString(e))
                 }
             }
         }
@@ -104,7 +106,7 @@ fun AdvanceSettings(
     LaunchedEffect(key1 = true) {
         vm.eventFlow.collectLatest { event ->
             when (event) {
-                is org.ireader.common_extensions.UiEvent.ShowSnackbar -> {
+                is UiEvent.ShowSnackbar -> {
                     scaffoldState.snackbarHostState.showSnackbar(
                         event.uiText.asString(context)
                     )
@@ -131,18 +133,18 @@ fun AdvanceSettings(
             TextSection(text = "Data", toUpper = false)
             AdvanceSettingItem(title = "Clear All Database") {
                 vm.deleteAllDatabase()
-                vm.showSnackBar(org.ireader.common_extensions.UiText.DynamicString("Database was cleared."))
+                vm.showSnackBar(UiText.DynamicString("Database was cleared."))
             }
             AdvanceSettingItem(title = "Clear All Chapters") {
                 vm.deleteAllChapters()
-                vm.showSnackBar(org.ireader.common_extensions.UiText.DynamicString("Chapters was cleared."))
+                vm.showSnackBar(UiText.DynamicString("Chapters was cleared."))
             }
             AdvanceSettingItem(
                 title = "Clear All Cache",
                 subtitle = org.ireader.common_extensions.getCacheSize(context = context)
             ) {
                 context.cacheDir.deleteRecursively()
-                vm.showSnackBar(org.ireader.common_extensions.UiText.DynamicString("Clear was cleared."))
+                vm.showSnackBar(UiText.DynamicString("Clear was cleared."))
             }
 
             TextSection(text = "Backup", toUpper = false)

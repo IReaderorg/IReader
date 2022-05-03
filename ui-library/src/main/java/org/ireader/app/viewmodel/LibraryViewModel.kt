@@ -13,9 +13,7 @@ import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetBookUseCases
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
-import org.ireader.domain.use_cases.preferences.reader_preferences.LibraryLayoutTypeUseCase
-import org.ireader.domain.use_cases.preferences.reader_preferences.SortersDescUseCase
-import org.ireader.domain.use_cases.preferences.reader_preferences.SortersUseCase
+import org.ireader.domain.use_cases.preferences.reader_preferences.screens.LibraryScreenPrefUseCases
 import org.ireader.domain.use_cases.services.ServiceUseCases
 import javax.inject.Inject
 
@@ -25,9 +23,7 @@ class LibraryViewModel @Inject constructor(
     private val insertUseCases: LocalInsertUseCases,
     private val deleteUseCase: DeleteUseCase,
     private val localGetChapterUseCase: LocalGetChapterUseCase,
-    private val libraryLayoutUseCase: LibraryLayoutTypeUseCase,
-    private val sortersDescUseCase: SortersDescUseCase,
-    private val sortersUseCase: SortersUseCase,
+    private val libraryScreenPrefUseCases: LibraryScreenPrefUseCases,
     private val libraryState: LibraryStateImpl,
     private val serviceUseCases: ServiceUseCases,
 ) : BaseViewModel(), LibraryState by libraryState {
@@ -52,7 +48,7 @@ class LibraryViewModel @Inject constructor(
     }
 
     fun onLayoutTypeChange(layoutType: DisplayMode) {
-        libraryLayoutUseCase.save(layoutType.layoutIndex)
+        libraryScreenPrefUseCases.libraryLayoutTypeUseCase.save(layoutType.layoutIndex)
         this.layout = layoutType.layout
     }
     fun downloadChapters() {
@@ -89,9 +85,9 @@ class LibraryViewModel @Inject constructor(
 
     private fun readLayoutTypeAndFilterTypeAndSortType() {
         viewModelScope.launch {
-            val sortType = sortersUseCase.read()
-            val layoutType = libraryLayoutUseCase.read().layout
-            val sortBy = sortersDescUseCase.read()
+            val sortType = libraryScreenPrefUseCases.sortersUseCase.read()
+            val layoutType = libraryScreenPrefUseCases.libraryLayoutTypeUseCase.read().layout
+            val sortBy = libraryScreenPrefUseCases.sortersDescUseCase.read()
             this@LibraryViewModel.layout = layoutType
             this@LibraryViewModel.sortType = sortType
             this@LibraryViewModel.desc = sortBy
@@ -102,14 +98,14 @@ class LibraryViewModel @Inject constructor(
         this.sortType = sortType
         if (sortType == sortType) {
             this.desc = !desc
-            sortersDescUseCase.save(this.desc)
+            libraryScreenPrefUseCases.sortersDescUseCase.save(this.desc)
         }
         saveSortType(sortType)
         getLibraryBooks()
     }
 
     private fun saveSortType(sortType: SortType) {
-        sortersUseCase.save(sortType.index)
+        libraryScreenPrefUseCases.sortersUseCase.save(sortType.index)
     }
 
     fun addFilters(filterType: FilterType) {

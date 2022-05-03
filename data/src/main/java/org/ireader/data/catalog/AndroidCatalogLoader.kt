@@ -21,12 +21,11 @@ import org.ireader.core_api.source.Source
 import org.ireader.core_api.source.TestSource
 import org.ireader.core_catalogs.service.CatalogLoader
 import java.io.File
-import javax.inject.Inject
 
 /**
  * Class that handles the loading of the catalogs installed in the system and the app.
  */
-class AndroidCatalogLoader @Inject constructor(
+class AndroidCatalogLoader(
     private val context: Application,
     private val httpClients: HttpClients,
 ) : CatalogLoader {

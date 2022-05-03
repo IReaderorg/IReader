@@ -16,6 +16,18 @@
 
 
 
+    <!--- install steps -->
+    <string name="fatal_error">Fatal error for</string>
+    <string name="installation_error">Error while (un)installing package</string>
+    <string name="installation_error_aborted">PackageManger: Cancelled</string>
+    <string name="installation_error_invalid">PackageManger: There is another apk installed with higher version than this package</string>
+    <string name="installation_error_Storage">PackageManger: InSufficient Storage</string>
+    <string name="installation_error_incompatible">PackageManger: Incompatible with installed package</string>
+    <string name="installation_error_conflicted">PackageManger: Conflicted with installed package</string>
+    <string name="installation_error_blocked">PackageManger: Installer was blocked</string>
+
+
+
 
 
 

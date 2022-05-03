@@ -16,7 +16,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.ireader.common_extensions.UiText
+import org.ireader.common_resources.UiText
 
 /** All credit belongs to tachiyomi**/
 val kaomojis = listOf(
@@ -31,7 +31,7 @@ val kaomojis = listOf(
 @Composable
 fun EmptyScreen(
     modifier: Modifier = Modifier,
-    text: org.ireader.common_extensions.UiText,
+    text: UiText,
 ) {
     val kaomoji = remember { kaomojis.random() }
 

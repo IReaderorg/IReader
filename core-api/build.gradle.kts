@@ -8,6 +8,7 @@ plugins {
 }
 
 dependencies {
+    implementation(project(Modules.commonResources))
     api(kotlinx.coroutines.core)
     api(kotlinx.stdlib)
     api(kotlinx.datetime)

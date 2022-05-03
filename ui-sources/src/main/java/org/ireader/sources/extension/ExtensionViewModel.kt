@@ -6,19 +6,19 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import org.ireader.common_extensions.UiText
 import org.ireader.common_extensions.launchIO
 import org.ireader.common_models.entities.Catalog
 import org.ireader.common_models.entities.CatalogInstalled
 import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.common_models.entities.CatalogRemote
+import org.ireader.common_resources.UiText
+import org.ireader.core_api.os.InstallStep
 import org.ireader.core_catalogs.interactor.GetCatalogsByType
 import org.ireader.core_catalogs.interactor.InstallCatalog
 import org.ireader.core_catalogs.interactor.SyncRemoteCatalogs
 import org.ireader.core_catalogs.interactor.TogglePinnedCatalog
 import org.ireader.core_catalogs.interactor.UninstallCatalog
 import org.ireader.core_catalogs.interactor.UpdateCatalog
-import org.ireader.core_catalogs.model.InstallStep
 import org.ireader.core_ui.exceptionHandler
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.use_cases.remote.key.RemoteKeyUseCase
@@ -73,20 +73,21 @@ class ExtensionViewModel @Inject constructor(
             val isUpdate = catalog is CatalogInstalled
             val (pkgName, flow) = if (isUpdate) {
                 catalog as CatalogInstalled
-                catalog.pkgName to updateCatalog.await(catalog) { error ->
-                    showSnackBar(exceptionHandler(error))
-                }
+                catalog.pkgName to updateCatalog.await(catalog)
             } else {
                 catalog as CatalogRemote
-                catalog.pkgName to installCatalog.await(catalog) { error ->
-                    showSnackBar(exceptionHandler(error))
-                }
+                catalog.pkgName to installCatalog.await(catalog)
             }
             flow.collect { step ->
-                if (step == InstallStep.Error) {
-                    showSnackBar(UiText.DynamicString(step.name))
+                if (step is InstallStep.Error) {
+                    showSnackBar(step.error)
                 }
                 state.installSteps = if (step != InstallStep.Completed) {
+                    if (step is InstallStep.Error) {
+                        showSnackBar(step.error)
+                    } else {
+                        showSnackBar(UiText.DynamicString(step.name))
+                    }
                     installSteps + (pkgName to step)
                 } else {
                     installSteps - pkgName
@@ -104,8 +105,9 @@ class ExtensionViewModel @Inject constructor(
     fun uninstallCatalog(catalog: Catalog) {
         scope.launch {
             if (catalog is CatalogInstalled) {
-                uninstallCatalog.await(catalog) { error ->
-                    showSnackBar(exceptionHandler(error))
+                val flow = uninstallCatalog.await(catalog)
+                if (flow is InstallStep.Error) {
+                    showSnackBar(flow.error)
                 }
             }
         }

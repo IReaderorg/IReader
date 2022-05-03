@@ -12,14 +12,16 @@ import org.ireader.common_models.LayoutType
 import org.ireader.common_models.SortType
 import org.ireader.common_models.entities.BookItem
 import org.ireader.common_models.entities.History
+import org.ireader.common_resources.UiText
 import javax.inject.Inject
+import javax.inject.Singleton
 
 interface LibraryState {
     var isLoading: Boolean
     var books: List<BookItem>
     val isEmpty: Boolean
     var searchedBook: List<BookItem>
-    var error: org.ireader.common_extensions.UiText
+    var error: UiText
     var layout: LayoutType
     var inSearchMode: Boolean
     var searchQuery: String
@@ -31,13 +33,13 @@ interface LibraryState {
     var selection: SnapshotStateList<Long>
     val hasSelection: Boolean
 }
-
+@Singleton
 open class LibraryStateImpl @Inject constructor() : LibraryState {
     override var isLoading by mutableStateOf<Boolean>(false)
     override var books by mutableStateOf<List<BookItem>>(emptyList())
     override val isEmpty: Boolean by derivedStateOf { books.isEmpty() }
     override var searchedBook by mutableStateOf<List<BookItem>>(emptyList())
-    override var error by mutableStateOf<org.ireader.common_extensions.UiText>(org.ireader.common_extensions.UiText.StringResource(org.ireader.core.R.string.no_error))
+    override var error by mutableStateOf<UiText>(UiText.StringResource(org.ireader.core.R.string.no_error))
     override var layout by mutableStateOf<LayoutType>(DisplayMode.GridLayout.layout)
     override var inSearchMode by mutableStateOf<Boolean>(false)
     override var searchQuery by mutableStateOf<String>("")

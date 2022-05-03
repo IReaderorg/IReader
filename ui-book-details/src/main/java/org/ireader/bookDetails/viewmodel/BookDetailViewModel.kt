@@ -13,6 +13,7 @@ import org.ireader.common_extensions.removeSameItemsFromList
 import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.Chapter
 import org.ireader.core.R
+import org.ireader.common_resources.UiText
 import org.ireader.core_api.log.Log
 import org.ireader.core_api.source.Source
 import org.ireader.core_catalogs.interactor.GetLocalCatalog
@@ -69,7 +70,7 @@ class BookDetailViewModel @Inject constructor(
             })
         } else {
             viewModelScope.launch {
-                showSnackBar(org.ireader.common_extensions.UiText.StringResource(R.string.something_is_wrong_with_this_book))
+                showSnackBar(UiText.StringResource(R.string.something_is_wrong_with_this_book))
             }
         }
     }

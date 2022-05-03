@@ -1,7 +1,7 @@
 package org.ireader.domain.use_cases.remote
 
 import kotlinx.coroutines.CancellationException
-import org.ireader.common_extensions.UiText
+import org.ireader.common_resources.UiText
 import org.ireader.common_extensions.withIOContext
 import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.Book.Companion.toBookInfo

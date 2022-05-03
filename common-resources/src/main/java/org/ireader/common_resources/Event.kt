@@ -1,9 +1,8 @@
 
 
-package org.ireader.common_extensions
+package org.ireader.common_resources
 
 import android.content.Context
-import org.ireader.core.R
 
 abstract class Event
 
@@ -32,6 +31,7 @@ sealed class UiText {
                 val eString = e.localizedMessage ?: context.getString(R.string.error_unknown)
                 return eString.substring(0, eString.length.coerceAtMost(500))
             }
+            else -> ""
         }
     }
 }

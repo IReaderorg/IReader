@@ -25,6 +25,8 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.ireader.common_extensions.async.viewModelIOCoroutine
 import org.ireader.core.R
+import org.ireader.common_resources.UiEvent
+import org.ireader.common_resources.UiText
 import org.ireader.core_api.log.Log
 import org.ireader.core_ui.theme.TransparentStatusBar
 import org.ireader.domain.ui.NavigationArgs
@@ -125,7 +127,7 @@ object ReaderScreenSpec : ScreenSpec {
 
                 vm.eventFlow.collectLatest { event ->
                     when (event) {
-                        is org.ireader.common_extensions.UiEvent.ShowSnackbar -> {
+                        is UiEvent.ShowSnackbar -> {
                             scaffoldState.snackbarHostState.showSnackbar(
                                 event.uiText.asString(context)
                             )
@@ -159,7 +161,7 @@ object ReaderScreenSpec : ScreenSpec {
                             } else {
                                 scope.launch {
                                     vm.showSnackBar(
-                                        org.ireader.common_extensions.UiText.StringResource(
+                                        UiText.StringResource(
                                             R.string.this_is_last_chapter
                                         )
                                     )
@@ -191,7 +193,7 @@ object ReaderScreenSpec : ScreenSpec {
                                 } else {
                                     scope.launch {
                                         vm.showSnackBar(
-                                            org.ireader.common_extensions.UiText.StringResource(
+                                            UiText.StringResource(
                                                 R.string.this_is_first_chapter
                                             )
                                         )
@@ -204,7 +206,7 @@ object ReaderScreenSpec : ScreenSpec {
                         onSliderFinished = {
                             scope.launch {
                                 vm.showSnackBar(
-                                    org.ireader.common_extensions.UiText.DynamicString(
+                                    UiText.DynamicString(
                                         chapters[vm.currentChapterIndex].title
                                     )
                                 )
@@ -430,7 +432,7 @@ object ReaderScreenSpec : ScreenSpec {
                             } catch (e: Throwable) {
                                 scope.launch {
                                     vm.showSnackBar(
-                                        org.ireader.common_extensions.UiText.ExceptionString(
+                                        UiText.ExceptionString(
                                             e
                                         )
                                     )

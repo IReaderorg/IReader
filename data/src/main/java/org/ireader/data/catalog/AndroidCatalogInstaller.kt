@@ -7,14 +7,14 @@ import io.ktor.http.HttpHeaders
 import io.ktor.utils.io.ByteReadChannel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import org.ireader.common_resources.UiText
 import org.ireader.core_api.http.HttpClients
 import org.ireader.core_api.io.saveTo
 import org.ireader.core_api.log.Log
+import org.ireader.core_api.os.InstallStep
 import org.ireader.core_api.os.PackageInstaller
-import org.ireader.core_catalogs.model.InstallStep
 import org.ireader.core_catalogs.service.CatalogInstaller
 import java.io.File
-import javax.inject.Inject
 
 /**
  * The installer which installs, updates and uninstalls the extensions.
@@ -22,7 +22,7 @@ import javax.inject.Inject
  * @param context The application context.
  */
 
-class AndroidCatalogInstaller @Inject constructor(
+class AndroidCatalogInstaller(
     private val context: Application,
     private val httpClient: HttpClients,
     private val installationChanges: AndroidCatalogInstallationChanges,
@@ -40,7 +40,7 @@ class AndroidCatalogInstaller @Inject constructor(
      *
      * @param catalog The catalog to install.
      */
-    override fun install(catalog: org.ireader.common_models.entities.CatalogRemote, onError: (Throwable) -> Unit): Flow<InstallStep> = flow {
+    override fun install(catalog: org.ireader.common_models.entities.CatalogRemote): Flow<InstallStep> = flow {
         emit(InstallStep.Downloading)
         val tmpApkFile = File(context.cacheDir, "${catalog.pkgName}.apk")
         val tmpIconFile = File(context.cacheDir, "${catalog.pkgName}.png")
@@ -54,27 +54,18 @@ class AndroidCatalogInstaller @Inject constructor(
                 headers.append(HttpHeaders.CacheControl, "no-store")
             }.body()
             iconResponse.saveTo(tmpIconFile)
-
             emit(InstallStep.Installing)
-
-//            val extDir = File(context.filesDir, "catalogs/${catalog.pkgName}").apply { mkdirs() }
-//            val apkFile = File(extDir, tmpApkFile.name)
-//            val iconFile = File(extDir, tmpIconFile.name)
             val success = packageInstaller.install(tmpApkFile, catalog.pkgName)
 
             tmpApkFile.deleteRecursively()
             tmpIconFile.deleteRecursively()
-            // val apkSuccess = tmpApkFile.renameTo(apkFile)
-            //  val iconSuccess = tmpIconFile.renameTo(iconFile)
-            //   val success = apkSuccess && iconSuccess
-            if (success) {
+            if (success is InstallStep.Success) {
                 installationChanges.notifyAppInstall(catalog.pkgName)
             }
-            emit(if (success) InstallStep.Completed else InstallStep.Error)
+            emit(success)
         } catch (e: Throwable) {
             Log.warn(e, "Error installing package")
-            onError(e)
-            emit(InstallStep.Error)
+            emit(InstallStep.Error(UiText.ExceptionString(e)))
         } finally {
             tmpApkFile.delete()
             tmpIconFile.delete()
@@ -86,16 +77,13 @@ class AndroidCatalogInstaller @Inject constructor(
      *
      * @param pkgName The package name of the extension to uninstall
      */
-    override suspend fun uninstall(pkgName: String, onError: (Throwable) -> Unit): Boolean {
+    override suspend fun uninstall(pkgName: String): InstallStep {
         return try {
             val deleted = packageInstaller.uninstall(pkgName)
             installationChanges.notifyAppUninstall(pkgName)
             deleted
         } catch (e: Throwable) {
-            onError(e)
-            false
+            InstallStep.Error(UiText.ExceptionString(e))
         }
-//        val file = File(context.filesDir, "catalogs/${pkgName}")
-//        val deleted = file.deleteRecursively()
     }
 }

@@ -53,7 +53,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.ireader.chapterDetails.viewmodel.ChapterDetailEvent
 import org.ireader.chapterDetails.viewmodel.ChapterDetailViewModel
-import org.ireader.common_extensions.UiText
+import org.ireader.common_resources.UiText
 import org.ireader.components.components.ChapterListItemComposable
 import org.ireader.components.list.scrollbars.LazyColumnScrollbar
 import org.ireader.components.reusable_composable.AppIconButton

@@ -1,9 +1,8 @@
 package org.ireader.domain.use_cases.preferences.reader_preferences
 
 import org.ireader.core_ui.theme.AppPreferences
-import javax.inject.Inject
 
-class BrightnessStateUseCase @Inject constructor(
+class BrightnessStateUseCase(
     private val appPreferences: AppPreferences,
 ) {
     fun saveBrightness(brightness: Float) {
@@ -23,7 +22,7 @@ class BrightnessStateUseCase @Inject constructor(
     }
 }
 
-class ScrollModeUseCase @Inject constructor(
+class ScrollModeUseCase(
     private val appPreferences: AppPreferences,
 ) {
     fun save(mode: Boolean) {
@@ -35,7 +34,7 @@ class ScrollModeUseCase @Inject constructor(
     }
 }
 
-class ImmersiveModeUseCase @Inject constructor(
+class ImmersiveModeUseCase(
     private val appPreferences: AppPreferences,
 ) {
     fun save(mode: Boolean) {
@@ -47,7 +46,7 @@ class ImmersiveModeUseCase @Inject constructor(
     }
 }
 
-class ScrollIndicatorUseCase @Inject constructor(
+class ScrollIndicatorUseCase(
     private val appPreferences: AppPreferences,
 ) {
     fun saveWidth(value: Int) {
@@ -77,7 +76,7 @@ class ScrollIndicatorUseCase @Inject constructor(
     }
 }
 
-class AutoScrollMode @Inject constructor(
+class AutoScrollMode(
     private val appPreferences: AppPreferences,
 ) {
     fun saveInterval(value: Long) {

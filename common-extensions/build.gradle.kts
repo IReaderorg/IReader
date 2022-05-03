@@ -11,6 +11,7 @@ dependencies {
     implementation(project(Modules.coreUi))
     implementation(project(Modules.core))
     implementation(project(Modules.coreApi))
+    implementation(project(Modules.commonResources))
 
     implementation(androidx.browser)
     implementation(androidx.lifecycle.viewmodelktx)

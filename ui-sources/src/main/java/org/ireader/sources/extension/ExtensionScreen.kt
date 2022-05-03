@@ -27,6 +27,7 @@ import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.flow.collectLatest
 import org.ireader.common_models.entities.Catalog
 import org.ireader.common_models.entities.CatalogLocal
+import org.ireader.common_resources.UiEvent
 import org.ireader.components.components.ISnackBarHost
 import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.core_ui.theme.AppColors
@@ -53,7 +54,7 @@ fun ExtensionScreen(
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
-                is org.ireader.common_extensions.UiEvent.ShowSnackbar -> {
+                is UiEvent.ShowSnackbar -> {
                     scaffoldState.snackbarHostState.showSnackbar(
                         event.uiText.asString(context)
                     )

@@ -8,7 +8,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import org.ireader.common_models.entities.UpdateWithInfo
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 open class UpdateStateImpl @Inject constructor() : UpdateState {
     override var isLoading: Boolean by mutableStateOf(false)
     override val isEmpty: Boolean by derivedStateOf { updates.isEmpty() }

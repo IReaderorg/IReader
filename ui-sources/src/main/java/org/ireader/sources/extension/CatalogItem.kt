@@ -40,7 +40,7 @@ import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.common_models.entities.CatalogRemote
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.MidSizeTextComposable
-import org.ireader.core_catalogs.model.InstallStep
+import org.ireader.core_api.os.InstallStep
 import org.ireader.sources.extension.composables.LetterIcon
 import java.util.Locale
 import kotlin.math.max

@@ -5,10 +5,8 @@ import org.ireader.common_data.repository.UpdatesRepository
 import org.ireader.common_models.entities.Update
 import org.ireader.common_models.entities.UpdateWithInfo
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-data class UpdateUseCases @Inject constructor(
+data class UpdateUseCases(
     val subscribeUpdates: SubscribeUpdates,
     val deleteUpdates: DeleteUpdates,
     val deleteAllUpdates: DeleteAllUpdates,

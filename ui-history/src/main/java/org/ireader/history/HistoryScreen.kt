@@ -8,6 +8,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import org.ireader.common_models.entities.HistoryWithRelations
+import org.ireader.common_resources.UiText
 import org.ireader.core_ui.ui.EmptyScreen
 import org.ireader.core_ui.ui.LoadingScreen
 import org.ireader.history.viewmodel.HistoryState
@@ -37,7 +38,7 @@ fun HistoryScreen(
             Crossfade(targetState = Pair(state.isLoading, state.isEmpty)) { (isLoading, isEmpty) ->
                 when {
                     isLoading -> LoadingScreen()
-                    isEmpty -> EmptyScreen(text = org.ireader.common_extensions.UiText.DynamicString("Nothing read recently"))
+                    isEmpty -> EmptyScreen(text = UiText.DynamicString("Nothing read recently"))
                     else -> HistoryContent(
                         state = state,
                         onClickItem = onHistory,

@@ -13,6 +13,8 @@ import kotlinx.coroutines.launch
 import org.ireader.common_models.DisplayMode
 import org.ireader.common_models.entities.RemoteKeys
 import org.ireader.common_models.entities.toBook
+import org.ireader.common_resources.UiEvent
+import org.ireader.common_resources.UiText
 import org.ireader.core.DefaultPaginator
 import org.ireader.core.exceptions.SourceNotFoundException
 import org.ireader.core_api.log.Log
@@ -22,8 +24,7 @@ import org.ireader.core_api.source.model.MangasPageInfo
 import org.ireader.core_catalogs.CatalogStore
 import org.ireader.core_ui.exceptionHandler
 import org.ireader.domain.use_cases.local.DeleteUseCase
-import org.ireader.domain.use_cases.local.LocalInsertUseCases
-import org.ireader.domain.use_cases.preferences.reader_preferences.BrowseLayoutTypeUseCase
+import org.ireader.domain.use_cases.preferences.reader_preferences.BrowseScreenPrefUseCase
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import org.ireader.domain.use_cases.remote.key.RemoteKeyUseCase
 import javax.inject.Inject
@@ -34,13 +35,12 @@ class ExploreViewModel @Inject constructor(
     private val remoteUseCases: RemoteUseCases,
     private val deleteUseCase: DeleteUseCase,
     private val catalogStore: CatalogStore,
-    private val browseLayoutTypeUseCase: BrowseLayoutTypeUseCase,
+    private val browseScreenPrefUseCase: BrowseScreenPrefUseCase,
     private val remoteKeyUseCase: RemoteKeyUseCase,
-    private val insertUseCases: LocalInsertUseCases,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel(), ExploreState by state {
 
-    private val _eventFlow = MutableSharedFlow<org.ireader.common_extensions.UiEvent>()
+    private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
 
     init {
@@ -69,13 +69,13 @@ class ExploreViewModel @Inject constructor(
                     }
                 } else {
                     viewModelScope.launch {
-                        showSnackBar(org.ireader.common_extensions.UiText.StringResource(org.ireader.core.R.string.the_source_is_not_found))
+                        showSnackBar(UiText.StringResource(org.ireader.core.R.string.the_source_is_not_found))
                     }
                 }
             }
         } else {
             viewModelScope.launch {
-                showSnackBar(org.ireader.common_extensions.UiText.StringResource(org.ireader.core.R.string.the_source_is_not_found))
+                showSnackBar(UiText.StringResource(org.ireader.core.R.string.the_source_is_not_found))
             }
         }
     }
@@ -209,18 +209,18 @@ class ExploreViewModel @Inject constructor(
 
     fun saveLayoutType(layoutType: DisplayMode) {
         state.layout = layoutType.layout
-        browseLayoutTypeUseCase.save(layoutType.layoutIndex)
+        browseScreenPrefUseCase.browseLayoutTypeUseCase.save(layoutType.layoutIndex)
     }
 
     private suspend fun readLayoutType() {
-        state.layout = browseLayoutTypeUseCase.read().layout
+        state.layout = browseScreenPrefUseCase.browseLayoutTypeUseCase.read().layout
     }
 
-    suspend fun showSnackBar(message: org.ireader.common_extensions.UiText?) {
+    suspend fun showSnackBar(message: UiText?) {
         _eventFlow.emit(
-            org.ireader.common_extensions.UiEvent.ShowSnackbar(
+            UiEvent.ShowSnackbar(
                 uiText = message
-                    ?: org.ireader.common_extensions.UiText.StringResource(org.ireader.core.R.string.error_unknown)
+                    ?: UiText.StringResource(org.ireader.core.R.string.error_unknown)
             )
         )
     }

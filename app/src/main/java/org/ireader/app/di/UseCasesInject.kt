@@ -1,25 +1,17 @@
 package org.ireader.app.di
 
+import android.content.Context
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import org.ireader.common_data.repository.HistoryRepository
 import org.ireader.common_data.repository.LocalBookRepository
 import org.ireader.common_data.repository.RemoteKeyRepository
-import org.ireader.core_catalogs.CatalogPreferences
-import org.ireader.core_catalogs.CatalogStore
-import org.ireader.core_catalogs.interactor.GetCatalogsByType
-import org.ireader.core_catalogs.interactor.GetLocalCatalog
-import org.ireader.core_catalogs.interactor.GetLocalCatalogs
-import org.ireader.core_catalogs.interactor.GetRemoteCatalogs
-import org.ireader.core_catalogs.interactor.InstallCatalog
-import org.ireader.core_catalogs.interactor.SyncRemoteCatalogs
-import org.ireader.core_catalogs.interactor.TogglePinnedCatalog
-import org.ireader.core_catalogs.interactor.UninstallCatalog
-import org.ireader.core_catalogs.interactor.UpdateCatalog
-import org.ireader.core_catalogs.service.CatalogInstaller
-import org.ireader.core_catalogs.service.CatalogRemoteApi
-import org.ireader.core_catalogs.service.CatalogRemoteRepository
+import org.ireader.common_data.repository.UpdatesRepository
+import org.ireader.core_ui.theme.AppPreferences
+import org.ireader.domain.use_cases.history.HistoryUseCase
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.FindBookByKey
 import org.ireader.domain.use_cases.local.FindBooksByKey
@@ -58,6 +50,27 @@ import org.ireader.domain.use_cases.local.insert_usecases.InsertBookAndChapters
 import org.ireader.domain.use_cases.local.insert_usecases.InsertBooks
 import org.ireader.domain.use_cases.local.insert_usecases.InsertChapter
 import org.ireader.domain.use_cases.local.insert_usecases.InsertChapters
+import org.ireader.domain.use_cases.preferences.reader_preferences.AutoScrollMode
+import org.ireader.domain.use_cases.preferences.reader_preferences.BackgroundColorUseCase
+import org.ireader.domain.use_cases.preferences.reader_preferences.BrightnessStateUseCase
+import org.ireader.domain.use_cases.preferences.reader_preferences.BrowseLayoutTypeUseCase
+import org.ireader.domain.use_cases.preferences.reader_preferences.BrowseScreenPrefUseCase
+import org.ireader.domain.use_cases.preferences.reader_preferences.FontHeightUseCase
+import org.ireader.domain.use_cases.preferences.reader_preferences.FontSizeStateUseCase
+import org.ireader.domain.use_cases.preferences.reader_preferences.ImmersiveModeUseCase
+import org.ireader.domain.use_cases.preferences.reader_preferences.LibraryLayoutTypeUseCase
+import org.ireader.domain.use_cases.preferences.reader_preferences.OrientationUseCase
+import org.ireader.domain.use_cases.preferences.reader_preferences.ParagraphDistanceUseCase
+import org.ireader.domain.use_cases.preferences.reader_preferences.ParagraphIndentUseCase
+import org.ireader.domain.use_cases.preferences.reader_preferences.ReaderPrefUseCases
+import org.ireader.domain.use_cases.preferences.reader_preferences.ScrollIndicatorUseCase
+import org.ireader.domain.use_cases.preferences.reader_preferences.ScrollModeUseCase
+import org.ireader.domain.use_cases.preferences.reader_preferences.SelectedFontStateUseCase
+import org.ireader.domain.use_cases.preferences.reader_preferences.SortersDescUseCase
+import org.ireader.domain.use_cases.preferences.reader_preferences.SortersUseCase
+import org.ireader.domain.use_cases.preferences.reader_preferences.TextAlignmentUseCase
+import org.ireader.domain.use_cases.preferences.reader_preferences.TextColorUseCase
+import org.ireader.domain.use_cases.preferences.reader_preferences.screens.LibraryScreenPrefUseCases
 import org.ireader.domain.use_cases.remote.GetBookDetail
 import org.ireader.domain.use_cases.remote.GetRemoteBooksUseCase
 import org.ireader.domain.use_cases.remote.GetRemoteChapters
@@ -72,8 +85,16 @@ import org.ireader.domain.use_cases.remote.key.InsertAllRemoteKeys
 import org.ireader.domain.use_cases.remote.key.PrepareExploreMode
 import org.ireader.domain.use_cases.remote.key.RemoteKeyUseCase
 import org.ireader.domain.use_cases.remote.key.SubScribeAllPagedExploreBooks
+import org.ireader.domain.use_cases.services.ServiceUseCases
+import org.ireader.domain.use_cases.services.StartDownloadServicesUseCase
+import org.ireader.domain.use_cases.services.StartLibraryUpdateServicesUseCase
+import org.ireader.domain.use_cases.services.StartTTSServicesUseCase
+import org.ireader.domain.use_cases.services.StopServiceUseCase
+import org.ireader.domain.use_cases.updates.DeleteAllUpdates
+import org.ireader.domain.use_cases.updates.DeleteUpdates
+import org.ireader.domain.use_cases.updates.SubscribeUpdates
+import org.ireader.domain.use_cases.updates.UpdateUseCases
 import org.ireader.image_loader.LibraryCovers
-import org.ireader.sources.extension.CatalogsStateImpl
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
@@ -184,83 +205,84 @@ class UseCasesInject {
         )
     }
 
-
-    /*** Catalog UseCase **/
     @Provides
     @Singleton
-    fun providesCatalogsStateImpl(
-    ): CatalogsStateImpl {
-        return CatalogsStateImpl()
+    fun providesServiceUseCases(
+      @ApplicationContext context: Context
+    ): ServiceUseCases {
+        return ServiceUseCases(
+            startDownloadServicesUseCase = StartDownloadServicesUseCase(context),
+            startLibraryUpdateServicesUseCase = StartLibraryUpdateServicesUseCase(context),
+            startTTSServicesUseCase = StartTTSServicesUseCase(context),
+            stopServicesUseCase = StopServiceUseCase(context),
+        )
     }
     @Provides
     @Singleton
-    fun providesGetCatalogsByType(
-     localCatalogs: GetLocalCatalogs,
-         remoteCatalogs: GetRemoteCatalogs,
-    ): GetCatalogsByType {
-        return GetCatalogsByType(localCatalogs, remoteCatalogs)
+    fun providesLibraryScreenPrefUseCases(
+        appPreferences: AppPreferences
+    ): LibraryScreenPrefUseCases {
+        return LibraryScreenPrefUseCases(
+          libraryLayoutTypeUseCase = LibraryLayoutTypeUseCase(appPreferences),
+            sortersDescUseCase = SortersDescUseCase(appPreferences),
+            sortersUseCase = SortersUseCase(appPreferences)
+        )
     }
     @Provides
     @Singleton
-    fun providesGetRemoteCatalogs(
-        catalogRemoteRepository: CatalogRemoteRepository,
-    ): GetRemoteCatalogs {
-        return GetRemoteCatalogs(catalogRemoteRepository)
-    }
-    @Provides
-    @Singleton
-    fun providesGetLocalCatalogs(
-      catalogStore: CatalogStore,
-       libraryRepository: LocalBookRepository,
-    ): GetLocalCatalogs {
-        return GetLocalCatalogs(catalogStore, libraryRepository)
-    }
-    @Provides
-    @Singleton
-    fun providesGetLocalCatalog(
-     store: CatalogStore
-    ): GetLocalCatalog {
-        return GetLocalCatalog(store)
-    }
-    @Provides
-    @Singleton
-    fun providesUpdateCatalog(
-       catalogRemoteRepository: CatalogRemoteRepository,
-        installCatalog: InstallCatalog,
-    ): UpdateCatalog {
-        return UpdateCatalog(catalogRemoteRepository, installCatalog)
-    }
-    @Provides
-    @Singleton
-    fun providesInstallCatalog(
-     catalogInstaller: CatalogInstaller,
-    ): InstallCatalog {
-        return InstallCatalog(catalogInstaller)
-    }
-    @Provides
-    @Singleton
-    fun providesUninstallCatalog(
-       catalogInstaller: CatalogInstaller,
-    ): UninstallCatalog {
-        return UninstallCatalog(catalogInstaller)
+    fun providesReaderPrefUseCases(
+        appPreferences: AppPreferences
+    ): ReaderPrefUseCases {
+        return ReaderPrefUseCases(
+            autoScrollMode = AutoScrollMode(appPreferences),
+            backgroundColorUseCase = BackgroundColorUseCase(appPreferences),
+            brightnessStateUseCase = BrightnessStateUseCase(appPreferences),
+            fontHeightUseCase = FontHeightUseCase(appPreferences),
+            fontSizeStateUseCase = FontSizeStateUseCase(appPreferences),
+            immersiveModeUseCase = ImmersiveModeUseCase(appPreferences),
+            orientationUseCase = OrientationUseCase(appPreferences),
+            paragraphDistanceUseCase = ParagraphDistanceUseCase(appPreferences),
+            paragraphIndentUseCase = ParagraphIndentUseCase(appPreferences),
+            scrollIndicatorUseCase = ScrollIndicatorUseCase(appPreferences),
+            scrollModeUseCase = ScrollModeUseCase(appPreferences),
+            selectedFontStateUseCase = SelectedFontStateUseCase(appPreferences),
+            textAlignmentUseCase = TextAlignmentUseCase(appPreferences),
+            textColorUseCase = TextColorUseCase(appPreferences)
+        )
     }
 
     @Provides
     @Singleton
-    fun providesTogglePinnedCatalog(
-     store: CatalogStore,
-    ): TogglePinnedCatalog {
-        return TogglePinnedCatalog(store)
+    fun providesBrowseScreenPrefUseCase(
+        appPreferences: AppPreferences
+    ): BrowseScreenPrefUseCase {
+        return BrowseScreenPrefUseCase(
+            browseLayoutTypeUseCase = BrowseLayoutTypeUseCase(appPreferences)
+        )
     }
     @Provides
     @Singleton
-    fun providesSyncRemoteCatalogs(
-     catalogRemoteRepository: CatalogRemoteRepository,
-      catalogRemoteApi: CatalogRemoteApi,
-      catalogPreferences: CatalogPreferences,
-    ): SyncRemoteCatalogs {
-        return SyncRemoteCatalogs(catalogRemoteRepository, catalogRemoteApi, catalogPreferences)
+    fun providesHistoryUseCase(
+        historyRepository: HistoryRepository
+    ): HistoryUseCase {
+        return HistoryUseCase(
+            historyRepository
+        )
     }
+
+    @Provides
+    @Singleton
+    fun providesUpdateUseCases(
+        updatesRepository: UpdatesRepository
+    ): UpdateUseCases {
+        return UpdateUseCases(
+            subscribeUpdates = SubscribeUpdates(updatesRepository),
+            deleteAllUpdates = DeleteAllUpdates(updatesRepository),
+            deleteUpdates = DeleteUpdates(updatesRepository),
+        )
+    }
+
+
 
 
 }

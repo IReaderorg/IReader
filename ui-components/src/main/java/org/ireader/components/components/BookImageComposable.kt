@@ -41,7 +41,7 @@ fun BookImageComposable(
                 .build(),
             contentScale = ContentScale.Crop
         )
-        if (showLoading && painter.state is AsyncImagePainter.State.Loading) {
+        if (showLoading && !image.favorite && painter.state is AsyncImagePainter.State.Loading) {
             ShowLoading(modifier = Modifier.align(Alignment.Center), size = 24.dp)
         }
 

@@ -1,6 +1,6 @@
 package org.ireader.core_ui
 
-import org.ireader.common_extensions.UiText
+import org.ireader.common_resources.UiText
 import org.ireader.core.exceptions.EmptyQuery
 import org.ireader.core.exceptions.SourceNotFoundException
 import org.ireader.core_api.log.Log

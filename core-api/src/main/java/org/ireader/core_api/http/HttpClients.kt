@@ -14,11 +14,8 @@ import okhttp3.Cache
 import okhttp3.OkHttpClient
 import java.io.File
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class HttpClients @Inject internal constructor(context: Application, browseEngine: BrowseEngine) {
+class HttpClients(context: Application, browseEngine: BrowseEngine) {
 
     private val cache = run {
         val dir = File(context.cacheDir, "network_cache")

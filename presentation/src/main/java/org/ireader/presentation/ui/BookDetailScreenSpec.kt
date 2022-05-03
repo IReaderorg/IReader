@@ -17,6 +17,7 @@ import org.ireader.bookDetails.viewmodel.BookDetailViewModel
 import org.ireader.common_extensions.getUrlWithoutDomain
 import org.ireader.common_resources.LAST_CHAPTER
 import org.ireader.components.components.EmptyScreenComposable
+import org.ireader.common_resources.UiText
 import org.ireader.core_api.source.HttpSource
 import org.ireader.domain.ui.NavigationArgs
 
@@ -86,12 +87,12 @@ object BookDetailScreenSpec : ScreenSpec {
                             )
                         } else {
                             scope.launch {
-                                viewModel.showSnackBar(org.ireader.common_extensions.UiText.StringResource(org.ireader.core.R.string.no_chapter_is_available))
+                                viewModel.showSnackBar(UiText.StringResource(org.ireader.core.R.string.no_chapter_is_available))
                             }
                         }
                     } else {
                         scope.launch {
-                            viewModel.showSnackBar(org.ireader.common_extensions.UiText.StringResource(org.ireader.core.R.string.source_not_available))
+                            viewModel.showSnackBar(UiText.StringResource(org.ireader.core.R.string.source_not_available))
                         }
                     }
                 },

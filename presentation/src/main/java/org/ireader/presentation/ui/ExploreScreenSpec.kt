@@ -11,6 +11,7 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import kotlinx.coroutines.launch
 import org.ireader.components.components.EmptyScreenComposable
 import org.ireader.core.R
+import org.ireader.common_resources.UiText
 import org.ireader.core_api.source.HttpSource
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.explore.ExploreScreen
@@ -67,7 +68,7 @@ object ExploreScreenSpec : ScreenSpec {
                         vm.stateListing = source.getListings().first()
                         vm.loadItems()
                         scope.launch {
-                            vm.showSnackBar(org.ireader.common_extensions.UiText.StringResource(R.string.query_must_not_be_empty))
+                            vm.showSnackBar(UiText.StringResource(R.string.query_must_not_be_empty))
                         }
                     }
                     focusManager.clearFocus()

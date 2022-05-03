@@ -20,6 +20,7 @@ import org.ireader.common_models.entities.Chapter
 import org.ireader.common_models.entities.History
 import org.ireader.common_resources.LAST_CHAPTER
 import org.ireader.common_resources.NO_VALUE
+import org.ireader.common_resources.UiText
 import org.ireader.core_catalogs.interactor.GetLocalCatalog
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.ui.NavigationArgs
@@ -66,12 +67,12 @@ class ReaderScreenViewModel @Inject constructor(
                 }
             } else {
                 viewModelScope.launch {
-                    showSnackBar(org.ireader.common_extensions.UiText.StringResource(org.ireader.core.R.string.the_source_is_not_found))
+                    showSnackBar(UiText.StringResource(org.ireader.core.R.string.the_source_is_not_found))
                 }
             }
         } else {
             viewModelScope.launch {
-                showSnackBar(org.ireader.common_extensions.UiText.StringResource(org.ireader.core.R.string.something_is_wrong_with_this_book))
+                showSnackBar(UiText.StringResource(org.ireader.core.R.string.something_is_wrong_with_this_book))
             }
         }
     }

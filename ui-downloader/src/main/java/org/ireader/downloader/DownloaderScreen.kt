@@ -40,6 +40,7 @@ import kotlinx.coroutines.flow.collectLatest
 import org.ireader.common_models.entities.SavedDownload
 import org.ireader.common_models.entities.SavedDownloadWithInfo
 import org.ireader.common_models.entities.toSavedDownload
+import org.ireader.common_resources.UiEvent
 import org.ireader.components.BookListItem
 import org.ireader.components.BookListItemColumn
 import org.ireader.components.BookListItemSubtitle
@@ -67,7 +68,7 @@ fun DownloaderScreen(
     LaunchedEffect(key1 = true) {
         vm.eventFlow.collectLatest { event ->
             when (event) {
-                is org.ireader.common_extensions.UiEvent.ShowSnackbar -> {
+                is UiEvent.ShowSnackbar -> {
                     scaffoldState.snackbarHostState.showSnackbar(
                         event.uiText.asString(context = context)
                     )

@@ -51,6 +51,7 @@ dependencies {
     implementation(project(Modules.commonData))
     implementation(project(Modules.coreCatalogs))
     implementation(project(Modules.commonExtensions))
+    implementation(project(Modules.commonResources))
 
     implementation(androidx.core)
     implementation(androidx.appCompat)

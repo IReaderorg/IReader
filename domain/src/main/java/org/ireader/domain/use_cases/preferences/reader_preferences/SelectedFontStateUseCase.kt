@@ -5,7 +5,7 @@ import org.ireader.core_ui.theme.FontType
 import org.ireader.core_ui.theme.fonts
 import javax.inject.Inject
 
-class SelectedFontStateUseCase @Inject constructor(
+class SelectedFontStateUseCase(
     private val appPreferences: AppPreferences,
 ) {
     fun saveFont(fontIndex: Int) {

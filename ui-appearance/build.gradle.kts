@@ -18,7 +18,7 @@ dependencies {
     implementation(project(Modules.core))
     implementation(project(Modules.coreApi))
     implementation(project(Modules.uiComponents))
-
+    implementation(project(Modules.commonResources))
     implementation(compose.compose.icons)
     implementation(compose.compose.navigation)
     implementation(compose.compose.foundation)

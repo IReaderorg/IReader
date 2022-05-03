@@ -3,9 +3,8 @@ package org.ireader.domain.use_cases.preferences.reader_preferences
 import org.ireader.common_models.DisplayMode
 import org.ireader.common_models.layouts
 import org.ireader.core_ui.theme.AppPreferences
-import javax.inject.Inject
 
-class LibraryLayoutTypeUseCase @Inject constructor(
+class LibraryLayoutTypeUseCase(
     private val appPreferences: AppPreferences,
 ) {
     fun save(layoutIndex: Int) {
@@ -17,7 +16,7 @@ class LibraryLayoutTypeUseCase @Inject constructor(
     }
 }
 
-class BrowseLayoutTypeUseCase @Inject constructor(
+class BrowseLayoutTypeUseCase(
     private val appPreferences: AppPreferences,
 ) {
     fun save(layoutIndex: Int) {
@@ -28,3 +27,7 @@ class BrowseLayoutTypeUseCase @Inject constructor(
         return layouts[appPreferences.exploreLayoutType().get()]
     }
 }
+
+data class BrowseScreenPrefUseCase(
+    val browseLayoutTypeUseCase: BrowseLayoutTypeUseCase
+)

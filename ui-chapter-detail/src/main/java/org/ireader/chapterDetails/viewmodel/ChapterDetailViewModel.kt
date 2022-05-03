@@ -6,7 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import org.ireader.common_extensions.UiText
+import org.ireader.common_resources.UiText
 import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.Chapter
 import org.ireader.core.R
@@ -38,7 +38,7 @@ class ChapterDetailViewModel @Inject constructor(
             }
         } else {
             viewModelScope.launch {
-                showSnackBar(org.ireader.common_extensions.UiText.StringResource(R.string.the_source_is_not_found))
+                showSnackBar(UiText.StringResource(R.string.the_source_is_not_found))
             }
         }
     }
