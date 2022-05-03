@@ -11,16 +11,11 @@ import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.services.downloaderService.DownloadServiceStateImpl
 import org.ireader.domain.services.downloaderService.DownloaderService
 import org.ireader.domain.use_cases.download.DownloadUseCases
-import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
-import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.services.ServiceUseCases
 import javax.inject.Inject
 
 @HiltViewModel
 class DownloaderViewModel @Inject constructor(
-    private val getBookUseCases: org.ireader.domain.use_cases.local.LocalGetBookUseCases,
-    private val getChapterUseCase: LocalGetChapterUseCase,
-    private val insertUseCases: LocalInsertUseCases,
     private val downloadUseCases: DownloadUseCases,
     private val serviceUseCases: ServiceUseCases,
     private val downloadState: DownloadStateImpl,

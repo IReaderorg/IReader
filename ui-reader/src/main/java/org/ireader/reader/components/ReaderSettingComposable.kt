@@ -42,8 +42,9 @@ import org.ireader.core_ui.ui.TextAlign
 import org.ireader.reader.viewmodel.Orientation
 import org.ireader.reader.viewmodel.ReaderScreenPreferencesState
 
+@OptIn(ExperimentalPagerApi::class, ExperimentalMaterialApi::class)
 @Composable
-fun ReaderSettingComposable(
+fun ReaderSettingMainLayout(
     modifier: Modifier = Modifier,
     vm: ReaderScreenPreferencesState,
     onFontSelected: (Int) -> Unit,
@@ -63,178 +64,7 @@ fun ReaderSettingComposable(
     onToggleAutoBrightness: () -> Unit,
     onChangeBrightness: (Float) -> Unit,
     onBackgroundChange: (Int) -> Unit,
-
-) {
-    val scrollState = rememberScrollState()
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(4.dp)
-            .verticalScroll(scrollState)
-    ) {
-        BrightnessSliderComposable(
-            viewModel = vm,
-            onToggleAutoBrightness = onToggleAutoBrightness,
-            onChangeBrightness = onChangeBrightness
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        ReaderBackgroundComposable(viewModel = vm, onBackgroundChange = onBackgroundChange)
-        Spacer(modifier = Modifier.height(16.dp))
-        /** Font indent and font menu **/
-        FontChip(
-            state = vm,
-            onFontSelected = onFontSelected
-        )
-        Spacer(modifier = Modifier.height(12.dp))
-        SettingItemToggleComposable(
-            text = "Scroll Mode",
-            value = vm.verticalScrolling,
-            onToggle = onToggleScrollMode
-        )
-
-        SettingItemToggleComposable(
-            text = "Orientation",
-            value = vm.orientation == Orientation.Landscape,
-            onToggle = onToggleOrientation
-        )
-        SettingItemToggleComposable(
-            text = "AutoScroll",
-            value = vm.autoScrollMode,
-            onToggle = onToggleAutoScroll
-        )
-        SettingItemToggleComposable(
-            text = "Immersive mode",
-            value = vm.immersiveMode,
-            onToggle = onToggleImmersiveMode
-        )
-        SettingItemToggleComposable(
-            text = "Selectable mode",
-            value = vm.selectableMode,
-            onToggle = onToggleSelectedMode
-        )
-        SettingItemComposable(
-            text = "Font Size",
-            value = vm.fontSize.toString(),
-            onAdd = {
-                onFontSizeIncrease(true)
-            },
-            onMinus = {
-                onFontSizeIncrease(false)
-            }
-        )
-        SettingItemComposable(
-            text = "Paragraph Indent",
-            value = vm.paragraphsIndent.toString(),
-            onAdd = {
-                onParagraphIndentIncrease(true)
-            },
-            onMinus = {
-                onParagraphIndentIncrease(false)
-            }
-        )
-
-        SettingItemComposable(
-            text = "Paragraph Distance",
-            value = vm.distanceBetweenParagraphs.toString(),
-            onAdd = {
-                onParagraphDistanceIncrease(true)
-            },
-            onMinus = {
-                onParagraphDistanceIncrease(false)
-            }
-        )
-        SettingItemComposable(
-            text = "Line Height",
-            value = vm.lineHeight.toString(),
-            onAdd = {
-                onLineHeightIncrease(true)
-            },
-            onMinus = {
-                onLineHeightIncrease(false)
-            }
-        )
-        SettingItemComposable(
-            text = "Autoscroll Interval",
-            value = "${vm.autoScrollInterval / 1000} second",
-            onAdd = {
-                onAutoscrollIntervalIncrease(true)
-            },
-            onMinus = {
-                onAutoscrollIntervalIncrease(false)
-            }
-        )
-        SettingItemComposable(
-            text = "Autoscroll Offset",
-            value = vm.autoScrollOffset.toString(),
-            onAdd = {
-                onAutoscrollOffsetIncrease(true)
-            },
-            onMinus = {
-                onAutoscrollOffsetIncrease(false)
-            }
-        )
-        SettingItemComposable(
-            text = "ScrollIndicator Padding",
-            value = vm.scrollIndicatorPadding.toString(),
-            onAdd = {
-                onScrollIndicatorPaddingIncrease(true)
-            },
-            onMinus = {
-                onScrollIndicatorPaddingIncrease(false)
-            }
-        )
-        SettingItemComposable(
-            text = "ScrollIndicator Width",
-            value = vm.scrollIndicatorWith.toString(),
-            onAdd = {
-                onScrollIndicatorWidthIncrease(true)
-            },
-            onMinus = {
-                onScrollIndicatorWidthIncrease(false)
-            }
-        )
-        Row(
-            modifier = Modifier.fillMaxSize(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "Advance Setting",
-                fontSize = 12.sp,
-                style = TextStyle(fontWeight = FontWeight.W400),
-                color = MaterialTheme.colors.onBackground
-            )
-            AppIconButton(
-                imageVector = Icons.Default.Settings,
-                title = "Advance Setting",
-                onClick = { vm.scrollIndicatorDialogShown = true }
-            )
-        }
-    }
-}
-
-@OptIn(ExperimentalPagerApi::class, ExperimentalMaterialApi::class)
-@Composable
-fun ReaderSettingMainLayout(    modifier: Modifier = Modifier,
-    vm: ReaderScreenPreferencesState,
-    onFontSelected: (Int) -> Unit,
-    onToggleScrollMode: (Boolean) -> Unit,
-    onToggleAutoScroll: (Boolean) -> Unit,
-    onToggleOrientation: (Boolean) -> Unit,
-    onToggleImmersiveMode: (Boolean) -> Unit,
-    onToggleSelectedMode: (Boolean) -> Unit,
-    onFontSizeIncrease: (Boolean) -> Unit,
-    onParagraphIndentIncrease: (Boolean) -> Unit,
-    onParagraphDistanceIncrease: (Boolean) -> Unit,
-    onLineHeightIncrease: (Boolean) -> Unit,
-    onAutoscrollIntervalIncrease: (Boolean) -> Unit,
-    onAutoscrollOffsetIncrease: (Boolean) -> Unit,
-    onScrollIndicatorPaddingIncrease: (Boolean) -> Unit,
-    onScrollIndicatorWidthIncrease: (Boolean) -> Unit,
-    onToggleAutoBrightness: () -> Unit,
-    onChangeBrightness: (Float) -> Unit,
-    onBackgroundChange: (Int) -> Unit,
-    onShowScrollIndicator : (Boolean) -> Unit,
+    onShowScrollIndicator: (Boolean) -> Unit,
     onTextAlign: (TextAlign) -> Unit
 ) {
     val pagerState = rememberPagerState()
@@ -286,7 +116,7 @@ fun ReaderSettingMainLayout(    modifier: Modifier = Modifier,
                             onClick = {
                                 onTextAlign(TextAlign.Left)
                             },
-                            tint = if ( vm.textAlignment == TextAlign.Left) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground
+                            tint = if (vm.textAlignment == TextAlign.Left) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground
                         )
                         AppIconButton(
                             imageVector = Icons.Default.FormatAlignCenter,
@@ -294,7 +124,7 @@ fun ReaderSettingMainLayout(    modifier: Modifier = Modifier,
                             onClick = {
                                 onTextAlign(TextAlign.Center)
                             },
-                            tint = if ( vm.textAlignment == TextAlign.Center) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground
+                            tint = if (vm.textAlignment == TextAlign.Center) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground
                         )
                         AppIconButton(
                             imageVector = Icons.Default.FormatAlignJustify,
@@ -302,7 +132,7 @@ fun ReaderSettingMainLayout(    modifier: Modifier = Modifier,
                             onClick = {
                                 onTextAlign(TextAlign.Justify)
                             },
-                            tint = if ( vm.textAlignment == TextAlign.Justify) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground
+                            tint = if (vm.textAlignment == TextAlign.Justify) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground
                         )
                         AppIconButton(
                             imageVector = Icons.Default.FormatAlignRight,
@@ -310,7 +140,7 @@ fun ReaderSettingMainLayout(    modifier: Modifier = Modifier,
                             onClick = {
                                 onTextAlign(TextAlign.Right)
                             },
-                            tint = if ( vm.textAlignment == TextAlign.Right) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground
+                            tint = if (vm.textAlignment == TextAlign.Right) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground
                         )
 
                     }
@@ -422,7 +252,10 @@ fun ReaderSettingMainLayout(    modifier: Modifier = Modifier,
             "General"
         ) {
             Column(
-                modifier = Modifier.verticalScroll(rememberScrollState())
+
+                modifier = Modifier.fillMaxSize()
+                    .padding(4.dp)
+                    .verticalScroll(rememberScrollState())
             ) {
                 SettingItemToggleComposable(
                     text = "Scroll Mode",
@@ -499,7 +332,7 @@ fun Tabs(libraryTabs: List<TabItem>, pagerState: PagerState) {
                 unselectedContentColor = MaterialTheme.colors.onBackground,
                 selectedContentColor = MaterialTheme.colors.primary,
                 onClick = {
-                          //TODO need to uncomment this on compose next update
+                    //TODO need to uncomment this on compose next update
                     //scope.launch { pagerState.animateScrollToPage(index) }
                 },
             )

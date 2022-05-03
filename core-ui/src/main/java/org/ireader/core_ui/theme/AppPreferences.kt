@@ -103,7 +103,7 @@ class AppPreferences @Inject constructor(
     }
 
     fun textAlign(): Preference<org.ireader.core_ui.ui.TextAlign> {
-        return preferenceStore.getEnum(TEXT_ALIGNMENT, org.ireader.core_ui.ui.TextAlign.Right)
+        return preferenceStore.getEnum(TEXT_ALIGNMENT, org.ireader.core_ui.ui.TextAlign.Left)
     }
 
     fun paragraphIndent(): Preference<Int> {

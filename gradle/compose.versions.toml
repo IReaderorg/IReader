@@ -7,7 +7,7 @@ lifecycle = "2.4.1"
 compose-runtime = { module = "androidx.compose.runtime:runtime", version = "compose" }
 compose-compiler = { module = "androidx.compose.compiler:compiler", version.ref = "compose" }
 compose-foundation = { module = "androidx.compose.foundation:foundation", version = "1.2.0-alpha08" }
-compose-material = { module = "androidx.compose.material:material", version.ref = "compose" }
+compose-material = { module = "androidx.compose.material:material", version = "1.0.0-alpha09" }
 compose-material3 = { module = "androidx.compose.material3:material3", version = "1.0.0-alpha09" }
 compose-icons = { module = "androidx.compose.material:material-icons-extended", version.ref = "compose" }
 compose-ui = { module = "androidx.compose.ui:ui", version.ref = "compose" }

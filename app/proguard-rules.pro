@@ -21,6 +21,7 @@
 -keep,allowoptimization class app.cash.quickjs.** { public protected *; }
 -keep,allowoptimization class com.google.accompanist.** { public protected *; }
 -keep,allowoptimization class androidx.compose.** { public protected *; }
+-keep,allowoptimization class org.tinylog.** { public protected *; }
 
 
 -dontwarn android.support.**

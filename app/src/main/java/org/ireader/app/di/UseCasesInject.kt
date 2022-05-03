@@ -6,11 +6,23 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import org.ireader.common_data.repository.DownloadRepository
 import org.ireader.common_data.repository.HistoryRepository
 import org.ireader.common_data.repository.LocalBookRepository
 import org.ireader.common_data.repository.RemoteKeyRepository
 import org.ireader.common_data.repository.UpdatesRepository
 import org.ireader.core_ui.theme.AppPreferences
+import org.ireader.domain.use_cases.download.DownloadUseCases
+import org.ireader.domain.use_cases.download.delete.DeleteAllSavedDownload
+import org.ireader.domain.use_cases.download.delete.DeleteSavedDownload
+import org.ireader.domain.use_cases.download.delete.DeleteSavedDownloadByBookId
+import org.ireader.domain.use_cases.download.delete.DeleteSavedDownloads
+import org.ireader.domain.use_cases.download.get.FindAllDownloadsUseCase
+import org.ireader.domain.use_cases.download.get.FindDownloadsUseCase
+import org.ireader.domain.use_cases.download.get.SubscribeDownloadsUseCase
+import org.ireader.domain.use_cases.download.get.SubscribeOneSavedDownload
+import org.ireader.domain.use_cases.download.insert.InsertDownload
+import org.ireader.domain.use_cases.download.insert.InsertDownloads
 import org.ireader.domain.use_cases.history.HistoryUseCase
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.FindBookByKey
@@ -279,6 +291,24 @@ class UseCasesInject {
             subscribeUpdates = SubscribeUpdates(updatesRepository),
             deleteAllUpdates = DeleteAllUpdates(updatesRepository),
             deleteUpdates = DeleteUpdates(updatesRepository),
+        )
+    }
+    @Provides
+    @Singleton
+    fun providesDownloadUseCases(
+       downloadRepository: DownloadRepository
+    ): DownloadUseCases {
+        return DownloadUseCases(
+           deleteAllSavedDownload = DeleteAllSavedDownload(downloadRepository),
+            deleteSavedDownload = DeleteSavedDownload(downloadRepository),
+            deleteSavedDownloadByBookId = DeleteSavedDownloadByBookId(downloadRepository),
+            deleteSavedDownloads = DeleteSavedDownloads(downloadRepository),
+            findAllDownloadsUseCase = FindAllDownloadsUseCase(downloadRepository),
+            findDownloadsUseCase = FindDownloadsUseCase(downloadRepository),
+            insertDownload = InsertDownload(downloadRepository),
+            insertDownloads = InsertDownloads(downloadRepository),
+            subscribeDownloadsUseCase = SubscribeDownloadsUseCase(downloadRepository),
+            subscribeOneSavedDownload = SubscribeOneSavedDownload(downloadRepository)
         )
     }
 

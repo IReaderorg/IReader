@@ -73,7 +73,7 @@ open class ReaderScreenPreferencesStateImpl @Inject constructor() : ReaderScreen
     override var autoScrollInterval by mutableStateOf<Long>(2000)
     override var autoScrollMode by mutableStateOf<Boolean>(false)
     override var showScrollIndicator by mutableStateOf<Boolean>(false)
-    override var textAlignment: TextAlign by mutableStateOf<TextAlign>(TextAlign.Right)
+    override var textAlignment: TextAlign by mutableStateOf<TextAlign>(TextAlign.Left)
     override var autoBrightnessMode by mutableStateOf<Boolean>(false)
     override var immersiveMode by mutableStateOf<Boolean>(false)
     override var selectableMode by mutableStateOf<Boolean>(false)
