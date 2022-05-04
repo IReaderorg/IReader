@@ -3,6 +3,8 @@ package org.ireader.core_api.source
 import io.ktor.client.HttpClient
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.url
+import org.ireader.core_api.source.model.Command
+import org.ireader.core_api.source.model.CommandList
 import org.ireader.core_api.source.model.ImageUrl
 import org.ireader.core_api.source.model.Listing
 import org.ireader.core_api.source.model.PageComplete
@@ -53,6 +55,15 @@ abstract class HttpSource(private val dependencies: Dependencies) : CatalogSourc
     }
 
     override fun getListings(): List<Listing> {
+        return emptyList()
+    }
+
+    /**
+     * the commands that are used
+     * to decrease the request to servers
+     * @return [CommandList] check out [Command]
+     */
+    override fun getCommands(): CommandList {
         return emptyList()
     }
 }

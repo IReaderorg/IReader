@@ -24,11 +24,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.ireader.common_extensions.async.viewModelIOCoroutine
-import org.ireader.core.R
 import org.ireader.common_resources.UiEvent
 import org.ireader.common_resources.UiText
+import org.ireader.core.R
 import org.ireader.core_api.log.Log
-import org.ireader.core_ui.theme.TransparentStatusBar
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.reader.ReadingScreen
 import org.ireader.reader.reverse_swip_refresh.rememberSwipeRefreshState
@@ -136,8 +135,6 @@ object ReaderScreenSpec : ScreenSpec {
                     }
                 }
             }
-
-            TransparentStatusBar {
                     ReadingScreen(
                         scaffoldState = scaffoldState,
                         vm = vm,
@@ -547,7 +544,7 @@ object ReaderScreenSpec : ScreenSpec {
 
                     )
 
-            }
+
         }
     }
 }

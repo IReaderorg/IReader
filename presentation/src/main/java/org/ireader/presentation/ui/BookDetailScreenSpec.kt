@@ -1,5 +1,8 @@
 package org.ireader.presentation.ui
 
+import androidx.compose.material.ModalBottomSheetState
+import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -16,8 +19,8 @@ import org.ireader.bookDetails.BookDetailScreen
 import org.ireader.bookDetails.viewmodel.BookDetailViewModel
 import org.ireader.common_extensions.getUrlWithoutDomain
 import org.ireader.common_resources.LAST_CHAPTER
-import org.ireader.components.components.EmptyScreenComposable
 import org.ireader.common_resources.UiText
+import org.ireader.components.components.EmptyScreenComposable
 import org.ireader.core_api.source.HttpSource
 import org.ireader.domain.ui.NavigationArgs
 
@@ -52,6 +55,8 @@ object BookDetailScreenSpec : ScreenSpec {
         navController: NavController,
         navBackStackEntry: NavBackStackEntry,
     ) {
+        val modalSheetState: ModalBottomSheetState =
+            rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
         val scaffoldStates = rememberScaffoldState()
         val viewModel: BookDetailViewModel = hiltViewModel()
         val context = LocalContext.current
@@ -146,6 +151,12 @@ object BookDetailScreenSpec : ScreenSpec {
                 chapterState = viewModel,
                 onPopBackStack = {
                     navController.popBackStack()
+                },
+                modalBottomSheetState = modalSheetState,
+                onCommand = {
+                    scope.launch {
+                        modalSheetState.show()
+                    }
                 }
             )
         } else {

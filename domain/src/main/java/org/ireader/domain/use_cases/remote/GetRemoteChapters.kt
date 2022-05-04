@@ -9,6 +9,7 @@ import org.ireader.common_models.entities.toChapter
 import org.ireader.common_resources.UiText
 import org.ireader.core_api.log.Log
 import org.ireader.core_api.source.Source
+import org.ireader.core_api.source.model.CommandList
 import org.ireader.core_ui.exceptionHandler
 import javax.inject.Inject
 
@@ -16,6 +17,7 @@ class GetRemoteChapters @Inject constructor() {
     suspend operator fun invoke(
         book: Book,
         source: Source,
+        commandList: CommandList = emptyList(),
         onSuccess: suspend (List<Chapter>) -> Unit,
         onError: suspend (UiText?) -> Unit,
     ) {

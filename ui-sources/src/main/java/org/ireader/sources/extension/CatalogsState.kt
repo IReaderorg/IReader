@@ -10,6 +10,7 @@ import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.common_models.entities.CatalogRemote
 import org.ireader.core_api.os.InstallStep
 import javax.inject.Inject
+import javax.inject.Singleton
 
 interface CatalogsState {
     val pinnedCatalogs: List<CatalogLocal>
@@ -27,6 +28,7 @@ fun CatalogsState(): CatalogsState {
     return CatalogsStateImpl()
 }
 
+@Singleton
 class CatalogsStateImpl @Inject constructor() : CatalogsState {
     override var pinnedCatalogs by mutableStateOf(emptyList<CatalogLocal>())
     override var unpinnedCatalogs by mutableStateOf(emptyList<CatalogLocal>())

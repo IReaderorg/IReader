@@ -12,8 +12,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.Scaffold
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.Text
@@ -28,20 +31,23 @@ import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.ireader.bookDetails.components.BookDetailScreenBottomBar
+import org.ireader.bookDetails.components.ChapterCommandBottomSheet
 import org.ireader.bookDetails.viewmodel.ChapterState
 import org.ireader.bookDetails.viewmodel.DetailState
 import org.ireader.common_models.entities.Book
 import org.ireader.components.components.ISnackBarHost
 import org.ireader.components.components.ShowLoading
+import org.ireader.core_api.source.CatalogSource
 import org.ireader.core_ui.theme.TransparentStatusBar
 import org.ireader.core_ui.ui_components.CardTile
 import org.ireader.core_ui.ui_components.DotsFlashing
 
-@OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class, ExperimentalMaterialApi::class)
 @Composable
 fun BookDetailScreen(
     modifier: Modifier = Modifier,
     detailState: DetailState,
+    modalBottomSheetState: ModalBottomSheetState,
     chapterState: ChapterState,
     onToggleLibrary: () -> Unit,
     onDownload: () -> Unit,
@@ -54,8 +60,10 @@ fun BookDetailScreen(
     book: Book,
     onTitle: (String) -> Unit,
     scaffoldState: ScaffoldState,
-    onPopBackStack:() -> Unit
+    onPopBackStack: () -> Unit,
+    onCommand: () -> Unit
 ) {
+
     val swipeRefreshState =
         rememberSwipeRefreshState(isRefreshing = detailState.detailIsLoading)
 
@@ -82,72 +90,96 @@ fun BookDetailScreen(
                 )
             }
         ) {
-        Scaffold(
-            topBar = {},
-            scaffoldState = scaffoldState,
-            snackbarHost = { ISnackBarHost(snackBarHostState = it) },
-            bottomBar = {
-                AnimatedVisibility(
-                    visible = true,
-                    enter = slideInVertically(initialOffsetY = { it }),
-                    exit = slideOutVertically(targetOffsetY = { it })
-                ) {
-                    BookDetailScreenBottomBar(
-                        onToggleInLibrary = {
-                            onToggleLibrary()
-                        },
-                        isInLibrary = book.favorite,
-                        onDownload = {
-                            onDownload()
-                        },
-                        isRead = chapterState.chapters.any { it.readAt != 0L },
-                        onRead = {
-                            onRead()
-                        },
-                        isInLibraryInProgress = detailState.inLibraryLoading
-                    )
-                }
-            }
-        ) { padding ->
-                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                    BookDetailScreenLoadedComposable(
-                        onWebView = {
-                            onWebView()
-                        },
-                        onTitle = onTitle,
-                        onSummaryExpand = onSummaryExpand,
-                        onRefresh = onRefresh,
-                        isSummaryExpanded = detailState.expandedSummary,
-                        book = book,
-                        source = detailState.source,
-                        onPopBackStack = onPopBackStack
-                    )
+            ModalBottomSheetLayout(
+                modifier = Modifier,
+                sheetState = modalBottomSheetState,
+                sheetContent = {
+                    val source = detailState.source
+                    if (source is CatalogSource) {
+                            ChapterCommandBottomSheet(
+                                onFetch = {
 
-                    CardTile(
-                        modifier = modifier
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                            .fillMaxWidth(),
-                        onClick = onChapterContent,
-                        title = "Contents",
-                        subtitle = "${chapterState.chapters.size} Chapters",
-                        trailing = {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(
-                                    text = "",
-                                    color = MaterialTheme.colors.onBackground,
-                                    style = MaterialTheme.typography.subtitle2
-                                )
-                                DotsFlashing(chapterState.chapterIsLoading)
+                                },
+                                onReset = {
 
-                                Icon(
-                                    imageVector = Icons.Default.ChevronRight,
-                                    contentDescription = "Contents Detail",
-                                    tint = MaterialTheme.colors.onBackground,
-                                )
-                            }
+                                },
+                                onUpdate = {
+
+                                },
+                                source.getCommands()
+                            )
                         }
-                    )
-                    Spacer(modifier = Modifier.height(60.dp))
+                },
+                sheetBackgroundColor = MaterialTheme.colors.background,
+                ) {
+                Scaffold(
+                    topBar = {},
+                    scaffoldState = scaffoldState,
+                    snackbarHost = { ISnackBarHost(snackBarHostState = it) },
+                    bottomBar = {
+                        AnimatedVisibility(
+                            visible = true,
+                            enter = slideInVertically(initialOffsetY = { it }),
+                            exit = slideOutVertically(targetOffsetY = { it })
+                        ) {
+                            BookDetailScreenBottomBar(
+                                onToggleInLibrary = {
+                                    onToggleLibrary()
+                                },
+                                isInLibrary = book.favorite,
+                                onDownload = {
+                                    onDownload()
+                                },
+                                isRead = chapterState.chapters.any { it.readAt != 0L },
+                                onRead = {
+                                    onRead()
+                                },
+                                isInLibraryInProgress = detailState.inLibraryLoading
+                            )
+                        }
+                    }
+                ) { padding ->
+                    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                        BookDetailScreenLoadedComposable(
+                            onWebView = {
+                                onWebView()
+                            },
+                            onTitle = onTitle,
+                            onSummaryExpand = onSummaryExpand,
+                            onRefresh = onRefresh,
+                            isSummaryExpanded = detailState.expandedSummary,
+                            book = book,
+                            source = detailState.source,
+                            onPopBackStack = onPopBackStack,
+                            onCommand = onCommand
+                        )
+
+                        CardTile(
+                            modifier = modifier
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                                .fillMaxWidth(),
+                            onClick = onChapterContent,
+                            title = "Contents",
+                            subtitle = "${chapterState.chapters.size} Chapters",
+                            trailing = {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        text = "",
+                                        color = MaterialTheme.colors.onBackground,
+                                        style = MaterialTheme.typography.subtitle2
+                                    )
+                                    DotsFlashing(chapterState.chapterIsLoading)
+
+                                    Icon(
+                                        imageVector = Icons.Default.ChevronRight,
+                                        contentDescription = "Contents Detail",
+                                        tint = MaterialTheme.colors.onBackground,
+                                    )
+                                }
+                            }
+                        )
+                        Spacer(modifier = Modifier.height(60.dp))
+                    }
                 }
             }
         }

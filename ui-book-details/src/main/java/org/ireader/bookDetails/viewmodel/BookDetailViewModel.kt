@@ -12,17 +12,18 @@ import kotlinx.coroutines.withContext
 import org.ireader.common_extensions.removeSameItemsFromList
 import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.Chapter
-import org.ireader.core.R
 import org.ireader.common_resources.UiText
+import org.ireader.core.R
 import org.ireader.core_api.log.Log
 import org.ireader.core_api.source.Source
+import org.ireader.core_api.source.model.CommandList
 import org.ireader.core_catalogs.interactor.GetLocalCatalog
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import org.ireader.domain.use_cases.services.ServiceUseCases
-import java.util.*
+import java.util.Calendar
 import javax.inject.Inject
 
 @HiltViewModel
@@ -121,7 +122,11 @@ class BookDetailViewModel @Inject constructor(
         }
     }
 
-    suspend fun getRemoteChapterDetail(book: Book, source: Source) {
+    suspend fun getRemoteChapterDetail(
+        book: Book,
+        source: Source,
+        commands:CommandList = emptyList()
+    ) {
         chapterIsLoading = true
         getChapterDetailJob?.cancel()
         getChapterDetailJob = viewModelScope.launch {
@@ -148,7 +153,8 @@ class BookDetailViewModel @Inject constructor(
                         }
                     }
                     chapterIsLoading = false
-                }
+                },
+                commandList = commands
             )
         }
     }

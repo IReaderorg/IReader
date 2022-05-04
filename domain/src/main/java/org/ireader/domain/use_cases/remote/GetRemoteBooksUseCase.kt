@@ -19,7 +19,7 @@ class GetRemoteBooksUseCase @Inject constructor() {
         onSuccess: suspend (MangasPageInfo) -> Unit,
     ) {
         withIOContext {
-            kotlin.runCatching {
+            try {
                 var item: MangasPageInfo = MangasPageInfo(emptyList(), false)
                 if (query != null) {
                     if (query != null && query.isNotBlank()) {
@@ -39,7 +39,9 @@ class GetRemoteBooksUseCase @Inject constructor() {
                     item = source.getMangaList(sort = listing, page)
                 }
                 onSuccess(item.copy(mangas = item.mangas.filter { it.title.isNotBlank() }))
-            }.getOrElse { e ->
+            }catch (e:Error ) {
+                onError(e)
+            }catch (e:Throwable) {
                 onError(e)
             }
         }

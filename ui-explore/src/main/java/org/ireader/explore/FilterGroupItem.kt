@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.ireader.components.reusable_composable.AppIconButton
+import org.ireader.components.reusable_composable.DropDownMenu
 import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.core_api.source.model.Filter
 import org.ireader.core_api.util.replace
@@ -80,8 +81,8 @@ fun FilterGroupItem(
                     LaunchedEffect(key1 = filter.value) {
                         state = filter.value?.index
                     }
-                    FilterMenuItem(
-                        filter = filter.name,
+                    DropDownMenu(
+                        text = filter.name,
                         onSelected = { value ->
                             onUpdate(
                                 filters.replace(
@@ -93,15 +94,16 @@ fun FilterGroupItem(
                             )
                             state = value
                         },
-                        currentItem = if (state != null) {
+                        currentValue = if (state != null) {
                             filter.options[state!!]
                         } else filter.options[0],
                         items = filter.options
                     )
                 }
                 is Filter.Text -> {
-                    FilterTextItem(
-                        filter = filter,
+                    TextField(
+                        initialValue = filter.value,
+                        hint = filter.name,
                         onUpdate = {
                             onUpdate(
                                 filters.replace(

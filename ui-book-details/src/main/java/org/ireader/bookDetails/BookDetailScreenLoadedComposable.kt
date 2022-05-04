@@ -58,7 +58,8 @@ fun BookDetailScreenLoadedComposable(
     onRefresh: () -> Unit,
     onSummaryExpand: () -> Unit,
     isSummaryExpanded: Boolean,
-    onPopBackStack:() -> Unit
+    onPopBackStack:() -> Unit,
+    onCommand:() -> Unit
 ) {
     val context = LocalContext.current
     var imageLoaded by remember { mutableStateOf(false) }
@@ -109,7 +110,9 @@ fun BookDetailScreenLoadedComposable(
                 onRefresh = {
                     onRefresh()
                 },
-                onPopBackStack = onPopBackStack
+                onPopBackStack = onPopBackStack,
+                source = source,
+                onCommand = onCommand
             )
             Row(
                 modifier = modifier

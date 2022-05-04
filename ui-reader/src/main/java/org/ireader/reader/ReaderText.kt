@@ -57,152 +57,151 @@ fun ReaderText(
     val scope = rememberCoroutineScope()
 
     val interactionSource = remember { MutableInteractionSource() }
-
-    Box(
-        Modifier
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null
-            ) {
-                toggleReaderMode()
-            }
-            .fillMaxSize()
-            .background(vm.backgroundColor)
-            .wrapContentSize(Alignment.CenterStart)
-    ) {
-
-        MultiSwipeRefresh(
-            modifier = Modifier.fillMaxSize(),
-            state = swipeState,
-            indicators = listOf(
-                ISwipeRefreshIndicator(
-                    scrollState.firstVisibleItemScrollOffset == 0,
-                    alignment = Alignment.TopCenter,
-                    indicator = { state, trigger ->
-                        ArrowIndicator(
-                            icon = Icons.Default.KeyboardArrowUp,
-                            swipeRefreshState = swipeState,
-                            refreshTriggerDistance = 80.dp,
-                            color = vm.textColor
-                        )
-                    }, onRefresh = {
-                        onPrev()
-                    }
-                ),
-                ISwipeRefreshIndicator(
-                    scrollState.firstVisibleItemScrollOffset != 0,
-                    alignment = Alignment.BottomCenter,
-                    onRefresh = {
-                        onNext()
-                    },
-                    indicator = { state, trigger ->
-                        ArrowIndicator(
-                            icon = Icons.Default.KeyboardArrowDown,
-                            swipeRefreshState = swipeState,
-                            refreshTriggerDistance = 80.dp,
-                            color = vm.textColor
-                        )
-                    }
-                ),
-            ),
+        Box(
+            Modifier
+                .clickable(
+                    interactionSource = interactionSource,
+                    indication = null
+                ) {
+                    toggleReaderMode()
+                }
+                .fillMaxSize()
+                .background(vm.backgroundColor)
+                .wrapContentSize(Alignment.CenterStart)
         ) {
-            uiState.stateContent?.value?.let { content ->
-                LazyColumnScrollbar(
-                    listState = scrollState,
-                    padding = if (vm.scrollIndicatorPadding < 0) 0.dp else vm.scrollIndicatorPadding.dp,
-                    thickness = if (vm.scrollIndicatorWith < 0) 0.dp else vm.scrollIndicatorWith.dp,
-                    enable = vm.showScrollIndicator
-                ) {
-                    LazyColumn(
-                        state = scrollState,
-                        modifier = Modifier
+            MultiSwipeRefresh(
+                modifier = Modifier.fillMaxSize(),
+                state = swipeState,
+                indicators = listOf(
+                    ISwipeRefreshIndicator(
+                        scrollState.firstVisibleItemScrollOffset == 0,
+                        alignment = Alignment.TopCenter,
+                        indicator = { state, trigger ->
+                            ArrowIndicator(
+                                icon = Icons.Default.KeyboardArrowUp,
+                                swipeRefreshState = swipeState,
+                                refreshTriggerDistance = 80.dp,
+                                color = vm.textColor
+                            )
+                        }, onRefresh = {
+                            onPrev()
+                        }
+                    ),
+                    ISwipeRefreshIndicator(
+                        scrollState.firstVisibleItemScrollOffset != 0,
+                        alignment = Alignment.BottomCenter,
+                        onRefresh = {
+                            onNext()
+                        },
+                        indicator = { state, trigger ->
+                            ArrowIndicator(
+                                icon = Icons.Default.KeyboardArrowDown,
+                                swipeRefreshState = swipeState,
+                                refreshTriggerDistance = 80.dp,
+                                color = vm.textColor
+                            )
+                        }
+                    ),
+                ),
+            ) {
+                uiState.stateContent?.value?.let { content ->
+                    LazyColumnScrollbar(
+                        listState = scrollState,
+                        padding = if (vm.scrollIndicatorPadding < 0) 0.dp else vm.scrollIndicatorPadding.dp,
+                        thickness = if (vm.scrollIndicatorWith < 0) 0.dp else vm.scrollIndicatorWith.dp,
+                        enable = vm.showScrollIndicator
                     ) {
-                        itemsIndexed(content) {  index, text->
-                            TextSelectionContainer(selectable = vm.selectableMode) {
-                                Text(
-                                    modifier = modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = vm.paragraphsIndent.dp)
-                                        .background(
-                                            if (index in vm.queriedTextIndex) vm.textColor.copy(
-                                                .1f
-                                            ) else Color.Transparent
+                        LazyColumn(
+                            modifier = modifier,
+                            state = scrollState,
+                        ) {
+                            itemsIndexed(content) { index, text ->
+                                TextSelectionContainer(selectable = vm.selectableMode) {
+                                    Text(
+                                        modifier = modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = vm.paragraphsIndent.dp)
+                                            .background(
+                                                if (index in vm.queriedTextIndex) vm.textColor.copy(
+                                                    .1f
+                                                ) else Color.Transparent
+                                            ),
+                                        text = if (index == 0) "\n\n" + content[index].plus(
+                                            "\n".repeat(
+                                                vm.distanceBetweenParagraphs
+                                            )
+                                        ) else content[index].plus(
+                                            "\n".repeat(vm.distanceBetweenParagraphs)
                                         ),
-                                    text = if (index == 0) "\n\n" + content[index].plus(
-                                        "\n".repeat(
-                                            vm.distanceBetweenParagraphs
-                                        )
-                                    ) else content[index].plus(
-                                        "\n".repeat(vm.distanceBetweenParagraphs)
-                                    ),
-                                    fontSize = vm.fontSize.sp,
-                                    fontFamily = vm.font.fontFamily,
-                                    textAlign = mapTextAlign(vm.textAlignment),
-                                    color = vm.textColor,
-                                    lineHeight = vm.lineHeight.sp,
-                                )
+                                        fontSize = vm.fontSize.sp,
+                                        fontFamily = vm.font.fontFamily,
+                                        textAlign = mapTextAlign(vm.textAlignment),
+                                        color = vm.textColor,
+                                        lineHeight = vm.lineHeight.sp,
+                                    )
+                                }
                             }
                         }
                     }
                 }
             }
-        }
 
-        if (!vm.verticalScrolling) {
-            Row(modifier = Modifier.fillMaxSize()) {
+            if (!vm.verticalScrolling) {
+                Row(modifier = Modifier.fillMaxSize()) {
 
-                Box(
-                    Modifier
-                        .fillMaxSize()
-                        .weight(1f)
-                        .clickable(
-                            interactionSource = interactionSource,
-                            indication = null
-                        ) {
-                            scope.launch {
+                    Box(
+                        Modifier
+                            .fillMaxSize()
+                            .weight(1f)
+                            .clickable(
+                                interactionSource = interactionSource,
+                                indication = null
+                            ) {
+                                scope.launch {
 
-                                if (scrollState.layoutInfo.viewportStartOffset != scrollState.firstVisibleItemScrollOffset) {
-                                    scrollState.scrollBy(-scrollState.layoutInfo.viewportEndOffset.toFloat())
-                                } else {
-                                    onPrev()
+                                    if (scrollState.layoutInfo.viewportStartOffset != scrollState.firstVisibleItemScrollOffset) {
+                                        scrollState.scrollBy(-scrollState.layoutInfo.viewportEndOffset.toFloat())
+                                    } else {
+                                        onPrev()
+                                    }
                                 }
                             }
-                        }
-                ) {
-                }
-                Box(
-                    Modifier
-                        .fillMaxSize()
-                        .weight(1f)
-                        .clickable(
-                            interactionSource = interactionSource,
-                            indication = null
-                        ) {
-                            toggleReaderMode()
-                        }
-                ) {
-                }
-                Box(
-                    Modifier
-                        .fillMaxSize()
-                        .weight(1f)
-                        .clickable(
-                            interactionSource = interactionSource,
-                            indication = null
-                        ) {
-                            scope.launch {
-                                if (!scrollState.isScrolledToTheEnd()) {
-                                    scrollState.scrollBy(scrollState.layoutInfo.viewportEndOffset.toFloat())
-                                } else {
-                                    onNext()
+                    ) {
+                    }
+                    Box(
+                        Modifier
+                            .fillMaxSize()
+                            .weight(1f)
+                            .clickable(
+                                interactionSource = interactionSource,
+                                indication = null
+                            ) {
+                                toggleReaderMode()
+                            }
+                    ) {
+                    }
+                    Box(
+                        Modifier
+                            .fillMaxSize()
+                            .weight(1f)
+                            .clickable(
+                                interactionSource = interactionSource,
+                                indication = null
+                            ) {
+                                scope.launch {
+                                    if (!scrollState.isScrolledToTheEnd()) {
+                                        scrollState.scrollBy(scrollState.layoutInfo.viewportEndOffset.toFloat())
+                                    } else {
+                                        onNext()
+                                    }
                                 }
                             }
-                        }
-                ) {
+                    ) {
+                    }
                 }
             }
         }
-    }
+
 }
 
 @Composable

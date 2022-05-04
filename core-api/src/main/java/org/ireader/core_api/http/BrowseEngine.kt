@@ -22,11 +22,20 @@ import kotlinx.coroutines.withContext
 import org.ireader.core_api.log.Log
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import java.util.concurrent.TimeoutException
 import javax.inject.Inject
 import kotlin.collections.set
 
 class BrowseEngine @Inject constructor(@ApplicationContext private val context: Context) {
-
+    /**
+     * this function
+     * @param url  the url of page
+     * @param selector  the selector of first element should appear before fetching the html content
+     * @param headers  the header of request
+     * @param timeout  the timeout of request
+     * @param userAgent  the userAgent of request
+     * @return [Result]
+     */
     suspend fun fetch(
         url: String,
         selector: String? = null,
@@ -48,7 +57,8 @@ class BrowseEngine @Inject constructor(@ApplicationContext private val context: 
                 Log.error(exception = e, "failed to set user agent")
             }
             var isLoadUp: Boolean = false
-
+            // throwing error inside onPageError causes runtime exception
+            var error = ""
             client.webViewClient = object : WebViewClientCompat() {
                 override fun onPageFinished(view: WebView, url: String) {
                     cookies = CookieManager.getInstance().getCookie(url)
@@ -72,8 +82,9 @@ class BrowseEngine @Inject constructor(@ApplicationContext private val context: 
                     failingUrl: String,
                     isMainFrame: Boolean,
                 ) {
-                    isLoadUp = true
-                    Log.error("WebView: Not shown")
+                    isLoadUp = false
+                    Log.error("WebView: failed to load $failingUrl Error Code:$errorCode")
+                    error = "ERROR CODE: $errorCode"
                 }
 
                 override fun shouldInterceptRequestCompat(
@@ -87,15 +98,20 @@ class BrowseEngine @Inject constructor(@ApplicationContext private val context: 
             }
             var currentTime = 0
             while (!isLoadUp && currentTime < timeout) {
+                if (error.isNotBlank()) {
+                    throw Throwable(error)
+                }
                 delay(200)
                 currentTime += 200
+            }
+            if (currentTime >= timeout) {
+                throw TimeoutException()
             }
             html = Jsoup.parse(client.getHtml())
             client.clearHistory()
             client.clearCache(true)
             client.destroy()
         }
-
         return Result(
             responseBody = html.html(),
             responseHeader = responseHeader?.responseHeaders,
@@ -122,7 +138,7 @@ private fun WebView.setDefaultSettings() {
 }
 
 @Suppress("OverridingDeprecatedMember")
-private abstract class WebViewClientCompat : WebViewClient() {
+abstract class WebViewClientCompat : WebViewClient() {
 
     open fun shouldOverrideUrlCompat(view: WebView, url: String): Boolean {
         return false
@@ -149,6 +165,7 @@ private abstract class WebViewClientCompat : WebViewClient() {
         return shouldOverrideUrlCompat(view, request.url.toString())
     }
 
+    @Deprecated("Deprecated in Java", ReplaceWith("shouldOverrideUrlCompat(view, url)"))
     final override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
         return shouldOverrideUrlCompat(view, url)
     }
@@ -160,6 +177,7 @@ private abstract class WebViewClientCompat : WebViewClient() {
         return shouldInterceptRequestCompat(view, request.url.toString())
     }
 
+    @Deprecated("Deprecated in Java", ReplaceWith("shouldInterceptRequestCompat(view, url)"))
     final override fun shouldInterceptRequest(
         view: WebView,
         url: String,
@@ -178,10 +196,14 @@ private abstract class WebViewClientCompat : WebViewClient() {
             error.errorCode,
             error.description?.toString(),
             request.url.toString(),
-            request.isForMainFrame
+            request.isForMainFrame,
         )
     }
 
+    @Deprecated(
+        "Deprecated in Java",
+        ReplaceWith("onReceivedErrorCompat(view, errorCode, description, failingUrl, failingUrl == view.url)")
+    )
     final override fun onReceivedError(
         view: WebView,
         errorCode: Int,

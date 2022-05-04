@@ -10,7 +10,6 @@ import org.ireader.core_api.source.CatalogSource
 import org.ireader.core_api.source.model.Filter
 import org.ireader.core_api.source.model.Listing
 import javax.inject.Inject
-import javax.inject.Singleton
 
 interface ExploreState {
     var isLoading: Boolean
@@ -33,7 +32,6 @@ interface ExploreState {
     var stateListing: Listing?
 }
 
-@Singleton
 open class ExploreStateImpl @Inject constructor() : ExploreState {
     override var isLoading by mutableStateOf<Boolean>(false)
     override var error by mutableStateOf<UiText?>(null)

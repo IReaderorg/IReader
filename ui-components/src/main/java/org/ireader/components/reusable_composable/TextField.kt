@@ -14,17 +14,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.ireader.components.reusable_composable.MidSizeTextComposable
-import org.ireader.core_api.source.model.Filter
 
 @Composable
-fun FilterTextItem(
-    filter: Filter.Text,
+fun TextField(
+    initialValue: String,
+    hint:String,
     onUpdate: (String) -> Unit,
 ) {
     var state by remember {
-        mutableStateOf(filter.value)
+        mutableStateOf(initialValue)
     }
-    if (filter.value.isBlank()) {
+    if (initialValue.isBlank()) {
         state = ""
     }
     Box(
@@ -39,9 +39,9 @@ fun FilterTextItem(
             modifier = Modifier
                 .fillMaxWidth()
         )
-        if (filter.value.isBlank()) {
+        if (initialValue.isBlank()) {
             MidSizeTextComposable(
-                text = filter.name,
+                text = hint,
                 color = MaterialTheme.colors.onBackground.copy(alpha = .4f),
                 modifier = Modifier.padding(horizontal = 16.dp)
             )

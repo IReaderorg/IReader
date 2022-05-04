@@ -6,6 +6,7 @@ import org.ireader.core.exceptions.SourceNotFoundException
 import org.ireader.core_api.log.Log
 import java.io.IOException
 import java.net.SocketTimeoutException
+import java.util.concurrent.TimeoutException
 
 fun exceptionHandler(e: Throwable): UiText? {
     Log.error(e, "exceptionHandler catch an exception")
@@ -25,6 +26,9 @@ fun exceptionHandler(e: Throwable): UiText? {
         }
         is NoSuchMethodError -> {
             UiText.StringResource(org.ireader.common_resources.R.string.library_is_out_of_date)
+        }
+        is TimeoutException -> {
+            UiText.StringResource(org.ireader.common_resources.R.string.time_out_exception)
         }
         is java.lang.ClassCastException -> {
             null

@@ -1,4 +1,4 @@
-package org.ireader.explore
+package org.ireader.components.reusable_composable
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,14 +21,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import org.ireader.components.reusable_composable.AppIconButton
-import org.ireader.components.reusable_composable.MidSizeTextComposable
 
 @Composable
-fun FilterMenuItem(
-    filter: String,
+fun DropDownMenu(
+    text: String,
     onSelected: (key: Int) -> Unit,
-    currentItem: String? = null,
+    currentValue: String? = null,
     items: Array<String>,
 ) {
     var opened by remember {
@@ -45,7 +43,7 @@ fun FilterMenuItem(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            MidSizeTextComposable(modifier = Modifier.weight(1f), text = filter)
+            MidSizeTextComposable(modifier = Modifier.weight(1f), text = text)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -56,7 +54,7 @@ fun FilterMenuItem(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                MidSizeTextComposable(text = currentItem ?: items.first())
+                MidSizeTextComposable(text = currentValue ?: items.first())
                 AppIconButton(
                     imageVector = Icons.Default.ArrowDropDown,
                     title = "",
@@ -94,7 +92,7 @@ fun SortedByScreen() {
 @Preview(showBackground = true)
 @Composable
 fun FilterItemPrev() {
-    FilterMenuItem(
+    DropDownMenu(
         "Sort By:",
         { s ->
         },

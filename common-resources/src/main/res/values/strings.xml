@@ -121,6 +121,7 @@
     <string name="restoredSuccessfully">The Backup Restored Successfully.</string>
 
     <string name="library_is_out_of_date">Library is Out of date.</string>
+    <string name="time_out_exception">The request was timed out.</string>
     <string name="the_source_is_not_found">The Source was not found.</string>
     <string name="something_is_wrong_with_this_book">Something is wrong with this book.</string>
 

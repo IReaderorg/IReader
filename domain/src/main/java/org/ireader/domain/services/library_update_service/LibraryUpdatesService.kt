@@ -83,7 +83,8 @@ class LibraryUpdatesService @AssistedInject constructor(
                             builder.setProgress(libraryBooks.size, index, false)
                             notify(Notifications.ID_LIBRARY_PROGRESS, builder.build())
                             remoteChapters.addAll(it)
-                        }, onError = {}
+                        },
+                        onError = {}
                     )
 
                     val newChapters =

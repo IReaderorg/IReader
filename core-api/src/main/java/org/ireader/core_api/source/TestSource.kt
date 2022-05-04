@@ -3,6 +3,8 @@ package org.ireader.core_api.source
 import kotlinx.coroutines.delay
 import kotlinx.datetime.Clock
 import org.ireader.core_api.source.model.ChapterInfo
+import org.ireader.core_api.source.model.Command
+import org.ireader.core_api.source.model.CommandList
 import org.ireader.core_api.source.model.Filter
 import org.ireader.core_api.source.model.FilterList
 import org.ireader.core_api.source.model.Listing
@@ -23,8 +25,20 @@ class TestSource : CatalogSource {
         return manga.copy(cover = "https://picsum.photos/300/400/?image=$picId")
     }
 
+    override suspend fun getMangaDetails(manga: MangaInfo, commands: List<Command<*>>): MangaInfo {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun getMangaList(sort: Listing?, page: Int): MangasPageInfo {
         delay(1000)
+        return MangasPageInfo(getTestManga(page), true)
+    }
+
+    override suspend fun getMangaList(
+        sort: Listing?,
+        page: Int,
+        commands: List<Command<*>>
+    ): MangasPageInfo {
         return MangasPageInfo(getTestManga(page), true)
     }
 
@@ -40,12 +54,41 @@ class TestSource : CatalogSource {
         return MangasPageInfo(mangaList, true)
     }
 
+    override suspend fun getMangaList(
+        filters: FilterList,
+        page: Int,
+        commands: List<Command<*>>
+    ): MangasPageInfo {
+        var mangaList = getTestManga(page)
+
+        filters.forEach { filter ->
+            if (filter is Filter.Title) {
+                mangaList = mangaList.filter { filter.value in it.title }
+            }
+        }
+
+        return MangasPageInfo(mangaList, true)
+    }
+
+    override suspend fun getChapterList(
+        manga: MangaInfo,
+        commands: List<Command<*>>
+    ): List<ChapterInfo> {
+        delay(1000)
+        return getTestChapters()
+    }
+
     override suspend fun getChapterList(manga: MangaInfo): List<ChapterInfo> {
         delay(1000)
         return getTestChapters()
     }
 
     override suspend fun getPageList(chapter: ChapterInfo): List<Page> {
+        delay(1000)
+        return getTestPages()
+    }
+
+    override suspend fun getPageList(chapter: ChapterInfo, commands: List<Command<*>>): List<Page> {
         delay(1000)
         return getTestPages()
     }
@@ -67,10 +110,16 @@ class TestSource : CatalogSource {
         )
     }
 
-    //  private class Status : Filter.Check("Completed")
-//  private class StatusValue(filter: Status) : Filter.Check(filter, null)
-//  private class Author : Filter.Text("Author")
-//  private class Genre(name: String) : Filter.TriState(name)
+    override fun getCommands(): CommandList {
+        return listOf(
+            Command.Chapter.Numeric("Start from "),
+            Command.Chapter.Note("Separate number using '-' example '2-10'"),
+            Command.Chapter.Text("fetch chapters between:"),
+            Command.Chapter.Select("Options", arrayOf(
+                "Last 10 Chapter"
+            )),
+        )
+    }
     private class GenreList(genres: List<Filter.Genre>) : Filter.Group("Genres", genres)
 
     private fun getGenreList() = listOf(
