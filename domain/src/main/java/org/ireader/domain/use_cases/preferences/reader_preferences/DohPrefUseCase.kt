@@ -10,7 +10,7 @@ class DohPrefUseCase @Inject constructor(
         appPreferences.dohStateKey().set(dohPref)
     }
 
-    suspend  fun read(): Int {
+    fun read(): Int {
         return appPreferences.dohStateKey().get()
     }
 }

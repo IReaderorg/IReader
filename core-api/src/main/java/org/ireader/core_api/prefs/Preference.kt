@@ -1,5 +1,3 @@
-
-
 package org.ireader.core_api.prefs
 
 import kotlinx.coroutines.CoroutineScope
@@ -20,7 +18,7 @@ interface Preference<T> {
     /**
      * Returns the current value of this preference.
      */
-    suspend fun get(): T
+    fun get(): T
 
     /**
      * Sets a new [value] for this preference.
@@ -51,5 +49,6 @@ interface Preference<T> {
      * Returns a hot [StateFlow] of this preference bound to the given [scope], allowing to read the
      * current value and receive preference updates.
      */
-    suspend fun stateIn(scope: CoroutineScope): StateFlow<T>
+    fun stateIn(scope: CoroutineScope): StateFlow<T>
+
 }

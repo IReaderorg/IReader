@@ -140,7 +140,7 @@ fun ReadingScreen(
 
 
     Scaffold(
-        modifier = Modifier.fillMaxSize().statusBarsPadding(),
+        modifier = Modifier.fillMaxSize(),
         topBar = {
             ReaderScreenTopBar(
                 isReaderModeEnable = vm.isReaderModeEnable,

@@ -110,7 +110,7 @@ fun SettingsItem(
         modifier = modifier
             .fillMaxWidth()
             .padding(16.dp)
-            .height(50.dp)
+            .height(30.dp)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null

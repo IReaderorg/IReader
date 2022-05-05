@@ -11,14 +11,14 @@ import kotlinx.coroutines.flow.stateIn
 import org.ireader.core_api.prefs.Preference
 
 class ColorPreference(
-    private val preference: Preference<Int>,
+    private val preference: Preference<Int>
 ) : Preference<Color> {
 
     override fun key(): String {
         return preference.key()
     }
 
-    override suspend fun get(): Color {
+    override fun get(): Color {
         return if (isSet()) {
             Color(preference.get())
         } else {
@@ -51,9 +51,10 @@ class ColorPreference(
             .map { get() }
     }
 
-    override suspend fun stateIn(scope: CoroutineScope): StateFlow<Color> {
+    override fun stateIn(scope: CoroutineScope): StateFlow<Color> {
         return preference.changes().map { get() }.stateIn(scope, SharingStarted.Eagerly, get())
     }
+
 }
 
 fun Preference<Int>.asColor(): ColorPreference {

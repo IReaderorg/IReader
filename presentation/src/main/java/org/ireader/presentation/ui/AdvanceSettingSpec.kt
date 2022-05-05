@@ -6,7 +6,7 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import org.ireader.settings.setting.SettingViewModel
-import org.ireader.settings.setting.dns.AdvanceSettings
+import org.ireader.settings.setting.advance_setting.AdvanceSettings
 
 
 object AdvanceSettingSpec : ScreenSpec {

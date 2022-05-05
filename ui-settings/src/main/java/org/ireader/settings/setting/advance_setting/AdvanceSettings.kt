@@ -1,4 +1,4 @@
-package org.ireader.settings.setting.dns
+package org.ireader.settings.setting.advance_setting
 
 import android.app.Activity
 import android.content.Intent
@@ -22,12 +22,12 @@ import org.ireader.common_extensions.findComponentActivity
 import org.ireader.common_extensions.launchIO
 import org.ireader.common_models.BackUpBook
 import org.ireader.common_resources.UiEvent
+import org.ireader.common_resources.UiText
 import org.ireader.components.AdvanceSettingItem
 import org.ireader.components.components.ISnackBarHost
 import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.components.reusable_composable.TopAppBarBackButton
-import org.ireader.common_resources.UiText
 import org.ireader.core_ui.ui_components.TextSection
 import org.ireader.settings.setting.SettingViewModel
 import org.ireader.ui_settings.R

@@ -1,16 +1,17 @@
 package org.ireader.components.components
 
 import androidx.annotation.DrawableRes
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.annotation.ExperimentalCoilApi
+import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
@@ -41,29 +42,53 @@ fun BookImageComposable(
                 .build(),
             contentScale = ContentScale.Crop
         )
-        if (showLoading && !image.favorite && painter.state is AsyncImagePainter.State.Loading) {
+        var isLoaded = remember {
+            false
+        }
+        if (showLoading && !image.favorite && painter.state is AsyncImagePainter.State.Loading && !isLoaded) {
             ShowLoading(modifier = Modifier.align(Alignment.Center), size = 24.dp)
         }
 
-        Image(
+
+        AsyncImage(
             modifier = Modifier.fillMaxSize(),
             contentScale = contentScale,
-            painter = rememberAsyncImagePainter(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .apply {
-                        data(image)
-                        crossfade(700)
-                        error(placeholder)
-                        if (!showLoading) {
-                            placeholder(placeholder)
-                        }
+            model = ImageRequest.Builder(LocalContext.current)
+                .apply {
+                    data(image)
+                    crossfade(700)
+                    error(placeholder)
+                    if (!showLoading) {
+                        placeholder(placeholder)
                     }
-                    .build(),
-                contentScale = ContentScale.Crop
-            ),
+                }
+                .build(),
+            onSuccess = {
+                isLoaded = false
+            },
             contentDescription = "an image",
             alignment = alignment,
         )
+
+//        Image(
+//            modifier = Modifier.fillMaxSize(),
+//            contentScale = contentScale,
+//            painter = rememberAsyncImagePainter(
+//                model = ImageRequest.Builder(LocalContext.current)
+//                    .apply {
+//                        data(image)
+//                        crossfade(700)
+//                        error(placeholder)
+//                        if (!showLoading) {
+//                            placeholder(placeholder)
+//                        }
+//                    }
+//                    .build(),
+//                contentScale = ContentScale.Crop
+//            ),
+//            contentDescription = "an image",
+//            alignment = alignment,
+//        )
     }
 
 }

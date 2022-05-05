@@ -23,7 +23,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             AppTheme {
                 Surface(
-                    color = MaterialTheme.colors.background,
+                    color = MaterialTheme.colors.surface,
                 ) {
                     ScreenContent()
                 }

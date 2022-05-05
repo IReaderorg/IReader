@@ -42,7 +42,7 @@ interface ReaderPrefFunctions {
     fun ReaderScreenViewModel.changeBackgroundColor(colorIndex: Int)
     fun ReaderScreenViewModel.setReaderBackgroundColor(color: Color)
     fun ReaderScreenViewModel.setReaderTextColor(color: Color)
-    fun ReaderScreenViewModel.setShowScrollIndicator(show:Boolean)
+    fun ReaderScreenViewModel.setShowScrollIndicator(show: Boolean)
     fun ReaderScreenViewModel.setAutoScrollIntervalReader(increase: Boolean)
     fun ReaderScreenViewModel.setAutoScrollOffsetReader(increase: Boolean)
     fun ReaderScreenViewModel.toggleAutoBrightness()
@@ -172,13 +172,12 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
         immersiveMode = readerUseCases.immersiveModeUseCase.read()
         context.findComponentActivity()?.let { activity ->
 
-            if (immersiveMode &&  !activity.isImmersiveModeEnabled) {
+            if (immersiveMode && !activity.isImmersiveModeEnabled) {
                 hideSystemBars(context = context)
-            } else if (activity.isImmersiveModeEnabled){
+            } else if (activity.isImmersiveModeEnabled) {
                 showSystemBars(context)
             }
         }
-
     }
 
     override fun ReaderScreenViewModel.toggleImmersiveMode(context: Context) {
@@ -221,7 +220,7 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
     }
 
     override suspend fun ReaderScreenViewModel.readShowScrollIndicator(): Boolean {
-       return readerUseCases.scrollIndicatorUseCase.isShow()
+        return readerUseCases.scrollIndicatorUseCase.isShow()
     }
 
     override suspend fun ReaderScreenViewModel.readScrollIndicatorWidth(): Int {
@@ -330,20 +329,20 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
     override fun ReaderScreenViewModel.showSystemBars(context: Context) {
         val activity = context.findComponentActivity()
         if (activity != null) {
-            activity.showSystemUI()
+             activity.showSystemUI()
             //activity.exitFullScreenMode()
-         //   activity.showBottomBar()
+            //   activity.showBottomBar()
         }
     }
 
     override fun ReaderScreenViewModel.hideSystemBars(context: Context) {
         val activity = context.findComponentActivity()
         if (activity != null) {
-            activity.hideSystemUI()
-       //     activity.enableImmersiveMode()
-         //   activity.enterFullScreenMode()
-          //  activity.hideBottomBar()
 
+            activity.hideSystemUI()
+//            activity.enableImmersiveMode()
+//            activity.enterFullScreenMode()
+//            activity.hideBottomBar()
         }
     }
 }

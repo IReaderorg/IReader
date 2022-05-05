@@ -157,8 +157,8 @@ class TTSNotificationBuilder constructor(
             .setContentTitle(description?.title)
             .setDeleteIntent(cancelMediaPlayer())
             .setLargeIcon(context, cover)
-            .setOngoing(true)
             .setOnlyAlertOnce(true)
+            .setOngoing(false)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .build()
     }
@@ -262,7 +262,7 @@ class TTSNotificationBuilder constructor(
             setSubText(bookName)
              setColorized(true)
            //  setAutoCancel(true)
-            setOngoing(true)
+            setOngoing(false)
         }
     }
 

@@ -50,8 +50,10 @@ internal sealed class AndroidPreference<K, T>(
     /**
      * Returns the current value of this preference.
      */
-    override suspend fun get(): T {
-       return read(store.data.first(), key) ?: defaultValue
+    override fun get(): T {
+        return runBlocking {
+            read(store.data.first(), key) ?: defaultValue
+        }
     }
 
     /**
@@ -102,7 +104,7 @@ internal sealed class AndroidPreference<K, T>(
      * Returns a hot [StateFlow] of this preference bound to the given [scope], allowing to read the
      * current value and receive preference updates.
      */
-    override suspend fun stateIn(scope: CoroutineScope): StateFlow<T> {
+    override fun stateIn(scope: CoroutineScope): StateFlow<T> {
         return changes().stateIn(scope, SharingStarted.Eagerly, get())
     }
 
@@ -123,6 +125,7 @@ internal sealed class AndroidPreference<K, T>(
         override fun write(preferences: MutablePreferences, key: Key<T>, value: T) {
             preferences[key] = value
         }
+
     }
 
     /**
@@ -144,5 +147,7 @@ internal sealed class AndroidPreference<K, T>(
         override fun write(preferences: MutablePreferences, key: Key<String>, value: T) {
             preferences[key] = serializer(value)
         }
+
     }
+
 }

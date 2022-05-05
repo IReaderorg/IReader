@@ -120,7 +120,9 @@ object ReaderScreenSpec : ScreenSpec {
                 }
             }
             LaunchedEffect(key1 = true) {
-
+                vm.prefFunc.apply {
+                    vm.readImmersiveMode(context)
+                }
             }
             LaunchedEffect(key1 = true) {
 

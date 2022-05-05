@@ -3,17 +3,22 @@ package org.ireader.core_ui.ui
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import org.ireader.core_api.log.Log
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import org.ireader.core_api.prefs.Preference
 
 class PreferenceMutableState<T>(
     private val preference: Preference<T>,
-    scope: CoroutineScope,
+    scope: CoroutineScope
 ) : MutableState<T> {
 
-    private val state = mutableStateOf(preference.defaultValue())
+    private val state = mutableStateOf(preference.get())
+
+    init {
+        preference.changes()
+            .onEach { state.value = it }
+            .launchIn(scope)
+    }
 
     override var value: T
         get() = state.value
@@ -29,28 +34,6 @@ class PreferenceMutableState<T>(
         return { preference.set(it) }
     }
 
-    init {
-        var isTurnOn = false
-        var tries = 0
-        val maxTries = 3
-        while (isTurnOn && tries < maxTries) {
-            kotlin.runCatching {
-                scope.launch {
-                    preference.changes().collect { value ->
-                        try {
-                            state.value = value
-                            isTurnOn = true
-                        } catch (e: Throwable) {
-                            delay(1000L)
-                            tries++
-                            Log.error(e, "Failed to set Preferences")
-                        }
-                    }
-                }
-
-            }
-        }
-    }
 }
 
 fun <T> Preference<T>.asStateIn(scope: CoroutineScope): PreferenceMutableState<T> {

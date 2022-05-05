@@ -11,7 +11,6 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.takeOrElse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
@@ -37,7 +36,7 @@ class AppThemeViewModel @Inject constructor(
     private val darkTheme by uiPreferences.darkTheme().asState()
 
     private val baseThemeJob = SupervisorJob()
-    private val baseThemeScope = CoroutineScope(baseThemeJob + Dispatchers.Main.immediate)
+    private val baseThemeScope = CoroutineScope(baseThemeJob)
     val coilLoader = coilLoaderFactory.newImageLoader()
 
     @Composable
