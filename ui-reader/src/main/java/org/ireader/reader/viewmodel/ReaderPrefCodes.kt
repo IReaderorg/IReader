@@ -5,10 +5,11 @@ import android.content.pm.ActivityInfo
 import android.view.WindowManager
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
+import org.ireader.common_extensions.brightness
 import org.ireader.common_extensions.findComponentActivity
+import org.ireader.common_extensions.hideSystemUI
+import org.ireader.common_extensions.isImmersiveModeEnabled
+import org.ireader.common_extensions.showSystemUI
 import org.ireader.core_ui.theme.OrientationMode
 import org.ireader.core_ui.theme.fonts
 import org.ireader.core_ui.theme.readerScreenBackgroundColors
@@ -80,11 +81,12 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
     override fun ReaderScreenViewModel.saveBrightness(brightness: Float, context: Context) {
         val activity = context.findComponentActivity()
         if (activity != null) {
-            val window = activity.window
-            this.brightness = brightness
-            val layoutParams: WindowManager.LayoutParams = window.attributes
-            layoutParams.screenBrightness = brightness
-            window.attributes = layoutParams
+            activity.brightness(brightness)
+//            val window = activity.window
+//            this.brightness = brightness
+//            val layoutParams: WindowManager.LayoutParams = window.attributes
+//            layoutParams.screenBrightness = brightness
+//            window.attributes = layoutParams
             readerUseCases.brightnessStateUseCase.saveBrightness(brightness)
         }
     }
@@ -168,11 +170,15 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
 
     override suspend fun ReaderScreenViewModel.readImmersiveMode(context: Context) {
         immersiveMode = readerUseCases.immersiveModeUseCase.read()
-        if (immersiveMode) {
-            hideSystemBars(context = context)
-        } else {
-            showSystemBars(context)
+        context.findComponentActivity()?.let { activity ->
+
+            if (immersiveMode &&  !activity.isImmersiveModeEnabled) {
+                hideSystemBars(context = context)
+            } else if (activity.isImmersiveModeEnabled){
+                showSystemBars(context)
+            }
         }
+
     }
 
     override fun ReaderScreenViewModel.toggleImmersiveMode(context: Context) {
@@ -324,32 +330,20 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
     override fun ReaderScreenViewModel.showSystemBars(context: Context) {
         val activity = context.findComponentActivity()
         if (activity != null) {
-            val window = activity.window
-            val windowInsetsController =
-                ViewCompat.getWindowInsetsController(window.decorView) ?: return
-            // Configure the behavior of the hidden system bars
-            windowInsetsController.systemBarsBehavior =
-                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-
-            // Hide both the status bar and the navigation bar
-            // windowInsetsController.show(WindowInsetsCompat.Type.systemBars())
-            windowInsetsController.show(WindowInsetsCompat.Type.systemBars())
+            activity.showSystemUI()
+            //activity.exitFullScreenMode()
+         //   activity.showBottomBar()
         }
     }
 
     override fun ReaderScreenViewModel.hideSystemBars(context: Context) {
         val activity = context.findComponentActivity()
-        if (activity != null && immersiveMode) {
-            val window = activity.window
-            val windowInsetsController =
-                ViewCompat.getWindowInsetsController(window.decorView) ?: return
-            // Configure the behavior of the hidden system bars
-            windowInsetsController.systemBarsBehavior =
-                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-            // Hide both the status bar and the navigation bar
-            windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+        if (activity != null) {
+            activity.hideSystemUI()
+       //     activity.enableImmersiveMode()
+         //   activity.enterFullScreenMode()
+          //  activity.hideBottomBar()
 
-            //  windowInsetsController.hide(WindowInsetsCompat.Type.navigationBars())
         }
     }
 }

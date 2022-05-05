@@ -15,6 +15,7 @@ import org.ireader.common_models.entities.Chapter
 import org.ireader.common_resources.UiText
 import org.ireader.core.R
 import org.ireader.core_api.log.Log
+import org.ireader.core_api.source.CatalogSource
 import org.ireader.core_api.source.Source
 import org.ireader.core_api.source.model.CommandList
 import org.ireader.core_catalogs.interactor.GetLocalCatalog
@@ -34,8 +35,8 @@ class BookDetailViewModel @Inject constructor(
     private val remoteUseCases: RemoteUseCases,
     savedStateHandle: SavedStateHandle,
     private val getLocalCatalog: GetLocalCatalog,
-    private val state: DetailStateImpl,
-    private val chapterState: ChapterStateImpl,
+    val state: DetailStateImpl,
+    val chapterState: ChapterStateImpl,
     private val serviceUseCases: ServiceUseCases,
 ) : BaseViewModel(), DetailState by state, ChapterState by chapterState {
 
@@ -44,12 +45,16 @@ class BookDetailViewModel @Inject constructor(
 
     var initBooks = false
     var initChapters = false
+
     init {
         val bookId = savedStateHandle.get<Long>("bookId")
         val sourceId = savedStateHandle.get<Long>("sourceId")
         if (bookId != null && sourceId != null) {
             val source = getLocalCatalog.get(sourceId)?.source
             this.source = source
+            if (source is CatalogSource) {
+                this.modifiedCommands = source.getCommands()
+            }
             toggleBookLoading(true)
             chapterIsLoading = true
             subscribeBook(bookId = bookId, onSuccess = { book ->
@@ -84,6 +89,7 @@ class BookDetailViewModel @Inject constructor(
                 }
             }.launchIn(viewModelScope)
     }
+
     private fun subscribeChapters(bookId: Long, onSuccess: suspend (List<Chapter>) -> Unit = {}) {
         getChapterUseCase.subscribeChaptersByBookId(bookId)
             .onEach { snapshot ->
@@ -125,7 +131,7 @@ class BookDetailViewModel @Inject constructor(
     suspend fun getRemoteChapterDetail(
         book: Book,
         source: Source,
-        commands:CommandList = emptyList()
+        commands: CommandList = emptyList()
     ) {
         chapterIsLoading = true
         getChapterDetailJob?.cancel()

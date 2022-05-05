@@ -121,8 +121,8 @@ fun ExploreScreen(
                     setShowSnackBar(false)
                     vm.endReached = false
                     loadItems(false)
-                    // books.retry()
                 }
+                else -> {}
             }
         }
     }
@@ -143,7 +143,6 @@ fun ExploreScreen(
                     vm.stateFilters = mFilters
                     vm.searchQuery = null
                     loadItems(true)
-                    // vm.getBooks(filters = mFilters, source = source)
                 },
                 filters = vm.modifiedFilter,
                 onReset = {

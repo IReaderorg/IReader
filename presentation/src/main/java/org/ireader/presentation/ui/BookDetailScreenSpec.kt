@@ -17,10 +17,12 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import kotlinx.coroutines.launch
 import org.ireader.bookDetails.BookDetailScreen
 import org.ireader.bookDetails.viewmodel.BookDetailViewModel
+import org.ireader.common_extensions.async.viewModelIOCoroutine
 import org.ireader.common_extensions.getUrlWithoutDomain
 import org.ireader.common_resources.LAST_CHAPTER
 import org.ireader.common_resources.UiText
 import org.ireader.components.components.EmptyScreenComposable
+import org.ireader.core_api.source.CatalogSource
 import org.ireader.core_api.source.HttpSource
 import org.ireader.domain.ui.NavigationArgs
 
@@ -58,23 +60,24 @@ object BookDetailScreenSpec : ScreenSpec {
         val modalSheetState: ModalBottomSheetState =
             rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
         val scaffoldStates = rememberScaffoldState()
-        val viewModel: BookDetailViewModel = hiltViewModel()
+        val vm: BookDetailViewModel = hiltViewModel()
         val context = LocalContext.current
-        val state = viewModel
+        val state = vm
         val book = state.book
         val source = state.source
         val scope = rememberCoroutineScope()
+
         if (book != null) {
             BookDetailScreen(
                 onToggleLibrary = {
-                    viewModel.toggleInLibrary(book = book)
+                    vm.toggleInLibrary(book = book)
                 },
                 onDownload = {
-                    viewModel.startDownloadService(book = book)
+                    vm.startDownloadService(book = book)
                 },
                 onRead = {
                     if (source != null) {
-                        if (viewModel.chapters.any { it.readAt != 0L } && viewModel.chapters.isNotEmpty()) {
+                        if (vm.chapters.any { it.readAt != 0L } && vm.chapters.isNotEmpty()) {
                             navController.navigate(
                                 ReaderScreenSpec.buildRoute(
                                     bookId = book.id,
@@ -82,33 +85,33 @@ object BookDetailScreenSpec : ScreenSpec {
                                     chapterId = LAST_CHAPTER,
                                 )
                             )
-                        } else if (viewModel.chapters.isNotEmpty()) {
+                        } else if (vm.chapters.isNotEmpty()) {
                             navController.navigate(
                                 ReaderScreenSpec.buildRoute(
                                     bookId = book.id,
                                     sourceId = source.id,
-                                    chapterId = viewModel.chapters.first().id,
+                                    chapterId = vm.chapters.first().id,
                                 )
                             )
                         } else {
                             scope.launch {
-                                viewModel.showSnackBar(UiText.StringResource(org.ireader.core.R.string.no_chapter_is_available))
+                                vm.showSnackBar(UiText.StringResource(org.ireader.core.R.string.no_chapter_is_available))
                             }
                         }
                     } else {
                         scope.launch {
-                            viewModel.showSnackBar(UiText.StringResource(org.ireader.core.R.string.source_not_available))
+                            vm.showSnackBar(UiText.StringResource(org.ireader.core.R.string.source_not_available))
                         }
                     }
                 },
                 onSummaryExpand = {
-                    viewModel.expandedSummary = !viewModel.expandedSummary
+                    vm.expandedSummary = !vm.expandedSummary
                 },
                 onRefresh = {
                     if (source != null) {
                         scope.launch {
-                            viewModel.getRemoteBookDetail(book, source = source)
-                            viewModel.getRemoteChapterDetail(book, source)
+                            vm.getRemoteBookDetail(book, source = source)
+                            vm.getRemoteChapterDetail(book, source)
                         }
                     }
                 },
@@ -125,7 +128,7 @@ object BookDetailScreenSpec : ScreenSpec {
                 onSwipeRefresh = {
                     source?.let {
                         scope.launch {
-                            viewModel.getRemoteChapterDetail(book, source)
+                            vm.getRemoteChapterDetail(book, source)
                         }
                     }
                 },
@@ -140,7 +143,7 @@ object BookDetailScreenSpec : ScreenSpec {
                     }
                 },
                 book = book,
-                detailState = viewModel,
+                detailState = vm,
                 onTitle = {
                     try {
                         navController.navigate(GlobalSearchScreenSpec.buildRoute(query = it))
@@ -148,7 +151,7 @@ object BookDetailScreenSpec : ScreenSpec {
                     }
                 },
                 scaffoldState = scaffoldStates,
-                chapterState = viewModel,
+                chapterState = vm,
                 onPopBackStack = {
                     navController.popBackStack()
                 },
@@ -156,6 +159,27 @@ object BookDetailScreenSpec : ScreenSpec {
                 onCommand = {
                     scope.launch {
                         modalSheetState.show()
+                    }
+                },
+                onUpdate = {
+                    vm.modifiedCommands = it
+                },
+                onReset = {
+                    source.let { source ->
+                        if (source is CatalogSource) {
+                            vm.modifiedCommands = source.getCommands()
+                        }
+                    }
+                },
+                onFetch = {
+                    source?.let { source ->
+                        vm.viewModelIOCoroutine {
+                            vm.getRemoteChapterDetail(
+                                book,
+                                source,
+                                vm.modifiedCommands.filter { !it.isDefaultValue() }
+                            )
+                        }
                     }
                 }
             )

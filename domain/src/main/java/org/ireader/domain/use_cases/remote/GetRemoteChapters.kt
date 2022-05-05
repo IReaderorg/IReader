@@ -26,7 +26,7 @@ class GetRemoteChapters @Inject constructor() {
                 try {
                     Log.debug { "Timber: GetRemoteChaptersUseCase was Called" }
 
-                    val chapters = source.getChapterList(manga = book.toBookInfo(source.id))
+                    val chapters = source.getChapterList(manga = book.toBookInfo(source.id),commandList)
 
                     onSuccess(chapters.map { it.toChapter(book.id) })
                     Log.debug { "Timber: GetRemoteChaptersUseCase was Finished Successfully" }

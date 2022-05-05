@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.DropDownMenu
 import org.ireader.components.reusable_composable.MidSizeTextComposable
+import org.ireader.components.reusable_composable.TextField
 import org.ireader.core_api.source.model.Filter
 import org.ireader.core_api.util.replace
 
@@ -102,8 +103,7 @@ fun FilterGroupItem(
                 }
                 is Filter.Text -> {
                     TextField(
-                        initialValue = filter.value,
-                        hint = filter.name,
+                        filter = filter,
                         onUpdate = {
                             onUpdate(
                                 filters.replace(

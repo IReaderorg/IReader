@@ -3,6 +3,7 @@ package org.ireader.bookDetails
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -38,6 +39,7 @@ import org.ireader.common_models.entities.Book
 import org.ireader.components.components.ISnackBarHost
 import org.ireader.components.components.ShowLoading
 import org.ireader.core_api.source.CatalogSource
+import org.ireader.core_api.source.model.Command
 import org.ireader.core_ui.theme.TransparentStatusBar
 import org.ireader.core_ui.ui_components.CardTile
 import org.ireader.core_ui.ui_components.DotsFlashing
@@ -61,7 +63,10 @@ fun BookDetailScreen(
     onTitle: (String) -> Unit,
     scaffoldState: ScaffoldState,
     onPopBackStack: () -> Unit,
-    onCommand: () -> Unit
+    onCommand: () -> Unit,
+    onFetch: () -> Unit,
+    onReset: () -> Unit,
+    onUpdate: (List<Command<*>>) -> Unit,
 ) {
 
     val swipeRefreshState =
@@ -94,21 +99,17 @@ fun BookDetailScreen(
                 modifier = Modifier,
                 sheetState = modalBottomSheetState,
                 sheetContent = {
-                    val source = detailState.source
-                    if (source is CatalogSource) {
+                    detailState.source.let {  source ->
+                        if (source is CatalogSource) {
                             ChapterCommandBottomSheet(
-                                onFetch = {
-
-                                },
-                                onReset = {
-
-                                },
-                                onUpdate = {
-
-                                },
-                                source.getCommands()
+                                onFetch = onFetch,
+                                onReset = onReset,
+                                onUpdate = onUpdate,
+                                detailState.modifiedCommands
                             )
                         }
+                    }
+                    Box(modifier = Modifier.height(1.dp))
                 },
                 sheetBackgroundColor = MaterialTheme.colors.background,
                 ) {

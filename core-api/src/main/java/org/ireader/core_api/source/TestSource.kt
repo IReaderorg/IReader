@@ -75,8 +75,9 @@ class TestSource : CatalogSource {
         commands: List<Command<*>>
     ): List<ChapterInfo> {
         delay(1000)
-        return getTestChapters()
+        return getTestChapters(commands)
     }
+
 
     override suspend fun getChapterList(manga: MangaInfo): List<ChapterInfo> {
         delay(1000)
@@ -112,10 +113,10 @@ class TestSource : CatalogSource {
 
     override fun getCommands(): CommandList {
         return listOf(
-            Command.Chapter.Numeric("Start from "),
-            Command.Chapter.Note("Separate number using '-' example '2-10'"),
-            Command.Chapter.Text("fetch chapters between:"),
+            Command.Chapter.Note("NOTE:Only the first value would be used"),
+            Command.Chapter.Text("Title"),
             Command.Chapter.Select("Options", arrayOf(
+                "None",
                 "Last 10 Chapter"
             )),
         )
@@ -187,6 +188,44 @@ class TestSource : CatalogSource {
 
         return list
     }
+    private fun getTestChapters(commands: List<Command<*>>): List<ChapterInfo> {
+        val chapters = mutableListOf<ChapterInfo>()
+        org.ireader.core_api.log.Log.error { commands.toString() }
+        return when(val cmd = commands.firstOrNull()) {
+            is Command.Chapter.Text -> {
+                chapters.add(ChapterInfo(
+                    Clock.System.now().toEpochMilliseconds().toString(),
+                    cmd.value,
+                    Clock.System.now().toEpochMilliseconds()
+                ))
+                chapters
+            }
+            is Command.Chapter.Select -> {
+                org.ireader.core_api.log.Log.error { cmd.value.toString() }
+                chapters.add(ChapterInfo(
+                    Clock.System.now().toEpochMilliseconds().toString(),
+                    "Chapter ${cmd.options[cmd.value]}",
+                    Clock.System.now().toEpochMilliseconds()
+                ))
+                chapters
+            }
+            else -> {
+                val chapter1 = ChapterInfo(
+                    "1",
+                    "Chapter 1",
+                    Clock.System.now().toEpochMilliseconds()
+                )
+                val chapter2 = chapter1.copy(key = "2", name = "Chapter2")
+                val chapter3 = chapter1.copy(key = "3", name = "Chapter3")
+
+                return listOf(chapter1, chapter2, chapter3)
+            }
+        }
+
+
+
+    }
+
 
     private fun getTestChapters(): List<ChapterInfo> {
         val chapter1 = ChapterInfo(
@@ -205,8 +244,6 @@ class TestSource : CatalogSource {
             Text(it)
         }
     }
-}
-
 val ipsum = """
   Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin eget rutrum nisl, vitae ullamcorper velit. In eu diam justo. Sed placerat, risus at luctus vestibulum, nisl nunc lobortis est, eu viverra sapien nulla at metus. Proin lacinia felis tortor. Nullam quis dignissim lorem. Morbi vel tristique mi. Phasellus eget tellus dui. Maecenas sollicitudin in neque vel porta. Nam vel nulla at lectus fringilla fringilla mollis at metus. Duis elit nulla, viverra gravida ullamcorper sit amet, sagittis vitae eros. Interdum et malesuada fames ac ante ipsum primis in faucibus. Proin sodales vehicula mi, id laoreet elit dapibus in. Morbi tristique velit a velit pellentesque aliquam. Etiam tempus venenatis blandit.
 
@@ -218,3 +255,5 @@ val ipsum = """
 
   Pellentesque consequat metus felis, sit amet commodo sapien vestibulum et. Curabitur velit dolor, lacinia et interdum in, viverra ut ante. Curabitur malesuada odio et condimentum mattis. Sed aliquam leo dui, eu fringilla mi laoreet in. Donec at justo id sem egestas dictum eget aliquet ex. Curabitur iaculis facilisis nisl, at efficitur est tincidunt a. Maecenas ullamcorper sapien vel pulvinar posuere. Aenean molestie at quam in convallis. Praesent vitae odio mauris. Suspendisse metus urna, congue ut orci laoreet, feugiat vestibulum ipsum.
 """.trimIndent()
+}
+

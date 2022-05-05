@@ -16,20 +16,25 @@ import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.ireader.components.reusable_composable.DropDownMenu
 import org.ireader.components.reusable_composable.MidSizeTextComposable
+import org.ireader.components.reusable_composable.TextField
 import org.ireader.core_api.source.model.Command
 import org.ireader.core_api.source.model.CommandList
-import org.ireader.core_api.source.model.Filter
-import org.ireader.explore.TextField
+import org.ireader.core_api.util.replace
 
 @Composable
 fun ChapterCommandBottomSheet(
     onFetch: () -> Unit,
     onReset: () -> Unit,
-    onUpdate: (List<Filter<*>>) -> Unit,
+    onUpdate: (List<Command<*>>) -> Unit,
     commandList: CommandList,
 ) {
     val scrollState = rememberScrollState()
@@ -52,25 +57,52 @@ fun ChapterCommandBottomSheet(
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
-        commandList.forEach { command ->
+        commandList.forEachIndexed { index, command ->
             Spacer(modifier = Modifier.height(8.dp))
             when (command) {
                 is Command.Chapter.Text -> {
-                    TextField(initialValue = command.initialValue, hint = command.name, onUpdate = {})
-                }
-                is Command.Chapter.Select -> {
-                    DropDownMenu(
-                        text = command.name,
-                        onSelected = {},
-                        items = command.options
+                    TextField(
+                        command = command,
+                        onUpdate = {
+                            onUpdate(
+                                commandList.replace(
+                                    index,
+                                    command.apply {
+                                        this.value = it
+                                    }
+                                )
+                            )
+                        },
                     )
                 }
-                is Command.Chapter.Numeric -> {
-                    TextField(initialValue = command.initialValue.toString(), hint = command.name, onUpdate = {})
+                is Command.Chapter.Select -> {
+                    var state by remember {
+                        mutableStateOf(command.initialValue)
+                    }
+                    LaunchedEffect(key1 = command.value) {
+                        state = command.value
+                    }
+                    DropDownMenu(
+                        text = command.name,
+                        onSelected = { value ->
+                            onUpdate(
+                                commandList.replace(
+                                    index,
+                                    command.apply {
+                                        this.value = value
+                                    }
+                                )
+                            )
+                            state = value
+                        },
+                        currentValue = command.options[state],
+                        items = command.options
+                    )
                 }
                 is Command.Chapter.Note -> {
                     MidSizeTextComposable(text = command.name)
                 }
+                else -> {}
             }
         }
 
