@@ -19,6 +19,11 @@
             @android:color/transparent
         </item>
 
+        <!-- Optional: set the status bar light and content dark. -->
+        <item name="android:windowLightStatusBar"  tools:targetApi="m"/>
+        <item name="android:windowLayoutInDisplayCutoutMode"   tools:targetApi="p">default</item>
+        <!-- Optional: set the status bar light and content dark. -->
+
     </style>
 
     <style name="Theme.Infinity.AppBarOverlay" parent="ThemeOverlay.AppCompat.DayNight.ActionBar" />

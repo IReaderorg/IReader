@@ -9,9 +9,9 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import kotlinx.coroutines.launch
+import org.ireader.common_resources.UiText
 import org.ireader.components.components.EmptyScreenComposable
 import org.ireader.core.R
-import org.ireader.common_resources.UiText
 import org.ireader.core_api.source.HttpSource
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.explore.ExploreScreen
@@ -88,7 +88,10 @@ object ExploreScreenSpec : ScreenSpec {
                     if (source is HttpSource) {
                         navController.navigate(
                             WebViewScreenSpec.buildRoute(
-                                url = (source).baseUrl
+                                url = (source).baseUrl,
+                                sourceId = source.id,
+                                chapterId = null,
+                                bookId = null
                             )
                         )
                     }
@@ -111,14 +114,19 @@ object ExploreScreenSpec : ScreenSpec {
                     )
                 },
                 onAppbarWebView = {
-                    navController.navigate(WebViewScreenSpec.buildRoute(url = it))
+                    navController.navigate(
+                        WebViewScreenSpec.buildRoute(
+                            url = it,
+                            sourceId = source.id,
+                        )
+                    )
                 },
                 onPopBackStack = {
                     navController.popBackStack()
                 }
             )
         } else {
-            EmptyScreenComposable( R.string.source_not_available,
+            EmptyScreenComposable(R.string.source_not_available,
                 onPopBackStack = {
                     navController.popBackStack()
                 })

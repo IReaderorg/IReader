@@ -18,29 +18,19 @@ class TestSource : CatalogSource {
 
     override val name = "Test source"
     override val lang get() = "en"
-    override suspend fun getMangaDetails(manga: MangaInfo): MangaInfo {
+    override suspend fun getMangaDetails(manga: MangaInfo, commands: List<Command<*>>): MangaInfo {
         delay(1000)
         val noHipstersOffset = 10
         val picId = manga.title.split(" ")[1].toInt() + noHipstersOffset
         return manga.copy(cover = "https://picsum.photos/300/400/?image=$picId")
     }
 
-    override suspend fun getMangaDetails(manga: MangaInfo, commands: List<Command<*>>): MangaInfo {
-        TODO("Not yet implemented")
-    }
 
     override suspend fun getMangaList(sort: Listing?, page: Int): MangasPageInfo {
         delay(1000)
         return MangasPageInfo(getTestManga(page), true)
     }
 
-    override suspend fun getMangaList(
-        sort: Listing?,
-        page: Int,
-        commands: List<Command<*>>
-    ): MangasPageInfo {
-        return MangasPageInfo(getTestManga(page), true)
-    }
 
     override suspend fun getMangaList(filters: FilterList, page: Int): MangasPageInfo {
         var mangaList = getTestManga(page)
@@ -54,45 +44,21 @@ class TestSource : CatalogSource {
         return MangasPageInfo(mangaList, true)
     }
 
-    override suspend fun getMangaList(
-        filters: FilterList,
-        page: Int,
-        commands: List<Command<*>>
-    ): MangasPageInfo {
-        var mangaList = getTestManga(page)
 
-        filters.forEach { filter ->
-            if (filter is Filter.Title) {
-                mangaList = mangaList.filter { filter.value in it.title }
-            }
-        }
-
-        return MangasPageInfo(mangaList, true)
-    }
 
     override suspend fun getChapterList(
         manga: MangaInfo,
         commands: List<Command<*>>
     ): List<ChapterInfo> {
         delay(1000)
-        return getTestChapters(commands)
-    }
-
-
-    override suspend fun getChapterList(manga: MangaInfo): List<ChapterInfo> {
-        delay(1000)
         return getTestChapters()
-    }
-
-    override suspend fun getPageList(chapter: ChapterInfo): List<Page> {
-        delay(1000)
-        return getTestPages()
     }
 
     override suspend fun getPageList(chapter: ChapterInfo, commands: List<Command<*>>): List<Page> {
         delay(1000)
         return getTestPages()
     }
+
 
     class Alphabetically : Listing("Alphabetically")
 

@@ -5,6 +5,7 @@ import org.ireader.common_models.entities.Chapter
 import org.ireader.common_models.entities.toChapterInfo
 import org.ireader.common_resources.UiText
 import org.ireader.core_api.source.Source
+import org.ireader.core_api.source.model.CommandList
 import org.ireader.core_api.source.model.Text
 import org.ireader.core_ui.exceptionHandler
 import org.ireader.domain.R
@@ -16,6 +17,7 @@ class GetRemoteReadingContent @Inject constructor() {
         source: Source,
         onError: suspend (message: UiText?) -> Unit,
         onSuccess: suspend (chapter: Chapter) -> Unit,
+        commands:CommandList = emptyList()
     ) {
         withIOContext {
             kotlin.runCatching {
@@ -23,7 +25,7 @@ class GetRemoteReadingContent @Inject constructor() {
                     org.ireader.core_api.log.Log.debug("Timber: GetRemoteReadingContentUseCase was Called")
                     // val page = source.getPageList(chapter.toChapterInfo())
                     val content = mutableListOf<String>()
-                    val page = source.getPageList(chapter.toChapterInfo())
+                    val page = source.getPageList(chapter.toChapterInfo(),commands)
 
                     page.forEach {
                         when (it) {

@@ -30,14 +30,6 @@ interface Source {
      *
      * @param manga the manga to update.
      */
-    @Deprecated("This api is deprecated")
-    suspend fun getMangaDetails(manga: MangaInfo): MangaInfo
-
-    /**
-     * Returns an observable with the updated details for a manga.
-     *
-     * @param manga the manga to update.
-     */
     suspend fun getMangaDetails(manga: MangaInfo,commands: List<Command<*>>): MangaInfo
 
     /**
@@ -48,23 +40,6 @@ interface Source {
      */
     suspend fun getChapterList(manga: MangaInfo,commands: List<Command<*>>): List<ChapterInfo>
 
-
-    /**
-     * Returns an observable with all the available chapters for a manga.
-     *
-     * @param manga the manga to update.
-     * @param commands the list of commands
-     */
-    @Deprecated("This api is deprecated")
-    suspend fun getChapterList(manga: MangaInfo): List<ChapterInfo>
-
-    /**
-     * Returns an observable with the list of pages a chapter has.
-     *
-     * @param chapter the chapter.
-     */
-    @Deprecated("This api is deprecated")
-    suspend fun getPageList(chapter: ChapterInfo): List<Page>
 
     /**
      * Returns an observable with the list of pages a chapter has.

@@ -5,6 +5,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import io.ktor.client.plugins.cookies.ConstantCookiesStorage
 import org.ireader.common_data.repository.LocalBookRepository
 import org.ireader.core_api.http.BrowseEngine
 import org.ireader.core_api.http.HttpClients
@@ -108,11 +109,13 @@ class CatalogModule {
     @Singleton
     fun providesHttpClients(
         context: Application,
-        browseEngine: BrowseEngine
+        browseEngine: BrowseEngine,
+        constantCookiesStorage: ConstantCookiesStorage
     ): HttpClients {
         return HttpClients(
             context,
-            browseEngine
+            browseEngine,
+            constantCookiesStorage = constantCookiesStorage
         )
     }
 

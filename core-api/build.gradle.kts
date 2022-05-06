@@ -33,6 +33,10 @@ dependencies {
 val packageVersion = "1.2-SNAPSHOT"
 mavenPublish {
     sonatypeHost = null
+
+}
+mavenPublishing {
+    com.vanniktech.maven.publish.AndroidSingleVariantLibrary()
 }
 
 publishing {

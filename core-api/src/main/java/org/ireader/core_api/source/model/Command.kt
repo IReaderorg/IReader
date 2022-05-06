@@ -16,15 +16,15 @@ sealed class Command<V>(val name: String, val initialValue: V) {
     }
 
     object Detail {
-        open class Fetch(url: String, html: String = "") : Command<String>(url, html)
+        open class Fetch(val url: String = "",val html: String = "") : Command<String>(url, html)
     }
 
     object Content {
-        open class Fetch(url: String, html: String = "") : Command<String>(url, html)
+        open class Fetch(val url: String = "",val  html: String = "") : Command<String>(url, html)
     }
 
     object Explore {
-        open class Fetch(url: String, html: String = "") : Command<String>(url, html)
+        open class Fetch(val url: String = "",val  html: String = "") : Command<String>(url, html)
     }
 
     object Chapter {
@@ -36,7 +36,7 @@ sealed class Command<V>(val name: String, val initialValue: V) {
             value: Int = 0
         ) : Command<Int>(name, value)
 
-        open class Fetch(val url: String, private val html: String = "") :
+        open class Fetch(val url: String = "", val html: String = "") :
             Command<String>(url, html)
     }
 }

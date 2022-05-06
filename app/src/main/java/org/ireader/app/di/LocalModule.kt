@@ -6,6 +6,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import io.ktor.client.plugins.cookies.ConstantCookiesStorage
 import okio.FileSystem
 import okio.Path.Companion.toOkioPath
 import org.ireader.core_api.prefs.AndroidPreferenceStore
@@ -32,5 +33,11 @@ class LocalModule {
     @Singleton
     fun providePreferencesStore(@ApplicationContext context: Context): PreferenceStore {
         return AndroidPreferenceStore(context = context, "ui")
+    }
+
+    @Provides
+    @Singleton
+    fun provideCookieJar(): ConstantCookiesStorage {
+        return ConstantCookiesStorage()
     }
 }

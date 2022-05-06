@@ -15,7 +15,11 @@ import okhttp3.OkHttpClient
 import java.io.File
 import java.util.concurrent.TimeUnit
 
-class HttpClients(context: Application, browseEngine: BrowseEngine) {
+class HttpClients(
+    context: Application,
+    browseEngine: BrowseEngine,
+    constantCookiesStorage:ConstantCookiesStorage
+) {
 
     private val cache = run {
         val dir = File(context.cacheDir, "network_cache")
@@ -23,13 +27,16 @@ class HttpClients(context: Application, browseEngine: BrowseEngine) {
         Cache(dir, size)
     }
 
-    private val cookieJar = WebViewCookieJar()
+
+
+    private val cookieJar = AndroidCookieJar(constantCookiesStorage)
 
     private val okhttpClient = OkHttpClient.Builder()
         .cache(cache)
         .cookieJar(cookieJar)
         .readTimeout(30L, TimeUnit.SECONDS)
         .writeTimeout(30L, TimeUnit.SECONDS)
+        .callTimeout(2, TimeUnit.MINUTES)
         .build()
 
     val browser = browseEngine
@@ -43,7 +50,7 @@ class HttpClients(context: Application, browseEngine: BrowseEngine) {
             gson()
         }
         install(HttpCookies) {
-            storage = ConstantCookiesStorage()
+            storage = constantCookiesStorage
         }
     }
 }

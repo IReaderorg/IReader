@@ -160,7 +160,7 @@ class BookDetailViewModel @Inject constructor(
                     }
                     chapterIsLoading = false
                 },
-                commandList = commands
+                commands = commands
             )
         }
     }

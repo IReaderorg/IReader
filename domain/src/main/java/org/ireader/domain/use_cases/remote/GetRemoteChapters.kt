@@ -17,7 +17,7 @@ class GetRemoteChapters @Inject constructor() {
     suspend operator fun invoke(
         book: Book,
         source: Source,
-        commandList: CommandList = emptyList(),
+        commands: CommandList = emptyList(),
         onSuccess: suspend (List<Chapter>) -> Unit,
         onError: suspend (UiText?) -> Unit,
     ) {
@@ -26,7 +26,7 @@ class GetRemoteChapters @Inject constructor() {
                 try {
                     Log.debug { "Timber: GetRemoteChaptersUseCase was Called" }
 
-                    val chapters = source.getChapterList(manga = book.toBookInfo(source.id),commandList)
+                    val chapters = source.getChapterList(manga = book.toBookInfo(source.id),commands)
 
                     onSuccess(chapters.map { it.toChapter(book.id) })
                     Log.debug { "Timber: GetRemoteChaptersUseCase was Finished Successfully" }

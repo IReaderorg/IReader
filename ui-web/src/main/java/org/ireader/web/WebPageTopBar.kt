@@ -21,10 +21,13 @@ import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.BuildDropDownMenu
 import org.ireader.components.reusable_composable.DropDownMenuItem
 import org.ireader.components.reusable_composable.TopAppBarBackButton
+import org.ireader.core_api.source.CatalogSource
+import org.ireader.core_api.source.model.Command
 import org.ireader.explore.webview.CustomTextField
 
 @Composable
 fun WebPageTopBar(
+    state:WebViewPageState,
     urlToRender: String,
     onValueChange: (text: String) -> Unit,
     onGo: () -> Unit,
@@ -32,7 +35,12 @@ fun WebPageTopBar(
     goBack: () -> Unit,
     goForward: () -> Unit,
     onPopBackStack: () -> Unit,
+    source: CatalogSource?,
+    onFetchBook:() -> Unit,
+    onFetchChapter:() -> Unit,
+    onFetchChapters:() -> Unit,
 ) {
+
     var isMenuExpanded by remember {
         mutableStateOf(false)
     }
@@ -67,7 +75,7 @@ fun WebPageTopBar(
                 },
             )
             val list =
-                listOf<DropDownMenuItem>(
+                mutableListOf<DropDownMenuItem>(
                     DropDownMenuItem(
                         stringResource(org.ireader.core.R.string.Go)
                     ) {
@@ -88,41 +96,35 @@ fun WebPageTopBar(
                     ) {
                         goForward()
                     },
-
                 )
+            if (source != null && source.getCommands().find { it is Command.Detail.Fetch } != null && state.stateBook == null ) {
+                list.add(
+                    DropDownMenuItem(
+                        stringResource(org.ireader.core.R.string.fetch_book)
+                    ) {
+                        onFetchBook()
+                    }
+                )
+            }
+            if (source != null && source.getCommands().find { it is Command.Content.Fetch } != null && state.stateChapter != null) {
+                list.add(
+                    DropDownMenuItem(
+                        stringResource(org.ireader.core.R.string.fetch_chapter)
+                    ) {
+                        onFetchChapter()
+                    }
+                )
+            }
+            if (source != null && source.getCommands().find { it is Command.Chapter.Fetch} != null&& state.stateBook != null) {
+                list.add(
+                    DropDownMenuItem(
+                        stringResource(org.ireader.core.R.string.fetch_chapters)
+                    ) {
+                        onFetchChapters()
+                    }
+                )
+            }
             BuildDropDownMenu(list, enable = isMenuExpanded, onEnable = { isMenuExpanded = it })
-//            DropdownMenu(
-//                modifier = Modifier.background(MaterialTheme.colors.background),
-//                expanded = isMenuExpanded,//viewModel.state.isMenuExpanded,
-//                onDismissRequest = {
-//                    isMenuExpanded = false
-//                },
-//            ) {
-//                DropdownMenuItem(onClick = {
-//                    isMenuExpanded = false
-//                    onGo()
-//                }) {
-//                    MidSizeTextComposable(text = stringResource(R.string.Go))
-//                }
-//                DropdownMenuItem(onClick = {
-//                    isMenuExpanded = false
-//                    refresh()
-//                }) {
-//                    MidSizeTextComposable(text = stringResource(R.string.refresh))
-//                }
-//                DropdownMenuItem(onClick = {
-//                    isMenuExpanded = false
-//                    goBack()
-//                }) {
-//                    MidSizeTextComposable(text = stringResource(R.string.go_back))
-//                }
-//                DropdownMenuItem(onClick = {
-//                    isMenuExpanded = false
-//                    goForward()
-//                }) {
-//                    MidSizeTextComposable(text = stringResource(R.string.go_forward))
-//                }
-//            }
         },
     )
 }

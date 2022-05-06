@@ -84,7 +84,6 @@ class BrowseEngine @Inject constructor(@ApplicationContext private val context: 
                 ) {
                     isLoadUp = false
                     Log.error("WebView: failed to load $failingUrl Error Code:$errorCode")
-                    error = "ERROR CODE: $errorCode"
                 }
 
                 override fun shouldInterceptRequestCompat(
@@ -98,19 +97,26 @@ class BrowseEngine @Inject constructor(@ApplicationContext private val context: 
             }
             var currentTime = 0
             while (!isLoadUp && currentTime < timeout) {
-                if (error.isNotBlank()) {
-                    throw Throwable(error)
-                }
+
                 delay(200)
                 currentTime += 200
             }
             if (currentTime >= timeout) {
+//                client.clearHistory()
+//                client.clearCache(true)
+//                client.destroy()
+//                client.clearSslPreferences()
+//                WebStorage.getInstance().deleteAllData()
+//                context.applicationInfo?.dataDir?.let { File("$it/app_webview/").deleteRecursively() }
                 throw TimeoutException()
             }
             html = Jsoup.parse(client.getHtml())
-            client.clearHistory()
-            client.clearCache(true)
-            client.destroy()
+//            client.clearHistory()
+//            client.clearCache(true)
+//            client.destroy()
+//            client.clearSslPreferences()
+//            WebStorage.getInstance().deleteAllData()
+//            context.applicationInfo?.dataDir?.let { File("$it/app_webview/").deleteRecursively() }
         }
         return Result(
             responseBody = html.html(),

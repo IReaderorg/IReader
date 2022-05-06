@@ -120,8 +120,11 @@ object BookDetailScreenSpec : ScreenSpec {
                         navController.navigate(
                             WebViewScreenSpec.buildRoute(
                                 url = (source).baseUrl + getUrlWithoutDomain(
-                                    book.link
+                                    book.link,
                                 ),
+                                sourceId = source.id,
+                                bookId = book.id,
+                                chapterId = null
                             )
                         )
                 },

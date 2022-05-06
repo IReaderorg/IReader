@@ -9,6 +9,9 @@
     <string name="refresh">Refresh</string>
     <string name="go_back">Go Back</string>
     <string name="go_forward">Go Forward</string>
+    <string name="fetch_book">Fetch Book</string>
+    <string name="fetch_chapter">Fetch Chapter</string>
+    <string name="fetch_chapters">Fetch Chapters</string>
     <string name="Go">Go</string>
     <string name="filter">Filter</string>
     <string name="pause">Pause</string>

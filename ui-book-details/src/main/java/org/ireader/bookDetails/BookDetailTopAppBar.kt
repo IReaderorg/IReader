@@ -18,15 +18,17 @@ import org.ireader.components.reusable_composable.TopAppBarBackButton
 import org.ireader.core_api.source.CatalogSource
 import org.ireader.core_api.source.HttpSource
 import org.ireader.core_api.source.Source
+import org.ireader.core_api.source.model.Command
+import org.ireader.core_api.source.model.CommandList
 
 @Composable
 fun BookDetailTopAppBar(
     modifier: Modifier = Modifier,
-    source:Source?,
+    source: Source?,
     onWebView: () -> Unit,
     onRefresh: () -> Unit,
     onPopBackStack: () -> Unit,
-    onCommand:() -> Unit
+    onCommand: () -> Unit
 ) {
     Toolbar(
         title = {},
@@ -46,7 +48,7 @@ fun BookDetailTopAppBar(
                     tint = MaterialTheme.colors.onBackground,
                 )
             }
-            if(source is CatalogSource && source.getCommands().isNotEmpty()) {
+            if (source is CatalogSource && !source.getCommands().emptyCommands()) {
                 IconButton(onClick = {
                     onCommand()
                 }) {
@@ -58,7 +60,7 @@ fun BookDetailTopAppBar(
                 }
             }
 
-            if(source is HttpSource) {
+            if (source is HttpSource) {
                 IconButton(onClick = {
                     onWebView()
                 }) {
@@ -75,4 +77,12 @@ fun BookDetailTopAppBar(
             TopAppBarBackButton(onClick = onPopBackStack)
         }
     )
+}
+
+fun CommandList.emptyCommands(): Boolean {
+    return this.none {
+        it !is Command.Detail.Fetch ||
+            it !is Command.Chapter.Fetch ||
+            it !is Command.Content.Fetch
+    }
 }

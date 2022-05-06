@@ -3,7 +3,6 @@ package org.ireader.presentation.ui
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.DrawerValue
-import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberDrawerState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
@@ -88,6 +87,7 @@ object ReaderScreenSpec : ScreenSpec {
         val source = vm.source
         val chapters = vm.stateChapters
         val chapter = vm.stateChapter
+        val book = vm.book
 
         val scrollState = rememberLazyListState()
         val drawerScrollState = rememberLazyListState()
@@ -421,19 +421,37 @@ object ReaderScreenSpec : ScreenSpec {
                 },
                 onReaderWebView = { modalState ->
                     try {
-                        if (chapter != null && !vm.isReaderModeEnable && modalState.targetValue == ModalBottomSheetValue.Expanded) {
-                            navController.navigate(
-                                WebViewScreenSpec.buildRoute(
-                                    url = chapter.link,
-                                )
+                        navController.navigate(
+                            WebViewScreenSpec.buildRoute(
+                                url = chapter?.link,
+                                sourceId = source.id,
+                                chapterId = chapter?.id,
+                                bookId = book?.id
                             )
-                        } else if (chapter != null) {
-                            navController.navigate(
-                                WebViewScreenSpec.buildRoute(
-                                    url = chapter.link,
-                                )
-                            )
-                        }
+                        )
+
+
+//                        if (chapter != null && !vm.isReaderModeEnable && modalState.targetValue == ModalBottomSheetValue.Expanded) {
+//
+//
+//                            navController.navigate(
+//                                WebViewScreenSpec.buildRoute(
+//                                    url = chapter.link,
+//                                    sourceId = source.id,
+//                                    chapterId = chapter.id,
+//                                    bookId = book?.id
+//                                )
+//                            )
+//                        } else if (chapter != null) {
+//                            navController.navigate(
+//                                WebViewScreenSpec.buildRoute(
+//                                    url = chapter.link,
+//                                    sourceId = source.id,
+//                                    chapterId = chapter.id,
+//                                    bookId = book?.id
+//                                )
+//                            )
+//                        }
                     } catch (e: Throwable) {
                         scope.launch {
                             vm.showSnackBar(

@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
@@ -115,7 +114,7 @@ fun ReaderText(
                             modifier = modifier,
                             state = scrollState,
                         ) {
-                            itemsIndexed(content) { index, text ->
+                            items(content.size) { index ->
                                 TextSelectionContainer(selectable = vm.selectableMode) {
                                     Text(
                                         modifier = modifier
