@@ -16,6 +16,8 @@
     <string name="filter">Filter</string>
     <string name="pause">Pause</string>
     <string name="resume">Resume</string>
+    <string name="unknown">Unknown</string>
+    <string name="invalid_source">Unknown</string>
 
 
 

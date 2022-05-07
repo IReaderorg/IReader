@@ -74,50 +74,52 @@ class LibraryUpdatesService @AssistedInject constructor(
                 libraryBooks.forEachIndexed { index, book ->
                     val chapters = getChapterUseCase.findChaptersByBookId(bookId = book.id)
                     val source = getLocalCatalog.get(book.sourceId)!!.source
-                    val remoteChapters = mutableListOf<Chapter>()
-                    remoteUseCases.getRemoteChapters(
-                        book, source,
-                        onSuccess = {
-                            builder.setContentText(book.title)
-                            builder.setSubText(index.toString())
-                            builder.setProgress(libraryBooks.size, index, false)
-                            notify(Notifications.ID_LIBRARY_PROGRESS, builder.build())
-                            remoteChapters.addAll(it)
-                        },
-                        onError = {}
-                    )
-
-                    val newChapters =
-                        remoteChapters.filter { chapter -> chapter.link !in chapters.map { it.link } }
-
-                    if (newChapters.isNotEmpty()) {
-                        updatedBookSize += 1
-                    }
-                    withContext(Dispatchers.IO) {
-
-                        val chapterIds = insertUseCases.insertChapters(
-                            newChapters.map {
-                                it.copy(
-                                    bookId = book.id,
-                                    dateFetch = Clock.System.now().toEpochMilliseconds(),
-                                )
-                            }
+                    if (source != null) {
+                        val remoteChapters = mutableListOf<Chapter>()
+                        remoteUseCases.getRemoteChapters(
+                            book, source,
+                            onSuccess = {
+                                builder.setContentText(book.title)
+                                builder.setSubText(index.toString())
+                                builder.setProgress(libraryBooks.size, index, false)
+                                notify(Notifications.ID_LIBRARY_PROGRESS, builder.build())
+                                remoteChapters.addAll(it)
+                            },
+                            onError = {}
                         )
-                        insertUseCases.insertBook(
-                            book.copy(
-                                lastUpdated = Clock.System.now()
-                                    .toEpochMilliseconds()
+
+                        val newChapters =
+                            remoteChapters.filter { chapter -> chapter.link !in chapters.map { it.link } }
+
+                        if (newChapters.isNotEmpty()) {
+                            updatedBookSize += 1
+                        }
+                        withContext(Dispatchers.IO) {
+
+                            val chapterIds = insertUseCases.insertChapters(
+                                newChapters.map {
+                                    it.copy(
+                                        bookId = book.id,
+                                        dateFetch = Clock.System.now().toEpochMilliseconds(),
+                                    )
+                                }
                             )
-                        )
-                        updatesUseCase(
-                            newChapters.mapIndexed { index, chapter ->
-                                Update(
-                                    chapterId = chapterIds[index],
-                                    bookId = chapter.bookId,
-                                    date = Clock.System.now().toEpochMilliseconds()
+                            insertUseCases.insertBook(
+                                book.copy(
+                                    lastUpdated = Clock.System.now()
+                                        .toEpochMilliseconds()
                                 )
-                            }
-                        )
+                            )
+                            updatesUseCase(
+                                newChapters.mapIndexed { index, chapter ->
+                                    Update(
+                                        chapterId = chapterIds[index],
+                                        bookId = chapter.bookId,
+                                        date = Clock.System.now().toEpochMilliseconds()
+                                    )
+                                }
+                            )
+                        }
                     }
                 }
             } catch (e: Throwable) {

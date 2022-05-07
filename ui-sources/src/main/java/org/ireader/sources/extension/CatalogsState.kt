@@ -14,7 +14,9 @@ import javax.inject.Singleton
 
 interface CatalogsState {
     val pinnedCatalogs: List<CatalogLocal>
+    val validPinnedCatalogs: State<List<CatalogLocal>>
     val unpinnedCatalogs: List<CatalogLocal>
+    val validUnpinnedCatalogs: State<List<CatalogLocal>>
     val remoteCatalogs: List<CatalogRemote>
     val languageChoices: List<LanguageChoice>
     var selectedLanguage: LanguageChoice
@@ -22,6 +24,7 @@ interface CatalogsState {
     val isRefreshing: Boolean
     var searchQuery: String?
     var mappedCatalogs: State<Map<String, List<CatalogLocal>>>
+    var validMappedCatalogs: State<Map<String, List<CatalogLocal>>>
 }
 
 fun CatalogsState(): CatalogsState {
@@ -31,14 +34,17 @@ fun CatalogsState(): CatalogsState {
 @Singleton
 class CatalogsStateImpl @Inject constructor() : CatalogsState {
     override var pinnedCatalogs by mutableStateOf(emptyList<CatalogLocal>())
+    override var validPinnedCatalogs = derivedStateOf { pinnedCatalogs.filter { it.source != null } }
     override var unpinnedCatalogs by mutableStateOf(emptyList<CatalogLocal>())
+    override var validUnpinnedCatalogs = derivedStateOf { unpinnedCatalogs.filter { it.source != null  }}
     override var remoteCatalogs by mutableStateOf(emptyList<CatalogRemote>())
     override var languageChoices by mutableStateOf(emptyList<LanguageChoice>())
     override var selectedLanguage by mutableStateOf<LanguageChoice>(LanguageChoice.All)
     override var installSteps by mutableStateOf(emptyMap<String, InstallStep>())
     override var isRefreshing by mutableStateOf(false)
     override var searchQuery by mutableStateOf<String?>(null)
-    override var mappedCatalogs: State<Map<String, List<CatalogLocal>>> = derivedStateOf { unpinnedCatalogs.groupBy { it.source.lang } }
+    override var mappedCatalogs: State<Map<String, List<CatalogLocal>>> = derivedStateOf { unpinnedCatalogs.groupBy { it.source?.lang?:"" } }
+    override var validMappedCatalogs: State<Map<String, List<CatalogLocal>>> = derivedStateOf { unpinnedCatalogs.filter {  it.source != null  }.groupBy { it.source?.lang?:"" } }
 
     var allPinnedCatalogs by mutableStateOf(
         emptyList<CatalogLocal>(),

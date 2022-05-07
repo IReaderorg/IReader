@@ -59,7 +59,7 @@ fun CatalogItem(
     }
     val lang = when (catalog) {
         is CatalogBundled -> null
-        is CatalogInstalled -> catalog.source.lang
+        is CatalogInstalled -> catalog.source?.lang
         is CatalogRemote -> catalog.lang
     }?.let { Language(it) }
 

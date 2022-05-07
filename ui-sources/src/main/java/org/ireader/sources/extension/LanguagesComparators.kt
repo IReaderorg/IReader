@@ -28,7 +28,7 @@ class InstalledLanguagesComparator(
 ) : Comparator<Language> {
 
     private val preferredLanguages = localCatalogs
-        .groupBy { it.source.lang }
+        .groupBy { it.source?.lang }
         .mapValues { it.value.size }
 
     override fun compare(a: Language, b: Language): Int {

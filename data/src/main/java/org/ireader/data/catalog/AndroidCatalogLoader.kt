@@ -20,6 +20,7 @@ import org.ireader.core_api.source.Dependencies
 import org.ireader.core_api.source.Source
 import org.ireader.core_api.source.TestSource
 import org.ireader.core_catalogs.service.CatalogLoader
+import org.ireader.data.R
 import java.io.File
 
 /**
@@ -147,10 +148,10 @@ class AndroidCatalogLoader(
     ): org.ireader.common_models.entities.CatalogInstalled.SystemWide? {
         val data = validateMetadata(pkgName, pkgInfo) ?: return null
         val loader = PathClassLoader(pkgInfo.applicationInfo.sourceDir, null, context.classLoader)
-        val source = loadSource(pkgName, loader, data) ?: return null
+        val source = loadSource(pkgName, loader, data)
 
         return org.ireader.common_models.entities.CatalogInstalled.SystemWide(
-            name = source.name,
+            name = source?.name?:context.resources.getString(R.string.unknown),
             description = data.description,
             source = source,
             pkgName = pkgName,

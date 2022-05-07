@@ -30,17 +30,17 @@ sealed class Catalog {
 }
 
 sealed class CatalogLocal : Catalog() {
-    abstract val source: Source
-    override val sourceId get() = source.id
+    abstract val source: Source?
+    override val sourceId get() = source?.id?:-1L
     abstract val nsfw: Boolean
     abstract val isPinned: Boolean
     open val hasUpdate: Boolean = false
 }
 
 data class CatalogBundled(
-    override val source: Source,
+    override val source: Source?,
     override val description: String = "",
-    override val name: String = source.name,
+    override val name: String = source?.name?:"UNKNOWN",
     override val nsfw: Boolean = false,
     override val isPinned: Boolean = false,
 ) : CatalogLocal()
@@ -53,7 +53,7 @@ sealed class CatalogInstalled : CatalogLocal() {
     data class SystemWide(
         override val name: String,
         override val description: String,
-        override val source: Source,
+        override val source: Source?,
         override val pkgName: String,
         override val versionName: String,
         override val versionCode: Int,

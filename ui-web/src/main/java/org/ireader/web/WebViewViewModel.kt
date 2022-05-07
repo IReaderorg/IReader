@@ -128,9 +128,14 @@ class WebViewPageModel @Inject constructor(
                     showSnackBar(UiText.DynamicString("Failed"))
                 },
                 onSuccess = {
-                    webChapter = it
-                    insertChapter(it)
-                    showSnackBar(UiText.DynamicString("Success"))
+                    if (it.content.isNotEmpty()) {
+                        webChapter = it
+                        insertChapter(it)
+                        showSnackBar(UiText.DynamicString("Success"))
+                    } else {
+                        showSnackBar(UiText.DynamicString("Failed"))
+                    }
+
                 },
                 commands = listOf(Command.Content.Fetch(url = url, pageSource))
             )
@@ -184,9 +189,14 @@ class WebViewPageModel @Inject constructor(
                     showSnackBar(UiText.DynamicString("Failed"))
                 },
                 onSuccess = {
-                    webBook = it
-                    insertBook(it.copy(favorite = true))
-                    showSnackBar(UiText.DynamicString("Success"))
+                    if (!book?.title.isNullOrBlank()) {
+                        webBook = it
+                        insertBook(it.copy(favorite = true))
+                        showSnackBar(UiText.DynamicString("Success"))
+                    } else {
+                        showSnackBar(UiText.DynamicString("Failed"))
+                    }
+
                 },
                 commands = listOf(Command.Detail.Fetch(url = url, pageSource))
             )

@@ -47,7 +47,7 @@ class ExploreViewModel @Inject constructor(
         val sourceId = savedStateHandle.get<Long>("sourceId")
         val query = savedStateHandle.get<String>("query")
         val source =
-            catalogStore.catalogs.find { it.source.id == sourceId }?.source
+            catalogStore.catalogs.find { it.source?.id == sourceId }?.source
         loadBooks()
 
         if (sourceId != null && source is CatalogSource) {

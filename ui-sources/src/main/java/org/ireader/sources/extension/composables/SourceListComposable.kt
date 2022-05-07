@@ -74,5 +74,5 @@ fun SourceListComposable(
 }
 
 fun iconFinder(source: CatalogLocal): String {
-    return "https://github.com/kazemcodes/IReader-Sources/tree/main/src/${source.source.lang}/${source.name}/icon.png"
+    return "https://github.com/kazemcodes/IReader-Sources/tree/main/src/${source.source?.lang}/${source.name}/icon.png"
 }

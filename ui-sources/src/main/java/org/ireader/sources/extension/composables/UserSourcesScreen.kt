@@ -33,14 +33,14 @@ fun UserSourcesScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         kotlin.runCatching {
-            if (state.pinnedCatalogs.isNotEmpty()) {
+            if (state.validPinnedCatalogs.value.isNotEmpty()) {
                 item {
                     TextSection(
                         text = "Pinned",
                     )
                 }
-                items(state.pinnedCatalogs.size) { index ->
-                    val catalog = state.pinnedCatalogs[index]
+                items(state.validPinnedCatalogs.value.size) { index ->
+                    val catalog = state.validPinnedCatalogs.value[index]
                     CatalogItem(
                         catalog = catalog,
                         installStep = if (catalog is CatalogInstalled) state.installSteps[catalog.pkgName] else null,
@@ -50,8 +50,8 @@ fun UserSourcesScreen(
                 }
             }
 
-            if (state.unpinnedCatalogs.isNotEmpty()) {
-                state.mappedCatalogs.value.forEach { (lang, catalogs) ->
+            if (state.validUnpinnedCatalogs.value.isNotEmpty()) {
+                state.validMappedCatalogs.value.forEach { (lang, catalogs) ->
                     item {
                         TextSection(
                             text = lang,

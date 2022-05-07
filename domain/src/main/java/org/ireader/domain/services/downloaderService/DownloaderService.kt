@@ -84,7 +84,7 @@ class DownloaderService @AssistedInject constructor(
                 val books = bookRepo.findBookByIds(distinctBookIds)
                 val distinctSources = books.map { it.sourceId }.distinct()
                 val sources =
-                    extensions.catalogs.map { it.source }.filter { it.id in distinctSources }
+                    extensions.catalogs.map { it.source }.filter { it?.id in distinctSources }
 
                 val mappedChapters =
                     chapters.filter { it.content.joinToString().length < 10 }.map { chapter ->
@@ -107,7 +107,7 @@ class DownloaderService @AssistedInject constructor(
                 downloadServiceState.isEnable = true
                 downloads.forEachIndexed { index, download ->
                     chapters.find { it.id == download.chapterId }?.let { chapter ->
-                        sources.find { it.id == download.sourceId }?.let { source ->
+                        sources.find { it?.id == download.sourceId }?.let { source ->
                             if (chapter.content.joinToString().length < 10) {
                                 remoteUseCases.getRemoteReadingContent(
                                     chapter = chapter,
