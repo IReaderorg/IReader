@@ -59,8 +59,8 @@ class UpdatesViewModel @Inject constructor(
 
     fun downloadChapter(update: UpdateWithInfo) {
         viewModelScope.launchIO {
-            val source = getLocalCatalog.get(update.sourceId)?.source
-            if (source != null) {
+            val catalog = getLocalCatalog.get(update.sourceId)
+            if (catalog != null) {
                 remoteUseCases.getRemoteReadingContent(
                     chapter = Chapter(
                         id = update.chapterId,
@@ -70,7 +70,7 @@ class UpdatesViewModel @Inject constructor(
                         read = update.read,
                         number = update.number,
                     ),
-                    source = source,
+                    catalog = catalog,
                     onSuccess = {
                     },
                     onError = {

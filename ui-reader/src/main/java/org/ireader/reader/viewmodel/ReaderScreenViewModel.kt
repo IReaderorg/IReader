@@ -11,13 +11,10 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
 import org.ireader.common_extensions.async.nextAfter
 import org.ireader.common_extensions.async.prevBefore
-import org.ireader.common_extensions.currentTimeToLong
 import org.ireader.common_extensions.findComponentActivity
 import org.ireader.common_models.entities.Chapter
-import org.ireader.common_models.entities.History
 import org.ireader.common_resources.LAST_CHAPTER
 import org.ireader.common_resources.NO_VALUE
 import org.ireader.common_resources.UiText
@@ -56,9 +53,9 @@ class ReaderScreenViewModel @Inject constructor(
         val bookId = savedStateHandle.get<Long>(NavigationArgs.bookId.name)
 
         if (bookId != null && chapterId != null && sourceId != null) {
-            val source = getLocalCatalog.get(sourceId)?.source
+            val source = getLocalCatalog.get(sourceId)
             if (source != null) {
-                state.source = source
+                state.catalog = source
                 subscribeChapters(bookId)
                 viewModelScope.launch {
                     state.book = getBookUseCases.findBookById(bookId)
@@ -97,9 +94,9 @@ class ReaderScreenViewModel @Inject constructor(
             val chapter = getChapterUseCase.findChapterById(chapterId)
             stateChapter = chapter
             if (chapter?.isEmpty() == true) {
-                state.source?.let { source -> getRemoteChapter(chapter, source) }
+                state.source?.let { source -> getRemoteChapter(chapter) }
             }
-            stateChapter?.let { ch -> updateLastReadTime(ch) }
+            stateChapter?.let { ch -> getChapterUseCase.updateLastReadTime(ch) }
             val index = stateChapters.indexOfFirst { it.id == chapter?.id }
             if (index != -1) {
                 currentChapterIndex = index
@@ -113,11 +110,11 @@ class ReaderScreenViewModel @Inject constructor(
 
     private suspend fun getRemoteChapter(
         chapter: Chapter,
-        source: org.ireader.core_api.source.Source
     ) {
+        val catalog = catalog
         remoteUseCases.getRemoteReadingContent(
             chapter,
-            source,
+            catalog,
             onSuccess = { result ->
                 state.stateChapter = result
             },
@@ -142,23 +139,6 @@ class ReaderScreenViewModel @Inject constructor(
         }
     }
 
-    private fun updateLastReadTime(chapter: Chapter) {
-        viewModelScope.launch(Dispatchers.IO) {
-            insertUseCases.insertChapter(
-                chapter = chapter.copy(
-                    read = true,
-                    readAt = Clock.System.now().toEpochMilliseconds()
-                )
-            )
-            historyUseCase.insertHistory(
-                History(
-                    bookId = chapter.bookId,
-                    chapterId = chapter.id,
-                    readAt = currentTimeToLong()
-                )
-            )
-        }
-    }
 
     var getContentJob: Job? = null
     var getChapterJob: Job? = null

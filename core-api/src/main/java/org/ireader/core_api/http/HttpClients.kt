@@ -7,7 +7,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.BrowserUserAgent
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.cookies.ConstantCookiesStorage
+import io.ktor.client.plugins.cookies.CookiesStorage
 import io.ktor.client.plugins.cookies.HttpCookies
 import io.ktor.serialization.gson.gson
 import okhttp3.Cache
@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit
 class HttpClients(
     context: Application,
     browseEngine: BrowseEngine,
-    constantCookiesStorage:ConstantCookiesStorage
+    cookiesStorage: CookiesStorage
 ) {
 
     private val cache = run {
@@ -29,7 +29,7 @@ class HttpClients(
 
 
 
-    private val cookieJar = AndroidCookieJar(constantCookiesStorage)
+    private val cookieJar = WebViewCookieJar(cookiesStorage)
 
     private val okhttpClient = OkHttpClient.Builder()
         .cache(cache)
@@ -50,7 +50,7 @@ class HttpClients(
             gson()
         }
         install(HttpCookies) {
-            storage = constantCookiesStorage
+            storage = cookiesStorage
         }
     }
 }

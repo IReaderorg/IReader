@@ -26,14 +26,12 @@ import org.ireader.components.list.scrollbars.LazyColumnScrollbar
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.components.text_related.ErrorTextWithEmojis
-import org.ireader.core_api.source.Source
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun ReaderScreenDrawer(
     modifier: Modifier = Modifier,
     chapter: Chapter?,
-    source: Source,
     onChapter: (chapter: Chapter) -> Unit,
     chapters: List<Chapter>,
     onReverseIcon: () -> Unit,

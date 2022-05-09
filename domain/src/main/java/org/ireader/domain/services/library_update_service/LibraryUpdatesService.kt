@@ -73,7 +73,7 @@ class LibraryUpdatesService @AssistedInject constructor(
             try {
                 libraryBooks.forEachIndexed { index, book ->
                     val chapters = getChapterUseCase.findChaptersByBookId(bookId = book.id)
-                    val source = getLocalCatalog.get(book.sourceId)!!.source
+                    val source = getLocalCatalog.get(book.sourceId)
                     if (source != null) {
                         val remoteChapters = mutableListOf<Chapter>()
                         remoteUseCases.getRemoteChapters(

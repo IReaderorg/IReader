@@ -14,6 +14,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import org.ireader.common_extensions.findComponentActivity
 import org.ireader.common_models.entities.Chapter
+import org.ireader.core_api.log.Log
 import org.ireader.core_catalogs.interactor.GetLocalCatalog
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.services.tts_service.Player
@@ -27,6 +28,7 @@ import org.ireader.domain.use_cases.preferences.reader_preferences.ReaderPrefUse
 import org.ireader.domain.use_cases.preferences.reader_preferences.TextReaderPrefUseCase
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import org.ireader.domain.use_cases.services.ServiceUseCases
+import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
@@ -62,7 +64,7 @@ class TTSViewModel @Inject constructor(
 
         if (sourceId != null && chapterId != null && bookId != null) {
             this.chapterId = chapterId
-            ttsSource = getLocalCatalog.get(sourceId = sourceId)?.source
+            ttsCatalog = getLocalCatalog.get(sourceId = sourceId)
             viewModelScope.launch {
                 val book = getBookUseCases.findBookById(bookId)
                 ttsBook = book
@@ -91,39 +93,44 @@ class TTSViewModel @Inject constructor(
     }
 
     var controller: MediaControllerCompat? = null
-    private val ctrlCallback = TTSController()
-    private lateinit var textReader: TextToSpeech
+    private var ctrlCallback: TTSController? = null
+    private var textReader: TextToSpeech? = null
     fun initMedia(context: Context) {
-        browser = MediaBrowserCompat(
-            context,
-            ComponentName(context, TTSService::class.java),
-            connCallback(context),
-            null
-        )
-        browser.connect()
-        textReader = TextToSpeech(context) { status ->
-            if (status == TextToSpeech.SUCCESS) {
-                this.
-                ttsState.languages = textReader.availableLanguages.toList()
-                ttsState.voices = textReader.voices.toList()
-            }
-
+        if (browser == null) {
+            browser = MediaBrowserCompat(
+                context,
+                ComponentName(context, TTSService::class.java),
+                connCallback(context),
+                null
+            )
+        }
+        if (!isServiceConnected) {
+            browser?.connect()
         }
 
+        if (textReader == null) {
+            textReader = TextToSpeech(context) { status ->
+                if (status == TextToSpeech.SUCCESS) {
+                    ttsState.languages = textReader?.availableLanguages?.toList() ?: emptyList()
+                    ttsState.voices = textReader?.voices?.toList() ?: emptyList()
+                }
+
+            }
+        }
     }
 
-
     override fun onDestroy() {
-        browser.disconnect()
-        textReader.shutdown()
+        browser?.disconnect()
+        textReader?.shutdown()
         super.onDestroy()
     }
 
-    lateinit var browser: MediaBrowserCompat
+    var browser: MediaBrowserCompat? = null
     private fun connCallback(context: Context) = object : MediaBrowserCompat.ConnectionCallback() {
         override fun onConnected() {
+
             isServiceConnected = true
-            browser.sessionToken.also { token ->
+            browser?.sessionToken?.also { token ->
                 controller = MediaControllerCompat(context, token)
                 context.findComponentActivity()?.let { activity ->
                     MediaControllerCompat.setMediaController(
@@ -136,16 +143,28 @@ class TTSViewModel @Inject constructor(
         }
 
         override fun onConnectionSuspended() {
+            Log.error { "onConnectionSuspended" }
             isServiceConnected = false
-            controller?.unregisterCallback(ctrlCallback)
+            ctrlCallback?.let { controller?.unregisterCallback(it) }
             controller = null
+            browser = null
+            textReader = null
+        }
+
+        override fun onConnectionFailed() {
+            isServiceConnected = false
+            Log.error { "onConnectionFailed" }
+            super.onConnectionFailed()
         }
     }
 
     fun initController() {
-        controller?.registerCallback(ctrlCallback)
-        ctrlCallback.onMetadataChanged(controller?.metadata)
-        ctrlCallback.onPlaybackStateChanged(controller?.playbackState)
+        ctrlCallback = TTSController()
+        ctrlCallback?.let { ctrlCallback ->
+            controller?.registerCallback(ctrlCallback)
+            ctrlCallback.onMetadataChanged(controller?.metadata)
+            ctrlCallback.onPlaybackStateChanged(controller?.playbackState)
+        }
     }
 
     private inner class TTSController : MediaControllerCompat.Callback() {
@@ -213,7 +232,7 @@ class TTSViewModel @Inject constructor(
             val chapter = getChapterUseCase.findChapterById(chapterId)
             ttsChapter = chapter
             if (chapter?.isEmpty() == true) {
-                ttsSource?.let { source -> getRemoteChapter(chapter, source) }
+                ttsSource?.let { source -> getRemoteChapter(chapter) }
             }
             runTTSService(Player.PAUSE)
         }
@@ -231,11 +250,11 @@ class TTSViewModel @Inject constructor(
 
     private suspend fun getRemoteChapter(
         chapter: Chapter,
-        source: org.ireader.core_api.source.Source
     ) {
+        val catalog = ttsState.ttsCatalog
         remoteUseCases.getRemoteReadingContent(
             chapter,
-            source,
+            catalog,
             onSuccess = { result ->
                 ttsChapter = result
             },
@@ -245,3 +264,12 @@ class TTSViewModel @Inject constructor(
         )
     }
 }
+
+data class Voice(
+    val name: String,
+    val locale: Locale,
+    val quality: Int,
+    val latency: Int,
+    val requiresNetworkConnection: Boolean,
+    val features: Set<String>,
+)

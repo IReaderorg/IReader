@@ -12,7 +12,8 @@ suspend fun HttpResponse.asJsoup(html: String? = null): Document {
 
     return Jsoup.parse(html ?: this.bodyAsText(), request.url.toString())
 }
-suspend fun String.asJsoup(html: String? = null): Document {
+
+fun String.asJsoup(html: String? = null): Document {
 
     return Jsoup.parse(html ?: this)
 }

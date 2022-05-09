@@ -47,6 +47,7 @@ import org.ireader.domain.use_cases.local.chapter_usecases.FindLastReadChapter
 import org.ireader.domain.use_cases.local.chapter_usecases.SubscribeChapterById
 import org.ireader.domain.use_cases.local.chapter_usecases.SubscribeChaptersByBookId
 import org.ireader.domain.use_cases.local.chapter_usecases.SubscribeLastReadChapter
+import org.ireader.domain.use_cases.local.chapter_usecases.UpdateLastReadTime
 import org.ireader.domain.use_cases.local.delete_usecases.book.DeleteAllBooks
 import org.ireader.domain.use_cases.local.delete_usecases.book.DeleteAllExploreBook
 import org.ireader.domain.use_cases.local.delete_usecases.book.DeleteBookAndChapterByBookIds
@@ -163,7 +164,9 @@ class UseCasesInject {
     @Provides
     @Singleton
     fun provideLocalChapterUseCase(
-        localChapterRepository: org.ireader.common_data.repository.LocalChapterRepository
+        localChapterRepository: org.ireader.common_data.repository.LocalChapterRepository,
+        historyUseCase: HistoryUseCase,
+        insertUseCases: LocalInsertUseCases
     ): LocalGetChapterUseCase {
         return LocalGetChapterUseCase(
             findAllInLibraryChapters = FindAllInLibraryChapters(localChapterRepository),
@@ -176,7 +179,8 @@ class UseCasesInject {
             findLastReadChapter = FindLastReadChapter(localChapterRepository),
             subscribeChapterById = SubscribeChapterById(localChapterRepository),
             subscribeChaptersByBookId = SubscribeChaptersByBookId(localChapterRepository),
-            subscribeLastReadChapter = SubscribeLastReadChapter(localChapterRepository)
+            subscribeLastReadChapter = SubscribeLastReadChapter(localChapterRepository),
+            updateLastReadTime = UpdateLastReadTime(insertUseCases = insertUseCases, historyUseCase = historyUseCase)
         )
     }
     @Provides

@@ -1,11 +1,17 @@
 package org.ireader.domain.services.tts_service.media_player
 
 import android.app.PendingIntent
+import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.media.AudioAttributes
+import android.media.AudioFocusRequest
+import android.media.AudioManager
 import android.media.MediaMetadata
 import android.media.MediaPlayer
+import android.os.Build
 import android.os.Bundle
 import android.os.ResultReceiver
 import android.speech.tts.TextToSpeech
@@ -24,11 +30,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
 import org.ireader.common_models.entities.Book
+import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.common_models.entities.Chapter
 import org.ireader.core_api.log.Log
-import org.ireader.core_api.source.Source
 import org.ireader.core_catalogs.CatalogStore
 import org.ireader.core_ui.theme.AppPreferences
 import org.ireader.domain.R
@@ -36,6 +41,7 @@ import org.ireader.domain.notification.Notifications
 import org.ireader.domain.services.tts_service.Player
 import org.ireader.domain.services.tts_service.TTSState
 import org.ireader.domain.services.tts_service.TTSStateImpl
+import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.preferences.reader_preferences.TextReaderPrefUseCase
 import org.ireader.domain.use_cases.remote.RemoteUseCases
@@ -43,13 +49,16 @@ import org.ireader.domain.utils.notificationManager
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class TTSService : MediaBrowserServiceCompat() {
+class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeListener {
 
     @Inject
     lateinit var bookRepo: org.ireader.common_data.repository.LocalBookRepository
 
     @Inject
     lateinit var chapterRepo: org.ireader.common_data.repository.LocalChapterRepository
+
+    @Inject
+    lateinit var chapterUseCase: LocalGetChapterUseCase
 
     @Inject
     lateinit var remoteUseCases: RemoteUseCases
@@ -67,11 +76,17 @@ class TTSService : MediaBrowserServiceCompat() {
     @Inject
     lateinit var textReaderPrefUseCase: TextReaderPrefUseCase
 
+    private val noisyReceiver = NoisyReceiver()
+    private var noisyReceiverHooked = false
+    private val focusLock = Any()
+    private var resumeOnFocus = true
+
     @Inject
     lateinit var appPreferences: AppPreferences
 
     lateinit var mediaSession: MediaSessionCompat
     lateinit var stateBuilder: PlaybackStateCompat.Builder
+    private val metadata = MediaMetadataCompat.Builder()
 
     private lateinit var mediaCallback: TTSSessionCallback
     private lateinit var notificationController: NotificationController
@@ -81,7 +96,8 @@ class TTSService : MediaBrowserServiceCompat() {
 
     private var serviceJob: Job? = null
     private var isPlayerDispose = false
-
+    private var isHooked = false
+    private lateinit var focusRequest: AudioFocusRequest
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     companion object {
@@ -255,10 +271,42 @@ class TTSService : MediaBrowserServiceCompat() {
                 isNotificationForeground = true
             }
         }
+        if (isPlayerDispose) {
+            initPlayer()
+        }
+        if (!noisyReceiverHooked) {
+            registerReceiver(noisyReceiver, IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY))
+            noisyReceiverHooked = true
+        }
+        val am = baseContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        val result = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN).run {
+                setOnAudioFocusChangeListener(this@TTSService)
+                setAudioAttributes(AudioAttributes.Builder().run {
+                    setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                    setUsage(AudioAttributes.USAGE_MEDIA)
+                    build()
+                })
+                build()
+            }
+            am.requestAudioFocus(focusRequest)
+        } else {
+            @Suppress("DEPRECATION")
+            am.requestAudioFocus(
+                this@TTSService,
+                AudioManager.STREAM_MUSIC,
+                AudioManager.AUDIOFOCUS_GAIN
+            )
+        }
     }
 
     fun unhookNotification() {
         stopForeground(true)
+        try {
+
+            unregisterReceiver(noisyReceiver)
+        } catch (e: Exception) {
+        }
         isNotificationForeground = false
     }
 
@@ -307,12 +355,12 @@ class TTSService : MediaBrowserServiceCompat() {
                         val book = bookRepo.findBookById(bookId)
                         val chapter = chapterRepo.findChapterById(chapterId)
                         val chapters = chapterRepo.findChaptersByBookId(bookId)
-                        val source = book?.sourceId?.let { extensions.get(it)?.source }
+                        val source = book?.sourceId?.let { extensions.get(it) }
                         if (chapter != null && source != null) {
                             state.ttsBook = book
                             state.ttsChapter = chapter
                             state.ttsChapters = chapters
-                            state.ttsSource = source
+                            state.ttsCatalog = source
                             state.currentReadingParagraph = 0
                             setBundle(book, chapter)
                             startService(command)
@@ -321,12 +369,34 @@ class TTSService : MediaBrowserServiceCompat() {
                 }
             }
             ACTION_CANCEL -> {
-                this.stopSelf()
+                player.stop()
+                state.utteranceId = ""
+                val am = baseContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    am.abandonAudioFocusRequest(focusRequest)
+                } else {
+                    @Suppress("DEPRECATION")
+                    am.abandonAudioFocus(this@TTSService)
+                }
+
+                Log.error { "Service was cancelled" }
+                unhookNotification()
+                if (isNotificationForeground) {
+                    stopForeground(true)
+                    isNotificationForeground = false
+                }
+                if (noisyReceiverHooked) {
+                    kotlin.runCatching {
+                        unregisterReceiver(noisyReceiver)
+                        noisyReceiverHooked = false
+
+                    }
+                }
+                resumeOnFocus = false
                 notificationController.stop()
-                player.shutdown()
                 isPlayerDispose = true
                 setPlaybackState(PlaybackStateCompat.STATE_NONE)
-                Log.error { "Service was cancelled" }
+                stopSelf()
 
                 return START_STICKY
             }
@@ -340,6 +410,9 @@ class TTSService : MediaBrowserServiceCompat() {
         player.shutdown()
         notificationController.stop()
         unhookNotification()
+        mediaSession.isActive = false
+        mediaSession.release()
+        isPlayerDispose = true
         Log.error { "onDestroy" }
         super.onDestroy()
     }
@@ -354,8 +427,9 @@ class TTSService : MediaBrowserServiceCompat() {
         isLoading: Boolean = false,
         error: Boolean = false
     ) {
-        val data = MediaMetadataCompat.Builder()
+        val data = metadata
             .apply {
+                val lastTrackNumber = state.ttsContent?.value?.lastIndex?.toLong()
                 if (book != null) {
                     putText(NOVEL_TITLE, book.title)
                     putLong(NOVEL_ID, book.id)
@@ -367,17 +441,12 @@ class TTSService : MediaBrowserServiceCompat() {
                 if (chapter != null) {
                     putText(CHAPTER_TITLE, chapter.title)
                     putLong(CHAPTER_ID, chapter.id)
-                    putText(MediaMetadata.METADATA_KEY_TITLE, chapter.title)
+                    putText(MediaMetadata.METADATA_KEY_DISPLAY_TITLE, chapter.title)
                 }
-
                 putLong(IS_LOADING, if (isLoading) 1L else 0L)
-
-
                 putLong(ERROR, if (error) 1L else 0L)
-
                 putLong(PROGRESS, state.currentReadingParagraph.toLong())
-                putLong(LAST_PARAGRAPH, state.ttsContent?.value?.lastIndex?.toLong() ?: 1L)
-
+                putLong(LAST_PARAGRAPH, lastTrackNumber ?: 1L)
             }.build()
         mediaSession.setMetadata(data)
     }
@@ -386,6 +455,9 @@ class TTSService : MediaBrowserServiceCompat() {
 
         override fun onPlay() {
             Log.error { "onPlay" }
+            if (isPlayerDispose) {
+                initPlayer()
+            }
             startService(Player.PLAY)
         }
 
@@ -464,7 +536,7 @@ class TTSService : MediaBrowserServiceCompat() {
         mediaSession.setPlaybackState(
             stateBuilder.setState(
                 state,
-                this.state.currentReadingParagraph.toLong(),
+                this.state.currentReadingParagraph.toLong() * 1000L,
                 0.0f
             ).build()
         )
@@ -490,12 +562,13 @@ class TTSService : MediaBrowserServiceCompat() {
         if (isPlayerDispose) {
             initPlayer()
         }
+        hookNotification()
         serviceJob = scope.launch {
             try {
                 player.let { tts ->
                     mediaSession.let { mediaSession ->
                         state.ttsChapter?.let { chapter ->
-                            state.ttsSource?.let { source ->
+                            state.ttsCatalog?.let { source ->
                                 state.ttsChapters.let { chapters ->
                                     state.ttsBook?.let { book ->
                                         setBundle(book, chapter)
@@ -587,6 +660,7 @@ class TTSService : MediaBrowserServiceCompat() {
                                             }
                                             Player.PLAY -> {
                                                 setPlaybackState(PlaybackStateCompat.STATE_PLAYING)
+                                                hookNotification()
                                                 state.isPlaying = true
                                                 readText(this@TTSService, mediaSession)
                                             }
@@ -735,7 +809,7 @@ class TTSService : MediaBrowserServiceCompat() {
                                             if (autoNextChapter) {
                                                 scope.launch {
                                                     state.ttsChapters.let { chapters ->
-                                                        state.ttsSource?.let { source ->
+                                                        state.ttsCatalog?.let { source ->
                                                             val index =
                                                                 getChapterIndex(
                                                                     chapter,
@@ -800,7 +874,7 @@ class TTSService : MediaBrowserServiceCompat() {
 
     suspend fun getRemoteChapter(
         chapterId: Long,
-        source: Source,
+        source: CatalogLocal,
         ttsState: TTSState,
         onSuccess: suspend () -> Unit,
     ) {
@@ -823,13 +897,7 @@ class TTSService : MediaBrowserServiceCompat() {
                 ttsState.ttsBook?.let { book ->
                     updateNotification()
                 }
-                insertUseCases.insertChapter(
-                    localChapter.copy(
-                        read = true,
-                        readAt = Clock.System.now()
-                            .toEpochMilliseconds(),
-                    )
-                )
+                chapterUseCase.updateLastReadTime(localChapter, updateDateFetched = false)
                 onSuccess()
             } else {
                 if (localChapter != null) {
@@ -839,15 +907,7 @@ class TTSService : MediaBrowserServiceCompat() {
                         onSuccess = { result ->
                             if (result.content.joinToString().length > 1) {
                                 state.ttsChapter = result
-                                insertUseCases.insertChapter(
-                                    result.copy(
-                                        dateFetch = Clock.System.now()
-                                            .toEpochMilliseconds(),
-                                        read = true,
-                                        readAt = Clock.System.now()
-                                            .toEpochMilliseconds(),
-                                    )
-                                )
+                                chapterUseCase.updateLastReadTime(result, updateDateFetched = true)
                                 chapterRepo.findChaptersByBookId(result.bookId).let { res ->
                                     state.ttsChapters = res
                                 }
@@ -885,6 +945,33 @@ class TTSService : MediaBrowserServiceCompat() {
             index
         } else {
             throw Exception("Invalid Id")
+        }
+    }
+
+    private inner class NoisyReceiver : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action == AudioManager.ACTION_AUDIO_BECOMING_NOISY) {
+                resumeOnFocus = false
+                player.stop()
+            }
+        }
+    }
+
+    override fun onAudioFocusChange(focusChange: Int) {
+        Log.debug("TAG", "Focus change $focusChange")
+        when (focusChange) {
+            AudioManager.AUDIOFOCUS_GAIN -> if (resumeOnFocus) {
+                synchronized(focusLock) { resumeOnFocus = false }
+                startService(Player.PLAY)
+            }
+            AudioManager.AUDIOFOCUS_LOSS -> {
+                synchronized(focusLock) { resumeOnFocus = false }
+                player.stop()
+            }
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT, AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
+                synchronized(focusLock) { resumeOnFocus = state.isPlaying }
+                player.stop()
+            }
         }
     }
 }

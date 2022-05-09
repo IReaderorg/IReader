@@ -175,7 +175,6 @@ fun TTSScreen(
                     onReverseIcon = onDrawerReverseIcon,
                     onChapter = onChapter,
                     chapter = vm.ttsChapter,
-                    source = source,
                     chapters = vm.uiChapters.value,
                     drawerScrollState = drawerScrollState,
                     onMap = onMap,

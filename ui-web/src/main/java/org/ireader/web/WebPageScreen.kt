@@ -92,6 +92,7 @@ fun WebPageScreen(
         }
     }
 
+
     LaunchedEffect(key1 = true) {
         viewModel.uiFLow.collectLatest { event ->
             when (event) {

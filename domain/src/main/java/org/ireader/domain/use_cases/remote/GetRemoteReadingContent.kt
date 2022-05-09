@@ -1,10 +1,11 @@
 package org.ireader.domain.use_cases.remote
 
 import org.ireader.common_extensions.async.withIOContext
+import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.common_models.entities.Chapter
 import org.ireader.common_models.entities.toChapterInfo
 import org.ireader.common_resources.UiText
-import org.ireader.core_api.source.Source
+import org.ireader.core.exceptions.SourceNotFoundException
 import org.ireader.core_api.source.model.CommandList
 import org.ireader.core_api.source.model.Text
 import org.ireader.core_ui.exceptionHandler
@@ -14,11 +15,12 @@ import javax.inject.Inject
 class GetRemoteReadingContent @Inject constructor() {
     suspend operator fun invoke(
         chapter: Chapter,
-        source: Source,
+        catalog: CatalogLocal?,
         onError: suspend (message: UiText?) -> Unit,
         onSuccess: suspend (chapter: Chapter) -> Unit,
         commands:CommandList = emptyList()
     ) {
+        val source = catalog?.source ?: throw SourceNotFoundException()
         withIOContext {
             kotlin.runCatching {
                 try {

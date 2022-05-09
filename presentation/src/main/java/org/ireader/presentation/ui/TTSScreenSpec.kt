@@ -96,7 +96,7 @@ object TTSScreenSpec : ScreenSpec {
 
         DisposableEffect(key1 = true) {
             onDispose {
-                vm.browser.disconnect()
+                vm.browser?.disconnect()
             }
         }
 
@@ -108,9 +108,11 @@ object TTSScreenSpec : ScreenSpec {
                 },
                 onPlay = {
                     if (vm.controller?.playbackState?.state == PlaybackStateCompat.STATE_NONE) {
+                        vm.initMedia(context)
+                        vm.initController()
                         vm.runTTSService(Player.PLAY)
                     } else if (vm.controller?.playbackState?.isPlaying == true) {
-                        vm.controller?.transportControls?.stop()
+                        vm.controller?.transportControls?.pause()
                     } else {
                         vm.controller?.transportControls?.play()
                     }

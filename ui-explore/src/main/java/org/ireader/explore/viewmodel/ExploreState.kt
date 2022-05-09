@@ -1,10 +1,12 @@
 package org.ireader.explore.viewmodel
 
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import org.ireader.common_models.LayoutType
 import org.ireader.common_models.entities.BookItem
+import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.common_resources.UiText
 import org.ireader.core_api.source.CatalogSource
 import org.ireader.core_api.source.model.Filter
@@ -18,6 +20,7 @@ interface ExploreState {
     val isSearchModeEnable: Boolean
     var searchQuery: String?
     val source: CatalogSource?
+    val catalog: CatalogLocal?
     val isFilterEnable: Boolean
     var topMenuEnable: Boolean
 
@@ -38,7 +41,11 @@ open class ExploreStateImpl @Inject constructor() : ExploreState {
     override var layout by mutableStateOf<LayoutType>(LayoutType.GridLayout)
     override var isSearchModeEnable by mutableStateOf<Boolean>(false)
     override var searchQuery by mutableStateOf<String?>(null)
-    override var source by mutableStateOf<CatalogSource?>(null)
+    override val source: CatalogSource? by derivedStateOf {
+        val source = catalog?.source
+        if (source is CatalogSource) source else null
+    }
+    override var catalog by mutableStateOf<CatalogLocal?>(null)
     override var isFilterEnable by mutableStateOf<Boolean>(false)
     override var topMenuEnable: Boolean by mutableStateOf<Boolean>(false)
     override var modifiedFilter by mutableStateOf(emptyList<Filter<*>>())

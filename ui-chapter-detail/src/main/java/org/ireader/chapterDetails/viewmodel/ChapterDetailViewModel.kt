@@ -6,9 +6,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import org.ireader.common_resources.UiText
 import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.Chapter
+import org.ireader.common_resources.UiText
 import org.ireader.core.R
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.ui.NavigationArgs
@@ -85,16 +85,16 @@ class ChapterDetailViewModel @Inject constructor(
         )
         viewModelScope.launch(Dispatchers.IO) {
             deleteUseCase.deleteChapters(list)
-            insertUseCases.insertChapters(list)
+            insertUseCases.insertChapters(list.map { it.copy(id = 0) })
         }
     }
 
     fun reverseChapterInDB() {
         toggleAsc()
-        book?.let { getLocalChaptersByPaging(isAsc = isAsc) }
+       // book?.let { getLocalChaptersByPaging(isAsc = isAsc) }
         viewModelScope.launch(Dispatchers.IO) {
             deleteUseCase.deleteChapters(chapters)
-            insertUseCases.insertChapters(chapters.reversed())
+            insertUseCases.insertChapters(chapters.reversed().map { it.copy(id = 0) })
         }
     }
 

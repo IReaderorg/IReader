@@ -11,13 +11,13 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.ktor.client.plugins.cookies.ConstantCookiesStorage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import org.ireader.common_models.entities.Book
+import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.common_models.entities.Chapter
 import org.ireader.common_resources.UiText
 import org.ireader.core_api.source.CatalogSource
@@ -44,7 +44,6 @@ class WebViewPageModel @Inject constructor(
     private val remoteUseCases: RemoteUseCases,
     private val savedStateHandle: SavedStateHandle,
     private val webpageImpl: WebViewPageStateImpl,
-    private val constantCookiesStorage: ConstantCookiesStorage,
 ) : BaseViewModel(), WebViewPageState by webpageImpl {
 
     init {
@@ -62,9 +61,9 @@ class WebViewPageModel @Inject constructor(
         }
         sourceId?.let {
             viewModelScope.launch {
-                extensions.get(sourceId)?.source.let {
+                extensions.get(sourceId)?.let {
                     if (it is CatalogSource) {
-                        source = it
+                        catalog = it
                     }
                 }
             }
@@ -115,22 +114,22 @@ class WebViewPageModel @Inject constructor(
     fun getContentFromWebView(
         chapter: Chapter,
         webView: WebView,
-        source: CatalogSource
     ) {
+        val catalog = catalog
         viewModelScope.launch {
             val pageSource = webView.getHtml()
             val url = webView.url ?: ""
             remoteUseCases.getRemoteReadingContent(
                 chapter,
-                source,
+                catalog,
                 onError = {
                     showSnackBar(it)
                     showSnackBar(UiText.DynamicString("Failed"))
                 },
-                onSuccess = {
-                    if (it.content.isNotEmpty()) {
-                        webChapter = it
-                        insertChapter(it)
+                onSuccess = { result ->
+                    if (result.content.isNotEmpty()) {
+                        webChapter = result
+                        insertChapter(result)
                         showSnackBar(UiText.DynamicString("Success"))
                     } else {
                         showSnackBar(UiText.DynamicString("Failed"))
@@ -147,22 +146,21 @@ class WebViewPageModel @Inject constructor(
     fun getChapters(
         book: Book,
         webView: WebView,
-        source: CatalogSource,
     ) {
         viewModelScope.launch {
             val pageSource = webView.getHtml()
             val url = webView.url ?: ""
             remoteUseCases.getRemoteChapters(
                 book,
-                source,
+                catalog,
                 onError = {
                     showSnackBar(it)
                 },
-                onSuccess = {
-                    webChapters = it
-                    if (it.isNotEmpty()) {
+                onSuccess = { result ->
+                    webChapters = result
+                    if (result.isNotEmpty()) {
                         showSnackBar(UiText.DynamicString("Success"))
-                        insertChapters(it.map { it.copy(bookId = book.id) })
+                        insertChapters(result.map { it.copy(bookId = book.id) })
                     } else {
                         showSnackBar(UiText.DynamicString("Failed"))
                     }
@@ -176,22 +174,21 @@ class WebViewPageModel @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getDetails(
         webView: WebView,
-        source: CatalogSource,
         book: Book? = null,
     ) {
         viewModelScope.launch {
             val pageSource = webView.getHtml()
             val url = webView.originalUrl ?: ""
             remoteUseCases.getBookDetail(
-                book ?: Book(link = "", title = "", sourceId = source.id),
-                source,
+                book ?: Book(link = "", title = "", sourceId = source?.id?:0),
+                catalog,
                 onError = {
                     showSnackBar(UiText.DynamicString("Failed"))
                 },
-                onSuccess = {
-                    if (!book?.title.isNullOrBlank()) {
-                        webBook = it
-                        insertBook(it.copy(favorite = true))
+                onSuccess = { result ->
+                    if (result.title.isNotBlank()) {
+                        webBook = result
+                        insertBook(result.copy(favorite = true))
                         showSnackBar(UiText.DynamicString("Success"))
                     } else {
                         showSnackBar(UiText.DynamicString("Failed"))
@@ -237,7 +234,8 @@ interface WebViewPageState {
     var webUrl: String
     var isLoading: Boolean
 
-    var source: CatalogSource?
+    val source: CatalogSource?
+    var catalog: CatalogLocal?
 
     var bookId: Long?
     var bookTitle: String
@@ -258,7 +256,11 @@ open class WebViewPageStateImpl @Inject constructor() : WebViewPageState {
 
     override var isLoading: Boolean by mutableStateOf(false)
 
-    override var source: CatalogSource? by mutableStateOf(null)
+    override val source: CatalogSource? by derivedStateOf {
+        val source = catalog?.source
+        if (source is CatalogSource) source else null
+    }
+    override var catalog: CatalogLocal? by mutableStateOf(null)
 
     override var bookId: Long? by mutableStateOf(null)
     override var bookTitle: String by mutableStateOf("")

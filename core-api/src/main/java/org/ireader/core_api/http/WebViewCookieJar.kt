@@ -1,7 +1,7 @@
 package org.ireader.core_api.http
 
 import android.webkit.CookieManager
-import io.ktor.client.plugins.cookies.ConstantCookiesStorage
+import io.ktor.client.plugins.cookies.CookiesStorage
 import io.ktor.http.Url
 import io.ktor.util.date.GMTDate
 import kotlinx.coroutines.CoroutineScope
@@ -13,16 +13,24 @@ import okhttp3.CookieJar
 import okhttp3.HttpUrl
 import java.util.Calendar
 
-class WebViewCookieJar(private val cookiesStorage: ConstantCookiesStorage) : CookieJar {
+class WebViewCookieJar(private val cookiesStorage: CookiesStorage) : CookieJar {
 
     private val manager = CookieManager.getInstance()
 
     override fun loadForRequest(url: HttpUrl): List<Cookie> {
         return get(url)
     }
+    private fun convertGoogleTranslationUrlToDecoded(url:String) :String {
+        return if (url.contains(".translate.goog",true)) {
+            url.substringBefore(".translate.goog").replace("-",".")
+        } else {
+            url
+        }
+    }
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {
-        val urlString = url.toString()
+
+        val urlString = convertGoogleTranslationUrlToDecoded(url.host)
         cookies.forEach { manager.setCookie(urlString, it.toString()) }
         scope.launch {
             cookies.forEach {  cookiesStorage.addCookie(Url(urlString),it.toCookies()) }
@@ -62,7 +70,7 @@ class WebViewCookieJar(private val cookiesStorage: ConstantCookiesStorage) : Coo
     }
 }
 
-class AndroidCookieJar(private val cookiesStorage: ConstantCookiesStorage) : CookieJar {
+class AndroidCookieJar(private val cookiesStorage: CookiesStorage) : CookieJar {
 
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val manager = CookieManager.getInstance()

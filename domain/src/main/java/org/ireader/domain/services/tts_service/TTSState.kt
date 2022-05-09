@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import org.ireader.common_models.entities.Book
+import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.common_models.entities.Chapter
 import org.ireader.core_api.source.Source
 import org.ireader.core_ui.theme.FontType
@@ -36,7 +37,8 @@ interface TTSState {
     var prevSpeechSpeed: Float
     var ttsBook: Book?
     var ttsChapter: Chapter?
-    var ttsSource: Source?
+    val ttsSource: Source?
+    var ttsCatalog: CatalogLocal?
     var ttsChapters: List<Chapter>
     var ttsCurrentChapterIndex: Int
     var font: FontType
@@ -77,7 +79,8 @@ class TTSStateImpl @Inject constructor() : TTSState {
     override var speechSpeed by mutableStateOf<Float>(.8f)
     override var prevSpeechSpeed by mutableStateOf<Float>(.8f)
     override var ttsBook by mutableStateOf<Book?>(null)
-    override var ttsSource by mutableStateOf<Source?>(null)
+    override val ttsSource by derivedStateOf { ttsCatalog?.source }
+    override var ttsCatalog: CatalogLocal? by mutableStateOf<CatalogLocal?>(null)
     override var ttsChapter by mutableStateOf<Chapter?>(null)
     override var ttsChapters by mutableStateOf<List<Chapter>>(emptyList())
     override var ttsCurrentChapterIndex by mutableStateOf<Int>(-1)

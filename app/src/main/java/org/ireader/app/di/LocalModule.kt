@@ -6,9 +6,10 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import io.ktor.client.plugins.cookies.ConstantCookiesStorage
+import io.ktor.client.plugins.cookies.CookiesStorage
 import okio.FileSystem
 import okio.Path.Companion.toOkioPath
+import org.ireader.core_api.http.AcceptAllCookiesStorage
 import org.ireader.core_api.prefs.AndroidPreferenceStore
 import org.ireader.core_api.prefs.PreferenceStore
 import org.ireader.image_loader.LibraryCovers
@@ -37,7 +38,7 @@ class LocalModule {
 
     @Provides
     @Singleton
-    fun provideCookieJar(): ConstantCookiesStorage {
-        return ConstantCookiesStorage()
+    fun provideCookieJar(): CookiesStorage {
+        return AcceptAllCookiesStorage()
     }
 }

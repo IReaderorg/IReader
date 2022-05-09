@@ -16,7 +16,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.ireader.common_models.entities.Chapter
 import org.ireader.components.reusable_composable.AppIconButton
-import org.ireader.core_api.source.Source
 
 @Composable
 fun MainBottomSettingComposable(
@@ -27,7 +26,6 @@ fun MainBottomSettingComposable(
     chapters: List<Chapter>,
     chapter: Chapter,
     currentChapterIndex: Int,
-    source: Source,
     onSetting: () -> Unit,
     onNext: () -> Unit,
     onPrev: () -> Unit,

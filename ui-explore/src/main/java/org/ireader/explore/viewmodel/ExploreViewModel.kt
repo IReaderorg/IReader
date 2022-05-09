@@ -18,7 +18,6 @@ import org.ireader.common_resources.UiText
 import org.ireader.core.DefaultPaginator
 import org.ireader.core.exceptions.SourceNotFoundException
 import org.ireader.core_api.log.Log
-import org.ireader.core_api.source.CatalogSource
 import org.ireader.core_api.source.model.Filter
 import org.ireader.core_api.source.model.MangasPageInfo
 import org.ireader.core_catalogs.CatalogStore
@@ -46,12 +45,13 @@ class ExploreViewModel @Inject constructor(
     init {
         val sourceId = savedStateHandle.get<Long>("sourceId")
         val query = savedStateHandle.get<String>("query")
-        val source =
-            catalogStore.catalogs.find { it.source?.id == sourceId }?.source
+        val catalog =
+            catalogStore.catalogs.find { it.source?.id == sourceId }
         loadBooks()
 
-        if (sourceId != null && source is CatalogSource) {
-            state.source = source
+            state.catalog = catalog
+        val source = state.source
+        if (sourceId != null && source != null) {
             if (!query.isNullOrBlank()) {
                 toggleSearchMode(true)
                 searchQuery = query
@@ -113,7 +113,7 @@ class ExploreViewModel @Inject constructor(
                             val query = searchQuery
                             val filters = stateFilters
                             val listing = stateListing
-                            val source = source
+                            val source = catalog
                             if (source != null) {
                                 var result = MangasPageInfo(emptyList(), false)
                                 remoteUseCases.getRemoteBooks(

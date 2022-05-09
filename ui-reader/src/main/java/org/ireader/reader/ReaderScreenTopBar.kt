@@ -34,7 +34,6 @@ import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.AppTextField
 import org.ireader.components.reusable_composable.TopAppBarBackButton
-import org.ireader.core_api.source.Source
 import org.ireader.reader.viewmodel.ReaderScreenPreferencesState
 import org.ireader.reader.viewmodel.ReaderScreenState
 
@@ -48,7 +47,6 @@ fun ReaderScreenTopBar(
     modalBottomSheetValue: ModalBottomSheetValue,
     chapter: Chapter?,
     onRefresh: () -> Unit,
-    source: Source,
     onWebView: () -> Unit,
     onBookMark: () -> Unit,
     scrollState: LazyListState,

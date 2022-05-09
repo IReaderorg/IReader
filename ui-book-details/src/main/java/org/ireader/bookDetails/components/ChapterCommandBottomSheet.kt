@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,6 +23,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.ireader.components.reusable_composable.DropDownMenu
 import org.ireader.components.reusable_composable.MidSizeTextComposable
@@ -100,7 +103,13 @@ fun ChapterCommandBottomSheet(
                     )
                 }
                 is Command.Chapter.Note -> {
-                    MidSizeTextComposable(text = command.name)
+                    Text(
+                        text = command.name,
+                        fontWeight = FontWeight.W400,
+                        color = MaterialTheme.colors.onSurface.copy(.8f),
+                        textAlign = TextAlign.Justify,
+                        style = MaterialTheme.typography.h6,
+                    )
                 }
                 else -> {}
             }

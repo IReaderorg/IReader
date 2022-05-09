@@ -31,7 +31,6 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.ireader.common_models.entities.Chapter
 import org.ireader.components.components.ISnackBarHost
-import org.ireader.core_api.source.Source
 import org.ireader.core_ui.ui.TextAlign
 import org.ireader.reader.components.MainBottomSettingComposable
 import org.ireader.reader.components.ReaderSettingMainLayout
@@ -48,7 +47,6 @@ import org.ireader.reader.viewmodel.ReaderScreenState
 fun ReadingScreen(
     modifier: Modifier = Modifier,
     vm: ReaderScreenState,
-    source: Source,
     scrollState: LazyListState,
     drawerScrollState: LazyListState,
     swipeState: SwipeRefreshState,
@@ -83,16 +81,15 @@ fun ReadingScreen(
     onMap: (LazyListState) -> Unit,
     onPopBackStack: () -> Unit,
     readerScreenPreferencesState: ReaderScreenPreferencesState,
-    toggleReaderMode:() -> Unit,
+    toggleReaderMode: () -> Unit,
     onDismiss: () -> Unit,
-    onBackgroundValueChange:(String) -> Unit,
-    onTextColorValueChange:(String) -> Unit,
-    onBackgroundColorAndTextColorApply:(bgColor:String,txtColor:String) -> Unit,
+    onBackgroundValueChange: (String) -> Unit,
+    onTextColorValueChange: (String) -> Unit,
+    onBackgroundColorAndTextColorApply: (bgColor: String, txtColor: String) -> Unit,
     scaffoldState: ScaffoldState,
-    onShowScrollIndicator : (Boolean) -> Unit,
+    onShowScrollIndicator: (Boolean) -> Unit,
     onTextAlign: (TextAlign) -> Unit
 ) {
-
 
     val modalState =
         rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
@@ -101,16 +98,16 @@ fun ReadingScreen(
 
     LaunchedEffect(key1 = scaffoldState.drawerState.targetValue) {
         if (chapter != null && scaffoldState.drawerState.targetValue == DrawerValue.Open && vm.stateChapters.isNotEmpty()) {
-                val index = vm.stateChapters.indexOfFirst { it.id == chapter.id }
-                if (index != -1) {
-                    scope.launch {
-                        drawerScrollState.scrollToItem(
-                            index,
-                            -drawerScrollState.layoutInfo.viewportEndOffset / 2
-                        )
-                    }
+            val index = vm.stateChapters.indexOfFirst { it.id == chapter.id }
+            if (index != -1) {
+                scope.launch {
+                    drawerScrollState.scrollToItem(
+                        index,
+                        -drawerScrollState.layoutInfo.viewportEndOffset / 2
+                    )
                 }
             }
+        }
     }
 
     LaunchedEffect(key1 = modalState.currentValue) {
@@ -149,7 +146,6 @@ fun ReadingScreen(
                 onRefresh = {
                     onReaderRefresh(chapter)
                 },
-                source = source,
                 chapter = chapter,
                 onWebView = {
                     onReaderWebView(modalState)
@@ -190,7 +186,6 @@ fun ReadingScreen(
                                     chapters = vm.stateChapters,
                                     currentChapterIndex = vm.currentChapterIndex,
                                     onSetting = onReaderBottomOnSetting,
-                                    source = source,
                                     onNext = onNext,
                                     onPrev = {
                                         onPrev(false)
@@ -202,7 +197,7 @@ fun ReadingScreen(
                             }
                             if (vm.isSettingModeEnable) {
                                 ReaderSettingMainLayout(
-                                                                        onFontSelected = onFontSelected,
+                                    onFontSelected = onFontSelected,
                                     onAutoscrollIntervalIncrease = onAutoscrollIntervalIncrease,
                                     onAutoscrollOffsetIncrease = onAutoscrollOffsetIncrease,
                                     onFontSizeIncrease = onFontSizeIncrease,
@@ -260,7 +255,6 @@ fun ReadingScreen(
                 },
                 onChapter = onChapter,
                 chapter = chapter,
-                source = source,
                 chapters = vm.drawerChapters.value,
                 drawerScrollState = drawerScrollState,
                 onMap = onMap,
@@ -276,7 +270,9 @@ fun ReadingScreen(
             onBackgroundColorAndTextColorApply = onBackgroundColorAndTextColorApply,
         )
         if (chapter != null) {
-            Box(modifier = modifier.fillMaxSize().padding(padding)) {
+            Box(modifier = modifier
+                .fillMaxSize()
+                .padding(padding)) {
                 if (!chapter.isEmpty() && !vm.isLoading) {
                     ReaderText(
                         vm = readerScreenPreferencesState,

@@ -1,7 +1,9 @@
 package org.ireader.domain.use_cases.remote
 
 import org.ireader.common_extensions.withIOContext
+import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.core.exceptions.EmptyQuery
+import org.ireader.core.exceptions.SourceNotFoundException
 import org.ireader.core_api.source.CatalogSource
 import org.ireader.core_api.source.model.Filter
 import org.ireader.core_api.source.model.Listing
@@ -13,11 +15,13 @@ class GetRemoteBooksUseCase @Inject constructor() {
         query: String? = null,
         listing: Listing?,
         filters: List<Filter<*>>?,
-        source: CatalogSource,
+        catalog: CatalogLocal?,
         page: Int,
         onError: suspend (Throwable) -> Unit,
         onSuccess: suspend (MangasPageInfo) -> Unit,
     ) {
+        val source = catalog?.source ?: throw SourceNotFoundException()
+        if (source !is CatalogSource) throw SourceNotFoundException()
         withIOContext {
             try {
                 var item: MangasPageInfo = MangasPageInfo(emptyList(), false)
@@ -39,9 +43,9 @@ class GetRemoteBooksUseCase @Inject constructor() {
                     item = source.getMangaList(sort = listing, page)
                 }
                 onSuccess(item.copy(mangas = item.mangas.filter { it.title.isNotBlank() }))
-            }catch (e:Error ) {
+            } catch (e: Error) {
                 onError(e)
-            }catch (e:Throwable) {
+            } catch (e: Throwable) {
                 onError(e)
             }
         }

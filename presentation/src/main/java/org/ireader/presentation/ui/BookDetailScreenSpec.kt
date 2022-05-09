@@ -64,7 +64,8 @@ object BookDetailScreenSpec : ScreenSpec {
         val context = LocalContext.current
         val state = vm
         val book = state.book
-        val source = state.source
+        val source = state.catalogSource?.source
+        val catalog = state.catalogSource
         val scope = rememberCoroutineScope()
 
         if (book != null) {
@@ -76,12 +77,12 @@ object BookDetailScreenSpec : ScreenSpec {
                     vm.startDownloadService(book = book)
                 },
                 onRead = {
-                    if (source != null) {
+                    if (catalog != null) {
                         if (vm.chapters.any { it.readAt != 0L } && vm.chapters.isNotEmpty()) {
                             navController.navigate(
                                 ReaderScreenSpec.buildRoute(
                                     bookId = book.id,
-                                    sourceId = source.id,
+                                    sourceId = catalog.sourceId,
                                     chapterId = LAST_CHAPTER,
                                 )
                             )
@@ -89,7 +90,7 @@ object BookDetailScreenSpec : ScreenSpec {
                             navController.navigate(
                                 ReaderScreenSpec.buildRoute(
                                     bookId = book.id,
-                                    sourceId = source.id,
+                                    sourceId = catalog.sourceId,
                                     chapterId = vm.chapters.first().id,
                                 )
                             )
@@ -108,11 +109,9 @@ object BookDetailScreenSpec : ScreenSpec {
                     vm.expandedSummary = !vm.expandedSummary
                 },
                 onRefresh = {
-                    if (source != null) {
-                        scope.launch {
-                            vm.getRemoteBookDetail(book, source = source)
-                            vm.getRemoteChapterDetail(book, source)
-                        }
+                    scope.launch {
+                        vm.getRemoteBookDetail(book, source = catalog)
+                        vm.getRemoteChapterDetail(book, catalog)
                     }
                 },
                 onWebView = {
@@ -129,18 +128,16 @@ object BookDetailScreenSpec : ScreenSpec {
                         )
                 },
                 onSwipeRefresh = {
-                    source?.let {
-                        scope.launch {
-                            vm.getRemoteChapterDetail(book, source)
-                        }
+                    scope.launch {
+                        vm.getRemoteChapterDetail(book, catalog)
                     }
                 },
                 onChapterContent = {
-                    if (source != null) {
+                    if (catalog != null) {
                         navController.navigate(
                             ChapterScreenSpec.buildRoute(
                                 bookId = book.id,
-                                sourceId = source.id
+                                sourceId = catalog.sourceId
                             )
                         )
                     }
@@ -179,7 +176,7 @@ object BookDetailScreenSpec : ScreenSpec {
                         vm.viewModelIOCoroutine {
                             vm.getRemoteChapterDetail(
                                 book,
-                                source,
+                                catalog,
                                 vm.modifiedCommands.filter { !it.isDefaultValue() }
                             )
                         }

@@ -4,7 +4,7 @@ import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.content.Context
 import android.os.Build
-import android.webkit.CookieManager
+import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
@@ -46,55 +46,67 @@ class BrowseEngine @Inject constructor(@ApplicationContext private val context: 
         var html: Document = Document("No Data was Found")
         var cookies: String? = null
         var responseHeader: WebResourceResponse? = null
+        var isLoadUp: Boolean = false
         withContext(Dispatchers.Main) {
             val scope = this
             val client = WebView(context.applicationContext)
-            client.setDefaultSettings()
-            client.loadUrl(url, headers)
             try {
                 client.settings.userAgentString = userAgent
             } catch (e: Throwable) {
                 Log.error(exception = e, "failed to set user agent")
             }
-            var isLoadUp: Boolean = false
-            // throwing error inside onPageError causes runtime exception
-            var error = ""
-            client.webViewClient = object : WebViewClientCompat() {
-                override fun onPageFinished(view: WebView, url: String) {
-                    cookies = CookieManager.getInstance().getCookie(url)
-                    scope.launch {
-                        html = Jsoup.parse(client.getHtml())
-                        if (selector != null) {
-                            while (html.select(selector).text().isEmpty()) {
-                                html = Jsoup.parse(client.getHtml())
+            try {
+
+                client.webChromeClient = object : WebChromeClient() {
+                    override fun onProgressChanged(view: WebView?, newProgress: Int) {
+
+                        scope.launch {
+                            if (newProgress == 100) {
+                                html = Jsoup.parse(view?.getHtml() ?: "")
+                                if (selector != null) {
+                                    while (html.select(selector).text().isEmpty()) {
+                                        html = Jsoup.parse(view?.getHtml() ?: "")
+                                        delay(300L)
+                                    }
+                                    isLoadUp = true
+                                } else {
+                                    isLoadUp = true
+                                }
                             }
-                            isLoadUp = true
-                        } else {
-                            isLoadUp = true
                         }
+                        super.onProgressChanged(view, newProgress)
                     }
                 }
+            } catch (e: Exception) {
+                client.webViewClient = object : WebViewClientCompat() {
+                    override fun onPageFinished(view: WebView, url: String) {
+                        scope.launch {
+                            html = Jsoup.parse(client.getHtml())
+                            if (selector != null) {
+                                while (html.select(selector).text().isEmpty()) {
+                                    html = Jsoup.parse(client.getHtml())
+                                    delay(300L)
+                                }
+                                isLoadUp = true
+                            } else {
+                                isLoadUp = true
+                            }
+                        }
+                    }
 
-                override fun onReceivedErrorCompat(
-                    view: WebView,
-                    errorCode: Int,
-                    description: String?,
-                    failingUrl: String,
-                    isMainFrame: Boolean,
-                ) {
-                    isLoadUp = false
-                    Log.error("WebView: failed to load $failingUrl Error Code:$errorCode")
-                }
-
-                override fun shouldInterceptRequestCompat(
-                    view: WebView,
-                    url: String,
-                ): WebResourceResponse? {
-                    val req = super.shouldInterceptRequestCompat(view, url)
-                    responseHeader = req
-                    return req
+                    override fun shouldInterceptRequestCompat(
+                        view: WebView,
+                        url: String,
+                    ): WebResourceResponse? {
+                        val req = super.shouldInterceptRequestCompat(view, url)
+                        responseHeader = req
+                        return req
+                    }
                 }
             }
+            client.setDefaultSettings()
+            client.loadUrl(url, headers)
+
             var currentTime = 0
             while (!isLoadUp && currentTime < timeout) {
 

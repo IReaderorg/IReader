@@ -11,7 +11,7 @@ import org.ireader.domain.use_cases.local.chapter_usecases.FindLastReadChapter
 import org.ireader.domain.use_cases.local.chapter_usecases.SubscribeChapterById
 import org.ireader.domain.use_cases.local.chapter_usecases.SubscribeChaptersByBookId
 import org.ireader.domain.use_cases.local.chapter_usecases.SubscribeLastReadChapter
-
+import org.ireader.domain.use_cases.local.chapter_usecases.UpdateLastReadTime
 
 data class LocalGetChapterUseCase(
     val subscribeChapterById: SubscribeChapterById,
@@ -25,4 +25,5 @@ data class LocalGetChapterUseCase(
     val findFirstChapter: FindFirstChapter,
     val findChapterByKey: FindChapterByKey,
     val findChaptersByKey: FindChaptersByKey,
+    val updateLastReadTime: UpdateLastReadTime
 )

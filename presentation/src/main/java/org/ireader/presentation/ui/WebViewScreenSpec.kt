@@ -110,7 +110,6 @@ object WebViewScreenSpec : ScreenSpec {
                     vm.getChapters(
                         book = book,
                         webView = it,
-                        source = source
                     )
                 }
 
@@ -122,7 +121,6 @@ object WebViewScreenSpec : ScreenSpec {
                     vm.getContentFromWebView(
                         chapter = chapter,
                         webView = it,
-                        source = source
                     )
                 }
 
@@ -134,7 +132,6 @@ object WebViewScreenSpec : ScreenSpec {
                     vm.getDetails(
                         book = book,
                         webView = it,
-                        source = source
                     )
                 }
             },

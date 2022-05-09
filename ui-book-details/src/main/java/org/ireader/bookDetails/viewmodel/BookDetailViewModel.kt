@@ -11,12 +11,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ireader.common_extensions.removeSameItemsFromList
 import org.ireader.common_models.entities.Book
+import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.common_models.entities.Chapter
 import org.ireader.common_resources.UiText
 import org.ireader.core.R
 import org.ireader.core_api.log.Log
 import org.ireader.core_api.source.CatalogSource
-import org.ireader.core_api.source.Source
 import org.ireader.core_api.source.model.CommandList
 import org.ireader.core_catalogs.interactor.GetLocalCatalog
 import org.ireader.core_ui.viewmodel.BaseViewModel
@@ -50,8 +50,10 @@ class BookDetailViewModel @Inject constructor(
         val bookId = savedStateHandle.get<Long>("bookId")
         val sourceId = savedStateHandle.get<Long>("sourceId")
         if (bookId != null && sourceId != null) {
-            val source = getLocalCatalog.get(sourceId)?.source
-            this.source = source
+            val catalogSource = getLocalCatalog.get(sourceId)
+            this.catalogSource = catalogSource
+
+            val source = catalogSource?.source
             if (source is CatalogSource) {
                 this.modifiedCommands = source.getCommands()
             }
@@ -63,8 +65,8 @@ class BookDetailViewModel @Inject constructor(
                 if (!initBooks) {
                     initBooks = true
                     if (book.lastUpdated < 1L && source != null) {
-                        getRemoteBookDetail(book, source)
-                        getRemoteChapterDetail(book, source)
+                        getRemoteBookDetail(book, catalogSource)
+                        getRemoteChapterDetail(book, catalogSource)
                     } else {
                         toggleBookLoading(false)
                         chapterIsLoading = false
@@ -99,13 +101,13 @@ class BookDetailViewModel @Inject constructor(
             }.launchIn(viewModelScope)
     }
 
-    suspend fun getRemoteBookDetail(book: Book, source: Source) {
+    suspend fun getRemoteBookDetail(book: Book, source: CatalogLocal?) {
         toggleBookLoading(true)
         getBookDetailJob?.cancel()
         getBookDetailJob = viewModelScope.launch(Dispatchers.IO) {
             remoteUseCases.getBookDetail(
                 book = book,
-                source = source,
+                catalog = source,
                 onError = { message ->
                     toggleBookLoading(false)
                     insertBookDetailToLocal(state.book!!)
@@ -130,7 +132,7 @@ class BookDetailViewModel @Inject constructor(
 
     suspend fun getRemoteChapterDetail(
         book: Book,
-        source: Source,
+        source: CatalogLocal?,
         commands: CommandList = emptyList()
     ) {
         chapterIsLoading = true
@@ -138,7 +140,7 @@ class BookDetailViewModel @Inject constructor(
         getChapterDetailJob = viewModelScope.launch {
             remoteUseCases.getRemoteChapters(
                 book = book,
-                source = source,
+                catalog = source,
                 onError = { message ->
                     Log.error { message.toString() }
                     showSnackBar(message)

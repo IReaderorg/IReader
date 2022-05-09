@@ -85,6 +85,7 @@ class TTSNotificationBuilder constructor(
                 PlaybackStateCompat.ACTION_SKIP_TO_NEXT
             )
         )
+
     fun openTTSScreen(
         bookId: Long,
         sourceId: Long,
@@ -101,6 +102,7 @@ class TTSNotificationBuilder constructor(
                 currentReadingParagraph = progress.toInt()
             )
         )
+
     val close =
         NotificationCompat.Action(
             org.ireader.core.R.drawable.baseline_close_24,
@@ -183,7 +185,7 @@ class TTSNotificationBuilder constructor(
         org.ireader.common_extensions.launchMainActivityIntent(context)
             .apply {
                 action = Intent.ACTION_VIEW
-                data =buildReaderScreenDeepLink(
+                data = buildReaderScreenDeepLink(
                     bookId = bookId,
                     chapterId = chapterId,
                     sourceId = sourceId,
@@ -208,12 +210,10 @@ class TTSNotificationBuilder constructor(
         val cover = controller.metadata.getText(TTSService.NOVEL_COVER)
         val progress = controller.metadata.getLong(TTSService.PROGRESS)
         val lastPar = controller.metadata.getLong(TTSService.LAST_PARAGRAPH)
-        val isLoading : Boolean = controller.metadata.getLong(TTSService.IS_LOADING) == 1L
-        val isError : Boolean = controller.metadata.getLong(TTSService.ERROR) == 1L
+        val isLoading: Boolean = controller.metadata.getLong(TTSService.IS_LOADING) == 1L
+        val isError: Boolean = controller.metadata.getLong(TTSService.ERROR) == 1L
 
         val playbackState = controller.playbackState
-
-
 
         val contentText =
             when {
@@ -232,15 +232,19 @@ class TTSNotificationBuilder constructor(
             setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             setLargeIcon(context, cover)
             priority = NotificationCompat.PRIORITY_LOW
+          //  setProgress(lastPar.toInt(), progress.toInt(), false)
+           // setTicker(contentText)
 
-            setContentIntent(openReaderScreenIntent(
-                chapterId = chapterId,
-                bookId = bookId,
-                sourceId = sourceId,
-                currentReadingParagraph = progress.toInt()
-            ))
+//            setContentIntent(
+//                openReaderScreenIntent(
+//                    chapterId = chapterId,
+//                    bookId = bookId,
+//                    sourceId = sourceId,
+//                    currentReadingParagraph = progress.toInt()
+//                )
+//            )
             setDeleteIntent(cancelMediaPlayer())
-            addAction(skipPrevActionButton)
+            //   addAction(skipPrevActionButton)
             addAction(rewindAction)
 
             if (playbackState?.isPlaying == true) {
@@ -249,20 +253,22 @@ class TTSNotificationBuilder constructor(
                 addAction(play)
             }
             addAction(next)
-            addAction(skipNext)
+            //  addAction(skipNext)
+            addAction(close)
+            addAction(openTTSScreen(bookId, sourceId, chapterId))
             setStyle(
                 androidx.media.app.NotificationCompat.MediaStyle()
                     .setMediaSession(mediaSessionCompat.sessionToken)
                     .setShowCancelButton(true)
                     .setCancelButtonIntent(cancelMediaPlayer())
-                    .setShowActionsInCompactView(1,2,3)
+                    .setShowActionsInCompactView(0,1,2)
 
             )
 
             setSubText(bookName)
-             setColorized(true)
-           //  setAutoCancel(true)
-            setOngoing(false)
+            setAutoCancel(false)
+            setColorized(true)
+            setOngoing(true)
         }
     }
 
