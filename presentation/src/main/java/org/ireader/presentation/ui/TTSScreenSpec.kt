@@ -24,9 +24,12 @@ import androidx.navigation.navDeepLink
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.ireader.core_api.log.Log
 import org.ireader.domain.services.tts_service.Player
 import org.ireader.domain.services.tts_service.media_player.isPlaying
+import org.ireader.domain.services.tts_service.toIReaderVoice
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.tts.TTSScreen
 import org.ireader.tts.TTSViewModel
@@ -162,8 +165,8 @@ object TTSScreenSpec : ScreenSpec {
                     vm.speechPrefUseCases.saveAutoNext(vm.autoNextChapter)
                 },
                 onVoice = { voice ->
-                    vm.currentVoice = voice.locale.displayName
-                    vm.speechPrefUseCases.saveVoice(voice.locale.displayName)
+                    vm.currentVoice = voice.toIReaderVoice()
+                    vm.speechPrefUseCases.saveVoice(Json.encodeToString(voice.toIReaderVoice()))
                 },
                 onLanguage = { language ->
                     vm.currentLanguage = language.displayName

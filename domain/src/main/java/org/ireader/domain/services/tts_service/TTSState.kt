@@ -26,8 +26,8 @@ interface TTSState {
     var autoNextChapter: Boolean
     var languages: List<Locale>
     var voices: List<Voice>
-    var currentVoice: String
-    var prevVoice: String
+    var currentVoice: IReaderVoice?
+    var prevVoice: IReaderVoice?
     var currentLanguage: String
     var utteranceId: String
     var prevLanguage: String
@@ -66,8 +66,8 @@ class TTSStateImpl @Inject constructor() : TTSState {
     override var languages by mutableStateOf<List<Locale>>(emptyList())
     override var voices by mutableStateOf<List<Voice>>(emptyList())
 
-    override var currentVoice by mutableStateOf<String>("")
-    override var prevVoice by mutableStateOf<String>("")
+    override var currentVoice by mutableStateOf<IReaderVoice?>(null)
+    override var prevVoice by mutableStateOf<IReaderVoice?>(null)
     override var currentLanguage by mutableStateOf<String>("")
     override var prevLanguage by mutableStateOf<String>("")
     override var isPlaying by mutableStateOf<Boolean>(false)

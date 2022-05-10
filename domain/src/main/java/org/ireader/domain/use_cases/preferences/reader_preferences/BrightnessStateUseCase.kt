@@ -1,97 +1,97 @@
 package org.ireader.domain.use_cases.preferences.reader_preferences
 
-import org.ireader.core_ui.theme.AppPreferences
+import org.ireader.core_ui.preferences.ReaderPreferences
 
 class BrightnessStateUseCase(
-    private val appPreferences: AppPreferences,
+    private val prefs:ReaderPreferences,
 ) {
     fun saveBrightness(brightness: Float) {
-        return appPreferences.brightness().set(brightness)
+        return prefs.brightness().set(brightness)
     }
 
     suspend fun readBrightness(): Float {
-        return appPreferences.brightness().get()
+        return prefs.brightness().get()
     }
 
     fun saveAutoBrightness(brightness: Boolean) {
-        return appPreferences.autoBrightness().set(brightness)
+        return prefs.autoBrightness().set(brightness)
     }
 
     suspend fun readAutoBrightness(): Boolean {
-        return appPreferences.autoBrightness().get()
+        return prefs.autoBrightness().get()
     }
 }
 
 class ScrollModeUseCase(
-    private val appPreferences: AppPreferences,
+    private val prefs: ReaderPreferences,
 ) {
     fun save(mode: Boolean) {
-        return appPreferences.scrollMode().set(mode)
+        return prefs.scrollMode().set(mode)
     }
 
     suspend fun read(): Boolean {
-        return appPreferences.scrollMode().get()
+        return prefs.scrollMode().get()
     }
 }
 
 class ImmersiveModeUseCase(
-    private val appPreferences: AppPreferences,
+    private val prefs: ReaderPreferences,
 ) {
     fun save(mode: Boolean) {
-        return appPreferences.immersiveMode().set(mode)
+        return prefs.immersiveMode().set(mode)
     }
 
     suspend  fun read(): Boolean {
-        return appPreferences.immersiveMode().get()
+        return prefs.immersiveMode().get()
     }
 }
 
 class ScrollIndicatorUseCase(
-    private val appPreferences: AppPreferences,
+    private val prefs: ReaderPreferences,
 ) {
     fun saveWidth(value: Int) {
         if (value > 0) {
-            return appPreferences.scrollIndicatorWith().set(value)
+            return prefs.scrollIndicatorWith().set(value)
         }
     }
 
     suspend fun readWidth(): Int {
-        return appPreferences.scrollIndicatorWith().get()
+        return prefs.scrollIndicatorWith().get()
     }
 
     fun savePadding(value: Int) {
         if (value > 0) {
-            return appPreferences.scrollIndicatorPadding().set(value)
+            return prefs.scrollIndicatorPadding().set(value)
         }
     }
 
     suspend fun readPadding(): Int {
-        return appPreferences.scrollIndicatorPadding().get()
+        return prefs.scrollIndicatorPadding().get()
     }
     suspend fun isShow(): Boolean {
-        return appPreferences.showScrollIndicator().get()
+        return prefs.showScrollIndicator().get()
     }
     fun setIsShown(show:Boolean) {
-        return appPreferences.showScrollIndicator().set(show)
+        return prefs.showScrollIndicator().set(show)
     }
 }
 
 class AutoScrollMode(
-    private val appPreferences: AppPreferences,
+    private val prefs: ReaderPreferences,
 ) {
     fun saveInterval(value: Long) {
-        return appPreferences.autoScrollInterval().set(value)
+        return prefs.autoScrollInterval().set(value)
     }
 
     suspend fun readInterval(): Long {
-        return appPreferences.autoScrollInterval().get()
+        return prefs.autoScrollInterval().get()
     }
 
     fun saveOffset(value: Int) {
-        return appPreferences.autoScrollOffset().set(value)
+        return prefs.autoScrollOffset().set(value)
     }
 
     suspend fun readOffset(): Int {
-        return appPreferences.autoScrollOffset().get()
+        return prefs.autoScrollOffset().get()
     }
 }

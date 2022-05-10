@@ -2,6 +2,7 @@ plugins {
     id("com.android.library")
     id("kotlin-android")
     id("kotlin-kapt")
+    kotlin("plugin.serialization")
 }
 android {
     buildFeatures {
@@ -33,6 +34,7 @@ dependencies {
     implementation(accompanist.pager)
     implementation(accompanist.swipeRefresh)
     implementation(libs.hilt.android)
+    implementation(libs.gson)
     implementation(project(mapOf("path" to ":domain")))
     kapt(libs.hilt.androidcompiler)
     implementation(androidx.media)

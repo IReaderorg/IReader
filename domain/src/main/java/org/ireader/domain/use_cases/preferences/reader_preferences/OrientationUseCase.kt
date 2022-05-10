@@ -2,38 +2,33 @@ package org.ireader.domain.use_cases.preferences.reader_preferences
 
 import org.ireader.common_models.FilterType
 import org.ireader.common_models.SortType
-import org.ireader.core_ui.theme.AppPreferences
+import org.ireader.core_ui.preferences.AppPreferences
+import org.ireader.core_ui.preferences.ReaderPreferences
 import org.ireader.core_ui.theme.OrientationMode
 import org.ireader.core_ui.ui.TextAlign
 import javax.inject.Inject
 
-
-
-
-
-
-
-
 class OrientationUseCase(
-    private val appPreferences: AppPreferences,
+    private val prefs: ReaderPreferences,
 ) {
     fun save(orientation: OrientationMode) {
-        appPreferences.orientation().set(orientation)
+        prefs.orientation().set(orientation)
     }
 
     suspend fun read(): OrientationMode {
-        return appPreferences.orientation().get()
+        return prefs.orientation().get()
     }
 }
+
 class TextAlignmentUseCase(
-    private val appPreferences: AppPreferences,
+    private val prefs: ReaderPreferences,
 ) {
     fun save(textAlign: TextAlign) {
-        appPreferences.textAlign().set(textAlign)
+        prefs.textAlign().set(textAlign)
     }
 
     suspend fun read(): TextAlign {
-        return appPreferences.textAlign().get()
+        return prefs.textAlign().get()
     }
 }
 
@@ -102,45 +97,47 @@ fun mapFilterType(input: Int): FilterType {
 }
 
 class TextReaderPrefUseCase @Inject constructor(
-    private val appPreferences: AppPreferences,
+    private val prefs: ReaderPreferences,
 ) {
     fun savePitch(value: Float) {
-        appPreferences.speechPitch().set(value)
+        prefs.speechPitch().set(value)
     }
 
-    suspend  fun readPitch(): Float {
-        return appPreferences.speechPitch().get()
+    suspend fun readPitch(): Float {
+        return prefs.speechPitch().get()
     }
 
     fun saveRate(value: Float) {
-        appPreferences.speechRate().set(value)
+        prefs.speechRate().set(value)
     }
 
     suspend fun readRate(): Float {
-        return appPreferences.speechRate().get()
+        return prefs.speechRate().get()
     }
 
     fun saveLanguage(value: String) {
-        appPreferences.speechLanguage().set(value)
+        prefs.speechLanguage().set(value)
     }
 
     suspend fun readLanguage(): String {
-        return appPreferences.speechLanguage().get()
+        return prefs.speechLanguage().get()
     }
 
     fun saveVoice(value: String) {
-        appPreferences.speechVoice().set(value)
+        kotlin.runCatching {
+            prefs.speechVoice().set(value)
+        }
     }
 
-    suspend  fun readVoice(): String {
-        return appPreferences.speechVoice().get()
+    fun readVoice(): String? {
+        return prefs.speechVoice().get()
     }
 
     fun saveAutoNext(value: Boolean) {
-        appPreferences.readerAutoNext().set(value)
+        prefs.readerAutoNext().set(value)
     }
 
-    suspend  fun readAutoNext(): Boolean {
-        return appPreferences.readerAutoNext().get()
+    suspend fun readAutoNext(): Boolean {
+        return prefs.readerAutoNext().get()
     }
 }

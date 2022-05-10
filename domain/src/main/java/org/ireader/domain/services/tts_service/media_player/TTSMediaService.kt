@@ -30,17 +30,21 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.common_models.entities.Chapter
 import org.ireader.core_api.log.Log
 import org.ireader.core_catalogs.CatalogStore
-import org.ireader.core_ui.theme.AppPreferences
+import org.ireader.core_ui.preferences.ReaderPreferences
 import org.ireader.domain.R
 import org.ireader.domain.notification.Notifications
+import org.ireader.domain.services.tts_service.IReaderVoice
 import org.ireader.domain.services.tts_service.Player
 import org.ireader.domain.services.tts_service.TTSState
 import org.ireader.domain.services.tts_service.TTSStateImpl
+import org.ireader.domain.services.tts_service.isSame
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.preferences.reader_preferences.TextReaderPrefUseCase
@@ -82,7 +86,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
     private var resumeOnFocus = true
 
     @Inject
-    lateinit var appPreferences: AppPreferences
+    lateinit var readerPreferences: ReaderPreferences
 
     lateinit var mediaSession: MediaSessionCompat
     lateinit var stateBuilder: PlaybackStateCompat.Builder
@@ -134,34 +138,34 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
 
     fun readPrefs() {
         scope.launch {
-            state.autoNextChapter = appPreferences.readerAutoNext().get()
-            state.currentLanguage = appPreferences.speechLanguage().get()
-            state.currentVoice = appPreferences.speechVoice().get()
-            state.speechSpeed = appPreferences.speechRate().get()
-            state.pitch = appPreferences.speechPitch().get()
+            state.autoNextChapter = readerPreferences.readerAutoNext().get()
+            state.currentLanguage = readerPreferences.speechLanguage().get()
+            state.currentVoice =  textReaderPrefUseCase.readVoice()?.let { Json.decodeFromString<IReaderVoice?>(it) }
+            state.speechSpeed = readerPreferences.speechRate().get()
+            state.pitch = readerPreferences.speechPitch().get()
         }
         scope.launch {
-            appPreferences.readerAutoNext().changes().collect {
+            readerPreferences.readerAutoNext().changes().collect {
                 state.autoNextChapter = it
             }
         }
         scope.launch {
-            appPreferences.speechLanguage().changes().collect {
+            readerPreferences.speechLanguage().changes().collect {
                 state.currentLanguage = it
             }
         }
         scope.launch {
-            appPreferences.speechVoice().changes().collect {
-                state.currentVoice = it
+            readerPreferences.speechVoice().changes().collect {
+                state.currentVoice = Json.decodeFromString<IReaderVoice?>(it)
             }
         }
         scope.launch {
-            appPreferences.speechPitch().changes().collect {
+            readerPreferences.speechPitch().changes().collect {
                 state.pitch = it
             }
         }
         scope.launch {
-            appPreferences.speechRate().changes().collect {
+            readerPreferences.speechRate().changes().collect {
                 state.speechSpeed = it
             }
         }
@@ -733,10 +737,11 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
             }
             if (currentVoice != prevVoice) {
                 prevVoice = currentVoice
-                player.voices?.firstOrNull { it.name == currentVoice }?.let {
+                player.voices?.firstOrNull { it.isSame(currentVoice) }?.let {
                     player.voice = it
                 }
             }
+
 
             if (currentLanguage != prevLanguage) {
                 prevLanguage = currentLanguage

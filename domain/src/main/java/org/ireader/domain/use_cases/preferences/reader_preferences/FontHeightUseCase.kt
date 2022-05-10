@@ -1,15 +1,15 @@
 package org.ireader.domain.use_cases.preferences.reader_preferences
 
-import org.ireader.core_ui.theme.AppPreferences
+import org.ireader.core_ui.preferences.ReaderPreferences
 
 class FontHeightUseCase(
-    private val appPreferences: AppPreferences,
+    private val prefs: ReaderPreferences,
 ) {
     fun save(fontHeight: Int) {
-        appPreferences.lineHeight().set(fontHeight)
+        prefs.lineHeight().set(fontHeight)
     }
 
     suspend  fun read(): Int {
-        return appPreferences.lineHeight().get()
+        return prefs.lineHeight().get()
     }
 }

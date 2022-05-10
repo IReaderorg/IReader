@@ -3,7 +3,7 @@ package org.ireader.appearance
 import androidx.compose.runtime.mutableStateOf
 import dagger.hilt.android.lifecycle.HiltViewModel
 import org.ireader.core_ui.theme.ThemeMode
-import org.ireader.core_ui.theme.UiPreferences
+import org.ireader.core_ui.preferences.UiPreferences
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import javax.inject.Inject
 

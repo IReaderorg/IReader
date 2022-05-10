@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.ireader.components.reusable_composable.CaptionTextComposable
 import org.ireader.domain.services.tts_service.TTSState
+import org.ireader.domain.services.tts_service.isSame
 import java.util.Locale
 
 @Composable
@@ -69,7 +70,7 @@ fun VoiceChip(
                             .background(MaterialTheme.colors.background)
                             .border(
                                 2.dp,
-                                if (voices[index].locale.displayName == viewModel.currentVoice) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground.copy(
+                                if (voices[index].isSame(viewModel.currentVoice)) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground.copy(
                                     .4f
                                 ),
                                 CircleShape
@@ -80,7 +81,7 @@ fun VoiceChip(
                         contentAlignment = Alignment.Center
                     ) {
                         CaptionTextComposable(
-                            text = voices[index].locale.displayName,
+                            text = "${voices[index].name} ${voices[index].locale.displayName}",
                             maxLine = 1,
                             align = TextAlign.Center,
                             modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp)

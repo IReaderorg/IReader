@@ -1,15 +1,15 @@
 package org.ireader.domain.use_cases.preferences.reader_preferences
 
-import org.ireader.core_ui.theme.AppPreferences
+import org.ireader.core_ui.preferences.ReaderPreferences
 
 class FontSizeStateUseCase(
-    private val appPreferences: AppPreferences,
+    private val prefs: ReaderPreferences,
 ) {
     fun save(fontSize: Int) {
-        appPreferences.fontSize().set(fontSize)
+        prefs.fontSize().set(fontSize)
     }
 
     suspend fun read(): Int {
-        return appPreferences.fontSize().get()
+        return prefs.fontSize().get()
     }
 }

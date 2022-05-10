@@ -12,11 +12,14 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import org.ireader.common_extensions.findComponentActivity
 import org.ireader.common_models.entities.Chapter
 import org.ireader.core_api.log.Log
 import org.ireader.core_catalogs.interactor.GetLocalCatalog
 import org.ireader.core_ui.viewmodel.BaseViewModel
+import org.ireader.domain.services.tts_service.IReaderVoice
 import org.ireader.domain.services.tts_service.Player
 import org.ireader.domain.services.tts_service.TTSState
 import org.ireader.domain.services.tts_service.TTSStateImpl
@@ -28,7 +31,6 @@ import org.ireader.domain.use_cases.preferences.reader_preferences.ReaderPrefUse
 import org.ireader.domain.use_cases.preferences.reader_preferences.TextReaderPrefUseCase
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import org.ireader.domain.use_cases.services.ServiceUseCases
-import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
@@ -84,11 +86,12 @@ class TTSViewModel @Inject constructor(
         viewModelScope.launch {
             speechSpeed = speechPrefUseCases.readRate()
             pitch = speechPrefUseCases.readPitch()
-            currentVoice = speechPrefUseCases.readVoice()
             currentLanguage = speechPrefUseCases.readLanguage()
             autoNextChapter = speechPrefUseCases.readAutoNext()
             font = readerUseCases.selectedFontStateUseCase.readFont()
             lineHeight = readerUseCases.fontHeightUseCase.read()
+                currentVoice = speechPrefUseCases.readVoice()
+                    ?.let { Json.decodeFromString<IReaderVoice?>(it) }
         }
     }
 
@@ -265,11 +268,3 @@ class TTSViewModel @Inject constructor(
     }
 }
 
-data class Voice(
-    val name: String,
-    val locale: Locale,
-    val quality: Int,
-    val latency: Int,
-    val requiresNetworkConnection: Boolean,
-    val features: Set<String>,
-)

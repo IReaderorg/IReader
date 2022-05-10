@@ -18,7 +18,7 @@ import org.ireader.core_ui.theme.AppRippleTheme
 import org.ireader.core_ui.theme.ExtraColors
 import org.ireader.core_ui.theme.Theme
 import org.ireader.core_ui.theme.ThemeMode
-import org.ireader.core_ui.theme.UiPreferences
+import org.ireader.core_ui.preferences.UiPreferences
 import org.ireader.core_ui.theme.asState
 import org.ireader.core_ui.theme.getDarkColors
 import org.ireader.core_ui.theme.getLightColors

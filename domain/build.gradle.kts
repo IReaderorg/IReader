@@ -37,6 +37,7 @@ dependencies {
     implementation(compose.compose.material)
     implementation(compose.compose.coil)
     implementation(compose.compose.paging)
+    implementation(libs.gson)
     implementation(project(mapOf("path" to ":common-models")))
     debugImplementation(compose.compose.uiTestManifest)
 

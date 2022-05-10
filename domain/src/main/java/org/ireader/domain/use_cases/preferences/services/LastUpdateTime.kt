@@ -1,6 +1,6 @@
 package org.ireader.domain.use_cases.preferences.services
 
-import org.ireader.core_ui.theme.AppPreferences
+import org.ireader.core_ui.preferences.AppPreferences
 import javax.inject.Inject
 
 class LastUpdateTime @Inject constructor(

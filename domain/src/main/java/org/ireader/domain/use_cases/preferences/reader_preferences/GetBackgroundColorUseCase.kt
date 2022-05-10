@@ -1,27 +1,27 @@
 package org.ireader.domain.use_cases.preferences.reader_preferences
 
-import org.ireader.core_ui.theme.AppPreferences
+import org.ireader.core_ui.preferences.ReaderPreferences
 
 class BackgroundColorUseCase(
-    private val appPreferences: AppPreferences,
+    private val prefs: ReaderPreferences,
 ) {
     fun save(value: Int) {
-        appPreferences.backgroundColorReader().set(value)
+        prefs.backgroundColorReader().set(value)
     }
 
     suspend fun read(): Int {
-        return appPreferences.backgroundColorReader().get()
+        return prefs.backgroundColorReader().get()
     }
 }
 
 class TextColorUseCase(
-    private val appPreferences: AppPreferences,
+    private val prefs: ReaderPreferences,
 ) {
     fun save(value: Int) {
-        appPreferences.textColorReader().set(value)
+        prefs.textColorReader().set(value)
     }
 
     suspend  fun read(): Int {
-        return appPreferences.textColorReader().get()
+        return prefs.textColorReader().get()
     }
 }

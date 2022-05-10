@@ -11,7 +11,8 @@ import org.ireader.common_data.repository.HistoryRepository
 import org.ireader.common_data.repository.LocalBookRepository
 import org.ireader.common_data.repository.RemoteKeyRepository
 import org.ireader.common_data.repository.UpdatesRepository
-import org.ireader.core_ui.theme.AppPreferences
+import org.ireader.core_ui.preferences.AppPreferences
+import org.ireader.core_ui.preferences.ReaderPreferences
 import org.ireader.domain.use_cases.download.DownloadUseCases
 import org.ireader.domain.use_cases.download.delete.DeleteAllSavedDownload
 import org.ireader.domain.use_cases.download.delete.DeleteSavedDownload
@@ -247,23 +248,23 @@ class UseCasesInject {
     @Provides
     @Singleton
     fun providesReaderPrefUseCases(
-        appPreferences: AppPreferences
+        prefs: ReaderPreferences
     ): ReaderPrefUseCases {
         return ReaderPrefUseCases(
-            autoScrollMode = AutoScrollMode(appPreferences),
-            backgroundColorUseCase = BackgroundColorUseCase(appPreferences),
-            brightnessStateUseCase = BrightnessStateUseCase(appPreferences),
-            fontHeightUseCase = FontHeightUseCase(appPreferences),
-            fontSizeStateUseCase = FontSizeStateUseCase(appPreferences),
-            immersiveModeUseCase = ImmersiveModeUseCase(appPreferences),
-            orientationUseCase = OrientationUseCase(appPreferences),
-            paragraphDistanceUseCase = ParagraphDistanceUseCase(appPreferences),
-            paragraphIndentUseCase = ParagraphIndentUseCase(appPreferences),
-            scrollIndicatorUseCase = ScrollIndicatorUseCase(appPreferences),
-            scrollModeUseCase = ScrollModeUseCase(appPreferences),
-            selectedFontStateUseCase = SelectedFontStateUseCase(appPreferences),
-            textAlignmentUseCase = TextAlignmentUseCase(appPreferences),
-            textColorUseCase = TextColorUseCase(appPreferences)
+            autoScrollMode = AutoScrollMode(prefs),
+            backgroundColorUseCase = BackgroundColorUseCase(prefs),
+            brightnessStateUseCase = BrightnessStateUseCase(prefs),
+            fontHeightUseCase = FontHeightUseCase(prefs),
+            fontSizeStateUseCase = FontSizeStateUseCase(prefs),
+            immersiveModeUseCase = ImmersiveModeUseCase(prefs),
+            orientationUseCase = OrientationUseCase(prefs),
+            paragraphDistanceUseCase = ParagraphDistanceUseCase(prefs),
+            paragraphIndentUseCase = ParagraphIndentUseCase(prefs),
+            scrollIndicatorUseCase = ScrollIndicatorUseCase(prefs),
+            scrollModeUseCase = ScrollModeUseCase(prefs),
+            selectedFontStateUseCase = SelectedFontStateUseCase(prefs),
+            textAlignmentUseCase = TextAlignmentUseCase(prefs),
+            textColorUseCase = TextColorUseCase(prefs)
         )
     }
 
