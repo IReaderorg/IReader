@@ -140,7 +140,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
         scope.launch {
             state.autoNextChapter = readerPreferences.readerAutoNext().get()
             state.currentLanguage = readerPreferences.speechLanguage().get()
-            state.currentVoice =  textReaderPrefUseCase.readVoice()?.let { Json.decodeFromString<IReaderVoice?>(it) }
+            state.currentVoice = textReaderPrefUseCase.readVoice()
             state.speechSpeed = readerPreferences.speechRate().get()
             state.pitch = readerPreferences.speechPitch().get()
         }
@@ -156,7 +156,9 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
         }
         scope.launch {
             readerPreferences.speechVoice().changes().collect {
-                state.currentVoice = Json.decodeFromString<IReaderVoice?>(it)
+                state.currentVoice = kotlin.runCatching {
+                     return@runCatching Json.decodeFromString<IReaderVoice?>(it)
+                }.getOrNull()
             }
         }
         scope.launch {
@@ -174,7 +176,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
     lateinit var silence: MediaPlayer
     override fun onCreate() {
         super.onCreate()
-        Log.error { "OnCreate is Called" }
+        Log.debug { "TTS SERVICE: OnCreate is Called" }
 
         state = TTSStateImpl()
 
@@ -417,7 +419,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
         mediaSession.isActive = false
         mediaSession.release()
         isPlayerDispose = true
-        Log.error { "onDestroy" }
+        Log.debug { "TTS SERVICE was Destroyed" }
         super.onDestroy()
     }
 
@@ -458,7 +460,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
     private inner class TTSSessionCallback : MediaSessionCompat.Callback() {
 
         override fun onPlay() {
-            Log.error { "onPlay" }
+            Log.debug { "TTS SERVICE: onPlay" }
             if (isPlayerDispose) {
                 initPlayer()
             }
@@ -466,34 +468,34 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
         }
 
         override fun onPause() {
-            Log.error { "onPause" }
+            Log.debug { "TTS SERVICE: onPause" }
             startService(Player.PAUSE)
             player.stop()
         }
 
         override fun onStop() {
-            Log.error { "onStop" }
+            Log.debug { "TTS SERVICE: onStop" }
             startService(Player.PAUSE)
             player.stop()
         }
 
         override fun onRewind() {
-            Log.error { "onRewind" }
+            Log.debug { "TTS SERVICE: onRewind" }
             startService(Player.PREV_PAR)
         }
 
         override fun onFastForward() {
-            Log.error { "onFastForward" }
+            Log.debug { "TTS SERVICE: onFastForward" }
             startService(Player.NEXT_PAR)
         }
 
         override fun onSkipToNext() {
-            Log.error { "onSkipToNext" }
+            Log.debug { "TTS SERVICE: TTS SERVICE: onSkipToNext" }
             startService(Player.SKIP_NEXT)
         }
 
         override fun onSkipToPrevious() {
-            Log.error { "onSkipToPrevious" }
+            Log.debug { "TTS SERVICE: onSkipToPrevious" }
             startService(Player.SKIP_PREV)
         }
 

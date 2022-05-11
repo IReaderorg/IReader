@@ -1,11 +1,14 @@
 package org.ireader.domain.use_cases.preferences.reader_preferences
 
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import org.ireader.common_models.FilterType
 import org.ireader.common_models.SortType
 import org.ireader.core_ui.preferences.AppPreferences
 import org.ireader.core_ui.preferences.ReaderPreferences
 import org.ireader.core_ui.theme.OrientationMode
 import org.ireader.core_ui.ui.TextAlign
+import org.ireader.domain.services.tts_service.IReaderVoice
 import javax.inject.Inject
 
 class OrientationUseCase(
@@ -129,8 +132,13 @@ class TextReaderPrefUseCase @Inject constructor(
         }
     }
 
-    fun readVoice(): String? {
-        return prefs.speechVoice().get()
+    fun readVoice(): IReaderVoice? {
+        /**
+         * because the default value is "" which means the first value should return null
+         */
+        return kotlin.runCatching {
+            return Json.decodeFromString<IReaderVoice?>(prefs.speechVoice().get())
+        }.getOrNull()
     }
 
     fun saveAutoNext(value: Boolean) {

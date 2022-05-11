@@ -77,7 +77,7 @@ fun ReaderScreenTopBar(
                             onValueChange = { query ->
                                 vm.searchQuery = query
                                 vm.queriedTextIndex.clear()
-                                state.stateContent?.value?.let { content ->
+                                state.stateContent.let { content ->
                                     content.filter { cont ->
                                         cont.contains(
                                             query,

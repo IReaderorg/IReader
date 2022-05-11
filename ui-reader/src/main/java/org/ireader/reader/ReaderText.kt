@@ -103,7 +103,7 @@ fun ReaderText(
                     ),
                 ),
             ) {
-                uiState.stateContent?.value?.let { content ->
+                uiState.stateContent.let { content ->
                     LazyColumnScrollbar(
                         listState = scrollState,
                         padding = if (vm.scrollIndicatorPadding < 0) 0.dp else vm.scrollIndicatorPadding.dp,

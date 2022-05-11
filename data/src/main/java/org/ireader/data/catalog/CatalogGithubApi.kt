@@ -9,9 +9,9 @@ import kotlinx.serialization.json.Json
 import org.ireader.core_api.http.HttpClients
 import org.ireader.core_catalogs.service.CatalogRemoteApi
 import org.ireader.core_ui.CatalogNotFoundException
-import javax.inject.Inject
 
-class CatalogGithubApi @Inject constructor(
+
+class CatalogGithubApi(
     private val httpClient: HttpClients,
 ) : CatalogRemoteApi {
 

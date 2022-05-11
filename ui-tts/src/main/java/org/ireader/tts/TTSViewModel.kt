@@ -12,14 +12,11 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
 import org.ireader.common_extensions.findComponentActivity
 import org.ireader.common_models.entities.Chapter
 import org.ireader.core_api.log.Log
 import org.ireader.core_catalogs.interactor.GetLocalCatalog
 import org.ireader.core_ui.viewmodel.BaseViewModel
-import org.ireader.domain.services.tts_service.IReaderVoice
 import org.ireader.domain.services.tts_service.Player
 import org.ireader.domain.services.tts_service.TTSState
 import org.ireader.domain.services.tts_service.TTSStateImpl
@@ -90,8 +87,7 @@ class TTSViewModel @Inject constructor(
             autoNextChapter = speechPrefUseCases.readAutoNext()
             font = readerUseCases.selectedFontStateUseCase.readFont()
             lineHeight = readerUseCases.fontHeightUseCase.read()
-                currentVoice = speechPrefUseCases.readVoice()
-                    ?.let { Json.decodeFromString<IReaderVoice?>(it) }
+            currentVoice = speechPrefUseCases.readVoice()
         }
     }
 
@@ -146,7 +142,7 @@ class TTSViewModel @Inject constructor(
         }
 
         override fun onConnectionSuspended() {
-            Log.error { "onConnectionSuspended" }
+            Log.debug { "TTS ViewModel: MediaSession: onConnectionSuspended" }
             isServiceConnected = false
             ctrlCallback?.let { controller?.unregisterCallback(it) }
             controller = null
@@ -156,7 +152,7 @@ class TTSViewModel @Inject constructor(
 
         override fun onConnectionFailed() {
             isServiceConnected = false
-            Log.error { "onConnectionFailed" }
+            Log.debug { "TTS ViewModel: MediaSession:  onConnectionFailed" }
             super.onConnectionFailed()
         }
     }

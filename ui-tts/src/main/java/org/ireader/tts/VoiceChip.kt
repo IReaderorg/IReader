@@ -80,8 +80,12 @@ fun VoiceChip(
                             },
                         contentAlignment = Alignment.Center
                     ) {
+                        /**
+                         * I used the display name because the google voices name is not really good for the UI
+                         * need to think of something else for it later
+                         */
                         CaptionTextComposable(
-                            text = "${voices[index].name} ${voices[index].locale.displayName}",
+                            text = voices[index].locale.displayName,
                             maxLine = 1,
                             align = TextAlign.Center,
                             modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp)
