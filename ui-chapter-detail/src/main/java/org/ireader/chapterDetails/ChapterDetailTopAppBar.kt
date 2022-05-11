@@ -16,10 +16,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.ireader.chapterDetails.viewmodel.ChapterDetailState
+import org.ireader.common_resources.UiText
 import org.ireader.components.components.CenterTopAppBar
 import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.BigSizeTextComposable
+import org.ireader.core_ui.asString
+import org.ireader.ui_chapter_detail.R
 
 @Composable
 fun ChapterDetailTopAppBar(
@@ -63,14 +66,14 @@ fun RegularChapterDetailTopAppBar(
             .fillMaxWidth()
             .height(86.dp),
         title = {
-            BigSizeTextComposable(text = "Content")
+            BigSizeTextComposable(text = UiText.StringResource(R.string.content))
         },
         actions = {
-            AppIconButton(imageVector = Icons.Filled.Place, title = "", onClick = onMap)
+            AppIconButton(imageVector = Icons.Filled.Place, text =  UiText.StringResource(R.string.find_current_chapter), onClick = onMap)
             IconButton(onClick = onReverseClick) {
                 Icon(
                     imageVector = Icons.Default.Sort,
-                    contentDescription = "Sort Icon"
+                    contentDescription = UiText.StringResource(R.string.sort).asString()
                 )
             }
         },
@@ -78,7 +81,7 @@ fun RegularChapterDetailTopAppBar(
             IconButton(onClick = onPopBackStack) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Back Icon"
+                    contentDescription =  UiText.StringResource(R.string.return_to_previous_screen).asString()
                 )
             }
         },
@@ -94,7 +97,7 @@ private fun EditModeChapterDetailTopAppBar(
     onClickInvertSelection: () -> Unit,
 ) {
     Toolbar(
-        title = { BigSizeTextComposable(text = "$selectionSize") },
+        title = { BigSizeTextComposable(text = UiText.DynamicString("$selectionSize")) },
         navigationIcon = {
             IconButton(onClick = onClickCancelSelection) {
                 Icon(Icons.Default.Close, contentDescription = null)

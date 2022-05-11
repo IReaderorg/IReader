@@ -11,8 +11,10 @@ import androidx.compose.ui.unit.dp
 import org.ireader.common_models.DisplayMode
 import org.ireader.common_models.LayoutType
 import org.ireader.common_models.layouts
+import org.ireader.common_resources.UiText
 import org.ireader.components.text_related.RadioButton
-import org.ireader.core_ui.ui_components.TextSection
+import org.ireader.components.text_related.TextSection
+import org.ireader.ui_library.R
 
 @Composable
 fun DisplayScreen(
@@ -25,7 +27,7 @@ fun DisplayScreen(
             .background(MaterialTheme.colors.background)
     ) {
         TextSection(
-            text = "DISPLAY MODE",
+            text = UiText.StringResource( R.string.display_mode),
             padding = PaddingValues(vertical = 8.dp, horizontal = 16.dp),
             style = MaterialTheme.typography.subtitle1,
         )

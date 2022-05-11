@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
@@ -24,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.pager.ExperimentalPagerApi
 import org.ireader.common_models.entities.BaseBook
+import org.ireader.common_resources.UiText
 import org.ireader.components.list.layouts.BookImage
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.MidSizeTextComposable
@@ -31,6 +33,7 @@ import org.ireader.components.reusable_composable.SmallTextComposable
 import org.ireader.core_ui.ui_components.DotsFlashing
 import org.ireader.sources.global_search.viewmodel.GlobalSearchState
 import org.ireader.sources.global_search.viewmodel.SearchItem
+import org.ireader.ui_sources.R
 
 @Composable
 fun GlobalSearchScreen(
@@ -61,16 +64,14 @@ fun GlobalSearchScreen(
                 .padding(padding)
                 .verticalScroll(rememberScrollState()),
         ) {
-            /**
-             * TODO need to wait for this issue to be close before using lazycolumn
-             * https://issuetracker.google.com/issues/229752147
-             */
-            allSearch.forEachIndexed { index, _ ->
-                GlobalSearchBookInfo(
-                    allSearch[index],
-                    onBook = onBook,
-                    goToExplore = { onGoToExplore(index) }
-                )
+            LazyColumn() {
+                items(count = allSearch.size) { index ->
+                    GlobalSearchBookInfo(
+                        allSearch[index],
+                        onBook = onBook,
+                        goToExplore = { onGoToExplore(index) }
+                    )
+                }
             }
         }
     }
@@ -103,14 +104,14 @@ fun GlobalSearchBookInfo(
                 verticalArrangement = Arrangement.SpaceEvenly,
                 horizontalAlignment = Alignment.Start
             ) {
-                MidSizeTextComposable(text = book.source.name, fontWeight = FontWeight.Bold)
-                SmallTextComposable(text = book.source.lang.uppercase())
+                MidSizeTextComposable(text = UiText.DynamicString(book.source.name), fontWeight = FontWeight.Bold)
+                SmallTextComposable(text = UiText.DynamicString(book.source.lang.uppercase()))
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 DotsFlashing(book.loading)
                 AppIconButton(
                     imageVector = Icons.Default.ArrowForward,
-                    title = "open explore",
+                    text = UiText.StringResource(R.string.open_explore),
                     onClick = goToExplore
                 )
             }

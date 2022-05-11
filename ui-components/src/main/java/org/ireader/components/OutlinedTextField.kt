@@ -13,7 +13,9 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import org.ireader.common_resources.UiText
 import org.ireader.components.reusable_composable.MidSizeTextComposable
+import org.ireader.ui_components.R
 
 @Composable
 fun CustomTextField(
@@ -25,7 +27,7 @@ fun CustomTextField(
     paddingTrailingIconStart: Dp = 0.dp,
     leadingIcon: (@Composable() () -> Unit)? = null,
     trailingIcon: (@Composable() () -> Unit)? = null,
-    hint: String = "",
+    hint: UiText = UiText.StringResource(R.string.search_hint),
     textColor: Color = MaterialTheme.colors.onBackground,
 ) {
 

@@ -22,7 +22,6 @@ interface Source {
      */
     val name: String
 
-    // TODO remove CatalogSource?
     val lang: String
 
     /**

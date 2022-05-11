@@ -38,10 +38,12 @@ import org.ireader.common_models.entities.CatalogBundled
 import org.ireader.common_models.entities.CatalogInstalled
 import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.common_models.entities.CatalogRemote
+import org.ireader.common_resources.UiText
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.core_api.os.InstallStep
 import org.ireader.sources.extension.composables.LetterIcon
+import org.ireader.ui_sources.R
 import java.util.Locale
 import kotlin.math.max
 
@@ -199,13 +201,13 @@ private fun CatalogButtons(
             } else if (onInstall != null) {
                 if (catalog is CatalogLocal) {
                     MidSizeTextComposable(
-                        text = "Update",
+                        text = UiText.StringResource( R.string.update),
                         color = MaterialTheme.colors.primary,
                         modifier = Modifier.clickable { onInstall() }
                     )
                 } else if (catalog is CatalogRemote) {
                     MidSizeTextComposable(
-                        text = "Install",
+                        text = UiText.StringResource(R.string.install),
                         color = MaterialTheme.colors.primary,
                         modifier = Modifier.clickable { onInstall() }
                     )
@@ -235,14 +237,14 @@ internal fun CatalogMenuButton(
                 AppIconButton(
                     imageVector = Icons.Filled.PushPin,
                     tint = MaterialTheme.colors.primary,
-                    title = "Pin",
+                    text = UiText.StringResource( R.string.pin),
                     onClick = onPinToggle
                 )
             } else {
                 AppIconButton(
                     imageVector = Icons.Outlined.PushPin,
                     tint = MaterialTheme.colors.onBackground.copy(.5f),
-                    title = "UnPin",
+                    text = UiText.StringResource( R.string.unpin),
                     onClick = onPinToggle
                 )
             }
@@ -250,7 +252,7 @@ internal fun CatalogMenuButton(
             Spacer(modifier = Modifier.padding(horizontal = 4.dp))
             if (onUninstall != null && catalog is CatalogLocal) {
                 MidSizeTextComposable(
-                    text = "Uninstall",
+                    text = UiText.StringResource( R.string.uninstall),
                     color = MaterialTheme.colors.primary,
                     modifier = Modifier.clickable { onUninstall() }
                 )

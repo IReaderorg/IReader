@@ -28,6 +28,7 @@ import org.ireader.common_resources.UiText
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.core_ui.ui.EmptyScreen
 import org.ireader.core_ui.ui.LoadingScreen
+import org.ireader.ui_updates.R
 import org.ireader.updates.component.UpdatesContent
 import org.ireader.updates.component.UpdatesToolbar
 import org.ireader.updates.viewmodel.UpdateState
@@ -61,11 +62,14 @@ fun UpdateScreen(
             )
         }
     ) { padding ->
-        Box(Modifier.fillMaxSize().padding(padding)) {
+        Box(
+            Modifier
+                .fillMaxSize()
+                .padding(padding)) {
             Crossfade(targetState = Pair(state.isLoading, state.isEmpty)) { (isLoading, isEmpty) ->
                 when {
                     isLoading -> LoadingScreen()
-                    isEmpty -> EmptyScreen(text = UiText.DynamicString("No New Updates is Available."))
+                    isEmpty -> EmptyScreen(text = UiText.StringResource(R.string.no_new_update_available))
                     else -> UpdatesContent(
                         state = state,
                         onClickItem = onUpdate,
@@ -123,25 +127,25 @@ private fun BoxScope.UpdateEditBar(
             ) {
                 AppIconButton(
                     imageVector = Icons.Default.GetApp,
-                    title = "Download",
+                    text = UiText.StringResource( R.string.download),
                     onClick = onBottomBarDownload
                 )
             }
             AppIconButton(
                 imageVector = Icons.Default.BookmarkBorder,
-                title = "Bookmark",
+                text = UiText.StringResource( R.string.bookmark),
                 onClick = onBottomBookMark
             )
 
             AppIconButton(
                 imageVector = Icons.Default.Done,
-                title = "Mark as read",
+                text = UiText.StringResource( R.string.mark_as_read),
                 onClick = onBottomBarMarkAsRead
             )
 
             AppIconButton(
                 imageVector = Icons.Default.Delete,
-                title = "Delete Update",
+                text = UiText.StringResource( R.string.delete_update),
                 onClick = onBottomBarDelete
             )
         }

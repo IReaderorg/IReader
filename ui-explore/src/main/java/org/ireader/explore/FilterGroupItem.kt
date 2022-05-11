@@ -17,6 +17,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import org.ireader.common_resources.UiText
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.DropDownMenu
 import org.ireader.components.reusable_composable.MidSizeTextComposable
@@ -26,7 +27,7 @@ import org.ireader.core_api.util.replace
 
 @Composable
 fun FilterGroupItem(
-    name: String,
+    name: UiText,
     filters: List<Filter<*>>,
     onUpdate: (List<Filter<*>>) -> Unit,
     isExpandable: Boolean = false,
@@ -48,7 +49,7 @@ fun FilterGroupItem(
             MidSizeTextComposable(text = name)
             AppIconButton(
                 imageVector = Icons.Default.ArrowDropDown,
-                title = name,
+                text = name,
                 onClick = { expanded = !expanded }
             )
         }
@@ -73,7 +74,7 @@ fun FilterGroupItem(
                     )
                 }
                 is Filter.Note -> {
-                    MidSizeTextComposable(text = filter.name)
+                    MidSizeTextComposable(text = UiText.DynamicString(filter.name))
                 }
                 is Filter.Sort -> {
                     var state by remember {
@@ -83,7 +84,7 @@ fun FilterGroupItem(
                         state = filter.value?.index
                     }
                     DropDownMenu(
-                        text = filter.name,
+                        text = UiText.DynamicString(filter.name),
                         onSelected = { value ->
                             onUpdate(
                                 filters.replace(
@@ -96,9 +97,9 @@ fun FilterGroupItem(
                             state = value
                         },
                         currentValue = if (state != null) {
-                            filter.options[state!!]
-                        } else filter.options[0],
-                        items = filter.options
+                            UiText.DynamicString(filter.options[state!!])
+                        } else UiText.DynamicString(filter.options[0]),
+                        items = filter.options.map { UiText.DynamicString(it) }.toTypedArray()
                     )
                 }
                 is Filter.Text -> {
@@ -118,7 +119,7 @@ fun FilterGroupItem(
                 }
                 is Filter.Group -> {
                     FilterGroupItem(
-                        name = filter.name,
+                        name = UiText.DynamicString(filter.name),
                         filters = filter.filters,
                         onUpdate = {
                             onUpdate(filters.replace(index, Filter.Group(filter.name, it)))

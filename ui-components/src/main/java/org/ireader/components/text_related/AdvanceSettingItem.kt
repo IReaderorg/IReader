@@ -1,4 +1,4 @@
-package org.ireader.components
+package org.ireader.components.text_related
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -8,14 +8,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
+import org.ireader.common_resources.UiText
 import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.components.reusable_composable.SuperSmallTextComposable
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AdvanceSettingItem(
-    title: String = "",
-    subtitle: String = "",
+    title: UiText = UiText.DynamicString(""),
+    subtitle: UiText =  UiText.DynamicString(""),
     onClick: () -> Unit = {},
 ) {
     ListItem(
@@ -34,5 +35,5 @@ fun AdvanceSettingItem(
 @Preview(showBackground = true)
 @Composable
 fun AdvanceSettingPrev() {
-    AdvanceSettingItem(title = "Clear All Table", subtitle = "38.6 kb")
+    AdvanceSettingItem(title = UiText.DynamicString("Clear All Table"), subtitle = UiText.DynamicString("38.6 kb"))
 }

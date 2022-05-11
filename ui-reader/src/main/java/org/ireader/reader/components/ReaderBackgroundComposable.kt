@@ -22,9 +22,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import org.ireader.common_resources.UiText
 import org.ireader.components.reusable_composable.CaptionTextComposable
 import org.ireader.core_ui.theme.readerScreenBackgroundColors
 import org.ireader.reader.viewmodel.ReaderScreenPreferencesState
+import org.ireader.ui_reader.R
 
 @Composable
 fun ReaderBackgroundComposable(
@@ -40,7 +42,7 @@ fun ReaderBackgroundComposable(
     ) {
         CaptionTextComposable(
             modifier = Modifier.width(100.dp),
-            text = "Background Color",
+            text = UiText.StringResource(R.string.background_color),
             style = MaterialTheme.typography.caption
         )
         LazyRow {

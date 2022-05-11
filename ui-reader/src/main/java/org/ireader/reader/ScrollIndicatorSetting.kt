@@ -24,9 +24,11 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import org.ireader.common_resources.UiText
 import org.ireader.components.reusable_composable.AppTextField
 import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.reader.viewmodel.ReaderScreenPreferencesState
+import org.ireader.ui_reader.R
 
 @Composable
 fun ScrollIndicatorSetting(
@@ -57,7 +59,7 @@ fun ScrollIndicatorSetting(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    MidSizeTextComposable(text = "Advance Setting")
+                    MidSizeTextComposable(text = UiText.StringResource(R.string.advance_setting))
                     Spacer(modifier = Modifier.height(32.dp))
                     AppTextField(
                         query = bgValue,
@@ -68,7 +70,7 @@ fun ScrollIndicatorSetting(
                         onConfirm = {
                             focusManager.clearFocus()
                         },
-                        hint = "Background Color",
+                        hint = UiText.StringResource(R.string.background_color),
                         mode = 2,
                         keyboardAction = KeyboardOptions(
                             imeAction = ImeAction.Done,
@@ -85,7 +87,7 @@ fun ScrollIndicatorSetting(
                         onConfirm = {
                             focusManager.clearFocus()
                         },
-                        hint = "TextColor Value",
+                        hint = UiText.StringResource(R.string.text_color),
                         mode = 2,
                         keyboardAction = KeyboardOptions(
                             imeAction = ImeAction.Done,
@@ -113,7 +115,7 @@ fun ScrollIndicatorSetting(
                         )
                     ) {
 
-                        MidSizeTextComposable(text = "DISMISS")
+                        MidSizeTextComposable(text = UiText.StringResource(R.string.dismiss))
                     }
                     Button(
                         onClick = {
@@ -126,7 +128,7 @@ fun ScrollIndicatorSetting(
                         )
                     ) {
 
-                        MidSizeTextComposable(text = "APPLY")
+                        MidSizeTextComposable(text = UiText.StringResource(R.string.apply))
                     }
                 }
             },

@@ -17,7 +17,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.ireader.common_models.entities.BookItem
+import org.ireader.common_resources.UiText
 import org.ireader.core_ui.ui_components.isScrolledToTheEnd
+import org.ireader.ui_components.R
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -56,7 +58,7 @@ fun CompactGridLayoutComposable(
                             GoToLastReadComposable(onClick = { goToLatestChapter(books[index]) })
                         }
                         if (!isLocal && books[index].favorite) {
-                            TextBadge(text = "in Library")
+                            TextBadge(text = UiText.StringResource(R.string.in_library))
                         }
                     }
                 }

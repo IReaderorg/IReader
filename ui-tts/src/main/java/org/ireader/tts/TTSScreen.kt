@@ -53,7 +53,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -63,6 +62,7 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
 import kotlinx.coroutines.launch
 import org.ireader.common_models.entities.Chapter
+import org.ireader.common_resources.UiText
 import org.ireader.components.components.BookImageComposable
 import org.ireader.components.components.ShowLoading
 import org.ireader.components.reusable_composable.AppIconButton
@@ -71,6 +71,7 @@ import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.components.reusable_composable.SuperSmallTextComposable
 import org.ireader.core.R
 import org.ireader.core_api.source.Source
+import org.ireader.core_ui.ui.string
 import org.ireader.domain.services.tts_service.TTSState
 import org.ireader.image_loader.BookCover
 import org.ireader.reader.ReaderScreenDrawer
@@ -129,13 +130,13 @@ fun TTSScreen(
                         onLanguage = onLanguage
                     )
                     SettingItemToggleComposable(
-                        text = "Auto Next Chapter",
+                        text = UiText.StringResource( R.string.auto_next_chapter),
                         value = vm.autoNextChapter,
                         onToggle = onAutoNextChapterToggle
                     )
                     SettingItemComposable(
-                        text = "Speech Rate",
-                        value = vm.speechSpeed.toString(),
+                        text =UiText.StringResource( R.string.auto_next_chapter),
+                        value = UiText.DynamicString(vm.speechSpeed.toString()),
                         onAdd = {
                             onSpeechRateChange(true)
 
@@ -146,8 +147,8 @@ fun TTSScreen(
                     )
 
                     SettingItemComposable(
-                        text = "Pitch",
-                        value = vm.pitch.toString(),
+                        text =UiText.StringResource( R.string.pitch),
+                        value = UiText.DynamicString(vm.pitch.toString()),
                         onAdd = {
                             onSpeechPitchChange(true)
                         },
@@ -187,7 +188,7 @@ fun TTSScreen(
                         .align(Alignment.TopStart)
                         .padding(start = 4.dp),
                     imageVector = Icons.Default.ArrowBack,
-                    title = "Return to Reader Screen",
+                    text =UiText.StringResource( R.string.return_to_previous_screen),
                     onClick = onPopStack
                 )
 
@@ -223,18 +224,18 @@ fun TTSScreen(
                                     )
 
                                     BigSizeTextComposable(
-                                        text = chapter.title,
+                                        text = UiText.DynamicString( chapter.title),
                                         align = TextAlign.Center,
                                         maxLine = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
                                     MidSizeTextComposable(
-                                        text = book.title,
+                                        text = UiText.DynamicString(book.title),
                                         align = TextAlign.Center,
                                         maxLine = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
-                                    SuperSmallTextComposable(text = "${vm.currentReadingParagraph + 1}/${vm.ttsContent?.value?.size ?: 0L}")
+                                    SuperSmallTextComposable(text = UiText.DynamicString("${vm.currentReadingParagraph + 1}/${vm.ttsContent?.value?.size ?: 0L}"))
                                 }
                                 HorizontalPager(
                                     modifier = Modifier.weight(6f), count = chapter.content.size,
@@ -330,10 +331,11 @@ private fun TTLScreenSetting(
         ) {
             Icon(
                 modifier = Modifier.size(40.dp), imageVector = Icons.Default.List,
-                contentDescription = stringResource(id = R.string.content).uppercase()
+                contentDescription = UiText.DynamicString(string(id =  R.string.content).uppercase()).asString(
+                    LocalContext.current)
             )
             Spacer(modifier = Modifier.width(16.dp))
-            MidSizeTextComposable(text = stringResource(id = R.string.content).uppercase())
+            MidSizeTextComposable(text = UiText.DynamicString(string(id = R.string.content).uppercase()))
         }
         Divider(
             modifier = Modifier
@@ -350,10 +352,12 @@ private fun TTLScreenSetting(
         ) {
             Icon(
                 modifier = Modifier.size(40.dp), imageVector = Icons.Default.Settings,
-                contentDescription = stringResource(id = R.string.settings).uppercase()
+                contentDescription = UiText.DynamicString(string(id = R.string.settings).uppercase()).asString(
+                    LocalContext.current)
             )
             Spacer(modifier = Modifier.width(16.dp))
-            MidSizeTextComposable(text = stringResource(id = R.string.settings).uppercase())
+            MidSizeTextComposable(text = UiText.DynamicString(UiText.DynamicString(string(id = R.string.settings).uppercase()).asString(
+                LocalContext.current)))
         }
     }
 }
@@ -413,14 +417,14 @@ private fun TTLScreenPlay(
                 AppIconButton(
                     modifier = Modifier.size(50.dp),
                     imageVector = Icons.Filled.SkipPrevious,
-                    title = "Previous Paragraph",
+                    text = UiText.StringResource( R.string.previous_chapter),
                     onClick = onPrev,
                     tint = MaterialTheme.colors.onBackground
                 )
                 AppIconButton(
                     modifier = Modifier.size(50.dp),
                     imageVector = Icons.Filled.FastRewind,
-                    title = "Previous",
+                    text = UiText.StringResource( R.string.previous_paragraph),
                     onClick = onPrevPar,
                     tint = MaterialTheme.colors.onBackground
                 )
@@ -438,7 +442,7 @@ private fun TTLScreenPlay(
                             AppIconButton(
                                 modifier = Modifier.size(80.dp),
                                 imageVector = Icons.Filled.Pause,
-                                title = "Play",
+                                text = UiText.StringResource( R.string.play),
                                 onClick = onPlay,
                                 tint = MaterialTheme.colors.onBackground
                             )
@@ -447,7 +451,7 @@ private fun TTLScreenPlay(
                             AppIconButton(
                                 modifier = Modifier.size(80.dp),
                                 imageVector = Icons.Filled.PlayArrow,
-                                title = "Play",
+                                text =UiText.StringResource( R.string.pause),
                                 onClick = onPlay,
                                 tint = MaterialTheme.colors.onBackground
                             )
@@ -458,14 +462,14 @@ private fun TTLScreenPlay(
                 AppIconButton(
                     modifier = Modifier.size(50.dp),
                     imageVector = Icons.Filled.FastForward,
-                    title = "Next Paragraph",
+                    text = UiText.StringResource( R.string.next_paragraph),
                     onClick = onNextPar,
                     tint = MaterialTheme.colors.onBackground
                 )
                 AppIconButton(
                     modifier = Modifier.size(50.dp),
                     imageVector = Icons.Filled.SkipNext,
-                    title = "Next",
+                    text = UiText.StringResource( R.string.next_chapter),
                     onClick = onNext,
                     tint = MaterialTheme.colors.onBackground
                 )

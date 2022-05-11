@@ -44,7 +44,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -52,6 +51,7 @@ import kotlinx.coroutines.launch
 import org.ireader.common_models.DisplayMode
 import org.ireader.common_models.LayoutType
 import org.ireader.common_models.entities.BookItem
+import org.ireader.common_resources.UiText
 import org.ireader.components.components.ShowLoading
 import org.ireader.components.list.LayoutComposable
 import org.ireader.components.reusable_composable.AppIconButton
@@ -187,7 +187,7 @@ fun ExploreScreen(
                 ExtendedFloatingActionButton(
                     text = {
                         MidSizeTextComposable(
-                            text = stringResource(R.string.filter),
+                            text = UiText.StringResource(R.string.filter),
                             color = Color.White
                         )
                     },
@@ -297,12 +297,12 @@ private fun BoxScope.ExploreScreenErrorComposable(
             ) {
                 AppIconButton(
                     imageVector = Icons.Default.Refresh,
-                    title = "Retry",
+                    text = UiText.StringResource(R.string.retry),
                     onClick = {
                         onRefresh()
                     }
                 )
-                SmallTextComposable(text = "Retry")
+                SmallTextComposable(text = UiText.StringResource(R.string.retry))
             }
             Column(
                 Modifier
@@ -313,13 +313,13 @@ private fun BoxScope.ExploreScreenErrorComposable(
                 if (source is HttpSource) {
                     AppIconButton(
                         imageVector = Icons.Default.Public,
-                        title = "Open in WebView",
+                        text = UiText.StringResource(R.string.open_in_webView),
                         onClick = {
                             onWebView(source)
                         }
                     )
                 }
-                SmallTextComposable(text = "Open in WebView")
+                SmallTextComposable(text =UiText.StringResource(R.string.open_in_webView))
             }
         }
     }

@@ -27,9 +27,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.ireader.common_resources.UiText
 import org.ireader.components.reusable_composable.CaptionTextComposable
+import org.ireader.core_ui.ui.string
 import org.ireader.domain.services.tts_service.TTSState
 import org.ireader.domain.services.tts_service.isSame
+import org.ireader.ui_tts.R
 import java.util.Locale
 
 @Composable
@@ -49,7 +52,7 @@ fun VoiceChip(
         Text(
             modifier = Modifier
                 .width(100.dp),
-            text = "Voices",
+            text = string(id = R.string.voices),
             textAlign = TextAlign.Start,
             fontSize = 12.sp,
             style = TextStyle(fontWeight = FontWeight.W400)
@@ -85,7 +88,7 @@ fun VoiceChip(
                          * need to think of something else for it later
                          */
                         CaptionTextComposable(
-                            text = voices[index].locale.displayName,
+                            text = UiText.DynamicString(voices[index].locale.displayName),
                             maxLine = 1,
                             align = TextAlign.Center,
                             modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp)
@@ -114,7 +117,7 @@ fun LanguageChip(
         Text(
             modifier = Modifier
                 .width(100.dp),
-            text = "Languages",
+            text = string(id = R.string.languages),
             fontSize = 12.sp,
             style = TextStyle(fontWeight = FontWeight.W400)
         )
@@ -141,7 +144,7 @@ fun LanguageChip(
                         contentAlignment = Alignment.Center
                     ) {
                         CaptionTextComposable(
-                            text = language[index].displayName,
+                            text = UiText.DynamicString(language[index].displayName),
                             maxLine = 1,
                             align = TextAlign.Center,
                             modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp)

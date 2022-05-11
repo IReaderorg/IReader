@@ -19,16 +19,17 @@ import kotlinx.serialization.SerializationException
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.ireader.common_extensions.findComponentActivity
+import org.ireader.common_extensions.getCacheSize
 import org.ireader.common_extensions.launchIO
 import org.ireader.common_models.BackUpBook
 import org.ireader.common_resources.UiEvent
 import org.ireader.common_resources.UiText
-import org.ireader.components.AdvanceSettingItem
 import org.ireader.components.components.ISnackBarHost
 import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.components.reusable_composable.TopAppBarBackButton
-import org.ireader.core_ui.ui_components.TextSection
+import org.ireader.components.text_related.AdvanceSettingItem
+import org.ireader.components.text_related.TextSection
 import org.ireader.settings.setting.SettingViewModel
 import org.ireader.ui_settings.R
 import java.io.FileInputStream
@@ -39,7 +40,7 @@ import java.io.FileOutputStream
 fun AdvanceSettings(
     modifier: Modifier = Modifier,
     vm: SettingViewModel,
-    onBackStack:() -> Unit
+    onBackStack: () -> Unit
 
 ) {
     val context = LocalContext.current
@@ -119,9 +120,9 @@ fun AdvanceSettings(
         topBar = {
             Toolbar(
                 title = {
-                    BigSizeTextComposable(text = "Advance Settings")
+                    BigSizeTextComposable(text =   UiText.StringResource(R.string.advance_setting))
                 },
-                navigationIcon = { TopAppBarBackButton(onClick =onBackStack ) }
+                navigationIcon = { TopAppBarBackButton(onClick = onBackStack) }
             )
         },
         snackbarHost = { ISnackBarHost(snackBarHostState = it) },
@@ -130,25 +131,27 @@ fun AdvanceSettings(
         Column(
             modifier = Modifier.padding(padding)
         ) {
-            TextSection(text = "Data", toUpper = false)
-            AdvanceSettingItem(title = "Clear All Database") {
+            TextSection(text = UiText.StringResource(R.string.data), toUpper = false)
+            AdvanceSettingItem(title = UiText.StringResource(R.string.clear_all_database)) {
                 vm.deleteAllDatabase()
-                vm.showSnackBar(UiText.DynamicString("Database was cleared."))
+                vm.showSnackBar(
+                    UiText.StringResource(R.string.database_was_cleared)
+                )
             }
-            AdvanceSettingItem(title = "Clear All Chapters") {
+            AdvanceSettingItem(title =  UiText.StringResource(R.string.clear_all_chapters)) {
                 vm.deleteAllChapters()
-                vm.showSnackBar(UiText.DynamicString("Chapters was cleared."))
+                vm.showSnackBar(UiText.StringResource(R.string.chapters_was_cleared))
             }
             AdvanceSettingItem(
-                title = "Clear All Cache",
-                subtitle = org.ireader.common_extensions.getCacheSize(context = context)
+                title =   UiText.StringResource(R.string.clear_all_cache),
+                subtitle =   UiText.DynamicString(getCacheSize(context = context))
             ) {
                 context.cacheDir.deleteRecursively()
                 vm.showSnackBar(UiText.DynamicString("Clear was cleared."))
             }
 
-            TextSection(text = "Backup", toUpper = false)
-            AdvanceSettingItem(title = "Backup") {
+            TextSection(text =   UiText.StringResource(R.string.backup), toUpper = false)
+            AdvanceSettingItem(title =   UiText.StringResource(R.string.backup)) {
                 context.findComponentActivity()
                     ?.let { activity ->
                         vm.onLocalBackupRequested { intent: Intent ->
@@ -156,7 +159,7 @@ fun AdvanceSettings(
                         }
                     }
             }
-            AdvanceSettingItem(title = "Restore") {
+            AdvanceSettingItem(title =   UiText.StringResource(R.string.restore)) {
                 context.findComponentActivity()
                     ?.let { activity ->
                         vm.onRestoreBackupRequested { intent: Intent ->
@@ -164,8 +167,8 @@ fun AdvanceSettings(
                         }
                     }
             }
-            TextSection(text = "Reset Setting", toUpper = false)
-            AdvanceSettingItem(title = "Reset Reader Screen Settings") {
+            TextSection(text =   UiText.StringResource(R.string.reset_setting), toUpper = false)
+            AdvanceSettingItem(title =   UiText.StringResource(R.string.reset_reader_screen_settings)) {
                 vm.deleteDefaultSettings()
             }
         }

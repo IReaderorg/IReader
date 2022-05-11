@@ -9,11 +9,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import org.ireader.common_resources.UiText
 import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.AppTextField
 import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.history.viewmodel.HistoryState
+import org.ireader.ui_history.R
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -27,7 +29,7 @@ fun HistoryTopAppBar(
     Toolbar(
         title = {
             if (!vm.searchMode) {
-                BigSizeTextComposable(text = "History")
+                BigSizeTextComposable(text = UiText.StringResource(R.string.history_screen_label))
             } else {
                 AppTextField(
                     query = vm.searchQuery,
@@ -46,7 +48,7 @@ fun HistoryTopAppBar(
             if (vm.searchMode) {
                 AppIconButton(
                     imageVector = Icons.Default.Close,
-                    title = "Close",
+                    text = UiText.StringResource(R.string.close),
                     onClick = {
                         vm.searchMode = false
                         vm.searchQuery = ""
@@ -57,14 +59,14 @@ fun HistoryTopAppBar(
             }
             AppIconButton(
                 imageVector = Icons.Default.Search,
-                title = "Search",
+                text = UiText.StringResource(R.string.search),
                 onClick = {
                     vm.searchMode = true
                 },
             )
             AppIconButton(
                 imageVector = Icons.Default.Delete,
-                title = "Delete All Histories",
+                text = UiText.StringResource(R.string.delete_all_histories),
                 onClick = {
                     onDeleteAll()
                 },
@@ -74,7 +76,7 @@ fun HistoryTopAppBar(
             {
                 AppIconButton(
                     imageVector = Icons.Default.ArrowBack,
-                    title = "Toggle search mode off",
+                    text = UiText.StringResource(R.string.toggle_search_mode_off),
                     onClick = {
                         vm.searchMode = false
                         vm.searchQuery = ""

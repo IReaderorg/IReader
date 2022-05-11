@@ -56,9 +56,11 @@ import com.google.accompanist.web.rememberWebViewState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collectLatest
 import org.ireader.common_resources.UiEvent
+import org.ireader.common_resources.UiText
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.components.reusable_composable.MidSizeTextComposable
+import org.ireader.core.R
 import org.ireader.core_api.source.CatalogSource
 import org.ireader.domain.utils.setDefaultSettings
 
@@ -265,7 +267,7 @@ fun WebPageScreen(
 
 @Composable
 fun ScrollableAppBar(
-    title: String,
+    title: UiText,
     modifier: Modifier = Modifier,
     navigationIcon: @Composable (() -> Unit)? = null,
     background: Color = MaterialTheme.colors.primary,
@@ -309,12 +311,12 @@ private fun WebPageBottomLayout(
             TextButton(onClick = {
                 onCancel()
             }, modifier = Modifier.width(92.dp), shape = RoundedCornerShape(4.dp)) {
-                MidSizeTextComposable(text = "Cancel", color = MaterialTheme.colors.primary)
+                MidSizeTextComposable(text = UiText.StringResource( R.string.cancel), color = MaterialTheme.colors.primary)
             }
             Button(onClick = {
                 onConfirm()
             }, modifier = Modifier.width(92.dp), shape = RoundedCornerShape(4.dp)) {
-                MidSizeTextComposable(text = "Apply", color = MaterialTheme.colors.onPrimary)
+                MidSizeTextComposable(text = UiText.StringResource( R.string.apply), color = MaterialTheme.colors.onPrimary)
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -335,7 +337,7 @@ private fun WebPageBottomLayout(
                                     state.selectedBooks.remove(-1)
                                 }
                             })
-                        MidSizeTextComposable(text = "New")
+                        MidSizeTextComposable(text = UiText.StringResource( R.string.add_as_new))
 
                     }
                 }
@@ -361,10 +363,10 @@ private fun WebPageBottomLayout(
                                     state.selectedBooks.remove(item.id)
                                 }
                             })
-                        MidSizeTextComposable(text = item.title)
+                        MidSizeTextComposable(text = UiText.DynamicString(item.title))
                     }
                     AppIconButton(imageVector = Icons.Default.ArrowForward,
-                        title = "View Book",
+                        text =UiText.StringResource( R.string.view_book),
                         onClick = {
                             onBook(item.id)
                         })

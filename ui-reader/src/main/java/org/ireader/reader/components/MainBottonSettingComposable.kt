@@ -15,7 +15,9 @@ import androidx.compose.ui.Modifier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.ireader.common_models.entities.Chapter
+import org.ireader.common_resources.UiText
 import org.ireader.components.reusable_composable.AppIconButton
+import org.ireader.ui_reader.R
 
 @Composable
 fun MainBottomSettingComposable(
@@ -58,17 +60,17 @@ fun MainBottomSettingComposable(
     ) {
         AppIconButton(
             imageVector = Icons.Default.Menu,
-            title = "Chapter List Drawer",
+            text = UiText.StringResource(R.string.drawer),
             onClick = { scope.launch { scaffoldState.drawerState.open() } }
         )
         AppIconButton(
             imageVector = Icons.Default.Headphones,
-            title = "Play Text To Speech",
+            text = UiText.StringResource(R.string.play),
             onClick = { onPlay() }
         )
         AppIconButton(
             imageVector = Icons.Default.Settings,
-            title = "Setting Drawer",
+            text = UiText.StringResource(R.string.settings),
             onClick = { onSetting() }
         )
     }

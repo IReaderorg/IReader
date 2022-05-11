@@ -8,10 +8,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import org.ireader.common_resources.UiText
 import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.AppTextField
 import org.ireader.sources.global_search.viewmodel.GlobalSearchState
+import org.ireader.ui_sources.R
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -40,7 +42,7 @@ fun GlobalScreenTopBar(
         actions = {
             AppIconButton(
                 imageVector = Icons.Default.Search,
-                title = "Search",
+                text =  UiText.StringResource(R.string.search),
                 onClick = {
                     state.searchMode = true
                 },
@@ -49,7 +51,7 @@ fun GlobalScreenTopBar(
         navigationIcon = {
             AppIconButton(
                 imageVector = Icons.Default.ArrowBack,
-                title = "Toggle search mode off",
+                text = UiText.StringResource(R.string.toggle_search_mode_off),
                 onClick = {
                     onPop()
                 }

@@ -21,11 +21,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.ireader.common_models.entities.Chapter
+import org.ireader.common_resources.UiText
 import org.ireader.components.components.ChapterListItemComposable
 import org.ireader.components.list.scrollbars.LazyColumnScrollbar
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.components.text_related.ErrorTextWithEmojis
+import org.ireader.ui_reader.R
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -46,7 +48,7 @@ fun ReaderScreenDrawer(
     ) {
         Spacer(modifier = modifier.height(5.dp))
         Box(modifier = Modifier.fillMaxWidth()) {
-            BigSizeTextComposable(text = "Content", modifier = Modifier.align(Alignment.Center))
+            BigSizeTextComposable(text = UiText.StringResource(R.string.content), modifier = Modifier.align(Alignment.Center))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.End,
@@ -54,12 +56,12 @@ fun ReaderScreenDrawer(
             ) {
                 Box {}
 
-                AppIconButton(imageVector = Icons.Filled.Place, title = "", onClick = {
+                AppIconButton(imageVector = Icons.Filled.Place, text = UiText.StringResource(R.string.find_current_chapter), onClick = {
                     onMap(drawerScrollState)
                 })
                 AppIconButton(
                     imageVector = Icons.Default.Sort,
-                    title = "Reverse list icon",
+                    text =UiText.StringResource(R.string.reverse),
                     onClick = {
                         onReverseIcon()
                     }

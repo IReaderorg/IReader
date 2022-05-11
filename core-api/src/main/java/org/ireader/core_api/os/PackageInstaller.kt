@@ -14,6 +14,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.ireader.common_resources.UiText
+import org.ireader.common_resources.string
 import org.ireader.core_api.R
 import org.ireader.core_api.log.Log
 import org.ireader.core_api.util.calculateSizeRecursively
@@ -93,7 +94,7 @@ class PackageInstaller(
                 PackageInstaller.STATUS_PENDING_USER_ACTION -> {
                     val confirmationIntent = intent.getParcelableExtra<Intent>(Intent.EXTRA_INTENT)
                     if (confirmationIntent == null) {
-                        Log.error { "Fatal error for $intent" }
+                        Log.warn { "Fatal error for $intent" }
                         deferred.complete(InstallStep.Error(UiText.StringResource(R.string.fatal_error)))
                         return
                     }
@@ -114,7 +115,7 @@ class PackageInstaller(
                 }
                 PackageInstaller.STATUS_FAILURE_ABORTED -> {
                     deferred.complete(InstallStep.Error(UiText.StringResource(R.string.installation_error_aborted)))
-                    org.ireader.core_api.log.Log.error(
+                    org.ireader.core_api.log.Log.warn(
                         "Package installer failed to install packages",
                         status.toString()
                     )
@@ -140,7 +141,7 @@ class PackageInstaller(
                         "Package installer failed to install packages",
                         status.toString()
                     )
-                    deferred.complete(InstallStep.Error(UiText.DynamicString("Package installer failed to install packages: STATUS_CODE: $status")))
+                    deferred.complete(InstallStep.Error(UiText.DynamicString(context.string(R.string.package_installer_failed_to_install_packages)  + " $status")))
                 }
             }
         }
@@ -149,12 +150,12 @@ class PackageInstaller(
 
 private const val INSTALL_ACTION = "PackageInstallerInstaller.INSTALL_ACTION"
 
-sealed class InstallStep(val name: String,error: UiText? = null) {
-    object Success : InstallStep("Success", null)
-    object Downloading : InstallStep("Downloading", null)
-    object Installing : InstallStep("Installing", null)
-    object Completed : InstallStep("Complete", null)
-    data class Error(val error: UiText) : InstallStep("Failed", error)
+sealed class InstallStep(val name: UiText,error: UiText? = null) {
+    object Success : InstallStep(UiText.StringResource(R.string.success), null)
+    object Downloading : InstallStep(UiText.StringResource(R.string.downloading), null)
+    object Installing : InstallStep(UiText.StringResource(R.string.installing), null)
+    object Completed : InstallStep(UiText.StringResource(R.string.completed), null)
+    data class Error(val error: UiText) : InstallStep(UiText.StringResource(R.string.failed), error)
     fun isFinished(): Boolean {
         return this is Completed || this is Error || this is Success
     }

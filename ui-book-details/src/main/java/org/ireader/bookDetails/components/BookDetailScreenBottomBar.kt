@@ -15,8 +15,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import org.ireader.common_resources.UiText
 import org.ireader.components.components.ShowLoading
+import org.ireader.core_ui.asString
+import org.ireader.core_ui.ui.string
 import org.ireader.core_ui.ui_components.ClickableTextIcon
+import org.ireader.ui_book_details.R
 
 @Composable
 fun BookDetailScreenBottomBar(
@@ -43,14 +47,14 @@ fun BookDetailScreenBottomBar(
         ) {
             ClickableTextIcon(
                 modifier = Modifier.weight(1F),
-                text = if (!isInLibrary) "Add to Library" else "Added To Library",
+                text = if (!isInLibrary) UiText.StringResource(R.string.add_to_library) else UiText.StringResource(R.string.added_to_library),
                 icon = {
                     if (isInLibraryInProgress) {
                         ShowLoading()
                     } else {
                         Icon(
                             imageVector = if (!isInLibrary) Icons.Default.AddCircleOutline else Icons.Default.Check,
-                            contentDescription = "toggle in library",
+                            contentDescription =  UiText.StringResource(R.string.toggle_in_library).asString(),
                             tint = MaterialTheme.colors.onBackground
                         )
                     }
@@ -64,7 +68,7 @@ fun BookDetailScreenBottomBar(
 
             ClickableTextIcon(
                 modifier = Modifier.weight(1F),
-                text = if (isRead) "Continue Reading" else "Read",
+                text = if (isRead) UiText.StringResource(R.string.continue_reading) else UiText.StringResource(R.string.read),
                 icon = {
                     Icon(
                         imageVector = Icons.Default.AutoStories,
@@ -79,11 +83,11 @@ fun BookDetailScreenBottomBar(
 
             ClickableTextIcon(
                 modifier = Modifier.weight(1F),
-                text = "Download",
+                text = UiText.StringResource( R.string.download),
                 icon = {
                     Icon(
                         imageVector = Icons.Default.FileDownload,
-                        contentDescription = "Download",
+                        contentDescription = string(id = R.string.download),
                         tint = MaterialTheme.colors.onBackground
                     )
                 },

@@ -19,6 +19,7 @@ import org.ireader.common_models.DisplayMode
 import org.ireader.common_models.FilterType
 import org.ireader.common_models.LayoutType
 import org.ireader.common_models.SortType
+import org.ireader.common_resources.UiText
 import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.core_ui.ui.Colour.contentColor
 
@@ -44,7 +45,7 @@ fun Tabs(libraryTabs: List<TabItem>, pagerState: PagerState) {
     ) {
         libraryTabs.forEachIndexed { index, tab ->
             Tab(
-                text = { MidSizeTextComposable(text = tab.title) },
+                text = { MidSizeTextComposable(text = UiText.StringResource( tab.title)) },
                 selected = pagerState.currentPage == index,
                 unselectedContentColor = MaterialTheme.colors.onBackground,
                 selectedContentColor = MaterialTheme.colors.primary,

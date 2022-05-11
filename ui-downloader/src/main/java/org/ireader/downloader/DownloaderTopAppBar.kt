@@ -20,14 +20,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import org.ireader.common_resources.UiText
 import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.components.reusable_composable.BuildDropDownMenu
 import org.ireader.components.reusable_composable.DropDownMenuItem
+import org.ireader.core_ui.asString
 import org.ireader.ui_downloader.R
 
 @Composable
@@ -83,7 +84,7 @@ private fun RegularTopBar(
     Toolbar(
         title = {
             Text(
-                text = "Downloads queue",
+                text = UiText.StringResource(R.string.downloads_queue).asString(),
                 color = MaterialTheme.colors.onBackground,
                 style = MaterialTheme.typography.subtitle1,
                 fontWeight = FontWeight.Bold,
@@ -93,7 +94,7 @@ private fun RegularTopBar(
         actions = {
             AppIconButton(
                 imageVector = Icons.Default.MoreVert,
-                title = "Menu Icon",
+                text = UiText.StringResource(R.string.menu),
                 onClick = {
                     isMenuExpanded = true
                 },
@@ -101,7 +102,7 @@ private fun RegularTopBar(
             val list =
                 listOf<DropDownMenuItem>(
                     DropDownMenuItem(
-                        stringResource(R.string.cancel_all)
+                        UiText.StringResource(R.string.cancel_all)
                     ) {
                         onCancelAll()
                     }
@@ -112,7 +113,7 @@ private fun RegularTopBar(
             IconButton(onClick = onPopBackStack) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "ArrowBack Icon",
+                    contentDescription = UiText.StringResource(R.string.return_to_previous_screen).asString(),
                     tint = MaterialTheme.colors.onBackground,
                 )
             }
@@ -129,7 +130,7 @@ private fun EditModeTopAppBar(
     onDelete: () -> Unit
 ) {
     Toolbar(
-        title = { BigSizeTextComposable(text = "$selectionSize") },
+        title = { BigSizeTextComposable(text = UiText.StringResource(selectionSize)) },
         navigationIcon = {
             IconButton(onClick = onClickCancelSelection) {
                 Icon(Icons.Default.Close, contentDescription = null)

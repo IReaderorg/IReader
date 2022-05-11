@@ -49,6 +49,7 @@ import org.ireader.components.list.scrollbars.LazyColumnScrollbar
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.core_ui.ui.EmptyScreen
 import org.ireader.core_ui.ui.LoadingScreen
+import org.ireader.ui_library.R
 
 @ExperimentalPagerApi
 @ExperimentalAnimationApi
@@ -144,9 +145,7 @@ fun LibraryScreen(
                         when {
                             isLoading -> LoadingScreen()
                             isEmpty && vm.filters.isEmpty() -> EmptyScreen(
-                                text = UiText.DynamicString(
-                                    "There is no book is Library, you can add books in the Explore screen."
-                                )
+                                text = UiText.StringResource(R.string.empty_library)
                             )
                             else -> {
                                 LazyColumnScrollbar(
@@ -191,22 +190,22 @@ fun LibraryScreen(
                                 ) {
                                     AppIconButton(
                                         imageVector = Icons.Default.GetApp,
-                                        title = "Download",
+                                        text = UiText.StringResource(R.string.download),
                                         onClick = onDownload
                                     )
                                     AppIconButton(
                                         imageVector = Icons.Default.Done,
-                                        title = "Mark as read",
+                                        text = UiText.StringResource(R.string.mark_as_read),
                                         onClick = onMarkAsRead
                                     )
                                     AppIconButton(
                                         imageVector = Icons.Default.DoneOutline,
-                                        title = "Mark as Not read",
+                                        text = UiText.StringResource(R.string.mark_as_not_read),
                                         onClick = onMarkAsNotRead
                                     )
                                     AppIconButton(
                                         imageVector = Icons.Default.Delete,
-                                        title = "Mark Previous as read",
+                                        text = UiText.StringResource(R.string.mark_previous_as_read),
                                         onClick = onDelete
                                     )
                                 }

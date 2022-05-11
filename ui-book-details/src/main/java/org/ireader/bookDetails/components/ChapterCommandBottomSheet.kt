@@ -26,12 +26,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import org.ireader.common_resources.UiText
 import org.ireader.components.reusable_composable.DropDownMenu
 import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.components.reusable_composable.TextField
 import org.ireader.core_api.source.model.Command
 import org.ireader.core_api.source.model.CommandList
 import org.ireader.core_api.util.replace
+import org.ireader.ui_book_details.R
 
 @Composable
 fun ChapterCommandBottomSheet(
@@ -51,12 +53,12 @@ fun ChapterCommandBottomSheet(
             TextButton(onClick = {
                 onReset()
             }, modifier = Modifier.width(92.dp), shape = RoundedCornerShape(4.dp)) {
-                MidSizeTextComposable(text = "Reset", color = MaterialTheme.colors.primary)
+                MidSizeTextComposable(text = UiText.StringResource(R.string.reset), color = MaterialTheme.colors.primary)
             }
             Button(onClick = {
                 onFetch()
             }, modifier = Modifier.width(92.dp), shape = RoundedCornerShape(4.dp)) {
-                MidSizeTextComposable(text = "Fetch", color = MaterialTheme.colors.onPrimary)
+                MidSizeTextComposable(text = UiText.StringResource(R.string.fetch), color = MaterialTheme.colors.onPrimary)
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -86,7 +88,7 @@ fun ChapterCommandBottomSheet(
                         state = command.value
                     }
                     DropDownMenu(
-                        text = command.name,
+                        text = UiText.DynamicString(command.name),
                         onSelected = { value ->
                             onUpdate(
                                 commandList.replace(
@@ -98,8 +100,8 @@ fun ChapterCommandBottomSheet(
                             )
                             state = value
                         },
-                        currentValue = command.options[state],
-                        items = command.options
+                        currentValue = UiText.DynamicString(command.options[state]),
+                        items = command.options.map { UiText.DynamicString(it) }.toTypedArray()
                     )
                 }
                 is Command.Chapter.Note -> {

@@ -19,10 +19,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.ireader.common_resources.UiText
 import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.core_api.source.CatalogSource
 import org.ireader.core_api.source.TestSource
 import org.ireader.core_api.source.model.Filter
+import org.ireader.ui_explore.R
 
 @Composable
 fun FilterBottomSheet(
@@ -42,17 +44,17 @@ fun FilterBottomSheet(
             TextButton(onClick = {
                 onReset()
             }, modifier = Modifier.width(92.dp), shape = RoundedCornerShape(4.dp)) {
-                MidSizeTextComposable(text = "Reset", color = MaterialTheme.colors.primary)
+                MidSizeTextComposable(text = UiText.StringResource(R.string.reset), color = MaterialTheme.colors.primary)
             }
             Button(onClick = {
                 onApply()
             }, modifier = Modifier.width(92.dp), shape = RoundedCornerShape(4.dp)) {
-                MidSizeTextComposable(text = "Apply", color = MaterialTheme.colors.onPrimary)
+                MidSizeTextComposable(text = UiText.StringResource(R.string.apply), color = MaterialTheme.colors.onPrimary)
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
         FilterGroupItem(
-            name = "",
+            name =UiText.DynamicString(""),
             filters = filters,
             onUpdate = {
                 onUpdate(it)

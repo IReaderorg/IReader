@@ -14,8 +14,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import org.ireader.common_resources.UiText
 import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.BuildDropDownMenu
@@ -69,7 +69,7 @@ fun WebPageTopBar(
         actions = {
             AppIconButton(
                 imageVector = Icons.Default.Menu,
-                title = "Menu Icon",
+                text =   UiText.StringResource(org.ireader.core.R.string.menu),
                 onClick = {
                     isMenuExpanded = true
                 },
@@ -77,22 +77,22 @@ fun WebPageTopBar(
             val list =
                 mutableListOf<DropDownMenuItem>(
                     DropDownMenuItem(
-                        stringResource(org.ireader.core.R.string.Go)
+                        UiText.StringResource(org.ireader.core.R.string.Go)
                     ) {
                         onGo()
                     },
                     DropDownMenuItem(
-                        stringResource(org.ireader.core.R.string.refresh)
+                        UiText.StringResource(org.ireader.core.R.string.refresh)
                     ) {
                         refresh()
                     },
                     DropDownMenuItem(
-                        stringResource(org.ireader.core.R.string.go_back)
+                        UiText.StringResource(org.ireader.core.R.string.go_back)
                     ) {
                         goBack()
                     },
                     DropDownMenuItem(
-                        stringResource(org.ireader.core.R.string.go_forward)
+                        UiText.StringResource(org.ireader.core.R.string.go_forward)
                     ) {
                         goForward()
                     },
@@ -100,7 +100,7 @@ fun WebPageTopBar(
             if (source != null && source.getCommands().find { it is Command.Detail.Fetch } != null && state.stateBook == null ) {
                 list.add(
                     DropDownMenuItem(
-                        stringResource(org.ireader.core.R.string.fetch_book)
+                        UiText.StringResource(org.ireader.core.R.string.fetch_book)
                     ) {
                         onFetchBook()
                     }
@@ -109,7 +109,7 @@ fun WebPageTopBar(
             if (source != null && source.getCommands().find { it is Command.Content.Fetch } != null && state.stateChapter != null) {
                 list.add(
                     DropDownMenuItem(
-                        stringResource(org.ireader.core.R.string.fetch_chapter)
+                        UiText.StringResource(org.ireader.core.R.string.fetch_chapter)
                     ) {
                         onFetchChapter()
                     }
@@ -118,7 +118,7 @@ fun WebPageTopBar(
             if (source != null && source.getCommands().find { it is Command.Chapter.Fetch} != null&& state.stateBook != null) {
                 list.add(
                     DropDownMenuItem(
-                        stringResource(org.ireader.core.R.string.fetch_chapters)
+                        UiText.StringResource(org.ireader.core.R.string.fetch_chapters)
                     ) {
                         onFetchChapters()
                     }

@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import org.ireader.common_models.DisplayMode
 import org.ireader.common_models.LayoutType
 import org.ireader.common_models.layouts
+import org.ireader.common_resources.UiText
 import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.AppTextField
@@ -29,6 +30,7 @@ import org.ireader.core_api.source.CatalogSource
 import org.ireader.core_api.source.HttpSource
 import org.ireader.core_api.source.model.Filter
 import org.ireader.explore.viewmodel.ExploreState
+import org.ireader.ui_explore.R
 
 @Composable
 fun BrowseTopAppBar(
@@ -49,7 +51,7 @@ fun BrowseTopAppBar(
     Toolbar(
         title = {
             if (!state.isSearchModeEnable) {
-                BigSizeTextComposable(text = source.name)
+                BigSizeTextComposable(text = UiText.DynamicString(source.name))
             } else {
                 AppTextField(
                     query = state.searchQuery ?: "",
@@ -66,7 +68,7 @@ fun BrowseTopAppBar(
             if (state.isSearchModeEnable) {
                 AppIconButton(
                     imageVector = Icons.Default.Close,
-                    title = "Close",
+                    text = UiText.StringResource(R.string.close),
                     onClick = {
                         onSearchDisable()
                     },
@@ -76,7 +78,7 @@ fun BrowseTopAppBar(
             ) {
                 AppIconButton(
                     imageVector = Icons.Default.Search,
-                    title = "Search",
+                    text =  UiText.StringResource(R.string.search),
                     onClick = {
                         onSearchEnable()
                     },
@@ -85,7 +87,7 @@ fun BrowseTopAppBar(
             if (source is HttpSource) {
                 AppIconButton(
                     imageVector = Icons.Default.Public,
-                    title = "WebView",
+                    text = UiText.StringResource(R.string.webView),
                     onClick = {
                         onWebView()
                     },
@@ -93,7 +95,7 @@ fun BrowseTopAppBar(
             }
             AppIconButton(
                 imageVector = Icons.Default.GridView,
-                title = "Layout",
+                text = UiText.StringResource(R.string.layout),
                 onClick = {
                     topMenu = true
                 },

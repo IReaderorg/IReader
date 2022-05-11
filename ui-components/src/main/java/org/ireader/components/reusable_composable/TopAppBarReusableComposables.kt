@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -29,11 +30,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.ireader.common_resources.UiText
+import org.ireader.ui_components.R
 
 @Composable
 fun BigSizeTextComposable(
     modifier: Modifier = Modifier,
-    text: String,
+    text: UiText,
     color: Color? = null,
     style: TextStyle? = null,
     fontWeight: FontWeight? = null,
@@ -43,7 +46,7 @@ fun BigSizeTextComposable(
 ) {
     Text(
         modifier = modifier,
-        text = text,
+        text = text.asString(LocalContext.current),
         color = color ?: MaterialTheme.colors.onBackground,
         style = style ?: MaterialTheme.typography.subtitle1,
         fontWeight = fontWeight ?: FontWeight.Bold,
@@ -56,7 +59,7 @@ fun BigSizeTextComposable(
 @Composable
 fun MidSizeTextComposable(
     modifier: Modifier = Modifier,
-    text: String,
+    text: UiText,
     color: Color? = null,
     style: TextStyle? = null,
     fontWeight: FontWeight? = null,
@@ -66,7 +69,7 @@ fun MidSizeTextComposable(
 ) {
     Text(
         modifier = modifier,
-        text = text,
+        text = text.asString(LocalContext.current),
         color = color ?: MaterialTheme.colors.onBackground,
         style = style ?: MaterialTheme.typography.subtitle2,
         fontWeight = fontWeight ?: FontWeight.SemiBold,
@@ -79,7 +82,7 @@ fun MidSizeTextComposable(
 @Composable
 fun SmallTextComposable(
     modifier: Modifier = Modifier,
-    text: String,
+    text: UiText,
     color: Color? = null,
     style: TextStyle? = null,
     fontWeight: FontWeight? = null,
@@ -89,7 +92,7 @@ fun SmallTextComposable(
 ) {
     Text(
         modifier = modifier,
-        text = text,
+        text = text.asString(LocalContext.current),
         color = color ?: MaterialTheme.colors.onBackground,
         style = style ?: MaterialTheme.typography.caption,
         fontWeight = fontWeight ?: FontWeight.SemiBold,
@@ -102,7 +105,7 @@ fun SmallTextComposable(
 @Composable
 fun SuperSmallTextComposable(
     modifier: Modifier = Modifier,
-    text: String,
+    text: UiText,
     color: Color? = null,
     style: TextStyle? = null,
     fontWeight: FontWeight? = null,
@@ -110,10 +113,10 @@ fun SuperSmallTextComposable(
     maxLine: Int = Int.MAX_VALUE,
     align: TextAlign? = null,
 
-) {
+    ) {
     Text(
         modifier = modifier,
-        text = text,
+        text = text.asString(LocalContext.current),
         color = color ?: MaterialTheme.colors.onBackground,
         style = style ?: MaterialTheme.typography.caption,
         fontWeight = fontWeight ?: FontWeight.Normal,
@@ -127,7 +130,7 @@ fun SuperSmallTextComposable(
 @Composable
 fun CaptionTextComposable(
     modifier: Modifier = Modifier,
-    text: String,
+    text: UiText,
     color: Color? = null,
     style: TextStyle? = null,
     fontWeight: FontWeight? = null,
@@ -137,7 +140,7 @@ fun CaptionTextComposable(
 ) {
     Text(
         modifier = modifier,
-        text = text,
+        text = text.asString(LocalContext.current),
         color = color ?: MaterialTheme.colors.onBackground,
         style = style ?: MaterialTheme.typography.caption,
         fontWeight = fontWeight ?: FontWeight.Normal,
@@ -152,7 +155,7 @@ fun CaptionTextComposable(
 fun AppIconButton(
     modifier: Modifier = Modifier,
     imageVector: ImageVector,
-    title: String,
+    text: UiText,
     onClick: () -> Unit,
     tint: Color? = null,
 ) {
@@ -164,12 +167,11 @@ fun AppIconButton(
         Icon(
             modifier = modifier,
             imageVector = imageVector,
-            contentDescription = "$title Icon",
+            contentDescription = text.asString(LocalContext.current),
             tint = tint ?: MaterialTheme.colors.onBackground
         )
     }
 }
-
 
 @Composable
 fun TopAppBarBackButton(onClick: () -> Unit) {
@@ -178,7 +180,8 @@ fun TopAppBarBackButton(onClick: () -> Unit) {
     }) {
         Icon(
             imageVector = Icons.Default.ArrowBack,
-            contentDescription = "ArrowBack Icon",
+            contentDescription = UiText.StringResource( R.string.return_to_previous_screen).asString(
+                LocalContext.current),
             tint = MaterialTheme.colors.onBackground,
         )
     }
@@ -189,7 +192,7 @@ fun AppTextField(
     query: String,
     onValueChange: (value: String) -> Unit,
     onConfirm: () -> Unit,
-    hint: String = "Search...",
+    hint: UiText = UiText.StringResource( R.string.search_hint),
     mode: Int = 0,
     keyboardAction: KeyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
     keyboardActions: KeyboardActions = KeyboardActions(onSearch = {
@@ -201,7 +204,7 @@ fun AppTextField(
         if (query.isBlank() && mode != 2) {
             Text(
                 modifier = Modifier.padding(horizontal = 0.dp),
-                text = hint,
+                text = hint.asString(LocalContext.current),
                 style = MaterialTheme.typography.subtitle1,
                 color = MaterialTheme.colors.onBackground.copy(alpha = .7F)
             )

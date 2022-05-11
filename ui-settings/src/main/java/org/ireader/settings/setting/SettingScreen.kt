@@ -21,16 +21,16 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import org.ireader.common_resources.UiText
 import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.BigSizeTextComposable
+import org.ireader.ui_settings.R
 
 @Composable
 fun SettingScreen(
@@ -39,14 +39,27 @@ fun SettingScreen(
     itemsRoutes: List<String>
 ) {
     val settingItems = listOf(
-        SettingItems.Downloads(itemsRoutes[0]),
-        SettingItems.Appearance(itemsRoutes[1]),
-        SettingItems.DnsOverHttp(itemsRoutes[2]),
-        SettingItems.About(itemsRoutes[3]),
+        SettingItem(
+            "Downloads",
+            Icons.Default.Download,
+            itemsRoutes[0]
+        ),
+        SettingItem(
+            "Appearance",
+            Icons.Default.Palette,
+            itemsRoutes[1]
+        ),
+        SettingItem(
+            "Advance Setting",
+            Icons.Default.Settings,
+            itemsRoutes[2]
+        ),
+        SettingItem(
+            "About",
+            Icons.Default.Info,
+            itemsRoutes[3]
+        ),
     )
-    val a by remember {
-        mutableStateOf("")
-    }
     Box(
         modifier
             .fillMaxSize()
@@ -55,7 +68,7 @@ fun SettingScreen(
         Scaffold(modifier = Modifier.fillMaxSize(), topBar = {
             Toolbar(
                 title = {
-                    BigSizeTextComposable(text = "Setting")
+                    BigSizeTextComposable(text =  UiText.StringResource(R.string.settings),)
                 },
             )
         }) { padding ->
@@ -80,22 +93,13 @@ fun SettingScreen(
     }
 }
 
-sealed class SettingItems(
+
+data class SettingItem(
     val title: String,
     val icon: ImageVector,
     val route: String,
-) {
-    data class Downloads(val navRoute: String) :
-        SettingItems("Downloads", Icons.Default.Download, navRoute)
+)
 
-    data class Appearance(val navRoute: String) :
-        SettingItems("Appearance", Icons.Default.Palette, navRoute)
-
-    data class DnsOverHttp(val navRoute: String) :
-        SettingItems("Advance Setting", Icons.Default.Settings, navRoute)
-
-    data class About(val navRoute: String) : SettingItems("About", Icons.Default.Info, navRoute)
-}
 
 @Composable
 fun SettingsItem(

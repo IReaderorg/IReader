@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.FormatAlignLeft
 import androidx.compose.material.icons.filled.FormatAlignRight
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
@@ -35,12 +36,16 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.google.accompanist.pager.rememberPagerState
+import kotlinx.coroutines.launch
+import org.ireader.common_resources.UiText
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.MidSizeTextComposable
+import org.ireader.core_ui.asString
 import org.ireader.core_ui.ui.Colour.contentColor
 import org.ireader.core_ui.ui.TextAlign
 import org.ireader.reader.viewmodel.Orientation
 import org.ireader.reader.viewmodel.ReaderScreenPreferencesState
+import org.ireader.ui_reader.R
 
 @OptIn(ExperimentalPagerApi::class, ExperimentalMaterialApi::class)
 @Composable
@@ -68,9 +73,10 @@ fun ReaderSettingMainLayout(
     onTextAlign: (TextAlign) -> Unit
 ) {
     val pagerState = rememberPagerState()
+
     val tabs = listOf<TabItem>(
         TabItem(
-            "Reader"
+            UiText.StringResource(R.string.reader)
         ) {
             val scrollState = rememberScrollState()
             Column(
@@ -100,7 +106,7 @@ fun ReaderSettingMainLayout(
                 ) {
                     Text(
                         modifier = Modifier.width(100.dp),
-                        text = "Text Align",
+                        text = UiText.StringResource(R.string.text_align).asString(),
                         fontSize = 12.sp,
                         style = TextStyle(fontWeight = FontWeight.W400),
                         color = MaterialTheme.colors.onBackground
@@ -112,7 +118,7 @@ fun ReaderSettingMainLayout(
                     ) {
                         AppIconButton(
                             imageVector = Icons.Default.FormatAlignLeft,
-                            title = "ext Align Left",
+                            text = UiText.StringResource(R.string.text_align_left),
                             onClick = {
                                 onTextAlign(TextAlign.Left)
                             },
@@ -120,7 +126,7 @@ fun ReaderSettingMainLayout(
                         )
                         AppIconButton(
                             imageVector = Icons.Default.FormatAlignCenter,
-                            title = "Text Align Center",
+                            text = UiText.StringResource(R.string.text_align_center),
                             onClick = {
                                 onTextAlign(TextAlign.Center)
                             },
@@ -128,7 +134,7 @@ fun ReaderSettingMainLayout(
                         )
                         AppIconButton(
                             imageVector = Icons.Default.FormatAlignJustify,
-                            title = "Text Align Justify",
+                            text = UiText.StringResource(R.string.text_align_justify),
                             onClick = {
                                 onTextAlign(TextAlign.Justify)
                             },
@@ -136,7 +142,7 @@ fun ReaderSettingMainLayout(
                         )
                         AppIconButton(
                             imageVector = Icons.Default.FormatAlignRight,
-                            title = "Text Align Right",
+                            text = UiText.StringResource(R.string.text_align_right),
                             onClick = {
                                 onTextAlign(TextAlign.Right)
                             },
@@ -147,8 +153,8 @@ fun ReaderSettingMainLayout(
 
                 }
                 SettingItemComposable(
-                    text = "Font Size",
-                    value = vm.fontSize.toString(),
+                    text =UiText.StringResource(R.string.font_size),
+                    value = UiText.DynamicString(vm.fontSize.toString()),
                     onAdd = {
                         onFontSizeIncrease(true)
                     },
@@ -157,8 +163,8 @@ fun ReaderSettingMainLayout(
                     }
                 )
                 SettingItemComposable(
-                    text = "Paragraph Indent",
-                    value = vm.paragraphsIndent.toString(),
+                    text = UiText.StringResource(R.string.paragraph_indent),
+                    value = UiText.DynamicString(vm.paragraphsIndent.toString()),
                     onAdd = {
                         onParagraphIndentIncrease(true)
                     },
@@ -168,8 +174,8 @@ fun ReaderSettingMainLayout(
                 )
 
                 SettingItemComposable(
-                    text = "Paragraph Distance",
-                    value = vm.distanceBetweenParagraphs.toString(),
+                    text = UiText.StringResource(R.string.paragraph_distance),
+                    value = UiText.DynamicString(vm.distanceBetweenParagraphs.toString()),
                     onAdd = {
                         onParagraphDistanceIncrease(true)
                     },
@@ -178,8 +184,8 @@ fun ReaderSettingMainLayout(
                     }
                 )
                 SettingItemComposable(
-                    text = "Line Height",
-                    value = vm.lineHeight.toString(),
+                    text = UiText.StringResource(R.string.line_height),
+                    value = UiText.DynamicString(vm.lineHeight.toString()),
                     onAdd = {
                         onLineHeightIncrease(true)
                     },
@@ -188,8 +194,8 @@ fun ReaderSettingMainLayout(
                     }
                 )
                 SettingItemComposable(
-                    text = "Autoscroll Interval",
-                    value = "${vm.autoScrollInterval / 1000} second",
+                    text = UiText.StringResource(R.string.autoscroll_interval),
+                    value = UiText.DynamicString("${vm.autoScrollInterval / 1000} second"),
                     onAdd = {
                         onAutoscrollIntervalIncrease(true)
                     },
@@ -198,8 +204,8 @@ fun ReaderSettingMainLayout(
                     }
                 )
                 SettingItemComposable(
-                    text = "Autoscroll Offset",
-                    value = vm.autoScrollOffset.toString(),
+                    text = UiText.StringResource(R.string.autoscroll_offset),
+                    value = UiText.DynamicString(vm.autoScrollOffset.toString()),
                     onAdd = {
                         onAutoscrollOffsetIncrease(true)
                     },
@@ -208,8 +214,8 @@ fun ReaderSettingMainLayout(
                     }
                 )
                 SettingItemComposable(
-                    text = "ScrollIndicator Padding",
-                    value = vm.scrollIndicatorPadding.toString(),
+                    text = UiText.StringResource(R.string.scrollIndicator_padding),
+                    value = UiText.DynamicString(vm.scrollIndicatorPadding.toString()),
                     onAdd = {
                         onScrollIndicatorPaddingIncrease(true)
                     },
@@ -218,8 +224,8 @@ fun ReaderSettingMainLayout(
                     }
                 )
                 SettingItemComposable(
-                    text = "ScrollIndicator Width",
-                    value = vm.scrollIndicatorWith.toString(),
+                    text = UiText.StringResource(R.string.scrollIndicator_width),
+                    value = UiText.DynamicString(vm.scrollIndicatorWith.toString()),
                     onAdd = {
                         onScrollIndicatorWidthIncrease(true)
                     },
@@ -234,14 +240,14 @@ fun ReaderSettingMainLayout(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = "Advance Setting",
+                        text = UiText.StringResource(R.string.advance_setting).asString(),
                         fontSize = 12.sp,
                         style = TextStyle(fontWeight = FontWeight.W400),
                         color = MaterialTheme.colors.onBackground
                     )
                     AppIconButton(
                         imageVector = Icons.Default.Settings,
-                        title = "Advance Setting",
+                        text = UiText.StringResource(R.string.advance_setting),
                         onClick = { vm.scrollIndicatorDialogShown = true }
                     )
                 }
@@ -249,42 +255,43 @@ fun ReaderSettingMainLayout(
 
         },
         TabItem(
-            "General"
+            UiText.StringResource(R.string.general)
         ) {
             Column(
 
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
                     .padding(4.dp)
                     .verticalScroll(rememberScrollState())
             ) {
                 SettingItemToggleComposable(
-                    text = "Scroll Mode",
+                    text = UiText.StringResource(R.string.scroll_mode),
                     value = vm.verticalScrolling,
                     onToggle = onToggleScrollMode
                 )
                 SettingItemToggleComposable(
-                    text = "Show Scrollbar",
+                    text = UiText.StringResource(R.string.show_scrollbar),
                     value = vm.showScrollIndicator,
                     onToggle = onShowScrollIndicator
                 )
 
                 SettingItemToggleComposable(
-                    text = "Orientation",
+                    text = UiText.StringResource(R.string.orientation),
                     value = vm.orientation == Orientation.Landscape,
                     onToggle = onToggleOrientation
                 )
                 SettingItemToggleComposable(
-                    text = "AutoScroll",
+                    text = UiText.StringResource(R.string.autoScroll),
                     value = vm.autoScrollMode,
                     onToggle = onToggleAutoScroll
                 )
                 SettingItemToggleComposable(
-                    text = "Immersive mode",
+                    text = UiText.StringResource(R.string.immersive_mode),
                     value = vm.immersiveMode,
                     onToggle = onToggleImmersiveMode
                 )
                 SettingItemToggleComposable(
-                    text = "Selectable mode",
+                    text = UiText.StringResource(R.string.selectable_mode),
                     value = vm.selectableMode,
                     onToggle = onToggleSelectedMode
                 )
@@ -305,7 +312,7 @@ fun ReaderSettingMainLayout(
 }
 
 data class TabItem(
-    val name: String,
+    val name: UiText,
     val screen: @Composable () -> Unit
 )
 
@@ -313,6 +320,7 @@ data class TabItem(
 @ExperimentalMaterialApi
 @Composable
 fun Tabs(libraryTabs: List<TabItem>, pagerState: PagerState) {
+    val scope = rememberCoroutineScope()
     TabRow(
         selectedTabIndex = pagerState.currentPage,
         backgroundColor = MaterialTheme.colors.background,
@@ -332,8 +340,7 @@ fun Tabs(libraryTabs: List<TabItem>, pagerState: PagerState) {
                 unselectedContentColor = MaterialTheme.colors.onBackground,
                 selectedContentColor = MaterialTheme.colors.primary,
                 onClick = {
-                    //TODO need to uncomment this on compose next update
-                    //scope.launch { pagerState.animateScrollToPage(index) }
+                    scope.launch { pagerState.animateScrollToPage(index) }
                 },
             )
         }

@@ -11,15 +11,17 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import org.ireader.common_resources.UiText
 
 @Composable
 fun ClickableTextIcon(
     modifier: Modifier = Modifier,
     icon: @Composable ColumnScope.() -> Unit,
-    text: String,
+    text: UiText,
     contentDescription: String = "an Icon",
     onClick: () -> Unit,
 ) {
@@ -35,7 +37,7 @@ fun ClickableTextIcon(
         ) {
             icon(this)
             Text(
-                text = text,
+                text = text.asString(LocalContext.current),
                 style = MaterialTheme.typography.caption,
                 color = MaterialTheme.colors.onBackground,
                 overflow = TextOverflow.Visible,

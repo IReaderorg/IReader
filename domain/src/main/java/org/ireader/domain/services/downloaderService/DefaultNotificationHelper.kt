@@ -16,6 +16,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableSharedFlow
 import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.Chapter
+import org.ireader.common_resources.string
 import org.ireader.core.R
 import org.ireader.domain.notification.Notifications
 import org.ireader.domain.notification.flags
@@ -28,9 +29,9 @@ import javax.inject.Singleton
 
 @Singleton
 class DefaultNotificationHelper @Inject constructor(
-    @ApplicationContext private val applicationContext: Context,
+    @ApplicationContext private val context: Context,
 ) {
-    private val notificationManager = NotificationManagerCompat.from(applicationContext)
+    private val notificationManager = NotificationManagerCompat.from(context)
 
     private val pendingIntentFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
@@ -42,7 +43,7 @@ class DefaultNotificationHelper @Inject constructor(
         bookId: Long,
         sourceId: Long,
     ): Intent {
-        return org.ireader.common_extensions.launchMainActivityIntent(applicationContext)
+        return org.ireader.common_extensions.launchMainActivityIntent(context)
             .apply {
                 action = Intent.ACTION_VIEW
                 data = "https://www.ireader.org/book_detail_route/$bookId/$sourceId".toUri()
@@ -54,12 +55,12 @@ class DefaultNotificationHelper @Inject constructor(
         sourceId: Long,
     ): PendingIntent {
         return PendingIntent.getActivity(
-            applicationContext, 0, openBookDetailIntent(bookId, sourceId), flags
+            context, 0, openBookDetailIntent(bookId, sourceId), flags
         )
     }
 
     val openDownloadIntent = org.ireader.common_extensions.launchMainActivityIntent(
-        applicationContext
+        context
     )
         .apply {
             action = Intent.ACTION_VIEW
@@ -67,28 +68,33 @@ class DefaultNotificationHelper @Inject constructor(
         }
 
     val openDownloadsPendingIntent: PendingIntent = PendingIntent.getActivity(
-        applicationContext, 0, openDownloadIntent, flags
+        context, 0, openDownloadIntent, flags
     )
 
     fun baseNotificationDownloader(
         chapter: Chapter? = null,
         workManagerId: UUID,
     ): NotificationCompat.Builder {
-        val cancelDownloadIntent = WorkManager.getInstance(applicationContext)
+        val cancelDownloadIntent = WorkManager.getInstance(context)
             .createCancelPendingIntent(workManagerId)
         return NotificationCompat.Builder(
-            applicationContext,
+            context,
             Notifications.CHANNEL_DOWNLOADER_PROGRESS
         ).apply {
             chapter?.let {
                 setContentTitle("Downloading ${chapter.title}")
             }
+
             setSmallIcon(R.drawable.ic_downloading)
             setOnlyAlertOnce(true)
             priority = NotificationCompat.PRIORITY_LOW
             setAutoCancel(true)
             setOngoing(true)
-            addAction(R.drawable.baseline_close_24, "Cancel", cancelDownloadIntent)
+            addAction(
+                R.drawable.baseline_close_24,
+                context.resources.getString(R.string.cancel),
+                cancelDownloadIntent
+            )
             setContentIntent(openDownloadsPendingIntent)
         }
     }
@@ -98,14 +104,18 @@ class DefaultNotificationHelper @Inject constructor(
         e: Throwable,
     ): NotificationCompat.Builder {
         return NotificationCompat.Builder(
-            applicationContext.applicationContext,
+            context.applicationContext,
             Notifications.CHANNEL_DOWNLOADER_ERROR
         ).apply {
-            if (e.localizedMessage == "Job was cancelled") {
-                setSubText("Download was cancelled")
-                setContentTitle("Download of $bookName was canceled.")
+            if (e.localizedMessage == context.string(R.string.the_downloads_was_interrupted)) {
+                setSubText(context.string(R.string.the_downloads_was_cancelled))
+                setContentTitle(
+                    context.string(R.string.download_of) + " $bookName" + context.string(
+                        R.string.was_cancelled
+                    )
+                )
             } else {
-                setContentTitle("Failed to download $bookName")
+                setContentTitle(context.string(R.string.failed_to_download) + " $bookName")
                 setSubText(e.localizedMessage)
             }
             setSmallIcon(R.drawable.ic_downloading)
@@ -120,14 +130,18 @@ class DefaultNotificationHelper @Inject constructor(
         e: Exception,
     ): NotificationCompat.Builder {
         return NotificationCompat.Builder(
-            applicationContext,
+            context,
             Notifications.CHANNEL_DOWNLOADER_ERROR
         ).apply {
-            if (e.localizedMessage == "Job was cancelled") {
-                setSubText("Download was cancelled")
-                setContentTitle("Download of ${book.title} was canceled.")
+            if (e.localizedMessage == context.string(R.string.the_downloads_was_interrupted)) {
+                setSubText(context.string(R.string.the_downloads_was_cancelled))
+                setContentTitle(
+                    context.string(R.string.download_of) + " ${book.title}" + context.string(
+                        R.string.was_cancelled
+                    )
+                )
             } else {
-                setContentTitle("Failed to download ${book.title}")
+                setContentTitle(context.string(R.string.failed_to_download) + " $${book.title}")
                 setSubText(e.localizedMessage)
             }
             setSmallIcon(R.drawable.ic_downloading)
@@ -142,98 +156,80 @@ class DefaultNotificationHelper @Inject constructor(
         }
     }
 
-//    fun updateDownloaderNotification(
-//        chapter: Chapter,
-//        book: Book,
-//        workManagerId: UUID,
-//        index: Int,
-//        maxIndex: Int,
-//    ) {
-//        val notification = baseNotificationDownloader(chapter, book, workManagerId).apply {
-//            setContentText(chapter.title)
-//            setSubText(index.toString())
-//            setProgress(maxIndex, index, false)
-//        }.build()
-//
-//        NotificationManagerCompat.from(applicationContext)
-//            .notify(Notifications.ID_DOWNLOAD_CHAPTER_PROGRESS, notification)
-//
-//    }
-
     val skipPrev = PendingIntent.getBroadcast(
-        applicationContext,
+        context,
         Player.SKIP_PREV,
         Intent(
-            applicationContext,
+            context,
             TTSService::class.java
         ).apply {
-            putExtra("PLAYER", Player.SKIP_PREV)
+            putExtra(Player.KEY, Player.SKIP_PREV)
         },
         pendingIntentFlags
     )
     val rewind = PendingIntent.getBroadcast(
-        applicationContext,
+        context,
         Player.PREV_PAR,
         Intent(
-            applicationContext.applicationContext,
-                     TTSService::class.java
+            context.applicationContext,
+            TTSService::class.java
         ).apply {
-            putExtra("PLAYER", Player.PREV_PAR)
+            putExtra(Player.KEY, Player.PREV_PAR)
         },
         pendingIntentFlags
     )
     val pause = PendingIntent.getBroadcast(
-        applicationContext,
+        context,
         Player.PAUSE,
         Intent(
-            applicationContext,
-                     TTSService::class.java
+            context,
+            TTSService::class.java
         ).apply {
-            putExtra("PLAYER", Player.PAUSE)
+            putExtra(Player.KEY, Player.PAUSE)
         },
         pendingIntentFlags
     )
     val play = PendingIntent.getBroadcast(
-        applicationContext,
+        context,
         Player.PLAY,
         Intent(
-            applicationContext,
-                     TTSService::class.java
+            context,
+            TTSService::class.java
         ).apply {
-            putExtra("PLAYER", Player.PLAY)
+            putExtra(Player.KEY, Player.PLAY)
         },
         pendingIntentFlags
     )
     val next = PendingIntent.getBroadcast(
-        applicationContext,
+        context,
         Player.NEXT_PAR,
         Intent(
-            applicationContext,
-                     TTSService::class.java
+            context,
+            TTSService::class.java
         ).apply {
-            putExtra("PLAYER", Player.NEXT_PAR)
+            putExtra(Player.KEY, Player.NEXT_PAR)
         },
         pendingIntentFlags
     )
     val skipNext = PendingIntent.getBroadcast(
-        applicationContext,
+        context,
         Player.SKIP_NEXT,
         Intent(
-            applicationContext,
-                     TTSService::class.java
+            context,
+            TTSService::class.java
         ).apply {
-            putExtra("PLAYER", Player.SKIP_NEXT)
+            putExtra(Player.KEY, Player.SKIP_NEXT)
         },
         pendingIntentFlags
     )
     val cancelMediaPlater = PendingIntent.getBroadcast(
-        applicationContext,
+        context,
         Player.CANCEL,
         Intent(
-            applicationContext,
-                     TTSService::class.java
+            context,
+            TTSService::class.java
         ).apply {
-            putExtra("PLAYER", Player.CANCEL)
+            putExtra(Player.KEY, Player.CANCEL)
         },
         pendingIntentFlags
     )
@@ -249,8 +245,8 @@ class DefaultNotificationHelper @Inject constructor(
     ): NotificationCompat.Builder {
         val contentText =
             when {
-                isLoading -> "Loading..."
-                isError -> "ERROR"
+                isLoading -> context.string(R.string.loading)
+                isError -> context.string(R.string.error)
                 else -> "$progress/${chapter.content.lastIndex}"
             }
         mediaSessionCompat.apply {
@@ -264,7 +260,7 @@ class DefaultNotificationHelper @Inject constructor(
             stateBuilder.addCustomAction(
                 PlaybackStateCompat.CustomAction.Builder(
                     "PLAY",
-                    "Play",
+                    context.string(R.string.play),
                     R.drawable.ic_baseline_play_arrow
                 ).build()
             )
@@ -276,7 +272,7 @@ class DefaultNotificationHelper @Inject constructor(
             )
         }
         return NotificationCompat.Builder(
-            applicationContext,
+            context,
             Notifications.CHANNEL_TTS
         ).apply {
             setContentTitle(chapter.title)
@@ -284,28 +280,36 @@ class DefaultNotificationHelper @Inject constructor(
             setSmallIcon(org.ireader.core.R.drawable.ic_infinity)
             setOnlyAlertOnce(true)
             setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            setLargeIcon(applicationContext, book.cover)
+            setLargeIcon(context, book.cover)
             priority = NotificationCompat.PRIORITY_LOW
 
             setContentIntent(openReaderScreenIntent(chapter, book, progress))
             addAction(
                 R.drawable.ic_baseline_skip_previous,
-                "Previous Chapter",
+                context.string(R.string.previous_chapter),
                 skipPrev
             )
             addAction(
                 R.drawable.ic_baseline_fast_rewind,
-                "Previous Paragraph",
+                context.string(R.string.previous_paragraph),
                 rewind
             )
 
             if (playing) {
-                addAction(R.drawable.ic_baseline_pause, "Pause", pause)
+                addAction(R.drawable.ic_baseline_pause, context.string(R.string.pause), pause)
             } else {
-                addAction(R.drawable.ic_baseline_play_arrow, "Start", play)
+                addAction(R.drawable.ic_baseline_play_arrow, context.string(R.string.play),  play)
             }
-            addAction(R.drawable.ic_baseline_fast_forward, "Next Paragraph", next)
-            addAction(R.drawable.ic_baseline_skip_next, "Next Chapter", skipNext)
+            addAction(
+                R.drawable.ic_baseline_fast_forward,
+                context.string(R.string.next_paragraph),
+                next
+            )
+            addAction(
+                R.drawable.ic_baseline_skip_next,
+                context.string(R.string.next_chapter),
+                skipNext
+            )
             setStyle(
                 androidx.media.app.NotificationCompat.MediaStyle()
                     .setCancelButtonIntent(cancelMediaPlater)
@@ -335,9 +339,9 @@ class DefaultNotificationHelper @Inject constructor(
         book: Book,
         currentReadingParagraph: Int = 0,
     ): PendingIntent = PendingIntent.getActivity(
-        applicationContext.applicationContext,
+        context.applicationContext,
         5,
-        org.ireader.common_extensions.launchMainActivityIntent(applicationContext)
+        org.ireader.common_extensions.launchMainActivityIntent(context)
             .apply {
                 action = Intent.ACTION_VIEW
                 data = buildDownloadScreenDeepLink(

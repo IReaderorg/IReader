@@ -11,6 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import org.ireader.common_resources.UiText
 import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.core_api.source.model.Filter
 
@@ -30,7 +31,7 @@ fun FilterCheckItem(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        MidSizeTextComposable(text = filter.name)
+        MidSizeTextComposable(text = UiText.DynamicString(filter.name))
         UnCheckedCheckBox(
             isChecked = state,
             filter.allowsExclusion,

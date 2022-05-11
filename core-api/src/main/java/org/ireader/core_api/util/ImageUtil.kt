@@ -2,7 +2,6 @@
 
 package org.ireader.core_api.util
 
-// TODO probably better to parse headers with the tachiyomi decoder
 object ImageUtil {
 
     private val jpgMagic = charByteArrayOf(0xFF, 0xD8, 0xFF)

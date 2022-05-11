@@ -21,13 +21,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import org.ireader.common_resources.UiText
 import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.components.reusable_composable.TopAppBarBackButton
 import org.ireader.core_ui.theme.ThemeMode
+import org.ireader.ui_appearance.R
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -45,7 +48,7 @@ fun AppearanceSettingScreen(
         modifier = Modifier.fillMaxSize(), topBar = {
             Toolbar(
                 title = {
-                    BigSizeTextComposable(text = "Appearance")
+                    BigSizeTextComposable(text = UiText.StringResource(R.string.appearance))
                 },
                 navigationIcon = {
                     TopAppBarBackButton() {
@@ -63,11 +66,12 @@ fun AppearanceSettingScreen(
             Row {
                 Icon(
                     imageVector = Icons.Default.ModeNight,
-                    contentDescription = "Night Mode",
+                    contentDescription = UiText.StringResource(R.string.night_mode).asString(
+                        LocalContext.current),
                     tint = MaterialTheme.colors.primary
                 )
                 Spacer(modifier = Modifier.width(16.dp))
-                MidSizeTextComposable(text = "Dark Mode")
+                MidSizeTextComposable(text = UiText.StringResource(R.string.dark_mode))
             }
         }
 
@@ -77,7 +81,7 @@ fun AppearanceSettingScreen(
                     openDialog.value = false
                 },
                 title = {
-                    BigSizeTextComposable(text = "Night Mode")
+                    BigSizeTextComposable(text = UiText.StringResource(R.string.night_mode))
                 },
                 buttons = {
                     Column(
@@ -111,8 +115,8 @@ fun AppearanceSettingScreen(
     }
 }
 
-sealed class AppearanceItems(val text: String, val appTheme: ThemeMode) {
-    object Day : AppearanceItems("Off", ThemeMode.Light)
-    object Night : AppearanceItems("On", ThemeMode.Dark)
-    object Auto : AppearanceItems("Auto", ThemeMode.System)
+private sealed class AppearanceItems(val text: UiText, val appTheme: ThemeMode) {
+    object Day : AppearanceItems(UiText.StringResource(R.string.off), ThemeMode.Light)
+    object Night : AppearanceItems(UiText.StringResource(R.string.on), ThemeMode.Dark)
+    object Auto : AppearanceItems(UiText.StringResource(R.string.auto), ThemeMode.System)
 }

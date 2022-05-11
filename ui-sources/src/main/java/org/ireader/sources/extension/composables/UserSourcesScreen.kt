@@ -11,10 +11,12 @@ import androidx.compose.ui.Modifier
 import org.ireader.common_models.entities.Catalog
 import org.ireader.common_models.entities.CatalogInstalled
 import org.ireader.common_models.entities.CatalogLocal
+import org.ireader.common_resources.UiText
+import org.ireader.components.text_related.TextSection
 import org.ireader.core_api.log.Log
-import org.ireader.core_ui.ui_components.TextSection
 import org.ireader.sources.extension.CatalogItem
 import org.ireader.sources.extension.CatalogsState
+import org.ireader.ui_sources.R
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -36,7 +38,7 @@ fun UserSourcesScreen(
             if (state.validPinnedCatalogs.value.isNotEmpty()) {
                 item {
                     TextSection(
-                        text = "Pinned",
+                        text =  UiText.StringResource(R.string.pin),
                     )
                 }
                 items(state.validPinnedCatalogs.value.size) { index ->
@@ -54,7 +56,7 @@ fun UserSourcesScreen(
                 state.validMappedCatalogs.value.forEach { (lang, catalogs) ->
                     item {
                         TextSection(
-                            text = lang,
+                            text = UiText.DynamicString(lang),
                         )
                     }
                     items(catalogs.size) { index ->

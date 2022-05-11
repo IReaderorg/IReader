@@ -1,6 +1,9 @@
 package org.ireader.domain.services.tts_service
 
 object Player {
+
+    const val KEY = "PLAYER"
+
     const val SKIP_PREV = 1
     const val SKIP_PREV_ACTION = "skip_prev"
     const val PREV_PAR = 2

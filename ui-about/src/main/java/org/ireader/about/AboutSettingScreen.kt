@@ -19,11 +19,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import org.ireader.common_resources.UiText
 import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.components.reusable_composable.TopAppBarBackButton
+import org.ireader.core_ui.ui.string
 import org.ireader.domain.utils.toast
+import org.ireader.ui_about.R
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -37,13 +40,13 @@ fun AboutSettingScreen(
         try {
             context.packageManager.getPackageInfo(context.packageName, 0).versionName
         } catch (e: Throwable) {
-            "Unable to get Package Version"
+            throw Exception(string(id = R.string.unable_to_get_package_version))
         }
     Scaffold(modifier = modifier.fillMaxSize(), topBar = {
         Toolbar(
             modifier = Modifier,
             title = {
-                BigSizeTextComposable(text = "About", style = MaterialTheme.typography.h6)
+                BigSizeTextComposable(text = UiText.StringResource( R.string.about), style = MaterialTheme.typography.h6)
             },
             navigationIcon = {
                 TopAppBarBackButton(onClick = {
@@ -75,7 +78,7 @@ fun AboutSettingScreen(
                             try {
                                 context.startActivity(it.intent)
                             } catch (e: Throwable) {
-                                context.toast("Something went wrong. you don't have the required app.")
+                                context.toast(R.string.no_app_was_found_to_lauch)
                             }
                         },
                     singleLineSecondaryText = false,
@@ -106,17 +109,17 @@ fun AboutSettingScreen(
     }
 }
 
-sealed class AboutTile(val title: String, val subtitle: String, val intent: Intent) {
+sealed class AboutTile(val title: UiText, val subtitle: UiText, val intent: Intent) {
 
     data class Version(val version: String) : AboutTile(
-        "Version",
-        version,
+        UiText.StringResource(R.string.version),
+        UiText.DynamicString(version),
         Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/kazemcodes/Infinity/releases"))
     )
 
     object WhatsNew : AboutTile(
-        "Whats New",
-        "Check the Update",
+        UiText.StringResource(R.string.whats_new),
+        UiText.StringResource(R.string.check_the_update),
         Intent(
             Intent.ACTION_VIEW,
             Uri.parse("https://github.com/kazemcodes/IReader/releases/latest")
@@ -124,14 +127,14 @@ sealed class AboutTile(val title: String, val subtitle: String, val intent: Inte
     )
 
     object Discord : AboutTile(
-        "Discord",
-        "https://discord.gg/HBU6zD8c5v",
+        UiText.StringResource(R.string.discord),
+        UiText.DynamicString("https://discord.gg/HBU6zD8c5v"),
         Intent(Intent.ACTION_VIEW, Uri.parse("https://discord.gg/HBU6zD8c5v"))
     )
 
     object Github : AboutTile(
-        "Github",
-        "https://github.com/kazemcodes/IReader",
+        UiText.StringResource(R.string.github),
+        UiText.DynamicString("https://github.com/kazemcodes/IReader"),
         Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/kazemcodes/Infinity"))
     )
 }

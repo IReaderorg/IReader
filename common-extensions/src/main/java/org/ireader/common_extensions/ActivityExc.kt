@@ -7,7 +7,6 @@ import android.view.View
 import android.view.View.GONE
 import android.view.WindowManager
 import androidx.annotation.UiThread
-
 /**
  *  Makes the activity enter fullscreen mode.
  */
@@ -26,6 +25,7 @@ fun Activity.exitFullScreenMode() {
     window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
     window.addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN)
 }
+
 
 fun Activity.enableFullScreen() {
     window.setFlags(
@@ -100,15 +100,19 @@ fun Activity.enableImmersiveMode() {
  * This snippet shows the system bars. It does this by removing all the flags
  * except for the ones that make the content appear under the system bars.
  */
+
 fun Activity.showSystemUI() {
     window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
         or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
         or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
 }
 
+
+
 /**
  * This snippet hides the system bars.
  */
+
 fun Activity.hideSystemUI() {
     // Set the IMMERSIVE flag.
     // Set the content to appear under the system bars so that the content

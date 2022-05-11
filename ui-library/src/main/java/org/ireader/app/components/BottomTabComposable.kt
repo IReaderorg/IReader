@@ -11,6 +11,7 @@ import org.ireader.common_models.DisplayMode
 import org.ireader.common_models.FilterType
 import org.ireader.common_models.LayoutType
 import org.ireader.common_models.SortType
+import org.ireader.ui_library.R
 
 @ExperimentalMaterialApi
 @ExperimentalPagerApi
@@ -29,13 +30,18 @@ fun BottomTabComposable(
 ) {
     val tabs = listOf(
         TabItem.Filter(
-            filters, addFilters, removeFilter
+            filters,
+            addFilters,
+            removeFilter
         ),
         TabItem.Sort(
-            sortType, isSortDesc, onSortSelected
+            sortType,
+            isSortDesc,
+            onSortSelected
         ),
         TabItem.Display(
-            layoutType, onLayoutSelected
+            layoutType,
+            onLayoutSelected
         )
     )
 
@@ -55,4 +61,44 @@ fun BottomTabComposable(
             onLayoutSelected
         )
     }
+}
+ sealed class TabItem(
+    var title: Int,
+    var screen: ComposableFun,
+    ) {
+
+    data class Filter(
+        val filters: List<FilterType>,
+        val addFilters: (FilterType) -> Unit,
+        val removeFilter: (FilterType) -> Unit
+    ) :
+        TabItem(R.string.filter, {
+            FilterScreen(
+                removeFilter = removeFilter,
+                addFilters = addFilters,
+                filters = filters
+            )
+        })
+
+    data class Sort(
+        val sortType: SortType,
+        val isSortDesc: Boolean,
+        val onSortSelected: (SortType) -> Unit
+    ) :
+        TabItem(R.string.sort, {
+            SortScreen(
+                sortType, isSortDesc, onSortSelected
+            )
+        })
+
+    data class Display(
+        val layoutType: LayoutType,
+        val onLayoutSelected: (DisplayMode) -> Unit
+    ) :
+        TabItem( R.string.display, {
+            DisplayScreen(
+                layoutType,
+                onLayoutSelected
+            )
+        })
 }

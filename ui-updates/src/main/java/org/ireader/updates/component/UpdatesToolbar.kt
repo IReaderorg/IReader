@@ -14,7 +14,7 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import org.ireader.common_resources.UiText
 import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.ui_updates.R
@@ -57,7 +57,7 @@ private fun UpdatesSelectionToolbar(
     onClickInvertSelection: () -> Unit,
 ) {
     Toolbar(
-        title = { BigSizeTextComposable(text = "$selectionSize") },
+        title = { BigSizeTextComposable(text = UiText.DynamicString("$selectionSize")) },
         navigationIcon = {
             IconButton(onClick = onClickCancelSelection) {
                 Icon(Icons.Default.Close, contentDescription = null)
@@ -80,7 +80,7 @@ fun UpdatesRegularToolbar(
     onClickDelete: () -> Unit,
 ) {
     Toolbar(
-        title = { BigSizeTextComposable(text = stringResource(id = R.string.updates_screen_label)) },
+        title = { BigSizeTextComposable(text = UiText.StringResource( R.string.updates_screen_label)) },
         actions = {
             IconButton(onClick = onClickRefresh) {
                 Icon(Icons.Default.Refresh, contentDescription = null)

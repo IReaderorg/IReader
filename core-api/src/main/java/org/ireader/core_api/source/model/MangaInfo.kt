@@ -5,7 +5,6 @@ package org.ireader.core_api.source.model
 /**
  * Model for a manga given by a source
  *
- * TODO: we should avoid data class due to possible incompatibilities across versions
  */
 data class MangaInfo(
     val key: String,

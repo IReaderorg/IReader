@@ -6,6 +6,7 @@ import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import org.ireader.common_resources.UiText
 
 @Composable
 fun BuildDropDownMenu(
@@ -33,6 +34,6 @@ fun BuildDropDownMenu(
 }
 
 data class DropDownMenuItem(
-    val text: String,
+    val text: UiText,
     val onItem: () -> Unit,
 )

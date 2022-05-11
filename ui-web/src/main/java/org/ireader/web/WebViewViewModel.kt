@@ -28,6 +28,7 @@ import org.ireader.domain.ui.NavigationArgs
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
+import org.ireader.ui_web.R
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 import javax.inject.Inject
@@ -124,15 +125,15 @@ class WebViewPageModel @Inject constructor(
                 catalog,
                 onError = {
                     showSnackBar(it)
-                    showSnackBar(UiText.DynamicString("Failed"))
+                    showSnackBar(UiText.StringResource(R.string.failed))
                 },
                 onSuccess = { result ->
                     if (result.content.isNotEmpty()) {
                         webChapter = result
                         insertChapter(result)
-                        showSnackBar(UiText.DynamicString("Success"))
+                        showSnackBar(UiText.StringResource(R.string.success))
                     } else {
-                        showSnackBar(UiText.DynamicString("Failed"))
+                        showSnackBar(UiText.StringResource(R.string.failed))
                     }
 
                 },
@@ -159,10 +160,10 @@ class WebViewPageModel @Inject constructor(
                 onSuccess = { result ->
                     webChapters = result
                     if (result.isNotEmpty()) {
-                        showSnackBar(UiText.DynamicString("Success"))
+                        showSnackBar(UiText.StringResource(R.string.success))
                         insertChapters(result.map { it.copy(bookId = book.id) })
                     } else {
-                        showSnackBar(UiText.DynamicString("Failed"))
+                        showSnackBar(UiText.StringResource(R.string.failed))
                     }
                 },
                 commands = listOf(Command.Chapter.Fetch(url = url, pageSource))
@@ -183,15 +184,15 @@ class WebViewPageModel @Inject constructor(
                 book ?: Book(link = "", title = "", sourceId = source?.id?:0),
                 catalog,
                 onError = {
-                    showSnackBar(UiText.DynamicString("Failed"))
+                    showSnackBar(UiText.StringResource(R.string.failed))
                 },
                 onSuccess = { result ->
                     if (result.title.isNotBlank()) {
                         webBook = result
                         insertBook(result.copy(favorite = true))
-                        showSnackBar(UiText.DynamicString("Success"))
+                        showSnackBar(UiText.StringResource(R.string.success))
                     } else {
-                        showSnackBar(UiText.DynamicString("Failed"))
+                        showSnackBar(UiText.StringResource(R.string.failed))
                     }
 
                 },

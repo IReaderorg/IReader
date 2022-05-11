@@ -30,12 +30,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.ireader.common_models.entities.Chapter
+import org.ireader.common_resources.UiText
 import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.AppTextField
 import org.ireader.components.reusable_composable.TopAppBarBackButton
 import org.ireader.reader.viewmodel.ReaderScreenPreferencesState
 import org.ireader.reader.viewmodel.ReaderScreenState
+import org.ireader.ui_reader.R
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -107,7 +109,7 @@ fun ReaderScreenTopBar(
                     } else {
                         AppIconButton(
                             imageVector = Icons.Default.ArrowBack,
-                            title = "Exit search mode",
+                            text = UiText.StringResource(R.string.exit_search_mode),
                             onClick = {
                                 vm.searchQuery = ""
                                 vm.searchMode = false
@@ -121,7 +123,7 @@ fun ReaderScreenTopBar(
                         true -> {
                             AppIconButton(
                                 imageVector = Icons.Default.Close,
-                                title = "Close",
+                                text = UiText.StringResource(R.string.close),
                                 onClick = {
                                     vm.searchQuery = ""
                                     vm.searchMode = false
@@ -130,7 +132,7 @@ fun ReaderScreenTopBar(
                             )
                             AppIconButton(
                                 imageVector = Icons.Default.ExpandMore,
-                                title = "previous result",
+                                text = UiText.StringResource(R.string.previous_result),
                                 onClick = {
                                     vm.currentViewingSearchResultIndex.let { index ->
                                         chapter?.let {
@@ -150,7 +152,7 @@ fun ReaderScreenTopBar(
                             )
                             AppIconButton(
                                 imageVector = Icons.Default.ExpandLess,
-                                title = "next result",
+                                text =  UiText.StringResource(R.string.next_result),
                                 onClick = {
                                     vm.currentViewingSearchResultIndex.let { index ->
                                         if (index > 0) {
@@ -172,7 +174,7 @@ fun ReaderScreenTopBar(
                             if (chapter != null) {
                                 AppIconButton(
                                     imageVector = if (vm.expandTopMenu) Icons.Default.ChevronRight else Icons.Default.ChevronLeft,
-                                    title = "Expand Menu",
+                                    text = UiText.StringResource(R.string.expand_menu),
                                     onClick = {
                                         vm.expandTopMenu = !vm.expandTopMenu
                                     }
@@ -180,7 +182,7 @@ fun ReaderScreenTopBar(
                                 if (vm.expandTopMenu) {
                                     AppIconButton(
                                         imageVector = if (chapter.bookmark) Icons.Filled.Bookmark else Icons.Default.Bookmark,
-                                        title = "Bookmark",
+                                        text = UiText.StringResource( R.string.bookmark),
                                         tint = if (chapter.bookmark) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground,
                                         onClick = {
                                             onBookMark()
@@ -188,14 +190,14 @@ fun ReaderScreenTopBar(
                                     )
                                     AppIconButton(
                                         imageVector = Icons.Default.Search,
-                                        title = "Search",
+                                        text = UiText.StringResource(R.string.search),
                                         onClick = {
                                             vm.searchMode = true
                                         }
                                     )
                                     AppIconButton(
                                         imageVector = Icons.Default.Public,
-                                        title = "WebView",
+                                        text = UiText.StringResource(R.string.webView),
                                         onClick = {
                                             onWebView()
                                         }
@@ -203,7 +205,7 @@ fun ReaderScreenTopBar(
                                 }
                                 AppIconButton(
                                     imageVector = Icons.Default.Autorenew,
-                                    title = "Refresh",
+                                    text = UiText.StringResource(R.string.refresh),
                                     onClick = {
                                         onRefresh()
                                     }
@@ -224,7 +226,7 @@ fun ReaderScreenTopBar(
                 if (chapter != null) {
                     AppIconButton(
                         imageVector = Icons.Default.Autorenew,
-                        title = "Refresh",
+                        text = UiText.StringResource(R.string.refresh),
                         onClick = {
                             onRefresh()
                         }
@@ -232,7 +234,7 @@ fun ReaderScreenTopBar(
                 }
                 AppIconButton(
                     imageVector = Icons.Default.Public,
-                    title = "WebView",
+                    text =UiText.StringResource(R.string.webView),
                     onClick = {
                         onWebView()
                     }

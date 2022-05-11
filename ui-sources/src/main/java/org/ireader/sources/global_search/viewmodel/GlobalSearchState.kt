@@ -9,16 +9,12 @@ import javax.inject.Inject
 
 interface GlobalSearchState {
     var searchItems: List<SearchItem>
-    var items: List<SearchItem>
     var query: String
     var searchMode: Boolean
 }
 
 open class GlobalSearchStateImpl @Inject constructor() : GlobalSearchState {
     override var searchItems: List<SearchItem> by mutableStateOf(emptyList())
-    override var items: List<SearchItem>
-        get() = TODO("Not yet implemented")
-        set(value) {}
     override var query: String by mutableStateOf("")
     override var searchMode: Boolean by mutableStateOf(false)
 }

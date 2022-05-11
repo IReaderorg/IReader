@@ -13,17 +13,21 @@ import androidx.compose.material.icons.filled.Remove
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.ireader.common_resources.UiText
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.MidSizeTextComposable
+import org.ireader.core_ui.ui.string
+import org.ireader.ui_reader.R
 
 @Composable
 fun SettingItemComposable(
-    text: String,
-    value: String,
+    text: UiText,
+    value: UiText,
     onAdd: () -> Unit,
     onMinus: () -> Unit,
 ) {
@@ -34,7 +38,7 @@ fun SettingItemComposable(
     ) {
         Text(
             modifier = Modifier.width(100.dp),
-            text = text,
+            text = text.asString(LocalContext.current),
             fontSize = 12.sp,
             style = TextStyle(fontWeight = FontWeight.W400),
             color = MaterialTheme.colors.onBackground
@@ -47,14 +51,22 @@ fun SettingItemComposable(
             AppIconButton(
                 imageVector = Icons.Default.Remove,
                 tint = MaterialTheme.colors.onBackground,
-                title = "Decrease $text",
+                text = UiText.DynamicString(
+                    string(id = R.string.decrease) + text.asString(
+                        LocalContext.current
+                    )
+                ),
                 onClick = { onMinus() }
             )
             MidSizeTextComposable(text = value)
             AppIconButton(
                 imageVector = Icons.Default.Add,
                 tint = MaterialTheme.colors.onBackground,
-                title = "Increase $text",
+                text = UiText.DynamicString(
+                    string(id = R.string.increase) + text.asString(
+                        LocalContext.current
+                    )
+                ),
                 onClick = { onAdd() }
             )
         }
@@ -63,7 +75,7 @@ fun SettingItemComposable(
 
 @Composable
 fun SettingItemToggleComposable(
-    text: String,
+    text: UiText,
     value: Boolean,
     onToggle: (Boolean) -> Unit,
 ) {
@@ -74,7 +86,7 @@ fun SettingItemToggleComposable(
     ) {
         Text(
             modifier = Modifier.width(100.dp),
-            text = text,
+            text = text.asString(LocalContext.current),
             fontSize = 12.sp,
             style = TextStyle(fontWeight = FontWeight.W400),
             color = MaterialTheme.colors.onBackground

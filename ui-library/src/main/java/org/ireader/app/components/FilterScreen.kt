@@ -11,6 +11,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.ireader.common_models.FilterType
+import org.ireader.common_resources.UiText
+import org.ireader.components.text_related.TextCheckBox
+import org.ireader.core_ui.ui.string
+import org.ireader.ui_library.R
 
 @Composable
 fun FilterScreen(
@@ -27,13 +31,13 @@ fun FilterScreen(
         verticalArrangement = Arrangement.Top
     ) {
         val items = listOf(
-            FilterItem("Unread", FilterType.Unread),
-            FilterItem("Completed", FilterType.Completed),
-            FilterItem("Downloaded", FilterType.Downloaded),
+            FilterItem(string(id = R.string.unread), FilterType.Unread),
+            FilterItem(string(id = R.string.completed), FilterType.Completed),
+            FilterItem(string(id = R.string.downloaded), FilterType.Downloaded),
         )
         items.forEach { filter ->
             TextCheckBox(
-                filter.name,
+                UiText.DynamicString(filter.name),
                 filters.contains(filter.type)
             ) {
                 if (!filters.contains(filter.type)) {

@@ -19,8 +19,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.ireader.common_resources.DEFAULT
+import org.ireader.common_resources.UiText
 import org.ireader.components.reusable_composable.CaptionTextComposable
 import org.ireader.reader.viewmodel.ReaderScreenPreferencesState
+import org.ireader.ui_reader.R
 
 @Composable
 fun BrightnessSliderComposable(
@@ -85,7 +87,7 @@ fun BrightnessSliderComposable(
             CaptionTextComposable(
                 modifier = Modifier.align(Alignment.CenterVertically),
                 color = if (viewModel.autoBrightnessMode) MaterialTheme.colors.onPrimary else MaterialTheme.colors.onBackground,
-                text = "Auto",
+                text = UiText.StringResource(R.string.auto),
                 style = MaterialTheme.typography.caption,
                 maxLine = 1
             )

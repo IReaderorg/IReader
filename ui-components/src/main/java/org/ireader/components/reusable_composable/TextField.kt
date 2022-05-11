@@ -13,6 +13,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import org.ireader.common_resources.UiText
 
 @Composable
 fun TextField(
@@ -39,7 +40,7 @@ fun TextField(
         )
         if (filter.value.isBlank()) {
             MidSizeTextComposable(
-                text = filter.name,
+                text = UiText.DynamicString(filter.name),
                 color = MaterialTheme.colors.onBackground.copy(alpha = .4f),
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
@@ -72,7 +73,7 @@ fun TextField(
         )
         if (command.value.isBlank()) {
             MidSizeTextComposable(
-                text = command.name,
+                text =   UiText.DynamicString(command.name),
                 color = MaterialTheme.colors.onBackground.copy(alpha = .4f),
                 modifier = Modifier.padding(horizontal = 16.dp)
             )

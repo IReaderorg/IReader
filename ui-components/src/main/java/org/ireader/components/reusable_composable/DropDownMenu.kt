@@ -21,13 +21,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.ireader.common_resources.UiText
 
 @Composable
 fun DropDownMenu(
-    text: String,
+    text: UiText,
     onSelected: (key: Int) -> Unit,
-    currentValue: String? = null,
-    items: Array<String>,
+    currentValue: UiText? = null,
+    items: Array<UiText>,
 ) {
     var opened by remember {
         mutableStateOf(false)
@@ -57,7 +58,7 @@ fun DropDownMenu(
                 MidSizeTextComposable(text = currentValue ?: items.first())
                 AppIconButton(
                     imageVector = Icons.Default.ArrowDropDown,
-                    title = "",
+                    text = UiText.DynamicString(""),
                     onClick = {
                         opened = true
                     }
@@ -93,13 +94,13 @@ fun SortedByScreen() {
 @Composable
 fun FilterItemPrev() {
     DropDownMenu(
-        "Sort By:",
+        UiText.DynamicString("Sort By:"),
         { s ->
         },
-        "Latest",
+        UiText.DynamicString("Latest"),
         arrayOf(
-            "Latest",
-            "Popular"
+            UiText.DynamicString("Latest"),
+            UiText.DynamicString("Popular")
         )
     )
 }

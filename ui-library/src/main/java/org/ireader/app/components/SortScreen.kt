@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.ireader.common_models.SortType
+import org.ireader.common_resources.UiText
 import org.ireader.components.text_related.TextIcon
 
 @Composable
@@ -50,7 +51,7 @@ fun SortScreen(
             items.forEach { item ->
 
                 TextIcon(
-                    item.name,
+                    UiText.DynamicString(item.name),
                     if (isSortDesc) Icons.Default.ArrowDownward else Icons.Default.ArrowUpward,
                     sortType == item,
                     onClick = {

@@ -11,7 +11,6 @@ import org.ireader.common_models.entities.Catalog
 import org.ireader.common_models.entities.CatalogInstalled
 import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.common_models.entities.CatalogRemote
-import org.ireader.common_resources.UiText
 import org.ireader.core_api.os.InstallStep
 import org.ireader.core_catalogs.interactor.GetCatalogsByType
 import org.ireader.core_catalogs.interactor.InstallCatalog
@@ -86,7 +85,7 @@ class ExtensionViewModel @Inject constructor(
                     if (step is InstallStep.Error) {
                         showSnackBar(step.error)
                     } else {
-                        showSnackBar(UiText.DynamicString(step.name))
+                        showSnackBar(step.name)
                     }
                     installSteps + (pkgName to step)
                 } else {

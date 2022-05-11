@@ -15,10 +15,12 @@ import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import org.ireader.common_models.entities.Catalog
 import org.ireader.common_models.entities.CatalogInstalled
+import org.ireader.common_resources.UiText
+import org.ireader.components.text_related.TextSection
 import org.ireader.core_api.log.Log
-import org.ireader.core_ui.ui_components.TextSection
 import org.ireader.sources.extension.CatalogItem
 import org.ireader.sources.extension.CatalogsState
+import org.ireader.ui_sources.R
 
 @Composable
 fun RemoteSourcesScreen(
@@ -55,7 +57,7 @@ fun RemoteSourcesScreen(
             if (allCatalogs.isNotEmpty()) {
                 item {
                     TextSection(
-                        text = "Installed",
+                        text = UiText.StringResource(R.string.installed),
                     )
                 }
                 items(allCatalogs.size) { index ->
@@ -71,7 +73,7 @@ fun RemoteSourcesScreen(
             if (state.remoteCatalogs.isNotEmpty()) {
                 item {
                     TextSection(
-                        text = "Available",
+                        text = UiText.StringResource(R.string.available),
                     )
                 }
 

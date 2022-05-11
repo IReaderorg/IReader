@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.flowlayout.FlowRow
+import org.ireader.common_resources.UiText
 import org.ireader.components.reusable_composable.MidSizeTextComposable
 
 @Composable
@@ -85,7 +86,7 @@ private fun GenreChip(genre: String) {
         color = MaterialTheme.colors.background
     ) {
         MidSizeTextComposable(
-            text = genre,
+            text = UiText.DynamicString(genre),
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
         )
     }

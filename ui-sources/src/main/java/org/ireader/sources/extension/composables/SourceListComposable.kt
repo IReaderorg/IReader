@@ -31,44 +31,8 @@ fun SourceListComposable(
                 catalog = sources[index],
                 onClick = {
                     onExploreNavigation(index)
-//                    navController.navigate(ExploreScreenSpec.buildRoute(
-//                        sourceId = sources[index].sourceId,
-//                    ))
                 }
             )
-//            ListItem(
-//                modifier = Modifier
-//                    .clickable {
-//                        navController.navigate(ExploreScreenSpec.buildRoute(
-//                            sourceId = sources[index].sourceId,
-//                            exploreType = ExploreType.Latest.id
-//                        ))
-//                    }
-//                    .height(60.dp),
-//                text = { Text(sources[index].name) },
-//                trailing = {},
-//                secondaryText = {},
-//                icon = {
-//
-//                    Box(modifier = Modifier
-//                        .clip(RoundedCornerShape(2.dp))
-//                        .shadow(elevation = 1.dp)
-//                        .width(40.dp)
-//                        .height(100.dp),
-//                        contentAlignment = Alignment.Center) {
-//                        BookImageComposable(
-//                            modifier = Modifier
-//                                .fillMaxSize()
-//                                .padding(1.dp),
-//                            //TODO need to add this later
-//                            image = "https://github.com/LNReader/lnreader-sources/blob/main/src/en/comrademao/icon.png",
-//                            contentScale = ContentScale.Inside,
-//                            alignment = Alignment.Center,
-//                            placeholder = org.ireader.core.R.drawable.ic_wallpaper
-//                        )
-//                    }
-//                }
-//            )
         }
     }
 }

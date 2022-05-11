@@ -22,11 +22,13 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import kotlinx.coroutines.launch
 import org.ireader.app.viewmodel.LibraryState
+import org.ireader.common_resources.UiText
 import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.AppTextField
 import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.core_ui.ui.DEFAULT_ELEVATION
+import org.ireader.ui_library.R
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -82,7 +84,7 @@ private fun RegularTopBar(
     Toolbar(
         title = {
             if (!vm.inSearchMode) {
-                BigSizeTextComposable(text = "Library")
+                BigSizeTextComposable(text = UiText.StringResource(R.string.label_library))
             } else {
                 AppTextField(
                     query = vm.searchQuery,
@@ -102,7 +104,7 @@ private fun RegularTopBar(
             if (vm.inSearchMode) {
                 AppIconButton(
                     imageVector = Icons.Default.Close,
-                    title = "Close",
+                    text = UiText.StringResource( R.string.close),
                     onClick = {
                         vm.inSearchMode = false
                         vm.searchQuery = ""
@@ -112,7 +114,7 @@ private fun RegularTopBar(
             } else {
                 AppIconButton(
                     imageVector = Icons.Default.Sort,
-                    title = "Filter",
+                    text =UiText.StringResource( R.string.filter),
                     onClick = {
                         scope.launch {
                             if (bottomSheetState.isVisible) {
@@ -125,14 +127,14 @@ private fun RegularTopBar(
                 )
                 AppIconButton(
                     imageVector = Icons.Default.Search,
-                    title = "Search",
+                    text =UiText.StringResource( R.string.search),
                     onClick = {
                         vm.inSearchMode = true
                     },
                 )
                 AppIconButton(
                     imageVector = Icons.Default.Refresh,
-                    title = "Refresh",
+                    text = UiText.StringResource( R.string.refresh),
                     onClick = {
                         refreshUpdate()
                     },
@@ -143,7 +145,7 @@ private fun RegularTopBar(
             {
                 AppIconButton(
                     imageVector = Icons.Default.ArrowBack,
-                    title = "Toggle search mode off",
+                    text = UiText.StringResource( R.string.toggle_search_mode_off),
                     onClick = {
                         vm.inSearchMode = false
                     }
@@ -162,7 +164,7 @@ private fun EditModeTopAppBar(
     onClickInvertSelection: () -> Unit,
 ) {
     Toolbar(
-        title = { BigSizeTextComposable(text = "$selectionSize") },
+        title = { BigSizeTextComposable(text = UiText.DynamicString("$selectionSize")) },
         navigationIcon = {
             IconButton(onClick = onClickCancelSelection) {
                 Icon(Icons.Default.Close, contentDescription = null)

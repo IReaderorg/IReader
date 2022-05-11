@@ -18,8 +18,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import org.ireader.common_resources.UiText
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.SuperSmallTextComposable
+import org.ireader.ui_components.R
 
 @Composable
 fun GoToLastReadComposable(onClick: () -> Unit) {
@@ -41,7 +43,7 @@ fun GoToLastReadComposable(onClick: () -> Unit) {
         ) {
             AppIconButton(
                 imageVector = Icons.Default.ImportContacts,
-                title = "Open last chapter",
+                text = UiText.StringResource(R.string.open_last_chapter),
                 onClick = {
                     onClick()
                 },
@@ -52,7 +54,7 @@ fun GoToLastReadComposable(onClick: () -> Unit) {
 }
 
 @Composable
-fun TextBadge(modifier: Modifier = Modifier, text: String) {
+fun TextBadge(modifier: Modifier = Modifier, text: UiText) {
     Box(
         modifier = Modifier
             .padding(5.dp)

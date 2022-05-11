@@ -62,6 +62,7 @@ import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.core_ui.ui.EmptyScreen
 import org.ireader.core_ui.ui.LoadingScreen
 import org.ireader.explore.webview.CustomTextField
+import org.ireader.ui_chapter_detail.R
 
 @ExperimentalAnimationApi
 @OptIn(ExperimentalMaterialApi::class)
@@ -132,7 +133,7 @@ fun ChapterDetailScreen(
                 verticalArrangement = Arrangement.Top
             ) {
                 Spacer(modifier = modifier.height(5.dp))
-                BigSizeTextComposable(text = "Advance Setting")
+                BigSizeTextComposable(text = UiText.StringResource(R.string.advance_setting))
 
                 Spacer(modifier = modifier.height(5.dp))
                 Divider(modifier = modifier.fillMaxWidth(), thickness = 1.dp)
@@ -140,13 +141,13 @@ fun ChapterDetailScreen(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = { vm.reverseChapterInDB() }
                 ) {
-                    MidSizeTextComposable(text = "Reverse Chapters in DB")
+                    MidSizeTextComposable(text =  UiText.StringResource(R.string.reverse_chapter_in_db))
                 }
                 TextButton(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = { vm.autoSortChapterInDB() }
                 ) {
-                    MidSizeTextComposable(text = "Auto Sort Chapters in DB")
+                    MidSizeTextComposable(text = UiText.StringResource(R.string.auto_sort_chapters_in_db))
                 }
             }
         },
@@ -162,7 +163,7 @@ fun ChapterDetailScreen(
                             color = MaterialTheme.colors.onBackground.copy(.1f),
                             shape = CircleShape
                         ),
-                    hint = "Search...",
+                    hint = UiText.StringResource(R.string.search_hint),
                     value = vm.query,
                     onValueChange = {
                         vm.query = it
@@ -177,7 +178,7 @@ fun ChapterDetailScreen(
                         if (vm.query.isNotBlank()) {
                             AppIconButton(
                                 imageVector = Icons.Default.Close,
-                                title = "Exit search",
+                                text = UiText.StringResource(R.string.exit_search_mode),
                                 onClick = {
                                     vm.query = ""
                                     vm.getLocalChaptersByPaging(vm.isAsc)
@@ -195,7 +196,7 @@ fun ChapterDetailScreen(
                     ) { (isLoading, isEmpty) ->
                         when {
                             isLoading -> LoadingScreen()
-                            isEmpty -> EmptyScreen(text = UiText.DynamicString("There is no chapter."))
+                            isEmpty -> EmptyScreen(text = UiText.StringResource(R.string.there_is_no_chapter))
                             else -> {
                                 LazyColumnScrollbar(listState = scrollState) {
                                     LazyColumn(
@@ -307,7 +308,7 @@ private fun BoxScope.ChapterDetailBottomBar(
         ) {
             AppIconButton(
                 imageVector = Icons.Default.GetApp,
-                title = "Download",
+                text =  UiText.StringResource( R.string.download),
                 onClick = {
                     vm.downloadChapters()
                     vm.selection.clear()
@@ -315,7 +316,7 @@ private fun BoxScope.ChapterDetailBottomBar(
             )
             AppIconButton(
                 imageVector = Icons.Default.BookmarkBorder,
-                title = "Bookmark",
+                text =UiText.StringResource(R.string.bookmark),
                 onClick = {
                     vm.insertChapters(
                         vm.chapters.filter { it.id in vm.selection }
@@ -330,7 +331,7 @@ private fun BoxScope.ChapterDetailBottomBar(
                     .map { it.id }
                     .containsAll(vm.selection)
                 ) Icons.Default.DoneOutline else Icons.Default.Done,
-                title = "Mark as read",
+                text =UiText.StringResource( R.string.mark_as_read),
                 onClick = {
                     vm.insertChapters(
                         vm.chapters.filter { it.id in vm.selection }
@@ -341,10 +342,10 @@ private fun BoxScope.ChapterDetailBottomBar(
             )
             AppIconButton(
                 imageVector = Icons.Default.PlaylistAddCheck,
-                title = "Mark Previous as read",
+                text = UiText.StringResource(R.string.mark_previous_as_read),
                 onClick = {
                     vm.insertChapters(
-                        vm.chapters.filter { it.id <= vm.selection.maxOrNull() ?: 0 }
+                        vm.chapters.filter { it.id <= (vm.selection.maxOrNull() ?: 0) }
                             .map { it.copy(read = true) }
                     )
                     vm.selection.clear()
@@ -352,7 +353,7 @@ private fun BoxScope.ChapterDetailBottomBar(
             )
             AppIconButton(
                 imageVector = Icons.Default.Delete,
-                title = "Delete",
+                text =  UiText.StringResource(R.string.delete),
                 onClick = {
                     vm.deleteChapters(vm.chapters.filter { it.id in vm.selection })
                     vm.selection.clear()

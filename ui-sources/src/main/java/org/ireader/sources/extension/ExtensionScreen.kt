@@ -26,14 +26,17 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import org.ireader.common_models.entities.Catalog
 import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.common_resources.UiEvent
+import org.ireader.common_resources.UiText
 import org.ireader.components.components.ISnackBarHost
 import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.core_ui.theme.AppColors
 import org.ireader.sources.extension.composables.RemoteSourcesScreen
 import org.ireader.sources.extension.composables.UserSourcesScreen
+import org.ireader.ui_sources.R
 
 @ExperimentalMaterialApi
 @OptIn(ExperimentalPagerApi::class)
@@ -69,9 +72,9 @@ fun ExtensionScreen(
         viewModel.clearExploreMode()
     }
 
-    val pages = listOf<String>(
-        "Sources",
-        "Extensions"
+    val pages = listOf<UiText>(
+        UiText.StringResource(R.string.sources),
+        UiText.StringResource(R.string.extensions),
     )
 
     var searchMode by remember {
@@ -130,11 +133,7 @@ fun ExtensionScreen(
                         },
                         selected = pagerState.currentPage == index,
                         onClick = {
-                            /**
-                             * TODO need to wait for this issue to be close before using this line
-                             * https://issuetracker.google.com/issues/229752147
-                             */
-                            // scope.launch { pagerState.animateScrollToPage(index) }
+                             scope.launch { pagerState.animateScrollToPage(index) }
                         },
                         selectedContentColor = MaterialTheme.colors.primary,
                         unselectedContentColor = MaterialTheme.colors.onBackground,

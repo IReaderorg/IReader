@@ -1,14 +1,15 @@
-package org.ireader.app.components
+package org.ireader.components.text_related
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.Checkbox
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import org.ireader.common_resources.UiText
 import org.ireader.components.reusable_composable.MidSizeTextComposable
 
 @Composable
-fun TextCheckBox(title: String, isChecked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+fun TextCheckBox(title: UiText, isChecked: Boolean, onCheckedChange: (Boolean) -> Unit) {
     Row(
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically

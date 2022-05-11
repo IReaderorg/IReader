@@ -1,5 +1,7 @@
 package org.ireader.core_ui
 
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import org.ireader.common_resources.UiText
 import org.ireader.core.exceptions.EmptyQuery
 import org.ireader.core.exceptions.SourceNotFoundException
@@ -46,3 +48,8 @@ fun exceptionHandler(e: Throwable): UiText? {
 }
 
 class CatalogNotFoundException : Exception()
+@Composable
+fun UiText.StringResource.asString(): String {
+    return LocalContext.current.getString(resId)
+}
+

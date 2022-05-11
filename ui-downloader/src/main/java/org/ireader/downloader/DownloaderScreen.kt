@@ -33,7 +33,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.collectLatest
@@ -41,6 +40,7 @@ import org.ireader.common_models.entities.SavedDownload
 import org.ireader.common_models.entities.SavedDownloadWithInfo
 import org.ireader.common_models.entities.toSavedDownload
 import org.ireader.common_resources.UiEvent
+import org.ireader.common_resources.UiText
 import org.ireader.components.BookListItem
 import org.ireader.components.BookListItemColumn
 import org.ireader.components.BookListItemSubtitle
@@ -59,7 +59,7 @@ fun DownloaderScreen(
     vm: DownloaderViewModel,
     onDownloadItem: (
         item:
-            SavedDownloadWithInfo
+        SavedDownloadWithInfo
     ) -> Unit,
     onPopBackStack: () -> Unit,
 ) {
@@ -93,7 +93,8 @@ fun DownloaderScreen(
                 },
                 state = vm,
                 onDelete = {
-                    vm.deleteSelectedDownloads(vm.downloads.filter { it.chapterId in vm.selection }.map { it.toSavedDownload() })
+                    vm.deleteSelectedDownloads(vm.downloads.filter { it.chapterId in vm.selection }
+                        .map { it.toSavedDownload() })
                     vm.selection.clear()
                 }
             )
@@ -106,8 +107,8 @@ fun DownloaderScreen(
                 text = {
                     MidSizeTextComposable(
                         text = when (vm.downloadServiceStateImpl.isEnable) {
-                            true -> stringResource(R.string.pause)
-                            else -> stringResource(R.string.resume)
+                            true -> UiText.StringResource(R.string.pause)
+                            else -> UiText.StringResource(R.string.resume)
                         },
                         color = Color.White
                     )
@@ -166,7 +167,8 @@ fun DownloaderScreen(
                     inProgress = downloads[index].chapterId in vm.downloadServiceStateImpl.downloads.map { it.chapterId },
                     isDownloaded = downloads[index].isDownloaded,
                     onCancelAllFromThisSeries = { item ->
-                        vm.deleteSelectedDownloads(vm.downloads.filter { it.bookId == item.bookId }.map { it.toSavedDownload() })
+                        vm.deleteSelectedDownloads(vm.downloads.filter { it.bookId == item.bookId }
+                            .map { it.toSavedDownload() })
                     },
                     onCancelDownload = { item ->
                         vm.deleteSelectedDownloads(list = listOf(item))
@@ -248,12 +250,12 @@ fun DownloadScreenItem(
                 val list =
                     listOf<DropDownMenuItem>(
                         DropDownMenuItem(
-                            "Cancel"
+                            UiText.StringResource(R.string.cancel)
                         ) {
                             onCancelDownload(item)
                         },
                         DropDownMenuItem(
-                            "Cancel all for this series"
+                            UiText.StringResource(R.string.cancel_all_for_this_series)
                         ) {
                             onCancelAllFromThisSeries(item)
                         }

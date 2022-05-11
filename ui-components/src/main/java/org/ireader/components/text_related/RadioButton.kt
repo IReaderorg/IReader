@@ -11,12 +11,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import org.ireader.common_resources.UiText
 import org.ireader.components.reusable_composable.MidSizeTextComposable
 
 @Composable
 fun RadioButton(
     modifier: Modifier = Modifier,
-    text: String,
+    text: UiText,
     selected: Boolean,
     onClick: () -> Unit = {},
 ) {
