@@ -21,6 +21,11 @@ interface Preference<T> {
     fun get(): T
 
     /**
+     * Returns the current value of this preference.
+     */
+    suspend fun read(): T
+
+    /**
      * Sets a new [value] for this preference.
      */
     fun set(value: T)

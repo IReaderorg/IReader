@@ -57,6 +57,13 @@ internal sealed class AndroidPreference<K, T>(
     }
 
     /**
+     * Returns the current value of this preference.
+     */
+    override suspend fun read(): T {
+        return read(store.data.first(), key) ?: defaultValue
+    }
+
+    /**
      * Sets a new [value] for this preference.
      */
     override fun set(value: T) {
@@ -125,7 +132,6 @@ internal sealed class AndroidPreference<K, T>(
         override fun write(preferences: MutablePreferences, key: Key<T>, value: T) {
             preferences[key] = value
         }
-
     }
 
     /**
@@ -147,7 +153,5 @@ internal sealed class AndroidPreference<K, T>(
         override fun write(preferences: MutablePreferences, key: Key<String>, value: T) {
             preferences[key] = serializer(value)
         }
-
     }
-
 }

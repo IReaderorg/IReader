@@ -12,9 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
@@ -23,7 +20,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.pager.ExperimentalPagerApi
 import org.ireader.common_models.entities.BaseBook
 import org.ireader.common_resources.UiText
 import org.ireader.components.list.layouts.BookImage
@@ -48,7 +44,7 @@ fun GlobalSearchScreen(
     val uiSearch = vm.searchItems.filter { it.items.isNotEmpty() }
     val emptySearches = vm.searchItems.filter { it.items.isEmpty() }
     val allSearch = uiSearch + emptySearches
-    val scrollState = rememberLazyListState()
+
     Scaffold(
         topBar = {
             GlobalScreenTopBar(
@@ -58,13 +54,16 @@ fun GlobalSearchScreen(
             )
         }
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(rememberScrollState()),
-        ) {
-            LazyColumn() {
+//        Column(
+//            modifier = Modifier
+//                .fillMaxSize()
+//                .padding(padding)
+//                .verticalScroll(rememberScrollState()),
+//        ) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+             .padding(padding)) {
                 items(count = allSearch.size) { index ->
                     GlobalSearchBookInfo(
                         allSearch[index],
@@ -74,10 +73,10 @@ fun GlobalSearchScreen(
                 }
             }
         }
-    }
+//    }
 }
 
-@OptIn(ExperimentalPagerApi::class)
+
 @Composable
 fun GlobalSearchBookInfo(
     book: SearchItem,
@@ -117,7 +116,7 @@ fun GlobalSearchBookInfo(
             }
         }
         Spacer(modifier = Modifier.height(20.dp))
-        LazyRow {
+        LazyRow(modifier= Modifier) {
             items(book.items.size) { index ->
                 BookImage(
                     modifier = Modifier

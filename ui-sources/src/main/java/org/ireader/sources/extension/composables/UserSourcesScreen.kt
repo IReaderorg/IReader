@@ -34,7 +34,6 @@ fun UserSourcesScreen(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        kotlin.runCatching {
             if (state.validPinnedCatalogs.value.isNotEmpty()) {
                 item {
                     TextSection(
@@ -74,8 +73,5 @@ fun UserSourcesScreen(
                     }
                 }
             }
-        }.getOrElse {
-            Log.error { "Throws an error" + it.message }
-        }
     }
 }

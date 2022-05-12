@@ -25,7 +25,7 @@ compose-navigation = { module = "androidx.navigation:navigation-compose", versio
 compose-hiltNavigation = { module = "androidx.hilt:hilt-navigation-compose", version = "1.0.0" }
 compose-activity = { module = "androidx.activity:activity-compose", version.ref = "activity" }
 compose-lifecycle = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
-compose-coil = "io.coil-kt:coil-compose:2.0.0-rc03"
+compose-coil = "io.coil-kt:coil-compose:2.0.0"
 
 
 compose-destinations-core = "io.github.raamcosta.compose-destinations:core:1.5.1-beta"

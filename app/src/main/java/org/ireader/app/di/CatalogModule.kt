@@ -23,28 +23,17 @@ import org.ireader.core_catalogs.interactor.TogglePinnedCatalog
 import org.ireader.core_catalogs.interactor.UninstallCatalog
 import org.ireader.core_catalogs.interactor.UpdateCatalog
 import org.ireader.core_catalogs.service.CatalogInstaller
-import org.ireader.core_catalogs.service.CatalogLoader
-import org.ireader.core_catalogs.service.CatalogRemoteApi
 import org.ireader.core_catalogs.service.CatalogRemoteRepository
 import org.ireader.data.catalog.AndroidCatalogInstallationChanges
 import org.ireader.data.catalog.AndroidCatalogInstaller
 import org.ireader.data.catalog.AndroidCatalogLoader
 import org.ireader.data.catalog.CatalogGithubApi
-import org.ireader.sources.extension.CatalogsStateImpl
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
 @Module
 class CatalogModule {
 
-    @Provides
-    @Singleton
-    fun provideCatalogLoader(
-        context: Application,
-        httpClients: HttpClients,
-    ): CatalogLoader {
-        return AndroidCatalogLoader(context = context, httpClients)
-    }
 
     @Provides
     @Singleton
@@ -63,13 +52,6 @@ class CatalogModule {
         return AndroidCatalogInstaller(context, httpClient, installationChanges, packageInstaller)
     }
 
-    @Provides
-    @Singleton
-    fun provideCatalogRemoteApi(
-        httpClient: HttpClients,
-    ): CatalogRemoteApi {
-        return CatalogGithubApi(httpClient)
-    }
 
     @Provides
     @Singleton
@@ -82,13 +64,14 @@ class CatalogModule {
     @Provides
     @Singleton
     fun providesCatalogStore(
-        loader: CatalogLoader,
         catalogPreferences: CatalogPreferences,
         catalogRemoteRepository: CatalogRemoteRepository,
         installationChanges: AndroidCatalogInstallationChanges,
+        context: Application,
+        httpClients: HttpClients,
     ): CatalogStore {
         return CatalogStore(
-            loader,
+            AndroidCatalogLoader(context, httpClients),
             catalogPreferences,
             catalogRemoteRepository,
             installationChanges
@@ -134,12 +117,7 @@ class CatalogModule {
             packageInstaller
         )
     }
-    @Provides
-    @Singleton
-    fun providesCatalogsStateImpl(
-    ): CatalogsStateImpl {
-        return CatalogsStateImpl()
-    }
+
     @Provides
     @Singleton
     fun providesGetCatalogsByType(
@@ -204,10 +182,10 @@ class CatalogModule {
     @Singleton
     fun providesSyncRemoteCatalogs(
         catalogRemoteRepository: CatalogRemoteRepository,
-        catalogRemoteApi: CatalogRemoteApi,
         catalogPreferences: CatalogPreferences,
+        httpClient: HttpClients,
     ): SyncRemoteCatalogs {
-        return SyncRemoteCatalogs(catalogRemoteRepository, catalogRemoteApi, catalogPreferences)
+        return SyncRemoteCatalogs(catalogRemoteRepository, CatalogGithubApi(httpClient), catalogPreferences)
     }
 
 }

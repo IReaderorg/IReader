@@ -26,6 +26,14 @@ class ColorPreference(
         }
     }
 
+    override suspend fun read(): Color {
+        return if (isSet()) {
+            Color(preference.read())
+        } else {
+            Color.Unspecified
+        }
+    }
+
     override fun set(value: Color) {
         if (value != Color.Unspecified) {
             preference.set(value.toArgb())

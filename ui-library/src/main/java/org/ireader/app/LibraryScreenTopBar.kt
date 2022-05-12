@@ -84,7 +84,7 @@ private fun RegularTopBar(
     Toolbar(
         title = {
             if (!vm.inSearchMode) {
-                BigSizeTextComposable(text = UiText.StringResource(R.string.label_library))
+                BigSizeTextComposable(text = UiText.StringResource(R.string.library))
             } else {
                 AppTextField(
                     query = vm.searchQuery,

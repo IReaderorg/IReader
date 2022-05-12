@@ -46,7 +46,7 @@ fun BookImageComposable(
             false
         }
         if (showLoading && !image.favorite && painter.state is AsyncImagePainter.State.Loading && !isLoaded) {
-            ShowLoading(modifier = Modifier.align(Alignment.Center), size = 24.dp)
+            ShowLoading(modifier = Modifier.align(Alignment.Center), size = 16.dp)
         }
 
 
@@ -64,7 +64,10 @@ fun BookImageComposable(
                 }
                 .build(),
             onSuccess = {
-                isLoaded = false
+                isLoaded = true
+            },
+            onError = {
+                isLoaded = true
             },
             contentDescription = "an image",
             alignment = alignment,

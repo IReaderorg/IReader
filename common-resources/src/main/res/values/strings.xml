@@ -185,6 +185,7 @@
     <string name="channel_crash_logs">Crash logs</string>
     <string name="label_backup">restoring from Backup</string>
     <string name="label_library">Checking Library</string>
+    <string name="library">Library</string>
     <string name="label_recent_updates">Recent Updates</string>
     <string name="popular_book">Most Popular</string>
     <string name="copied_to_clipboard">Copied to clipboard</string>

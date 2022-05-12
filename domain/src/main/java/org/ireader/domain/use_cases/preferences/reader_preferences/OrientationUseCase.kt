@@ -43,7 +43,7 @@ class SortersUseCase(
     }
 
     suspend fun read(): SortType {
-        return mapSortType(appPreferences.sortLibraryScreen().get())
+        return mapSortType(appPreferences.sortLibraryScreen().read())
     }
 }
 
@@ -55,7 +55,7 @@ class SortersDescUseCase(
     }
 
     suspend fun read(): Boolean {
-        return appPreferences.sortDescLibraryScreen().get()
+        return appPreferences.sortDescLibraryScreen().read()
     }
 }
 

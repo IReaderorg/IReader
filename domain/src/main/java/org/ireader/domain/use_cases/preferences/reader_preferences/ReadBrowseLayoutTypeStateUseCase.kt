@@ -12,7 +12,7 @@ class LibraryLayoutTypeUseCase(
     }
 
     suspend fun read(): DisplayMode {
-        return layouts[appPreferences.libraryLayoutType().get()]
+        return layouts[appPreferences.libraryLayoutType().read()]
     }
 }
 
