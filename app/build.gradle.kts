@@ -48,14 +48,35 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = compose.versions.compose.get()
     }
-
+    defaultConfig {
+        buildConfigField("String", "COMMIT_COUNT", "\"${getCommitCount()}\"")
+        buildConfigField("String", "COMMIT_SHA", "\"${getGitSha()}\"")
+        buildConfigField("String", "BUILD_TIME", "\"${getBuildTime()}\"")
+        buildConfigField("boolean", "INCLUDE_UPDATER", "false")
+        buildConfigField("boolean", "PREVIEW", "false")
+        buildConfigField("String", "VERSION_NAME", "\"${ProjectConfig.versionName}\"")
+        buildConfigField("int", "VERSION_CODE",  "${ProjectConfig.versionCode}")
+    }
 
 
     buildTypes {
-        getByName("release") {
+        named("debug") {
+            versionNameSuffix = "-${getCommitCount()}"
+            applicationIdSuffix = ".debug"
+        }
+        named("release") {
             isShrinkResources = true
             isMinifyEnabled = true
             proguardFiles("proguard-rules.pro")
+        }
+        create("preview") {
+            initWith(getByName("release"))
+            buildConfigField("boolean", "PREVIEW", "true")
+
+            val debugType = getByName("debug")
+            signingConfig = debugType.signingConfig
+            versionNameSuffix = debugType.versionNameSuffix
+            applicationIdSuffix = debugType.applicationIdSuffix
         }
     }
 }
@@ -68,7 +89,9 @@ dependencies {
     implementation(androidx.media)
     implementation(compose.compose.activity)
     implementation("androidx.core:core-splashscreen:1.0.0-beta02")
-    implementation(compose.compose.material)
+implementation(compose.compose.material3)
+
+
     implementation(compose.compose.coil)
 
     implementation(project(Modules.coreApi))
@@ -95,6 +118,7 @@ dependencies {
     /** Coroutine **/
     implementation(kotlinx.coroutines.core)
     implementation(kotlinx.coroutines.android)
+    implementation("com.google.firebase:firebase-analytics:17.2.2")
 
     /** Hilt **/
     kapt(libs.hilt.androidcompiler)

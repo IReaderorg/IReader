@@ -14,27 +14,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.ContentAlpha
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ExtendedFloatingActionButton
-import androidx.compose.material.FabPosition
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentColor
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Snackbar
-import androidx.compose.material.SnackbarDuration
-import androidx.compose.material.SnackbarHost
-import androidx.compose.material.SnackbarResult
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.rememberModalBottomSheetState
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -52,6 +47,7 @@ import org.ireader.common_models.DisplayMode
 import org.ireader.common_models.LayoutType
 import org.ireader.common_models.entities.BookItem
 import org.ireader.common_resources.UiText
+import org.ireader.components.components.ISnackBarHost
 import org.ireader.components.components.ShowLoading
 import org.ireader.components.list.LayoutComposable
 import org.ireader.components.reusable_composable.AppIconButton
@@ -62,11 +58,14 @@ import org.ireader.core_api.source.HttpSource
 import org.ireader.core_api.source.Source
 import org.ireader.core_api.source.model.Filter
 import org.ireader.core_api.source.model.Listing
+import org.ireader.core_ui.theme.ContentAlpha
 import org.ireader.core_ui.ui.kaomojis
 import org.ireader.explore.viewmodel.ExploreState
 import org.ireader.ui_explore.R
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class,
+    ExperimentalMaterial3Api::class
+)
 @Composable
 fun ExploreScreen(
     modifier: Modifier = Modifier,
@@ -91,7 +90,7 @@ fun ExploreScreen(
     val context = LocalContext.current
 
     // val books = vm.books.collectAsLazyPagingItems()
-
+    val snackBarHostState = remember { SnackbarHostState() }
     val gridState = rememberLazyGridState()
     val bottomSheetState =
         rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
@@ -101,7 +100,6 @@ fun ExploreScreen(
         vm.modifiedFilter = source.getFilters()
     }
 
-    val scaffoldState = rememberScaffoldState()
     val (showSnackBar, setShowSnackBar) = remember {
         mutableStateOf(false)
     }
@@ -110,14 +108,14 @@ fun ExploreScreen(
     }
 
     if (showSnackBar) {
-        LaunchedEffect(scaffoldState.snackbarHostState) {
-            val result = scaffoldState.snackbarHostState.showSnackbar(
-                snackBarText,
+        LaunchedEffect(snackBarHostState.currentSnackbarData) {
+            val result = snackBarHostState.showSnackbar(
+                message= snackBarText,
                 actionLabel = "Reload",
-                duration = SnackbarDuration.Indefinite
+                duration = androidx.compose.material3.SnackbarDuration.Indefinite
             )
             when (result) {
-                SnackbarResult.ActionPerformed -> {
+                androidx.compose.material3.SnackbarResult.ActionPerformed -> {
                     setShowSnackBar(false)
                     vm.endReached = false
                     loadItems(false)
@@ -153,7 +151,7 @@ fun ExploreScreen(
                 }
             )
         },
-        sheetBackgroundColor = MaterialTheme.colors.background,
+        sheetBackgroundColor = MaterialTheme.colorScheme.background,
 
     ) {
         Scaffold(
@@ -171,18 +169,10 @@ fun ExploreScreen(
                     currentLayout = currentLayout
                 )
             },
-            scaffoldState = scaffoldState,
             snackbarHost = {
-                SnackbarHost(hostState = it) { data ->
-                    Snackbar(
-                        actionColor = MaterialTheme.colors.primary,
-                        snackbarData = data,
-                        backgroundColor = MaterialTheme.colors.background,
-                        contentColor = MaterialTheme.colors.onBackground,
-                    )
-                }
+                ISnackBarHost(snackBarHostState = snackBarHostState)
             },
-            floatingActionButtonPosition = FabPosition.End,
+            floatingActionButtonPosition = androidx.compose.material3.FabPosition.End,
             floatingActionButton = {
                 ExtendedFloatingActionButton(
                     text = {
@@ -197,8 +187,10 @@ fun ExploreScreen(
                         }
                     },
                     icon = {
-                        Icon(Icons.Filled.Add, "", tint = MaterialTheme.colors.onSecondary)
-                    }
+                        Icon(Icons.Filled.Add, "", tint = MaterialTheme.colorScheme.onSecondary)
+                    },
+                    contentColor = MaterialTheme.colorScheme.onSecondary,
+                    backgroundColor = MaterialTheme.colorScheme.secondary,
                 )
             },
         ) { paddingValue ->
@@ -266,15 +258,15 @@ private fun BoxScope.ExploreScreenErrorComposable(
 
         Text(
             text = kaomoji,
-            style = MaterialTheme.typography.body2.copy(
-                color = LocalContentColor.current.copy(alpha = ContentAlpha.medium),
+            style = MaterialTheme.typography.displayMedium.copy(
+                color = LocalContentColor.current.copy(alpha = ContentAlpha.medium()),
                 fontSize = 48.sp
             ),
         )
         Text(
             text = error,
-            style = MaterialTheme.typography.body2.copy(
-                color = LocalContentColor.current.copy(alpha = ContentAlpha.medium)
+            style = MaterialTheme.typography.displayMedium.copy(
+                color = LocalContentColor.current.copy(alpha = androidx.compose.material.ContentAlpha.medium)
             ),
             textAlign = TextAlign.Center,
             modifier = Modifier

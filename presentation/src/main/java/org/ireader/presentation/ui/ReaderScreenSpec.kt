@@ -2,12 +2,12 @@ package org.ireader.presentation.ui
 
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.DrawerValue
-import androidx.compose.material.rememberDrawerState
 import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -89,11 +89,11 @@ object ReaderScreenSpec : ScreenSpec {
         val chapters = vm.stateChapters
         val chapter = vm.stateChapter
         val book = vm.book
-
+        val snackBarHostState = remember { SnackbarHostState() }
         val scrollState = rememberLazyListState()
         val drawerScrollState = rememberLazyListState()
         val swipeState = rememberSwipeRefreshState(isRefreshing = false)
-        val scaffoldState = rememberScaffoldState(rememberDrawerState(DrawerValue.Closed))
+        val scaffoldState = rememberScaffoldState(androidx.compose.material.rememberDrawerState(androidx.compose.material.DrawerValue.Closed))
         DisposableEffect(key1 = true) {
             onDispose {
                 vm.restoreSetting(context, scrollState)
@@ -545,7 +545,8 @@ object ReaderScreenSpec : ScreenSpec {
             onTextAlign = {
                 vm.textAlignment = it
                 vm.readerUseCases.textAlignmentUseCase.save(it)
-            }
+            },
+            snackBarHostState=snackBarHostState
 
         )
     }

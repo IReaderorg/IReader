@@ -1,8 +1,9 @@
 package org.ireader.core_ui.ui
 
-import androidx.compose.material.Colors
+import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import org.ireader.core_ui.theme.isLight
 
 object Colour {
     val blue_200 = Color(0xFF90CAF9)
@@ -28,22 +29,22 @@ object Colour {
 
     val transparent = Color(0x00FFFFFF)
 
-    val Colors.topBarColor
+    val ColorScheme.topBarColor
         @Composable
-        get() = if (isLight) white_50 else black_900
+        get() = if (isLight()) white_50 else black_900
 
-    val Colors.contentColor
+    val ColorScheme.contentColor
         @Composable
-        get() = if (isLight) black_900 else white_50
-    val Colors.Transparent
+        get() = if (isLight()) black_900 else white_50
+    val ColorScheme.Transparent
         @Composable
-        get() = if (isLight) black_900.copy(alpha = .1f) else white_50
+        get() = if (isLight()) black_900.copy(alpha = .1f) else white_50
 
-    val Colors.iconColor
+    val ColorScheme.iconColor
         @Composable
-        get() = if (isLight) blue_500 else blue_500
+        get() = if (isLight()) blue_500 else blue_500
 
-    val Colors.scrollingThumbColor
+    val ColorScheme.scrollingThumbColor
         @Composable
-        get() = if (isLight) blue_accent else blue_accent
+        get() = if (isLight()) blue_accent else blue_accent
 }

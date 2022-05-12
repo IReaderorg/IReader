@@ -1,20 +1,20 @@
 package org.ireader.core_ui.theme
 
-import androidx.compose.material.Colors
-import androidx.compose.material.darkColors
-import androidx.compose.material.lightColors
+import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 import org.ireader.core_ui.ui.Colour
 
 data class Theme(
     val id: Int,
-    val materialColors: Colors,
+    val materialColors: ColorScheme,
     val extraColors: ExtraColors,
 )
 
 val themes = listOf(
     Theme(
-        1, lightColors(),
+        1, lightColorScheme(),
         ExtraColors(
             bars = androidx.compose.ui.graphics.Color.White,
             onBars = Color.Black
@@ -22,12 +22,12 @@ val themes = listOf(
     ),
     Theme(
         2,
-        lightColors(
+        lightColorScheme(
             primary = Color(0xFF2979FF),
-            primaryVariant = Color(0xFF2979FF),
+            primaryContainer = Color(0xFF2979FF),
             onPrimary = Color.White,
             secondary = Color(0xFF2979FF),
-            secondaryVariant = Color(0xFF2979FF),
+            secondaryContainer = Color(0xFF2979FF),
             onSecondary = Color.White
         ),
         ExtraColors(
@@ -36,7 +36,7 @@ val themes = listOf(
         )
     ),
     Theme(
-        3, darkColors(),
+        3, darkColorScheme(),
         ExtraColors(
             bars = Color(0xFF212121),
             onBars = Color.White
@@ -44,7 +44,7 @@ val themes = listOf(
     ),
     Theme(
         4,
-        darkColors(
+        darkColorScheme(
             primary = Color.Black,
             background = Color.Black
         ),
@@ -55,9 +55,9 @@ val themes = listOf(
     ),
     Theme(
         5,
-        darkColors(
+        darkColorScheme(
             primary = Colour.blue_accent,
-            primaryVariant = Colour.blue_600,
+            primaryContainer = Colour.blue_600,
             onPrimary = Colour.black_900,
             secondary = Colour.blue_accent,
             onSecondary = Colour.black_900,
@@ -75,9 +75,9 @@ val themes = listOf(
     ),
     Theme(
         6,
-        lightColors(
+        lightColorScheme(
             primary = Colour.blue_accent,
-            primaryVariant = Colour.blue_700,
+            primaryContainer = Colour.blue_700,
             onPrimary = Colour.white_50,
             secondary = Colour.blue_accent,
             onSecondary = Colour.white_50,

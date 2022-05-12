@@ -6,13 +6,15 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Scaffold
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerializationException
@@ -28,14 +30,14 @@ import org.ireader.components.components.ISnackBarHost
 import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.components.reusable_composable.TopAppBarBackButton
-import org.ireader.components.text_related.AdvanceSettingItem
 import org.ireader.components.text_related.TextSection
+import org.ireader.core_ui.component.PreferenceRow
 import org.ireader.settings.setting.SettingViewModel
 import org.ireader.ui_settings.R
 import java.io.FileInputStream
 import java.io.FileOutputStream
 
-@OptIn(ExperimentalSerializationApi::class)
+@OptIn(ExperimentalSerializationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun AdvanceSettings(
     modifier: Modifier = Modifier,
@@ -44,9 +46,8 @@ fun AdvanceSettings(
 
 ) {
     val context = LocalContext.current
-    val scaffoldState = rememberScaffoldState()
     val scope = rememberCoroutineScope()
-
+    val snackBarHostState = remember { SnackbarHostState() }
     val onBackup =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultIntent ->
             if (resultIntent.resultCode == Activity.RESULT_OK && resultIntent.data != null) {
@@ -108,7 +109,7 @@ fun AdvanceSettings(
         vm.eventFlow.collectLatest { event ->
             when (event) {
                 is UiEvent.ShowSnackbar -> {
-                    scaffoldState.snackbarHostState.showSnackbar(
+                    snackBarHostState.showSnackbar(
                         event.uiText.asString(context)
                     )
                 }
@@ -116,7 +117,7 @@ fun AdvanceSettings(
         }
     }
 
-    Scaffold(
+    androidx.compose.material3.Scaffold(
         topBar = {
             Toolbar(
                 title = {
@@ -125,52 +126,52 @@ fun AdvanceSettings(
                 navigationIcon = { TopAppBarBackButton(onClick = onBackStack) }
             )
         },
-        snackbarHost = { ISnackBarHost(snackBarHostState = it) },
-        scaffoldState = scaffoldState
+        snackbarHost = { ISnackBarHost(snackBarHostState = snackBarHostState) },
     ) { padding ->
         Column(
             modifier = Modifier.padding(padding)
         ) {
             TextSection(text = UiText.StringResource(R.string.data), toUpper = false)
-            AdvanceSettingItem(title = UiText.StringResource(R.string.clear_all_database)) {
+            PreferenceRow(title = stringResource(id = R.string.clear_all_database), onClick = {
                 vm.deleteAllDatabase()
                 vm.showSnackBar(
                     UiText.StringResource(R.string.database_was_cleared)
                 )
-            }
-            AdvanceSettingItem(title =  UiText.StringResource(R.string.clear_all_chapters)) {
+            })
+            PreferenceRow(title =  stringResource(R.string.clear_all_chapters), onClick = {
                 vm.deleteAllChapters()
                 vm.showSnackBar(UiText.StringResource(R.string.chapters_was_cleared))
-            }
-            AdvanceSettingItem(
-                title =   UiText.StringResource(R.string.clear_all_cache),
-                subtitle =   UiText.DynamicString(getCacheSize(context = context))
-            ) {
-                context.cacheDir.deleteRecursively()
-                vm.showSnackBar(UiText.DynamicString("Clear was cleared."))
-            }
+            })
+            PreferenceRow(
+                title =   stringResource(R.string.clear_all_cache),
+                subtitle =getCacheSize(context = context) ,
+                onClick = {
+                    context.cacheDir.deleteRecursively()
+                    vm.showSnackBar(UiText.DynamicString("Clear was cleared."))
+                }
+            )
 
             TextSection(text =   UiText.StringResource(R.string.backup), toUpper = false)
-            AdvanceSettingItem(title =   UiText.StringResource(R.string.backup)) {
+            PreferenceRow(title =   stringResource(R.string.backup), onClick = {
                 context.findComponentActivity()
                     ?.let { activity ->
                         vm.onLocalBackupRequested { intent: Intent ->
                             onBackup.launch(intent)
                         }
                     }
-            }
-            AdvanceSettingItem(title =   UiText.StringResource(R.string.restore)) {
+            })
+            PreferenceRow(title =   stringResource(R.string.restore), onClick ={
                 context.findComponentActivity()
                     ?.let { activity ->
                         vm.onRestoreBackupRequested { intent: Intent ->
                             onRestore.launch(intent)
                         }
                     }
-            }
+            })
             TextSection(text =   UiText.StringResource(R.string.reset_setting), toUpper = false)
-            AdvanceSettingItem(title =   UiText.StringResource(R.string.reset_reader_screen_settings)) {
+            PreferenceRow(title =   stringResource(R.string.reset_reader_screen_settings), onClick = {
                 vm.deleteDefaultSettings()
-            }
+            })
         }
     }
 }

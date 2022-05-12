@@ -12,10 +12,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -53,12 +53,12 @@ fun ChapterCommandBottomSheet(
             TextButton(onClick = {
                 onReset()
             }, modifier = Modifier.width(92.dp), shape = RoundedCornerShape(4.dp)) {
-                MidSizeTextComposable(text = UiText.StringResource(R.string.reset), color = MaterialTheme.colors.primary)
+                MidSizeTextComposable(text = UiText.StringResource(R.string.reset), color = MaterialTheme.colorScheme.primary)
             }
             Button(onClick = {
                 onFetch()
             }, modifier = Modifier.width(92.dp), shape = RoundedCornerShape(4.dp)) {
-                MidSizeTextComposable(text = UiText.StringResource(R.string.fetch), color = MaterialTheme.colors.onPrimary)
+                MidSizeTextComposable(text = UiText.StringResource(R.string.fetch), color = MaterialTheme.colorScheme.onPrimary)
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -108,9 +108,9 @@ fun ChapterCommandBottomSheet(
                     Text(
                         text = command.name,
                         fontWeight = FontWeight.W400,
-                        color = MaterialTheme.colors.onSurface.copy(.8f),
+                        color = MaterialTheme.colorScheme.onSurface.copy(.8f),
                         textAlign = TextAlign.Justify,
-                        style = MaterialTheme.typography.h6,
+                        style = MaterialTheme.typography.headlineSmall,
                     )
                 }
                 else -> {}

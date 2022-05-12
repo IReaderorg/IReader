@@ -7,7 +7,6 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -21,6 +20,7 @@ import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -67,8 +67,8 @@ fun ReaderScreenTopBar(
                     if (!vm.searchMode) {
                         Text(
                             text = chapter?.title ?: "",
-                            color = MaterialTheme.colors.onBackground,
-                            style = MaterialTheme.typography.subtitle1,
+                            color = MaterialTheme.colorScheme.onBackground,
+                            style = MaterialTheme.typography.displaySmall,
                             fontWeight = FontWeight.Bold,
                             overflow = TextOverflow.Ellipsis,
                             maxLines = 1
@@ -98,8 +98,8 @@ fun ReaderScreenTopBar(
                         )
                     }
                 },
-                backgroundColor = MaterialTheme.colors.background,
-                contentColor = MaterialTheme.colors.onBackground,
+                backgroundColor = MaterialTheme.colorScheme.background,
+                contentColor = MaterialTheme.colorScheme.onBackground,
                 elevation = 0.dp,
                 navigationIcon = {
                     if (!vm.searchMode) {
@@ -183,7 +183,7 @@ fun ReaderScreenTopBar(
                                     AppIconButton(
                                         imageVector = if (chapter.bookmark) Icons.Filled.Bookmark else Icons.Default.Bookmark,
                                         text = UiText.StringResource( R.string.bookmark),
-                                        tint = if (chapter.bookmark) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground,
+                                        tint = if (chapter.bookmark) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground,
                                         onClick = {
                                             onBookMark()
                                         }

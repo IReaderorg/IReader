@@ -3,8 +3,9 @@ package org.ireader.presentation.ui
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -59,7 +60,6 @@ object BookDetailScreenSpec : ScreenSpec {
     ) {
         val modalSheetState: ModalBottomSheetState =
             rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
-        val scaffoldStates = rememberScaffoldState()
         val vm: BookDetailViewModel = hiltViewModel()
         val context = LocalContext.current
         val state = vm
@@ -67,6 +67,7 @@ object BookDetailScreenSpec : ScreenSpec {
         val source = state.catalogSource?.source
         val catalog = state.catalogSource
         val scope = rememberCoroutineScope()
+        val snackBarHostState = remember { SnackbarHostState() }
 
         if (book != null) {
             BookDetailScreen(
@@ -150,7 +151,7 @@ object BookDetailScreenSpec : ScreenSpec {
                     } catch (e: Throwable) {
                     }
                 },
-                scaffoldState = scaffoldStates,
+                snackBarHostState = snackBarHostState,
                 chapterState = vm,
                 onPopBackStack = {
                     navController.popBackStack()

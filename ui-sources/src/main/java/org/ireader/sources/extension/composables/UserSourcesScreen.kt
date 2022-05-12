@@ -34,14 +34,14 @@ fun UserSourcesScreen(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-            if (state.validPinnedCatalogs.value.isNotEmpty()) {
+            if (state.pinnedCatalogs.isNotEmpty()) {
                 item {
                     TextSection(
                         text =  UiText.StringResource(R.string.pin),
                     )
                 }
-                items(state.validPinnedCatalogs.value.size) { index ->
-                    val catalog = state.validPinnedCatalogs.value[index]
+                items(state.pinnedCatalogs.size) { index ->
+                    val catalog = state.pinnedCatalogs[index]
                     CatalogItem(
                         catalog = catalog,
                         installStep = if (catalog is CatalogInstalled) state.installSteps[catalog.pkgName] else null,
@@ -51,7 +51,7 @@ fun UserSourcesScreen(
                 }
             }
 
-            if (state.validUnpinnedCatalogs.value.isNotEmpty()) {
+            if (state.unpinnedCatalogs.isNotEmpty()) {
                 state.validMappedCatalogs.value.forEach { (lang, catalogs) ->
                     item {
                         TextSection(

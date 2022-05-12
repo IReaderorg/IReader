@@ -83,14 +83,15 @@ fun ExtensionScreenTopAppBar(
                 }
             }
         },
-        navigationIcon = if (searchMode) {
-            {
-                AppIconButton(
-                    imageVector = Icons.Default.ArrowBack,
-                    text = UiText.StringResource(R.string.toggle_search_mode_off),
-                    onClick = onSearchDisable
-                )
-            }
-        } else null
+        navigationIcon = {
+            if (searchMode) {
+
+                    AppIconButton(
+                        imageVector = Icons.Default.ArrowBack,
+                        text = UiText.StringResource(R.string.toggle_search_mode_off),
+                        onClick = onSearchDisable
+                    )
+            } else null
+        }
     )
 }

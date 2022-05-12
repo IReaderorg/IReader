@@ -6,8 +6,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -77,7 +77,7 @@ fun BookListItemTitle(
         text = text,
         maxLines = maxLines,
         overflow = TextOverflow.Ellipsis,
-        style = MaterialTheme.typography.body2,
+        style = MaterialTheme.typography.bodyMedium,
         fontWeight = fontWeight
     )
 }
@@ -92,6 +92,6 @@ fun BookListItemSubtitle(
         text = text,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
-        style = MaterialTheme.typography.caption
+        style = MaterialTheme.typography.labelSmall
     )
 }

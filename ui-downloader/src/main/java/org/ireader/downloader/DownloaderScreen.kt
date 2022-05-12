@@ -10,19 +10,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ExtendedFloatingActionButton
-import androidx.compose.material.FabPosition
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.LinearProgressIndicator
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.CheckCircleOutline
 import androidx.compose.material.icons.outlined.MoreVert
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -52,7 +50,7 @@ import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.core_ui.modifier.selectedBackground
 import org.ireader.ui_downloader.R
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun DownloaderScreen(
     modifier: Modifier = Modifier,
@@ -64,12 +62,12 @@ fun DownloaderScreen(
     onPopBackStack: () -> Unit,
 ) {
     val context = LocalContext.current
-    val scaffoldState = rememberScaffoldState()
+    val snackBarHostState = remember { SnackbarHostState() }
     LaunchedEffect(key1 = true) {
         vm.eventFlow.collectLatest { event ->
             when (event) {
                 is UiEvent.ShowSnackbar -> {
-                    scaffoldState.snackbarHostState.showSnackbar(
+                    snackBarHostState.showSnackbar(
                         event.uiText.asString(context = context)
                     )
                 }
@@ -78,7 +76,7 @@ fun DownloaderScreen(
     }
     val downloads = vm.downloads
 
-    Scaffold(
+    androidx.compose.material3.Scaffold(
         topBar = {
             DownloaderTopAppBar(
                 onPopBackStack = onPopBackStack,
@@ -99,11 +97,10 @@ fun DownloaderScreen(
                 }
             )
         },
-        scaffoldState = scaffoldState,
-        snackbarHost = { ISnackBarHost(snackBarHostState = it) },
-        floatingActionButtonPosition = FabPosition.End,
+        snackbarHost = { ISnackBarHost(snackBarHostState = snackBarHostState) },
+        floatingActionButtonPosition = androidx.compose.material3.FabPosition.End,
         floatingActionButton = {
-            ExtendedFloatingActionButton(
+            androidx.compose.material.ExtendedFloatingActionButton(
                 text = {
                     MidSizeTextComposable(
                         text = when (vm.downloadServiceStateImpl.isEnable) {
@@ -124,15 +121,17 @@ fun DownloaderScreen(
                         true -> Icon(
                             Icons.Filled.Pause,
                             "",
-                            tint = MaterialTheme.colors.onSecondary
+                            tint = MaterialTheme.colorScheme.onSecondary
                         )
                         else -> Icon(
                             Icons.Filled.PlayArrow,
                             "",
-                            tint = MaterialTheme.colors.onSecondary
+                            tint = MaterialTheme.colorScheme.onSecondary
                         )
                     }
-                }
+                },
+                contentColor = MaterialTheme.colorScheme.onSecondary,
+                backgroundColor = MaterialTheme.colorScheme.secondary,
             )
         },
     ) { padding ->

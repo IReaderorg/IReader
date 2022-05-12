@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.Composable
@@ -52,7 +52,7 @@ fun WebPageTopBar(
                     .fillMaxHeight(.7f)
                     .fillMaxWidth()
                     .background(
-                        color = MaterialTheme.colors.onBackground.copy(.2f),
+                        color = MaterialTheme.colorScheme.onBackground.copy(.2f),
                         shape = CircleShape
                     ),
                 value = urlToRender,

@@ -3,7 +3,7 @@ package org.ireader.app.components
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
 import androidx.compose.material.TabRowDefaults
@@ -33,12 +33,12 @@ fun Tabs(libraryTabs: List<TabItem>, pagerState: PagerState) {
     // OR ScrollableTabRow()
     TabRow(
         selectedTabIndex = pagerState.currentPage,
-        backgroundColor = MaterialTheme.colors.background,
-        contentColor = MaterialTheme.colors.contentColor,
+        backgroundColor = MaterialTheme.colorScheme.background,
+        contentColor = MaterialTheme.colorScheme.contentColor,
         indicator = { tabPositions ->
             TabRowDefaults.Indicator(
                 Modifier.pagerTabIndicatorOffset(pagerState, tabPositions),
-                color = MaterialTheme.colors.primary,
+                color = MaterialTheme.colorScheme.primary,
 
             )
         }
@@ -47,8 +47,8 @@ fun Tabs(libraryTabs: List<TabItem>, pagerState: PagerState) {
             Tab(
                 text = { MidSizeTextComposable(text = UiText.StringResource( tab.title)) },
                 selected = pagerState.currentPage == index,
-                unselectedContentColor = MaterialTheme.colors.onBackground,
-                selectedContentColor = MaterialTheme.colors.primary,
+                unselectedContentColor = MaterialTheme.colorScheme.onBackground,
+                selectedContentColor = MaterialTheme.colorScheme.primary,
                 onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
             )
         }

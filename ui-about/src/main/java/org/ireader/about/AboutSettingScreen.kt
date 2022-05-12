@@ -1,52 +1,50 @@
 package org.ireader.about
 
-import android.content.Intent
-import android.net.Uri
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Divider
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ListItem
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Public
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import org.ireader.common_resources.BuildConfig
 import org.ireader.common_resources.UiText
+import org.ireader.components.components.LogoHeader
 import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.BigSizeTextComposable
-import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.components.reusable_composable.TopAppBarBackButton
-import org.ireader.core_ui.ui.string
-import org.ireader.domain.utils.toast
+import org.ireader.core_ui.component.LinkIcon
+import org.ireader.core_ui.component.PreferenceRow
 import org.ireader.ui_about.R
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AboutSettingScreen(
     modifier: Modifier = Modifier,
-    onPopBackStack:() -> Unit
+    getFormattedBuildTime:() -> String,
+    onPopBackStack: () -> Unit
 ) {
-
     val context = LocalContext.current
-    val versionCode: String =
-        try {
-            context.packageManager.getPackageInfo(context.packageName, 0).versionName
-        } catch (e: Throwable) {
-            throw Exception(string(id = R.string.unable_to_get_package_version))
-        }
+    val uriHandler = LocalUriHandler.current
     Scaffold(modifier = modifier.fillMaxSize(), topBar = {
         Toolbar(
             modifier = Modifier,
             title = {
-                BigSizeTextComposable(text = UiText.StringResource( R.string.about), style = MaterialTheme.typography.h6)
+                BigSizeTextComposable(
+                    text = UiText.StringResource(R.string.about),
+                    style = MaterialTheme.typography.headlineSmall
+                )
             },
             navigationIcon = {
                 TopAppBarBackButton(onClick = {
@@ -55,86 +53,65 @@ fun AboutSettingScreen(
             }
         )
     }) { padding ->
-        val list = listOf<AboutTile>(
-            AboutTile.Version(versionCode),
-            AboutTile.WhatsNew,
-            AboutTile.Discord,
-            AboutTile.Github,
-        )
-
-        Column(
-            modifier = modifier
-                .padding(12.dp)
-                .fillMaxWidth(),
-            horizontalAlignment = Alignment.Start,
-            verticalArrangement = Arrangement.Center
+        LazyColumn(
+            modifier = Modifier.padding(padding),
         ) {
-            list.forEach {
-                ListItem(
-                    modifier = modifier
-                        .fillMaxWidth()
-                        .align(Alignment.Start)
-                        .clickable(role = Role.Button) {
-                            try {
-                                context.startActivity(it.intent)
-                            } catch (e: Throwable) {
-                                context.toast(R.string.no_app_was_found_to_lauch)
-                            }
-                        },
-                    singleLineSecondaryText = false,
-                    secondaryText = {
-                        MidSizeTextComposable(
-                            modifier
-                                .fillMaxWidth()
-                                .align(Alignment.Start),
-                            text = it.subtitle,
-                            color = MaterialTheme.colors.onBackground
-                        )
-                    },
-                    text = {
-                        BigSizeTextComposable(
-                            modifier = modifier
-                                .fillMaxWidth()
-                                .align(Alignment.Start),
-                            text = it.title
-                        )
+            item {
+                LogoHeader()
+            }
+            item {
+                PreferenceRow(
+                    title = stringResource(R.string.version),
+                    subtitle = when {
+                        org.ireader.common_resources.BuildConfig.DEBUG -> {
+                            "Debug ${BuildConfig.COMMIT_SHA} (${getFormattedBuildTime()})"
+                        }
+                        org.ireader.common_resources.BuildConfig.PREVIEW -> {
+                            "Preview r${BuildConfig.COMMIT_COUNT} (${BuildConfig.COMMIT_SHA}, ${getFormattedBuildTime()})"
+                        }
+                        else -> {
+                            "Stable ${BuildConfig.VERSION_NAME} (${getFormattedBuildTime()})"
+                        }
                     },
                 )
-                Divider(
-                    modifier = modifier.fillMaxWidth(),
-                    color = MaterialTheme.colors.onBackground.copy(alpha = .1f)
+            }
+            item {
+                PreferenceRow(
+                    title = stringResource(R.string.check_the_update),
+                    onClick = {
+                        uriHandler.openUri("https://github.com/kazemcodes/Infinity/releases")
+                    },
                 )
+            }
+            item {
+                PreferenceRow(
+                    title = stringResource(R.string.whats_new),
+                    onClick = { uriHandler.openUri("https://github.com/kazemcodes/IReader/releases/latest") },
+                )
+            }
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                ) {
+                    LinkIcon(
+                        label = stringResource(R.string.website),
+                        painter = rememberVectorPainter(Icons.Outlined.Public),
+                        url = "https://github.com/kazemcodes/IReader",
+                    )
+                    LinkIcon(
+                        label = "Discord",
+                        painter = painterResource(R.drawable.ic_discord_24dp),
+                        url = "https://discord.gg/HBU6zD8c5v",
+                    )
+                    LinkIcon(
+                        label = "GitHub",
+                        painter = painterResource(R.drawable.ic_github_24dp),
+                        url = "https://github.com/kazemcodes/IReader",
+                    )
+                }
             }
         }
     }
 }
 
-sealed class AboutTile(val title: UiText, val subtitle: UiText, val intent: Intent) {
-
-    data class Version(val version: String) : AboutTile(
-        UiText.StringResource(R.string.version),
-        UiText.DynamicString(version),
-        Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/kazemcodes/Infinity/releases"))
-    )
-
-    object WhatsNew : AboutTile(
-        UiText.StringResource(R.string.whats_new),
-        UiText.StringResource(R.string.check_the_update),
-        Intent(
-            Intent.ACTION_VIEW,
-            Uri.parse("https://github.com/kazemcodes/IReader/releases/latest")
-        )
-    )
-
-    object Discord : AboutTile(
-        UiText.StringResource(R.string.discord),
-        UiText.DynamicString("https://discord.gg/HBU6zD8c5v"),
-        Intent(Intent.ACTION_VIEW, Uri.parse("https://discord.gg/HBU6zD8c5v"))
-    )
-
-    object Github : AboutTile(
-        UiText.StringResource(R.string.github),
-        UiText.DynamicString("https://github.com/kazemcodes/IReader"),
-        Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/kazemcodes/Infinity"))
-    )
-}

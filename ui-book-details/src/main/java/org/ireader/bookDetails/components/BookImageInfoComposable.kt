@@ -7,8 +7,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,26 +28,26 @@ fun BookImageInfoComposable(modifier: Modifier = Modifier, book: Book) {
                 .height(180.dp)
                 .width(150.dp)
                 .clip(RoundedCornerShape(4.dp))
-                .border(2.dp, MaterialTheme.colors.onBackground.copy(alpha = .1f)),
+                .border(2.dp, MaterialTheme.colorScheme.onBackground.copy(alpha = .1f)),
         )
         Spacer(modifier = modifier.height(8.dp))
         Column {
             Text(
                 text = book.title,
-                style = MaterialTheme.typography.h4.copy(
+                style = MaterialTheme.typography.headlineSmall.copy(
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 24.sp
                 ),
-                color = MaterialTheme.colors.onBackground
+                color = MaterialTheme.colorScheme.onBackground
             )
             Spacer(modifier = modifier.height(8.dp))
             Text(
                 text = "Author: ${book.author}",
-                style = MaterialTheme.typography.h4.copy(
+                style = MaterialTheme.typography.headlineSmall.copy(
                     fontWeight = FontWeight.W400,
                     fontSize = 16.sp
                 ),
-                color = MaterialTheme.colors.onBackground
+                color = MaterialTheme.colorScheme.onBackground
             )
             Spacer(modifier = modifier.height(8.dp))
         }

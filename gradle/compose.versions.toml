@@ -18,7 +18,8 @@ compose-animations = { module = "androidx.compose.animation:animation", version.
 compose-testing = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "compose" }
 compose-composeTooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose" }
 compose-uiTestManifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "compose" }
-compose-uiTesting = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "compose" }
+compose-j4Unit = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "compose" }
+compose-googlFonts = { module = "androidx.compose.ui:ui-text-google-fonts", version = "1.1.1" }
 
 
 compose-navigation = { module = "androidx.navigation:navigation-compose", version = "2.5.0-beta01" }

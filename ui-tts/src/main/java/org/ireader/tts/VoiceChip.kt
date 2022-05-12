@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -70,10 +70,10 @@ fun VoiceChip(
                         modifier = modifier
                             .height(20.dp)
                             .clip(RectangleShape)
-                            .background(MaterialTheme.colors.background)
+                            .background(MaterialTheme.colorScheme.background)
                             .border(
                                 2.dp,
-                                if (voices[index].isSame(viewModel.currentVoice)) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground.copy(
+                                if (voices[index].isSame(viewModel.currentVoice)) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground.copy(
                                     .4f
                                 ),
                                 CircleShape
@@ -130,10 +130,10 @@ fun LanguageChip(
                         modifier = modifier
                             .height(50.dp)
                             .clip(RectangleShape)
-                            .background(MaterialTheme.colors.background)
+                            .background(MaterialTheme.colorScheme.background)
                             .border(
                                 2.dp,
-                                if (language[index].displayName == viewModel.currentLanguage) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground.copy(
+                                if (language[index].displayName == viewModel.currentLanguage) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground.copy(
                                     .4f
                                 ),
                                 CircleShape

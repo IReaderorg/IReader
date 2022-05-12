@@ -14,9 +14,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,7 +43,7 @@ fun ReaderBackgroundComposable(
         CaptionTextComposable(
             modifier = Modifier.width(100.dp),
             text = UiText.StringResource(R.string.background_color),
-            style = MaterialTheme.typography.caption
+            style = MaterialTheme.typography.labelSmall
         )
         LazyRow {
             items(readerScreenBackgroundColors.size) { index ->
@@ -57,7 +57,7 @@ fun ReaderBackgroundComposable(
                         .background(color = readerScreenBackgroundColors[index].color)
                         .border(
                             2.dp,
-                            MaterialTheme.colors.primary,
+                            MaterialTheme.colorScheme.primary,
                             CircleShape
                         )
                         .clickable {
@@ -69,7 +69,7 @@ fun ReaderBackgroundComposable(
                         Icon(
                             imageVector = Icons.Default.Check,
                             contentDescription = "color selected",
-                            tint = MaterialTheme.colors.primary
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 }

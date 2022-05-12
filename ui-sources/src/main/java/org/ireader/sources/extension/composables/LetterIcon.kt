@@ -4,9 +4,9 @@ package org.ireader.sources.extension.composables
 
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -34,7 +34,7 @@ fun LetterIcon(
             text = letter,
             color = Color.White,
             modifier = Modifier.wrapContentSize(Alignment.Center),
-            style = MaterialTheme.typography.h6
+            style = MaterialTheme.typography.headlineSmall
         )
     }
 }

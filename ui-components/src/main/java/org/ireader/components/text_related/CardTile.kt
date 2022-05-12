@@ -5,8 +5,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -28,14 +28,14 @@ fun CardTile(
         Text(
             modifier = modifier,
             text = title,
-            style = MaterialTheme.typography.h6,
+            style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colors.onBackground
+            color = MaterialTheme.colorScheme.onBackground
         )
         Row(modifier = modifier, horizontalArrangement = Arrangement.SpaceBetween) {
             Text(
-                text = subtitle, color = MaterialTheme.colors.onBackground,
-                style = MaterialTheme.typography.subtitle2
+                text = subtitle, color = MaterialTheme.colorScheme.onBackground,
+                style = MaterialTheme.typography.displayMedium
             )
             trailing()
         }

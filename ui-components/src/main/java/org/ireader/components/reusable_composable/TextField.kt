@@ -3,8 +3,8 @@ package org.ireader.components.reusable_composable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,7 +41,7 @@ fun TextField(
         if (filter.value.isBlank()) {
             MidSizeTextComposable(
                 text = UiText.DynamicString(filter.name),
-                color = MaterialTheme.colors.onBackground.copy(alpha = .4f),
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = .4f),
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
         }
@@ -74,7 +74,7 @@ fun TextField(
         if (command.value.isBlank()) {
             MidSizeTextComposable(
                 text =   UiText.DynamicString(command.name),
-                color = MaterialTheme.colors.onBackground.copy(alpha = .4f),
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = .4f),
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
         }

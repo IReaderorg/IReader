@@ -12,13 +12,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.GetApp
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,6 +32,7 @@ import org.ireader.updates.component.UpdatesContent
 import org.ireader.updates.component.UpdatesToolbar
 import org.ireader.updates.viewmodel.UpdateState
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UpdateScreen(
     state: UpdateState,
@@ -50,7 +50,7 @@ fun UpdateScreen(
     onBottomBarDelete: () -> Unit,
     onBottomBookMark: () -> Unit,
 ) {
-    Scaffold(
+    androidx.compose.material3.Scaffold(
         topBar = {
             UpdatesToolbar(
                 state = state,
@@ -108,10 +108,10 @@ private fun BoxScope.UpdateEditBar(
             .height(80.dp)
             .align(Alignment.BottomCenter)
             .padding(8.dp)
-            .background(MaterialTheme.colors.background)
+            .background(androidx.compose.material3.MaterialTheme.colorScheme.background)
             .border(
                 width = 1.dp,
-                color = MaterialTheme.colors.onBackground.copy(.1f)
+                color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground.copy(.1f)
             )
             .clickable(enabled = false) {},
     ) {

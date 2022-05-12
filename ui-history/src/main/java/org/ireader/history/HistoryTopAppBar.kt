@@ -72,19 +72,20 @@ fun HistoryTopAppBar(
                 },
             )
         },
-        navigationIcon = if (vm.searchMode) {
-            {
-                AppIconButton(
-                    imageVector = Icons.Default.ArrowBack,
-                    text = UiText.StringResource(R.string.toggle_search_mode_off),
-                    onClick = {
-                        vm.searchMode = false
-                        vm.searchQuery = ""
-                        keyboardController?.hide()
-                    }
-                )
-            }
-        } else null
+        navigationIcon = {
+            if (vm.searchMode) {
+                    AppIconButton(
+                        imageVector = Icons.Default.ArrowBack,
+                        text = UiText.StringResource(R.string.toggle_search_mode_off),
+                        onClick = {
+                            vm.searchMode = false
+                            vm.searchQuery = ""
+                            keyboardController?.hide()
+                        }
+                    )
+
+            } else null
+        }
 
     )
 }

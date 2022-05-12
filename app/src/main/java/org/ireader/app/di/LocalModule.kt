@@ -9,6 +9,8 @@ import dagger.hilt.components.SingletonComponent
 import io.ktor.client.plugins.cookies.CookiesStorage
 import okio.FileSystem
 import okio.Path.Companion.toOkioPath
+import org.ireader.app.BuildConfig
+import org.ireader.common_resources.ProjectConfig
 import org.ireader.core_api.http.AcceptAllCookiesStorage
 import org.ireader.core_api.prefs.AndroidPreferenceStore
 import org.ireader.core_api.prefs.PreferenceStore
@@ -34,6 +36,19 @@ class LocalModule {
     @Singleton
     fun providePreferencesStore(@ApplicationContext context: Context): PreferenceStore {
         return AndroidPreferenceStore(context = context, "ui")
+    }
+    @Provides
+    @Singleton
+    fun provideProjectConfig(@ApplicationContext context: Context): ProjectConfig {
+        return ProjectConfig(
+            buildTime = BuildConfig.BUILD_TIME,
+            commitCount = BuildConfig.COMMIT_COUNT,
+            commitSHA = BuildConfig.COMMIT_SHA,
+            includeUpdater =BuildConfig.INCLUDE_UPDATER ,
+            preview =BuildConfig.PREVIEW ,
+            versionCode = BuildConfig.VERSION_CODE,
+            versionName = BuildConfig.VERSION_NAME
+        )
     }
 
     @Provides

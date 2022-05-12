@@ -20,8 +20,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Divider
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -70,6 +70,7 @@ fun BookDetailScreenLoadedComposable(
 
     Box() {
         Box {
+
             Image(
                 painter = rememberAsyncImagePainter(
                     ImageRequest.Builder(LocalContext.current)
@@ -95,7 +96,7 @@ fun BookDetailScreenLoadedComposable(
                         Brush.verticalGradient(
                             listOf(
                                 Color.Transparent,
-                                MaterialTheme.colors.background,
+                                MaterialTheme.colorScheme.background,
                             )
                         )
                     )
@@ -119,7 +120,7 @@ fun BookDetailScreenLoadedComposable(
                     .padding(horizontal = 16.dp)
                     .fillMaxWidth()
             ) {
-                /** Book Image **/
+
                 /** Book Image **/
                 BookImageComposable(
                     image = BookCover.from(book),
@@ -128,7 +129,7 @@ fun BookDetailScreenLoadedComposable(
                         .weight(0.40f)
                         .aspectRatio(3f / 4f)
                         .clip(MaterialTheme.shapes.medium)
-                        .border(2.dp, MaterialTheme.colors.onBackground.copy(alpha = .1f)),
+                        .border(2.dp, MaterialTheme.colorScheme.onBackground.copy(alpha = .1f)),
                     contentScale = ContentScale.Crop,
                 )
                 Spacer(modifier = modifier.width(8.dp))
@@ -145,17 +146,17 @@ fun BookDetailScreenLoadedComposable(
                             onLongClick = { context.copyToClipboard(book.title, book.title) }
                         ),
                         text = book.title,
-                        style = MaterialTheme.typography.h6,
+                        style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colors.onBackground,
+                        color = MaterialTheme.colorScheme.onBackground,
                         overflow = TextOverflow.Ellipsis
                     )
                     if (book.author.isNotBlank()) {
                         Text(
                             text = "Author: ${book.author}",
-                            style = MaterialTheme.typography.subtitle2,
+                            style = MaterialTheme.typography.displaySmall,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colors.onBackground.copy(alpha = .5f),
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = .5f),
                             overflow = TextOverflow.Ellipsis
                         )
                     }
@@ -165,18 +166,18 @@ fun BookDetailScreenLoadedComposable(
                     ) {
                         Text(
                             text = book.getStatusByName(),
-                            style = MaterialTheme.typography.subtitle2,
+                            style = MaterialTheme.typography.displaySmall,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colors.onBackground.copy(alpha = .5f),
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = .5f),
                             overflow = TextOverflow.Ellipsis
                         )
                         Text("•")
                         if (source != null) {
                             Text(
                                 text = source.name,
-                                color = MaterialTheme.colors.onBackground.copy(alpha = .5f),
+                                color = MaterialTheme.colorScheme.onBackground.copy(alpha = .5f),
                                 fontWeight = FontWeight.Bold,
-                                style = MaterialTheme.typography.subtitle2,
+                                style = MaterialTheme.typography.displaySmall,
                                 overflow = TextOverflow.Ellipsis
                             )
                         }
@@ -193,7 +194,7 @@ fun BookDetailScreenLoadedComposable(
                 Brush.verticalGradient(
                     listOf(
                         Color.Transparent,
-                        MaterialTheme.colors.background,
+                        MaterialTheme.colorScheme.background,
                     )
                 )
             )
@@ -203,7 +204,7 @@ fun BookDetailScreenLoadedComposable(
     Column(
         modifier = modifier
             .padding(horizontal = 16.dp)
-            .background(MaterialTheme.colors.background)
+            .background(MaterialTheme.colorScheme.background)
             .fillMaxSize()
 
     ) {

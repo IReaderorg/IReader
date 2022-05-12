@@ -12,6 +12,7 @@ import org.ireader.core_ui.theme.AppColors
 import org.ireader.core_ui.theme.LocalTransparentStatusBar
 import org.ireader.core_ui.theme.Shapes
 import org.ireader.core_ui.theme.Typography
+import org.ireader.core_ui.theme.isLight
 
 @Composable
 fun AppTheme(
@@ -23,9 +24,10 @@ fun AppTheme(
     val systemUiController = rememberSystemUiController()
     val transparentStatusBar = LocalTransparentStatusBar.current.enabled
 
+    val isLight = materialColors.isLight()
     LaunchedEffect(customColors.isBarLight, transparentStatusBar) {
         val darkIcons =
-            if (transparentStatusBar) materialColors.isLight else customColors.isBarLight
+            if (transparentStatusBar) isLight else customColors.isBarLight
         systemUiController.setSystemBarsColor(
             color = Color.Transparent,
             darkIcons = darkIcons,

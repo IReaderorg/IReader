@@ -21,17 +21,16 @@ import androidx.compose.material.Button
 import androidx.compose.material.Checkbox
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.LinearProgressIndicator
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Snackbar
-import androidx.compose.material.SnackbarHost
 import androidx.compose.material.Surface
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -57,6 +56,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collectLatest
 import org.ireader.common_resources.UiEvent
 import org.ireader.common_resources.UiText
+import org.ireader.components.components.ISnackBarHost
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.components.reusable_composable.MidSizeTextComposable
@@ -64,7 +64,7 @@ import org.ireader.core.R
 import org.ireader.core_api.source.CatalogSource
 import org.ireader.domain.utils.setDefaultSettings
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @ExperimentalCoroutinesApi
 @Composable
 fun WebPageScreen(
@@ -81,13 +81,13 @@ fun WebPageScreen(
     onFetchChapter: (WebView) -> Unit,
     onFetchChapters: (WebView) -> Unit,
 ) {
-    val scaffoldState = rememberScaffoldState()
+
     val context = LocalContext.current
     var webView by remember {
         mutableStateOf<WebView?>(null)
     }
     val accompanistState = AccompanistWebChromeClient()
-
+    val snackBarHostState = remember { SnackbarHostState() }
     DisposableEffect(key1 = true) {
         onDispose {
             webView?.destroy()
@@ -116,7 +116,7 @@ fun WebPageScreen(
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
                 is UiEvent.ShowSnackbar -> {
-                    scaffoldState.snackbarHostState.showSnackbar(
+                    snackBarHostState.showSnackbar(
                         event.uiText.asString(context)
                     )
                 }
@@ -159,7 +159,7 @@ fun WebPageScreen(
                 )
             }
         },
-        sheetBackgroundColor = MaterialTheme.colors.background,
+        sheetBackgroundColor = MaterialTheme.colorScheme.background,
 
         ) {
         Scaffold(
@@ -197,16 +197,8 @@ fun WebPageScreen(
                     state = viewModel
                 )
             },
-            scaffoldState = scaffoldState,
             snackbarHost = {
-                SnackbarHost(it) { data ->
-                    Snackbar(
-                        actionColor = MaterialTheme.colors.primary,
-                        snackbarData = data,
-                        backgroundColor = MaterialTheme.colors.background,
-                        contentColor = MaterialTheme.colors.onBackground,
-                    )
-                }
+                ISnackBarHost(snackBarHostState = snackBarHostState)
             }
 
         ) { padding ->
@@ -223,8 +215,8 @@ fun WebPageScreen(
                             state = state,
                             refreshTriggerDistance = trigger,
                             scale = true,
-                            backgroundColor = MaterialTheme.colors.background,
-                            contentColor = MaterialTheme.colors.primaryVariant,
+                            backgroundColor = MaterialTheme.colorScheme.background,
+                            contentColor = MaterialTheme.colorScheme.primaryContainer,
                             elevation = 8.dp
                         )
                     }
@@ -270,7 +262,7 @@ fun ScrollableAppBar(
     title: UiText,
     modifier: Modifier = Modifier,
     navigationIcon: @Composable (() -> Unit)? = null,
-    background: Color = MaterialTheme.colors.primary,
+    background: Color = MaterialTheme.colorScheme.primary,
     scrollUpState: Boolean,
 ) {
     val position by animateFloatAsState(if (scrollUpState) -150f else 0f)
@@ -311,12 +303,12 @@ private fun WebPageBottomLayout(
             TextButton(onClick = {
                 onCancel()
             }, modifier = Modifier.width(92.dp), shape = RoundedCornerShape(4.dp)) {
-                MidSizeTextComposable(text = UiText.StringResource( R.string.cancel), color = MaterialTheme.colors.primary)
+                MidSizeTextComposable(text = UiText.StringResource( R.string.cancel), color = MaterialTheme.colorScheme.primary)
             }
             Button(onClick = {
                 onConfirm()
             }, modifier = Modifier.width(92.dp), shape = RoundedCornerShape(4.dp)) {
-                MidSizeTextComposable(text = UiText.StringResource( R.string.apply), color = MaterialTheme.colors.onPrimary)
+                MidSizeTextComposable(text = UiText.StringResource( R.string.apply), color = MaterialTheme.colorScheme.onPrimary)
             }
         }
         Spacer(modifier = Modifier.height(16.dp))

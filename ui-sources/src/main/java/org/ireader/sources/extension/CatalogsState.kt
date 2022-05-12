@@ -14,9 +14,7 @@ import javax.inject.Singleton
 
 interface CatalogsState {
     val pinnedCatalogs: List<CatalogLocal>
-    val validPinnedCatalogs: State<List<CatalogLocal>>
     val unpinnedCatalogs: List<CatalogLocal>
-    val validUnpinnedCatalogs: State<List<CatalogLocal>>
     val remoteCatalogs: List<CatalogRemote>
     val languageChoices: List<LanguageChoice>
     var selectedLanguage: LanguageChoice
@@ -34,9 +32,7 @@ fun CatalogsState(): CatalogsState {
 @Singleton
 class CatalogsStateImpl @Inject constructor() : CatalogsState {
     override var pinnedCatalogs by mutableStateOf(emptyList<CatalogLocal>())
-    override var validPinnedCatalogs = derivedStateOf { pinnedCatalogs.filter { it.source != null } }
     override var unpinnedCatalogs by mutableStateOf(emptyList<CatalogLocal>())
-    override var validUnpinnedCatalogs = derivedStateOf { unpinnedCatalogs.filter { it.source != null  }}
     override var remoteCatalogs by mutableStateOf(emptyList<CatalogRemote>())
     override var languageChoices by mutableStateOf(emptyList<LanguageChoice>())
     override var selectedLanguage by mutableStateOf<LanguageChoice>(LanguageChoice.All)

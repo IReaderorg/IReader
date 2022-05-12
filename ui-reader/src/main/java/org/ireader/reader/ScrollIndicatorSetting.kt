@@ -2,7 +2,6 @@ package org.ireader.reader
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -10,11 +9,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedButton
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,9 +34,9 @@ fun ScrollIndicatorSetting(
     enable: Boolean = false,
     vm: ReaderScreenPreferencesState,
     onDismiss: () -> Unit,
-    onBackgroundColorValueChange:(String) -> Unit,
-    onTextColorValueChange:(String) -> Unit,
-    onBackgroundColorAndTextColorApply:(bgColor:String,txtColor:String) -> Unit
+    onBackgroundColorValueChange: (String) -> Unit,
+    onTextColorValueChange: (String) -> Unit,
+    onBackgroundColorAndTextColorApply: (bgColor: String, txtColor: String) -> Unit
 ) {
 
     val (bgValue, setBGValue) = remember { mutableStateOf<String>("") }
@@ -97,41 +96,39 @@ fun ScrollIndicatorSetting(
                     Spacer(modifier = Modifier.height(8.dp))
                 }
             },
-            contentColor = MaterialTheme.colors.onBackground,
-            backgroundColor = MaterialTheme.colors.background,
-            buttons = {
-                Row(
-                    horizontalArrangement = Arrangement.SpaceAround,
-                    modifier = Modifier.fillMaxWidth()
+            textContentColor = MaterialTheme.colorScheme.onBackground,
+            containerColor = MaterialTheme.colorScheme.background,
+            confirmButton = {
+
+                Button(
+                    onClick = {
+                        vm.scrollIndicatorDialogShown = false
+                        onBackgroundColorAndTextColorApply(bgValue, txtValue)
+                    },
+                    colors = ButtonDefaults.textButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.background
+                    )
                 ) {
-                    OutlinedButton(
-                        onClick = {
-                            vm.scrollIndicatorDialogShown = false
-                            onDismiss()
-                        },
-                        colors = ButtonDefaults.textButtonColors(
-                            backgroundColor = MaterialTheme.colors.background,
-                            contentColor = MaterialTheme.colors.onBackground
-                        )
-                    ) {
 
-                        MidSizeTextComposable(text = UiText.StringResource(R.string.dismiss))
-                    }
-                    Button(
-                        onClick = {
-                            vm.scrollIndicatorDialogShown = false
-                            onBackgroundColorAndTextColorApply(bgValue,txtValue)
-                        },
-                        colors = ButtonDefaults.textButtonColors(
-                            backgroundColor = MaterialTheme.colors.primary,
-                            contentColor = MaterialTheme.colors.background
-                        )
-                    ) {
-
-                        MidSizeTextComposable(text = UiText.StringResource(R.string.apply))
-                    }
+                    MidSizeTextComposable(text = UiText.StringResource(R.string.apply))
                 }
             },
+            dismissButton = {
+                OutlinedButton(
+                    onClick = {
+                        vm.scrollIndicatorDialogShown = false
+                        onDismiss()
+                    },
+                    colors = ButtonDefaults.textButtonColors(
+                        containerColor = MaterialTheme.colorScheme.background,
+                        contentColor = MaterialTheme.colorScheme.onBackground
+                    )
+                ) {
+
+                    MidSizeTextComposable(text = UiText.StringResource(R.string.dismiss))
+                }
+            }
         )
     }
 }

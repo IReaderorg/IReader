@@ -7,8 +7,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,7 +32,7 @@ fun TextIcon(title: UiText, icon: ImageVector, isEnable: Boolean, onClick: () ->
         Icon(
             imageVector = icon,
             contentDescription = "$title icon",
-            tint = if (isEnable) MaterialTheme.colors.iconColor else Color.Transparent
+            tint = if (isEnable) MaterialTheme.colorScheme.iconColor else Color.Transparent
         )
         Spacer(modifier = Modifier.width(8.dp))
         MidSizeTextComposable(text = title)

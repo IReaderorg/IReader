@@ -21,10 +21,14 @@ dependencies {
     implementation(project(Modules.uiImageLoader))
 
     implementation(compose.compose.foundation)
+implementation(compose.compose.material3)
+
+
     implementation(compose.compose.ui)
     implementation(compose.compose.compiler)
+    implementation(accompanist.pager)
     implementation(compose.compose.activity)
-    implementation(compose.compose.material)
+
     implementation(compose.compose.uiToolingPreview)
     implementation(compose.compose.icons)
     implementation(compose.compose.animations)

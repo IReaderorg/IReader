@@ -7,13 +7,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Slider
 import androidx.compose.material.SliderDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Brightness7
 import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -58,9 +58,9 @@ fun BrightnessSliderComposable(
                 valueRange = DEFAULT.MIN_BRIGHTNESS..DEFAULT.MAX_BRIGHTNESS,
                 steps = 0,
                 colors = SliderDefaults.colors(
-                    thumbColor = MaterialTheme.colors.primary,
-                    activeTrackColor = MaterialTheme.colors.primary.copy(alpha = .6f),
-                    inactiveTrackColor = MaterialTheme.colors.onBackground.copy(alpha = .4f),
+                    thumbColor = MaterialTheme.colorScheme.primary,
+                    activeTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = .6f),
+                    inactiveTrackColor = MaterialTheme.colorScheme.onBackground.copy(alpha = .4f),
                 ),
                 enabled = !viewModel.autoBrightnessMode
 
@@ -78,17 +78,17 @@ fun BrightnessSliderComposable(
                 .padding(8.dp),
             border = BorderStroke(
                 ButtonDefaults.OutlinedBorderSize,
-                if (viewModel.autoBrightnessMode) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground
+                if (viewModel.autoBrightnessMode) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
             ),
             colors = ButtonDefaults.outlinedButtonColors(
-                backgroundColor = if (viewModel.autoBrightnessMode) MaterialTheme.colors.primary else MaterialTheme.colors.background,
+                backgroundColor = if (viewModel.autoBrightnessMode) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.background,
             )
         ) {
             CaptionTextComposable(
                 modifier = Modifier.align(Alignment.CenterVertically),
-                color = if (viewModel.autoBrightnessMode) MaterialTheme.colors.onPrimary else MaterialTheme.colors.onBackground,
+                color = if (viewModel.autoBrightnessMode) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onBackground,
                 text = UiText.StringResource(R.string.auto),
-                style = MaterialTheme.typography.caption,
+                style = MaterialTheme.typography.labelSmall,
                 maxLine = 1
             )
         }

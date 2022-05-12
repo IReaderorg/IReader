@@ -23,7 +23,9 @@ dependencies {
     implementation(compose.compose.navigation)
     implementation(compose.compose.foundation)
     implementation(compose.compose.animations)
-    implementation(compose.compose.material)
+implementation(compose.compose.material3)
+
+
     implementation(compose.compose.uiToolingPreview)
     implementation(accompanist.pagerIndicator)
     implementation(accompanist.pager)

@@ -22,7 +22,9 @@ dependencies {
     implementation(compose.compose.coil)
     implementation(compose.compose.foundation)
     implementation(compose.compose.animations)
-    implementation(compose.compose.material)
+implementation(compose.compose.material3)
+
+
 
     implementation(libs.hilt.android)
     kapt(libs.hilt.androidcompiler)

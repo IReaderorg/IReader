@@ -2,9 +2,7 @@ package org.ireader.chapterDetails
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
@@ -12,16 +10,14 @@ import androidx.compose.material.icons.filled.FlipToBack
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.filled.Sort
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import org.ireader.chapterDetails.viewmodel.ChapterDetailState
 import org.ireader.common_resources.UiText
-import org.ireader.components.components.CenterTopAppBar
 import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.BigSizeTextComposable
-import org.ireader.core_ui.asString
 import org.ireader.ui_chapter_detail.R
 
 @Composable
@@ -61,31 +57,46 @@ fun RegularChapterDetailTopAppBar(
     onPopBackStack: () -> Unit,
     onMap: () -> Unit,
 ) {
-    CenterTopAppBar(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(86.dp),
+//    CenterAlignedTopAppBar(
+//        modifier = Modifier
+//            .fillMaxWidth()
+//            .height(86.dp),
+//        title = {
+//            BigSizeTextComposable(text = UiText.StringResource(R.string.content))
+//        },
+//        actions = {
+//            AppIconButton(imageVector = Icons.Filled.Place, text =  UiText.StringResource(R.string.find_current_chapter), onClick = onMap)
+//            IconButton(onClick = onReverseClick) {
+//                Icon(
+//                    imageVector = Icons.Default.Sort,
+//                    contentDescription = UiText.StringResource(R.string.sort).asString()
+//                )
+//            }
+//        },
+//        navigationIcon = {
+//            IconButton(onClick = onPopBackStack) {
+//                Icon(
+//                    imageVector = Icons.Default.ArrowBack,
+//                    contentDescription =  UiText.StringResource(R.string.return_to_previous_screen).asString()
+//                )
+//            }
+//        },
+//        colors =  TopAppBarDefaults.centerAlignedTopAppBarColors(
+//
+//        ),
+//    )
+    CenterAlignedTopAppBar(
+        modifier = Modifier.statusBarsPadding(),
         title = {
             BigSizeTextComposable(text = UiText.StringResource(R.string.content))
         },
         actions = {
             AppIconButton(imageVector = Icons.Filled.Place, text =  UiText.StringResource(R.string.find_current_chapter), onClick = onMap)
-            IconButton(onClick = onReverseClick) {
-                Icon(
-                    imageVector = Icons.Default.Sort,
-                    contentDescription = UiText.StringResource(R.string.sort).asString()
-                )
-            }
+            AppIconButton(imageVector =Icons.Default.Sort , text = UiText.StringResource(R.string.sort), onClick = onReverseClick)
         },
         navigationIcon = {
-            IconButton(onClick = onPopBackStack) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription =  UiText.StringResource(R.string.return_to_previous_screen).asString()
-                )
-            }
+            AppIconButton(imageVector =Icons.Default.ArrowBack , text =UiText.StringResource(R.string.return_to_previous_screen), onClick = onPopBackStack)
         },
-        elevation = 0.dp
     )
 }
 
@@ -99,17 +110,11 @@ private fun EditModeChapterDetailTopAppBar(
     Toolbar(
         title = { BigSizeTextComposable(text = UiText.DynamicString("$selectionSize")) },
         navigationIcon = {
-            IconButton(onClick = onClickCancelSelection) {
-                Icon(Icons.Default.Close, contentDescription = null)
-            }
+            AppIconButton(imageVector =Icons.Default.Close , text = UiText.StringResource(R.string.close), onClick = onClickCancelSelection)
         },
         actions = {
-            IconButton(onClick = onClickSelectAll) {
-                Icon(Icons.Default.SelectAll, contentDescription = null)
-            }
-            IconButton(onClick = onClickInvertSelection) {
-                Icon(Icons.Default.FlipToBack, contentDescription = null)
-            }
+            AppIconButton(imageVector =Icons.Default.SelectAll , text = UiText.StringResource(R.string.select_all), onClick = onClickSelectAll)
+            AppIconButton(imageVector =Icons.Default.FlipToBack , text = UiText.StringResource(R.string.select_inverted), onClick = onClickInvertSelection)
         }
     )
 }

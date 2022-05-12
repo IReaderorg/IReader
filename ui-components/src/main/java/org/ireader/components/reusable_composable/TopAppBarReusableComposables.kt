@@ -7,14 +7,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,8 +46,8 @@ fun BigSizeTextComposable(
     Text(
         modifier = modifier,
         text = text.asString(LocalContext.current),
-        color = color ?: MaterialTheme.colors.onBackground,
-        style = style ?: MaterialTheme.typography.subtitle1,
+        color = color ?: MaterialTheme.colorScheme.onSurface,
+        style = style ?: MaterialTheme.typography.displaySmall,
         fontWeight = fontWeight ?: FontWeight.Bold,
         overflow = overflow ?: TextOverflow.Ellipsis,
         textAlign = align ?: TextAlign.Start,
@@ -70,8 +69,8 @@ fun MidSizeTextComposable(
     Text(
         modifier = modifier,
         text = text.asString(LocalContext.current),
-        color = color ?: MaterialTheme.colors.onBackground,
-        style = style ?: MaterialTheme.typography.subtitle2,
+        color = color ?: MaterialTheme.colorScheme.onSurface,
+        style = style ?: MaterialTheme.typography.displayMedium,
         fontWeight = fontWeight ?: FontWeight.SemiBold,
         overflow = overflow ?: TextOverflow.Ellipsis,
         textAlign = align ?: TextAlign.Start,
@@ -93,8 +92,8 @@ fun SmallTextComposable(
     Text(
         modifier = modifier,
         text = text.asString(LocalContext.current),
-        color = color ?: MaterialTheme.colors.onBackground,
-        style = style ?: MaterialTheme.typography.caption,
+        color = color ?: MaterialTheme.colorScheme.onSurface,
+        style = style ?: MaterialTheme.typography.labelSmall,
         fontWeight = fontWeight ?: FontWeight.SemiBold,
         overflow = overflow ?: TextOverflow.Ellipsis,
         textAlign = align ?: TextAlign.Start,
@@ -117,8 +116,8 @@ fun SuperSmallTextComposable(
     Text(
         modifier = modifier,
         text = text.asString(LocalContext.current),
-        color = color ?: MaterialTheme.colors.onBackground,
-        style = style ?: MaterialTheme.typography.caption,
+        color = color ?: MaterialTheme.colorScheme.onSurface,
+        style = style ?: MaterialTheme.typography.labelSmall,
         fontWeight = fontWeight ?: FontWeight.Normal,
         fontSize = 12.sp,
         overflow = overflow ?: TextOverflow.Ellipsis,
@@ -141,8 +140,8 @@ fun CaptionTextComposable(
     Text(
         modifier = modifier,
         text = text.asString(LocalContext.current),
-        color = color ?: MaterialTheme.colors.onBackground,
-        style = style ?: MaterialTheme.typography.caption,
+        color = color ?: MaterialTheme.colorScheme.onSurface,
+        style = style ?: MaterialTheme.typography.labelSmall,
         fontWeight = fontWeight ?: FontWeight.Normal,
         overflow = overflow ?: TextOverflow.Ellipsis,
         maxLines = maxLine,
@@ -168,7 +167,7 @@ fun AppIconButton(
             modifier = modifier,
             imageVector = imageVector,
             contentDescription = text.asString(LocalContext.current),
-            tint = tint ?: MaterialTheme.colors.onBackground
+            tint = tint ?: MaterialTheme.colorScheme.onSurface
         )
     }
 }
@@ -182,7 +181,7 @@ fun TopAppBarBackButton(onClick: () -> Unit) {
             imageVector = Icons.Default.ArrowBack,
             contentDescription = UiText.StringResource( R.string.return_to_previous_screen).asString(
                 LocalContext.current),
-            tint = MaterialTheme.colors.onBackground,
+            tint = MaterialTheme.colorScheme.onSurface,
         )
     }
 }
@@ -205,8 +204,8 @@ fun AppTextField(
             Text(
                 modifier = Modifier.padding(horizontal = 0.dp),
                 text = hint.asString(LocalContext.current),
-                style = MaterialTheme.typography.subtitle1,
-                color = MaterialTheme.colors.onBackground.copy(alpha = .7F)
+                style = MaterialTheme.typography.displaySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = .7F)
             )
         }
 
@@ -221,8 +220,8 @@ fun AppTextField(
                 keyboardOptions = keyboardAction,
                 keyboardActions = keyboardActions,
                 singleLine = true,
-                textStyle = TextStyle(color = MaterialTheme.colors.onBackground),
-                cursorBrush = SolidColor(MaterialTheme.colors.primary),
+                textStyle = TextStyle(color = MaterialTheme.colorScheme.onSurface),
+                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
             )
         } else if (mode == 1) {
             OutlinedTextField(
@@ -234,10 +233,10 @@ fun AppTextField(
                 keyboardActions = keyboardActions,
 
                 singleLine = true,
-                textStyle = TextStyle(color = MaterialTheme.colors.onBackground),
+                textStyle = TextStyle(color = MaterialTheme.colorScheme.onSurface),
             )
         } else if (mode == 2) {
-            TextField(
+            androidx.compose.material3.TextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = query,
                 onValueChange = onValueChange,
@@ -248,7 +247,7 @@ fun AppTextField(
                 keyboardOptions = keyboardAction,
                 keyboardActions = keyboardActions,
                 singleLine = true,
-                textStyle = TextStyle(color = MaterialTheme.colors.onBackground),
+                textStyle = TextStyle(color = MaterialTheme.colorScheme.onSurface),
             )
         }
     }

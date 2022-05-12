@@ -16,8 +16,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -41,7 +41,7 @@ fun DotsPulsing() {
             .size(dotSize)
             .scale(scale)
             .background(
-                color = MaterialTheme.colors.primary,
+                color = MaterialTheme.colorScheme.primary,
                 shape = CircleShape
             )
     )
@@ -92,7 +92,7 @@ fun DotsElastic() {
             .size(dotSize)
             .scale(scaleX = minScale, scaleY = scale)
             .background(
-                color = MaterialTheme.colors.primary,
+                color = MaterialTheme.colorScheme.primary,
                 shape = CircleShape
             )
     )
@@ -144,7 +144,7 @@ fun DotsFlashing(show: Boolean) {
                 .size(dotSize)
                 .alpha(alpha)
                 .background(
-                    color = MaterialTheme.colors.primary,
+                    color = MaterialTheme.colorScheme.primary,
                     shape = CircleShape
                 )
         )
@@ -196,7 +196,7 @@ fun DotsTyping() {
             .size(dotSize)
             .offset(y = -offset.dp)
             .background(
-                color = MaterialTheme.colors.primary,
+                color = MaterialTheme.colorScheme.primary,
                 shape = CircleShape
             )
     )
@@ -249,7 +249,7 @@ fun DotsCollision() {
             .size(dotSize)
             .offset(x = offset.dp)
             .background(
-                color = MaterialTheme.colors.primary,
+                color = MaterialTheme.colorScheme.primary,
                 shape = CircleShape
             )
     )
@@ -304,7 +304,7 @@ fun DotsPreview() = MaterialTheme {
 
         Text(
             text = "Dots pulsing",
-            style = MaterialTheme.typography.h5
+            style = MaterialTheme.typography.displayMedium
         )
         DotsPulsing()
 
@@ -312,7 +312,7 @@ fun DotsPreview() = MaterialTheme {
 
         Text(
             text = "Dots elastic",
-            style = MaterialTheme.typography.h5
+            style = MaterialTheme.typography.displayMedium
         )
         DotsElastic()
 
@@ -320,7 +320,7 @@ fun DotsPreview() = MaterialTheme {
 
         Text(
             text = "Dots flashing",
-            style = MaterialTheme.typography.h5
+            style = MaterialTheme.typography.displayMedium
         )
         DotsFlashing(true)
 
@@ -328,7 +328,7 @@ fun DotsPreview() = MaterialTheme {
 
         Text(
             text = "Dots typing",
-            style = MaterialTheme.typography.h5
+            style = MaterialTheme.typography.displayMedium
         )
         DotsTyping()
 
@@ -336,7 +336,7 @@ fun DotsPreview() = MaterialTheme {
 
         Text(
             text = "Dots collision",
-            style = MaterialTheme.typography.h5
+            style = MaterialTheme.typography.displayMedium
         )
         DotsCollision()
     }

@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,7 +28,7 @@ fun CustomTextField(
     leadingIcon: (@Composable() () -> Unit)? = null,
     trailingIcon: (@Composable() () -> Unit)? = null,
     hint: UiText = UiText.StringResource(R.string.search_hint),
-    textColor: Color = MaterialTheme.colors.onBackground,
+    textColor: Color = MaterialTheme.colorScheme.onBackground,
 ) {
 
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
@@ -46,7 +46,7 @@ fun CustomTextField(
                 onValueChange = onValueChange,
                 maxLines = 1,
                 singleLine = true,
-                cursorBrush = SolidColor(MaterialTheme.colors.onBackground),
+                cursorBrush = SolidColor(MaterialTheme.colorScheme.onBackground),
                 textStyle = TextStyle(color = textColor)
             )
             if (value.isEmpty()) {

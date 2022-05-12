@@ -17,9 +17,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,7 +55,7 @@ fun LinearBookItem(
                     .clip(RoundedCornerShape(4.dp))
                     .border(
                         .2.dp,
-                        if (selected) MaterialTheme.colors.primary.copy(alpha = .5f) else MaterialTheme.colors.onBackground.copy(
+                        if (selected) MaterialTheme.colorScheme.primary.copy(alpha = .5f) else MaterialTheme.colorScheme.onBackground.copy(
                             alpha = .1f
                         )
                     )
@@ -63,8 +63,8 @@ fun LinearBookItem(
             Spacer(modifier = Modifier.width(15.dp))
             Text(
                 text = title,
-                style = MaterialTheme.typography.body2,
-                color = MaterialTheme.colors.onBackground,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground,
                 textAlign = TextAlign.Center
             )
         }

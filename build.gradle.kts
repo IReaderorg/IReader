@@ -11,8 +11,7 @@ buildscript {
         gradlePluginPortal()
     }
     dependencies {
-        classpath("com.android.tools.build:gradle:7.1.3")
-       // classpath(libs.gradle.tools)
+        classpath(libs.gradle.tools)
         classpath(libs.gradle.kotlin)
         classpath(libs.gradle.kotlinSerialization)
         classpath(libs.gradle.hilt)
@@ -20,10 +19,11 @@ buildscript {
         classpath(libs.gradle.firebaseCrashlytic)
         classpath(libs.gradle.idea.ext)
         classpath("com.vanniktech:gradle-maven-publish-plugin:0.19.0")
-        classpath("com.android.tools.build:gradle:7.1.3")
-
+        classpath("com.google.gms:google-services:4.3.3")
     }
 }
+
+
 
 plugins {
     id("com.autonomousapps.dependency-analysis") version "1.1.0"

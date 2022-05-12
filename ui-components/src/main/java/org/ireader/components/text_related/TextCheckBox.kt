@@ -2,12 +2,14 @@ package org.ireader.components.text_related
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.material.Checkbox
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import org.ireader.common_resources.UiText
 import org.ireader.components.reusable_composable.MidSizeTextComposable
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TextCheckBox(title: UiText, isChecked: Boolean, onCheckedChange: (Boolean) -> Unit) {
     Row(

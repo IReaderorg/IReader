@@ -15,14 +15,15 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
-import androidx.compose.material.Scaffold
-import androidx.compose.material.ScaffoldState
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,7 +45,9 @@ import org.ireader.core_ui.theme.TransparentStatusBar
 import org.ireader.core_ui.ui_components.CardTile
 import org.ireader.core_ui.ui_components.DotsFlashing
 
-@OptIn(ExperimentalCoroutinesApi::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalCoroutinesApi::class, ExperimentalMaterialApi::class,
+    ExperimentalMaterial3Api::class
+)
 @Composable
 fun BookDetailScreen(
     modifier: Modifier = Modifier,
@@ -61,7 +64,7 @@ fun BookDetailScreen(
     onChapterContent: () -> Unit,
     book: Book,
     onTitle: (String) -> Unit,
-    scaffoldState: ScaffoldState,
+    snackBarHostState: SnackbarHostState,
     onPopBackStack: () -> Unit,
     onCommand: () -> Unit,
     onFetch: () -> Unit,
@@ -77,6 +80,7 @@ fun BookDetailScreen(
     }
 
 
+
     TransparentStatusBar {
         SwipeRefresh(
             state = swipeRefreshState,
@@ -89,8 +93,8 @@ fun BookDetailScreen(
                     state = state,
                     refreshTriggerDistance = trigger,
                     scale = true,
-                    backgroundColor = MaterialTheme.colors.background,
-                    contentColor = MaterialTheme.colors.primaryVariant,
+                    backgroundColor = MaterialTheme.colorScheme.background,
+                    contentColor = MaterialTheme.colorScheme.primaryContainer,
                     elevation = 8.dp,
                 )
             }
@@ -111,12 +115,11 @@ fun BookDetailScreen(
                     }
                     Box(modifier = Modifier.height(1.dp))
                 },
-                sheetBackgroundColor = MaterialTheme.colors.background,
+                sheetBackgroundColor = MaterialTheme.colorScheme.background,
                 ) {
                 Scaffold(
                     topBar = {},
-                    scaffoldState = scaffoldState,
-                    snackbarHost = { ISnackBarHost(snackBarHostState = it) },
+                    snackbarHost = { ISnackBarHost(snackBarHostState = snackBarHostState) },
                     bottomBar = {
                         AnimatedVisibility(
                             visible = true,
@@ -166,15 +169,15 @@ fun BookDetailScreen(
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Text(
                                         text = "",
-                                        color = MaterialTheme.colors.onBackground,
-                                        style = MaterialTheme.typography.subtitle2
+                                        color = MaterialTheme.colorScheme.onBackground,
+                                        style = MaterialTheme.typography.displaySmall
                                     )
                                     DotsFlashing(chapterState.chapterIsLoading)
 
                                     Icon(
                                         imageVector = Icons.Default.ChevronRight,
                                         contentDescription = "Contents Detail",
-                                        tint = MaterialTheme.colors.onBackground,
+                                        tint = MaterialTheme.colorScheme.onBackground,
                                     )
                                 }
                             }

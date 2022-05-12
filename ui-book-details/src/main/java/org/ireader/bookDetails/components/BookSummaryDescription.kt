@@ -7,11 +7,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ExpandLess
 import androidx.compose.material.icons.outlined.ExpandMore
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -70,6 +70,7 @@ fun BookSummaryDescription(
                         setIsExpandable(result.didOverflowHeight)
                     }
                 },
+                color = MaterialTheme.colorScheme.onSurface
             )
             if (isExpandable == true) {
                 if (!isExpanded) {
@@ -79,8 +80,8 @@ fun BookSummaryDescription(
                             .background(
                                 Brush.verticalGradient(
                                     0f to Color.Transparent,
-                                    0.4f to MaterialTheme.colors.background.copy(alpha = 0.9f),
-                                    0.5f to MaterialTheme.colors.background
+                                    0.4f to MaterialTheme.colorScheme.background.copy(alpha = 0.9f),
+                                    0.5f to MaterialTheme.colorScheme.background
                                 )
                             )
                             .layoutId("scrim")

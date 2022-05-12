@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.BottomAppBar
 import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material.icons.filled.AutoStories
@@ -34,8 +34,8 @@ fun BookDetailScreenBottomBar(
 ) {
     BottomAppBar(
         modifier = modifier.fillMaxWidth(),
-        backgroundColor = MaterialTheme.colors.background,
-        contentColor = MaterialTheme.colors.onBackground,
+        backgroundColor = MaterialTheme.colorScheme.background,
+        contentColor = MaterialTheme.colorScheme.onBackground,
         elevation = 8.dp,
     ) {
         Row(
@@ -55,7 +55,7 @@ fun BookDetailScreenBottomBar(
                         Icon(
                             imageVector = if (!isInLibrary) Icons.Default.AddCircleOutline else Icons.Default.Check,
                             contentDescription =  UiText.StringResource(R.string.toggle_in_library).asString(),
-                            tint = MaterialTheme.colors.onBackground
+                            tint = MaterialTheme.colorScheme.onBackground
                         )
                     }
                 },
@@ -73,7 +73,7 @@ fun BookDetailScreenBottomBar(
                     Icon(
                         imageVector = Icons.Default.AutoStories,
                         contentDescription = "Continue Reading",
-                        tint = MaterialTheme.colors.onBackground
+                        tint = MaterialTheme.colorScheme.onBackground
                     )
                 },
                 onClick = {
@@ -88,7 +88,7 @@ fun BookDetailScreenBottomBar(
                     Icon(
                         imageVector = Icons.Default.FileDownload,
                         contentDescription = string(id = R.string.download),
-                        tint = MaterialTheme.colors.onBackground
+                        tint = MaterialTheme.colorScheme.onBackground
                     )
                 },
                 onClick = {

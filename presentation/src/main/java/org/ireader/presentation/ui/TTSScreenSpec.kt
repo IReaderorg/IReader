@@ -5,11 +5,11 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material.DrawerValue
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -72,7 +72,9 @@ object TTSScreenSpec : ScreenSpec {
         NavigationArgs.sourceId,
     )
 
-    @OptIn(ExperimentalMaterialApi::class, ExperimentalPagerApi::class)
+    @OptIn(ExperimentalMaterialApi::class, ExperimentalPagerApi::class,
+        ExperimentalMaterial3Api::class
+    )
     @Composable
     override fun Content(
         navController: NavController,
@@ -87,10 +89,11 @@ object TTSScreenSpec : ScreenSpec {
         val pagerState = rememberPagerState()
 
         val drawerScrollState = rememberLazyListState()
+        val drawerState = rememberDrawerState(initialValue = androidx.compose.material3.DrawerValue.Closed)
         val textScroll = rememberScrollState()
         val chapter = vm.ttsChapter
         val chapters = vm.ttsChapters
-        val scaffoldState = rememberScaffoldState()
+
         val bottomSheetState =
             rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
         LaunchedEffect(key1 = true) {
@@ -158,7 +161,6 @@ object TTSScreenSpec : ScreenSpec {
                 sliderInteractionSource = sliderInteractionSource,
                 pagerState = pagerState,
                 drawerScrollState = drawerScrollState,
-                scaffoldState = scaffoldState,
                 bottomSheetState = bottomSheetState,
                 onAutoNextChapterToggle = {
                     vm.autoNextChapter = !vm.autoNextChapter
@@ -221,11 +223,12 @@ object TTSScreenSpec : ScreenSpec {
                     if (vm.ttsChapter != null) {
                         vm.isDrawerAsc = !vm.isDrawerAsc
                     }
-                }
+                },
+                drawerState = drawerState
             )
         }
-        LaunchedEffect(key1 = scaffoldState.drawerState.targetValue) {
-            if (chapter != null && scaffoldState.drawerState.targetValue == DrawerValue.Open && vm.ttsChapters.isNotEmpty()) {
+        LaunchedEffect(key1 = drawerState.targetValue) {
+            if (chapter != null && drawerState.targetValue == androidx.compose.material3.DrawerValue.Open && vm.ttsChapters.isNotEmpty()) {
 
                 val index = vm.ttsChapters.indexOfFirst { it.id == chapter.id }
                 if (index != -1) {

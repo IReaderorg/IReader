@@ -4,12 +4,12 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -65,14 +65,14 @@ fun ExpandableText(modifier: Modifier = Modifier, text: String) {
             onTextLayout = { textLayoutResultState.value = it },
             modifier = modifier
                 .animateContentSize(),
-            fontWeight = FontWeight.W400, color = MaterialTheme.colors.onBackground,
+            fontWeight = FontWeight.W400, color = MaterialTheme.colorScheme.onBackground,
             textAlign = TextAlign.Start,
         )
         if (finalText.takeLast(3) == "...") {
             Icon(
                 imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
                 contentDescription = "Expand Icon",
-                tint = MaterialTheme.colors.onBackground
+                tint = MaterialTheme.colorScheme.onBackground
             )
         }
     }

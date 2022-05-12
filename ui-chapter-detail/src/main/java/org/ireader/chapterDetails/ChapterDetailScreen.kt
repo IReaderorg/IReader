@@ -25,8 +25,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BookmarkBorder
@@ -36,6 +34,10 @@ import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.DoneOutline
 import androidx.compose.material.icons.filled.GetApp
 import androidx.compose.material.icons.filled.PlaylistAddCheck
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -65,7 +67,7 @@ import org.ireader.explore.webview.CustomTextField
 import org.ireader.ui_chapter_detail.R
 
 @ExperimentalAnimationApi
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ChapterDetailScreen(
     modifier: Modifier = Modifier,
@@ -87,43 +89,7 @@ fun ChapterDetailScreen(
         }
     }
     val scope = rememberCoroutineScope()
-    Scaffold(
-        modifier = Modifier,
-        topBar = {
-            ChapterDetailTopAppBar(
-                state = vm,
-                onClickCancelSelection = { vm.selection.clear() },
-                onClickSelectAll = {
-                    vm.selection.clear()
-                    vm.selection.addAll(vm.chapters.map { it.id })
-                    vm.selection.distinct()
-                },
-                onClickFlipSelection = {
-                    val ids: List<Long> =
-                        vm.chapters.map { it.id }
-                            .filterNot { it in vm.selection }.distinct()
-                    vm.selection.clear()
-                    vm.selection.addAll(ids)
-                },
-                onReverseClick = {
-                    vm.onEvent(ChapterDetailEvent.ToggleOrder)
-                },
-                onPopBackStack =  onPopBackStack,
-                onMap = {
-                    scope.launch {
-                        try {
-                            scrollState.scrollToItem(
-                                vm.getLastChapterIndex(),
-                                -scrollState.layoutInfo.viewportEndOffset / 2
-                            )
-                        } catch (e: Throwable) {
-                        }
-                    }
-                }
-            )
-        },
-        drawerGesturesEnabled = true,
-        drawerBackgroundColor = MaterialTheme.colors.background,
+    ModalNavigationDrawer(
         drawerContent = {
             Column(
                 modifier = modifier
@@ -141,7 +107,7 @@ fun ChapterDetailScreen(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = { vm.reverseChapterInDB() }
                 ) {
-                    MidSizeTextComposable(text =  UiText.StringResource(R.string.reverse_chapter_in_db))
+                    MidSizeTextComposable(text = UiText.StringResource(R.string.reverse_chapter_in_db))
                 }
                 TextButton(
                     modifier = Modifier.fillMaxWidth(),
@@ -151,72 +117,109 @@ fun ChapterDetailScreen(
                 }
             }
         },
-    ) { padding ->
-        Box(modifier = Modifier.fillMaxSize()) {
-            Column {
-                CustomTextField(
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp, vertical = 8.dp)
-                        .height(35.dp)
-                        .fillMaxWidth()
-                        .background(
-                            color = MaterialTheme.colors.onBackground.copy(.1f),
-                            shape = CircleShape
-                        ),
-                    hint = UiText.StringResource(R.string.search_hint),
-                    value = vm.query,
-                    onValueChange = {
-                        vm.query = it
-                        vm.getLocalChaptersByPaging(vm.isAsc)
+    ) {
+        Scaffold(
+            modifier = Modifier,
+            topBar = {
+                ChapterDetailTopAppBar(
+                    state = vm,
+                    onClickCancelSelection = { vm.selection.clear() },
+                    onClickSelectAll = {
+                        vm.selection.clear()
+                        vm.selection.addAll(vm.chapters.map { it.id })
+                        vm.selection.distinct()
                     },
-                    onValueConfirm = {
-                        focusManager.clearFocus()
+                    onClickFlipSelection = {
+                        val ids: List<Long> =
+                            vm.chapters.map { it.id }
+                                .filterNot { it in vm.selection }.distinct()
+                        vm.selection.clear()
+                        vm.selection.addAll(ids)
                     },
-                    paddingTrailingIconStart = 8.dp,
-                    paddingLeadingIconEnd = 8.dp,
-                    trailingIcon = {
-                        if (vm.query.isNotBlank()) {
-                            AppIconButton(
-                                imageVector = Icons.Default.Close,
-                                text = UiText.StringResource(R.string.exit_search_mode),
-                                onClick = {
-                                    vm.query = ""
-                                    vm.getLocalChaptersByPaging(vm.isAsc)
-                                }
-                            )
+                    onReverseClick = {
+                        vm.onEvent(ChapterDetailEvent.ToggleOrder)
+                    },
+                    onPopBackStack = onPopBackStack,
+                    onMap = {
+                        scope.launch {
+                            try {
+                                scrollState.scrollToItem(
+                                    vm.getLastChapterIndex(),
+                                    -scrollState.layoutInfo.viewportEndOffset / 2
+                                )
+                            } catch (e: Throwable) {
+                            }
                         }
                     }
                 )
-                Box(modifier.fillMaxSize()) {
-                    Crossfade(
-                        targetState = Pair(
-                            vm.isLoading,
-                            vm.isEmpty
-                        )
-                    ) { (isLoading, isEmpty) ->
-                        when {
-                            isLoading -> LoadingScreen()
-                            isEmpty -> EmptyScreen(text = UiText.StringResource(R.string.there_is_no_chapter))
-                            else -> {
-                                LazyColumnScrollbar(listState = scrollState) {
-                                    LazyColumn(
-                                        modifier = Modifier
-                                            .fillMaxSize(),
-                                        state = scrollState
-                                    ) {
-                                        items(vm.chapters.size) { index ->
-                                            ChapterListItemComposable(
-                                                modifier = modifier,
-                                                chapter = vm.chapters[index],
-                                                onItemClick = {
-                                                    onItemClick(index)
-                                                },
-                                                isLastRead = vm.chapters[index].id == vm.lastRead,
-                                                isSelected = vm.chapters[index].id in vm.selection,
-                                                onLongClick = {
-                                                    onLongItemClick(index)
-                                                }
-                                            )
+            },
+        ) { padding ->
+            Box(modifier = Modifier.padding(padding).fillMaxSize()) {
+                Column {
+                    CustomTextField(
+                        modifier = Modifier
+                            .padding(horizontal = 8.dp, vertical = 8.dp)
+                            .height(35.dp)
+                            .fillMaxWidth()
+                            .background(
+                                color = MaterialTheme.colorScheme.onBackground.copy(.1f),
+                                shape = CircleShape
+                            ),
+                        hint = UiText.StringResource(R.string.search_hint),
+                        value = vm.query,
+                        onValueChange = {
+                            vm.query = it
+                            vm.getLocalChaptersByPaging(vm.isAsc)
+                        },
+                        onValueConfirm = {
+                            focusManager.clearFocus()
+                        },
+                        paddingTrailingIconStart = 8.dp,
+                        paddingLeadingIconEnd = 8.dp,
+                        trailingIcon = {
+                            if (vm.query.isNotBlank()) {
+                                AppIconButton(
+                                    imageVector = Icons.Default.Close,
+                                    text = UiText.StringResource(R.string.exit_search_mode),
+                                    onClick = {
+                                        vm.query = ""
+                                        vm.getLocalChaptersByPaging(vm.isAsc)
+                                    }
+                                )
+                            }
+                        }
+                    )
+                    Box(modifier.fillMaxSize()) {
+                        Crossfade(
+                            targetState = Pair(
+                                vm.isLoading,
+                                vm.isEmpty
+                            )
+                        ) { (isLoading, isEmpty) ->
+                            when {
+                                isLoading -> LoadingScreen()
+                                isEmpty -> EmptyScreen(text = UiText.StringResource(R.string.there_is_no_chapter))
+                                else -> {
+                                    LazyColumnScrollbar(listState = scrollState) {
+                                        LazyColumn(
+                                            modifier = Modifier
+                                                .fillMaxSize(),
+                                            state = scrollState
+                                        ) {
+                                            items(vm.chapters.size) { index ->
+                                                ChapterListItemComposable(
+                                                    modifier = modifier,
+                                                    chapter = vm.chapters[index],
+                                                    onItemClick = {
+                                                        onItemClick(index)
+                                                    },
+                                                    isLastRead = vm.chapters[index].id == vm.lastRead,
+                                                    isSelected = vm.chapters[index].id in vm.selection,
+                                                    onLongClick = {
+                                                        onLongItemClick(index)
+                                                    }
+                                                )
+                                            }
                                         }
                                     }
                                 }
@@ -224,19 +227,19 @@ fun ChapterDetailScreen(
                         }
                     }
                 }
-            }
-            when {
-                vm.hasSelection -> {
-                    ChapterDetailBottomBar(
-                        vm,
-                        context,
-                        onDownload = {
-                        },
-                        onBookmark = {
-                        },
-                        onMarkAsRead = {
-                        }
-                    )
+                when {
+                    vm.hasSelection -> {
+                        ChapterDetailBottomBar(
+                            vm,
+                            context,
+                            onDownload = {
+                            },
+                            onBookmark = {
+                            },
+                            onMarkAsRead = {
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -246,7 +249,7 @@ fun ChapterDetailScreen(
     fun Modifier.simpleVerticalScrollbar(
         state: LazyListState,
         width: Dp = 8.dp,
-        color: Color = MaterialTheme.colors.primary,
+        color: Color = MaterialTheme.colorScheme.primary,
     ): Modifier {
         val targetAlpha = if (state.isScrollInProgress) 1f else 0f
         val duration = if (state.isScrollInProgress) 150 else 500
@@ -293,10 +296,10 @@ private fun BoxScope.ChapterDetailBottomBar(
             .height(80.dp)
             .align(Alignment.BottomCenter)
             .padding(8.dp)
-            .background(MaterialTheme.colors.background)
+            .background(MaterialTheme.colorScheme.background)
             .border(
                 width = 1.dp,
-                color = MaterialTheme.colors.onBackground.copy(.1f)
+                color = MaterialTheme.colorScheme.onBackground.copy(.1f)
             )
             .clickable(enabled = false) {},
     ) {
@@ -308,7 +311,7 @@ private fun BoxScope.ChapterDetailBottomBar(
         ) {
             AppIconButton(
                 imageVector = Icons.Default.GetApp,
-                text =  UiText.StringResource( R.string.download),
+                text = UiText.StringResource(R.string.download),
                 onClick = {
                     vm.downloadChapters()
                     vm.selection.clear()
@@ -316,7 +319,7 @@ private fun BoxScope.ChapterDetailBottomBar(
             )
             AppIconButton(
                 imageVector = Icons.Default.BookmarkBorder,
-                text =UiText.StringResource(R.string.bookmark),
+                text = UiText.StringResource(R.string.bookmark),
                 onClick = {
                     vm.insertChapters(
                         vm.chapters.filter { it.id in vm.selection }
@@ -328,10 +331,10 @@ private fun BoxScope.ChapterDetailBottomBar(
 
             AppIconButton(
                 imageVector = if (vm.chapters.filter { it.read }
-                    .map { it.id }
-                    .containsAll(vm.selection)
+                        .map { it.id }
+                        .containsAll(vm.selection)
                 ) Icons.Default.DoneOutline else Icons.Default.Done,
-                text =UiText.StringResource( R.string.mark_as_read),
+                text = UiText.StringResource(R.string.mark_as_read),
                 onClick = {
                     vm.insertChapters(
                         vm.chapters.filter { it.id in vm.selection }
@@ -353,7 +356,7 @@ private fun BoxScope.ChapterDetailBottomBar(
             )
             AppIconButton(
                 imageVector = Icons.Default.Delete,
-                text =  UiText.StringResource(R.string.delete),
+                text = UiText.StringResource(R.string.delete),
                 onClick = {
                     vm.deleteChapters(vm.chapters.filter { it.id in vm.selection })
                     vm.selection.clear()

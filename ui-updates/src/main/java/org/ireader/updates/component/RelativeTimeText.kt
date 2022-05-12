@@ -1,7 +1,7 @@
 package org.ireader.updates.component
 
 import android.text.format.DateUtils
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -14,7 +14,7 @@ fun RelativeTimeText(modifier: Modifier = Modifier, date: LocalDate) {
     Text(
         text = date.asRelativeTimeString(),
         modifier = modifier,
-        color = MaterialTheme.colors.onBackground
+        color = MaterialTheme.colorScheme.onBackground
     )
 }
 

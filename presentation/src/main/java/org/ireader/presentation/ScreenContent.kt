@@ -2,6 +2,7 @@
 package org.ireader.presentation
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -16,9 +17,9 @@ import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -35,7 +36,9 @@ import org.ireader.presentation.ui.BottomNavScreenSpec
 import org.ireader.presentation.ui.LibraryScreenSpec
 import org.ireader.presentation.ui.ScreenSpec
 
-@OptIn(ExperimentalMaterialApi::class, androidx.compose.animation.ExperimentalAnimationApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalAnimationApi::class,
+    ExperimentalMaterial3Api::class
+)
 @Composable
 fun ScreenContent() {
     val navController = rememberAnimatedNavController()
@@ -43,7 +46,7 @@ fun ScreenContent() {
     val currentDestination = navBackStackEntry?.destination
     val screenSpec = ScreenSpec.allScreens[currentDestination?.route]
     val hideBottomBar = navBackStackEntry?.arguments?.getBoolean(ARG_HIDE_BOTTOM_BAR)
-    Scaffold(
+    androidx.compose.material3.Scaffold(
         modifier = Modifier
             .fillMaxSize()
             .navigationBarsPadding(),
@@ -55,7 +58,7 @@ fun ScreenContent() {
             ) {
                 BottomNavigation(
                     modifier = Modifier.fillMaxWidth(),
-                    backgroundColor = MaterialTheme.colors.surface,
+                    backgroundColor = MaterialTheme.colorScheme.surface,
                     elevation = 5.dp
                 ) {
                     BottomNavScreenSpec.screens.forEach { bottomNavDestination ->
@@ -66,8 +69,8 @@ fun ScreenContent() {
                             label = {
                                 Text(stringResource(bottomNavDestination.label))
                             },
-                            selectedContentColor = MaterialTheme.colors.primary,
-                            unselectedContentColor = MaterialTheme.colors.onSurface.copy(0.4f),
+                            selectedContentColor = MaterialTheme.colorScheme.primary,
+                            unselectedContentColor = MaterialTheme.colorScheme.onSurface.copy(0.4f),
                             alwaysShowLabel = true,
                             selected = currentDestination?.hierarchy?.any { it.route == bottomNavDestination.navHostRoute } == true,
                             onClick = {

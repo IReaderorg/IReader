@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.Slider
 import androidx.compose.material.SliderDefaults
 import androidx.compose.material.Text
@@ -35,8 +35,8 @@ fun ChaptersSliderComposable(
     Column(modifier = modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = if (chapters.isNotEmpty() && currentChapterIndex != -1) chapters[currentChapterIndex].title else currentChapter.title,
-            color = MaterialTheme.colors.onBackground,
-            style = MaterialTheme.typography.subtitle2,
+            color = MaterialTheme.colorScheme.onBackground,
+            style = MaterialTheme.typography.displaySmall,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -62,11 +62,11 @@ fun ChaptersSliderComposable(
                 },
                 valueRange = 0f..(if (chapters.isNotEmpty()) chapters.size - 1 else 0).toFloat(),
                 colors = SliderDefaults.colors(
-                    thumbColor = MaterialTheme.colors.primary,
-                    activeTrackColor = MaterialTheme.colors.primary.copy(alpha = .6f),
-                    inactiveTickColor = MaterialTheme.colors.onBackground.copy(alpha = .6f),
-                    inactiveTrackColor = MaterialTheme.colors.onBackground.copy(alpha = .6f),
-                    activeTickColor = MaterialTheme.colors.primary.copy(alpha = .6f)
+                    thumbColor = MaterialTheme.colorScheme.primary,
+                    activeTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = .6f),
+                    inactiveTickColor = MaterialTheme.colorScheme.onBackground.copy(alpha = .6f),
+                    inactiveTrackColor = MaterialTheme.colorScheme.onBackground.copy(alpha = .6f),
+                    activeTickColor = MaterialTheme.colorScheme.primary.copy(alpha = .6f)
                 ),
             )
             IconButton(modifier = modifier.weight(1f), onClick = {

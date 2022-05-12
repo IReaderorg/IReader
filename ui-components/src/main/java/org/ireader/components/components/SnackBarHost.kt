@@ -1,19 +1,16 @@
 package org.ireader.components.components
 
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Snackbar
-import androidx.compose.material.SnackbarHost
-import androidx.compose.material.SnackbarHostState
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 
 @Composable
-fun ISnackBarHost(snackBarHostState: SnackbarHostState) {
-    SnackbarHost(hostState = snackBarHostState) { data ->
-        Snackbar(
-            actionColor = MaterialTheme.colors.primary,
+fun ISnackBarHost(snackBarHostState: androidx.compose.material3.SnackbarHostState) {
+    androidx.compose.material3.SnackbarHost(hostState = snackBarHostState) { data ->
+        androidx.compose.material3.Snackbar(
+            actionColor = MaterialTheme.colorScheme.primary,
             snackbarData = data,
-            backgroundColor = MaterialTheme.colors.surface,
-            contentColor = MaterialTheme.colors.onSurface,
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface,
         )
     }
 }

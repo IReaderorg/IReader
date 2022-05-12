@@ -24,18 +24,9 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Divider
-import androidx.compose.material.DrawerValue
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
-import androidx.compose.material.Scaffold
-import androidx.compose.material.ScaffoldState
-import androidx.compose.material.Slider
-import androidx.compose.material.SliderDefaults
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.FastForward
@@ -46,6 +37,16 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
+import androidx.compose.material3.Divider
+import androidx.compose.material3.DrawerState
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -79,7 +80,7 @@ import org.ireader.reader.components.SettingItemComposable
 import org.ireader.reader.components.SettingItemToggleComposable
 import java.util.Locale
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalPagerApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalPagerApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun TTSScreen(
     modifier: Modifier = Modifier,
@@ -90,6 +91,7 @@ fun TTSScreen(
     onPlay: () -> Unit,
     onNext: () -> Unit,
     source: Source,
+    drawerState:DrawerState,
     onChapter: (Chapter) -> Unit,
     onValueChange: (Float) -> Unit,
     onValueChangeFinished: () -> Unit,
@@ -97,7 +99,6 @@ fun TTSScreen(
     onPopStack: () -> Unit,
     sliderInteractionSource: MutableInteractionSource,
     bottomSheetState : ModalBottomSheetState,
-    scaffoldState:ScaffoldState,
     drawerScrollState:LazyListState,
     pagerState:PagerState,
     onAutoNextChapterToggle:(Boolean) -> Unit,
@@ -160,27 +161,24 @@ fun TTSScreen(
             }
         },
         sheetState = bottomSheetState,
-        sheetBackgroundColor = MaterialTheme.colors.background,
-        sheetContentColor = MaterialTheme.colors.onBackground,
+        sheetBackgroundColor = MaterialTheme.colorScheme.background,
+        sheetContentColor = MaterialTheme.colorScheme.onBackground,
     ) {
+        ModalNavigationDrawer( drawerContent = {
+            ReaderScreenDrawer(
+                modifier = Modifier.statusBarsPadding(),
+                onReverseIcon = onDrawerReverseIcon,
+                onChapter = onChapter,
+                chapter = vm.ttsChapter,
+                chapters = vm.uiChapters.value,
+                drawerScrollState = drawerScrollState,
+                onMap = onMap,
+            )
+        }) {
+
         Scaffold(
             modifier = Modifier
                 .fillMaxSize(),
-
-            scaffoldState = scaffoldState,
-            drawerGesturesEnabled = true,
-            drawerBackgroundColor = MaterialTheme.colors.background,
-            drawerContent = {
-                ReaderScreenDrawer(
-                    modifier = Modifier.statusBarsPadding(),
-                    onReverseIcon = onDrawerReverseIcon,
-                    onChapter = onChapter,
-                    chapter = vm.ttsChapter,
-                    chapters = vm.uiChapters.value,
-                    drawerScrollState = drawerScrollState,
-                    onMap = onMap,
-                )
-            }
         ) { padding ->
             Box(modifier = Modifier.fillMaxSize()) {
                 AppIconButton(
@@ -218,7 +216,7 @@ fun TTSScreen(
                                             .clip(MaterialTheme.shapes.medium)
                                             .border(
                                                 2.dp,
-                                                MaterialTheme.colors.onBackground.copy(alpha = .2f)
+                                                MaterialTheme.colorScheme.onBackground.copy(alpha = .2f)
                                             ),
                                         contentScale = ContentScale.Crop,
                                     )
@@ -255,7 +253,7 @@ fun TTSScreen(
                                         fontSize = vm.fontSize.sp,
                                         fontFamily = vm.font.fontFamily,
                                         textAlign = TextAlign.Start,
-                                        color = MaterialTheme.colors.onBackground,
+                                        color = MaterialTheme.colorScheme.onBackground,
                                         lineHeight = vm.lineHeight.sp,
                                         maxLines = 12,
                                     )
@@ -277,8 +275,8 @@ fun TTSScreen(
                                         },
                                         onContent = {
                                             scope.launch {
-                                                scaffoldState.drawerState.animateTo(
-                                                    DrawerValue.Open,
+                                                drawerState.animateTo(
+                                                    androidx.compose.material3.DrawerValue.Open,
                                                     TweenSpec()
                                                 )
                                             }
@@ -301,6 +299,8 @@ fun TTSScreen(
                                 }
                             }
                         }
+
+                    }
                     }
                 }
             }
@@ -317,7 +317,7 @@ private fun TTLScreenSetting(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .border(width = 1.dp, color = MaterialTheme.colors.onBackground.copy(.1f)),
+            .border(width = 1.dp, color = MaterialTheme.colorScheme.onBackground.copy(.1f)),
         horizontalArrangement = Arrangement.SpaceAround,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -392,11 +392,11 @@ private fun TTLScreenPlay(
                 },
                 valueRange = 0f..(if (content.isNotEmpty()) content.lastIndex else 0).toFloat(),
                 colors = SliderDefaults.colors(
-                    thumbColor = MaterialTheme.colors.primary,
-                    activeTrackColor = MaterialTheme.colors.primary.copy(alpha = .6f),
-                    inactiveTickColor = MaterialTheme.colors.onBackground.copy(alpha = .6f),
-                    inactiveTrackColor = MaterialTheme.colors.onBackground.copy(alpha = .6f),
-                    activeTickColor = MaterialTheme.colors.primary.copy(alpha = .6f)
+                    thumbColor = MaterialTheme.colorScheme.primary,
+                    activeTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = .6f),
+                    inactiveTickColor = MaterialTheme.colorScheme.onBackground.copy(alpha = .6f),
+                    inactiveTrackColor = MaterialTheme.colorScheme.onBackground.copy(alpha = .6f),
+                    activeTickColor = MaterialTheme.colorScheme.primary.copy(alpha = .6f)
                 ),
                 interactionSource = sliderInteractionSource
             )
@@ -419,19 +419,19 @@ private fun TTLScreenPlay(
                     imageVector = Icons.Filled.SkipPrevious,
                     text = UiText.StringResource( R.string.previous_chapter),
                     onClick = onPrev,
-                    tint = MaterialTheme.colors.onBackground
+                    tint = MaterialTheme.colorScheme.onBackground
                 )
                 AppIconButton(
                     modifier = Modifier.size(50.dp),
                     imageVector = Icons.Filled.FastRewind,
                     text = UiText.StringResource( R.string.previous_paragraph),
                     onClick = onPrevPar,
-                    tint = MaterialTheme.colors.onBackground
+                    tint = MaterialTheme.colorScheme.onBackground
                 )
                 Box(
                     modifier = Modifier
                         .size(80.dp)
-                        .border(1.dp, MaterialTheme.colors.onBackground.copy(.4f), CircleShape),
+                        .border(1.dp, MaterialTheme.colorScheme.onBackground.copy(.4f), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     when {
@@ -444,7 +444,7 @@ private fun TTLScreenPlay(
                                 imageVector = Icons.Filled.Pause,
                                 text = UiText.StringResource( R.string.play),
                                 onClick = onPlay,
-                                tint = MaterialTheme.colors.onBackground
+                                tint = MaterialTheme.colorScheme.onBackground
                             )
                         }
                         else -> {
@@ -453,7 +453,7 @@ private fun TTLScreenPlay(
                                 imageVector = Icons.Filled.PlayArrow,
                                 text =UiText.StringResource( R.string.pause),
                                 onClick = onPlay,
-                                tint = MaterialTheme.colors.onBackground
+                                tint = MaterialTheme.colorScheme.onBackground
                             )
                         }
                     }
@@ -464,14 +464,14 @@ private fun TTLScreenPlay(
                     imageVector = Icons.Filled.FastForward,
                     text = UiText.StringResource( R.string.next_paragraph),
                     onClick = onNextPar,
-                    tint = MaterialTheme.colors.onBackground
+                    tint = MaterialTheme.colorScheme.onBackground
                 )
                 AppIconButton(
                     modifier = Modifier.size(50.dp),
                     imageVector = Icons.Filled.SkipNext,
                     text = UiText.StringResource( R.string.next_chapter),
                     onClick = onNext,
-                    tint = MaterialTheme.colors.onBackground
+                    tint = MaterialTheme.colorScheme.onBackground
                 )
             }
         }

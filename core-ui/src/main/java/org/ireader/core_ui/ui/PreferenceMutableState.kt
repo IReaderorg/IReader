@@ -3,8 +3,8 @@ package org.ireader.core_ui.ui
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.ireader.core_api.prefs.Preference
 
 class PreferenceMutableState<T>(
@@ -15,9 +15,14 @@ class PreferenceMutableState<T>(
     private val state = mutableStateOf(preference.get())
 
     init {
-        preference.changes()
-            .onEach { state.value = it }
-            .launchIn(scope)
+        scope.launch(Dispatchers.Main) {
+            preference.changes()
+                .collect {
+                    kotlin.runCatching {
+                        state.value = it
+                    }
+                }
+        }
     }
 
     override var value: T
@@ -33,7 +38,6 @@ class PreferenceMutableState<T>(
     override fun component2(): (T) -> Unit {
         return { preference.set(it) }
     }
-
 }
 
 fun <T> Preference<T>.asStateIn(scope: CoroutineScope): PreferenceMutableState<T> {

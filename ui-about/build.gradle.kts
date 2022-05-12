@@ -19,11 +19,14 @@ dependencies {
     implementation(project(Modules.coreApi))
     implementation(project(Modules.uiComponents))
     implementation(project(Modules.commonResources))
+    implementation(project(Modules.commonExtensions))
     implementation(compose.compose.icons)
     implementation(compose.compose.navigation)
     implementation(compose.compose.foundation)
     implementation(compose.compose.animations)
-    implementation(compose.compose.material)
+implementation(compose.compose.material3)
+
+
     implementation(compose.compose.uiToolingPreview)
     implementation(accompanist.pagerIndicator)
     implementation(accompanist.pager)

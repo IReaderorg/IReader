@@ -7,11 +7,11 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ImportContacts
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,11 +32,11 @@ fun GoToLastReadComposable(onClick: () -> Unit) {
                 .padding(5.dp)
                 .size(40.dp),
             shape = CircleShape,
-            border = BorderStroke(1.dp, MaterialTheme.colors.background.copy(alpha = .3f)),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.background.copy(alpha = .3f)),
             contentPadding = PaddingValues(0.dp), // avoid the little icon
             colors = ButtonDefaults.outlinedButtonColors(
-                contentColor = MaterialTheme.colors.background,
-                backgroundColor = MaterialTheme.colors.onBackground.copy(
+                contentColor = MaterialTheme.colorScheme.background,
+                containerColor = MaterialTheme.colorScheme.onBackground.copy(
                     alpha = .4f
                 )
             )
@@ -47,7 +47,7 @@ fun GoToLastReadComposable(onClick: () -> Unit) {
                 onClick = {
                     onClick()
                 },
-                tint = MaterialTheme.colors.background.copy(alpha = .4f)
+                tint = MaterialTheme.colorScheme.background.copy(alpha = .4f)
             )
         }
     }
@@ -59,7 +59,7 @@ fun TextBadge(modifier: Modifier = Modifier, text: UiText) {
         modifier = Modifier
             .padding(5.dp)
             .size(width = 60.dp, height = 20.dp)
-            .background(MaterialTheme.colors.primary),
+            .background(MaterialTheme.colorScheme.primary),
         contentAlignment = Alignment.Center,
     ) {
         SuperSmallTextComposable(

@@ -81,6 +81,7 @@
     <string name="book_name">Book Name</string>
     <string name="auto_sort_chapters_in_db">Auto Sort Chapters in DB</string>
     <string name="advance_setting">Advance Setting</string>
+    <string name="advance_commands">Advance Commands</string>
     <string name="pause">Pause</string>
     <string name="resume">Resume</string>
     <string name="unknown">Unknown</string>
@@ -284,6 +285,10 @@
     <string name="uninstalled">Uninstalled</string>
     <string name="uninstalled_failed">Uninstalled Failed</string>
     <string name="Refreshed">Refreshed</string>
+    <string name="label_more">Load More</string>
+    <string name="select_all">Select All</string>
+    <string name="select_inverted">Select Inverted</string>
+    <string name="website">IReader</string>
 
 
 </resources>

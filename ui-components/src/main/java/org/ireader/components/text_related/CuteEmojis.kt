@@ -5,8 +5,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,13 +24,13 @@ fun NotImplementedText() {
     ) {
         Text(
             text = "＼( °□° )／",
-            style = MaterialTheme.typography.h3
+            style = MaterialTheme.typography.headlineMedium
             // fontSize = 200.dp
         )
         Spacer(modifier = Modifier.height(25.dp))
         Text(
             text = "Not Implemented yet.",
-            style = MaterialTheme.typography.subtitle1
+            style = MaterialTheme.typography.displayMedium
             // fontSize = 200.dp
         )
     }
@@ -46,17 +46,17 @@ fun ErrorTextWithEmojis(modifier: Modifier = Modifier, error: String, textColor:
     ) {
         Text(
             text = sad_emojis.random(),
-            style = MaterialTheme.typography.h3,
+            style = MaterialTheme.typography.headlineMedium,
             // fontSize = 200.dp
             textAlign = TextAlign.Center,
-            color = textColor ?: MaterialTheme.colors.onBackground
+            color = textColor ?: MaterialTheme.colorScheme.onBackground
         )
         Spacer(modifier = Modifier.height(25.dp))
         Text(
             text = error,
-            style = MaterialTheme.typography.subtitle1,
+            style = MaterialTheme.typography.displayMedium,
             textAlign = TextAlign.Center,
-            color = textColor ?: MaterialTheme.colors.onBackground,
+            color = textColor ?: MaterialTheme.colorScheme.onBackground,
             overflow = TextOverflow.Ellipsis,
             maxLines = 3
             // fontSize = 200.dp

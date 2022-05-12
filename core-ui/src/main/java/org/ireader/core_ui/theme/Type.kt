@@ -1,7 +1,7 @@
 package org.ireader.core_ui.theme
 
-import androidx.compose.material.Typography
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -77,8 +77,22 @@ val comfortaa = FontFamily(
 )
 
 // Set of Material typography styles to start with
-val Typography = Typography(
-    defaultFontFamily = sourceSansPro,
+val Typography = androidx.compose.material3.Typography(
+    bodyLarge = TextStyle(fontFamily = sourceSansPro),
+    bodyMedium = TextStyle(fontFamily = sourceSansPro),
+    bodySmall = TextStyle(fontFamily = sourceSansPro),
+    displayLarge = TextStyle(fontFamily = sourceSansPro),
+    displayMedium = TextStyle(fontFamily = sourceSansPro),
+    displaySmall = TextStyle(fontFamily = sourceSansPro),
+    headlineLarge = TextStyle(fontFamily = sourceSansPro),
+    headlineMedium = TextStyle(fontFamily = sourceSansPro),
+    headlineSmall = TextStyle(fontFamily = sourceSansPro),
+    labelLarge = TextStyle(fontFamily = sourceSansPro),
+    labelMedium = TextStyle(fontFamily = sourceSansPro),
+    labelSmall = TextStyle(fontFamily = sourceSansPro),
+    titleLarge = TextStyle(fontFamily = sourceSansPro),
+    titleMedium = TextStyle(fontFamily = sourceSansPro),
+    titleSmall = TextStyle(fontFamily = sourceSansPro),
 )
 val fonts = listOf<FontType>(
     FontType.Poppins,

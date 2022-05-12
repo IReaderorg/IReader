@@ -3,10 +3,6 @@ package org.ireader.downloader
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
@@ -14,6 +10,10 @@ import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.FlipToBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.SelectAll
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -85,8 +85,8 @@ private fun RegularTopBar(
         title = {
             Text(
                 text = UiText.StringResource(R.string.downloads_queue).asString(),
-                color = MaterialTheme.colors.onBackground,
-                style = MaterialTheme.typography.subtitle1,
+                color = MaterialTheme.colorScheme.onBackground,
+                style = MaterialTheme.typography.displayMedium,
                 fontWeight = FontWeight.Bold,
                 overflow = TextOverflow.Ellipsis
             )
@@ -114,7 +114,7 @@ private fun RegularTopBar(
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
                     contentDescription = UiText.StringResource(R.string.return_to_previous_screen).asString(),
-                    tint = MaterialTheme.colors.onBackground,
+                    tint = MaterialTheme.colorScheme.onBackground,
                 )
             }
         }

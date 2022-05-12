@@ -7,11 +7,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -66,7 +66,7 @@ fun DropDownMenu(
             }
             DropdownMenu(
                 modifier = Modifier
-                    .background(MaterialTheme.colors.background)
+                    .background(MaterialTheme.colorScheme.background)
                     .fillMaxWidth(.5f),
                 expanded = opened, // viewModel.state.isMenuExpanded,
                 onDismissRequest = {
@@ -77,9 +77,9 @@ fun DropDownMenu(
                     DropdownMenuItem(onClick = {
                         opened = false
                         onSelected(index)
-                    }) {
+                    },text = {
                         MidSizeTextComposable(text = s)
-                    }
+                    })
                 }
             }
         }

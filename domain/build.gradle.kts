@@ -34,7 +34,9 @@ dependencies {
     implementation(compose.compose.ui)
     implementation(compose.compose.runtime)
     implementation(compose.compose.navigation)
-    implementation(compose.compose.material)
+implementation(compose.compose.material3)
+
+
     implementation(compose.compose.coil)
     implementation(compose.compose.paging)
     implementation(libs.gson)
@@ -90,14 +92,14 @@ dependencies {
     testImplementation(test.junitAndroidExt)
     testImplementation(test.truth)
     testImplementation(test.coroutines)
-    testImplementation(compose.compose.uiTesting)
+    testImplementation(compose.compose.j4Unit)
 
     androidTestImplementation(test.junit4)
     androidTestImplementation(test.junitAndroidExt)
     androidTestImplementation(test.truth)
     androidTestImplementation(test.coroutines)
     androidTestImplementation(test.coroutines)
-    androidTestImplementation(compose.compose.uiTesting)
+    androidTestImplementation(compose.compose.j4Unit)
     androidTestImplementation(libs.hilt.androidtest)
 
     // Instrumented Unit Tests

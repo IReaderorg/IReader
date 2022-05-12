@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
 import androidx.compose.material.TabRowDefaults
@@ -109,7 +109,7 @@ fun ReaderSettingMainLayout(
                         text = UiText.StringResource(R.string.text_align).asString(),
                         fontSize = 12.sp,
                         style = TextStyle(fontWeight = FontWeight.W400),
-                        color = MaterialTheme.colors.onBackground
+                        color = MaterialTheme.colorScheme.onBackground
                     )
                     Row(
                         modifier.fillMaxWidth(),
@@ -122,7 +122,7 @@ fun ReaderSettingMainLayout(
                             onClick = {
                                 onTextAlign(TextAlign.Left)
                             },
-                            tint = if (vm.textAlignment == TextAlign.Left) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground
+                            tint = if (vm.textAlignment == TextAlign.Left) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
                         )
                         AppIconButton(
                             imageVector = Icons.Default.FormatAlignCenter,
@@ -130,7 +130,7 @@ fun ReaderSettingMainLayout(
                             onClick = {
                                 onTextAlign(TextAlign.Center)
                             },
-                            tint = if (vm.textAlignment == TextAlign.Center) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground
+                            tint = if (vm.textAlignment == TextAlign.Center) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
                         )
                         AppIconButton(
                             imageVector = Icons.Default.FormatAlignJustify,
@@ -138,7 +138,7 @@ fun ReaderSettingMainLayout(
                             onClick = {
                                 onTextAlign(TextAlign.Justify)
                             },
-                            tint = if (vm.textAlignment == TextAlign.Justify) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground
+                            tint = if (vm.textAlignment == TextAlign.Justify) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
                         )
                         AppIconButton(
                             imageVector = Icons.Default.FormatAlignRight,
@@ -146,7 +146,7 @@ fun ReaderSettingMainLayout(
                             onClick = {
                                 onTextAlign(TextAlign.Right)
                             },
-                            tint = if (vm.textAlignment == TextAlign.Right) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground
+                            tint = if (vm.textAlignment == TextAlign.Right) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
                         )
 
                     }
@@ -243,7 +243,7 @@ fun ReaderSettingMainLayout(
                         text = UiText.StringResource(R.string.advance_setting).asString(),
                         fontSize = 12.sp,
                         style = TextStyle(fontWeight = FontWeight.W400),
-                        color = MaterialTheme.colors.onBackground
+                        color = MaterialTheme.colorScheme.onBackground
                     )
                     AppIconButton(
                         imageVector = Icons.Default.Settings,
@@ -323,12 +323,12 @@ fun Tabs(libraryTabs: List<TabItem>, pagerState: PagerState) {
     val scope = rememberCoroutineScope()
     TabRow(
         selectedTabIndex = pagerState.currentPage,
-        backgroundColor = MaterialTheme.colors.background,
-        contentColor = MaterialTheme.colors.contentColor,
+        backgroundColor = MaterialTheme.colorScheme.background,
+        contentColor = MaterialTheme.colorScheme.contentColor,
         indicator = { tabPositions ->
             TabRowDefaults.Indicator(
                 Modifier.pagerTabIndicatorOffset(pagerState, tabPositions),
-                color = MaterialTheme.colors.primary,
+                color = MaterialTheme.colorScheme.primary,
 
                 )
         }
@@ -337,8 +337,8 @@ fun Tabs(libraryTabs: List<TabItem>, pagerState: PagerState) {
             Tab(
                 text = { MidSizeTextComposable(text = tab.name) },
                 selected = pagerState.currentPage == index,
-                unselectedContentColor = MaterialTheme.colors.onBackground,
-                selectedContentColor = MaterialTheme.colors.primary,
+                unselectedContentColor = MaterialTheme.colorScheme.onBackground,
+                selectedContentColor = MaterialTheme.colorScheme.primary,
                 onClick = {
                     scope.launch { pagerState.animateScrollToPage(index) }
                 },

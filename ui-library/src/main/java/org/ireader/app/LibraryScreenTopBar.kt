@@ -141,17 +141,18 @@ private fun RegularTopBar(
                 )
             }
         },
-        navigationIcon = if (vm.inSearchMode) {
-            {
-                AppIconButton(
-                    imageVector = Icons.Default.ArrowBack,
-                    text = UiText.StringResource( R.string.toggle_search_mode_off),
-                    onClick = {
-                        vm.inSearchMode = false
-                    }
-                )
-            }
-        } else null
+        navigationIcon = {
+            if (vm.inSearchMode) {
+
+                    AppIconButton(
+                        imageVector = Icons.Default.ArrowBack,
+                        text = UiText.StringResource( R.string.toggle_search_mode_off),
+                        onClick = {
+                            vm.inSearchMode = false
+                        }
+                    )
+            } else null
+        }
 
     )
 }

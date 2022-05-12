@@ -2,6 +2,7 @@ package org.ireader.app
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -18,16 +19,16 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.DoneOutline
 import androidx.compose.material.icons.filled.GetApp
 import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,7 +54,9 @@ import org.ireader.ui_library.R
 
 @ExperimentalPagerApi
 @ExperimentalAnimationApi
-@OptIn(ExperimentalMaterialApi::class, androidx.compose.foundation.ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class,
+    ExperimentalMaterial3Api::class
+)
 @Composable
 fun LibraryScreen(
     modifier: Modifier = Modifier,
@@ -102,8 +105,8 @@ fun LibraryScreen(
                 }
         },
         sheetState = bottomSheetState,
-        sheetBackgroundColor = MaterialTheme.colors.background,
-        sheetContentColor = MaterialTheme.colors.onBackground,
+        sheetBackgroundColor = MaterialTheme.colorScheme.background,
+        sheetContentColor = MaterialTheme.colorScheme.onBackground,
     ) {
 
         SwipeRefresh(
@@ -113,13 +116,13 @@ fun LibraryScreen(
                     state = state,
                     refreshTriggerDistance = trigger,
                     scale = true,
-                    backgroundColor = MaterialTheme.colors.background,
-                    contentColor = MaterialTheme.colors.primaryVariant,
+                    backgroundColor = MaterialTheme.colorScheme.background,
+                    contentColor = MaterialTheme.colorScheme.primaryContainer,
                     elevation = 8.dp,
                 )
             }
         ) {
-            Scaffold(
+            androidx.compose.material3.Scaffold(
                 modifier = Modifier
                     .fillMaxSize(),
                 topBar = {
@@ -176,10 +179,10 @@ fun LibraryScreen(
                                     .height(60.dp)
                                     .align(Alignment.BottomCenter)
                                     .border(
-                                        width = 0.dp, color = MaterialTheme.colors.background,
+                                        width = 0.dp, color = MaterialTheme.colorScheme.background,
                                         RoundedCornerShape(8.dp)
                                     )
-                                    .background(MaterialTheme.colors.surface)
+                                    .background(MaterialTheme.colorScheme.surface)
                                     .clickable(enabled = false) {},
                             ) {
                                 Row(

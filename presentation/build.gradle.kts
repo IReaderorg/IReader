@@ -58,7 +58,9 @@ dependencies {
     implementation(compose.compose.compiler)
     implementation(compose.compose.activity)
 
-    implementation(compose.compose.material)
+implementation(compose.compose.material3)
+
+
     implementation(compose.compose.uiToolingPreview)
 
     implementation(compose.compose.icons)

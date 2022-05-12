@@ -11,23 +11,27 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Divider
 import androidx.compose.material.DrawerValue
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.Scaffold
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.google.accompanist.pager.ExperimentalPagerApi
+import dev.chrisbanes.snapper.ExperimentalSnapperApi
 import kotlinx.coroutines.launch
 import org.ireader.common_models.entities.Chapter
 import org.ireader.components.components.ISnackBarHost
@@ -40,8 +44,8 @@ import org.ireader.reader.viewmodel.ReaderScreenState
 
 @ExperimentalAnimationApi
 @OptIn(
-    ExperimentalMaterialApi::class, com.google.accompanist.pager.ExperimentalPagerApi::class,
-    dev.chrisbanes.snapper.ExperimentalSnapperApi::class
+    ExperimentalMaterialApi::class, ExperimentalPagerApi::class,
+    ExperimentalSnapperApi::class, ExperimentalMaterial3Api::class
 )
 @Composable
 fun ReadingScreen(
@@ -88,7 +92,8 @@ fun ReadingScreen(
     onBackgroundColorAndTextColorApply: (bgColor: String, txtColor: String) -> Unit,
     scaffoldState: ScaffoldState,
     onShowScrollIndicator: (Boolean) -> Unit,
-    onTextAlign: (TextAlign) -> Unit
+    onTextAlign: (TextAlign) -> Unit,
+    snackBarHostState:SnackbarHostState
 ) {
 
     val modalState =
@@ -135,8 +140,25 @@ fun ReadingScreen(
 
 
 
+    ModalNavigationDrawer(
+        drawerContent = {
+            ReaderScreenDrawer(
+                modifier = Modifier.statusBarsPadding(),
+                onReverseIcon = {
+                    onDrawerRevereIcon(chapter)
+                },
+                onChapter = onChapter,
+                chapter = chapter,
+                chapters = vm.drawerChapters.value,
+                drawerScrollState = drawerScrollState,
+                onMap = onMap,
+            )
+        }
+    ) {
 
-    Scaffold(
+
+
+    androidx.compose.material3.Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             ReaderScreenTopBar(
@@ -157,8 +179,7 @@ fun ReadingScreen(
                 onPopBackStack = onPopBackStack
             )
         },
-        scaffoldState = scaffoldState,
-        snackbarHost = { ISnackBarHost(snackBarHostState = it) },
+        snackbarHost = { ISnackBarHost(snackBarHostState = snackBarHostState) },
         bottomBar = {
             if (!vm.isReaderModeEnable && chapter != null) {
                 ModalBottomSheetLayout(
@@ -166,14 +187,14 @@ fun ReadingScreen(
                         .fillMaxWidth()
                         .height(IntrinsicSize.Max)
                         .height(if (vm.isMainBottomModeEnable) 130.dp else 320.dp),
-                    sheetBackgroundColor = MaterialTheme.colors.background,
+                    sheetBackgroundColor = MaterialTheme.colorScheme.background,
                     sheetElevation = 8.dp,
                     sheetState = modalState,
                     sheetContent = {
                         Column(modifier.fillMaxSize()) {
                             Divider(
                                 modifier = modifier.fillMaxWidth(),
-                                color = MaterialTheme.colors.onBackground.copy(alpha = .2f),
+                                color = MaterialTheme.colorScheme.onBackground.copy(alpha = .2f),
                                 thickness = 1.dp
                             )
                             Spacer(modifier = modifier.height(5.dp))
@@ -245,21 +266,7 @@ fun ReadingScreen(
                 )
             }
         },
-        drawerGesturesEnabled = true,
-        drawerBackgroundColor = MaterialTheme.colors.background,
-        drawerContent = {
-            ReaderScreenDrawer(
-                modifier = Modifier.statusBarsPadding(),
-                onReverseIcon = {
-                    onDrawerRevereIcon(chapter)
-                },
-                onChapter = onChapter,
-                chapter = chapter,
-                chapters = vm.drawerChapters.value,
-                drawerScrollState = drawerScrollState,
-                onMap = onMap,
-            )
-        }
+
     ) { padding ->
         ScrollIndicatorSetting(
             enable = readerScreenPreferencesState.scrollIndicatorDialogShown,
@@ -290,10 +297,11 @@ fun ReadingScreen(
                 if (vm.isLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier.align(Alignment.Center),
-                        color = MaterialTheme.colors.primary
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
             }
         }
+    }
     }
 }

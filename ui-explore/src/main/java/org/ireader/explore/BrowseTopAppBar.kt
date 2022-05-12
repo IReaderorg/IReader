@@ -4,12 +4,12 @@ package org.ireader.explore
 import androidx.compose.foundation.background
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -101,7 +101,7 @@ fun BrowseTopAppBar(
                 },
             )
             DropdownMenu(
-                modifier = Modifier.background(MaterialTheme.colors.background),
+                modifier = Modifier.background(MaterialTheme.colorScheme.background),
                 expanded = topMenu,
                 onDismissRequest = {
                     topMenu = false

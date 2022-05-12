@@ -12,11 +12,12 @@ import androidx.compose.material.AlertDialog
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.ListItem
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ModeNight
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,7 +33,7 @@ import org.ireader.components.reusable_composable.TopAppBarBackButton
 import org.ireader.core_ui.theme.ThemeMode
 import org.ireader.ui_appearance.R
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun AppearanceSettingScreen(
     modifier: Modifier = Modifier,
@@ -61,14 +62,14 @@ fun AppearanceSettingScreen(
         ListItem(
             modifier = Modifier.clickable {
                 openDialog.value = true
-            }
+            }.padding(padding)
         ) {
             Row {
                 Icon(
                     imageVector = Icons.Default.ModeNight,
                     contentDescription = UiText.StringResource(R.string.night_mode).asString(
                         LocalContext.current),
-                    tint = MaterialTheme.colors.primary
+                    tint = MaterialTheme.colorScheme.primary
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 MidSizeTextComposable(text = UiText.StringResource(R.string.dark_mode))
@@ -108,8 +109,8 @@ fun AppearanceSettingScreen(
                         }
                     }
                 },
-                backgroundColor = MaterialTheme.colors.background,
-                contentColor = MaterialTheme.colors.onBackground,
+                backgroundColor = MaterialTheme.colorScheme.background,
+                contentColor = MaterialTheme.colorScheme.onBackground,
             )
         }
     }

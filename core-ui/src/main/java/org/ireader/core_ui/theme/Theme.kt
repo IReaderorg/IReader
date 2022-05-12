@@ -1,12 +1,12 @@
 package org.ireader.core_ui.theme
 
-import androidx.compose.material.darkColors
-import androidx.compose.material.lightColors
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import org.ireader.core_ui.ui.Colour
 
-val DarkColorPalette = darkColors(
+val DarkColorPalette = darkColorScheme(
     primary = Colour.blue_200,
-    primaryVariant = Colour.blue_600,
+    primaryContainer = Colour.blue_600,
     onPrimary = Colour.black_900,
     secondary = Colour.light_blue_a_200,
     onSecondary = Colour.black_900,
@@ -17,9 +17,9 @@ val DarkColorPalette = darkColors(
     error = Colour.red_600,
     onError = Colour.black_900,
 )
-val LightColorPalette = lightColors(
+val LightColorPalette = lightColorScheme(
     primary = Colour.blue_500,
-    primaryVariant = Colour.blue_700,
+    primaryContainer = Colour.blue_700,
     onPrimary = Colour.white_50,
     secondary = Colour.light_blue_a_200,
     onSecondary = Colour.black_900,
@@ -42,7 +42,7 @@ val LightColorPalette = lightColors(
 //    } else {
 //        LightColorPalette
 //    }
-//    val useDarkIcon = MaterialTheme.colors.isLight
+//    val useDarkIcon = MaterialTheme.colorScheme.isLight
 //    val systemUiController = rememberSystemUiController()
 //    val transparentStatusBar = LocalTransparentStatusBar.current.enabled
 //    if (!isMiui) {

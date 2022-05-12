@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -57,10 +57,10 @@ fun FontChip(
                     modifier = modifier
                         .height(30.dp)
                         .clip(RectangleShape)
-                        .background(MaterialTheme.colors.background)
+                        .background(MaterialTheme.colorScheme.background)
                         .border(
                             2.dp,
-                            if (fonts[index] == state.font) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground.copy(
+                            if (fonts[index] == state.font) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground.copy(
                                 .4f
                             ),
                             CircleShape

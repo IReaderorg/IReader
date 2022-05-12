@@ -22,7 +22,10 @@ dependencies {
     implementation(compose.compose.icons)
     implementation(compose.compose.coil)
     implementation(compose.compose.foundation)
-    implementation(compose.compose.material)
+implementation(compose.compose.material3)
+implementation(compose.compose.material)
+
+
     implementation(compose.compose.uiToolingPreview)
     implementation(compose.compose.navigation)
 }

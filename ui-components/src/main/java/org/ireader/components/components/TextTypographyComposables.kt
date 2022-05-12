@@ -1,8 +1,8 @@
 package org.ireader.components.components
 
-import androidx.compose.material.Colors
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -10,14 +10,14 @@ import androidx.compose.ui.text.font.FontWeight
 @Composable
 fun TitleText(
     text: String,
-    color: Colors? = null,
+    color: ColorScheme? = null,
     style: FontStyle? = null,
     fontWeight: FontWeight? = null,
 ) {
     Text(
         text = text,
-        color = MaterialTheme.colors.onBackground,
-        style = MaterialTheme.typography.h6,
+        color = MaterialTheme.colorScheme.onBackground,
+        style = MaterialTheme.typography.displayMedium,
         fontWeight = FontWeight.Bold
     )
 }

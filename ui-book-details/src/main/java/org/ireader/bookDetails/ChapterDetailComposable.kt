@@ -7,8 +7,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -32,9 +32,9 @@ fun ChapterDetailComposable(
 
             Text(
                 text = if (name.contains(chapterNumber)) name else chapterNumber,
-                style = MaterialTheme.typography.body2
+                style = MaterialTheme.typography.displayMedium
             )
-            Text(text = dateUploaded, style = MaterialTheme.typography.body2)
+            Text(text = dateUploaded, style = MaterialTheme.typography.displayMedium)
         }
     }
 }

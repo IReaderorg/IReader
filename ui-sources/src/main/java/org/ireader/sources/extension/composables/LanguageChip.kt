@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,9 +21,9 @@ import org.ireader.sources.extension.LanguageChoice
 fun LanguageChip(choice: LanguageChoice, isSelected: Boolean, onClick: () -> Unit) {
     Surface(
         color = if (isSelected) {
-            MaterialTheme.colors.primary
+            MaterialTheme.colorScheme.primary
         } else {
-            MaterialTheme.colors.onSurface.copy(alpha = 0.25f)
+            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
         },
         modifier = Modifier
             .widthIn(min = 56.dp)
@@ -41,9 +41,9 @@ fun LanguageChip(choice: LanguageChoice, isSelected: Boolean, onClick: () -> Uni
             text = UiText.DynamicString(text.uppercase()),
             modifier = Modifier.wrapContentSize(Alignment.Center),
             color = if (isSelected) {
-                MaterialTheme.colors.onBackground
+                MaterialTheme.colorScheme.onBackground
             } else {
-                MaterialTheme.colors.onBackground.copy(.5f)
+                MaterialTheme.colorScheme.onBackground.copy(.5f)
             }
         )
     }

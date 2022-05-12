@@ -9,15 +9,15 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.LocalContentAlpha
-import androidx.compose.material.LocalContentColor
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.outlined.PushPin
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -77,7 +77,7 @@ fun CatalogItem(
             )
             Text(
                 text = title,
-                style = MaterialTheme.typography.subtitle1,
+                style = MaterialTheme.typography.displayMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
@@ -87,7 +87,7 @@ fun CatalogItem(
 
             Text(
                 text = lang?.code?.uppercase(Locale.getDefault()) ?: "",
-                style = MaterialTheme.typography.body2,
+                style = MaterialTheme.typography.displayMedium,
                 color = LocalContentColor.current.copy(alpha = ContentAlpha.medium),
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
@@ -202,13 +202,13 @@ private fun CatalogButtons(
                 if (catalog is CatalogLocal) {
                     MidSizeTextComposable(
                         text = UiText.StringResource( R.string.update),
-                        color = MaterialTheme.colors.primary,
+                        color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.clickable { onInstall() }
                     )
                 } else if (catalog is CatalogRemote) {
                     MidSizeTextComposable(
                         text = UiText.StringResource(R.string.install),
-                        color = MaterialTheme.colors.primary,
+                        color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.clickable { onInstall() }
                     )
                 }
@@ -236,14 +236,14 @@ internal fun CatalogMenuButton(
             if (catalog.isPinned) {
                 AppIconButton(
                     imageVector = Icons.Filled.PushPin,
-                    tint = MaterialTheme.colors.primary,
+                    tint = androidx.compose.material3.MaterialTheme.colorScheme.primary,
                     text = UiText.StringResource( R.string.pin),
                     onClick = onPinToggle
                 )
             } else {
                 AppIconButton(
                     imageVector = Icons.Outlined.PushPin,
-                    tint = MaterialTheme.colors.onBackground.copy(.5f),
+                    tint =  androidx.compose.material3.MaterialTheme.colorScheme.onBackground.copy(.5f),
                     text = UiText.StringResource( R.string.unpin),
                     onClick = onPinToggle
                 )
@@ -253,7 +253,7 @@ internal fun CatalogMenuButton(
             if (onUninstall != null && catalog is CatalogLocal) {
                 MidSizeTextComposable(
                     text = UiText.StringResource( R.string.uninstall),
-                    color = MaterialTheme.colors.primary,
+                    color =  androidx.compose.material3.MaterialTheme.colorScheme.primary,
                     modifier = Modifier.clickable { onUninstall() }
                 )
             }

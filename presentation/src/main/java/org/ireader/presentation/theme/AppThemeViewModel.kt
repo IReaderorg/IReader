@@ -1,8 +1,8 @@
 package org.ireader.presentation.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material.Colors
 import androidx.compose.material.ripple.RippleTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -14,14 +14,15 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
+import org.ireader.core_ui.preferences.UiPreferences
 import org.ireader.core_ui.theme.AppRippleTheme
 import org.ireader.core_ui.theme.ExtraColors
 import org.ireader.core_ui.theme.Theme
 import org.ireader.core_ui.theme.ThemeMode
-import org.ireader.core_ui.preferences.UiPreferences
 import org.ireader.core_ui.theme.asState
 import org.ireader.core_ui.theme.getDarkColors
 import org.ireader.core_ui.theme.getLightColors
+import org.ireader.core_ui.theme.isLight
 import org.ireader.core_ui.theme.themes
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import javax.inject.Inject
@@ -48,12 +49,12 @@ class AppThemeViewModel @Inject constructor(
         }
     }
     @Composable
-    fun getColors(): Pair<Colors, ExtraColors> {
+    fun getColors(): Pair<ColorScheme, ExtraColors> {
         val baseTheme = getBaseTheme(themeMode, lightTheme, darkTheme)
-        val colors = remember(baseTheme.materialColors.isLight) {
+        val isLight = baseTheme.materialColors.isLight()
+        val colors = remember(baseTheme.materialColors.isLight()) {
             baseThemeJob.cancelChildren()
-
-            if (baseTheme.materialColors.isLight) {
+            if (isLight) {
                 uiPreferences.getLightColors().asState(baseThemeScope)
             } else {
                 uiPreferences.getDarkColors().asState(baseThemeScope)
@@ -71,9 +72,10 @@ class AppThemeViewModel @Inject constructor(
         lightTheme: Int,
         darkTheme: Int,
     ): Theme {
+        @Composable
         fun getTheme(id: Int, fallbackIsLight: Boolean): Theme {
             return themes.find { it.id == id }
-                ?: themes.first { it.materialColors.isLight == fallbackIsLight }
+                ?: themes.first { it.materialColors.isLight() == fallbackIsLight }
         }
 
         return when (themeMode) {
@@ -88,17 +90,17 @@ class AppThemeViewModel @Inject constructor(
     }
 
     private fun getMaterialColors(
-        baseColors: Colors,
+        baseColors: ColorScheme,
         colorPrimary: Color,
         colorSecondary: Color,
-    ): Colors {
+    ): ColorScheme {
         val primary = colorPrimary.takeOrElse { baseColors.primary }
         val secondary = colorSecondary.takeOrElse { baseColors.secondary }
         return baseColors.copy(
             primary = primary,
-            primaryVariant = primary,
+            primaryContainer = primary,
             secondary = secondary,
-            secondaryVariant = secondary,
+            secondaryContainer = secondary,
             onPrimary = if (primary.luminance() > 0.5) Color.Black else Color.White,
             onSecondary = if (secondary.luminance() > 0.5) Color.Black else Color.White,
         )

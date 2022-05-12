@@ -4,12 +4,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Tab
-import androidx.compose.material.TabRow
 import androidx.compose.material.TabRowDefaults
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -23,7 +22,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -31,15 +29,15 @@ import org.ireader.common_models.entities.Catalog
 import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.common_resources.UiEvent
 import org.ireader.common_resources.UiText
-import org.ireader.components.components.ISnackBarHost
 import org.ireader.components.reusable_composable.MidSizeTextComposable
+import org.ireader.core_ui.component.pagerTabIndicatorOffset
 import org.ireader.core_ui.theme.AppColors
 import org.ireader.sources.extension.composables.RemoteSourcesScreen
 import org.ireader.sources.extension.composables.UserSourcesScreen
 import org.ireader.ui_sources.R
 
 @ExperimentalMaterialApi
-@OptIn(ExperimentalPagerApi::class)
+@OptIn(ExperimentalPagerApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ExtensionScreen(
     modifier: Modifier = Modifier,
@@ -53,14 +51,13 @@ fun ExtensionScreen(
 ) {
     val scope = rememberCoroutineScope()
     val pagerState = rememberPagerState()
-    val scaffoldState = rememberScaffoldState()
     val context = LocalContext.current
-
+    val snackBarHostState = remember { androidx.compose.material3.SnackbarHostState() }
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
                 is UiEvent.ShowSnackbar -> {
-                    scaffoldState.snackbarHostState.showSnackbar(
+                    snackBarHostState.showSnackbar(
                         event.uiText.asString(context)
                     )
                 }
@@ -81,7 +78,7 @@ fun ExtensionScreen(
         mutableStateOf(false)
     }
     val focusManager = LocalFocusManager.current
-    Scaffold(
+    androidx.compose.material3.Scaffold(
         topBar = {
             ExtensionScreenTopAppBar(
                 searchMode = searchMode,
@@ -110,15 +107,22 @@ fun ExtensionScreen(
                 onSearchNavigate = onSearchNavigate
             )
         },
-        scaffoldState = scaffoldState,
-        snackbarHost = { ISnackBarHost(snackBarHostState = it) },
+        snackbarHost = {
+            androidx.compose.material3.SnackbarHost(hostState = snackBarHostState) { data ->
+            androidx.compose.material3.Snackbar(
+                actionColor = MaterialTheme.colorScheme.primary,
+                snackbarData = data,
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.onSurface,
+            )
+        } },
     ) { padding ->
         // UserSourcesScreen(viewModel, navController)
 
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
             TabRow(
                 selectedTabIndex = pagerState.currentPage,
-                backgroundColor = AppColors.current.bars,
+                containerColor = AppColors.current.bars,
                 contentColor = AppColors.current.onBars,
                 indicator = { tabPositions ->
                     TabRowDefaults.Indicator(
@@ -135,8 +139,8 @@ fun ExtensionScreen(
                         onClick = {
                              scope.launch { pagerState.animateScrollToPage(index) }
                         },
-                        selectedContentColor = MaterialTheme.colors.primary,
-                        unselectedContentColor = MaterialTheme.colors.onBackground,
+                        selectedContentColor = MaterialTheme.colorScheme.primary,
+                        unselectedContentColor = MaterialTheme.colorScheme.onBackground,
                     )
                 }
             }

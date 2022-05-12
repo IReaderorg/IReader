@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -41,7 +41,7 @@ fun SettingItemComposable(
             text = text.asString(LocalContext.current),
             fontSize = 12.sp,
             style = TextStyle(fontWeight = FontWeight.W400),
-            color = MaterialTheme.colors.onBackground
+            color = MaterialTheme.colorScheme.onBackground
         )
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -50,7 +50,7 @@ fun SettingItemComposable(
         ) {
             AppIconButton(
                 imageVector = Icons.Default.Remove,
-                tint = MaterialTheme.colors.onBackground,
+                tint = MaterialTheme.colorScheme.onBackground,
                 text = UiText.DynamicString(
                     string(id = R.string.decrease) + text.asString(
                         LocalContext.current
@@ -61,7 +61,7 @@ fun SettingItemComposable(
             MidSizeTextComposable(text = value)
             AppIconButton(
                 imageVector = Icons.Default.Add,
-                tint = MaterialTheme.colors.onBackground,
+                tint = MaterialTheme.colorScheme.onBackground,
                 text = UiText.DynamicString(
                     string(id = R.string.increase) + text.asString(
                         LocalContext.current
@@ -89,7 +89,7 @@ fun SettingItemToggleComposable(
             text = text.asString(LocalContext.current),
             fontSize = 12.sp,
             style = TextStyle(fontWeight = FontWeight.W400),
-            color = MaterialTheme.colors.onBackground
+            color = MaterialTheme.colorScheme.onBackground
         )
         Switch(checked = value, onCheckedChange = onToggle)
     }

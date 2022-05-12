@@ -1,8 +1,8 @@
 package org.ireader.core_ui.theme
 
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Shapes
-import androidx.compose.material.Typography
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Shapes
+import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
@@ -15,10 +15,10 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.structuralEqualityPolicy
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
-import androidx.compose.material.Colors as MaterialColors
+import androidx.compose.material3.ColorScheme as MaterialColors
 
 /**
- * All the application colors from both [MaterialTheme.colors] and [ExtraColors] which can be
+ * All the application colors from both [MaterialTheme.colorScheme] and [ExtraColors] which can be
  * accessed through this class.
  */
 @Stable
@@ -29,9 +29,9 @@ class AppColors(
 ) {
 
     val primary get() = materialColors.primary
-    val primaryVariant get() = materialColors.primaryVariant
+    val primaryVariant get() = materialColors.primaryContainer
     val secondary get() = materialColors.secondary
-    val secondaryVariant get() = materialColors.secondaryVariant
+    val secondaryVariant get() = materialColors.secondaryContainer
     val background get() = materialColors.background
     val surface get() = materialColors.surface
     val error get() = materialColors.error
@@ -40,7 +40,6 @@ class AppColors(
     val onBackground get() = materialColors.onBackground
     val onSurface get() = materialColors.onSurface
     val onError get() = materialColors.onError
-    val isLight get() = materialColors.isLight
 
     val bars get() = extraColors.bars
     val onBars get() = extraColors.onBars
@@ -70,7 +69,7 @@ fun AppColors(
     val rememberedAppColors = remember { AppColors(materialColors, rememberedCustomColors) }
 
     MaterialTheme(
-        colors = materialColors,
+        colorScheme = materialColors,
         typography = typography,
         shapes = shape,
     ) {
@@ -86,7 +85,7 @@ private val LocalAppColors = staticCompositionLocalOf<AppColors> {
 }
 
 /**
- * The extra colors of the application which are not included in [MaterialTheme.colors]. An instance
+ * The extra colors of the application which are not included in [MaterialTheme.colorScheme]. An instance
  * of this class can be retrieved through the composition local [AppColors.current].
  */
 @Stable

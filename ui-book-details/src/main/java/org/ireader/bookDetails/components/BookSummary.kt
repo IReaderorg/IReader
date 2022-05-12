@@ -9,9 +9,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,8 +42,8 @@ fun BookSummary(
     Column(modifier = modifier) {
         Text(
             text = "Synopsis", fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colors.onBackground,
-            style = MaterialTheme.typography.h6,
+            color = MaterialTheme.colorScheme.onSurface,
+            style = MaterialTheme.typography.headlineSmall,
         )
         BookSummaryDescription(
             description,
@@ -82,8 +82,8 @@ private fun GenreChip(genre: String) {
     Surface(
         modifier = Modifier.padding(horizontal = 2.dp),
         shape = CircleShape,
-        border = BorderStroke(1.dp, MaterialTheme.colors.onBackground.copy(alpha = .5f)),
-        color = MaterialTheme.colors.background
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onBackground.copy(alpha = .5f)),
+        color = MaterialTheme.colorScheme.background
     ) {
         MidSizeTextComposable(
             text = UiText.DynamicString(genre),

@@ -4,15 +4,16 @@ import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Card
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,7 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.ireader.core_ui.theme.Shapes
 
-@ExperimentalMaterialApi
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExpandableCardComposable(
     modifier: Modifier = Modifier,
@@ -50,10 +51,11 @@ fun ExpandableCardComposable(
                     durationMillis = durationMillis,
                     easing = LinearOutSlowInEasing
                 )
-            ),
+            )
+            .clickable {
+                isExpanded = !isExpanded
+            }.background(color = MaterialTheme.colorScheme.background),
         shape = Shapes.medium,
-        onClick = { isExpanded = !isExpanded },
-        backgroundColor = MaterialTheme.colors.background
     ) {
         Column(
             modifier = modifier.padding(16.dp),
@@ -61,7 +63,7 @@ fun ExpandableCardComposable(
         ) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.h4.copy(
+                style = MaterialTheme.typography.titleMedium.copy(
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 18.sp
                 ),
@@ -77,7 +79,7 @@ fun ExpandableCardComposable(
 
             Text(
                 text = "Show More",
-                color = MaterialTheme.colors.primary,
+                color = MaterialTheme.colorScheme.primary,
                 modifier = modifier
                     .align(Alignment.End)
                     .clickable { isExpanded = !isExpanded }
@@ -95,7 +97,6 @@ fun ExpandableCardComposable(
     }
 }
 
-@ExperimentalMaterialApi
 @Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
 @Composable
 fun ExpandableCardComposablePrev() {
