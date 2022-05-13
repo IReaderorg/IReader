@@ -74,8 +74,17 @@ tinylog-impl = { module = "org.tinylog:tinylog-impl", version.ref = "tinylog" }
 tinylog-api = { module = "org.tinylog:tinylog-api", version.ref = "tinylog" }
 
 
+ireader-ktorCore =  { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ireader-ktorContentNegotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+ireader-ktorSerialization =  { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+ireader-ktorGson =  { module = "io.ktor:ktor-serialization-gson", version.ref = "ktor" }
+ireader-ktorOkhttp =   { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
+ireader-ktorAndroid = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
+
+
 [bundles]
 tinylog = ["tinylog-impl", "tinylog-api"]
+ireader = ["ireader-ktorCore", "ireader-ktorContentNegotiation","ireader-ktorSerialization","ireader-ktorGson","ireader-ktorOkhttp","ireader-ktorAndroid"]
 
 [plugins]
 benmens = { id = "com.github.ben-manes.versions", version = "0.42.0" }

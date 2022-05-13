@@ -4,26 +4,28 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.material.ScaffoldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Headphones
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.DrawerState
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.ireader.common_models.entities.Chapter
-import org.ireader.common_resources.UiText
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.ui_reader.R
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainBottomSettingComposable(
     modifier: Modifier = Modifier,
     scope: CoroutineScope,
-    scaffoldState: ScaffoldState,
+    drawerState: DrawerState,
     scrollState: LazyListState,
     chapters: List<Chapter>,
     chapter: Chapter,
@@ -60,17 +62,17 @@ fun MainBottomSettingComposable(
     ) {
         AppIconButton(
             imageVector = Icons.Default.Menu,
-            text = UiText.StringResource(R.string.drawer),
-            onClick = { scope.launch { scaffoldState.drawerState.open() } }
+           contentDescription = stringResource(R.string.drawer),
+            onClick = { scope.launch { drawerState.open() } }
         )
         AppIconButton(
             imageVector = Icons.Default.Headphones,
-            text = UiText.StringResource(R.string.play),
+           contentDescription = stringResource(R.string.play),
             onClick = { onPlay() }
         )
         AppIconButton(
             imageVector = Icons.Default.Settings,
-            text = UiText.StringResource(R.string.settings),
+           contentDescription = stringResource(R.string.settings),
             onClick = { onSetting() }
         )
     }

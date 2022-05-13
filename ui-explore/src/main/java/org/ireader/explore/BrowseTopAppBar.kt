@@ -16,6 +16,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import org.ireader.common_models.DisplayMode
 import org.ireader.common_models.LayoutType
 import org.ireader.common_models.layouts
@@ -68,7 +69,7 @@ fun BrowseTopAppBar(
             if (state.isSearchModeEnable) {
                 AppIconButton(
                     imageVector = Icons.Default.Close,
-                    text = UiText.StringResource(R.string.close),
+                   contentDescription = stringResource(R.string.close),
                     onClick = {
                         onSearchDisable()
                     },
@@ -78,7 +79,7 @@ fun BrowseTopAppBar(
             ) {
                 AppIconButton(
                     imageVector = Icons.Default.Search,
-                    text =  UiText.StringResource(R.string.search),
+                    contentDescription =  stringResource(R.string.search),
                     onClick = {
                         onSearchEnable()
                     },
@@ -87,7 +88,7 @@ fun BrowseTopAppBar(
             if (source is HttpSource) {
                 AppIconButton(
                     imageVector = Icons.Default.Public,
-                    text = UiText.StringResource(R.string.webView),
+                   contentDescription = stringResource(R.string.webView),
                     onClick = {
                         onWebView()
                     },
@@ -95,7 +96,7 @@ fun BrowseTopAppBar(
             }
             AppIconButton(
                 imageVector = Icons.Default.GridView,
-                text = UiText.StringResource(R.string.layout),
+               contentDescription = stringResource(R.string.layout),
                 onClick = {
                     topMenu = true
                 },

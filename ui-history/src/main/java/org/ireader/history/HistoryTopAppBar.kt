@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import org.ireader.common_resources.UiText
 import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.AppIconButton
@@ -48,7 +49,7 @@ fun HistoryTopAppBar(
             if (vm.searchMode) {
                 AppIconButton(
                     imageVector = Icons.Default.Close,
-                    text = UiText.StringResource(R.string.close),
+                   contentDescription = stringResource(R.string.close),
                     onClick = {
                         vm.searchMode = false
                         vm.searchQuery = ""
@@ -59,14 +60,14 @@ fun HistoryTopAppBar(
             }
             AppIconButton(
                 imageVector = Icons.Default.Search,
-                text = UiText.StringResource(R.string.search),
+               contentDescription = stringResource(R.string.search),
                 onClick = {
                     vm.searchMode = true
                 },
             )
             AppIconButton(
                 imageVector = Icons.Default.Delete,
-                text = UiText.StringResource(R.string.delete_all_histories),
+               contentDescription = stringResource(R.string.delete_all_histories),
                 onClick = {
                     onDeleteAll()
                 },
@@ -76,7 +77,7 @@ fun HistoryTopAppBar(
             if (vm.searchMode) {
                     AppIconButton(
                         imageVector = Icons.Default.ArrowBack,
-                        text = UiText.StringResource(R.string.toggle_search_mode_off),
+                       contentDescription = stringResource(R.string.toggle_search_mode_off),
                         onClick = {
                             vm.searchMode = false
                             vm.searchQuery = ""

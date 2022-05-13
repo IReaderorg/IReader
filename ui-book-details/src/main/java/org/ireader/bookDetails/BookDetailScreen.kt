@@ -134,7 +134,7 @@ fun BookDetailScreen(
                                 onDownload = {
                                     onDownload()
                                 },
-                                isRead = chapterState.chapters.any { it.readAt != 0L },
+                                isRead = chapterState.haveBeenRead,
                                 onRead = {
                                     onRead()
                                 },

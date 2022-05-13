@@ -25,12 +25,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.ireader.common_models.entities.Chapter
-import org.ireader.common_resources.UiText
 import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.AppTextField
@@ -109,7 +109,7 @@ fun ReaderScreenTopBar(
                     } else {
                         AppIconButton(
                             imageVector = Icons.Default.ArrowBack,
-                            text = UiText.StringResource(R.string.exit_search_mode),
+                           contentDescription = stringResource(R.string.exit_search_mode),
                             onClick = {
                                 vm.searchQuery = ""
                                 vm.searchMode = false
@@ -123,7 +123,7 @@ fun ReaderScreenTopBar(
                         true -> {
                             AppIconButton(
                                 imageVector = Icons.Default.Close,
-                                text = UiText.StringResource(R.string.close),
+                               contentDescription = stringResource(R.string.close),
                                 onClick = {
                                     vm.searchQuery = ""
                                     vm.searchMode = false
@@ -132,7 +132,7 @@ fun ReaderScreenTopBar(
                             )
                             AppIconButton(
                                 imageVector = Icons.Default.ExpandMore,
-                                text = UiText.StringResource(R.string.previous_result),
+                               contentDescription = stringResource(R.string.previous_result),
                                 onClick = {
                                     vm.currentViewingSearchResultIndex.let { index ->
                                         chapter?.let {
@@ -152,7 +152,7 @@ fun ReaderScreenTopBar(
                             )
                             AppIconButton(
                                 imageVector = Icons.Default.ExpandLess,
-                                text =  UiText.StringResource(R.string.next_result),
+                                contentDescription =  stringResource(R.string.next_result),
                                 onClick = {
                                     vm.currentViewingSearchResultIndex.let { index ->
                                         if (index > 0) {
@@ -174,7 +174,7 @@ fun ReaderScreenTopBar(
                             if (chapter != null) {
                                 AppIconButton(
                                     imageVector = if (vm.expandTopMenu) Icons.Default.ChevronRight else Icons.Default.ChevronLeft,
-                                    text = UiText.StringResource(R.string.expand_menu),
+                                   contentDescription = stringResource(R.string.expand_menu),
                                     onClick = {
                                         vm.expandTopMenu = !vm.expandTopMenu
                                     }
@@ -182,7 +182,7 @@ fun ReaderScreenTopBar(
                                 if (vm.expandTopMenu) {
                                     AppIconButton(
                                         imageVector = if (chapter.bookmark) Icons.Filled.Bookmark else Icons.Default.Bookmark,
-                                        text = UiText.StringResource( R.string.bookmark),
+                                       contentDescription = stringResource( R.string.bookmark),
                                         tint = if (chapter.bookmark) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground,
                                         onClick = {
                                             onBookMark()
@@ -190,14 +190,14 @@ fun ReaderScreenTopBar(
                                     )
                                     AppIconButton(
                                         imageVector = Icons.Default.Search,
-                                        text = UiText.StringResource(R.string.search),
+                                       contentDescription = stringResource(R.string.search),
                                         onClick = {
                                             vm.searchMode = true
                                         }
                                     )
                                     AppIconButton(
                                         imageVector = Icons.Default.Public,
-                                        text = UiText.StringResource(R.string.webView),
+                                       contentDescription = stringResource(R.string.webView),
                                         onClick = {
                                             onWebView()
                                         }
@@ -205,7 +205,7 @@ fun ReaderScreenTopBar(
                                 }
                                 AppIconButton(
                                     imageVector = Icons.Default.Autorenew,
-                                    text = UiText.StringResource(R.string.refresh),
+                                   contentDescription = stringResource(R.string.refresh),
                                     onClick = {
                                         onRefresh()
                                     }
@@ -226,7 +226,7 @@ fun ReaderScreenTopBar(
                 if (chapter != null) {
                     AppIconButton(
                         imageVector = Icons.Default.Autorenew,
-                        text = UiText.StringResource(R.string.refresh),
+                       contentDescription = stringResource(R.string.refresh),
                         onClick = {
                             onRefresh()
                         }
@@ -234,7 +234,7 @@ fun ReaderScreenTopBar(
                 }
                 AppIconButton(
                     imageVector = Icons.Default.Public,
-                    text =UiText.StringResource(R.string.webView),
+                    contentDescription = stringResource(R.string.webView),
                     onClick = {
                         onWebView()
                     }

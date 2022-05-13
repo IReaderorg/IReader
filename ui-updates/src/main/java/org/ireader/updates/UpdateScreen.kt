@@ -21,6 +21,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import org.ireader.common_models.entities.UpdateWithInfo
 import org.ireader.common_resources.UiText
@@ -127,25 +128,25 @@ private fun BoxScope.UpdateEditBar(
             ) {
                 AppIconButton(
                     imageVector = Icons.Default.GetApp,
-                    text = UiText.StringResource( R.string.download),
+                   contentDescription = stringResource( R.string.download),
                     onClick = onBottomBarDownload
                 )
             }
             AppIconButton(
                 imageVector = Icons.Default.BookmarkBorder,
-                text = UiText.StringResource( R.string.bookmark),
+               contentDescription = stringResource( R.string.bookmark),
                 onClick = onBottomBookMark
             )
 
             AppIconButton(
                 imageVector = Icons.Default.Done,
-                text = UiText.StringResource( R.string.mark_as_read),
+               contentDescription = stringResource( R.string.mark_as_read),
                 onClick = onBottomBarMarkAsRead
             )
 
             AppIconButton(
                 imageVector = Icons.Default.Delete,
-                text = UiText.StringResource( R.string.delete_update),
+               contentDescription = stringResource( R.string.delete_update),
                 onClick = onBottomBarDelete
             )
         }

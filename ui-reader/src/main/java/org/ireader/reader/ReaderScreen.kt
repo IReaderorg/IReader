@@ -11,15 +11,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.material.DrawerValue
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.ScaffoldState
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
+import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
@@ -90,10 +89,10 @@ fun ReadingScreen(
     onBackgroundValueChange: (String) -> Unit,
     onTextColorValueChange: (String) -> Unit,
     onBackgroundColorAndTextColorApply: (bgColor: String, txtColor: String) -> Unit,
-    scaffoldState: ScaffoldState,
     onShowScrollIndicator: (Boolean) -> Unit,
     onTextAlign: (TextAlign) -> Unit,
-    snackBarHostState:SnackbarHostState
+    snackBarHostState:SnackbarHostState,
+    drawerState: DrawerState
 ) {
 
     val modalState =
@@ -101,8 +100,8 @@ fun ReadingScreen(
     val scope = rememberCoroutineScope()
     val chapter = vm.stateChapter
 
-    LaunchedEffect(key1 = scaffoldState.drawerState.targetValue) {
-        if (chapter != null && scaffoldState.drawerState.targetValue == DrawerValue.Open && vm.stateChapters.isNotEmpty()) {
+    LaunchedEffect(key1 = drawerState.targetValue) {
+        if (chapter != null && drawerState.targetValue == androidx.compose.material3.DrawerValue.Open && vm.stateChapters.isNotEmpty()) {
             val index = vm.stateChapters.indexOfFirst { it.id == chapter.id }
             if (index != -1) {
                 scope.launch {
@@ -141,6 +140,7 @@ fun ReadingScreen(
 
 
     ModalNavigationDrawer(
+        drawerState = drawerState,
         drawerContent = {
             ReaderScreenDrawer(
                 modifier = Modifier.statusBarsPadding(),
@@ -201,7 +201,7 @@ fun ReadingScreen(
                             if (vm.isMainBottomModeEnable) {
                                 MainBottomSettingComposable(
                                     scope = scope,
-                                    scaffoldState = scaffoldState,
+                                    drawerState= drawerState,
                                     scrollState = scrollState,
                                     chapter = chapter,
                                     chapters = vm.stateChapters,
@@ -237,28 +237,8 @@ fun ReadingScreen(
                                     onBackgroundChange = onBackgroundChange,
                                     vm = readerScreenPreferencesState,
                                     onShowScrollIndicator = onShowScrollIndicator,
-                                    onTextAlign = onTextAlign
+                                    onTextAlign = onTextAlign,
                                 )
-//                                ReaderSettingComposable(
-//                                    onFontSelected = onFontSelected,
-//                                    onAutoscrollIntervalIncrease = onAutoscrollIntervalIncrease,
-//                                    onAutoscrollOffsetIncrease = onAutoscrollOffsetIncrease,
-//                                    onFontSizeIncrease = onFontSizeIncrease,
-//                                    onLineHeightIncrease = onLineHeightIncrease,
-//                                    onParagraphDistanceIncrease = onParagraphDistanceIncrease,
-//                                    onParagraphIndentIncrease = onParagraphIndentIncrease,
-//                                    onScrollIndicatorPaddingIncrease = onScrollIndicatorPaddingIncrease,
-//                                    onScrollIndicatorWidthIncrease = onScrollIndicatorWidthIncrease,
-//                                    onToggleAutoScroll = onToggleAutoScroll,
-//                                    onToggleImmersiveMode = onToggleImmersiveMode,
-//                                    onToggleOrientation = onToggleOrientation,
-//                                    onToggleScrollMode = onToggleScrollMode,
-//                                    onToggleSelectedMode = onToggleSelectedMode,
-//                                    onChangeBrightness = onChangeBrightness,
-//                                    onToggleAutoBrightness = onToggleAutoBrightness,
-//                                    onBackgroundChange = onBackgroundChange,
-//                                    vm = readerScreenPreferencesState
-//                                )
                             }
                         }
                     },

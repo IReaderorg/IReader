@@ -20,9 +20,10 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
 
     @Query(
         """SELECT  library.* ,
-        MAX(chapter.readAt) as lastRead
+        MAX(history.readAt) as lastRead
         FROM  library
         LEFT JOIN chapter ON library.id = chapter.bookId
+        LEFT JOIN history ON history.bookId = chapter.bookId
         GROUP BY library.id
         HAVING library.favorite = 1
         ORDER BY lastRead
@@ -84,12 +85,13 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
 
     @Query(
         """SELECT  library.* ,
-        MAX(chapter.readAt) as lastRead,
+        MAX(history.readAt) as lastRead,
         COUNT(DISTINCT chapter.id) AS totalChapters,
         SUM(chapter.read) as isRead,
         SUM(length(chapter.content) > 10) AS totalDownload
         FROM  library
         LEFT JOIN chapter ON library.id = chapter.bookId
+                LEFT JOIN history ON history.bookId = chapter.bookId
         GROUP BY library.id
         HAVING library.favorite = 1
         ORDER BY 

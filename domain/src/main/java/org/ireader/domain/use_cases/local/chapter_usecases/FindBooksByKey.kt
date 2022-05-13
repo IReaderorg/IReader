@@ -4,6 +4,7 @@ import kotlinx.datetime.Clock
 import org.ireader.common_extensions.currentTimeToLong
 import org.ireader.common_models.entities.Chapter
 import org.ireader.common_models.entities.History
+import org.ireader.core_ui.preferences.UiPreferences
 import org.ireader.domain.use_cases.history.HistoryUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import javax.inject.Inject
@@ -20,22 +21,25 @@ class FindChapterByKey @Inject constructor(private val localChapterRepository: o
     }
 }
 
-class UpdateLastReadTime @Inject constructor(private val insertUseCases: LocalInsertUseCases,private val historyUseCase: HistoryUseCase) {
+class UpdateLastReadTime @Inject constructor(private val insertUseCases: LocalInsertUseCases,private val historyUseCase: HistoryUseCase,private val uiPreferences: UiPreferences) {
     suspend operator fun invoke(chapter: Chapter,updateDateFetched:Boolean = false) {
 
+        if (!uiPreferences.incognitoMode().read()) {
         insertUseCases.insertChapter(
             chapter = chapter.copy(
                 read = true,
-                readAt = Clock.System.now().toEpochMilliseconds(),
                 dateFetch = if (updateDateFetched) Clock.System.now().toEpochMilliseconds() else chapter.dateFetch
             )
         )
-        historyUseCase.insertHistory(
-            History(
-                bookId = chapter.bookId,
-                chapterId = chapter.id,
-                readAt = currentTimeToLong()
+
+            historyUseCase.insertHistory(
+                History(
+                    bookId = chapter.bookId,
+                    chapterId = chapter.id,
+                    readAt = currentTimeToLong()
+                )
             )
-        )
+        }
+
     }
 }

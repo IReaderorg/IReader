@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
 import androidx.compose.material.TabRowDefaults
@@ -23,10 +22,12 @@ import androidx.compose.material.icons.filled.FormatAlignJustify
 import androidx.compose.material.icons.filled.FormatAlignLeft
 import androidx.compose.material.icons.filled.FormatAlignRight
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -118,7 +119,7 @@ fun ReaderSettingMainLayout(
                     ) {
                         AppIconButton(
                             imageVector = Icons.Default.FormatAlignLeft,
-                            text = UiText.StringResource(R.string.text_align_left),
+                           contentDescription = stringResource(R.string.text_align_left),
                             onClick = {
                                 onTextAlign(TextAlign.Left)
                             },
@@ -126,7 +127,7 @@ fun ReaderSettingMainLayout(
                         )
                         AppIconButton(
                             imageVector = Icons.Default.FormatAlignCenter,
-                            text = UiText.StringResource(R.string.text_align_center),
+                           contentDescription = stringResource(R.string.text_align_center),
                             onClick = {
                                 onTextAlign(TextAlign.Center)
                             },
@@ -134,7 +135,7 @@ fun ReaderSettingMainLayout(
                         )
                         AppIconButton(
                             imageVector = Icons.Default.FormatAlignJustify,
-                            text = UiText.StringResource(R.string.text_align_justify),
+                           contentDescription = stringResource(R.string.text_align_justify),
                             onClick = {
                                 onTextAlign(TextAlign.Justify)
                             },
@@ -142,7 +143,7 @@ fun ReaderSettingMainLayout(
                         )
                         AppIconButton(
                             imageVector = Icons.Default.FormatAlignRight,
-                            text = UiText.StringResource(R.string.text_align_right),
+                           contentDescription = stringResource(R.string.text_align_right),
                             onClick = {
                                 onTextAlign(TextAlign.Right)
                             },
@@ -247,7 +248,7 @@ fun ReaderSettingMainLayout(
                     )
                     AppIconButton(
                         imageVector = Icons.Default.Settings,
-                        text = UiText.StringResource(R.string.advance_setting),
+                       contentDescription = stringResource(R.string.advance_setting),
                         onClick = { vm.scrollIndicatorDialogShown = true }
                     )
                 }

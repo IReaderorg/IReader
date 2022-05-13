@@ -12,6 +12,9 @@
     <string name="view_book">View Book</string>
     <string name="search_hint">Search…</string>
     <string name="about">About</string>
+    <string name="help">Help</string>
+    <string name="pref_incognito_mode">Incognito mode</string>
+    <string name="pref_incognito_mode_summary">Pause reading history</string>
     <string name="no_app_was_found_to_lauch">Something went wrong. you don\'t have the required app.</string>
     <string name="the_downloads_was_interrupted">The Downloads was interrupted</string>
     <string name="the_downloads_was_cancelled">The Downloads was Cancelled</string>
@@ -91,6 +94,8 @@
 
 
 
+    <string name="create_backup">Create Backup</string>
+    <string name="restore_backup">Restore Backup</string>
 
     <string name="download">Download</string>
     <string name="bookmark">Bookmark</string>
@@ -215,6 +220,7 @@
     <string name="extensions">Extensions</string>
     <string name="sources">Sources</string>
     <string name="backup">Backup</string>
+    <string name="backup_and_restore">Backup and restore</string>
     <string name="restore">Restore</string>
     <string name="data">Data</string>
     <string name="chapters_was_cleared">Chapters was cleared</string>
@@ -286,9 +292,12 @@
     <string name="uninstalled_failed">Uninstalled Failed</string>
     <string name="Refreshed">Refreshed</string>
     <string name="label_more">Load More</string>
+    <string name="more">More</string>
     <string name="select_all">Select All</string>
     <string name="select_inverted">Select Inverted</string>
     <string name="website">IReader</string>
+    <string name="less_brightness">Less Brightness</string>
+    <string name="more_brightness">More Brightness</string>
 
 
 </resources>

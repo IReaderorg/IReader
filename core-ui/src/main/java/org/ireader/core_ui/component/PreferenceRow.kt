@@ -113,16 +113,16 @@ fun SwitchPreference(
     title: String,
     subtitle: String? = null,
     painter: Painter? = null,
+    icon: ImageVector? = null,
 ) {
     PreferenceRow(
         modifier = modifier,
         title = title,
         subtitle = subtitle,
         painter = painter,
+        icon = icon,
         action = {
             Switch(checked = preference.value, onCheckedChange = null)
-            // TODO: remove this once switch checked state is fixed: https://issuetracker.google.com/issues/228336571
-            Text(preference.value.toString())
         },
         onClick = { preference.value = !preference.value },
     )

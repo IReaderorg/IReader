@@ -13,8 +13,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,7 +48,8 @@ fun FontChip(
             modifier = Modifier.width(100.dp),
             text = "Font",
             fontSize = 12.sp,
-            style = TextStyle(fontWeight = FontWeight.W400)
+            style = TextStyle(fontWeight = FontWeight.W400),
+            color = MaterialTheme.colorScheme.onSurface
         )
         LazyRow {
             items(count = fonts.size) { index ->

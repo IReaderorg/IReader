@@ -7,6 +7,7 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.TravelExplore
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.PagerState
 import org.ireader.common_resources.UiText
@@ -47,37 +48,37 @@ fun ExtensionScreenTopAppBar(
                 if (searchMode) {
                     AppIconButton(
                         imageVector = Icons.Default.Close,
-                        text = UiText.StringResource(R.string.close),
+                       contentDescription = stringResource(R.string.close),
                         onClick = onClose,
                     )
                 } else {
                     AppIconButton(
                         imageVector = Icons.Default.Search,
-                        text = UiText.StringResource(R.string.search),
+                       contentDescription = stringResource(R.string.search),
                         onClick = onSearchEnable,
                     )
                 }
                 AppIconButton(
                     imageVector = Icons.Default.Refresh,
-                    text = UiText.StringResource(R.string.refresh),
+                   contentDescription = stringResource(R.string.refresh),
                     onClick = onRefresh,
                 )
             } else {
                 if (searchMode) {
                     AppIconButton(
                         imageVector = Icons.Default.Close,
-                        text = UiText.StringResource(R.string.close),
+                       contentDescription = stringResource(R.string.close),
                         onClick = onSearchDisable,
                     )
                 } else {
                     AppIconButton(
                         imageVector = Icons.Default.Search,
-                        text = UiText.StringResource(R.string.search),
+                       contentDescription = stringResource(R.string.search),
                         onClick = onSearchEnable,
                     )
                     AppIconButton(
                         imageVector = Icons.Default.TravelExplore,
-                        text = UiText.StringResource(R.string.search),
+                       contentDescription = stringResource(R.string.search),
                         onClick = onSearchNavigate,
                     )
                 }
@@ -88,7 +89,7 @@ fun ExtensionScreenTopAppBar(
 
                     AppIconButton(
                         imageVector = Icons.Default.ArrowBack,
-                        text = UiText.StringResource(R.string.toggle_search_mode_off),
+                       contentDescription = stringResource(R.string.toggle_search_mode_off),
                         onClick = onSearchDisable
                     )
             } else null

@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import org.ireader.common_resources.UiText
 import org.ireader.components.reusable_composable.AppIconButton
@@ -20,8 +21,7 @@ fun BookTable() {
             MidSizeTextComposable(text =  UiText.StringResource(R.string.book_name),)
             AppIconButton(
                 imageVector = Icons.Default.ArrowForward,
-                text = UiText.StringResource(R.string.open_explore),
-                onClick = { /*TODO*/ }
+               contentDescription = stringResource(R.string.open_explore),
             )
         }
     }

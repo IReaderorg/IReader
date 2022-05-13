@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -237,14 +238,14 @@ internal fun CatalogMenuButton(
                 AppIconButton(
                     imageVector = Icons.Filled.PushPin,
                     tint = androidx.compose.material3.MaterialTheme.colorScheme.primary,
-                    text = UiText.StringResource( R.string.pin),
+                   contentDescription = stringResource( R.string.pin),
                     onClick = onPinToggle
                 )
             } else {
                 AppIconButton(
                     imageVector = Icons.Outlined.PushPin,
                     tint =  androidx.compose.material3.MaterialTheme.colorScheme.onBackground.copy(.5f),
-                    text = UiText.StringResource( R.string.unpin),
+                   contentDescription = stringResource( R.string.unpin),
                     onClick = onPinToggle
                 )
             }

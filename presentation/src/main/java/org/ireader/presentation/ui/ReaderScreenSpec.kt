@@ -1,9 +1,13 @@
 package org.ireader.presentation.ui
 
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -72,8 +76,8 @@ object ReaderScreenSpec : ScreenSpec {
     )
 
     @OptIn(
-        ExperimentalPagerApi::class, androidx.compose.animation.ExperimentalAnimationApi::class,
-        androidx.compose.material.ExperimentalMaterialApi::class
+        ExperimentalPagerApi::class, ExperimentalAnimationApi::class,
+        ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class
     )
     @Composable
     override fun Content(
@@ -92,8 +96,8 @@ object ReaderScreenSpec : ScreenSpec {
         val snackBarHostState = remember { SnackbarHostState() }
         val scrollState = rememberLazyListState()
         val drawerScrollState = rememberLazyListState()
+        val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
         val swipeState = rememberSwipeRefreshState(isRefreshing = false)
-        val scaffoldState = rememberScaffoldState(androidx.compose.material.rememberDrawerState(androidx.compose.material.DrawerValue.Closed))
         DisposableEffect(key1 = true) {
             onDispose {
                 vm.restoreSetting(context, scrollState)
@@ -136,7 +140,7 @@ object ReaderScreenSpec : ScreenSpec {
             vm.eventFlow.collectLatest { event ->
                 when (event) {
                     is UiEvent.ShowSnackbar -> {
-                        scaffoldState.snackbarHostState.showSnackbar(
+                        snackBarHostState.showSnackbar(
                             event.uiText.asString(context)
                         )
                     }
@@ -145,7 +149,7 @@ object ReaderScreenSpec : ScreenSpec {
             }
         }
         ReadingScreen(
-            scaffoldState = scaffoldState,
+            drawerState = drawerState,
             vm = vm,
             scrollState = scrollState,
             onNext = {

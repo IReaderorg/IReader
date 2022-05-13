@@ -50,6 +50,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
@@ -180,7 +181,7 @@ fun ChapterDetailScreen(
                             if (vm.query.isNotBlank()) {
                                 AppIconButton(
                                     imageVector = Icons.Default.Close,
-                                    text = UiText.StringResource(R.string.exit_search_mode),
+                                   contentDescription = stringResource(R.string.exit_search_mode),
                                     onClick = {
                                         vm.query = ""
                                         vm.getLocalChaptersByPaging(vm.isAsc)
@@ -311,7 +312,7 @@ private fun BoxScope.ChapterDetailBottomBar(
         ) {
             AppIconButton(
                 imageVector = Icons.Default.GetApp,
-                text = UiText.StringResource(R.string.download),
+                contentDescription = stringResource(R.string.download),
                 onClick = {
                     vm.downloadChapters()
                     vm.selection.clear()
@@ -319,7 +320,7 @@ private fun BoxScope.ChapterDetailBottomBar(
             )
             AppIconButton(
                 imageVector = Icons.Default.BookmarkBorder,
-                text = UiText.StringResource(R.string.bookmark),
+               contentDescription = stringResource(R.string.bookmark),
                 onClick = {
                     vm.insertChapters(
                         vm.chapters.filter { it.id in vm.selection }
@@ -334,7 +335,7 @@ private fun BoxScope.ChapterDetailBottomBar(
                         .map { it.id }
                         .containsAll(vm.selection)
                 ) Icons.Default.DoneOutline else Icons.Default.Done,
-                text = UiText.StringResource(R.string.mark_as_read),
+               contentDescription = stringResource(R.string.mark_as_read),
                 onClick = {
                     vm.insertChapters(
                         vm.chapters.filter { it.id in vm.selection }
@@ -345,7 +346,7 @@ private fun BoxScope.ChapterDetailBottomBar(
             )
             AppIconButton(
                 imageVector = Icons.Default.PlaylistAddCheck,
-                text = UiText.StringResource(R.string.mark_previous_as_read),
+               contentDescription = stringResource(R.string.mark_previous_as_read),
                 onClick = {
                     vm.insertChapters(
                         vm.chapters.filter { it.id <= (vm.selection.maxOrNull() ?: 0) }
@@ -356,7 +357,7 @@ private fun BoxScope.ChapterDetailBottomBar(
             )
             AppIconButton(
                 imageVector = Icons.Default.Delete,
-                text = UiText.StringResource(R.string.delete),
+               contentDescription = stringResource(R.string.delete),
                 onClick = {
                     vm.deleteChapters(vm.chapters.filter { it.id in vm.selection })
                     vm.selection.clear()

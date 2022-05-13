@@ -11,6 +11,7 @@ data class Book(
     @PrimaryKey(autoGenerate = true)
     override val id: Long = 0,
     val tableId: Long = 0,
+    val type:Long = 0,
     override val sourceId: Long,
     val link: String,
     override val title: String,

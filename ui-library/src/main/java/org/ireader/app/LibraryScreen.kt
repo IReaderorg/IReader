@@ -32,6 +32,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
@@ -193,22 +194,22 @@ fun LibraryScreen(
                                 ) {
                                     AppIconButton(
                                         imageVector = Icons.Default.GetApp,
-                                        text = UiText.StringResource(R.string.download),
+                                       contentDescription = stringResource(R.string.download),
                                         onClick = onDownload
                                     )
                                     AppIconButton(
                                         imageVector = Icons.Default.Done,
-                                        text = UiText.StringResource(R.string.mark_as_read),
+                                       contentDescription = stringResource(R.string.mark_as_read),
                                         onClick = onMarkAsRead
                                     )
                                     AppIconButton(
                                         imageVector = Icons.Default.DoneOutline,
-                                        text = UiText.StringResource(R.string.mark_as_not_read),
+                                       contentDescription = stringResource(R.string.mark_as_not_read),
                                         onClick = onMarkAsNotRead
                                     )
                                     AppIconButton(
                                         imageVector = Icons.Default.Delete,
-                                        text = UiText.StringResource(R.string.mark_previous_as_read),
+                                       contentDescription = stringResource(R.string.mark_previous_as_read),
                                         onClick = onDelete
                                     )
                                 }

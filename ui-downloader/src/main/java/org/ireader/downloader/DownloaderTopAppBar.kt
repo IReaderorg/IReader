@@ -20,6 +20,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import org.ireader.common_resources.UiText
@@ -94,7 +95,7 @@ private fun RegularTopBar(
         actions = {
             AppIconButton(
                 imageVector = Icons.Default.MoreVert,
-                text = UiText.StringResource(R.string.menu),
+               contentDescription = stringResource(R.string.menu),
                 onClick = {
                     isMenuExpanded = true
                 },
@@ -113,7 +114,7 @@ private fun RegularTopBar(
             IconButton(onClick = onPopBackStack) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
-                    contentDescription = UiText.StringResource(R.string.return_to_previous_screen).asString(),
+                   contentDescription = stringResource(R.string.return_to_previous_screen),
                     tint = MaterialTheme.colorScheme.onBackground,
                 )
             }

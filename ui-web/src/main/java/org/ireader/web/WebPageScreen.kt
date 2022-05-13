@@ -43,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
@@ -358,7 +359,7 @@ private fun WebPageBottomLayout(
                         MidSizeTextComposable(text = UiText.DynamicString(item.title))
                     }
                     AppIconButton(imageVector = Icons.Default.ArrowForward,
-                        text =UiText.StringResource( R.string.view_book),
+                        contentDescription = stringResource( R.string.view_book),
                         onClick = {
                             onBook(item.id)
                         })

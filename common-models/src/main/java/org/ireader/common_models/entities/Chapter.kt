@@ -20,7 +20,6 @@ data class Chapter(
     val progress: Int = 0,
     val dateUpload: Long = 0,
     val dateFetch: Long = 0,
-    val readAt: Long = 0,
     val content: List<String> = emptyList(),
     val number: Float = -1f,
     val translator: String = "",

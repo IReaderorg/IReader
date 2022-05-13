@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.ireader.common_resources.UiText
@@ -43,7 +44,7 @@ fun GoToLastReadComposable(onClick: () -> Unit) {
         ) {
             AppIconButton(
                 imageVector = Icons.Default.ImportContacts,
-                text = UiText.StringResource(R.string.open_last_chapter),
+               contentDescription = stringResource(R.string.open_last_chapter),
                 onClick = {
                     onClick()
                 },

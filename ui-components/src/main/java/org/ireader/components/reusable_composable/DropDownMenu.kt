@@ -58,7 +58,7 @@ fun DropDownMenu(
                 MidSizeTextComposable(text = currentValue ?: items.first())
                 AppIconButton(
                     imageVector = Icons.Default.ArrowDropDown,
-                    text = UiText.DynamicString(""),
+                    contentDescription = null,
                     onClick = {
                         opened = true
                     }

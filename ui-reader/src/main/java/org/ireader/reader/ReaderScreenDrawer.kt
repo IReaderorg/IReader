@@ -12,13 +12,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.material3.Divider
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Sort
+import androidx.compose.material3.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import org.ireader.common_models.entities.Chapter
 import org.ireader.common_resources.UiText
@@ -56,12 +57,12 @@ fun ReaderScreenDrawer(
             ) {
                 Box {}
 
-                AppIconButton(imageVector = Icons.Filled.Place, text = UiText.StringResource(R.string.find_current_chapter), onClick = {
+                AppIconButton(imageVector = Icons.Filled.Place,contentDescription = stringResource(R.string.find_current_chapter), onClick = {
                     onMap(drawerScrollState)
                 })
                 AppIconButton(
                     imageVector = Icons.Default.Sort,
-                    text =UiText.StringResource(R.string.reverse),
+                    contentDescription = stringResource(R.string.reverse),
                     onClick = {
                         onReverseIcon()
                     }

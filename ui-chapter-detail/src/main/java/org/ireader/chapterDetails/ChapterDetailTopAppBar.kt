@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import org.ireader.chapterDetails.viewmodel.ChapterDetailState
 import org.ireader.common_resources.UiText
 import org.ireader.components.components.Toolbar
@@ -69,7 +70,7 @@ fun RegularChapterDetailTopAppBar(
 //            IconButton(onClick = onReverseClick) {
 //                Icon(
 //                    imageVector = Icons.Default.Sort,
-//                    contentDescription = UiText.StringResource(R.string.sort).asString()
+//                   contentDescription = stringResource(R.string.sort).asString()
 //                )
 //            }
 //        },
@@ -91,11 +92,11 @@ fun RegularChapterDetailTopAppBar(
             BigSizeTextComposable(text = UiText.StringResource(R.string.content))
         },
         actions = {
-            AppIconButton(imageVector = Icons.Filled.Place, text =  UiText.StringResource(R.string.find_current_chapter), onClick = onMap)
-            AppIconButton(imageVector =Icons.Default.Sort , text = UiText.StringResource(R.string.sort), onClick = onReverseClick)
+            AppIconButton(imageVector = Icons.Filled.Place, contentDescription = stringResource(R.string.find_current_chapter), onClick = onMap)
+            AppIconButton(imageVector =Icons.Default.Sort ,contentDescription = stringResource(R.string.sort), onClick = onReverseClick)
         },
         navigationIcon = {
-            AppIconButton(imageVector =Icons.Default.ArrowBack , text =UiText.StringResource(R.string.return_to_previous_screen), onClick = onPopBackStack)
+            AppIconButton(imageVector =Icons.Default.ArrowBack , contentDescription = stringResource(R.string.return_to_previous_screen), onClick = onPopBackStack)
         },
     )
 }
@@ -110,11 +111,11 @@ private fun EditModeChapterDetailTopAppBar(
     Toolbar(
         title = { BigSizeTextComposable(text = UiText.DynamicString("$selectionSize")) },
         navigationIcon = {
-            AppIconButton(imageVector =Icons.Default.Close , text = UiText.StringResource(R.string.close), onClick = onClickCancelSelection)
+            AppIconButton(imageVector =Icons.Default.Close ,contentDescription = stringResource(R.string.close), onClick = onClickCancelSelection)
         },
         actions = {
-            AppIconButton(imageVector =Icons.Default.SelectAll , text = UiText.StringResource(R.string.select_all), onClick = onClickSelectAll)
-            AppIconButton(imageVector =Icons.Default.FlipToBack , text = UiText.StringResource(R.string.select_inverted), onClick = onClickInvertSelection)
+            AppIconButton(imageVector =Icons.Default.SelectAll ,contentDescription = stringResource(R.string.select_all), onClick = onClickSelectAll)
+            AppIconButton(imageVector =Icons.Default.FlipToBack ,contentDescription = stringResource(R.string.select_inverted), onClick = onClickInvertSelection)
         }
     )
 }

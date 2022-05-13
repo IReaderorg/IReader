@@ -30,7 +30,8 @@ sealed interface ScreenSpec {
             WebViewScreenSpec,
             ExploreScreenSpec,
             GlobalSearchScreenSpec,
-            TTSScreenSpec
+            TTSScreenSpec,
+            BackupAndRestoreScreenSpec
         ).associateBy { it.navHostRoute }
     }
 

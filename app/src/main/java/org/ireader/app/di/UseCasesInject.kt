@@ -13,6 +13,7 @@ import org.ireader.common_data.repository.RemoteKeyRepository
 import org.ireader.common_data.repository.UpdatesRepository
 import org.ireader.core_ui.preferences.AppPreferences
 import org.ireader.core_ui.preferences.ReaderPreferences
+import org.ireader.core_ui.preferences.UiPreferences
 import org.ireader.domain.use_cases.download.DownloadUseCases
 import org.ireader.domain.use_cases.download.delete.DeleteAllSavedDownload
 import org.ireader.domain.use_cases.download.delete.DeleteSavedDownload
@@ -167,7 +168,8 @@ class UseCasesInject {
     fun provideLocalChapterUseCase(
         localChapterRepository: org.ireader.common_data.repository.LocalChapterRepository,
         historyUseCase: HistoryUseCase,
-        insertUseCases: LocalInsertUseCases
+        insertUseCases: LocalInsertUseCases,
+        uiPreferences: UiPreferences
     ): LocalGetChapterUseCase {
         return LocalGetChapterUseCase(
             findAllInLibraryChapters = FindAllInLibraryChapters(localChapterRepository),
@@ -181,7 +183,7 @@ class UseCasesInject {
             subscribeChapterById = SubscribeChapterById(localChapterRepository),
             subscribeChaptersByBookId = SubscribeChaptersByBookId(localChapterRepository),
             subscribeLastReadChapter = SubscribeLastReadChapter(localChapterRepository),
-            updateLastReadTime = UpdateLastReadTime(insertUseCases = insertUseCases, historyUseCase = historyUseCase)
+            updateLastReadTime = UpdateLastReadTime(insertUseCases = insertUseCases, historyUseCase = historyUseCase, uiPreferences = uiPreferences)
         )
     }
     @Provides

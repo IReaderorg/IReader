@@ -16,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import org.ireader.common_resources.UiText
 import org.ireader.components.reusable_composable.AppIconButton
@@ -49,7 +50,7 @@ fun FilterGroupItem(
             MidSizeTextComposable(text = name)
             AppIconButton(
                 imageVector = Icons.Default.ArrowDropDown,
-                text = name,
+                contentDescription = name.asString(LocalContext.current),
                 onClick = { expanded = !expanded }
             )
         }

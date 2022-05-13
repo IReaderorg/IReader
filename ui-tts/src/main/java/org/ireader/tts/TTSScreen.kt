@@ -54,6 +54,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -186,7 +187,7 @@ fun TTSScreen(
                         .align(Alignment.TopStart)
                         .padding(start = 4.dp),
                     imageVector = Icons.Default.ArrowBack,
-                    text =UiText.StringResource( R.string.return_to_previous_screen),
+                    contentDescription = stringResource( R.string.return_to_previous_screen),
                     onClick = onPopStack
                 )
 
@@ -417,14 +418,14 @@ private fun TTLScreenPlay(
                 AppIconButton(
                     modifier = Modifier.size(50.dp),
                     imageVector = Icons.Filled.SkipPrevious,
-                    text = UiText.StringResource( R.string.previous_chapter),
+                   contentDescription = stringResource( R.string.previous_chapter),
                     onClick = onPrev,
                     tint = MaterialTheme.colorScheme.onBackground
                 )
                 AppIconButton(
                     modifier = Modifier.size(50.dp),
                     imageVector = Icons.Filled.FastRewind,
-                    text = UiText.StringResource( R.string.previous_paragraph),
+                   contentDescription = stringResource( R.string.previous_paragraph),
                     onClick = onPrevPar,
                     tint = MaterialTheme.colorScheme.onBackground
                 )
@@ -442,7 +443,7 @@ private fun TTLScreenPlay(
                             AppIconButton(
                                 modifier = Modifier.size(80.dp),
                                 imageVector = Icons.Filled.Pause,
-                                text = UiText.StringResource( R.string.play),
+                               contentDescription = stringResource( R.string.play),
                                 onClick = onPlay,
                                 tint = MaterialTheme.colorScheme.onBackground
                             )
@@ -451,7 +452,7 @@ private fun TTLScreenPlay(
                             AppIconButton(
                                 modifier = Modifier.size(80.dp),
                                 imageVector = Icons.Filled.PlayArrow,
-                                text =UiText.StringResource( R.string.pause),
+                                contentDescription = stringResource( R.string.pause),
                                 onClick = onPlay,
                                 tint = MaterialTheme.colorScheme.onBackground
                             )
@@ -462,14 +463,14 @@ private fun TTLScreenPlay(
                 AppIconButton(
                     modifier = Modifier.size(50.dp),
                     imageVector = Icons.Filled.FastForward,
-                    text = UiText.StringResource( R.string.next_paragraph),
+                   contentDescription = stringResource( R.string.next_paragraph),
                     onClick = onNextPar,
                     tint = MaterialTheme.colorScheme.onBackground
                 )
                 AppIconButton(
                     modifier = Modifier.size(50.dp),
                     imageVector = Icons.Filled.SkipNext,
-                    text = UiText.StringResource( R.string.next_chapter),
+                   contentDescription = stringResource( R.string.next_chapter),
                     onClick = onNext,
                     tint = MaterialTheme.colorScheme.onBackground
                 )

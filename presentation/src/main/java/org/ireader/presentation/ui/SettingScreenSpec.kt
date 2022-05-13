@@ -4,12 +4,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.presentation.R
+import org.ireader.settings.setting.MainSettingScreenViewModel
 import org.ireader.settings.setting.SettingScreen
 
 object SettingScreenSpec : BottomNavScreenSpec {
@@ -30,15 +33,29 @@ object SettingScreenSpec : BottomNavScreenSpec {
         navController: NavController,
         navBackStackEntry: NavBackStackEntry,
     ) {
+        val uriHandler = LocalUriHandler.current
+        val vm: MainSettingScreenViewModel = hiltViewModel()
+
+
         SettingScreen(
-            itemsRoutes = listOf(
-                DownloaderScreenSpec.navHostRoute,
-                AppearanceScreenSpec.navHostRoute,
-                AdvanceSettingSpec.navHostRoute,
-                AboutInfoScreenSpec.navHostRoute
-            ),
-            onItemClick = { route ->
-                navController.navigate(route)
+            vm = vm,
+            onAbout = {
+                navController.navigate(AboutInfoScreenSpec.navHostRoute)
+            },
+            onAdvance = {
+                navController.navigate(AdvanceSettingSpec.navHostRoute)
+            },
+            onAppearanceScreen = {
+                navController.navigate(AppearanceScreenSpec.navHostRoute)
+            },
+            onBackupScreen = {
+                navController.navigate(BackupAndRestoreScreenSpec.navHostRoute)
+            },
+            onDownloadScreen = {
+                navController.navigate(DownloaderScreenSpec.navHostRoute)
+            },
+            onHelp = {
+                uriHandler.openUri("https://discord.gg/HBU6zD8c5v")
             }
         )
     }

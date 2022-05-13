@@ -39,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -289,7 +290,7 @@ private fun BoxScope.ExploreScreenErrorComposable(
             ) {
                 AppIconButton(
                     imageVector = Icons.Default.Refresh,
-                    text = UiText.StringResource(R.string.retry),
+                   contentDescription = stringResource(R.string.retry),
                     onClick = {
                         onRefresh()
                     }
@@ -305,7 +306,7 @@ private fun BoxScope.ExploreScreenErrorComposable(
                 if (source is HttpSource) {
                     AppIconButton(
                         imageVector = Icons.Default.Public,
-                        text = UiText.StringResource(R.string.open_in_webView),
+                       contentDescription = stringResource(R.string.open_in_webView),
                         onClick = {
                             onWebView(source)
                         }

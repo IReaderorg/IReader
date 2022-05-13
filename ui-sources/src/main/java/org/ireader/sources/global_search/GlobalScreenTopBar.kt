@@ -8,7 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import org.ireader.common_resources.UiText
+import androidx.compose.ui.res.stringResource
 import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.AppTextField
@@ -42,7 +42,7 @@ fun GlobalScreenTopBar(
         actions = {
             AppIconButton(
                 imageVector = Icons.Default.Search,
-                text =  UiText.StringResource(R.string.search),
+                contentDescription = stringResource(R.string.search),
                 onClick = {
                     state.searchMode = true
                 },
@@ -51,7 +51,7 @@ fun GlobalScreenTopBar(
         navigationIcon = {
             AppIconButton(
                 imageVector = Icons.Default.ArrowBack,
-                text = UiText.StringResource(R.string.toggle_search_mode_off),
+               contentDescription = stringResource(R.string.toggle_search_mode_off),
                 onClick = {
                     onPop()
                 }

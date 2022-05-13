@@ -46,7 +46,10 @@ interface ChapterDao : BaseDao<org.ireader.common_models.entities.Chapter> {
         CASE WHEN :isAsc = 0 THEN  id END DESC
     """
     )
-    fun subscribeChaptersByBookId(bookId: Long, isAsc: Boolean): Flow<List<org.ireader.common_models.entities.Chapter>>
+    fun subscribeChaptersByBookId(
+        bookId: Long,
+        isAsc: Boolean
+    ): Flow<List<org.ireader.common_models.entities.Chapter>>
 
     @Query(
         """SELECT * FROM chapter WHERE bookId= :bookId ORDER BY
@@ -54,7 +57,10 @@ interface ChapterDao : BaseDao<org.ireader.common_models.entities.Chapter> {
         CASE WHEN :isAsc = 0 THEN  id END DESC
     """
     )
-    suspend fun findChaptersByBookId(bookId: Long, isAsc: Boolean): List<org.ireader.common_models.entities.Chapter>
+    suspend fun findChaptersByBookId(
+        bookId: Long,
+        isAsc: Boolean
+    ): List<org.ireader.common_models.entities.Chapter>
 
     @Query("""SELECT * FROM chapter WHERE bookId in (:bookIds)""")
     suspend fun findChaptersByBookIds(bookIds: List<Long>): List<org.ireader.common_models.entities.Chapter>
@@ -92,6 +98,7 @@ interface ChapterDao : BaseDao<org.ireader.common_models.entities.Chapter> {
         """
         SELECT *
         from chapter
+        LEFT JOIN history ON history.bookId == chapter.bookId
         GROUP BY id
         HAVING chapter.bookId == :bookId
         ORDER BY readAt DESC
@@ -104,8 +111,9 @@ interface ChapterDao : BaseDao<org.ireader.common_models.entities.Chapter> {
         """
         SELECT *
         from chapter
-        GROUP BY id
-        HAVING chapter.bookId == :bookId AND chapter.readAt != 0 
+               LEFT JOIN history ON history.bookId == chapter.bookId
+        GROUP BY chapter.id
+        HAVING chapter.bookId == :bookId AND history.readAt != 0 
         ORDER BY readAt DESC
         LIMIT 1
     """
@@ -137,7 +145,10 @@ interface ChapterDao : BaseDao<org.ireader.common_models.entities.Chapter> {
     suspend fun deleteAllChapters()
 
     @Transaction
-    suspend fun updateChapters(bookId: Long, chapters: List<org.ireader.common_models.entities.Chapter>) {
+    suspend fun updateChapters(
+        bookId: Long,
+        chapters: List<org.ireader.common_models.entities.Chapter>
+    ) {
         deleteChaptersByBookId(bookId)
         insertChapters(chapters)
     }

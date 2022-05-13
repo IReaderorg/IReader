@@ -20,6 +20,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import kotlinx.coroutines.launch
 import org.ireader.app.viewmodel.LibraryState
 import org.ireader.common_resources.UiText
@@ -104,7 +105,7 @@ private fun RegularTopBar(
             if (vm.inSearchMode) {
                 AppIconButton(
                     imageVector = Icons.Default.Close,
-                    text = UiText.StringResource( R.string.close),
+                   contentDescription = stringResource( R.string.close),
                     onClick = {
                         vm.inSearchMode = false
                         vm.searchQuery = ""
@@ -114,7 +115,7 @@ private fun RegularTopBar(
             } else {
                 AppIconButton(
                     imageVector = Icons.Default.Sort,
-                    text =UiText.StringResource( R.string.filter),
+                    contentDescription = stringResource( R.string.filter),
                     onClick = {
                         scope.launch {
                             if (bottomSheetState.isVisible) {
@@ -127,14 +128,14 @@ private fun RegularTopBar(
                 )
                 AppIconButton(
                     imageVector = Icons.Default.Search,
-                    text =UiText.StringResource( R.string.search),
+                    contentDescription = stringResource( R.string.search),
                     onClick = {
                         vm.inSearchMode = true
                     },
                 )
                 AppIconButton(
                     imageVector = Icons.Default.Refresh,
-                    text = UiText.StringResource( R.string.refresh),
+                   contentDescription = stringResource( R.string.refresh),
                     onClick = {
                         refreshUpdate()
                     },
@@ -146,7 +147,7 @@ private fun RegularTopBar(
 
                     AppIconButton(
                         imageVector = Icons.Default.ArrowBack,
-                        text = UiText.StringResource( R.string.toggle_search_mode_off),
+                       contentDescription = stringResource( R.string.toggle_search_mode_off),
                         onClick = {
                             vm.inSearchMode = false
                         }

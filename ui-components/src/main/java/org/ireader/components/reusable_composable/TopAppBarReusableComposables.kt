@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -154,8 +155,8 @@ fun CaptionTextComposable(
 fun AppIconButton(
     modifier: Modifier = Modifier,
     imageVector: ImageVector,
-    text: UiText,
-    onClick: () -> Unit,
+    contentDescription: String? = null,
+    onClick: () -> Unit = {},
     tint: Color? = null,
 ) {
     IconButton(
@@ -166,7 +167,7 @@ fun AppIconButton(
         Icon(
             modifier = modifier,
             imageVector = imageVector,
-            contentDescription = text.asString(LocalContext.current),
+            contentDescription = contentDescription,
             tint = tint ?: MaterialTheme.colorScheme.onSurface
         )
     }
@@ -179,8 +180,7 @@ fun TopAppBarBackButton(onClick: () -> Unit) {
     }) {
         Icon(
             imageVector = Icons.Default.ArrowBack,
-            contentDescription = UiText.StringResource( R.string.return_to_previous_screen).asString(
-                LocalContext.current),
+           contentDescription = stringResource( R.string.return_to_previous_screen),
             tint = MaterialTheme.colorScheme.onSurface,
         )
     }

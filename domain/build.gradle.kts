@@ -87,6 +87,8 @@ implementation(compose.compose.material3)
     implementation(libs.ktor.core)
     implementation(libs.ktor.contentNegotiation)
     implementation(libs.ktor.okhttp)
+    implementation(libs.bundles.ireader)
+
 
     testImplementation(test.junit4)
     testImplementation(test.junitAndroidExt)

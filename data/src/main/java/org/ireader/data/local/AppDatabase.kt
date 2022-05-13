@@ -14,12 +14,12 @@ import org.ireader.common_models.entities.RemoteKeys
 import org.ireader.common_models.entities.SavedDownload
 import org.ireader.common_models.entities.Update
 import org.ireader.data.local.dao.CatalogDao
+import org.ireader.data.local.dao.ChapterDao
 import org.ireader.data.local.dao.DownloadDao
 import org.ireader.data.local.dao.HistoryDao
 import org.ireader.data.local.dao.LibraryBookDao
 import org.ireader.data.local.dao.RemoteKeysDao
 import org.ireader.data.local.dao.UpdatesDao
-import org.ireader.data.local.dao.ChapterDao
 
 @Database(
     entities = [
@@ -32,7 +32,7 @@ import org.ireader.data.local.dao.ChapterDao
         Update::class,
         RemoteKeys::class,
     ],
-    version = 17,
+    version = 18,
     exportSchema = true,
 )
 @TypeConverters(DatabaseConverter::class)
@@ -73,3 +73,9 @@ val MIGRATION_12_11 = object : Migration(12, 13) {
         database.execSQL("ALTER TABLE history_table RENAME TO history")
     }
 }
+val MIGRATION_17_18 = object : Migration(17, 18) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        database.execSQL("ALTER TABLE history_table RENAME TO history")
+    }
+}
+
