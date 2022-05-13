@@ -21,10 +21,10 @@ import org.ireader.common_resources.BuildConfig
 import org.ireader.common_resources.UiText
 import org.ireader.components.components.LogoHeader
 import org.ireader.components.components.Toolbar
+import org.ireader.components.components.component.LinkIcon
+import org.ireader.components.components.component.PreferenceRow
 import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.components.reusable_composable.TopAppBarBackButton
-import org.ireader.core_ui.component.LinkIcon
-import org.ireader.core_ui.component.PreferenceRow
 import org.ireader.ui_about.R
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -61,10 +61,10 @@ fun AboutSettingScreen(
                 PreferenceRow(
                     title = stringResource(R.string.version),
                     subtitle = when {
-                        org.ireader.common_resources.BuildConfig.DEBUG -> {
+                        BuildConfig.DEBUG -> {
                             "Debug ${BuildConfig.COMMIT_SHA} (${getFormattedBuildTime()})"
                         }
-                        org.ireader.common_resources.BuildConfig.PREVIEW -> {
+                        BuildConfig.PREVIEW -> {
                             "Preview r${BuildConfig.COMMIT_COUNT} (${BuildConfig.COMMIT_SHA}, ${getFormattedBuildTime()})"
                         }
                         else -> {

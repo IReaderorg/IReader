@@ -298,7 +298,17 @@
     <string name="website">IReader</string>
     <string name="less_brightness">Less Brightness</string>
     <string name="more_brightness">More Brightness</string>
-
+    <string name="custom">Custom</string>
+    <string name="select">Select</string>
+    <string name="presents">Presents</string>
+    <string name="theme">Theme</string>
+    <string name="follow_system_settings">Follow system settings</string>
+    <string name="dark">Dark Mode</string>
+    <string name="light">Light mode</string>
+    <string name="other_source">Others</string>
+    <string name="all_lang">All</string>
+    <string name="pinned_sources">Pinned</string>
+    <string name="last_used_source">Last Used</string>
 
 </resources>
 

@@ -12,7 +12,9 @@ import androidx.annotation.UiThread
  */
 @UiThread
 fun Activity.enterFullScreenMode() {
+    @Suppress("DEPRECATION")
     window.clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN)
+    @Suppress("DEPRECATION")
     window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
 }
 
@@ -21,19 +23,20 @@ fun Activity.enterFullScreenMode() {
  * Makes the Activity exit fullscreen mode.
  */
 @UiThread
+@Suppress("DEPRECATION")
 fun Activity.exitFullScreenMode() {
     window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
     window.addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN)
 }
 
-
+@Suppress("DEPRECATION")
 fun Activity.enableFullScreen() {
     window.setFlags(
         WindowManager.LayoutParams.FLAG_FULLSCREEN,
         WindowManager.LayoutParams.FLAG_FULLSCREEN
     )
 }
-
+@Suppress("DEPRECATION")
 val Activity.isImmersiveModeEnabled
     get() = window.decorView.systemUiVisibility or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY == window.decorView.systemUiVisibility
 
@@ -51,6 +54,7 @@ fun Activity.brightness(brightness: Float = 1f) {
 
 
 @SuppressLint("ObsoleteSdkInt")
+@Suppress("DEPRECATION")
 fun Activity.hideBottomBar() {
     if (Build.VERSION.SDK_INT < 19) { // lower api
         val v = this.window.decorView
@@ -64,6 +68,7 @@ fun Activity.hideBottomBar() {
 }
 
 @SuppressLint("ObsoleteSdkInt")
+@Suppress("DEPRECATION")
 fun Activity.showBottomBar() {
     if (Build.VERSION.SDK_INT < 19) { // lower api
         val v = this.window.decorView
@@ -80,7 +85,7 @@ fun Activity.showBottomBar() {
 /**
  * Created by hristijan on 3/29/19 to long live and prosper !
  */
-
+@Suppress("DEPRECATION")
 fun Activity.enableImmersiveMode() {
     val window = window
     window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)
@@ -100,7 +105,7 @@ fun Activity.enableImmersiveMode() {
  * This snippet shows the system bars. It does this by removing all the flags
  * except for the ones that make the content appear under the system bars.
  */
-
+@Suppress("DEPRECATION")
 fun Activity.showSystemUI() {
     window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
         or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
@@ -112,7 +117,7 @@ fun Activity.showSystemUI() {
 /**
  * This snippet hides the system bars.
  */
-
+@Suppress("DEPRECATION")
 fun Activity.hideSystemUI() {
     // Set the IMMERSIVE flag.
     // Set the content to appear under the system bars so that the content

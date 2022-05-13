@@ -1,4 +1,4 @@
-package org.ireader.core_ui.component
+package org.ireader.components.components.component
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon

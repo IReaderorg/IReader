@@ -105,7 +105,7 @@ fun SmallTextComposable(
 @Composable
 fun SuperSmallTextComposable(
     modifier: Modifier = Modifier,
-    text: UiText,
+    text: String,
     color: Color? = null,
     style: TextStyle? = null,
     fontWeight: FontWeight? = null,
@@ -116,7 +116,7 @@ fun SuperSmallTextComposable(
     ) {
     Text(
         modifier = modifier,
-        text = text.asString(LocalContext.current),
+        text = text,
         color = color ?: MaterialTheme.colorScheme.onSurface,
         style = style ?: MaterialTheme.typography.labelSmall,
         fontWeight = fontWeight ?: FontWeight.Normal,

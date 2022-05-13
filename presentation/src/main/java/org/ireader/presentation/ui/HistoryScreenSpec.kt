@@ -16,7 +16,7 @@ import org.ireader.history.viewmodel.HistoryViewModel
 import org.ireader.presentation.R
 
 object HistoryScreenSpec : BottomNavScreenSpec {
-    override val icon: ImageVector = Icons.Default.History
+    override val icon: ImageVector = Icons.Filled.History
     override val label: Int = R.string.history_screen_label
     override val navHostRoute: String = "history"
 

@@ -19,6 +19,7 @@ import org.ireader.core_catalogs.interactor.TogglePinnedCatalog
 import org.ireader.core_catalogs.interactor.UninstallCatalog
 import org.ireader.core_catalogs.interactor.UpdateCatalog
 import org.ireader.core_ui.exceptionHandler
+import org.ireader.core_ui.preferences.UiPreferences
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.use_cases.remote.key.RemoteKeyUseCase
 import javax.inject.Inject
@@ -33,9 +34,11 @@ class ExtensionViewModel @Inject constructor(
     private val togglePinnedCatalog: TogglePinnedCatalog,
     private val syncRemoteCatalogs: SyncRemoteCatalogs,
     private val remoteKeyUseCase: RemoteKeyUseCase,
+    val uiPreferences: UiPreferences,
 ) : BaseViewModel(), CatalogsState by state {
 
     var getCatalogJob: Job? = null
+
 
     init {
         scope.launch {
@@ -58,6 +61,9 @@ class ExtensionViewModel @Inject constructor(
             snapshotFlow { state.allUnpinnedCatalogs.filteredByQuery(searchQuery) }
                 .collect { state.unpinnedCatalogs = it }
         }
+
+        lastReadCatalog = uiPreferences.lastUsedSource().get()
+
         viewModelScope.launch {
             snapshotFlow {
                 state.allRemoteCatalogs.filteredByQuery(searchQuery)
@@ -95,7 +101,7 @@ class ExtensionViewModel @Inject constructor(
         }
     }
 
-    fun togglePinnedCatalog(catalog: CatalogLocal) {
+    fun togglePinnedCatalog(catalog: Catalog) {
         scope.launch {
             togglePinnedCatalog.await(catalog)
         }

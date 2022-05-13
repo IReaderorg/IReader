@@ -66,4 +66,7 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
     fun incognitoMode(): Preference<Boolean> {
         return preferenceStore.getBoolean("incognito_mode", false)
     }
+    fun lastUsedSource(): Preference<Long> {
+        return preferenceStore.getLong("last_used_source", -1L)
+    }
 }

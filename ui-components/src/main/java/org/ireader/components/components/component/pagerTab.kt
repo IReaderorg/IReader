@@ -1,4 +1,4 @@
-package org.ireader.core_ui.component
+package org.ireader.components.components.component
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset

@@ -30,7 +30,8 @@ object AppearanceScreenSpec : ScreenSpec {
             },
             onPopBackStack = {
                 navController.popBackStack()
-            }
+            },
+            vm = viewModel
         )
     }
 }

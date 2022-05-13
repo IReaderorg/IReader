@@ -33,10 +33,10 @@ fun AppTheme(
             darkIcons = darkIcons,
             isNavigationBarContrastEnforced = false
         )
-        systemUiController.setNavigationBarColor(
-            color = materialColors.background,
-            darkIcons = darkIcons,
-        )
+//        systemUiController.setNavigationBarColor(
+//            color = materialColors.background,
+//            darkIcons = darkIcons,
+//        )
     }
     Coil.setImageLoader(vm.coilLoader)
     AppColors(

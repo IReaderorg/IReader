@@ -24,10 +24,10 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import org.ireader.common_resources.UiText
 import org.ireader.components.components.LogoHeader
 import org.ireader.components.components.Toolbar
+import org.ireader.components.components.component.Divider
+import org.ireader.components.components.component.PreferenceRow
+import org.ireader.components.components.component.SwitchPreference
 import org.ireader.components.reusable_composable.BigSizeTextComposable
-import org.ireader.core_ui.component.Divider
-import org.ireader.core_ui.component.PreferenceRow
-import org.ireader.core_ui.component.SwitchPreference
 import org.ireader.core_ui.preferences.UiPreferences
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.ui_settings.R

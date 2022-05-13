@@ -24,6 +24,7 @@ import org.ireader.components.reusable_composable.DropDownMenuItem
 import org.ireader.components.reusable_composable.TopAppBarBackButton
 import org.ireader.core.R
 import org.ireader.core_api.source.CatalogSource
+import org.ireader.core_api.source.findInstance
 import org.ireader.core_api.source.model.Command
 import org.ireader.explore.webview.CustomTextField
 
@@ -99,7 +100,7 @@ fun WebPageTopBar(
                         goForward()
                     },
                 )
-            if (source != null && source.getCommands().find { it is Command.Detail.Fetch } != null && state.stateBook == null ) {
+            if (source != null && source.getCommands().findInstance<Command.Detail.Fetch>()!= null && state.stateBook == null ) {
                 list.add(
                     DropDownMenuItem(
                         UiText.StringResource(org.ireader.core.R.string.fetch_book)
@@ -108,7 +109,7 @@ fun WebPageTopBar(
                     }
                 )
             }
-            if (source != null && source.getCommands().find { it is Command.Content.Fetch } != null && state.stateChapter != null) {
+            if (source != null && source.getCommands().findInstance<Command.Content.Fetch>() != null && state.stateChapter != null) {
                 list.add(
                     DropDownMenuItem(
                         UiText.StringResource(org.ireader.core.R.string.fetch_chapter)
@@ -117,7 +118,7 @@ fun WebPageTopBar(
                     }
                 )
             }
-            if (source != null && source.getCommands().find { it is Command.Chapter.Fetch} != null&& state.stateBook != null) {
+            if (source != null && source.getCommands().findInstance<Command.Chapter.Fetch>() != null&& state.stateBook != null) {
                 list.add(
                     DropDownMenuItem(
                         UiText.StringResource(org.ireader.core.R.string.fetch_chapters)

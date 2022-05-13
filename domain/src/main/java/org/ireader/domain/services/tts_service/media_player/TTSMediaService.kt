@@ -49,7 +49,6 @@ import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.preferences.reader_preferences.TextReaderPrefUseCase
 import org.ireader.domain.use_cases.remote.RemoteUseCases
-import org.ireader.domain.utils.notificationManager
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -527,7 +526,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
             if (state != null && mediaSession.controller.metadata != null) {
                 scope.launch {
-                    notificationManager.notify(
+                    NotificationManagerCompat.from(applicationContext).notify(
                         Notifications.ID_TTS,
                         ttsNotificationBuilder.buildTTSNotification(mediaSession).build()
                     )

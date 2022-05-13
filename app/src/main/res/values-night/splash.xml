@@ -2,8 +2,8 @@
     <!-- Base application theme. -->
     <style name="Theme.ISplash" parent="Theme.SplashScreen">
 
-        <item name="windowSplashScreenBackground">@color/black_900</item>
-        <item name="windowSplashScreenIconBackgroundColor">@color/black_900</item>
+        <item name="windowSplashScreenBackground">#FF000000</item>
+        <item name="windowSplashScreenIconBackgroundColor">#FF000000</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_night</item>
 
         <item name="postSplashScreenTheme">@style/Theme.Infinity</item>

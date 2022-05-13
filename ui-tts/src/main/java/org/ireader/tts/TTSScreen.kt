@@ -234,7 +234,7 @@ fun TTSScreen(
                                         maxLine = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
-                                    SuperSmallTextComposable(text = UiText.DynamicString("${vm.currentReadingParagraph + 1}/${vm.ttsContent?.value?.size ?: 0L}"))
+                                    SuperSmallTextComposable(text = "${vm.currentReadingParagraph + 1}/${vm.ttsContent?.value?.size ?: 0L}")
                                 }
                                 HorizontalPager(
                                     modifier = Modifier.weight(6f), count = chapter.content.size,

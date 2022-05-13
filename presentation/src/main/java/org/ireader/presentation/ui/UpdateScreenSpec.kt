@@ -17,7 +17,7 @@ import org.ireader.updates.UpdateScreen
 import org.ireader.updates.viewmodel.UpdatesViewModel
 
 object UpdateScreenSpec : BottomNavScreenSpec {
-    override val icon: ImageVector = Icons.Default.NewReleases
+    override val icon: ImageVector = Icons.Filled.NewReleases
 
     override val label: Int = R.string.updates_screen_label
     override val navHostRoute: String = "updates"

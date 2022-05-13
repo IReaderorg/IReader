@@ -87,7 +87,7 @@ fun LinearListDisplay(
     LazyColumn(modifier = Modifier.fillMaxSize(), state = scrollState) {
         items(count = books.size, key = { index ->
             books[index].id
-        }) { index ->
+        }, contentType = { "books"  }) { index ->
             onEndReach(index)
             LinearBookItem(
                 title = books[index].title,

@@ -14,7 +14,7 @@ import org.ireader.sources.extension.ExtensionScreen
 import org.ireader.sources.extension.ExtensionViewModel
 
 object ExtensionScreenSpec : BottomNavScreenSpec {
-    override val icon: ImageVector = Icons.Default.Explore
+    override val icon: ImageVector = Icons.Filled.Explore
     override val label: Int = R.string.explore_screen_label
     override val navHostRoute: String = "explore"
 
@@ -28,20 +28,23 @@ object ExtensionScreenSpec : BottomNavScreenSpec {
         navController: NavController,
         navBackStackEntry: NavBackStackEntry,
     ) {
-        val viewModel: ExtensionViewModel = hiltViewModel()
+        val vm: ExtensionViewModel = hiltViewModel()
         ExtensionScreen(
-            viewModel = viewModel,
+            viewModel = vm,
             onClickCatalog = {
+                if (vm.uiPreferences.incognitoMode().get()) {
+                    vm.uiPreferences.lastUsedSource().set(it.sourceId)
+                }
                 navController.navigate(
                     ExploreScreenSpec.buildRoute(
                         sourceId = it.sourceId,
                     )
                 )
             },
-            onRefreshCatalogs = { viewModel.refreshCatalogs() },
-            onClickInstall = { viewModel.installCatalog(it) },
-            onClickTogglePinned = { viewModel.togglePinnedCatalog(it) },
-            onClickUninstall = { viewModel.uninstallCatalog(it) },
+            onRefreshCatalogs = { vm.refreshCatalogs() },
+            onClickInstall = { vm.installCatalog(it) },
+            onClickTogglePinned = { vm.togglePinnedCatalog(it) },
+            onClickUninstall = { vm.uninstallCatalog(it) },
             onSearchNavigate = {
                 navController.navigate(
                     GlobalSearchScreenSpec.navHostRoute

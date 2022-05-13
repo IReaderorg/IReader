@@ -50,6 +50,7 @@ import kotlin.math.max
 
 @Composable
 fun CatalogItem(
+    modifier: Modifier = Modifier,
     catalog: Catalog,
     installStep: InstallStep? = null,
     onClick: (() -> Unit)? = null,
@@ -67,7 +68,7 @@ fun CatalogItem(
     }?.let { Language(it) }
 
     Layout(
-        modifier = onClick?.let { Modifier.clickable(onClick = it) } ?: Modifier,
+        modifier = onClick?.let { modifier.clickable(onClick = it) } ?: modifier,
         content = {
             CatalogPic(
                 catalog = catalog,

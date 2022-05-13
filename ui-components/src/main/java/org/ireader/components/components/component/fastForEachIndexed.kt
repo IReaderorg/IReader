@@ -1,4 +1,4 @@
-package org.ireader.core_ui.component
+package org.ireader.components.components.component
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract

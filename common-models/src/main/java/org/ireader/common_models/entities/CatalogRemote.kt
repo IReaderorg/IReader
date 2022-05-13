@@ -75,3 +75,23 @@ sealed class CatalogInstalled : CatalogLocal() {
         override val hasUpdate: Boolean = false,
     ) : CatalogInstalled()
 }
+
+enum class  SourceState {
+    Pinned,
+    UnPinned,
+    LastUsed,
+    Installed,
+    Remote,
+    Nothing
+}
+
+fun Catalog.key(state:SourceState) : String {
+    return when(state) {
+        SourceState.LastUsed -> "$sourceId-lastused"
+        SourceState.Pinned -> "$sourceId-pinned"
+        SourceState.UnPinned -> "$sourceId-unpinned"
+        SourceState.Installed -> "$sourceId-installed"
+        SourceState.Remote -> "$sourceId-remote"
+        else -> "$sourceId"
+    }
+}

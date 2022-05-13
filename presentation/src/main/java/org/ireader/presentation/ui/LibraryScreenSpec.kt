@@ -17,7 +17,7 @@ import org.ireader.domain.ui.NavigationArgs
 import org.ireader.presentation.R
 
 object LibraryScreenSpec : BottomNavScreenSpec {
-    override val icon: ImageVector = Icons.Default.Book
+    override val icon: ImageVector = Icons.Filled.Book
     override val label: Int = R.string.library_screen_label
     override val navHostRoute: String = "library"
 

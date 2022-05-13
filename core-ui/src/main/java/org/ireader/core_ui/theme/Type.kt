@@ -78,22 +78,23 @@ val comfortaa = FontFamily(
 
 // Set of Material typography styles to start with
 val Typography = androidx.compose.material3.Typography(
-    bodyLarge = TextStyle(fontFamily = sourceSansPro),
-    bodyMedium = TextStyle(fontFamily = sourceSansPro),
-    bodySmall = TextStyle(fontFamily = sourceSansPro),
-    displayLarge = TextStyle(fontFamily = sourceSansPro),
-    displayMedium = TextStyle(fontFamily = sourceSansPro),
-    displaySmall = TextStyle(fontFamily = sourceSansPro),
-    headlineLarge = TextStyle(fontFamily = sourceSansPro),
-    headlineMedium = TextStyle(fontFamily = sourceSansPro),
-    headlineSmall = TextStyle(fontFamily = sourceSansPro),
-    labelLarge = TextStyle(fontFamily = sourceSansPro),
-    labelMedium = TextStyle(fontFamily = sourceSansPro),
-    labelSmall = TextStyle(fontFamily = sourceSansPro),
-    titleLarge = TextStyle(fontFamily = sourceSansPro),
-    titleMedium = TextStyle(fontFamily = sourceSansPro),
-    titleSmall = TextStyle(fontFamily = sourceSansPro),
+    displayLarge = TextStyle(fontFamily = sourceSansPro, fontWeight = FontWeight.W700),
+    displayMedium = TextStyle(fontFamily = sourceSansPro, fontWeight = FontWeight.W700),
+    displaySmall = TextStyle(fontFamily = sourceSansPro, fontWeight = FontWeight.W700),
+    headlineLarge = TextStyle(fontFamily = sourceSansPro, fontWeight = FontWeight.W700),
+    headlineMedium = TextStyle(fontFamily = sourceSansPro, fontWeight = FontWeight.W700),
+    headlineSmall = TextStyle(fontFamily = sourceSansPro, fontWeight = FontWeight.W700),
+    titleLarge = TextStyle(fontFamily = sourceSansPro, fontWeight = FontWeight.W700),
+    titleMedium = TextStyle(fontFamily = sourceSansPro, fontWeight = FontWeight.W700),
+    titleSmall = TextStyle(fontFamily = sourceSansPro, fontWeight = FontWeight.W700),
+    labelLarge = TextStyle(fontFamily = sourceSansPro, fontWeight = FontWeight.W600),
+    labelMedium = TextStyle(fontFamily = sourceSansPro, fontWeight = FontWeight.W500),
+    labelSmall = TextStyle(fontFamily = sourceSansPro, fontWeight = FontWeight.W500),
+    bodyLarge = TextStyle(fontFamily = sourceSansPro, fontWeight = FontWeight.W500),
+    bodyMedium = TextStyle(fontFamily = sourceSansPro, fontWeight = FontWeight.W500),
+    bodySmall = TextStyle(fontFamily = sourceSansPro, fontWeight = FontWeight.W500),
 )
+
 val fonts = listOf<FontType>(
     FontType.Poppins,
     FontType.SourceSansPro,

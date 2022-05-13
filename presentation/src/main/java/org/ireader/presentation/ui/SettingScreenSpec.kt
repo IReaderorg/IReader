@@ -1,7 +1,7 @@
 package org.ireader.presentation.ui
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalUriHandler
@@ -16,9 +16,9 @@ import org.ireader.settings.setting.MainSettingScreenViewModel
 import org.ireader.settings.setting.SettingScreen
 
 object SettingScreenSpec : BottomNavScreenSpec {
-    override val icon: ImageVector = Icons.Default.Settings
-    override val label: Int = R.string.setting_screen_label
-    override val navHostRoute: String = "setting"
+    override val icon: ImageVector = Icons.Filled.MoreHoriz
+    override val label: Int = R.string.more
+    override val navHostRoute: String = "more"
 
     override val arguments: List<NamedNavArgument> = listOf(
         NavigationArgs.showBottomNav

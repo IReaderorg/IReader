@@ -45,7 +45,7 @@ fun CompactGridLayoutComposable(
             content = {
                 items(count = books.size, key = { index ->
                     books[index].id
-                }) { index ->
+                }, contentType = { "books"  }) { index ->
                     onEndReach(index)
                     BookImage(
                         onClick = { onClick(books[index]) },

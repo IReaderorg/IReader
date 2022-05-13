@@ -21,7 +21,7 @@ import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.components.reusable_composable.TopAppBarBackButton
 import org.ireader.components.text_related.TextSection
-import org.ireader.core_ui.component.PreferenceRow
+import org.ireader.components.components.component.PreferenceRow
 import org.ireader.settings.setting.SettingViewModel
 import org.ireader.ui_settings.R
 

@@ -1,10 +1,13 @@
 package org.ireader.sources.extension
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.TabRowDefaults
+import androidx.compose.material.Text
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
@@ -16,22 +19,24 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.unit.dp
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.ireader.common_models.entities.Catalog
-import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.common_resources.UiEvent
 import org.ireader.common_resources.UiText
+import org.ireader.components.components.component.pagerTabIndicatorOffset
 import org.ireader.components.reusable_composable.MidSizeTextComposable
-import org.ireader.core_ui.component.pagerTabIndicatorOffset
 import org.ireader.core_ui.theme.AppColors
+import org.ireader.core_ui.utils.horizontalPadding
 import org.ireader.sources.extension.composables.RemoteSourcesScreen
 import org.ireader.sources.extension.composables.UserSourcesScreen
 import org.ireader.ui_sources.R
@@ -46,7 +51,7 @@ fun ExtensionScreen(
     onClickCatalog: (Catalog) -> Unit,
     onClickInstall: (Catalog) -> Unit,
     onClickUninstall: (Catalog) -> Unit,
-    onClickTogglePinned: (CatalogLocal) -> Unit,
+    onClickTogglePinned: (Catalog) -> Unit,
     onSearchNavigate: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -79,6 +84,7 @@ fun ExtensionScreen(
     }
     val focusManager = LocalFocusManager.current
     androidx.compose.material3.Scaffold(
+        modifier = Modifier.padding(bottom = 35.dp),
         topBar = {
             ExtensionScreenTopAppBar(
                 searchMode = searchMode,
@@ -117,16 +123,18 @@ fun ExtensionScreen(
             )
         } },
     ) { padding ->
-        // UserSourcesScreen(viewModel, navController)
 
-        Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+        Column(modifier = Modifier
+            .fillMaxSize()
+            .padding(padding)) {
             TabRow(
                 selectedTabIndex = pagerState.currentPage,
                 containerColor = AppColors.current.bars,
                 contentColor = AppColors.current.onBars,
                 indicator = { tabPositions ->
                     TabRowDefaults.Indicator(
-                        Modifier.pagerTabIndicatorOffset(pagerState, tabPositions)
+                        Modifier.pagerTabIndicatorOffset(pagerState, tabPositions),
+                        color = MaterialTheme.colorScheme.primary,
                     )
                 },
             ) {
@@ -171,4 +179,24 @@ fun ExtensionScreen(
             }
 
     }
+}
+@Composable
+fun SourceHeader(
+    modifier: Modifier = Modifier,
+    language: String,
+) {
+    val context = LocalContext.current
+    Box(
+        modifier = Modifier.fillMaxWidth(),
+        contentAlignment = Alignment.CenterStart
+    ) {
+        Text(
+            text = LocaleHelper.getSourceDisplayName(language, context),
+            modifier = modifier
+                .padding(horizontal = horizontalPadding, vertical = 8.dp),
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+    }
+
 }
