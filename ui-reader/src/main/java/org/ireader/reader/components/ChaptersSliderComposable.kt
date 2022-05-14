@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Slider
 import androidx.compose.material.SliderDefaults
@@ -19,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import org.ireader.common_models.entities.Chapter
+import org.ireader.components.reusable_composable.AppIcon
 
 @Composable
 fun ChaptersSliderComposable(
@@ -34,20 +34,21 @@ fun ChaptersSliderComposable(
 ) {
     Column(modifier = modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
-            text = if (chapters.isNotEmpty() && currentChapterIndex != -1) chapters[currentChapterIndex].title else currentChapter.title,
+            text = if (chapters.isNotEmpty() && currentChapterIndex != -1) chapters[currentChapterIndex].name else currentChapter.name,
             color = MaterialTheme.colorScheme.onBackground,
             style = MaterialTheme.typography.bodyMedium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
         Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            
             IconButton(
                 modifier = modifier.weight(1f),
                 onClick = {
                     onPrev()
-                }
+                },
             ) {
-                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Previous Chapter")
+                AppIcon(imageVector = Icons.Default.ArrowBack, contentDescription = "Previous Chapter")
             }
             Slider(
                 modifier = Modifier
@@ -72,7 +73,7 @@ fun ChaptersSliderComposable(
             IconButton(modifier = modifier.weight(1f), onClick = {
                 onNext()
             }) {
-                Icon(imageVector = Icons.Default.ArrowForward, contentDescription = "Next Chapter")
+                AppIcon(imageVector = Icons.Default.ArrowForward, contentDescription = "Next Chapter")
             }
         }
     }

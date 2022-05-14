@@ -444,9 +444,9 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
                     putText(MediaMetadata.METADATA_KEY_AUTHOR, book.author)
                 }
                 if (chapter != null) {
-                    putText(CHAPTER_TITLE, chapter.title)
+                    putText(CHAPTER_TITLE, chapter.name)
                     putLong(CHAPTER_ID, chapter.id)
-                    putText(MediaMetadata.METADATA_KEY_DISPLAY_TITLE, chapter.title)
+                    putText(MediaMetadata.METADATA_KEY_DISPLAY_TITLE, chapter.name)
                 }
                 putLong(IS_LOADING, if (isLoading) 1L else 0L)
                 putLong(ERROR, if (error) 1L else 0L)
@@ -944,8 +944,8 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
     }
 
     fun getChapterIndex(chapter: Chapter, chapters: List<Chapter>): Int {
-        val chaptersIds = chapters.map { it.title }
-        val index = chaptersIds.indexOfFirst { it == chapter.title }
+        val chaptersIds = chapters.map { it.name }
+        val index = chaptersIds.indexOfFirst { it == chapter.name }
 
         return if (index != -1) {
             index

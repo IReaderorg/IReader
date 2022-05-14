@@ -1,19 +1,43 @@
 package org.ireader.presentation.ui
 
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetState
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import org.ireader.about.AboutSettingScreen
 import org.ireader.common_extensions.toDateTimestampString
 import org.ireader.common_resources.BuildConfig
+import org.ireader.components.components.TitleToolbar
+import org.ireader.ui_settings.R
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone
 
-object AboutInfoScreenSpec : ScreenSpec {
+object AboutScreenSpec : ScreenSpec {
 
     override val navHostRoute: String = "about_screen_route"
+    @OptIn(ExperimentalMaterialApi::class)
+    @Composable
+    override fun TopBar(
+        navController: NavController,
+        navBackStackEntry: NavBackStackEntry,
+        snackBarHostState: SnackbarHostState,
+        sheetState: ModalBottomSheetState
+    ) {
+        TitleToolbar(
+            title = stringResource(R.string.about),
+            navController = navController
+        )
+    }
+
+
 
     @OptIn(
         androidx.compose.animation.ExperimentalAnimationApi::class,
@@ -23,8 +47,12 @@ object AboutInfoScreenSpec : ScreenSpec {
     override fun Content(
         navController: NavController,
         navBackStackEntry: NavBackStackEntry,
+        snackBarHostState: SnackbarHostState,
+        scaffoldPadding:PaddingValues,
+        sheetState: ModalBottomSheetState
     ) {
         AboutSettingScreen(
+            modifier = Modifier.padding(scaffoldPadding),
             onPopBackStack = {
                 navController.popBackStack()
             },

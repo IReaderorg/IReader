@@ -2,6 +2,7 @@ package org.ireader.domain.ui
 
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import org.ireader.common_resources.ARG_HAVE_MODAL_SHEET
 import org.ireader.common_resources.ARG_HIDE_BOTTOM_BAR
 
 object NavigationArgs {
@@ -35,6 +36,9 @@ object NavigationArgs {
     }
 
     val showBottomNav = navArgument(ARG_HIDE_BOTTOM_BAR) {
+        defaultValue = true
+    }
+    val showModalSheet = navArgument(ARG_HAVE_MODAL_SHEET) {
         defaultValue = true
     }
 }

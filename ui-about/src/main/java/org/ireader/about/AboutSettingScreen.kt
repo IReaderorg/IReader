@@ -2,15 +2,11 @@ package org.ireader.about
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Public
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -18,13 +14,9 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import org.ireader.common_resources.BuildConfig
-import org.ireader.common_resources.UiText
 import org.ireader.components.components.LogoHeader
-import org.ireader.components.components.Toolbar
 import org.ireader.components.components.component.LinkIcon
 import org.ireader.components.components.component.PreferenceRow
-import org.ireader.components.reusable_composable.BigSizeTextComposable
-import org.ireader.components.reusable_composable.TopAppBarBackButton
 import org.ireader.ui_about.R
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -35,24 +27,8 @@ fun AboutSettingScreen(
     onPopBackStack: () -> Unit
 ) {
     val uriHandler = LocalUriHandler.current
-    Scaffold(modifier = modifier.fillMaxSize(), topBar = {
-        Toolbar(
-            modifier = Modifier,
-            title = {
-                BigSizeTextComposable(
-                    text = UiText.StringResource(R.string.about),
-                    style = MaterialTheme.typography.headlineSmall
-                )
-            },
-            navigationIcon = {
-                TopAppBarBackButton(onClick = {
-                    onPopBackStack()
-                })
-            }
-        )
-    }) { padding ->
         LazyColumn(
-            modifier = Modifier.padding(padding),
+            modifier = modifier,
         ) {
             item {
                 LogoHeader()
@@ -110,6 +86,5 @@ fun AboutSettingScreen(
                 }
             }
         }
-    }
 }
 

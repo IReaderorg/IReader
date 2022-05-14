@@ -13,8 +13,8 @@ data class Chapter(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     val bookId: Long,
-    val link: String,
-    val title: String,
+    val key: String,
+    val name: String,
     val read: Boolean = false,
     val bookmark: Boolean = false,
     val progress: Int = 0,
@@ -33,9 +33,9 @@ data class Chapter(
 
 fun Chapter.toChapterInfo(): ChapterInfo {
     return ChapterInfo(
-        key = this.link,
+        key = this.key,
         scanlator = this.translator,
-        name = this.title,
+        name = this.name,
         dateUpload = this.dateUpload,
         number = this.number,
     )
@@ -43,8 +43,8 @@ fun Chapter.toChapterInfo(): ChapterInfo {
 
 fun ChapterInfo.toChapter(bookId: Long): Chapter {
     return Chapter(
-        title = name,
-        link = key,
+        name = name,
+        key = key,
         bookId = bookId,
     )
 }

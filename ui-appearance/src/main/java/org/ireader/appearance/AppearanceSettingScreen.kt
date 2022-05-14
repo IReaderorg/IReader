@@ -5,7 +5,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
@@ -20,7 +19,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,12 +28,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.ireader.common_resources.UiText
 import org.ireader.components.components.Toolbar
 import org.ireader.components.components.component.ChoicePreference
 import org.ireader.components.components.component.ColorPreference
-import org.ireader.components.reusable_composable.BigSizeTextComposable
-import org.ireader.components.reusable_composable.TopAppBarBackButton
 import org.ireader.core_ui.theme.AppColors
 import org.ireader.core_ui.theme.Theme
 import org.ireader.core_ui.theme.ThemeMode
@@ -57,82 +52,68 @@ fun AppearanceSettingScreen(
     val isLight = MaterialTheme.colorScheme.isLight()
     val themesForCurrentMode = remember(isLight) {
         if (isLight)
-        themes.filter { it.light().materialColors.isLight() == isLight }.map { it.light() }
+            themes.filter { it.light().materialColors.isLight() == isLight }.map { it.light() }
         else
             themes.filter { it.light().materialColors.isLight() != isLight }.map { it.dark() }
     }
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(), topBar = {
-            Toolbar(
-                title = {
-                    BigSizeTextComposable(text = UiText.StringResource(R.string.appearance))
-                },
-                navigationIcon = {
-                    TopAppBarBackButton() {
-                        onPopBackStack()
-                    }
+
+    LazyColumn(modifier =modifier) {
+        item {
+            ChoicePreference(
+                preference = vm.themeMode,
+                choices = mapOf(
+                    ThemeMode.System to R.string.follow_system_settings,
+                    ThemeMode.Light to R.string.light,
+                    ThemeMode.Dark to R.string.dark
+                ),
+                title = R.string.theme,
+                subtitle = null,
+                onValue = {
+                    vm.saveNightModePreferences(it)
                 }
             )
         }
-    ) { padding ->
-        LazyColumn(modifier = Modifier.padding(padding)) {
-            item {
-                ChoicePreference(
-                    preference = vm.themeMode,
-                    choices = mapOf(
-                        ThemeMode.System to R.string.follow_system_settings,
-                        ThemeMode.Light to R.string.light,
-                        ThemeMode.Dark to R.string.dark
-                    ),
-                    title = R.string.theme,
-                    subtitle = null,
-                    onValue = {
-                        vm.saveNightModePreferences(it)
-                    }
-                )
-            }
-            item {
-                Text(
-                    "Preset themes",
-                    modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 4.dp)
-                )
-            }
-            item {
-                LazyRow(modifier = Modifier.padding(horizontal = 8.dp)) {
-                    items(items = themesForCurrentMode) { theme ->
-                        ThemeItem(theme, onClick = {
-                            vm.colorTheme.value = it.id
-                            customizedColors.primaryState.value = it.materialColors.primary
-                            customizedColors.secondaryState.value = it.materialColors.secondary
-                            customizedColors.barsState.value = it.extraColors.bars
-                        })
-                    }
+        item {
+            Text(
+                "Preset themes",
+                modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 4.dp)
+            )
+        }
+        item {
+            LazyRow(modifier = Modifier.padding(horizontal = 8.dp)) {
+                items(items = themesForCurrentMode) { theme ->
+                    ThemeItem(theme, onClick = {
+                        vm.colorTheme.value = it.id
+                        customizedColors.primaryState.value = it.materialColors.primary
+                        customizedColors.secondaryState.value = it.materialColors.secondary
+                        customizedColors.barsState.value = it.extraColors.bars
+                    })
                 }
             }
-            item {
-                ColorPreference(
-                    preference = customizedColors.primaryState,
-                    title = "Color primary",
-                    subtitle = "Displayed most frequently across your app",
-                    unsetColor = MaterialTheme.colorScheme.primary
-                )
-            }
-            item {
-                ColorPreference(
-                    preference = customizedColors.secondaryState,
-                    title = "Color secondary",
-                    subtitle = "Accents select parts of the UI",
-                    unsetColor = MaterialTheme.colorScheme.secondary
-                )
-            }
-            item {
-                ColorPreference(
-                    preference = customizedColors.barsState,
-                    title = "Toolbar color",
-                    unsetColor = AppColors.current.bars
-                )
-            }
+        }
+        item {
+            ColorPreference(
+                preference = customizedColors.primaryState,
+                title = "Color primary",
+                subtitle = "Displayed most frequently across your app",
+                unsetColor = MaterialTheme.colorScheme.primary
+            )
+        }
+        item {
+            ColorPreference(
+                preference = customizedColors.secondaryState,
+                title = "Color secondary",
+                subtitle = "Accents select parts of the UI",
+                unsetColor = MaterialTheme.colorScheme.secondary
+            )
+        }
+        item {
+            ColorPreference(
+                preference = customizedColors.barsState,
+                title = "Toolbar color",
+                unsetColor = AppColors.current.bars
+            )
         }
     }
 }

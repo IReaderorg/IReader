@@ -29,6 +29,7 @@ interface CatalogsState {
     val userSources: List<SourceUiModel>
     val remoteSources: List<SourceUiModel>
     var searchQuery: String?
+    var currentPagerPage: Int
 }
 
 fun CatalogsState(): CatalogsState {
@@ -37,6 +38,9 @@ fun CatalogsState(): CatalogsState {
 
 @Singleton
 class CatalogsStateImpl @Inject constructor() : CatalogsState {
+
+    override var currentPagerPage by mutableStateOf(0)
+
     override var pinnedCatalogs by mutableStateOf(emptyList<CatalogLocal>())
     override var unpinnedCatalogs by mutableStateOf(emptyList<CatalogLocal>())
     override var lastReadCatalog: Long? by mutableStateOf(null)

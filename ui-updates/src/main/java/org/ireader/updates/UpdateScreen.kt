@@ -30,18 +30,13 @@ import org.ireader.core_ui.ui.EmptyScreen
 import org.ireader.core_ui.ui.LoadingScreen
 import org.ireader.ui_updates.R
 import org.ireader.updates.component.UpdatesContent
-import org.ireader.updates.component.UpdatesToolbar
 import org.ireader.updates.viewmodel.UpdateState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UpdateScreen(
+    modifier: Modifier = Modifier,
     state: UpdateState,
-    onAppbarCancelSelection: () -> Unit,
-    onAppbarSelectAll: () -> Unit,
-    onAppbarFilipSelection: () -> Unit,
-    onAppbarRefresh: () -> Unit,
-    onAppbarDeleteAll: () -> Unit,
     onUpdate: (UpdateWithInfo) -> Unit,
     onLongUpdate: (UpdateWithInfo) -> Unit,
     onCoverUpdate: (UpdateWithInfo) -> Unit,
@@ -51,44 +46,31 @@ fun UpdateScreen(
     onBottomBarDelete: () -> Unit,
     onBottomBookMark: () -> Unit,
 ) {
-    androidx.compose.material3.Scaffold(
-        topBar = {
-            UpdatesToolbar(
-                state = state,
-                onClickCancelSelection = onAppbarCancelSelection,
-                onClickSelectAll = onAppbarSelectAll,
-                onClickFlipSelection = onAppbarFilipSelection,
-                onClickRefresh = onAppbarRefresh,
-                onClickDelete = onAppbarDeleteAll
-            )
-        }
-    ) { padding ->
-        Box(
-            Modifier
-                .fillMaxSize()
-                .padding(padding)) {
-            Crossfade(targetState = Pair(state.isLoading, state.isEmpty)) { (isLoading, isEmpty) ->
-                when {
-                    isLoading -> LoadingScreen()
-                    isEmpty -> EmptyScreen(text = UiText.StringResource(R.string.no_new_update_available))
-                    else -> UpdatesContent(
-                        state = state,
-                        onClickItem = onUpdate,
-                        onLongClickItem = onLongUpdate,
-                        onClickCover = onCoverUpdate,
-                        onClickDownload = onDownloadUpdate
+    Box(
+       modifier =  modifier.fillMaxSize()
+
+    ) {
+        Crossfade(targetState = Pair(state.isLoading, state.isEmpty)) { (isLoading, isEmpty) ->
+            when {
+                isLoading -> LoadingScreen()
+                isEmpty -> EmptyScreen(text = UiText.StringResource(R.string.no_new_update_available))
+                else -> UpdatesContent(
+                    state = state,
+                    onClickItem = onUpdate,
+                    onLongClickItem = onLongUpdate,
+                    onClickCover = onCoverUpdate,
+                    onClickDownload = onDownloadUpdate
+                )
+            }
+            when {
+                state.hasSelection -> {
+                    UpdateEditBar(
+                        state,
+                        onBottomBarDownload,
+                        onBottomBarMarkAsRead,
+                        onBottomBarDelete,
+                        onBottomBookMark
                     )
-                }
-                when {
-                    state.hasSelection -> {
-                        UpdateEditBar(
-                            state,
-                            onBottomBarDownload,
-                            onBottomBarMarkAsRead,
-                            onBottomBarDelete,
-                            onBottomBookMark
-                        )
-                    }
                 }
             }
         }
@@ -123,30 +105,31 @@ private fun BoxScope.UpdateEditBar(
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (state.selection.any { selectionId ->
-                selectionId in state.updates.values.flatten().filter { !it.downloaded }.map { it.id }
-            }
+                    selectionId in state.updates.values.flatten().filter { !it.downloaded }
+                        .map { it.id }
+                }
             ) {
                 AppIconButton(
                     imageVector = Icons.Default.GetApp,
-                   contentDescription = stringResource( R.string.download),
+                    contentDescription = stringResource(R.string.download),
                     onClick = onBottomBarDownload
                 )
             }
             AppIconButton(
                 imageVector = Icons.Default.BookmarkBorder,
-               contentDescription = stringResource( R.string.bookmark),
+                contentDescription = stringResource(R.string.bookmark),
                 onClick = onBottomBookMark
             )
 
             AppIconButton(
                 imageVector = Icons.Default.Done,
-               contentDescription = stringResource( R.string.mark_as_read),
+                contentDescription = stringResource(R.string.mark_as_read),
                 onClick = onBottomBarMarkAsRead
             )
 
             AppIconButton(
                 imageVector = Icons.Default.Delete,
-               contentDescription = stringResource( R.string.delete_update),
+                contentDescription = stringResource(R.string.delete_update),
                 onClick = onBottomBarDelete
             )
         }

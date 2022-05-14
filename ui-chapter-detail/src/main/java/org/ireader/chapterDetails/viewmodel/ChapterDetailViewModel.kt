@@ -77,7 +77,7 @@ class ChapterDetailViewModel @Inject constructor(
             }
 
             fun extractInt(s: Chapter): Int {
-                val num = s.title.replace("\\D".toRegex(), "")
+                val num = s.name.replace("\\D".toRegex(), "")
                 // return 0 if no digits found
                 return if (num.isEmpty()) 0 else Integer.parseInt(num)
             }

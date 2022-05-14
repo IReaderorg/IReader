@@ -22,7 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import org.ireader.common_models.entities.Chapter
-import org.ireader.common_resources.UiText
 import org.ireader.components.components.ChapterListItemComposable
 import org.ireader.components.list.scrollbars.LazyColumnScrollbar
 import org.ireader.components.reusable_composable.AppIconButton
@@ -49,7 +48,7 @@ fun ReaderScreenDrawer(
     ) {
         Spacer(modifier = modifier.height(5.dp))
         Box(modifier = Modifier.fillMaxWidth()) {
-            BigSizeTextComposable(text = UiText.StringResource(R.string.content), modifier = Modifier.align(Alignment.Center))
+            BigSizeTextComposable(text =stringResource(R.string.content), modifier = Modifier.align(Alignment.Center))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.End,

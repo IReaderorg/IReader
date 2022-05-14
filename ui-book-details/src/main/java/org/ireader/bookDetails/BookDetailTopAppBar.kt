@@ -45,7 +45,7 @@ fun BookDetailTopAppBar(
                     tint = MaterialTheme.colorScheme.onBackground,
                 )
             }
-            if (source is CatalogSource && !source.getCommands().emptyCommands()) {
+            if (source is CatalogSource && source.getCommands().any { it !is Command.Fetchers }) {
                 IconButton(onClick = {
                     onCommand()
                 }) {

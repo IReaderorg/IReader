@@ -7,6 +7,8 @@ sealed class Command<V>(val name: String, val initialValue: V) {
      */
     var value = initialValue
 
+    open class Fetchers(open val url: String = "", open val html: String = "") : Command<String>(url, html)
+
     /**
      * Whether this command has been updated. If this method returns true, the catalog won't receive
      * this command when performing an operation.
@@ -16,15 +18,15 @@ sealed class Command<V>(val name: String, val initialValue: V) {
     }
 
     object Detail {
-        open class Fetch(val url: String = "",val html: String = "") : Command<String>(url, html)
+        open class Fetch(override val url: String = "", override val html: String = "") : Fetchers(url, html)
     }
 
     object Content {
-        open class Fetch(val url: String = "",val  html: String = "") : Command<String>(url, html)
+        open class Fetch(override val url: String = "", override val  html: String = "") : Fetchers(url, html)
     }
 
     object Explore {
-        open class Fetch(val url: String = "",val  html: String = "") : Command<String>(url, html)
+        open class Fetch(override val url: String = "", override val  html: String = "") : Fetchers(url, html)
     }
 
     object Chapter {
@@ -36,7 +38,6 @@ sealed class Command<V>(val name: String, val initialValue: V) {
             value: Int = 0
         ) : Command<Int>(name, value)
 
-        open class Fetch(val url: String = "", val html: String = "") :
-            Command<String>(url, html)
+        open class Fetch(override val url: String = "", override val html: String = "") : Fetchers(url, html)
     }
 }

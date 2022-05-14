@@ -20,7 +20,6 @@ import androidx.compose.ui.res.stringResource
 import org.ireader.common_models.DisplayMode
 import org.ireader.common_models.LayoutType
 import org.ireader.common_models.layouts
-import org.ireader.common_resources.UiText
 import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.AppTextField
@@ -52,7 +51,7 @@ fun BrowseTopAppBar(
     Toolbar(
         title = {
             if (!state.isSearchModeEnable) {
-                BigSizeTextComposable(text = UiText.DynamicString(source.name))
+                BigSizeTextComposable(text = source.name)
             } else {
                 AppTextField(
                     query = state.searchQuery ?: "",

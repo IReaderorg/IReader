@@ -1,19 +1,25 @@
 package org.ireader.presentation.ui
 
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.NewReleases
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
-import com.google.accompanist.pager.ExperimentalPagerApi
 import org.ireader.common_extensions.async.viewModelIOCoroutine
 import org.ireader.common_models.entities.UpdateWithInfo.Companion.toUpdate
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.presentation.R
 import org.ireader.updates.UpdateScreen
+import org.ireader.updates.component.UpdatesToolbar
 import org.ireader.updates.viewmodel.UpdatesViewModel
 
 object UpdateScreenSpec : BottomNavScreenSpec {
@@ -22,32 +28,31 @@ object UpdateScreenSpec : BottomNavScreenSpec {
     override val label: Int = R.string.updates_screen_label
     override val navHostRoute: String = "updates"
 
+
     override val arguments: List<NamedNavArgument> = listOf(
         NavigationArgs.showBottomNav
     )
-
-    @OptIn(
-        ExperimentalPagerApi::class, androidx.compose.animation.ExperimentalAnimationApi::class,
-        androidx.compose.material.ExperimentalMaterialApi::class
-    )
+    @ExperimentalMaterialApi
     @Composable
-    override fun Content(
+    override fun TopBar(
         navController: NavController,
         navBackStackEntry: NavBackStackEntry,
+        snackBarHostState: SnackbarHostState,
+        sheetState: ModalBottomSheetState
     ) {
-        val vm: UpdatesViewModel = hiltViewModel()
-        UpdateScreen(
+        val vm: UpdatesViewModel = hiltViewModel(navBackStackEntry)
+        UpdatesToolbar(
             state = vm,
-            onAppbarCancelSelection = {
+            onClickCancelSelection = {
                 vm.selection.clear()
             },
-            onAppbarSelectAll = {
+            onClickSelectAll = {
                 val ids: List<Long> =
                     (vm.selection + vm.updates.values.flatMap { list -> list.map { it.id } }).distinct()
                 vm.selection.clear()
                 vm.selection.addAll(ids)
             },
-            onAppbarFilipSelection = {
+            onClickFlipSelection = {
                 val ids: List<Long> =
                     (
                         vm.updates.flatMap { update -> update.value.map { it.id } }
@@ -56,14 +61,33 @@ object UpdateScreenSpec : BottomNavScreenSpec {
                 vm.selection.clear()
                 vm.selection.addAll(ids)
             },
-            onAppbarRefresh = {
+            onClickRefresh = {
                 vm.refreshUpdate()
             },
-            onAppbarDeleteAll = {
+            onClickDelete = {
                 vm.viewModelIOCoroutine {
                     vm.updateUseCases.deleteAllUpdates()
                 }
-            },
+            }
+        )
+    }
+
+    @OptIn(
+        androidx.compose.animation.ExperimentalAnimationApi::class,
+        androidx.compose.material.ExperimentalMaterialApi::class
+    )
+    @Composable
+    override fun Content(
+        navController: NavController,
+        navBackStackEntry: NavBackStackEntry,
+        snackBarHostState: SnackbarHostState,
+        scaffoldPadding:PaddingValues,
+        sheetState: ModalBottomSheetState
+    ) {
+        val vm: UpdatesViewModel = hiltViewModel(navBackStackEntry)
+        UpdateScreen(
+            modifier = Modifier.padding(scaffoldPadding),
+            state = vm,
             onUpdate = { update ->
                 if (vm.hasSelection) {
                     vm.addUpdate(update)

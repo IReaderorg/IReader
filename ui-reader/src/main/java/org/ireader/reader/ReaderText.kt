@@ -15,10 +15,10 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
-import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -137,6 +137,7 @@ fun ReaderText(
                                         textAlign = mapTextAlign(vm.textAlignment),
                                         color = vm.textColor,
                                         lineHeight = vm.lineHeight.sp,
+                                      //  style = MaterialTheme.typography.
                                     )
                                 }
                             }

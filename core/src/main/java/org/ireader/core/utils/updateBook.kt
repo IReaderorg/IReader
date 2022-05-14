@@ -17,7 +17,7 @@ fun updateBook(newBook: Book, oldBook: Book, libraryCovers: LibraryCovers): Book
         sourceId = oldBook.sourceId,
         customCover = oldBook.customCover,
         flags = oldBook.flags,
-        link = newBook.link.ifBlank { oldBook.link },
+        key = newBook.key.ifBlank { oldBook.key },
         dataAdded = oldBook.dataAdded,
         lastUpdated = Calendar.getInstance().timeInMillis,
         favorite = oldBook.favorite,

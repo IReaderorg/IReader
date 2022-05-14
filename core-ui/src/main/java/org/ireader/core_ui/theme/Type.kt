@@ -9,16 +9,10 @@ import org.ireader.core_ui.R
 // Set of Material typography styles to start with
 val poppins = FontFamily(
     Font(R.font.poppins_regular, weight = FontWeight.Normal),
-    Font(R.font.poppins_semibold, weight = FontWeight.SemiBold)
 )
 val sourceSansPro = FontFamily(
     listOf(
-        Font(R.font.source_sans_pro_w200_extra_light, weight = FontWeight.ExtraLight),
-        Font(R.font.source_sans_pro_lignt, weight = FontWeight.Light),
         Font(R.font.source_sans_pro_resgular, weight = FontWeight.Normal),
-        Font(R.font.source_sans_pro_semi_bold, weight = FontWeight.SemiBold),
-        Font(R.font.source_sans_pro_bold_700, weight = FontWeight.Bold),
-        Font(R.font.source_sans_pro_900, weight = FontWeight.ExtraBold),
     )
 )
 val supermercadoOne = FontFamily(
@@ -69,9 +63,6 @@ val roboto_serif = FontFamily(
 val comfortaa = FontFamily(
     listOf(
         Font(R.font.comfortaa_font_regular, weight = FontWeight.Normal),
-        Font(R.font.comfortaa_font_regular, weight = FontWeight.Medium),
-        Font(R.font.comfortaa_font_regular, weight = FontWeight.W400),
-        Font(R.font.comfortaa_font_regular, weight = FontWeight.SemiBold),
     )
 )
 

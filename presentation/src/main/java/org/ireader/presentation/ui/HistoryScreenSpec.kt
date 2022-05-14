@@ -1,8 +1,14 @@
 package org.ireader.presentation.ui
 
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
@@ -12,6 +18,7 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import org.ireader.common_extensions.async.viewModelIOCoroutine
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.history.HistoryScreen
+import org.ireader.history.HistoryTopAppBar
 import org.ireader.history.viewmodel.HistoryViewModel
 import org.ireader.presentation.R
 
@@ -23,6 +30,27 @@ object HistoryScreenSpec : BottomNavScreenSpec {
     override val arguments: List<NamedNavArgument> = listOf(
         NavigationArgs.showBottomNav
     )
+    @OptIn(ExperimentalMaterialApi::class)
+    @Composable
+    override fun TopBar(
+        navController: NavController,
+        navBackStackEntry: NavBackStackEntry,
+        snackBarHostState: SnackbarHostState,
+        sheetState: ModalBottomSheetState
+    ) {
+        val vm: HistoryViewModel = hiltViewModel(navBackStackEntry)
+        HistoryTopAppBar(
+            vm = vm,
+            getHistories = {
+                vm.getHistoryBooks()
+            },
+            onDeleteAll = {
+                vm.viewModelIOCoroutine {
+                    vm.historyUseCase.deleteAllHistories()
+                }
+            },
+        )
+    }
 
     @OptIn(
         ExperimentalPagerApi::class, androidx.compose.animation.ExperimentalAnimationApi::class,
@@ -32,9 +60,13 @@ object HistoryScreenSpec : BottomNavScreenSpec {
     override fun Content(
         navController: NavController,
         navBackStackEntry: NavBackStackEntry,
+        snackBarHostState: SnackbarHostState,
+        scaffoldPadding:PaddingValues,
+        sheetState: ModalBottomSheetState
     ) {
-        val vm: HistoryViewModel = hiltViewModel()
+        val vm: HistoryViewModel = hiltViewModel(navBackStackEntry)
         HistoryScreen(
+            modifier = Modifier.padding(scaffoldPadding),
             onHistory = { history ->
                 navController.navigate(
                     ReaderScreenSpec.buildRoute(
@@ -57,14 +89,6 @@ object HistoryScreenSpec : BottomNavScreenSpec {
                 vm.viewModelIOCoroutine {
                     vm.historyUseCase.deleteHistory(history.chapterId)
                 }
-            },
-            onAppbarDeleteAll = {
-                vm.viewModelIOCoroutine {
-                    vm.historyUseCase.deleteAllHistories()
-                }
-            },
-            getHistories = {
-                vm.getHistoryBooks()
             },
             state = vm,
             onBookCover = { history ->

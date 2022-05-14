@@ -152,7 +152,7 @@ class BookDetailViewModel @Inject constructor(
                             chapterState.chapters,
                             result
                         ) {
-                            it.link
+                            it.key
                         }
                     this@BookDetailViewModel.chapters = uniqueList
                     if (uniqueList.isNotEmpty()) {

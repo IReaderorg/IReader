@@ -10,7 +10,6 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
-import org.ireader.common_resources.UiText
 import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.AppTextField
@@ -30,7 +29,7 @@ fun HistoryTopAppBar(
     Toolbar(
         title = {
             if (!vm.searchMode) {
-                BigSizeTextComposable(text = UiText.StringResource(R.string.history_screen_label))
+                BigSizeTextComposable(text = stringResource(R.string.history_screen_label))
             } else {
                 AppTextField(
                     query = vm.searchQuery,

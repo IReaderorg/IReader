@@ -23,7 +23,6 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import kotlinx.coroutines.launch
 import org.ireader.app.viewmodel.LibraryState
-import org.ireader.common_resources.UiText
 import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.AppTextField
@@ -85,7 +84,7 @@ private fun RegularTopBar(
     Toolbar(
         title = {
             if (!vm.inSearchMode) {
-                BigSizeTextComposable(text = UiText.StringResource(R.string.library))
+                BigSizeTextComposable(text = stringResource(R.string.library))
             } else {
                 AppTextField(
                     query = vm.searchQuery,
@@ -166,7 +165,7 @@ private fun EditModeTopAppBar(
     onClickInvertSelection: () -> Unit,
 ) {
     Toolbar(
-        title = { BigSizeTextComposable(text = UiText.DynamicString("$selectionSize")) },
+        title = { BigSizeTextComposable(text ="$selectionSize") },
         navigationIcon = {
             IconButton(onClick = onClickCancelSelection) {
                 Icon(Icons.Default.Close, contentDescription = null)

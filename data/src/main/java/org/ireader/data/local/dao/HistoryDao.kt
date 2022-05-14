@@ -17,7 +17,7 @@ interface HistoryDao : BaseDao<org.ireader.common_models.entities.History> {
     suspend fun findHistories(): List<org.ireader.common_models.entities.History>
 
     @Query(
-        """SELECT history.*, library.title as bookTitle, library.sourceId, library.cover, library.favorite, chapter.title as chapterTitle,
+        """SELECT history.*, library.title as bookTitle, library.sourceId, library.cover, library.favorite, chapter.name as chapterTitle,
     date(ROUND(history.readAt / 1000), 'unixepoch', 'localtime') AS date,chapter.number as chapterNumber
     FROM history
     JOIN library ON history.bookId = library.id

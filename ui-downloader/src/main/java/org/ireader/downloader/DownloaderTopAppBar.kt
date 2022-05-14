@@ -131,7 +131,7 @@ private fun EditModeTopAppBar(
     onDelete: () -> Unit
 ) {
     Toolbar(
-        title = { BigSizeTextComposable(text = UiText.StringResource(selectionSize)) },
+        title = { BigSizeTextComposable(text = stringResource(selectionSize)) },
         navigationIcon = {
             IconButton(onClick = onClickCancelSelection) {
                 Icon(Icons.Default.Close, contentDescription = null)

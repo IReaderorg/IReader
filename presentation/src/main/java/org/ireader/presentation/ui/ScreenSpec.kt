@@ -1,14 +1,14 @@
 package org.ireader.presentation.ui
 
-import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetState
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavDeepLink
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.compose.composable
 
 @OptIn(ExperimentalMaterialApi::class)
 sealed interface ScreenSpec {
@@ -19,9 +19,9 @@ sealed interface ScreenSpec {
             UpdateScreenSpec,
             HistoryScreenSpec,
             ExtensionScreenSpec,
-            SettingScreenSpec,
+            MoreScreenSpec,
             AppearanceScreenSpec,
-            AboutInfoScreenSpec,
+            AboutScreenSpec,
             AdvanceSettingSpec,
             BookDetailScreenSpec,
             DownloaderScreenSpec,
@@ -31,7 +31,8 @@ sealed interface ScreenSpec {
             ExploreScreenSpec,
             GlobalSearchScreenSpec,
             TTSScreenSpec,
-            BackupAndRestoreScreenSpec
+            BackupAndRestoreScreenSpec,
+            SettingScreenSpec
         ).associateBy { it.navHostRoute }
     }
 
@@ -40,23 +41,32 @@ sealed interface ScreenSpec {
     val arguments: List<NamedNavArgument> get() = emptyList()
 
     val deepLinks: List<NavDeepLink> get() = emptyList()
-
-    @OptIn(ExperimentalAnimationApi::class)
-    fun NavGraphBuilder.AddDestination(
-        navController: NavController
+    @Composable
+    fun BottomModalSheet(
+        navController: NavController,
+        navBackStackEntry: NavBackStackEntry,
+        snackBarHostState: SnackbarHostState,
+        sheetState: ModalBottomSheetState
     ) {
-        composable(
-            route = navHostRoute,
-            deepLinks = deepLinks,
-            arguments = arguments,
-        ) { navBackStackEntry ->
-            Content(navController, navBackStackEntry)
-        }
+
     }
 
     @Composable
-    fun Content(
+    fun TopBar(
         navController: NavController,
         navBackStackEntry: NavBackStackEntry,
+        snackBarHostState: SnackbarHostState,
+        sheetState: ModalBottomSheetState
+    ) {
+
+    }
+    @Composable
+    fun  Content(
+        navController: NavController,
+        navBackStackEntry: NavBackStackEntry,
+        snackBarHostState: SnackbarHostState,
+        scaffoldPadding:PaddingValues,
+        sheetState: ModalBottomSheetState
     )
 }
+

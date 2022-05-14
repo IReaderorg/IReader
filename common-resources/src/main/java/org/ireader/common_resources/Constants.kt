@@ -14,9 +14,12 @@ const val KODEIN_MODULE = "kodein_module"
 const val EXPLORE_BOOK_TABLE = "explore"
 
 const val ARG_HIDE_BOTTOM_BAR = "ARG_HIDE_BOTTOM_BAR"
+const val ARG_HAVE_MODAL_SHEET = "HAVE_MODAL_SHEETS"
 
 const val repo_url = "/repos/kazemcodes/IReader/releases/latest"
 const val github_api_url = "https://api.github.com"
+
+const val discord = "https://discord.gg/HBU6zD8c5v"
 
 const val NULL_VALUE = -1L
 const val LAST_CHAPTER = -2L

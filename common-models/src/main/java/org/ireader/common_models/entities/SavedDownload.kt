@@ -49,8 +49,8 @@ fun buildSavedDownload(book: Book, chapter: Chapter): SavedDownload {
     return SavedDownload(
         bookId = book.id,
         priority = 1,
-        chapterName = chapter.title,
-        chapterKey = chapter.link,
+        chapterName = chapter.name,
+        chapterKey = chapter.key,
         translator = chapter.translator,
         chapterId = chapter.id,
         bookName = book.title,

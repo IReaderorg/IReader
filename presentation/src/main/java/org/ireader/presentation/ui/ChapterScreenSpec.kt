@@ -1,6 +1,9 @@
 package org.ireader.presentation.ui
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.ModalBottomSheetState
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -37,6 +40,9 @@ object ChapterScreenSpec : ScreenSpec {
     override fun Content(
         navController: NavController,
         navBackStackEntry: NavBackStackEntry,
+        snackBarHostState: SnackbarHostState,
+        scaffoldPadding:PaddingValues,
+        sheetState: ModalBottomSheetState
     ) {
         val vm: ChapterDetailViewModel = hiltViewModel()
         val book = vm.book

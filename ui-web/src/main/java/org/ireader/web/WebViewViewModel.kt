@@ -179,7 +179,7 @@ class WebViewPageModel @Inject constructor(
             val pageSource = webView.getHtml()
             val url = webView.originalUrl ?: ""
             remoteUseCases.getBookDetail(
-                book ?: Book(link = "", title = "", sourceId = source?.id?:0),
+                book ?: Book(key = "", title = "", sourceId = source?.id?:0),
                 catalog,
                 onError = {
                     showSnackBar(UiText.StringResource(R.string.failed))

@@ -279,7 +279,7 @@ fun ScrollableAppBar(
             if (navigationIcon != null) {
                 navigationIcon()
             }
-            BigSizeTextComposable(text = title)
+            BigSizeTextComposable(text = title.asString(LocalContext.current))
         }
     }
 }

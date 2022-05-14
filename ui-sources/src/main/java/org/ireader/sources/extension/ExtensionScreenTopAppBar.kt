@@ -9,8 +9,6 @@ import androidx.compose.material.icons.filled.TravelExplore
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.PagerState
-import org.ireader.common_resources.UiText
 import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.AppTextField
@@ -20,11 +18,11 @@ import org.ireader.ui_sources.R
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 fun ExtensionScreenTopAppBar(
+    currentPage:Int,
     searchMode:Boolean,
     query:String,
     onValueChange:(query:String) -> Unit,
     onConfirm:() -> Unit,
-    pagerState:PagerState,
     onClose:() -> Unit,
     onSearchDisable:() -> Unit,
     onSearchEnable:() -> Unit,
@@ -34,7 +32,7 @@ fun ExtensionScreenTopAppBar(
     Toolbar(
         title = {
             if (!searchMode) {
-                BigSizeTextComposable(text = UiText.StringResource(R.string.extensions))
+                BigSizeTextComposable(text = stringResource(R.string.extensions))
             } else {
                 AppTextField(
                     query = query,
@@ -44,7 +42,7 @@ fun ExtensionScreenTopAppBar(
             }
         },
         actions = {
-            if (pagerState.currentPage == 1) {
+            if (currentPage == 1) {
                 if (searchMode) {
                     AppIconButton(
                         imageVector = Icons.Default.Close,

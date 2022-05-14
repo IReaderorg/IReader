@@ -232,13 +232,13 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
     @Query("SELECT * FROM library WHERE id in (:bookIds)")
     suspend fun findBookByIds(bookIds: List<Long>): List<org.ireader.common_models.entities.Book>
 
-    @Query("SELECT * FROM library WHERE link = :key Limit 1")
+    @Query("SELECT * FROM library WHERE `key` = :key Limit 1")
     suspend fun findBookByKey(key: String): org.ireader.common_models.entities.Book?
 
-    @Query("SELECT * FROM library WHERE link = :key")
+    @Query("SELECT * FROM library WHERE `key` = :key")
     suspend fun findBooksByKey(key: String): List<org.ireader.common_models.entities.Book>
 
-    @Query("SELECT * FROM library WHERE link = :key or title = :title")
+    @Query("SELECT * FROM library WHERE `key` = :key or title = :title")
     fun subscribeBooksByKey(
         key: String,
         title: String

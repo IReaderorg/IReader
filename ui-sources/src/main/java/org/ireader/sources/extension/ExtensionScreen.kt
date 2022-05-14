@@ -14,16 +14,12 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
@@ -52,12 +48,11 @@ fun ExtensionScreen(
     onClickInstall: (Catalog) -> Unit,
     onClickUninstall: (Catalog) -> Unit,
     onClickTogglePinned: (Catalog) -> Unit,
-    onSearchNavigate: () -> Unit
+    snackBarHostState: androidx.compose.material3.SnackbarHostState
 ) {
     val scope = rememberCoroutineScope()
     val pagerState = rememberPagerState()
     val context = LocalContext.current
-    val snackBarHostState = remember { androidx.compose.material3.SnackbarHostState() }
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
@@ -73,113 +68,69 @@ fun ExtensionScreen(
     LaunchedEffect(key1 = true) {
         viewModel.clearExploreMode()
     }
-
-    val pages = listOf<UiText>(
-        UiText.StringResource(R.string.sources),
-        UiText.StringResource(R.string.extensions),
-    )
-
-    var searchMode by remember {
-        mutableStateOf(false)
+    val pages = remember {
+        listOf<UiText>(
+            UiText.StringResource(R.string.sources),
+            UiText.StringResource(R.string.extensions),
+        )
     }
-    val focusManager = LocalFocusManager.current
-    androidx.compose.material3.Scaffold(
-        modifier = Modifier.padding(bottom = 35.dp),
-        topBar = {
-            ExtensionScreenTopAppBar(
-                searchMode = searchMode,
-                query = viewModel.searchQuery ?: "",
-                onValueChange = {
-                    viewModel.searchQuery = it
-                },
-                onConfirm = {
-                    focusManager.clearFocus()
-                },
-                pagerState = pagerState,
-                onClose = {
-                    searchMode = false
-                    viewModel.searchQuery = ""
-                },
-                onSearchDisable = {
-                    searchMode = false
-                    viewModel.searchQuery = ""
-                },
-                onRefresh = {
-                    viewModel.refreshCatalogs()
-                },
-                onSearchEnable = {
-                    searchMode = true
-                },
-                onSearchNavigate = onSearchNavigate
-            )
-        },
-        snackbarHost = {
-            androidx.compose.material3.SnackbarHost(hostState = snackBarHostState) { data ->
-            androidx.compose.material3.Snackbar(
-                actionColor = MaterialTheme.colorScheme.primary,
-                snackbarData = data,
-                containerColor = MaterialTheme.colorScheme.surface,
-                contentColor = MaterialTheme.colorScheme.onSurface,
-            )
-        } },
-    ) { padding ->
-
-        Column(modifier = Modifier
+    Column(
+        modifier = modifier
             .fillMaxSize()
-            .padding(padding)) {
-            TabRow(
-                selectedTabIndex = pagerState.currentPage,
-                containerColor = AppColors.current.bars,
-                contentColor = AppColors.current.onBars,
-                indicator = { tabPositions ->
-                    TabRowDefaults.Indicator(
-                        Modifier.pagerTabIndicatorOffset(pagerState, tabPositions),
-                        color = MaterialTheme.colorScheme.primary,
+    ) {
+        TabRow(
+            selectedTabIndex = pagerState.currentPage,
+            containerColor = AppColors.current.bars,
+            contentColor = AppColors.current.onBars,
+            indicator = { tabPositions ->
+                TabRowDefaults.Indicator(
+                    Modifier.pagerTabIndicatorOffset(pagerState, tabPositions),
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            },
+        ) {
+            pages.forEachIndexed { index, title ->
+                Tab(
+                    text = {
+                        MidSizeTextComposable(text = title, color = Color.Unspecified)
+                    },
+                    selected = pagerState.currentPage == index,
+                    onClick = {
+                        scope.launch { pagerState.animateScrollToPage(index) }
+                    },
+                    selectedContentColor = MaterialTheme.colorScheme.primary,
+                    unselectedContentColor = MaterialTheme.colorScheme.onBackground,
+                )
+            }
+        }
+
+        HorizontalPager(
+            count = pages.size,
+            state = pagerState,
+            modifier = Modifier.fillMaxSize()
+        ) { page ->
+            viewModel.currentPagerPage = page
+            when (page) {
+                0 -> {
+                    UserSourcesScreen(
+                        onClickCatalog = onClickCatalog,
+                        onClickTogglePinned = onClickTogglePinned,
+                        state = viewModel,
                     )
-                },
-            ) {
-                pages.forEachIndexed { index, title ->
-                    Tab(
-                        text = {
-                            MidSizeTextComposable(text = title, color = Color.Unspecified)
-                        },
-                        selected = pagerState.currentPage == index,
-                        onClick = {
-                             scope.launch { pagerState.animateScrollToPage(index) }
-                        },
-                        selectedContentColor = MaterialTheme.colorScheme.primary,
-                        unselectedContentColor = MaterialTheme.colorScheme.onBackground,
+                }
+                1 -> {
+                    RemoteSourcesScreen(
+                        state = viewModel,
+                        onRefreshCatalogs = onRefreshCatalogs,
+                        onClickInstall = onClickInstall,
+                        onClickUninstall = onClickUninstall,
                     )
                 }
             }
-
-            HorizontalPager(
-                count = pages.size,
-                state = pagerState,
-                modifier = Modifier.fillMaxSize()
-            ) { page ->
-                when (page) {
-                    0 -> {
-                        UserSourcesScreen(
-                            onClickCatalog = onClickCatalog,
-                            onClickTogglePinned = onClickTogglePinned,
-                            state = viewModel,
-                        )
-                    }
-                    1 -> {
-                        RemoteSourcesScreen(
-                            state = viewModel,
-                            onRefreshCatalogs = onRefreshCatalogs,
-                            onClickInstall = onClickInstall,
-                            onClickUninstall = onClickUninstall,
-                        )
-                    }
-                }
-            }
-            }
-
+        }
     }
 }
+
 @Composable
 fun SourceHeader(
     modifier: Modifier = Modifier,
@@ -198,5 +149,4 @@ fun SourceHeader(
             color = MaterialTheme.colorScheme.onSurface,
         )
     }
-
 }

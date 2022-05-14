@@ -66,7 +66,7 @@ fun ReaderScreenTopBar(
                 title = {
                     if (!vm.searchMode) {
                         Text(
-                            text = chapter?.title ?: "",
+                            text = chapter?.name ?: "",
                             color = MaterialTheme.colorScheme.onBackground,
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.Bold,

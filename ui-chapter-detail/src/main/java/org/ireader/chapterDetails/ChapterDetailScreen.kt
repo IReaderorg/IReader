@@ -100,7 +100,7 @@ fun ChapterDetailScreen(
                 verticalArrangement = Arrangement.Top
             ) {
                 Spacer(modifier = modifier.height(5.dp))
-                BigSizeTextComposable(text = UiText.StringResource(R.string.advance_setting))
+                BigSizeTextComposable(text = stringResource(R.string.advance_setting))
 
                 Spacer(modifier = modifier.height(5.dp))
                 Divider(modifier = modifier.fillMaxWidth(), thickness = 1.dp)

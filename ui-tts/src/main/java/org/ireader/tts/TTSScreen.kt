@@ -165,7 +165,9 @@ fun TTSScreen(
         sheetBackgroundColor = MaterialTheme.colorScheme.background,
         sheetContentColor = MaterialTheme.colorScheme.onBackground,
     ) {
-        ModalNavigationDrawer( drawerContent = {
+        ModalNavigationDrawer(
+            drawerState = drawerState,
+            drawerContent = {
             ReaderScreenDrawer(
                 modifier = Modifier.statusBarsPadding(),
                 onReverseIcon = onDrawerReverseIcon,
@@ -223,7 +225,7 @@ fun TTSScreen(
                                     )
 
                                     BigSizeTextComposable(
-                                        text = UiText.DynamicString( chapter.title),
+                                        text = chapter.name,
                                         align = TextAlign.Center,
                                         maxLine = 1,
                                         overflow = TextOverflow.Ellipsis

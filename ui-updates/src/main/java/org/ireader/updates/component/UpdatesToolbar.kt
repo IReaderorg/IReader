@@ -14,8 +14,9 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import org.ireader.common_resources.UiText
+import androidx.compose.ui.res.stringResource
 import org.ireader.components.components.Toolbar
+import org.ireader.components.reusable_composable.AppIcon
 import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.ui_updates.R
 import org.ireader.updates.viewmodel.UpdateState
@@ -57,7 +58,7 @@ private fun UpdatesSelectionToolbar(
     onClickInvertSelection: () -> Unit,
 ) {
     Toolbar(
-        title = { BigSizeTextComposable(text = UiText.DynamicString("$selectionSize")) },
+        title = { BigSizeTextComposable(text = "$selectionSize") },
         navigationIcon = {
             IconButton(onClick = onClickCancelSelection) {
                 Icon(Icons.Default.Close, contentDescription = null)
@@ -65,10 +66,10 @@ private fun UpdatesSelectionToolbar(
         },
         actions = {
             IconButton(onClick = onClickSelectAll) {
-                Icon(Icons.Default.SelectAll, contentDescription = null)
+                AppIcon(imageVector = Icons.Default.SelectAll, contentDescription = null)
             }
             IconButton(onClick = onClickInvertSelection) {
-                Icon(Icons.Default.FlipToBack, contentDescription = null)
+                AppIcon(imageVector = Icons.Default.FlipToBack, contentDescription = null)
             }
         }
     )
@@ -80,13 +81,13 @@ fun UpdatesRegularToolbar(
     onClickDelete: () -> Unit,
 ) {
     Toolbar(
-        title = { BigSizeTextComposable(text = UiText.StringResource( R.string.updates_screen_label)) },
+        title = { BigSizeTextComposable(text = stringResource( R.string.updates_screen_label)) },
         actions = {
             IconButton(onClick = onClickRefresh) {
-                Icon(Icons.Default.Refresh, contentDescription = null)
+                AppIcon(imageVector = Icons.Default.Refresh, contentDescription = null)
             }
             IconButton(onClick = onClickDelete) {
-                Icon(Icons.Default.DeleteForever, contentDescription = null)
+                AppIcon(imageVector = Icons.Default.DeleteForever, contentDescription = null)
             }
         }
     )

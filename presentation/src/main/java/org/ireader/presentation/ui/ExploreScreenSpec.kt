@@ -1,7 +1,12 @@
 package org.ireader.presentation.ui
 
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.ModalBottomSheetState
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
@@ -42,6 +47,9 @@ object ExploreScreenSpec : ScreenSpec {
     override fun Content(
         navController: NavController,
         navBackStackEntry: NavBackStackEntry,
+        snackBarHostState: SnackbarHostState,
+        scaffoldPadding:PaddingValues,
+        sheetState: ModalBottomSheetState
     ) {
         val vm: ExploreViewModel = hiltViewModel()
         val focusManager = LocalFocusManager.current
@@ -49,6 +57,7 @@ object ExploreScreenSpec : ScreenSpec {
         val scope = rememberCoroutineScope()
         if (source != null) {
             ExploreScreen(
+                modifier = Modifier.padding(paddingValues = scaffoldPadding),
                 vm = vm,
                 onFilterClick = {
                     vm.toggleFilterMode()

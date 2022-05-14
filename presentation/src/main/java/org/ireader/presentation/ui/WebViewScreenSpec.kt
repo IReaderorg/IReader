@@ -1,7 +1,10 @@
 package org.ireader.presentation.ui
 
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -36,7 +39,7 @@ object WebViewScreenSpec : ScreenSpec {
 
     fun buildRoute(
         url: String? = null,
-        sourceId: Long?=null,
+        sourceId: Long? = null,
         bookId: Long? = null,
         chapterId: Long? = null,
     ): String {
@@ -57,6 +60,9 @@ object WebViewScreenSpec : ScreenSpec {
     override fun Content(
         navController: NavController,
         navBackStackEntry: NavBackStackEntry,
+        snackBarHostState: SnackbarHostState,
+        scaffoldPadding:PaddingValues,
+        sheetState: ModalBottomSheetState
     ) {
         val vm: WebViewPageModel = hiltViewModel()
         val scope = rememberCoroutineScope()

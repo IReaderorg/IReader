@@ -1,62 +1,74 @@
 package org.ireader.presentation.ui
 
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreHoriz
+import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalUriHandler
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NamedNavArgument
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
-import com.google.accompanist.pager.ExperimentalPagerApi
-import org.ireader.domain.ui.NavigationArgs
-import org.ireader.presentation.R
-import org.ireader.settings.setting.MainSettingScreenViewModel
-import org.ireader.settings.setting.SettingScreen
+import org.ireader.components.components.Toolbar
+import org.ireader.components.reusable_composable.BigSizeTextComposable
+import org.ireader.components.reusable_composable.TopAppBarBackButton
+import org.ireader.settings.setting.SettingsSection
+import org.ireader.settings.setting.SetupLayout
+import org.ireader.ui_settings.R
 
-object SettingScreenSpec : BottomNavScreenSpec {
-    override val icon: ImageVector = Icons.Filled.MoreHoriz
-    override val label: Int = R.string.more
-    override val navHostRoute: String = "more"
+object SettingScreenSpec : ScreenSpec {
+    override val navHostRoute: String = "settings"
 
-    override val arguments: List<NamedNavArgument> = listOf(
-        NavigationArgs.showBottomNav
-    )
+    @OptIn(ExperimentalMaterialApi::class)
+    @Composable
+    override fun TopBar(
+        navController: NavController,
+        navBackStackEntry: NavBackStackEntry,
+        snackBarHostState: SnackbarHostState,
+        sheetState: ModalBottomSheetState
+    ) {
+        Toolbar(
+            title = {
+                BigSizeTextComposable(text = stringResource(org.ireader.ui_settings.R.string.settings))
+            },
+            navigationIcon = { TopAppBarBackButton(onClick = { navController.popBackStack() }) },
+        )
+    }
 
     @OptIn(
-        ExperimentalPagerApi::class, androidx.compose.animation.ExperimentalAnimationApi::class,
+        androidx.compose.animation.ExperimentalAnimationApi::class,
         androidx.compose.material.ExperimentalMaterialApi::class
     )
     @Composable
     override fun Content(
         navController: NavController,
         navBackStackEntry: NavBackStackEntry,
+        snackBarHostState: SnackbarHostState,
+        scaffoldPadding:PaddingValues,
+        sheetState: ModalBottomSheetState
     ) {
-        val uriHandler = LocalUriHandler.current
-        val vm: MainSettingScreenViewModel = hiltViewModel()
+        val settingItems = remember {
+            listOf(
+                SettingsSection(
+                    R.string.appearance,
+                    Icons.Default.Palette,
+                ) {
+                    navController.navigate(AppearanceScreenSpec.navHostRoute)
+                },
+                SettingsSection(
+                    R.string.advance_setting,
+                    Icons.Default.Code
+                ) {
+                    navController.navigate(AdvanceSettingSpec.navHostRoute)
+                },
+            )
+        }
+        SetupLayout(modifier = Modifier.padding(scaffoldPadding),items = settingItems)
 
-
-        SettingScreen(
-            vm = vm,
-            onAbout = {
-                navController.navigate(AboutInfoScreenSpec.navHostRoute)
-            },
-            onAdvance = {
-                navController.navigate(AdvanceSettingSpec.navHostRoute)
-            },
-            onAppearanceScreen = {
-                navController.navigate(AppearanceScreenSpec.navHostRoute)
-            },
-            onBackupScreen = {
-                navController.navigate(BackupAndRestoreScreenSpec.navHostRoute)
-            },
-            onDownloadScreen = {
-                navController.navigate(DownloaderScreenSpec.navHostRoute)
-            },
-            onHelp = {
-                uriHandler.openUri("https://discord.gg/HBU6zD8c5v")
-            }
-        )
     }
 }

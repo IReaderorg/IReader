@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 18,
-    "identityHash": "b120f65dee7baefa1479f0826d9328ad",
+    "identityHash": "0931d3b3c2910d0b61a9837ee6b83c67",
     "entities": [
       {
         "tableName": "library",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `tableId` INTEGER NOT NULL, `type` INTEGER NOT NULL, `sourceId` INTEGER NOT NULL, `link` TEXT NOT NULL, `title` TEXT NOT NULL, `author` TEXT NOT NULL, `description` TEXT NOT NULL, `genres` TEXT NOT NULL, `status` INTEGER NOT NULL, `cover` TEXT NOT NULL, `customCover` TEXT NOT NULL, `favorite` INTEGER NOT NULL, `lastUpdated` INTEGER NOT NULL, `dataAdded` INTEGER NOT NULL, `viewer` INTEGER NOT NULL, `flags` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `tableId` INTEGER NOT NULL, `type` INTEGER NOT NULL, `sourceId` INTEGER NOT NULL, `key` TEXT NOT NULL, `title` TEXT NOT NULL, `author` TEXT NOT NULL, `description` TEXT NOT NULL, `genres` TEXT NOT NULL, `status` INTEGER NOT NULL, `cover` TEXT NOT NULL, `customCover` TEXT NOT NULL, `favorite` INTEGER NOT NULL, `lastUpdated` INTEGER NOT NULL, `dataAdded` INTEGER NOT NULL, `viewer` INTEGER NOT NULL, `flags` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -33,8 +33,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "link",
-            "columnName": "link",
+            "fieldPath": "key",
+            "columnName": "key",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -240,7 +240,7 @@
       },
       {
         "tableName": "chapter",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `bookId` INTEGER NOT NULL, `link` TEXT NOT NULL, `title` TEXT NOT NULL, `read` INTEGER NOT NULL, `bookmark` INTEGER NOT NULL, `progress` INTEGER NOT NULL, `dateUpload` INTEGER NOT NULL, `dateFetch` INTEGER NOT NULL, `content` TEXT NOT NULL, `number` REAL NOT NULL, `translator` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `bookId` INTEGER NOT NULL, `key` TEXT NOT NULL, `name` TEXT NOT NULL, `read` INTEGER NOT NULL, `bookmark` INTEGER NOT NULL, `progress` INTEGER NOT NULL, `dateUpload` INTEGER NOT NULL, `dateFetch` INTEGER NOT NULL, `content` TEXT NOT NULL, `number` REAL NOT NULL, `translator` TEXT NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -255,14 +255,14 @@
             "notNull": true
           },
           {
-            "fieldPath": "link",
-            "columnName": "link",
+            "fieldPath": "key",
+            "columnName": "key",
             "affinity": "TEXT",
             "notNull": true
           },
           {
-            "fieldPath": "title",
-            "columnName": "title",
+            "fieldPath": "name",
+            "columnName": "name",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -504,7 +504,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b120f65dee7baefa1479f0826d9328ad')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0931d3b3c2910d0b61a9837ee6b83c67')"
     ]
   }
 }

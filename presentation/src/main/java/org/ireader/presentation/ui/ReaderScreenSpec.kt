@@ -2,8 +2,10 @@ package org.ireader.presentation.ui
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.gestures.scrollBy
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarHostState
@@ -83,6 +85,9 @@ object ReaderScreenSpec : ScreenSpec {
     override fun Content(
         navController: NavController,
         navBackStackEntry: NavBackStackEntry,
+        snackBarHostState: SnackbarHostState,
+        scaffoldPadding:PaddingValues,
+        sheetState: ModalBottomSheetState
     ) {
         val context = LocalContext.current
         val scope = rememberCoroutineScope()
@@ -216,7 +221,7 @@ object ReaderScreenSpec : ScreenSpec {
                 scope.launch {
                     vm.showSnackBar(
                         UiText.DynamicString(
-                            chapters[vm.currentChapterIndex].title
+                            chapters[vm.currentChapterIndex].name
                         )
                     )
                 }
@@ -428,7 +433,7 @@ object ReaderScreenSpec : ScreenSpec {
                     catalog?.let { catalog ->
                         navController.navigate(
                             WebViewScreenSpec.buildRoute(
-                                url = chapter?.link,
+                                url = chapter?.key,
                                 sourceId = catalog.sourceId,
                                 chapterId = chapter?.id,
                                 bookId = book?.id

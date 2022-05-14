@@ -11,6 +11,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import org.ireader.components.reusable_composable.BigSizeTextComposable
+import org.ireader.components.reusable_composable.TopAppBarBackButton
 import org.ireader.core_ui.theme.AppColors
 
 @Composable
@@ -44,6 +47,18 @@ fun Toolbar(
     }
 }
 
+@Composable
+fun TitleToolbar(
+    title: String,
+    navController:NavController?
+) {
+    Toolbar(
+        title = {
+            BigSizeTextComposable(text = title)
+        },
+        navigationIcon = { if (navController != null ) { TopAppBarBackButton(onClick = { navController.popBackStack() }) } else {} },
+    )
+}
 @Composable
 fun MidSizeToolbar(
     title: @Composable () -> Unit,

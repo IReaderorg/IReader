@@ -65,8 +65,8 @@ class UpdatesViewModel @Inject constructor(
                     chapter = Chapter(
                         id = update.chapterId,
                         bookId = update.bookId,
-                        link = update.chapterLink,
-                        title = update.chapterTitle,
+                        key = update.chapterLink,
+                        name = update.chapterTitle,
                         read = update.read,
                         number = update.number,
                     ),

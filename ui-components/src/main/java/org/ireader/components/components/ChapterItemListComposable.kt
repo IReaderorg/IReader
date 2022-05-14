@@ -48,7 +48,7 @@ fun ChapterListItemComposable(
         } else null,
         text = {
             Text(
-                text = chapter.title,
+                text = chapter.name,
                 color = if (!isLastRead) {
                     if (chapter.read) MaterialTheme.colorScheme.onBackground.copy(
                         alpha = .4f

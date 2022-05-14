@@ -82,7 +82,7 @@ class DefaultNotificationHelper @Inject constructor(
             Notifications.CHANNEL_DOWNLOADER_PROGRESS
         ).apply {
             chapter?.let {
-                setContentTitle("Downloading ${chapter.title}")
+                setContentTitle("Downloading ${chapter.name}")
             }
 
             setSmallIcon(R.drawable.ic_downloading)
@@ -253,7 +253,7 @@ class DefaultNotificationHelper @Inject constructor(
             isActive = true
             setMetadata(
                 MediaMetadataCompat.Builder().apply {
-                    putText(MediaMetadata.METADATA_KEY_TITLE, chapter.title)
+                    putText(MediaMetadata.METADATA_KEY_TITLE, chapter.name)
                 }.build()
             )
             val stateBuilder = PlaybackStateCompat.Builder()
@@ -275,7 +275,7 @@ class DefaultNotificationHelper @Inject constructor(
             context,
             Notifications.CHANNEL_TTS
         ).apply {
-            setContentTitle(chapter.title)
+            setContentTitle(chapter.name)
             setContentText(contentText)
             setSmallIcon(org.ireader.core.R.drawable.ic_infinity)
             setOnlyAlertOnce(true)

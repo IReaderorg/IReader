@@ -36,7 +36,7 @@ import org.ireader.ui_components.R
 @Composable
 fun BigSizeTextComposable(
     modifier: Modifier = Modifier,
-    text: UiText,
+    text: String,
     color: Color? = null,
     style: TextStyle? = null,
     fontWeight: FontWeight? = null,
@@ -46,7 +46,7 @@ fun BigSizeTextComposable(
 ) {
     Text(
         modifier = modifier,
-        text = text.asString(LocalContext.current),
+        text = text,
         color = color ?: MaterialTheme.colorScheme.onSurface,
         style = style ?: MaterialTheme.typography.titleSmall,
         fontWeight = fontWeight ?: FontWeight.Bold,
@@ -149,6 +149,22 @@ fun CaptionTextComposable(
         textAlign = align ?: TextAlign.Start,
     )
 }
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun AppIcon(
+    modifier: Modifier = Modifier,
+    imageVector: ImageVector,
+    contentDescription: String? = null,
+    tint: Color? = null,
+) {
+        Icon(
+            modifier = modifier,
+            imageVector = imageVector,
+            contentDescription = contentDescription,
+            tint = tint ?: MaterialTheme.colorScheme.onSurface
+        )
+}
+
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

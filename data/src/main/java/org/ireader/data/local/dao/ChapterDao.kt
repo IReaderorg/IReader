@@ -66,19 +66,19 @@ interface ChapterDao : BaseDao<org.ireader.common_models.entities.Chapter> {
     suspend fun findChaptersByBookIds(bookIds: List<Long>): List<org.ireader.common_models.entities.Chapter>
 
     @Query(
-        """SELECT * FROM chapter WHERE link= :key
+        """SELECT * FROM chapter WHERE `key`= :key
     """
     )
     suspend fun findChaptersByKey(key: String): List<org.ireader.common_models.entities.Chapter>
 
     @Query(
-        """SELECT * FROM chapter WHERE link= :key LIMIT 1
+        """SELECT * FROM chapter WHERE `key`= :key LIMIT 1
     """
     )
     suspend fun findChapterByKey(key: String): org.ireader.common_models.entities.Chapter?
 
     @Query(
-        """SELECT * FROM chapter WHERE bookId = :bookId AND title LIKE '%' || :query || '%' ORDER BY 
+        """SELECT * FROM chapter WHERE bookId = :bookId AND name LIKE '%' || :query || '%' ORDER BY 
         CASE WHEN :isAsc = 1 THEN id END ASC,
         CASE WHEN :isAsc = 0 THEN  id END DESC"""
     )

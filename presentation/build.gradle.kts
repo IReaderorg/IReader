@@ -80,7 +80,7 @@ implementation(compose.compose.material3)
     implementation(androidx.appCompat)
     implementation(androidx.media)
     implementation(androidx.core)
-    implementation(androidx.material)
+    //implementation(androidx.material)
     implementation(androidx.emoji)
 
     implementation(androidx.work.runtime)

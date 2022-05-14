@@ -1,5 +1,6 @@
 package org.ireader.presentation.ui
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
@@ -57,6 +58,9 @@ object BookDetailScreenSpec : ScreenSpec {
     override fun Content(
         navController: NavController,
         navBackStackEntry: NavBackStackEntry,
+        snackBarHostState: SnackbarHostState,
+        scaffoldPadding:PaddingValues,
+        sheetState: ModalBottomSheetState
     ) {
         val modalSheetState: ModalBottomSheetState =
             rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
@@ -120,7 +124,7 @@ object BookDetailScreenSpec : ScreenSpec {
                         navController.navigate(
                             WebViewScreenSpec.buildRoute(
                                 url = (source).baseUrl + getUrlWithoutDomain(
-                                    book.link,
+                                    book.key,
                                 ),
                                 sourceId = book.sourceId,
                                 bookId = book.id,

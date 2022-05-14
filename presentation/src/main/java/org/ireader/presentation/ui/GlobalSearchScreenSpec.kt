@@ -1,5 +1,9 @@
 package org.ireader.presentation.ui
 
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetState
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
@@ -26,10 +30,14 @@ object GlobalSearchScreenSpec : ScreenSpec {
         return "global?query=$query"
     }
 
+    @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun Content(
         navController: NavController,
         navBackStackEntry: NavBackStackEntry,
+        snackBarHostState: SnackbarHostState,
+        scaffoldPadding:PaddingValues,
+        sheetState: ModalBottomSheetState
     ) {
         val vm: GlobalSearchViewModel = hiltViewModel()
         GlobalSearchScreen(

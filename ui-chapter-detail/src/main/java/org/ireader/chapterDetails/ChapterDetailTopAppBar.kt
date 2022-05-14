@@ -15,7 +15,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import org.ireader.chapterDetails.viewmodel.ChapterDetailState
-import org.ireader.common_resources.UiText
 import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.BigSizeTextComposable
@@ -63,7 +62,7 @@ fun RegularChapterDetailTopAppBar(
 //            .fillMaxWidth()
 //            .height(86.dp),
 //        title = {
-//            BigSizeTextComposable(text = UiText.StringResource(R.string.content))
+//            BigSizeTextComposable(text = stringResource(R.string.content))
 //        },
 //        actions = {
 //            AppIconButton(imageVector = Icons.Filled.Place, text =  UiText.StringResource(R.string.find_current_chapter), onClick = onMap)
@@ -89,7 +88,7 @@ fun RegularChapterDetailTopAppBar(
     CenterAlignedTopAppBar(
         modifier = Modifier.statusBarsPadding(),
         title = {
-            BigSizeTextComposable(text = UiText.StringResource(R.string.content))
+            BigSizeTextComposable(text = stringResource(R.string.content))
         },
         actions = {
             AppIconButton(imageVector = Icons.Filled.Place, contentDescription = stringResource(R.string.find_current_chapter), onClick = onMap)
@@ -109,7 +108,7 @@ private fun EditModeChapterDetailTopAppBar(
     onClickInvertSelection: () -> Unit,
 ) {
     Toolbar(
-        title = { BigSizeTextComposable(text = UiText.DynamicString("$selectionSize")) },
+        title = { BigSizeTextComposable(text = "$selectionSize") },
         navigationIcon = {
             AppIconButton(imageVector =Icons.Default.Close ,contentDescription = stringResource(R.string.close), onClick = onClickCancelSelection)
         },

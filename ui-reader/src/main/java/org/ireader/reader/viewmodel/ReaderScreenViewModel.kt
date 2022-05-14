@@ -149,9 +149,9 @@ class ReaderScreenViewModel @Inject constructor(
         if (index != -1) {
             currentChapterIndex = index
             return stateChapters.nextAfter(index)
-                ?: throw IllegalAccessException("List doesn't contains ${chapter?.title}")
+                ?: throw IllegalAccessException("List doesn't contains ${chapter?.name}")
         }
-        throw IllegalAccessException("List doesn't contains ${chapter?.title}")
+        throw IllegalAccessException("List doesn't contains ${chapter?.name}")
     }
 
     fun prevChapter(): Chapter {
@@ -160,9 +160,9 @@ class ReaderScreenViewModel @Inject constructor(
         if (index != -1) {
             currentChapterIndex = index
             return stateChapters.prevBefore(index)
-                ?: throw IllegalAccessException("List doesn't contains ${chapter?.title}")
+                ?: throw IllegalAccessException("List doesn't contains ${chapter?.name}")
         }
-        throw IllegalAccessException("List doesn't contains ${chapter?.title}")
+        throw IllegalAccessException("List doesn't contains ${chapter?.name}")
     }
 
     fun restoreSetting(

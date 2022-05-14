@@ -116,7 +116,7 @@ class DownloaderService @AssistedInject constructor(
                                         withContext(Dispatchers.IO) {
                                             insertUseCases.insertChapter(chapter = content)
                                         }
-                                        builder.setContentText(chapter.title)
+                                        builder.setContentText(chapter.name)
                                         builder.setSubText(index.toString())
 
                                         builder.setProgress(downloads.size, index, false)
@@ -124,8 +124,8 @@ class DownloaderService @AssistedInject constructor(
                                         savedDownload = savedDownload.copy(
                                             bookId = download.bookId,
                                             priority = 1,
-                                            chapterName = chapter.title,
-                                            chapterKey = chapter.link,
+                                            chapterName = chapter.name,
+                                            chapterKey = chapter.key,
                                             translator = chapter.translator,
                                             chapterId = chapter.id,
                                             bookName = download.bookName,
