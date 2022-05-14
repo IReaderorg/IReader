@@ -195,7 +195,7 @@ fun WebPageScreen(
                     onFetchChapters = {
                         webView?.let { onFetchChapters(it) }
                     },
-                    state = viewModel
+                    state = viewModel,
                 )
             },
             snackbarHost = {

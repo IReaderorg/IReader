@@ -10,6 +10,7 @@ import org.ireader.common_extensions.findComponentActivity
 import org.ireader.common_extensions.hideSystemUI
 import org.ireader.common_extensions.isImmersiveModeEnabled
 import org.ireader.common_extensions.showSystemUI
+import org.ireader.core_ui.theme.FontType
 import org.ireader.core_ui.theme.OrientationMode
 import org.ireader.core_ui.theme.fonts
 import org.ireader.core_ui.theme.readerScreenBackgroundColors
@@ -92,7 +93,7 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
     }
 
     override fun ReaderScreenViewModel.saveFont(index: Int) {
-        this.font = fonts[index]
+        this.font = fonts.getOrNull(index)?:FontType.Roboto
         readerUseCases.selectedFontStateUseCase.saveFont(index)
     }
 

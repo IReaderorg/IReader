@@ -68,7 +68,7 @@ fun ReaderScreenTopBar(
                         Text(
                             text = chapter?.title ?: "",
                             color = MaterialTheme.colorScheme.onBackground,
-                            style = MaterialTheme.typography.displaySmall,
+                            style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.Bold,
                             overflow = TextOverflow.Ellipsis,
                             maxLines = 1

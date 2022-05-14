@@ -22,7 +22,7 @@ dependencies {
     api(libs.hilt.android)
 
     implementation(androidx.core)
-    implementation(androidx.lifecycle.process)
+    implementation(androidx.lifecycle.runtime)
     implementation(androidx.dataStore)
     implementation(libs.quickjsAndroid)
     compileOnly(libs.jsoup)

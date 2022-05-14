@@ -79,7 +79,7 @@ fun CatalogItem(
             )
             Text(
                 text = title,
-                style = MaterialTheme.typography.displayMedium,
+                style = MaterialTheme.typography.labelMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
@@ -89,7 +89,7 @@ fun CatalogItem(
 
             Text(
                 text = lang?.code?.uppercase(Locale.getDefault()) ?: "",
-                style = MaterialTheme.typography.displayMedium,
+                style = MaterialTheme.typography.labelMedium,
                 color = LocalContentColor.current.copy(alpha = ContentAlpha.medium),
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,

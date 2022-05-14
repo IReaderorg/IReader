@@ -7,13 +7,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.Slider
 import androidx.compose.material.SliderDefaults
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,7 +36,7 @@ fun ChaptersSliderComposable(
         Text(
             text = if (chapters.isNotEmpty() && currentChapterIndex != -1) chapters[currentChapterIndex].title else currentChapter.title,
             color = MaterialTheme.colorScheme.onBackground,
-            style = MaterialTheme.typography.displaySmall,
+            style = MaterialTheme.typography.bodyMedium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )

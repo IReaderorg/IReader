@@ -43,7 +43,7 @@ fun BookSummary(
         Text(
             text = "Synopsis", fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface,
-            style = MaterialTheme.typography.headlineSmall,
+            style = MaterialTheme.typography.bodyLarge,
         )
         BookSummaryDescription(
             description,

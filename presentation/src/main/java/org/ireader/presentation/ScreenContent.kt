@@ -15,13 +15,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -30,7 +34,6 @@ import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import org.ireader.common_resources.ARG_HIDE_BOTTOM_BAR
-import org.ireader.components.reusable_composable.SuperSmallTextComposable
 import org.ireader.core_ui.theme.AppColors
 import org.ireader.presentation.ui.BottomNavScreenSpec
 import org.ireader.presentation.ui.LibraryScreenSpec
@@ -74,18 +77,24 @@ fun ScreenContent() {
                                 Icon(
                                     bottomNavDestination.icon,
                                     contentDescription = null,
-                                    tint = AppColors.current.onBars
+                                    tint = if (isSelected) MaterialTheme.colorScheme.onPrimary   else MaterialTheme.colorScheme.onBackground
                                 )
                             },
                             label = {
-                                SuperSmallTextComposable(
-                                    text = stringResource(bottomNavDestination.label),
-                                    color = AppColors.current.onBars
+                                Text(
+                                    stringResource(bottomNavDestination.label),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    color = MaterialTheme.colorScheme.onBackground
                                 )
                             },
-//                            colors = NavigationBarItemDefaults.colors(
-//                                indicatorColor = Color.Transparent,
-//                            ),
+                            colors = NavigationBarItemDefaults.colors(
+                                indicatorColor = MaterialTheme.colorScheme.primaryContainer,
+                                unselectedTextColor = MaterialTheme.colorScheme.onBackground,
+                                selectedTextColor = MaterialTheme.colorScheme.onBackground,
+                                selectedIconColor = MaterialTheme.colorScheme.onBackground,
+                                unselectedIconColor =MaterialTheme.colorScheme.onBackground
+                            ),
                             alwaysShowLabel = true,
                             selected = isSelected,
                             onClick = {

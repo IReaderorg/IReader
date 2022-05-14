@@ -11,8 +11,8 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import org.ireader.core_ui.theme.AppColors
 import org.ireader.core_ui.theme.LocalTransparentStatusBar
 import org.ireader.core_ui.theme.Shapes
-import org.ireader.core_ui.theme.Typography
 import org.ireader.core_ui.theme.isLight
+import org.ireader.core_ui.theme.themes.AppTypography
 
 @Composable
 fun AppTheme(
@@ -33,16 +33,16 @@ fun AppTheme(
             darkIcons = darkIcons,
             isNavigationBarContrastEnforced = false
         )
-//        systemUiController.setNavigationBarColor(
-//            color = materialColors.background,
-//            darkIcons = darkIcons,
-//        )
+        systemUiController.setNavigationBarColor(
+            color = materialColors.background,
+            darkIcons = darkIcons,
+        )
     }
     Coil.setImageLoader(vm.coilLoader)
     AppColors(
         materialColors = materialColors,
         extraColors = customColors,
-        typography = Typography,
+        typography = AppTypography,
         shape = Shapes
     ) {
         CompositionLocalProvider(

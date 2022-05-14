@@ -11,7 +11,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import kotlinx.coroutines.flow.collectLatest
@@ -23,7 +22,6 @@ import org.ireader.common_extensions.launchIO
 import org.ireader.common_models.BackUpBook
 import org.ireader.common_resources.UiEvent
 import org.ireader.common_resources.UiText
-import org.ireader.domain.ui.NavigationArgs
 import org.ireader.settings.setting.SettingsSection
 import org.ireader.settings.setting.backups.BackUpAndRestoreScreen
 import org.ireader.settings.setting.backups.BackupScreenViewModel
@@ -35,9 +33,6 @@ object BackupAndRestoreScreenSpec : ScreenSpec {
 
     override val navHostRoute: String = "backup_restore"
 
-    override val arguments: List<NamedNavArgument> = listOf(
-        NavigationArgs.showBottomNav
-    )
 
     @OptIn(
         androidx.compose.animation.ExperimentalAnimationApi::class,
@@ -150,7 +145,8 @@ object BackupAndRestoreScreenSpec : ScreenSpec {
             items = settingItems,
             onBackStack = {
                 navController.popBackStack()
-            }
+            },
+            snackbarHostState = snackBarHostState
         )
     }
 }

@@ -48,7 +48,7 @@ fun BigSizeTextComposable(
         modifier = modifier,
         text = text.asString(LocalContext.current),
         color = color ?: MaterialTheme.colorScheme.onSurface,
-        style = style ?: MaterialTheme.typography.displaySmall,
+        style = style ?: MaterialTheme.typography.titleSmall,
         fontWeight = fontWeight ?: FontWeight.Bold,
         overflow = overflow ?: TextOverflow.Ellipsis,
         textAlign = align ?: TextAlign.Start,
@@ -71,7 +71,7 @@ fun MidSizeTextComposable(
         modifier = modifier,
         text = text.asString(LocalContext.current),
         color = color ?: MaterialTheme.colorScheme.onSurface,
-        style = style ?: MaterialTheme.typography.displayMedium,
+        style = style ?: MaterialTheme.typography.bodyMedium,
         fontWeight = fontWeight ?: FontWeight.SemiBold,
         overflow = overflow ?: TextOverflow.Ellipsis,
         textAlign = align ?: TextAlign.Start,
@@ -204,7 +204,7 @@ fun AppTextField(
             Text(
                 modifier = Modifier.padding(horizontal = 0.dp),
                 text = hint.asString(LocalContext.current),
-                style = MaterialTheme.typography.displaySmall,
+                style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = .7F)
             )
         }

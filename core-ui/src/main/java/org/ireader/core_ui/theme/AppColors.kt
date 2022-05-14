@@ -29,9 +29,9 @@ class AppColors(
 ) {
 
     val primary get() = materialColors.primary
-    val primaryVariant get() = materialColors.primaryContainer
+    val primaryContainer get() = materialColors.primaryContainer
     val secondary get() = materialColors.secondary
-    val secondaryVariant get() = materialColors.secondaryContainer
+    val secondaryContainer get() = materialColors.secondaryContainer
     val background get() = materialColors.background
     val surface get() = materialColors.surface
     val error get() = materialColors.error

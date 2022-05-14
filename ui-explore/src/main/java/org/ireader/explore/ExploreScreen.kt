@@ -259,14 +259,14 @@ private fun BoxScope.ExploreScreenErrorComposable(
 
         Text(
             text = kaomoji,
-            style = MaterialTheme.typography.displayMedium.copy(
+            style =MaterialTheme.typography.bodyMedium.copy(
                 color = LocalContentColor.current.copy(alpha = ContentAlpha.medium()),
                 fontSize = 48.sp
             ),
         )
         Text(
             text = error,
-            style = MaterialTheme.typography.displayMedium.copy(
+            style =MaterialTheme.typography.bodyMedium.copy(
                 color = LocalContentColor.current.copy(alpha = androidx.compose.material.ContentAlpha.medium)
             ),
             textAlign = TextAlign.Center,

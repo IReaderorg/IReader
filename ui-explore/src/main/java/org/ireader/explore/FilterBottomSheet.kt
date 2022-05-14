@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.TextButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -41,12 +39,12 @@ fun FilterBottomSheet(
             .verticalScroll(scrollState)
     ) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            TextButton(onClick = {
+            androidx.compose.material3.TextButton(onClick = {
                 onReset()
             }, modifier = Modifier.width(92.dp), shape = RoundedCornerShape(4.dp)) {
                 MidSizeTextComposable(text = UiText.StringResource(R.string.reset), color = MaterialTheme.colorScheme.primary)
             }
-            Button(onClick = {
+            androidx.compose.material3.Button(onClick = {
                 onApply()
             }, modifier = Modifier.width(92.dp), shape = RoundedCornerShape(4.dp)) {
                 MidSizeTextComposable(text = UiText.StringResource(R.string.apply), color = MaterialTheme.colorScheme.onPrimary)

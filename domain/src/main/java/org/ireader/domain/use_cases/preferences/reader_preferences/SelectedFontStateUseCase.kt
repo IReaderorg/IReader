@@ -14,9 +14,9 @@ class SelectedFontStateUseCase(
     /**
      * fontIndex is the index of font which is in fonts list inside the Type package
      */
-    suspend fun readFont(): FontType {
+    fun readFont(): FontType {
         val fontType = prefs.font().get()
-        return fonts[fontType]
+        return fonts.getOrNull(fontType)?: FontType.Roboto
     }
 
     fun saveSelectableText(value: Boolean) {

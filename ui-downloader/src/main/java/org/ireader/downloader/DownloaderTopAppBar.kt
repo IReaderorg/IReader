@@ -87,7 +87,7 @@ private fun RegularTopBar(
             Text(
                 text = UiText.StringResource(R.string.downloads_queue).asString(),
                 color = MaterialTheme.colorScheme.onBackground,
-                style = MaterialTheme.typography.displayMedium,
+                style =MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Bold,
                 overflow = TextOverflow.Ellipsis
             )

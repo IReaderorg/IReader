@@ -23,8 +23,9 @@ class AppearanceViewModel @Inject constructor(
     val state = _state
 
     val themeMode = uiPreferences.themeMode().asState()
-    val lightTheme = uiPreferences.lightTheme().asState()
-    val darkTheme = uiPreferences.darkTheme().asState()
+    val colorTheme = uiPreferences.colorTheme().asState()
+//    val lightTheme = uiPreferences.lightTheme().asState()
+//    val darkTheme = uiPreferences.darkTheme().asState()
     val lightColors = uiPreferences.getLightColors().asState(scope)
     val darkColors = uiPreferences.getDarkColors().asState(scope)
 

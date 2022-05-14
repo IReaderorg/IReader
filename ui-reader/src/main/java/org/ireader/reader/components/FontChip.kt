@@ -72,7 +72,7 @@ fun FontChip(
                     contentAlignment = Alignment.Center
                 ) {
                     CaptionTextComposable(
-                        text = UiText.DynamicString(fonts[index].fontName),
+                        text = UiText.DynamicString(fonts.getOrNull(index)?.fontName?:"Unknown"),
                         maxLine = 1,
                         align = TextAlign.Center,
                         modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp)

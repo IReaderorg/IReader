@@ -122,7 +122,7 @@ object BookDetailScreenSpec : ScreenSpec {
                                 url = (source).baseUrl + getUrlWithoutDomain(
                                     book.link,
                                 ),
-                                sourceId = source.id,
+                                sourceId = book.sourceId,
                                 bookId = book.id,
                                 chapterId = null
                             )

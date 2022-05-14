@@ -63,9 +63,7 @@ class WebViewPageModel @Inject constructor(
         sourceId?.let {
             viewModelScope.launch {
                 extensions.get(sourceId)?.let {
-                    if (it is CatalogSource) {
                         catalog = it
-                    }
                 }
             }
         }

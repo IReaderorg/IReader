@@ -20,9 +20,11 @@ import org.ireader.core_ui.theme.ExtraColors
 import org.ireader.core_ui.theme.Theme
 import org.ireader.core_ui.theme.ThemeMode
 import org.ireader.core_ui.theme.asState
+import org.ireader.core_ui.theme.dark
 import org.ireader.core_ui.theme.getDarkColors
 import org.ireader.core_ui.theme.getLightColors
 import org.ireader.core_ui.theme.isLight
+import org.ireader.core_ui.theme.light
 import org.ireader.core_ui.theme.themes
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import javax.inject.Inject
@@ -33,8 +35,9 @@ class AppThemeViewModel @Inject constructor(
     coilLoaderFactory: org.ireader.image_loader.coil.CoilLoaderFactory,
 ) : BaseViewModel() {
     private val themeMode by uiPreferences.themeMode().asState()
-    private val lightTheme by uiPreferences.lightTheme().asState()
-    private val darkTheme by uiPreferences.darkTheme().asState()
+    private val colorTheme by uiPreferences.colorTheme().asState()
+//    private val lightTheme by uiPreferences.lightTheme().asState()
+//    private val darkTheme by uiPreferences.darkTheme().asState()
 
     private val baseThemeJob = SupervisorJob()
     private val baseThemeScope = CoroutineScope(baseThemeJob)
@@ -50,7 +53,7 @@ class AppThemeViewModel @Inject constructor(
     }
     @Composable
     fun getColors(): Pair<ColorScheme, ExtraColors> {
-        val baseTheme = getBaseTheme(themeMode, lightTheme, darkTheme)
+        val baseTheme = getBaseTheme(themeMode, colorTheme)
         val isLight = baseTheme.materialColors.isLight()
         val colors = remember(baseTheme.materialColors.isLight()) {
             baseThemeJob.cancelChildren()
@@ -69,23 +72,27 @@ class AppThemeViewModel @Inject constructor(
     @Composable
     private fun getBaseTheme(
         themeMode: ThemeMode,
-        lightTheme: Int,
-        darkTheme: Int,
+        colorTheme: Int,
     ): Theme {
         @Composable
-        fun getTheme(id: Int, fallbackIsLight: Boolean): Theme {
-            return themes.find { it.id == id }
-                ?: themes.first { it.materialColors.isLight() == fallbackIsLight }
+        fun getTheme(fallbackIsLight: Boolean): Theme {
+            return themes.firstOrNull { it.id == colorTheme }.let {
+                if (fallbackIsLight) {
+                    it?.light()
+                }else {
+                    it?.dark()
+                }
+            }?: themes.first { it.lightColor.isLight() == fallbackIsLight }.light()
         }
 
         return when (themeMode) {
             ThemeMode.System -> if (!isSystemInDarkTheme()) {
-                getTheme(lightTheme, true)
+                getTheme(true,)
             } else {
-                getTheme(darkTheme, false)
+                getTheme(false)
             }
-            ThemeMode.Light -> getTheme(lightTheme, true)
-            ThemeMode.Dark -> getTheme(darkTheme, false)
+            ThemeMode.Light -> getTheme(true)
+            ThemeMode.Dark -> getTheme(false)
         }
     }
 

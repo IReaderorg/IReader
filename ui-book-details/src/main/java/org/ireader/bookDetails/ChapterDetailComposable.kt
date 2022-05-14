@@ -32,9 +32,9 @@ fun ChapterDetailComposable(
 
             Text(
                 text = if (name.contains(chapterNumber)) name else chapterNumber,
-                style = MaterialTheme.typography.displayMedium
+                style = MaterialTheme.typography.labelMedium
             )
-            Text(text = dateUploaded, style = MaterialTheme.typography.displayMedium)
+            Text(text = dateUploaded, style = MaterialTheme.typography.labelSmall)
         }
     }
 }

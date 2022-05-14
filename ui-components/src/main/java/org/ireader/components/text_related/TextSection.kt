@@ -21,7 +21,7 @@ fun TextSection(
     text: UiText,
     toUpper: Boolean = true,
     padding: PaddingValues = PaddingValues(16.dp),
-    style: TextStyle = MaterialTheme.typography.displayMedium,
+    style: TextStyle = MaterialTheme.typography.labelMedium,
 ) {
     Row(
         modifier = Modifier

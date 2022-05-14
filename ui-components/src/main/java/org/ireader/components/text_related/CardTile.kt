@@ -28,14 +28,14 @@ fun CardTile(
         Text(
             modifier = modifier,
             text = title,
-            style = MaterialTheme.typography.headlineSmall,
+            style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground
         )
         Row(modifier = modifier, horizontalArrangement = Arrangement.SpaceBetween) {
             Text(
                 text = subtitle, color = MaterialTheme.colorScheme.onBackground,
-                style = MaterialTheme.typography.displayMedium
+                style =MaterialTheme.typography.bodyMedium
             )
             trailing()
         }

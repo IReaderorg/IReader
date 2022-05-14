@@ -194,7 +194,7 @@ fun SourceHeader(
             text = LocaleHelper.getSourceDisplayName(language, context),
             modifier = modifier
                 .padding(horizontal = horizontalPadding, vertical = 8.dp),
-            style = MaterialTheme.typography.headlineSmall,
+            style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurface,
         )
     }

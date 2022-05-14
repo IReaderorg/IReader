@@ -29,7 +29,7 @@ fun DisplayScreen(
         TextSection(
             text = UiText.StringResource( R.string.display_mode),
             padding = PaddingValues(vertical = 8.dp, horizontal = 16.dp),
-            style = MaterialTheme.typography.displayMedium,
+            style =MaterialTheme.typography.bodyMedium,
         )
         layouts.forEach { layout ->
             RadioButton(

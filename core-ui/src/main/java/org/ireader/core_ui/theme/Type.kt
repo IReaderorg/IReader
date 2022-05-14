@@ -1,7 +1,6 @@
 package org.ireader.core_ui.theme
 
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -74,25 +73,6 @@ val comfortaa = FontFamily(
         Font(R.font.comfortaa_font_regular, weight = FontWeight.W400),
         Font(R.font.comfortaa_font_regular, weight = FontWeight.SemiBold),
     )
-)
-
-// Set of Material typography styles to start with
-val Typography = androidx.compose.material3.Typography(
-    displayLarge = TextStyle(fontFamily = sourceSansPro, fontWeight = FontWeight.W700),
-    displayMedium = TextStyle(fontFamily = sourceSansPro, fontWeight = FontWeight.W700),
-    displaySmall = TextStyle(fontFamily = sourceSansPro, fontWeight = FontWeight.W700),
-    headlineLarge = TextStyle(fontFamily = sourceSansPro, fontWeight = FontWeight.W700),
-    headlineMedium = TextStyle(fontFamily = sourceSansPro, fontWeight = FontWeight.W700),
-    headlineSmall = TextStyle(fontFamily = sourceSansPro, fontWeight = FontWeight.W700),
-    titleLarge = TextStyle(fontFamily = sourceSansPro, fontWeight = FontWeight.W700),
-    titleMedium = TextStyle(fontFamily = sourceSansPro, fontWeight = FontWeight.W700),
-    titleSmall = TextStyle(fontFamily = sourceSansPro, fontWeight = FontWeight.W700),
-    labelLarge = TextStyle(fontFamily = sourceSansPro, fontWeight = FontWeight.W600),
-    labelMedium = TextStyle(fontFamily = sourceSansPro, fontWeight = FontWeight.W500),
-    labelSmall = TextStyle(fontFamily = sourceSansPro, fontWeight = FontWeight.W500),
-    bodyLarge = TextStyle(fontFamily = sourceSansPro, fontWeight = FontWeight.W500),
-    bodyMedium = TextStyle(fontFamily = sourceSansPro, fontWeight = FontWeight.W500),
-    bodySmall = TextStyle(fontFamily = sourceSansPro, fontWeight = FontWeight.W500),
 )
 
 val fonts = listOf<FontType>(

@@ -56,7 +56,7 @@ fun ChapterListItemComposable(
                 } else {
                     MaterialTheme.colorScheme.primary
                 },
-                style = MaterialTheme.typography.displayMedium,
+                style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.SemiBold,
                 overflow = TextOverflow.Ellipsis,
             )

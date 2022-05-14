@@ -170,7 +170,7 @@ fun BookDetailScreen(
                                     Text(
                                         text = "",
                                         color = MaterialTheme.colorScheme.onBackground,
-                                        style = MaterialTheme.typography.displaySmall
+                                        style = MaterialTheme.typography.bodyLarge
                                     )
                                     DotsFlashing(chapterState.chapterIsLoading)
 

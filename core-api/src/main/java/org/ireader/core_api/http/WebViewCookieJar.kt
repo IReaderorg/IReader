@@ -30,7 +30,7 @@ class WebViewCookieJar(private val cookiesStorage: CookiesStorage) : CookieJar {
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {
 
-        val urlString = convertGoogleTranslationUrlToDecoded(url.host)
+        val urlString = convertGoogleTranslationUrlToDecoded(url.host).replace("http://","https://")
         cookies.forEach { manager.setCookie(urlString, it.toString()) }
         scope.launch {
             cookies.forEach {  cookiesStorage.addCookie(Url(urlString),it.toCookies()) }

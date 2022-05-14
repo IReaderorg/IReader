@@ -4,6 +4,16 @@ import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
+import org.ireader.core_ui.theme.themes.DarkThemeColorsStrawberries
+import org.ireader.core_ui.theme.themes.DarkThemeColorsTachiyomi
+import org.ireader.core_ui.theme.themes.DarkThemeColorsTako
+import org.ireader.core_ui.theme.themes.GreenAppleDarkThemeColors
+import org.ireader.core_ui.theme.themes.GreenAppleLightThemeColors
+import org.ireader.core_ui.theme.themes.LightThemeColorsStrawberries
+import org.ireader.core_ui.theme.themes.LightThemeColorsTachiyomi
+import org.ireader.core_ui.theme.themes.LightThemeColorsTako
+import org.ireader.core_ui.theme.themes.MidNightDarkColorScheme
+import org.ireader.core_ui.theme.themes.MidNightLightColorScheme
 import org.ireader.core_ui.ui.Colour
 
 data class Theme(
@@ -11,71 +21,35 @@ data class Theme(
     val materialColors: ColorScheme,
     val extraColors: ExtraColors,
 )
+data class BaseTheme(
+    val id: Int,
+    val lightColor: ColorScheme,
+    val darkColor: ColorScheme,
+    val lightExtraColors: ExtraColors,
+    val darkExtraColors: ExtraColors,
+)
 
-val themes = listOf(
-    Theme(
-        1, lightColorScheme(),
-        ExtraColors(
-            bars = androidx.compose.ui.graphics.Color.White,
-            onBars = Color.Black
-        )
-    ),
-    Theme(
-        2,
-        lightColorScheme(
-            primary = Color(0xFF2979FF),
-            primaryContainer = Color(0xFF2979FF),
-            onPrimary = Color.White,
-            secondary = Color(0xFF2979FF),
-            secondaryContainer = Color(0xFF2979FF),
-            onSecondary = Color.White
-        ),
-        ExtraColors(
-            bars = Color(0xFF54759E),
-            onBars = Color.White
-        )
-    ),
-    Theme(
-        3, darkColorScheme(),
-        ExtraColors(
-            bars = Color(0xFF212121),
-            onBars = Color.White
-        )
-    ),
-    Theme(
-        4,
-        darkColorScheme(
-            primary = Color.Black,
-            background = Color.Black
-        ),
-        ExtraColors(
-            bars = Color.Black,
-            onBars = Color.White
-        )
-    ),
-    Theme(
-        5,
-        darkColorScheme(
-            primary = Colour.blue_accent,
-            primaryContainer = Colour.blue_600,
-            onPrimary = Colour.black_900,
-            secondary = Colour.blue_accent,
-            onSecondary = Colour.black_900,
-            background = Color(0xFF121212),
-            surface = Color(0xFF000000),
-            onBackground = Colour.white_50,
-            onSurface = Colour.white_50,
-            error = Colour.red_600,
-            onError = Colour.black_900,
-        ),
-        ExtraColors(
-            bars = Color(0xFF181818),
-            onBars = Color.White
-        )
-    ),
-    Theme(
-        6,
-        lightColorScheme(
+fun BaseTheme.light():Theme {
+    return Theme(
+        id,
+        lightColor,
+        lightExtraColors
+    )
+}
+fun BaseTheme.dark():Theme {
+    return Theme(
+        id,
+        darkColor,
+        darkExtraColors
+    )
+}
+
+
+
+val themes = listOf<BaseTheme>(
+    BaseTheme(
+        id = 1,
+        lightColor = lightColorScheme(
             primary = Colour.blue_accent,
             primaryContainer = Colour.blue_700,
             onPrimary = Colour.white_50,
@@ -88,48 +62,94 @@ val themes = listOf(
             error = Colour.red_600,
             onError = Colour.white_50,
         ),
-        ExtraColors(
+        darkColor = darkColorScheme(
+            primary = Colour.blue_accent,
+            primaryContainer = Colour.blue_600,
+            onPrimary = Colour.black_900,
+            secondary = Colour.blue_accent,
+            onSecondary = Colour.black_900,
+            background = Color(0xFF121212),
+            surface = Color(0xFF000000),
+            onBackground = Colour.white_50,
+            onSurface = Colour.white_50,
+            error = Colour.red_600,
+            onError = Colour.black_900,
+        ),
+        lightExtraColors = ExtraColors(
             bars = Color.White,
             onBars = Color.Black
-        )
-    ),
-    // Pure white
-    Theme(
-        1, lightColorScheme(), ExtraColors(
-            bars = Color.White,
-            onBars = Color.Black
-        )
-    ),
-    // Tachiyomi 0.x default colors
-    Theme(
-        2, lightColorScheme(
-            primary = Color(0xFF2979FF),
-            primaryContainer = Color(0xFF2979FF),
-            onPrimary = Color.White,
-            secondary = Color(0xFF2979FF),
-            secondaryContainer = Color(0xFF2979FF),
-            onSecondary = Color.White
-        ), ExtraColors(
-            bars = Color(0xFF54759E),
+        ),
+        darkExtraColors = ExtraColors(
+            bars = Color(0xFF181818),
             onBars = Color.White
+        ),
+
+    ),
+    BaseTheme(
+        id = 2,
+        lightColor = MidNightLightColorScheme,
+        darkColor = MidNightDarkColorScheme,
+        darkExtraColors =ExtraColors(
+            bars = MidNightDarkColorScheme.surface,
+            onBars = MidNightDarkColorScheme.onSurface
+        ),
+        lightExtraColors = ExtraColors(
+            bars = MidNightLightColorScheme.surface,
+            onBars = MidNightLightColorScheme.onSurface
         )
     ),
-    // Tachiyomi 0.x dark theme
-    Theme(
-        3, darkColorScheme(), ExtraColors(
-            bars = Color(0xFF212121),
-            onBars = Color.White
+    BaseTheme(
+        id = 3,
+        lightColor = GreenAppleLightThemeColors,
+        darkColor = GreenAppleDarkThemeColors,
+        darkExtraColors =ExtraColors(
+            bars = GreenAppleDarkThemeColors.surface,
+            onBars = GreenAppleDarkThemeColors.onSurface
+        ),
+        lightExtraColors = ExtraColors(
+            bars = GreenAppleLightThemeColors.surface,
+            onBars = GreenAppleLightThemeColors.onSurface
         )
     ),
-    // AMOLED theme
-    Theme(
-        4, darkColorScheme(
-            primary = Color.Black,
-            onPrimary = Color.White,
-            background = Color.Black
-        ), ExtraColors(
-            bars = Color.Black,
-            onBars = Color.White
+    BaseTheme(
+        id = 4,
+        lightColor = LightThemeColorsStrawberries,
+        darkColor = DarkThemeColorsStrawberries,
+        darkExtraColors =ExtraColors(
+            bars = DarkThemeColorsStrawberries.surface,
+            onBars = DarkThemeColorsStrawberries.onSurface
+        ),
+        lightExtraColors = ExtraColors(
+            bars = LightThemeColorsStrawberries.surface,
+            onBars = LightThemeColorsStrawberries.onSurface
         )
     ),
+    BaseTheme(
+        id = 5,
+        lightColor = LightThemeColorsTachiyomi,
+        darkColor = DarkThemeColorsTachiyomi,
+        darkExtraColors =ExtraColors(
+            bars = DarkThemeColorsTachiyomi.surface,
+            onBars = DarkThemeColorsTachiyomi.onSurface
+        ),
+        lightExtraColors = ExtraColors(
+            bars = LightThemeColorsTachiyomi.surface,
+            onBars = LightThemeColorsTachiyomi.onSurface
+        )
+    ),
+    BaseTheme(
+        id = 6,
+        lightColor = LightThemeColorsTako,
+        darkColor = DarkThemeColorsTako,
+        darkExtraColors =ExtraColors(
+            bars = DarkThemeColorsTako.surface,
+            onBars = DarkThemeColorsTako.onSurface
+        ),
+        lightExtraColors = ExtraColors(
+            bars = LightThemeColorsTako.surface,
+            onBars = LightThemeColorsTako.onSurface
+        )
+    ),
+
+
 )

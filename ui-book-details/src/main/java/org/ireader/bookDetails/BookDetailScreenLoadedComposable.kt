@@ -146,7 +146,7 @@ fun BookDetailScreenLoadedComposable(
                             onLongClick = { context.copyToClipboard(book.title, book.title) }
                         ),
                         text = book.title,
-                        style = MaterialTheme.typography.headlineSmall,
+                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground,
                         overflow = TextOverflow.Ellipsis
@@ -154,7 +154,7 @@ fun BookDetailScreenLoadedComposable(
                     if (book.author.isNotBlank()) {
                         Text(
                             text = "Author: ${book.author}",
-                            style = MaterialTheme.typography.displaySmall,
+                            style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onBackground.copy(alpha = .5f),
                             overflow = TextOverflow.Ellipsis
@@ -166,7 +166,7 @@ fun BookDetailScreenLoadedComposable(
                     ) {
                         Text(
                             text = book.getStatusByName(),
-                            style = MaterialTheme.typography.displaySmall,
+                            style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onBackground.copy(alpha = .5f),
                             overflow = TextOverflow.Ellipsis
@@ -177,7 +177,7 @@ fun BookDetailScreenLoadedComposable(
                                 text = source.name,
                                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = .5f),
                                 fontWeight = FontWeight.Bold,
-                                style = MaterialTheme.typography.displaySmall,
+                                style = MaterialTheme.typography.labelMedium,
                                 overflow = TextOverflow.Ellipsis
                             )
                         }

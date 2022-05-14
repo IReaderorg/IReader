@@ -36,7 +36,7 @@ object WebViewScreenSpec : ScreenSpec {
 
     fun buildRoute(
         url: String? = null,
-        sourceId: Long,
+        sourceId: Long?=null,
         bookId: Long? = null,
         chapterId: Long? = null,
     ): String {

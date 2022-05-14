@@ -11,12 +11,8 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
         return preferenceStore.getEnum("theme_mode", ThemeMode.System)
     }
 
-    fun lightTheme(): Preference<Int> {
-        return preferenceStore.getInt("theme_light", 6)
-    }
-
-    fun darkTheme(): Preference<Int> {
-        return preferenceStore.getInt("theme_dark", 5)
+    fun colorTheme(): Preference<Int> {
+        return preferenceStore.getInt("color_theme", 6)
     }
 
     fun colorPrimaryLight(): Preference<Int> {

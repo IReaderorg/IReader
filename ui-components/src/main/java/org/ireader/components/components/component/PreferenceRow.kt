@@ -242,13 +242,15 @@ fun <Key> ChoicePreference(
     preference: PreferenceMutableState<Key>,
     choices: Map<Key, Int>,
     title: Int,
-    subtitle: String? = null
+    subtitle: String? = null,
+    onValue:((Key)->Unit)? = null
 ) {
     ChoicePreference(
         preference,
         choices.mapValues {map -> stringResource(map.value) },
         stringResource(title),
-        subtitle
+        subtitle,
+        onValue
     )
 }
 
@@ -258,7 +260,8 @@ fun <Key> ChoicePreference(
     preference: PreferenceMutableState<Key>,
     choices: Map<Key, String>,
     title: String,
-    subtitle: String? = null
+    subtitle: String? = null,
+    onValue:((Key)->Unit)? = null
 ) {
     var showDialog by remember { mutableStateOf(false) }
 
@@ -280,7 +283,12 @@ fun <Key> ChoicePreference(
                                 .requiredHeight(48.dp)
                                 .fillMaxWidth()
                                 .clickable(onClick = {
-                                    preference.value = value
+                                    if (onValue != null) {
+                                        onValue(value)
+                                    } else {
+                                        preference.value = value
+                                    }
+
                                     showDialog = false
                                 }),
                             verticalAlignment = Alignment.CenterVertically

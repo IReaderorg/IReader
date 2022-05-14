@@ -28,7 +28,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.ireader.common_resources.UiText
@@ -40,7 +39,9 @@ import org.ireader.components.reusable_composable.TopAppBarBackButton
 import org.ireader.core_ui.theme.AppColors
 import org.ireader.core_ui.theme.Theme
 import org.ireader.core_ui.theme.ThemeMode
+import org.ireader.core_ui.theme.dark
 import org.ireader.core_ui.theme.isLight
+import org.ireader.core_ui.theme.light
 import org.ireader.core_ui.theme.themes
 import org.ireader.ui_appearance.R
 
@@ -55,7 +56,10 @@ fun AppearanceSettingScreen(
     val customizedColors = vm.getCustomizedColors()
     val isLight = MaterialTheme.colorScheme.isLight()
     val themesForCurrentMode = remember(isLight) {
-        themes.filter { it.materialColors.isLight() == isLight }
+        if (isLight)
+        themes.filter { it.light().materialColors.isLight() == isLight }.map { it.light() }
+        else
+            themes.filter { it.light().materialColors.isLight() != isLight }.map { it.dark() }
     }
 
     Scaffold(
@@ -82,7 +86,10 @@ fun AppearanceSettingScreen(
                         ThemeMode.Dark to R.string.dark
                     ),
                     title = R.string.theme,
-                    subtitle = null
+                    subtitle = null,
+                    onValue = {
+                        vm.saveNightModePreferences(it)
+                    }
                 )
             }
             item {
@@ -95,7 +102,7 @@ fun AppearanceSettingScreen(
                 LazyRow(modifier = Modifier.padding(horizontal = 8.dp)) {
                     items(items = themesForCurrentMode) { theme ->
                         ThemeItem(theme, onClick = {
-                            (if (isLight) vm.lightTheme else vm.darkTheme).value = it.id
+                            vm.colorTheme.value = it.id
                             customizedColors.primaryState.value = it.materialColors.primary
                             customizedColors.secondaryState.value = it.materialColors.secondary
                             customizedColors.barsState.value = it.extraColors.bars
@@ -128,16 +135,6 @@ fun AppearanceSettingScreen(
             }
         }
     }
-}
-
-
-@Composable
-private fun parseThemeName(mode:ThemeMode): String {
-    return stringResource(id = when(mode){
-        ThemeMode.System -> R.string.follow_system_settings
-        ThemeMode.Light -> R.string.light
-        ThemeMode.Dark -> R.string.dark
-    })
 }
 
 @Composable

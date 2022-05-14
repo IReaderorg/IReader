@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 private const val COLLAPSED_MAX_LINES = 3
 
@@ -70,7 +71,9 @@ fun BookSummaryDescription(
                         setIsExpandable(result.didOverflowHeight)
                     }
                 },
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.bodyMedium,
+                lineHeight = 18.sp
             )
             if (isExpandable == true) {
                 if (!isExpanded) {
