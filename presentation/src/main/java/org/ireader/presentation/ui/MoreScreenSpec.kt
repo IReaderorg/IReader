@@ -6,6 +6,8 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreHoriz
+import androidx.compose.material3.DrawerState
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -31,13 +33,16 @@ object MoreScreenSpec : BottomNavScreenSpec {
     override val arguments: List<NamedNavArgument> = listOf(
         NavigationArgs.showBottomNav
     )
+    @ExperimentalMaterial3Api
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun TopBar(
         navController: NavController,
         navBackStackEntry: NavBackStackEntry,
         snackBarHostState: SnackbarHostState,
-        sheetState: ModalBottomSheetState
+
+        sheetState: ModalBottomSheetState,
+        drawerState: DrawerState
     ) {
         TitleToolbar(
             title = stringResource(org.ireader.ui_settings.R.string.more),
@@ -46,19 +51,20 @@ object MoreScreenSpec : BottomNavScreenSpec {
     }
 
     @OptIn(
-         androidx.compose.animation.ExperimentalAnimationApi::class,
-        androidx.compose.material.ExperimentalMaterialApi::class
+        ExperimentalMaterialApi::class,
+        ExperimentalMaterial3Api::class
     )
     @Composable
     override fun Content(
         navController: NavController,
         navBackStackEntry: NavBackStackEntry,
         snackBarHostState: SnackbarHostState,
-        scaffoldPadding:PaddingValues,
-        sheetState: ModalBottomSheetState
+        scaffoldPadding: PaddingValues,
+        sheetState: ModalBottomSheetState,
+        drawerState: DrawerState
     ) {
         val uriHandler = LocalUriHandler.current
-        val vm: MainSettingScreenViewModel = hiltViewModel()
+        val vm: MainSettingScreenViewModel = hiltViewModel(navBackStackEntry)
 
 
         MoreScreen(

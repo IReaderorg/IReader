@@ -1,5 +1,8 @@
 package org.ireader.reader.viewmodel
 
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -19,6 +22,10 @@ import javax.inject.Inject
 
 open class ReaderScreenStateImpl @Inject constructor() : ReaderScreenState {
     override var isLoading by mutableStateOf<Boolean>(false)
+    override var drawerListState by mutableStateOf<LazyListState?>(null)
+    override var readerScrollState by mutableStateOf<LazyListState?>(null)
+    @ExperimentalMaterialApi
+    override var modalBottomSheetState by mutableStateOf<ModalBottomSheetState?>(null)
     override var isDrawerAsc by mutableStateOf<Boolean>(true)
     override var drawerChapters: State<List<Chapter>> = derivedStateOf { if (isDrawerAsc) stateChapters else stateChapters.reversed() }
     override var isReaderModeEnable by mutableStateOf<Boolean>(true)
@@ -52,10 +59,15 @@ interface ReaderScreenState {
     var isChapterLoaded: State<Boolean>
     var book: Book?
     val stateContent: List<String>
+
+    var drawerListState:LazyListState?
+    var readerScrollState:LazyListState?
+    @OptIn(ExperimentalMaterialApi::class) var modalBottomSheetState: ModalBottomSheetState?
 }
 
 open class ReaderScreenPreferencesStateImpl @Inject constructor() : ReaderScreenPreferencesState {
     override var isAsc by mutableStateOf<Boolean>(true)
+
     override var fontSize by mutableStateOf<Int>(18)
     override var font by mutableStateOf<FontType>(FontType.Poppins)
     override var brightness by mutableStateOf<Float>(0.3f)

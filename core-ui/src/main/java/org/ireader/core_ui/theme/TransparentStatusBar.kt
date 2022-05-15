@@ -8,7 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 
 @Composable
-fun TransparentStatusBar(content: @Composable () -> Unit) {
+fun TransparentStatusBar(enable:Boolean = false, content: @Composable () -> Unit) {
     val state = LocalTransparentStatusBar.current
     DisposableEffect(Unit) {
         state.enabled = true

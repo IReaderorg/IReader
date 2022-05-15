@@ -55,7 +55,9 @@ class TTSViewModel @Inject constructor(
         kotlin.runCatching {
             val readingParagraph =
                 savedStateHandle.get<String>(NavigationArgs.readingParagraph.name)
-            if (readingParagraph != null && readingParagraph.toInt() < ttsState.ttsContent?.value?.lastIndex ?: 0) {
+            if (readingParagraph != null && readingParagraph.toInt() < (ttsState.ttsContent?.value?.lastIndex
+                    ?: 0)
+            ) {
                 ttsState.currentReadingParagraph = readingParagraph.toInt()
             }
 

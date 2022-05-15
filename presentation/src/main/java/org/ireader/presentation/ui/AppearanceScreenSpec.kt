@@ -1,9 +1,12 @@
 package org.ireader.presentation.ui
 
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
+import androidx.compose.material3.DrawerState
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -22,13 +25,15 @@ object AppearanceScreenSpec : ScreenSpec {
 
     override val navHostRoute: String = "appearance_setting_route"
 
+    @ExperimentalMaterial3Api
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun TopBar(
         navController: NavController,
         navBackStackEntry: NavBackStackEntry,
         snackBarHostState: SnackbarHostState,
-        sheetState: ModalBottomSheetState
+        sheetState: ModalBottomSheetState,
+        drawerState: DrawerState
     ) {
         Toolbar(
             title = {
@@ -43,18 +48,19 @@ object AppearanceScreenSpec : ScreenSpec {
     }
 
     @OptIn(
-        androidx.compose.animation.ExperimentalAnimationApi::class,
-        androidx.compose.material.ExperimentalMaterialApi::class
+        ExperimentalAnimationApi::class,
+        ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class
     )
     @Composable
     override fun Content(
         navController: NavController,
         navBackStackEntry: NavBackStackEntry,
         snackBarHostState: SnackbarHostState,
-        scaffoldPadding:PaddingValues,
-        sheetState: ModalBottomSheetState
+        scaffoldPadding: PaddingValues,
+        sheetState: ModalBottomSheetState,
+        drawerState: DrawerState
     ) {
-        val viewModel: AppearanceViewModel = hiltViewModel()
+        val viewModel: AppearanceViewModel = hiltViewModel(navBackStackEntry)
         AppearanceSettingScreen(
             modifier = Modifier.padding(scaffoldPadding),
             saveDarkModePreference = { theme ->

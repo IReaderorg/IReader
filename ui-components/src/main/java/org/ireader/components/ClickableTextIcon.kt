@@ -1,12 +1,13 @@
-package org.ireader.core_ui.ui_components
+package org.ireader.components
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Shapes
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -14,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import org.ireader.common_resources.UiText
 
 @Composable
@@ -28,10 +28,14 @@ fun ClickableTextIcon(
     Button(
         modifier = modifier,
         onClick = { onClick() },
-        border = BorderStroke(0.dp, MaterialTheme.colorScheme.background),
-        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.background)
+        border = null,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.background,
+        ),
+        shape = Shapes.None,
     ) {
         Column(
+            modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {

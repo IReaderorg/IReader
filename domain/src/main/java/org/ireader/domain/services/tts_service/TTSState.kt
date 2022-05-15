@@ -2,6 +2,7 @@ package org.ireader.domain.services.tts_service
 
 import android.speech.tts.Voice
 import android.support.v4.media.MediaMetadataCompat
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -52,12 +53,14 @@ interface TTSState {
     val uiPage : State<Int>
     val uiChapters : State<List<Chapter>>
     var isDrawerAsc : Boolean
+    var drawerState : LazyListState?
 
 }
 
 class TTSStateImpl @Inject constructor() : TTSState {
     override var font by mutableStateOf<FontType>(FontType.Poppins)
     override var lineHeight by mutableStateOf<Int>(25)
+    override var drawerState by mutableStateOf<LazyListState?>(null)
     override var isServiceConnected by mutableStateOf<Boolean>(false)
 
     override var fontSize by mutableStateOf<Int>(18)
@@ -93,12 +96,5 @@ class TTSStateImpl @Inject constructor() : TTSState {
     override var uiPage : State<Int> = derivedStateOf { meta?.getLong(TTSService.PROGRESS)?.toInt()?:0 }
     override var uiChapters : State<List<Chapter>> = derivedStateOf { if (!isDrawerAsc) ttsChapters else ttsChapters.reversed() }
     override var isDrawerAsc :Boolean by mutableStateOf(false)
-
-}
-
-interface TTSSUIState {
-    var uiBook : Book?
-    var uiChapter: Chapter?
-    var uiChapters: List<Chapter>
 
 }

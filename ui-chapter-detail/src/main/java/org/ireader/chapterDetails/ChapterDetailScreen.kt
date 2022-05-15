@@ -12,20 +12,17 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Close
@@ -36,8 +33,6 @@ import androidx.compose.material.icons.filled.GetApp
 import androidx.compose.material.icons.filled.PlaylistAddCheck
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -53,15 +48,11 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
-import org.ireader.chapterDetails.viewmodel.ChapterDetailEvent
 import org.ireader.chapterDetails.viewmodel.ChapterDetailViewModel
 import org.ireader.common_resources.UiText
 import org.ireader.components.components.ChapterListItemComposable
 import org.ireader.components.list.scrollbars.LazyColumnScrollbar
 import org.ireader.components.reusable_composable.AppIconButton
-import org.ireader.components.reusable_composable.BigSizeTextComposable
-import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.core_ui.ui.EmptyScreen
 import org.ireader.core_ui.ui.LoadingScreen
 import org.ireader.explore.webview.CustomTextField
@@ -75,173 +66,108 @@ fun ChapterDetailScreen(
     vm: ChapterDetailViewModel,
     onItemClick: (index: Int) -> Unit,
     onLongItemClick: (index: Int) -> Unit,
-    onPopBackStack: () -> Unit,
+    scaffoldPadding : PaddingValues
 ) {
-    val book = vm.book
     val context = LocalContext.current
     val scrollState = rememberLazyListState()
+    LaunchedEffect(key1 = scrollState.hashCode() ) {
+        vm.scrollState = scrollState
+    }
     val focusManager = LocalFocusManager.current
-//    LaunchedEffect(key1 = true) {
-//        vm.book?.let { vm.getLocalBookById(it.id) }
-//    }
+
     LaunchedEffect(key1 = true) {
         vm.book?.let { book ->
             vm.getLastReadChapter(book)
         }
     }
     val scope = rememberCoroutineScope()
-    ModalNavigationDrawer(
-        drawerContent = {
-            Column(
-                modifier = modifier
-                    .fillMaxSize()
-                    .systemBarsPadding(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Top
-            ) {
-                Spacer(modifier = modifier.height(5.dp))
-                BigSizeTextComposable(text = stringResource(R.string.advance_setting))
-
-                Spacer(modifier = modifier.height(5.dp))
-                Divider(modifier = modifier.fillMaxWidth(), thickness = 1.dp)
-                TextButton(
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = { vm.reverseChapterInDB() }
-                ) {
-                    MidSizeTextComposable(text = UiText.StringResource(R.string.reverse_chapter_in_db))
-                }
-                TextButton(
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = { vm.autoSortChapterInDB() }
-                ) {
-                    MidSizeTextComposable(text = UiText.StringResource(R.string.auto_sort_chapters_in_db))
-                }
-            }
-        },
-    ) {
-        Scaffold(
-            modifier = Modifier,
-            topBar = {
-                ChapterDetailTopAppBar(
-                    state = vm,
-                    onClickCancelSelection = { vm.selection.clear() },
-                    onClickSelectAll = {
-                        vm.selection.clear()
-                        vm.selection.addAll(vm.chapters.map { it.id })
-                        vm.selection.distinct()
-                    },
-                    onClickFlipSelection = {
-                        val ids: List<Long> =
-                            vm.chapters.map { it.id }
-                                .filterNot { it in vm.selection }.distinct()
-                        vm.selection.clear()
-                        vm.selection.addAll(ids)
-                    },
-                    onReverseClick = {
-                        vm.onEvent(ChapterDetailEvent.ToggleOrder)
-                    },
-                    onPopBackStack = onPopBackStack,
-                    onMap = {
-                        scope.launch {
-                            try {
-                                scrollState.scrollToItem(
-                                    vm.getLastChapterIndex(),
-                                    -scrollState.layoutInfo.viewportEndOffset / 2
-                                )
-                            } catch (e: Throwable) {
+    Box(modifier = Modifier
+        .padding(scaffoldPadding)
+        .fillMaxSize()) {
+        Column {
+            CustomTextField(
+                modifier = Modifier
+                    .padding(horizontal = 8.dp, vertical = 8.dp)
+                    .height(35.dp)
+                    .fillMaxWidth()
+                    .background(
+                        color = MaterialTheme.colorScheme.onBackground.copy(.1f),
+                        shape = CircleShape
+                    ),
+                hint = UiText.StringResource(R.string.search_hint),
+                value = vm.query,
+                onValueChange = {
+                    vm.query = it
+                    vm.getLocalChaptersByPaging(vm.isAsc)
+                },
+                onValueConfirm = {
+                    focusManager.clearFocus()
+                },
+                paddingTrailingIconStart = 8.dp,
+                paddingLeadingIconEnd = 8.dp,
+                trailingIcon = {
+                    if (vm.query.isNotBlank()) {
+                        AppIconButton(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = stringResource(R.string.exit_search_mode),
+                            onClick = {
+                                vm.query = ""
+                                vm.getLocalChaptersByPaging(vm.isAsc)
                             }
-                        }
+                        )
                     }
-                )
-            },
-        ) { padding ->
-            Box(modifier = Modifier.padding(padding).fillMaxSize()) {
-                Column {
-                    CustomTextField(
-                        modifier = Modifier
-                            .padding(horizontal = 8.dp, vertical = 8.dp)
-                            .height(35.dp)
-                            .fillMaxWidth()
-                            .background(
-                                color = MaterialTheme.colorScheme.onBackground.copy(.1f),
-                                shape = CircleShape
-                            ),
-                        hint = UiText.StringResource(R.string.search_hint),
-                        value = vm.query,
-                        onValueChange = {
-                            vm.query = it
-                            vm.getLocalChaptersByPaging(vm.isAsc)
-                        },
-                        onValueConfirm = {
-                            focusManager.clearFocus()
-                        },
-                        paddingTrailingIconStart = 8.dp,
-                        paddingLeadingIconEnd = 8.dp,
-                        trailingIcon = {
-                            if (vm.query.isNotBlank()) {
-                                AppIconButton(
-                                    imageVector = Icons.Default.Close,
-                                   contentDescription = stringResource(R.string.exit_search_mode),
-                                    onClick = {
-                                        vm.query = ""
-                                        vm.getLocalChaptersByPaging(vm.isAsc)
-                                    }
-                                )
-                            }
-                        }
+                }
+            )
+            Box(modifier.fillMaxSize()) {
+                Crossfade(
+                    targetState = Pair(
+                        vm.isLoading,
+                        vm.isEmpty
                     )
-                    Box(modifier.fillMaxSize()) {
-                        Crossfade(
-                            targetState = Pair(
-                                vm.isLoading,
-                                vm.isEmpty
-                            )
-                        ) { (isLoading, isEmpty) ->
-                            when {
-                                isLoading -> LoadingScreen()
-                                isEmpty -> EmptyScreen(text = UiText.StringResource(R.string.there_is_no_chapter))
-                                else -> {
-                                    LazyColumnScrollbar(listState = scrollState) {
-                                        LazyColumn(
-                                            modifier = Modifier
-                                                .fillMaxSize(),
-                                            state = scrollState
-                                        ) {
-                                            items(vm.chapters.size) { index ->
-                                                ChapterListItemComposable(
-                                                    modifier = modifier,
-                                                    chapter = vm.chapters[index],
-                                                    onItemClick = {
-                                                        onItemClick(index)
-                                                    },
-                                                    isLastRead = vm.chapters[index].id == vm.lastRead,
-                                                    isSelected = vm.chapters[index].id in vm.selection,
-                                                    onLongClick = {
-                                                        onLongItemClick(index)
-                                                    }
-                                                )
+                ) { (isLoading, isEmpty) ->
+                    when {
+                        isLoading -> LoadingScreen()
+                        isEmpty -> EmptyScreen(text = UiText.StringResource(R.string.there_is_no_chapter))
+                        else -> {
+                            LazyColumnScrollbar(listState = scrollState) {
+                                LazyColumn(
+                                    modifier = Modifier
+                                        .fillMaxSize(),
+                                    state = scrollState
+                                ) {
+                                    items(vm.chapters.size) { index ->
+                                        ChapterListItemComposable(
+                                            modifier = modifier,
+                                            chapter = vm.chapters[index],
+                                            onItemClick = {
+                                                onItemClick(index)
+                                            },
+                                            isLastRead = vm.chapters[index].id == vm.lastRead,
+                                            isSelected = vm.chapters[index].id in vm.selection,
+                                            onLongClick = {
+                                                onLongItemClick(index)
                                             }
-                                        }
+                                        )
                                     }
                                 }
                             }
                         }
                     }
                 }
-                when {
-                    vm.hasSelection -> {
-                        ChapterDetailBottomBar(
-                            vm,
-                            context,
-                            onDownload = {
-                            },
-                            onBookmark = {
-                            },
-                            onMarkAsRead = {
-                            }
-                        )
+            }
+        }
+        when {
+            vm.hasSelection -> {
+                ChapterDetailBottomBar(
+                    vm,
+                    context,
+                    onDownload = {
+                    },
+                    onBookmark = {
+                    },
+                    onMarkAsRead = {
                     }
-                }
+                )
             }
         }
     }
@@ -320,7 +246,7 @@ private fun BoxScope.ChapterDetailBottomBar(
             )
             AppIconButton(
                 imageVector = Icons.Default.BookmarkBorder,
-               contentDescription = stringResource(R.string.bookmark),
+                contentDescription = stringResource(R.string.bookmark),
                 onClick = {
                     vm.insertChapters(
                         vm.chapters.filter { it.id in vm.selection }
@@ -335,7 +261,7 @@ private fun BoxScope.ChapterDetailBottomBar(
                         .map { it.id }
                         .containsAll(vm.selection)
                 ) Icons.Default.DoneOutline else Icons.Default.Done,
-               contentDescription = stringResource(R.string.mark_as_read),
+                contentDescription = stringResource(R.string.mark_as_read),
                 onClick = {
                     vm.insertChapters(
                         vm.chapters.filter { it.id in vm.selection }
@@ -346,7 +272,7 @@ private fun BoxScope.ChapterDetailBottomBar(
             )
             AppIconButton(
                 imageVector = Icons.Default.PlaylistAddCheck,
-               contentDescription = stringResource(R.string.mark_previous_as_read),
+                contentDescription = stringResource(R.string.mark_previous_as_read),
                 onClick = {
                     vm.insertChapters(
                         vm.chapters.filter { it.id <= (vm.selection.maxOrNull() ?: 0) }
@@ -357,7 +283,7 @@ private fun BoxScope.ChapterDetailBottomBar(
             )
             AppIconButton(
                 imageVector = Icons.Default.Delete,
-               contentDescription = stringResource(R.string.delete),
+                contentDescription = stringResource(R.string.delete),
                 onClick = {
                     vm.deleteChapters(vm.chapters.filter { it.id in vm.selection })
                     vm.selection.clear()

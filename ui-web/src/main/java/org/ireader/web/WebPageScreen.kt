@@ -50,14 +50,12 @@ import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.google.accompanist.web.AccompanistWebChromeClient
 import com.google.accompanist.web.LoadingState
-import com.google.accompanist.web.WebContent
 import com.google.accompanist.web.WebView
 import com.google.accompanist.web.rememberWebViewState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collectLatest
 import org.ireader.common_resources.UiEvent
 import org.ireader.common_resources.UiText
-import org.ireader.components.components.ISnackBarHost
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.components.reusable_composable.MidSizeTextComposable
@@ -81,14 +79,29 @@ fun WebPageScreen(
     onFetchBook: (WebView) -> Unit,
     onFetchChapter: (WebView) -> Unit,
     onFetchChapters: (WebView) -> Unit,
+    snackBarHostState: SnackbarHostState
 ) {
 
     val context = LocalContext.current
     var webView by remember {
         mutableStateOf<WebView?>(null)
     }
+    val webUrl = remember {
+        mutableStateOf(viewModel.webUrl)
+    }
+
+    LaunchedEffect(key1 = webView.hashCode() ) {
+        viewModel.webView = webView
+    }
+    val webViewState = rememberWebViewState(url = webUrl.value)
+
+    LaunchedEffect(key1 = webViewState.hashCode() ) {
+        viewModel.webViewState = webViewState
+    }
+
+
     val accompanistState = AccompanistWebChromeClient()
-    val snackBarHostState = remember { SnackbarHostState() }
+
     DisposableEffect(key1 = true) {
         onDispose {
             webView?.destroy()
@@ -125,11 +138,7 @@ fun WebPageScreen(
             }
         }
     }
-    val webUrl = remember {
-        mutableStateOf(viewModel.webUrl)
-    }
 
-    val webViewState = rememberWebViewState(url = webUrl.value)
 
     LaunchedEffect(key1 = webViewState.loadingState ) {
         if (webViewState.loadingState == LoadingState.Finished) {
@@ -165,43 +174,8 @@ fun WebPageScreen(
         ) {
         Scaffold(
             topBar = {
-                WebPageTopBar(
-                    urlToRender = viewModel.url,
-                    onGo = {
-                        webViewState.content = WebContent.Url(viewModel.url)
-                        // webView.value?.loadUrl(viewModel.state.url)
-                        viewModel.updateWebUrl(viewModel.url)
-                    },
-                    refresh = {
-                        webView?.reload()
-                    },
-                    goBack = {
-                        webView?.goBack()
-                    },
-                    goForward = {
-                        webView?.goForward()
-                    },
-                    onValueChange = {
-                        viewModel.updateUrl(it)
-                    },
-                    onPopBackStack = onPopBackStack,
-                    source = source,
-                    onFetchBook = {
-                        webView?.let { onFetchBook(it) }
-                    },
-                    onFetchChapter = {
-                        webView?.let { onFetchChapter(it) }
-                    },
-                    onFetchChapters = {
-                        webView?.let { onFetchChapters(it) }
-                    },
-                    state = viewModel,
-                )
-            },
-            snackbarHost = {
-                ISnackBarHost(snackBarHostState = snackBarHostState)
-            }
 
+            },
         ) { padding ->
             Box(modifier = Modifier.padding(padding)) {
 

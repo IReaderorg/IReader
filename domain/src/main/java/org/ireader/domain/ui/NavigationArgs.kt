@@ -2,8 +2,11 @@ package org.ireader.domain.ui
 
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import org.ireader.common_resources.ARG_HAVE_VARIANT_BOTTOM_BAR
+import org.ireader.common_resources.ARG_HAVE_DRAWER
 import org.ireader.common_resources.ARG_HAVE_MODAL_SHEET
 import org.ireader.common_resources.ARG_HIDE_BOTTOM_BAR
+import org.ireader.common_resources.ARG_TRANSPARENT_STATUS_BAR
 
 object NavigationArgs {
     val bookId = navArgument("bookId") {
@@ -39,6 +42,15 @@ object NavigationArgs {
         defaultValue = true
     }
     val showModalSheet = navArgument(ARG_HAVE_MODAL_SHEET) {
+        defaultValue = true
+    }
+    val haveDrawer = navArgument(ARG_HAVE_DRAWER) {
+        defaultValue = true
+    }
+    val transparentStatusBar = navArgument(ARG_TRANSPARENT_STATUS_BAR) {
+        defaultValue = true
+    }
+    val haveBottomBar = navArgument(ARG_HAVE_VARIANT_BOTTOM_BAR) {
         defaultValue = true
     }
 }

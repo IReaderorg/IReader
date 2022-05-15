@@ -1,5 +1,6 @@
 package org.ireader.chapterDetails.viewmodel
 
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -22,9 +23,11 @@ open class ChapterDetailStateImpl @Inject constructor() : ChapterDetailState {
     override var currentScrollPosition by mutableStateOf<Int>(0)
     override var query by mutableStateOf<String>("")
     override var lastRead by mutableStateOf<Long?>(null)
+    override var scrollState by mutableStateOf<LazyListState?>(null)
     override val isEmpty: Boolean by derivedStateOf { chapters.isEmpty() }
     override var selection: SnapshotStateList<Long> = mutableStateListOf()
     override val hasSelection: Boolean by derivedStateOf { selection.isNotEmpty() }
+
 }
 
 interface ChapterDetailState {
@@ -41,4 +44,5 @@ interface ChapterDetailState {
     val isEmpty: Boolean
     var selection: SnapshotStateList<Long>
     val hasSelection: Boolean
+    var scrollState: LazyListState?
 }

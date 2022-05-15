@@ -10,6 +10,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.google.accompanist.web.WebViewState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -229,6 +230,10 @@ interface WebViewPageState {
     var stateChapter: Chapter?
     var stateBook: Book?
 
+    var webView: WebView?
+    var webViewState: WebViewState?
+
+
     var url: String
     var webUrl: String
     var isLoading: Boolean
@@ -252,6 +257,8 @@ interface WebViewPageState {
 open class WebViewPageStateImpl @Inject constructor() : WebViewPageState {
     override var url: String by mutableStateOf("")
     override var webUrl: String by mutableStateOf("")
+    override var webView: WebView? by mutableStateOf(null)
+    override var webViewState: WebViewState? by mutableStateOf(null)
 
     override var isLoading: Boolean by mutableStateOf(false)
 

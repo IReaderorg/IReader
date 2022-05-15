@@ -2,24 +2,24 @@ package org.ireader.bookDetails.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.BottomAppBar
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.FileDownload
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.ireader.common_resources.UiText
+import org.ireader.components.ClickableTextIcon
 import org.ireader.components.components.ShowLoading
 import org.ireader.core_ui.asString
 import org.ireader.core_ui.ui.string
-import org.ireader.core_ui.ui_components.ClickableTextIcon
 import org.ireader.ui_book_details.R
 
 @Composable
@@ -32,29 +32,32 @@ fun BookDetailScreenBottomBar(
     isRead: Boolean,
     onRead: () -> Unit,
 ) {
-    BottomAppBar(
-        modifier = modifier.fillMaxWidth(),
-        backgroundColor = MaterialTheme.colorScheme.background,
-        contentColor = MaterialTheme.colorScheme.onBackground,
-        elevation = 8.dp,
+    androidx.compose.material3.BottomAppBar(
+        modifier = modifier,
+        containerColor = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        tonalElevation =  0.dp,
     ) {
         Row(
             modifier = modifier
-                .fillMaxWidth(),
+                .fillMaxSize(),
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically
 
         ) {
             ClickableTextIcon(
-                modifier = Modifier.weight(1F),
-                text = if (!isInLibrary) UiText.StringResource(R.string.add_to_library) else UiText.StringResource(R.string.added_to_library),
+                modifier = Modifier.fillMaxHeight().weight(1f),
+                text = if (!isInLibrary) UiText.StringResource(R.string.add_to_library) else UiText.StringResource(
+                    R.string.added_to_library
+                ),
                 icon = {
                     if (isInLibraryInProgress) {
                         ShowLoading()
                     } else {
                         Icon(
                             imageVector = if (!isInLibrary) Icons.Default.AddCircleOutline else Icons.Default.Check,
-                            contentDescription =  UiText.StringResource(R.string.toggle_in_library).asString(),
+                            contentDescription = UiText.StringResource(R.string.toggle_in_library)
+                                .asString(),
                             tint = MaterialTheme.colorScheme.onBackground
                         )
                     }
@@ -67,8 +70,10 @@ fun BookDetailScreenBottomBar(
             )
 
             ClickableTextIcon(
-                modifier = Modifier.weight(1F),
-                text = if (isRead) UiText.StringResource(R.string.continue_reading) else UiText.StringResource(R.string.read),
+                modifier = Modifier.fillMaxHeight().weight(1f),
+                text = if (isRead) UiText.StringResource(R.string.continue_reading) else UiText.StringResource(
+                    R.string.read
+                ),
                 icon = {
                     Icon(
                         imageVector = Icons.Default.AutoStories,
@@ -82,8 +87,8 @@ fun BookDetailScreenBottomBar(
             )
 
             ClickableTextIcon(
-                modifier = Modifier.weight(1F),
-                text = UiText.StringResource( R.string.download),
+                modifier = Modifier.fillMaxHeight().weight(1f),
+                text = UiText.StringResource(R.string.download),
                 icon = {
                     Icon(
                         imageVector = Icons.Default.FileDownload,

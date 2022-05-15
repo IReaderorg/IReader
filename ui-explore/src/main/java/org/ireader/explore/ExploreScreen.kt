@@ -14,8 +14,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ExtendedFloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.ModalBottomSheetLayout
@@ -37,7 +37,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -175,11 +174,11 @@ fun ExploreScreen(
             },
             floatingActionButtonPosition = androidx.compose.material3.FabPosition.End,
             floatingActionButton = {
-                ExtendedFloatingActionButton(
+                androidx.compose.material3.ExtendedFloatingActionButton(
                     text = {
                         MidSizeTextComposable(
                             text = UiText.StringResource(R.string.filter),
-                            color = Color.White
+                            color = MaterialTheme.colorScheme.onSecondary
                         )
                     },
                     onClick = {
@@ -191,7 +190,8 @@ fun ExploreScreen(
                         Icon(Icons.Filled.Add, "", tint = MaterialTheme.colorScheme.onSecondary)
                     },
                     contentColor = MaterialTheme.colorScheme.onSecondary,
-                    backgroundColor = MaterialTheme.colorScheme.secondary,
+                    containerColor = MaterialTheme.colorScheme.secondary,
+                    shape = RoundedCornerShape(32.dp)
                 )
             },
         ) { paddingValue ->

@@ -3,21 +3,25 @@ package org.ireader.presentation.ui
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsDraggedAsState
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
-import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
@@ -29,13 +33,20 @@ import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.ireader.common_resources.UiText
+import org.ireader.core.R
 import org.ireader.core_api.log.Log
 import org.ireader.domain.services.tts_service.Player
 import org.ireader.domain.services.tts_service.media_player.isPlaying
 import org.ireader.domain.services.tts_service.toIReaderVoice
 import org.ireader.domain.ui.NavigationArgs
+import org.ireader.reader.ReaderScreenDrawer
+import org.ireader.reader.components.SettingItemComposable
+import org.ireader.reader.components.SettingItemToggleComposable
+import org.ireader.tts.LanguageChip
 import org.ireader.tts.TTSScreen
 import org.ireader.tts.TTSViewModel
+import org.ireader.tts.VoiceChip
 import java.math.RoundingMode
 
 object TTSScreenSpec : ScreenSpec {
@@ -73,9 +84,13 @@ object TTSScreenSpec : ScreenSpec {
         NavigationArgs.bookId,
         NavigationArgs.chapterId,
         NavigationArgs.sourceId,
-    )
+        NavigationArgs.showModalSheet,
+        NavigationArgs.haveDrawer,
 
-    @OptIn(ExperimentalMaterialApi::class, ExperimentalPagerApi::class,
+        )
+
+    @OptIn(
+        ExperimentalMaterialApi::class, ExperimentalPagerApi::class,
         ExperimentalMaterial3Api::class
     )
     @Composable
@@ -83,10 +98,11 @@ object TTSScreenSpec : ScreenSpec {
         navController: NavController,
         navBackStackEntry: NavBackStackEntry,
         snackBarHostState: SnackbarHostState,
-        scaffoldPadding:PaddingValues,
-        sheetState: ModalBottomSheetState
+        scaffoldPadding: PaddingValues,
+        sheetState: ModalBottomSheetState,
+        drawerState: DrawerState
     ) {
-        val vm: TTSViewModel = hiltViewModel()
+        val vm: TTSViewModel = hiltViewModel(navBackStackEntry)
         val scope = rememberCoroutineScope()
         val context = LocalContext.current
         val sliderInteractionSource = MutableInteractionSource()
@@ -95,13 +111,12 @@ object TTSScreenSpec : ScreenSpec {
         val pagerState = rememberPagerState()
 
         val drawerScrollState = rememberLazyListState()
-        val drawerState = rememberDrawerState(initialValue = androidx.compose.material3.DrawerValue.Closed)
-        val textScroll = rememberScrollState()
-        val chapter = vm.ttsChapter
-        val chapters = vm.ttsChapters
+        LaunchedEffect(key1 = drawerState.hashCode()) {
+            vm.drawerState = drawerScrollState
+        }
 
-        val bottomSheetState =
-            rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
+        val chapter = vm.ttsChapter
+
         LaunchedEffect(key1 = true) {
             vm.initMedia(context)
         }
@@ -112,127 +127,49 @@ object TTSScreenSpec : ScreenSpec {
             }
         }
 
-        vm.ttsSource?.let { source ->
-            TTSScreen(
-                vm = vm,
-                onPrev = {
-                    vm.controller?.transportControls?.skipToPrevious()
-                },
-                onPlay = {
-                    if (vm.controller?.playbackState?.state == PlaybackStateCompat.STATE_NONE) {
-                        vm.initMedia(context)
-                        vm.initController()
-                        vm.runTTSService(Player.PLAY)
-                    } else if (vm.controller?.playbackState?.isPlaying == true) {
-                        vm.controller?.transportControls?.pause()
-                    } else {
-                        vm.controller?.transportControls?.play()
-                    }
-                },
-                onNext = {
-                    vm.controller?.transportControls?.skipToNext()
-                },
-                onChapter = { ch ->
-                    vm.getLocalChapter(ch.id)
-                },
-                source = source,
-                onPrevPar = {
-                    vm.controller?.transportControls?.rewind()
-                },
-                onNextPar = {
-                    vm.controller?.transportControls?.fastForward()
-                },
-                onValueChange = {
-                    vm.controller?.transportControls?.seekTo(it.toLong())
-                },
-                onValueChangeFinished = {},
-                onMap = { drawer ->
-                    scope.launch {
-                        try {
-                            val index =
-                                vm.ttsState.uiChapters.value.indexOfFirst { it.id == vm.ttsChapter?.id }
-                            if (index != -1) {
-                                drawer.scrollToItem(
-                                    index,
-                                    -drawer.layoutInfo.viewportEndOffset / 2
-                                )
-                            }
-                        } catch (e: Throwable) {
-                        }
-                    }
-                },
-                onPopStack = {
-                    navController.popBackStack()
-                },
-                sliderInteractionSource = sliderInteractionSource,
-                pagerState = pagerState,
-                drawerScrollState = drawerScrollState,
-                bottomSheetState = bottomSheetState,
-                onAutoNextChapterToggle = {
-                    vm.autoNextChapter = !vm.autoNextChapter
-                    vm.speechPrefUseCases.saveAutoNext(vm.autoNextChapter)
-                },
-                onVoice = { voice ->
-                    vm.currentVoice = voice.toIReaderVoice()
-                    vm.speechPrefUseCases.saveVoice(Json.encodeToString(voice.toIReaderVoice()))
-                },
-                onLanguage = { language ->
-                    vm.currentLanguage = language.displayName
-                    vm.speechPrefUseCases.saveLanguage(language.displayName)
-                },
-                onSpeechRateChange = { isIncreased ->
-                    when (isIncreased) {
-                        true -> {
-                            if (vm.speechSpeed < 3.0f) {
-                                vm.speechSpeed += .1f
-                                vm.speechSpeed =
-                                    vm.speechSpeed.toBigDecimal().setScale(1, RoundingMode.FLOOR)
-                                        .toFloat()
-                                vm.speechPrefUseCases.saveRate(vm.speechSpeed)
-                            }
-                        }
-                        else -> {
-                            if (vm.speechSpeed >= .5F) {
-                                vm.speechSpeed -= .1f
-                                vm.speechSpeed =
-                                    vm.speechSpeed.toBigDecimal().setScale(1, RoundingMode.FLOOR)
-                                        .toFloat()
-                                vm.speechPrefUseCases.saveRate(vm.speechSpeed)
-                            }
-                        }
-                    }
-
-                },
-                onSpeechPitchChange = { isIncreased ->
-                    when (isIncreased) {
-                        true -> {
-                            if (vm.pitch <= 2.0F) {
-                                vm.pitch += .1f
-                                vm.pitch =
-                                    vm.pitch.toBigDecimal().setScale(1, RoundingMode.FLOOR)
-                                        .toFloat()
-                                vm.speechPrefUseCases.savePitch(vm.pitch)
-                            }
-                        }
-                        else -> {
-                            if (vm.pitch >= .5F) {
-                                vm.pitch -= .1f
-                                vm.pitch =
-                                    vm.pitch.toBigDecimal().setScale(1, RoundingMode.FLOOR)
-                                        .toFloat()
-                                vm.speechPrefUseCases.savePitch(vm.pitch)
-                            }
-                        }
-                    }
-                },
-                onDrawerReverseIcon = {
-                    if (vm.ttsChapter != null) {
-                        vm.isDrawerAsc = !vm.isDrawerAsc
-                    }
-                },
-                drawerState = drawerState
-            )
-        }
+        TTSScreen(
+            modifier = Modifier,
+            vm = vm,
+            onPrev = {
+                vm.controller?.transportControls?.skipToPrevious()
+            },
+            onPlay = {
+                if (vm.controller?.playbackState?.state == PlaybackStateCompat.STATE_NONE) {
+                    vm.initMedia(context)
+                    vm.initController()
+                    vm.runTTSService(Player.PLAY)
+                } else if (vm.controller?.playbackState?.isPlaying == true) {
+                    vm.controller?.transportControls?.pause()
+                } else {
+                    vm.controller?.transportControls?.play()
+                }
+            },
+            onNext = {
+                vm.controller?.transportControls?.skipToNext()
+            },
+            onChapter = { ch ->
+                vm.getLocalChapter(ch.id)
+            },
+            source = vm.ttsSource,
+            onPrevPar = {
+                vm.controller?.transportControls?.rewind()
+            },
+            onNextPar = {
+                vm.controller?.transportControls?.fastForward()
+            },
+            onValueChange = {
+                vm.controller?.transportControls?.seekTo(it.toLong())
+            },
+            onValueChangeFinished = {},
+            onPopStack = {
+                navController.popBackStack()
+            },
+            sliderInteractionSource = sliderInteractionSource,
+            pagerState = pagerState,
+            drawerScrollState = drawerScrollState,
+            bottomSheetState = sheetState,
+            drawerState = drawerState
+        )
         LaunchedEffect(key1 = drawerState.targetValue) {
             if (chapter != null && drawerState.targetValue == androidx.compose.material3.DrawerValue.Open && vm.ttsChapters.isNotEmpty()) {
 
@@ -260,10 +197,146 @@ object TTSScreenSpec : ScreenSpec {
             if (vm.currentReadingParagraph != pagerState.currentPage) {
                 vm.currentReadingParagraph = pagerState.currentPage
 
-                    vm.controller?.transportControls?.seekTo(pagerState.currentPage.toLong())
+                vm.controller?.transportControls?.seekTo(pagerState.currentPage.toLong())
 
                 vm.prevPar = pagerState.currentPage
             }
+        }
+    }
+
+    @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
+    @Composable
+    override fun ModalDrawer(
+        navController: NavController,
+        navBackStackEntry: NavBackStackEntry,
+        snackBarHostState: SnackbarHostState,
+        sheetState: ModalBottomSheetState,
+        drawerState: DrawerState
+    ) {
+        val vm: TTSViewModel = hiltViewModel(navBackStackEntry)
+        val scope = rememberCoroutineScope()
+        ReaderScreenDrawer(
+            modifier = Modifier.statusBarsPadding(),
+            onReverseIcon = {
+                if (vm.ttsChapter != null) {
+                    vm.isDrawerAsc = !vm.isDrawerAsc
+                }
+            },
+            onChapter = { ch ->
+                vm.getLocalChapter(ch.id)
+            },
+            chapter = vm.ttsChapter,
+            chapters = vm.uiChapters.value,
+            drawerScrollState = vm.drawerState ?: rememberLazyListState(),
+            onMap = { drawer ->
+                scope.launch {
+                    try {
+                        val index =
+                            vm.ttsState.uiChapters.value.indexOfFirst { it.id == vm.ttsChapter?.id }
+                        if (index != -1) {
+                            drawer.scrollToItem(
+                                index,
+                                -drawer.layoutInfo.viewportEndOffset / 2
+                            )
+                        }
+                    } catch (e: Throwable) {
+                    }
+                }
+            },
+        )
+    }
+
+    @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
+    @Composable
+    override fun BottomModalSheet(
+        navController: NavController,
+        navBackStackEntry: NavBackStackEntry,
+        snackBarHostState: SnackbarHostState,
+        sheetState: ModalBottomSheetState,
+        drawerState: DrawerState
+    ) {
+        val vm: TTSViewModel = hiltViewModel(navBackStackEntry)
+
+        LaunchedEffect(key1 = sheetState.hashCode()) {
+            sheetState.hide()
+        }
+
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            VoiceChip(
+                viewModel = vm,
+                modifier = Modifier.height(32.dp),
+                onVoice = { voice ->
+                    vm.currentVoice = voice.toIReaderVoice()
+                    vm.speechPrefUseCases.saveVoice(Json.encodeToString(voice.toIReaderVoice()))
+                }
+            )
+            LanguageChip(
+                viewModel = vm,
+                modifier = Modifier.height(32.dp),
+                onLanguage = { language ->
+                    vm.currentLanguage = language.displayName
+                    vm.speechPrefUseCases.saveLanguage(language.displayName)
+                }
+            )
+            SettingItemToggleComposable(
+                text = UiText.StringResource(R.string.auto_next_chapter),
+                value = vm.autoNextChapter,
+                onToggle = {
+                    vm.autoNextChapter = !vm.autoNextChapter
+                    vm.speechPrefUseCases.saveAutoNext(vm.autoNextChapter)
+                }
+            )
+            SettingItemComposable(
+                text = UiText.StringResource(R.string.auto_next_chapter),
+                value = UiText.DynamicString(vm.speechSpeed.toString()),
+                onAdd = {
+                    if (vm.speechSpeed < 3.0f) {
+                        vm.speechSpeed += .1f
+                        vm.speechSpeed =
+                            vm.speechSpeed.toBigDecimal().setScale(1, RoundingMode.FLOOR)
+                                .toFloat()
+                        vm.speechPrefUseCases.saveRate(vm.speechSpeed)
+                    }
+
+                },
+                onMinus = {
+                    if (vm.speechSpeed >= .5F) {
+                        vm.speechSpeed -= .1f
+                        vm.speechSpeed =
+                            vm.speechSpeed.toBigDecimal().setScale(1, RoundingMode.FLOOR)
+                                .toFloat()
+                        vm.speechPrefUseCases.saveRate(vm.speechSpeed)
+                    }
+                }
+            )
+
+            SettingItemComposable(
+                text = UiText.StringResource(R.string.pitch),
+                value = UiText.DynamicString(vm.pitch.toString()),
+                onAdd = {
+                    if (vm.pitch <= 2.0F) {
+                        vm.pitch += .1f
+                        vm.pitch =
+                            vm.pitch.toBigDecimal().setScale(1, RoundingMode.FLOOR)
+                                .toFloat()
+                        vm.speechPrefUseCases.savePitch(vm.pitch)
+                    }
+                },
+                onMinus = {
+                    if (vm.pitch >= .5F) {
+                        vm.pitch -= .1f
+                        vm.pitch =
+                            vm.pitch.toBigDecimal().setScale(1, RoundingMode.FLOOR)
+                                .toFloat()
+                        vm.speechPrefUseCases.savePitch(vm.pitch)
+                    }
+                }
+            )
         }
     }
 }

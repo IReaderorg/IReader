@@ -43,7 +43,6 @@ import org.ireader.components.BookListItem
 import org.ireader.components.BookListItemColumn
 import org.ireader.components.BookListItemSubtitle
 import org.ireader.components.BookListItemTitle
-import org.ireader.components.components.ISnackBarHost
 import org.ireader.components.reusable_composable.BuildDropDownMenu
 import org.ireader.components.reusable_composable.DropDownMenuItem
 import org.ireader.components.reusable_composable.MidSizeTextComposable
@@ -59,10 +58,9 @@ fun DownloaderScreen(
         item:
         SavedDownloadWithInfo
     ) -> Unit,
-    onPopBackStack: () -> Unit,
+    snackBarHostState:SnackbarHostState
 ) {
     val context = LocalContext.current
-    val snackBarHostState = remember { SnackbarHostState() }
     LaunchedEffect(key1 = true) {
         vm.eventFlow.collectLatest { event ->
             when (event) {
@@ -77,27 +75,6 @@ fun DownloaderScreen(
     val downloads = vm.downloads
 
     androidx.compose.material3.Scaffold(
-        topBar = {
-            DownloaderTopAppBar(
-                onPopBackStack = onPopBackStack,
-                onCancelAll = {
-                    vm.deleteSelectedDownloads(vm.downloads.map { it.toSavedDownload() })
-                },
-                onMenuIcon = {
-                    vm.toggleExpandMenu(enable = true)
-                },
-                onDeleteAllDownload = {
-                    vm.deleteAllDownloads()
-                },
-                state = vm,
-                onDelete = {
-                    vm.deleteSelectedDownloads(vm.downloads.filter { it.chapterId in vm.selection }
-                        .map { it.toSavedDownload() })
-                    vm.selection.clear()
-                }
-            )
-        },
-        snackbarHost = { ISnackBarHost(snackBarHostState = snackBarHostState) },
         floatingActionButtonPosition = androidx.compose.material3.FabPosition.End,
         floatingActionButton = {
             androidx.compose.material.ExtendedFloatingActionButton(

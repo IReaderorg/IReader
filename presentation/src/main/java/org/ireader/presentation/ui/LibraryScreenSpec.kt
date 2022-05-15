@@ -7,6 +7,8 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
+import androidx.compose.material3.DrawerState
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -36,6 +38,7 @@ object LibraryScreenSpec : BottomNavScreenSpec {
         showModalSheet
     )
 
+    @ExperimentalMaterial3Api
     @ExperimentalMaterialApi
     @OptIn(ExperimentalPagerApi::class)
     @Composable
@@ -43,7 +46,8 @@ object LibraryScreenSpec : BottomNavScreenSpec {
         navController: NavController,
         navBackStackEntry: NavBackStackEntry,
         snackBarHostState: SnackbarHostState,
-        sheetState: ModalBottomSheetState
+        sheetState: ModalBottomSheetState,
+        drawerState: DrawerState
     ) {
         val vm: LibraryViewModel = hiltViewModel(navBackStackEntry)
 
@@ -71,13 +75,15 @@ object LibraryScreenSpec : BottomNavScreenSpec {
 
     private const val route = "library"
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @ExperimentalMaterialApi
     @Composable
     override fun TopBar(
         navController: NavController,
         navBackStackEntry: NavBackStackEntry,
         snackBarHostState: SnackbarHostState,
-        sheetState: ModalBottomSheetState
+        sheetState: ModalBottomSheetState,
+        drawerState: DrawerState
     ) {
         val vm: LibraryViewModel = hiltViewModel(navBackStackEntry)
         LibraryScreenTopBar(
@@ -92,15 +98,18 @@ object LibraryScreenSpec : BottomNavScreenSpec {
         )
     }
 
-    @ExperimentalMaterialApi
-    @OptIn(ExperimentalPagerApi::class, ExperimentalAnimationApi::class)
+    @OptIn(
+        ExperimentalAnimationApi::class,
+        ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class, ExperimentalPagerApi::class
+    )
     @Composable
     override fun Content(
         navController: NavController,
         navBackStackEntry: NavBackStackEntry,
         snackBarHostState: SnackbarHostState,
         scaffoldPadding: PaddingValues,
-        sheetState: ModalBottomSheetState
+        sheetState: ModalBottomSheetState,
+        drawerState: DrawerState
     ) {
         val vm: LibraryViewModel = hiltViewModel(navBackStackEntry)
         LibraryScreen(

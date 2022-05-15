@@ -53,16 +53,13 @@ fun BookDetailScreenLoadedComposable(
     modifier: Modifier = Modifier,
     book: Book,
     source: Source?,
-    onWebView: () -> Unit,
     onTitle: (String) -> Unit,
-    onRefresh: () -> Unit,
     onSummaryExpand: () -> Unit,
     isSummaryExpanded: Boolean,
-    onPopBackStack:() -> Unit,
-    onCommand:() -> Unit
 ) {
     val context = LocalContext.current
     var imageLoaded by remember { mutableStateOf(false) }
+    var isScreenLoaded by remember { mutableStateOf(false) }
 
     val fadeInImage by animateFloatAsState(
         if (imageLoaded) 0.2f else 0f, tween(easing = LinearOutSlowInEasing)
@@ -74,7 +71,8 @@ fun BookDetailScreenLoadedComposable(
             Image(
                 painter = rememberAsyncImagePainter(
                     ImageRequest.Builder(LocalContext.current)
-                        .data(data = BookCover.from(book)).apply(block = fun ImageRequest.Builder.() {
+                        .data(data = BookCover.from(book))
+                        .apply(block = fun ImageRequest.Builder.() {
                             listener(onSuccess = { _, _ ->
                                 imageLoaded = true
                             })
@@ -104,20 +102,10 @@ fun BookDetailScreenLoadedComposable(
             )
         }
         Column {
-            BookDetailTopAppBar(
-                onWebView = {
-                    onWebView()
-                },
-                onRefresh = {
-                    onRefresh()
-                },
-                onPopBackStack = onPopBackStack,
-                source = source,
-                onCommand = onCommand
-            )
+
             Row(
                 modifier = modifier
-                    .padding(horizontal = 16.dp)
+                    .padding(start = 16.dp, end = 16.dp, top = 80.dp)
                     .fillMaxWidth()
             ) {
 

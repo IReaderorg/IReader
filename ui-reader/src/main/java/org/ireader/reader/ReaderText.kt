@@ -28,7 +28,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
-import org.ireader.common_models.entities.Chapter
 import org.ireader.components.list.scrollbars.LazyColumnScrollbar
 import org.ireader.core_ui.ui.mapTextAlign
 import org.ireader.core_ui.ui_components.isScrolledToTheEnd
@@ -44,7 +43,6 @@ fun ReaderText(
     modifier: Modifier = Modifier,
     vm: ReaderScreenPreferencesState,
     uiState: ReaderScreenState,
-    chapter: Chapter,
     onNext: () -> Unit,
     onPrev: () -> Unit,
     swipeState: SwipeRefreshState,
@@ -205,7 +203,7 @@ fun ReaderText(
 }
 
 @Composable
-fun TextSelectionContainer(
+private fun TextSelectionContainer(
     modifier: Modifier = Modifier,
     selectable: Boolean,
     content: @Composable () -> Unit,

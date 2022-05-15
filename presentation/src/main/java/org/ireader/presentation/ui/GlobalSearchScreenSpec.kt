@@ -1,8 +1,11 @@
 package org.ireader.presentation.ui
 
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
+import androidx.compose.material3.DrawerState
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -30,16 +33,20 @@ object GlobalSearchScreenSpec : ScreenSpec {
         return "global?query=$query"
     }
 
-    @OptIn(ExperimentalMaterialApi::class)
+    @OptIn(
+        ExperimentalAnimationApi::class,
+        ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class
+    )
     @Composable
     override fun Content(
         navController: NavController,
         navBackStackEntry: NavBackStackEntry,
         snackBarHostState: SnackbarHostState,
-        scaffoldPadding:PaddingValues,
-        sheetState: ModalBottomSheetState
+        scaffoldPadding: PaddingValues,
+        sheetState: ModalBottomSheetState,
+        drawerState: DrawerState
     ) {
-        val vm: GlobalSearchViewModel = hiltViewModel()
+        val vm: GlobalSearchViewModel = hiltViewModel(navBackStackEntry)
         GlobalSearchScreen(
             onPopBackStack = {
                 navController.popBackStack()

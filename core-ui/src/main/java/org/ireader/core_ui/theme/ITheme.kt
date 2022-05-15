@@ -49,6 +49,19 @@ fun BaseTheme.dark():Theme {
 val themes = listOf<BaseTheme>(
     BaseTheme(
         id = 1,
+        lightColor = LightThemeColorsTachiyomi,
+        darkColor = DarkThemeColorsTachiyomi,
+        darkExtraColors =ExtraColors(
+            bars = DarkThemeColorsTachiyomi.surface,
+            onBars = DarkThemeColorsTachiyomi.onSurface
+        ),
+        lightExtraColors = ExtraColors(
+            bars = LightThemeColorsTachiyomi.surface,
+            onBars = LightThemeColorsTachiyomi.onSurface
+        )
+    ),
+    BaseTheme(
+        id = 2,
         lightColor = lightColorScheme(
             primary = Colour.blue_accent,
             primaryContainer = Colour.blue_700,
@@ -86,7 +99,7 @@ val themes = listOf<BaseTheme>(
 
     ),
     BaseTheme(
-        id = 2,
+        id = 3,
         lightColor = MidNightLightColorScheme,
         darkColor = MidNightDarkColorScheme,
         darkExtraColors =ExtraColors(
@@ -99,7 +112,7 @@ val themes = listOf<BaseTheme>(
         )
     ),
     BaseTheme(
-        id = 3,
+        id = 4,
         lightColor = GreenAppleLightThemeColors,
         darkColor = GreenAppleDarkThemeColors,
         darkExtraColors =ExtraColors(
@@ -112,7 +125,7 @@ val themes = listOf<BaseTheme>(
         )
     ),
     BaseTheme(
-        id = 4,
+        id = 5,
         lightColor = LightThemeColorsStrawberries,
         darkColor = DarkThemeColorsStrawberries,
         darkExtraColors =ExtraColors(
@@ -122,19 +135,6 @@ val themes = listOf<BaseTheme>(
         lightExtraColors = ExtraColors(
             bars = LightThemeColorsStrawberries.surface,
             onBars = LightThemeColorsStrawberries.onSurface
-        )
-    ),
-    BaseTheme(
-        id = 5,
-        lightColor = LightThemeColorsTachiyomi,
-        darkColor = DarkThemeColorsTachiyomi,
-        darkExtraColors =ExtraColors(
-            bars = DarkThemeColorsTachiyomi.surface,
-            onBars = DarkThemeColorsTachiyomi.onSurface
-        ),
-        lightExtraColors = ExtraColors(
-            bars = LightThemeColorsTachiyomi.surface,
-            onBars = LightThemeColorsTachiyomi.onSurface
         )
     ),
     BaseTheme(

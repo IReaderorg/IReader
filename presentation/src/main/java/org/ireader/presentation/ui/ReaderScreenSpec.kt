@@ -1,22 +1,34 @@
 package org.ireader.presentation.ui
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.gestures.scrollBy
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
-import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.Divider
+import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
@@ -34,10 +46,14 @@ import org.ireader.common_resources.UiText
 import org.ireader.core.R
 import org.ireader.core_api.log.Log
 import org.ireader.domain.ui.NavigationArgs
+import org.ireader.reader.ReaderScreenDrawer
+import org.ireader.reader.ReaderScreenTopBar
 import org.ireader.reader.ReadingScreen
+import org.ireader.reader.components.ReaderSettingMainLayout
 import org.ireader.reader.reverse_swip_refresh.rememberSwipeRefreshState
 import org.ireader.reader.viewmodel.ReaderScreenViewModel
 
+@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 object ReaderScreenSpec : ScreenSpec {
 
     override val navHostRoute: String = "reader_screen_route/{bookId}/{chapterId}/{sourceId}"
@@ -46,6 +62,8 @@ object ReaderScreenSpec : ScreenSpec {
         NavigationArgs.bookId,
         NavigationArgs.chapterId,
         NavigationArgs.sourceId,
+        NavigationArgs.haveDrawer,
+        NavigationArgs.showModalSheet,
     )
 
     fun buildRoute(
@@ -86,22 +104,30 @@ object ReaderScreenSpec : ScreenSpec {
         navController: NavController,
         navBackStackEntry: NavBackStackEntry,
         snackBarHostState: SnackbarHostState,
-        scaffoldPadding:PaddingValues,
-        sheetState: ModalBottomSheetState
+        scaffoldPadding: PaddingValues,
+        sheetState: ModalBottomSheetState,
+        drawerState: DrawerState
     ) {
         val context = LocalContext.current
         val scope = rememberCoroutineScope()
-        val vm: ReaderScreenViewModel = hiltViewModel()
+        val vm: ReaderScreenViewModel = hiltViewModel(navBackStackEntry)
         val currentIndex = vm.currentChapterIndex
-        val catalog = vm.catalog
-        val source = vm.source
         val chapters = vm.stateChapters
         val chapter = vm.stateChapter
-        val book = vm.book
-        val snackBarHostState = remember { SnackbarHostState() }
+
         val scrollState = rememberLazyListState()
         val drawerScrollState = rememberLazyListState()
-        val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+
+
+        LaunchedEffect(key1 = drawerScrollState.hashCode()) {
+            vm.drawerListState = drawerScrollState
+        }
+        LaunchedEffect(key1 = scrollState.hashCode()) {
+            vm.readerScrollState = scrollState
+        }
+
+
+
         val swipeState = rememberSwipeRefreshState(isRefreshing = false)
         DisposableEffect(key1 = true) {
             onDispose {
@@ -154,6 +180,7 @@ object ReaderScreenSpec : ScreenSpec {
             }
         }
         ReadingScreen(
+            modifier = Modifier.systemBarsPadding(),
             drawerState = drawerState,
             vm = vm,
             scrollState = scrollState,
@@ -182,6 +209,7 @@ object ReaderScreenSpec : ScreenSpec {
                     }
                 }
             },
+            scaffoldPaddingValues = scaffoldPadding,
             onPrev = { scrollToEnd ->
                 try {
                     if (currentIndex > 0) {
@@ -216,272 +244,6 @@ object ReaderScreenSpec : ScreenSpec {
                 } catch (e: Throwable) {
                     Log.error(e, "Reader Spec failed to go previous chapter")
                 }
-            },
-            onSliderFinished = {
-                scope.launch {
-                    vm.showSnackBar(
-                        UiText.DynamicString(
-                            chapters[vm.currentChapterIndex].name
-                        )
-                    )
-                }
-                vm.currentChapterIndex = currentIndex
-                scope.launch {
-                    vm.getLocalChapter(
-                        chapters[vm.currentChapterIndex].id,
-                    )
-                }
-
-                scope.launch {
-                    scrollState.animateScrollToItem(0, 0)
-                }
-            },
-            onSliderChange = {
-                vm.currentChapterIndex = it.toInt()
-            },
-            swipeState = swipeState,
-            drawerScrollState = drawerScrollState,
-            onChapter = { ch ->
-                val index = vm.stateChapters.indexOfFirst { it.id == ch.id }
-                if (index != -1) {
-                    scope.launch {
-                        vm.getLocalChapter(ch.id)
-                    }
-                    scope.launch {
-                        scrollState.scrollToItem(0, 0)
-                    }
-                    vm.currentChapterIndex = index
-                }
-            },
-            onDrawerRevereIcon = { ch ->
-                if (ch != null) {
-                    vm.isDrawerAsc = !vm.isDrawerAsc
-                }
-            },
-            onReaderRefresh = { ch ->
-                if (ch != null) {
-                    vm.getLocalChapter(
-                        ch.id
-                    )
-                }
-            },
-            onToggleScrollMode = {
-                vm.prefFunc.apply {
-                    vm.toggleScrollMode()
-                }
-            },
-            onToggleSelectedMode = {
-                vm.prefFunc.apply {
-                    vm.toggleSelectableMode()
-                }
-            },
-            onToggleOrientation = {
-                vm.prefFunc.apply {
-                    vm.saveOrientation(context)
-                }
-            },
-            onToggleImmersiveMode = {
-                vm.prefFunc.apply {
-                    vm.toggleImmersiveMode(context)
-                }
-            },
-            onToggleAutoScroll = {
-                vm.prefFunc.apply {
-                    vm.toggleAutoScrollMode()
-                }
-            },
-            onScrollIndicatorWidthIncrease = {
-                when (it) {
-                    true -> {
-                        vm.prefFunc.apply {
-                            vm.saveScrollIndicatorWidth(true)
-                        }
-                    }
-                    else -> {
-                        vm.prefFunc.apply {
-                            vm.saveScrollIndicatorWidth(false)
-                        }
-                    }
-                }
-            },
-            onScrollIndicatorPaddingIncrease = {
-                when (it) {
-                    true -> {
-                        vm.prefFunc.apply {
-                            vm.saveScrollIndicatorPadding(true)
-                        }
-                    }
-                    else -> {
-                        vm.apply {
-                            vm.saveScrollIndicatorPadding(false)
-                        }
-                    }
-                }
-            },
-            onParagraphIndentIncrease = {
-                when (it) {
-                    true -> {
-                        vm.prefFunc.apply {
-                            vm.saveParagraphIndent(true)
-                        }
-                    }
-                    else -> {
-                        vm.prefFunc.apply {
-                            vm.saveParagraphIndent(false)
-                        }
-                    }
-                }
-            },
-            onParagraphDistanceIncrease = {
-                when (it) {
-                    true -> {
-                        vm.prefFunc.apply {
-                            vm.saveParagraphDistance(true)
-                        }
-                    }
-                    else -> {
-                        vm.prefFunc.apply {
-                            vm.saveParagraphDistance(false)
-                        }
-                    }
-                }
-            },
-            onLineHeightIncrease = {
-                when (it) {
-                    true -> {
-                        vm.prefFunc.apply {
-                            vm.saveFontHeight(true)
-                        }
-                    }
-                    else -> {
-                        vm.prefFunc.apply {
-                            vm.saveFontHeight(false)
-                        }
-                    }
-                }
-            },
-            onFontSizeIncrease = {
-                when (it) {
-                    true -> {
-                        vm.apply {
-                            vm.saveFontSize(true)
-                        }
-                    }
-                    else -> {
-                        vm.apply {
-                            vm.saveFontSize(false)
-                        }
-                    }
-                }
-            },
-            onAutoscrollOffsetIncrease = {
-                when (it) {
-                    true -> {
-                        vm.prefFunc.apply {
-                            vm.setAutoScrollOffsetReader(true)
-                        }
-                    }
-                    else -> {
-                        vm.prefFunc.apply {
-                            vm.setAutoScrollOffsetReader(false)
-                        }
-                    }
-                }
-            },
-            onAutoscrollIntervalIncrease = {
-                when (it) {
-                    true -> {
-                        vm.prefFunc.apply {
-                            vm.setAutoScrollIntervalReader(true)
-                        }
-                    }
-                    else -> {
-                        vm.prefFunc.apply {
-                            vm.setAutoScrollIntervalReader(false)
-                        }
-                    }
-                }
-            },
-            onFontSelected = { index ->
-                vm.apply {
-                    vm.saveFont(index)
-                }
-            },
-            onReaderPlay = {
-                vm.book?.let { book ->
-                    vm.stateChapter?.let { chapter ->
-                        navController.navigate(
-                            TTSScreenSpec.buildRoute(
-                                book.id,
-                                book.sourceId,
-                                chapterId = chapter.id
-                            )
-                        )
-
-                    }
-                }
-
-            },
-            onReaderBottomOnSetting = {
-                vm.toggleSettingMode(true, null)
-            },
-            onReaderBookmark = {
-                vm.bookmarkChapter()
-            },
-            onReaderWebView = { modalState ->
-                try {
-                    catalog?.let { catalog ->
-                        navController.navigate(
-                            WebViewScreenSpec.buildRoute(
-                                url = chapter?.key,
-                                sourceId = catalog.sourceId,
-                                chapterId = chapter?.id,
-                                bookId = book?.id
-                            )
-                        )
-                    }
-                } catch (e: Throwable) {
-                    scope.launch {
-                        vm.showSnackBar(
-                            UiText.ExceptionString(
-                                e
-                            )
-                        )
-                    }
-                }
-            },
-            onChangeBrightness = {
-                vm.apply {
-                    vm.saveBrightness(it, context)
-                }
-            },
-            onToggleAutoBrightness = {
-                vm.prefFunc.apply {
-                    vm.toggleAutoBrightness()
-                }
-            },
-            onBackgroundChange = { index ->
-                vm.prefFunc.apply {
-                    vm.changeBackgroundColor(index)
-                }
-            },
-            onMap = { drawer ->
-                scope.launch {
-                    try {
-                        val index =
-                            vm.drawerChapters.value.indexOfFirst { it.id == vm.stateChapter?.id }
-                        if (index != -1) {
-                            drawer.scrollToItem(
-                                index,
-                                -drawer.layoutInfo.viewportEndOffset / 2
-                            )
-                        }
-                    } catch (e: Throwable) {
-                    }
-                }
-            },
-            onPopBackStack = {
-                navController.popBackStack()
             },
             toggleReaderMode = {
                 vm.apply {
@@ -545,18 +307,363 @@ object ReaderScreenSpec : ScreenSpec {
                 } catch (e: Throwable) {
                 }
             },
-            onShowScrollIndicator = {
-                vm.showScrollIndicator = it
-                vm.apply {
-                    vm.setShowScrollIndicator(it)
+
+            snackBarHostState = snackBarHostState,
+            drawerScrollState = drawerScrollState,
+            swipeState = swipeState,
+            onSliderFinished = {
+                scope.launch {
+                    vm.showSnackBar(
+                        UiText.DynamicString(
+                            chapters[vm.currentChapterIndex].name
+                        )
+                    )
+                }
+                vm.currentChapterIndex = currentIndex
+                scope.launch {
+                    vm.getLocalChapter(
+                        chapters[vm.currentChapterIndex].id,
+                    )
+                }
+
+                scope.launch {
+                    scrollState.animateScrollToItem(0, 0)
                 }
             },
-            onTextAlign = {
-                vm.textAlignment = it
-                vm.readerUseCases.textAlignmentUseCase.save(it)
+            onSliderChange = {
+                vm.currentChapterIndex = it.toInt()
             },
-            snackBarHostState=snackBarHostState
+            onReaderPlay = {
+                vm.book?.let { book ->
+                    vm.stateChapter?.let { chapter ->
+                        navController.navigate(
+                            TTSScreenSpec.buildRoute(
+                                book.id,
+                                book.sourceId,
+                                chapterId = chapter.id
+                            )
+                        )
 
+                    }
+                }
+
+            },
+            onReaderBottomOnSetting = {
+                scope.launch {
+                    sheetState.show()
+                }
+            },
         )
+    }
+
+    @Composable
+    override fun ModalDrawer(
+        navController: NavController,
+        navBackStackEntry: NavBackStackEntry,
+        snackBarHostState: SnackbarHostState,
+        sheetState: ModalBottomSheetState,
+        drawerState: DrawerState
+    ) {
+        val vm: ReaderScreenViewModel = hiltViewModel(navBackStackEntry)
+        val lazyListState = vm.drawerListState
+        val chapter = vm.stateChapter
+        val scope = rememberCoroutineScope()
+        if (lazyListState != null) {
+        AnimatedVisibility(
+            visible = true,
+            enter = slideInVertically(initialOffsetY = { -it }),
+            exit = slideOutVertically(targetOffsetY = { -it })
+        ) {
+                ReaderScreenDrawer(
+                    modifier = Modifier.statusBarsPadding(),
+                    onReverseIcon = {
+                        vm.isDrawerAsc = !vm.isDrawerAsc
+                    },
+                    onChapter = { ch ->
+                        val index = vm.stateChapters.indexOfFirst { it.id == ch.id }
+                        if (index != -1) {
+                            scope.launch {
+                                vm.getLocalChapter(ch.id)
+                            }
+                            scope.launch {
+                                lazyListState.scrollToItem(0, 0)
+                            }
+                            vm.currentChapterIndex = index
+                        }
+                    },
+                    chapter = chapter,
+                    chapters = vm.drawerChapters.value,
+                    drawerScrollState = lazyListState,
+                    onMap = { drawer ->
+                        scope.launch {
+                            try {
+                                val index =
+                                    vm.drawerChapters.value.indexOfFirst { it.id == vm.stateChapter?.id }
+                                if (index != -1) {
+                                    drawer.scrollToItem(
+                                        index,
+                                        -drawer.layoutInfo.viewportEndOffset / 2
+                                    )
+                                }
+                            } catch (e: Throwable) {
+                            }
+                        }
+                    },
+                )
+            }
+        }
+    }
+
+    @Composable
+    override fun TopBar(
+        navController: NavController,
+        navBackStackEntry: NavBackStackEntry,
+        snackBarHostState: SnackbarHostState,
+        sheetState: ModalBottomSheetState,
+        drawerState: DrawerState
+    ) {
+        val vm: ReaderScreenViewModel = hiltViewModel(navBackStackEntry)
+        val catalog = vm.catalog
+        val book = vm.book
+        val chapter = vm.stateChapter
+        val readerScrollState = vm.readerScrollState
+        val scope = rememberCoroutineScope()
+        if(readerScrollState != null) {
+                ReaderScreenTopBar(
+                    isReaderModeEnable = vm.isReaderModeEnable,
+                    isLoaded = vm.isChapterLoaded.value,
+                    modalBottomSheetValue = sheetState.targetValue,
+                    onRefresh = {
+                        vm.getLocalChapter(
+                            chapter?.id
+                        )
+                    },
+                    chapter = chapter,
+                    onWebView = {
+                        try {
+                            catalog?.let { catalog ->
+                                navController.navigate(
+                                    WebViewScreenSpec.buildRoute(
+                                        url = chapter?.key,
+                                        sourceId = catalog.sourceId,
+                                        chapterId = chapter?.id,
+                                        bookId = book?.id
+                                    )
+                                )
+                            }
+                        } catch (e: Throwable) {
+                            scope.launch {
+                                vm.showSnackBar(
+                                    UiText.ExceptionString(
+                                        e
+                                    )
+                                )
+                            }
+                        }
+                    },
+                    vm = vm,
+                    state = vm,
+                    scrollState = readerScrollState,
+                    onBookMark = {
+                        vm.bookmarkChapter()
+                    },
+                    onPopBackStack = {
+                        navController.popBackStack()
+                    }
+                )
+        }
+    }
+
+    @Composable
+    override fun BottomModalSheet(
+        navController: NavController,
+        navBackStackEntry: NavBackStackEntry,
+        snackBarHostState: SnackbarHostState,
+        sheetState: ModalBottomSheetState,
+        drawerState: DrawerState
+    ) {
+        val vm: ReaderScreenViewModel = hiltViewModel(navBackStackEntry)
+        val context = LocalContext.current
+        Column(
+            Modifier
+                .fillMaxSize()
+        ) {
+            Divider(
+                modifier = Modifier.fillMaxWidth(),
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = .2f),
+                thickness = 1.dp
+            )
+            Spacer(modifier = Modifier.height(5.dp))
+            ReaderSettingMainLayout(
+                onFontSelected = { index ->
+                    vm.apply {
+                        vm.saveFont(index)
+                    }
+                },
+                onAutoscrollIntervalIncrease = {
+                    when (it) {
+                        true -> {
+                            vm.prefFunc.apply {
+                                vm.setAutoScrollIntervalReader(true)
+                            }
+                        }
+                        else -> {
+                            vm.prefFunc.apply {
+                                vm.setAutoScrollIntervalReader(false)
+                            }
+                        }
+                    }
+                },
+                onAutoscrollOffsetIncrease = {
+                    when (it) {
+                        true -> {
+                            vm.prefFunc.apply {
+                                vm.setAutoScrollOffsetReader(true)
+                            }
+                        }
+                        else -> {
+                            vm.prefFunc.apply {
+                                vm.setAutoScrollOffsetReader(false)
+                            }
+                        }
+                    }
+                },
+                onFontSizeIncrease = {
+                    when (it) {
+                        true -> {
+                            vm.apply {
+                                vm.saveFontSize(true)
+                            }
+                        }
+                        else -> {
+                            vm.apply {
+                                vm.saveFontSize(false)
+                            }
+                        }
+                    }
+                },
+                onLineHeightIncrease = {
+                    when (it) {
+                        true -> {
+                            vm.prefFunc.apply {
+                                vm.saveFontHeight(true)
+                            }
+                        }
+                        else -> {
+                            vm.prefFunc.apply {
+                                vm.saveFontHeight(false)
+                            }
+                        }
+                    }
+                },
+                onParagraphDistanceIncrease = {
+                    when (it) {
+                        true -> {
+                            vm.prefFunc.apply {
+                                vm.saveParagraphDistance(true)
+                            }
+                        }
+                        else -> {
+                            vm.prefFunc.apply {
+                                vm.saveParagraphDistance(false)
+                            }
+                        }
+                    }
+                },
+                onParagraphIndentIncrease = {
+                    when (it) {
+                        true -> {
+                            vm.prefFunc.apply {
+                                vm.saveParagraphIndent(true)
+                            }
+                        }
+                        else -> {
+                            vm.prefFunc.apply {
+                                vm.saveParagraphIndent(false)
+                            }
+                        }
+                    }
+                },
+                onScrollIndicatorPaddingIncrease = {
+                    when (it) {
+                        true -> {
+                            vm.prefFunc.apply {
+                                vm.saveScrollIndicatorPadding(true)
+                            }
+                        }
+                        else -> {
+                            vm.apply {
+                                vm.saveScrollIndicatorPadding(false)
+                            }
+                        }
+                    }
+                },
+                onScrollIndicatorWidthIncrease = {
+                    when (it) {
+                        true -> {
+                            vm.prefFunc.apply {
+                                vm.saveScrollIndicatorWidth(true)
+                            }
+                        }
+                        else -> {
+                            vm.prefFunc.apply {
+                                vm.saveScrollIndicatorWidth(false)
+                            }
+                        }
+                    }
+                },
+                onToggleAutoScroll = {
+                    vm.prefFunc.apply {
+                        vm.toggleAutoScrollMode()
+                    }
+                },
+                onToggleImmersiveMode = {
+                    vm.prefFunc.apply {
+                        vm.toggleImmersiveMode(context)
+                    }
+                },
+                onToggleOrientation = {
+                    vm.prefFunc.apply {
+                        vm.saveOrientation(context)
+                    }
+                },
+                onToggleScrollMode = {
+                    vm.prefFunc.apply {
+                        vm.toggleScrollMode()
+                    }
+                },
+                onToggleSelectedMode = {
+                    vm.prefFunc.apply {
+                        vm.toggleSelectableMode()
+                    }
+                },
+                onChangeBrightness = {
+                    vm.apply {
+                        vm.saveBrightness(it, context)
+                    }
+                },
+                onToggleAutoBrightness = {
+                    vm.prefFunc.apply {
+                        vm.toggleAutoBrightness()
+                    }
+                },
+                onBackgroundChange = { index ->
+                    vm.prefFunc.apply {
+                        vm.changeBackgroundColor(index)
+                    }
+                },
+                vm = vm,
+                onShowScrollIndicator = {
+                    vm.showScrollIndicator = it
+                    vm.apply {
+                        vm.setShowScrollIndicator(it)
+                    }
+                },
+                onTextAlign = {
+                    vm.textAlignment = it
+                    vm.readerUseCases.textAlignmentUseCase.save(it)
+                },
+            )
+        }
     }
 }

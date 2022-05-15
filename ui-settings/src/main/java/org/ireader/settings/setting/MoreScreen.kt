@@ -59,17 +59,10 @@ fun MoreScreen(
             Divider()
         }
 
-//        item {
-//            PreferenceRow(
-//                title = stringResource(id = R.string.appearance),
-//                icon = Icons.Default.Palette,
-//                onClick = onAppearanceScreen,
-//            )
-//        }
         item {
-            SettingsSection(
-                R.string.download,
-                Icons.Default.Download,
+            PreferenceRow(
+                title =  stringResource(id =R.string.download ),
+                icon = Icons.Default.Download,
                 onClick = onDownloadScreen
             )
         }
@@ -84,13 +77,6 @@ fun MoreScreen(
         item {
             Divider()
         }
-//        item {
-//            PreferenceRow(
-//                title = stringResource(id = R.string.advance_setting),
-//                icon = Icons.Default.Settings,
-//                onClick = onSettings,
-//            )
-//        }
         item {
             PreferenceRow(
                 title = stringResource(id = R.string.settings),

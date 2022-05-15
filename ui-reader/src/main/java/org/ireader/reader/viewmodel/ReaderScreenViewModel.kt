@@ -88,7 +88,8 @@ class ReaderScreenViewModel @Inject constructor(
         }
     }
 
-    fun getLocalChapter(chapterId: Long) {
+    fun getLocalChapter(chapterId: Long?) {
+        if (chapterId == null) return
         viewModelScope.launch {
             isLoading = true
             val chapter = getChapterUseCase.findChapterById(chapterId)

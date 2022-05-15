@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.IconButton
 import androidx.compose.material.Slider
 import androidx.compose.material.SliderDefaults
@@ -23,8 +22,7 @@ import org.ireader.components.reusable_composable.AppIcon
 @Composable
 fun ChaptersSliderComposable(
     modifier: Modifier = Modifier,
-    scrollState: LazyListState,
-    currentChapter: Chapter,
+    currentChapter: Chapter?,
     currentChapterIndex: Int,
     chapters: List<Chapter>,
     onPrev: () -> Unit,
@@ -34,7 +32,7 @@ fun ChaptersSliderComposable(
 ) {
     Column(modifier = modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
-            text = if (chapters.isNotEmpty() && currentChapterIndex != -1) chapters[currentChapterIndex].name else currentChapter.name,
+            text = if (chapters.isNotEmpty() && currentChapterIndex != -1) chapters[currentChapterIndex].name else currentChapter?.name?:"",
             color = MaterialTheme.colorScheme.onBackground,
             style = MaterialTheme.typography.bodyMedium,
             maxLines = 1,

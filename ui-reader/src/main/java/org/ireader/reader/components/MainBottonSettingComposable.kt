@@ -3,7 +3,6 @@ package org.ireader.reader.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Headphones
 import androidx.compose.material.icons.filled.Menu
@@ -26,9 +25,8 @@ fun MainBottomSettingComposable(
     modifier: Modifier = Modifier,
     scope: CoroutineScope,
     drawerState: DrawerState,
-    scrollState: LazyListState,
     chapters: List<Chapter>,
-    chapter: Chapter,
+    chapter: Chapter?,
     currentChapterIndex: Int,
     onSetting: () -> Unit,
     onNext: () -> Unit,
@@ -38,7 +36,6 @@ fun MainBottomSettingComposable(
     onSliderChange: (index: Float) -> Unit,
 ) {
     ChaptersSliderComposable(
-        scrollState = scrollState,
         onNext = {
             onNext()
         },

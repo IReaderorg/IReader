@@ -131,10 +131,11 @@ class BookDetailViewModel @Inject constructor(
     }
 
     suspend fun getRemoteChapterDetail(
-        book: Book,
+        book: Book?,
         source: CatalogLocal?,
         commands: CommandList = emptyList()
     ) {
+        if (book == null) return
         chapterIsLoading = true
         getChapterDetailJob?.cancel()
         getChapterDetailJob = viewModelScope.launch {
