@@ -16,7 +16,7 @@ class SelectedFontStateUseCase(
      */
     fun readFont(): FontType {
         val fontType = prefs.font().get()
-        return fonts.getOrNull(fontType)?: FontType.Roboto
+        return fonts.getOrNull(fontType)?: org.ireader.core_ui.theme.Roboto
     }
 
     fun saveSelectableText(value: Boolean) {

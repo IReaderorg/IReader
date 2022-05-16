@@ -13,6 +13,7 @@ import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.common_models.entities.Chapter
 import org.ireader.core_api.source.Source
 import org.ireader.core_ui.theme.FontType
+import org.ireader.core_ui.theme.Roboto
 import org.ireader.domain.services.tts_service.media_player.TTSService
 import java.util.Locale
 import javax.inject.Inject
@@ -58,7 +59,7 @@ interface TTSState {
 }
 
 class TTSStateImpl @Inject constructor() : TTSState {
-    override var font by mutableStateOf<FontType>(FontType.Poppins)
+    override var font by mutableStateOf<FontType>(Roboto)
     override var lineHeight by mutableStateOf<Int>(25)
     override var drawerState by mutableStateOf<LazyListState?>(null)
     override var isServiceConnected by mutableStateOf<Boolean>(false)

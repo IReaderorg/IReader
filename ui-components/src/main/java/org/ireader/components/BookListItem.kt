@@ -1,6 +1,5 @@
 package org.ireader.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -14,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import coil.compose.rememberAsyncImagePainter
+import coil.compose.AsyncImage
 import org.ireader.common_models.entities.Book
 import org.ireader.image_loader.BookCover
 
@@ -41,8 +40,8 @@ fun BookListItemImage(
     modifier: Modifier = Modifier,
     mangaCover: BookCover,
 ) {
-    Image(
-        painter = rememberAsyncImagePainter(mangaCover),
+    AsyncImage(
+        model = mangaCover,
         contentDescription = null,
         modifier = modifier,
         contentScale = ContentScale.Crop

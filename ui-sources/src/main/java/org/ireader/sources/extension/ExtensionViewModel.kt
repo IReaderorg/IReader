@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.ireader.common_extensions.launchIO
 import org.ireader.common_models.entities.Catalog
@@ -39,38 +41,40 @@ class ExtensionViewModel @Inject constructor(
 
     var getCatalogJob: Job? = null
 
-
     init {
         scope.launch {
             getCatalogsByType.subscribe(excludeRemoteInstalled = true)
-                .collect { (pinned, unpinned, remote) ->
+                .onEach { (pinned, unpinned, remote) ->
                     state.allPinnedCatalogs = pinned
                     state.allUnpinnedCatalogs = unpinned
                     state.allRemoteCatalogs = remote
 
                     state.languageChoices = getLanguageChoices(remote, pinned + unpinned)
-                }
+                }.launchIn(scope)
+
         }
+
 
         // Update catalogs whenever the query changes or there's a new update from the backend
-        viewModelScope.launch {
-            snapshotFlow { state.allPinnedCatalogs.filteredByQuery(searchQuery) }
-                .collect { state.pinnedCatalogs = it }
-        }
-        viewModelScope.launch {
-            snapshotFlow { state.allUnpinnedCatalogs.filteredByQuery(searchQuery) }
-                .collect { state.unpinnedCatalogs = it }
+
+        snapshotFlow { state.allPinnedCatalogs.filteredByQuery(searchQuery) }
+            .onEach { state.pinnedCatalogs = it }.launchIn(viewModelScope)
+
+
+        snapshotFlow { state.allUnpinnedCatalogs.filteredByQuery(searchQuery) }
+            .onEach { state.unpinnedCatalogs = it }.launchIn(viewModelScope)
+
+
+        scope.launch {
+            lastReadCatalog = uiPreferences.lastUsedSource().read()
         }
 
-        lastReadCatalog = uiPreferences.lastUsedSource().get()
 
-        viewModelScope.launch {
-            snapshotFlow {
-                state.allRemoteCatalogs.filteredByQuery(searchQuery)
-                    .filteredByChoice(selectedLanguage)
-            }
-                .collect { state.remoteCatalogs = it }
+        snapshotFlow {
+            state.allRemoteCatalogs.filteredByQuery(searchQuery)
+                .filteredByChoice(selectedLanguage)
         }
+            .onEach { state.remoteCatalogs = it }.launchIn(viewModelScope)
     }
 
     fun installCatalog(catalog: Catalog) {

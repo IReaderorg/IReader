@@ -25,7 +25,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.ireader.common_resources.UiText
 import org.ireader.components.reusable_composable.CaptionTextComposable
 import org.ireader.core_ui.theme.fonts
 import org.ireader.reader.viewmodel.ReaderScreenPreferencesState
@@ -72,7 +71,7 @@ fun FontChip(
                     contentAlignment = Alignment.Center
                 ) {
                     CaptionTextComposable(
-                        text = UiText.DynamicString(fonts.getOrNull(index)?.fontName?:"Unknown"),
+                        text =fonts.getOrNull(index)?.fontName?:"Unknown",
                         maxLine = 1,
                         align = TextAlign.Center,
                         modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp)

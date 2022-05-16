@@ -77,7 +77,8 @@ fun AppearanceSettingScreen(
         item {
             Text(
                 "Preset themes",
-                modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 4.dp)
+                modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 4.dp),
+                color = MaterialTheme.colorScheme.primary
             )
         }
         item {

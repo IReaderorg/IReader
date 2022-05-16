@@ -3,8 +3,6 @@ package org.ireader.presentation.ui
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
-import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarHostState
@@ -20,12 +18,13 @@ import com.google.accompanist.web.WebContent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import org.ireader.domain.ui.NavigationArgs
+import org.ireader.web.WebPageBottomLayout
+import org.ireader.web.WebPageEvents
 import org.ireader.web.WebPageScreen
 import org.ireader.web.WebPageTopBar
 import org.ireader.web.WebViewPageModel
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
-
 
 @OptIn(
     ExperimentalMaterialApi::class,
@@ -44,8 +43,8 @@ object WebViewScreenSpec : ScreenSpec {
         NavigationArgs.sourceId,
         NavigationArgs.chapterId,
         NavigationArgs.bookId,
-
-        )
+        NavigationArgs.showModalSheet,
+    )
 
     fun buildRoute(
         url: String? = null,
@@ -61,7 +60,6 @@ object WebViewScreenSpec : ScreenSpec {
         }/${sourceId ?: 0}/${bookId ?: 0}/${chapterId ?: 0}".trim()
     }
 
-
     @Composable
     override fun Content(
         navController: NavController,
@@ -73,8 +71,6 @@ object WebViewScreenSpec : ScreenSpec {
     ) {
         val vm: WebViewPageModel = hiltViewModel(navBackStackEntry)
         val scope = rememberCoroutineScope()
-        val bottomSheetState =
-            rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
         WebPageScreen(
             viewModel = vm,
             onPopBackStack = {
@@ -82,46 +78,19 @@ object WebViewScreenSpec : ScreenSpec {
             },
             onModalBottomSheetHide = {
                 scope.launch {
-                    bottomSheetState.hide()
+                    sheetState.hide()
 
                 }
             },
             onModalBottomSheetShow = {
                 scope.launch {
-                    bottomSheetState.show()
-                }
-            },
-            modalBottomSheetState = bottomSheetState,
-            onBookNavigation = { bookId ->
-                vm.source?.let { source ->
-                    navController.navigate(
-                        BookDetailScreenSpec.buildRoute(
-                            source.id,
-                            bookId = bookId
-                        )
-                    )
-                }
-            },
-            onModalSheetConfirm = { webview ->
-                val book = vm.webBook
-                val chapter = vm.webChapter
-                val chapters = vm.webChapters
-                if (book != null) {
-                    vm.insertBook(book.copy(favorite = true))
-                }
-                if (chapter != null) {
-                    vm.insertChapter(chapter)
-                }
-                if (book != null) {
-                    vm.insertChapters(chapters)
+                    sheetState.show()
                 }
             },
             onFetchChapters = {
 
-
             },
             onFetchChapter = {
-
 
             },
             onFetchBook = {
@@ -135,10 +104,12 @@ object WebViewScreenSpec : ScreenSpec {
                 }
             },
             source = vm.source,
-            snackBarHostState = snackBarHostState
+            snackBarHostState = snackBarHostState,
+            scaffoldPadding = scaffoldPadding
         )
     }
-@Composable
+
+    @Composable
     override fun TopBar(
         navController: NavController,
         navBackStackEntry: NavBackStackEntry,
@@ -146,64 +117,120 @@ object WebViewScreenSpec : ScreenSpec {
         sheetState: ModalBottomSheetState,
         drawerState: DrawerState
     ) {
-    val vm: WebViewPageModel = hiltViewModel(navBackStackEntry)
-    val webView = vm.webView
-    val source = vm.source
-    WebPageTopBar(
-        urlToRender = vm.url,
-        onGo = {
-            vm.webViewState?.content = WebContent.Url(vm.url)
-            // webView.value?.loadUrl(viewModel.state.url)
-            vm.updateWebUrl(vm.url)
-        },
-        refresh = {
-            webView?.reload()
-        },
-        goBack = {
-            webView?.goBack()
-        },
-        goForward = {
-            webView?.goForward()
-        },
-        onValueChange = {
-            vm.updateUrl(it)
-        },
-        onPopBackStack = {
-                         navController.popBackStack()
-        },
-        source = source,
-        onFetchBook = {
-            webView?.let {
-                val book = vm.stateBook
+        val vm: WebViewPageModel = hiltViewModel(navBackStackEntry)
+        val webView = vm.webView
+        val source = vm.source
+        WebPageTopBar(
+            urlToRender = vm.url,
+            onGo = {
+                vm.webViewState?.content = WebContent.Url(vm.url)
+                // webView.value?.loadUrl(viewModel.state.url)
+                vm.updateWebUrl(vm.url)
+            },
+            refresh = {
+                webView?.reload()
+            },
+            goBack = {
+                webView?.goBack()
+            },
+            goForward = {
+                webView?.goForward()
+            },
+            onValueChange = {
+                vm.updateUrl(it)
+            },
+            onPopBackStack = {
+                navController.popBackStack()
+            },
+            source = source,
+            onFetchBook = {
+                webView?.let {
+                    val book = vm.stateBook
 
-                if (source != null) {
-                    vm.getDetails(
-                        book = book,
-                        webView = it,
-                    )
-                }}
-        },
-        onFetchChapter = {
-            webView?.let {  val chapter = vm.stateChapter
+                    if (source != null) {
+                        vm.getDetails(
+                            book = book,
+                            webView = it,
+                        )
+                    }
+                }
+            },
+            onFetchChapter = {
+                webView?.let {
+                    val chapter = vm.stateChapter
 
-                if (chapter != null && source != null) {
-                    vm.getContentFromWebView(
-                        chapter = chapter,
-                        webView = it,
+                    if (chapter != null && source != null) {
+                        vm.getContentFromWebView(
+                            chapter = chapter,
+                            webView = it,
+                        )
+                    }
+                }
+            },
+            onFetchChapters = {
+                webView?.let {
+                    val book = vm.stateBook
+                    val source = vm.source
+                    if (book != null && source != null) {
+                        vm.getChapters(
+                            book = book,
+                            webView = it,
+                        )
+                    }
+                }
+            },
+            state = vm,
+        )
+    }
+
+    @Composable
+    override fun BottomModalSheet(
+        navController: NavController,
+        navBackStackEntry: NavBackStackEntry,
+        snackBarHostState: SnackbarHostState,
+        sheetState: ModalBottomSheetState,
+        drawerState: DrawerState
+    ) {
+        val vm: WebViewPageModel = hiltViewModel(navBackStackEntry)
+        val webView = vm.webView
+        val scope = rememberCoroutineScope()
+        WebPageBottomLayout(
+            onConfirm = {
+                scope.launch {
+                    sheetState.hide()
+                }
+                webView?.let { webview ->
+                    val book = vm.webBook
+                    val chapter = vm.webChapter
+                    val chapters = vm.webChapters
+                    if (book != null) {
+                        vm.insertBook(book.copy(favorite = true))
+                    }
+                    if (chapter != null) {
+                        vm.insertChapter(chapter)
+                    }
+                    if (book != null) {
+                        vm.insertChapters(chapters)
+                    }
+                }
+            },
+            onCancel = {
+                scope.launch {
+                    sheetState.hide()
+                }
+                vm.onEvent(WebPageEvents.Cancel)
+            },
+            state = vm,
+            onBook = { bookId ->
+                vm.source?.let { source ->
+                    navController.navigate(
+                        BookDetailScreenSpec.buildRoute(
+                            source.id,
+                            bookId = bookId
+                        )
                     )
-                } }
-        },
-        onFetchChapters = {
-            webView?.let { val book = vm.stateBook
-                val source = vm.source
-                if (book != null && source != null) {
-                    vm.getChapters(
-                        book = book,
-                        webView = it,
-                    )
-                } }
-        },
-        state = vm,
-    )
+                }
+            }
+        )
     }
 }

@@ -14,8 +14,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,7 +27,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.ireader.common_resources.UiText
 import org.ireader.components.reusable_composable.CaptionTextComposable
 import org.ireader.core_ui.ui.string
 import org.ireader.domain.services.tts_service.TTSState
@@ -88,7 +87,7 @@ fun VoiceChip(
                          * need to think of something else for it later
                          */
                         CaptionTextComposable(
-                            text = UiText.DynamicString(voices[index].locale.displayName),
+                            text = voices[index].locale.displayName,
                             maxLine = 1,
                             align = TextAlign.Center,
                             modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp)
@@ -144,7 +143,7 @@ fun LanguageChip(
                         contentAlignment = Alignment.Center
                     ) {
                         CaptionTextComposable(
-                            text = UiText.DynamicString(language[index].displayName),
+                            text = language[index].displayName,
                             maxLine = 1,
                             align = TextAlign.Center,
                             modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp)

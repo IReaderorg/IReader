@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -18,7 +19,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -37,7 +37,7 @@ import org.ireader.ui_components.R
 fun BigSizeTextComposable(
     modifier: Modifier = Modifier,
     text: String,
-    color: Color? = null,
+    color: Color = Color.Unspecified,
     style: TextStyle? = null,
     fontWeight: FontWeight? = null,
     overflow: TextOverflow? = null,
@@ -47,7 +47,7 @@ fun BigSizeTextComposable(
     Text(
         modifier = modifier,
         text = text,
-        color = color ?: MaterialTheme.colorScheme.onSurface,
+        color = color,
         style = style ?: MaterialTheme.typography.titleSmall,
         fontWeight = fontWeight ?: FontWeight.Bold,
         overflow = overflow ?: TextOverflow.Ellipsis,
@@ -60,7 +60,7 @@ fun BigSizeTextComposable(
 fun MidSizeTextComposable(
     modifier: Modifier = Modifier,
     text: UiText,
-    color: Color? = null,
+    color: Color = Color.Unspecified,
     style: TextStyle? = null,
     fontWeight: FontWeight? = null,
     overflow: TextOverflow? = null,
@@ -70,7 +70,7 @@ fun MidSizeTextComposable(
     Text(
         modifier = modifier,
         text = text.asString(LocalContext.current),
-        color = color ?: MaterialTheme.colorScheme.onSurface,
+        color = color,
         style = style ?: MaterialTheme.typography.bodyMedium,
         fontWeight = fontWeight ?: FontWeight.SemiBold,
         overflow = overflow ?: TextOverflow.Ellipsis,
@@ -83,7 +83,7 @@ fun MidSizeTextComposable(
 fun SmallTextComposable(
     modifier: Modifier = Modifier,
     text: UiText,
-    color: Color? = null,
+    color: Color = Color.Unspecified,
     style: TextStyle? = null,
     fontWeight: FontWeight? = null,
     overflow: TextOverflow? = null,
@@ -93,7 +93,7 @@ fun SmallTextComposable(
     Text(
         modifier = modifier,
         text = text.asString(LocalContext.current),
-        color = color ?: MaterialTheme.colorScheme.onSurface,
+        color = color,
         style = style ?: MaterialTheme.typography.labelSmall,
         fontWeight = fontWeight ?: FontWeight.SemiBold,
         overflow = overflow ?: TextOverflow.Ellipsis,
@@ -106,7 +106,7 @@ fun SmallTextComposable(
 fun SuperSmallTextComposable(
     modifier: Modifier = Modifier,
     text: String,
-    color: Color? = null,
+    color: Color = Color.Unspecified,
     style: TextStyle? = null,
     fontWeight: FontWeight? = null,
     overflow: TextOverflow? = null,
@@ -117,7 +117,7 @@ fun SuperSmallTextComposable(
     Text(
         modifier = modifier,
         text = text,
-        color = color ?: MaterialTheme.colorScheme.onSurface,
+        color = color,
         style = style ?: MaterialTheme.typography.labelSmall,
         fontWeight = fontWeight ?: FontWeight.Normal,
         fontSize = 12.sp,
@@ -130,7 +130,7 @@ fun SuperSmallTextComposable(
 @Composable
 fun CaptionTextComposable(
     modifier: Modifier = Modifier,
-    text: UiText,
+    text: String,
     color: Color? = null,
     style: TextStyle? = null,
     fontWeight: FontWeight? = null,
@@ -140,8 +140,8 @@ fun CaptionTextComposable(
 ) {
     Text(
         modifier = modifier,
-        text = text.asString(LocalContext.current),
-        color = color ?: MaterialTheme.colorScheme.onSurface,
+        text = text,
+        color = color ?: Color.Unspecified,
         style = style ?: MaterialTheme.typography.labelSmall,
         fontWeight = fontWeight ?: FontWeight.Normal,
         overflow = overflow ?: TextOverflow.Ellipsis,
@@ -173,7 +173,7 @@ fun AppIconButton(
     imageVector: ImageVector,
     contentDescription: String? = null,
     onClick: () -> Unit = {},
-    tint: Color? = null,
+    tint: Color = LocalContentColor.current,
 ) {
     IconButton(
         onClick = {
@@ -184,7 +184,7 @@ fun AppIconButton(
             modifier = modifier,
             imageVector = imageVector,
             contentDescription = contentDescription,
-            tint = tint ?: MaterialTheme.colorScheme.onSurface
+            tint = tint
         )
     }
 }
@@ -207,7 +207,7 @@ fun AppTextField(
     query: String,
     onValueChange: (value: String) -> Unit,
     onConfirm: () -> Unit,
-    hint: UiText = UiText.StringResource( R.string.search_hint),
+    hint: String = stringResource( R.string.search_hint),
     mode: Int = 0,
     keyboardAction: KeyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
     keyboardActions: KeyboardActions = KeyboardActions(onSearch = {
@@ -219,9 +219,8 @@ fun AppTextField(
         if (query.isBlank() && mode != 2) {
             Text(
                 modifier = Modifier.padding(horizontal = 0.dp),
-                text = hint.asString(LocalContext.current),
+                text = hint,
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = .7F)
             )
         }
 
@@ -236,8 +235,6 @@ fun AppTextField(
                 keyboardOptions = keyboardAction,
                 keyboardActions = keyboardActions,
                 singleLine = true,
-                textStyle = TextStyle(color = MaterialTheme.colorScheme.onSurface),
-                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
             )
         } else if (mode == 1) {
             OutlinedTextField(
@@ -247,9 +244,7 @@ fun AppTextField(
                 maxLines = 1,
                 keyboardOptions = keyboardAction,
                 keyboardActions = keyboardActions,
-
                 singleLine = true,
-                textStyle = TextStyle(color = MaterialTheme.colorScheme.onSurface),
             )
         } else if (mode == 2) {
             androidx.compose.material3.TextField(
@@ -263,7 +258,6 @@ fun AppTextField(
                 keyboardOptions = keyboardAction,
                 keyboardActions = keyboardActions,
                 singleLine = true,
-                textStyle = TextStyle(color = MaterialTheme.colorScheme.onSurface),
             )
         }
     }

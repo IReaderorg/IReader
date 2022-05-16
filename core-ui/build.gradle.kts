@@ -28,7 +28,7 @@ implementation(compose.compose.material3)
     implementation(compose.compose.compiler)
     implementation(accompanist.pager)
     implementation(compose.compose.activity)
-   // implementation(compose.compose.googlFonts)
+    implementation(compose.compose.googlFonts)
 
     implementation(compose.compose.uiToolingPreview)
     implementation(compose.compose.icons)
@@ -42,6 +42,7 @@ implementation(compose.compose.material3)
     androidTestImplementation(compose.compose.uiTestManifest)
     androidTestImplementation(compose.compose.testing)
     androidTestImplementation(compose.compose.composeTooling)
+    debugImplementation(compose.compose.composeTooling)
 
     implementation(accompanist.systemUiController)
 

@@ -1,8 +1,5 @@
-
-
 package org.ireader.sources.extension
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -27,13 +24,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layoutId
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.compose.rememberAsyncImagePainter
+import coil.compose.AsyncImage
 import org.ireader.common_models.entities.Catalog
 import org.ireader.common_models.entities.CatalogBundled
 import org.ireader.common_models.entities.CatalogInstalled
@@ -147,34 +143,22 @@ private fun CatalogPic(catalog: Catalog, modifier: Modifier = Modifier) {
             LetterIcon(catalog.name, modifier)
         }
         is CatalogInstalled -> {
-            runCatching {
-                Image(
-                    painter = rememberAsyncImagePainter(
-                        LocalContext.current.packageManager.getApplicationIcon(
-                            catalog.pkgName
-                        )
-                    ),
-                    contentDescription = null,
-                    modifier = modifier
-                )
-            }.getOrElse {
-                Image(
-                    painter = rememberAsyncImagePainter(catalog),
-                    contentDescription = null,
-                    modifier = modifier
-                )
-            }
-        }
-        is CatalogRemote -> {
-            Image(
-                painter = rememberAsyncImagePainter(catalog.iconUrl),
+            AsyncImage(
+                model = catalog,
                 contentDescription = null,
                 modifier = modifier
             )
         }
+        is CatalogRemote -> {
+            AsyncImage(
+                model = catalog.iconUrl,
+                contentDescription = null,
+                modifier = modifier,
+            )
+        }
         else -> {
-            Image(
-                painter = rememberAsyncImagePainter(catalog),
+            AsyncImage(
+                model = catalog,
                 contentDescription = null,
                 modifier = modifier
             )
@@ -203,7 +187,7 @@ private fun CatalogButtons(
             } else if (onInstall != null) {
                 if (catalog is CatalogLocal) {
                     MidSizeTextComposable(
-                        text = UiText.StringResource( R.string.update),
+                        text = UiText.StringResource(R.string.update),
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.clickable { onInstall() }
                     )
@@ -239,14 +223,16 @@ internal fun CatalogMenuButton(
                 AppIconButton(
                     imageVector = Icons.Filled.PushPin,
                     tint = androidx.compose.material3.MaterialTheme.colorScheme.primary,
-                   contentDescription = stringResource( R.string.pin),
+                    contentDescription = stringResource(R.string.pin),
                     onClick = onPinToggle
                 )
             } else {
                 AppIconButton(
                     imageVector = Icons.Outlined.PushPin,
-                    tint =  androidx.compose.material3.MaterialTheme.colorScheme.onBackground.copy(.5f),
-                   contentDescription = stringResource( R.string.unpin),
+                    tint = androidx.compose.material3.MaterialTheme.colorScheme.onBackground.copy(
+                        .5f
+                    ),
+                    contentDescription = stringResource(R.string.unpin),
                     onClick = onPinToggle
                 )
             }
@@ -254,8 +240,8 @@ internal fun CatalogMenuButton(
             Spacer(modifier = Modifier.padding(horizontal = 4.dp))
             if (onUninstall != null && catalog is CatalogLocal) {
                 MidSizeTextComposable(
-                    text = UiText.StringResource( R.string.uninstall),
-                    color =  androidx.compose.material3.MaterialTheme.colorScheme.primary,
+                    text = UiText.StringResource(R.string.uninstall),
+                    color = androidx.compose.material3.MaterialTheme.colorScheme.primary,
                     modifier = Modifier.clickable { onUninstall() }
                 )
             }

@@ -37,9 +37,11 @@ fun GridLayoutComposable(
             columns = GridCells.Fixed(3),
             content = {
                 items(
-                    count = books.size, key = { index ->
+                    count = books.size,
+                    key = { index ->
                     books[index].id
-                }, contentType = { "books" }) { index ->
+                }, contentType = { "books" },
+                ) { index ->
                     onEndReach(index)
                     BookImage(
                         onClick = { onClick(books[index]) },

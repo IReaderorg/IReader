@@ -39,12 +39,13 @@ import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.launch
 import org.ireader.common_resources.UiText
+import org.ireader.components.components.component.ChipPreference
+import org.ireader.components.components.component.SwitchPreference
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.core_ui.asString
 import org.ireader.core_ui.ui.Colour.contentColor
 import org.ireader.core_ui.ui.TextAlign
-import org.ireader.reader.viewmodel.Orientation
 import org.ireader.reader.viewmodel.ReaderScreenPreferencesState
 import org.ireader.ui_reader.R
 
@@ -153,6 +154,7 @@ fun ReaderSettingMainLayout(
                     }
 
                 }
+
                 SettingItemComposable(
                     text =UiText.StringResource(R.string.font_size),
                     value = UiText.DynamicString(vm.fontSize.toString()),
@@ -265,37 +267,27 @@ fun ReaderSettingMainLayout(
                     .padding(4.dp)
                     .verticalScroll(rememberScrollState())
             ) {
-                SettingItemToggleComposable(
-                    text = UiText.StringResource(R.string.scroll_mode),
-                    value = vm.verticalScrolling,
-                    onToggle = onToggleScrollMode
-                )
-                SettingItemToggleComposable(
-                    text = UiText.StringResource(R.string.show_scrollbar),
-                    value = vm.showScrollIndicator,
-                    onToggle = onShowScrollIndicator
-                )
+                ChipPreference(preference = listOf(
+                    stringResource(id = R.string.horizontal),
+                    stringResource(id = R.string.vertical),
+                ), selected = vm.verticalScrolling.isTrue(),
+                    onValueChange = {
+                        onToggleScrollMode(it == 0)
+                    },
+                    title =  stringResource(id = R.string.scroll_mode))
 
-                SettingItemToggleComposable(
-                    text = UiText.StringResource(R.string.orientation),
-                    value = vm.orientation == Orientation.Landscape,
-                    onToggle = onToggleOrientation
-                )
-                SettingItemToggleComposable(
-                    text = UiText.StringResource(R.string.autoScroll),
-                    value = vm.autoScrollMode,
-                    onToggle = onToggleAutoScroll
-                )
-                SettingItemToggleComposable(
-                    text = UiText.StringResource(R.string.immersive_mode),
-                    value = vm.immersiveMode,
-                    onToggle = onToggleImmersiveMode
-                )
-                SettingItemToggleComposable(
-                    text = UiText.StringResource(R.string.selectable_mode),
-                    value = vm.selectableMode,
-                    onToggle = onToggleSelectedMode
-                )
+                ChipPreference(preference = listOf(
+                    stringResource(id = R.string.landscape),
+                    stringResource(id = R.string.portrait),
+                ), selected = vm.isInPortraitMode.isTrue(),
+                    onValueChange = {
+                        onToggleOrientation(it == 0)
+                    },
+                    title =  stringResource(id = R.string.orientation))
+                SwitchPreference(preference = vm.showScrollIndicator, title = stringResource(id = R.string.show_scrollbar), onValueChange = onShowScrollIndicator)
+                SwitchPreference(preference = vm.autoScrollMode, title = stringResource(id = R.string.autoScroll), onValueChange = onToggleAutoScroll)
+                SwitchPreference(preference = vm.immersiveMode, title = stringResource(id = R.string.immersive_mode), onValueChange =onToggleImmersiveMode)
+                SwitchPreference(preference = vm.selectableMode, title = stringResource(id = R.string.selectable_mode), onValueChange =onToggleSelectedMode)
             }
 
         },
@@ -363,3 +355,10 @@ fun TabsContent(
     }
 }
 
+fun Boolean.isTrue(): Int {
+    return if (this) {
+        1
+    } else {
+        0
+    }
+}

@@ -35,7 +35,7 @@ import org.ireader.ui_explore.R
 @Composable
 fun BrowseTopAppBar(
     state: ExploreState,
-    source: CatalogSource,
+    source: CatalogSource?,
     onValueChange: (String) -> Unit,
     onSearch: () -> Unit,
     onSearchDisable: () -> Unit,
@@ -51,7 +51,7 @@ fun BrowseTopAppBar(
     Toolbar(
         title = {
             if (!state.isSearchModeEnable) {
-                BigSizeTextComposable(text = source.name)
+                BigSizeTextComposable(text = source?.name?:"")
             } else {
                 AppTextField(
                     query = state.searchQuery ?: "",
@@ -73,8 +73,8 @@ fun BrowseTopAppBar(
                         onSearchDisable()
                     },
                 )
-            } else if (source.getFilters()
-                .find { it is Filter.Title } != null
+            } else if (source?.getFilters()
+                ?.find { it is Filter.Title } != null
             ) {
                 AppIconButton(
                     imageVector = Icons.Default.Search,

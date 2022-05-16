@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,14 +19,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentColor
-import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -43,11 +42,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
-import org.ireader.common_models.DisplayMode
-import org.ireader.common_models.LayoutType
 import org.ireader.common_models.entities.BookItem
 import org.ireader.common_resources.UiText
-import org.ireader.components.components.ISnackBarHost
 import org.ireader.components.components.ShowLoading
 import org.ireader.components.list.LayoutComposable
 import org.ireader.components.reusable_composable.AppIconButton
@@ -72,28 +68,21 @@ fun ExploreScreen(
     vm: ExploreState,
     source: CatalogSource,
     onFilterClick: () -> Unit,
-    onValueChange: (String) -> Unit,
-    onSearch: () -> Unit,
-    onSearchDisable: () -> Unit,
-    onSearchEnable: () -> Unit,
-    onWebView: () -> Unit,
-    onPop: () -> Unit,
-    onLayoutTypeSelect: (DisplayMode) -> Unit,
-    currentLayout: LayoutType,
     getBooks: (query: String?, listing: Listing?, filters: List<Filter<*>>) -> Unit,
     loadItems: (Boolean) -> Unit,
     onBook: (BookItem) -> Unit,
     onAppbarWebView: (url: String) -> Unit,
     onPopBackStack: () -> Unit,
+    snackBarHostState:SnackbarHostState,
+    modalState: ModalBottomSheetState,
+    scaffoldPadding:PaddingValues
 ) {
     val scrollState = rememberLazyListState()
     val context = LocalContext.current
 
-    // val books = vm.books.collectAsLazyPagingItems()
-    val snackBarHostState = remember { SnackbarHostState() }
+
     val gridState = rememberLazyGridState()
-    val bottomSheetState =
-        rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
+
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(key1 = true) {
@@ -131,47 +120,8 @@ fun ExploreScreen(
             setSnackBarText(errors.asString(context))
         }
     }
-    ModalBottomSheetLayout(
-        modifier = Modifier,
-        sheetState = bottomSheetState,
-        sheetContent = {
-            FilterBottomSheet(
-                onApply = {
-                    val mFilters = vm.modifiedFilter.filterNot { it.isDefaultValue() }
-                    vm.stateFilters = mFilters
-                    vm.searchQuery = null
-                    loadItems(true)
-                },
-                filters = vm.modifiedFilter,
-                onReset = {
-                    vm.modifiedFilter = source.getFilters()
-                },
-                onUpdate = {
-                    vm.modifiedFilter = it
-                }
-            )
-        },
-        sheetBackgroundColor = MaterialTheme.colorScheme.background,
-
-    ) {
         Scaffold(
-            topBar = {
-                BrowseTopAppBar(
-                    state = vm,
-                    source = source,
-                    onValueChange = onValueChange,
-                    onSearch = onSearch,
-                    onSearchDisable = onSearchDisable,
-                    onSearchEnable = onSearchEnable,
-                    onWebView = onWebView,
-                    onPop = onPop,
-                    onLayoutTypeSelect = onLayoutTypeSelect,
-                    currentLayout = currentLayout
-                )
-            },
-            snackbarHost = {
-                ISnackBarHost(snackBarHostState = snackBarHostState)
-            },
+            modifier = Modifier.padding(scaffoldPadding),
             floatingActionButtonPosition = androidx.compose.material3.FabPosition.End,
             floatingActionButton = {
                 androidx.compose.material3.ExtendedFloatingActionButton(
@@ -183,7 +133,7 @@ fun ExploreScreen(
                     },
                     onClick = {
                         scope.launch {
-                            bottomSheetState.show()
+                            modalState.show()
                         }
                     },
                     icon = {
@@ -234,7 +184,6 @@ fun ExploreScreen(
                         )
                     }
                 }
-            }
         }
     }
 }

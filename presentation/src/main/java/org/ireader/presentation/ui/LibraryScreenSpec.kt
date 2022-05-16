@@ -112,6 +112,7 @@ object LibraryScreenSpec : BottomNavScreenSpec {
         drawerState: DrawerState
     ) {
         val vm: LibraryViewModel = hiltViewModel(navBackStackEntry)
+
         LibraryScreen(
             modifier = Modifier.padding(scaffoldPadding),
             addFilters = {

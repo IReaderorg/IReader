@@ -9,25 +9,32 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,8 +47,11 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow.Companion.Ellipsis
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.ireader.components.reusable_composable.CaptionTextComposable
 import org.ireader.core_ui.ui.PreferenceMutableState
 import org.ireader.core_ui.utils.horizontalPadding
 
@@ -185,7 +195,7 @@ fun PreferenceRow(
                 imageVector = icon,
                 tint = MaterialTheme.colorScheme.primary,
 
-            )
+                )
         }
         Column(
             Modifier
@@ -216,6 +226,107 @@ fun PreferenceRow(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SliderPreference(
+    preference: Float,
+    title: String,
+    subtitle: String? = null,
+    icon: ImageVector? = null,
+    onValueChange: ((Float) -> Unit)?
+) {
+    PreferenceRow(
+        title = title,
+        subtitle = subtitle,
+        icon = icon,
+        action = {
+            if (onValueChange != null) {
+                Slider(
+                    value = preference,
+                    onValueChange = onValueChange
+                )
+            }
+        },
+    )
+}
+
+@Preview
+@Composable
+private fun SliderPreferencesPreview() {
+    var pref by remember {
+        mutableStateOf(24F)
+    }
+    SliderPreference(preference = pref, title = "Font Size", onValueChange = {
+        pref = it
+    })
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ChipPreference(
+    preference: List<String>,
+    selected: Int,
+    title: String,
+    subtitle: String? = null,
+    icon: ImageVector? = null,
+    onValueChange: ((Int) -> Unit)?
+) {
+    PreferenceRow(
+        title = title,
+        subtitle = subtitle,
+        icon = icon,
+        action = {
+            LazyRow {
+                items(count = preference.size) { index ->
+                    FilterChip(
+                        selected = index == selected,
+                        onClick = {
+                            if (onValueChange != null) {
+                                onValueChange(index)
+                            }
+                        },
+                        colors = FilterChipDefaults.filterChipColors(
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            labelColor = MaterialTheme.colorScheme.onPrimary,
+                            selectedContainerColor = MaterialTheme.colorScheme.primary,
+                        ),
+                        label = {
+                            CaptionTextComposable(
+                                text = preference[index],
+                                maxLine = 1,
+                                align = TextAlign.Center,
+                                modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
+                                color = if (selected == index) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                }
+            }
+        },
+    )
+}
+
+@Composable
+fun SwitchPreference(
+    preference: Boolean,
+    title: String,
+    subtitle: String? = null,
+    icon: ImageVector? = null,
+    onValueChange: ((Boolean) -> Unit)?
+) {
+    PreferenceRow(
+        title = title,
+        subtitle = subtitle,
+        icon = icon,
+        action = { Switch(checked = preference, onCheckedChange = null) },
+        onClick = {
+            if (onValueChange != null) {
+                onValueChange(!preference)
+            }
+        }
+    )
+}
 
 @Composable
 fun SwitchPreference(
@@ -233,7 +344,21 @@ fun SwitchPreference(
     )
 }
 
-
+@Composable
+fun SwitchPreference(
+    preference: MutableState<Boolean>,
+    title: String,
+    subtitle: String? = null,
+    icon: ImageVector? = null,
+) {
+    PreferenceRow(
+        title = title,
+        subtitle = subtitle,
+        icon = icon,
+        action = { Switch(checked = preference.value, onCheckedChange = null) },
+        onClick = { preference.value = !preference.value }
+    )
+}
 
 @Composable
 fun <Key> ChoicePreference(
@@ -241,11 +366,11 @@ fun <Key> ChoicePreference(
     choices: Map<Key, Int>,
     title: Int,
     subtitle: String? = null,
-    onValue:((Key)->Unit)? = null
+    onValue: ((Key) -> Unit)? = null
 ) {
     ChoicePreference(
         preference,
-        choices.mapValues {map -> stringResource(map.value) },
+        choices.mapValues { map -> stringResource(map.value) },
         stringResource(title),
         subtitle,
         onValue
@@ -259,7 +384,7 @@ fun <Key> ChoicePreference(
     choices: Map<Key, String>,
     title: String,
     subtitle: String? = null,
-    onValue:((Key)->Unit)? = null
+    onValue: ((Key) -> Unit)? = null
 ) {
     var showDialog by remember { mutableStateOf(false) }
 

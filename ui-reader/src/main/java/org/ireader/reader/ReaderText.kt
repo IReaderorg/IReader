@@ -48,7 +48,7 @@ fun ReaderText(
     swipeState: SwipeRefreshState,
     scrollState: LazyListState,
     modalState: ModalBottomSheetState,
-    toggleReaderMode:() -> Unit
+    toggleReaderMode:() -> Unit,
 ) {
 
     val scope = rememberCoroutineScope()

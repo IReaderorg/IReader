@@ -19,6 +19,7 @@ import org.ireader.common_resources.LAST_CHAPTER
 import org.ireader.common_resources.NO_VALUE
 import org.ireader.common_resources.UiText
 import org.ireader.core_catalogs.interactor.GetLocalCatalog
+import org.ireader.core_ui.preferences.ReaderPreferences
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.domain.use_cases.history.HistoryUseCase
@@ -41,10 +42,14 @@ class ReaderScreenViewModel @Inject constructor(
     val state: ReaderScreenStateImpl,
     val prefFunc: ReaderPrefFunctionsImpl,
     val savedStateHandle: SavedStateHandle,
+    val readerPreferences: ReaderPreferences,
 ) : BaseViewModel(),
     ReaderScreenPreferencesState by prefState,
     ReaderScreenState by state,
     ReaderPrefFunctions by prefFunc {
+
+
+
 
     init {
 

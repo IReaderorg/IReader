@@ -1,10 +1,13 @@
 package org.ireader.core_ui.theme
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import org.ireader.core_ui.R
+import androidx.compose.ui.text.googlefonts.GoogleFont
+import org.ireader.common_resources.R
+import org.ireader.core_ui.theme.themes.Roboto
 
 // Set of Material typography styles to start with
 val poppins = FontFamily(
@@ -66,19 +69,28 @@ val comfortaa = FontFamily(
     )
 )
 
+val Roboto = FontType("Roboto", Roboto)
+
+@OptIn(ExperimentalTextApi::class) val fon = GoogleFont.Provider(
+    providerAuthority = "com.google.android.gms.fonts",
+    providerPackage = "com.google.android.gms",
+    certificates = R.array.com_google_android_gms_fonts_certs
+)
+
 val fonts = listOf<FontType>(
-    FontType.Poppins,
-    FontType.SourceSansPro,
-    FontType.SupermercadoOne,
-    FontType.Comfortaa,
-    FontType.PTSerif,
-    FontType.ArbutusSlab,
-    FontType.Domine,
-    FontType.Lora,
-    FontType.Nunito,
-    FontType.Noto,
-    FontType.OpenSand,
-    FontType.RobotoSerif,
+    FontType("Roboto", Roboto),
+    FontType("Poppins", poppins),
+    FontType("Source Sans Pro", sourceSansPro),
+    FontType("Supermercado One", supermercadoOne),
+    FontType("Comfortaa", comfortaa),
+    FontType("PT Serif", pt_serif),
+    FontType("Arbutus Slab", arbutus_slab),
+    FontType("Domine", domine),
+    FontType("Lora", lora),
+    FontType("Nunito", nunito),
+    FontType("Noto", noto),
+    FontType("Open Sans", openSans),
+    FontType("Roboto Serif", roboto_serif),
 )
 
 val readerScreenBackgroundColors = listOf<BackgroundColor>(

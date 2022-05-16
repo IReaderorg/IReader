@@ -10,8 +10,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
@@ -19,19 +21,27 @@ import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 import org.ireader.common_resources.UiText
 import org.ireader.components.components.EmptyScreenComposable
+import org.ireader.components.hideKeyboard
 import org.ireader.core.R
 import org.ireader.core_api.source.HttpSource
 import org.ireader.domain.ui.NavigationArgs
+import org.ireader.explore.BrowseTopAppBar
 import org.ireader.explore.ExploreScreen
+import org.ireader.explore.FilterBottomSheet
 import org.ireader.explore.viewmodel.ExploreViewModel
 
+@OptIn(
+    ExperimentalAnimationApi::class,
+    ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class
+)
 object ExploreScreenSpec : ScreenSpec {
 
     override val navHostRoute: String = "explore_route/{sourceId}?query={query}"
 
     override val arguments: List<NamedNavArgument> = listOf(
         NavigationArgs.query,
-        NavigationArgs.sourceId
+        NavigationArgs.sourceId,
+        NavigationArgs.showModalSheet,
     )
 
     fun buildRoute(sourceId: Long, query: String? = null): String {
@@ -67,48 +77,6 @@ object ExploreScreenSpec : ScreenSpec {
                     vm.toggleFilterMode()
                 },
                 source = source,
-                onPop = { navController.popBackStack() },
-                currentLayout = vm.layout,
-                onLayoutTypeSelect = { layout ->
-                    vm.saveLayoutType(layout)
-                },
-                onSearch = {
-                    val query = vm.searchQuery
-                    if (query != null && query.isNotBlank()) {
-                        vm.searchQuery = query
-                        vm.loadItems(true)
-                    } else {
-                        vm.stateListing = source.getListings().first()
-                        vm.loadItems()
-                        scope.launch {
-                            vm.showSnackBar(UiText.StringResource(R.string.query_must_not_be_empty))
-                        }
-                    }
-                    focusManager.clearFocus()
-                },
-                onSearchDisable = {
-                    vm.toggleSearchMode(false)
-                    vm.searchQuery = null
-                    vm.loadItems(true)
-                },
-                onSearchEnable = {
-                    vm.toggleSearchMode(true)
-                },
-                onValueChange = {
-                    vm.searchQuery = it
-                },
-                onWebView = {
-                    if (source is HttpSource) {
-                        navController.navigate(
-                            WebViewScreenSpec.buildRoute(
-                                url = (source).baseUrl,
-                                sourceId = source.id,
-                                chapterId = null,
-                                bookId = null
-                            )
-                        )
-                    }
-                },
                 getBooks = { query, listing, filters ->
                     vm.searchQuery = query
                     vm.stateListing = listing
@@ -136,7 +104,10 @@ object ExploreScreenSpec : ScreenSpec {
                 },
                 onPopBackStack = {
                     navController.popBackStack()
-                }
+                },
+                snackBarHostState = snackBarHostState,
+                modalState = sheetState,
+                scaffoldPadding = scaffoldPadding
             )
         } else {
             EmptyScreenComposable(R.string.source_not_available,
@@ -144,5 +115,97 @@ object ExploreScreenSpec : ScreenSpec {
                     navController.popBackStack()
                 })
         }
+    }
+
+    @OptIn(ExperimentalComposeUiApi::class)
+    @Composable
+    override fun BottomModalSheet(
+        navController: NavController,
+        navBackStackEntry: NavBackStackEntry,
+        snackBarHostState: SnackbarHostState,
+        sheetState: ModalBottomSheetState,
+        drawerState: DrawerState
+    ) {
+        val vm: ExploreViewModel = hiltViewModel(navBackStackEntry)
+        val source = vm.source
+        val scope = rememberCoroutineScope()
+        val focusManager = LocalFocusManager.current
+        val keyboardController = LocalSoftwareKeyboardController.current
+        FilterBottomSheet(
+            onApply = {
+                val mFilters = vm.modifiedFilter.filterNot { it.isDefaultValue() }
+                vm.stateFilters = mFilters
+                vm.searchQuery = null
+                vm.loadItems(reset = true)
+                hideKeyboard(softwareKeyboardController = keyboardController,focusManager)
+            },
+            filters = vm.modifiedFilter,
+            onReset = {
+                vm.modifiedFilter = source?.getFilters()?: emptyList()
+            },
+            onUpdate = {
+                vm.modifiedFilter = it
+            }
+        )
+    }
+
+    @Composable
+    override fun TopBar(
+        navController: NavController,
+        navBackStackEntry: NavBackStackEntry,
+        snackBarHostState: SnackbarHostState,
+        sheetState: ModalBottomSheetState,
+        drawerState: DrawerState
+    ) {
+        val vm: ExploreViewModel = hiltViewModel(navBackStackEntry)
+        val focusManager = LocalFocusManager.current
+        val source = vm.source
+        val scope = rememberCoroutineScope()
+        BrowseTopAppBar(
+            state = vm,
+            source = source,
+            onValueChange = {
+                vm.searchQuery = it
+            },
+            onSearch = {
+                val query = vm.searchQuery
+                if (query != null && query.isNotBlank()) {
+                    vm.searchQuery = query
+                    vm.loadItems(true)
+                } else {
+                    vm.stateListing = source?.getListings()?.first()
+                    vm.loadItems()
+                    scope.launch {
+                        vm.showSnackBar(UiText.StringResource(R.string.query_must_not_be_empty))
+                    }
+                }
+                focusManager.clearFocus()
+            },
+            onSearchDisable = {
+            vm.toggleSearchMode(false)
+            vm.searchQuery = null
+            vm.loadItems(true)
+        },
+            onSearchEnable = {
+                vm.toggleSearchMode(true)
+            },
+            onWebView = {
+                if (source is HttpSource) {
+                    navController.navigate(
+                        WebViewScreenSpec.buildRoute(
+                            url = (source).baseUrl,
+                            sourceId = source.id,
+                            chapterId = null,
+                            bookId = null
+                        )
+                    )
+                }
+            },
+            onPop = { navController.popBackStack() },
+            onLayoutTypeSelect = { layout ->
+                vm.saveLayoutType(layout)
+            },
+            currentLayout = vm.layout
+        )
     }
 }

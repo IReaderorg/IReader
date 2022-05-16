@@ -1,5 +1,6 @@
 package org.ireader.reader.viewmodel
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.view.WindowManager
@@ -10,8 +11,8 @@ import org.ireader.common_extensions.findComponentActivity
 import org.ireader.common_extensions.hideSystemUI
 import org.ireader.common_extensions.isImmersiveModeEnabled
 import org.ireader.common_extensions.showSystemUI
-import org.ireader.core_ui.theme.FontType
 import org.ireader.core_ui.theme.OrientationMode
+import org.ireader.core_ui.theme.Roboto
 import org.ireader.core_ui.theme.fonts
 import org.ireader.core_ui.theme.readerScreenBackgroundColors
 import javax.inject.Inject
@@ -71,6 +72,7 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
         selectableMode = readerUseCases.selectedFontStateUseCase.readSelectableText()
         showScrollIndicator = readerUseCases.scrollIndicatorUseCase.isShow()
         textAlignment = readerUseCases.textAlignmentUseCase.read()
+        isInPortraitMode = readerUseCases.orientationUseCase.read() == OrientationMode.Portrait
     }
 
     override fun ReaderScreenViewModel.toggleReaderMode(enable: Boolean?) {
@@ -93,7 +95,7 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
     }
 
     override fun ReaderScreenViewModel.saveFont(index: Int) {
-        this.font = fonts.getOrNull(index)?:FontType.Roboto
+        this.font = fonts.getOrNull(index)?: Roboto
         readerUseCases.selectedFontStateUseCase.saveFont(index)
     }
 
@@ -151,18 +153,19 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
         }
     }
 
+    @SuppressLint("SourceLockedOrientationActivity")
     override fun ReaderScreenViewModel.saveOrientation(context: Context) {
         val activity = context.findComponentActivity()
         if (activity != null) {
-            when (prefState.orientation) {
-                is Orientation.Landscape -> {
+            when (prefState.isInPortraitMode) {
+                false -> {
                     activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-                    orientation = Orientation.Portrait
+                    isInPortraitMode = true
                     readerUseCases.orientationUseCase.save(OrientationMode.Portrait)
                 }
-                is Orientation.Portrait -> {
+               true -> {
                     activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-                    orientation = Orientation.Landscape
+                     isInPortraitMode = false
                     readerUseCases.orientationUseCase.save(OrientationMode.Landscape)
                 }
             }
@@ -266,11 +269,11 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
             when (readerUseCases.orientationUseCase.read()) {
                 OrientationMode.Portrait -> {
                     activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-                    orientation = Orientation.Portrait
+                    isInPortraitMode = true
                 }
                 OrientationMode.Landscape -> {
                     activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-                    orientation = Orientation.Landscape
+                    isInPortraitMode = false
                 }
             }
         }

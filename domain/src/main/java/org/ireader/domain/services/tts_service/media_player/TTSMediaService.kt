@@ -283,6 +283,10 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
             registerReceiver(noisyReceiver, IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY))
             noisyReceiverHooked = true
         }
+        initAudioManager()
+    }
+
+    private fun initAudioManager() {
         val am = baseContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         val result = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN).run {

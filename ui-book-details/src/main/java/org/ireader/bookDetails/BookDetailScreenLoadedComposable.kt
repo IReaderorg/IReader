@@ -4,7 +4,6 @@ import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
@@ -38,8 +37,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
+import coil.compose.AsyncImage
 import org.ireader.bookDetails.components.BookSummary
 import org.ireader.common_models.entities.Book
 import org.ireader.components.components.BookImageComposable
@@ -68,24 +66,20 @@ fun BookDetailScreenLoadedComposable(
     Box() {
         Box {
 
-            Image(
-                painter = rememberAsyncImagePainter(
-                    ImageRequest.Builder(LocalContext.current)
-                        .data(data = BookCover.from(book))
-                        .apply(block = fun ImageRequest.Builder.() {
-                            listener(onSuccess = { _, _ ->
-                                imageLoaded = true
-                            })
-                        }).build()
-                ),
+            AsyncImage(
+                model = BookCover.from(book),
                 contentDescription = null,
+                onSuccess = {
+                    imageLoaded = true
+                },
                 alignment = Alignment.TopCenter,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(300.dp)
                     .alpha(fadeInImage),
                 contentScale = ContentScale.Crop,
-            )
+
+                )
             Box(
                 Modifier
                     .fillMaxWidth()

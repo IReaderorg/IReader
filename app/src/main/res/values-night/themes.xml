@@ -18,7 +18,7 @@
         </item>
 
         <!-- Optional: set the status bar light and content dark. -->
-        <item name="android:windowLightStatusBar" />
+        <item name="android:windowLightStatusBar" tools:targetApi="m" />
     </style>
 
     <style name="Theme.Infinity.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />

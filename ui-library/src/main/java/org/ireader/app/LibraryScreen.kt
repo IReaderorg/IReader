@@ -126,51 +126,55 @@ fun LibraryScreen(
                     }
                 }
             }
-            when {
-                vm.hasSelection -> {
-                    Box(
+            if(vm.hasSelection) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 16.dp)
+                        .height(60.dp)
+                        .align(Alignment.BottomCenter)
+                        .border(
+                            width = 0.dp, color = MaterialTheme.colorScheme.background,
+                            RoundedCornerShape(8.dp)
+                        )
+                        .background(MaterialTheme.colorScheme.surface)
+                        .clickable(enabled = false) {},
+                ) {
+                    Row(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 12.dp, vertical = 16.dp)
-                            .height(60.dp)
-                            .align(Alignment.BottomCenter)
-                            .border(
-                                width = 0.dp, color = MaterialTheme.colorScheme.background,
-                                RoundedCornerShape(8.dp)
-                            )
-                            .background(MaterialTheme.colorScheme.surface)
-                            .clickable(enabled = false) {},
+                            .fillMaxSize(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxSize(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            AppIconButton(
-                                imageVector = Icons.Default.GetApp,
-                                contentDescription = stringResource(R.string.download),
-                                onClick = onDownload
-                            )
-                            AppIconButton(
-                                imageVector = Icons.Default.Done,
-                                contentDescription = stringResource(R.string.mark_as_read),
-                                onClick = onMarkAsRead
-                            )
-                            AppIconButton(
-                                imageVector = Icons.Default.DoneOutline,
-                                contentDescription = stringResource(R.string.mark_as_not_read),
-                                onClick = onMarkAsNotRead
-                            )
-                            AppIconButton(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = stringResource(R.string.mark_previous_as_read),
-                                onClick = onDelete
-                            )
-                        }
+                        AppIconButton(
+                            imageVector = Icons.Default.GetApp,
+                            contentDescription = stringResource(R.string.download),
+                            onClick = onDownload
+                        )
+                        AppIconButton(
+                            imageVector = Icons.Default.Done,
+                            contentDescription = stringResource(R.string.mark_as_read),
+                            onClick = onMarkAsRead
+                        )
+                        AppIconButton(
+                            imageVector = Icons.Default.DoneOutline,
+                            contentDescription = stringResource(R.string.mark_as_not_read),
+                            onClick = onMarkAsNotRead
+                        )
+                        AppIconButton(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = stringResource(R.string.mark_previous_as_read),
+                            onClick = onDelete
+                        )
                     }
                 }
+
             }
         }
     }
+}
+
+@Composable
+private fun EditMode() {
+
 }

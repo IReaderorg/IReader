@@ -53,6 +53,12 @@ fun ExtensionScreen(
     val scope = rememberCoroutineScope()
     val pagerState = rememberPagerState()
     val context = LocalContext.current
+
+    LaunchedEffect(key1 = pagerState.targetPage ) {
+        viewModel.currentPagerPage = pagerState.targetPage
+    }
+
+
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
@@ -109,7 +115,6 @@ fun ExtensionScreen(
             state = pagerState,
             modifier = Modifier.fillMaxSize()
         ) { page ->
-            viewModel.currentPagerPage = page
             when (page) {
                 0 -> {
                     UserSourcesScreen(
@@ -146,7 +151,7 @@ fun SourceHeader(
             modifier = modifier
                 .padding(horizontal = horizontalPadding, vertical = 8.dp),
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurface,
+            color = MaterialTheme.colorScheme.primary,
         )
     }
 }

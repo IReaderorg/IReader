@@ -6,14 +6,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,15 +20,12 @@ import androidx.compose.material.Button
 import androidx.compose.material.Checkbox
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.LinearProgressIndicator
-import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.Surface
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -72,14 +68,12 @@ fun WebPageScreen(
     onPopBackStack: () -> Unit,
     onModalBottomSheetShow: () -> Unit,
     onModalBottomSheetHide: () -> Unit,
-    modalBottomSheetState: ModalBottomSheetState,
-    onBookNavigation: (Long) -> Unit,
-    onModalSheetConfirm: (WebView) -> Unit,
     source: CatalogSource?,
     onFetchBook: (WebView) -> Unit,
     onFetchChapter: (WebView) -> Unit,
     onFetchChapters: (WebView) -> Unit,
-    snackBarHostState: SnackbarHostState
+    snackBarHostState: SnackbarHostState,
+    scaffoldPadding: PaddingValues
 ) {
 
     val context = LocalContext.current
@@ -90,15 +84,14 @@ fun WebPageScreen(
         mutableStateOf(viewModel.webUrl)
     }
 
-    LaunchedEffect(key1 = webView.hashCode() ) {
+    LaunchedEffect(key1 = webView.hashCode()) {
         viewModel.webView = webView
     }
     val webViewState = rememberWebViewState(url = webUrl.value)
 
-    LaunchedEffect(key1 = webViewState.hashCode() ) {
+    LaunchedEffect(key1 = webViewState.hashCode()) {
         viewModel.webViewState = webViewState
     }
-
 
     val accompanistState = AccompanistWebChromeClient()
 
@@ -140,94 +133,48 @@ fun WebPageScreen(
     }
 
 
-    LaunchedEffect(key1 = webViewState.loadingState ) {
+    LaunchedEffect(key1 = webViewState.loadingState) {
         if (webViewState.loadingState == LoadingState.Finished) {
 
-            viewModel.updateCookies(webView?.url?:"")
+            viewModel.updateCookies(webView?.url ?: "")
         }
     }
 
     val refreshState = rememberSwipeRefreshState(isRefreshing = viewModel.isLoading)
-    ModalBottomSheetLayout(
-        modifier = Modifier.statusBarsPadding(),
-        sheetState = modalBottomSheetState,
-        sheetContent = {
-            Box(modifier.defaultMinSize(minHeight = 1.dp)) {
-                WebPageBottomLayout(
-                    onConfirm = {
-                        onModalBottomSheetHide()
-                        webView?.let { onModalSheetConfirm(it) }
-                    },
-                    onCancel = {
-                        onModalBottomSheetHide()
-                        viewModel.onEvent(WebPageEvents.Cancel)
-                    },
-                    state = viewModel,
-                    onBook = { id ->
-                        onBookNavigation(id)
-                    }
+    Box(modifier = Modifier.padding(scaffoldPadding)) {
+
+        SwipeRefresh(
+            state = refreshState,
+            onRefresh = {
+                webView?.reload()
+                viewModel.toggleLoading(true)
+            },
+            indicator = { state, trigger ->
+                SwipeRefreshIndicator(
+                    state = state,
+                    refreshTriggerDistance = trigger,
+                    scale = true,
+                    backgroundColor = MaterialTheme.colorScheme.background,
+                    contentColor = MaterialTheme.colorScheme.primaryContainer,
+                    elevation = 8.dp
                 )
             }
-        },
-        sheetBackgroundColor = MaterialTheme.colorScheme.background,
-
         ) {
-        Scaffold(
-            topBar = {
-
-            },
-        ) { padding ->
-            Box(modifier = Modifier.padding(padding)) {
-
-                SwipeRefresh(
-                    state = refreshState,
-                    onRefresh = {
-                        webView?.reload()
-                        viewModel.toggleLoading(true)
-                    },
-                    indicator = { state, trigger ->
-                        SwipeRefreshIndicator(
-                            state = state,
-                            refreshTriggerDistance = trigger,
-                            scale = true,
-                            backgroundColor = MaterialTheme.colorScheme.background,
-                            contentColor = MaterialTheme.colorScheme.primaryContainer,
-                            elevation = 8.dp
-                        )
-                    }
-                ) {
-                    if (webViewState.isLoading) {
-                        LinearProgressIndicator(
-                            Modifier
-                                .fillMaxWidth(),
-                        )
-                    }
-
-                    WebView(
-                        state = webViewState,
-                        onCreated = {
-                            webView = it
-                            it.setDefaultSettings()
-                        },
-                        chromeClient = accompanistState
-                    )
-//                    WebView(
-//                        modifier = Modifier.fillMaxSize(),
-//                        state = webViewState,
-//                        captureBackPresses = false,
-//                        isLoading = {
-//                            viewModel.toggleLoading(it)
-//                        },
-//                        onCreated = {
-//                            webView = it
-//                            it.setDefaultSettings()
-//                        },
-//                        updateUrl = {
-//                            viewModel.updateUrl(it)
-//                        },
-//                    )
-                }
+            if (webViewState.isLoading) {
+                LinearProgressIndicator(
+                    Modifier
+                        .fillMaxWidth(),
+                )
             }
+
+            WebView(
+                state = webViewState,
+                onCreated = {
+                    webView = it
+                    it.setDefaultSettings()
+                },
+                chromeClient = accompanistState
+            )
         }
     }
 }
@@ -259,7 +206,7 @@ fun ScrollableAppBar(
 }
 
 @Composable
-private fun WebPageBottomLayout(
+fun WebPageBottomLayout(
     onConfirm: () -> Unit,
     onCancel: () -> Unit,
     onBook: (Long) -> Unit,
@@ -278,12 +225,18 @@ private fun WebPageBottomLayout(
             TextButton(onClick = {
                 onCancel()
             }, modifier = Modifier.width(92.dp), shape = RoundedCornerShape(4.dp)) {
-                MidSizeTextComposable(text = UiText.StringResource( R.string.cancel), color = MaterialTheme.colorScheme.primary)
+                MidSizeTextComposable(
+                    text = UiText.StringResource(R.string.cancel),
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
             Button(onClick = {
                 onConfirm()
             }, modifier = Modifier.width(92.dp), shape = RoundedCornerShape(4.dp)) {
-                MidSizeTextComposable(text = UiText.StringResource( R.string.apply), color = MaterialTheme.colorScheme.onPrimary)
+                MidSizeTextComposable(
+                    text = UiText.StringResource(R.string.apply),
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -304,7 +257,7 @@ private fun WebPageBottomLayout(
                                     state.selectedBooks.remove(-1)
                                 }
                             })
-                        MidSizeTextComposable(text = UiText.StringResource( R.string.add_as_new))
+                        MidSizeTextComposable(text = UiText.StringResource(R.string.add_as_new))
 
                     }
                 }
@@ -333,7 +286,7 @@ private fun WebPageBottomLayout(
                         MidSizeTextComposable(text = UiText.DynamicString(item.title))
                     }
                     AppIconButton(imageVector = Icons.Default.ArrowForward,
-                        contentDescription = stringResource( R.string.view_book),
+                        contentDescription = stringResource(R.string.view_book),
                         onClick = {
                             onBook(item.id)
                         })

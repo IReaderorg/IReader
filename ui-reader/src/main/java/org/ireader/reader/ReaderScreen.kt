@@ -183,7 +183,7 @@ fun ReadingScreen(
                             scrollState = scrollState,
                             modalState = modalBottomSheetState,
                             toggleReaderMode = toggleReaderMode,
-                            uiState = vm
+                            uiState = vm,
                         )
                     }
                 }

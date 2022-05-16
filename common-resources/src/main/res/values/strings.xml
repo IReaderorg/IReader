@@ -252,6 +252,10 @@
     <string name="immersive_mode">Immersive mode</string>
     <string name="general">General</string>
     <string name="reader">Reader</string>
+    <string name="landscape">Landscape</string>
+    <string name="portrait">Portrait</string>
+    <string name="vertical">Vertical</string>
+    <string name="horizontal">Horizontal</string>
     <string name="selectable_mode">Selectable mode</string>
 
 

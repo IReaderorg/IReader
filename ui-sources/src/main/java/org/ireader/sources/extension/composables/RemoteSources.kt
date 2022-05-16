@@ -2,6 +2,7 @@ package org.ireader.sources.extension.composables
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -49,6 +50,7 @@ fun RemoteSourcesScreen(
         }
     ) {
         LazyColumn(
+            modifier = Modifier.fillMaxSize(),
             state = scrollState,
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally

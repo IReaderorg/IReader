@@ -41,4 +41,7 @@
 <!--    <color name="animated_icon_color">#99dddddd</color>-->
 <!--    <color name="branding_image_text_color">#1E1E1E</color>-->
 
+    <color name="background">#FFFFFFFF</color>
+    <color name="iconBackground">#FFE500</color>
+
 </resources>
