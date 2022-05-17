@@ -76,11 +76,11 @@ class AppThemeViewModel @Inject constructor(
     ): Theme {
         @Composable
         fun getTheme(fallbackIsLight: Boolean): Theme {
-            return themes.firstOrNull { it.id == colorTheme }.let {
+            return themes.firstOrNull { it.id == colorTheme }?.let {
                 if (fallbackIsLight) {
-                    it?.light()
+                    it.light()
                 }else {
-                    it?.dark()
+                    it.dark()
                 }
             }?: themes.first { it.lightColor.isLight() == fallbackIsLight }.light()
         }

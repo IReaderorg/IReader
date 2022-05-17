@@ -25,6 +25,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
@@ -37,7 +38,7 @@ import org.ireader.reader.reverse_swip_refresh.SwipeRefreshState
 import org.ireader.reader.viewmodel.ReaderScreenState
 import org.ireader.reader.viewmodel.ReaderScreenViewModel
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalTextApi::class)
 @Composable
 fun ReaderText(
     modifier: Modifier = Modifier,
@@ -106,7 +107,8 @@ fun ReaderText(
                         listState = scrollState,
                         padding = if (vm.scrollIndicatorPadding.value < 0) 0.dp else vm.scrollIndicatorPadding.value.dp,
                         thickness = if (vm.scrollIndicatorWith.value < 0) 0.dp else vm.scrollIndicatorWith.value.dp,
-                        enable = vm.showScrollIndicator.value
+                        enable = vm.showScrollIndicator.value,
+                        isDraggable = vm.isScrollIndicatorDraggable.value
                     ) {
                         LazyColumn(
                             modifier = modifier,

@@ -11,12 +11,13 @@ import org.ireader.data.local.AppDatabase
 import org.ireader.data.local.MIGRATION_11_12
 import org.ireader.data.local.MIGRATION_8_9
 import org.ireader.data.local.dao.CatalogDao
+import org.ireader.data.local.dao.ChapterDao
 import org.ireader.data.local.dao.DownloadDao
+import org.ireader.data.local.dao.FontDao
 import org.ireader.data.local.dao.HistoryDao
 import org.ireader.data.local.dao.LibraryBookDao
 import org.ireader.data.local.dao.RemoteKeysDao
 import org.ireader.data.local.dao.UpdatesDao
-import org.ireader.data.local.dao.ChapterDao
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
@@ -60,6 +61,8 @@ object DatabaseInject {
 
         @Provides
         fun provideUpdatesDao(db: AppDatabase): UpdatesDao = db.updatesDao
+        @Provides
+        fun provideFontDao(db: AppDatabase): FontDao = db.fontDao
 
         @Provides
         fun provideDownloadDao(

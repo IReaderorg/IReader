@@ -9,6 +9,7 @@ import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.CatalogRemote
 import org.ireader.common_models.entities.Category
 import org.ireader.common_models.entities.Chapter
+import org.ireader.common_models.entities.FontEntity
 import org.ireader.common_models.entities.History
 import org.ireader.common_models.entities.RemoteKeys
 import org.ireader.common_models.entities.SavedDownload
@@ -16,6 +17,7 @@ import org.ireader.common_models.entities.Update
 import org.ireader.data.local.dao.CatalogDao
 import org.ireader.data.local.dao.ChapterDao
 import org.ireader.data.local.dao.DownloadDao
+import org.ireader.data.local.dao.FontDao
 import org.ireader.data.local.dao.HistoryDao
 import org.ireader.data.local.dao.LibraryBookDao
 import org.ireader.data.local.dao.RemoteKeysDao
@@ -31,6 +33,7 @@ import org.ireader.data.local.dao.UpdatesDao
         History::class,
         Update::class,
         RemoteKeys::class,
+        FontEntity::class,
     ],
     version = 18,
     exportSchema = true,
@@ -44,6 +47,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract val catalogDao: CatalogDao
     abstract val historyDao: HistoryDao
     abstract val updatesDao: UpdatesDao
+    abstract val fontDao: FontDao
 
     companion object {
         const val DATABASE_NAME = "infinity_db"

@@ -23,6 +23,7 @@ dependencies {
     implementation(project(Modules.coreCatalogs))
 
     implementation(compose.compose.icons)
+    implementation(compose.compose.googlFonts)
     implementation(compose.compose.navigation)
     implementation(compose.compose.foundation)
     implementation(compose.compose.animations)

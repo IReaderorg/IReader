@@ -253,6 +253,7 @@
     <string name="colors">Colors</string>
     <string name="scroll_mode">Scroll Mode</string>
     <string name="show_scrollbar">Show Scrollbar</string>
+    <string name="scrollbar_draggable">ScrollBar Draggable</string>
     <string name="orientation">Orientation</string>
     <string name="autoScroll">AutoScroll</string>
     <string name="immersive_mode">Immersive mode</string>

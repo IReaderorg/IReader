@@ -16,7 +16,7 @@ import androidx.navigation.NavDeepLink
 sealed interface ScreenSpec {
 
     companion object {
-        val allScreens = listOf<ScreenSpec>(
+        @OptIn(ExperimentalMaterial3Api::class) val allScreens = listOf<ScreenSpec>(
             LibraryScreenSpec,
             UpdateScreenSpec,
             HistoryScreenSpec,
@@ -34,7 +34,9 @@ sealed interface ScreenSpec {
             GlobalSearchScreenSpec,
             TTSScreenSpec,
             BackupAndRestoreScreenSpec,
-            SettingScreenSpec
+            SettingScreenSpec,
+            ReaderSettingSpec,
+            FontScreenSpec
         ).associateBy { it.navHostRoute }
     }
 

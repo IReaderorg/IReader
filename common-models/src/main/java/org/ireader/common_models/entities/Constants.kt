@@ -4,6 +4,7 @@ package org.ireader.common_models.entities
 
 const val ImageKeyTable = "images"
 const val BOOK_TABLE = "library"
+const val FONT_TABLE = "fonts"
 const val CHAPTER_TABLE = "chapter"
 const val REMOTE_TABLE = "remote"
 const val DOWNLOAD_TABLE = "download"

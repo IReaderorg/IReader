@@ -176,6 +176,7 @@ fun PreferenceRow(
     onLongClick: () -> Unit = {},
     subtitle: String? = null,
     action: @Composable (() -> Unit)? = null,
+    actionAlignment: Alignment = Alignment.CenterEnd
 ) {
     val height = if (subtitle != null) 72.dp else 56.dp
 
@@ -222,7 +223,7 @@ fun PreferenceRow(
             }
         }
         if (action != null) {
-            Box(Modifier.widthIn(min = 56.dp, max = 250.dp), contentAlignment = Alignment.CenterStart) {
+            Box(Modifier.widthIn(min = 56.dp, max = 250.dp), contentAlignment = actionAlignment) {
                 action()
             }
         }
@@ -475,7 +476,8 @@ fun <Key> ChipChoicePreference(
     title: String,
     subtitle: String? = null,
     icon: ImageVector? = null,
-    onValue: ((Key) -> Unit)? = null
+    onValue: ((Key) -> Unit)? = null,
+    onFailToFindElement:String = ""
 ) {
     var showDialog by remember { mutableStateOf(false) }
     PreferenceRow(
@@ -495,7 +497,7 @@ fun <Key> ChipChoicePreference(
                 shape = RoundedCornerShape(4.dp),
                 content = {
                     CaptionTextComposable(
-                        text =  choices[preference.value] ?:"",
+                        text =  choices[preference.value] ?:onFailToFindElement,
                         maxLine = 1,
                         align = TextAlign.Center,
                         modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),

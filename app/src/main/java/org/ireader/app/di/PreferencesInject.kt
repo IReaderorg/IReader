@@ -1,5 +1,7 @@
 package org.ireader.app.di
 
+import androidx.compose.ui.text.ExperimentalTextApi
+import androidx.compose.ui.text.googlefonts.GoogleFont
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -34,13 +36,16 @@ class PreferencesInject {
             preferenceStore
         )
     }
+    @OptIn(ExperimentalTextApi::class)
     @Provides
     @Singleton
     fun provideReaderPreferences(
         preferenceStore: PreferenceStore,
+        provider: GoogleFont.Provider
     ): ReaderPreferences {
         return ReaderPreferences(
-            preferenceStore
+            preferenceStore,
+            provider
         )
     }
 

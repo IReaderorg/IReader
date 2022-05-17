@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 18,
-    "identityHash": "0931d3b3c2910d0b61a9837ee6b83c67",
+    "identityHash": "521676bf2b76bcfe1c17a076b711b1b4",
     "entities": [
       {
         "tableName": "library",
@@ -499,12 +499,44 @@
         },
         "indices": [],
         "foreignKeys": []
+      },
+      {
+        "tableName": "fonts",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`fontName` TEXT NOT NULL, `category` TEXT NOT NULL, `isDownloaded` INTEGER NOT NULL, PRIMARY KEY(`fontName`))",
+        "fields": [
+          {
+            "fieldPath": "fontName",
+            "columnName": "fontName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "category",
+            "columnName": "category",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isDownloaded",
+            "columnName": "isDownloaded",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "fontName"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0931d3b3c2910d0b61a9837ee6b83c67')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '521676bf2b76bcfe1c17a076b711b1b4')"
     ]
   }
 }

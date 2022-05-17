@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChromeReaderMode
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.DrawerState
@@ -66,6 +67,13 @@ object SettingScreenSpec : ScreenSpec {
                     Icons.Default.Palette,
                 ) {
                     navController.navigate(AppearanceScreenSpec.navHostRoute)
+                },
+                SettingsSection(
+                    R.string.reader,
+                    Icons.Default.ChromeReaderMode
+                    ,
+                ) {
+                    navController.navigate(ReaderSettingSpec.navHostRoute)
                 },
                 SettingsSection(
                     R.string.advance_setting,

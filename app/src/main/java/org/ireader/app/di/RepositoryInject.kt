@@ -4,16 +4,19 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import org.ireader.common_data.repository.FontRepository
 import org.ireader.core_catalogs.service.CatalogRemoteRepository
 import org.ireader.data.local.dao.CatalogDao
 import org.ireader.data.local.dao.ChapterDao
 import org.ireader.data.local.dao.DownloadDao
+import org.ireader.data.local.dao.FontDao
 import org.ireader.data.local.dao.HistoryDao
 import org.ireader.data.local.dao.LibraryBookDao
 import org.ireader.data.local.dao.RemoteKeysDao
 import org.ireader.data.local.dao.UpdatesDao
 import org.ireader.data.repository.CatalogRemoteRepositoryImpl
 import org.ireader.data.repository.DownloadRepositoryImpl
+import org.ireader.data.repository.FontEntityRepositoryImpl
 import org.ireader.data.repository.HistoryRepositoryImpl
 import org.ireader.data.repository.LocalBookRepositoryImpl
 import org.ireader.data.repository.LocalChapterRepositoryImpl
@@ -49,6 +52,13 @@ class RepositoryInject {
         updatesDao: UpdatesDao,
     ): org.ireader.common_data.repository.UpdatesRepository {
         return UpdatesRepositoryImpl(updatesDao)
+    }
+    @Singleton
+    @Provides
+    fun provideFontRepository(
+        fontDao: FontDao,
+    ): FontRepository {
+        return FontEntityRepositoryImpl(fontDao)
     }
 
     @Provides

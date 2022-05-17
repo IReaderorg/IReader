@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Tab
@@ -32,15 +31,14 @@ import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.launch
 import org.ireader.components.components.Components
+import org.ireader.components.components.SetupUiComponent
 import org.ireader.components.components.component.ChipChoicePreference
 import org.ireader.components.components.component.ChipPreference
 import org.ireader.components.components.component.ColorPreference
 import org.ireader.components.components.component.PreferenceRow
-import org.ireader.components.components.component.SliderPreference
 import org.ireader.components.components.component.SwitchPreference
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.MidSizeTextComposable
-import org.ireader.components.text_related.TextSection
 import org.ireader.core_ui.theme.OrientationMode
 import org.ireader.core_ui.theme.fonts
 import org.ireader.core_ui.ui.Colour.contentColor
@@ -147,6 +145,7 @@ fun ReaderSettingMainLayout(
                                 return@associate fontType to fontType.fontName
                             },
                             title = stringResource(id = R.string.font),
+                            onFailToFindElement = vm.font.value.fontName
                         )
                     }
                     item {
@@ -230,12 +229,7 @@ fun ReaderSettingMainLayout(
                             title = stringResource(id = R.string.orientation)
                         )
                     }
-                    item {
-                        SwitchPreference(
-                            preference = vm.showScrollIndicator,
-                            title = stringResource(id = R.string.show_scrollbar),
-                        )
-                    }
+
                     item {
                         SwitchPreference(
                             preference = vm.autoScrollMode,
@@ -253,6 +247,18 @@ fun ReaderSettingMainLayout(
                         SwitchPreference(
                             preference = vm.selectableMode,
                             title = stringResource(id = R.string.selectable_mode),
+                        )
+                    }
+                    item {
+                        SwitchPreference(
+                            preference = vm.showScrollIndicator,
+                            title = stringResource(id = R.string.show_scrollbar),
+                        )
+                    }
+                    item {
+                        SwitchPreference(
+                            preference = vm.isScrollIndicatorDraggable,
+                            title = stringResource(id = R.string.scrollbar_draggable),
                         )
                     }
                 }
@@ -376,32 +382,3 @@ fun Boolean.isTrue(): Int {
     }
 }
 
-fun LazyListScope.SetupUiComponent(list: List<Components>) {
-    list.forEach { component ->
-        item {
-            when (component) {
-                is Components.Header -> {
-                    TextSection(
-                        text = component.text
-                    )
-                }
-                is Components.Slider -> {
-                    SliderPreference(
-                        preferenceAsLong = component.preferenceAsLong,
-                        preferenceAsFloat = component.preferenceAsFloat,
-                        preferenceAsInt = component.preferenceAsInt,
-                        title = component.title,
-                        onValueChange = {
-                            component.onValueChange?.let { it1 -> it1(it) }
-                        },
-                        trailing = component.trailing,
-                        valueRange = component.valueRange,
-                        onValueChangeFinished = {
-                            component.onValueChangeFinished?.let { it1 -> it1(it) }
-                        },
-                    )
-                }
-            }
-        }
-    }
-}

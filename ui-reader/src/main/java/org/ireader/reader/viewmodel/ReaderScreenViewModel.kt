@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.pm.ActivityInfo
 import android.view.WindowManager
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.ui.text.ExperimentalTextApi
+import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
@@ -30,7 +32,8 @@ import org.ireader.domain.use_cases.remote.RemoteUseCases
 import javax.inject.Inject
 
 @HiltViewModel
-class ReaderScreenViewModel @Inject constructor(
+class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
+@Inject constructor(
     val getBookUseCases: org.ireader.domain.use_cases.local.LocalGetBookUseCases,
     val getChapterUseCase: LocalGetChapterUseCase,
     val remoteUseCases: RemoteUseCases,
@@ -43,6 +46,7 @@ class ReaderScreenViewModel @Inject constructor(
     val prefFunc: ReaderPrefFunctionsImpl,
     val savedStateHandle: SavedStateHandle,
     val readerPreferences: ReaderPreferences,
+    val googleFontProvider : GoogleFont.Provider
 ) : BaseViewModel(),
     ReaderScreenPreferencesState by prefState,
     ReaderScreenState by state,
@@ -61,6 +65,7 @@ class ReaderScreenViewModel @Inject constructor(
     var autoScrollInterval = readerPreferences.autoScrollInterval().asState()
     val autoBrightnessMode = readerPreferences.autoBrightness().asState()
     val immersiveMode = readerPreferences.immersiveMode().asState()
+    val isScrollIndicatorDraggable = readerPreferences.isScrollIndicatorDraggable().asState()
     val font = readerPreferences.font().asState()
 
     val selectableMode = readerPreferences.selectableText().asState()

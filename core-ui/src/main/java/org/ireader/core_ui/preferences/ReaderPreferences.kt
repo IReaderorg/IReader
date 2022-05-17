@@ -2,16 +2,20 @@ package org.ireader.core_ui.preferences
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.text.ExperimentalTextApi
+import androidx.compose.ui.text.googlefonts.GoogleFont
 import org.ireader.core_api.prefs.Preference
 import org.ireader.core_api.prefs.PreferenceStore
 import org.ireader.core_api.prefs.getEnum
 import org.ireader.core_ui.theme.FontType
 import org.ireader.core_ui.theme.OrientationMode
+import org.ireader.core_ui.theme.Roboto
 import org.ireader.core_ui.theme.prefs.asColor
 import org.ireader.core_ui.theme.prefs.asFont
 
-class ReaderPreferences(
+class ReaderPreferences @OptIn(ExperimentalTextApi::class) constructor(
     private val preferenceStore: PreferenceStore,
+    private val provider: GoogleFont.Provider
 ) {
     companion object PreferenceKeys {
         const val SAVED_FONT_SIZE_PREFERENCES = "reader_font_size"
@@ -33,6 +37,7 @@ class ReaderPreferences(
         const val SCROLL_INDICATOR_PADDING = "scroll_indicator_padding"
         const val SCROLL_INDICATOR_WIDTH = "scroll_indicator_width"
         const val SCROLL_INDICATOR_IS_ENABLE = "scroll_indicator_is_enable"
+        const val SCROLL_INDICATOR_IS_DRAGGABLE = "scroll_indicator_is_draggable"
         const val SELECTABLE_TEXT = "selectable_text"
         const val TEXT_ALIGNMENT = "text_alignment"
 
@@ -61,8 +66,9 @@ class ReaderPreferences(
         return preferenceStore.getInt(SAVED_FONT_SIZE_PREFERENCES, 18)
     }
 
+    @OptIn(ExperimentalTextApi::class)
     fun font(): Preference<FontType> {
-        return preferenceStore.getInt(SAVED_FONT_PREFERENCES, 0).asFont()
+        return preferenceStore.getString(SAVED_FONT_PREFERENCES, Roboto.fontName).asFont(provider)
     }
     fun backgroundColorReader(): Preference<Color> {
         return preferenceStore.getInt(SAVED_BACKGROUND_COLOR, Color.Black.toArgb()).asColor()
@@ -98,6 +104,9 @@ class ReaderPreferences(
 
     fun showScrollIndicator(): Preference<Boolean> {
         return preferenceStore.getBoolean(SCROLL_INDICATOR_IS_ENABLE, true)
+    }
+    fun isScrollIndicatorDraggable(): Preference<Boolean> {
+        return preferenceStore.getBoolean(SCROLL_INDICATOR_IS_DRAGGABLE, true)
     }
 
     fun selectableText(): Preference<Boolean> {
