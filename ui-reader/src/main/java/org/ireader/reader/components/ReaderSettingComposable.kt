@@ -2,297 +2,310 @@ package org.ireader.reader.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
 import androidx.compose.material.TabRowDefaults
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FormatAlignCenter
 import androidx.compose.material.icons.filled.FormatAlignJustify
 import androidx.compose.material.icons.filled.FormatAlignLeft
 import androidx.compose.material.icons.filled.FormatAlignRight
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.launch
-import org.ireader.common_resources.UiText
+import org.ireader.components.components.Components
+import org.ireader.components.components.component.ChipChoicePreference
 import org.ireader.components.components.component.ChipPreference
+import org.ireader.components.components.component.ColorPreference
+import org.ireader.components.components.component.PreferenceRow
+import org.ireader.components.components.component.SliderPreference
 import org.ireader.components.components.component.SwitchPreference
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.MidSizeTextComposable
-import org.ireader.core_ui.asString
+import org.ireader.components.text_related.TextSection
+import org.ireader.core_ui.theme.OrientationMode
+import org.ireader.core_ui.theme.fonts
 import org.ireader.core_ui.ui.Colour.contentColor
 import org.ireader.core_ui.ui.TextAlign
-import org.ireader.reader.viewmodel.ReaderScreenPreferencesState
+import org.ireader.reader.viewmodel.ReaderScreenViewModel
 import org.ireader.ui_reader.R
 
 @OptIn(ExperimentalPagerApi::class, ExperimentalMaterialApi::class)
 @Composable
 fun ReaderSettingMainLayout(
     modifier: Modifier = Modifier,
-    vm: ReaderScreenPreferencesState,
+    vm: ReaderScreenViewModel,
     onFontSelected: (Int) -> Unit,
-    onToggleScrollMode: (Boolean) -> Unit,
-    onToggleAutoScroll: (Boolean) -> Unit,
-    onToggleOrientation: (Boolean) -> Unit,
-    onToggleImmersiveMode: (Boolean) -> Unit,
-    onToggleSelectedMode: (Boolean) -> Unit,
-    onFontSizeIncrease: (Boolean) -> Unit,
-    onParagraphIndentIncrease: (Boolean) -> Unit,
-    onParagraphDistanceIncrease: (Boolean) -> Unit,
-    onLineHeightIncrease: (Boolean) -> Unit,
-    onAutoscrollIntervalIncrease: (Boolean) -> Unit,
-    onAutoscrollOffsetIncrease: (Boolean) -> Unit,
-    onScrollIndicatorPaddingIncrease: (Boolean) -> Unit,
-    onScrollIndicatorWidthIncrease: (Boolean) -> Unit,
     onToggleAutoBrightness: () -> Unit,
     onChangeBrightness: (Float) -> Unit,
     onBackgroundChange: (Int) -> Unit,
-    onShowScrollIndicator: (Boolean) -> Unit,
     onTextAlign: (TextAlign) -> Unit
 ) {
     val pagerState = rememberPagerState()
-
-    val tabs = listOf<TabItem>(
-        TabItem(
-            UiText.StringResource(R.string.reader)
-        ) {
-            val scrollState = rememberScrollState()
-            Column(
-                modifier = modifier
-                    .fillMaxSize()
-                    .padding(4.dp)
-                    .verticalScroll(scrollState)
+    val context = LocalContext.current
+    val tabs = remember {
+        listOf<TabItem>(
+            TabItem(
+                context.getString(R.string.reader)
             ) {
-                BrightnessSliderComposable(
-                    viewModel = vm,
-                    onToggleAutoBrightness = onToggleAutoBrightness,
-                    onChangeBrightness = onChangeBrightness
+                val items = listOf<Components>(
+                    Components.Slider(
+                        preferenceAsInt = vm.fontSize,
+                        title = stringResource(id = R.string.font_size),
+                        trailing = vm.fontSize.value.toInt().toString(),
+                        valueRange = 8.0F..32.0F,
+                    ),
+                    Components.Header(
+                        stringResource(id = R.string.paragraph)
+                    ),
+                    Components.Slider(
+                        preferenceAsInt = vm.paragraphsIndent,
+                        title = stringResource(id = R.string.paragraph_indent),
+                        trailing = vm.paragraphsIndent.value.toInt().toString(),
+                        valueRange = 0.0F..32.0F,
+                    ),
+                    Components.Slider(
+                        preferenceAsInt = vm.distanceBetweenParagraphs,
+                        title = stringResource(id = R.string.paragraph_distance),
+                        trailing = vm.distanceBetweenParagraphs.value.toInt().toString(),
+                        valueRange = 0.0F..8.0F,
+                    ),
+                    Components.Header(
+                        stringResource(id = R.string.line)
+                    ),
+                    Components.Slider(
+                        preferenceAsInt = vm.lineHeight,
+                        title = stringResource(id = R.string.line_height),
+                        trailing = vm.lineHeight.value.toInt().toString(),
+                        valueRange = 22.0F..48.0F,
+                    ),
+                    Components.Header(
+                        stringResource(id = R.string.autoscroll)
+                    ),
+                    Components.Slider(
+                        preferenceAsLong = vm.autoScrollInterval,
+                        title = stringResource(id = R.string.interval),
+                        trailing = (vm.autoScrollInterval.value / 1000).toInt().toString(),
+                        valueRange = 500.0F..10000.0F,
+                    ),
+                    Components.Slider(
+                        preferenceAsInt = vm.autoScrollOffset,
+                        title = stringResource(id = R.string.offset),
+                        trailing = (vm.autoScrollOffset.value / 1000).toInt().toString(),
+                        valueRange = 500.0F..10000F,
+                    ),
+                    Components.Header(
+                        stringResource(id = R.string.scrollIndicator)
+                    ),
+                    Components.Slider(
+                        preferenceAsInt = vm.scrollIndicatorPadding,
+                        title = stringResource(id = R.string.padding),
+                        trailing = vm.scrollIndicatorPadding.value.toString(),
+                        valueRange = 0F..32F,
+                    ),
+                    Components.Slider(
+                        preferenceAsInt = vm.scrollIndicatorWith,
+                        title = stringResource(id = R.string.width),
+                        trailing = vm.scrollIndicatorWith.value.toString(),
+                        valueRange = 0F..32F,
+                    ),
                 )
-                Spacer(modifier = Modifier.height(16.dp))
-                ReaderBackgroundComposable(viewModel = vm, onBackgroundChange = onBackgroundChange)
-                Spacer(modifier = Modifier.height(16.dp))
-                /** Font indent and font menu **/
-                FontChip(
-                    state = vm,
-                    onFontSelected = onFontSelected
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                Row(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+                LazyColumn(
+                    verticalArrangement = Arrangement.Top,
+                    modifier = Modifier.fillMaxSize()
                 ) {
-                    Text(
-                        modifier = Modifier.width(100.dp),
-                        text = UiText.StringResource(R.string.text_align).asString(),
-                        fontSize = 12.sp,
-                        style = TextStyle(fontWeight = FontWeight.W400),
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                    Row(
-                        modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Start,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        AppIconButton(
-                            imageVector = Icons.Default.FormatAlignLeft,
-                           contentDescription = stringResource(R.string.text_align_left),
-                            onClick = {
-                                onTextAlign(TextAlign.Left)
-                            },
-                            tint = if (vm.textAlignment == TextAlign.Left) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
-                        )
-                        AppIconButton(
-                            imageVector = Icons.Default.FormatAlignCenter,
-                           contentDescription = stringResource(R.string.text_align_center),
-                            onClick = {
-                                onTextAlign(TextAlign.Center)
-                            },
-                            tint = if (vm.textAlignment == TextAlign.Center) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
-                        )
-                        AppIconButton(
-                            imageVector = Icons.Default.FormatAlignJustify,
-                           contentDescription = stringResource(R.string.text_align_justify),
-                            onClick = {
-                                onTextAlign(TextAlign.Justify)
-                            },
-                            tint = if (vm.textAlignment == TextAlign.Justify) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
-                        )
-                        AppIconButton(
-                            imageVector = Icons.Default.FormatAlignRight,
-                           contentDescription = stringResource(R.string.text_align_right),
-                            onClick = {
-                                onTextAlign(TextAlign.Right)
-                            },
-                            tint = if (vm.textAlignment == TextAlign.Right) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
-                        )
-
+                    item {
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
 
+                    item {
+                        var postion = remember {
+                            0
+                        }
+                        ChipChoicePreference(
+                            preference = vm.font,
+                            choices = fonts.associate { fontType ->
+                                postion++
+                                return@associate fontType to fontType.fontName
+                            },
+                            title = stringResource(id = R.string.font),
+                        )
+                    }
+                    item {
+                        PreferenceRow(
+                            title = stringResource(id = R.string.text_align),
+                            action = {
+                                LazyRow {
+                                    item {
+                                        AppIconButton(
+                                            imageVector = Icons.Default.FormatAlignLeft,
+                                            contentDescription = stringResource(R.string.text_align_left),
+                                            onClick = {
+                                                onTextAlign(TextAlign.Left)
+                                            },
+                                            tint = if (vm.textAlignment.value == TextAlign.Left) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
+                                        )
+                                        AppIconButton(
+                                            imageVector = Icons.Default.FormatAlignCenter,
+                                            contentDescription = stringResource(R.string.text_align_center),
+                                            onClick = {
+                                                onTextAlign(TextAlign.Center)
+                                            },
+                                            tint = if (vm.textAlignment.value == TextAlign.Center) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
+                                        )
+                                        AppIconButton(
+                                            imageVector = Icons.Default.FormatAlignJustify,
+                                            contentDescription = stringResource(R.string.text_align_justify),
+                                            onClick = {
+                                                onTextAlign(TextAlign.Justify)
+                                            },
+                                            tint = if (vm.textAlignment.value == TextAlign.Justify) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
+                                        )
+                                        AppIconButton(
+                                            imageVector = Icons.Default.FormatAlignRight,
+                                            contentDescription = stringResource(R.string.text_align_right),
+                                            onClick = {
+                                                onTextAlign(TextAlign.Right)
+                                            },
+                                            tint = if (vm.textAlignment.value == TextAlign.Right) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
+                                        )
+                                    }
+                                }
+                            }
+                        )
+                    }
+                    SetupUiComponent(items)
+                }
+            },
+            TabItem(
+                context.getString(R.string.general)
+            ) {
+                LazyColumn(
+                    verticalArrangement = Arrangement.Top,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    item {
+                        ChipPreference(
+                            preference = listOf(
+                                stringResource(id = R.string.horizontal),
+                                stringResource(id = R.string.vertical),
+                            ), selected = vm.verticalScrolling.value.isTrue(),
+                            onValueChange = {
+                                vm.verticalScrolling.value = it == 1
+                            },
+                            title = stringResource(id = R.string.scroll_mode)
+                        )
+                    }
+                    item {
+                        ChipPreference(
+                            preference = listOf(
+                                stringResource(id = R.string.landscape),
+                                stringResource(id = R.string.portrait),
+                            ),
+                            selected = vm.orientation.value.ordinal,
+                            onValueChange = {
+                                when (it) {
+                                    0 -> vm.orientation.value = OrientationMode.Landscape
+                                    1 -> vm.orientation.value = OrientationMode.Portrait
+                                }
+                            },
+                            title = stringResource(id = R.string.orientation)
+                        )
+                    }
+                    item {
+                        SwitchPreference(
+                            preference = vm.showScrollIndicator,
+                            title = stringResource(id = R.string.show_scrollbar),
+                        )
+                    }
+                    item {
+                        SwitchPreference(
+                            preference = vm.autoScrollMode,
+                            title = stringResource(id = R.string.autoScroll),
+                            onValueChange = { vm.autoScrollMode = it }
+                        )
+                    }
+                    item {
+                        SwitchPreference(
+                            preference = vm.immersiveMode,
+                            title = stringResource(id = R.string.immersive_mode),
+                        )
+                    }
+                    item {
+                        SwitchPreference(
+                            preference = vm.selectableMode,
+                            title = stringResource(id = R.string.selectable_mode),
+                        )
+                    }
                 }
 
-                SettingItemComposable(
-                    text =UiText.StringResource(R.string.font_size),
-                    value = UiText.DynamicString(vm.fontSize.toString()),
-                    onAdd = {
-                        onFontSizeIncrease(true)
-                    },
-                    onMinus = {
-                        onFontSizeIncrease(false)
-                    }
-                )
-                SettingItemComposable(
-                    text = UiText.StringResource(R.string.paragraph_indent),
-                    value = UiText.DynamicString(vm.paragraphsIndent.toString()),
-                    onAdd = {
-                        onParagraphIndentIncrease(true)
-                    },
-                    onMinus = {
-                        onParagraphIndentIncrease(false)
-                    }
-                )
+            },
+            TabItem(context.getString(R.string.colors)) {
 
-                SettingItemComposable(
-                    text = UiText.StringResource(R.string.paragraph_distance),
-                    value = UiText.DynamicString(vm.distanceBetweenParagraphs.toString()),
-                    onAdd = {
-                        onParagraphDistanceIncrease(true)
-                    },
-                    onMinus = {
-                        onParagraphDistanceIncrease(false)
-                    }
-                )
-                SettingItemComposable(
-                    text = UiText.StringResource(R.string.line_height),
-                    value = UiText.DynamicString(vm.lineHeight.toString()),
-                    onAdd = {
-                        onLineHeightIncrease(true)
-                    },
-                    onMinus = {
-                        onLineHeightIncrease(false)
-                    }
-                )
-                SettingItemComposable(
-                    text = UiText.StringResource(R.string.autoscroll_interval),
-                    value = UiText.DynamicString("${vm.autoScrollInterval / 1000} second"),
-                    onAdd = {
-                        onAutoscrollIntervalIncrease(true)
-                    },
-                    onMinus = {
-                        onAutoscrollIntervalIncrease(false)
-                    }
-                )
-                SettingItemComposable(
-                    text = UiText.StringResource(R.string.autoscroll_offset),
-                    value = UiText.DynamicString(vm.autoScrollOffset.toString()),
-                    onAdd = {
-                        onAutoscrollOffsetIncrease(true)
-                    },
-                    onMinus = {
-                        onAutoscrollOffsetIncrease(false)
-                    }
-                )
-                SettingItemComposable(
-                    text = UiText.StringResource(R.string.scrollIndicator_padding),
-                    value = UiText.DynamicString(vm.scrollIndicatorPadding.toString()),
-                    onAdd = {
-                        onScrollIndicatorPaddingIncrease(true)
-                    },
-                    onMinus = {
-                        onScrollIndicatorPaddingIncrease(false)
-                    }
-                )
-                SettingItemComposable(
-                    text = UiText.StringResource(R.string.scrollIndicator_width),
-                    value = UiText.DynamicString(vm.scrollIndicatorWith.toString()),
-                    onAdd = {
-                        onScrollIndicatorWidthIncrease(true)
-                    },
-                    onMinus = {
-                        onScrollIndicatorWidthIncrease(false)
-                    }
-                )
-
-                Row(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+                LazyColumn(
+                    verticalArrangement = Arrangement.Top,
+                    modifier = Modifier.fillMaxSize()
                 ) {
-                    Text(
-                        text = UiText.StringResource(R.string.advance_setting).asString(),
-                        fontSize = 12.sp,
-                        style = TextStyle(fontWeight = FontWeight.W400),
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                    AppIconButton(
-                        imageVector = Icons.Default.Settings,
-                       contentDescription = stringResource(R.string.advance_setting),
-                        onClick = { vm.scrollIndicatorDialogShown = true }
-                    )
+                    item {
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+                    item {
+                        SwitchPreference(
+                            preference = vm.autoBrightnessMode,
+                            title = stringResource(id = R.string.custom_brightness),
+                        )
+                    }
+                    item {
+                        BrightnessSliderComposable(
+                            viewModel = vm,
+                            onChangeBrightness = onChangeBrightness
+                        )
+                    }
+                    item {
+
+                        ReaderBackgroundComposable(
+                            viewModel = vm,
+                            onBackgroundChange = onBackgroundChange
+                        )
+                    }
+                    item {
+
+                        ColorPreference(
+                            preference = vm.backgroundColor,
+                            title = stringResource(id = R.string.background_color)
+                        )
+                    }
+                    item {
+                        ColorPreference(
+                            preference = vm.textColor,
+                            title = stringResource(id = R.string.text_color)
+                        )
+
+                    }
                 }
+
             }
-
-        },
-        TabItem(
-            UiText.StringResource(R.string.general)
-        ) {
-            Column(
-
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(4.dp)
-                    .verticalScroll(rememberScrollState())
-            ) {
-                ChipPreference(preference = listOf(
-                    stringResource(id = R.string.horizontal),
-                    stringResource(id = R.string.vertical),
-                ), selected = vm.verticalScrolling.isTrue(),
-                    onValueChange = {
-                        onToggleScrollMode(it == 0)
-                    },
-                    title =  stringResource(id = R.string.scroll_mode))
-
-                ChipPreference(preference = listOf(
-                    stringResource(id = R.string.landscape),
-                    stringResource(id = R.string.portrait),
-                ), selected = vm.isInPortraitMode.isTrue(),
-                    onValueChange = {
-                        onToggleOrientation(it == 0)
-                    },
-                    title =  stringResource(id = R.string.orientation))
-                SwitchPreference(preference = vm.showScrollIndicator, title = stringResource(id = R.string.show_scrollbar), onValueChange = onShowScrollIndicator)
-                SwitchPreference(preference = vm.autoScrollMode, title = stringResource(id = R.string.autoScroll), onValueChange = onToggleAutoScroll)
-                SwitchPreference(preference = vm.immersiveMode, title = stringResource(id = R.string.immersive_mode), onValueChange =onToggleImmersiveMode)
-                SwitchPreference(preference = vm.selectableMode, title = stringResource(id = R.string.selectable_mode), onValueChange =onToggleSelectedMode)
-            }
-
-        },
 
         )
+    }
 
     /** There is Some issue here were sheet content is not need , not sure why**/
     Column(modifier = Modifier.fillMaxSize()) {
@@ -305,7 +318,7 @@ fun ReaderSettingMainLayout(
 }
 
 data class TabItem(
-    val name: UiText,
+    val name: String,
     val screen: @Composable () -> Unit
 )
 
@@ -360,5 +373,35 @@ fun Boolean.isTrue(): Int {
         1
     } else {
         0
+    }
+}
+
+fun LazyListScope.SetupUiComponent(list: List<Components>) {
+    list.forEach { component ->
+        item {
+            when (component) {
+                is Components.Header -> {
+                    TextSection(
+                        text = component.text
+                    )
+                }
+                is Components.Slider -> {
+                    SliderPreference(
+                        preferenceAsLong = component.preferenceAsLong,
+                        preferenceAsFloat = component.preferenceAsFloat,
+                        preferenceAsInt = component.preferenceAsInt,
+                        title = component.title,
+                        onValueChange = {
+                            component.onValueChange?.let { it1 -> it1(it) }
+                        },
+                        trailing = component.trailing,
+                        valueRange = component.valueRange,
+                        onValueChangeFinished = {
+                            component.onValueChangeFinished?.let { it1 -> it1(it) }
+                        },
+                    )
+                }
+            }
+        }
     }
 }

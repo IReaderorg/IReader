@@ -93,6 +93,7 @@ implementation(compose.compose.material3)
 
 
     implementation(compose.compose.coil)
+    implementation(compose.compose.googlFonts)
 
     implementation(project(Modules.coreApi))
     implementation(project(Modules.coreUi))

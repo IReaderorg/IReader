@@ -21,6 +21,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
@@ -292,8 +293,8 @@ object TTSScreenSpec : ScreenSpec {
                 }
             )
             SettingItemComposable(
-                text = UiText.StringResource(R.string.auto_next_chapter),
-                value = UiText.DynamicString(vm.speechSpeed.toString()),
+                text = stringResource(R.string.auto_next_chapter),
+                value = vm.speechSpeed.toString(),
                 onAdd = {
                     if (vm.speechSpeed < 3.0f) {
                         vm.speechSpeed += .1f
@@ -316,8 +317,8 @@ object TTSScreenSpec : ScreenSpec {
             )
 
             SettingItemComposable(
-                text = UiText.StringResource(R.string.pitch),
-                value = UiText.DynamicString(vm.pitch.toString()),
+                text = stringResource(R.string.pitch),
+                value = vm.pitch.toString(),
                 onAdd = {
                     if (vm.pitch <= 2.0F) {
                         vm.pitch += .1f

@@ -16,6 +16,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import org.ireader.common_models.DisplayMode
 import org.ireader.common_models.LayoutType
@@ -113,7 +114,7 @@ fun BrowseTopAppBar(
                         topMenu = false
                     }) {
                         RadioButton(
-                            text = layout.title,
+                            text = layout.title.asString(LocalContext.current),
                             selected = currentLayout == layout.layout,
                             onClick = {
                                 onLayoutTypeSelect(layout)

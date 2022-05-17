@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,8 +22,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -49,7 +53,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow.Companion.Ellipsis
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.ireader.components.reusable_composable.CaptionTextComposable
 import org.ireader.core_ui.ui.PreferenceMutableState
@@ -184,7 +187,7 @@ fun PreferenceRow(
                 onLongClick = onLongClick,
                 onClick = onClick
             ),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         if (icon != null) {
             Icon(
@@ -219,46 +222,203 @@ fun PreferenceRow(
             }
         }
         if (action != null) {
-            Box(Modifier.widthIn(min = 56.dp)) {
+            Box(Modifier.widthIn(min = 56.dp, max = 250.dp), contentAlignment = Alignment.CenterStart) {
                 action()
             }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+//@Composable
+//fun SliderPreference(
+//    preference: MutableState<Float>,
+//    title: String,
+//    subtitle: String? = null,
+//    icon: ImageVector? = null,
+//    trailing: String? = null,
+//    onValueChange: ((Float) -> Unit) = {},
+//    valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
+//    onValueChangeFinished: ((Float) -> Unit)? = null,
+//    steps : Int = 0
+//) {
+//
+//    val height = if (subtitle != null) 72.dp else 56.dp
+//
+//    Row(
+//        modifier = Modifier
+//            .fillMaxWidth()
+//            .requiredHeight(height),
+//        verticalAlignment = Alignment.CenterVertically
+//    ) {
+//        if (icon != null) {
+//            Icon(
+//                modifier = Modifier
+//                    .padding(horizontal = 16.dp)
+//                    .size(24.dp),
+//                contentDescription = null,
+//                imageVector = icon,
+//                tint = MaterialTheme.colorScheme.primary,
+//            )
+//        }
+//        Column(
+//            Modifier
+//                .padding(horizontal = 16.dp)
+//                .weight(3f),
+//            horizontalAlignment = Alignment.Start,
+//            verticalArrangement = Arrangement.Center
+//        ) {
+//            Text(
+//                modifier = Modifier,
+//                text = title,
+//                overflow = Ellipsis,
+//                maxLines = 1,
+//                style = MaterialTheme.typography.labelSmall,
+//                textAlign = TextAlign.Start,
+//                softWrap  = true,
+//            )
+//            if (subtitle != null) {
+//                Text(
+//                    modifier = Modifier,
+//                    text = subtitle,
+//                    overflow = Ellipsis,
+//                    maxLines = 1,
+//                    color = LocalContentColor.current.copy(alpha = ContentAlpha.medium),
+//                    style = MaterialTheme.typography.labelMedium,
+//                    softWrap  = true,
+//                )
+//            }
+//        }
+//        Slider(
+//            modifier = Modifier
+//                .weight(7f),
+//            value = preference.value,
+//            onValueChange = {
+//                preference.value = it
+//                onValueChange(it)
+//            },
+//            valueRange = valueRange,
+//            onValueChangeFinished = {
+//                if (onValueChangeFinished != null) {
+//                    onValueChangeFinished(preference.value)
+//                }
+//            },
+//            steps = steps
+//        )
+//        if (trailing != null) {
+//            Text(
+//                modifier = Modifier
+//                    .weight(.5f)
+//                    .padding(horizontal = 8.dp),
+//                text = trailing,
+//                overflow = Ellipsis,
+//                maxLines = 1,
+//                style = MaterialTheme.typography.labelSmall,
+//                textAlign = TextAlign.Start,
+//                softWrap  = true,
+//            )
+//        }
+//    }
+//}
+
 @Composable
 fun SliderPreference(
-    preference: Float,
+    preferenceAsFloat: PreferenceMutableState<Float>? = null,
+    preferenceAsInt: PreferenceMutableState<Int>? = null,
+    preferenceAsLong: PreferenceMutableState<Long>? = null,
+    mutablePreferences: MutableState<Float>? = null,
     title: String,
     subtitle: String? = null,
     icon: ImageVector? = null,
-    onValueChange: ((Float) -> Unit)?
+    trailing: String? = null,
+    onValueChange: ((Float) -> Unit) = {},
+    valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
+    onValueChangeFinished: ((Float) -> Unit)? = null,
+    steps: Int = 0
 ) {
-    PreferenceRow(
-        title = title,
-        subtitle = subtitle,
-        icon = icon,
-        action = {
-            if (onValueChange != null) {
-                Slider(
-                    value = preference,
-                    onValueChange = onValueChange
+
+    val height = if (subtitle != null) 72.dp else 56.dp
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .requiredHeight(height),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (icon != null) {
+            Icon(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .size(24.dp),
+                contentDescription = null,
+                imageVector = icon,
+                tint = MaterialTheme.colorScheme.primary,
+            )
+        }
+        Column(
+            Modifier
+                .padding(horizontal = 16.dp)
+                .weight(3f),
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                modifier = Modifier,
+                text = title,
+                overflow = Ellipsis,
+                maxLines = 1,
+                style = MaterialTheme.typography.labelSmall,
+                textAlign = TextAlign.Start,
+                softWrap = true,
+            )
+            if (subtitle != null) {
+                Text(
+                    modifier = Modifier,
+                    text = subtitle,
+                    overflow = Ellipsis,
+                    maxLines = 1,
+                    color = LocalContentColor.current.copy(alpha = ContentAlpha.medium),
+                    style = MaterialTheme.typography.labelMedium,
+                    softWrap = true,
                 )
             }
-        },
-    )
-}
-
-@Preview
-@Composable
-private fun SliderPreferencesPreview() {
-    var pref by remember {
-        mutableStateOf(24F)
+        }
+        Slider(
+            modifier = Modifier
+                .weight(7f),
+            value = preferenceAsFloat?.value ?: preferenceAsInt?.value?.toFloat()
+            ?: preferenceAsLong?.value?.toFloat() ?: mutablePreferences?.value ?: 0F,
+            onValueChange = {
+                preferenceAsFloat?.value = it
+                preferenceAsInt?.value = it.toInt()
+                preferenceAsLong?.value = it.toLong()
+                mutablePreferences?.value = it
+                onValueChange(it)
+            },
+            valueRange = valueRange,
+            onValueChangeFinished = {
+                if (onValueChangeFinished != null) {
+                    onValueChangeFinished(
+                        preferenceAsFloat?.value?.toFloat() ?: preferenceAsInt?.value?.toFloat()
+                        ?: preferenceAsLong?.value?.toFloat() ?: mutablePreferences?.value ?: 0F
+                    )
+                }
+            },
+            steps = steps,
+        )
+        if (trailing != null) {
+            Text(
+                modifier = Modifier
+                    .weight(.7f)
+                    .padding(horizontal = 0.dp),
+                text = trailing,
+                overflow = Ellipsis,
+                maxLines = 1,
+                style = MaterialTheme.typography.labelSmall,
+                textAlign = TextAlign.Start,
+                softWrap = true,
+            )
+        }
     }
-    SliderPreference(preference = pref, title = "Font Size", onValueChange = {
-        pref = it
-    })
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -305,6 +465,81 @@ fun ChipPreference(
             }
         },
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun <Key> ChipChoicePreference(
+    preference: PreferenceMutableState<Key>,
+    choices: Map<Key, String>,
+    title: String,
+    subtitle: String? = null,
+    icon: ImageVector? = null,
+    onValue: ((Key) -> Unit)? = null
+) {
+    var showDialog by remember { mutableStateOf(false) }
+    PreferenceRow(
+        title = title,
+        subtitle = subtitle,
+        icon = icon,
+        action = {
+            Button(
+                modifier = Modifier.fillMaxWidth().padding(end = 16.dp, top =4.dp, bottom = 4.dp),
+                onClick = {
+                    showDialog = true
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                ),
+                shape = RoundedCornerShape(4.dp),
+                content = {
+                    CaptionTextComposable(
+                        text =  choices[preference.value] ?:"",
+                        maxLine = 1,
+                        align = TextAlign.Center,
+                        modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                },
+            )
+        },
+    )
+    if (showDialog) {
+        AlertDialog(
+            modifier = Modifier.heightIn(max = 350.dp),
+            onDismissRequest = { showDialog = false },
+            title = { Text(title) },
+            text = {
+                LazyColumn {
+                    items(choices.toList()) { (value, text) ->
+                        Row(
+                            modifier = Modifier
+                                .requiredHeight(48.dp)
+                                .fillMaxWidth()
+                                .clickable(onClick = {
+                                    if (onValue != null) {
+                                        onValue(value)
+                                    } else {
+                                        preference.value = value
+                                    }
+
+                                    showDialog = false
+                                }),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = value == preference.value,
+                                onClick = null,
+                            )
+                            Text(text = text, modifier = Modifier.padding(start = 24.dp))
+                        }
+                    }
+                }
+            },
+            confirmButton = {}
+        )
+    }
 }
 
 @Composable

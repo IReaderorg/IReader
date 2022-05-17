@@ -94,7 +94,7 @@ fun ChapterDetailScreen(
                         color = MaterialTheme.colorScheme.onBackground.copy(.1f),
                         shape = CircleShape
                     ),
-                hint = UiText.StringResource(R.string.search_hint),
+                hint = stringResource(R.string.search_hint),
                 value = vm.query,
                 onValueChange = {
                     vm.query = it

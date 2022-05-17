@@ -7,16 +7,15 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.ireader.common_models.SortType
-import org.ireader.common_resources.UiText
 import org.ireader.components.text_related.TextIcon
 
 @Composable
@@ -51,7 +50,7 @@ fun SortScreen(
             items.forEach { item ->
 
                 TextIcon(
-                    UiText.DynamicString(item.name),
+                    item.name,
                     if (isSortDesc) Icons.Default.ArrowDownward else Icons.Default.ArrowUpward,
                     sortType == item,
                     onClick = {

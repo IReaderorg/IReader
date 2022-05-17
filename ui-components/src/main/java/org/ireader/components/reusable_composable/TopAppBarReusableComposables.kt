@@ -59,7 +59,7 @@ fun BigSizeTextComposable(
 @Composable
 fun MidSizeTextComposable(
     modifier: Modifier = Modifier,
-    text: UiText,
+    text: String,
     color: Color = Color.Unspecified,
     style: TextStyle? = null,
     fontWeight: FontWeight? = null,
@@ -69,7 +69,7 @@ fun MidSizeTextComposable(
 ) {
     Text(
         modifier = modifier,
-        text = text.asString(LocalContext.current),
+        text = text,
         color = color,
         style = style ?: MaterialTheme.typography.bodyMedium,
         fontWeight = fontWeight ?: FontWeight.SemiBold,

@@ -34,14 +34,14 @@ import org.ireader.core_ui.ui_components.isScrolledToTheEnd
 import org.ireader.reader.reverse_swip_refresh.ISwipeRefreshIndicator
 import org.ireader.reader.reverse_swip_refresh.MultiSwipeRefresh
 import org.ireader.reader.reverse_swip_refresh.SwipeRefreshState
-import org.ireader.reader.viewmodel.ReaderScreenPreferencesState
 import org.ireader.reader.viewmodel.ReaderScreenState
+import org.ireader.reader.viewmodel.ReaderScreenViewModel
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ReaderText(
     modifier: Modifier = Modifier,
-    vm: ReaderScreenPreferencesState,
+    vm: ReaderScreenViewModel,
     uiState: ReaderScreenState,
     onNext: () -> Unit,
     onPrev: () -> Unit,
@@ -63,7 +63,7 @@ fun ReaderText(
                     toggleReaderMode()
                 }
                 .fillMaxSize()
-                .background(vm.backgroundColor)
+                .background(vm.backgroundColor.value)
                 .wrapContentSize(Alignment.CenterStart)
         ) {
             MultiSwipeRefresh(
@@ -78,7 +78,7 @@ fun ReaderText(
                                 icon = Icons.Default.KeyboardArrowUp,
                                 swipeRefreshState = swipeState,
                                 refreshTriggerDistance = 80.dp,
-                                color = vm.textColor
+                                color = vm.textColor.value
                             )
                         }, onRefresh = {
                             onPrev()
@@ -95,7 +95,7 @@ fun ReaderText(
                                 icon = Icons.Default.KeyboardArrowDown,
                                 swipeRefreshState = swipeState,
                                 refreshTriggerDistance = 80.dp,
-                                color = vm.textColor
+                                color = vm.textColor.value
                             )
                         }
                     ),
@@ -104,37 +104,37 @@ fun ReaderText(
                 uiState.stateContent.let { content ->
                     LazyColumnScrollbar(
                         listState = scrollState,
-                        padding = if (vm.scrollIndicatorPadding < 0) 0.dp else vm.scrollIndicatorPadding.dp,
-                        thickness = if (vm.scrollIndicatorWith < 0) 0.dp else vm.scrollIndicatorWith.dp,
-                        enable = vm.showScrollIndicator
+                        padding = if (vm.scrollIndicatorPadding.value < 0) 0.dp else vm.scrollIndicatorPadding.value.dp,
+                        thickness = if (vm.scrollIndicatorWith.value < 0) 0.dp else vm.scrollIndicatorWith.value.dp,
+                        enable = vm.showScrollIndicator.value
                     ) {
                         LazyColumn(
                             modifier = modifier,
                             state = scrollState,
                         ) {
                             items(content.size) { index ->
-                                TextSelectionContainer(selectable = vm.selectableMode) {
+                                TextSelectionContainer(selectable = vm.selectableMode.value) {
                                     Text(
                                         modifier = modifier
                                             .fillMaxWidth()
-                                            .padding(horizontal = vm.paragraphsIndent.dp)
+                                            .padding(horizontal = vm.paragraphsIndent.value.dp)
                                             .background(
-                                                if (index in vm.queriedTextIndex) vm.textColor.copy(
+                                                if (index in vm.queriedTextIndex) vm.textColor.value.copy(
                                                     .1f
                                                 ) else Color.Transparent
                                             ),
                                         text = if (index == 0) "\n\n" + content[index].plus(
                                             "\n".repeat(
-                                                vm.distanceBetweenParagraphs
+                                                vm.distanceBetweenParagraphs.value.toInt()
                                             )
                                         ) else content[index].plus(
-                                            "\n".repeat(vm.distanceBetweenParagraphs)
+                                            "\n".repeat(vm.distanceBetweenParagraphs.value.toInt())
                                         ),
-                                        fontSize = vm.fontSize.sp,
-                                        fontFamily = vm.font.fontFamily,
-                                        textAlign = mapTextAlign(vm.textAlignment),
-                                        color = vm.textColor,
-                                        lineHeight = vm.lineHeight.sp,
+                                        fontSize = vm.fontSize.value.sp,
+                                        fontFamily = vm.font.value.fontFamily,
+                                        textAlign = mapTextAlign(vm.textAlignment.value),
+                                        color = vm.textColor.value,
+                                        lineHeight = vm.lineHeight.value.sp,
                                       //  style = MaterialTheme.typography.
                                     )
                                 }
@@ -144,7 +144,7 @@ fun ReaderText(
                 }
             }
 
-            if (!vm.verticalScrolling) {
+            if (!vm.verticalScrolling.value) {
                 Row(modifier = Modifier.fillMaxSize()) {
 
                     Box(

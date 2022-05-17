@@ -88,7 +88,7 @@ class TTSViewModel @Inject constructor(
             currentLanguage = speechPrefUseCases.readLanguage()
             autoNextChapter = speechPrefUseCases.readAutoNext()
             font = readerUseCases.selectedFontStateUseCase.readFont()
-            lineHeight = readerUseCases.fontHeightUseCase.read()
+            lineHeight = readerUseCases.fontHeightUseCase.read().toInt()
             currentVoice = speechPrefUseCases.readVoice()
         }
     }

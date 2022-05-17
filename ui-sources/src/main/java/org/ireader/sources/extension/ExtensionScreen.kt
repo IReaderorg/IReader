@@ -28,7 +28,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.ireader.common_models.entities.Catalog
 import org.ireader.common_resources.UiEvent
-import org.ireader.common_resources.UiText
 import org.ireader.components.components.component.pagerTabIndicatorOffset
 import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.core_ui.theme.AppColors
@@ -75,9 +74,9 @@ fun ExtensionScreen(
         viewModel.clearExploreMode()
     }
     val pages = remember {
-        listOf<UiText>(
-            UiText.StringResource(R.string.sources),
-            UiText.StringResource(R.string.extensions),
+        listOf<String>(
+            context.getString(R.string.sources),
+            context.getString(R.string.extensions),
         )
     }
     Column(

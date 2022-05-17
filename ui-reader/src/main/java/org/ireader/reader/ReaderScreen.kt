@@ -33,8 +33,8 @@ import dev.chrisbanes.snapper.ExperimentalSnapperApi
 import kotlinx.coroutines.launch
 import org.ireader.reader.components.MainBottomSettingComposable
 import org.ireader.reader.reverse_swip_refresh.SwipeRefreshState
-import org.ireader.reader.viewmodel.ReaderScreenPreferencesState
 import org.ireader.reader.viewmodel.ReaderScreenState
+import org.ireader.reader.viewmodel.ReaderScreenViewModel
 
 @ExperimentalAnimationApi
 @OptIn(
@@ -50,11 +50,8 @@ fun ReadingScreen(
     swipeState: SwipeRefreshState,
     onNext: () -> Unit,
     onPrev: (scrollToEnd: Boolean) -> Unit,
-    readerScreenPreferencesState: ReaderScreenPreferencesState,
+    readerScreenPreferencesState: ReaderScreenViewModel,
     toggleReaderMode: () -> Unit,
-    onDismiss: () -> Unit,
-    onBackgroundValueChange: (String) -> Unit,
-    onTextColorValueChange: (String) -> Unit,
     onBackgroundColorAndTextColorApply: (bgColor: String, txtColor: String) -> Unit,
     snackBarHostState: SnackbarHostState,
     drawerState: DrawerState,
@@ -106,16 +103,6 @@ fun ReadingScreen(
             }
         }
     }
-
-
-    ScrollIndicatorSetting(
-        enable = readerScreenPreferencesState.scrollIndicatorDialogShown,
-        readerScreenPreferencesState,
-        onDismiss = onDismiss,
-        onBackgroundColorValueChange = onBackgroundValueChange,
-        onTextColorValueChange = onTextColorValueChange,
-        onBackgroundColorAndTextColorApply = onBackgroundColorAndTextColorApply,
-    )
     Box(
         modifier = modifier
             .fillMaxSize(),

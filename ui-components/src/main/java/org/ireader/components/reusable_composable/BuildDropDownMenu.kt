@@ -32,6 +32,6 @@ fun BuildDropDownMenu(
 }
 
 data class DropDownMenuItem(
-    val text: UiText,
+    val text: String,
     val onItem: () -> Unit,
 )

@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.Color
 import kotlinx.coroutines.CoroutineScope
 import org.ireader.core_api.prefs.Preference
 import org.ireader.core_ui.preferences.UiPreferences
+import org.ireader.core_ui.theme.prefs.asColor
 import org.ireader.core_ui.ui.PreferenceMutableState
 import org.ireader.core_ui.ui.asStateIn
 

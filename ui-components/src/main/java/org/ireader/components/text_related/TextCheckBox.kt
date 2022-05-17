@@ -6,12 +6,11 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
-import org.ireader.common_resources.UiText
 import org.ireader.components.reusable_composable.MidSizeTextComposable
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TextCheckBox(title: UiText, isChecked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+fun TextCheckBox(title: String, isChecked: Boolean, onCheckedChange: (Boolean) -> Unit) {
     Row(
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically

@@ -18,7 +18,7 @@ import org.ireader.components.reusable_composable.MidSizeTextComposable
 @Composable
 fun RadioButton(
     modifier: Modifier = Modifier,
-    text: UiText,
+    text: String,
     selected: Boolean,
     onClick: () -> Unit = {},
 ) {

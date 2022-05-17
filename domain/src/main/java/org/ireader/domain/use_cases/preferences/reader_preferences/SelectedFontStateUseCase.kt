@@ -2,12 +2,11 @@ package org.ireader.domain.use_cases.preferences.reader_preferences
 
 import org.ireader.core_ui.preferences.ReaderPreferences
 import org.ireader.core_ui.theme.FontType
-import org.ireader.core_ui.theme.fonts
 
 class SelectedFontStateUseCase(
     private val prefs: ReaderPreferences,
 ) {
-    fun saveFont(fontIndex: Int) {
+    fun saveFont(fontIndex: FontType) {
         prefs.font().set(fontIndex)
     }
 
@@ -15,8 +14,7 @@ class SelectedFontStateUseCase(
      * fontIndex is the index of font which is in fonts list inside the Type package
      */
     fun readFont(): FontType {
-        val fontType = prefs.font().get()
-        return fonts.getOrNull(fontType)?: org.ireader.core_ui.theme.Roboto
+        return prefs.font().get()
     }
 
     fun saveSelectableText(value: Boolean) {

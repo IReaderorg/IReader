@@ -3,14 +3,9 @@ package org.ireader.reader.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
@@ -23,36 +18,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import org.ireader.components.reusable_composable.CaptionTextComposable
+import org.ireader.components.components.component.PreferenceRow
 import org.ireader.core_ui.theme.readerScreenBackgroundColors
-import org.ireader.reader.viewmodel.ReaderScreenPreferencesState
+import org.ireader.reader.viewmodel.ReaderScreenViewModel
 import org.ireader.ui_reader.R
 
 @Composable
 fun ReaderBackgroundComposable(
     modifier: Modifier = Modifier,
-    viewModel: ReaderScreenPreferencesState,
+    viewModel: ReaderScreenViewModel,
     onBackgroundChange: (Int) -> Unit
 ) {
 
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        CaptionTextComposable(
-            modifier = Modifier.width(100.dp),
-            text = stringResource(R.string.background_color),
-            style = MaterialTheme.typography.labelSmall
-        )
+    PreferenceRow(title = stringResource(R.string.background_color), action = {
         LazyRow {
             items(readerScreenBackgroundColors.size) { index ->
-                Spacer(modifier = modifier.width(10.dp))
                 Box(
-                    modifier = modifier
-                        .width(50.dp)
-                        .height(30.dp)
-                        .padding(horizontal = 0.dp)
+                    modifier = Modifier
+                        .padding(4.dp)
+                        .size(40.dp)
                         .clip(CircleShape)
                         .background(color = readerScreenBackgroundColors[index].color)
                         .border(
@@ -65,7 +49,7 @@ fun ReaderBackgroundComposable(
                         },
                     contentAlignment = Alignment.Center
                 ) {
-                    if (viewModel.backgroundColor == readerScreenBackgroundColors[index].color) {
+                    if (viewModel.backgroundColor.value == readerScreenBackgroundColors[index].color) {
                         Icon(
                             imageVector = Icons.Default.Check,
                             contentDescription = "color selected",
@@ -75,5 +59,47 @@ fun ReaderBackgroundComposable(
                 }
             }
         }
-    }
+    })
+
+//    Row(
+//        modifier = Modifier.fillMaxWidth(),
+//        horizontalArrangement = Arrangement.SpaceBetween,
+//        verticalAlignment = Alignment.CenterVertically
+//    ) {
+//        CaptionTextComposable(
+//            modifier = Modifier.width(100.dp),
+//            text = stringResource(R.string.background_color),
+//            style = MaterialTheme.typography.labelSmall
+//        )
+//        LazyRow {
+//            items(readerScreenBackgroundColors.size) { index ->
+//                Spacer(modifier = modifier.width(10.dp))
+//                Box(
+//                    modifier = modifier
+//                        .width(50.dp)
+//                        .height(30.dp)
+//                        .padding(horizontal = 0.dp)
+//                        .clip(CircleShape)
+//                        .background(color = readerScreenBackgroundColors[index].color)
+//                        .border(
+//                            2.dp,
+//                            MaterialTheme.colorScheme.primary,
+//                            CircleShape
+//                        )
+//                        .clickable {
+//                            onBackgroundChange(index)
+//                        },
+//                    contentAlignment = Alignment.Center
+//                ) {
+//                    if (viewModel.backgroundColor.value == readerScreenBackgroundColors[index].color) {
+//                        Icon(
+//                            imageVector = Icons.Default.Check,
+//                            contentDescription = "color selected",
+//                            tint = MaterialTheme.colorScheme.primary
+//                        )
+//                    }
+//                }
+//            }
+//        }
+//    }
 }

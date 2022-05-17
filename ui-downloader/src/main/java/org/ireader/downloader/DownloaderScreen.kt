@@ -30,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.collectLatest
@@ -37,7 +38,6 @@ import org.ireader.common_models.entities.SavedDownload
 import org.ireader.common_models.entities.SavedDownloadWithInfo
 import org.ireader.common_models.entities.toSavedDownload
 import org.ireader.common_resources.UiEvent
-import org.ireader.common_resources.UiText
 import org.ireader.components.BookListItem
 import org.ireader.components.BookListItemColumn
 import org.ireader.components.BookListItemSubtitle
@@ -80,8 +80,8 @@ fun DownloaderScreen(
                 text = {
                     MidSizeTextComposable(
                         text = when (vm.downloadServiceStateImpl.isEnable) {
-                            true -> UiText.StringResource(R.string.pause)
-                            else -> UiText.StringResource(R.string.resume)
+                            true -> stringResource(R.string.pause)
+                            else -> stringResource(R.string.resume)
                         },
                         color = MaterialTheme.colorScheme.onSecondary
                     )
@@ -225,12 +225,12 @@ fun DownloadScreenItem(
                 val list =
                     listOf<DropDownMenuItem>(
                         DropDownMenuItem(
-                            UiText.StringResource(R.string.cancel)
+                            stringResource(R.string.cancel)
                         ) {
                             onCancelDownload(item)
                         },
                         DropDownMenuItem(
-                            UiText.StringResource(R.string.cancel_all_for_this_series)
+                            stringResource(R.string.cancel_all_for_this_series)
                         ) {
                             onCancelAllFromThisSeries(item)
                         }

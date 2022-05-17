@@ -25,6 +25,7 @@ dependencies {
     implementation(accompanist.pager)
 implementation(compose.compose.material3)
 implementation(compose.compose.material)
+implementation(compose.compose.constraintlayout)
 
 
     implementation(compose.compose.uiToolingPreview)

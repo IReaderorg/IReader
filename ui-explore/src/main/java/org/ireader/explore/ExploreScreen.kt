@@ -127,7 +127,7 @@ fun ExploreScreen(
                 androidx.compose.material3.ExtendedFloatingActionButton(
                     text = {
                         MidSizeTextComposable(
-                            text = UiText.StringResource(R.string.filter),
+                            text = stringResource(R.string.filter),
                             color = MaterialTheme.colorScheme.onSecondary
                         )
                     },

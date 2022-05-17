@@ -103,7 +103,7 @@ private fun RegularTopBar(
             val list =
                 listOf<DropDownMenuItem>(
                     DropDownMenuItem(
-                        UiText.StringResource(R.string.cancel_all)
+                        stringResource(R.string.cancel_all)
                     ) {
                         onCancelAll()
                     }

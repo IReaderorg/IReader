@@ -15,12 +15,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import org.ireader.common_resources.UiText
 import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.core_ui.ui.Colour.iconColor
 
 @Composable
-fun TextIcon(title: UiText, icon: ImageVector, isEnable: Boolean, onClick: () -> Unit) {
+fun TextIcon(title: String, icon: ImageVector, isEnable: Boolean, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .clickable { onClick() }

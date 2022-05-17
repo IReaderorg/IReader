@@ -21,14 +21,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import org.ireader.common_resources.UiText
 
 @Composable
 fun DropDownMenu(
-    text: UiText,
+    text: String,
     onSelected: (key: Int) -> Unit,
-    currentValue: UiText? = null,
-    items: Array<UiText>,
+    currentValue: String? = null,
+    items: Array<String>,
 ) {
     var opened by remember {
         mutableStateOf(false)
@@ -94,13 +93,13 @@ fun SortedByScreen() {
 @Composable
 fun FilterItemPrev() {
     DropDownMenu(
-        UiText.DynamicString("Sort By:"),
+      "Sort By:",
         { s ->
         },
-        UiText.DynamicString("Latest"),
+      "Latest",
         arrayOf(
-            UiText.DynamicString("Latest"),
-            UiText.DynamicString("Popular")
+        "Latest",
+           "Popular"
         )
     )
 }

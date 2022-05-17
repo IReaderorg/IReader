@@ -13,9 +13,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -23,10 +23,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import org.ireader.common_resources.UiText
 import org.ireader.components.reusable_composable.DropDownMenu
 import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.components.reusable_composable.TextField
@@ -53,12 +53,12 @@ fun ChapterCommandBottomSheet(
             TextButton(onClick = {
                 onReset()
             }, modifier = Modifier.width(92.dp), shape = RoundedCornerShape(4.dp)) {
-                MidSizeTextComposable(text = UiText.StringResource(R.string.reset), color = MaterialTheme.colorScheme.primary)
+                MidSizeTextComposable(text = stringResource(R.string.reset), color = MaterialTheme.colorScheme.primary)
             }
             Button(onClick = {
                 onFetch()
             }, modifier = Modifier.width(92.dp), shape = RoundedCornerShape(4.dp)) {
-                MidSizeTextComposable(text = UiText.StringResource(R.string.fetch), color = MaterialTheme.colorScheme.onPrimary)
+                MidSizeTextComposable(text =stringResource(R.string.fetch), color = MaterialTheme.colorScheme.onPrimary)
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -88,7 +88,7 @@ fun ChapterCommandBottomSheet(
                         state = command.value
                     }
                     DropDownMenu(
-                        text = UiText.DynamicString(command.name),
+                        text = command.name,
                         onSelected = { value ->
                             onUpdate(
                                 commandList.replace(
@@ -100,8 +100,8 @@ fun ChapterCommandBottomSheet(
                             )
                             state = value
                         },
-                        currentValue = UiText.DynamicString(command.options[state]),
-                        items = command.options.map { UiText.DynamicString(it) }.toTypedArray()
+                        currentValue = command.options[state],
+                        items = command.options.map {it }.toTypedArray()
                     )
                 }
                 is Command.Chapter.Note -> {

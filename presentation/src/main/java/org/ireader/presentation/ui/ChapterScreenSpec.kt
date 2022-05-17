@@ -126,13 +126,13 @@ object ChapterScreenSpec : ScreenSpec {
                 modifier = Modifier.fillMaxWidth(),
                 onClick = { vm.reverseChapterInDB() }
             ) {
-                MidSizeTextComposable(text = UiText.StringResource(R.string.reverse_chapter_in_db))
+                MidSizeTextComposable(text = stringResource(R.string.reverse_chapter_in_db))
             }
             TextButton(
                 modifier = Modifier.fillMaxWidth(),
                 onClick = { vm.autoSortChapterInDB() }
             ) {
-                MidSizeTextComposable(text = UiText.StringResource(R.string.auto_sort_chapters_in_db))
+                MidSizeTextComposable(text =stringResource(R.string.auto_sort_chapters_in_db))
             }
         }
     }

@@ -6,14 +6,13 @@ import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.Surface
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import org.ireader.common_resources.UiText
 import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.sources.extension.LanguageChoice
 
@@ -38,7 +37,7 @@ fun LanguageChip(choice: LanguageChoice, isSelected: Boolean, onClick: () -> Uni
             is LanguageChoice.Others -> "Others"
         }
         MidSizeTextComposable(
-            text = UiText.DynamicString(text.uppercase()),
+            text =text.uppercase(),
             modifier = Modifier.wrapContentSize(Alignment.Center),
             color = if (isSelected) {
                 MaterialTheme.colorScheme.onBackground

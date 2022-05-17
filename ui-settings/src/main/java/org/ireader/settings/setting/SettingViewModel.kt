@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import org.ireader.common_extensions.launchIO
 import org.ireader.core_ui.theme.OrientationMode
+import org.ireader.core_ui.theme.Roboto
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetBookUseCases
@@ -45,7 +46,7 @@ class SettingViewModel @Inject constructor(
 
     fun deleteDefaultSettings() {
         viewModelScope.launchIO {
-            prefUseCases.selectedFontStateUseCase.saveFont(0)
+            prefUseCases.selectedFontStateUseCase.saveFont(Roboto)
             prefUseCases.fontHeightUseCase.save(25)
             prefUseCases.fontSizeStateUseCase.save(18)
             prefUseCases.paragraphDistanceUseCase.save(2)

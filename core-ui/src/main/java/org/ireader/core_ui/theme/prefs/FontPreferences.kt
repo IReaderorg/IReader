@@ -1,7 +1,5 @@
-package org.ireader.core_ui.theme
+package org.ireader.core_ui.theme.prefs
 
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -9,34 +7,38 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import org.ireader.core_api.prefs.Preference
+import org.ireader.core_ui.theme.FontType
+import org.ireader.core_ui.theme.Roboto
+import org.ireader.core_ui.theme.fonts
 
-class ColorPreference(
+class FontPreferences(
     private val preference: Preference<Int>
-) : Preference<Color> {
+) : Preference<FontType> {
 
     override fun key(): String {
         return preference.key()
     }
 
-    override fun get(): Color {
+    override fun get(): FontType {
         return if (isSet()) {
-            Color(preference.get())
+            fonts.getOrNull(preference.get())?: Roboto
         } else {
-            Color.Unspecified
+            Roboto
         }
     }
 
-    override suspend fun read(): Color {
+    override suspend fun read(): FontType {
         return if (isSet()) {
-            Color(preference.read())
+            fonts.getOrNull(preference.get())?: Roboto
         } else {
-            Color.Unspecified
+            Roboto
         }
     }
 
-    override fun set(value: Color) {
-        if (value != Color.Unspecified) {
-            preference.set(value.toArgb())
+    override fun set(value: FontType) {
+        if (value != Roboto) {
+            val index = fonts.indexOfFirst { it == value }
+            preference.set(index)
         } else {
             preference.delete()
         }
@@ -50,21 +52,21 @@ class ColorPreference(
         preference.delete()
     }
 
-    override fun defaultValue(): Color {
-        return Color.Unspecified
+    override fun defaultValue(): FontType {
+        return   Roboto
     }
 
-    override fun changes(): Flow<Color> {
+    override fun changes(): Flow<FontType> {
         return preference.changes()
             .map { get() }
     }
 
-    override fun stateIn(scope: CoroutineScope): StateFlow<Color> {
+    override fun stateIn(scope: CoroutineScope): StateFlow<FontType> {
         return preference.changes().map { get() }.stateIn(scope, SharingStarted.Eagerly, get())
     }
 
 }
 
-fun Preference<Int>.asColor(): ColorPreference {
-    return ColorPreference(this)
+fun Preference<Int>.asFont(): FontPreferences {
+    return FontPreferences(this)
 }

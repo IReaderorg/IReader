@@ -26,8 +26,8 @@ import org.ireader.ui_reader.R
 
 @Composable
 fun SettingItemComposable(
-    text: UiText,
-    value: UiText,
+    text: String,
+    value: String,
     onAdd: () -> Unit,
     onMinus: () -> Unit,
 ) {
@@ -38,7 +38,7 @@ fun SettingItemComposable(
     ) {
         Text(
             modifier = Modifier.width(100.dp),
-            text = text.asString(LocalContext.current),
+            text = text,
             fontSize = 12.sp,
             style = TextStyle(fontWeight = FontWeight.W400),
             color = MaterialTheme.colorScheme.onBackground
@@ -52,9 +52,7 @@ fun SettingItemComposable(
                 imageVector = Icons.Default.Remove,
                 tint = MaterialTheme.colorScheme.onBackground,
                 contentDescription = UiText.DynamicString(
-                    string(id = R.string.decrease) + text.asString(
-                        LocalContext.current
-                    )
+                    string(id = R.string.decrease) + text
                 ).asString(LocalContext.current),
                 onClick = { onMinus() }
             )
@@ -63,9 +61,7 @@ fun SettingItemComposable(
                 imageVector = Icons.Default.Add,
                 tint = MaterialTheme.colorScheme.onBackground,
                 contentDescription = UiText.DynamicString(
-                    string(id = R.string.increase) + text.asString(
-                        LocalContext.current
-                    )
+                    string(id = R.string.increase) + text
                 ).asString(LocalContext.current),
                 onClick = { onAdd() }
             )

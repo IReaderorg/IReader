@@ -238,13 +238,19 @@
     <string name="text_align_justify">Text Align Justify</string>
     <string name="text_align_right">Text Align right</string>
     <string name="font_size">Font Size</string>
-    <string name="paragraph_indent">Paragraph Indent</string>
-    <string name="paragraph_distance">Paragraph Distance</string>
-    <string name="line_height">Line Height</string>
-    <string name="autoscroll_interval">Autoscroll Interval</string>
-    <string name="autoscroll_offset">Autoscroll Offset</string>
-    <string name="scrollIndicator_padding">ScrollIndicator Padding</string>
-    <string name="scrollIndicator_width">ScrollIndicator Width</string>
+    <string name="font">Font</string>
+    <string name="paragraph_indent">Indent</string>
+    <string name="paragraph_distance">Distance</string>
+    <string name="paragraph">Paragraph</string>
+    <string name="line_height">Height</string>
+    <string name="line">Line</string>
+    <string name="autoscroll">Autoscroll</string>
+    <string name="interval">Interval</string>
+    <string name="offset">Offset</string>
+    <string name="scrollIndicator">ScrollBar</string>
+    <string name="padding">Padding</string>
+    <string name="width">Width</string>
+    <string name="colors">Colors</string>
     <string name="scroll_mode">Scroll Mode</string>
     <string name="show_scrollbar">Show Scrollbar</string>
     <string name="orientation">Orientation</string>
@@ -257,6 +263,7 @@
     <string name="vertical">Vertical</string>
     <string name="horizontal">Horizontal</string>
     <string name="selectable_mode">Selectable mode</string>
+    <string name="custom_brightness">Custom Brightness</string>
 
 
 

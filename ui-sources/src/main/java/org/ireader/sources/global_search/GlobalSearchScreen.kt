@@ -106,7 +106,7 @@ fun GlobalSearchBookInfo(
                 verticalArrangement = Arrangement.SpaceEvenly,
                 horizontalAlignment = Alignment.Start
             ) {
-                MidSizeTextComposable(text = UiText.DynamicString(book.source.name), fontWeight = FontWeight.Bold)
+                MidSizeTextComposable(text = book.source.name, fontWeight = FontWeight.Bold)
                 SmallTextComposable(text = UiText.DynamicString(book.source.lang.uppercase()))
             }
             Row(verticalAlignment = Alignment.CenterVertically) {

@@ -10,14 +10,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
-import org.ireader.common_resources.UiText
 
 @Composable
 fun TextSection(
-    text: UiText,
+    text: String,
     toUpper: Boolean = true,
     padding: PaddingValues = PaddingValues(16.dp),
     style: TextStyle = MaterialTheme.typography.labelMedium,
@@ -30,8 +28,7 @@ fun TextSection(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            if (toUpper) text.asString(LocalContext.current).uppercase() else text.asString(
-                LocalContext.current),
+            if (toUpper) text.uppercase() else text,
             style = style,
             color = color
         )

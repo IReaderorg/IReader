@@ -48,8 +48,25 @@ class ReaderScreenViewModel @Inject constructor(
     ReaderScreenState by state,
     ReaderPrefFunctions by prefFunc {
 
+    val backgroundColor = readerPreferences.backgroundColorReader().asState()
+    val textColor = readerPreferences.textColorReader().asState()
+    val lineHeight = readerPreferences.lineHeight().asState()
+    val paragraphsIndent = readerPreferences.paragraphIndent().asState()
+    val showScrollIndicator = readerPreferences.showScrollIndicator().asState()
+    val textAlignment = readerPreferences.textAlign().asState()
+    val orientation = readerPreferences.orientation().asState()
+    val scrollIndicatorWith = readerPreferences.scrollIndicatorWith().asState()
+    val scrollIndicatorPadding = readerPreferences.scrollIndicatorPadding().asState()
+    val autoScrollOffset = readerPreferences.autoScrollOffset().asState()
+    var autoScrollInterval = readerPreferences.autoScrollInterval().asState()
+    val autoBrightnessMode = readerPreferences.autoBrightness().asState()
+    val immersiveMode = readerPreferences.immersiveMode().asState()
+    val font = readerPreferences.font().asState()
 
-
+    val selectableMode = readerPreferences.selectableText().asState()
+    val fontSize = readerPreferences.fontSize().asState()
+    val distanceBetweenParagraphs = readerPreferences.paragraphDistance().asState()
+    val verticalScrolling = readerPreferences.scrollMode().asState()
 
     init {
 
@@ -65,7 +82,6 @@ class ReaderScreenViewModel @Inject constructor(
                 viewModelScope.launch {
                     state.book = getBookUseCases.findBookById(bookId)
                     setupChapters(bookId, chapterId)
-                    readPreferences()
                 }
             } else {
                 viewModelScope.launch {
@@ -144,7 +160,6 @@ class ReaderScreenViewModel @Inject constructor(
                 }
         }
     }
-
 
     var getContentJob: Job? = null
     var getChapterJob: Job? = null

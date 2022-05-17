@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,10 +49,11 @@ fun LazyColumnScrollbar(
     thickness: Dp = 6.dp,
     padding: Dp = 8.dp,
     thumbMinHeight: Float = 0.1f,
-    thumbColor: Color = Color(0xFF2A59B6),
-    thumbSelectedColor: Color = Color(0xFF5281CA),
+    thumbColor: Color = MaterialTheme.colorScheme.primaryContainer,
+    thumbSelectedColor: Color = MaterialTheme.colorScheme.primary,
     thumbShape: Shape = CircleShape,
     enable:Boolean = true,
+    isDraggable:Boolean = true,
     content: @Composable () -> Unit,
 ) {
     Box {
@@ -66,6 +68,7 @@ fun LazyColumnScrollbar(
                 thumbColor = thumbColor,
                 thumbSelectedColor = thumbSelectedColor,
                 thumbShape = thumbShape,
+                isDraggable = isDraggable
             )
         }
 
@@ -89,7 +92,8 @@ fun LazyColumnScrollbar(
     thumbMinHeight: Float = 0.1f,
     thumbColor: Color = Color(0xFF2A59B6),
     thumbSelectedColor: Color = Color(0xFF5281CA),
-    thumbShape: Shape = CircleShape
+    thumbShape: Shape = CircleShape,
+    isDraggable:Boolean = true,
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -151,13 +155,13 @@ fun LazyColumnScrollbar(
         val dragState = rememberDraggableState { delta ->
             setScrollOffset(dragOffset + delta / constraints.maxHeight.toFloat())
         }
-
         BoxWithConstraints(
             Modifier
                 .align(if (rightSide) Alignment.TopEnd else Alignment.TopStart)
                 .alpha(alpha)
                 .fillMaxHeight()
                 .draggable(
+                    enabled = isDraggable,
                     state = dragState,
                     orientation = Orientation.Vertical,
                     startDragImmediately = true,

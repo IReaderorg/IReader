@@ -146,7 +146,7 @@ fun TTSScreen(
                                 overflow = TextOverflow.Ellipsis
                             )
                             MidSizeTextComposable(
-                                text = UiText.DynamicString(book.title),
+                                text =book.title,
                                 align = TextAlign.Center,
                                 maxLine = 1,
                                 overflow = TextOverflow.Ellipsis
@@ -252,7 +252,7 @@ private fun TTLScreenSetting(
                     )
             )
             Spacer(modifier = Modifier.width(16.dp))
-            MidSizeTextComposable(text = UiText.DynamicString(string(id = R.string.content).uppercase()))
+            MidSizeTextComposable(text =string(id = R.string.content).uppercase())
         }
         Divider(
             modifier = Modifier
@@ -276,11 +276,9 @@ private fun TTLScreenSetting(
             )
             Spacer(modifier = Modifier.width(16.dp))
             MidSizeTextComposable(
-                text = UiText.DynamicString(
-                    UiText.DynamicString(string(id = R.string.settings).uppercase()).asString(
-                        LocalContext.current
-                    )
-                )
+                text =
+                string(id = R.string.settings).uppercase()
+
             )
         }
     }

@@ -11,7 +11,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.ireader.common_models.entities.UpdateWithInfo
-import org.ireader.common_resources.UiText
 import org.ireader.components.text_related.TextSection
 import org.ireader.updates.viewmodel.UpdateState
 
@@ -34,7 +33,7 @@ fun UpdatesContent(
             state.updates.forEach { (date, updates) ->
                 item {
                     TextSection(
-                        text = UiText.DynamicString(date)
+                        text =date
                     )
                 }
                 items(

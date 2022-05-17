@@ -1,9 +1,14 @@
 package org.ireader.core_ui.preferences
 
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import org.ireader.core_api.prefs.Preference
 import org.ireader.core_api.prefs.PreferenceStore
 import org.ireader.core_api.prefs.getEnum
+import org.ireader.core_ui.theme.FontType
 import org.ireader.core_ui.theme.OrientationMode
+import org.ireader.core_ui.theme.prefs.asColor
+import org.ireader.core_ui.theme.prefs.asFont
 
 class ReaderPreferences(
     private val preferenceStore: PreferenceStore,
@@ -56,15 +61,15 @@ class ReaderPreferences(
         return preferenceStore.getInt(SAVED_FONT_SIZE_PREFERENCES, 18)
     }
 
-    fun font(): Preference<Int> {
-        return preferenceStore.getInt(SAVED_FONT_PREFERENCES, 0)
+    fun font(): Preference<FontType> {
+        return preferenceStore.getInt(SAVED_FONT_PREFERENCES, 0).asFont()
     }
-    fun backgroundColorReader(): Preference<Int> {
-        return preferenceStore.getInt(SAVED_BACKGROUND_COLOR, -14277082)
+    fun backgroundColorReader(): Preference<Color> {
+        return preferenceStore.getInt(SAVED_BACKGROUND_COLOR, Color.Black.toArgb()).asColor()
     }
 
-    fun textColorReader(): Preference<Int> {
-        return preferenceStore.getInt(SAVED_TEXT_COLOR, -1447447)
+    fun textColorReader(): Preference<Color> {
+        return preferenceStore.getInt(SAVED_TEXT_COLOR, Color.White.toArgb()).asColor()
     }
 
     fun lineHeight(): Preference<Int> {

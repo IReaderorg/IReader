@@ -15,9 +15,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import org.ireader.common_resources.UiText
 import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.core_api.source.CatalogSource
 import org.ireader.core_api.source.TestSource
@@ -42,17 +42,17 @@ fun FilterBottomSheet(
             androidx.compose.material3.TextButton(onClick = {
                 onReset()
             }, modifier = Modifier.width(92.dp), shape = RoundedCornerShape(4.dp)) {
-                MidSizeTextComposable(text = UiText.StringResource(R.string.reset), color = MaterialTheme.colorScheme.primary)
+                MidSizeTextComposable(text = stringResource(R.string.reset), color = MaterialTheme.colorScheme.primary)
             }
             androidx.compose.material3.Button(onClick = {
                 onApply()
             }, modifier = Modifier.width(92.dp), shape = RoundedCornerShape(4.dp)) {
-                MidSizeTextComposable(text = UiText.StringResource(R.string.apply), color = MaterialTheme.colorScheme.onPrimary)
+                MidSizeTextComposable(text = stringResource(R.string.apply), color = MaterialTheme.colorScheme.onPrimary)
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
         FilterGroupItem(
-            name =UiText.DynamicString(""),
+            name ="",
             filters = filters,
             onUpdate = {
                 onUpdate(it)

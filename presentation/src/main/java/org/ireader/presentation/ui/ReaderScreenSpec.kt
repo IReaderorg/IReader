@@ -26,10 +26,8 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.core.graphics.toColorInt
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
@@ -40,11 +38,12 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import org.ireader.common_extensions.async.viewModelIOCoroutine
 import org.ireader.common_resources.UiEvent
 import org.ireader.common_resources.UiText
 import org.ireader.core.R
 import org.ireader.core_api.log.Log
+import org.ireader.core_ui.theme.Roboto
+import org.ireader.core_ui.theme.fonts
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.reader.ReaderScreenDrawer
 import org.ireader.reader.ReaderScreenTopBar
@@ -126,8 +125,6 @@ object ReaderScreenSpec : ScreenSpec {
             vm.readerScrollState = scrollState
         }
 
-
-
         val swipeState = rememberSwipeRefreshState(isRefreshing = false)
         DisposableEffect(key1 = true) {
             onDispose {
@@ -137,12 +134,12 @@ object ReaderScreenSpec : ScreenSpec {
         }
 
         LaunchedEffect(key1 = vm.autoScrollMode) {
-            while (vm.autoScrollInterval != 0L && vm.autoScrollMode) {
-                scrollState.scrollBy(vm.autoScrollOffset.toFloat())
-                delay(vm.autoScrollInterval)
+            while (vm.autoScrollInterval.value.toInt() != 0 && vm.autoScrollMode) {
+                scrollState.scrollBy(vm.autoScrollOffset.value.toFloat())
+                delay(vm.autoScrollInterval.value.toLong())
             }
         }
-        LaunchedEffect(key1 = vm.autoBrightnessMode) {
+        LaunchedEffect(key1 = vm.autoBrightnessMode.value) {
             vm.prefFunc.apply {
                 vm.readBrightness(context)
             }
@@ -160,13 +157,20 @@ object ReaderScreenSpec : ScreenSpec {
                 vm.readImmersiveMode(context)
             }
         }
-        LaunchedEffect(key1 = true) {
+//        LaunchedEffect(key1 = true) {
+//            vm.prefFunc.apply {
+//                vm.readOrientation(context)
+//                //vm.readBrightness(context)
+//                // vm.readImmersiveMode(context)
+//            }
+//        }
 
+        LaunchedEffect(key1 = vm.orientation.value) {
             vm.prefFunc.apply {
                 vm.readOrientation(context)
-                vm.readBrightness(context)
-                // vm.readImmersiveMode(context)
             }
+        }
+        LaunchedEffect(key1 = true) {
 
             vm.eventFlow.collectLatest { event ->
                 when (event) {
@@ -251,48 +255,11 @@ object ReaderScreenSpec : ScreenSpec {
                 }
             },
             readerScreenPreferencesState = vm,
-            onDismiss = {
-                vm.scrollIndicatorDialogShown = false
-                vm.prefFunc.apply {
-                    vm.viewModelIOCoroutine {
-                        vm.readScrollIndicatorPadding()
-                        vm.readScrollIndicatorWidth()
-                    }
-                }
-                vm.prefFunc.apply {
-                    vm.viewModelIOCoroutine {
-                        vm.readBackgroundColor()
-                        vm.readTextColor()
-                    }
-                }
-            },
-            onBackgroundValueChange = {
-                try {
-                    vm.backgroundColor = Color(it.toColorInt())
-                } catch (e: Throwable) {
-                    vm.prefFunc.apply {
-                        vm.viewModelIOCoroutine {
-                            vm.readBackgroundColor()
-                        }
-                    }
-                }
-            },
-            onTextColorValueChange = {
-                try {
-                    vm.textColor = Color(it.toColorInt())
-                } catch (e: Throwable) {
-                    vm.prefFunc.apply {
-                        vm.viewModelIOCoroutine {
-                            vm.readTextColor()
-                        }
-                    }
-                }
-            },
             onBackgroundColorAndTextColorApply = { bgColor, txtColor ->
                 try {
                     if (bgColor.isNotBlank()) {
                         vm.prefFunc.apply {
-                            vm.setReaderBackgroundColor(vm.backgroundColor)
+                            vm.setReaderBackgroundColor(vm.backgroundColor.value)
                         }
                     }
                 } catch (e: Throwable) {
@@ -301,7 +268,7 @@ object ReaderScreenSpec : ScreenSpec {
                 try {
                     if (txtColor.isNotBlank()) {
                         vm.prefFunc.apply {
-                            vm.setReaderTextColor(vm.textColor)
+                            vm.setReaderTextColor(vm.textColor.value)
                         }
                     }
                 } catch (e: Throwable) {
@@ -369,11 +336,11 @@ object ReaderScreenSpec : ScreenSpec {
         val chapter = vm.stateChapter
         val scope = rememberCoroutineScope()
         if (lazyListState != null) {
-        AnimatedVisibility(
-            visible = true,
-            enter = slideInVertically(initialOffsetY = { -it }),
-            exit = slideOutVertically(targetOffsetY = { -it })
-        ) {
+            AnimatedVisibility(
+                visible = true,
+                enter = slideInVertically(initialOffsetY = { -it }),
+                exit = slideOutVertically(targetOffsetY = { -it })
+            ) {
                 ReaderScreenDrawer(
                     modifier = Modifier.statusBarsPadding(),
                     onReverseIcon = {
@@ -428,49 +395,49 @@ object ReaderScreenSpec : ScreenSpec {
         val chapter = vm.stateChapter
         val readerScrollState = vm.readerScrollState
         val scope = rememberCoroutineScope()
-        if(readerScrollState != null) {
-                ReaderScreenTopBar(
-                    isReaderModeEnable = vm.isReaderModeEnable,
-                    isLoaded = vm.isChapterLoaded.value,
-                    modalBottomSheetValue = sheetState.targetValue,
-                    onRefresh = {
-                        vm.getLocalChapter(
-                            chapter?.id
-                        )
-                    },
-                    chapter = chapter,
-                    onWebView = {
-                        try {
-                            catalog?.let { catalog ->
-                                navController.navigate(
-                                    WebViewScreenSpec.buildRoute(
-                                        url = chapter?.key,
-                                        sourceId = catalog.sourceId,
-                                        chapterId = chapter?.id,
-                                        bookId = book?.id
-                                    )
+        if (readerScrollState != null) {
+            ReaderScreenTopBar(
+                isReaderModeEnable = vm.isReaderModeEnable,
+                isLoaded = vm.isChapterLoaded.value,
+                modalBottomSheetValue = sheetState.targetValue,
+                onRefresh = {
+                    vm.getLocalChapter(
+                        chapter?.id
+                    )
+                },
+                chapter = chapter,
+                onWebView = {
+                    try {
+                        catalog?.let { catalog ->
+                            navController.navigate(
+                                WebViewScreenSpec.buildRoute(
+                                    url = chapter?.key,
+                                    sourceId = catalog.sourceId,
+                                    chapterId = chapter?.id,
+                                    bookId = book?.id
                                 )
-                            }
-                        } catch (e: Throwable) {
-                            scope.launch {
-                                vm.showSnackBar(
-                                    UiText.ExceptionString(
-                                        e
-                                    )
-                                )
-                            }
+                            )
                         }
-                    },
-                    vm = vm,
-                    state = vm,
-                    scrollState = readerScrollState,
-                    onBookMark = {
-                        vm.bookmarkChapter()
-                    },
-                    onPopBackStack = {
-                        navController.popBackStack()
+                    } catch (e: Throwable) {
+                        scope.launch {
+                            vm.showSnackBar(
+                                UiText.ExceptionString(
+                                    e
+                                )
+                            )
+                        }
                     }
-                )
+                },
+                vm = vm,
+                state = vm,
+                scrollState = readerScrollState,
+                onBookMark = {
+                    vm.bookmarkChapter()
+                },
+                onPopBackStack = {
+                    navController.popBackStack()
+                }
+            )
         }
     }
 
@@ -484,6 +451,12 @@ object ReaderScreenSpec : ScreenSpec {
     ) {
         val vm: ReaderScreenViewModel = hiltViewModel(navBackStackEntry)
         val context = LocalContext.current
+
+        LaunchedEffect(key1 = vm.immersiveMode.value) {
+            vm.prefFunc.apply {
+                vm.toggleImmersiveMode(vm.immersiveMode.value, context)
+            }
+        }
         Column(
             Modifier
                 .fillMaxSize()
@@ -496,155 +469,11 @@ object ReaderScreenSpec : ScreenSpec {
             Spacer(modifier = Modifier.height(5.dp))
             ReaderSettingMainLayout(
                 onFontSelected = { index ->
-                    vm.apply {
-                        vm.saveFont(index)
-                    }
-                },
-                onAutoscrollIntervalIncrease = {
-                    when (it) {
-                        true -> {
-                            vm.prefFunc.apply {
-                                vm.setAutoScrollIntervalReader(true)
-                            }
-                        }
-                        else -> {
-                            vm.prefFunc.apply {
-                                vm.setAutoScrollIntervalReader(false)
-                            }
-                        }
-                    }
-                },
-                onAutoscrollOffsetIncrease = {
-                    when (it) {
-                        true -> {
-                            vm.prefFunc.apply {
-                                vm.setAutoScrollOffsetReader(true)
-                            }
-                        }
-                        else -> {
-                            vm.prefFunc.apply {
-                                vm.setAutoScrollOffsetReader(false)
-                            }
-                        }
-                    }
-                },
-                onFontSizeIncrease = {
-                    when (it) {
-                        true -> {
-                            vm.apply {
-                                vm.saveFontSize(true)
-                            }
-                        }
-                        else -> {
-                            vm.apply {
-                                vm.saveFontSize(false)
-                            }
-                        }
-                    }
-                },
-                onLineHeightIncrease = {
-                    when (it) {
-                        true -> {
-                            vm.prefFunc.apply {
-                                vm.saveFontHeight(true)
-                            }
-                        }
-                        else -> {
-                            vm.prefFunc.apply {
-                                vm.saveFontHeight(false)
-                            }
-                        }
-                    }
-                },
-                onParagraphDistanceIncrease = {
-                    when (it) {
-                        true -> {
-                            vm.prefFunc.apply {
-                                vm.saveParagraphDistance(true)
-                            }
-                        }
-                        else -> {
-                            vm.prefFunc.apply {
-                                vm.saveParagraphDistance(false)
-                            }
-                        }
-                    }
-                },
-                onParagraphIndentIncrease = {
-                    when (it) {
-                        true -> {
-                            vm.prefFunc.apply {
-                                vm.saveParagraphIndent(true)
-                            }
-                        }
-                        else -> {
-                            vm.prefFunc.apply {
-                                vm.saveParagraphIndent(false)
-                            }
-                        }
-                    }
-                },
-                onScrollIndicatorPaddingIncrease = {
-                    when (it) {
-                        true -> {
-                            vm.prefFunc.apply {
-                                vm.saveScrollIndicatorPadding(true)
-                            }
-                        }
-                        else -> {
-                            vm.apply {
-                                vm.saveScrollIndicatorPadding(false)
-                            }
-                        }
-                    }
-                },
-                onScrollIndicatorWidthIncrease = {
-                    when (it) {
-                        true -> {
-                            vm.prefFunc.apply {
-                                vm.saveScrollIndicatorWidth(true)
-                            }
-                        }
-                        else -> {
-                            vm.prefFunc.apply {
-                                vm.saveScrollIndicatorWidth(false)
-                            }
-                        }
-                    }
-                },
-                onToggleAutoScroll = {
-                    vm.prefFunc.apply {
-                        vm.toggleAutoScrollMode()
-                    }
-                },
-                onToggleImmersiveMode = {
-                    vm.prefFunc.apply {
-                        vm.toggleImmersiveMode(context)
-                    }
-                },
-                onToggleOrientation = {
-                    vm.prefFunc.apply {
-                        vm.saveOrientation(context)
-                    }
-                },
-                onToggleScrollMode = {
-                    vm.prefFunc.apply {
-                        vm.toggleScrollMode()
-                    }
-                },
-                onToggleSelectedMode = {
-                    vm.prefFunc.apply {
-                        vm.toggleSelectableMode()
-                    }
+                    vm.font.value = fonts.getOrNull(index)?: Roboto
                 },
                 onChangeBrightness = {
                     vm.apply {
                         vm.saveBrightness(it, context)
-                    }
-                },
-                onToggleAutoBrightness = {
-                    vm.prefFunc.apply {
-                        vm.toggleAutoBrightness()
                     }
                 },
                 onBackgroundChange = { index ->
@@ -653,16 +482,16 @@ object ReaderScreenSpec : ScreenSpec {
                     }
                 },
                 vm = vm,
-                onShowScrollIndicator = {
-                    vm.showScrollIndicator = it
-                    vm.apply {
-                        vm.setShowScrollIndicator(it)
-                    }
-                },
                 onTextAlign = {
-                    vm.textAlignment = it
+                    vm.textAlignment.value = it
                     vm.readerUseCases.textAlignmentUseCase.save(it)
                 },
+                onToggleAutoBrightness = {
+                    vm.autoBrightnessMode.value = !vm.autoBrightnessMode.value
+//                    vm.prefFunc.apply {
+//                        vm.toggleAutoBrightness()
+//                    }
+                }
             )
         }
     }

@@ -10,15 +10,10 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.ui.graphics.Color
 import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.common_models.entities.Chapter
 import org.ireader.core_api.source.Source
-import org.ireader.core_ui.theme.BackgroundColor
-import org.ireader.core_ui.theme.FontType
-import org.ireader.core_ui.theme.Roboto
-import org.ireader.core_ui.ui.TextAlign
 import javax.inject.Inject
 
 open class ReaderScreenStateImpl @Inject constructor() : ReaderScreenState {
@@ -69,29 +64,17 @@ interface ReaderScreenState {
 open class ReaderScreenPreferencesStateImpl @Inject constructor() : ReaderScreenPreferencesState {
     override var isAsc by mutableStateOf<Boolean>(true)
 
-    override var fontSize by mutableStateOf<Int>(18)
-    override var font by mutableStateOf<FontType>(Roboto)
+
+
     override var brightness by mutableStateOf<Float>(0.3f)
-    override var distanceBetweenParagraphs by mutableStateOf<Int>(2)
-    override var paragraphsIndent by mutableStateOf<Int>(8)
-    override var lineHeight by mutableStateOf<Int>(25)
-    override var backgroundColor by mutableStateOf<Color>(BackgroundColor.Black.color)
-    override var textColor by mutableStateOf<Color>(BackgroundColor.Black.onTextColor)
-    override var isInPortraitMode by mutableStateOf<Boolean>(true)
+
+
     override var isChaptersReversed by mutableStateOf<Boolean>(false)
-    override var showScrollIndicator: Boolean by mutableStateOf(false)
+
     override var isChapterReversingInProgress by mutableStateOf<Boolean>(false)
-    override var verticalScrolling: Boolean by mutableStateOf<Boolean>(true)
-    override var scrollIndicatorWith by mutableStateOf<Int>(2)
-    override var scrollIndicatorPadding by mutableStateOf<Int>(4)
-    override var scrollIndicatorDialogShown by mutableStateOf<Boolean>(false)
-    override var autoScrollOffset by mutableStateOf<Int>(500)
-    override var autoScrollInterval by mutableStateOf<Long>(2000)
+
     override var autoScrollMode: Boolean by mutableStateOf<Boolean>(false)
-    override var textAlignment: TextAlign by mutableStateOf<TextAlign>(TextAlign.Left)
-    override var autoBrightnessMode by mutableStateOf<Boolean>(false)
-    override var immersiveMode: Boolean by mutableStateOf<Boolean>(false)
-    override var selectableMode: Boolean by mutableStateOf<Boolean>(false)
+
     override var initialized by mutableStateOf<Boolean>(false)
     override var searchMode by mutableStateOf<Boolean>(false)
     override var searchQuery by mutableStateOf<String>("")
@@ -101,35 +84,25 @@ open class ReaderScreenPreferencesStateImpl @Inject constructor() : ReaderScreen
 
 
     override var scrollMode by mutableStateOf<Boolean>(false)
-    override var autoBrightness by mutableStateOf<Boolean>(false)
 
 }
 
 interface ReaderScreenPreferencesState {
     var isAsc: Boolean
-    var fontSize: Int
-    var font: FontType
+
+
     var brightness: Float
-    var distanceBetweenParagraphs: Int
-    var paragraphsIndent: Int
-    var lineHeight: Int
-    var backgroundColor: Color
-    var textColor: Color
-    var isInPortraitMode: Boolean
+
+
     var isChaptersReversed: Boolean
     var isChapterReversingInProgress: Boolean
-    var verticalScrolling: Boolean
-    var showScrollIndicator: Boolean
-    var textAlignment: TextAlign
-    var scrollIndicatorWith: Int
-    var scrollIndicatorPadding: Int
-    var scrollIndicatorDialogShown: Boolean
-    var autoScrollOffset: Int
-    var autoScrollInterval: Long
+
+
+
+
+
     var autoScrollMode:Boolean
-    var autoBrightnessMode: Boolean
-    var immersiveMode: Boolean
-    var selectableMode: Boolean
+
     var initialized: Boolean
     var searchMode: Boolean
     var expandTopMenu: Boolean
@@ -137,9 +110,8 @@ interface ReaderScreenPreferencesState {
     var queriedTextIndex: SnapshotStateList<Int>
     var currentViewingSearchResultIndex: Int
 
-    val scrollMode : Boolean
+    var scrollMode : Boolean
   //  val isVerticalScrolling : Boolean
-    val autoBrightness  : Boolean
 }
 
 sealed class Orientation(val index: Int) {

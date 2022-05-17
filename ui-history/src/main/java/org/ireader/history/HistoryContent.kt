@@ -6,7 +6,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import org.ireader.common_models.entities.HistoryWithRelations
-import org.ireader.common_resources.UiText
 import org.ireader.components.text_related.TextSection
 import org.ireader.history.viewmodel.HistoryState
 
@@ -28,7 +27,7 @@ fun HistoryContent(
         state.history.forEach { (date, history) ->
             item {
                 TextSection(
-                    text = UiText.DynamicString(date)
+                    text = date
                 )
             }
             items(

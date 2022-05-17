@@ -11,7 +11,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.ireader.common_models.FilterType
-import org.ireader.common_resources.UiText
 import org.ireader.components.text_related.TextCheckBox
 import org.ireader.core_ui.ui.string
 import org.ireader.ui_library.R
@@ -37,7 +36,7 @@ fun FilterScreen(
         )
         items.forEach { filter ->
             TextCheckBox(
-                UiText.DynamicString(filter.name),
+                filter.name,
                 filters.contains(filter.type)
             ) {
                 if (!filters.contains(filter.type)) {

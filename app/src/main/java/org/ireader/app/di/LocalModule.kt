@@ -1,6 +1,8 @@
 package org.ireader.app.di
 
 import android.content.Context
+import androidx.compose.ui.text.ExperimentalTextApi
+import androidx.compose.ui.text.googlefonts.GoogleFont
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -10,6 +12,7 @@ import io.ktor.client.plugins.cookies.CookiesStorage
 import okio.FileSystem
 import okio.Path.Companion.toOkioPath
 import org.ireader.app.BuildConfig
+import org.ireader.app.R
 import org.ireader.common_resources.ProjectConfig
 import org.ireader.core_api.http.AcceptAllCookiesStorage
 import org.ireader.core_api.prefs.AndroidPreferenceStore
@@ -55,5 +58,18 @@ class LocalModule {
     @Singleton
     fun provideCookieJar(): CookiesStorage {
         return AcceptAllCookiesStorage()
+    }
+
+
+
+    @OptIn(ExperimentalTextApi::class)
+    @Provides
+    @Singleton
+    fun provideGoogleFontProvider(): GoogleFont.Provider {
+        return  GoogleFont.Provider(
+            providerAuthority = "com.google.android.gms.fonts",
+            providerPackage = "com.google.android.gms",
+            certificates = R.array.com_google_android_gms_fonts_certs
+        )
     }
 }

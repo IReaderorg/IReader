@@ -47,7 +47,7 @@ fun AdvanceSettings(
     Column(
         modifier = Modifier
     ) {
-        TextSection(text = UiText.StringResource(R.string.data), toUpper = false)
+        TextSection(text =stringResource(R.string.data), toUpper = false)
         PreferenceRow(title = stringResource(id = R.string.clear_all_database), onClick = {
             vm.deleteAllDatabase()
             vm.showSnackBar(
@@ -66,7 +66,7 @@ fun AdvanceSettings(
                 vm.showSnackBar(UiText.DynamicString("Clear was cleared."))
             }
         )
-        TextSection(text = UiText.StringResource(R.string.reset_setting), toUpper = false)
+        TextSection(text = stringResource(R.string.reset_setting), toUpper = false)
         PreferenceRow(title = stringResource(R.string.reset_reader_screen_settings), onClick = {
             vm.deleteDefaultSettings()
         })

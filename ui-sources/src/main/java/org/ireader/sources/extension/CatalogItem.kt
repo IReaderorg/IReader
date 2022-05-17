@@ -35,7 +35,6 @@ import org.ireader.common_models.entities.CatalogBundled
 import org.ireader.common_models.entities.CatalogInstalled
 import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.common_models.entities.CatalogRemote
-import org.ireader.common_resources.UiText
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.core_api.os.InstallStep
@@ -187,13 +186,13 @@ private fun CatalogButtons(
             } else if (onInstall != null) {
                 if (catalog is CatalogLocal) {
                     MidSizeTextComposable(
-                        text = UiText.StringResource(R.string.update),
+                        text = stringResource(R.string.update),
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.clickable { onInstall() }
                     )
                 } else if (catalog is CatalogRemote) {
                     MidSizeTextComposable(
-                        text = UiText.StringResource(R.string.install),
+                        text = stringResource(R.string.install),
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.clickable { onInstall() }
                     )
@@ -240,7 +239,7 @@ internal fun CatalogMenuButton(
             Spacer(modifier = Modifier.padding(horizontal = 4.dp))
             if (onUninstall != null && catalog is CatalogLocal) {
                 MidSizeTextComposable(
-                    text = UiText.StringResource(R.string.uninstall),
+                    text =stringResource(R.string.uninstall),
                     color = androidx.compose.material3.MaterialTheme.colorScheme.primary,
                     modifier = Modifier.clickable { onUninstall() }
                 )

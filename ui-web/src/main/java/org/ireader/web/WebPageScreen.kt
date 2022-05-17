@@ -226,7 +226,7 @@ fun WebPageBottomLayout(
                 onCancel()
             }, modifier = Modifier.width(92.dp), shape = RoundedCornerShape(4.dp)) {
                 MidSizeTextComposable(
-                    text = UiText.StringResource(R.string.cancel),
+                    text =stringResource(R.string.cancel),
                     color = MaterialTheme.colorScheme.primary
                 )
             }
@@ -234,7 +234,7 @@ fun WebPageBottomLayout(
                 onConfirm()
             }, modifier = Modifier.width(92.dp), shape = RoundedCornerShape(4.dp)) {
                 MidSizeTextComposable(
-                    text = UiText.StringResource(R.string.apply),
+                    text = stringResource(R.string.apply),
                     color = MaterialTheme.colorScheme.onPrimary
                 )
             }
@@ -257,7 +257,7 @@ fun WebPageBottomLayout(
                                     state.selectedBooks.remove(-1)
                                 }
                             })
-                        MidSizeTextComposable(text = UiText.StringResource(R.string.add_as_new))
+                        MidSizeTextComposable(text = stringResource(R.string.add_as_new))
 
                     }
                 }
@@ -283,7 +283,7 @@ fun WebPageBottomLayout(
                                     state.selectedBooks.remove(item.id)
                                 }
                             })
-                        MidSizeTextComposable(text = UiText.DynamicString(item.title))
+                        MidSizeTextComposable(text = item.title)
                     }
                     AppIconButton(imageVector = Icons.Default.ArrowForward,
                         contentDescription = stringResource(R.string.view_book),
