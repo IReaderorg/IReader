@@ -6,7 +6,6 @@ import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -32,22 +31,17 @@ import androidx.navigation.navDeepLink
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.launch
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-import org.ireader.common_resources.UiText
+import org.ireader.components.components.component.ChipChoicePreference
+import org.ireader.components.components.component.SliderPreference
+import org.ireader.components.components.component.SwitchPreference
 import org.ireader.core.R
 import org.ireader.core_api.log.Log
 import org.ireader.domain.services.tts_service.Player
 import org.ireader.domain.services.tts_service.media_player.isPlaying
-import org.ireader.domain.services.tts_service.toIReaderVoice
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.reader.ReaderScreenDrawer
-import org.ireader.reader.components.SettingItemComposable
-import org.ireader.reader.components.SettingItemToggleComposable
-import org.ireader.tts.LanguageChip
 import org.ireader.tts.TTSScreen
 import org.ireader.tts.TTSViewModel
-import org.ireader.tts.VoiceChip
 import java.math.RoundingMode
 
 object TTSScreenSpec : ScreenSpec {
@@ -268,76 +262,34 @@ object TTSScreenSpec : ScreenSpec {
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            VoiceChip(
-                viewModel = vm,
-                modifier = Modifier.height(32.dp),
-                onVoice = { voice ->
-                    vm.currentVoice = voice.toIReaderVoice()
-                    vm.speechPrefUseCases.saveVoice(Json.encodeToString(voice.toIReaderVoice()))
-                }
-            )
-            LanguageChip(
-                viewModel = vm,
-                modifier = Modifier.height(32.dp),
-                onLanguage = { language ->
-                    vm.currentLanguage = language.displayName
-                    vm.speechPrefUseCases.saveLanguage(language.displayName)
-                }
-            )
-            SettingItemToggleComposable(
-                text = UiText.StringResource(R.string.auto_next_chapter),
-                value = vm.autoNextChapter,
-                onToggle = {
-                    vm.autoNextChapter = !vm.autoNextChapter
-                    vm.speechPrefUseCases.saveAutoNext(vm.autoNextChapter)
-                }
-            )
-            SettingItemComposable(
-                text = stringResource(R.string.auto_next_chapter),
-                value = vm.speechSpeed.toString(),
-                onAdd = {
-                    if (vm.speechSpeed < 3.0f) {
-                        vm.speechSpeed += .1f
-                        vm.speechSpeed =
-                            vm.speechSpeed.toBigDecimal().setScale(1, RoundingMode.FLOOR)
-                                .toFloat()
-                        vm.speechPrefUseCases.saveRate(vm.speechSpeed)
-                    }
-
+            ChipChoicePreference(
+                preference = vm.voice,
+                choices = vm.uiVoices.associate { voice ->
+                    return@associate voice to voice.localDisplayName
                 },
-                onMinus = {
-                    if (vm.speechSpeed >= .5F) {
-                        vm.speechSpeed -= .1f
-                        vm.speechSpeed =
-                            vm.speechSpeed.toBigDecimal().setScale(1, RoundingMode.FLOOR)
-                                .toFloat()
-                        vm.speechPrefUseCases.saveRate(vm.speechSpeed)
-                    }
-                }
+                title = stringResource(id = R.string.voices)
+            )
+            ChipChoicePreference(
+                preference = vm.language,
+                choices = vm.languages.associate { language ->
+                    return@associate language.displayName to language.displayName
+                },
+                title = stringResource(id = R.string.languages)
+            )
+            SwitchPreference(preference = vm.autoNext, title = stringResource(id = R.string.auto_next_chapter))
+            SliderPreference(
+                title = stringResource(R.string.auto_next_chapter),
+                preferenceAsFloat = vm.speechRate,
+                valueRange = .5F..3F,
+                trailing = vm.speechRate.value.toBigDecimal().setScale(1, RoundingMode.FLOOR).toString()
+            )
+            SliderPreference(
+                title = stringResource(R.string.pitch),
+                preferenceAsFloat = vm.speechPitch,
+                valueRange = .5F..2.1F,
+                trailing = vm.speechPitch.value.toBigDecimal().setScale(1, RoundingMode.FLOOR).toString()
             )
 
-            SettingItemComposable(
-                text = stringResource(R.string.pitch),
-                value = vm.pitch.toString(),
-                onAdd = {
-                    if (vm.pitch <= 2.0F) {
-                        vm.pitch += .1f
-                        vm.pitch =
-                            vm.pitch.toBigDecimal().setScale(1, RoundingMode.FLOOR)
-                                .toFloat()
-                        vm.speechPrefUseCases.savePitch(vm.pitch)
-                    }
-                },
-                onMinus = {
-                    if (vm.pitch >= .5F) {
-                        vm.pitch -= .1f
-                        vm.pitch =
-                            vm.pitch.toBigDecimal().setScale(1, RoundingMode.FLOOR)
-                                .toFloat()
-                        vm.speechPrefUseCases.savePitch(vm.pitch)
-                    }
-                }
-            )
         }
     }
 }

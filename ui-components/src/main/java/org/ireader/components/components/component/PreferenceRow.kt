@@ -378,14 +378,14 @@ fun SliderPreference(
                     overflow = Ellipsis,
                     maxLines = 1,
                     color = LocalContentColor.current.copy(alpha = ContentAlpha.medium),
-                    style = MaterialTheme.typography.labelMedium,
+                    style = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurface),
                     softWrap = true,
                 )
             }
         }
         Slider(
             modifier = Modifier
-                .weight(7f),
+                .widthIn(max = 200.dp),
             value = preferenceAsFloat?.value ?: preferenceAsInt?.value?.toFloat()
             ?: preferenceAsLong?.value?.toFloat() ?: mutablePreferences?.value ?: 0F,
             onValueChange = {
@@ -414,7 +414,7 @@ fun SliderPreference(
                 text = trailing,
                 overflow = Ellipsis,
                 maxLines = 1,
-                style = MaterialTheme.typography.labelSmall,
+                style = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.onSurface),
                 textAlign = TextAlign.Start,
                 softWrap = true,
             )
@@ -486,7 +486,7 @@ fun <Key> ChipChoicePreference(
         icon = icon,
         action = {
             Button(
-                modifier = Modifier.fillMaxWidth().padding(end = 16.dp, top =4.dp, bottom = 4.dp),
+                modifier = Modifier.fillMaxWidth().padding(end = 2.dp, top =4.dp, bottom = 4.dp),
                 onClick = {
                     showDialog = true
                 },
@@ -509,7 +509,7 @@ fun <Key> ChipChoicePreference(
     )
     if (showDialog) {
         AlertDialog(
-            modifier = Modifier.heightIn(max = 350.dp),
+            modifier = Modifier.heightIn(max = 350.dp, min = 200.dp),
             onDismissRequest = { showDialog = false },
             title = { Text(title) },
             text = {

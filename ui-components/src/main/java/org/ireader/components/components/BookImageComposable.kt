@@ -4,7 +4,10 @@ import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.FilterQuality
@@ -40,11 +43,11 @@ fun BookImageComposable(
 //                .build(),
 //            contentScale = ContentScale.Crop
 //        )
-        var isLoaded = remember {
-            false
+        var isLoaded by remember {
+            mutableStateOf(false)
         }
-        var isLoading = remember {
-            false
+        var isLoading by remember {
+            mutableStateOf(false)
         }
         if (showLoading && !image.favorite && !isLoaded) {
             ShowLoading(modifier = Modifier.align(Alignment.Center), size = 16.dp)
@@ -68,7 +71,7 @@ fun BookImageComposable(
             },
             contentDescription = "an image",
             alignment = alignment,
-            filterQuality = FilterQuality.Low
+            filterQuality = FilterQuality.High,
         )
 
 //        Image(

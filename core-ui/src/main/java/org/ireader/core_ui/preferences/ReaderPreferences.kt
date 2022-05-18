@@ -10,8 +10,10 @@ import org.ireader.core_api.prefs.getEnum
 import org.ireader.core_ui.theme.FontType
 import org.ireader.core_ui.theme.OrientationMode
 import org.ireader.core_ui.theme.Roboto
+import org.ireader.core_ui.theme.prefs.IReaderVoice
 import org.ireader.core_ui.theme.prefs.asColor
 import org.ireader.core_ui.theme.prefs.asFont
+import org.ireader.core_ui.theme.prefs.asVoice
 
 class ReaderPreferences @OptIn(ExperimentalTextApi::class) constructor(
     private val preferenceStore: PreferenceStore,
@@ -141,8 +143,8 @@ class ReaderPreferences @OptIn(ExperimentalTextApi::class) constructor(
         return preferenceStore.getFloat(TEXT_READER_SPEECH_PITCH, .8f)
     }
 
-    fun speechVoice(): Preference<String> {
-        return preferenceStore.getString(TEXT_READER_SPEECH_VOICE, "")
+    fun speechVoice(): Preference<IReaderVoice> {
+        return preferenceStore.getString(TEXT_READER_SPEECH_VOICE, "").asVoice()
     }
 
     fun speechLanguage(): Preference<String> {

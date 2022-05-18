@@ -1,20 +1,21 @@
 package org.ireader.domain.services.tts_service
 
 import android.speech.tts.Voice
-import kotlinx.serialization.Serializable
+import org.ireader.core_ui.theme.prefs.IReaderVoice
 
-@Serializable
-data class IReaderVoice(
-    val name: String,
-    val language: String,
-    val country:String
-)
+//@Serializable
+//data class IReaderVoice(
+//    val name: String,
+//    val language: String,
+//    val country:String
+//)
 
 fun Voice.toIReaderVoice(): IReaderVoice {
     return IReaderVoice(
         name = this.name,
         language = this.locale.language,
-        country = this.locale.country
+        country = this.locale.country,
+        localDisplayName = this.locale.displayName
     )
 }
 

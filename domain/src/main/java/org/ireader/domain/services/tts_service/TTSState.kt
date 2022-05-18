@@ -14,6 +14,7 @@ import org.ireader.common_models.entities.Chapter
 import org.ireader.core_api.source.Source
 import org.ireader.core_ui.theme.FontType
 import org.ireader.core_ui.theme.Roboto
+import org.ireader.core_ui.theme.prefs.IReaderVoice
 import org.ireader.domain.services.tts_service.media_player.TTSService
 import java.util.Locale
 import javax.inject.Inject
@@ -28,6 +29,7 @@ interface TTSState {
     var autoNextChapter: Boolean
     var languages: List<Locale>
     var voices: List<Voice>
+    val uiVoices: List<IReaderVoice>
     var currentVoice: IReaderVoice?
     var prevVoice: IReaderVoice?
     var currentLanguage: String
@@ -69,6 +71,7 @@ class TTSStateImpl @Inject constructor() : TTSState {
     override var prevPar: Int by mutableStateOf<Int>(0)
     override var languages by mutableStateOf<List<Locale>>(emptyList())
     override var voices by mutableStateOf<List<Voice>>(emptyList())
+    override val uiVoices by derivedStateOf { voices.map { it.toIReaderVoice() } }
 
     override var currentVoice by mutableStateOf<IReaderVoice?>(null)
     override var prevVoice by mutableStateOf<IReaderVoice?>(null)

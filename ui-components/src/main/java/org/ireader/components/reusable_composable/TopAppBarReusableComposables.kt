@@ -221,6 +221,7 @@ fun AppTextField(
                 modifier = Modifier.padding(horizontal = 0.dp),
                 text = hint,
                 style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface,
             )
         }
 
@@ -235,6 +236,8 @@ fun AppTextField(
                 keyboardOptions = keyboardAction,
                 keyboardActions = keyboardActions,
                 singleLine = true,
+                textStyle = MaterialTheme.typography.labelSmall
+
             )
         } else if (mode == 1) {
             OutlinedTextField(
@@ -245,6 +248,7 @@ fun AppTextField(
                 keyboardOptions = keyboardAction,
                 keyboardActions = keyboardActions,
                 singleLine = true,
+                textStyle =MaterialTheme.typography.labelSmall
             )
         } else if (mode == 2) {
             androidx.compose.material3.TextField(
@@ -258,6 +262,7 @@ fun AppTextField(
                 keyboardOptions = keyboardAction,
                 keyboardActions = keyboardActions,
                 singleLine = true,
+                textStyle = MaterialTheme.typography.labelSmall
             )
         }
     }

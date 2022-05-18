@@ -16,6 +16,7 @@ import org.ireader.common_extensions.findComponentActivity
 import org.ireader.common_models.entities.Chapter
 import org.ireader.core_api.log.Log
 import org.ireader.core_catalogs.interactor.GetLocalCatalog
+import org.ireader.core_ui.preferences.ReaderPreferences
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.services.tts_service.Player
 import org.ireader.domain.services.tts_service.TTSState
@@ -40,9 +41,16 @@ class TTSViewModel @Inject constructor(
     private val remoteUseCases: RemoteUseCases,
     private val getLocalCatalog: GetLocalCatalog,
     val speechPrefUseCases: TextReaderPrefUseCase,
-    private val readerUseCases: ReaderPrefUseCases
+    private val readerUseCases: ReaderPrefUseCases,
+    private val readerPreferences: ReaderPreferences,
 ) : BaseViewModel(),
     TTSState by ttsState {
+
+    val speechRate = readerPreferences.speechRate().asState()
+    val speechPitch = readerPreferences.speechPitch().asState()
+    val autoNext = readerPreferences.readerAutoNext().asState()
+    val voice = readerPreferences.speechVoice().asState()
+    val language = readerPreferences.speechLanguage().asState()
 
     private var chapterId: Long = -1
     private var initialize: Boolean = false

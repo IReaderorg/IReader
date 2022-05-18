@@ -1,5 +1,6 @@
 package org.ireader.settings.setting.font_screens
 
+import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -22,6 +23,8 @@ class FontScreenViewModel @Inject constructor(
         setup()
     }
 
+
+
     private fun setup() {
         viewModelScope.launch {
            fontScreenState.fonts = fontUseCase.findAllFontEntities()
@@ -39,15 +42,28 @@ class FontScreenViewModel @Inject constructor(
 
                 fontUseCase.insertFonts(fontScreenState.fonts)
             }
+
+            snapshotFlow {
+                fonts.filteredByQuery(searchQuery)
+            }
+                .collect {
+                    uiFonts = it
+                }
         }
+
     }
 
 
 
 
 
-
-
+    private fun List<FontEntity>.filteredByQuery(query: String?): List<FontEntity> {
+        return if (query == null || query.isBlank()) {
+            this
+        } else {
+            filter { it.fontName.contains(query, true) }
+        }
+    }
 
 }
 

@@ -30,8 +30,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
 import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.common_models.entities.Chapter
@@ -40,7 +38,6 @@ import org.ireader.core_catalogs.CatalogStore
 import org.ireader.core_ui.preferences.ReaderPreferences
 import org.ireader.domain.R
 import org.ireader.domain.notification.Notifications
-import org.ireader.domain.services.tts_service.IReaderVoice
 import org.ireader.domain.services.tts_service.Player
 import org.ireader.domain.services.tts_service.TTSState
 import org.ireader.domain.services.tts_service.TTSStateImpl
@@ -155,9 +152,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
         }
         scope.launch {
             readerPreferences.speechVoice().changes().collect {
-                state.currentVoice = kotlin.runCatching {
-                     return@runCatching Json.decodeFromString<IReaderVoice?>(it)
-                }.getOrNull()
+                state.currentVoice = it
             }
         }
         scope.launch {
@@ -412,7 +407,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
             null -> {}
             else -> Log.error { "Unknown Intent $intent" }
         }
-        return super.onStartCommand(intent, flags, startId)
+        return START_NOT_STICKY
     }
 
     override fun onDestroy() {

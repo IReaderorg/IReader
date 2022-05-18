@@ -11,7 +11,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
-import org.ireader.components.components.TitleToolbar
+import org.ireader.components.components.SearchToolbar
 import org.ireader.settings.setting.font_screens.FontScreen
 import org.ireader.settings.setting.font_screens.FontScreenViewModel
 import org.ireader.ui_settings.R
@@ -20,6 +20,7 @@ import org.ireader.ui_settings.R
 @OptIn(ExperimentalMaterialApi::class)
 object FontScreenSpec : ScreenSpec {
     override val navHostRoute: String = "font_screen_spec"
+
     @Composable
     override fun TopBar(
         navController: NavController,
@@ -28,13 +29,20 @@ object FontScreenSpec : ScreenSpec {
         sheetState: ModalBottomSheetState,
         drawerState: DrawerState
     ) {
-        TitleToolbar(
+        val vm: FontScreenViewModel = hiltViewModel(navBackStackEntry)
+        SearchToolbar(
             title = stringResource(R.string.font),
-            navController = navController
+            onPopBackStack = {
+                navController.popBackStack()
+            },
+            onValueChange = {
+                vm.searchQuery = it
+            },
+            onSearch = {
+                vm.searchQuery = it
+            }
         )
     }
-
-
 
     @Composable
     override fun Content(
@@ -45,13 +53,12 @@ object FontScreenSpec : ScreenSpec {
         sheetState: ModalBottomSheetState,
         drawerState: DrawerState
     ) {
-        val vm : FontScreenViewModel = hiltViewModel()
+        val vm: FontScreenViewModel = hiltViewModel(navBackStackEntry)
 
         FontScreen(
             vm
         )
     }
-
 }
 
 
