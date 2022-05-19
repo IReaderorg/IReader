@@ -2,10 +2,11 @@ package org.ireader.domain.ui
 
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
-import org.ireader.common_resources.ARG_HAVE_VARIANT_BOTTOM_BAR
 import org.ireader.common_resources.ARG_HAVE_DRAWER
 import org.ireader.common_resources.ARG_HAVE_MODAL_SHEET
+import org.ireader.common_resources.ARG_HAVE_VARIANT_BOTTOM_BAR
 import org.ireader.common_resources.ARG_HIDE_BOTTOM_BAR
+import org.ireader.common_resources.ARG_SYSTEM_BAR_PADDING
 import org.ireader.common_resources.ARG_TRANSPARENT_STATUS_BAR
 
 object NavigationArgs {
@@ -17,6 +18,7 @@ object NavigationArgs {
         type = NavType.LongType
         defaultValue = 0L
     }
+
     val sourceId = navArgument("sourceId") {
         type = NavType.LongType
         defaultValue = 0L
@@ -53,4 +55,8 @@ object NavigationArgs {
     val haveBottomBar = navArgument(ARG_HAVE_VARIANT_BOTTOM_BAR) {
         defaultValue = true
     }
+    val systemBarPadding = navArgument(ARG_SYSTEM_BAR_PADDING) {
+        defaultValue = true
+    }
+
 }

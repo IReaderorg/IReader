@@ -22,7 +22,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -33,8 +32,8 @@ import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.AppTextField
 import org.ireader.components.reusable_composable.TopAppBarBackButton
-import org.ireader.reader.viewmodel.ReaderScreenPreferencesState
 import org.ireader.reader.viewmodel.ReaderScreenState
+import org.ireader.reader.viewmodel.ReaderScreenViewModel
 import org.ireader.ui_reader.R
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -42,7 +41,7 @@ import org.ireader.ui_reader.R
 fun ReaderScreenTopBar(
     isReaderModeEnable: Boolean,
     isLoaded: Boolean,
-    vm: ReaderScreenPreferencesState,
+    vm: ReaderScreenViewModel,
     state: ReaderScreenState,
     modalBottomSheetValue: ModalBottomSheetValue,
     chapter: Chapter?,
@@ -216,7 +215,7 @@ fun ReaderScreenTopBar(
         Toolbar(
             title = {},
             elevation = 0.dp,
-            backgroundColor = Color.Transparent,
+            backgroundColor = vm.backgroundColor.value,
             actions = {
                 if (chapter != null) {
                     AppIconButton(
@@ -224,22 +223,23 @@ fun ReaderScreenTopBar(
                         contentDescription = stringResource(R.string.refresh),
                         onClick = {
                             onRefresh()
-                        }
+                        },
+                        tint = vm.textColor.value
+                    )
+                    AppIconButton(
+                        imageVector = Icons.Default.Public,
+                        contentDescription = stringResource(R.string.webView),
+                        onClick = {
+                            onWebView()
+                        },
+                        tint = vm.textColor.value
                     )
                 }
-                AppIconButton(
-                    imageVector = Icons.Default.Public,
-                    contentDescription = stringResource(R.string.webView),
-                    onClick = {
-                        onWebView()
-                    }
-                )
             },
             navigationIcon = {
-
                 TopAppBarBackButton(onClick = {
                     onPopBackStack()
-                })
+                }, tint = vm.textColor.value)
             })
     }
 }

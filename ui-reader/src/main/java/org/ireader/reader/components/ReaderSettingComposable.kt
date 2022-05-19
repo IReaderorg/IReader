@@ -218,13 +218,25 @@ fun ReaderSettingMainLayout(
                     item {
                         ChipPreference(
                             preference = listOf(
+                                "1",
+                                "2",
+                            ), selected = vm.readingMode.value.isTrue(),
+                            onValueChange = {
+                                vm.readingMode.value = it == 1
+                            },
+                            title = stringResource(id = R.string.scroll_mode)
+                        )
+                    }
+                    item {
+                        ChipPreference(
+                            preference = listOf(
                                 stringResource(id = R.string.horizontal),
                                 stringResource(id = R.string.vertical),
                             ), selected = vm.verticalScrolling.value.isTrue(),
                             onValueChange = {
                                 vm.verticalScrolling.value = it == 1
                             },
-                            title = stringResource(id = R.string.scroll_mode)
+                            title = stringResource(id = R.string.reading_mode)
                         )
                     }
                     item {

@@ -35,7 +35,10 @@ open class ReaderScreenStateImpl @Inject constructor() : ReaderScreenState {
     override var isChapterLoaded: State<Boolean> = derivedStateOf { stateChapter?.isEmpty() == false }
 
     override var book: Book? by mutableStateOf<Book?>(null)
+
+    override val chapterShell : SnapshotStateList<Chapter> = mutableStateListOf()
     override val stateContent: List<String> by derivedStateOf { stateChapter?.content?.filter { it.isNotBlank() }?.map { it.trim() }?: emptyList() }
+
 }
 
 interface ReaderScreenState {
@@ -44,6 +47,7 @@ interface ReaderScreenState {
     var drawerChapters: State<List<Chapter>>
 
     var isReaderModeEnable: Boolean
+
     var isSettingModeEnable: Boolean
     var isMainBottomModeEnable: Boolean
 
@@ -55,6 +59,7 @@ interface ReaderScreenState {
     var isChapterLoaded: State<Boolean>
     var book: Book?
     val stateContent: List<String>
+    val chapterShell : SnapshotStateList<Chapter>
 
     var drawerListState:LazyListState?
     var readerScrollState:LazyListState?

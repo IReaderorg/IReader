@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,7 +19,10 @@ import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -50,75 +54,136 @@ fun ReaderText(
     swipeState: SwipeRefreshState,
     scrollState: LazyListState,
     modalState: ModalBottomSheetState,
-    toggleReaderMode:() -> Unit,
+    toggleReaderMode: () -> Unit,
 ) {
 
     val scope = rememberCoroutineScope()
 
     val interactionSource = remember { MutableInteractionSource() }
-        Box(
-            Modifier
-                .clickable(
-                    interactionSource = interactionSource,
-                    indication = null
-                ) {
-                    toggleReaderMode()
-                }
-                .fillMaxSize()
-                .background(vm.backgroundColor.value)
-                .wrapContentSize(Alignment.CenterStart)
-        ) {
-            MultiSwipeRefresh(
-                modifier = Modifier.fillMaxSize(),
-                state = swipeState,
-                indicators = listOf(
-                    ISwipeRefreshIndicator(
-                        scrollState.firstVisibleItemScrollOffset == 0,
-                        alignment = Alignment.TopCenter,
-                        indicator = { state, trigger ->
-                            ArrowIndicator(
-                                icon = Icons.Default.KeyboardArrowUp,
-                                swipeRefreshState = swipeState,
-                                refreshTriggerDistance = 80.dp,
-                                color = vm.textColor.value
-                            )
-                        }, onRefresh = {
-                            onPrev()
-                        }
-                    ),
-                    ISwipeRefreshIndicator(
-                        scrollState.firstVisibleItemScrollOffset != 0,
-                        alignment = Alignment.BottomCenter,
-                        onRefresh = {
-                            onNext()
-                        },
-                        indicator = { state, trigger ->
-                            ArrowIndicator(
-                                icon = Icons.Default.KeyboardArrowDown,
-                                swipeRefreshState = swipeState,
-                                refreshTriggerDistance = 80.dp,
-                                color = vm.textColor.value
-                            )
-                        }
-                    ),
-                ),
+    Box(
+        Modifier
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null
             ) {
-                uiState.stateContent.let { content ->
-                    LazyColumnScrollbar(
-                        listState = scrollState,
-                        padding = if (vm.scrollIndicatorPadding.value < 0) 0.dp else vm.scrollIndicatorPadding.value.dp,
-                        thickness = if (vm.scrollIndicatorWith.value < 0) 0.dp else vm.scrollIndicatorWith.value.dp,
-                        enable = vm.showScrollIndicator.value,
-                        thumbColor = vm.unselectedScrollBarColor.value,
-                        thumbSelectedColor = vm.selectedScrollBarColor.value ,
-                        isDraggable = vm.isScrollIndicatorDraggable.value,
-                        rightSide = vm.scrollIndicatorAlignment.value == PreferenceAlignment.Right
-                    ) {
-                        LazyColumn(
-                            modifier = modifier,
-                            state = scrollState,
-                        ) {
-                            items(content.size) { index ->
+                toggleReaderMode()
+            }
+            .fillMaxSize()
+            .background(vm.backgroundColor.value)
+            .wrapContentSize(Alignment.CenterStart)
+    ) {
+        MultiSwipeRefresh(
+            modifier = Modifier.fillMaxSize(),
+            state = swipeState,
+            indicators = listOf(
+                ISwipeRefreshIndicator(
+                    scrollState.firstVisibleItemScrollOffset == 0,
+                    alignment = Alignment.TopCenter,
+                    indicator = { state, trigger ->
+                        ArrowIndicator(
+                            icon = Icons.Default.KeyboardArrowUp,
+                            swipeRefreshState = swipeState,
+                            refreshTriggerDistance = 80.dp,
+                            color = vm.textColor.value
+                        )
+                    }, onRefresh = {
+                        onPrev()
+                    }
+                ),
+                ISwipeRefreshIndicator(
+                    scrollState.firstVisibleItemScrollOffset != 0,
+                    alignment = Alignment.BottomCenter,
+                    onRefresh = {
+                        onNext()
+                    },
+                    indicator = { state, trigger ->
+                        ArrowIndicator(
+                            icon = Icons.Default.KeyboardArrowDown,
+                            swipeRefreshState = swipeState,
+                            refreshTriggerDistance = 80.dp,
+                            color = vm.textColor.value
+                        )
+                    }
+                ),
+            ),
+        ) {
+
+            LazyColumnScrollbar(
+                listState = scrollState,
+                padding = if (vm.scrollIndicatorPadding.value < 0) 0.dp else vm.scrollIndicatorPadding.value.dp,
+                thickness = if (vm.scrollIndicatorWith.value < 0) 0.dp else vm.scrollIndicatorWith.value.dp,
+                enable = vm.showScrollIndicator.value,
+                thumbColor = vm.unselectedScrollBarColor.value,
+                thumbSelectedColor = vm.selectedScrollBarColor.value,
+                isDraggable = vm.isScrollIndicatorDraggable.value,
+                rightSide = vm.scrollIndicatorAlignment.value == PreferenceAlignment.Right
+            ) {
+                LazyColumn(
+                    modifier = modifier,
+                    state = scrollState,
+                ) {
+                    when(vm.readingMode.value) {
+                        true -> {
+                            vm.chapterShell.forEach {
+                                item(
+                                    key = {
+                                        "-${it.id}"
+                                    }
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .height(100.dp)
+                                            .background(MaterialTheme.colorScheme.contentColorFor(vm.backgroundColor.value))
+                                    )
+                                }
+                                items(
+                                    it.content.size,
+                                    key = { index ->
+                                        "$index-${it.id}"
+                                    }
+                                ) { index ->
+                                    TextSelectionContainer(selectable = vm.selectableMode.value) {
+                                        Text(
+                                            modifier = modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = vm.paragraphsIndent.value.dp)
+                                                .background(
+                                                    if (index in vm.queriedTextIndex) vm.textColor.value.copy(
+                                                        .1f
+                                                    ) else Color.Transparent
+                                                ),
+                                            text = it.content[index].plus(
+                                                "\n".repeat(
+                                                    vm.distanceBetweenParagraphs.value
+                                                )
+                                            ),
+                                            fontSize = vm.fontSize.value.sp,
+                                            fontFamily = vm.font.value.fontFamily,
+                                            textAlign = mapTextAlign(vm.textAlignment.value),
+                                            color = vm.textColor.value,
+                                            lineHeight = vm.lineHeight.value.sp,
+                                            //  style = MaterialTheme.typography.
+                                        )
+                                    }
+                                }
+                                item() {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .height(100.dp)
+                                            .background(MaterialTheme.colorScheme.contentColorFor(vm.backgroundColor.value)), contentAlignment = Alignment.Center
+                                    ) {
+                                        if (vm.isLoading && scrollState.layoutInfo.visibleItemsInfo.getOrNull(scrollState.layoutInfo.visibleItemsInfo.lastIndex-1)?.key.toString().contains(it.id.toString())) {
+                                            CircularProgressIndicator()
+                                        }
+                                    }
+                                }
+
+                            }
+                        }
+                        else -> {
+                            items(vm.stateContent.size) { index ->
                                 TextSelectionContainer(selectable = vm.selectableMode.value) {
                                     Text(
                                         modifier = modifier
@@ -129,11 +194,11 @@ fun ReaderText(
                                                     .1f
                                                 ) else Color.Transparent
                                             ),
-                                        text = if (index == 0) "\n\n" + content[index].plus(
+                                        text = if (index == 0) "\n\n" + vm.stateContent[index].plus(
                                             "\n".repeat(
                                                 vm.distanceBetweenParagraphs.value.toInt()
                                             )
-                                        ) else content[index].plus(
+                                        ) else vm.stateContent[index].plus(
                                             "\n".repeat(vm.distanceBetweenParagraphs.value.toInt())
                                         ),
                                         fontSize = vm.fontSize.value.sp,
@@ -141,71 +206,73 @@ fun ReaderText(
                                         textAlign = mapTextAlign(vm.textAlignment.value),
                                         color = vm.textColor.value,
                                         lineHeight = vm.lineHeight.value.sp,
-                                      //  style = MaterialTheme.typography.
+                                        //  style = MaterialTheme.typography.
                                     )
                                 }
                             }
                         }
                     }
-                }
-            }
 
-            if (!vm.verticalScrolling.value) {
-                Row(modifier = Modifier.fillMaxSize()) {
 
-                    Box(
-                        Modifier
-                            .fillMaxSize()
-                            .weight(1f)
-                            .clickable(
-                                interactionSource = interactionSource,
-                                indication = null
-                            ) {
-                                scope.launch {
-
-                                    if (scrollState.layoutInfo.viewportStartOffset != scrollState.firstVisibleItemScrollOffset) {
-                                        scrollState.scrollBy(-scrollState.layoutInfo.viewportEndOffset.toFloat())
-                                    } else {
-                                        onPrev()
-                                    }
-                                }
-                            }
-                    ) {
-                    }
-                    Box(
-                        Modifier
-                            .fillMaxSize()
-                            .weight(1f)
-                            .clickable(
-                                interactionSource = interactionSource,
-                                indication = null
-                            ) {
-                                toggleReaderMode()
-                            }
-                    ) {
-                    }
-                    Box(
-                        Modifier
-                            .fillMaxSize()
-                            .weight(1f)
-                            .clickable(
-                                interactionSource = interactionSource,
-                                indication = null
-                            ) {
-                                scope.launch {
-                                    if (!scrollState.isScrolledToTheEnd()) {
-                                        scrollState.scrollBy(scrollState.layoutInfo.viewportEndOffset.toFloat())
-                                    } else {
-                                        onNext()
-                                    }
-                                }
-                            }
-                    ) {
-                    }
                 }
             }
         }
 
+        if (!vm.verticalScrolling.value) {
+            Row(modifier = Modifier.fillMaxSize()) {
+
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .weight(1f)
+                        .clickable(
+                            interactionSource = interactionSource,
+                            indication = null
+                        ) {
+                            scope.launch {
+
+                                if (scrollState.layoutInfo.viewportStartOffset != scrollState.firstVisibleItemScrollOffset) {
+                                    scrollState.scrollBy(-scrollState.layoutInfo.viewportEndOffset.toFloat())
+                                } else {
+                                    onPrev()
+                                }
+                            }
+                        }
+                ) {
+                }
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .weight(1f)
+                        .clickable(
+                            interactionSource = interactionSource,
+                            indication = null
+                        ) {
+                            toggleReaderMode()
+                        }
+                ) {
+                }
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .weight(1f)
+                        .clickable(
+                            interactionSource = interactionSource,
+                            indication = null
+                        ) {
+                            scope.launch {
+                                if (!scrollState.isScrolledToTheEnd()) {
+                                    scrollState.scrollBy(scrollState.layoutInfo.viewportEndOffset.toFloat())
+                                } else {
+                                    onNext()
+                                }
+                            }
+                        }
+                ) {
+                }
+            }
+        }
+    }
 }
 
 @Composable

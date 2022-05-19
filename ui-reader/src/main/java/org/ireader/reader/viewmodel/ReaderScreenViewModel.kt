@@ -46,7 +46,7 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
     val prefFunc: ReaderPrefFunctionsImpl,
     val savedStateHandle: SavedStateHandle,
     val readerPreferences: ReaderPreferences,
-    val googleFontProvider : GoogleFont.Provider
+    val googleFontProvider: GoogleFont.Provider
 ) : BaseViewModel(),
     ReaderScreenPreferencesState by prefState,
     ReaderScreenState by state,
@@ -75,6 +75,7 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
     val fontSize = readerPreferences.fontSize().asState()
     val distanceBetweenParagraphs = readerPreferences.paragraphDistance().asState()
     val verticalScrolling = readerPreferences.scrollMode().asState()
+    val readingMode = readerPreferences.readingMode().asState()
 
     init {
 
@@ -117,25 +118,35 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
         }
     }
 
-    fun getLocalChapter(chapterId: Long?) {
-        if (chapterId == null) return
-        viewModelScope.launch {
-            isLoading = true
-            val chapter = getChapterUseCase.findChapterById(chapterId)
-            stateChapter = chapter
-            if (chapter?.isEmpty() == true) {
-                state.source?.let { source -> getRemoteChapter(chapter) }
-            }
-            stateChapter?.let { ch -> getChapterUseCase.updateLastReadTime(ch) }
-            val index = stateChapters.indexOfFirst { it.id == chapter?.id }
-            if (index != -1) {
-                currentChapterIndex = index
-            }
+    suspend fun getLocalChapter(chapterId: Long?, next: Boolean = true): Chapter? {
+        if (chapterId == null) return null
 
-            isLoading = false
-            initialized = true
+        isLoading = true
+        val chapter = getChapterUseCase.findChapterById(chapterId)
+        chapter.let {
+            stateChapter = it
+        }
+        if (chapter?.isEmpty() == true) {
+            state.source?.let { source -> getRemoteChapter(chapter) }
+        }
+        stateChapter?.let { ch -> getChapterUseCase.updateLastReadTime(ch) }
+        val index = stateChapters.indexOfFirst { it.id == chapter?.id }
+        if (index != -1) {
+            currentChapterIndex = index
+        }
+
+        isLoading = false
+        initialized = true
+
+        stateChapter?.let {
+            if (next) {
+                chapterShell.add(it)
+            } else {
+                chapterShell.add(0, it)
+            }
 
         }
+        return stateChapter
     }
 
     private suspend fun getRemoteChapter(
@@ -173,7 +184,7 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
     var getChapterJob: Job? = null
 
     fun nextChapter(): Chapter {
-        val chapter = stateChapter
+        val chapter = if (readingMode.value) chapterShell.lastOrNull() else stateChapter
         val index = stateChapters.indexOfFirst { it.id == chapter?.id }
         if (index != -1) {
             currentChapterIndex = index
@@ -184,7 +195,7 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
     }
 
     fun prevChapter(): Chapter {
-        val chapter = stateChapter
+        val chapter = if (readingMode.value) chapterShell.getOrNull(0) else stateChapter
         val index = stateChapters.indexOfFirst { it.id == chapter?.id }
         if (index != -1) {
             currentChapterIndex = index
@@ -206,9 +217,27 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
             layoutParams.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
             activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
             window.attributes = layoutParams
-            stateChapter?.let { chapter ->
-                activity.lifecycleScope.launch {
-                    insertUseCases.insertChapter(chapter.copy(progress = scrollState.firstVisibleItemIndex))
+            if (readingMode.value) {
+                val key =
+                    scrollState.layoutInfo.visibleItemsInfo.firstOrNull()?.key.toString().split("-")
+                val index = stateChapters.indexOfFirst { it.id == key.getOrNull(1)?.toLong() }
+                if (index != -1) {
+                    stateChapters.getOrNull(index)?.let { chapter ->
+                        activity.lifecycleScope.launch {
+                            insertUseCases.insertChapter(
+                                chapter.copy(
+                                    progress = key.getOrNull(0)?.toInt() ?: 0,
+                                )
+                            )
+                            getChapterUseCase.updateLastReadTime(chapter)
+                        }
+                    }
+                }
+            } else {
+                stateChapter?.let { chapter ->
+                    activity.lifecycleScope.launch {
+                        insertUseCases.insertChapter(chapter.copy(progress = scrollState.firstVisibleItemIndex))
+                    }
                 }
             }
         }

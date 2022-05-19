@@ -47,8 +47,8 @@ fun ReadingScreen(
     scrollState: LazyListState,
     drawerScrollState: LazyListState,
     swipeState: SwipeRefreshState,
-    onNext: () -> Unit,
-    onPrev: (scrollToEnd: Boolean) -> Unit,
+    onNext: (reset:Boolean) -> Unit,
+    onPrev: (reset: Boolean) -> Unit,
     readerScreenPreferencesState: ReaderScreenViewModel,
     toggleReaderMode: () -> Unit,
     onBackgroundColorAndTextColorApply: (bgColor: String, txtColor: String) -> Unit,
@@ -105,12 +105,15 @@ fun ReadingScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(vm.backgroundColor.value),
+            .background(vm.backgroundColor.value)
+//            .systemBarsPadding()
+//            .systemBarsPadding()
+        ,
         contentAlignment = Alignment.Center,
     ) {
         Crossfade(
             modifier = Modifier.fillMaxSize(),
-            targetState = vm.isLoading
+            targetState = vm.isLoading && if (vm.readingMode.value)  vm.chapterShell.isEmpty() else true
         ) { isLoading ->
 
             when (isLoading) {
@@ -151,9 +154,11 @@ fun ReadingScreen(
                                     chapters = vm.stateChapters,
                                     currentChapterIndex = vm.currentChapterIndex,
                                     onSetting = onReaderBottomOnSetting,
-                                    onNext = onNext,
+                                    onNext = {
+                                        onNext(true)
+                                    },
                                     onPrev = {
-                                        onPrev(false)
+                                        onPrev(true)
                                     },
                                     onSliderChange = onSliderChange,
                                     onSliderFinished = onSliderFinished,
@@ -164,9 +169,11 @@ fun ReadingScreen(
                     ) {
                         ReaderText(
                             vm = readerScreenPreferencesState,
-                            onNext = onNext,
+                            onNext = {
+                                onNext(false)
+                            },
                             swipeState = swipeState,
-                            onPrev = { onPrev(true) },
+                            onPrev = { onPrev(false) },
                             scrollState = scrollState,
                             modalState = modalBottomSheetState,
                             toggleReaderMode = toggleReaderMode,

@@ -26,6 +26,7 @@ class ReaderPreferences @OptIn(ExperimentalTextApi::class) constructor(
         const val SAVED_BRIGHTNESS_PREFERENCES = "reader_brightness"
         const val SAVED_IMMERSIVE_MODE_PREFERENCES = "reader_immersive_mode"
         const val SAVED_AUTO_BRIGHTNESS_PREFERENCES = "reader_auto_brightness"
+        const val READING_MODE = "reader_mode"
 
         const val SAVED_BACKGROUND_COLOR = "background_color"
         const val SAVED_TEXT_COLOR = "text_color"
@@ -97,6 +98,9 @@ class ReaderPreferences @OptIn(ExperimentalTextApi::class) constructor(
 
     fun lineHeight(): Preference<Int> {
         return preferenceStore.getInt(SAVED_FONT_HEIGHT, 25)
+    }
+    fun readingMode(): Preference<Boolean> {
+        return preferenceStore.getBoolean(READING_MODE, true)
     }
 
     fun paragraphDistance(): Preference<Int> {

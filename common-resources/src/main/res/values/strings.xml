@@ -264,6 +264,7 @@
     <string name="scrollbar_draggable">ScrollBar Draggable</string>
     <string name="orientation">Orientation</string>
     <string name="autoScroll">AutoScroll</string>
+    <string name="reading_mode">Reading Mode</string>
     <string name="immersive_mode">Immersive mode</string>
     <string name="general">General</string>
     <string name="reader">Reader</string>

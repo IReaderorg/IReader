@@ -47,7 +47,7 @@
         android:screenOrientation="fullSensor"
         android:supportsRtl="true"
         android:theme="@style/Theme.App"
-        android:usesCleartextTraffic="true">
+        tools:targetApi="n">
         <activity
             android:name=".MainActivity"
             android:exported="true"

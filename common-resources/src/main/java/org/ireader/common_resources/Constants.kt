@@ -18,6 +18,7 @@ const val ARG_HAVE_MODAL_SHEET = "HAVE_MODAL_SHEETS"
 const val ARG_HAVE_DRAWER = "HAVE_DRAWER"
 const val ARG_HAVE_VARIANT_BOTTOM_BAR = "HAVE_BOTTOM_BAR"
 const val ARG_TRANSPARENT_STATUS_BAR = "TRANSPARENT_STATUS_BAR"
+const val ARG_SYSTEM_BAR_PADDING = "SYSTEM_BAR_PADDING"
 
 const val repo_url = "/repos/kazemcodes/IReader/releases/latest"
 const val github_api_url = "https://api.github.com"

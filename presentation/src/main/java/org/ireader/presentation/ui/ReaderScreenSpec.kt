@@ -5,13 +5,17 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.gestures.scrollBy
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
@@ -19,10 +23,14 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -90,6 +98,7 @@ object ReaderScreenSpec : ScreenSpec {
             NavigationArgs.chapterId
             NavigationArgs.sourceId
             NavigationArgs.readingParagraph
+            NavigationArgs.systemBarPadding
         }
     )
 
@@ -122,6 +131,24 @@ object ReaderScreenSpec : ScreenSpec {
         }
         LaunchedEffect(key1 = scrollState.hashCode()) {
             vm.readerScrollState = scrollState
+        }
+        val chapterIdKey by remember {
+            derivedStateOf { scrollState.getId() }
+        }
+
+        LaunchedEffect(key1 = chapterIdKey) {
+            kotlin.runCatching {
+                val id = chapterIdKey
+                vm.stateChapters.firstOrNull {
+                    it.id == chapterIdKey
+                }.let {
+                    vm.stateChapter = it
+                }
+                val index = vm.stateChapters.indexOfFirst { it.id == id }
+                if (index != -1) {
+                    vm.currentChapterIndex = index
+                }
+            }
         }
 
         val swipeState = rememberSwipeRefreshState(isRefreshing = false)
@@ -183,142 +210,149 @@ object ReaderScreenSpec : ScreenSpec {
             }
         }
 
-        ReadingScreen(
-            drawerState = drawerState,
-            vm = vm,
-            scrollState = scrollState,
-            onNext = {
-                if (currentIndex < chapters.lastIndex) {
-                    try {
-                        vm.apply {
-                            val nextChapter = vm.nextChapter()
-                            scope.launch {
-                                vm.getLocalChapter(
-                                    nextChapter.id,
-                                )
-                                scrollState.scrollToItem(0, 0)
-                            }
-                        }
-                    } catch (e: Throwable) {
-                        Log.error(e, "Reader Spec failed to go next chapter")
-                    }
-                } else {
-                    scope.launch {
-                        vm.showSnackBar(
-                            UiText.StringResource(
-                                R.string.this_is_last_chapter
-                            )
-                        )
-                    }
-                }
-            },
-            scaffoldPaddingValues = scaffoldPadding,
-            onPrev = { scrollToEnd ->
-                try {
-                    if (currentIndex > 0) {
-                        val prevChapter = vm.prevChapter()
-                        scope.launch {
-                            vm.getLocalChapter(
-                                prevChapter.id,
-                            )
-                            when (scrollToEnd) {
-                                true -> {
-                                    if (chapter != null) {
-                                        scrollState.scrollToItem(
-                                            chapter.content.lastIndex,
-                                            Int.MAX_VALUE
+        Scaffold() { padding ->
+
+            Box(modifier = Modifier
+                .padding(padding)
+                .systemBarsPadding()) {
+                ReadingScreen(
+                    drawerState = drawerState,
+                    vm = vm,
+                    scrollState = scrollState,
+                    onNext = { rest ->
+                        if (currentIndex < chapters.lastIndex) {
+                            try {
+                                vm.apply {
+                                    val nextChapter = vm.nextChapter()
+                                    scope.launch {
+                                        if (rest || !vm.readingMode.value) {
+                                            scrollState.scrollToItem(0, 0)
+                                            vm.chapterShell.clear()
+                                        }
+                                        vm.getLocalChapter(
+                                            nextChapter.id,
                                         )
+
                                     }
                                 }
-                                else -> {
-                                    scrollState.scrollToItem(0, 0)
-                                }
+                            } catch (e: Throwable) {
+                                Log.error(e, "Reader Spec failed to go next chapter")
+                            }
+                        } else {
+                            scope.launch {
+                                vm.showSnackBar(
+                                    UiText.StringResource(
+                                        R.string.this_is_last_chapter
+                                    )
+                                )
                             }
                         }
-                    } else {
+                    },
+                    scaffoldPaddingValues = scaffoldPadding,
+                    onPrev = { reset ->
+                        try {
+                            if (currentIndex > 0) {
+                                val prevChapter = vm.prevChapter()
+                                scope.launch {
+                                    if (reset || !vm.readingMode.value) {
+                                        scrollState.scrollToItem(0, 0)
+                                        vm.chapterShell.clear()
+                                    }
+                                    val ch = vm.getLocalChapter(
+                                        prevChapter.id,
+                                        false
+                                    )
+                                    if (vm.readingMode.value) {
+                                        scrollState.scrollToItem(ch?.content?.lastIndex ?: 0)
+                                    }
+                                }
+                            } else {
+                                scope.launch {
+                                    vm.showSnackBar(
+                                        UiText.StringResource(
+                                            R.string.this_is_first_chapter
+                                        )
+                                    )
+                                }
+                            }
+                        } catch (e: Throwable) {
+                            Log.error(e, "Reader Spec failed to go previous chapter")
+                        }
+                    },
+                    toggleReaderMode = {
+                        vm.apply {
+                            vm.toggleReaderMode(!vm.isReaderModeEnable)
+                        }
+                    },
+                    readerScreenPreferencesState = vm,
+                    onBackgroundColorAndTextColorApply = { bgColor, txtColor ->
+                        try {
+                            if (bgColor.isNotBlank()) {
+                                vm.prefFunc.apply {
+                                    vm.setReaderBackgroundColor(vm.backgroundColor.value)
+                                }
+                            }
+                        } catch (e: Throwable) {
+                        }
+
+                        try {
+                            if (txtColor.isNotBlank()) {
+                                vm.prefFunc.apply {
+                                    vm.setReaderTextColor(vm.textColor.value)
+                                }
+                            }
+                        } catch (e: Throwable) {
+                        }
+                    },
+
+                    snackBarHostState = snackBarHostState,
+                    drawerScrollState = drawerScrollState,
+                    swipeState = swipeState,
+                    onSliderFinished = {
                         scope.launch {
                             vm.showSnackBar(
-                                UiText.StringResource(
-                                    R.string.this_is_first_chapter
+                                UiText.DynamicString(
+                                    chapters[vm.currentChapterIndex].name
                                 )
                             )
                         }
-                    }
-                } catch (e: Throwable) {
-                    Log.error(e, "Reader Spec failed to go previous chapter")
-                }
-            },
-            toggleReaderMode = {
-                vm.apply {
-                    vm.toggleReaderMode(!vm.isReaderModeEnable)
-                }
-            },
-            readerScreenPreferencesState = vm,
-            onBackgroundColorAndTextColorApply = { bgColor, txtColor ->
-                try {
-                    if (bgColor.isNotBlank()) {
-                        vm.prefFunc.apply {
-                            vm.setReaderBackgroundColor(vm.backgroundColor.value)
-                        }
-                    }
-                } catch (e: Throwable) {
-                }
-
-                try {
-                    if (txtColor.isNotBlank()) {
-                        vm.prefFunc.apply {
-                            vm.setReaderTextColor(vm.textColor.value)
-                        }
-                    }
-                } catch (e: Throwable) {
-                }
-            },
-
-            snackBarHostState = snackBarHostState,
-            drawerScrollState = drawerScrollState,
-            swipeState = swipeState,
-            onSliderFinished = {
-                scope.launch {
-                    vm.showSnackBar(
-                        UiText.DynamicString(
-                            chapters[vm.currentChapterIndex].name
-                        )
-                    )
-                }
-                vm.currentChapterIndex = currentIndex
-                scope.launch {
-                    vm.getLocalChapter(
-                        chapters[vm.currentChapterIndex].id,
-                    )
-                }
-
-                scope.launch {
-                    scrollState.animateScrollToItem(0, 0)
-                }
-            },
-            onSliderChange = {
-                vm.currentChapterIndex = it.toInt()
-            },
-            onReaderPlay = {
-                vm.book?.let { book ->
-                    vm.stateChapter?.let { chapter ->
-                        navController.navigate(
-                            TTSScreenSpec.buildRoute(
-                                book.id,
-                                book.sourceId,
-                                chapterId = chapter.id
+                        vm.currentChapterIndex = currentIndex
+                        scope.launch {
+                            vm.getLocalChapter(
+                                chapters[vm.currentChapterIndex].id,
                             )
-                        )
+                        }
 
-                    }
-                }
+                        scope.launch {
+                            scrollState.animateScrollToItem(0, 0)
+                        }
+                    },
+                    onSliderChange = {
+                        vm.currentChapterIndex = it.toInt()
+                    },
+                    onReaderPlay = {
+                        vm.book?.let { book ->
+                            vm.stateChapter?.let { chapter ->
+                                navController.navigate(
+                                    TTSScreenSpec.buildRoute(
+                                        book.id,
+                                        book.sourceId,
+                                        chapterId = chapter.id
+                                    )
+                                )
 
-            },
-            onReaderBottomOnSetting = {
-                scope.launch {
-                    sheetState.show()
-                }
-            },)
+                            }
+                        }
+
+                    },
+                    onReaderBottomOnSetting = {
+                        scope.launch {
+                            sheetState.show()
+                        }
+                    },
+                )
+            }
+        }
     }
 
     @Composable
@@ -333,6 +367,7 @@ object ReaderScreenSpec : ScreenSpec {
         val lazyListState = vm.drawerListState
         val chapter = vm.stateChapter
         val scope = rememberCoroutineScope()
+        val scrollState = vm.readerScrollState
         if (lazyListState != null) {
             AnimatedVisibility(
                 visible = true,
@@ -348,6 +383,10 @@ object ReaderScreenSpec : ScreenSpec {
                         val index = vm.stateChapters.indexOfFirst { it.id == ch.id }
                         if (index != -1) {
                             scope.launch {
+                                if (!vm.readingMode.value) {
+                                    scrollState?.scrollToItem(0, 0)
+                                    vm.chapterShell.clear()
+                                }
                                 vm.getLocalChapter(ch.id)
                             }
                             scope.launch {
@@ -399,9 +438,12 @@ object ReaderScreenSpec : ScreenSpec {
                 isLoaded = vm.isChapterLoaded.value,
                 modalBottomSheetValue = sheetState.targetValue,
                 onRefresh = {
-                    vm.getLocalChapter(
-                        chapter?.id
-                    )
+                    scope.launch {
+                        vm.getLocalChapter(
+                            chapter?.id
+                        )
+                    }
+
                 },
                 chapter = chapter,
                 onWebView = {
@@ -467,7 +509,7 @@ object ReaderScreenSpec : ScreenSpec {
             Spacer(modifier = Modifier.height(5.dp))
             ReaderSettingMainLayout(
                 onFontSelected = { index ->
-                    vm.font.value = fonts.getOrNull(index)?: Roboto
+                    vm.font.value = fonts.getOrNull(index) ?: Roboto
                 },
                 onChangeBrightness = {
                     vm.apply {
@@ -493,4 +535,11 @@ object ReaderScreenSpec : ScreenSpec {
             )
         }
     }
+}
+
+private fun LazyListState.getId(): Long? {
+    return kotlin.runCatching {
+        return@runCatching this.layoutInfo.visibleItemsInfo.firstOrNull()?.key.toString()
+            .substringAfter("-").toLong()
+    }.getOrNull()
 }

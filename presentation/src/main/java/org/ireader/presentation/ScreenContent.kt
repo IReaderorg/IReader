@@ -50,6 +50,7 @@ import org.ireader.common_resources.ARG_HAVE_DRAWER
 import org.ireader.common_resources.ARG_HAVE_MODAL_SHEET
 import org.ireader.common_resources.ARG_HAVE_VARIANT_BOTTOM_BAR
 import org.ireader.common_resources.ARG_HIDE_BOTTOM_BAR
+import org.ireader.common_resources.ARG_SYSTEM_BAR_PADDING
 import org.ireader.common_resources.ARG_TRANSPARENT_STATUS_BAR
 import org.ireader.components.components.ISnackBarHost
 import org.ireader.core_ui.theme.AppColors
@@ -76,6 +77,8 @@ fun ScreenContent() {
     val haveDrawer = navBackStackEntry?.arguments?.getBoolean(ARG_HAVE_DRAWER) ?: false
     val haveVariantBottomAppBar =
         navBackStackEntry?.arguments?.getBoolean(ARG_HAVE_VARIANT_BOTTOM_BAR) ?: false
+    val systemBarPadding =
+        navBackStackEntry?.arguments?.getBoolean(ARG_SYSTEM_BAR_PADDING) ?: false
     val snackBarHostState = remember { SnackbarHostState() }
     val modalBottomSheetState =
         rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
@@ -113,9 +116,8 @@ fun ScreenContent() {
         ) {
             TransparentStatusBar(enable = transparentStatusBar) {
                 Scaffold(
-                    modifier = Modifier.navigationBarsPadding(),
+                    modifier = Modifier.fillMaxSize().navigationBarsPadding(),
                     topBar = {
-
                         if (navStackEntry != null) {
                             screenSpec?.TopBar(
                                 navController,

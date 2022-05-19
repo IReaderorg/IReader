@@ -189,14 +189,14 @@ fun AppIconButton(
 }
 
 @Composable
-fun TopAppBarBackButton(onClick: () -> Unit) {
+fun TopAppBarBackButton(tint: Color = MaterialTheme.colorScheme.onSurface, onClick: () -> Unit,) {
     IconButton(onClick = {
         onClick()
     }) {
         Icon(
             imageVector = Icons.Default.ArrowBack,
            contentDescription = stringResource( R.string.return_to_previous_screen),
-            tint = MaterialTheme.colorScheme.onSurface,
+            tint = tint,
         )
     }
 }
