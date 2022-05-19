@@ -27,7 +27,7 @@ class SyncRemoteCatalogs(
                     val newCatalogs = catalogRemoteApi.fetchCatalogs()
                     catalogRemoteRepository.deleteAllRemoteCatalogs()
                     catalogRemoteRepository.insertRemoteCatalogs(newCatalogs)
-                    lastCheckPref.set(Clock.System.now().epochSeconds)
+                    lastCheckPref.set(Clock.System.now().toEpochMilliseconds())
                 }
                 return true
             } catch (e: Throwable) {

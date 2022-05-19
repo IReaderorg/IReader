@@ -42,7 +42,7 @@ import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.core_ui.theme.OrientationMode
 import org.ireader.core_ui.theme.fonts
 import org.ireader.core_ui.ui.Colour.contentColor
-import org.ireader.core_ui.ui.TextAlign
+import org.ireader.core_ui.ui.PreferenceAlignment
 import org.ireader.reader.viewmodel.ReaderScreenViewModel
 import org.ireader.ui_reader.R
 
@@ -55,7 +55,7 @@ fun ReaderSettingMainLayout(
     onToggleAutoBrightness: () -> Unit,
     onChangeBrightness: (Float) -> Unit,
     onBackgroundChange: (Int) -> Unit,
-    onTextAlign: (TextAlign) -> Unit
+    onTextAlign: (PreferenceAlignment) -> Unit
 ) {
     val pagerState = rememberPagerState()
     val context = LocalContext.current
@@ -125,6 +125,20 @@ fun ReaderSettingMainLayout(
                         trailing = vm.scrollIndicatorWith.value.toString(),
                         valueRange = 0F..32F,
                     ),
+                    Components.Chip(
+                       preference = listOf(
+                           stringResource(id = R.string.right),
+                           stringResource(id = R.string.left),
+                       ),
+                        title = stringResource(id = R.string.alignment),
+                        onValueChange = {
+                            when(it) {
+                                0 -> vm.scrollIndicatorAlignment.value = PreferenceAlignment.Right
+                                1 -> vm.scrollIndicatorAlignment.value = PreferenceAlignment.Left
+                            }
+                        },
+                        selected = vm.scrollIndicatorAlignment.value.ordinal
+                    ),
                 )
                 LazyColumn(
                     verticalArrangement = Arrangement.Top,
@@ -158,33 +172,33 @@ fun ReaderSettingMainLayout(
                                             imageVector = Icons.Default.FormatAlignLeft,
                                             contentDescription = stringResource(R.string.text_align_left),
                                             onClick = {
-                                                onTextAlign(TextAlign.Left)
+                                                onTextAlign(PreferenceAlignment.Left)
                                             },
-                                            tint = if (vm.textAlignment.value == TextAlign.Left) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
+                                            tint = if (vm.textAlignment.value == PreferenceAlignment.Left) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
                                         )
                                         AppIconButton(
                                             imageVector = Icons.Default.FormatAlignCenter,
                                             contentDescription = stringResource(R.string.text_align_center),
                                             onClick = {
-                                                onTextAlign(TextAlign.Center)
+                                                onTextAlign(PreferenceAlignment.Center)
                                             },
-                                            tint = if (vm.textAlignment.value == TextAlign.Center) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
+                                            tint = if (vm.textAlignment.value == PreferenceAlignment.Center) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
                                         )
                                         AppIconButton(
                                             imageVector = Icons.Default.FormatAlignJustify,
                                             contentDescription = stringResource(R.string.text_align_justify),
                                             onClick = {
-                                                onTextAlign(TextAlign.Justify)
+                                                onTextAlign(PreferenceAlignment.Justify)
                                             },
-                                            tint = if (vm.textAlignment.value == TextAlign.Justify) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
+                                            tint = if (vm.textAlignment.value == PreferenceAlignment.Justify) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
                                         )
                                         AppIconButton(
                                             imageVector = Icons.Default.FormatAlignRight,
                                             contentDescription = stringResource(R.string.text_align_right),
                                             onClick = {
-                                                onTextAlign(TextAlign.Right)
+                                                onTextAlign(PreferenceAlignment.Right)
                                             },
-                                            tint = if (vm.textAlignment.value == TextAlign.Right) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
+                                            tint = if (vm.textAlignment.value == PreferenceAlignment.Right) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
                                         )
                                     }
                                 }
@@ -303,6 +317,20 @@ fun ReaderSettingMainLayout(
                         ColorPreference(
                             preference = vm.textColor,
                             title = stringResource(id = R.string.text_color)
+                        )
+
+                    }
+                    item {
+                        ColorPreference(
+                            preference = vm.selectedScrollBarColor,
+                            title = stringResource(id = R.string.selected_scrollbar_color)
+                        )
+
+                    }
+                    item {
+                        ColorPreference(
+                            preference = vm.unselectedScrollBarColor,
+                            title = stringResource(id = R.string.unselected_scrollbar_color)
                         )
 
                     }

@@ -48,6 +48,8 @@ class TTSViewModel @Inject constructor(
 
     val speechRate = readerPreferences.speechRate().asState()
     val speechPitch = readerPreferences.speechPitch().asState()
+    val sleepModeUi = readerPreferences.sleepMode().asState()
+    val sleepTimeUi = readerPreferences.sleepTime().asState()
     val autoNext = readerPreferences.readerAutoNext().asState()
     val voice = readerPreferences.speechVoice().asState()
     val language = readerPreferences.speechLanguage().asState()
@@ -205,20 +207,13 @@ class TTSViewModel @Inject constructor(
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
             super.onPlaybackStateChanged(state)
             if (state == null) return
-            when (state.state) {
+            isPlaying = when (state.state) {
                 PlaybackStateCompat.STATE_PLAYING -> {
-                    isPlaying = true
+                    true
                 }
-                PlaybackStateCompat.STATE_PAUSED -> {
-                    isPlaying = false
+                else -> {
+                    false
                 }
-                PlaybackStateCompat.STATE_NONE -> {
-                    isPlaying = false
-                }
-                PlaybackStateCompat.STATE_BUFFERING -> {
-                    isPlaying = false
-                }
-                else -> {}
             }
         }
 
@@ -247,7 +242,7 @@ class TTSViewModel @Inject constructor(
         }
     }
 
-    fun subscribeChapters(bookId: Long) {
+    private fun subscribeChapters(bookId: Long) {
         viewModelScope.launch {
             getChapterUseCase.subscribeChaptersByBookId(
                 bookId

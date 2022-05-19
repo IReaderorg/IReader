@@ -5,7 +5,7 @@ import androidx.compose.ui.graphics.Color
 import kotlinx.coroutines.CoroutineScope
 import org.ireader.core_api.prefs.Preference
 import org.ireader.core_ui.preferences.UiPreferences
-import org.ireader.core_ui.theme.prefs.asColor
+import org.ireader.core_ui.theme.prefs.asThemeColor
 import org.ireader.core_ui.ui.PreferenceMutableState
 import org.ireader.core_ui.ui.asStateIn
 
@@ -27,17 +27,17 @@ class CustomizableAppColorsPreferenceState(
 
 fun UiPreferences.getLightColors(): CustomizableAppColorsPreference {
     return CustomizableAppColorsPreference(
-        colorPrimaryLight().asColor(),
-        colorSecondaryLight().asColor(),
-        colorBarsLight().asColor()
+        colorPrimaryLight().asThemeColor(),
+        colorSecondaryLight().asThemeColor(),
+        colorBarsLight().asThemeColor()
     )
 }
 
 fun UiPreferences.getDarkColors(): CustomizableAppColorsPreference {
     return CustomizableAppColorsPreference(
-        colorPrimaryDark().asColor(),
-        colorSecondaryDark().asColor(),
-        colorBarsDark().asColor()
+        colorPrimaryDark().asThemeColor(),
+        colorSecondaryDark().asThemeColor(),
+        colorBarsDark().asThemeColor()
     )
 }
 

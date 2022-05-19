@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
@@ -183,8 +182,8 @@ object ReaderScreenSpec : ScreenSpec {
                 }
             }
         }
+
         ReadingScreen(
-            modifier = Modifier.systemBarsPadding(),
             drawerState = drawerState,
             vm = vm,
             scrollState = scrollState,
@@ -319,8 +318,7 @@ object ReaderScreenSpec : ScreenSpec {
                 scope.launch {
                     sheetState.show()
                 }
-            },
-        )
+            },)
     }
 
     @Composable

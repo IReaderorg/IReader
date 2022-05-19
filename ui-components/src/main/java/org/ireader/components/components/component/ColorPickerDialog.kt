@@ -29,8 +29,6 @@ import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
@@ -92,20 +90,20 @@ fun ColorPickerDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = {
+            androidx.compose.material3.TextButton(onClick = {
                 onSelected(currentColor)
             }) {
-                Text(stringResource(R.string.select))
+                androidx.compose.material3.Text(stringResource(R.string.select))
             }
 
         },
         dismissButton = {
-            TextButton(onClick = {
+            androidx.compose.material3.TextButton(onClick = {
                 showPresets = !showPresets
             }) {
                 val text =
                     if (showPresets) R.string.presents else R.string.custom
-                Text(stringResource(text))
+                androidx.compose.material3.Text(stringResource(text))
             }
         }
     )

@@ -28,6 +28,7 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
@@ -95,27 +96,24 @@ fun ScreenContent() {
             }
         }
     ) {
-        TransparentStatusBar(enable = transparentStatusBar) {
-            IModalDrawer(
-                state = drawerState,
-                sheetContent = {
-                    if (navStackEntry != null) {
-                        screenSpec?.ModalDrawer(
-                            navController,
-                            navStackEntry,
-                            snackBarHostState,
-                            modalBottomSheetState,
-                            drawerState
-                        )
-                    }
-                },
-                isEnable = haveDrawer,
-            ) {
-
-                androidx.compose.material3.Scaffold(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .navigationBarsPadding(),
+        IModalDrawer(
+            state = drawerState,
+            sheetContent = {
+                if (navStackEntry != null) {
+                    screenSpec?.ModalDrawer(
+                        navController,
+                        navStackEntry,
+                        snackBarHostState,
+                        modalBottomSheetState,
+                        drawerState
+                    )
+                }
+            },
+            isEnable = haveDrawer,
+        ) {
+            TransparentStatusBar(enable = transparentStatusBar) {
+                Scaffold(
+                    modifier = Modifier.navigationBarsPadding(),
                     topBar = {
 
                         if (navStackEntry != null) {
@@ -202,46 +200,40 @@ fun ScreenContent() {
                     },
                     snackbarHost = { ISnackBarHost(snackBarHostState = snackBarHostState) },
                 ) { padding ->
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                        ///.padding(bottom = if (hideBottomBar == null || hideBottomBar == true) 45.dp else 0.dp)
+                    AnimatedNavHost(
+                        modifier = Modifier.fillMaxSize(),
+                        navController = navController,
+                        startDestination = LibraryScreenSpec.navHostRoute,
+                        enterTransition = {
+                            fadeIn(animationSpec = tween(500))
+                        },
+                        exitTransition = {
+                            fadeOut(animationSpec = tween(500))
+                        },
                     ) {
-                        AnimatedNavHost(
-                            navController = navController,
-                            startDestination = LibraryScreenSpec.navHostRoute,
-                            modifier = Modifier
-                                .fillMaxSize(),
-                            enterTransition = {
-                                fadeIn(animationSpec = tween(500))
-                            },
-                            exitTransition = {
-                                fadeOut(animationSpec = tween(500))
-                            },
-                        ) {
 
-                            ScreenSpec.allScreens.values.forEach { screen ->
-                                composable(
-                                    route = screen.navHostRoute,
-                                    arguments = screen.arguments,
-                                    deepLinks = screen.deepLinks,
-                                ) { navBackStackEntry ->
+                        ScreenSpec.allScreens.values.forEach { screen ->
+                            composable(
+                                route = screen.navHostRoute,
+                                arguments = screen.arguments,
+                                deepLinks = screen.deepLinks,
+                            ) { navBackStackEntry ->
 
-                                    screen.Content(
-                                        navController = navController,
-                                        navBackStackEntry = navBackStackEntry,
-                                        snackBarHostState,
-                                        padding,
-                                        sheetState = modalBottomSheetState,
-                                        drawerState
-                                    )
-                                }
+                                screen.Content(
+                                    navController = navController,
+                                    navBackStackEntry = navBackStackEntry,
+                                    snackBarHostState,
+                                    padding,
+                                    sheetState = modalBottomSheetState,
+                                    drawerState
+                                )
                             }
                         }
                     }
                 }
             }
         }
+
     }
 }
 

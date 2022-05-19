@@ -15,11 +15,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import org.ireader.components.components.Components
 import org.ireader.components.components.SetupUiComponent
 import org.ireader.components.components.TitleToolbar
+import org.ireader.core_ui.ui.PreferenceAlignment
+import org.ireader.settings.setting.reader_screen.ReaderSettingScreenViewModel
 import org.ireader.ui_settings.R
 
 object ReaderSettingSpec : ScreenSpec {
@@ -57,6 +60,7 @@ object ReaderSettingSpec : ScreenSpec {
         drawerState: DrawerState
     ) {
         val context = LocalContext.current
+        val vm : ReaderSettingScreenViewModel = hiltViewModel()
         val items = remember {
             listOf<Components>(
                 Components.Header(
@@ -68,11 +72,87 @@ object ReaderSettingSpec : ScreenSpec {
                         navController.navigate(FontScreenSpec.navHostRoute)
                     },
                 ),
+                Components.Slider(
+                    preferenceAsInt = vm.fontSize,
+                    title = context.getString(org.ireader.ui_reader.R.string.font_size),
+                    trailing = vm.fontSize.value.toInt().toString(),
+                    valueRange = 8.0F..32.0F,
+                ),
+                Components.Header(
+                   context.getString(org.ireader.ui_reader.R.string.paragraph)
+                ),
+                Components.Slider(
+                    preferenceAsInt = vm.paragraphsIndent,
+                    title =context.getString(org.ireader.ui_reader.R.string.paragraph_indent),
+                    trailing = vm.paragraphsIndent.value.toInt().toString(),
+                    valueRange = 0.0F..32.0F,
+                ),
+                Components.Slider(
+                    preferenceAsInt = vm.distanceBetweenParagraphs,
+                    title =context.getString(org.ireader.ui_reader.R.string.paragraph_distance),
+                    trailing = vm.distanceBetweenParagraphs.value.toInt().toString(),
+                    valueRange = 0.0F..8.0F,
+                ),
+                Components.Header(
+                   context.getString(org.ireader.ui_reader.R.string.line)
+                ),
+                Components.Slider(
+                    preferenceAsInt = vm.lineHeight,
+                    title =context.getString(org.ireader.ui_reader.R.string.line_height),
+                    trailing = vm.lineHeight.value.toInt().toString(),
+                    valueRange = 22.0F..48.0F,
+                ),
+                Components.Header(
+                   context.getString(org.ireader.ui_reader.R.string.autoscroll)
+                ),
+                Components.Slider(
+                    preferenceAsLong = vm.autoScrollInterval,
+                    title =context.getString(org.ireader.ui_reader.R.string.interval),
+                    trailing = (vm.autoScrollInterval.value / 1000).toInt().toString(),
+                    valueRange = 500.0F..10000.0F,
+                ),
+                Components.Slider(
+                    preferenceAsInt = vm.autoScrollOffset,
+                    title =context.getString(org.ireader.ui_reader.R.string.offset),
+                    trailing = (vm.autoScrollOffset.value / 1000).toInt().toString(),
+                    valueRange = 500.0F..10000F,
+                ),
+                Components.Header(
+                   context.getString(org.ireader.ui_reader.R.string.scrollIndicator)
+                ),
+                Components.Slider(
+                    preferenceAsInt = vm.scrollIndicatorPadding,
+                    title =context.getString(org.ireader.ui_reader.R.string.padding),
+                    trailing = vm.scrollIndicatorPadding.value.toString(),
+                    valueRange = 0F..32F,
+                ),
+                Components.Slider(
+                    preferenceAsInt = vm.scrollIndicatorWith,
+                    title =context.getString(org.ireader.ui_reader.R.string.width),
+                    trailing = vm.scrollIndicatorWith.value.toString(),
+                    valueRange = 0F..32F,
+                ),
+                Components.Chip(
+                    preference = listOf(
+                        context.getString( org.ireader.ui_reader.R.string.right),
+                        context.getString(  org.ireader.ui_reader.R.string.left),
+                    ),
+                    title =   context.getString(  org.ireader.ui_reader.R.string.alignment),
+                    onValueChange = {
+                        when(it) {
+                            0 -> vm.scrollIndicatorAlignment.value = PreferenceAlignment.Right
+                            1 -> vm.scrollIndicatorAlignment.value = PreferenceAlignment.Left
+                        }
+                    },
+                    selected = vm.scrollIndicatorAlignment.value.ordinal
+                ),
             )
         }
 
         LazyColumn(
-            modifier = Modifier.padding(scaffoldPadding).fillMaxSize()
+            modifier = Modifier
+                .padding(scaffoldPadding)
+                .fillMaxSize()
         ) {
             SetupUiComponent(items)
         }

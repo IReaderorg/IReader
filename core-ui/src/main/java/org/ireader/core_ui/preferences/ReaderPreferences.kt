@@ -14,6 +14,7 @@ import org.ireader.core_ui.theme.prefs.IReaderVoice
 import org.ireader.core_ui.theme.prefs.asColor
 import org.ireader.core_ui.theme.prefs.asFont
 import org.ireader.core_ui.theme.prefs.asVoice
+import org.ireader.core_ui.ui.PreferenceAlignment
 
 class ReaderPreferences @OptIn(ExperimentalTextApi::class) constructor(
     private val preferenceStore: PreferenceStore,
@@ -32,6 +33,8 @@ class ReaderPreferences @OptIn(ExperimentalTextApi::class) constructor(
         const val SAVED_PARAGRAPH_DISTANCE = "paragraph_distance"
         const val SAVED_PARAGRAPH_INDENT = "paragraph_indent"
         const val SAVED_ORIENTATION = "orientation_reader"
+        const val SLEEP_TIMER = "tts_sleep_timer"
+        const val SLEEP_TIMER_MODE = "tts_sleep_mode"
 
         const val SCROLL_MODE = "scroll_mode"
         const val AUTO_SCROLL_MODE_INTERVAL = "auto_scroll_mode_interval"
@@ -40,6 +43,9 @@ class ReaderPreferences @OptIn(ExperimentalTextApi::class) constructor(
         const val SCROLL_INDICATOR_WIDTH = "scroll_indicator_width"
         const val SCROLL_INDICATOR_IS_ENABLE = "scroll_indicator_is_enable"
         const val SCROLL_INDICATOR_IS_DRAGGABLE = "scroll_indicator_is_draggable"
+        const val SCROLL_INDICATOR_SELECTED_COLOR = "scroll_indicator_selected_color"
+        const val SCROLL_INDICATOR_UNSELECTED_COLOR = "scroll_indicator_unselected_color"
+        const val SCROLL_INDICATOR_ALIGNMENT = "scroll_indicator_alignment"
         const val SELECTABLE_TEXT = "selectable_text"
         const val TEXT_ALIGNMENT = "text_alignment"
 
@@ -73,11 +79,20 @@ class ReaderPreferences @OptIn(ExperimentalTextApi::class) constructor(
         return preferenceStore.getString(SAVED_FONT_PREFERENCES, Roboto.fontName).asFont(provider)
     }
     fun backgroundColorReader(): Preference<Color> {
-        return preferenceStore.getInt(SAVED_BACKGROUND_COLOR, Color.Black.toArgb()).asColor()
+        return preferenceStore.getInt(SAVED_BACKGROUND_COLOR, Color(0xff262626).toArgb()).asColor()
     }
 
     fun textColorReader(): Preference<Color> {
-        return preferenceStore.getInt(SAVED_TEXT_COLOR, Color.White.toArgb()).asColor()
+        return preferenceStore.getInt(SAVED_TEXT_COLOR, Color(0xFFE9E9E9).toArgb()).asColor()
+    }
+    fun unselectedScrollBarColor(): Preference<Color> {
+        return preferenceStore.getInt(SCROLL_INDICATOR_SELECTED_COLOR, Color(0xFF2A59B6).toArgb()).asColor()
+    }
+    fun selectedScrollBarColor(): Preference<Color> {
+        return preferenceStore.getInt(SCROLL_INDICATOR_UNSELECTED_COLOR,  Color(0xFF5281CA).toArgb()).asColor()
+    }
+    fun scrollBarAlignment(): Preference<PreferenceAlignment> {
+        return preferenceStore.getEnum(SCROLL_INDICATOR_ALIGNMENT,PreferenceAlignment.Right )
     }
 
     fun lineHeight(): Preference<Int> {
@@ -92,8 +107,16 @@ class ReaderPreferences @OptIn(ExperimentalTextApi::class) constructor(
         return preferenceStore.getEnum(SAVED_ORIENTATION, OrientationMode.Portrait)
     }
 
-    fun textAlign(): Preference<org.ireader.core_ui.ui.TextAlign> {
-        return preferenceStore.getEnum(TEXT_ALIGNMENT, org.ireader.core_ui.ui.TextAlign.Left)
+    fun sleepTime(): Preference<Long> {
+        return preferenceStore.getLong(SLEEP_TIMER, 15)
+    }
+    fun sleepMode(): Preference<Boolean> {
+        return preferenceStore.getBoolean(SLEEP_TIMER_MODE, false)
+    }
+
+
+    fun textAlign(): Preference<org.ireader.core_ui.ui.PreferenceAlignment> {
+        return preferenceStore.getEnum(TEXT_ALIGNMENT, org.ireader.core_ui.ui.PreferenceAlignment.Left)
     }
 
     fun paragraphIndent(): Preference<Int> {

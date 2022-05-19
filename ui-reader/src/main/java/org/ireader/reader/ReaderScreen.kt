@@ -3,6 +3,7 @@ package org.ireader.reader
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -33,7 +34,6 @@ import dev.chrisbanes.snapper.ExperimentalSnapperApi
 import kotlinx.coroutines.launch
 import org.ireader.reader.components.MainBottomSettingComposable
 import org.ireader.reader.reverse_swip_refresh.SwipeRefreshState
-import org.ireader.reader.viewmodel.ReaderScreenState
 import org.ireader.reader.viewmodel.ReaderScreenViewModel
 
 @ExperimentalAnimationApi
@@ -43,8 +43,7 @@ import org.ireader.reader.viewmodel.ReaderScreenViewModel
 )
 @Composable
 fun ReadingScreen(
-    modifier: Modifier = Modifier,
-    vm: ReaderScreenState,
+    vm: ReaderScreenViewModel,
     scrollState: LazyListState,
     drawerScrollState: LazyListState,
     swipeState: SwipeRefreshState,
@@ -82,7 +81,7 @@ fun ReadingScreen(
         }
     }
 
-    LaunchedEffect(key1 = modalBottomSheetState.targetValue,) {
+    LaunchedEffect(key1 = modalBottomSheetState.targetValue) {
         when (modalBottomSheetState.targetValue) {
             ModalBottomSheetValue.Expanded -> vm.isReaderModeEnable = false
             ModalBottomSheetValue.Hidden -> vm.isReaderModeEnable = true
@@ -104,28 +103,29 @@ fun ReadingScreen(
         }
     }
     Box(
-        modifier = modifier
-            .fillMaxSize(),
-        contentAlignment = Alignment.Center
+        modifier = Modifier
+            .fillMaxSize()
+            .background(vm.backgroundColor.value),
+        contentAlignment = Alignment.Center,
     ) {
         Crossfade(
             modifier = Modifier.fillMaxSize(),
-            targetState = vm.isLoading && readerScreenPreferencesState.initialized,
-        ) { loading ->
-            when (loading) {
+            targetState = vm.isLoading
+        ) { isLoading ->
+
+            when (isLoading) {
                 true -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
                         CircularProgressIndicator(
-                            modifier = modifier.align(Alignment.Center),
+                            modifier = Modifier.align(Alignment.Center),
                             color = MaterialTheme.colorScheme.primary
                         )
                     }
-
                 }
-                false -> {
+                else -> {
                     ModalBottomSheetLayout(
                         modifier = Modifier
                             .fillMaxWidth(),
@@ -174,7 +174,6 @@ fun ReadingScreen(
                         )
                     }
                 }
-
             }
         }
 

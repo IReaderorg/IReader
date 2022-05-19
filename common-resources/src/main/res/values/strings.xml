@@ -79,6 +79,9 @@
     <string name="reverse">Reverse</string>
     <string name="background_color">Background Color</string>
     <string name="text_color">TextColor</string>
+    <string name="scrollbar_color">ScrollBar Color</string>
+    <string name="selected_scrollbar_color">Selected ScrollBar Color</string>
+    <string name="unselected_scrollbar_color">UnSelected ScrollBar Color</string>
     <string name="open_explore">open explore</string>
     <string name="dismiss">Dismiss</string>
     <string name="book_name">Book Name</string>
@@ -107,8 +110,10 @@
     <string name="voices">Voices</string>
     <string name="languages">Languages</string>
     <string name="pitch">Pitch</string>
+    <string name="sleep">Sleep</string>
     <string name="speech_rate">Speech Rate</string>
     <string name="auto_next_chapter">Auto Next Chapter</string>
+    <string name="enable_sleep_timer">Sleep Mode</string>
     <string name="mark_as_read">Mark as read</string>
     <string name="delete_update">Delete Update</string>
     <string name="no_new_update_available">No New Updates is Available.</string>
@@ -239,6 +244,9 @@
     <string name="text_align_right">Text Align right</string>
     <string name="font_size">Font Size</string>
     <string name="font">Font</string>
+    <string name="right">Right</string>
+    <string name="left">Left</string>
+    <string name="alignment">Alignment</string>
     <string name="paragraph_indent">Indent</string>
     <string name="paragraph_distance">Distance</string>
     <string name="paragraph">Paragraph</string>

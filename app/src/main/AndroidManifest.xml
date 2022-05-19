@@ -21,8 +21,6 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
 
-
-
     <!-- To view extension packages in API 30+ -->
     <uses-permission
         android:name="android.permission.QUERY_ALL_PACKAGES"
@@ -48,12 +46,12 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:screenOrientation="fullSensor"
         android:supportsRtl="true"
-        android:theme="@style/Theme.ISplash"
+        android:theme="@style/Theme.App"
         android:usesCleartextTraffic="true">
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.ISplash"
+            android:theme="@style/Theme.Splash"
             android:windowSoftInputMode="adjustResize">
 
             <intent-filter>
@@ -74,6 +72,7 @@
                     android:host="deeplink"
                     android:scheme="ireader" />
             </intent-filter>
+
 
         </activity>
         <provider
@@ -101,7 +100,8 @@
                 <action android:name="android.media.browse.MediaBrowserService" />
             </intent-filter>
         </service>
-        <receiver android:name="androidx.media.session.MediaButtonReceiver"
+        <receiver
+            android:name="androidx.media.session.MediaButtonReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON" />

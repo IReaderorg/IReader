@@ -9,12 +9,17 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.scopes.ActivityScoped
+import org.ireader.domain.use_cases.backup.BackUpUseCases
 import org.ireader.presentation.ScreenContent
 import org.ireader.presentation.theme.AppTheme
+import javax.inject.Inject
 
 @AndroidEntryPoint
 @ActivityScoped
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var backUpUseCases: BackUpUseCases
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,4 +37,8 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+
+
+
 }

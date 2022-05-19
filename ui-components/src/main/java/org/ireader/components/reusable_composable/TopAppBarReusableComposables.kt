@@ -11,7 +11,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -173,7 +172,7 @@ fun AppIconButton(
     imageVector: ImageVector,
     contentDescription: String? = null,
     onClick: () -> Unit = {},
-    tint: Color = LocalContentColor.current,
+    tint: Color = MaterialTheme.colorScheme.onSurface,
 ) {
     IconButton(
         onClick = {

@@ -1,32 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Theme.Infinity" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+
+    <style name="Theme.App" parent="Theme.Material3.DayNight">
         <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
     </style>
 
-    <style name="Theme.Infinity.NoActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
-        <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
-        <item name="android:windowDisablePreview">true</item>
-        <item name="android:windowActionBar">false</item>
-        <item name="android:navigationBarColor">
-            @android:color/transparent
-        </item>
-
-        <!-- Optional: set to transparent if your app is drawing behind the status bar. -->
-        <item name="android:statusBarColor">
-            @android:color/transparent
-        </item>
-
-        <!-- Optional: set the status bar light and content dark. -->
-        <item name="android:windowLightStatusBar"  tools:targetApi="m"/>
-        <item name="android:windowLayoutInDisplayCutoutMode"   tools:targetApi="p">default</item>
-        <!-- Optional: set the status bar light and content dark. -->
+    <style name="Theme.Splash" parent="Theme.App">
+        <item name="colorBackgroundSplash">#FFF</item>
+        <item name="iconSplashTint">#000000</item>
+        <item name="android:windowBackground">@drawable/bg_splash</item>
+        <item name="android:statusBarColor">?attr/colorBackgroundSplash</item>
+        <item name="android:navigationBarColor">?attr/colorBackgroundSplash</item>
 
     </style>
 
-    <style name="Theme.Infinity.AppBarOverlay" parent="ThemeOverlay.AppCompat.DayNight.ActionBar" />
 
-    <style name="Theme.Infinity.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>

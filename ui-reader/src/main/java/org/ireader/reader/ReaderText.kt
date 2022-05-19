@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import org.ireader.components.list.scrollbars.LazyColumnScrollbar
+import org.ireader.core_ui.ui.PreferenceAlignment
 import org.ireader.core_ui.ui.mapTextAlign
 import org.ireader.core_ui.ui_components.isScrolledToTheEnd
 import org.ireader.reader.reverse_swip_refresh.ISwipeRefreshIndicator
@@ -108,7 +109,10 @@ fun ReaderText(
                         padding = if (vm.scrollIndicatorPadding.value < 0) 0.dp else vm.scrollIndicatorPadding.value.dp,
                         thickness = if (vm.scrollIndicatorWith.value < 0) 0.dp else vm.scrollIndicatorWith.value.dp,
                         enable = vm.showScrollIndicator.value,
-                        isDraggable = vm.isScrollIndicatorDraggable.value
+                        thumbColor = vm.unselectedScrollBarColor.value,
+                        thumbSelectedColor = vm.selectedScrollBarColor.value ,
+                        isDraggable = vm.isScrollIndicatorDraggable.value,
+                        rightSide = vm.scrollIndicatorAlignment.value == PreferenceAlignment.Right
                     ) {
                         LazyColumn(
                             modifier = modifier,

@@ -278,7 +278,7 @@ object TTSScreenSpec : ScreenSpec {
             )
             SwitchPreference(preference = vm.autoNext, title = stringResource(id = R.string.auto_next_chapter))
             SliderPreference(
-                title = stringResource(R.string.auto_next_chapter),
+                title = stringResource(R.string.speech_rate),
                 preferenceAsFloat = vm.speechRate,
                 valueRange = .5F..3F,
                 trailing = vm.speechRate.value.toBigDecimal().setScale(1, RoundingMode.FLOOR).toString()
@@ -288,6 +288,14 @@ object TTSScreenSpec : ScreenSpec {
                 preferenceAsFloat = vm.speechPitch,
                 valueRange = .5F..2.1F,
                 trailing = vm.speechPitch.value.toBigDecimal().setScale(1, RoundingMode.FLOOR).toString()
+            )
+            SwitchPreference(preference = vm.sleepModeUi, title = stringResource(id = R.string.enable_sleep_timer))
+            SliderPreference(
+                title = stringResource(R.string.sleep),
+                preferenceAsLong = vm.sleepTimeUi,
+                valueRange = 0F..60F,
+                trailing = "${vm.sleepTimeUi.value.toInt()} M",
+                isEnable = vm.sleepModeUi.value
             )
 
         }

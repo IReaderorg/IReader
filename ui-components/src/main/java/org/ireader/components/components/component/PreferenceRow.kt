@@ -334,7 +334,8 @@ fun SliderPreference(
     onValueChange: ((Float) -> Unit) = {},
     valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
     onValueChangeFinished: ((Float) -> Unit)? = null,
-    steps: Int = 0
+    steps: Int = 0,
+    isEnable:Boolean = true
 ) {
 
     val height = if (subtitle != null) 72.dp else 56.dp
@@ -405,6 +406,7 @@ fun SliderPreference(
                 }
             },
             steps = steps,
+            enabled = isEnable
         )
         if (trailing != null) {
             Text(

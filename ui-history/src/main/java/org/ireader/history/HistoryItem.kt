@@ -8,10 +8,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -69,10 +69,10 @@ fun HistoryItem(
             )
         }
         IconButton(onClick = { onClickDelete(history) }) {
-            Icon(imageVector = Icons.Outlined.Delete, contentDescription = "")
+            Icon(imageVector = Icons.Outlined.Delete, contentDescription = "",tint = MaterialTheme.colorScheme.onSurface)
         }
         IconButton(onClick = { onClickPlay(history) }) {
-            Icon(imageVector = Icons.Filled.PlayArrow, contentDescription = "")
+            Icon(imageVector = Icons.Filled.PlayArrow, contentDescription = "",tint = MaterialTheme.colorScheme.onSurface)
         }
     }
 }

@@ -11,15 +11,16 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import org.ireader.common_models.update_service_models.Release
 import org.ireader.common_models.update_service_models.Version
 import org.ireader.core.BuildConfig
+import org.ireader.core_ui.preferences.AppPreferences
 import org.ireader.domain.R
 import org.ireader.domain.notification.Notifications.CHANNEL_APP_UPDATE
 import org.ireader.domain.notification.Notifications.ID_APP_UPDATER
 import org.ireader.domain.notification.flags
-import org.ireader.domain.use_cases.preferences.services.LastUpdateTime
-import java.util.*
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
@@ -27,15 +28,16 @@ import kotlin.time.toDuration
 class UpdateService @AssistedInject constructor(
     @Assisted private val context: Context,
     @Assisted params: WorkerParameters,
-    private val lastUpdateTime: LastUpdateTime,
+    private val appPreferences: AppPreferences,
     private val api: UpdateApi,
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
-        val last = lastUpdateTime.read()
-        val time = lastUpdateTime.read() + 1.toDuration(DurationUnit.HOURS).inWholeMilliseconds
+        val lastCheck =  Instant.fromEpochMilliseconds(appPreferences.lastUpdateCheck().get())
+        val now = Clock.System.now()
 
-        if (last < time) {
+
+        if ((!org.ireader.common_resources.BuildConfig.DEBUG || !org.ireader.common_resources.BuildConfig.PREVIEW) && now - lastCheck < minTimeUpdateCheck) {
             return Result.success()
         }
 
@@ -44,16 +46,11 @@ class UpdateService @AssistedInject constructor(
         val version = Version.create(release.tag_name)
 
         BuildConfig.LIBRARY_PACKAGE_NAME
-        val versionCode: String =
-            try {
-                context.packageManager.getPackageInfo(context.packageName, 0).versionName
-            } catch (e: Throwable) {
-                "1.0"
-            }
+        val versionCode: String = org.ireader.common_resources.BuildConfig.VERSION_NAME
         val current = Version.create(versionCode)
 
         if (Version.isNewVersion(release.tag_name, versionCode)) {
-            lastUpdateTime.save(Calendar.getInstance().timeInMillis)
+            appPreferences.lastUpdateCheck().set(Clock.System.now().toEpochMilliseconds())
             with(NotificationManagerCompat.from(applicationContext)) {
                 notify(ID_APP_UPDATER, createNotification(current, version, createIntent(release)))
             }
@@ -80,4 +77,8 @@ class UpdateService @AssistedInject constructor(
 
     private val Version.simpleText: String
         get() = "v$version"
+
+    internal companion object {
+        val minTimeUpdateCheck = 1.toDuration(DurationUnit.HOURS)
+    }
 }

@@ -15,6 +15,10 @@
         <entry key="../../../../../../../layout/compose-model-1649061735196.xml" value="1.0" />
         <entry key="../../../../../../../layout/compose-model-1649752446350.xml" value="0.1" />
         <entry key="../../../../../../../layout/compose-model-1649752455929.xml" value="0.22" />
+        <entry key="..\:/Programming/Android/d-projects/IReader-main-project/app/src/main/res/drawable/bg_splash.xml" value="0.1735" />
+        <entry key="..\:/Programming/Android/d-projects/IReader-main-project/app/src/main/res/drawable/ic_eternity_full.xml" value="0.128" />
+        <entry key="..\:/Programming/Android/d-projects/IReader-main-project/app/src/main/res/drawable/ic_eternity_full_splash.xml" value="0.1" />
+        <entry key="..\:/Programming/Android/d-projects/IReader-main-project/app/src/main/res/drawable/splash_background.xml" value="0.1" />
         <entry key="..\:/Programming/Android/d-projects/IReader-main-project/common-resources/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.1375" />
         <entry key="..\:/Programming/Android/d-projects/IReader-main-project/common-resources/src/main/res/drawable/baseline_close_24.xml" value="0.2635" />
         <entry key="..\:/Programming/Android/d-projects/IReader-main-project/common-resources/src/main/res/drawable/baseline_refresh_24.xml" value="0.2635" />
@@ -32,7 +36,7 @@
         <entry key="..\:/Programming/Android/d-projects/IReader-main-project/common-resources/src/main/res/drawable/ic_downloading.xml" value="0.201" />
         <entry key="..\:/Programming/Android/d-projects/IReader-main-project/common-resources/src/main/res/drawable/ic_eternity.xml" value="0.201" />
         <entry key="..\:/Programming/Android/d-projects/IReader-main-project/common-resources/src/main/res/drawable/ic_eternity_1.xml" value="0.201" />
-        <entry key="..\:/Programming/Android/d-projects/IReader-main-project/common-resources/src/main/res/drawable/ic_eternity_full.xml" value="0.2075" />
+        <entry key="..\:/Programming/Android/d-projects/IReader-main-project/common-resources/src/main/res/drawable/ic_eternity_full.xml" value="0.1" />
         <entry key="..\:/Programming/Android/d-projects/IReader-main-project/common-resources/src/main/res/drawable/ic_github_24dp.xml" value="0.2635" />
         <entry key="..\:/Programming/Android/d-projects/IReader-main-project/common-resources/src/main/res/drawable/ic_glasses_24dp.xml" value="0.155" />
         <entry key="..\:/Programming/Android/d-projects/IReader-main-project/common-resources/src/main/res/drawable/ic_increase_text_size.xml" value="0.201" />

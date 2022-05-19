@@ -8,6 +8,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import kotlinx.datetime.Instant
 import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.common_models.entities.Chapter
@@ -39,6 +40,7 @@ interface TTSState {
     var prevPitch: Float
     var speechSpeed: Float
     var prevSpeechSpeed: Float
+    var sleepTime: Long
     var ttsBook: Book?
     var ttsChapter: Chapter?
     val ttsSource: Source?
@@ -57,6 +59,8 @@ interface TTSState {
     val uiChapters : State<List<Chapter>>
     var isDrawerAsc : Boolean
     var drawerState : LazyListState?
+    var startTime : Instant?
+    var sleepMode : Boolean
 
 }
 
@@ -84,6 +88,9 @@ class TTSStateImpl @Inject constructor() : TTSState {
     override var pitch by mutableStateOf<Float>(.8f)
     override var prevPitch by mutableStateOf<Float>(.8f)
     override var speechSpeed by mutableStateOf<Float>(.8f)
+    override var sleepTime by mutableStateOf<Long>(0)
+    override var startTime by mutableStateOf<Instant?>(null)
+    override var sleepMode by mutableStateOf<Boolean>(false)
     override var prevSpeechSpeed by mutableStateOf<Float>(.8f)
     override var ttsBook by mutableStateOf<Book?>(null)
     override val ttsSource by derivedStateOf { ttsCatalog?.source }

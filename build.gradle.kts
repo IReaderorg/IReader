@@ -28,9 +28,7 @@ buildscript {
 plugins {
     id("com.autonomousapps.dependency-analysis") version "1.1.0"
     id("com.github.ben-manes.versions") version "0.42.0"
-    id("com.osacky.doctor") version "0.8.0"
     id("com.diffplug.spotless") version "6.3.0"
-    //kotlin("jvm") version "1.6.10"
 }
 fun isNonStable(version: String): Boolean {
     val stableKeyword = listOf("RELEASE", "FINAL", "GA").any { version.toUpperCase().contains(it) }

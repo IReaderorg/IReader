@@ -6,7 +6,7 @@ import org.ireader.core_ui.preferences.AppPreferences
 import org.ireader.core_ui.preferences.ReaderPreferences
 import org.ireader.core_ui.theme.OrientationMode
 import org.ireader.core_ui.theme.prefs.IReaderVoice
-import org.ireader.core_ui.ui.TextAlign
+import org.ireader.core_ui.ui.PreferenceAlignment
 import javax.inject.Inject
 
 class OrientationUseCase(
@@ -24,11 +24,11 @@ class OrientationUseCase(
 class TextAlignmentUseCase(
     private val prefs: ReaderPreferences,
 ) {
-    fun save(textAlign: TextAlign) {
+    fun save(textAlign: PreferenceAlignment) {
         prefs.textAlign().set(textAlign)
     }
 
-    suspend fun read(): TextAlign {
+    suspend fun read(): PreferenceAlignment {
         return prefs.textAlign().get()
     }
 }

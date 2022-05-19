@@ -1,8 +1,10 @@
 package org.ireader.presentation.ui
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.PaddingValues
@@ -177,5 +179,56 @@ object BackupAndRestoreScreenSpec : ScreenSpec {
             },
             snackbarHostState = snackBarHostState
         )
+    }
+}
+
+fun restoreBackup(
+    context:Context,
+    resultIntent: ActivityResult,
+    onSuccess:(String) -> Unit,
+    onError:(Throwable) -> Unit
+) {
+    try {
+            val contentResolver = context.findComponentActivity()!!.contentResolver
+            val uri = resultIntent.data!!.data!!
+            contentResolver
+                .takePersistableUriPermission(
+                    uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                )
+            val pfd = contentResolver.openFileDescriptor(uri, "r")
+            pfd?.use {
+                FileInputStream(pfd.fileDescriptor).use { stream ->
+                    val txt = stream.readBytes().decodeToString()
+                    kotlin.runCatching {
+                        onSuccess(txt)
+                    }.getOrElse { e ->
+                        onError(e)
+                    }
+                }
+            }
+
+    } catch (e: Throwable) {
+        onError(e)
+    }
+}
+
+fun makeBackup(
+    context:Context,
+    resultIntent: ActivityResult,
+    text:String,
+    onError:(Throwable) -> Unit
+) {
+    try {
+        val contentResolver = context.findComponentActivity()!!.contentResolver
+        val uri = resultIntent.data!!.data!!
+        val pfd = contentResolver.openFileDescriptor(uri, "w")
+        pfd?.use {
+            FileOutputStream(pfd.fileDescriptor).use { outputStream ->
+                outputStream.write(text.toByteArray())
+            }
+        }
+    } catch (e: Throwable) {
+        onError(e)
     }
 }

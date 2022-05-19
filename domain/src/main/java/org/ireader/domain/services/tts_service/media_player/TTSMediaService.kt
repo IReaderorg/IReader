@@ -30,6 +30,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.common_models.entities.Chapter
@@ -47,6 +48,8 @@ import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.preferences.reader_preferences.TextReaderPrefUseCase
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.ExperimentalTime
 
 @AndroidEntryPoint
 class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeListener {
@@ -90,14 +93,14 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
 
     private lateinit var mediaCallback: TTSSessionCallback
     private lateinit var notificationController: NotificationController
-    private lateinit var controller: MediaControllerCompat
+    private  var controller: MediaControllerCompat?=null
 
-    private lateinit var player: TextToSpeech
+    private var player: TextToSpeech? = null
 
     private var serviceJob: Job? = null
     private var isPlayerDispose = false
     private var isHooked = false
-    private lateinit var focusRequest: AudioFocusRequest
+    private var focusRequest: AudioFocusRequest?=null
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     companion object {
@@ -139,6 +142,8 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
             state.currentVoice = textReaderPrefUseCase.readVoice()
             state.speechSpeed = readerPreferences.speechRate().get()
             state.pitch = readerPreferences.speechPitch().get()
+            state.sleepTime = readerPreferences.sleepTime().get()
+            state.sleepMode = readerPreferences.sleepMode().get()
         }
         scope.launch {
             readerPreferences.readerAutoNext().changes().collect {
@@ -165,9 +170,19 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
                 state.speechSpeed = it
             }
         }
+        scope.launch {
+            readerPreferences.sleepTime().changes().collect {
+                state.sleepTime = it
+            }
+        }
+        scope.launch {
+            readerPreferences.sleepMode().changes().collect {
+                state.sleepMode = it
+            }
+        }
     }
 
-    lateinit var silence: MediaPlayer
+    var silence: MediaPlayer? = null
     override fun onCreate() {
         super.onCreate()
         Log.debug { "TTS SERVICE: OnCreate is Called" }
@@ -255,7 +270,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
             isLooping = true
         }
 
-        silence.start()
+        silence?.start()
     }
 
     var isNotificationForeground = false
@@ -293,7 +308,9 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
                 })
                 build()
             }
+            focusRequest?.let {  focusRequest ->
             am.requestAudioFocus(focusRequest)
+            }
         } else {
             @Suppress("DEPRECATION")
             am.requestAudioFocus(
@@ -322,8 +339,8 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
                 return@TextToSpeech
             }
             if (status == TextToSpeech.SUCCESS) {
-                state.voices = player.voices?.toList() ?: emptyList()
-                state.languages = player.availableLanguages?.toList() ?: emptyList()
+                state.voices = player?.voices?.toList() ?: emptyList()
+                state.languages = player?.availableLanguages?.toList() ?: emptyList()
                 readPrefs()
             }
         }
@@ -373,35 +390,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
                 }
             }
             ACTION_CANCEL -> {
-                player.stop()
-                state.utteranceId = ""
-                val am = baseContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    am.abandonAudioFocusRequest(focusRequest)
-                } else {
-                    @Suppress("DEPRECATION")
-                    am.abandonAudioFocus(this@TTSService)
-                }
-
-                Log.error { "Service was cancelled" }
-                unhookNotification()
-                if (isNotificationForeground) {
-                    stopForeground(true)
-                    isNotificationForeground = false
-                }
-                if (noisyReceiverHooked) {
-                    kotlin.runCatching {
-                        unregisterReceiver(noisyReceiver)
-                        noisyReceiverHooked = false
-
-                    }
-                }
-                resumeOnFocus = false
-                notificationController.stop()
-                isPlayerDispose = true
-                setPlaybackState(PlaybackStateCompat.STATE_NONE)
-                stopSelf()
-
+                startService(Player.CANCEL)
                 return START_STICKY
             }
             null -> {}
@@ -411,7 +400,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
     }
 
     override fun onDestroy() {
-        player.shutdown()
+        player?.shutdown()
         notificationController.stop()
         unhookNotification()
         mediaSession.isActive = false
@@ -462,19 +451,21 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
             if (isPlayerDispose) {
                 initPlayer()
             }
+            state.startTime = Clock.System.now()
             startService(Player.PLAY)
+
         }
 
         override fun onPause() {
             Log.debug { "TTS SERVICE: onPause" }
             startService(Player.PAUSE)
-            player.stop()
+            player?.stop()
         }
 
         override fun onStop() {
             Log.debug { "TTS SERVICE: onStop" }
             startService(Player.PAUSE)
-            player.stop()
+            player?.stop()
         }
 
         override fun onRewind() {
@@ -591,9 +582,37 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
                                             Player.CANCEL -> {
                                                 NotificationManagerCompat.from(this@TTSService)
                                                     .cancel(Notifications.ID_TTS)
+                                                player?.stop()
+                                                state.utteranceId = ""
+                                                val am = baseContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+                                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                                    focusRequest?.let { am.abandonAudioFocusRequest(it) }
+                                                } else {
+                                                    @Suppress("DEPRECATION")
+                                                    am.abandonAudioFocus(this@TTSService)
+                                                }
+
+                                                Log.error { "Service was cancelled" }
+                                                unhookNotification()
+                                                if (isNotificationForeground) {
+                                                    stopForeground(true)
+                                                    isNotificationForeground = false
+                                                }
+                                                if (noisyReceiverHooked) {
+                                                    kotlin.runCatching {
+                                                        unregisterReceiver(noisyReceiver)
+                                                        noisyReceiverHooked = false
+
+                                                    }
+                                                }
+                                                resumeOnFocus = false
+                                                notificationController.stop()
+                                                isPlayerDispose = true
+                                                setPlaybackState(PlaybackStateCompat.STATE_NONE)
+                                                stopSelf()
                                             }
                                             Player.SKIP_PREV -> {
-                                                tts.stop()
+                                                tts?.stop()
                                                 updateNotification()
                                                 val index = getChapterIndex(chapter, chapters)
                                                 if (index > 0) {
@@ -627,7 +646,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
                                                 }
                                             }
                                             Player.SKIP_NEXT -> {
-                                                tts.stop()
+                                                tts?.stop()
                                                 updateNotification()
                                                 val index = getChapterIndex(chapter, chapters)
                                                 if (index != chapters.lastIndex) {
@@ -671,14 +690,14 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
                                             Player.PAUSE -> {
                                                 setPlaybackState(PlaybackStateCompat.STATE_PAUSED)
                                                 state.isPlaying = false
-                                                tts.stop()
+                                                tts?.stop()
                                                 updateNotification()
                                             }
                                             Player.PLAY_PAUSE -> {
                                                 if (state.isPlaying) {
                                                     setPlaybackState(PlaybackStateCompat.STATE_PAUSED)
                                                     state.isPlaying = false
-                                                    tts.stop()
+                                                    tts?.stop()
                                                     updateNotification()
                                                 } else {
                                                     setPlaybackState(PlaybackStateCompat.STATE_PLAYING)
@@ -689,7 +708,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
                                             else -> {
                                                 if (state.isPlaying) {
                                                     state.isPlaying = false
-                                                    tts.stop()
+                                                    tts?.stop()
                                                     updateNotification()
                                                 } else {
                                                     state.isPlaying = true
@@ -726,38 +745,38 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
         setBundle()
         state.apply {
             if (state.languages.isEmpty()) {
-                player.availableLanguages?.let {
+                player?.availableLanguages?.let {
                     state.languages = it.toList()
                 }
             }
             if (state.voices.isEmpty()) {
-                player.voices?.toList()?.let {
+                player?.voices?.toList()?.let {
                     state.voices = it
                 }
             }
             if (currentVoice != prevVoice) {
                 prevVoice = currentVoice
-                player.voices?.firstOrNull { it.isSame(currentVoice) }?.let {
-                    player.voice = it
+                player?.voices?.firstOrNull { it.isSame(currentVoice) }?.let {
+                    player?.voice = it
                 }
             }
 
 
             if (currentLanguage != prevLanguage) {
                 prevLanguage = currentLanguage
-                player.availableLanguages?.firstOrNull { it.displayName == currentLanguage }
+                player?.availableLanguages?.firstOrNull { it.displayName == currentLanguage }
                     ?.let {
-                        player.language = it
+                        player?.language = it
                     }
             }
 
             if (pitch != prevPitch) {
                 prevPitch = pitch
-                player.setPitch(pitch)
+                player?.setPitch(pitch)
             }
             if (speechSpeed != prevSpeechSpeed) {
                 prevSpeechSpeed = speechSpeed
-                player.setSpeechRate(speechSpeed)
+                player?.setSpeechRate(speechSpeed)
             }
 
             ttsChapter?.let { chapter ->
@@ -769,7 +788,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
                                 updateNotification()
                             }
                             if (state.utteranceId != (currentReadingParagraph).toString()) {
-                                player.speak(
+                                player?.speak(
                                     content[currentReadingParagraph],
                                     TextToSpeech.QUEUE_FLUSH,
                                     null,
@@ -777,7 +796,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
                                 )
                             }
 
-                            player.setOnUtteranceProgressListener(object :
+                            player?.setOnUtteranceProgressListener(object :
                                 UtteranceProgressListener() {
                                 override fun onStop(
                                     utteranceId: String?,
@@ -794,6 +813,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
                                 }
 
                                 override fun onDone(p0: String) {
+                                    checkSleepTime()
                                     try {
                                         var isFinished = false
 
@@ -806,11 +826,11 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
                                             readText(context, mediaSessionCompat)
                                         }
 
-                                        if (currentReadingParagraph == content.lastIndex && controller.playbackState.isPlaying && isFinished) {
+                                        if (currentReadingParagraph == content.lastIndex && controller?.playbackState?.isPlaying == true && isFinished) {
                                             isPlaying = false
                                             currentReadingParagraph = 0
 
-                                            player.stop()
+                                            player?.stop()
                                             if (autoNextChapter) {
                                                 scope.launch {
                                                     state.ttsChapters.let { chapters ->
@@ -874,6 +894,16 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
                     }
                 }
             }
+        }
+    }
+
+    @OptIn(ExperimentalTime::class)
+    fun checkSleepTime() {
+        val lastCheckPref = state.startTime
+        val currentSleepTime = state.sleepTime.minutes
+        val now = Clock.System.now()
+        if ( lastCheckPref != null && now - lastCheckPref > currentSleepTime && state.sleepMode) {
+            startService(Player.CANCEL)
         }
     }
 
@@ -957,7 +987,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent?.action == AudioManager.ACTION_AUDIO_BECOMING_NOISY) {
                 resumeOnFocus = false
-                player.stop()
+                player?.stop()
             }
         }
     }
@@ -971,11 +1001,11 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
             }
             AudioManager.AUDIOFOCUS_LOSS -> {
                 synchronized(focusLock) { resumeOnFocus = false }
-                player.stop()
+                player?.stop()
             }
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT, AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
                 synchronized(focusLock) { resumeOnFocus = state.isPlaying }
-                player.stop()
+                player?.stop()
             }
         }
     }

@@ -94,8 +94,8 @@ fun ReaderScreenTopBar(
                     )
                 }
             },
-            backgroundColor = MaterialTheme.colorScheme.background,
-            contentColor = MaterialTheme.colorScheme.onBackground,
+            backgroundColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface,
             elevation = 0.dp,
             navigationIcon = {
                 if (!vm.searchMode) {

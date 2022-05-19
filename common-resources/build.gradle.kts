@@ -28,6 +28,7 @@ ext {
 }
 
 dependencies {
+    implementation(androidx.material)
 }
 // Git is needed in your system PATH for these commands to work.
 // If it's not installed, you can return a random value as a workaround
