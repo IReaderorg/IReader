@@ -118,16 +118,17 @@ fun ReaderText(
                 isDraggable = vm.isScrollIndicatorDraggable.value,
                 rightSide = vm.scrollIndicatorAlignment.value == PreferenceAlignment.Right
             ) {
+
                 LazyColumn(
                     modifier = modifier,
                     state = scrollState,
                 ) {
                     when(vm.readingMode.value) {
                         true -> {
-                            vm.chapterShell.forEach {
+                            vm.chapterShell.forEach {  chapter ->
                                 item(
                                     key = {
-                                        "-${it.id}"
+                                        "-${chapter.id}"
                                     }
                                 ) {
                                     Box(
@@ -138,10 +139,13 @@ fun ReaderText(
                                     )
                                 }
                                 items(
-                                    it.content.size,
+                                    chapter.content.size,
                                     key = { index ->
-                                        "$index-${it.id}"
-                                    }
+                                        "$index-${chapter.id}"
+                                    },
+                                    contentType = {
+                                        "text"
+                                    },
                                 ) { index ->
                                     TextSelectionContainer(selectable = vm.selectableMode.value) {
                                         Text(
@@ -153,7 +157,7 @@ fun ReaderText(
                                                         .1f
                                                     ) else Color.Transparent
                                                 ),
-                                            text = it.content[index].plus(
+                                            text = chapter.content[index].plus(
                                                 "\n".repeat(
                                                     vm.distanceBetweenParagraphs.value
                                                 )
@@ -174,7 +178,7 @@ fun ReaderText(
                                             .height(100.dp)
                                             .background(MaterialTheme.colorScheme.contentColorFor(vm.backgroundColor.value)), contentAlignment = Alignment.Center
                                     ) {
-                                        if (vm.isLoading && scrollState.layoutInfo.visibleItemsInfo.getOrNull(scrollState.layoutInfo.visibleItemsInfo.lastIndex-1)?.key.toString().contains(it.id.toString())) {
+                                        if (vm.isLoading && scrollState.layoutInfo.visibleItemsInfo.getOrNull(scrollState.layoutInfo.visibleItemsInfo.lastIndex-1)?.key.toString().contains(chapter.id.toString())) {
                                             CircularProgressIndicator()
                                         }
                                     }

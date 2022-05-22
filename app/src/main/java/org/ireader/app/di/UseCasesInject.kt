@@ -22,7 +22,6 @@ import org.ireader.domain.use_cases.download.delete.DeleteSavedDownloads
 import org.ireader.domain.use_cases.download.get.FindAllDownloadsUseCase
 import org.ireader.domain.use_cases.download.get.FindDownloadsUseCase
 import org.ireader.domain.use_cases.download.get.SubscribeDownloadsUseCase
-import org.ireader.domain.use_cases.download.get.SubscribeOneSavedDownload
 import org.ireader.domain.use_cases.download.insert.InsertDownload
 import org.ireader.domain.use_cases.download.insert.InsertDownloads
 import org.ireader.domain.use_cases.history.HistoryUseCase
@@ -315,7 +314,6 @@ class UseCasesInject {
             insertDownload = InsertDownload(downloadRepository),
             insertDownloads = InsertDownloads(downloadRepository),
             subscribeDownloadsUseCase = SubscribeDownloadsUseCase(downloadRepository),
-            subscribeOneSavedDownload = SubscribeOneSavedDownload(downloadRepository)
         )
     }
 

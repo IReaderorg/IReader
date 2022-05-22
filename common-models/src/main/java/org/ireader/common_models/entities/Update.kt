@@ -41,24 +41,4 @@ data class Update(
     val chapterId: Long,
     val bookId: Long,
     val date: Long,
-) {
-    companion object {
-//        fun toUpdates(book: Book, chapter: Chapter): Update {
-//            return Update(
-//                bookId = chapter.bookId,
-//                read = chapter.read,
-//                chapterId = chapter.id,
-//                bookTitle = book.title,
-//                chapterDateUpload = chapter.dateUpload,
-//                chapterLink = chapter.link,
-//                chapterTitle = chapter.title,
-//                cover = book.cover,
-//                date = Clock.System.now().toEpochMilliseconds(),
-//                favorite = book.favorite,
-//                number = chapter.number,
-//                sourceId = book.sourceId,
-//                downloaded = chapter.content.joinToString().isNotEmpty()
-//            )
-//        }
-    }
-}
+)

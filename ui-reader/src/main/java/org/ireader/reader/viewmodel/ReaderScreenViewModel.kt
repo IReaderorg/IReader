@@ -262,6 +262,13 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
         }
     }
 
+    suspend fun clearChapterShell(scrollState:LazyListState?,force:Boolean = false) {
+        if (readingMode.value || force) {
+            scrollState?.scrollToItem(0, 0)
+            chapterShell.clear()
+        }
+    }
+
     override fun onDestroy() {
         getChapterJob?.cancel()
         getContentJob?.cancel()

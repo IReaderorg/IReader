@@ -1,6 +1,5 @@
 package org.ireader.components.reusable_composable
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,7 +10,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -65,7 +63,6 @@ fun DropDownMenu(
             }
             DropdownMenu(
                 modifier = Modifier
-                    .background(MaterialTheme.colorScheme.background)
                     .fillMaxWidth(.5f),
                 expanded = opened, // viewModel.state.isMenuExpanded,
                 onDismissRequest = {

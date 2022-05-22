@@ -6,20 +6,24 @@ import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import org.ireader.common_models.entities.Book
+import org.ireader.common_models.entities.BookCategory
 import org.ireader.common_models.entities.CatalogRemote
 import org.ireader.common_models.entities.Category
 import org.ireader.common_models.entities.Chapter
+import org.ireader.common_models.entities.Download
 import org.ireader.common_models.entities.FontEntity
 import org.ireader.common_models.entities.History
 import org.ireader.common_models.entities.RemoteKeys
-import org.ireader.common_models.entities.SavedDownload
 import org.ireader.common_models.entities.Update
+import org.ireader.data.local.dao.BookCategoryDao
 import org.ireader.data.local.dao.CatalogDao
+import org.ireader.data.local.dao.CategoryDao
 import org.ireader.data.local.dao.ChapterDao
 import org.ireader.data.local.dao.DownloadDao
 import org.ireader.data.local.dao.FontDao
 import org.ireader.data.local.dao.HistoryDao
 import org.ireader.data.local.dao.LibraryBookDao
+import org.ireader.data.local.dao.LibraryDao
 import org.ireader.data.local.dao.RemoteKeysDao
 import org.ireader.data.local.dao.UpdatesDao
 
@@ -29,11 +33,12 @@ import org.ireader.data.local.dao.UpdatesDao
         CatalogRemote::class,
         Category::class,
         Chapter::class,
-        SavedDownload::class,
+        Download::class,
         History::class,
         Update::class,
         RemoteKeys::class,
         FontEntity::class,
+        BookCategory::class
     ],
     version = 18,
     exportSchema = true,
@@ -47,6 +52,9 @@ abstract class AppDatabase : RoomDatabase() {
     abstract val catalogDao: CatalogDao
     abstract val historyDao: HistoryDao
     abstract val updatesDao: UpdatesDao
+    abstract val libraryDao:LibraryDao
+    abstract val categoryDao:CategoryDao
+    abstract val bookCategoryDao: BookCategoryDao
     abstract val fontDao: FontDao
 
     companion object {

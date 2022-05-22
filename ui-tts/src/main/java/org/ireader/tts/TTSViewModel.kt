@@ -122,8 +122,14 @@ class TTSViewModel @Inject constructor(
         if (textReader == null) {
             textReader = TextToSpeech(context) { status ->
                 if (status == TextToSpeech.SUCCESS) {
-                    ttsState.languages = textReader?.availableLanguages?.toList() ?: emptyList()
-                    ttsState.voices = textReader?.voices?.toList() ?: emptyList()
+                    /**
+                     * ERROR: this line throws an error when devices doesn't have tts service installed
+                     */
+                    kotlin.runCatching {
+                        ttsState.languages = textReader?.availableLanguages?.toList() ?: emptyList()
+                        ttsState.voices = textReader?.voices?.toList() ?: emptyList()
+                    }
+
                 }
 
             }

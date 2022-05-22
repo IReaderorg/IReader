@@ -36,7 +36,8 @@ sealed interface ScreenSpec {
             BackupAndRestoreScreenSpec,
             SettingScreenSpec,
             ReaderSettingSpec,
-            FontScreenSpec
+            FontScreenSpec,
+            CategoryScreenSpec
         ).associateBy { it.navHostRoute }
     }
 

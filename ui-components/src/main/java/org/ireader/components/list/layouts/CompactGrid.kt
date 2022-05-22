@@ -32,7 +32,6 @@ fun CompactGridLayoutComposable(
     scrollState: LazyGridState = rememberLazyGridState(),
     isLocal: Boolean,
     goToLatestChapter: (book: BookItem) -> Unit,
-    onEndReach: (itemIndex: Int) -> Unit = {},
     isLoading: Boolean = false,
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
@@ -46,15 +45,15 @@ fun CompactGridLayoutComposable(
                 items(count = books.size, key = { index ->
                     books[index].id
                 }, contentType = { "books"  }) { index ->
-                    onEndReach(index)
                     BookImage(
+                        modifier = Modifier.animateItemPlacement(),
                         onClick = { onClick(books[index]) },
                         book = books[index],
                         ratio = 6f / 9f,
                         selected = books[index].id in selection,
                         onLongClick = { onLongClick(books[index]) },
                     ) {
-                        if (books[index].totalDownload != 0) {
+                        if (isLocal) {
                             GoToLastReadComposable(onClick = { goToLatestChapter(books[index]) })
                         }
                         if (!isLocal && books[index].favorite) {

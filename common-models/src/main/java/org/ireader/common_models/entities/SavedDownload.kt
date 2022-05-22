@@ -3,34 +3,70 @@
 package org.ireader.common_models.entities
 
 import androidx.room.Entity
+import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 
-@Entity(tableName = DOWNLOAD_TABLE)
-
-data class SavedDownload(
+@Entity(
+    tableName = DOWNLOAD_TABLE,
+    foreignKeys = [
+        ForeignKey(
+            entity = Chapter::class,
+            parentColumns = arrayOf("id"),
+            childColumns = arrayOf("chapterId"),
+            onDelete =  ForeignKey.CASCADE
+        )]
+)
+data class Download(
     @PrimaryKey(autoGenerate = false)
     val chapterId: Long,
     val bookId: Long,
-    val sourceId: Long,
-    val priority: Int = 0,
+    val priority: Int,
+)
+
+
+
+
+
+
+data class SavedDownload(
+    val chapterId: Long,
+    val bookId: Long,
+    val priority: Int,
     val bookName: String,
     val chapterKey: String,
     val chapterName: String,
-    val translator: String,
-)
+    val translator: String
+) {
+    fun toDownload():Download {
+        return Download(
+            chapterId = this.chapterId,
+            bookId =this.bookId ,
+            priority =this.priority
+        )
+    }
+}
 
 data class SavedDownloadWithInfo(
-    @PrimaryKey(autoGenerate = false)
     val chapterId: Long,
     val bookId: Long,
-    val sourceId: Long,
     val priority: Int = 0,
+    val id: Long,
+    val sourceId: Long,
     val bookName: String,
     val chapterKey: String,
     val chapterName: String,
     val translator: String,
     val isDownloaded: Boolean
-)
+) {
+    fun toDownload():Download {
+        return Download(
+            chapterId = this.chapterId,
+            bookId =this.bookId ,
+            priority =this.priority
+        )
+    }
+
+}
 
 fun SavedDownloadWithInfo.toSavedDownload(): SavedDownload {
     return SavedDownload(
@@ -41,7 +77,6 @@ fun SavedDownloadWithInfo.toSavedDownload(): SavedDownload {
         translator = translator,
         chapterId = chapterId,
         bookName = bookName,
-        sourceId = sourceId,
     )
 }
 
@@ -54,6 +89,5 @@ fun buildSavedDownload(book: Book, chapter: Chapter): SavedDownload {
         translator = chapter.translator,
         chapterId = chapter.id,
         bookName = book.title,
-        sourceId = book.sourceId,
     )
 }

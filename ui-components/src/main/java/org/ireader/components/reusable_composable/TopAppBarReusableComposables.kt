@@ -235,7 +235,8 @@ fun AppTextField(
                 keyboardOptions = keyboardAction,
                 keyboardActions = keyboardActions,
                 singleLine = true,
-                textStyle = MaterialTheme.typography.labelSmall
+                textStyle = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+
 
             )
         } else if (mode == 1) {
@@ -247,7 +248,7 @@ fun AppTextField(
                 keyboardOptions = keyboardAction,
                 keyboardActions = keyboardActions,
                 singleLine = true,
-                textStyle =MaterialTheme.typography.labelSmall
+                textStyle = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurface),
             )
         } else if (mode == 2) {
             androidx.compose.material3.TextField(
@@ -261,7 +262,7 @@ fun AppTextField(
                 keyboardOptions = keyboardAction,
                 keyboardActions = keyboardActions,
                 singleLine = true,
-                textStyle = MaterialTheme.typography.labelSmall
+                textStyle = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurface),
             )
         }
     }

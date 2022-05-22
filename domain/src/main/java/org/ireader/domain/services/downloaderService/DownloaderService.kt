@@ -61,7 +61,6 @@ class DownloaderService @AssistedInject constructor(
             translator = "",
             chapterId = 0,
             bookName = "",
-            sourceId = 0,
         )
 
     override suspend fun doWork(): Result {
@@ -94,7 +93,7 @@ class DownloaderService @AssistedInject constructor(
                         }
                     }.filterNotNull()
 
-                val downloadIds = downloadUseCases.insertDownloads(mappedChapters)
+                val downloadIds = downloadUseCases.insertDownloads(mappedChapters.map { it.toDownload() })
 
                 val downloads = mappedChapters // downloadUseCases.findDownloadsUseCase(downloadIds)
                 val builder = defaultNotificationHelper.baseNotificationDownloader(
@@ -107,7 +106,7 @@ class DownloaderService @AssistedInject constructor(
                 downloadServiceState.isEnable = true
                 downloads.forEachIndexed { index, download ->
                     chapters.find { it.id == download.chapterId }?.let { chapter ->
-                        sources.find { it.sourceId == download.sourceId }?.let { source ->
+                        sources.find { it.sourceId ==  books.find { it.id == chapter.bookId }?.sourceId  }?.let { source ->
                             if (chapter.content.joinToString().length < 10) {
                                 remoteUseCases.getRemoteReadingContent(
                                     chapter = chapter,
@@ -129,13 +128,12 @@ class DownloaderService @AssistedInject constructor(
                                             translator = chapter.translator,
                                             chapterId = chapter.id,
                                             bookName = download.bookName,
-                                            sourceId = download.sourceId,
                                         )
                                         withContext(Dispatchers.IO) {
                                             downloadUseCases.insertDownload(
                                                 savedDownload.copy(
                                                     priority = 1
-                                                )
+                                                ).toDownload()
                                             )
                                         }
                                     },
@@ -162,7 +160,7 @@ class DownloaderService @AssistedInject constructor(
                 )
 
                 scope.launchIO {
-                    downloadUseCases.insertDownload(savedDownload.copy(priority = 0))
+                    downloadUseCases.insertDownload(savedDownload.copy(priority = 0).toDownload())
                 }
                 downloadServiceState.downloads = emptyList()
                 downloadServiceState.isEnable = false
@@ -172,7 +170,7 @@ class DownloaderService @AssistedInject constructor(
             withContext(Dispatchers.Main) {
                 cancel(ID_DOWNLOAD_CHAPTER_PROGRESS)
                 withContext(Dispatchers.IO) {
-                    downloadUseCases.insertDownload(savedDownload.copy(priority = 0))
+                    downloadUseCases.insertDownload(savedDownload.copy(priority = 0).toDownload())
                 }
                 val notification = NotificationCompat.Builder(
                     applicationContext.applicationContext,

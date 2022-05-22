@@ -42,7 +42,7 @@ class GetRemoteReadingContent @Inject constructor() {
                         onError(UiText.StringResource(R.string.cant_get_content))
                     } else {
                         org.ireader.core_api.log.Log.debug("Timber: GetRemoteReadingContentUseCase was Finished Successfully")
-                        onSuccess(chapter.copy(content = content, dateFetch = org.ireader.common_extensions.currentTimeToLong()))
+                        onSuccess(chapter.copy(content = content.filter { it.isNotBlank() }, dateFetch = org.ireader.common_extensions.currentTimeToLong()))
                     }
                 } catch (e: Throwable) {
                     onError(exceptionHandler(e))

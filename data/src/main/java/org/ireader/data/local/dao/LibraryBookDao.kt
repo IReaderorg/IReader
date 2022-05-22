@@ -12,6 +12,7 @@ import org.ireader.common_models.entities.Chapter
 @Dao
 interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
 
+
     @Query("SELECT * FROM library")
     suspend fun findAllBooks(): List<org.ireader.common_models.entities.Book>
 
@@ -78,7 +79,7 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
         """SELECT  library.*
         FROM  library
         WHERE library.favorite = 1
-        ORDER BY library.lastUpdated
+        ORDER BY library.lastUpdate
         """
     )
     fun subscribeBookByLastUpdate(): Flow<List<BookItem>>
@@ -88,7 +89,7 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
         MAX(history.readAt) as lastRead,
         COUNT(DISTINCT chapter.id) AS totalChapters,
         SUM(chapter.read) as isRead,
-        SUM(length(chapter.content) > 10) AS totalDownload
+        SUM(chapter.content > 10) AS totalDownload
         FROM  library
         LEFT JOIN chapter ON library.id = chapter.bookId
                 LEFT JOIN history ON history.bookId = chapter.bookId
@@ -107,8 +108,8 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
         CASE WHEN :desc = 0 AND :dateAdded = 1 THEN  dataAdded END ASC,
         CASE WHEN :desc = 1 AND :sortByTotalChapter = 1 THEN  totalChapters END DESC,
         CASE WHEN :desc = 0 AND :sortByTotalChapter = 1 THEN  totalChapters END ASC,
-        CASE WHEN :desc = 1 AND :lastChecked = 1 THEN  lastUpdated END DESC,
-        CASE WHEN :desc = 0 AND :lastChecked = 1 THEN  lastUpdated END ASC
+        CASE WHEN :desc = 1 AND :lastChecked = 1 THEN  lastUpdate END DESC,
+        CASE WHEN :desc = 0 AND :lastChecked = 1 THEN  lastUpdate END ASC
         """
     )
     fun subscribeAllInLibraryBooks(
@@ -126,7 +127,7 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
         """
     SELECT library.*,
     MAX(history.readAt) AS max,
-    SUM(length(chapter.content) > 10) AS totalDownload
+    SUM(chapter.content > 0) AS totalDownload
     FROM library
     LEFT JOIN chapter
     ON library.id = chapter.bookId
@@ -144,7 +145,7 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
     @Query(
         """
     SELECT library.*, MAX(chapter.dateUpload) AS max,
-    SUM(length(chapter.content) > 10) AS totalDownload
+    SUM(chapter.content > 10) AS totalDownload
     FROM library
     LEFT JOIN chapter
     ON library.id = chapter.bookId
@@ -159,7 +160,7 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
     @Query(
         """
     SELECT library.*, SUM(CASE WHEN chapter.read == 0 THEN 1 ELSE 0 END) AS unread,
-    SUM(length(chapter.content) > 10) AS totalDownload
+    SUM(chapter.content > 10) AS totalDownload
     FROM library
     JOIN chapter
     ON library.id = chapter.bookId
@@ -175,7 +176,7 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
     @Query(
         """
     SELECT library.*, 
-    SUM(length(chapter.content) > 10) AS totalDownload,
+    SUM(chapter.content > 10) AS totalDownload,
     SUM(CASE WHEN chapter.read == 0 THEN 1 ELSE 0 END) AS unread,
     COUNT(*) AS total
     FROM library
@@ -191,7 +192,7 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
         """
     SELECT library.*, 
     SUM(length(chapter.content) > 10) as total_download,
-    SUM(length(chapter.content) > 10) AS totalDownload,
+    SUM(chapter.content > 10) AS totalDownload,
     COUNT(*) AS total
     FROM library
     LEFT JOIN chapter
@@ -205,7 +206,7 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
     @Query(
         """
     SELECT library.*, 
-    SUM(length(chapter.content) > 10) AS totalDownload,
+    SUM(chapter.content > 10) AS totalDownload,
     SUM(CASE WHEN chapter.read == 0 THEN 1 ELSE 0 END) AS unread,
     COUNT(*) AS total
     FROM library

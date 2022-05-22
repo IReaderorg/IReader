@@ -4,20 +4,29 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import org.ireader.common_data.repository.BookCategoryRepository
+import org.ireader.common_data.repository.CategoryRepository
 import org.ireader.common_data.repository.FontRepository
+import org.ireader.common_data.repository.LibraryRepository
 import org.ireader.core_catalogs.service.CatalogRemoteRepository
+import org.ireader.data.local.dao.BookCategoryDao
 import org.ireader.data.local.dao.CatalogDao
+import org.ireader.data.local.dao.CategoryDao
 import org.ireader.data.local.dao.ChapterDao
 import org.ireader.data.local.dao.DownloadDao
 import org.ireader.data.local.dao.FontDao
 import org.ireader.data.local.dao.HistoryDao
 import org.ireader.data.local.dao.LibraryBookDao
+import org.ireader.data.local.dao.LibraryDao
 import org.ireader.data.local.dao.RemoteKeysDao
 import org.ireader.data.local.dao.UpdatesDao
+import org.ireader.data.repository.BookCategoryRepositoryImpl
 import org.ireader.data.repository.CatalogRemoteRepositoryImpl
+import org.ireader.data.repository.CategoryRepositoryImpl
 import org.ireader.data.repository.DownloadRepositoryImpl
 import org.ireader.data.repository.FontEntityRepositoryImpl
 import org.ireader.data.repository.HistoryRepositoryImpl
+import org.ireader.data.repository.LibraryRepositoryImpl
 import org.ireader.data.repository.LocalBookRepositoryImpl
 import org.ireader.data.repository.LocalChapterRepositoryImpl
 import org.ireader.data.repository.RemoteKeyRepositoryImpl
@@ -60,6 +69,20 @@ class RepositoryInject {
     ): FontRepository {
         return FontEntityRepositoryImpl(fontDao)
     }
+    @Singleton
+    @Provides
+    fun provideLibraryRepository(
+        dao:LibraryDao,
+    ): LibraryRepository {
+        return LibraryRepositoryImpl(dao)
+    }
+    @Singleton
+    @Provides
+    fun provideCategoryRepository(
+        dao:CategoryDao,
+    ): CategoryRepository {
+        return CategoryRepositoryImpl(dao)
+    }
 
     @Provides
     @Singleton
@@ -91,6 +114,14 @@ class RepositoryInject {
         historyDao: HistoryDao,
     ): org.ireader.common_data.repository.HistoryRepository {
         return HistoryRepositoryImpl(historyDao)
+    }
+
+    @Provides
+    @Singleton
+    fun providesBookCategoryRepository(
+        dao: BookCategoryDao,
+    ): BookCategoryRepository {
+        return BookCategoryRepositoryImpl(dao)
     }
 
 

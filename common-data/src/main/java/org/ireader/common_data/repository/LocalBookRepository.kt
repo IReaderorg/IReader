@@ -1,12 +1,14 @@
 package org.ireader.common_data.repository
 
 import kotlinx.coroutines.flow.Flow
-import org.ireader.common_models.SortType
 import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.BookItem
 import org.ireader.common_models.entities.Chapter
+import org.ireader.common_models.library.LibrarySort
 
 interface LocalBookRepository {
+
+    /***************************************************/
 
     /** Local GetUseCase**/
     suspend fun findAllBooks(): List<Book>
@@ -16,7 +18,7 @@ interface LocalBookRepository {
     suspend fun findBookByIds(id: List<Long>): List<Book>
 
     suspend fun findAllInLibraryBooks(
-        sortType: SortType = SortType.LastRead,
+        sortType: LibrarySort,
         isAsc: Boolean = false,
         unreadFilter: Boolean = false,
     ): List<Book>

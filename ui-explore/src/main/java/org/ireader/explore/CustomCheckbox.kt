@@ -1,11 +1,10 @@
 package org.ireader.explore
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.material.Checkbox
-import androidx.compose.material.CheckboxDefaults
-import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -15,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UnCheckedCheckBox(
     isChecked: Boolean?,
@@ -33,15 +33,15 @@ fun UnCheckedCheckBox(
     Box(
         contentAlignment = Alignment.Center,
     ) {
-        Checkbox(
+        androidx.compose.material3.Checkbox(
             checked = isChecked != null,
             onCheckedChange = {
                 onChecked(next)
             },
-            colors = if (isChecked == false) CheckboxDefaults.colors(
+            colors = if (isChecked == false) androidx.compose.material3.CheckboxDefaults.colors(
                 checkmarkColor = Color.Black.copy(.0f),
                 checkedColor = Color.Black.copy(.2f),
-            ) else CheckboxDefaults.colors()
+            ) else androidx.compose.material3.CheckboxDefaults.colors()
         )
         if (isChecked == false) {
             Icon(imageVector = Icons.Default.Close, contentDescription = "", tint = Color.White)

@@ -7,7 +7,6 @@ import org.ireader.domain.use_cases.download.delete.DeleteSavedDownloads
 import org.ireader.domain.use_cases.download.get.FindAllDownloadsUseCase
 import org.ireader.domain.use_cases.download.get.FindDownloadsUseCase
 import org.ireader.domain.use_cases.download.get.SubscribeDownloadsUseCase
-import org.ireader.domain.use_cases.download.get.SubscribeOneSavedDownload
 import org.ireader.domain.use_cases.download.insert.InsertDownload
 import org.ireader.domain.use_cases.download.insert.InsertDownloads
 
@@ -15,7 +14,6 @@ import org.ireader.domain.use_cases.download.insert.InsertDownloads
 data class DownloadUseCases(
     val subscribeDownloadsUseCase: SubscribeDownloadsUseCase,
     val findAllDownloadsUseCase: FindAllDownloadsUseCase,
-    val subscribeOneSavedDownload: SubscribeOneSavedDownload,
     val findDownloadsUseCase: FindDownloadsUseCase,
     val deleteAllSavedDownload: DeleteAllSavedDownload,
     val deleteSavedDownload: DeleteSavedDownload,

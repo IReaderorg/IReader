@@ -3,12 +3,22 @@
 package org.ireader.common_models.entities
 
 import androidx.room.Entity
+import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 import org.ireader.core_api.source.model.ChapterInfo
 
 @Serializable
-@Entity(tableName = CHAPTER_TABLE)
+@Entity(
+    tableName = CHAPTER_TABLE,
+    foreignKeys = [
+        ForeignKey(
+        entity = Book::class,
+        parentColumns = arrayOf("id"),
+        childColumns = arrayOf("bookId"),
+        onDelete =  ForeignKey.CASCADE
+    )]
+)
 data class Chapter(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
@@ -20,6 +30,7 @@ data class Chapter(
     val progress: Int = 0,
     val dateUpload: Long = 0,
     val dateFetch: Long = 0,
+    val sourceOrder: Int = 0,
     val content: List<String> = emptyList(),
     val number: Float = -1f,
     val translator: String = "",

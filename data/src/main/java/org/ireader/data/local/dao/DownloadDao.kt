@@ -5,33 +5,32 @@ import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface DownloadDao : BaseDao<org.ireader.common_models.entities.SavedDownload> {
+interface DownloadDao : BaseDao<org.ireader.common_models.entities.Download> {
 
     @Query(
         """
-        SELECT download.*,length(chapter.content) > 10 AS isDownloaded FROM download
-        JOIN chapter ON download.chapterId == chapter.id
+        SELECT download.*, library.id, library.title as bookName,
+        chapter.'key' as chapterKey, chapter.name as chapterName,
+        chapter.translator,library.sourceId,length(chapter.content) > 10 AS isDownloaded
+        FROM download
+        JOIN library ON download.bookId = library.id
+        JOIN chapter ON download.chapterId = chapter.id;
     """
     )
     fun subscribeAllDownloads(): Flow<List<org.ireader.common_models.entities.SavedDownloadWithInfo>>
 
-    @Query("SELECT * FROM download")
-    fun findAllDownloads(): List<org.ireader.common_models.entities.SavedDownload>
-
     @Query(
         """
-        DELETE FROM download where chapterId in (
-        SELECT chapterId FROM chapter WHERE length(chapter.content) > 1
-        )
+                SELECT download.*, library.id,
+            library.title as bookName, chapter.'key' as chapterKey,
+            chapter.name as chapterName,
+        chapter.translator,library.sourceId,length(chapter.content) > 10 AS isDownloaded
+        FROM download
+        JOIN library ON download.bookId = library.id
+        JOIN chapter ON download.chapterId = chapter.id;
     """
     )
-    suspend fun deleteDownloadedBooks()
-
-    @Query("SELECT * FROM download WHERE chapterId in (:downloadIds)")
-    suspend fun findDownloads(downloadIds: List<Long>): List<org.ireader.common_models.entities.SavedDownload>
-
-    @Query("SELECT * FROM download WHERE bookId = :bookId")
-    fun findDownload(bookId: Long): Flow<org.ireader.common_models.entities.SavedDownload?>
+    fun findAllDownloads(): List<org.ireader.common_models.entities.SavedDownloadWithInfo>
 
     @Query("DELETE FROM download WHERE bookId = :bookId ")
     suspend fun deleteSavedDownloadByBookId(bookId: Long)

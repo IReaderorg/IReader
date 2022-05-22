@@ -10,19 +10,20 @@ import org.ireader.core_api.source.model.MangaInfo
 data class Book(
     @PrimaryKey(autoGenerate = true)
     override val id: Long = 0,
+    override val sourceId: Long,
+    override val title: String,
+    val key: String,
     val tableId: Long = 0,
     val type:Long = 0,
-    override val sourceId: Long,
-    val key: String,
-    override val title: String,
-    override val author: String = "",
+    val author: String = "",
     val description: String = "",
     val genres: List<String> = emptyList(),
     val status: Int = 0,
     override val cover: String = "",
     override val customCover: String = "",
     override val favorite: Boolean = false,
-    val lastUpdated: Long = 0,
+    val lastUpdate: Long = 0,
+    val lastInit: Long = 0,
     val dataAdded: Long = 0,
     val viewer: Int = 0,
     val flags: Int = 0,
@@ -75,7 +76,7 @@ fun MangaInfo.toBook(sourceId: Long, tableId: Long = 0, lastUpdated: Long = 0): 
         flags = 0,
         key = this.key,
         dataAdded = 0L,
-        lastUpdated = lastUpdated,
+        lastUpdate = lastUpdated,
         favorite = false,
         title = this.title,
         status = this.status,
@@ -95,7 +96,7 @@ fun MangaInfo.fromBookInfo(sourceId: Long): Book {
         flags = 0,
         key = this.key,
         dataAdded = 0L,
-        lastUpdated = 0L,
+        lastUpdate = 0L,
         favorite = false,
         title = this.title,
         status = this.status,
@@ -140,7 +141,7 @@ fun BookWithInfo.toBook(): Book {
         flags = 0,
         key = this.link,
         dataAdded = 0L,
-        lastUpdated = 0L,
+        lastUpdate = 0L,
         favorite = false,
         title = this.title,
         status = this.status,
@@ -149,12 +150,37 @@ fun BookWithInfo.toBook(): Book {
         author = this.author,
     )
 }
+interface BookBase {
+    val id: Long
+    val sourceId: Long
+    val key: String
+    val title: String
+}
+
+data class LibraryBook(
+    override val id: Long,
+    override val sourceId: Long,
+    override val key: String,
+    override val title: String,
+    val status: Int,
+    val cover: String,
+    val lastUpdate: Long = 0,
+    val unread: Int,
+) : BookBase {
+    fun toBookItem() : BookItem {
+        return BookItem(
+            id = id,
+            sourceId = sourceId,
+            title = title,
+            cover = cover,
+        )
+    }
+}
 
 interface BaseBook {
     val id: Long
     val sourceId: Long
     val title: String
-    val author: String
     val favorite: Boolean
     val cover: String
     val customCover: String
@@ -164,9 +190,17 @@ data class BookItem(
     override val id: Long = 0,
     override val sourceId: Long,
     override val title: String,
-    override val author: String = "",
     override val favorite: Boolean = false,
     override val cover: String = "",
     override val customCover: String = "",
-    val totalDownload: Int? = 0,
 ) : BaseBook
+
+data class DownloadedBook(
+    val id:Long,
+    val totalChapters: Int,
+    val totalDownloadedChapter:Int
+)
+
+
+
+

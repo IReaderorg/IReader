@@ -1,7 +1,7 @@
 package org.ireader.domain.use_cases.preferences.reader_preferences
 
-import org.ireader.common_models.FilterType
-import org.ireader.common_models.SortType
+import org.ireader.common_models.library.LibrarySort
+import org.ireader.common_models.library.deserialize
 import org.ireader.core_ui.preferences.AppPreferences
 import org.ireader.core_ui.preferences.ReaderPreferences
 import org.ireader.core_ui.theme.OrientationMode
@@ -36,12 +36,12 @@ class TextAlignmentUseCase(
 class SortersUseCase(
     private val appPreferences: AppPreferences,
 ) {
-    fun save(value: Int) {
+    fun save(value: String) {
         appPreferences.sortLibraryScreen().set(value)
     }
 
-    suspend fun read(): SortType {
-        return mapSortType(appPreferences.sortLibraryScreen().read())
+    suspend fun read(): LibrarySort {
+        return LibrarySort.deserialize(appPreferences.sortLibraryScreen().read())
     }
 }
 
@@ -54,46 +54,6 @@ class SortersDescUseCase(
 
     suspend fun read(): Boolean {
         return appPreferences.sortDescLibraryScreen().read()
-    }
-}
-
-fun mapSortType(input: Int): SortType {
-    return when (input) {
-        0 -> {
-            SortType.Alphabetically
-        }
-        1 -> {
-            SortType.LastRead
-        }
-        2 -> {
-            SortType.LastChecked
-        }
-        3 -> {
-            SortType.TotalChapters
-        }
-        4 -> {
-            SortType.LatestChapter
-        }
-        5 -> {
-            SortType.DateFetched
-        }
-        6 -> {
-            SortType.DateAdded
-        }
-        else -> {
-            SortType.LastRead
-        }
-    }
-}
-
-fun mapFilterType(input: Int): FilterType {
-    return when (input) {
-        0 -> {
-            FilterType.Disable
-        }
-        else -> {
-            FilterType.Unread
-        }
     }
 }
 

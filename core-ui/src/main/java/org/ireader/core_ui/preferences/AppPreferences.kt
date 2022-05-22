@@ -1,5 +1,6 @@
 package org.ireader.core_ui.preferences
 
+import org.ireader.common_models.library.LibrarySort
 import org.ireader.core_api.prefs.Preference
 import org.ireader.core_api.prefs.PreferenceStore
 
@@ -43,8 +44,8 @@ class AppPreferences(
     }
 
 
-    fun sortLibraryScreen(): Preference<Int> {
-        return preferenceStore.getInt(SORT_LIBRARY_SCREEN, 0)
+    fun sortLibraryScreen(): Preference<String> {
+        return preferenceStore.getString(SORT_LIBRARY_SCREEN, LibrarySort.Type.LastRead.name)
     }
 
     fun sortDescLibraryScreen(): Preference<Boolean> {

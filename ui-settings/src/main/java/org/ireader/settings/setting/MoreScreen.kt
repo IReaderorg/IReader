@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Label
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SettingsBackupRestore
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -35,6 +36,7 @@ fun MoreScreen(
     onDownloadScreen: () -> Unit,
     onAppearanceScreen: () -> Unit,
     onBackupScreen: () -> Unit,
+    onCategory:() -> Unit,
     onSettings: () -> Unit,
     onAbout: () -> Unit,
     onHelp: () -> Unit,
@@ -71,6 +73,13 @@ fun MoreScreen(
                 title = stringResource(id = R.string.backup_and_restore),
                 icon = Icons.Default.SettingsBackupRestore,
                 onClick = onBackupScreen,
+            )
+        }
+        item {
+            PreferenceRow(
+                title = stringResource(id = R.string.category),
+                icon = Icons.Default.Label,
+                onClick = onCategory,
             )
         }
 

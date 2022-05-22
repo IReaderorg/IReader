@@ -82,20 +82,20 @@ fun LinearListDisplay(
     isLocal: Boolean,
     goToLatestChapter: (book: BookItem) -> Unit,
     isLoading: Boolean = false,
-    onEndReach: (itemIndex: Int) -> Unit = {},
 ) {
     LazyColumn(modifier = Modifier.fillMaxSize(), state = scrollState) {
         items(count = books.size, key = { index ->
             books[index].id
-        }, contentType = { "books"  }) { index ->
-            onEndReach(index)
+        },
+            contentType = { "books"  }
+        ) { index ->
             LinearBookItem(
                 title = books[index].title,
                 book = books[index],
                 modifier = Modifier.combinedClickable(
                     onClick = { onClick(books[index]) },
                     onLongClick = { onClick(books[index]) },
-                ),
+                ).animateItemPlacement(),
                 selected = books[index].id in selection
             )
         }

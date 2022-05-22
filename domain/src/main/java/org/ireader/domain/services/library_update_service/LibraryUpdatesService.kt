@@ -106,7 +106,7 @@ class LibraryUpdatesService @AssistedInject constructor(
                             )
                             insertUseCases.insertBook(
                                 book.copy(
-                                    lastUpdated = Clock.System.now()
+                                    lastUpdate = Clock.System.now()
                                         .toEpochMilliseconds()
                                 )
                             )

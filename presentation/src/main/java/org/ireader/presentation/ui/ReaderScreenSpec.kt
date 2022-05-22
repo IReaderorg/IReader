@@ -138,13 +138,12 @@ object ReaderScreenSpec : ScreenSpec {
 
         LaunchedEffect(key1 = chapterIdKey) {
             kotlin.runCatching {
-                val id = chapterIdKey
                 vm.stateChapters.firstOrNull {
                     it.id == chapterIdKey
-                }.let {
+                }?.let {
                     vm.stateChapter = it
                 }
-                val index = vm.stateChapters.indexOfFirst { it.id == id }
+                val index = vm.stateChapters.indexOfFirst { it.id == chapterIdKey }
                 if (index != -1) {
                     vm.currentChapterIndex = index
                 }
@@ -225,9 +224,8 @@ object ReaderScreenSpec : ScreenSpec {
                                 vm.apply {
                                     val nextChapter = vm.nextChapter()
                                     scope.launch {
-                                        if (rest || !vm.readingMode.value) {
-                                            scrollState.scrollToItem(0, 0)
-                                            vm.chapterShell.clear()
+                                        if (rest) {
+                                            vm.clearChapterShell(scrollState)
                                         }
                                         vm.getLocalChapter(
                                             nextChapter.id,
@@ -254,9 +252,8 @@ object ReaderScreenSpec : ScreenSpec {
                             if (currentIndex > 0) {
                                 val prevChapter = vm.prevChapter()
                                 scope.launch {
-                                    if (reset || !vm.readingMode.value) {
-                                        scrollState.scrollToItem(0, 0)
-                                        vm.chapterShell.clear()
+                                    if (reset) {
+                                        vm.clearChapterShell(scrollState)
                                     }
                                     val ch = vm.getLocalChapter(
                                         prevChapter.id,
@@ -383,10 +380,7 @@ object ReaderScreenSpec : ScreenSpec {
                         val index = vm.stateChapters.indexOfFirst { it.id == ch.id }
                         if (index != -1) {
                             scope.launch {
-                                if (!vm.readingMode.value) {
-                                    scrollState?.scrollToItem(0, 0)
-                                    vm.chapterShell.clear()
-                                }
+                                vm.clearChapterShell(scrollState)
                                 vm.getLocalChapter(ch.id)
                             }
                             scope.launch {

@@ -28,7 +28,6 @@ fun GridLayoutComposable(
     isLocal: Boolean,
     goToLatestChapter: (book: BookItem) -> Unit,
     isLoading: Boolean = false,
-    onEndReach: (itemIndex: Int) -> Unit = {},
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         LazyVerticalGrid(
@@ -42,7 +41,6 @@ fun GridLayoutComposable(
                     books[index].id
                 }, contentType = { "books" },
                 ) { index ->
-                    onEndReach(index)
                     BookImage(
                         onClick = { onClick(books[index]) },
                         book = books[index],
@@ -50,7 +48,7 @@ fun GridLayoutComposable(
                         selected = books[index].id in selection,
                         onLongClick = { onLongClick(books[index]) },
                     ) {
-                        if (books[index].totalDownload != 0) {
+                        if (isLocal) {
                             GoToLastReadComposable(onClick = { goToLatestChapter(books[index]) })
                         }
                         if (!isLocal && books[index].favorite) {

@@ -339,8 +339,13 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
                 return@TextToSpeech
             }
             if (status == TextToSpeech.SUCCESS) {
-                state.voices = player?.voices?.toList() ?: emptyList()
-                state.languages = player?.availableLanguages?.toList() ?: emptyList()
+                /**
+                 * This lines throws an error when device doesn't have tts
+                 */
+                kotlin.runCatching {
+                    state.voices = player?.voices?.toList() ?: emptyList()
+                    state.languages = player?.availableLanguages?.toList() ?: emptyList()
+                }
                 readPrefs()
             }
         }
@@ -391,7 +396,6 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
             }
             ACTION_CANCEL -> {
                 startService(Player.CANCEL)
-                return START_STICKY
             }
             null -> {}
             else -> Log.error { "Unknown Intent $intent" }

@@ -1,6 +1,8 @@
 package org.ireader.data.repository
 
 import kotlinx.coroutines.flow.Flow
+import org.ireader.common_models.entities.Download
+import org.ireader.common_models.entities.SavedDownloadWithInfo
 import org.ireader.data.local.dao.DownloadDao
 
 class DownloadRepositoryImpl(private val dao: DownloadDao) :
@@ -10,31 +12,23 @@ class DownloadRepositoryImpl(private val dao: DownloadDao) :
         return dao.subscribeAllDownloads()
     }
 
-    override suspend fun findAllDownloads(): List<org.ireader.common_models.entities.SavedDownload> {
+    override suspend fun findAllDownloads(): List<SavedDownloadWithInfo> {
         return dao.findAllDownloads()
     }
 
-    override suspend fun findDownloads(downloadIds: List<Long>): List<org.ireader.common_models.entities.SavedDownload> {
-        return dao.findDownloads(downloadIds)
-    }
-
-    override fun findSavedDownload(bookId: Long): Flow<org.ireader.common_models.entities.SavedDownload?> {
-        return dao.findDownload(bookId)
-    }
-
-    override suspend fun insertDownload(savedDownload: org.ireader.common_models.entities.SavedDownload): Long {
+    override suspend fun insertDownload(savedDownload: Download): Long {
         return dao.insert(savedDownload)
     }
 
-    override suspend fun insertDownloads(savedDownloads: List<org.ireader.common_models.entities.SavedDownload>): List<Long> {
+    override suspend fun insertDownloads(savedDownloads: List<Download>): List<Long> {
         return dao.insert(savedDownloads)
     }
 
-    override suspend fun deleteSavedDownload(savedDownload: org.ireader.common_models.entities.SavedDownload) {
+    override suspend fun deleteSavedDownload(savedDownload: Download) {
         dao.delete(savedDownload)
     }
 
-    override suspend fun deleteSavedDownload(savedDownloads: List<org.ireader.common_models.entities.SavedDownload>) {
+    override suspend fun deleteSavedDownload(savedDownloads: List<Download>) {
         return dao.delete(savedDownloads)
     }
 

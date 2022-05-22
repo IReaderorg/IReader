@@ -17,7 +17,6 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.Text
@@ -26,6 +25,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -56,6 +56,7 @@ import org.ireader.core_api.source.model.Filter
 import org.ireader.core_api.source.model.Listing
 import org.ireader.core_ui.theme.ContentAlpha
 import org.ireader.core_ui.ui.kaomojis
+import org.ireader.core_ui.ui_components.isScrolledToTheEnd
 import org.ireader.explore.viewmodel.ExploreState
 import org.ireader.ui_explore.R
 
@@ -120,6 +121,12 @@ fun ExploreScreen(
             setSnackBarText(errors.asString(context))
         }
     }
+    LaunchedEffect(key1 = scrollState.isScrolledToTheEnd() && !vm.endReached && !vm.isLoading ) {
+        loadItems(false)
+    }
+    LaunchedEffect(key1 = gridState.isScrolledToTheEnd() && !vm.endReached && !vm.isLoading ) {
+        loadItems(false)
+    }
         Scaffold(
             modifier = Modifier.padding(scaffoldPadding),
             floatingActionButtonPosition = androidx.compose.material3.FabPosition.End,
@@ -176,11 +183,6 @@ fun ExploreScreen(
                                 onBook(book)
                             },
                             isLoading = vm.isLoading,
-                            onEndReachValidator = { index ->
-                                if (index >= vm.stateItems.lastIndex && !vm.endReached && !vm.isLoading) {
-                                    loadItems(false)
-                                }
-                            }
                         )
                     }
                 }

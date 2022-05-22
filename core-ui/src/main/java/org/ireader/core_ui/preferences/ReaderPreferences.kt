@@ -100,7 +100,7 @@ class ReaderPreferences @OptIn(ExperimentalTextApi::class) constructor(
         return preferenceStore.getInt(SAVED_FONT_HEIGHT, 25)
     }
     fun readingMode(): Preference<Boolean> {
-        return preferenceStore.getBoolean(READING_MODE, true)
+        return preferenceStore.getBoolean(READING_MODE, false)
     }
 
     fun paragraphDistance(): Preference<Int> {

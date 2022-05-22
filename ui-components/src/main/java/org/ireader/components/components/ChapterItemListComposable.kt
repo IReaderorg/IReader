@@ -3,7 +3,7 @@ package org.ireader.components.components
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
+import androidx.compose.material3.Icon
 import androidx.compose.material.ListItem
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons

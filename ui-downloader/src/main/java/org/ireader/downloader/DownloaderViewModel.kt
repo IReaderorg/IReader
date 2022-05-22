@@ -7,7 +7,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import org.ireader.common_models.entities.SavedDownload
-import org.ireader.core_api.log.Log
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.services.downloaderService.DownloadServiceStateImpl
 import org.ireader.domain.services.downloaderService.DownloaderService
@@ -30,7 +29,7 @@ class DownloaderViewModel @Inject constructor(
     fun insertSavedDownload(download: SavedDownload) {
         viewModelScope.launch(Dispatchers.IO) {
             downloadUseCases.insertDownload(
-                download = download
+                download = download.toDownload()
             )
         }
     }
@@ -68,7 +67,7 @@ class DownloaderViewModel @Inject constructor(
     }
     fun deleteSelectedDownloads(list: List<SavedDownload>) {
         viewModelScope.launch(Dispatchers.IO) {
-            downloadUseCases.deleteSavedDownloads(list)
+            downloadUseCases.deleteSavedDownloads(list.map { it.toDownload() })
         }
     }
 

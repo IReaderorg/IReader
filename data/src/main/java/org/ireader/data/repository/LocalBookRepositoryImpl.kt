@@ -3,8 +3,9 @@ package org.ireader.data.repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import org.ireader.common_models.SortType
+import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.BookItem
+import org.ireader.common_models.library.LibrarySort
 import org.ireader.data.local.dao.LibraryBookDao
 import org.ireader.data.local.dao.RemoteKeysDao
 
@@ -12,6 +13,7 @@ class LocalBookRepositoryImpl(
     private val bookDao: LibraryBookDao,
     private val remoteKeysDao: RemoteKeysDao,
 ) : org.ireader.common_data.repository.LocalBookRepository {
+
     override suspend fun findAllBooks(): List<org.ireader.common_models.entities.Book> {
         return bookDao.findAllBooks()
     }
@@ -26,6 +28,14 @@ class LocalBookRepositoryImpl(
 
     override suspend fun findBookByIds(id: List<Long>): List<org.ireader.common_models.entities.Book> {
         return bookDao.findBookByIds(id)
+    }
+
+    override suspend fun findAllInLibraryBooks(
+        sortType: LibrarySort,
+        isAsc: Boolean,
+        unreadFilter: Boolean
+    ): List<Book> {
+        return bookDao.findAllInLibraryBooks()
     }
 
     override suspend fun findUnreadBooks(): List<org.ireader.common_models.entities.BookItem> {
@@ -83,13 +93,13 @@ class LocalBookRepositoryImpl(
 //        }
     }
 
-    override suspend fun findAllInLibraryBooks(
-        sortType: SortType,
-        isAsc: Boolean,
-        unreadFilter: Boolean,
-    ): List<org.ireader.common_models.entities.Book> {
-        return bookDao.findAllInLibraryBooks()
-    }
+//    override suspend fun findAllInLibraryBooks(
+//        sortType: SortType,
+//        isAsc: Boolean,
+//        unreadFilter: Boolean,
+//    ): List<org.ireader.common_models.entities.Book> {
+//        return bookDao.findAllInLibraryBooks()
+//    }
 
     override fun getBooksByQueryPagingSource(query: String): Flow<org.ireader.common_models.entities.Book> {
         return bookDao.searchBook(query)

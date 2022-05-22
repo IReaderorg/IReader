@@ -8,6 +8,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import org.ireader.core_api.prefs.PreferenceStore
 import org.ireader.core_ui.preferences.AppPreferences
+import org.ireader.core_ui.preferences.LibraryPreferences
 import org.ireader.core_ui.preferences.ReaderPreferences
 import org.ireader.core_ui.preferences.UiPreferences
 import javax.inject.Singleton
@@ -47,6 +48,13 @@ class PreferencesInject {
             preferenceStore,
             provider
         )
+    }
+    @Provides
+    @Singleton
+    fun provideLibraryPreferences(
+        preferenceStore: PreferenceStore,
+    ): LibraryPreferences {
+        return LibraryPreferences(preferenceStore)
     }
 
 }

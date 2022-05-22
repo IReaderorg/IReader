@@ -87,6 +87,9 @@ object MoreScreenSpec : BottomNavScreenSpec {
             },
             onHelp = {
                 uriHandler.openUri(discord)
+            },
+            onCategory = {
+                navController.navigate(CategoryScreenSpec.navHostRoute)
             }
         )
     }

@@ -10,12 +10,15 @@ import dagger.hilt.components.SingletonComponent
 import org.ireader.data.local.AppDatabase
 import org.ireader.data.local.MIGRATION_11_12
 import org.ireader.data.local.MIGRATION_8_9
+import org.ireader.data.local.dao.BookCategoryDao
 import org.ireader.data.local.dao.CatalogDao
+import org.ireader.data.local.dao.CategoryDao
 import org.ireader.data.local.dao.ChapterDao
 import org.ireader.data.local.dao.DownloadDao
 import org.ireader.data.local.dao.FontDao
 import org.ireader.data.local.dao.HistoryDao
 import org.ireader.data.local.dao.LibraryBookDao
+import org.ireader.data.local.dao.LibraryDao
 import org.ireader.data.local.dao.RemoteKeysDao
 import org.ireader.data.local.dao.UpdatesDao
 import javax.inject.Singleton
@@ -65,9 +68,18 @@ object DatabaseInject {
         fun provideFontDao(db: AppDatabase): FontDao = db.fontDao
 
         @Provides
+        fun provideCategoryDao(db: AppDatabase): CategoryDao = db.categoryDao
+        @Provides
+        fun provideBookCategoryDao(db: AppDatabase): BookCategoryDao = db.bookCategoryDao
+
+        @Provides
         fun provideDownloadDao(
             db: AppDatabase,
         ): DownloadDao = db.downloadDao
+        @Provides
+        fun provideLibraryDao(
+            db: AppDatabase,
+        ): LibraryDao = db.libraryDao
 
         @Provides
         fun provideCatalogDao(db: AppDatabase): CatalogDao = db.catalogDao

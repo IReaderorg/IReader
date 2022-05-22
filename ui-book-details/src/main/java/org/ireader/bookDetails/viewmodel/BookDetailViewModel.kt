@@ -64,7 +64,7 @@ class BookDetailViewModel @Inject constructor(
                 toggleBookLoading(false)
                 if (!initBooks) {
                     initBooks = true
-                    if (book.lastUpdated < 1L && source != null) {
+                    if (book.lastUpdate < 1L && source != null) {
                         getRemoteBookDetail(book, catalogSource)
                         getRemoteChapterDetail(book, catalogSource)
                     } else {

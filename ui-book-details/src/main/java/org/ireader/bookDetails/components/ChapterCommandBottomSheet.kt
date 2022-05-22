@@ -110,7 +110,7 @@ fun ChapterCommandBottomSheet(
                         fontWeight = FontWeight.W400,
                         color = MaterialTheme.colorScheme.onSurface.copy(.8f),
                         textAlign = TextAlign.Justify,
-                        style = MaterialTheme.typography.headlineSmall,
+                        style = MaterialTheme.typography.labelMedium,
                     )
                 }
                 else -> {}

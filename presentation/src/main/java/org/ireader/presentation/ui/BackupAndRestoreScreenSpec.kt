@@ -61,6 +61,11 @@ object BackupAndRestoreScreenSpec : ScreenSpec {
         )
     }
 
+
+    private val json = Json(Json) {
+        ignoreUnknownKeys = true
+    }
+
     @OptIn(
         ExperimentalAnimationApi::class,
         ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class
@@ -131,7 +136,7 @@ object BackupAndRestoreScreenSpec : ScreenSpec {
                                     val txt = stream.readBytes().decodeToString()
                                     kotlin.runCatching {
                                         vm.insertBackup(
-                                            Json.decodeFromString<List<BackUpBook>>(
+                                            json.decodeFromString<List<BackUpBook>>(
                                                 txt
                                             )
                                         )

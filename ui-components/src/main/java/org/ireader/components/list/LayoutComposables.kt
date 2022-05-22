@@ -25,9 +25,7 @@ fun LayoutComposable(
     isLocal: Boolean,
     goToLatestChapter: (book: BookItem) -> Unit = {},
     isLoading: Boolean = false,
-    onEndReachValidator: (itemIndex: Int) -> Unit = {},
 ) {
-
     when (layout) {
         is LayoutType.GridLayout -> {
             GridLayoutComposable(
@@ -40,7 +38,6 @@ fun LayoutComposable(
                 scrollState = gridState,
                 isLocal = isLocal,
                 goToLatestChapter = { goToLatestChapter(it) },
-                onEndReach = onEndReachValidator,
                 isLoading = isLoading
             )
         }
@@ -53,7 +50,6 @@ fun LayoutComposable(
                 selection = selection,
                 onLongClick = { onLongClick(it) },
                 goToLatestChapter = { goToLatestChapter(it) },
-                onEndReach = onEndReachValidator,
                 isLoading = isLoading
             )
         }
@@ -67,7 +63,6 @@ fun LayoutComposable(
                 selection = selection,
                 onLongClick = { onLongClick(it) },
                 goToLatestChapter = { goToLatestChapter(it) },
-                onEndReach = onEndReachValidator,
                 isLoading = isLoading
             )
         }

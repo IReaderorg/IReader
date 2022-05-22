@@ -9,9 +9,14 @@
     <string name="cancel">Cancel</string>
     <string name="apply">Apply</string>
     <string name="add_as_new">New</string>
+    <string name="add">Add</string>
     <string name="view_book">View Book</string>
     <string name="search_hint">Search…</string>
+    <string name="hint">…</string>
     <string name="about">About</string>
+    <string name="edit_category">Edit Categories</string>
+    <string name="confirm">Confirm</string>
+    <string name="category">Categories</string>
     <string name="help">Help</string>
     <string name="pref_incognito_mode">Incognito mode</string>
     <string name="pref_incognito_mode_summary">Pause reading history</string>
