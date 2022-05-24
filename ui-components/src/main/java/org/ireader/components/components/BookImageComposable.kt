@@ -10,7 +10,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -32,17 +31,6 @@ fun BookImageComposable(
 ) {
     Box(modifier = modifier
         .fillMaxSize(),) {
-//        val painter = rememberAsyncImagePainter(
-//            model = ImageRequest.Builder(LocalContext.current)
-//                .apply {
-//                    data(image)
-//                    crossfade(700)
-//                    placeholder(placeholder)
-//                    error(placeholder)
-//                }
-//                .build(),
-//            contentScale = ContentScale.Crop
-//        )
         var isLoaded by remember {
             mutableStateOf(false)
         }
@@ -71,28 +59,8 @@ fun BookImageComposable(
             },
             contentDescription = "an image",
             alignment = alignment,
-            filterQuality = FilterQuality.High,
         )
 
-//        Image(
-//            modifier = Modifier.fillMaxSize(),
-//            contentScale = contentScale,
-//            painter = rememberAsyncImagePainter(
-//                model = ImageRequest.Builder(LocalContext.current)
-//                    .apply {
-//                        data(image)
-//                        crossfade(700)
-//                        error(placeholder)
-//                        if (!showLoading) {
-//                            placeholder(placeholder)
-//                        }
-//                    }
-//                    .build(),
-//                contentScale = ContentScale.Crop
-//            ),
-//            contentDescription = "an image",
-//            alignment = alignment,
-//        )
     }
 
 }

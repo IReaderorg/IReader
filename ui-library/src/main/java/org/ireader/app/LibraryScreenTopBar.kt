@@ -87,7 +87,7 @@ private fun RegularTopBar(
                 BigSizeTextComposable(text = stringResource(R.string.library))
             } else {
                 AppTextField(
-                    query = vm.searchQuery,
+                    query = vm.searchQuery?:"",
                     onValueChange = { query ->
                         vm.searchQuery = query
                         onSearch()

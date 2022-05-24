@@ -31,6 +31,7 @@ class CoilLoaderFactory @Inject constructor(
             getLocalCatalog,
             cache,
             data = BookCover(0, 0, "", false),
+            client = client.default
         )
 
         return ImageLoader.Builder(context)

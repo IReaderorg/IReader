@@ -1,22 +1,16 @@
 package org.ireader.presentation.ui
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.NewReleases
-import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
-import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavController
 import org.ireader.common_extensions.async.viewModelIOCoroutine
 import org.ireader.common_models.entities.UpdateWithInfo.Companion.toUpdate
 import org.ireader.domain.ui.NavigationArgs
@@ -39,13 +33,9 @@ object UpdateScreenSpec : BottomNavScreenSpec {
     @ExperimentalMaterialApi
     @Composable
     override fun TopBar(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+        controller: ScreenSpec.Controller
     ) {
-        val vm: UpdatesViewModel = hiltViewModel(navBackStackEntry)
+        val vm: UpdatesViewModel = hiltViewModel(controller.navBackStackEntry)
         UpdatesToolbar(
             state = vm,
             onClickCancelSelection = {
@@ -83,22 +73,17 @@ object UpdateScreenSpec : BottomNavScreenSpec {
     )
     @Composable
     override fun Content(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-        scaffoldPadding: PaddingValues,
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+        controller: ScreenSpec.Controller
     ) {
-        val vm: UpdatesViewModel = hiltViewModel(navBackStackEntry)
+        val vm: UpdatesViewModel = hiltViewModel(controller.navBackStackEntry)
         UpdateScreen(
-            modifier = Modifier.padding(scaffoldPadding),
+            modifier = Modifier.padding(controller.scaffoldPadding),
             state = vm,
             onUpdate = { update ->
                 if (vm.hasSelection) {
                     vm.addUpdate(update)
                 } else {
-                    navController.navigate(
+                    controller.navController.navigate(
                         ReaderScreenSpec.buildRoute(
                             update.bookId,
                             update.sourceId,
@@ -111,7 +96,7 @@ object UpdateScreenSpec : BottomNavScreenSpec {
                 vm.addUpdate(it)
             },
             onCoverUpdate = { update ->
-                navController.navigate(
+                controller.navController.navigate(
                     BookDetailScreenSpec.buildRoute(
                         update.sourceId,
                         update.bookId

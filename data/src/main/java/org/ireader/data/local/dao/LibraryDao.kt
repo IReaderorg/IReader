@@ -10,13 +10,59 @@ import org.ireader.common_models.entities.LibraryBook
 @Dao
 interface LibraryDao : BaseDao<org.ireader.common_models.entities.Book> {
 
+
+
+
+    @Query("""
+            SELECT M.*, COALESCE(MC.categoryId, 0) AS library
+    FROM (
+        SELECT library.*, COALESCE(C.unreadCount, 0) AS unread, COALESCE(R.readCount, 0) AS readCount
+        FROM library
+        LEFT JOIN (
+            SELECT chapter.bookId, COUNT(*) AS unreadCount
+            FROM chapter
+            WHERE chapter.read = 0
+            GROUP BY chapter.bookId
+        ) AS C
+        ON library.id = C.bookId
+        LEFT JOIN (
+            SELECT chapter.bookId, COUNT(*) AS readCount
+            FROM chapter
+            GROUP BY chapter.bookId
+        ) AS R
+        ON library.id = R.bookId
+        WHERE library.favorite = 1
+        GROUP BY library.id
+        ORDER BY library.title
+    ) AS M
+    LEFT JOIN (SELECT * FROM bookcategory ) AS MC
+        ON MC.bookId = M.id
+    """)
+    fun UniqeQuery() : Flow<List<LibraryBook>>
+
     @Query(
         """
-SELECT library.id, library.sourceId, library.`key`, library.title, library.status, library.cover,
-  library.lastUpdate, COUNT(chapter.id) AS unread, MAX(history.readAt) as lastRead
+
+                SELECT library.id, library.sourceId, library.`key`, library.title, library.status, library.cover,
+  library.lastUpdate,COALESCE(C.unreadCount, 0)  as unread, COALESCE(R.readCount, 0) AS readCount, MAX(history.readAt) as lastRead
     FROM library
-    LEFT JOIN chapter ON library.id = chapter.bookId AND chapter.read = 0
-    LEFT JOIN history ON history.bookId == library.id
+        LEFT JOIN (
+            SELECT chapter.bookId, COUNT(*)  AS unreadCount,chapter.dateFetch
+            FROM chapter
+            WHERE chapter.read = 0
+            GROUP BY chapter.bookId
+        ) AS C
+        ON library.id = C.bookId
+        LEFT JOIN (
+            SELECT chapter.bookId, COUNT(*) AS readCount
+            FROM chapter
+            WHERE chapter.read = 1
+            GROUP BY chapter.bookId
+        ) AS R
+        ON library.id = R.bookId
+    LEFT JOIN (
+    SELECT history.readAt,history.bookId FROM history
+    ) AS history ON history.bookId == library.id
     GROUP BY library.id
     HAVING library.favorite = 1
     ORDER BY
@@ -26,7 +72,7 @@ SELECT library.id, library.sourceId, library.`key`, library.title, library.statu
       WHEN :sort = 'lastUpdated' THEN lastUpdate
       WHEN :sort = 'unread' THEN unread
       WHEN :sort = 'dateAdded' THEN dataAdded
-      WHEN :sort = 'dateFetched' THEN dateFetch
+      WHEN :sort = 'dateFetched' THEN C.dateFetch
       WHEN :sort = 'source' THEN sourceId
     END,
     CASE
@@ -35,7 +81,7 @@ SELECT library.id, library.sourceId, library.`key`, library.title, library.statu
       WHEN :sort = 'lastUpdatedDesc' THEN lastUpdate
       WHEN :sort = 'unreadDesc' THEN unread
       WHEN :sort = 'dateAddedDesc' THEN dataAdded
-      WHEN :sort = 'dateFetchedDesc' THEN dateFetch
+      WHEN :sort = 'dateFetchedDesc' THEN C.dateFetch
       WHEN :sort = 'sourceDesc' THEN sourceId
     END DESC,
     CASE
@@ -48,13 +94,28 @@ SELECT library.id, library.sourceId, library.`key`, library.title, library.statu
 
     @Query(
         """
-SELECT library.id, library.sourceId, library.`key`, library.title, library.status, library.cover,
-  library.lastUpdate, COUNT(chapter.id) AS unread, MAX(history.readAt) as lastRead
+                SELECT library.id, library.sourceId, library.`key`, library.title, library.status, library.cover,
+  library.lastUpdate,COALESCE(C.unreadCount, 0) AS unread, COALESCE(R.readCount, 0) AS readCount, MAX(history.readAt) as lastRead
     FROM library
-    LEFT JOIN chapter ON library.id = chapter.bookId AND chapter.read = 0
-    LEFT JOIN history ON history.bookId == library.id
+        LEFT JOIN (
+            SELECT chapter.bookId, COUNT(*)  AS unreadCount,chapter.dateFetch
+            FROM chapter
+            WHERE chapter.read = 0
+            GROUP BY chapter.bookId
+        ) AS C
+        ON library.id = C.bookId
+        LEFT JOIN (
+            SELECT chapter.bookId, COUNT(*) AS readCount
+            FROM chapter
+            WHERE chapter.read = 1
+            GROUP BY chapter.bookId
+        ) AS R
+        ON library.id = R.bookId
+    LEFT JOIN (
+    SELECT history.readAt,history.bookId FROM history
+    ) AS history ON history.bookId == library.id
     GROUP BY library.id
-        HAVING library.favorite = 1
+    HAVING library.favorite = 1
     ORDER BY
     CASE
       WHEN :sort = 'title' THEN title
@@ -62,7 +123,7 @@ SELECT library.id, library.sourceId, library.`key`, library.title, library.statu
       WHEN :sort = 'lastUpdated' THEN lastUpdate
       WHEN :sort = 'unread' THEN unread
       WHEN :sort = 'dateAdded' THEN dataAdded
-      WHEN :sort = 'dateFetched' THEN dateFetch
+      WHEN :sort = 'dateFetched' THEN C.dateFetch
       WHEN :sort = 'source' THEN sourceId
     END,
     CASE
@@ -71,12 +132,13 @@ SELECT library.id, library.sourceId, library.`key`, library.title, library.statu
       WHEN :sort = 'lastUpdatedDesc' THEN lastUpdate
       WHEN :sort = 'unreadDesc' THEN unread
       WHEN :sort = 'dateAddedDesc' THEN dataAdded
-      WHEN :sort = 'dateFetchedDesc' THEN dateFetch
+      WHEN :sort = 'dateFetchedDesc' THEN C.dateFetch
       WHEN :sort = 'sourceDesc' THEN sourceId
     END DESC,
     CASE
       WHEN :sort = 'source' THEN title
-      WHEN :sort = 'sourceDesc' THEN title END
+      WHEN :sort = 'sourceDesc' THEN title 
+    END
         """
     )
     suspend fun findAll(sort: String): List<LibraryBook>
@@ -84,10 +146,25 @@ SELECT library.id, library.sourceId, library.`key`, library.title, library.statu
     @Query(
         """
         SELECT library.id, library.sourceId, library.'key', library.title, library.status, library.cover,
-          library.lastUpdate, COUNT(chapter.id) AS unread, MAX(history.readAt) as lastRead
+          library.lastUpdate, COALESCE(C.unreadCount, 0) AS unread, COALESCE(R.readCount, 0) AS readCount, MAX(history.readAt) as lastRead
         FROM library
-        LEFT JOIN chapter ON library.id = chapter.bookId AND chapter.read = 0
-        LEFT JOIN history ON history.bookId == library.id
+        LEFT JOIN (
+            SELECT chapter.bookId, COUNT(*)  AS unreadCount,chapter.dateFetch
+            FROM chapter
+            WHERE chapter.read = 0
+            GROUP BY chapter.bookId
+        ) AS C
+        ON library.id = C.bookId
+        LEFT JOIN (
+            SELECT chapter.bookId, COUNT(*) AS readCount
+            FROM chapter
+            WHERE chapter.read = 1
+            GROUP BY chapter.bookId
+        ) AS R
+        ON library.id = R.bookId
+    LEFT JOIN (
+    SELECT history.readAt,history.bookId FROM history
+    ) AS history ON history.bookId == library.id
         WHERE NOT EXISTS
           (SELECT bookcategory.bookId FROM bookcategory WHERE library.id = bookcategory.bookId)
               AND library.favorite = 1
@@ -99,7 +176,7 @@ SELECT library.id, library.sourceId, library.`key`, library.title, library.statu
       WHEN :sort = 'lastUpdated' THEN lastUpdate
       WHEN :sort = 'unread' THEN unread
       WHEN :sort = 'dateAdded' THEN dataAdded
-      WHEN :sort = 'dateFetched' THEN dateFetch
+      WHEN :sort = 'dateFetched' THEN C.dateFetch
       WHEN :sort = 'source' THEN sourceId
     END,
     CASE
@@ -108,7 +185,7 @@ SELECT library.id, library.sourceId, library.`key`, library.title, library.statu
       WHEN :sort = 'lastUpdatedDesc' THEN lastUpdate
       WHEN :sort = 'unreadDesc' THEN unread
       WHEN :sort = 'dateAddedDesc' THEN dataAdded
-      WHEN :sort = 'dateFetchedDesc' THEN dateFetch
+      WHEN :sort = 'dateFetchedDesc' THEN C.dateFetch
       WHEN :sort = 'sourceDesc' THEN sourceId
     END DESC,
         CASE
@@ -122,13 +199,28 @@ SELECT library.id, library.sourceId, library.`key`, library.title, library.statu
     @Query(
         """
         SELECT library.id, library.sourceId, library.'key', library.title, library.status, library.cover,
-          library.lastUpdate, COUNT(chapter.id) AS unread, MAX(history.readAt) as lastRead
+          library.lastUpdate, COALESCE(C.unreadCount, 0) AS unread, COALESCE(R.readCount, 0) AS readCount, MAX(history.readAt) as lastRead
         FROM library
-        LEFT JOIN chapter ON library.id = chapter.bookId AND chapter.read = 0
-        LEFT JOIN history ON history.bookId == library.id
+        LEFT JOIN (
+            SELECT chapter.bookId, COUNT(*)  AS unreadCount,chapter.dateFetch
+            FROM chapter
+            WHERE chapter.read = 0
+            GROUP BY chapter.bookId
+        ) AS C
+        ON library.id = C.bookId
+        LEFT JOIN (
+            SELECT chapter.bookId, COUNT(*) AS readCount
+            FROM chapter
+            WHERE chapter.read = 1
+            GROUP BY chapter.bookId
+        ) AS R
+        ON library.id = R.bookId
+    LEFT JOIN (
+    SELECT history.readAt,history.bookId FROM history
+    ) AS history ON history.bookId == library.id
         WHERE NOT EXISTS
           (SELECT bookcategory.bookId FROM bookcategory WHERE library.id = bookcategory.bookId)
-           AND    library.favorite = 1
+              AND library.favorite = 1
         GROUP BY library.id
         ORDER BY
     CASE
@@ -137,7 +229,7 @@ SELECT library.id, library.sourceId, library.`key`, library.title, library.statu
       WHEN :sort = 'lastUpdated' THEN lastUpdate
       WHEN :sort = 'unread' THEN unread
       WHEN :sort = 'dateAdded' THEN dataAdded
-      WHEN :sort = 'dateFetched' THEN dateFetch
+      WHEN :sort = 'dateFetched' THEN C.dateFetch
       WHEN :sort = 'source' THEN sourceId
     END,
     CASE
@@ -146,7 +238,7 @@ SELECT library.id, library.sourceId, library.`key`, library.title, library.statu
       WHEN :sort = 'lastUpdatedDesc' THEN lastUpdate
       WHEN :sort = 'unreadDesc' THEN unread
       WHEN :sort = 'dateAddedDesc' THEN dataAdded
-      WHEN :sort = 'dateFetchedDesc' THEN dateFetch
+      WHEN :sort = 'dateFetchedDesc' THEN C.dateFetch
       WHEN :sort = 'sourceDesc' THEN sourceId
     END DESC,
         CASE
@@ -160,10 +252,31 @@ SELECT library.id, library.sourceId, library.`key`, library.title, library.statu
     @Query(
         """
         SELECT library.id, library.sourceId, library.'key', library.title, library.status, library.cover,
-          library.lastUpdate, COUNT(chapter.id) AS total,
-          SUM(CASE WHEN chapter.read == 0 THEN 1 ELSE 0 END) AS unread
+          library.lastUpdate, COALESCE(A.total, 0) AS total,COALESCE(C.unreadCount, 0) AS unread, COALESCE(R.readCount, 0) AS readCount
         FROM library
-        LEFT JOIN chapter ON library.id = chapter.bookId
+        LEFT JOIN (
+            SELECT chapter.bookId, COUNT(*)  AS unreadCount,chapter.dateFetch
+            FROM chapter
+            WHERE chapter.read = 0
+            GROUP BY chapter.bookId
+        ) AS C
+        ON library.id = C.bookId
+        LEFT JOIN (
+            SELECT chapter.bookId, COUNT(*) AS readCount
+            FROM chapter
+            WHERE chapter.read = 1
+            GROUP BY chapter.bookId
+        ) AS R
+        ON library.id = R.bookId
+                LEFT JOIN (
+            SELECT chapter.bookId, COUNT(*) AS total
+            FROM chapter
+            GROUP BY chapter.bookId
+        ) AS A
+        ON library.id = A.bookId
+    LEFT JOIN (
+    SELECT history.readAt,history.bookId FROM history
+    ) AS history ON history.bookId == library.id
         GROUP BY library.id
             HAVING library.favorite = 1
         ORDER BY
@@ -176,11 +289,28 @@ SELECT library.id, library.sourceId, library.`key`, library.title, library.statu
     @Query(
         """
         SELECT library.id, library.sourceId, library.'key', library.title, library.status, library.cover,
-          library.lastUpdate, COUNT(chapter.id) AS total,
-          SUM(CASE WHEN chapter.read == 0 THEN 1 ELSE 0 END) AS unread
+          library.lastUpdate, COALESCE(A.total, 0) AS total,COALESCE(C.unreadCount, 0) AS unread, COALESCE(R.readCount, 0) AS readCount
         FROM library
-        LEFT JOIN chapter ON library.id = chapter.bookId
-        
+        LEFT JOIN (
+            SELECT chapter.bookId, COUNT(*)  AS unreadCount,chapter.dateFetch
+            FROM chapter
+            WHERE chapter.read = 0
+            GROUP BY chapter.bookId
+        ) AS C
+        ON library.id = C.bookId
+        LEFT JOIN (
+            SELECT chapter.bookId, COUNT(*) AS readCount
+            FROM chapter
+            WHERE chapter.read = 1
+            GROUP BY chapter.bookId
+        ) AS R
+        ON library.id = R.bookId
+                LEFT JOIN (
+            SELECT chapter.bookId, COUNT(*) AS total
+            FROM chapter
+            GROUP BY chapter.bookId
+        ) AS A
+        ON library.id = A.bookId
         GROUP BY library.id
             HAVING library.favorite = 1
         ORDER BY
@@ -193,10 +323,31 @@ SELECT library.id, library.sourceId, library.`key`, library.title, library.statu
     @Query(
         """
         SELECT library.id, library.sourceId, library.'key', library.title, library.status, library.cover,
-          library.lastUpdate, COUNT(chapter.id) AS total,
-          SUM(CASE WHEN chapter.read == 0 THEN 1 ELSE 0 END) AS unread
+          library.lastUpdate, COALESCE(A.total, 0) AS total,COALESCE(C.unreadCount, 0) AS unread, COALESCE(R.readCount, 0) AS readCount
         FROM library
-        LEFT JOIN chapter ON library.id = chapter.bookId
+        LEFT JOIN (
+            SELECT chapter.bookId, COUNT(*)  AS unreadCount,chapter.dateFetch
+            FROM chapter
+            WHERE chapter.read = 0
+            GROUP BY chapter.bookId
+        ) AS C
+        ON library.id = C.bookId
+        LEFT JOIN (
+            SELECT chapter.bookId, COUNT(*) AS readCount
+            FROM chapter
+            WHERE chapter.read = 1
+            GROUP BY chapter.bookId
+        ) AS R
+        ON library.id = R.bookId
+                LEFT JOIN (
+            SELECT chapter.bookId, COUNT(*) AS total
+            FROM chapter
+            GROUP BY chapter.bookId
+        ) AS A
+        ON library.id = A.bookId
+    LEFT JOIN (
+    SELECT history.readAt,history.bookId FROM history
+    ) AS history ON history.bookId == library.id
         WHERE NOT EXISTS
           (SELECT bookcategory.bookId FROM bookcategory WHERE library.id = bookcategory.bookId)     AND library.favorite = 1
         GROUP BY library.id
@@ -208,10 +359,32 @@ SELECT library.id, library.sourceId, library.`key`, library.title, library.statu
     @Query(
         """
         SELECT library.id, library.sourceId, library.'key', library.title, library.status, library.cover,
-          library.lastUpdate, COUNT(chapter.id) AS total,
-          SUM(CASE WHEN chapter.read == 0 THEN 1 ELSE 0 END) AS unread
+          library.lastUpdate, COALESCE(A.total, 0) AS total,
+      COALESCE(C.unreadCount, 0) AS unread, COALESCE(R.readCount, 0) AS readCount
         FROM library
-        LEFT JOIN chapter ON library.id = chapter.bookId
+        LEFT JOIN (
+            SELECT chapter.bookId, COUNT(*)  AS unreadCount,chapter.dateFetch
+            FROM chapter
+            WHERE chapter.read = 0
+            GROUP BY chapter.bookId
+        ) AS C
+        ON library.id = C.bookId
+        LEFT JOIN (
+            SELECT chapter.bookId, COUNT(*) AS readCount
+            FROM chapter
+            WHERE chapter.read = 1
+            GROUP BY chapter.bookId
+        ) AS R
+        ON library.id = R.bookId
+                LEFT JOIN (
+            SELECT chapter.bookId, COUNT(*) AS total
+            FROM chapter
+            GROUP BY chapter.bookId
+        ) AS A
+        ON library.id = A.bookId
+    LEFT JOIN (
+    SELECT history.readAt,history.bookId FROM history
+    ) AS history ON history.bookId == library.id
         WHERE NOT EXISTS
           (SELECT bookcategory.bookId FROM bookcategory WHERE library.id = bookcategory.bookId)   AND library.favorite = 1
         GROUP BY library.id
@@ -223,11 +396,26 @@ SELECT library.id, library.sourceId, library.`key`, library.title, library.statu
     @Query(
         """
              SELECT library.id, library.sourceId, library.'key', library.title, library.status, library.cover, library.customCover, library.favorite,
-          library.lastUpdate, COUNT(chapter.id) AS unread, MAX(history.readAt) as lastRead
+          library.lastUpdate ,MAX(history.readAt) as lastRead, COALESCE(R.readCount, 0)  as readCount,COALESCE(C.unreadCount, 0) AS unread, COALESCE(R.readCount, 0) AS readCount
         FROM bookcategory
         INNER JOIN library ON bookcategory.bookId = library.id
-        LEFT JOIN chapter ON library.id = chapter.bookId AND chapter.read = 0
-            LEFT JOIN history ON history.bookId == library.id
+        LEFT JOIN (
+            SELECT chapter.bookId, COUNT(*)  AS unreadCount,chapter.dateFetch
+            FROM chapter
+            WHERE chapter.read = 0
+            GROUP BY chapter.bookId
+        ) AS C
+        ON library.id = C.bookId
+        LEFT JOIN (
+            SELECT chapter.bookId, COUNT(*) AS readCount
+            FROM chapter
+            WHERE chapter.read = 1
+            GROUP BY chapter.bookId
+        ) AS R
+        ON library.id = R.bookId
+    LEFT JOIN (
+    SELECT history.readAt,history.bookId FROM history
+    ) AS history ON history.bookId == library.id
         WHERE bookcategory.categoryId = :categoryId AND library.favorite = 1
         GROUP BY library.id
         ORDER BY
@@ -237,7 +425,7 @@ SELECT library.id, library.sourceId, library.`key`, library.title, library.statu
       WHEN :sort = 'lastUpdated' THEN lastUpdate
       WHEN :sort = 'unread' THEN unread
       WHEN :sort = 'dateAdded' THEN dataAdded
-      WHEN :sort = 'dateFetched' THEN dateFetch
+      WHEN :sort = 'dateFetched' THEN C.dateFetch
       WHEN :sort = 'source' THEN sourceId
     END,
     CASE
@@ -246,7 +434,7 @@ SELECT library.id, library.sourceId, library.`key`, library.title, library.statu
       WHEN :sort = 'lastUpdatedDesc' THEN lastUpdate
       WHEN :sort = 'unreadDesc' THEN unread
       WHEN :sort = 'dateAddedDesc' THEN dataAdded
-      WHEN :sort = 'dateFetchedDesc' THEN dateFetch
+      WHEN :sort = 'dateFetchedDesc' THEN C.dateFetch
       WHEN :sort = 'sourceDesc' THEN sourceId
     END DESC,
         CASE
@@ -260,11 +448,26 @@ SELECT library.id, library.sourceId, library.`key`, library.title, library.statu
     @Query(
         """
              SELECT library.id, library.sourceId, library.'key', library.title, library.status, library.cover, library.customCover, library.favorite,
-          library.lastUpdate, COUNT(chapter.id) AS unread, MAX(history.readAt) as lastRead
+          library.lastUpdate, MAX(history.readAt) as lastRead,COALESCE(C.unreadCount, 0) AS unread, COALESCE(R.readCount, 0) AS readCount
         FROM bookcategory
         INNER JOIN library ON bookcategory.bookId = library.id
-        LEFT JOIN chapter ON library.id = chapter.bookId AND chapter.read = 0
-            LEFT JOIN history ON history.bookId == library.id
+        LEFT JOIN (
+            SELECT chapter.bookId, COUNT(*)  AS unreadCount,chapter.dateFetch
+            FROM chapter
+            WHERE chapter.read = 0
+            GROUP BY chapter.bookId
+        ) AS C
+        ON library.id = C.bookId
+        LEFT JOIN (
+            SELECT chapter.bookId, COUNT(*) AS readCount
+            FROM chapter
+            WHERE chapter.read = 1
+            GROUP BY chapter.bookId
+        ) AS R
+        ON library.id = R.bookId
+    LEFT JOIN (
+    SELECT history.readAt,history.bookId FROM history
+    ) AS history ON history.bookId == library.id
         WHERE bookcategory.categoryId = :categoryId AND library.favorite = 1
         GROUP BY library.id
         ORDER BY
@@ -274,7 +477,7 @@ SELECT library.id, library.sourceId, library.`key`, library.title, library.statu
       WHEN :sort = 'lastUpdated' THEN lastUpdate
       WHEN :sort = 'unread' THEN unread
       WHEN :sort = 'dateAdded' THEN dataAdded
-      WHEN :sort = 'dateFetched' THEN dateFetch
+      WHEN :sort = 'dateFetched' THEN C.dateFetch
       WHEN :sort = 'source' THEN sourceId
     END,
     CASE
@@ -283,7 +486,7 @@ SELECT library.id, library.sourceId, library.`key`, library.title, library.statu
       WHEN :sort = 'lastUpdatedDesc' THEN lastUpdate
       WHEN :sort = 'unreadDesc' THEN unread
       WHEN :sort = 'dateAddedDesc' THEN dataAdded
-      WHEN :sort = 'dateFetchedDesc' THEN dateFetch
+      WHEN :sort = 'dateFetchedDesc' THEN C.dateFetch
       WHEN :sort = 'sourceDesc' THEN sourceId
     END DESC,
         CASE
@@ -297,11 +500,33 @@ SELECT library.id, library.sourceId, library.`key`, library.title, library.statu
     @Query(
         """
         SELECT library.id, library.sourceId, library.'key', library.title, library.status, library.cover, library.customCover, library.favorite,
-          library.lastUpdate, COUNT(chapter.id) AS total,
-          SUM(CASE WHEN chapter.read == 0 THEN 1 ELSE 0 END) AS unread
+          library.lastUpdate, COALESCE(A.total, 0) AS total,
+          COALESCE(C.unreadCount, 0) AS unread, COALESCE(R.readCount, 0) AS readCount
         FROM bookcategory
         INNER JOIN library ON bookcategory.bookId = library.id
-        LEFT JOIN chapter ON library.id = chapter.bookId
+        LEFT JOIN (
+            SELECT chapter.bookId, COUNT(*)  AS unreadCount,chapter.dateFetch
+            FROM chapter
+            WHERE chapter.read = 0
+            GROUP BY chapter.bookId
+        ) AS C
+        ON library.id = C.bookId
+        LEFT JOIN (
+            SELECT chapter.bookId, COUNT(*) AS readCount
+            FROM chapter
+            WHERE chapter.read = 1
+            GROUP BY chapter.bookId
+        ) AS R
+        ON library.id = R.bookId
+                LEFT JOIN (
+            SELECT chapter.bookId, COUNT(*) AS total
+            FROM chapter
+            GROUP BY chapter.bookId
+        ) AS A
+        ON library.id = A.bookId
+    LEFT JOIN (
+    SELECT history.readAt,history.bookId FROM history
+    ) AS history ON history.bookId == library.id
         WHERE bookcategory.categoryId = :categoryId AND library.favorite = 1
         GROUP BY library.id
         ORDER BY total;
@@ -312,11 +537,33 @@ SELECT library.id, library.sourceId, library.`key`, library.title, library.statu
     @Query(
         """
         SELECT library.id, library.sourceId, library.'key', library.title, library.status, library.cover, library.customCover, library.favorite,
-          library.lastUpdate, COUNT(chapter.id) AS total,
-          SUM(CASE WHEN chapter.read == 0 THEN 1 ELSE 0 END) AS unread
+          library.lastUpdate, COALESCE(A.total, 0) AS total,
+          COALESCE(C.unreadCount, 0) AS unread, COALESCE(R.readCount, 0) AS readCount
         FROM bookcategory
         INNER JOIN library ON bookcategory.bookId = library.id
-        LEFT JOIN chapter ON library.id = chapter.bookId
+        LEFT JOIN (
+            SELECT chapter.bookId, COUNT(*)  AS unreadCount,chapter.dateFetch
+            FROM chapter
+            WHERE chapter.read = 0
+            GROUP BY chapter.bookId
+        ) AS C
+        ON library.id = C.bookId
+        LEFT JOIN (
+            SELECT chapter.bookId, COUNT(*) AS readCount
+            FROM chapter
+            WHERE chapter.read = 1
+            GROUP BY chapter.bookId
+        ) AS R
+        ON library.id = R.bookId
+                LEFT JOIN (
+            SELECT chapter.bookId, COUNT(*) AS total
+            FROM chapter
+            GROUP BY chapter.bookId
+        ) AS A
+        ON library.id = A.bookId
+    LEFT JOIN (
+    SELECT history.readAt,history.bookId FROM history
+    ) AS history ON history.bookId == library.id
         WHERE bookcategory.categoryId = :categoryId AND library.favorite = 1
         GROUP BY library.id
         ORDER BY total;

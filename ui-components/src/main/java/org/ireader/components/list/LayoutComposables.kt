@@ -26,45 +26,45 @@ fun LayoutComposable(
     goToLatestChapter: (book: BookItem) -> Unit = {},
     isLoading: Boolean = false,
 ) {
-    when (layout) {
-        is LayoutType.GridLayout -> {
-            GridLayoutComposable(
-                books = books,
-                onClick = { book ->
-                    onClick(book)
-                },
-                selection = selection,
-                onLongClick = { onLongClick(it) },
-                scrollState = gridState,
-                isLocal = isLocal,
-                goToLatestChapter = { goToLatestChapter(it) },
-                isLoading = isLoading
-            )
+        when (layout) {
+            is LayoutType.GridLayout -> {
+                GridLayoutComposable(
+                    books = books,
+                    onClick = { book ->
+                        onClick(book)
+                    },
+                    selection = selection,
+                    onLongClick = { onLongClick(it) },
+                    scrollState = gridState,
+                    isLocal = isLocal,
+                    goToLatestChapter = { goToLatestChapter(it) },
+                    isLoading = isLoading
+                )
+            }
+            is LayoutType.ListLayout -> {
+                LinearListDisplay(
+                    books = books, onClick = { book ->
+                        onClick(book)
+                    }, scrollState = scrollState,
+                    isLocal = isLocal,
+                    selection = selection,
+                    onLongClick = { onLongClick(it) },
+                    goToLatestChapter = { goToLatestChapter(it) },
+                    isLoading = isLoading
+                )
+            }
+            is LayoutType.CompactGrid -> {
+                CompactGridLayoutComposable(
+                    books = books,
+                    onClick = { book ->
+                        onClick(book)
+                    }, scrollState = gridState,
+                    isLocal = isLocal,
+                    selection = selection,
+                    onLongClick = { onLongClick(it) },
+                    goToLatestChapter = { goToLatestChapter(it) },
+                    isLoading = isLoading
+                )
+            }
         }
-        is LayoutType.ListLayout -> {
-            LinearListDisplay(
-                books = books, onClick = { book ->
-                    onClick(book)
-                }, scrollState = scrollState,
-                isLocal = isLocal,
-                selection = selection,
-                onLongClick = { onLongClick(it) },
-                goToLatestChapter = { goToLatestChapter(it) },
-                isLoading = isLoading
-            )
-        }
-        is LayoutType.CompactGrid -> {
-            CompactGridLayoutComposable(
-                books = books,
-                onClick = { book ->
-                    onClick(book)
-                }, scrollState = gridState,
-                isLocal = isLocal,
-                selection = selection,
-                onLongClick = { onLongClick(it) },
-                goToLatestChapter = { goToLatestChapter(it) },
-                isLoading = isLoading
-            )
-        }
-    }
 }

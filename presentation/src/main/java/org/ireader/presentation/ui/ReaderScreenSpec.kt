@@ -108,16 +108,11 @@ object ReaderScreenSpec : ScreenSpec {
     )
     @Composable
     override fun Content(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-        scaffoldPadding: PaddingValues,
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+        controller: ScreenSpec.Controller
     ) {
         val context = LocalContext.current
         val scope = rememberCoroutineScope()
-        val vm: ReaderScreenViewModel = hiltViewModel(navBackStackEntry)
+        val vm: ReaderScreenViewModel = hiltViewModel   (controller.navBackStackEntry)
         val currentIndex = vm.currentChapterIndex
         val chapters = vm.stateChapters
         val chapter = vm.stateChapter
@@ -200,7 +195,7 @@ object ReaderScreenSpec : ScreenSpec {
             vm.eventFlow.collectLatest { event ->
                 when (event) {
                     is UiEvent.ShowSnackbar -> {
-                        snackBarHostState.showSnackbar(
+                        controller.snackBarHostState.showSnackbar(
                             event.uiText.asString(context)
                         )
                     }
@@ -215,7 +210,7 @@ object ReaderScreenSpec : ScreenSpec {
                 .padding(padding)
                 .systemBarsPadding()) {
                 ReadingScreen(
-                    drawerState = drawerState,
+                    drawerState = controller.drawerState,
                     vm = vm,
                     scrollState = scrollState,
                     onNext = { rest ->
@@ -246,7 +241,7 @@ object ReaderScreenSpec : ScreenSpec {
                             }
                         }
                     },
-                    scaffoldPaddingValues = scaffoldPadding,
+                    scaffoldPaddingValues = controller.scaffoldPadding,
                     onPrev = { reset ->
                         try {
                             if (currentIndex > 0) {
@@ -302,7 +297,7 @@ object ReaderScreenSpec : ScreenSpec {
                         }
                     },
 
-                    snackBarHostState = snackBarHostState,
+                    snackBarHostState = controller.snackBarHostState,
                     drawerScrollState = drawerScrollState,
                     swipeState = swipeState,
                     onSliderFinished = {
@@ -330,7 +325,7 @@ object ReaderScreenSpec : ScreenSpec {
                     onReaderPlay = {
                         vm.book?.let { book ->
                             vm.stateChapter?.let { chapter ->
-                                navController.navigate(
+                                controller.navController.navigate(
                                     TTSScreenSpec.buildRoute(
                                         book.id,
                                         book.sourceId,
@@ -344,7 +339,7 @@ object ReaderScreenSpec : ScreenSpec {
                     },
                     onReaderBottomOnSetting = {
                         scope.launch {
-                            sheetState.show()
+                            controller.sheetState.show()
                         }
                     },
                 )
@@ -354,13 +349,9 @@ object ReaderScreenSpec : ScreenSpec {
 
     @Composable
     override fun ModalDrawer(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+        controller: ScreenSpec.Controller
     ) {
-        val vm: ReaderScreenViewModel = hiltViewModel(navBackStackEntry)
+        val vm: ReaderScreenViewModel = hiltViewModel   (controller.navBackStackEntry)
         val lazyListState = vm.drawerListState
         val chapter = vm.stateChapter
         val scope = rememberCoroutineScope()
@@ -414,13 +405,9 @@ object ReaderScreenSpec : ScreenSpec {
 
     @Composable
     override fun TopBar(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+        controller: ScreenSpec.Controller
     ) {
-        val vm: ReaderScreenViewModel = hiltViewModel(navBackStackEntry)
+        val vm: ReaderScreenViewModel = hiltViewModel   (controller.navBackStackEntry)
         val catalog = vm.catalog
         val book = vm.book
         val chapter = vm.stateChapter
@@ -430,7 +417,7 @@ object ReaderScreenSpec : ScreenSpec {
             ReaderScreenTopBar(
                 isReaderModeEnable = vm.isReaderModeEnable,
                 isLoaded = vm.isChapterLoaded.value,
-                modalBottomSheetValue = sheetState.targetValue,
+                modalBottomSheetValue = controller.sheetState.targetValue,
                 onRefresh = {
                     scope.launch {
                         vm.getLocalChapter(
@@ -443,7 +430,7 @@ object ReaderScreenSpec : ScreenSpec {
                 onWebView = {
                     try {
                         catalog?.let { catalog ->
-                            navController.navigate(
+                            controller.navController.navigate(
                                 WebViewScreenSpec.buildRoute(
                                     url = chapter?.key,
                                     sourceId = catalog.sourceId,
@@ -469,7 +456,7 @@ object ReaderScreenSpec : ScreenSpec {
                     vm.bookmarkChapter()
                 },
                 onPopBackStack = {
-                    navController.popBackStack()
+                    controller.navController.popBackStack()
                 }
             )
         }
@@ -477,13 +464,9 @@ object ReaderScreenSpec : ScreenSpec {
 
     @Composable
     override fun BottomModalSheet(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+        controller: ScreenSpec.Controller
     ) {
-        val vm: ReaderScreenViewModel = hiltViewModel(navBackStackEntry)
+        val vm: ReaderScreenViewModel = hiltViewModel   (controller.navBackStackEntry)
         val context = LocalContext.current
 
         LaunchedEffect(key1 = vm.immersiveMode.value) {

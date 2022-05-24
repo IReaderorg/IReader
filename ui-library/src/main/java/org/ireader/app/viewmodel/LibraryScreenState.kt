@@ -6,10 +6,9 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.PagerState
 import org.ireader.common_models.DisplayMode
 import org.ireader.common_models.LayoutType
+import org.ireader.common_models.entities.Category
 import org.ireader.common_models.entities.History
 import org.ireader.common_models.entities.LibraryBook
 import org.ireader.common_models.library.LibrarySort
@@ -30,10 +29,11 @@ interface LibraryState {
     var desc: Boolean
    // var filters: SnapshotStateList<FilterType>
     var currentScrollState: Int
+    var selectedCategoryIndex: Int
     var histories: List<History>
     var selection: SnapshotStateList<Long>
     val hasSelection: Boolean
-    @OptIn(ExperimentalPagerApi::class) var pager : PagerState?
+    val categories : List<Category>
 }
 @Singleton
 open class LibraryStateImpl @Inject constructor() : LibraryState {
@@ -49,8 +49,9 @@ open class LibraryStateImpl @Inject constructor() : LibraryState {
     override var desc by mutableStateOf<Boolean>(false)
    // override var filters: SnapshotStateList<FilterType> = mutableStateListOf()
     override var currentScrollState by mutableStateOf<Int>(0)
+    override var selectedCategoryIndex by mutableStateOf<Int>(0)
     override var histories by mutableStateOf<List<History>>(emptyList())
     override var selection: SnapshotStateList<Long> = mutableStateListOf()
     override val hasSelection: Boolean by derivedStateOf { selection.isNotEmpty() }
-    @OptIn(ExperimentalPagerApi::class) override var pager : PagerState? by mutableStateOf(null)
+    override var categories: List<Category> by mutableStateOf(emptyList())
 }

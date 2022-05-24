@@ -38,6 +38,7 @@ import org.ireader.common_models.library.LibraryFilter
 import org.ireader.common_models.library.LibrarySort
 import org.ireader.components.components.component.pagerTabIndicatorOffset
 import org.ireader.components.reusable_composable.MidSizeTextComposable
+import org.ireader.core_ui.theme.AppColors
 import org.ireader.core_ui.ui.Colour.contentColor
 
 
@@ -78,10 +79,10 @@ fun ScrollableTabs(modifier : Modifier = Modifier,libraryTabs: List<String>, pag
     val scope = rememberCoroutineScope()
     // OR ScrollableTabRow()
     ScrollableTabRow(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier,
         selectedTabIndex = pagerState.currentPage,
-        containerColor = MaterialTheme.colorScheme.background,
-        contentColor = MaterialTheme.colorScheme.contentColor,
+        containerColor = AppColors.current.bars,
+        contentColor = AppColors.current.onBars,
         edgePadding = 0.dp,
         indicator = { tabPositions ->
             TabRowDefaults.Indicator(

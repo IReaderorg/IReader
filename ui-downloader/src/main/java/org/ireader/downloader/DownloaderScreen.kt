@@ -118,7 +118,7 @@ fun DownloaderScreen(
                     onClickItem = {
                         if (vm.selection.isEmpty()) {
                             onDownloadItem(downloads[index])
-//                            navController.navigate(
+//                            controller.navController.navigate(
 //                                BookDetailScreenSpec.buildRoute(
 //                                    sourceId = downloads[index].sourceId,
 //                                    bookId = downloads[index].bookId

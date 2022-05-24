@@ -1,6 +1,5 @@
 package org.ireader.image_loader.coil
 
-import android.content.Context
 import coil.ImageLoader
 import coil.decode.DataSource
 import coil.decode.ImageSource
@@ -9,18 +8,22 @@ import coil.fetch.Fetcher
 import coil.fetch.SourceResult
 import coil.key.Keyer
 import coil.request.Options
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
 import io.ktor.client.engine.mergeHeaders
 import io.ktor.client.request.HttpRequestData
+import io.ktor.client.request.get
 import io.ktor.http.HttpHeaders
 import io.ktor.util.InternalAPI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.Cache
+import okhttp3.CacheControl
 import okhttp3.Call
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okio.buffer
-import okio.source
+import okhttp3.ResponseBody
+import okio.Path.Companion.toOkioPath
 import org.ireader.core_api.http.okhttp
 import org.ireader.core_api.io.saveTo
 import org.ireader.core_api.source.HttpSource
@@ -35,6 +38,7 @@ internal class LibraryMangaFetcherFactory(
     private val libraryCovers: LibraryCovers,
     private val getLocalCatalog: GetLocalCatalog,
     private val coilCache: Cache,
+    private val client: HttpClient,
     val data: BookCover,
 ) : Fetcher.Factory<BookCover> {
     override fun create(data: BookCover, options: Options, imageLoader: ImageLoader): Fetcher? {
@@ -44,7 +48,8 @@ internal class LibraryMangaFetcherFactory(
             defaultClient = defaultClient,
             getLocalCatalog = getLocalCatalog,
             libraryCovers = libraryCovers,
-            context = options.context
+            options = options,
+            client = client
         )
     }
 }
@@ -76,15 +81,19 @@ internal class LibraryMangaFetcher(
     private val libraryCovers: LibraryCovers,
     private val getLocalCatalog: GetLocalCatalog,
     private val coilCache: Cache,
-    private val context: Context,
+    private val options: Options,
+    private val client: HttpClient,
     val data: BookCover,
 ) : Fetcher {
+    private val diskCacheKey: String? by lazy { LibraryMangaFetcherFactoryKeyer(libraryCovers).key(data, options) }
+    private lateinit var url: String
 
     override suspend fun fetch(): FetchResult? {
+        url = diskCacheKey ?: error("No Cover specified")
         return when (getResourceType(data.cover)) {
             Type.File -> getFileLoader(data)
             Type.URL -> getUrlLoader(data)
-            null -> null
+            null -> error("Invalid Image")
         }
     }
 
@@ -95,12 +104,12 @@ internal class LibraryMangaFetcher(
 
     private fun getFileLoader(file: File): SourceResult {
         return SourceResult(
-            source = ImageSource(file.source().buffer(), context),
+            source = ImageSource(file = file.toOkioPath(), diskCacheKey = diskCacheKey),
             mimeType = "image/*",
             dataSource = DataSource.DISK
         )
     }
-
+    //TODO need to replace this with ktor
     private suspend fun getUrlLoader(manga: BookCover): SourceResult {
         val file = libraryCovers.find(manga.id).toFile()
         if (file.exists() && file.lastModified() != 0L) {
@@ -135,10 +144,20 @@ internal class LibraryMangaFetcher(
 
         // Fallback to image from source
         return SourceResult(
-            source = ImageSource(body.source(), context),
+            source = ImageSource(body.source(), options.context),
             mimeType = "image/*",
             dataSource = if (response.cacheResponse != null) DataSource.DISK else DataSource.NETWORK
         )
+    }
+    
+    private suspend fun getResponseBody(manga: BookCover) : ResponseBody? {
+        val catalog = getLocalCatalog.get(manga.sourceId)
+        val source = catalog?.source as? HttpSource
+
+        val clientAndRequest = source?.getCoverRequest(manga.cover)
+       return clientAndRequest?.first?.get(manga.cover) {
+            clientAndRequest.second.build()
+        }?.body()
     }
 
     private fun getCall(manga: BookCover): Call {
@@ -155,6 +174,12 @@ internal class LibraryMangaFetcher(
             ?: Request.Builder().url(manga.cover).build()
 
         return newClient.newCall(request)
+    }
+    companion object {
+        const val USE_CUSTOM_COVER = "use_custom_cover"
+
+        private val CACHE_CONTROL_FORCE_NETWORK_NO_CACHE = CacheControl.Builder().noCache().noStore().build()
+        private val CACHE_CONTROL_NO_NETWORK_NO_CACHE = CacheControl.Builder().noCache().onlyIfCached().build()
     }
 }
 

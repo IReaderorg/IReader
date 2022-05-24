@@ -1,15 +1,11 @@
 package org.ireader.presentation.ui
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Explore
-import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -20,8 +16,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
-import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavController
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.presentation.R
 import org.ireader.sources.extension.ExtensionScreen
@@ -41,14 +35,9 @@ object ExtensionScreenSpec : BottomNavScreenSpec {
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun TopBar(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+                controller: ScreenSpec.Controller
     ) {
-        val vm: ExtensionViewModel = hiltViewModel(navBackStackEntry)
+        val vm: ExtensionViewModel = hiltViewModel(controller.navBackStackEntry)
         var searchMode by remember {
             mutableStateOf(false)
         }
@@ -78,7 +67,7 @@ object ExtensionScreenSpec : BottomNavScreenSpec {
                 searchMode = true
             },
             onSearchNavigate = {
-                navController.navigate(
+                controller.navController.navigate(
                     GlobalSearchScreenSpec.navHostRoute
                 )
             }
@@ -91,23 +80,18 @@ object ExtensionScreenSpec : BottomNavScreenSpec {
     )
     @Composable
     override fun Content(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-        scaffoldPadding: PaddingValues,
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+        controller: ScreenSpec.Controller
     ) {
-        val vm: ExtensionViewModel = hiltViewModel(navBackStackEntry)
+        val vm: ExtensionViewModel = hiltViewModel(   controller.navBackStackEntry)
 
         ExtensionScreen(
-            modifier = Modifier.padding(scaffoldPadding),
+            modifier = Modifier.padding(controller.scaffoldPadding),
             viewModel = vm,
             onClickCatalog = {
                 if (vm.uiPreferences.incognitoMode().get()) {
                     vm.uiPreferences.lastUsedSource().set(it.sourceId)
                 }
-                navController.navigate(
+                controller.navController.navigate(
                     ExploreScreenSpec.buildRoute(
                         sourceId = it.sourceId,
                     )
@@ -117,7 +101,7 @@ object ExtensionScreenSpec : BottomNavScreenSpec {
             onClickInstall = { vm.installCatalog(it) },
             onClickTogglePinned = { vm.togglePinnedCatalog(it) },
             onClickUninstall = { vm.uninstallCatalog(it) },
-            snackBarHostState = snackBarHostState
+            snackBarHostState = controller.snackBarHostState
         )
     }
 }

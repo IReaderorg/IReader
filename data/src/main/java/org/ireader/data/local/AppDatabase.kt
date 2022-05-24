@@ -1,6 +1,8 @@
 package org.ireader.data.local
 
+import android.content.Context
 import androidx.room.Database
+import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.room.migration.Migration
@@ -9,6 +11,8 @@ import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.BookCategory
 import org.ireader.common_models.entities.CatalogRemote
 import org.ireader.common_models.entities.Category
+import org.ireader.common_models.entities.Category.Companion.ALL_ID
+import org.ireader.common_models.entities.Category.Companion.UNCATEGORIZED_ID
 import org.ireader.common_models.entities.Chapter
 import org.ireader.common_models.entities.Download
 import org.ireader.common_models.entities.FontEntity
@@ -26,6 +30,7 @@ import org.ireader.data.local.dao.LibraryBookDao
 import org.ireader.data.local.dao.LibraryDao
 import org.ireader.data.local.dao.RemoteKeysDao
 import org.ireader.data.local.dao.UpdatesDao
+import java.util.concurrent.Executors
 
 @Database(
     entities = [
@@ -59,7 +64,58 @@ abstract class AppDatabase : RoomDatabase() {
 
     companion object {
         const val DATABASE_NAME = "infinity_db"
+        @Volatile private var INSTANCE: AppDatabase? = null
+
+        fun getInstance(context: Context): AppDatabase =
+            INSTANCE ?: synchronized(this) {
+                INSTANCE ?: buildDatabase(context).also { INSTANCE = it }
+            }
+
+        private fun buildDatabase(context: Context) :AppDatabase =
+            Room.databaseBuilder(
+                context.applicationContext,
+                AppDatabase::class.java,
+                DATABASE_NAME
+            )
+                // prepopulate the database after onCreate was called
+                .addCallback(object : Callback() {
+                    override fun onCreate(db: SupportSQLiteDatabase) {
+                        super.onCreate(db)
+                        // insert the data on the IO Thread
+                        Executors.newSingleThreadExecutor().execute {
+                           getInstance(context).categoryDao.insertDate(systemCategories)
+//                            db.query("""
+//                                INSERT OR IGNORE INTO category VALUES (0, "", 0, 0, 0);
+//                                INSERT OR IGNORE INTO category VALUES (-2, "", 0, 0, 0);
+//                                CREATE TRIGGER IF NOT EXISTS system_categories_deletion_trigger BEFORE DELETE ON category
+//                                BEGIN SELECT CASE
+//                                  WHEN old.id <= 0 THEN
+//                                    RAISE(ABORT, 'System category cant be deleted')
+//                                  END;
+//                                END;
+//                            """.trimIndent())
+                        }
+                    }
+                })
+                .addMigrations(
+                    MIGRATION_8_9,
+                    MIGRATION_11_12
+                )
+                .fallbackToDestructiveMigration()
+                .addCallback(object :RoomDatabase.Callback() {
+                    override fun onCreate(db: SupportSQLiteDatabase) {
+                        super.onCreate(db)
+                        Executors.newSingleThreadExecutor().execute {
+
+                        }
+                    }
+                })
+                .build()
+
+        val systemCategories = listOf<Category>(Category(UNCATEGORIZED_ID,"",0,0,0),Category(ALL_ID,"",0,0,0))
+
     }
+
 }
 
 val MIGRATION_8_9 = object : Migration(8, 9) {

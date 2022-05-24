@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -15,7 +16,6 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -26,8 +26,8 @@ import org.ireader.components.reusable_composable.SuperSmallTextComposable
 import org.ireader.ui_components.R
 
 @Composable
-fun GoToLastReadComposable(onClick: () -> Unit) {
-    Box {
+fun GoToLastReadComposable(modifier: Modifier = Modifier,onClick: () -> Unit) {
+    Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.TopEnd) {
         OutlinedButton(
             onClick = {},
             modifier = Modifier
@@ -66,7 +66,7 @@ fun TextBadge(modifier: Modifier = Modifier, text: UiText) {
     ) {
         SuperSmallTextComposable(
             text = text.asString(LocalContext.current),
-            color = Color.White,
+            color = MaterialTheme.colorScheme.onPrimary,
             maxLine = 1,
             overflow = TextOverflow.Ellipsis
         )

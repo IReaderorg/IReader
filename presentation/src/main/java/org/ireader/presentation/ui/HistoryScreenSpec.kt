@@ -1,22 +1,16 @@
 package org.ireader.presentation.ui
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
-import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
-import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavController
 import org.ireader.common_extensions.async.viewModelIOCoroutine
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.history.HistoryScreen
@@ -36,14 +30,9 @@ object HistoryScreenSpec : BottomNavScreenSpec {
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun TopBar(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+        controller:ScreenSpec.Controller
     ) {
-        val vm: HistoryViewModel = hiltViewModel(navBackStackEntry)
+        val vm: HistoryViewModel = hiltViewModel(controller.navBackStackEntry)
         HistoryTopAppBar(
             vm = vm,
             getHistories = {
@@ -63,18 +52,13 @@ object HistoryScreenSpec : BottomNavScreenSpec {
     )
     @Composable
     override fun Content(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-        scaffoldPadding: PaddingValues,
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+        controller: ScreenSpec.Controller
     ) {
-        val vm: HistoryViewModel = hiltViewModel(navBackStackEntry)
+        val vm: HistoryViewModel = hiltViewModel(controller.navBackStackEntry)
         HistoryScreen(
-            modifier = Modifier.padding(scaffoldPadding),
+            modifier = Modifier.padding(controller.scaffoldPadding),
             onHistory = { history ->
-                navController.navigate(
+                controller.navController.navigate(
                     ReaderScreenSpec.buildRoute(
                         history.bookId,
                         history.sourceId,
@@ -83,7 +67,7 @@ object HistoryScreenSpec : BottomNavScreenSpec {
                 )
             },
             onHistoryPlay = { history ->
-                navController.navigate(
+                controller.navController.navigate(
                     ReaderScreenSpec.buildRoute(
                         history.bookId,
                         history.sourceId,
@@ -98,7 +82,7 @@ object HistoryScreenSpec : BottomNavScreenSpec {
             },
             state = vm,
             onBookCover = { history ->
-                navController.navigate(
+                controller.navController.navigate(
                     BookDetailScreenSpec.buildRoute(
                         history.sourceId,
                         history.bookId

@@ -7,6 +7,7 @@ import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
@@ -46,14 +47,22 @@ sealed interface ScreenSpec {
     val arguments: List<NamedNavArgument> get() = emptyList()
 
     val deepLinks: List<NavDeepLink> get() = emptyList()
+
+    data class Controller @OptIn(ExperimentalMaterial3Api::class) constructor(
+        val navController: NavController,
+        val navBackStackEntry: NavBackStackEntry,
+        val snackBarHostState: SnackbarHostState,
+        val sheetState: ModalBottomSheetState,
+        val drawerState: DrawerState,
+        val scaffoldPadding: PaddingValues = PaddingValues(0.dp),
+        val requestHideNavigator: (Boolean) -> Unit = {}
+    )
+
+
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun BottomModalSheet(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+        controller: Controller
     ) {
 
     }
@@ -61,11 +70,7 @@ sealed interface ScreenSpec {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun BottomAppBar(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+        controller: Controller
     ) {
 
     }
@@ -74,11 +79,7 @@ sealed interface ScreenSpec {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun ModalDrawer(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+        controller: Controller
     ) {
 
     }
@@ -86,23 +87,14 @@ sealed interface ScreenSpec {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun TopBar(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+        controller: Controller
     ) {
 
     }
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun  Content(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-        scaffoldPadding:PaddingValues,
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+        controller: Controller
     )
 }
 

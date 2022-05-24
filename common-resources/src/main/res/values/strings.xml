@@ -333,6 +333,9 @@
     <string name="light">Light mode</string>
     <string name="other_source">Others</string>
     <string name="all_lang">All</string>
+    <string name="all_category">All</string>
+    <string name="uncategorized">Uncategorized</string>
+    <string name="uncategorized_category">Default</string>
     <string name="pinned_sources">Pinned</string>
     <string name="last_used_source">Last Used</string>
 

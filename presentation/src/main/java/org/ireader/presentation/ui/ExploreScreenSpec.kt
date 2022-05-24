@@ -1,13 +1,9 @@
 package org.ireader.presentation.ui
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetState
-import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -16,8 +12,6 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
-import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 import org.ireader.common_resources.UiText
 import org.ireader.components.components.EmptyScreenComposable
@@ -58,20 +52,15 @@ object ExploreScreenSpec : ScreenSpec {
     )
     @Composable
     override fun Content(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-        scaffoldPadding: PaddingValues,
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+        controller: ScreenSpec.Controller
     ) {
-        val vm: ExploreViewModel = hiltViewModel(navBackStackEntry)
+        val vm: ExploreViewModel = hiltViewModel(   controller.navBackStackEntry)
         val focusManager = LocalFocusManager.current
         val source = vm.source
         val scope = rememberCoroutineScope()
         if (source != null) {
             ExploreScreen(
-                modifier = Modifier.padding(paddingValues = scaffoldPadding),
+                modifier = Modifier.padding(paddingValues = controller.scaffoldPadding),
                 vm = vm,
                 onFilterClick = {
                     vm.toggleFilterMode()
@@ -87,7 +76,7 @@ object ExploreScreenSpec : ScreenSpec {
                     vm.loadItems(reset)
                 },
                 onBook = { book ->
-                    navController.navigate(
+                    controller.navController.navigate(
                         route = BookDetailScreenSpec.buildRoute(
                             sourceId = book.sourceId,
                             bookId = book.id
@@ -95,7 +84,7 @@ object ExploreScreenSpec : ScreenSpec {
                     )
                 },
                 onAppbarWebView = {
-                    navController.navigate(
+                    controller.navController.navigate(
                         WebViewScreenSpec.buildRoute(
                             url = it,
                             sourceId = source.id,
@@ -103,16 +92,16 @@ object ExploreScreenSpec : ScreenSpec {
                     )
                 },
                 onPopBackStack = {
-                    navController.popBackStack()
+                    controller.navController.popBackStack()
                 },
-                snackBarHostState = snackBarHostState,
-                modalState = sheetState,
-                scaffoldPadding = scaffoldPadding
+                snackBarHostState = controller.snackBarHostState,
+                modalState = controller.sheetState,
+                scaffoldPadding = controller.scaffoldPadding
             )
         } else {
             EmptyScreenComposable(R.string.source_not_available,
                 onPopBackStack = {
-                    navController.popBackStack()
+                    controller.navController.popBackStack()
                 })
         }
     }
@@ -120,13 +109,9 @@ object ExploreScreenSpec : ScreenSpec {
     @OptIn(ExperimentalComposeUiApi::class)
     @Composable
     override fun BottomModalSheet(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+        controller: ScreenSpec.Controller
     ) {
-        val vm: ExploreViewModel = hiltViewModel(navBackStackEntry)
+        val vm: ExploreViewModel = hiltViewModel(   controller.navBackStackEntry)
         val source = vm.source
         val scope = rememberCoroutineScope()
         val focusManager = LocalFocusManager.current
@@ -151,13 +136,9 @@ object ExploreScreenSpec : ScreenSpec {
 
     @Composable
     override fun TopBar(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+        controller: ScreenSpec.Controller
     ) {
-        val vm: ExploreViewModel = hiltViewModel(navBackStackEntry)
+        val vm: ExploreViewModel = hiltViewModel(   controller.navBackStackEntry)
         val focusManager = LocalFocusManager.current
         val source = vm.source
         val scope = rememberCoroutineScope()
@@ -191,7 +172,7 @@ object ExploreScreenSpec : ScreenSpec {
             },
             onWebView = {
                 if (source is HttpSource) {
-                    navController.navigate(
+                    controller.navController.navigate(
                         WebViewScreenSpec.buildRoute(
                             url = (source).baseUrl,
                             sourceId = source.id,
@@ -201,7 +182,7 @@ object ExploreScreenSpec : ScreenSpec {
                     )
                 }
             },
-            onPop = { navController.popBackStack() },
+            onPop = { controller.navController.popBackStack() },
             onLayoutTypeSelect = { layout ->
                 vm.saveLayoutType(layout)
             },

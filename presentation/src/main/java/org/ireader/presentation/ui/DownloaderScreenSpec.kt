@@ -1,16 +1,10 @@
 package org.ireader.presentation.ui
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetState
-import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavController
 import androidx.navigation.NavDeepLink
 import androidx.navigation.navDeepLink
 import org.ireader.common_models.entities.toSavedDownload
@@ -34,17 +28,12 @@ object DownloaderScreenSpec : ScreenSpec {
     )
     @Composable
     override fun Content(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-        scaffoldPadding: PaddingValues,
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+        controller: ScreenSpec.Controller
     ) {
-        val vm: DownloaderViewModel = hiltViewModel(navBackStackEntry)
+        val vm: DownloaderViewModel = hiltViewModel(   controller.navBackStackEntry)
         DownloaderScreen(
             onDownloadItem = { item ->
-                navController.navigate(
+                controller.navController.navigate(
                     BookDetailScreenSpec.buildRoute(
                         sourceId = item.sourceId,
                         bookId = item.bookId
@@ -52,23 +41,19 @@ object DownloaderScreenSpec : ScreenSpec {
                 )
             },
             vm = vm,
-            snackBarHostState = snackBarHostState
+            snackBarHostState = controller.snackBarHostState
         )
     }
     @OptIn(ExperimentalMaterialApi::class)
     @ExperimentalMaterial3Api
     @Composable
     override fun TopBar(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+        controller: ScreenSpec.Controller
     ) {
-        val vm: DownloaderViewModel = hiltViewModel(navBackStackEntry)
+        val vm: DownloaderViewModel = hiltViewModel(   controller.navBackStackEntry)
         DownloaderTopAppBar(
             onPopBackStack = {
-                navController.popBackStack()
+                controller.navController.popBackStack()
             },
             onCancelAll = {
                 vm.deleteSelectedDownloads(vm.downloads.map { it.toSavedDownload() })

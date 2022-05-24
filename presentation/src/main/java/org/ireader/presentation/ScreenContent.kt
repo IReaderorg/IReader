@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material3.Icon
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
@@ -23,6 +22,7 @@ import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationBar
@@ -33,9 +33,12 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -46,6 +49,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
+import kotlinx.coroutines.launch
 import org.ireader.common_resources.ARG_HAVE_DRAWER
 import org.ireader.common_resources.ARG_HAVE_MODAL_SHEET
 import org.ireader.common_resources.ARG_HAVE_VARIANT_BOTTOM_BAR
@@ -84,17 +88,33 @@ fun ScreenContent() {
         rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
+    val (requestedHideBottomNav, requestHideBottomNav) = remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+
+    DisposableEffect(navBackStackEntry) {
+        onDispose {
+            requestHideBottomNav(false)
+            scope.launch {
+                modalBottomSheetState.hide()
+                drawerState.close()
+
+            }
+        }
+    }
+
     IModalSheets(
         bottomSheetState = modalBottomSheetState,
         isEnable = shoeModalSheet,
         sheetContent = {
             if (navStackEntry != null) {
                 screenSpec?.BottomModalSheet(
-                    navController,
-                    navStackEntry,
-                    snackBarHostState,
-                    modalBottomSheetState,
-                    drawerState
+                    ScreenSpec.Controller(
+                        navController,
+                        navStackEntry,
+                        snackBarHostState,
+                        modalBottomSheetState,
+                        drawerState
+                    )
                 )
             }
         }
@@ -104,11 +124,14 @@ fun ScreenContent() {
             sheetContent = {
                 if (navStackEntry != null) {
                     screenSpec?.ModalDrawer(
-                        navController,
-                        navStackEntry,
-                        snackBarHostState,
-                        modalBottomSheetState,
-                        drawerState
+                        ScreenSpec.Controller(
+                            navController = navController,
+                            snackBarHostState = snackBarHostState,
+                            sheetState = modalBottomSheetState,
+                            drawerState = drawerState,
+                            requestHideNavigator = requestHideBottomNav,
+                            navBackStackEntry = navStackEntry
+                        )
                     )
                 }
             },
@@ -116,15 +139,20 @@ fun ScreenContent() {
         ) {
             TransparentStatusBar(enable = transparentStatusBar) {
                 Scaffold(
-                    modifier = Modifier.fillMaxSize().navigationBarsPadding(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .navigationBarsPadding(),
                     topBar = {
                         if (navStackEntry != null) {
                             screenSpec?.TopBar(
-                                navController,
-                                navStackEntry,
-                                snackBarHostState,
-                                modalBottomSheetState,
-                                drawerState
+                                ScreenSpec.Controller(
+                                    navController = navController,
+                                    snackBarHostState = snackBarHostState,
+                                    sheetState = modalBottomSheetState,
+                                    drawerState = drawerState,
+                                    requestHideNavigator = requestHideBottomNav,
+                                    navBackStackEntry = navStackEntry
+                                )
                             )
                         }
                     },
@@ -134,18 +162,21 @@ fun ScreenContent() {
                                 isEnable = haveVariantBottomAppBar,
                                 sheetContent = {
                                     screenSpec?.BottomAppBar(
-                                        navController,
-                                        navStackEntry,
-                                        snackBarHostState,
-                                        modalBottomSheetState,
-                                        drawerState
+                                        ScreenSpec.Controller(
+                                            navController = navController,
+                                            snackBarHostState = snackBarHostState,
+                                            sheetState = modalBottomSheetState,
+                                            drawerState = drawerState,
+                                            requestHideNavigator = requestHideBottomNav,
+                                            navBackStackEntry = navStackEntry
+                                        )
                                     )
                                 }
                             )
                         }
 
                         AnimatedVisibility(
-                            visible = hideBottomBar == null || hideBottomBar == true,
+                            visible = hideBottomBar == null || hideBottomBar == true || requestedHideBottomNav,
                             enter = slideInVertically(initialOffsetY = { it }),
                             exit = slideOutVertically(targetOffsetY = { it })
                         ) {
@@ -222,12 +253,15 @@ fun ScreenContent() {
                             ) { navBackStackEntry ->
 
                                 screen.Content(
-                                    navController = navController,
-                                    navBackStackEntry = navBackStackEntry,
-                                    snackBarHostState,
-                                    padding,
-                                    sheetState = modalBottomSheetState,
-                                    drawerState
+                                    ScreenSpec.Controller(
+                                        navController = navController,
+                                        navBackStackEntry = navBackStackEntry,
+                                        snackBarHostState = snackBarHostState,
+                                        sheetState = modalBottomSheetState,
+                                        drawerState = drawerState,
+                                        requestHideNavigator = requestHideBottomNav,
+                                        scaffoldPadding = padding
+                                    )
                                 )
                             }
                         }

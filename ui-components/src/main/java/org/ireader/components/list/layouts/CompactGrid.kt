@@ -42,9 +42,12 @@ fun CompactGridLayoutComposable(
             columns = GridCells.Fixed(2),
             contentPadding = PaddingValues(8.dp),
             content = {
-                items(count = books.size, key = { index ->
+                items(
+                    count = books.size,
+                    key = { index ->
                     books[index].id
-                }, contentType = { "books"  }) { index ->
+                },
+                    contentType = { "books"  }) { index ->
                     BookImage(
                         modifier = Modifier.animateItemPlacement(),
                         onClick = { onClick(books[index]) },

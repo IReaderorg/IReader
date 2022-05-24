@@ -1,23 +1,17 @@
 package org.ireader.presentation.ui
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChromeReaderMode
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavController
 import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.components.reusable_composable.TopAppBarBackButton
@@ -32,18 +26,13 @@ object SettingScreenSpec : ScreenSpec {
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun TopBar(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+                controller: ScreenSpec.Controller
     ) {
         Toolbar(
             title = {
                 BigSizeTextComposable(text = stringResource(org.ireader.ui_settings.R.string.settings))
             },
-            navigationIcon = { TopAppBarBackButton(onClick = { navController.popBackStack() }) },
+            navigationIcon = { TopAppBarBackButton(onClick = { controller.navController.popBackStack() }) },
         )
     }
 
@@ -53,12 +42,7 @@ object SettingScreenSpec : ScreenSpec {
     )
     @Composable
     override fun Content(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-        scaffoldPadding: PaddingValues,
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+        controller: ScreenSpec.Controller
     ) {
         val settingItems = remember {
             listOf(
@@ -66,24 +50,24 @@ object SettingScreenSpec : ScreenSpec {
                     R.string.appearance,
                     Icons.Default.Palette,
                 ) {
-                    navController.navigate(AppearanceScreenSpec.navHostRoute)
+                    controller.navController.navigate(AppearanceScreenSpec.navHostRoute)
                 },
                 SettingsSection(
                     R.string.reader,
                     Icons.Default.ChromeReaderMode
                     ,
                 ) {
-                    navController.navigate(ReaderSettingSpec.navHostRoute)
+                    controller.navController.navigate(ReaderSettingSpec.navHostRoute)
                 },
                 SettingsSection(
                     R.string.advance_setting,
                     Icons.Default.Code
                 ) {
-                    navController.navigate(AdvanceSettingSpec.navHostRoute)
+                    controller.navController.navigate(AdvanceSettingSpec.navHostRoute)
                 },
             )
         }
-        SetupLayout(modifier = Modifier.padding(scaffoldPadding),items = settingItems)
+        SetupLayout(modifier = Modifier.padding(controller.scaffoldPadding),items = settingItems)
 
     }
 }

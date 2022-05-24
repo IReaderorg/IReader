@@ -1,15 +1,12 @@
 package org.ireader.app.di
 
 import android.content.Context
-import androidx.room.Room
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import org.ireader.data.local.AppDatabase
-import org.ireader.data.local.MIGRATION_11_12
-import org.ireader.data.local.MIGRATION_8_9
 import org.ireader.data.local.dao.BookCategoryDao
 import org.ireader.data.local.dao.CatalogDao
 import org.ireader.data.local.dao.CategoryDao
@@ -31,17 +28,7 @@ object DatabaseInject {
     fun provideBookDatabase(
         @ApplicationContext app: Context,
     ): AppDatabase {
-        return Room.databaseBuilder(
-            app,
-            AppDatabase::class.java,
-            AppDatabase.DATABASE_NAME
-        )
-            .addMigrations(
-                MIGRATION_8_9,
-                MIGRATION_11_12
-            )
-            .fallbackToDestructiveMigration()
-            .build()
+        return AppDatabase.getInstance(app)
     }
 
     @InstallIn(SingletonComponent::class)

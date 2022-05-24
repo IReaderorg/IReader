@@ -1,18 +1,12 @@
 package org.ireader.presentation.ui
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetState
-import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavController
 import org.ireader.about.AboutSettingScreen
 import org.ireader.common_extensions.toDateTimestampString
 import org.ireader.common_resources.BuildConfig
@@ -30,15 +24,11 @@ object AboutScreenSpec : ScreenSpec {
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun TopBar(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+        controller: ScreenSpec.Controller
     ) {
         TitleToolbar(
             title = stringResource(R.string.about),
-            navController = navController
+            navController =controller. navController
         )
     }
 
@@ -50,17 +40,12 @@ object AboutScreenSpec : ScreenSpec {
     )
     @Composable
     override fun Content(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-        scaffoldPadding: PaddingValues,
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+        controller: ScreenSpec.Controller
     ) {
         AboutSettingScreen(
-            modifier = Modifier.padding(scaffoldPadding),
+            modifier = Modifier.padding(controller.scaffoldPadding),
             onPopBackStack = {
-                navController.popBackStack()
+                controller. navController.popBackStack()
             },
             getFormattedBuildTime = this::getFormattedBuildTime,
         )

@@ -32,15 +32,11 @@ object ReaderSettingSpec : ScreenSpec {
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun TopBar(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+        controller: ScreenSpec.Controller
     ) {
         TitleToolbar(
             title = stringResource(R.string.reader),
-            navController = navController
+            navController = controller.navController
         )
     }
 
@@ -52,12 +48,7 @@ object ReaderSettingSpec : ScreenSpec {
     )
     @Composable
     override fun Content(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-        scaffoldPadding: PaddingValues,
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+        controller: ScreenSpec.Controller
     ) {
         val context = LocalContext.current
         val vm : ReaderSettingScreenViewModel = hiltViewModel()
@@ -69,7 +60,7 @@ object ReaderSettingSpec : ScreenSpec {
                 Components.Row(
                     title = context.getString(R.string.font),
                     onClick = {
-                        navController.navigate(FontScreenSpec.navHostRoute)
+                        controller.navController.navigate(FontScreenSpec.navHostRoute)
                     },
                 ),
                 Components.Slider(
@@ -151,7 +142,7 @@ object ReaderSettingSpec : ScreenSpec {
 
         LazyColumn(
             modifier = Modifier
-                .padding(scaffoldPadding)
+                .padding(controller.scaffoldPadding)
                 .fillMaxSize()
         ) {
             SetupUiComponent(items)

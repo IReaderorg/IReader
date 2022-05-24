@@ -1,14 +1,10 @@
 package org.ireader.presentation.ui
 
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreHoriz
-import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -16,8 +12,6 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
-import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavController
 import org.ireader.common_resources.discord
 import org.ireader.components.components.TitleToolbar
 import org.ireader.domain.ui.NavigationArgs
@@ -37,12 +31,7 @@ object MoreScreenSpec : BottomNavScreenSpec {
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun TopBar(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+                controller: ScreenSpec.Controller
     ) {
         TitleToolbar(
             title = stringResource(org.ireader.ui_settings.R.string.more),
@@ -56,40 +45,35 @@ object MoreScreenSpec : BottomNavScreenSpec {
     )
     @Composable
     override fun Content(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-        scaffoldPadding: PaddingValues,
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+        controller: ScreenSpec.Controller
     ) {
         val uriHandler = LocalUriHandler.current
-        val vm: MainSettingScreenViewModel = hiltViewModel(navBackStackEntry)
+        val vm: MainSettingScreenViewModel = hiltViewModel   (controller.navBackStackEntry)
 
 
         MoreScreen(
-            modifier = Modifier.padding(scaffoldPadding),
+            modifier = Modifier.padding(controller.scaffoldPadding),
             vm = vm,
             onAbout = {
-                navController.navigate(AboutScreenSpec.navHostRoute)
+                controller.navController.navigate(AboutScreenSpec.navHostRoute)
             },
             onSettings = {
-                navController.navigate(SettingScreenSpec.navHostRoute)
+                controller.navController.navigate(SettingScreenSpec.navHostRoute)
             },
             onAppearanceScreen = {
-                navController.navigate(AppearanceScreenSpec.navHostRoute)
+                controller.navController.navigate(AppearanceScreenSpec.navHostRoute)
             },
             onBackupScreen = {
-                navController.navigate(BackupAndRestoreScreenSpec.navHostRoute)
+                controller.navController.navigate(BackupAndRestoreScreenSpec.navHostRoute)
             },
             onDownloadScreen = {
-                navController.navigate(DownloaderScreenSpec.navHostRoute)
+                controller.navController.navigate(DownloaderScreenSpec.navHostRoute)
             },
             onHelp = {
                 uriHandler.openUri(discord)
             },
             onCategory = {
-                navController.navigate(CategoryScreenSpec.navHostRoute)
+                controller.navController.navigate(CategoryScreenSpec.navHostRoute)
             }
         )
     }

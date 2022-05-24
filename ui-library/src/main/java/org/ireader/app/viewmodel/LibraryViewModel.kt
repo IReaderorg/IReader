@@ -1,9 +1,9 @@
 package org.ireader.app.viewmodel
 
+import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -13,11 +13,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.state.ToggleableState
 import androidx.lifecycle.viewModelScope
-import com.google.accompanist.pager.ExperimentalPagerApi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
@@ -25,8 +25,10 @@ import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import org.ireader.common_models.DisplayMode
 import org.ireader.common_models.entities.BookCategory
+import org.ireader.common_models.entities.BookItem
 import org.ireader.common_models.entities.Category
-import org.ireader.common_models.entities.LibraryBook
+import org.ireader.common_models.entities.Category.Companion.ALL_ID
+import org.ireader.common_models.entities.Category.Companion.UNCATEGORIZED_ID
 import org.ireader.common_models.library.LibraryFilter
 import org.ireader.common_models.library.LibrarySort
 import org.ireader.core_ui.preferences.LibraryPreferences
@@ -39,6 +41,7 @@ import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.local.book_usecases.GetLibraryCategory
 import org.ireader.domain.use_cases.preferences.reader_preferences.screens.LibraryScreenPrefUseCases
 import org.ireader.domain.use_cases.services.ServiceUseCases
+import org.ireader.ui_library.R
 import javax.inject.Inject
 
 @HiltViewModel
@@ -48,12 +51,12 @@ class LibraryViewModel @Inject constructor(
     private val deleteUseCase: DeleteUseCase,
     private val localGetChapterUseCase: LocalGetChapterUseCase,
     private val libraryScreenPrefUseCases: LibraryScreenPrefUseCases,
-    private val libraryState: LibraryStateImpl,
+    private val state: LibraryStateImpl,
     private val serviceUseCases: ServiceUseCases,
     private val getLibraryCategory: GetLibraryCategory,
     private val libraryPreferences: LibraryPreferences,
     val getCategory: GetCategories
-) : BaseViewModel(), LibraryState by libraryState {
+) : BaseViewModel(), LibraryState by state {
 
     var lastUsedCategory by libraryPreferences.lastUsedCategory().asState()
     var filters by libraryPreferences.filters(true).asState()
@@ -61,8 +64,7 @@ class LibraryViewModel @Inject constructor(
     var sorting by libraryPreferences.sorting().asState()
     val showCategoryTabs by libraryPreferences.showCategoryTabs().asState()
     val showCountInCategory by libraryPreferences.showCountInCategory().asState()
-    val categories by getCategory.subscribe().asState(emptyList())
-    val uiCategories by derivedStateOf { listOf(Category.allCategory) + categories }
+
     val bookCategories by getCategory.subscribeBookCategories().asState(emptyList())
     val deleteQueues: SnapshotStateList<BookCategory> = mutableStateListOf()
     val addQueues: SnapshotStateList<BookCategory> = mutableStateListOf()
@@ -70,9 +72,19 @@ class LibraryViewModel @Inject constructor(
 
     init {
         readLayoutTypeAndFilterTypeAndSortType()
-        getBooks()
+        getCategory.subscribe().onEach {  categories ->
+            val lastCategoryId = lastUsedCategory
+
+            val index = categories.indexOfFirst { it.id == lastCategoryId }.takeIf { it != -1 } ?: 0
+
+            state.categories =  categories
+            state.selectedCategoryIndex = index
+        }.launchIn(viewModelScope)
+
+
     }
-    private val loadedManga = mutableMapOf<Long, List<LibraryBook>>()
+
+    private val loadedManga = mutableMapOf<Long, List<BookItem>>()
     private var getBooksJob: Job? = null
 //    fun getLibraryBooks() {
 //        getBooksJob?.cancel()
@@ -85,24 +97,32 @@ class LibraryViewModel @Inject constructor(
 //            }.launchIn(scope)
 //    }
 
-    @OptIn(ExperimentalPagerApi::class)
-    fun getBooks() {
-        getBooksJob?.cancel()
-        getBooksJob = viewModelScope.launch {
-            val page = pager?.currentPage
+//    @OptIn(ExperimentalPagerApi::class)
+//    fun getBooks() {
+//        getBooksJob?.cancel()
+//        getBooksJob = viewModelScope.launch {
+//            val page = pager?.currentPage
+//
+//            if (page != null) {
+//                uiCategories.getOrNull(page)?.id?.let { id ->
+//                    getLibraryCategory.subscribe(id, sorting, filters).collect { books ->
+//                        libraryState.books =
+//                            books.filter { it.title.contains(searchQuery ?: "", true) }
+//                    }
+//                }
+//            }
+//
+//        }
+//    }
 
-            if (page != null) {
-                uiCategories.getOrNull(page)?.id?.let { id ->
-                    getLibraryCategory.subscribe(id, sorting, filters).collect { books ->
-                        libraryState.books = books.filter { it.title.contains(searchQuery?:"", true) }
-                    }
-                }
-            }
-
+    fun getCategoryName(category: Category,context:Context):String {
+        return when(category.id) {
+            ALL_ID-> context.getString( R.string.all_category)
+            UNCATEGORIZED_ID-> context.getString( R.string.uncategorized)
+            else -> category.name
 
         }
     }
-
 
 
     fun onLayoutTypeChange(layoutType: DisplayMode) {
@@ -186,7 +206,9 @@ class LibraryViewModel @Inject constructor(
     }
 
     fun getDefaultValue(categories: Category): ToggleableState {
-        val defaultValue : Boolean =  selection.any { id -> id in bookCategories.filter { it.categoryId == categories.id }.map { it.bookId }  }
+        val defaultValue: Boolean = selection.any { id ->
+            id in bookCategories.filter { it.categoryId == categories.id }.map { it.bookId }
+        }
 
         //categories.id in bookCategories.map { it.categoryId } &&
 
@@ -194,12 +216,14 @@ class LibraryViewModel @Inject constructor(
     }
 
     @Composable
-    fun getLibraryForCategoryIndex(categoryIndex: Int): State<List<LibraryBook>> {
+    fun getLibraryForCategoryIndex(categoryIndex: Int): State<List<BookItem>> {
         val scope = rememberCoroutineScope()
-        val categoryId = categories[categoryIndex].id
+        val categoryId = categories.getOrNull(categoryIndex)?.id ?: return remember {
+            mutableStateOf(emptyList())
+        }
 
         val unfiltered = remember(sorting, filters) {
-            getLibraryCategory.subscribe(categoryId, sorting, filters)
+            getLibraryCategory.subscribe(categoryId, sorting, filters).map { it.map { it.toBookItem() } }
                 .shareIn(scope, SharingStarted.WhileSubscribed(1000), 1)
         }
 

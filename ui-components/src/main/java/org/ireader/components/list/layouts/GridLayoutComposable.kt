@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -36,22 +37,24 @@ fun GridLayoutComposable(
             columns = GridCells.Fixed(3),
             content = {
                 items(
-                    count = books.size,
-                    key = { index ->
-                    books[index].id
+                    items = books,
+                    key = { book ->
+                        book.id
                 }, contentType = { "books" },
-                ) { index ->
+                ) { book ->
+
                     BookImage(
-                        onClick = { onClick(books[index]) },
-                        book = books[index],
+                        onClick = { onClick(book) },
+                        book = book,
                         ratio = 6f / 10f,
-                        selected = books[index].id in selection,
-                        onLongClick = { onLongClick(books[index]) },
+                        selected = book.id in selection,
+                        onLongClick = { onLongClick(book) },
                     ) {
                         if (isLocal) {
-                            GoToLastReadComposable(onClick = { goToLatestChapter(books[index]) })
+                            GoToLastReadComposable(onClick = { goToLatestChapter(book) })
+                            LibraryBadges(book.unread,book.downloaded)
                         }
-                        if (!isLocal && books[index].favorite) {
+                        if (!isLocal && book.favorite) {
                             TextBadge(text = UiText.StringResource(R.string.in_library))
                         }
                     }

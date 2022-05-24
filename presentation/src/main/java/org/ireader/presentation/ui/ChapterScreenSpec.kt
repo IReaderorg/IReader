@@ -3,7 +3,6 @@ package org.ireader.presentation.ui
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,11 +10,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.TextButton
-import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -24,14 +20,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
-import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 import org.ireader.chapterDetails.ChapterDetailScreen
 import org.ireader.chapterDetails.ChapterDetailTopAppBar
 import org.ireader.chapterDetails.viewmodel.ChapterDetailEvent
 import org.ireader.chapterDetails.viewmodel.ChapterDetailViewModel
-import org.ireader.common_resources.UiText
 import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.domain.ui.NavigationArgs
@@ -57,13 +50,9 @@ object ChapterScreenSpec : ScreenSpec {
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
     @Composable
     override fun TopBar(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+        controller: ScreenSpec.Controller
     ) {
-        val vm: ChapterDetailViewModel = hiltViewModel(navBackStackEntry)
+        val vm: ChapterDetailViewModel = hiltViewModel(   controller.navBackStackEntry)
         val scrollState = vm.scrollState
         val scope = rememberCoroutineScope()
         ChapterDetailTopAppBar(
@@ -85,7 +74,7 @@ object ChapterScreenSpec : ScreenSpec {
                 vm.onEvent(ChapterDetailEvent.ToggleOrder)
             },
             onPopBackStack = {
-                navController.popBackStack()
+                controller.navController.popBackStack()
             },
             onMap = {
                 scope.launch {
@@ -103,13 +92,9 @@ object ChapterScreenSpec : ScreenSpec {
     @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
     @Composable
     override fun ModalDrawer(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+        controller: ScreenSpec.Controller
     ) {
-        val vm: ChapterDetailViewModel = hiltViewModel(navBackStackEntry)
+        val vm: ChapterDetailViewModel = hiltViewModel(   controller.navBackStackEntry)
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -143,20 +128,15 @@ object ChapterScreenSpec : ScreenSpec {
     )
     @Composable
     override fun Content(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-        scaffoldPadding: PaddingValues,
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+        controller: ScreenSpec.Controller
     ) {
-        val vm: ChapterDetailViewModel = hiltViewModel(navBackStackEntry)
+        val vm: ChapterDetailViewModel = hiltViewModel(   controller.navBackStackEntry)
         val book = vm.book
         ChapterDetailScreen(
             onItemClick = { index ->
                 if (vm.selection.isEmpty()) {
                     if (book != null) {
-                        navController.navigate(
+                        controller.navController.navigate(
                             ReaderScreenSpec.buildRoute(
                                 bookId = book.id,
                                 sourceId = book.sourceId,
@@ -186,7 +166,7 @@ object ChapterScreenSpec : ScreenSpec {
                 }
             },
             vm = vm,
-            scaffoldPadding = scaffoldPadding
+            scaffoldPadding = controller.scaffoldPadding
         )
     }
 }

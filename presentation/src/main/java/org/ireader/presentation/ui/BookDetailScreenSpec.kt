@@ -4,14 +4,10 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetState
-import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -19,8 +15,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
-import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavController
 import androidx.navigation.NavDeepLink
 import androidx.navigation.navDeepLink
 import kotlinx.coroutines.launch
@@ -66,13 +60,9 @@ object BookDetailScreenSpec : ScreenSpec {
     @ExperimentalMaterial3Api
     @Composable
     override fun TopBar(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+        controller: ScreenSpec.Controller
     ) {
-        val vm: BookDetailViewModel = hiltViewModel(navBackStackEntry)
+        val vm: BookDetailViewModel = hiltViewModel(   controller.navBackStackEntry)
         val scope = rememberCoroutineScope()
         val source = vm.source
         val catalog = vm.catalogSource
@@ -80,7 +70,7 @@ object BookDetailScreenSpec : ScreenSpec {
         BookDetailTopAppBar(
             onWebView = {
                 if (source != null && source is HttpSource && book != null)
-                    navController.navigate(
+                    controller.navController.navigate(
                         WebViewScreenSpec.buildRoute(
                             url = (source).baseUrl + getUrlWithoutDomain(
                                 book.key,
@@ -100,12 +90,12 @@ object BookDetailScreenSpec : ScreenSpec {
                 }
             },
             onPopBackStack = {
-                navController.popBackStack()
+                controller.navController.popBackStack()
             },
             source = vm.source,
             onCommand = {
                 scope.launch {
-                    sheetState.show()
+                    controller.sheetState.show()
                 }
             }
         )
@@ -114,13 +104,9 @@ object BookDetailScreenSpec : ScreenSpec {
     @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
     @Composable
     override fun BottomAppBar(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+        controller: ScreenSpec.Controller
     ) {
-        val vm: BookDetailViewModel = hiltViewModel(navBackStackEntry)
+        val vm: BookDetailViewModel = hiltViewModel(   controller.navBackStackEntry)
         val detailState = vm.state
         val chapterState = vm.chapterState
         val book = vm.book
@@ -145,7 +131,7 @@ object BookDetailScreenSpec : ScreenSpec {
                     onRead = {
                         if (catalog != null) {
                             if (vm.chapters.any { it.read } && vm.chapters.isNotEmpty()) {
-                                navController.navigate(
+                                controller.navController.navigate(
                                     ReaderScreenSpec.buildRoute(
                                         bookId = book.id,
                                         sourceId = catalog.sourceId,
@@ -153,7 +139,7 @@ object BookDetailScreenSpec : ScreenSpec {
                                     )
                                 )
                             } else if (vm.chapters.isNotEmpty()) {
-                                navController.navigate(
+                                controller.navController.navigate(
                                     ReaderScreenSpec.buildRoute(
                                         bookId = book.id,
                                         sourceId = catalog.sourceId,
@@ -181,13 +167,9 @@ object BookDetailScreenSpec : ScreenSpec {
     @ExperimentalMaterial3Api
     @Composable
     override fun BottomModalSheet(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+        controller: ScreenSpec.Controller
     ) {
-        val vm: BookDetailViewModel = hiltViewModel(navBackStackEntry)
+        val vm: BookDetailViewModel = hiltViewModel(   controller.navBackStackEntry)
         val detailState = vm.state
         val book = vm.book
         val catalog = vm.catalogSource
@@ -229,15 +211,10 @@ object BookDetailScreenSpec : ScreenSpec {
     )
     @Composable
     override fun Content(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-        scaffoldPadding: PaddingValues,
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+        controller: ScreenSpec.Controller
     ) {
 
-        val vm: BookDetailViewModel = hiltViewModel(navBackStackEntry)
+        val vm: BookDetailViewModel = hiltViewModel(   controller.navBackStackEntry)
         val context = LocalContext.current
         val state = vm
         val book = state.book
@@ -246,7 +223,7 @@ object BookDetailScreenSpec : ScreenSpec {
         val scope = rememberCoroutineScope()
 
         BookDetailScreen(
-            modifier = Modifier.padding(bottom = scaffoldPadding.calculateBottomPadding()),
+            modifier = Modifier.padding(bottom = controller.scaffoldPadding.calculateBottomPadding()),
             onSummaryExpand = {
                 vm.expandedSummary = !vm.expandedSummary
             },
@@ -257,7 +234,7 @@ object BookDetailScreenSpec : ScreenSpec {
             },
             onChapterContent = {
                 if (catalog != null && book != null) {
-                    navController.navigate(
+                    controller.navController.navigate(
                         ChapterScreenSpec.buildRoute(
                             bookId = book.id,
                             sourceId = catalog.sourceId
@@ -269,13 +246,13 @@ object BookDetailScreenSpec : ScreenSpec {
             detailState = vm,
             onTitle = {
                 try {
-                    navController.navigate(GlobalSearchScreenSpec.buildRoute(query = it))
+                    controller.navController.navigate(GlobalSearchScreenSpec.buildRoute(query = it))
                 } catch (e: Throwable) {
                 }
             },
-            snackBarHostState = snackBarHostState,
+            snackBarHostState = controller.snackBarHostState,
             chapterState = vm,
-            modalBottomSheetState = sheetState,
+            modalBottomSheetState = controller.sheetState,
         )
     }
 }

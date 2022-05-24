@@ -7,6 +7,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
+import org.ireader.common_models.entities.Chapter
 
 @Dao
 interface ChapterDao : BaseDao<org.ireader.common_models.entities.Chapter> {
@@ -126,10 +127,10 @@ interface ChapterDao : BaseDao<org.ireader.common_models.entities.Chapter> {
     @Query("SELECT * from chapter WHERE bookId = :bookId LIMIT 1")
     suspend fun findFirstChapter(bookId: Long): org.ireader.common_models.entities.Chapter?
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE, entity = Chapter::class)
     suspend fun insertChapters(chapters: List<org.ireader.common_models.entities.Chapter>): List<Long>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE, entity = Chapter::class)
     suspend fun insertChapter(chapter: org.ireader.common_models.entities.Chapter): Long
 
     @Query("DELETE FROM chapter WHERE bookId = :bookId")

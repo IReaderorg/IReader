@@ -90,14 +90,9 @@ object TTSScreenSpec : ScreenSpec {
     )
     @Composable
     override fun Content(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-        scaffoldPadding: PaddingValues,
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+        controller: ScreenSpec.Controller
     ) {
-        val vm: TTSViewModel = hiltViewModel(navBackStackEntry)
+        val vm: TTSViewModel = hiltViewModel   (controller.navBackStackEntry)
         val scope = rememberCoroutineScope()
         val context = LocalContext.current
         val sliderInteractionSource = MutableInteractionSource()
@@ -106,7 +101,7 @@ object TTSScreenSpec : ScreenSpec {
         val pagerState = rememberPagerState()
 
         val drawerScrollState = rememberLazyListState()
-        LaunchedEffect(key1 = drawerState.hashCode()) {
+        LaunchedEffect(key1 = controller.drawerState.hashCode()) {
             vm.drawerState = drawerScrollState
         }
 
@@ -157,16 +152,16 @@ object TTSScreenSpec : ScreenSpec {
             },
             onValueChangeFinished = {},
             onPopStack = {
-                navController.popBackStack()
+                controller.navController.popBackStack()
             },
             sliderInteractionSource = sliderInteractionSource,
             pagerState = pagerState,
             drawerScrollState = drawerScrollState,
-            bottomSheetState = sheetState,
-            drawerState = drawerState
+            bottomSheetState = controller.sheetState,
+            drawerState = controller.drawerState
         )
-        LaunchedEffect(key1 = drawerState.targetValue) {
-            if (chapter != null && drawerState.targetValue == androidx.compose.material3.DrawerValue.Open && vm.ttsChapters.isNotEmpty()) {
+        LaunchedEffect(key1 = controller.drawerState.targetValue) {
+            if (chapter != null && controller.drawerState.targetValue == androidx.compose.material3.DrawerValue.Open && vm.ttsChapters.isNotEmpty()) {
 
                 val index = vm.ttsChapters.indexOfFirst { it.id == chapter.id }
                 if (index != -1) {
@@ -202,13 +197,9 @@ object TTSScreenSpec : ScreenSpec {
     @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
     @Composable
     override fun ModalDrawer(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+        controller: ScreenSpec.Controller
     ) {
-        val vm: TTSViewModel = hiltViewModel(navBackStackEntry)
+        val vm: TTSViewModel = hiltViewModel   (controller.navBackStackEntry)
         val scope = rememberCoroutineScope()
         ReaderScreenDrawer(
             modifier = Modifier.statusBarsPadding(),
@@ -244,16 +235,12 @@ object TTSScreenSpec : ScreenSpec {
     @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
     @Composable
     override fun BottomModalSheet(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+        controller: ScreenSpec.Controller
     ) {
-        val vm: TTSViewModel = hiltViewModel(navBackStackEntry)
+        val vm: TTSViewModel = hiltViewModel   (controller.navBackStackEntry)
 
-        LaunchedEffect(key1 = sheetState.hashCode()) {
-            sheetState.hide()
+        LaunchedEffect(key1 = controller.sheetState.hashCode()) {
+            controller.sheetState.hide()
         }
 
 

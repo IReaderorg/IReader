@@ -1,17 +1,11 @@
 package org.ireader.presentation.ui
 
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetState
-import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
-import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.google.accompanist.web.WebContent
@@ -62,29 +56,24 @@ object WebViewScreenSpec : ScreenSpec {
 
     @Composable
     override fun Content(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-        scaffoldPadding: PaddingValues,
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+        controller: ScreenSpec.Controller
     ) {
-        val vm: WebViewPageModel = hiltViewModel(navBackStackEntry)
+        val vm: WebViewPageModel = hiltViewModel   (controller.navBackStackEntry)
         val scope = rememberCoroutineScope()
         WebPageScreen(
             viewModel = vm,
             onPopBackStack = {
-                navController.popBackStack()
+                controller.navController.popBackStack()
             },
             onModalBottomSheetHide = {
                 scope.launch {
-                    sheetState.hide()
+                    controller.sheetState.hide()
 
                 }
             },
             onModalBottomSheetShow = {
                 scope.launch {
-                    sheetState.show()
+                    controller.sheetState.show()
                 }
             },
             onFetchChapters = {
@@ -104,20 +93,16 @@ object WebViewScreenSpec : ScreenSpec {
                 }
             },
             source = vm.source,
-            snackBarHostState = snackBarHostState,
-            scaffoldPadding = scaffoldPadding
+            snackBarHostState = controller.snackBarHostState,
+            scaffoldPadding = controller.scaffoldPadding
         )
     }
 
     @Composable
     override fun TopBar(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+        controller: ScreenSpec.Controller
     ) {
-        val vm: WebViewPageModel = hiltViewModel(navBackStackEntry)
+        val vm: WebViewPageModel = hiltViewModel   (controller.navBackStackEntry)
         val webView = vm.webView
         val source = vm.source
         WebPageTopBar(
@@ -140,7 +125,7 @@ object WebViewScreenSpec : ScreenSpec {
                 vm.updateUrl(it)
             },
             onPopBackStack = {
-                navController.popBackStack()
+                controller.navController.popBackStack()
             },
             source = source,
             onFetchBook = {
@@ -185,19 +170,15 @@ object WebViewScreenSpec : ScreenSpec {
 
     @Composable
     override fun BottomModalSheet(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+        controller: ScreenSpec.Controller
     ) {
-        val vm: WebViewPageModel = hiltViewModel(navBackStackEntry)
+        val vm: WebViewPageModel = hiltViewModel   (controller.navBackStackEntry)
         val webView = vm.webView
         val scope = rememberCoroutineScope()
         WebPageBottomLayout(
             onConfirm = {
                 scope.launch {
-                    sheetState.hide()
+                    controller.sheetState.hide()
                 }
                 webView?.let { webview ->
                     val book = vm.webBook
@@ -216,14 +197,14 @@ object WebViewScreenSpec : ScreenSpec {
             },
             onCancel = {
                 scope.launch {
-                    sheetState.hide()
+                    controller.sheetState.hide()
                 }
                 vm.onEvent(WebPageEvents.Cancel)
             },
             state = vm,
             onBook = { bookId ->
                 vm.source?.let { source ->
-                    navController.navigate(
+                    controller.navController.navigate(
                         BookDetailScreenSpec.buildRoute(
                             source.id,
                             bookId = bookId

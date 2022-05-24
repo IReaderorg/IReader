@@ -1,6 +1,7 @@
 package org.ireader.data.local.dao
 
 import androidx.room.Dao
+import androidx.room.Insert
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 import org.ireader.common_models.entities.Category
@@ -26,5 +27,8 @@ interface CategoryDao:BaseDao<Category> {
         SELECT category.* FROM category
     """)
     suspend fun findAll(): List<Category>
+
+    @Insert
+    fun insertDate(date:List<Category>)
 
 }

@@ -7,13 +7,9 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetState
-import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
@@ -21,8 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavController
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.decodeFromString
@@ -48,16 +42,11 @@ object BackupAndRestoreScreenSpec : ScreenSpec {
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun TopBar(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+                controller: ScreenSpec.Controller
     ) {
         TitleToolbar(
             title = stringResource(R.string.backup_and_restore),
-            navController = navController
+            navController = controller.navController
         )
     }
 
@@ -72,14 +61,9 @@ object BackupAndRestoreScreenSpec : ScreenSpec {
     )
     @Composable
     override fun Content(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-        scaffoldPadding: PaddingValues,
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+        controller: ScreenSpec.Controller
     ) {
-        val vm: BackupScreenViewModel = hiltViewModel(navBackStackEntry)
+        val vm: BackupScreenViewModel = hiltViewModel(   controller.navBackStackEntry)
         val context = LocalContext.current
         val scope = rememberCoroutineScope()
 
@@ -87,7 +71,7 @@ object BackupAndRestoreScreenSpec : ScreenSpec {
             vm.eventFlow.collectLatest { event ->
                 when (event) {
                     is UiEvent.ShowSnackbar -> {
-                        snackBarHostState.showSnackbar(
+                        controller.snackBarHostState.showSnackbar(
                             event.uiText.asString(context)
                         )
                     }
@@ -177,12 +161,12 @@ object BackupAndRestoreScreenSpec : ScreenSpec {
         )
 
         BackUpAndRestoreScreen(
-            modifier = Modifier.padding(scaffoldPadding),
+            modifier = Modifier.padding(controller.scaffoldPadding),
             items = settingItems,
             onBackStack = {
-                navController.popBackStack()
+                controller.navController.popBackStack()
             },
-            snackbarHostState = snackBarHostState
+            snackbarHostState = controller.snackBarHostState
         )
     }
 }

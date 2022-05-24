@@ -1,18 +1,13 @@
 package org.ireader.presentation.ui
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetState
-import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import org.ireader.appearance.AppearanceSettingScreen
 import org.ireader.appearance.AppearanceViewModel
@@ -29,11 +24,7 @@ object AppearanceScreenSpec : ScreenSpec {
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun TopBar(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+        controller: ScreenSpec.Controller
     ) {
         Toolbar(
             title = {
@@ -41,7 +32,7 @@ object AppearanceScreenSpec : ScreenSpec {
             },
             navigationIcon = {
                 TopAppBarBackButton() {
-                    popBackStack(navController)
+                    popBackStack(controller.navController)
                 }
             }
         )
@@ -53,21 +44,16 @@ object AppearanceScreenSpec : ScreenSpec {
     )
     @Composable
     override fun Content(
-        navController: NavController,
-        navBackStackEntry: NavBackStackEntry,
-        snackBarHostState: SnackbarHostState,
-        scaffoldPadding: PaddingValues,
-        sheetState: ModalBottomSheetState,
-        drawerState: DrawerState
+        controller: ScreenSpec.Controller
     ) {
-        val viewModel: AppearanceViewModel = hiltViewModel(navBackStackEntry)
+        val viewModel: AppearanceViewModel = hiltViewModel(   controller.navBackStackEntry)
         AppearanceSettingScreen(
-            modifier = Modifier.padding(scaffoldPadding),
+            modifier = Modifier.padding(controller.scaffoldPadding),
             saveDarkModePreference = { theme ->
                 viewModel.saveNightModePreferences(theme)
             },
             onPopBackStack = {
-                navController.popBackStack()
+                controller.navController.popBackStack()
             },
             vm = viewModel
         )

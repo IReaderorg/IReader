@@ -166,6 +166,7 @@ data class LibraryBook(
     val cover: String,
     val lastUpdate: Long = 0,
     val unread: Int,
+    val readCount: Int,
 ) : BookBase {
     fun toBookItem() : BookItem {
         return BookItem(
@@ -173,6 +174,8 @@ data class LibraryBook(
             sourceId = sourceId,
             title = title,
             cover = cover,
+            unread = unread,
+            downloaded = readCount
         )
     }
 }
@@ -193,6 +196,8 @@ data class BookItem(
     override val favorite: Boolean = false,
     override val cover: String = "",
     override val customCover: String = "",
+    val unread: Int? = null,
+    val downloaded: Int? = null,
 ) : BaseBook
 
 data class DownloadedBook(
