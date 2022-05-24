@@ -25,6 +25,7 @@ fun LayoutComposable(
     isLocal: Boolean,
     goToLatestChapter: (book: BookItem) -> Unit = {},
     isLoading: Boolean = false,
+    useDefaultImageLoader :Boolean = false,
 ) {
         when (layout) {
             is LayoutType.GridLayout -> {
@@ -38,7 +39,8 @@ fun LayoutComposable(
                     scrollState = gridState,
                     isLocal = isLocal,
                     goToLatestChapter = { goToLatestChapter(it) },
-                    isLoading = isLoading
+                    isLoading = isLoading,
+                    useDefaultImageLoader = useDefaultImageLoader
                 )
             }
             is LayoutType.ListLayout -> {
@@ -50,7 +52,8 @@ fun LayoutComposable(
                     selection = selection,
                     onLongClick = { onLongClick(it) },
                     goToLatestChapter = { goToLatestChapter(it) },
-                    isLoading = isLoading
+                    isLoading = isLoading,
+                    useDefaultImageLoader = useDefaultImageLoader
                 )
             }
             is LayoutType.CompactGrid -> {
@@ -63,7 +66,8 @@ fun LayoutComposable(
                     selection = selection,
                     onLongClick = { onLongClick(it) },
                     goToLatestChapter = { goToLatestChapter(it) },
-                    isLoading = isLoading
+                    isLoading = isLoading,
+                    useDefaultImageLoader = useDefaultImageLoader
                 )
             }
         }

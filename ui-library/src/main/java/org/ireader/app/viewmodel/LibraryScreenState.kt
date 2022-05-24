@@ -8,7 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import org.ireader.common_models.DisplayMode
 import org.ireader.common_models.LayoutType
-import org.ireader.common_models.entities.Category
+import org.ireader.common_models.entities.CategoryWithCount
 import org.ireader.common_models.entities.History
 import org.ireader.common_models.entities.LibraryBook
 import org.ireader.common_models.library.LibrarySort
@@ -33,7 +33,9 @@ interface LibraryState {
     var histories: List<History>
     var selection: SnapshotStateList<Long>
     val hasSelection: Boolean
-    val categories : List<Category>
+    val inititialized: Boolean
+    val categories : List<CategoryWithCount>
+    val selectedCategory : CategoryWithCount?
 }
 @Singleton
 open class LibraryStateImpl @Inject constructor() : LibraryState {
@@ -47,11 +49,13 @@ open class LibraryStateImpl @Inject constructor() : LibraryState {
     override var searchQuery by mutableStateOf<String?>(null)
     override var sortType by mutableStateOf<LibrarySort>(LibrarySort(LibrarySort.Type.LastRead,true))
     override var desc by mutableStateOf<Boolean>(false)
+    override var inititialized by mutableStateOf<Boolean>(false)
    // override var filters: SnapshotStateList<FilterType> = mutableStateListOf()
     override var currentScrollState by mutableStateOf<Int>(0)
     override var selectedCategoryIndex by mutableStateOf<Int>(0)
+    override var selectedCategory by mutableStateOf<CategoryWithCount?>(null)
     override var histories by mutableStateOf<List<History>>(emptyList())
     override var selection: SnapshotStateList<Long> = mutableStateListOf()
     override val hasSelection: Boolean by derivedStateOf { selection.isNotEmpty() }
-    override var categories: List<Category> by mutableStateOf(emptyList())
+    override var categories: List<CategoryWithCount> by mutableStateOf(emptyList())
 }

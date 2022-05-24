@@ -24,9 +24,7 @@ class AppPreferences(
 
         /** Setting Pref**/
         const val SAVED_DOH_KEY = "SAVED_DOH_KEY"
-        const val THEME_MODE_KEY = "theme_mode_key"
-        const val LIGHT_MODE_KEY = "theme_light"
-        const val NIGHT_MODE_KEY = "theme_dark"
+        const val DEFAULT_IMAGE_LOADER = "default_image_loader"
     }
 
 
@@ -41,6 +39,10 @@ class AppPreferences(
 
     fun dohStateKey(): Preference<Int> {
         return preferenceStore.getInt(SAVED_DOH_KEY, 0)
+    }
+
+    fun defaultImageLoader(): Preference<Boolean> {
+        return preferenceStore.getBoolean(DEFAULT_IMAGE_LOADER, false)
     }
 
 

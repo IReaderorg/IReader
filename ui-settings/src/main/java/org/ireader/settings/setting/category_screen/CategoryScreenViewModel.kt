@@ -11,11 +11,9 @@ import javax.inject.Inject
 @HiltViewModel
 class CategoryScreenViewModel @Inject constructor(
     val getCategories: GetCategories
-) : BaseViewModel()  {
-    val category by getCategories.subscribe().asState(emptyList())
+) : BaseViewModel() {
+    val category by getCategories.subscribe(true).asState(emptyList())
     var showDialog by mutableStateOf(false)
-
-
 }
 
 

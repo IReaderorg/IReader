@@ -14,26 +14,14 @@ data class Category(
     val flags: Int = 0,
 ) {
 
-    val isUncategorized get() = id == UNCATEGORIZED_ID
-    val isAll get() = id == ALL_ID
+    private val isUncategorized get() = id == UNCATEGORIZED_ID
+    private val isAll get() = id == ALL_ID
 
     val isSystemCategory get() = isUncategorized || isAll
 
     companion object {
         const val ALL_ID = -2L
-        const val UNCATEGORIZED_ID = 0L
-        val allCategory = Category(
-            id = ALL_ID,
-            "Default",
-
-
-            )
-        val unCategorized = Category(
-            id = ALL_ID,
-            "Default",
-
-
-            )
+        const val UNCATEGORIZED_ID = -1L
     }
 
 }

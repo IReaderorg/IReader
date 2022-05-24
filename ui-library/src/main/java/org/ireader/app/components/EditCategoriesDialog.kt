@@ -56,7 +56,7 @@ fun EditCategoriesDialog(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             val defaultValue by remember {
-                                derivedStateOf { vm.getDefaultValue(category) }
+                                derivedStateOf { vm.getDefaultValue(category.category) }
                             }
                             var state: ToggleableState by remember {
                                 mutableStateOf(defaultValue)
@@ -66,14 +66,14 @@ fun EditCategoriesDialog(
                                     state -> {
                                         when (state) {
                                             ToggleableState.On -> {
-                                              onAddDeleteQueue(category)
+                                              onAddDeleteQueue(category.category)
                                                 ToggleableState.Indeterminate
                                             }
                                             ToggleableState.Indeterminate -> {
                                                 ToggleableState.On
                                             }
                                             ToggleableState.Off -> {
-                                                onAddToInsertQueue(category)
+                                                onAddToInsertQueue(category.category)
                                                 ToggleableState.On
                                             }
                                         }
@@ -81,10 +81,10 @@ fun EditCategoriesDialog(
                                     else -> {
                                         when (state) {
                                             ToggleableState.On -> {
-                                                onRemoteInInsertQueue(category)
+                                                onRemoteInInsertQueue(category.category)
                                             }
                                             ToggleableState.Indeterminate -> {
-                                                onRemoteInDeleteQueue(category)
+                                                onRemoteInDeleteQueue(category.category)
 
                                             }
                                             else -> {}

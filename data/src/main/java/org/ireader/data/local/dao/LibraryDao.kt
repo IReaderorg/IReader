@@ -10,36 +10,6 @@ import org.ireader.common_models.entities.LibraryBook
 @Dao
 interface LibraryDao : BaseDao<org.ireader.common_models.entities.Book> {
 
-
-
-
-    @Query("""
-            SELECT M.*, COALESCE(MC.categoryId, 0) AS library
-    FROM (
-        SELECT library.*, COALESCE(C.unreadCount, 0) AS unread, COALESCE(R.readCount, 0) AS readCount
-        FROM library
-        LEFT JOIN (
-            SELECT chapter.bookId, COUNT(*) AS unreadCount
-            FROM chapter
-            WHERE chapter.read = 0
-            GROUP BY chapter.bookId
-        ) AS C
-        ON library.id = C.bookId
-        LEFT JOIN (
-            SELECT chapter.bookId, COUNT(*) AS readCount
-            FROM chapter
-            GROUP BY chapter.bookId
-        ) AS R
-        ON library.id = R.bookId
-        WHERE library.favorite = 1
-        GROUP BY library.id
-        ORDER BY library.title
-    ) AS M
-    LEFT JOIN (SELECT * FROM bookcategory ) AS MC
-        ON MC.bookId = M.id
-    """)
-    fun UniqeQuery() : Flow<List<LibraryBook>>
-
     @Query(
         """
 
@@ -570,7 +540,6 @@ interface LibraryDao : BaseDao<org.ireader.common_models.entities.Book> {
         """
     )
     fun findAllInCategoryWithTotalChapters(categoryId: Long): Flow<List<LibraryBook>>
-
 
     @RewriteQueriesToDropUnusedColumns
     @Query(

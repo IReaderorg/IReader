@@ -33,6 +33,7 @@ fun CompactGridLayoutComposable(
     isLocal: Boolean,
     goToLatestChapter: (book: BookItem) -> Unit,
     isLoading: Boolean = false,
+    useDefaultImageLoader :Boolean = false,
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -54,10 +55,12 @@ fun CompactGridLayoutComposable(
                         book = books[index],
                         ratio = 6f / 9f,
                         selected = books[index].id in selection,
+                        useDefaultImageLoader=useDefaultImageLoader,
                         onLongClick = { onLongClick(books[index]) },
                     ) {
                         if (isLocal) {
                             GoToLastReadComposable(onClick = { goToLatestChapter(books[index]) })
+                            LibraryBadges(books[index].unread,books[index].downloaded)
                         }
                         if (!isLocal && books[index].favorite) {
                             TextBadge(text = UiText.StringResource(R.string.in_library))

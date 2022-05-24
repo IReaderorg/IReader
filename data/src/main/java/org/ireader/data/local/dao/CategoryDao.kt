@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 import org.ireader.common_models.entities.Category
+import org.ireader.common_models.entities.CategoryWithRelation
 
 @Dao
 interface CategoryDao:BaseDao<Category> {
@@ -20,13 +21,69 @@ interface CategoryDao:BaseDao<Category> {
 
 
     @Query("""
-        SELECT category.* FROM category
+    -- User categories
+    SELECT category.*, COUNT(bookcategory.bookId) AS bookCount
+    FROM category
+    LEFT JOIN bookcategory
+    ON category.id = bookcategory.categoryId
+    WHERE category.id > 0
+    GROUP BY category.id
+    UNION ALL
+    -- Category.ALL
+    SELECT *, (
+      SELECT COUNT()
+      FROM library
+    ) AS bookCount
+    FROM category
+    WHERE category.id = -2
+    UNION ALL
+     -- Category.UNCATEGORIZED_ID
+    SELECT *, (
+      SELECT COUNT(library.id)
+      FROM library
+      WHERE NOT EXISTS (
+        SELECT bookcategory.bookId
+        FROM bookcategory
+        WHERE library.id = bookcategory.bookId
+      )
+    ) AS bookCount
+    FROM category
+    WHERE category.id = 0
+    ORDER BY sort;
     """)
-    fun subscribeAll(): Flow<List<Category>>
+    fun subscribeAll(): Flow<List<CategoryWithRelation>>
     @Query("""
-        SELECT category.* FROM category
+    -- User categories
+    SELECT category.*, COUNT(bookcategory.bookId) AS bookCount
+    FROM category
+    LEFT JOIN bookcategory
+    ON category.id = bookcategory.categoryId
+    WHERE category.id > 0
+    GROUP BY category.id
+    UNION ALL
+    -- Category.ALL
+    SELECT *, (
+      SELECT COUNT()
+      FROM library
+    ) AS bookCount
+    FROM category
+    WHERE category.id = -2
+    UNION ALL
+     -- Category.UNCATEGORIZED_ID
+    SELECT *, (
+      SELECT COUNT(library.id)
+      FROM library
+      WHERE NOT EXISTS (
+        SELECT bookcategory.bookId
+        FROM bookcategory
+        WHERE library.id = bookcategory.bookId
+      )
+    ) AS bookCount
+    FROM category
+    WHERE category.id = 0
+    ORDER BY sort;
     """)
-    suspend fun findAll(): List<Category>
+    suspend fun findAll(): List<CategoryWithRelation>
 
     @Insert
     fun insertDate(date:List<Category>)

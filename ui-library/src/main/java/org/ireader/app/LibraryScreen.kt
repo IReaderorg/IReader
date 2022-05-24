@@ -14,8 +14,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
@@ -32,9 +30,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -79,95 +76,116 @@ fun LibraryScreen(
     refreshUpdate: () -> Unit,
     onClickChangeCategory: () -> Unit,
     bottomSheetState: ModalBottomSheetState,
-    pagerState: PagerState,
     scaffoldPadding: PaddingValues,
     onAddToCategoryConfirm: () -> Unit,
     requestHideBottomNav: (Boolean) -> Unit,
 ) {
 
-    val gridState = rememberLazyGridState()
-    val lazyListState = rememberLazyListState()
-    val categoriesWithCount = remember {
-        derivedStateOf { vm.categories.map { CategoryWithCount(it,vm.books.size) }  }
-    }
     LaunchedEffect(vm.hasSelection) {
         requestHideBottomNav(vm.hasSelection)
     }
 
-        val horizontalPager = rememberPagerState()
 
-        Box(modifier = Modifier
+
+    Box(
+        modifier = Modifier
             .padding(scaffoldPadding)
-            .fillMaxSize(),) {
-            Column {
-                if (vm.categories.isNotEmpty()) {
-                    ScrollableTabs(
-                        modifier = Modifier.fillMaxWidth(),
-                        libraryTabs = vm.categories.map { it.visibleName },
-                        pagerState = horizontalPager
-                    )
-                }
-                LibraryPager(
-                    pagerState = horizontalPager,
-                    lazyListState = lazyListState,
-                    onClick = onBook,
-                    onLongClick = onLongBook,
-                    goToLatestChapter = goToLatestChapter,
-                    gridState = gridState,
-                    categories = categoriesWithCount.value,
-                    pageCount = vm.categories.size,
-                    layout = vm.layout,
-                    onPageChange = { page ->
-                                   vm.getLibraryForCategoryIndex(categoryIndex = page)
-                    },
-                    selection = vm.selection
-
-                )
-
-            }
-            EditCategoriesDialog(
+            .fillMaxSize(),
+    ) {
+        Column {
+            LibraryContent(
                 vm = vm,
-                onConfirm = onAddToCategoryConfirm,
-                dismissDialog = {
-                    vm.showDialog = false
-                },
-                onAddDeleteQueue = { category ->
-                    vm.deleteQueues.addAll(category.toBookCategory(vm.selection))
-                },
-                onRemoteInInsertQueue = { category ->
-                    vm.addQueues.removeIf { it.categoryId == category.id }
-                },
-                onAddToInsertQueue = { category ->
-                    vm.addQueues.addAll(category.toBookCategory(vm.selection))
-                },
-                onRemoteInDeleteQueue = { category ->
-                    vm.deleteQueues.removeIf { it.categoryId == category.id }
+                onBook = onBook,
+                onLongBook = onLongBook,
+                goToLatestChapter = goToLatestChapter,
+                onPageChanged = {
+                    vm.setSelectedPage(it)
                 }
             )
-            Crossfade(
-                targetState = Pair(
-                    vm.isLoading,
-                    vm.isEmpty
-                )
-            ) { (isLoading, isEmpty) ->
-                when {
-                    isLoading -> LoadingScreen()
-                    isEmpty && vm.filters.isEmpty() -> EmptyScreen(
-                        text = UiText.StringResource(R.string.empty_library)
-                    )
-                }
+
+        }
+        EditCategoriesDialog(
+            vm = vm,
+            onConfirm = onAddToCategoryConfirm,
+            dismissDialog = {
+                vm.showDialog = false
+            },
+            onAddDeleteQueue = { category ->
+                vm.deleteQueues.addAll(category.toBookCategory(vm.selection))
+            },
+            onRemoteInInsertQueue = { category ->
+                vm.addQueues.removeIf { it.categoryId == category.id }
+            },
+            onAddToInsertQueue = { category ->
+                vm.addQueues.addAll(category.toBookCategory(vm.selection))
+            },
+            onRemoteInDeleteQueue = { category ->
+                vm.deleteQueues.removeIf { it.categoryId == category.id }
             }
-            LibrarySelectionBar(
-                modifier = Modifier.align(Alignment.BottomCenter),
-                visible = vm.hasSelection,
-                onClickChangeCategory = onClickChangeCategory,
-                onClickDeleteDownloads = onDelete,
-                onClickDownload = onDownload,
-                onClickMarkAsRead = onMarkAsRead,
-                onClickMarkAsUnread = onMarkAsNotRead
+        )
+        Crossfade(
+            targetState = Pair(
+                vm.isLoading,
+                vm.isEmpty
             )
+        ) { (isLoading, isEmpty) ->
+            when {
+                isLoading -> LoadingScreen()
+                isEmpty && vm.filters.value.isEmpty() -> EmptyScreen(
+                    text = UiText.StringResource(R.string.empty_library)
+                )
+            }
+        }
+        LibrarySelectionBar(
+            modifier = Modifier.align(Alignment.BottomCenter),
+            visible = vm.hasSelection,
+            onClickChangeCategory = onClickChangeCategory,
+            onClickDeleteDownloads = onDelete,
+            onClickDownload = onDownload,
+            onClickMarkAsRead = onMarkAsRead,
+            onClickMarkAsUnread = onMarkAsNotRead
+        )
 
     }
+}
+
+@OptIn(ExperimentalPagerApi::class, ExperimentalMaterialApi::class)
+@Composable
+private fun LibraryContent(
+    vm: LibraryViewModel,
+    onBook: (book: BookItem) -> Unit,
+    onLongBook: (book: BookItem) -> Unit,
+    goToLatestChapter: (book: BookItem) -> Unit,
+    onPageChanged: (Int) -> Unit
+) {
+    if (vm.categories.isEmpty()) return
+    val horizontalPager = rememberPagerState(initialPage = vm.selectedCategoryIndex)
+    LaunchedEffect(horizontalPager) {
+        snapshotFlow { horizontalPager.currentPage }.collect {
+            onPageChanged(it)
+        }
+    }
+    ScrollableTabs(
+        modifier = Modifier.fillMaxWidth(),
+        libraryTabs = vm.categories.map { it.visibleName.plus(if (vm.showCountInCategory.value) " (${it.bookCount})" else "") },
+        pagerState = horizontalPager,
+        visible = vm.showCategoryTabs.value && vm.categories.isNotEmpty()
+    )
+    LibraryPager(
+        pagerState = horizontalPager,
+        onClick = onBook,
+        onLongClick = onLongBook,
+        goToLatestChapter = goToLatestChapter,
+        categories = vm.categories,
+        pageCount = vm.categories.size,
+        layout = vm.layout,
+        onPageChange = { page ->
+            vm.getLibraryForCategoryIndex(categoryIndex = page)
+        },
+        selection = vm.selection,
+        currentPage = vm.selectedCategoryIndex,
+
+    )
 }
 
 @Composable
@@ -217,8 +235,6 @@ private fun LibrarySelectionBar(
 @Composable
 fun LibraryPager(
     pagerState: PagerState,
-    lazyListState:LazyListState,
-    gridState:LazyGridState,
     onClick: (book: BookItem) -> Unit,
     onLongClick: (BookItem) -> Unit = {},
     goToLatestChapter: (book: BookItem) -> Unit = {},
@@ -226,18 +242,16 @@ fun LibraryPager(
     pageCount: Int,
     layout: LayoutType,
     selection: List<Long> = emptyList<Long>(),
-    onPageChange: @Composable (page:Int) -> State<List<BookItem>>
+    currentPage: Int,
+    onPageChange: @Composable (page: Int) -> State<List<BookItem>>,
 ) {
-    if (categories.isEmpty()) return
-
-
     HorizontalPager(
         count = pageCount,
         state = pagerState,
     ) { page ->
         val books by onPageChange(page)
-        val gridStatea = rememberLazyGridState()
-        val lazyListStatea = rememberLazyListState()
+        val gridState = rememberLazyGridState()
+        val lazyListState = rememberLazyListState()
         LazyColumnScrollbar(
             listState = lazyListState,
         ) {
@@ -245,8 +259,8 @@ fun LibraryPager(
                 books = books,
                 layout = layout,
                 isLocal = true,
-                gridState = gridStatea,
-                scrollState = lazyListStatea,
+                gridState = gridState,
+                scrollState = lazyListState,
                 selection = selection,
                 goToLatestChapter = goToLatestChapter,
                 onClick = onClick,

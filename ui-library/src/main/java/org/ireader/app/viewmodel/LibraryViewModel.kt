@@ -1,6 +1,5 @@
 package org.ireader.app.viewmodel
 
-import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
@@ -15,8 +14,10 @@ import androidx.compose.ui.state.ToggleableState
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
@@ -27,8 +28,6 @@ import org.ireader.common_models.DisplayMode
 import org.ireader.common_models.entities.BookCategory
 import org.ireader.common_models.entities.BookItem
 import org.ireader.common_models.entities.Category
-import org.ireader.common_models.entities.Category.Companion.ALL_ID
-import org.ireader.common_models.entities.Category.Companion.UNCATEGORIZED_ID
 import org.ireader.common_models.library.LibraryFilter
 import org.ireader.common_models.library.LibrarySort
 import org.ireader.core_ui.preferences.LibraryPreferences
@@ -41,9 +40,9 @@ import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.local.book_usecases.GetLibraryCategory
 import org.ireader.domain.use_cases.preferences.reader_preferences.screens.LibraryScreenPrefUseCases
 import org.ireader.domain.use_cases.services.ServiceUseCases
-import org.ireader.ui_library.R
 import javax.inject.Inject
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class LibraryViewModel @Inject constructor(
     private val localGetBookUseCases: LocalGetBookUseCases,
@@ -58,71 +57,37 @@ class LibraryViewModel @Inject constructor(
     val getCategory: GetCategories
 ) : BaseViewModel(), LibraryState by state {
 
-    var lastUsedCategory by libraryPreferences.lastUsedCategory().asState()
-    var filters by libraryPreferences.filters(true).asState()
+    var lastUsedCategory = libraryPreferences.lastUsedCategory().asState()
+    var filters = libraryPreferences.filters(true).asState()
 
-    var sorting by libraryPreferences.sorting().asState()
-    val showCategoryTabs by libraryPreferences.showCategoryTabs().asState()
-    val showCountInCategory by libraryPreferences.showCountInCategory().asState()
+    var sorting = libraryPreferences.sorting().asState()
+    val showCategoryTabs = libraryPreferences.showCategoryTabs().asState()
+    val showAllCategoryTab = libraryPreferences.showAllCategory().asState()
+    val showCountInCategory = libraryPreferences.showCountInCategory().asState()
 
-    val bookCategories by getCategory.subscribeBookCategories().asState(emptyList())
+    val bookCategories = getCategory.subscribeBookCategories().asState(emptyList())
     val deleteQueues: SnapshotStateList<BookCategory> = mutableStateListOf()
     val addQueues: SnapshotStateList<BookCategory> = mutableStateListOf()
     var showDialog: Boolean by mutableStateOf(false)
 
     init {
         readLayoutTypeAndFilterTypeAndSortType()
-        getCategory.subscribe().onEach {  categories ->
-            val lastCategoryId = lastUsedCategory
+        libraryPreferences.showAllCategory().stateIn(scope)
+            .flatMapLatest { showAll ->
+                getCategory.subscribe(showAll).onEach {  categories ->
+                    val lastCategoryId = lastUsedCategory
 
-            val index = categories.indexOfFirst { it.id == lastCategoryId }.takeIf { it != -1 } ?: 0
+                    val index = categories.indexOfFirst { it.id == lastCategoryId.value }.takeIf { it >= 0 } ?: 0
 
-            state.categories =  categories
-            state.selectedCategoryIndex = index
-        }.launchIn(viewModelScope)
-
-
+                    state.categories =  categories
+                    state.selectedCategoryIndex = index
+                }
+            }.launchIn(scope)
     }
 
     private val loadedManga = mutableMapOf<Long, List<BookItem>>()
     private var getBooksJob: Job? = null
-//    fun getLibraryBooks() {
-//        getBooksJob?.cancel()
-//        getBooksJob = localGetBookUseCases.SubscribeInLibraryBooks(
-//                sortType,
-//                desc = desc,
-//                filters
-//            ).onEach { list ->
-//                books = list.filter { it.title.contains(searchQuery, true) }
-//            }.launchIn(scope)
-//    }
 
-//    @OptIn(ExperimentalPagerApi::class)
-//    fun getBooks() {
-//        getBooksJob?.cancel()
-//        getBooksJob = viewModelScope.launch {
-//            val page = pager?.currentPage
-//
-//            if (page != null) {
-//                uiCategories.getOrNull(page)?.id?.let { id ->
-//                    getLibraryCategory.subscribe(id, sorting, filters).collect { books ->
-//                        libraryState.books =
-//                            books.filter { it.title.contains(searchQuery ?: "", true) }
-//                    }
-//                }
-//            }
-//
-//        }
-//    }
-
-    fun getCategoryName(category: Category,context:Context):String {
-        return when(category.id) {
-            ALL_ID-> context.getString( R.string.all_category)
-            UNCATEGORIZED_ID-> context.getString( R.string.uncategorized)
-            else -> category.name
-
-        }
-    }
 
 
     fun onLayoutTypeChange(layoutType: DisplayMode) {
@@ -174,7 +139,7 @@ class LibraryViewModel @Inject constructor(
     }
 
     fun toggleFilter(type: LibraryFilter.Type) {
-        val newFilters = filters
+        val newFilters = filters.value
             .map { filterState ->
                 if (type == filterState.type) {
                     LibraryFilter(
@@ -189,25 +154,49 @@ class LibraryViewModel @Inject constructor(
                 }
             }
 
-        this.filters = newFilters
+        this.filters.value = newFilters
     }
 
     fun toggleSort(type: LibrarySort.Type) {
         val currentSort = sorting
-        sorting = if (type == currentSort.type) {
-            currentSort.copy(isAscending = !currentSort.isAscending)
+        sorting.value = if (type == currentSort.value.type) {
+            currentSort.value.copy(isAscending = !currentSort.value.isAscending)
         } else {
-            currentSort.copy(type = type)
+            currentSort.value.copy(type = type)
         }
     }
 
     fun refreshUpdate() {
         serviceUseCases.startLibraryUpdateServicesUseCase()
     }
+    fun setSelectedPage(index: Int) {
+        if (index == selectedCategoryIndex) return
+        val categories = categories
+        val category = categories.getOrNull(index) ?: return
+        state.selectedCategoryIndex = index
+        lastUsedCategory.value = category.id
+    }
+    fun unselectAll() {
+        state.selection.clear()
+    }
+    fun selectAllInCurrentCategory() {
+        val mangaInCurrentCategory = loadedManga[selectedCategory?.id] ?: return
+        val currentSelected = selection.toList()
+        val mangaIds = mangaInCurrentCategory.map { it.id }.filter { it !in currentSelected }
+        state.selection.addAll(mangaIds)
+    }
+
+    fun flipAllInCurrentCategory() {
+        val mangaInCurrentCategory = loadedManga[selectedCategory?.id] ?: return
+        val currentSelected = selection.toList()
+        val (toRemove, toAdd) = mangaInCurrentCategory.map { it.id }.partition { it in currentSelected }
+        state.selection.removeAll(toRemove)
+        state.selection.addAll(toAdd)
+    }
 
     fun getDefaultValue(categories: Category): ToggleableState {
         val defaultValue: Boolean = selection.any { id ->
-            id in bookCategories.filter { it.categoryId == categories.id }.map { it.bookId }
+            id in bookCategories.value.filter { it.categoryId == categories.id }.map { it.bookId }
         }
 
         //categories.id in bookCategories.map { it.categoryId } &&
@@ -223,7 +212,7 @@ class LibraryViewModel @Inject constructor(
         }
 
         val unfiltered = remember(sorting, filters) {
-            getLibraryCategory.subscribe(categoryId, sorting, filters).map { it.map { it.toBookItem() } }
+            getLibraryCategory.subscribe(categoryId, sorting.value, filters.value).map { it.map { it.toBookItem() } }
                 .shareIn(scope, SharingStarted.WhileSubscribed(1000), 1)
         }
 

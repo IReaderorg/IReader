@@ -11,8 +11,6 @@ import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.BookCategory
 import org.ireader.common_models.entities.CatalogRemote
 import org.ireader.common_models.entities.Category
-import org.ireader.common_models.entities.Category.Companion.ALL_ID
-import org.ireader.common_models.entities.Category.Companion.UNCATEGORIZED_ID
 import org.ireader.common_models.entities.Chapter
 import org.ireader.common_models.entities.Download
 import org.ireader.common_models.entities.FontEntity
@@ -84,16 +82,6 @@ abstract class AppDatabase : RoomDatabase() {
                         // insert the data on the IO Thread
                         Executors.newSingleThreadExecutor().execute {
                            getInstance(context).categoryDao.insertDate(systemCategories)
-//                            db.query("""
-//                                INSERT OR IGNORE INTO category VALUES (0, "", 0, 0, 0);
-//                                INSERT OR IGNORE INTO category VALUES (-2, "", 0, 0, 0);
-//                                CREATE TRIGGER IF NOT EXISTS system_categories_deletion_trigger BEFORE DELETE ON category
-//                                BEGIN SELECT CASE
-//                                  WHEN old.id <= 0 THEN
-//                                    RAISE(ABORT, 'System category cant be deleted')
-//                                  END;
-//                                END;
-//                            """.trimIndent())
                         }
                     }
                 })
@@ -112,7 +100,7 @@ abstract class AppDatabase : RoomDatabase() {
                 })
                 .build()
 
-        val systemCategories = listOf<Category>(Category(UNCATEGORIZED_ID,"",0,0,0),Category(ALL_ID,"",0,0,0))
+        val systemCategories = listOf<Category>(Category(id = Category.ALL_ID,"",Category.ALL_ID.toInt(),0,0),Category(id = Category.UNCATEGORIZED_ID,"", Category.UNCATEGORIZED_ID.toInt(),0,0),)
 
     }
 

@@ -11,9 +11,8 @@ import org.ireader.core_api.http.okhttp
 import org.ireader.core_catalogs.interactor.GetLocalCatalog
 import org.ireader.image_loader.BookCover
 import org.ireader.image_loader.LibraryCovers
-import javax.inject.Inject
 
-class CoilLoaderFactory @Inject constructor(
+class CoilLoaderFactory(
     private val context: Application,
     private val libraryCovers: LibraryCovers,
     private val client: HttpClients,
@@ -24,6 +23,7 @@ class CoilLoaderFactory @Inject constructor(
         val cache = Cache(context.cacheDir.resolve("image_cache"), 15L * 1024 * 1024)
 
         val okhttpClient = client.default.okhttp
+
         // Faking a book cover here
         val factory = LibraryMangaFetcherFactory(
             okhttpClient,
@@ -34,13 +34,16 @@ class CoilLoaderFactory @Inject constructor(
             client = client.default
         )
 
+
+
         return ImageLoader.Builder(context)
             .components(fun ComponentRegistry.Builder.() {
                 add(factory)
                 add(CatalogRemoteMapper())
                 add(org.ireader.image_loader.coil.CatalogInstalledFetcher.Factory())
-                add(LibraryMangaFetcherFactoryKeyer(libraryCovers))
+                add(LibraryMangaFetcherFactoryKeyer())
             })
+            .crossfade(300)
             .diskCache {
                 DiskCache.Builder()
                     .directory(context.cacheDir.resolve("image_cache"))

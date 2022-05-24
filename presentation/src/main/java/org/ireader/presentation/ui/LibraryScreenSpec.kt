@@ -45,7 +45,7 @@ object LibraryScreenSpec : BottomNavScreenSpec {
         val pagerState = rememberPagerState()
         BottomTabComposable(
             pagerState = pagerState,
-            filters = vm.filters,
+            filters = vm.filters.value,
             toggleFilter = {
                 vm.toggleFilter(it.type)
             },
@@ -79,6 +79,15 @@ object LibraryScreenSpec : BottomNavScreenSpec {
             refreshUpdate = {
                 vm.refreshUpdate()
             },
+            onClearSelection = {
+                vm.unselectAll()
+            },
+            onClickInvertSelection = {
+                vm.flipAllInCurrentCategory()
+            },
+            onClickSelectAll = {
+                vm.selectAllInCurrentCategory()
+            }
         )
     }
 
@@ -92,6 +101,7 @@ object LibraryScreenSpec : BottomNavScreenSpec {
     ) {
         val vm: LibraryViewModel = hiltViewModel(controller.navBackStackEntry)
         val pager = rememberPagerState()
+
 
 
         LibraryScreen(
@@ -144,7 +154,6 @@ object LibraryScreenSpec : BottomNavScreenSpec {
                 vm.showDialog = true
             },
             scaffoldPadding = controller.scaffoldPadding,
-            pagerState = pager,
             onAddToCategoryConfirm = {
                 vm.viewModelScope.launch(Dispatchers.IO) {
                     vm.getCategory.insertBookCategory(vm.addQueues)

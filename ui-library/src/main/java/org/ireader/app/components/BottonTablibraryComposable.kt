@@ -1,8 +1,13 @@
 package org.ireader.app.components
 
-
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,6 +23,8 @@ import androidx.compose.material.TabRowDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Text
@@ -25,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -34,14 +42,15 @@ import kotlinx.coroutines.launch
 import org.ireader.app.viewmodel.LibraryViewModel
 import org.ireader.common_models.DisplayMode
 import org.ireader.common_models.LayoutType
+import org.ireader.common_models.layouts
 import org.ireader.common_models.library.LibraryFilter
 import org.ireader.common_models.library.LibrarySort
 import org.ireader.components.components.component.pagerTabIndicatorOffset
 import org.ireader.components.reusable_composable.MidSizeTextComposable
+import org.ireader.components.text_related.TextSection
 import org.ireader.core_ui.theme.AppColors
 import org.ireader.core_ui.ui.Colour.contentColor
-
-
+import org.ireader.ui_library.R
 
 @ExperimentalPagerApi
 @ExperimentalMaterialApi
@@ -58,7 +67,7 @@ fun Tabs(libraryTabs: List<TabItem>, pagerState: PagerState) {
                 Modifier.pagerTabIndicatorOffset(pagerState, tabPositions),
                 color = MaterialTheme.colorScheme.primary,
 
-            )
+                )
         }
     ) {
         libraryTabs.forEachIndexed { index, tab ->
@@ -72,38 +81,51 @@ fun Tabs(libraryTabs: List<TabItem>, pagerState: PagerState) {
         }
     }
 }
+
 @ExperimentalPagerApi
 @ExperimentalMaterialApi
 @Composable
-fun ScrollableTabs(modifier : Modifier = Modifier,libraryTabs: List<String>, pagerState: PagerState) {
+fun ScrollableTabs(
+    modifier: Modifier = Modifier,
+    libraryTabs: List<String>,
+    pagerState: PagerState,
+    visible: Boolean= true,
+) {
     val scope = rememberCoroutineScope()
     // OR ScrollableTabRow()
-    ScrollableTabRow(
-        modifier = modifier,
-        selectedTabIndex = pagerState.currentPage,
-        containerColor = AppColors.current.bars,
-        contentColor = AppColors.current.onBars,
-        edgePadding = 0.dp,
-        indicator = { tabPositions ->
-            TabRowDefaults.Indicator(
-                Modifier.pagerTabIndicatorOffset(pagerState, tabPositions),
-                color = MaterialTheme.colorScheme.primary,
-
-                )
-        }
+    AnimatedVisibility(
+        visible = visible,
+        enter = expandVertically(),
+        exit = shrinkVertically()
     ) {
-        libraryTabs.forEachIndexed { index, tab ->
-            androidx.compose.material3.Tab(
-                text = { MidSizeTextComposable(text = tab) },
-                selected = pagerState.currentPage == index,
-                unselectedContentColor = MaterialTheme.colorScheme.onBackground,
-                selectedContentColor = MaterialTheme.colorScheme.primary,
-                onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
-            )
+        ScrollableTabRow(
+            modifier = modifier,
+            selectedTabIndex = pagerState.currentPage,
+            containerColor = AppColors.current.bars,
+            contentColor = AppColors.current.onBars,
+            edgePadding = 0.dp,
+            indicator = { tabPositions ->
+                TabRowDefaults.Indicator(
+                    Modifier
+                        .fillMaxWidth()
+                        .pagerTabIndicatorOffset(pagerState, tabPositions),
+                    color = MaterialTheme.colorScheme.primary,
+
+                    )
+            }
+        ) {
+            libraryTabs.forEachIndexed { index, tab ->
+                androidx.compose.material3.Tab(
+                    text = { MidSizeTextComposable(text = tab) },
+                    selected = pagerState.currentPage == index,
+                    unselectedContentColor = MaterialTheme.colorScheme.onBackground,
+                    selectedContentColor = MaterialTheme.colorScheme.primary,
+                    onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
+                )
+            }
         }
     }
 }
-
 
 @ExperimentalPagerApi
 @Composable
@@ -117,7 +139,7 @@ fun TabsContent(
     onSortSelected: (LibrarySort) -> Unit,
     layoutType: LayoutType,
     onLayoutSelected: (DisplayMode) -> Unit,
-    vm:LibraryViewModel
+    vm: LibraryViewModel
 ) {
     HorizontalPager(
         count = libraryTabs.size,
@@ -126,26 +148,23 @@ fun TabsContent(
     ) { page ->
         LazyColumn(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Top) {
 
-
-        when (page) {
-            0 -> FiltersPage(filters, onClick = {
-                vm.toggleFilter(it)
-            })
-            1 -> SortPage(
-                vm.sorting,
-                onClick = vm::toggleSort
-            )
-            2 -> item {
-                DisplayScreen(
-                    layoutType,
-                    onLayoutSelected
+            when (page) {
+                0 -> FiltersPage(filters, onClick = {
+                    vm.toggleFilter(it)
+                })
+                1 -> SortPage(
+                    vm.sorting.value,
+                    onClick = vm::toggleSort
+                )
+                2 -> DispalyPage(
+                    layouts = layouts,
+                    onLayoutSelected = onLayoutSelected,
+                    vm = vm
                 )
             }
         }
     }
-    }
 }
-
 
 private fun LazyListScope.FiltersPage(
     filters: List<LibraryFilter>,
@@ -174,6 +193,7 @@ private fun ClickableRow(onClick: () -> Unit, content: @Composable () -> Unit) {
         content = { content() }
     )
 }
+
 private fun LibraryFilter.Value.asToggleableState(): ToggleableState {
     return when (this) {
         LibraryFilter.Value.Included -> ToggleableState.On
@@ -195,11 +215,85 @@ private fun LazyListScope.SortPage(
                 } else {
                     Icons.Default.KeyboardArrowDown
                 }
-                androidx.compose.material3.Icon(icon, null, iconModifier, MaterialTheme.colorScheme.primary)
+                androidx.compose.material3.Icon(
+                    icon,
+                    null,
+                    iconModifier,
+                    MaterialTheme.colorScheme.primary
+                )
             } else {
                 Spacer(iconModifier)
             }
             Text(type.name)
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+private fun LazyListScope.DispalyPage(
+    layouts: List<DisplayMode>,
+    vm: LibraryViewModel,
+    onLayoutSelected: (DisplayMode) -> Unit
+) {
+    item {
+        TextSection(
+            text = stringResource(R.string.display_mode),
+            padding = PaddingValues(vertical = 8.dp, horizontal = 16.dp),
+            style = MaterialTheme.typography.bodyMedium,
+        )
+    }
+    items(layouts) { layout ->
+        Column(
+            Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+        ) {
+            ClickableRow(onClick = { onLayoutSelected(layout) }) {
+                androidx.compose.material3.RadioButton(
+                    selected = vm.layout == layout.layout,
+                    onClick = { onLayoutSelected(layout) },
+                    modifier = Modifier.padding(horizontal = 15.dp)
+                )
+
+                MidSizeTextComposable(text = stringResource(id = layout.title))
+
+            }
+        }
+    }
+    item {
+        ClickableRow(onClick = { vm.showCategoryTabs.value = !vm.showCategoryTabs.value }) {
+            Checkbox(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                checked = vm.showCategoryTabs.value,
+                onCheckedChange = {
+                    vm.showCategoryTabs.value = it
+                }
+            )
+            MidSizeTextComposable(text = stringResource(id = R.string.show_category_tabs))
+        }
+    }
+    item {
+        ClickableRow(onClick = { vm.showAllCategoryTab.value = !vm.showAllCategoryTab.value }) {
+            Checkbox(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                checked = vm.showAllCategoryTab.value,
+                onCheckedChange = {
+                    vm.showAllCategoryTab.value = it
+                }
+            )
+            MidSizeTextComposable(text = stringResource(id = R.string.show_all_category_tab))
+        }
+    }
+    item {
+        ClickableRow(onClick = { vm.showCountInCategory.value = !vm.showCountInCategory.value }) {
+            Checkbox(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                checked = vm.showCountInCategory.value,
+                onCheckedChange = {
+                    vm.showCountInCategory.value = it
+                }
+            )
+            MidSizeTextComposable(text = stringResource(id = R.string.show_count_in_category_tab))
         }
     }
 }

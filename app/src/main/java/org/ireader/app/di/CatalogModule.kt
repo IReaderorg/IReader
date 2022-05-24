@@ -28,12 +28,13 @@ import org.ireader.data.catalog.AndroidCatalogInstallationChanges
 import org.ireader.data.catalog.AndroidCatalogInstaller
 import org.ireader.data.catalog.AndroidCatalogLoader
 import org.ireader.data.catalog.CatalogGithubApi
+import org.ireader.image_loader.LibraryCovers
+import org.ireader.image_loader.coil.CoilLoaderFactory
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
 @Module
 class CatalogModule {
-
 
     @Provides
     @Singleton
@@ -52,13 +53,28 @@ class CatalogModule {
         return AndroidCatalogInstaller(context, httpClient, installationChanges, packageInstaller)
     }
 
-
     @Provides
     @Singleton
     fun provideCatalogPreferences(
         store: PreferenceStore
     ): CatalogPreferences {
         return CatalogPreferences(store)
+    }
+
+    @Provides
+    @Singleton
+    fun provideImageLoader(
+        context: Application,
+        libraryCovers: LibraryCovers,
+        client: HttpClients,
+        getLocalCatalog: GetLocalCatalog,
+    ): CoilLoaderFactory {
+        return CoilLoaderFactory(
+            client = client,
+            context = context,
+            getLocalCatalog = getLocalCatalog,
+            libraryCovers = libraryCovers,
+        )
     }
 
     @Provides
@@ -126,6 +142,7 @@ class CatalogModule {
     ): GetCatalogsByType {
         return GetCatalogsByType(localCatalogs, remoteCatalogs)
     }
+
     @Provides
     @Singleton
     fun providesGetRemoteCatalogs(
@@ -133,6 +150,7 @@ class CatalogModule {
     ): GetRemoteCatalogs {
         return GetRemoteCatalogs(catalogRemoteRepository)
     }
+
     @Provides
     @Singleton
     fun providesGetLocalCatalogs(
@@ -141,6 +159,7 @@ class CatalogModule {
     ): GetLocalCatalogs {
         return GetLocalCatalogs(catalogStore, libraryRepository)
     }
+
     @Provides
     @Singleton
     fun providesGetLocalCatalog(
@@ -148,6 +167,7 @@ class CatalogModule {
     ): GetLocalCatalog {
         return GetLocalCatalog(store)
     }
+
     @Provides
     @Singleton
     fun providesUpdateCatalog(
@@ -156,6 +176,7 @@ class CatalogModule {
     ): UpdateCatalog {
         return UpdateCatalog(catalogRemoteRepository, installCatalog)
     }
+
     @Provides
     @Singleton
     fun providesInstallCatalog(
@@ -163,6 +184,7 @@ class CatalogModule {
     ): InstallCatalog {
         return InstallCatalog(catalogInstaller)
     }
+
     @Provides
     @Singleton
     fun providesUninstallCatalog(
@@ -178,6 +200,7 @@ class CatalogModule {
     ): TogglePinnedCatalog {
         return TogglePinnedCatalog(store)
     }
+
     @Provides
     @Singleton
     fun providesSyncRemoteCatalogs(
@@ -185,7 +208,10 @@ class CatalogModule {
         catalogPreferences: CatalogPreferences,
         httpClient: HttpClients,
     ): SyncRemoteCatalogs {
-        return SyncRemoteCatalogs(catalogRemoteRepository, CatalogGithubApi(httpClient), catalogPreferences)
+        return SyncRemoteCatalogs(
+            catalogRemoteRepository,
+            CatalogGithubApi(httpClient),
+            catalogPreferences
+        )
     }
-
 }

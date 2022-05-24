@@ -57,16 +57,17 @@ import org.ireader.core_api.source.model.Listing
 import org.ireader.core_ui.theme.ContentAlpha
 import org.ireader.core_ui.ui.kaomojis
 import org.ireader.core_ui.ui_components.isScrolledToTheEnd
-import org.ireader.explore.viewmodel.ExploreState
+import org.ireader.explore.viewmodel.ExploreViewModel
 import org.ireader.ui_explore.R
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class,
+@OptIn(
+    ExperimentalFoundationApi::class, ExperimentalMaterialApi::class,
     ExperimentalMaterial3Api::class
 )
 @Composable
 fun ExploreScreen(
     modifier: Modifier = Modifier,
-    vm: ExploreState,
+    vm: ExploreViewModel,
     source: CatalogSource,
     onFilterClick: () -> Unit,
     getBooks: (query: String?, listing: Listing?, filters: List<Filter<*>>) -> Unit,
@@ -74,13 +75,12 @@ fun ExploreScreen(
     onBook: (BookItem) -> Unit,
     onAppbarWebView: (url: String) -> Unit,
     onPopBackStack: () -> Unit,
-    snackBarHostState:SnackbarHostState,
+    snackBarHostState: SnackbarHostState,
     modalState: ModalBottomSheetState,
-    scaffoldPadding:PaddingValues
+    scaffoldPadding: PaddingValues
 ) {
     val scrollState = rememberLazyListState()
     val context = LocalContext.current
-
 
     val gridState = rememberLazyGridState()
 
@@ -100,7 +100,7 @@ fun ExploreScreen(
     if (showSnackBar) {
         LaunchedEffect(snackBarHostState.currentSnackbarData) {
             val result = snackBarHostState.showSnackbar(
-                message= snackBarText,
+                message = snackBarText,
                 actionLabel = "Reload",
                 duration = androidx.compose.material3.SnackbarDuration.Indefinite
             )
@@ -121,71 +121,76 @@ fun ExploreScreen(
             setSnackBarText(errors.asString(context))
         }
     }
-    LaunchedEffect(key1 = scrollState.isScrolledToTheEnd() && !vm.endReached && !vm.isLoading ) {
-        loadItems(false)
+    LaunchedEffect(key1 = scrollState.layoutInfo.totalItemsCount > 0 ,key2 =  scrollState.isScrolledToTheEnd() , key3 =  !vm.endReached && !vm.isLoading) {
+        if (scrollState.layoutInfo.totalItemsCount > 0 && scrollState.isScrolledToTheEnd() && !vm.endReached && !vm.isLoading) {
+            loadItems(false)
+        }
     }
-    LaunchedEffect(key1 = gridState.isScrolledToTheEnd() && !vm.endReached && !vm.isLoading ) {
-        loadItems(false)
+    LaunchedEffect(key1 = gridState.layoutInfo.totalItemsCount > 0 ,key2 =  gridState.isScrolledToTheEnd() , key3 =  !vm.endReached && !vm.isLoading) {
+        if (gridState.layoutInfo.totalItemsCount > 0 && gridState.isScrolledToTheEnd() && !vm.endReached && !vm.isLoading) {
+            loadItems(false)
+        }
     }
-        Scaffold(
-            modifier = Modifier.padding(scaffoldPadding),
-            floatingActionButtonPosition = androidx.compose.material3.FabPosition.End,
-            floatingActionButton = {
-                androidx.compose.material3.ExtendedFloatingActionButton(
-                    text = {
-                        MidSizeTextComposable(
-                            text = stringResource(R.string.filter),
-                            color = MaterialTheme.colorScheme.onSecondary
-                        )
-                    },
-                    onClick = {
-                        scope.launch {
-                            modalState.show()
-                        }
-                    },
-                    icon = {
-                        Icon(Icons.Filled.Add, "", tint = MaterialTheme.colorScheme.onSecondary)
-                    },
-                    contentColor = MaterialTheme.colorScheme.onSecondary,
-                    containerColor = MaterialTheme.colorScheme.secondary,
-                    shape = RoundedCornerShape(32.dp)
-                )
-            },
-        ) { paddingValue ->
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValue)
-            ) {
-                when {
-                    vm.isLoading && vm.page == 1 -> {
-                        ShowLoading()
+    Scaffold(
+        modifier = Modifier.padding(scaffoldPadding),
+        floatingActionButtonPosition = androidx.compose.material3.FabPosition.End,
+        floatingActionButton = {
+            androidx.compose.material3.ExtendedFloatingActionButton(
+                text = {
+                    MidSizeTextComposable(
+                        text = stringResource(R.string.filter),
+                        color = MaterialTheme.colorScheme.onSecondary
+                    )
+                },
+                onClick = {
+                    scope.launch {
+                        modalState.show()
                     }
-                    vm.error != null && vm.page == 1 -> {
-                        ExploreScreenErrorComposable(
-                            error = vm.error!!.asString(context),
-                            source = source,
-                            onRefresh = { getBooks(null, null, emptyList()) },
-                            onWebView = {
-                                onAppbarWebView(it.baseUrl)
-                            }
-                        )
-                    }
-                    else -> {
-                        LayoutComposable(
-                            books = vm.stateItems,
-                            layout = vm.layout,
-                            scrollState = scrollState,
-                            source = source,
-                            isLocal = false,
-                            gridState = gridState,
-                            onClick = { book ->
-                                onBook(book)
-                            },
-                            isLoading = vm.isLoading,
-                        )
-                    }
+                },
+                icon = {
+                    Icon(Icons.Filled.Add, "", tint = MaterialTheme.colorScheme.onSecondary)
+                },
+                contentColor = MaterialTheme.colorScheme.onSecondary,
+                containerColor = MaterialTheme.colorScheme.secondary,
+                shape = RoundedCornerShape(32.dp)
+            )
+        },
+    ) { paddingValue ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValue)
+        ) {
+            when {
+                vm.isLoading && vm.page == 1 -> {
+                    ShowLoading()
                 }
+                vm.error != null && vm.page == 1 -> {
+                    ExploreScreenErrorComposable(
+                        error = vm.error!!.asString(context),
+                        source = source,
+                        onRefresh = { getBooks(null, null, emptyList()) },
+                        onWebView = {
+                            onAppbarWebView(it.baseUrl)
+                        }
+                    )
+                }
+                else -> {
+                    LayoutComposable(
+                        books = vm.stateItems,
+                        layout = vm.layout,
+                        scrollState = scrollState,
+                        source = source,
+                        isLocal = false,
+                        gridState = gridState,
+                        onClick = { book ->
+                            onBook(book)
+                        },
+                        isLoading = vm.isLoading,
+                        useDefaultImageLoader = vm.useDefaultImageLoader
+                    )
+                }
+            }
         }
     }
 }
@@ -210,14 +215,14 @@ private fun BoxScope.ExploreScreenErrorComposable(
 
         Text(
             text = kaomoji,
-            style =MaterialTheme.typography.bodyMedium.copy(
+            style = MaterialTheme.typography.bodyMedium.copy(
                 color = LocalContentColor.current.copy(alpha = ContentAlpha.medium()),
                 fontSize = 48.sp
             ),
         )
         Text(
             text = error,
-            style =MaterialTheme.typography.bodyMedium.copy(
+            style = MaterialTheme.typography.bodyMedium.copy(
                 color = LocalContentColor.current.copy(alpha = androidx.compose.material.ContentAlpha.medium)
             ),
             textAlign = TextAlign.Center,
@@ -241,7 +246,7 @@ private fun BoxScope.ExploreScreenErrorComposable(
             ) {
                 AppIconButton(
                     imageVector = Icons.Default.Refresh,
-                   contentDescription = stringResource(R.string.retry),
+                    contentDescription = stringResource(R.string.retry),
                     onClick = {
                         onRefresh()
                     }
@@ -257,13 +262,13 @@ private fun BoxScope.ExploreScreenErrorComposable(
                 if (source is HttpSource) {
                     AppIconButton(
                         imageVector = Icons.Default.Public,
-                       contentDescription = stringResource(R.string.open_in_webView),
+                        contentDescription = stringResource(R.string.open_in_webView),
                         onClick = {
                             onWebView(source)
                         }
                     )
                 }
-                SmallTextComposable(text =UiText.StringResource(R.string.open_in_webView))
+                SmallTextComposable(text = UiText.StringResource(R.string.open_in_webView))
             }
         }
     }

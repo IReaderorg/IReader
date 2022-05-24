@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import org.ireader.common_models.DisplayMode
@@ -34,7 +33,7 @@ fun DisplayScreen(
         )
         layouts.forEach { layout ->
             RadioButton(
-                text = layout.title.asString(LocalContext.current),
+                text = stringResource(id = layout.title),
                 selected = layoutType == layout.layout,
                 onClick = {
                     onLayoutSelected(layout)

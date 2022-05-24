@@ -36,26 +36,19 @@ fun LibraryScreenTopBar(
     state: LibraryState,
     bottomSheetState: ModalBottomSheetState,
     onSearch: () -> Unit,
-    refreshUpdate: () -> Unit
+    refreshUpdate: () -> Unit,
+    onClickSelectAll: () -> Unit,
+    onClickInvertSelection: () -> Unit,
+    onClearSelection:() -> Unit
 ) {
     Box(modifier = Modifier.fillMaxWidth()) {
         when {
             state.hasSelection -> {
                 EditModeTopAppBar(
                     selectionSize = state.selection.size,
-                    onClickCancelSelection = { state.selection.clear() },
-                    onClickSelectAll = {
-                        state.selection.clear()
-                        state.selection.addAll(state.books.map { it.id })
-                        state.selection.distinct()
-                    },
-                    onClickInvertSelection = {
-                        val ids: List<Long> =
-                            state.books.map { it.id }
-                                .filterNot { it in state.selection }.distinct()
-                        state.selection.clear()
-                        state.selection.addAll(ids)
-                    }
+                    onClickCancelSelection = onClearSelection,
+                    onClickSelectAll = onClickSelectAll,
+                    onClickInvertSelection = onClickInvertSelection
                 )
             }
             else -> {

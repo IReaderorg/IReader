@@ -29,6 +29,7 @@ fun GridLayoutComposable(
     isLocal: Boolean,
     goToLatestChapter: (book: BookItem) -> Unit,
     isLoading: Boolean = false,
+    useDefaultImageLoader :Boolean = false,
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         LazyVerticalGrid(
@@ -48,6 +49,7 @@ fun GridLayoutComposable(
                         book = book,
                         ratio = 6f / 10f,
                         selected = book.id in selection,
+useDefaultImageLoader = useDefaultImageLoader,
                         onLongClick = { onLongClick(book) },
                     ) {
                         if (isLocal) {

@@ -1,5 +1,6 @@
 package org.ireader.explore.viewmodel
 
+import androidx.compose.runtime.getValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -22,6 +23,9 @@ import org.ireader.core_api.source.model.Filter
 import org.ireader.core_api.source.model.MangasPageInfo
 import org.ireader.core_catalogs.CatalogStore
 import org.ireader.core_ui.exceptionHandler
+import org.ireader.core_ui.preferences.AppPreferences
+import org.ireader.core_ui.ui.asStateIn
+import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.preferences.reader_preferences.BrowseScreenPrefUseCase
 import org.ireader.domain.use_cases.remote.RemoteUseCases
@@ -36,11 +40,12 @@ class ExploreViewModel @Inject constructor(
     private val catalogStore: CatalogStore,
     private val browseScreenPrefUseCase: BrowseScreenPrefUseCase,
     private val remoteKeyUseCase: RemoteKeyUseCase,
+    private val appPreferences: AppPreferences,
     savedStateHandle: SavedStateHandle,
-) : ViewModel(), ExploreState by state {
+) : BaseViewModel(), ExploreState by state {
 
-    private val _eventFlow = MutableSharedFlow<UiEvent>()
-    val eventFlow = _eventFlow.asSharedFlow()
+    val useDefaultImageLoader by appPreferences.defaultImageLoader().asState()
+
 
     init {
         val sourceId = savedStateHandle.get<Long>("sourceId")
@@ -216,14 +221,6 @@ class ExploreViewModel @Inject constructor(
         state.layout = browseScreenPrefUseCase.browseLayoutTypeUseCase.read().layout
     }
 
-    suspend fun showSnackBar(message: UiText?) {
-        _eventFlow.emit(
-            UiEvent.ShowSnackbar(
-                uiText = message
-                    ?: UiText.StringResource(org.ireader.core.R.string.error_unknown)
-            )
-        )
-    }
 
     fun removeExploreBooks() {
         viewModelScope.launch(Dispatchers.IO) {

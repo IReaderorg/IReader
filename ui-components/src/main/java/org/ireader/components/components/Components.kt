@@ -8,6 +8,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import org.ireader.components.components.component.ChipPreference
 import org.ireader.components.components.component.PreferenceRow
 import org.ireader.components.components.component.SliderPreference
+import org.ireader.components.components.component.SwitchPreference
 import org.ireader.components.text_related.TextSection
 import org.ireader.core_ui.ui.PreferenceMutableState
 
@@ -97,6 +98,14 @@ fun LazyListScope.SetupUiComponent(list: List<Components>) {
                         selected = component.selected,
                         onValueChange = component.onValueChange,
                         title = component.title
+                    )
+                }
+                is Components.Switch -> {
+                    SwitchPreference(
+                        preference = component.preference,
+                        title = component.title,
+                        icon = component.icon,
+                        subtitle = component.subtitle,
                     )
                 }
             }

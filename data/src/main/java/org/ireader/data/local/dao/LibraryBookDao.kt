@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.RewriteQueriesToDropUnusedColumns
 import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 import org.ireader.common_models.entities.BookItem
@@ -12,13 +13,13 @@ import org.ireader.common_models.entities.Chapter
 @Dao
 interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
 
-
+    @RewriteQueriesToDropUnusedColumns
     @Query("SELECT * FROM library")
     suspend fun findAllBooks(): List<org.ireader.common_models.entities.Book>
-
+    @RewriteQueriesToDropUnusedColumns
     @Query("""SELECT  * FROM library WHERE favorite = 1 """)
     fun subscribeAllLocalBooks(): Flow<List<org.ireader.common_models.entities.Book>>
-
+    @RewriteQueriesToDropUnusedColumns
     @Query(
         """SELECT  library.* ,
         MAX(history.readAt) as lastRead
@@ -31,7 +32,7 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
         """
     )
     fun subscribeBookByLatest(): Flow<List<BookItem>>
-
+    @RewriteQueriesToDropUnusedColumns
     @Query(
         """SELECT  library.*
         FROM  library
@@ -40,7 +41,7 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
         """
     )
     fun subscribeBookByAlphabets(): Flow<List<BookItem>>
-
+    @RewriteQueriesToDropUnusedColumns
     @Query(
         """SELECT  library.*
         FROM  library
@@ -49,7 +50,7 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
         """
     )
     fun subscribeBookByDateAdded(): Flow<List<BookItem>>
-
+    @RewriteQueriesToDropUnusedColumns
     @Query(
         """SELECT  library.*
         FROM  library
@@ -62,7 +63,7 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
         """
     )
     fun subscribeBookByDateFetched(): Flow<List<BookItem>>
-
+    @RewriteQueriesToDropUnusedColumns
     @Query(
         """SELECT  library.*,
                     COUNT(DISTINCT chapter.id) AS totalChapters
@@ -74,7 +75,7 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
         """
     )
     fun subscribeBookByTotalChapter(): Flow<List<BookItem>>
-
+    @RewriteQueriesToDropUnusedColumns
     @Query(
         """SELECT  library.*
         FROM  library
@@ -83,7 +84,7 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
         """
     )
     fun subscribeBookByLastUpdate(): Flow<List<BookItem>>
-
+    @RewriteQueriesToDropUnusedColumns
     @Query(
         """SELECT  library.* ,
         MAX(history.readAt) as lastRead,
@@ -122,7 +123,7 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
         lastChecked: Boolean = false,
         desc: Boolean = false,
     ): Flow<List<org.ireader.common_models.entities.BookItem>>
-
+    @RewriteQueriesToDropUnusedColumns
     @Query(
         """
     SELECT library.*,
@@ -141,7 +142,7 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
 """
     )
     fun subscribeLatestRead(desc: Boolean): Flow<List<org.ireader.common_models.entities.BookItem>>
-
+    @RewriteQueriesToDropUnusedColumns
     @Query(
         """
     SELECT library.*, MAX(chapter.dateUpload) AS max,
@@ -156,7 +157,7 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
 """
     )
     fun subscribeLatestChapter(desc: Boolean): Flow<List<org.ireader.common_models.entities.BookItem>>
-
+    @RewriteQueriesToDropUnusedColumns
     @Query(
         """
     SELECT library.*, SUM(CASE WHEN chapter.read == 0 THEN 1 ELSE 0 END) AS unread,
@@ -172,7 +173,7 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
 """
     )
     fun subscribeTotalChapter(desc: Boolean): Flow<List<org.ireader.common_models.entities.BookItem>>
-
+    @RewriteQueriesToDropUnusedColumns
     @Query(
         """
     SELECT library.*, 
@@ -187,7 +188,7 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
 """
     )
     suspend fun findUnreadBooks(): List<org.ireader.common_models.entities.BookItem>
-
+    @RewriteQueriesToDropUnusedColumns
     @Query(
         """
     SELECT library.*, 
@@ -202,7 +203,7 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
 """
     )
     suspend fun findCompletedBooks(): List<org.ireader.common_models.entities.BookItem>
-
+    @RewriteQueriesToDropUnusedColumns
     @Query(
         """
     SELECT library.*, 

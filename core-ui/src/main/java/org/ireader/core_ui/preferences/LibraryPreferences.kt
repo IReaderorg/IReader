@@ -54,11 +54,11 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
     }
 
     fun showCategoryTabs(): Preference<Boolean> {
-        return preferenceStore.getBoolean("category_tabs", true)
+        return preferenceStore.getBoolean("category_tabs", false)
     }
 
     fun showAllCategory(): Preference<Boolean> {
-        return preferenceStore.getBoolean("show_all_category", false)
+        return preferenceStore.getBoolean("show_all_category", true)
     }
 
     fun showCountInCategory(): Preference<Boolean> {
