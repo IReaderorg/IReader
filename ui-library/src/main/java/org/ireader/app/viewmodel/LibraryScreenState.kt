@@ -31,8 +31,8 @@ interface LibraryState {
     var currentScrollState: Int
     var selectedCategoryIndex: Int
     var histories: List<History>
-    var selection: SnapshotStateList<Long>
-    val hasSelection: Boolean
+    var selectedBooks: SnapshotStateList<Long>
+    val selectionMode: Boolean
     val inititialized: Boolean
     val categories : List<CategoryWithCount>
     val selectedCategory : CategoryWithCount?
@@ -53,9 +53,9 @@ open class LibraryStateImpl @Inject constructor() : LibraryState {
    // override var filters: SnapshotStateList<FilterType> = mutableStateListOf()
     override var currentScrollState by mutableStateOf<Int>(0)
     override var selectedCategoryIndex by mutableStateOf<Int>(0)
-    override var selectedCategory by mutableStateOf<CategoryWithCount?>(null)
+    override val selectedCategory by derivedStateOf { categories.getOrNull(selectedCategoryIndex) }
     override var histories by mutableStateOf<List<History>>(emptyList())
-    override var selection: SnapshotStateList<Long> = mutableStateListOf()
-    override val hasSelection: Boolean by derivedStateOf { selection.isNotEmpty() }
+    override var selectedBooks: SnapshotStateList<Long> = mutableStateListOf()
+    override val selectionMode: Boolean by derivedStateOf { selectedBooks.isNotEmpty() }
     override var categories: List<CategoryWithCount> by mutableStateOf(emptyList())
 }

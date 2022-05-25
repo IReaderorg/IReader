@@ -97,7 +97,9 @@ fun LazyListScope.SetupUiComponent(list: List<Components>) {
                         preference = component.preference,
                         selected = component.selected,
                         onValueChange = component.onValueChange,
-                        title = component.title
+                        title = component.title,
+                        subtitle = component.subtitle,
+                        icon = component.icon
                     )
                 }
                 is Components.Switch -> {

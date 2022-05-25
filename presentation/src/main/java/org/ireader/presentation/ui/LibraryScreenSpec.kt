@@ -100,8 +100,6 @@ object LibraryScreenSpec : BottomNavScreenSpec {
         controller:ScreenSpec.Controller
     ) {
         val vm: LibraryViewModel = hiltViewModel(controller.navBackStackEntry)
-        val pager = rememberPagerState()
-
 
 
         LibraryScreen(
@@ -127,11 +125,11 @@ object LibraryScreenSpec : BottomNavScreenSpec {
                 )
             },
             onBook = { book ->
-                if (vm.hasSelection) {
-                    if (book.id in vm.selection) {
-                        vm.selection.remove(book.id)
+                if (vm.selectionMode) {
+                    if (book.id in vm.selectedBooks) {
+                        vm.selectedBooks.remove(book.id)
                     } else {
-                        vm.selection.add(book.id)
+                        vm.selectedBooks.add(book.id)
                     }
                 } else {
                     controller.navController.navigate(
@@ -143,7 +141,8 @@ object LibraryScreenSpec : BottomNavScreenSpec {
                 }
             },
             onLongBook = {
-                vm.selection.add(it.id)
+                if (it.id in vm.selectedBooks) return@LibraryScreen
+                vm.selectedBooks.add(it.id)
             },
             vm = vm,
             refreshUpdate = {

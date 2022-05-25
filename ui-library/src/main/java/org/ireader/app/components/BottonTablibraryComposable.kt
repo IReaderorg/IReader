@@ -238,8 +238,9 @@ private fun LazyListScope.DispalyPage(
     item {
         TextSection(
             text = stringResource(R.string.display_mode),
-            padding = PaddingValues(vertical = 8.dp, horizontal = 16.dp),
+            padding = PaddingValues(vertical = 12.dp, horizontal = 20.dp),
             style = MaterialTheme.typography.bodyMedium,
+            toUpper = false
         )
     }
     items(layouts) { layout ->
@@ -259,6 +260,58 @@ private fun LazyListScope.DispalyPage(
 
             }
         }
+    }
+    item {
+        TextSection(
+            text = stringResource(R.string.badge),
+            padding = PaddingValues(vertical = 12.dp, horizontal = 20.dp),
+            style = MaterialTheme.typography.bodyMedium,
+            toUpper = false
+        )
+    }
+    item {
+        ClickableRow(onClick = { vm.readBadge.value = !vm.readBadge.value }) {
+            Checkbox(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                checked = vm.readBadge.value,
+                onCheckedChange = {
+                    vm.readBadge.value = it
+                }
+            )
+            MidSizeTextComposable(text = stringResource(id = R.string.read_chapters))
+        }
+    }
+    item {
+        ClickableRow(onClick = { vm.unreadBadge.value = !vm.unreadBadge.value }) {
+            Checkbox(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                checked = vm.unreadBadge.value,
+                onCheckedChange = {
+                    vm.unreadBadge.value = it
+                }
+            )
+            MidSizeTextComposable(text = stringResource(id = R.string.unread_chapters))
+        }
+    }
+    item {
+        ClickableRow(onClick = { vm.goToLastChapterBadge.value = !vm.goToLastChapterBadge.value }) {
+            Checkbox(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                checked = vm.goToLastChapterBadge.value,
+                onCheckedChange = {
+                    vm.goToLastChapterBadge.value = it
+                }
+            )
+            MidSizeTextComposable(text = stringResource(id = R.string.go_to_last_chapter))
+        }
+    }
+    item {
+        TextSection(
+            text = stringResource(R.string.tabs),
+            padding = PaddingValues(vertical = 12.dp, horizontal = 20.dp),
+            style = MaterialTheme.typography.bodyMedium,
+            toUpper = false
+        )
     }
     item {
         ClickableRow(onClick = { vm.showCategoryTabs.value = !vm.showCategoryTabs.value }) {

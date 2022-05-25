@@ -124,6 +124,7 @@ internal class LibraryMangaFetcher(
             return fileLoader(file)
         }
 
+
         var snapshot = readFromDiskCache()
         try {
             // Fetch from disk cache
@@ -333,7 +334,7 @@ private fun getResourceType(cover: String): Type? {
     }
 }
 
-private enum class Type {
+enum class Type {
     File, URL;
 }
 

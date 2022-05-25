@@ -4,6 +4,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import org.ireader.common_models.LayoutType
 import org.ireader.common_models.entities.BookItem
 import org.ireader.components.list.layouts.CompactGridLayoutComposable
@@ -26,6 +27,10 @@ fun LayoutComposable(
     goToLatestChapter: (book: BookItem) -> Unit = {},
     isLoading: Boolean = false,
     useDefaultImageLoader :Boolean = false,
+    showGoToLastChapterBadge: Boolean = false,
+    showUnreadBadge: Boolean = false,
+    showReadBadge: Boolean = false,
+    showInLibraryBadge:Boolean = false
 ) {
         when (layout) {
             is LayoutType.GridLayout -> {
@@ -37,10 +42,14 @@ fun LayoutComposable(
                     selection = selection,
                     onLongClick = { onLongClick(it) },
                     scrollState = gridState,
-                    isLocal = isLocal,
                     goToLatestChapter = { goToLatestChapter(it) },
                     isLoading = isLoading,
-                    useDefaultImageLoader = useDefaultImageLoader
+                    useDefaultImageLoader = useDefaultImageLoader,
+                    showGoToLastChapterBadge = showGoToLastChapterBadge,
+                    modifier = Modifier,
+                    showInLibraryBadge = showInLibraryBadge,
+                    showReadBadge = showReadBadge,
+                    showUnreadBadge = showUnreadBadge,
                 )
             }
             is LayoutType.ListLayout -> {
@@ -53,7 +62,11 @@ fun LayoutComposable(
                     onLongClick = { onLongClick(it) },
                     goToLatestChapter = { goToLatestChapter(it) },
                     isLoading = isLoading,
-                    useDefaultImageLoader = useDefaultImageLoader
+                    useDefaultImageLoader = useDefaultImageLoader,
+                    showGoToLastChapterBadge = showGoToLastChapterBadge,
+                    showInLibraryBadge = showInLibraryBadge,
+                    showReadBadge = showReadBadge,
+                    showUnreadBadge = showUnreadBadge,
                 )
             }
             is LayoutType.CompactGrid -> {
@@ -67,7 +80,12 @@ fun LayoutComposable(
                     onLongClick = { onLongClick(it) },
                     goToLatestChapter = { goToLatestChapter(it) },
                     isLoading = isLoading,
-                    useDefaultImageLoader = useDefaultImageLoader
+                    useDefaultImageLoader = useDefaultImageLoader,
+                    showGoToLastChapterBadge = showGoToLastChapterBadge,
+                    modifier = Modifier,
+                    showInLibraryBadge = showInLibraryBadge,
+                    showReadBadge = showReadBadge,
+                    showUnreadBadge = showUnreadBadge,
                 )
             }
         }

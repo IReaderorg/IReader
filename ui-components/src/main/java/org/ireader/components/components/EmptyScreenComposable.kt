@@ -5,7 +5,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import org.ireader.common_resources.UiText
+import androidx.compose.ui.res.stringResource
 import org.ireader.components.reusable_composable.TopAppBarBackButton
 import org.ireader.core_ui.ui.EmptyScreen
 
@@ -20,6 +20,6 @@ fun EmptyScreenComposable(errorResId: Int,onPopBackStack :() -> Unit) {
             )
         }
     ) { padding ->
-        EmptyScreen(text = UiText.StringResource(errorResId), modifier = Modifier.padding(padding))
+        EmptyScreen(text = stringResource(errorResId), modifier = Modifier.padding(padding))
     }
 }

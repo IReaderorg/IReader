@@ -43,9 +43,9 @@ fun LibraryScreenTopBar(
 ) {
     Box(modifier = Modifier.fillMaxWidth()) {
         when {
-            state.hasSelection -> {
+            state.selectionMode -> {
                 EditModeTopAppBar(
-                    selectionSize = state.selection.size,
+                    selectionSize = state.selectedBooks.size,
                     onClickCancelSelection = onClearSelection,
                     onClickSelectAll = onClickSelectAll,
                     onClickInvertSelection = onClickInvertSelection

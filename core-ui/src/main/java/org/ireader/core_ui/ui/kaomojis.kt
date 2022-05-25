@@ -11,11 +11,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.ireader.common_resources.UiText
 import org.ireader.core_ui.theme.ContentAlpha
 
 /** All credit belongs to tachiyomi**/
@@ -31,7 +29,7 @@ val kaomojis = listOf(
 @Composable
 fun EmptyScreen(
     modifier: Modifier = Modifier,
-    text: UiText,
+    text: String,
 ) {
     val kaomoji = remember { kaomojis.random() }
 
@@ -48,7 +46,7 @@ fun EmptyScreen(
             ),
         )
         Text(
-            text = text.asString(LocalContext.current),
+            text = text,
             style = MaterialTheme.typography.bodyMedium.copy(
                 color = LocalContentColor.current.copy(alpha = ContentAlpha.medium())
             ),

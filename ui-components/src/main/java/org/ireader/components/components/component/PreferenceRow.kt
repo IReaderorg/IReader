@@ -78,6 +78,7 @@ fun PreferenceRow(
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
     subtitle: String? = null,
+    clickable:Boolean = true,
     action: @Composable (() -> Unit)? = null,
 ) {
     val height = if (subtitle != null) 72.dp else 56.dp
@@ -91,10 +92,16 @@ fun PreferenceRow(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = height)
-            .combinedClickable(
-                onLongClick = onLongClick,
-                onClick = onClick,
-            ),
+            .apply {
+                  if (clickable) {
+                      this.combinedClickable(
+                          onLongClick = onLongClick,
+                          onClick = onClick,
+                      )
+                  }
+            }
+
+        ,
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (painter != null) {
@@ -490,7 +497,9 @@ fun <Key> ChipChoicePreference(
         icon = icon,
         action = {
             Button(
-                modifier = Modifier.fillMaxWidth().padding(end = 2.dp, top =4.dp, bottom = 4.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(end = 2.dp, top = 4.dp, bottom = 4.dp),
                 onClick = {
                     showDialog = true
                 },

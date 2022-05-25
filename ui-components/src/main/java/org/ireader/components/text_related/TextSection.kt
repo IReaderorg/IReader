@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun TextSection(
+    modifier: Modifier = Modifier,
     text: String,
     toUpper: Boolean = true,
     padding: PaddingValues = PaddingValues(16.dp),
@@ -22,7 +23,7 @@ fun TextSection(
     color: Color =  MaterialTheme.colorScheme.primary
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(padding),
         verticalAlignment = Alignment.CenterVertically

@@ -86,7 +86,7 @@ object ExtensionScreenSpec : BottomNavScreenSpec {
 
         ExtensionScreen(
             modifier = Modifier.padding(controller.scaffoldPadding),
-            viewModel = vm,
+            vm = vm,
             onClickCatalog = {
                 if (vm.uiPreferences.incognitoMode().get()) {
                     vm.uiPreferences.lastUsedSource().set(it.sourceId)

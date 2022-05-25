@@ -43,10 +43,7 @@ fun BottomTabComposable(
         },TabItem(
                 stringResource(id =   R.string.display)
         ) {
-            DisplayScreen(
-                layoutType,
-                onLayoutSelected
-            )
+
         },
     )
 

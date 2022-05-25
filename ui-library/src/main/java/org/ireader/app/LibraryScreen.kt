@@ -34,11 +34,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import org.ireader.app.components.EditCategoriesDialog
 import org.ireader.app.components.ScrollableTabs
 import org.ireader.app.components.visibleName
@@ -47,7 +51,6 @@ import org.ireader.common_models.LayoutType
 import org.ireader.common_models.entities.BookItem
 import org.ireader.common_models.entities.CategoryWithCount
 import org.ireader.common_models.entities.toBookCategory
-import org.ireader.common_resources.UiText
 import org.ireader.components.list.LayoutComposable
 import org.ireader.components.list.scrollbars.LazyColumnScrollbar
 import org.ireader.components.reusable_composable.AppIconButton
@@ -81,9 +84,10 @@ fun LibraryScreen(
     requestHideBottomNav: (Boolean) -> Unit,
 ) {
 
-    LaunchedEffect(vm.hasSelection) {
-        requestHideBottomNav(vm.hasSelection)
+    LaunchedEffect(vm.selectionMode) {
+        requestHideBottomNav(vm.selectionMode)
     }
+    val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = false)
 
 
 
@@ -92,60 +96,84 @@ fun LibraryScreen(
             .padding(scaffoldPadding)
             .fillMaxSize(),
     ) {
-        Column {
-            LibraryContent(
-                vm = vm,
-                onBook = onBook,
-                onLongBook = onLongBook,
-                goToLatestChapter = goToLatestChapter,
-                onPageChanged = {
-                    vm.setSelectedPage(it)
-                }
-            )
-
-        }
-        EditCategoriesDialog(
-            vm = vm,
-            onConfirm = onAddToCategoryConfirm,
-            dismissDialog = {
-                vm.showDialog = false
-            },
-            onAddDeleteQueue = { category ->
-                vm.deleteQueues.addAll(category.toBookCategory(vm.selection))
-            },
-            onRemoteInInsertQueue = { category ->
-                vm.addQueues.removeIf { it.categoryId == category.id }
-            },
-            onAddToInsertQueue = { category ->
-                vm.addQueues.addAll(category.toBookCategory(vm.selection))
-            },
-            onRemoteInDeleteQueue = { category ->
-                vm.deleteQueues.removeIf { it.categoryId == category.id }
-            }
-        )
-        Crossfade(
-            targetState = Pair(
-                vm.isLoading,
-                vm.isEmpty
-            )
-        ) { (isLoading, isEmpty) ->
-            when {
-                isLoading -> LoadingScreen()
-                isEmpty && vm.filters.value.isEmpty() -> EmptyScreen(
-                    text = UiText.StringResource(R.string.empty_library)
+        SwipeRefresh(
+            state = swipeRefreshState,
+            onRefresh = { refreshUpdate() },
+            indicator = { state, trigger ->
+                SwipeRefreshIndicator(
+                    state = state,
+                    refreshTriggerDistance = trigger,
+                    scale = true,
+                    backgroundColor = MaterialTheme.colorScheme.background,
+                    contentColor = MaterialTheme.colorScheme.primaryContainer,
+                    elevation = 8.dp,
                 )
             }
-        }
-        LibrarySelectionBar(
-            modifier = Modifier.align(Alignment.BottomCenter),
-            visible = vm.hasSelection,
-            onClickChangeCategory = onClickChangeCategory,
-            onClickDeleteDownloads = onDelete,
-            onClickDownload = onDownload,
-            onClickMarkAsRead = onMarkAsRead,
-            onClickMarkAsUnread = onMarkAsNotRead
-        )
+        ) {
+            Column {
+                LibraryContent(
+                    vm = vm,
+                    onBook = onBook,
+                    onLongBook = onLongBook,
+                    goToLatestChapter = goToLatestChapter,
+                    onPageChanged = {
+                        vm.setSelectedPage(it)
+                    }
+                )
 
+            }
+            EditCategoriesDialog(
+                vm = vm,
+                onConfirm = {
+                    vm.selectedBooks.clear()
+                    vm.addQueues.clear()
+                    vm.deleteQueues.clear()
+                    onAddToCategoryConfirm()
+                },
+                dismissDialog = {
+                    vm.showDialog = false
+                    vm.selectedBooks.clear()
+                    vm.addQueues.clear()
+                    vm.deleteQueues.clear()
+                },
+                onAddDeleteQueue = { category ->
+                    vm.deleteQueues.addAll(category.toBookCategory(vm.selectedBooks))
+                },
+                onRemoteInInsertQueue = { category ->
+                    vm.addQueues.removeIf { it.categoryId == category.id }
+                },
+                onAddToInsertQueue = { category ->
+                    vm.addQueues.addAll(category.toBookCategory(vm.selectedBooks))
+                },
+                onRemoteInDeleteQueue = { category ->
+                    vm.deleteQueues.removeIf { it.categoryId == category.id }
+                },
+                categories = vm.categories.filter { !it.category.isSystemCategory }
+            )
+            Crossfade(
+                targetState = Pair(
+                    vm.isLoading,
+                    vm.isEmpty
+                )
+            ) { (isLoading, isEmpty) ->
+                when {
+                    isLoading -> LoadingScreen()
+                    isEmpty && vm.filters.value.isEmpty() -> EmptyScreen(
+                        text = stringResource(R.string.empty_library)
+                    )
+                }
+            }
+            LibrarySelectionBar(
+                modifier = Modifier.align(Alignment.BottomCenter),
+                visible = vm.selectionMode,
+                onClickChangeCategory = onClickChangeCategory,
+                onClickDeleteDownloads = onDelete,
+                onClickDownload = onDownload,
+                onClickMarkAsRead = onMarkAsRead,
+                onClickMarkAsUnread = onMarkAsNotRead
+            )
+
+        }
     }
 }
 
@@ -182,8 +210,11 @@ private fun LibraryContent(
         onPageChange = { page ->
             vm.getLibraryForCategoryIndex(categoryIndex = page)
         },
-        selection = vm.selection,
+        selection = vm.selectedBooks,
         currentPage = vm.selectedCategoryIndex,
+        showUnreadBadge = vm.unreadBadge.value,
+        showReadBadge  = vm.readBadge.value,
+        showGoToLastChapterBadge = vm.goToLastChapterBadge.value
 
     )
 }
@@ -244,6 +275,10 @@ fun LibraryPager(
     selection: List<Long> = emptyList<Long>(),
     currentPage: Int,
     onPageChange: @Composable (page: Int) -> State<List<BookItem>>,
+    showGoToLastChapterBadge: Boolean = false,
+    showUnreadBadge: Boolean = false,
+    showReadBadge: Boolean = false,
+    showInLibraryBadge:Boolean = false
 ) {
     HorizontalPager(
         count = pageCount,
@@ -265,6 +300,9 @@ fun LibraryPager(
                 goToLatestChapter = goToLatestChapter,
                 onClick = onClick,
                 onLongClick = onLongClick,
+                showGoToLastChapterBadge = showGoToLastChapterBadge,
+                showReadBadge = showReadBadge,
+                showUnreadBadge = showUnreadBadge,
             )
         }
 

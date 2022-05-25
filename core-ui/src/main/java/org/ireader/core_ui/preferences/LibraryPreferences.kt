@@ -45,6 +45,10 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
         return preferenceStore.getBoolean("per_category_settings", false)
     }
 
+    fun goToLastChapterBadges(): Preference<Boolean> {
+        return preferenceStore.getBoolean("last_chapter_badges", false)
+    }
+
     fun downloadBadges(): Preference<Boolean> {
         return preferenceStore.getBoolean("download_badges", false)
     }

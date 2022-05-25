@@ -33,15 +33,22 @@ class CoilLoaderFactory(
             data = BookCover(0, 0, "", false),
             client = client.default
         )
+        val cover =BookCoverImageLoader(
+            okhttpClient,
+            libraryCovers = libraryCovers,
+            getLocalCatalog,
+            cache,
+            data = BookCover(0, 0, "", false),
+        )
 
 
 
         return ImageLoader.Builder(context)
             .components(fun ComponentRegistry.Builder.() {
-                add(factory)
+                add(cover)
                 add(CatalogRemoteMapper())
                 add(org.ireader.image_loader.coil.CatalogInstalledFetcher.Factory())
-                add(LibraryMangaFetcherFactoryKeyer())
+                add(BookCoverFetcherFactoryKeyer(libraryCovers))
             })
             .crossfade(300)
             .diskCache {

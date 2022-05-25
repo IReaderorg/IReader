@@ -24,7 +24,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import org.ireader.common_models.entities.UpdateWithInfo
-import org.ireader.common_resources.UiText
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.core_ui.ui.EmptyScreen
 import org.ireader.core_ui.ui.LoadingScreen
@@ -53,7 +52,7 @@ fun UpdateScreen(
         Crossfade(targetState = Pair(state.isLoading, state.isEmpty)) { (isLoading, isEmpty) ->
             when {
                 isLoading -> LoadingScreen()
-                isEmpty -> EmptyScreen(text = UiText.StringResource(R.string.no_new_update_available))
+                isEmpty -> EmptyScreen(text = stringResource(R.string.no_new_update_available))
                 else -> UpdatesContent(
                     state = state,
                     onClickItem = onUpdate,

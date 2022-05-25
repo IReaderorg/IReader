@@ -85,6 +85,10 @@ fun LinearListDisplay(
     goToLatestChapter: (book: BookItem) -> Unit,
     isLoading: Boolean = false,
     useDefaultImageLoader :Boolean = false,
+    showGoToLastChapterBadge: Boolean = false,
+    showUnreadBadge: Boolean = false,
+    showReadBadge: Boolean = false,
+    showInLibraryBadge:Boolean = false
 ) {
     LazyColumn(modifier = Modifier.fillMaxSize(), state = scrollState) {
         items(count = books.size, key = { index ->

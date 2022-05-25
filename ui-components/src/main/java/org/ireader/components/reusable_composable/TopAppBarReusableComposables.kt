@@ -217,7 +217,7 @@ fun AppTextField(
     Box(contentAlignment = Alignment.CenterStart) {
         if (query.isBlank() && mode != 2) {
             Text(
-                modifier = Modifier.padding(horizontal = 0.dp),
+                modifier = if (mode == 1) Modifier.padding(horizontal = 16.dp) else Modifier.padding(horizontal = 0.dp),
                 text = hint,
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -249,6 +249,7 @@ fun AppTextField(
                 keyboardActions = keyboardActions,
                 singleLine = true,
                 textStyle = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+
             )
         } else if (mode == 2) {
             androidx.compose.material3.TextField(

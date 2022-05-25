@@ -26,10 +26,13 @@ fun GridLayoutComposable(
     onClick: (book: BookItem) -> Unit,
     onLongClick: (book: BookItem) -> Unit = {},
     scrollState: androidx.compose.foundation.lazy.grid.LazyGridState,
-    isLocal: Boolean,
     goToLatestChapter: (book: BookItem) -> Unit,
     isLoading: Boolean = false,
-    useDefaultImageLoader :Boolean = false,
+    useDefaultImageLoader: Boolean = false,
+    showGoToLastChapterBadge: Boolean = false,
+    showUnreadBadge: Boolean = false,
+    showReadBadge: Boolean = false,
+    showInLibraryBadge:Boolean = false
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         LazyVerticalGrid(
@@ -41,7 +44,8 @@ fun GridLayoutComposable(
                     items = books,
                     key = { book ->
                         book.id
-                }, contentType = { "books" },
+                    },
+                    contentType = { "books" },
                 ) { book ->
 
                     BookImage(
@@ -49,14 +53,20 @@ fun GridLayoutComposable(
                         book = book,
                         ratio = 6f / 10f,
                         selected = book.id in selection,
-useDefaultImageLoader = useDefaultImageLoader,
+                        useDefaultImageLoader = useDefaultImageLoader,
                         onLongClick = { onLongClick(book) },
                     ) {
-                        if (isLocal) {
+                        if (showGoToLastChapterBadge) {
                             GoToLastReadComposable(onClick = { goToLatestChapter(book) })
-                            LibraryBadges(book.unread,book.downloaded)
                         }
-                        if (!isLocal && book.favorite) {
+                        if (showUnreadBadge || showUnreadBadge) {
+                            LibraryBadges(
+                                unread = if (showUnreadBadge) book.unread else null,
+                                downloaded = if (showReadBadge) book.downloaded else null
+                            )
+                        }
+
+                        if (showInLibraryBadge && book.favorite) {
                             TextBadge(text = UiText.StringResource(R.string.in_library))
                         }
                     }

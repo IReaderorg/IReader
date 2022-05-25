@@ -25,6 +25,7 @@ import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
 import org.ireader.app.viewmodel.LibraryViewModel
 import org.ireader.common_models.entities.Category
+import org.ireader.common_models.entities.CategoryWithCount
 import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.ui_library.R
 
@@ -38,6 +39,7 @@ fun EditCategoriesDialog(
     onRemoteInInsertQueue:(Category)-> Unit,
     onRemoteInDeleteQueue:(Category)-> Unit,
     onAddDeleteQueue:(Category)-> Unit,
+    categories: List<CategoryWithCount>
 ) {
 
     if (vm.showDialog) {
@@ -47,7 +49,7 @@ fun EditCategoriesDialog(
             title = { Text(stringResource(id = R.string.edit_category)) },
             text = {
                 LazyColumn {
-                    items(items = vm.categories) { category ->
+                    items(items = categories) { category ->
                         Row(
                             modifier = Modifier
                                 .requiredHeight(48.dp)

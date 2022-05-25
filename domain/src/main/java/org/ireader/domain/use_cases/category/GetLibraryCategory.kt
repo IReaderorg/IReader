@@ -10,8 +10,8 @@ import org.ireader.common_models.entities.Category
 import org.ireader.common_models.entities.CategoryWithCount
 import javax.inject.Inject
 
-class GetCategories @Inject internal constructor(
-    val repo : CategoryRepository,
+class CategoriesUseCases @Inject internal constructor(
+    private val repo : CategoryRepository,
     private val bookCategoryRepository : BookCategoryRepository,
 ) {
 
@@ -47,12 +47,13 @@ class GetCategories @Inject internal constructor(
             .distinctUntilChanged()
     }
 
-    suspend fun insertCategory(category: Category) {
-        repo.insert(category)
+    suspend fun deleteCategory(category: Category) {
+        repo.delete(category)
     }
     suspend fun insertBookCategory(categories: List<BookCategory>) {
         bookCategoryRepository.insertAll(categories)
     }
+
     suspend fun deleteBookCategory(categories: List<BookCategory>) {
         bookCategoryRepository.deleteAll(categories)
     }
