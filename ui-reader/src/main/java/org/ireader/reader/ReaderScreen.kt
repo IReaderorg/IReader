@@ -46,7 +46,6 @@ import org.ireader.reader.viewmodel.ReaderScreenViewModel
 fun ReadingScreen(
     vm: ReaderScreenViewModel,
     scrollState: LazyListState,
-    drawerScrollState: LazyListState,
     swipeState: SwipeRefreshState,
     onNext: (reset:Boolean) -> Unit,
     onPrev: (reset: Boolean) -> Unit,
@@ -68,19 +67,7 @@ fun ReadingScreen(
     }
     val scope = rememberCoroutineScope()
     val chapter = vm.stateChapter
-    LaunchedEffect(key1 = drawerState.targetValue) {
-        if (chapter != null && drawerState.targetValue == androidx.compose.material3.DrawerValue.Open && vm.stateChapters.isNotEmpty()) {
-            val index = vm.stateChapters.indexOfFirst { it.id == chapter.id }
-            if (index != -1) {
-                scope.launch {
-                    drawerScrollState.scrollToItem(
-                        index,
-                        -drawerScrollState.layoutInfo.viewportEndOffset / 2
-                    )
-                }
-            }
-        }
-    }
+
 
     LaunchedEffect(key1 = modalBottomSheetState.targetValue) {
         when (modalBottomSheetState.targetValue) {

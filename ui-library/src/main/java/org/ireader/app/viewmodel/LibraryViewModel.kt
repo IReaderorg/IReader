@@ -77,12 +77,13 @@ class LibraryViewModel @Inject constructor(
         readLayoutTypeAndFilterTypeAndSortType()
         libraryPreferences.showAllCategory().stateIn(scope)
             .flatMapLatest { showAll ->
-                getCategory.subscribe(showAll).onEach {  categories ->
+                getCategory.subscribe(showAll).onEach { categories ->
                     val lastCategoryId = lastUsedCategory.value
 
-                    val index = categories.indexOfFirst { it.id == lastCategoryId }.takeIf { it >= 0 } ?: 0
+                    val index =
+                        categories.indexOfFirst { it.id == lastCategoryId }.takeIf { it >= 0 } ?: 0
 
-                    state.categories =  categories
+                    state.categories = categories
                     state.selectedCategoryIndex = index
                 }
             }.launchIn(scope)
@@ -122,7 +123,9 @@ class LibraryViewModel @Inject constructor(
 
     fun deleteBooks() {
         viewModelScope.launch(Dispatchers.IO) {
-            deleteUseCase.deleteBooks(books.filter { it.id in selectedBooks }.map { it.toBook() })
+            books.filter { it.id in selectedBooks }.forEach {
+                deleteUseCase.deleteBookById(it.id)
+            }
             selectedBooks.clear()
         }
     }
@@ -169,6 +172,7 @@ class LibraryViewModel @Inject constructor(
     fun refreshUpdate() {
         serviceUseCases.startLibraryUpdateServicesUseCase()
     }
+
     fun setSelectedPage(index: Int) {
         if (index == selectedCategoryIndex) return
         val categories = categories
@@ -177,9 +181,11 @@ class LibraryViewModel @Inject constructor(
         state.selectedCategory
         lastUsedCategory.value = category.id
     }
+
     fun unselectAll() {
         state.selectedBooks.clear()
     }
+
     fun selectAllInCurrentCategory() {
         val mangaInCurrentCategory = loadedManga[selectedCategory?.id] ?: return
         val currentSelected = selectedBooks.toList()
@@ -190,7 +196,8 @@ class LibraryViewModel @Inject constructor(
     fun flipAllInCurrentCategory() {
         val mangaInCurrentCategory = loadedManga[selectedCategory?.id] ?: return
         val currentSelected = selectedBooks.toList()
-        val (toRemove, toAdd) = mangaInCurrentCategory.map { it.id }.partition { it in currentSelected }
+        val (toRemove, toAdd) = mangaInCurrentCategory.map { it.id }
+            .partition { it in currentSelected }
         state.selectedBooks.removeAll(toRemove)
         state.selectedBooks.addAll(toAdd)
     }
@@ -212,8 +219,14 @@ class LibraryViewModel @Inject constructor(
             mutableStateOf(emptyList())
         }
 
-        val unfiltered = remember(sorting.value, filters.value,categoryId) {
-            getLibraryCategory.subscribe(categoryId, sorting.value, filters.value).map { it.map { it.toBookItem() } }
+        val unfiltered = remember(sorting.value, filters.value, categoryId) {
+            getLibraryCategory.subscribe(categoryId, sorting.value, filters.value)
+                .map { list ->
+                    books = list
+                    list.map {
+                        it.toBookItem()
+                    }
+                }
                 .shareIn(scope, SharingStarted.WhileSubscribed(1000), 1)
         }
 

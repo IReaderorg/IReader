@@ -18,7 +18,7 @@ import javax.inject.Inject
 
 open class ReaderScreenStateImpl @Inject constructor() : ReaderScreenState {
     override var isLoading by mutableStateOf<Boolean>(false)
-    override var drawerListState by mutableStateOf<LazyListState?>(null)
+
     override var readerScrollState by mutableStateOf<LazyListState?>(null)
     @ExperimentalMaterialApi
     override var modalBottomSheetState by mutableStateOf<ModalBottomSheetState?>(null)
@@ -61,7 +61,7 @@ interface ReaderScreenState {
     val stateContent: List<String>
     val chapterShell : SnapshotStateList<Chapter>
 
-    var drawerListState:LazyListState?
+
     var readerScrollState:LazyListState?
     @OptIn(ExperimentalMaterialApi::class) var modalBottomSheetState: ModalBottomSheetState?
 }

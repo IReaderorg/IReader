@@ -167,7 +167,7 @@ fun LibraryScreen(
                 modifier = Modifier.align(Alignment.BottomCenter),
                 visible = vm.selectionMode,
                 onClickChangeCategory = onClickChangeCategory,
-                onClickDeleteDownloads = onDelete,
+                onClickDeleteDownload = onDelete,
                 onClickDownload = onDownload,
                 onClickMarkAsRead = onMarkAsRead,
                 onClickMarkAsUnread = onMarkAsNotRead
@@ -226,7 +226,7 @@ private fun LibrarySelectionBar(
     onClickDownload: () -> Unit,
     onClickMarkAsRead: () -> Unit,
     onClickMarkAsUnread: () -> Unit,
-    onClickDeleteDownloads: () -> Unit,
+    onClickDeleteDownload: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     AnimatedVisibility(
@@ -256,7 +256,7 @@ private fun LibrarySelectionBar(
                     imageVector = Icons.Outlined.DoneOutline,
                     onClick = onClickMarkAsUnread
                 )
-                AppIconButton(imageVector = Icons.Outlined.Delete, onClick = onClickDeleteDownloads)
+                AppIconButton(imageVector = Icons.Outlined.Delete, onClick = onClickDeleteDownload)
             }
         }
     }

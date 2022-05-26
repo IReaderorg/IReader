@@ -113,12 +113,7 @@ object ReaderScreenSpec : ScreenSpec {
         val chapter = vm.stateChapter
 
         val scrollState = rememberLazyListState()
-        val drawerScrollState = rememberLazyListState()
 
-
-        LaunchedEffect(key1 = drawerScrollState.hashCode()) {
-            vm.drawerListState = drawerScrollState
-        }
         LaunchedEffect(key1 = scrollState.hashCode()) {
             vm.readerScrollState = scrollState
         }
@@ -303,7 +298,6 @@ object ReaderScreenSpec : ScreenSpec {
                     },
 
                     snackBarHostState = controller.snackBarHostState,
-                    drawerScrollState = drawerScrollState,
                     swipeState = swipeState,
                     onSliderFinished = {
                         scope.launch {
@@ -357,54 +351,66 @@ object ReaderScreenSpec : ScreenSpec {
         controller: ScreenSpec.Controller
     ) {
         val vm: ReaderScreenViewModel = hiltViewModel(controller.navBackStackEntry)
-        val lazyListState = vm.drawerListState
+        val drawerScrollState = rememberLazyListState()
+        val drawerState = controller.drawerState
         val chapter = vm.stateChapter
         val scope = rememberCoroutineScope()
         val scrollState = vm.readerScrollState
-        if (lazyListState != null) {
-            AnimatedVisibility(
-                visible = true,
-                enter = slideInVertically(initialOffsetY = { -it }),
-                exit = slideOutVertically(targetOffsetY = { -it })
-            ) {
-                ReaderScreenDrawer(
-                    modifier = Modifier.statusBarsPadding(),
-                    onReverseIcon = {
-                        vm.isDrawerAsc = !vm.isDrawerAsc
-                    },
-                    onChapter = { ch ->
-                        val index = vm.stateChapters.indexOfFirst { it.id == ch.id }
-                        if (index != -1) {
-                            scope.launch {
-                                vm.clearChapterShell(scrollState)
-                                vm.getLocalChapter(ch.id)
-                            }
-                            scope.launch {
-                                lazyListState.scrollToItem(0, 0)
-                            }
-                            vm.currentChapterIndex = index
-                        }
-                    },
-                    chapter = chapter,
-                    chapters = vm.drawerChapters.value,
-                    drawerScrollState = lazyListState,
-                    onMap = { drawer ->
-                        scope.launch {
-                            try {
-                                val index =
-                                    vm.drawerChapters.value.indexOfFirst { it.id == vm.stateChapter?.id }
-                                if (index != -1) {
-                                    drawer.scrollToItem(
-                                        index,
-                                        -drawer.layoutInfo.viewportEndOffset / 2
-                                    )
-                                }
-                            } catch (e: Throwable) {
-                            }
-                        }
-                    },
-                )
+        LaunchedEffect(key1 = drawerState.targetValue) {
+            if (chapter != null && drawerState.targetValue == androidx.compose.material3.DrawerValue.Open && vm.stateChapters.isNotEmpty()) {
+                val index = vm.stateChapters.indexOfFirst { it.id == chapter.id }
+                if (index != -1) {
+                    scope.launch {
+                        drawerScrollState.scrollToItem(
+                            index,
+                            -drawerScrollState.layoutInfo.viewportEndOffset / 2
+                        )
+                    }
+                }
             }
+        }
+        AnimatedVisibility(
+            visible = true,
+            enter = slideInVertically(initialOffsetY = { -it }),
+            exit = slideOutVertically(targetOffsetY = { -it })
+        ) {
+            ReaderScreenDrawer(
+                modifier = Modifier.statusBarsPadding(),
+                onReverseIcon = {
+                    vm.isDrawerAsc = !vm.isDrawerAsc
+                },
+                onChapter = { ch ->
+                    val index = vm.stateChapters.indexOfFirst { it.id == ch.id }
+                    if (index != -1) {
+                        scope.launch {
+                            vm.clearChapterShell(scrollState)
+                            vm.getLocalChapter(ch.id)
+                        }
+                        scope.launch {
+                            scrollState?.scrollToItem(0, 0)
+                        }
+                        vm.currentChapterIndex = index
+                    }
+                },
+                chapter = chapter,
+                chapters = vm.drawerChapters.value,
+                drawerScrollState = drawerScrollState,
+                onMap = { drawer ->
+                    scope.launch {
+                        try {
+                            val index =
+                                vm.drawerChapters.value.indexOfFirst { it.id == vm.stateChapter?.id }
+                            if (index != -1) {
+                                drawer.scrollToItem(
+                                    index,
+                                    -drawer.layoutInfo.viewportEndOffset / 2
+                                )
+                            }
+                        } catch (e: Throwable) {
+                        }
+                    }
+                },
+            )
         }
     }
 

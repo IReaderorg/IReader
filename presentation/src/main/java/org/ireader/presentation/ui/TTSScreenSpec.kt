@@ -4,16 +4,12 @@ import android.support.v4.media.session.PlaybackStateCompat
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetState
-import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -24,8 +20,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
-import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavController
 import androidx.navigation.NavDeepLink
 import androidx.navigation.navDeepLink
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -100,10 +94,6 @@ object TTSScreenSpec : ScreenSpec {
 
         val pagerState = rememberPagerState()
 
-        val drawerScrollState = rememberLazyListState()
-        LaunchedEffect(key1 = controller.drawerState.hashCode()) {
-            vm.drawerState = drawerScrollState
-        }
 
         val chapter = vm.ttsChapter
 
@@ -156,19 +146,9 @@ object TTSScreenSpec : ScreenSpec {
             },
             sliderInteractionSource = sliderInteractionSource,
             pagerState = pagerState,
-            drawerScrollState = drawerScrollState,
             bottomSheetState = controller.sheetState,
             drawerState = controller.drawerState
         )
-        LaunchedEffect(key1 = controller.drawerState.targetValue) {
-            if (chapter != null && controller.drawerState.targetValue == androidx.compose.material3.DrawerValue.Open && vm.ttsChapters.isNotEmpty()) {
-
-                val index = vm.ttsChapters.indexOfFirst { it.id == chapter.id }
-                if (index != -1) {
-                    drawerScrollState.scrollToItem(index)
-                }
-            }
-        }
 
 
         LaunchedEffect(key1 = vm.ttsState.currentReadingParagraph) {
@@ -201,6 +181,17 @@ object TTSScreenSpec : ScreenSpec {
     ) {
         val vm: TTSViewModel = hiltViewModel   (controller.navBackStackEntry)
         val scope = rememberCoroutineScope()
+        val drawerScrollState = rememberLazyListState()
+        val chapter = vm.ttsChapter
+        LaunchedEffect(key1 = controller.drawerState.targetValue) {
+            if (chapter != null && controller.drawerState.targetValue == androidx.compose.material3.DrawerValue.Open && vm.ttsChapters.isNotEmpty()) {
+
+                val index = vm.ttsChapters.indexOfFirst { it.id == chapter.id }
+                if (index != -1) {
+                    drawerScrollState.scrollToItem(index)
+                }
+            }
+        }
         ReaderScreenDrawer(
             modifier = Modifier.statusBarsPadding(),
             onReverseIcon = {
@@ -213,7 +204,7 @@ object TTSScreenSpec : ScreenSpec {
             },
             chapter = vm.ttsChapter,
             chapters = vm.uiChapters.value,
-            drawerScrollState = vm.drawerState ?: rememberLazyListState(),
+            drawerScrollState = drawerScrollState,
             onMap = { drawer ->
                 scope.launch {
                     try {
