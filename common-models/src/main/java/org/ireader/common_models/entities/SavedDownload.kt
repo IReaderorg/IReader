@@ -13,8 +13,9 @@ import androidx.room.PrimaryKey
             entity = Chapter::class,
             parentColumns = arrayOf("id"),
             childColumns = arrayOf("chapterId"),
-            onDelete =  ForeignKey.CASCADE
-        )]
+            onDelete =  ForeignKey.CASCADE,
+        )],
+
 )
 data class Download(
     @PrimaryKey(autoGenerate = false)

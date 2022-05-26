@@ -8,11 +8,6 @@ import javax.inject.Inject
 class LocalChapterRepositoryImpl @Inject constructor(private val daoLibrary: ChapterDao) :
     org.ireader.common_data.repository.LocalChapterRepository {
 
-    override suspend fun findChapterByIdByBatch(
-        chapterId: List<Long>,
-    ): List<org.ireader.common_models.entities.Chapter> {
-        return daoLibrary.findChapterByIdByBatch(chapterId = chapterId)
-    }
 
     override suspend fun findAllChapters(): List<org.ireader.common_models.entities.Chapter> {
         return daoLibrary.findAllChapters()
@@ -39,9 +34,6 @@ class LocalChapterRepositoryImpl @Inject constructor(private val daoLibrary: Cha
         return daoLibrary.findChaptersByBookId(bookId, isAsc)
     }
 
-    override suspend fun findChaptersByBookIds(bookIds: List<Long>): List<org.ireader.common_models.entities.Chapter> {
-        return daoLibrary.findChaptersByBookIds(bookIds)
-    }
 
     override suspend fun findChaptersByKey(key: String): List<org.ireader.common_models.entities.Chapter> {
         return daoLibrary.findChaptersByKey(key = key)

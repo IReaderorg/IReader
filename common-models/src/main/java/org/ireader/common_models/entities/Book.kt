@@ -14,7 +14,7 @@ data class Book(
     override val title: String,
     val key: String,
     val tableId: Long = 0,
-    val type:Long = 0,
+    val type: Long = 0,
     val author: String = "",
     val description: String = "",
     val genres: List<String> = emptyList(),
@@ -150,6 +150,7 @@ fun BookWithInfo.toBook(): Book {
         author = this.author,
     )
 }
+
 interface BookBase {
     val id: Long
     val sourceId: Long
@@ -168,7 +169,7 @@ data class LibraryBook(
     val unread: Int,
     val readCount: Int,
 ) : BookBase {
-    fun toBookItem() : BookItem {
+    fun toBookItem(): BookItem {
         return BookItem(
             id = id,
             sourceId = sourceId,
@@ -176,6 +177,15 @@ data class LibraryBook(
             cover = cover,
             unread = unread,
             downloaded = readCount
+        )
+    }
+
+    fun toBook(): Book {
+        return Book(
+            id = id,
+            sourceId = sourceId,
+            title = title,
+            key = key
         )
     }
 }
@@ -201,9 +211,9 @@ data class BookItem(
 ) : BaseBook
 
 data class DownloadedBook(
-    val id:Long,
+    val id: Long,
     val totalChapters: Int,
-    val totalDownloadedChapter:Int
+    val totalDownloadedChapter: Int
 )
 
 

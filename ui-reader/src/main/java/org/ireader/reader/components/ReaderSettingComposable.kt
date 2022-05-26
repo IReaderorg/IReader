@@ -39,6 +39,7 @@ import org.ireader.components.components.component.PreferenceRow
 import org.ireader.components.components.component.SwitchPreference
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.MidSizeTextComposable
+import org.ireader.core_ui.preferences.ReadingMode
 import org.ireader.core_ui.theme.OrientationMode
 import org.ireader.core_ui.theme.fonts
 import org.ireader.core_ui.ui.Colour.contentColor
@@ -126,13 +127,13 @@ fun ReaderSettingMainLayout(
                         valueRange = 0F..32F,
                     ),
                     Components.Chip(
-                       preference = listOf(
-                           stringResource(id = R.string.right),
-                           stringResource(id = R.string.left),
-                       ),
+                        preference = listOf(
+                            stringResource(id = R.string.right),
+                            stringResource(id = R.string.left),
+                        ),
                         title = stringResource(id = R.string.alignment),
                         onValueChange = {
-                            when(it) {
+                            when (it) {
                                 0 -> vm.scrollIndicatorAlignment.value = PreferenceAlignment.Right
                                 1 -> vm.scrollIndicatorAlignment.value = PreferenceAlignment.Left
                             }
@@ -218,11 +219,11 @@ fun ReaderSettingMainLayout(
                     item {
                         ChipPreference(
                             preference = listOf(
-                                "1",
-                                "2",
-                            ), selected = vm.readingMode.value.isTrue(),
+                                stringResource(id = R.string.page),
+                                stringResource(id = R.string.continues),
+                            ), selected = vm.readingMode.value.ordinal,
                             onValueChange = {
-                                vm.readingMode.value = it == 1
+                                vm.readingMode.value = ReadingMode.valueOf(it)
                             },
                             title = stringResource(id = R.string.scroll_mode)
                         )

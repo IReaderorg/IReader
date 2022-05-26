@@ -41,8 +41,8 @@ class AppPreferences(
         return preferenceStore.getInt(SAVED_DOH_KEY, 0)
     }
 
-    fun defaultImageLoader(): Preference<Boolean> {
-        return preferenceStore.getBoolean(DEFAULT_IMAGE_LOADER, false)
+    fun appUpdater(): Preference<Boolean> {
+        return preferenceStore.getBoolean("app_updater", true)
     }
 
 

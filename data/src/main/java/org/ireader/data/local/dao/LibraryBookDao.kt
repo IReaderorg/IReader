@@ -231,8 +231,6 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
     @Query("SELECT * FROM library WHERE id = :bookId Limit 1")
     suspend fun findBookById(bookId: Long): org.ireader.common_models.entities.Book?
 
-    @Query("SELECT * FROM library WHERE id in (:bookIds)")
-    suspend fun findBookByIds(bookIds: List<Long>): List<org.ireader.common_models.entities.Book>
 
     @Query("SELECT * FROM library WHERE `key` = :key Limit 1")
     suspend fun findBookByKey(key: String): org.ireader.common_models.entities.Book?
@@ -264,15 +262,6 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
     @Query("SELECT sourceId FROM library GROUP BY sourceId ORDER BY COUNT(sourceId) DESC")
     suspend fun findFavoriteSourceIds(): List<Long>
 
-    @Transaction
-    suspend fun deleteBookAndChapterByBookIds(bookIds: List<Long>) {
-        deleteChaptersByBookIds(bookIds)
-        deleteBooksByIds(bookIds)
-        deleteAllUpdates(bookIds)
-    }
-
-    @Query("Delete FROM updates WHERE bookId in (:bookIds)")
-    suspend fun deleteAllUpdates(bookIds: List<Long>)
 
     @Transaction
     suspend fun insertBooksAndChapters(
@@ -289,14 +278,6 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
     )
     fun insertChapters(chapters: List<org.ireader.common_models.entities.Chapter>)
 
-    @Query(
-        """
-        DELETE FROM library
-        WHERE id in (:bookIds)
-    """
-    )
-    suspend fun deleteBooksByIds(bookIds: List<Long>)
 
-    @Query("DELETE FROM chapter WHERE bookId in (:bookIds)")
-    suspend fun deleteChaptersByBookIds(bookIds: List<Long>)
+
 }

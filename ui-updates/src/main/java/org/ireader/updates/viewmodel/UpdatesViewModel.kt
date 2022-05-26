@@ -52,7 +52,10 @@ class UpdatesViewModel @Inject constructor(
         val chapterIds = this.updates.values.flatten().filter { it.id in updateIds }
             .map { it.chapterId }
         viewModelScope.launch(Dispatchers.IO) {
-            val chapters = getChapterUseCase.findChapterByIdByBatch(chapterIds).map(onChapter)
+
+            val chapters = chapterIds.mapNotNull {
+                getChapterUseCase.findChapterById(it)
+            }.map(onChapter)
             insertUseCases.insertChapters(chapters)
         }
     }

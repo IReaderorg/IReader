@@ -14,6 +14,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import org.ireader.common_extensions.launchIO
+import org.ireader.common_models.entities.Chapter
 import org.ireader.common_models.entities.SavedDownload
 import org.ireader.common_models.entities.buildSavedDownload
 import org.ireader.core.R
@@ -70,32 +71,46 @@ class DownloaderService @AssistedInject constructor(
                 val inputtedBooksIds = inputData.getLongArray(DOWNLOADER_BOOKS_IDS)?.distinct()
                 val inputtedDownloaderMode = inputData.getBoolean(DOWNLOADER_MODE, false)
 
-                val chapters = if (inputtedBooksIds != null) {
-                    chapterRepo.findChaptersByBookIds(inputtedBooksIds)
-                } else {
-                    if (inputtedChapterIds != null) {
-                        chapterRepo.findChapterByIdByBatch(inputtedChapterIds)
-                    } else {
+
+                val chapters: List<Chapter> = when {
+                    inputtedBooksIds != null -> {
+                        inputtedBooksIds.flatMap {
+                            chapterRepo.findChaptersByBookId(it)
+                        }
+                    }
+                    inputtedChapterIds != null -> {
+                        inputtedChapterIds.mapNotNull {
+                            chapterRepo.findChapterById(it)
+                        }.filterNotNull()
+                    }
+                    inputtedDownloaderMode -> {
+                        downloadUseCases.findAllDownloadsUseCase().mapNotNull {
+                            chapterRepo.findChapterById(it.chapterId)
+                        }
+                    }
+                    else -> {
                         throw Exception("There is no chapter.")
                     }
                 }
                 val distinctBookIds = chapters.map { it.bookId }.distinct()
-                val books = bookRepo.findBookByIds(distinctBookIds)
-                val distinctSources = books.map { it.sourceId }.distinct()
+                val books = distinctBookIds.mapNotNull {
+                    bookRepo.findBookById(it)
+                }
+                val distinctSources = books.map { it.sourceId }.distinct().filterNotNull()
                 val sources =
                     extensions.catalogs.filter { it.sourceId in distinctSources }
 
-                val mappedChapters =
-                    chapters.filter { it.content.joinToString().length < 10 }.map { chapter ->
-                        val book = books.find { book -> book.id == chapter.bookId }
-                        book?.let { b ->
-                            buildSavedDownload(b, chapter)
+                val downloads =
+                    chapters.filter { it.content.joinToString().length < 10 }
+                        .mapNotNull { chapter ->
+                            val book = books.find { book -> book.id == chapter.bookId }
+                            book?.let { b ->
+                                buildSavedDownload(b, chapter)
+                            }
                         }
-                    }.filterNotNull()
 
-                val downloadIds = downloadUseCases.insertDownloads(mappedChapters.map { it.toDownload() })
+                downloadUseCases.insertDownloads(downloads.map { it.toDownload() })
 
-                val downloads = mappedChapters // downloadUseCases.findDownloadsUseCase(downloadIds)
                 val builder = defaultNotificationHelper.baseNotificationDownloader(
                     chapter = null,
                     id
@@ -106,43 +121,44 @@ class DownloaderService @AssistedInject constructor(
                 downloadServiceState.isEnable = true
                 downloads.forEachIndexed { index, download ->
                     chapters.find { it.id == download.chapterId }?.let { chapter ->
-                        sources.find { it.sourceId ==  books.find { it.id == chapter.bookId }?.sourceId  }?.let { source ->
-                            if (chapter.content.joinToString().length < 10) {
-                                remoteUseCases.getRemoteReadingContent(
-                                    chapter = chapter,
-                                    catalog = source,
-                                    onSuccess = { content ->
-                                        withContext(Dispatchers.IO) {
-                                            insertUseCases.insertChapter(chapter = content)
-                                        }
-                                        builder.setContentText(chapter.name)
-                                        builder.setSubText(index.toString())
+                        sources.find { it.sourceId == books.find { it.id == chapter.bookId }?.sourceId }
+                            ?.let { source ->
+                                if (chapter.content.joinToString().length < 10) {
+                                    remoteUseCases.getRemoteReadingContent(
+                                        chapter = chapter,
+                                        catalog = source,
+                                        onSuccess = { content ->
+                                            withContext(Dispatchers.IO) {
+                                                insertUseCases.insertChapter(chapter = content)
+                                            }
+                                            builder.setContentText(chapter.name)
+                                            builder.setSubText(index.toString())
 
-                                        builder.setProgress(downloads.size, index, false)
-                                        notify(ID_DOWNLOAD_CHAPTER_PROGRESS, builder.build())
-                                        savedDownload = savedDownload.copy(
-                                            bookId = download.bookId,
-                                            priority = 1,
-                                            chapterName = chapter.name,
-                                            chapterKey = chapter.key,
-                                            translator = chapter.translator,
-                                            chapterId = chapter.id,
-                                            bookName = download.bookName,
-                                        )
-                                        withContext(Dispatchers.IO) {
-                                            downloadUseCases.insertDownload(
-                                                savedDownload.copy(
-                                                    priority = 1
-                                                ).toDownload()
+                                            builder.setProgress(downloads.size, index, false)
+                                            notify(ID_DOWNLOAD_CHAPTER_PROGRESS, builder.build())
+                                            savedDownload = savedDownload.copy(
+                                                bookId = download.bookId,
+                                                priority = 1,
+                                                chapterName = chapter.name,
+                                                chapterKey = chapter.key,
+                                                translator = chapter.translator,
+                                                chapterId = chapter.id,
+                                                bookName = download.bookName,
                                             )
+                                            withContext(Dispatchers.IO) {
+                                                downloadUseCases.insertDownload(
+                                                    savedDownload.copy(
+                                                        priority = 1
+                                                    ).toDownload()
+                                                )
+                                            }
+                                        },
+                                        onError = { message ->
+                                            throw Exception(message?.asString(context))
                                         }
-                                    },
-                                    onError = { message ->
-                                        throw Exception(message?.asString(context))
-                                    }
-                                )
+                                    )
+                                }
                             }
-                        }
                     }
                     Log.debug { "getNotifications: Successfully to downloaded ${savedDownload.bookName} chapter ${savedDownload.chapterName}" }
                     delay(1000)

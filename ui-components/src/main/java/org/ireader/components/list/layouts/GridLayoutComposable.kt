@@ -28,7 +28,6 @@ fun GridLayoutComposable(
     scrollState: androidx.compose.foundation.lazy.grid.LazyGridState,
     goToLatestChapter: (book: BookItem) -> Unit,
     isLoading: Boolean = false,
-    useDefaultImageLoader: Boolean = false,
     showGoToLastChapterBadge: Boolean = false,
     showUnreadBadge: Boolean = false,
     showReadBadge: Boolean = false,
@@ -53,7 +52,6 @@ fun GridLayoutComposable(
                         book = book,
                         ratio = 6f / 10f,
                         selected = book.id in selection,
-                        useDefaultImageLoader = useDefaultImageLoader,
                         onLongClick = { onLongClick(book) },
                     ) {
                         if (showGoToLastChapterBadge) {

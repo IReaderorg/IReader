@@ -133,35 +133,35 @@ object ChapterScreenSpec : ScreenSpec {
         val vm: ChapterDetailViewModel = hiltViewModel(   controller.navBackStackEntry)
         val book = vm.book
         ChapterDetailScreen(
-            onItemClick = { index ->
+            onItemClick = { chapter ->
                 if (vm.selection.isEmpty()) {
                     if (book != null) {
                         controller.navController.navigate(
                             ReaderScreenSpec.buildRoute(
                                 bookId = book.id,
                                 sourceId = book.sourceId,
-                                chapterId = vm.chapters[index].id,
+                                chapterId =chapter.id,
                             )
                         )
                     }
                 } else {
-                    when (vm.chapters[index].id) {
+                    when (chapter.id) {
                         in vm.selection -> {
-                            vm.selection.remove(vm.chapters[index].id)
+                            vm.selection.remove(chapter.id)
                         }
                         else -> {
-                            vm.selection.add(vm.chapters[index].id)
+                            vm.selection.add(chapter.id)
                         }
                     }
                 }
             },
-            onLongItemClick = { index ->
-                when (vm.chapters[index].id) {
+            onLongItemClick = { chapter ->
+                when (chapter.id) {
                     in vm.selection -> {
-                        vm.selection.remove(vm.chapters[index].id)
+                        vm.selection.remove(chapter.id)
                     }
                     else -> {
-                        vm.selection.add(vm.chapters[index].id)
+                        vm.selection.add(chapter.id)
                     }
                 }
             },

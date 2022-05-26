@@ -38,15 +38,15 @@ class DownloaderViewModel @Inject constructor(
     private fun subscribeDownloads() {
         getBooksJob?.cancel()
         getBooksJob = viewModelScope.launch {
-            downloadUseCases.subscribeDownloadsUseCase().distinctUntilChanged().collect {
-                downloads = it.filter { it.chapterId != 0L }
+            downloadUseCases.subscribeDownloadsUseCase().distinctUntilChanged().collect { list ->
+                downloads = list.filter { it.chapterId != 0L }
             }
         }
     }
 
     fun startDownloadService(chapterIds: List<Long>) {
         serviceUseCases.startDownloadServicesUseCase(
-            chapterIds = chapterIds.toLongArray()
+            downloadModes = true
         )
     }
 

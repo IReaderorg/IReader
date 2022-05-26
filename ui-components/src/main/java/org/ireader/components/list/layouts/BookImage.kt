@@ -37,7 +37,6 @@ fun BookImage(
     book: BaseBook,
     ratio: Float = 3f / 4f,
     selected: Boolean = false,
-    useDefaultImageLoader :Boolean = false,
     badge: @Composable BoxScope.() -> Unit,
 ) {
     Box(
@@ -63,7 +62,6 @@ fun BookImage(
                 .align(Alignment.Center),
             image = BookCover.from(book),
             showLoading = true,
-            useDefaultImageLoader = useDefaultImageLoader
         )
 
         Box(

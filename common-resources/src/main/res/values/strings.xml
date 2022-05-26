@@ -69,6 +69,7 @@
     <string name="check_the_update">"Check the Update"</string>
 
     <string name="appearance">Appearance</string>
+    <string name="updater_is_enable">Updater</string>
     <string name="night_mode">Night Mode</string>
     <string name="dark_mode">Dark Mode</string>
     <string name="off">Off</string>
@@ -253,6 +254,8 @@
     <string name="text_align_right">Text Align right</string>
     <string name="font_size">Font Size</string>
     <string name="font">Font</string>
+    <string name="page">Page</string>
+    <string name="continues">Continue</string>
     <string name="right">Right</string>
     <string name="left">Left</string>
     <string name="alignment">Alignment</string>

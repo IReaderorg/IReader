@@ -36,7 +36,7 @@ fun LinearBookItem(
     title: String,
     selected: Boolean = false,
     book: BookItem,
-    useDefaultImageLoader:Boolean = false
+
 ) {
 
     Box(
@@ -51,7 +51,6 @@ fun LinearBookItem(
         ) {
             BookImageComposable(
                 image = BookCover.from(book),
-                useDefaultImageLoader = useDefaultImageLoader,
                 modifier = modifier
                     .aspectRatio(3f / 4f)
                     .clip(RoundedCornerShape(4.dp))
@@ -84,7 +83,6 @@ fun LinearListDisplay(
     isLocal: Boolean,
     goToLatestChapter: (book: BookItem) -> Unit,
     isLoading: Boolean = false,
-    useDefaultImageLoader :Boolean = false,
     showGoToLastChapterBadge: Boolean = false,
     showUnreadBadge: Boolean = false,
     showReadBadge: Boolean = false,
@@ -104,7 +102,6 @@ fun LinearListDisplay(
                     onLongClick = { onClick(books[index]) },
                 ).animateItemPlacement(),
                 selected = books[index].id in selection,
-                useDefaultImageLoader = useDefaultImageLoader
             )
         }
         item {

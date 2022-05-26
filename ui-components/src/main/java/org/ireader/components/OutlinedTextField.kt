@@ -1,4 +1,4 @@
-package org.ireader.explore.webview
+package org.ireader.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row

@@ -3,6 +3,7 @@ package org.ireader.data.repository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapLatest
+import org.ireader.common_models.entities.History
 import org.ireader.common_models.entities.HistoryWithRelations
 import org.ireader.data.local.dao.HistoryDao
 
@@ -14,6 +15,10 @@ class HistoryRepositoryImpl constructor(private val historyDao: HistoryDao) :
 
     override suspend fun findHistoryByBookId(bookId: Long): org.ireader.common_models.entities.History? {
         return historyDao.findHistoryByBookId(bookId)
+    }
+
+    override fun subscribeHistoryByBookId(bookId: Long): Flow<History?> {
+        return historyDao.subscribeHistoryByBookId(bookId)
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)

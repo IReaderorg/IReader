@@ -46,11 +46,11 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
     }
 
     fun goToLastChapterBadges(): Preference<Boolean> {
-        return preferenceStore.getBoolean("last_chapter_badges", false)
+        return preferenceStore.getBoolean("last_chapter_badges", true)
     }
 
     fun downloadBadges(): Preference<Boolean> {
-        return preferenceStore.getBoolean("download_badges", false)
+        return preferenceStore.getBoolean("download_badges", true)
     }
 
     fun unreadBadges(): Preference<Boolean> {
@@ -66,7 +66,7 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
     }
 
     fun showCountInCategory(): Preference<Boolean> {
-        return preferenceStore.getBoolean("show_count_in_category", false)
+        return preferenceStore.getBoolean("show_count_in_category", true)
     }
 
     fun columnsInPortrait(): Preference<Int> {

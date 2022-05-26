@@ -1,4 +1,4 @@
-package org.ireader.image_loader.coil
+package org.ireader.image_loader.coil.image_loaders
 
 import coil.ImageLoader
 import coil.annotation.ExperimentalCoilApi
@@ -8,21 +8,11 @@ import coil.disk.DiskCache
 import coil.fetch.FetchResult
 import coil.fetch.Fetcher
 import coil.fetch.SourceResult
-import coil.key.Keyer
 import coil.network.HttpException
 import coil.request.Options
 import coil.request.Parameters
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.mergeHeaders
-import io.ktor.client.request.HttpRequestData
-import io.ktor.http.HttpHeaders
-import io.ktor.util.InternalAPI
-import kotlinx.coroutines.suspendCancellableCoroutine
-import okhttp3.Cache
 import okhttp3.CacheControl
 import okhttp3.Call
-import okhttp3.Callback
-import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.internal.closeQuietly
@@ -31,83 +21,52 @@ import okio.Source
 import okio.buffer
 import okio.sink
 import org.ireader.core_api.http.okhttp
-import org.ireader.core_api.log.Log
 import org.ireader.core_api.source.HttpSource
-import org.ireader.core_catalogs.interactor.GetLocalCatalog
+import org.ireader.core_catalogs.CatalogStore
 import org.ireader.image_loader.BookCover
-import org.ireader.image_loader.LibraryCovers
+import org.ireader.image_loader.coil.cache.CoverCache
+import org.ireader.image_loader.coil.image_loaders.BookCoverFetcher.Companion.USE_CUSTOM_COVER
 import java.io.File
-import java.io.IOException
 import java.net.HttpURLConnection
-import kotlin.coroutines.resumeWithException
 
-@OptIn(ExperimentalCoilApi::class)
-internal class LibraryMangaFetcherFactory(
-    private val defaultClient: OkHttpClient,
-    private val libraryCovers: LibraryCovers,
-    private val getLocalCatalog: GetLocalCatalog,
-    private val coilCache: Cache,
-    private val client: HttpClient,
-    val data: BookCover,
-) : Fetcher.Factory<BookCover> {
-    override fun create(data: BookCover, options: Options, imageLoader: ImageLoader): Fetcher {
-        return LibraryMangaFetcher(
-            data = data,
-            coilCache = coilCache,
-            defaultClient = defaultClient,
-            getLocalCatalog = getLocalCatalog,
-            libraryCovers = libraryCovers,
-            options = options,
-            client = client,
-            diskCache = imageLoader.diskCache
-        )
-    }
-}
-
-internal class LibraryMangaFetcherFactoryKeyer() : Keyer<BookCover> {
-    override fun key(data: BookCover, options: Options): String? {
-        return data.cover.takeIf { it.isNotBlank() }
-    }
-}
-
-internal class LibraryMangaFetcher(
-    private val defaultClient: OkHttpClient,
-    private val libraryCovers: LibraryCovers,
-    private val getLocalCatalog: GetLocalCatalog,
-    private val coilCache: Cache,
+/**
+ * A [Fetcher] that fetches cover image for [BookCover] object.
+ *
+ * It uses [BookCover.c] if custom cover is not set by the user.
+ * Disk caching for library items is handled by [CoverCache], otherwise
+ * handled by Coil's [DiskCache].
+ *
+ * Available request parameter:
+ * - [USE_CUSTOM_COVER]: Use custom cover if set by user, default is true
+ */
+class BookCoverFetcher(
+    private val manga: BookCover,
+    private val sourceLazy: Lazy<HttpSource?>,
     private val options: Options,
-    private val client: HttpClient,
-    private val diskCache: DiskCache?,
-    val data: BookCover,
+    private val coverCache: CoverCache,
+    private val callFactoryLazy: Lazy<Call.Factory>,
+    private val diskCacheLazy: Lazy<DiskCache>,
 ) : Fetcher {
-    private val diskCacheKey: String? by lazy {
-        LibraryMangaFetcherFactoryKeyer().key(
-            data,
-            options
-        )
-    }
+
+    // For non-custom cover
+    private val diskCacheKey: String? by lazy { BookCoverKeyer().key(manga, options) }
     private lateinit var url: String
-    private var source: org.ireader.core_api.source.Source? = null
 
     override suspend fun fetch(): FetchResult {
-        source = getLocalCatalog.get(data.sourceId)?.source
-        url = diskCacheKey ?: error("No Cover specified")
+        // Use custom cover if exists
+        val useCustomCover = options.parameters.value(USE_CUSTOM_COVER) ?: true
+        val customCoverFile = coverCache.getCustomCoverFile(manga)
+        if (useCustomCover && customCoverFile.exists()) {
+            return fileLoader(customCoverFile)
+        }
 
+        // diskCacheKey is thumbnail_url
+        url = diskCacheKey ?: error("No cover specified")
         return when (getResourceType(url)) {
             Type.URL -> httpLoader()
             Type.File -> fileLoader(File(url.substringAfter("file://")))
             null -> error("Invalid image")
         }
-    }
-
-
-    companion object {
-        const val USE_CUSTOM_COVER = "use_custom_cover"
-
-        private val CACHE_CONTROL_FORCE_NETWORK_NO_CACHE =
-            CacheControl.Builder().noCache().noStore().build()
-        private val CACHE_CONTROL_NO_NETWORK_NO_CACHE =
-            CacheControl.Builder().noCache().onlyIfCached().build()
     }
 
     private fun fileLoader(file: File): FetchResult {
@@ -118,18 +77,23 @@ internal class LibraryMangaFetcher(
         )
     }
 
+    @OptIn(ExperimentalCoilApi::class)
     private suspend fun httpLoader(): FetchResult {
-        val file = libraryCovers.find(data.id).toFile()
-        if (file.exists() && file.lastModified() != 0L) {
-            return fileLoader(file)
+        // Only cache separately if it's a library item
+        val libraryCoverCacheFile = if (manga.favorite) {
+            coverCache.getCoverFile(manga) ?: error("No cover specified")
+        } else {
+            null
         }
-
+        if (libraryCoverCacheFile?.exists() == true && options.diskCachePolicy.readEnabled) {
+            return fileLoader(libraryCoverCacheFile)
+        }
 
         var snapshot = readFromDiskCache()
         try {
             // Fetch from disk cache
             if (snapshot != null) {
-                val snapshotCoverCache = moveSnapshotToCoverCache(snapshot, file)
+                val snapshotCoverCache = moveSnapshotToCoverCache(snapshot, libraryCoverCacheFile)
                 if (snapshotCoverCache != null) {
                     // Read from cover cache after added to library
                     return fileLoader(snapshotCoverCache)
@@ -148,7 +112,7 @@ internal class LibraryMangaFetcher(
             val responseBody = checkNotNull(response.body) { "Null response source" }
             try {
                 // Read from cover cache after library manga cover updated
-                val responseCoverCache = writeResponseToCoverCache(response, file)
+                val responseCoverCache = writeResponseToCoverCache(response, libraryCoverCacheFile)
                 if (responseCoverCache != null) {
                     return fileLoader(responseCoverCache)
                 }
@@ -180,8 +144,7 @@ internal class LibraryMangaFetcher(
     }
 
     private suspend fun executeNetworkRequest(): Response {
-        val client =
-            (source as? HttpSource)?.getCoverRequest(data.cover)?.first?.okhttp ?: defaultClient
+        val client = sourceLazy.value?.client?.okhttp ?: callFactoryLazy.value
         val response = client.newCall(newRequest()).await()
         if (!response.isSuccessful && response.code != HttpURLConnection.HTTP_NOT_MODIFIED) {
             response.body?.closeQuietly()
@@ -191,13 +154,9 @@ internal class LibraryMangaFetcher(
     }
 
     private fun newRequest(): Request {
-
         val request = Request.Builder()
             .url(url)
-            .headers(
-                (source as? HttpSource)?.getCoverRequest(data.cover)?.second?.build()
-                    ?.convertToOkHttpRequest()?.headers ?: options.headers
-            )
+            .headers(sourceLazy.value?.getCoverRequest(url)?.second?.build()?.convertToOkHttpRequest()?.headers ?: options.headers)
             // Support attaching custom data to the network request.
             .tag(Parameters::class.java, options.parameters)
 
@@ -225,7 +184,7 @@ internal class LibraryMangaFetcher(
     private fun moveSnapshotToCoverCache(snapshot: DiskCache.Snapshot, cacheFile: File?): File? {
         if (cacheFile == null) return null
         return try {
-            diskCache?.run {
+            diskCacheLazy.value.run {
                 fileSystem.source(snapshot.data).use { input ->
                     writeSourceToCoverCache(input, cacheFile)
                 }
@@ -233,7 +192,7 @@ internal class LibraryMangaFetcher(
             }
             cacheFile.takeIf { it.exists() }
         } catch (e: Exception) {
-            Log.error { "Failed to write snapshot data to cover cache ${cacheFile.name}" }
+           org.ireader.core_api.log.Log.error { "Failed to write snapshot data to cover cache ${cacheFile.name}" }
             null
         }
     }
@@ -246,7 +205,7 @@ internal class LibraryMangaFetcher(
             }
             cacheFile.takeIf { it.exists() }
         } catch (e: Exception) {
-            Log.error { "Failed to write response data to cover cache ${cacheFile.name}" }
+            org.ireader.core_api.log.Log.error { "Failed to write response data to cover cache ${cacheFile.name}" }
             null
         }
     }
@@ -266,7 +225,7 @@ internal class LibraryMangaFetcher(
 
     @OptIn(ExperimentalCoilApi::class)
     private fun readFromDiskCache(): DiskCache.Snapshot? {
-        return if (options.diskCachePolicy.readEnabled) diskCache?.get(diskCacheKey!!) else null
+        return if (options.diskCachePolicy.readEnabled) diskCacheLazy.value[diskCacheKey!!] else null
     }
 
     @OptIn(ExperimentalCoilApi::class)
@@ -281,10 +240,10 @@ internal class LibraryMangaFetcher(
         val editor = if (snapshot != null) {
             snapshot.closeAndEdit()
         } else {
-            diskCache?.edit(diskCacheKey!!)
+            diskCacheLazy.value.edit(diskCacheKey!!)
         } ?: return null
         try {
-            diskCache?.fileSystem?.write(editor.data) {
+            diskCacheLazy.value.fileSystem.write(editor.data) {
                 response.body!!.source().readAll(this)
             }
             return editor.commitAndGet()
@@ -301,73 +260,38 @@ internal class LibraryMangaFetcher(
     private fun DiskCache.Snapshot.toImageSource(): ImageSource {
         return ImageSource(file = data, diskCacheKey = diskCacheKey, closeable = this)
     }
-}
 
-/**
- * Converts a ktor request to okhttp. Note that it does not support sending a request body. If we
- * ever need it we could use reflection to call this other method instead:
- * https://github.com/ktorio/ktor/blob/1.6.4/ktor-client/ktor-client-okhttp/jvm/src/io/ktor/client/engine/okhttp/OkHttpEngine.kt#L180
- */
-@OptIn(InternalAPI::class)
-private fun HttpRequestData.convertToOkHttpRequest(): Request {
-    val builder = Request.Builder()
-
-    with(builder) {
-        url(url.toString())
-        mergeHeaders(headers, body) { key, value ->
-            if (key == HttpHeaders.ContentLength) return@mergeHeaders
-            addHeader(key, value)
+    private fun getResourceType(cover: String?): Type? {
+        return when {
+            cover.isNullOrEmpty() -> null
+            cover.startsWith("http", true) || cover.startsWith("Custom-", true) -> Type.URL
+            cover.startsWith("/") || cover.startsWith("file://") -> Type.File
+            else -> null
         }
-
-        method(method.value, null)
     }
 
-    return builder.build()
-}
-
-private fun getResourceType(cover: String): Type? {
-    return when {
-        cover.isEmpty() -> null
-        cover.startsWith("http") || cover.startsWith("Custom-", true) -> Type.URL
-        cover.startsWith("/") || cover.startsWith("file://") -> Type.File
-        else -> null
+    private enum class Type {
+        File, URL
     }
-}
 
-enum class Type {
-    File, URL;
-}
+    class Factory(
+        private val callFactoryLazy: Lazy<Call.Factory>,
+        private val diskCacheLazy: Lazy<DiskCache>,
+        private val catalogStore: CatalogStore,
+        private val coverCache: CoverCache,
+    ) : Fetcher.Factory<BookCover> {
 
-// Based on https://github.com/gildor/kotlin-coroutines-okhttp
-suspend fun Call.await(): Response {
-    return suspendCancellableCoroutine { continuation ->
-        enqueue(
-            object : Callback {
-                override fun onResponse(call: Call, response: Response) {
-                    if (!response.isSuccessful) {
-                        continuation.resumeWithException(HttpException(response))
-                        return
-                    }
 
-                    continuation.resume(response) {
-                        response.body?.closeQuietly()
-                    }
-                }
-
-                override fun onFailure(call: Call, e: IOException) {
-                    // Don't bother with resuming the continuation if it is already cancelled.
-                    if (continuation.isCancelled) return
-                    continuation.resumeWithException(e)
-                }
-            },
-        )
-
-        continuation.invokeOnCancellation {
-            try {
-                cancel()
-            } catch (ex: Throwable) {
-                // Ignore cancel exception
-            }
+        override fun create(data: BookCover, options: Options, imageLoader: ImageLoader): Fetcher {
+            val source = lazy { catalogStore.get(data.sourceId)?.source as? HttpSource }
+            return BookCoverFetcher(data, source, options, coverCache, callFactoryLazy, diskCacheLazy)
         }
+    }
+
+    companion object {
+        const val USE_CUSTOM_COVER = "use_custom_cover"
+
+        private val CACHE_CONTROL_FORCE_NETWORK_NO_CACHE = CacheControl.Builder().noCache().noStore().build()
+        private val CACHE_CONTROL_NO_NETWORK_NO_CACHE = CacheControl.Builder().noCache().onlyIfCached().build()
     }
 }

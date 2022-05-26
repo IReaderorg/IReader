@@ -30,7 +30,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.ireader.bookDetails.viewmodel.ChapterState
 import org.ireader.bookDetails.viewmodel.DetailState
 import org.ireader.common_models.entities.Book
-import org.ireader.components.components.ShowLoading
 import org.ireader.core_ui.ui_components.CardTile
 import org.ireader.core_ui.ui_components.DotsFlashing
 
@@ -55,9 +54,6 @@ fun BookDetailScreen(
     val swipeRefreshState =
         rememberSwipeRefreshState(isRefreshing = detailState.detailIsLoading)
 
-    if (detailState.detailIsLoading) {
-        ShowLoading()
-    }
 
     SwipeRefresh(
         state = swipeRefreshState,

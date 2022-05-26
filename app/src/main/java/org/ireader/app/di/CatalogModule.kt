@@ -30,6 +30,7 @@ import org.ireader.data.catalog.AndroidCatalogLoader
 import org.ireader.data.catalog.CatalogGithubApi
 import org.ireader.image_loader.LibraryCovers
 import org.ireader.image_loader.coil.CoilLoaderFactory
+import org.ireader.image_loader.coil.cache.CoverCache
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
@@ -68,12 +69,15 @@ class CatalogModule {
         libraryCovers: LibraryCovers,
         client: HttpClients,
         getLocalCatalog: GetLocalCatalog,
+        catalogStore: CatalogStore
     ): CoilLoaderFactory {
         return CoilLoaderFactory(
             client = client,
             context = context,
             getLocalCatalog = getLocalCatalog,
             libraryCovers = libraryCovers,
+            coverCache = CoverCache(context),
+            catalogStore = catalogStore
         )
     }
 

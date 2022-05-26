@@ -17,12 +17,11 @@ fun BookImageComposable(
     contentScale: ContentScale = ContentScale.FillHeight,
     iconBadge: (@Composable () -> Unit)? = null,
     showLoading:Boolean = false,
-    useDefaultImageLoader :Boolean = false,
 ) {
         AsyncImage(
             modifier = modifier.fillMaxSize(),
             contentScale = contentScale,
-            model = if (useDefaultImageLoader) image.cover else image,
+            model = if (image.favorite) image else image.cover,
             contentDescription = "an image",
             alignment = alignment,
         )

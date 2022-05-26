@@ -50,8 +50,6 @@ class ReaderPreferences @OptIn(ExperimentalTextApi::class) constructor(
         const val SELECTABLE_TEXT = "selectable_text"
         const val TEXT_ALIGNMENT = "text_alignment"
 
-
-
         const val TEXT_READER_SPEECH_RATE = "text_reader_speech_rate"
         const val TEXT_READER_SPEECH_PITCH = "text_reader_speech_pitch"
         const val TEXT_READER_SPEECH_LANGUAGE = "text_reader_speech_language"
@@ -79,6 +77,7 @@ class ReaderPreferences @OptIn(ExperimentalTextApi::class) constructor(
     fun font(): Preference<FontType> {
         return preferenceStore.getString(SAVED_FONT_PREFERENCES, Roboto.fontName).asFont(provider)
     }
+
     fun backgroundColorReader(): Preference<Color> {
         return preferenceStore.getInt(SAVED_BACKGROUND_COLOR, Color(0xff262626).toArgb()).asColor()
     }
@@ -86,21 +85,27 @@ class ReaderPreferences @OptIn(ExperimentalTextApi::class) constructor(
     fun textColorReader(): Preference<Color> {
         return preferenceStore.getInt(SAVED_TEXT_COLOR, Color(0xFFE9E9E9).toArgb()).asColor()
     }
+
     fun unselectedScrollBarColor(): Preference<Color> {
-        return preferenceStore.getInt(SCROLL_INDICATOR_SELECTED_COLOR, Color(0xFF2A59B6).toArgb()).asColor()
+        return preferenceStore.getInt(SCROLL_INDICATOR_SELECTED_COLOR, Color(0xFF2A59B6).toArgb())
+            .asColor()
     }
+
     fun selectedScrollBarColor(): Preference<Color> {
-        return preferenceStore.getInt(SCROLL_INDICATOR_UNSELECTED_COLOR,  Color(0xFF5281CA).toArgb()).asColor()
+        return preferenceStore.getInt(SCROLL_INDICATOR_UNSELECTED_COLOR, Color(0xFF5281CA).toArgb())
+            .asColor()
     }
+
     fun scrollBarAlignment(): Preference<PreferenceAlignment> {
-        return preferenceStore.getEnum(SCROLL_INDICATOR_ALIGNMENT,PreferenceAlignment.Right )
+        return preferenceStore.getEnum(SCROLL_INDICATOR_ALIGNMENT, PreferenceAlignment.Right)
     }
 
     fun lineHeight(): Preference<Int> {
         return preferenceStore.getInt(SAVED_FONT_HEIGHT, 25)
     }
-    fun readingMode(): Preference<Boolean> {
-        return preferenceStore.getBoolean(READING_MODE, false)
+
+    fun readingMode(): Preference<ReadingMode> {
+        return preferenceStore.getEnum(READING_MODE, ReadingMode.Page)
     }
 
     fun paragraphDistance(): Preference<Int> {
@@ -114,13 +119,16 @@ class ReaderPreferences @OptIn(ExperimentalTextApi::class) constructor(
     fun sleepTime(): Preference<Long> {
         return preferenceStore.getLong(SLEEP_TIMER, 15)
     }
+
     fun sleepMode(): Preference<Boolean> {
         return preferenceStore.getBoolean(SLEEP_TIMER_MODE, false)
     }
 
-
     fun textAlign(): Preference<org.ireader.core_ui.ui.PreferenceAlignment> {
-        return preferenceStore.getEnum(TEXT_ALIGNMENT, org.ireader.core_ui.ui.PreferenceAlignment.Left)
+        return preferenceStore.getEnum(
+            TEXT_ALIGNMENT,
+            org.ireader.core_ui.ui.PreferenceAlignment.Left
+        )
     }
 
     fun paragraphIndent(): Preference<Int> {
@@ -134,6 +142,7 @@ class ReaderPreferences @OptIn(ExperimentalTextApi::class) constructor(
     fun showScrollIndicator(): Preference<Boolean> {
         return preferenceStore.getBoolean(SCROLL_INDICATOR_IS_ENABLE, true)
     }
+
     fun isScrollIndicatorDraggable(): Preference<Boolean> {
         return preferenceStore.getBoolean(SCROLL_INDICATOR_IS_DRAGGABLE, true)
     }
@@ -177,5 +186,20 @@ class ReaderPreferences @OptIn(ExperimentalTextApi::class) constructor(
     fun speechLanguage(): Preference<String> {
         return preferenceStore.getString(TEXT_READER_SPEECH_LANGUAGE, "")
     }
-
 }
+
+enum class ReadingMode {
+    Page,
+    Continues;
+
+    companion object {
+        fun valueOf(index: Int): ReadingMode {
+            return when (index) {
+                Page.ordinal -> Page
+                Continues.ordinal -> Continues
+                else -> throw IllegalArgumentException()
+            }
+        }
+    }
+}
+

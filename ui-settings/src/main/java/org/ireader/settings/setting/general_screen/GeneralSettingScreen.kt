@@ -24,8 +24,8 @@ fun GeneralSettingScreen(
     val items = remember {
         listOf<Components>(
             Components.Switch(
-                preference = vm.defaultImageLoader,
-                title = context.getString(R.string.use_default_image_loader)
+                preference = vm.appUpdater,
+                title = context.getString(R.string.updater_is_enable)
             ),
         )
     }
@@ -42,7 +42,7 @@ fun GeneralSettingScreen(
 @HiltViewModel
 class GeneralSettingScreenViewModel @Inject constructor(private val appPreferences: AppPreferences) : BaseViewModel() {
 
-    val defaultImageLoader = appPreferences.defaultImageLoader().asState()
+    val appUpdater = appPreferences.appUpdater().asState()
 
 
 

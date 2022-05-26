@@ -2,6 +2,7 @@ package org.ireader.data.local.dao
 
 import androidx.room.Dao
 import androidx.room.Query
+import org.ireader.common_models.entities.History
 import org.ireader.common_models.entities.HistoryWithRelations
 
 @Dao
@@ -12,6 +13,10 @@ interface HistoryDao : BaseDao<org.ireader.common_models.entities.History> {
 
     @Query("SELECT history.* FROM history GROUP  By history.chapterId HAVING bookId = :bookId  ORDER BY history.readAt DESC LIMIT 1")
     suspend fun findHistoryByBookId(bookId: Long): org.ireader.common_models.entities.History?
+
+
+    @Query("SELECT history.* FROM history GROUP  By history.chapterId HAVING bookId = :bookId  ORDER BY history.readAt DESC LIMIT 1")
+    fun subscribeHistoryByBookId(bookId: Long): kotlinx.coroutines.flow.Flow<History?>
 
     @Query("SELECT * FROM history")
     suspend fun findHistories(): List<org.ireader.common_models.entities.History>

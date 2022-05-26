@@ -15,7 +15,6 @@ interface LocalBookRepository {
     fun subscribeBookById(id: Long): Flow<Book?>
     suspend fun findBookById(id: Long): Book?
 
-    suspend fun findBookByIds(id: List<Long>): List<Book>
 
     suspend fun findAllInLibraryBooks(
         sortType: LibrarySort,
@@ -54,7 +53,7 @@ interface LocalBookRepository {
     suspend fun deleteAllExploreBook()
 
     suspend fun deleteBooks(book: List<Book>)
-    suspend fun deleteBookAndChapterByBookIds(bookIds: List<Long>)
+
     suspend fun insertBooksAndChapters(books: List<Book>, chapters: List<Chapter>)
 
     suspend fun deleteBookById(id: Long)

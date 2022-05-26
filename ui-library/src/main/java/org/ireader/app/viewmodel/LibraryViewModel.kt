@@ -122,7 +122,7 @@ class LibraryViewModel @Inject constructor(
 
     fun deleteBooks() {
         viewModelScope.launch(Dispatchers.IO) {
-            deleteUseCase.deleteBookAndChapterByBookIds(selectedBooks)
+            deleteUseCase.deleteBooks(books.filter { it.id in selectedBooks }.map { it.toBook() })
             selectedBooks.clear()
         }
     }

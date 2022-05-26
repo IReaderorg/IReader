@@ -1,8 +1,7 @@
-
-
 package org.ireader.common_models.entities
 
 import androidx.room.Entity
+import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 
 data class UpdateWithInfo(
@@ -33,8 +32,16 @@ data class UpdateWithInfo(
     }
 }
 
-@Entity(tableName = UPDATE_TABLE)
-
+@Entity(
+    tableName = UPDATE_TABLE,
+    foreignKeys = [
+        ForeignKey(
+            entity = Chapter::class,
+            parentColumns = arrayOf("id"),
+            childColumns = arrayOf("chapterId"),
+            onDelete = ForeignKey.CASCADE,
+        )],
+)
 data class Update(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,

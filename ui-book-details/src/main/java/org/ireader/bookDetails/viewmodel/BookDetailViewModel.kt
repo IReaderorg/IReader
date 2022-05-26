@@ -20,6 +20,7 @@ import org.ireader.core_api.source.CatalogSource
 import org.ireader.core_api.source.model.CommandList
 import org.ireader.core_catalogs.interactor.GetLocalCatalog
 import org.ireader.core_ui.viewmodel.BaseViewModel
+import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
@@ -37,6 +38,7 @@ class BookDetailViewModel @Inject constructor(
     private val getLocalCatalog: GetLocalCatalog,
     val state: DetailStateImpl,
     val chapterState: ChapterStateImpl,
+    val deleteUseCase: DeleteUseCase,
     private val serviceUseCases: ServiceUseCases,
 ) : BaseViewModel(), DetailState by state, ChapterState by chapterState {
 

@@ -25,7 +25,7 @@ import org.ireader.core.R
 import org.ireader.core_api.source.CatalogSource
 import org.ireader.core_api.source.findInstance
 import org.ireader.core_api.source.model.Command
-import org.ireader.explore.webview.CustomTextField
+import org.ireader.components.CustomTextField
 
 @Composable
 fun WebPageTopBar(

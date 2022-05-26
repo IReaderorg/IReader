@@ -1,20 +1,15 @@
 package org.ireader.explore.viewmodel
 
-import androidx.compose.runtime.getValue
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import org.ireader.common_models.DisplayMode
 import org.ireader.common_models.entities.RemoteKeys
 import org.ireader.common_models.entities.toBook
-import org.ireader.common_resources.UiEvent
 import org.ireader.common_resources.UiText
 import org.ireader.core.DefaultPaginator
 import org.ireader.core.exceptions.SourceNotFoundException
@@ -24,7 +19,6 @@ import org.ireader.core_api.source.model.MangasPageInfo
 import org.ireader.core_catalogs.CatalogStore
 import org.ireader.core_ui.exceptionHandler
 import org.ireader.core_ui.preferences.AppPreferences
-import org.ireader.core_ui.ui.asStateIn
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.preferences.reader_preferences.BrowseScreenPrefUseCase
@@ -44,7 +38,7 @@ class ExploreViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
 ) : BaseViewModel(), ExploreState by state {
 
-    val useDefaultImageLoader by appPreferences.defaultImageLoader().asState()
+
 
 
     init {

@@ -25,10 +25,7 @@ interface ChapterDao : BaseDao<org.ireader.common_models.entities.Chapter> {
     @Query("SELECT * FROM chapter")
     suspend fun findAllChapters(): List<org.ireader.common_models.entities.Chapter>
 
-    @Query("SELECT * FROM chapter WHERE id in (:chapterId)")
-    suspend fun findChapterByIdByBatch(
-        chapterId: List<Long>,
-    ): List<org.ireader.common_models.entities.Chapter>
+
 
     @Query(
         """
@@ -63,8 +60,6 @@ interface ChapterDao : BaseDao<org.ireader.common_models.entities.Chapter> {
         isAsc: Boolean
     ): List<org.ireader.common_models.entities.Chapter>
 
-    @Query("""SELECT * FROM chapter WHERE bookId in (:bookIds)""")
-    suspend fun findChaptersByBookIds(bookIds: List<Long>): List<org.ireader.common_models.entities.Chapter>
 
     @Query(
         """SELECT * FROM chapter WHERE `key`= :key

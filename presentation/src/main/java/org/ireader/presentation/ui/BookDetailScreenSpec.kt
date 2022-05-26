@@ -9,11 +9,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavDeepLink
 import androidx.navigation.navDeepLink
@@ -24,6 +26,7 @@ import org.ireader.bookDetails.components.BookDetailScreenBottomBar
 import org.ireader.bookDetails.components.ChapterCommandBottomSheet
 import org.ireader.bookDetails.viewmodel.BookDetailViewModel
 import org.ireader.common_extensions.async.viewModelIOCoroutine
+import org.ireader.common_extensions.findComponentActivity
 import org.ireader.common_extensions.getUrlWithoutDomain
 import org.ireader.common_resources.LAST_CHAPTER
 import org.ireader.common_resources.UiText
@@ -62,7 +65,7 @@ object BookDetailScreenSpec : ScreenSpec {
     override fun TopBar(
         controller: ScreenSpec.Controller
     ) {
-        val vm: BookDetailViewModel = hiltViewModel(   controller.navBackStackEntry)
+        val vm: BookDetailViewModel = hiltViewModel(controller.navBackStackEntry)
         val scope = rememberCoroutineScope()
         val source = vm.source
         val catalog = vm.catalogSource
@@ -106,7 +109,7 @@ object BookDetailScreenSpec : ScreenSpec {
     override fun BottomAppBar(
         controller: ScreenSpec.Controller
     ) {
-        val vm: BookDetailViewModel = hiltViewModel(   controller.navBackStackEntry)
+        val vm: BookDetailViewModel = hiltViewModel(controller.navBackStackEntry)
         val detailState = vm.state
         val chapterState = vm.chapterState
         val book = vm.book
@@ -169,7 +172,7 @@ object BookDetailScreenSpec : ScreenSpec {
     override fun BottomModalSheet(
         controller: ScreenSpec.Controller
     ) {
-        val vm: BookDetailViewModel = hiltViewModel(   controller.navBackStackEntry)
+        val vm: BookDetailViewModel = hiltViewModel(controller.navBackStackEntry)
         val detailState = vm.state
         val book = vm.book
         val catalog = vm.catalogSource
@@ -214,13 +217,25 @@ object BookDetailScreenSpec : ScreenSpec {
         controller: ScreenSpec.Controller
     ) {
 
-        val vm: BookDetailViewModel = hiltViewModel(   controller.navBackStackEntry)
+        val vm: BookDetailViewModel = hiltViewModel(controller.navBackStackEntry)
         val context = LocalContext.current
         val state = vm
         val book = state.book
         val source = state.catalogSource?.source
         val catalog = state.catalogSource
         val scope = rememberCoroutineScope()
+
+        DisposableEffect(controller.navBackStackEntry) {
+            onDispose {
+                context.findComponentActivity()?.lifecycleScope?.launch {
+                    if (vm.book?.favorite == false) {
+                        vm.book?.let {
+                            vm.deleteUseCase.deleteBookById(it.id)
+                        }
+                    }
+                }
+            }
+        }
 
         BookDetailScreen(
             modifier = Modifier.padding(bottom = controller.scaffoldPadding.calculateBottomPadding()),

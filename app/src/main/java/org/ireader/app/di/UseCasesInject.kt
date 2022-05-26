@@ -34,12 +34,10 @@ import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.local.SubscribeBooksByKey
 import org.ireader.domain.use_cases.local.book_usecases.FindAllInLibraryBooks
 import org.ireader.domain.use_cases.local.book_usecases.FindBookById
-import org.ireader.domain.use_cases.local.book_usecases.FindBookByIds
 import org.ireader.domain.use_cases.local.book_usecases.SubscribeBookById
 import org.ireader.domain.use_cases.local.book_usecases.SubscribeInLibraryBooks
 import org.ireader.domain.use_cases.local.chapter_usecases.FindAllInLibraryChapters
 import org.ireader.domain.use_cases.local.chapter_usecases.FindChapterById
-import org.ireader.domain.use_cases.local.chapter_usecases.FindChapterByIdByBatch
 import org.ireader.domain.use_cases.local.chapter_usecases.FindChapterByKey
 import org.ireader.domain.use_cases.local.chapter_usecases.FindChaptersByBookId
 import org.ireader.domain.use_cases.local.chapter_usecases.FindChaptersByKey
@@ -51,7 +49,6 @@ import org.ireader.domain.use_cases.local.chapter_usecases.SubscribeLastReadChap
 import org.ireader.domain.use_cases.local.chapter_usecases.UpdateLastReadTime
 import org.ireader.domain.use_cases.local.delete_usecases.book.DeleteAllBooks
 import org.ireader.domain.use_cases.local.delete_usecases.book.DeleteAllExploreBook
-import org.ireader.domain.use_cases.local.delete_usecases.book.DeleteBookAndChapterByBookIds
 import org.ireader.domain.use_cases.local.delete_usecases.book.DeleteBookById
 import org.ireader.domain.use_cases.local.delete_usecases.book.DeleteBooks
 import org.ireader.domain.use_cases.local.delete_usecases.chapter.DeleteAllChapters
@@ -153,7 +150,6 @@ class UseCasesInject {
         return LocalGetBookUseCases(
           findAllInLibraryBooks = FindAllInLibraryBooks(localBookRepository),
             findBookById = FindBookById(localBookRepository),
-            findBookByIds = FindBookByIds(localBookRepository),
             findBookByKey = FindBookByKey(localBookRepository),
             findBooksByKey = FindBooksByKey(localBookRepository),
             subscribeBookById = SubscribeBookById(localBookRepository),
@@ -173,7 +169,6 @@ class UseCasesInject {
         return LocalGetChapterUseCase(
             findAllInLibraryChapters = FindAllInLibraryChapters(localChapterRepository),
             findChapterById = FindChapterById(localChapterRepository),
-            findChapterByIdByBatch = FindChapterByIdByBatch(localChapterRepository),
             findChapterByKey = FindChapterByKey(localChapterRepository),
             findChaptersByBookId = FindChaptersByBookId(localChapterRepository),
             findChaptersByKey = FindChaptersByKey(localChapterRepository),
@@ -197,7 +192,6 @@ class UseCasesInject {
             deleteAllChapters = DeleteAllChapters(localChapterRepository),
             deleteAllExploreBook = DeleteAllExploreBook(localBookRepository),
             deleteAllRemoteKeys = DeleteAllRemoteKeys(remoteKeyRepository),
-            deleteBookAndChapterByBookIds = DeleteBookAndChapterByBookIds(localBookRepository),
             deleteBookById = DeleteBookById(localBookRepository),
             deleteBooks = DeleteBooks(localBookRepository),
             deleteChapterByChapter = DeleteChapterByChapter(localChapterRepository),

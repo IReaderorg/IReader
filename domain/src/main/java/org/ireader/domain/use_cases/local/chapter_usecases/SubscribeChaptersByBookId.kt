@@ -1,7 +1,6 @@
 package org.ireader.domain.use_cases.local.chapter_usecases
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import org.ireader.common_models.entities.Chapter
 import javax.inject.Inject
 
@@ -13,11 +12,8 @@ class SubscribeChaptersByBookId @Inject constructor(private val localChapterRepo
     operator fun invoke(
         bookId: Long,
         isAsc: Boolean = true,
-        query: String = "",
-    ): Flow<List<Chapter>> = flow {
-        localChapterRepository.subscribeChaptersByBookId(bookId = bookId, isAsc).collect { books ->
-            emit(books.filter { it.name.contains(query, ignoreCase = true) })
-        }
+    ): Flow<List<Chapter>>{
+        return localChapterRepository.subscribeChaptersByBookId(bookId = bookId, isAsc)
     }
 }
 

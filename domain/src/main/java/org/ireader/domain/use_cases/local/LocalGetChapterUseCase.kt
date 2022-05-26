@@ -2,7 +2,6 @@ package org.ireader.domain.use_cases.local
 
 import org.ireader.domain.use_cases.local.chapter_usecases.FindAllInLibraryChapters
 import org.ireader.domain.use_cases.local.chapter_usecases.FindChapterById
-import org.ireader.domain.use_cases.local.chapter_usecases.FindChapterByIdByBatch
 import org.ireader.domain.use_cases.local.chapter_usecases.FindChapterByKey
 import org.ireader.domain.use_cases.local.chapter_usecases.FindChaptersByBookId
 import org.ireader.domain.use_cases.local.chapter_usecases.FindChaptersByKey
@@ -16,7 +15,6 @@ import org.ireader.domain.use_cases.local.chapter_usecases.UpdateLastReadTime
 data class LocalGetChapterUseCase(
     val subscribeChapterById: SubscribeChapterById,
     val findChapterById: FindChapterById,
-    val findChapterByIdByBatch: FindChapterByIdByBatch,
     val findAllInLibraryChapters: FindAllInLibraryChapters,
     val subscribeChaptersByBookId: SubscribeChaptersByBookId,
     val findChaptersByBookId: FindChaptersByBookId,

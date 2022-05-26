@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.pager.ExperimentalPagerApi
 import dev.chrisbanes.snapper.ExperimentalSnapperApi
 import kotlinx.coroutines.launch
+import org.ireader.core_ui.preferences.ReadingMode
 import org.ireader.reader.components.MainBottomSettingComposable
 import org.ireader.reader.reverse_swip_refresh.SwipeRefreshState
 import org.ireader.reader.viewmodel.ReaderScreenViewModel
@@ -113,7 +114,7 @@ fun ReadingScreen(
     ) {
         Crossfade(
             modifier = Modifier.fillMaxSize(),
-            targetState = vm.isLoading && if (vm.readingMode.value)  vm.chapterShell.isEmpty() else true
+            targetState = vm.isLoading && if (vm.readingMode.value == ReadingMode.Continues)  vm.chapterShell.isEmpty() else true
         ) { isLoading ->
 
             when (isLoading) {

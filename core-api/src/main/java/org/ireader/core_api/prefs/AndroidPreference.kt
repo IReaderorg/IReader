@@ -51,8 +51,13 @@ internal sealed class AndroidPreference<K, T>(
      * Returns the current value of this preference.
      */
     override fun get(): T {
-        return runBlocking {
-            read(store.data.first(), key) ?: defaultValue
+        return kotlin.runCatching {
+            runBlocking {
+                read(store.data.first(), key) ?: defaultValue
+            }
+        }.getOrElse {
+            set(defaultValue)
+            defaultValue
         }
     }
 
@@ -60,7 +65,11 @@ internal sealed class AndroidPreference<K, T>(
      * Returns the current value of this preference.
      */
     override suspend fun read(): T {
-        return read(store.data.first(), key) ?: defaultValue
+        return kotlin.runCatching { read(store.data.first(), key) ?: defaultValue }
+            .getOrElse {
+                set(defaultValue)
+                defaultValue
+            }
     }
 
     /**

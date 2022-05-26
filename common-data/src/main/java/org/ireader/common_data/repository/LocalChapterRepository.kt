@@ -13,9 +13,6 @@ interface LocalChapterRepository {
         chapterId: Long,
     ): Chapter?
 
-    suspend fun findChapterByIdByBatch(
-        chapterId: List<Long>,
-    ): List<Chapter>
 
     suspend fun findAllChapters(): List<Chapter>
 
@@ -31,7 +28,7 @@ interface LocalChapterRepository {
         isAsc: Boolean = true,
     ): List<Chapter>
 
-    suspend fun findChaptersByBookIds(bookIds: List<Long>): List<Chapter>
+
 
     suspend fun findChaptersByKey(key: String): List<Chapter>
 

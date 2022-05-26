@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -34,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import org.ireader.components.list.scrollbars.LazyColumnScrollbar
+import org.ireader.core_ui.preferences.ReadingMode
 import org.ireader.core_ui.ui.PreferenceAlignment
 import org.ireader.core_ui.ui.mapTextAlign
 import org.ireader.core_ui.ui_components.isScrolledToTheEnd
@@ -118,14 +120,25 @@ fun ReaderText(
                 isDraggable = vm.isScrollIndicatorDraggable.value,
                 rightSide = vm.scrollIndicatorAlignment.value == PreferenceAlignment.Right
             ) {
-
                 LazyColumn(
                     modifier = modifier,
                     state = scrollState,
                 ) {
-                    when(vm.readingMode.value) {
-                        true -> {
-                            vm.chapterShell.forEach {  chapter ->
+                    item(
+                        key = {
+                            "start"
+                        }
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .height(50.dp)
+                                .background(MaterialTheme.colorScheme.contentColorFor(vm.backgroundColor.value))
+                        )
+                    }
+                    when (vm.readingMode.value) {
+                        ReadingMode.Continues -> {
+                            vm.chapterShell.forEach { chapter ->
                                 item(
                                     key = {
                                         "-${chapter.id}"
@@ -138,47 +151,56 @@ fun ReaderText(
                                             .background(MaterialTheme.colorScheme.contentColorFor(vm.backgroundColor.value))
                                     )
                                 }
-                                items(
-                                    chapter.content.size,
-                                    key = { index ->
-                                        "$index-${chapter.id}"
+                                item(
+                                    key = {
+                                        "-${chapter.id}"
                                     },
                                     contentType = {
                                         "text"
                                     },
-                                ) { index ->
-                                    TextSelectionContainer(selectable = vm.selectableMode.value) {
-                                        Text(
-                                            modifier = modifier
-                                                .fillMaxWidth()
-                                                .padding(horizontal = vm.paragraphsIndent.value.dp)
-                                                .background(
-                                                    if (index in vm.queriedTextIndex) vm.textColor.value.copy(
-                                                        .1f
-                                                    ) else Color.Transparent
-                                                ),
-                                            text = chapter.content[index].plus(
-                                                "\n".repeat(
-                                                    vm.distanceBetweenParagraphs.value
+                                ) {
+                                    if (chapter.content.isEmpty()) return@item
+                                    Column(modifier = Modifier.fillMaxSize()) {
+                                        chapter.content.forEachIndexed { index, text ->
+                                            TextSelectionContainer(selectable = vm.selectableMode.value) {
+                                                Text(
+                                                    modifier = modifier
+                                                        .fillMaxWidth()
+                                                        .padding(horizontal = vm.paragraphsIndent.value.dp)
+                                                        .background(
+                                                            if (index in vm.queriedTextIndex) vm.textColor.value.copy(
+                                                                .1f
+                                                            ) else Color.Transparent
+                                                        ),
+                                                    text = text.plus(
+                                                        "\n".repeat(
+                                                            vm.distanceBetweenParagraphs.value
+                                                        )
+                                                    ),
+                                                    fontSize = vm.fontSize.value.sp,
+                                                    fontFamily = vm.font.value.fontFamily,
+                                                    textAlign = mapTextAlign(vm.textAlignment.value),
+                                                    color = vm.textColor.value,
+                                                    lineHeight = vm.lineHeight.value.sp,
+                                                    //  style = MaterialTheme.typography.
                                                 )
-                                            ),
-                                            fontSize = vm.fontSize.value.sp,
-                                            fontFamily = vm.font.value.fontFamily,
-                                            textAlign = mapTextAlign(vm.textAlignment.value),
-                                            color = vm.textColor.value,
-                                            lineHeight = vm.lineHeight.value.sp,
-                                            //  style = MaterialTheme.typography.
-                                        )
+                                            }
+                                        }
                                     }
+
                                 }
                                 item() {
                                     Box(
                                         modifier = Modifier
                                             .fillMaxSize()
                                             .height(100.dp)
-                                            .background(MaterialTheme.colorScheme.contentColorFor(vm.backgroundColor.value)), contentAlignment = Alignment.Center
+                                            .background(MaterialTheme.colorScheme.contentColorFor(vm.backgroundColor.value)),
+                                        contentAlignment = Alignment.Center
                                     ) {
-                                        if (vm.isLoading && scrollState.layoutInfo.visibleItemsInfo.getOrNull(scrollState.layoutInfo.visibleItemsInfo.lastIndex-1)?.key.toString().contains(chapter.id.toString())) {
+                                        if (vm.isLoading && scrollState.layoutInfo.visibleItemsInfo.getOrNull(
+                                                scrollState.layoutInfo.visibleItemsInfo.lastIndex - 1
+                                            )?.key.toString().contains(chapter.id.toString())
+                                        ) {
                                             CircularProgressIndicator()
                                         }
                                     }
@@ -187,38 +209,54 @@ fun ReaderText(
                             }
                         }
                         else -> {
-                            items(vm.stateContent.size) { index ->
-                                TextSelectionContainer(selectable = vm.selectableMode.value) {
-                                    Text(
-                                        modifier = modifier
-                                            .fillMaxWidth()
-                                            .padding(horizontal = vm.paragraphsIndent.value.dp)
-                                            .background(
-                                                if (index in vm.queriedTextIndex) vm.textColor.value.copy(
-                                                    .1f
-                                                ) else Color.Transparent
-                                            ),
-                                        text = if (index == 0) "\n\n" + vm.stateContent[index].plus(
-                                            "\n".repeat(
-                                                vm.distanceBetweenParagraphs.value.toInt()
+                            item {
+                                if (vm.state.stateContent.isEmpty()) return@item
+                                Column(modifier = Modifier.fillMaxSize()) {
+                                    vm.stateContent.forEachIndexed { index, text ->
+                                        TextSelectionContainer(selectable = vm.selectableMode.value) {
+                                            Text(
+                                                modifier = modifier
+                                                    .fillMaxWidth()
+                                                    .padding(horizontal = vm.paragraphsIndent.value.dp)
+                                                    .background(
+                                                        if (index in vm.queriedTextIndex) vm.textColor.value.copy(
+                                                            .1f
+                                                        ) else Color.Transparent
+                                                    ),
+                                                text = text.plus(
+                                                    "\n".repeat(vm.distanceBetweenParagraphs.value)
+                                                ),
+                                                fontSize = vm.fontSize.value.sp,
+                                                fontFamily = vm.font.value.fontFamily,
+                                                textAlign = mapTextAlign(vm.textAlignment.value),
+                                                color = vm.textColor.value,
+                                                lineHeight = vm.lineHeight.value.sp,
+                                                //  style = MaterialTheme.typography.
                                             )
-                                        ) else vm.stateContent[index].plus(
-                                            "\n".repeat(vm.distanceBetweenParagraphs.value.toInt())
-                                        ),
-                                        fontSize = vm.fontSize.value.sp,
-                                        fontFamily = vm.font.value.fontFamily,
-                                        textAlign = mapTextAlign(vm.textAlignment.value),
-                                        color = vm.textColor.value,
-                                        lineHeight = vm.lineHeight.value.sp,
-                                        //  style = MaterialTheme.typography.
-                                    )
+                                        }
+
+                                    }
+
                                 }
+
                             }
                         }
                     }
-
+                    item(
+                        key = {
+                            "end"
+                        }
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .height(1.dp)
+                                .background(MaterialTheme.colorScheme.contentColorFor(vm.backgroundColor.value))
+                        )
+                    }
 
                 }
+
             }
         }
 

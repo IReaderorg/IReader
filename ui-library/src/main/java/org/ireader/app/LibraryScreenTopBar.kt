@@ -87,6 +87,8 @@ private fun RegularTopBar(
                     },
                     onConfirm = {
                         onSearch()
+                        vm.inSearchMode = false
+                        vm.searchQuery = null
                         keyboardController?.hide()
                         focusManager.clearFocus()
                     },
@@ -100,7 +102,7 @@ private fun RegularTopBar(
                    contentDescription = stringResource( R.string.close),
                     onClick = {
                         vm.inSearchMode = false
-                        vm.searchQuery = ""
+                        vm.searchQuery = null
                         onSearch()
                     },
                 )
@@ -136,12 +138,12 @@ private fun RegularTopBar(
         },
         navigationIcon = {
             if (vm.inSearchMode) {
-
                     AppIconButton(
                         imageVector = Icons.Default.ArrowBack,
                        contentDescription = stringResource( R.string.toggle_search_mode_off),
                         onClick = {
                             vm.inSearchMode = false
+                            vm.searchQuery = null
                         }
                     )
             } else null

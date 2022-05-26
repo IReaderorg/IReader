@@ -103,9 +103,13 @@ fun LazyColumnScrollbar(
 
     fun normalizedThumbSize() = listState.layoutInfo.let {
         if (it.totalItemsCount == 0) return@let 0f
-        val firstPartial = it.visibleItemsInfo.first().run { -offset.toFloat() / size.toFloat() }
-        val lastPartial = it.visibleItemsInfo.last()
-            .run { 1f - (it.viewportEndOffset - offset).toFloat() / size.toFloat() }
+        val firstPartial = it.visibleItemsInfo.firstOrNull()?.run { -offset.toFloat() / size.toFloat() }?:return@let 0f
+        if (firstPartial.isNaN()) return@let 0F
+        //if (firstPartial.isInfinite()) return@let 0F
+        val lastPartial = it.visibleItemsInfo.lastOrNull()
+            ?.run { 1f - (it.viewportEndOffset - offset).toFloat() / size.toFloat() }?:0f
+        if (lastPartial.isNaN()) return@let 0F
+        //if (lastPartial.isInfinite()) return@let 0F
         val realVisibleSize = it.visibleItemsInfo.size.toFloat() - firstPartial - lastPartial
         realVisibleSize / it.totalItemsCount.toFloat()
     }.coerceAtLeast(thumbMinHeight)
@@ -120,6 +124,7 @@ fun LazyColumnScrollbar(
         dragOffset = newOffset.coerceIn(0f, 1f)
 
         val exactIndex: Float = listState.layoutInfo.totalItemsCount.toFloat() * dragOffset
+        if (exactIndex.isNaN()) return
         val index: Int = floor(exactIndex).toInt()
         val remainder: Float = exactIndex - floor(exactIndex)
 

@@ -33,7 +33,6 @@ fun CompactGridLayoutComposable(
     isLocal: Boolean,
     goToLatestChapter: (book: BookItem) -> Unit,
     isLoading: Boolean = false,
-    useDefaultImageLoader :Boolean = false,
     showGoToLastChapterBadge: Boolean = false,
     showUnreadBadge: Boolean = false,
     showReadBadge: Boolean = false,
@@ -59,7 +58,6 @@ fun CompactGridLayoutComposable(
                         book = books[index],
                         ratio = 6f / 9f,
                         selected = books[index].id in selection,
-                        useDefaultImageLoader=useDefaultImageLoader,
                         onLongClick = { onLongClick(books[index]) },
                     ) {
                         if (showGoToLastChapterBadge) {

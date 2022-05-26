@@ -22,6 +22,7 @@ import org.ireader.common_resources.NO_VALUE
 import org.ireader.common_resources.UiText
 import org.ireader.core_catalogs.interactor.GetLocalCatalog
 import org.ireader.core_ui.preferences.ReaderPreferences
+import org.ireader.core_ui.preferences.ReadingMode
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.domain.use_cases.history.HistoryUseCase
@@ -172,7 +173,7 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
         getChapterJob = viewModelScope.launch {
             getChapterUseCase.subscribeChaptersByBookId(
                 bookId = bookId,
-                isAsc = prefState.isAsc, ""
+                isAsc = prefState.isAsc,
             )
                 .collect {
                     stateChapters = it
@@ -184,7 +185,7 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
     var getChapterJob: Job? = null
 
     fun nextChapter(): Chapter {
-        val chapter = if (readingMode.value) chapterShell.lastOrNull() else stateChapter
+        val chapter = if (readingMode.value == ReadingMode.Continues) chapterShell.lastOrNull() else stateChapter
         val index = stateChapters.indexOfFirst { it.id == chapter?.id }
         if (index != -1) {
             currentChapterIndex = index
@@ -195,7 +196,7 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
     }
 
     fun prevChapter(): Chapter {
-        val chapter = if (readingMode.value) chapterShell.getOrNull(0) else stateChapter
+        val chapter = if (readingMode.value == ReadingMode.Continues) chapterShell.getOrNull(0) else stateChapter
         val index = stateChapters.indexOfFirst { it.id == chapter?.id }
         if (index != -1) {
             currentChapterIndex = index
@@ -217,7 +218,7 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
             layoutParams.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
             activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
             window.attributes = layoutParams
-            if (readingMode.value) {
+            if (readingMode.value == ReadingMode.Continues) {
                 val key =
                     scrollState.layoutInfo.visibleItemsInfo.firstOrNull()?.key.toString().split("-")
                 val index = stateChapters.indexOfFirst { it.id == key.getOrNull(1)?.toLong() }
@@ -263,7 +264,7 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
     }
 
     suspend fun clearChapterShell(scrollState:LazyListState?,force:Boolean = false) {
-        if (readingMode.value || force) {
+        if (readingMode.value == ReadingMode.Continues || force) {
             scrollState?.scrollToItem(0, 0)
             chapterShell.clear()
         }

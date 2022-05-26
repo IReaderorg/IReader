@@ -7,7 +7,6 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,13 +17,10 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material3.Divider
-import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -37,8 +33,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
-import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavController
 import androidx.navigation.NavDeepLink
 import androidx.navigation.navDeepLink
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -49,6 +43,7 @@ import org.ireader.common_resources.UiEvent
 import org.ireader.common_resources.UiText
 import org.ireader.core.R
 import org.ireader.core_api.log.Log
+import org.ireader.core_ui.preferences.ReadingMode
 import org.ireader.core_ui.theme.Roboto
 import org.ireader.core_ui.theme.fonts
 import org.ireader.domain.ui.NavigationArgs
@@ -112,7 +107,7 @@ object ReaderScreenSpec : ScreenSpec {
     ) {
         val context = LocalContext.current
         val scope = rememberCoroutineScope()
-        val vm: ReaderScreenViewModel = hiltViewModel   (controller.navBackStackEntry)
+        val vm: ReaderScreenViewModel = hiltViewModel(controller.navBackStackEntry)
         val currentIndex = vm.currentChapterIndex
         val chapters = vm.stateChapters
         val chapter = vm.stateChapter
@@ -206,9 +201,11 @@ object ReaderScreenSpec : ScreenSpec {
 
         Scaffold() { padding ->
 
-            Box(modifier = Modifier
-                .padding(padding)
-                .systemBarsPadding()) {
+            Box(
+                modifier = Modifier
+                    .padding(padding)
+                    .systemBarsPadding()
+            ) {
                 ReadingScreen(
                     drawerState = controller.drawerState,
                     vm = vm,
@@ -225,7 +222,11 @@ object ReaderScreenSpec : ScreenSpec {
                                         vm.getLocalChapter(
                                             nextChapter.id,
                                         )
-
+                                    }
+                                    scope.launch {
+                                        if (vm.readingMode.value == ReadingMode.Page) {
+                                            scrollState.scrollToItem(0)
+                                        }
                                     }
                                 }
                             } catch (e: Throwable) {
@@ -250,11 +251,15 @@ object ReaderScreenSpec : ScreenSpec {
                                     if (reset) {
                                         vm.clearChapterShell(scrollState)
                                     }
+
                                     val ch = vm.getLocalChapter(
                                         prevChapter.id,
                                         false
                                     )
-                                    if (vm.readingMode.value) {
+                                    if (vm.readingMode.value == ReadingMode.Page && !reset) {
+                                        scrollState.scrollToItem(scrollState.layoutInfo.totalItemsCount)
+                                    }
+                                    if (vm.readingMode.value == ReadingMode.Continues) {
                                         scrollState.scrollToItem(ch?.content?.lastIndex ?: 0)
                                     }
                                 }
@@ -351,7 +356,7 @@ object ReaderScreenSpec : ScreenSpec {
     override fun ModalDrawer(
         controller: ScreenSpec.Controller
     ) {
-        val vm: ReaderScreenViewModel = hiltViewModel   (controller.navBackStackEntry)
+        val vm: ReaderScreenViewModel = hiltViewModel(controller.navBackStackEntry)
         val lazyListState = vm.drawerListState
         val chapter = vm.stateChapter
         val scope = rememberCoroutineScope()
@@ -407,7 +412,7 @@ object ReaderScreenSpec : ScreenSpec {
     override fun TopBar(
         controller: ScreenSpec.Controller
     ) {
-        val vm: ReaderScreenViewModel = hiltViewModel   (controller.navBackStackEntry)
+        val vm: ReaderScreenViewModel = hiltViewModel(controller.navBackStackEntry)
         val catalog = vm.catalog
         val book = vm.book
         val chapter = vm.stateChapter
@@ -466,7 +471,7 @@ object ReaderScreenSpec : ScreenSpec {
     override fun BottomModalSheet(
         controller: ScreenSpec.Controller
     ) {
-        val vm: ReaderScreenViewModel = hiltViewModel   (controller.navBackStackEntry)
+        val vm: ReaderScreenViewModel = hiltViewModel(controller.navBackStackEntry)
         val context = LocalContext.current
 
         LaunchedEffect(key1 = vm.immersiveMode.value) {

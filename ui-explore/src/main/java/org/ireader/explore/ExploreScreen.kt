@@ -187,7 +187,7 @@ fun ExploreScreen(
                             onBook(book)
                         },
                         isLoading = vm.isLoading,
-                        useDefaultImageLoader = vm.useDefaultImageLoader,
+
                         showInLibraryBadge = true,
                     )
                 }

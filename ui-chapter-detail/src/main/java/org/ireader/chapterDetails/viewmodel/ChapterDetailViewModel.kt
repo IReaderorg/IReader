@@ -1,10 +1,19 @@
 package org.ireader.chapterDetails.viewmodel
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.Chapter
@@ -12,6 +21,7 @@ import org.ireader.common_resources.UiText
 import org.ireader.core.R
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.ui.NavigationArgs
+import org.ireader.domain.use_cases.history.HistoryUseCase
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
@@ -27,6 +37,7 @@ class ChapterDetailViewModel @Inject constructor(
     private val getBookUseCases: org.ireader.domain.use_cases.local.LocalGetBookUseCases,
     private val state: ChapterDetailStateImpl,
     private val serviceUseCases: ServiceUseCases,
+    private val historyUseCase: HistoryUseCase,
 ) : BaseViewModel(), ChapterDetailState by state {
 
     init {
@@ -48,14 +59,16 @@ class ChapterDetailViewModel @Inject constructor(
             is ChapterDetailEvent.ToggleOrder -> {
                 this.chapters = this.chapters.reversed()
                 toggleAsc()
-                book?.let { getLocalChaptersByPaging(isAsc = isAsc) }
+                //book?.let { getLocalChaptersByPaging(isAsc = isAsc) }
             }
         }
     }
 
     fun getLastReadChapter(book: Book) {
         viewModelScope.launch {
-            lastRead = getChapterUseCase.findLastReadChapter(book.id)?.id
+            historyUseCase.subscribeHistoryByBookId(book.id).onEach {
+                lastRead = it?.chapterId
+            }.launchIn(viewModelScope)
         }
     }
 
@@ -68,6 +81,28 @@ class ChapterDetailViewModel @Inject constructor(
                 index
             }
         }
+    }
+    @Composable
+    fun getChapters(book: Book): State<List<Chapter>> {
+        val scope = rememberCoroutineScope()
+        val unfiltered = remember(book.id, isAsc) {
+            getChapterUseCase.subscribeChaptersByBookId(
+                bookId = book.id,
+                isAsc = isAsc,
+            ).shareIn(scope, SharingStarted.WhileSubscribed(1000), 1)
+        }
+
+        return remember( state.query,book.id,isAsc) {
+            val query = state.query
+            if (query.isNullOrBlank()) {
+                unfiltered
+            } else {
+                unfiltered.map { mangas ->
+                    mangas.filter { it.name.contains(query, true) }
+                }
+            }
+                .onEach { state.chapters = it }
+        }.collectAsState(emptyList())
     }
 
     fun autoSortChapterInDB() {
@@ -91,7 +126,7 @@ class ChapterDetailViewModel @Inject constructor(
 
     fun reverseChapterInDB() {
         toggleAsc()
-       // book?.let { getLocalChaptersByPaging(isAsc = isAsc) }
+        // book?.let { getLocalChaptersByPaging(isAsc = isAsc) }
         viewModelScope.launch(Dispatchers.IO) {
             deleteUseCase.deleteChapters(chapters)
             insertUseCases.insertChapters(chapters.reversed().map { it.copy(id = 0) })
@@ -107,44 +142,28 @@ class ChapterDetailViewModel @Inject constructor(
             val book = getBookUseCases.findBookById(id = id)
             if (book != null) {
                 this@ChapterDetailViewModel.book = book
-                getLocalChaptersByPaging(isAsc = isAsc)
                 getLastReadChapter(book)
+                //getLocalChaptersByPaging(isAsc = isAsc)
             }
         }
     }
 
-    private
-    var getChapterJob: Job? = null
-    fun getLocalChaptersByPaging(isAsc: Boolean = true) {
-        val book = state.book
-        getChapterJob?.cancel()
-        getChapterJob = viewModelScope.launch {
-            if (book != null) {
-//                getChapterUseCase.getLocalChaptersByPaging(
+//    private
+//    var getChapterJob: Job? = null
+//    fun getLocalChaptersByPaging(isAsc: Boolean = true) {
+//        val book = state.book
+//        getChapterJob?.cancel()
+//        getChapterJob = viewModelScope.launch {
+//            if (book != null) {
+//                getChapterUseCase.subscribeChaptersByBookId(
 //                    bookId = book.id,
 //                    isAsc = isAsc,
-//                    query = query
-//                )
-//                    .cachedIn(viewModelScope)
-//                    .collect { snapshot ->
-//                        _chapters.value = snapshot
-//                    }
-                getChapterUseCase.subscribeChaptersByBookId(
-                    bookId = book.id,
-                    isAsc = isAsc,
-                    query = query
-                ).collect { chapters ->
-                    this@ChapterDetailViewModel.chapters = chapters.distinctBy { it.id }
-                }
-            }
-        }
-    }
-
-    fun insertBook(book: Book) {
-        viewModelScope.launch(Dispatchers.IO) {
-            insertUseCases.insertBook(book)
-        }
-    }
+//                ).collect { chapters ->
+//                    this@ChapterDetailViewModel.chapters = chapters.distinctBy { it.id }
+//                }
+//            }
+//        }
+//    }
 
     fun insertChapters(chapters: List<Chapter>) {
         viewModelScope.launch(Dispatchers.IO) {
