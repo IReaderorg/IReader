@@ -4,15 +4,15 @@
     "type": "APK",
     "kind": "Directory"
   },
-  "applicationId": "ir.kazemcodes.infinityreader",
+  "applicationId": "ir.kazemcodes.infinityreader.debug",
   "variantName": "debug",
   "elements": [
     {
       "type": "SINGLE",
       "filters": [],
       "attributes": [],
-      "versionCode": 26,
-      "versionName": "0.1.19 v4",
+      "versionCode": 29,
+      "versionName": "0.1.22-374",
       "outputFile": "app-debug.apk"
     }
   ],

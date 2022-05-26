@@ -105,7 +105,6 @@ import org.ireader.domain.use_cases.updates.DeleteAllUpdates
 import org.ireader.domain.use_cases.updates.DeleteUpdates
 import org.ireader.domain.use_cases.updates.SubscribeUpdates
 import org.ireader.domain.use_cases.updates.UpdateUseCases
-import org.ireader.image_loader.LibraryCovers
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
@@ -116,10 +115,9 @@ class UseCasesInject {
     @Provides
     @Singleton
     fun provideRemoteUseCase(
-       libraryCovers: LibraryCovers,
     ): RemoteUseCases {
         return RemoteUseCases(
-            getBookDetail = GetBookDetail(libraryCovers),
+            getBookDetail = GetBookDetail(),
             getRemoteBooks = GetRemoteBooksUseCase(),
             getRemoteChapters = GetRemoteChapters(),
             getRemoteReadingContent = GetRemoteReadingContent(),

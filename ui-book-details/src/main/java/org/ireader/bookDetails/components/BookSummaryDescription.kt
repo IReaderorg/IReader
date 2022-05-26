@@ -5,12 +5,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ExpandLess
 import androidx.compose.material.icons.outlined.ExpandMore
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -60,7 +59,7 @@ fun BookSummaryDescription(
             }
         },
         content = {
-            Text(
+            androidx.compose.material3.Text(
                 text = description,
                 modifier = Modifier
                     .padding(horizontal = 0.dp, vertical = 4.dp)
@@ -73,7 +72,7 @@ fun BookSummaryDescription(
                 },
                 color = MaterialTheme.colorScheme.onSurface,
                 style = MaterialTheme.typography.bodyMedium,
-                lineHeight = 18.sp
+                lineHeight = 22.sp
             )
             if (isExpandable == true) {
                 if (!isExpanded) {

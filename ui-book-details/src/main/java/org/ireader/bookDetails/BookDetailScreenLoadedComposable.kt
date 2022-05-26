@@ -67,10 +67,12 @@ fun BookDetailScreenLoadedComposable(
         Box {
 
             AsyncImage(
-                model = BookCover.from(book),
+                model = book.cover,
                 contentDescription = null,
                 onSuccess = {
-                    imageLoaded = true
+                    if (!imageLoaded) {
+                        imageLoaded = true
+                    }
                 },
                 alignment = Alignment.TopCenter,
                 modifier = Modifier
@@ -128,7 +130,7 @@ fun BookDetailScreenLoadedComposable(
                             onLongClick = { context.copyToClipboard(book.title, book.title) }
                         ),
                         text = book.title,
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground,
                         overflow = TextOverflow.Ellipsis

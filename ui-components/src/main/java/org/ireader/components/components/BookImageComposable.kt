@@ -21,7 +21,7 @@ fun BookImageComposable(
         AsyncImage(
             modifier = modifier.fillMaxSize(),
             contentScale = contentScale,
-            model = if (image.favorite) image else image.cover,
+            model = image.cover,
             contentDescription = "an image",
             alignment = alignment,
         )

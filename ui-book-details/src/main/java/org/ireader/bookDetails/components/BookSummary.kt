@@ -10,7 +10,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -39,10 +38,10 @@ fun BookSummary(
         else -> Modifier
     }
     Column(modifier = modifier) {
-        Text(
+        androidx.compose.material3.Text(
             text = "Synopsis", fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface,
-            style = MaterialTheme.typography.bodyLarge,
+            style = MaterialTheme.typography.titleSmall,
         )
         BookSummaryDescription(
             description,

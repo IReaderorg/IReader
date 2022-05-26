@@ -6,7 +6,6 @@ import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -51,14 +50,7 @@ object BackupAndRestoreScreenSpec : ScreenSpec {
     }
 
 
-    private val json = Json(Json) {
-        ignoreUnknownKeys = true
-    }
 
-    @OptIn(
-        ExperimentalAnimationApi::class,
-        ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class
-    )
     @Composable
     override fun Content(
         controller: ScreenSpec.Controller
@@ -120,7 +112,7 @@ object BackupAndRestoreScreenSpec : ScreenSpec {
                                     val txt = stream.readBytes().decodeToString()
                                     kotlin.runCatching {
                                         vm.insertBackup(
-                                            json.decodeFromString<List<BackUpBook>>(
+                                            Json.decodeFromString<List<BackUpBook>>(
                                                 txt
                                             )
                                         )

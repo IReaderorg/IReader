@@ -10,6 +10,7 @@ import androidx.room.PrimaryKey
 data class RemoteKeys(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
+    val bookId:Long = 0,
     val title: String,
     val sourceId: Long,
     val prevPage: Int?,

@@ -45,6 +45,7 @@ class DownloaderViewModel @Inject constructor(
     }
 
     fun startDownloadService(chapterIds: List<Long>) {
+        if (downloads.isEmpty()) return
         serviceUseCases.startDownloadServicesUseCase(
             downloadModes = true
         )

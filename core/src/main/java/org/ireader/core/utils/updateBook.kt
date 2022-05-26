@@ -1,25 +1,18 @@
-
-
 package org.ireader.core.utils
 
 import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.takeIf
-import org.ireader.image_loader.LibraryCovers
 import java.net.URI
 import java.net.URISyntaxException
 import java.util.Calendar
 
-fun updateBook(newBook: Book, oldBook: Book, libraryCovers: LibraryCovers): Book {
-    if (newBook.cover.isNotBlank() && newBook.cover != oldBook.cover) {
-        libraryCovers.invalidate(oldBook.id)
-    }
-
+fun updateBook(newBook: Book, oldBook: Book): Book {
     return Book(
         id = oldBook.id,
         sourceId = oldBook.sourceId,
         customCover = oldBook.customCover,
         flags = oldBook.flags,
-        key = if(newBook.key == getUrlWithoutDomain(oldBook.key)) oldBook.key else newBook.key.ifBlank { oldBook.key },
+        key = newBook.key.ifBlank { oldBook.key },
         dataAdded = oldBook.dataAdded,
         lastUpdate = Calendar.getInstance().timeInMillis,
         favorite = oldBook.favorite,

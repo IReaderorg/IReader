@@ -12,11 +12,9 @@ import org.ireader.core.utils.updateBook
 import org.ireader.core_api.log.Log
 import org.ireader.core_api.source.model.CommandList
 import org.ireader.core_ui.exceptionHandler
-import org.ireader.image_loader.LibraryCovers
 import javax.inject.Inject
 
 class GetBookDetail @Inject constructor(
-    val libraryCovers: LibraryCovers,
 ) {
     suspend operator fun invoke(
         book: Book,
@@ -36,8 +34,7 @@ class GetBookDetail @Inject constructor(
                     onSuccess(
                         updateBook(
                             bookDetail.toBook(catalog.sourceId),
-                            book,
-                            libraryCovers
+                            book
                         )
                     )
                 } catch (e: CancellationException) {

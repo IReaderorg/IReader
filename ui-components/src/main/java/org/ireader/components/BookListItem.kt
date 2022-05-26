@@ -41,7 +41,7 @@ fun BookListItemImage(
     mangaCover: BookCover,
 ) {
     AsyncImage(
-        model = mangaCover,
+        model = mangaCover.cover,
         contentDescription = null,
         modifier = modifier,
         contentScale = ContentScale.Crop
