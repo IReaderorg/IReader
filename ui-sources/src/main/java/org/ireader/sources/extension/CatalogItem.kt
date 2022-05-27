@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material3.CircularProgressIndicator
@@ -52,6 +53,8 @@ fun CatalogItem(
     onInstall: (() -> Unit)? = null,
     onUninstall: (() -> Unit)? = null,
     onPinToggle: (() -> Unit)? = null,
+    onCancelInstaller:((Catalog) -> Unit)? = null,
+    showLoading:Boolean = false,
 ) {
     val title = buildAnnotatedString {
         append("${catalog.name} ")
@@ -100,7 +103,9 @@ fun CatalogItem(
                 onPinToggle = onPinToggle,
                 modifier = Modifier
                     .layoutId("icons")
-                    .padding(end = 4.dp)
+                    .padding(end = 4.dp),
+                onCancelInstaller = onCancelInstaller,
+                showLoading = showLoading
             )
         },
         measurePolicy = { measurables, fullConstraints ->
@@ -172,17 +177,27 @@ private fun CatalogButtons(
     onInstall: (() -> Unit)?,
     onUninstall: (() -> Unit)?,
     onPinToggle: (() -> Unit)?,
+    onCancelInstaller:((Catalog) -> Unit)?,
     modifier: Modifier = Modifier,
+    showLoading:Boolean =false,
 ) {
     Row(modifier = modifier) {
         CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
             // Show either progress indicator or install button
             if (installStep != null && !installStep.isFinished()) {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .padding(12.dp)
-                )
+                Box {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .padding(12.dp)
+                    )
+                    AppIconButton(imageVector = Icons.Default.Close, onClick = {
+                        if (onCancelInstaller != null) {
+                            onCancelInstaller(catalog)
+                        }
+                    })
+                }
+
             } else if (onInstall != null) {
                 if (catalog is CatalogLocal) {
                     MidSizeTextComposable(

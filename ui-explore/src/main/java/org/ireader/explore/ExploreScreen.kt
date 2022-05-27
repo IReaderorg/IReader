@@ -19,7 +19,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.ModalBottomSheetState
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Public
@@ -214,14 +213,14 @@ private fun BoxScope.ExploreScreenErrorComposable(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
 
-        Text(
+        androidx.compose.material3.Text(
             text = kaomoji,
             style = MaterialTheme.typography.bodyMedium.copy(
                 color = LocalContentColor.current.copy(alpha = ContentAlpha.medium()),
                 fontSize = 48.sp
             ),
         )
-        Text(
+        androidx.compose.material3.Text(
             text = error,
             style = MaterialTheme.typography.bodyMedium.copy(
                 color = LocalContentColor.current.copy(alpha = androidx.compose.material.ContentAlpha.medium)

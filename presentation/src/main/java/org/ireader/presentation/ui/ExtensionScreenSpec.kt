@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
+import kotlinx.coroutines.Job
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.presentation.R
 import org.ireader.sources.extension.ExtensionScreen
@@ -35,7 +36,7 @@ object ExtensionScreenSpec : BottomNavScreenSpec {
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun TopBar(
-                controller: ScreenSpec.Controller
+        controller: ScreenSpec.Controller
     ) {
         val vm: ExtensionViewModel = hiltViewModel(controller.navBackStackEntry)
         var searchMode by remember {
@@ -82,7 +83,7 @@ object ExtensionScreenSpec : BottomNavScreenSpec {
     override fun Content(
         controller: ScreenSpec.Controller
     ) {
-        val vm: ExtensionViewModel = hiltViewModel(   controller.navBackStackEntry)
+        val vm: ExtensionViewModel = hiltViewModel(controller.navBackStackEntry)
 
         ExtensionScreen(
             modifier = Modifier.padding(controller.scaffoldPadding),
@@ -101,7 +102,12 @@ object ExtensionScreenSpec : BottomNavScreenSpec {
             onClickInstall = { vm.installCatalog(it) },
             onClickTogglePinned = { vm.togglePinnedCatalog(it) },
             onClickUninstall = { vm.uninstallCatalog(it) },
-            snackBarHostState = controller.snackBarHostState
+            snackBarHostState = controller.snackBarHostState,
+            onCancelInstaller = {
+                vm.installerJobs.getOrElse(it.sourceId) { Job() }.cancel()
+                vm.installerJobs.remove(it.sourceId)
+
+            }
         )
     }
 }

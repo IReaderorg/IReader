@@ -113,6 +113,7 @@
     <string name="download">Download</string>
     <string name="bookmark">Bookmark</string>
     <string name="success">Success</string>
+    <string name="aborted">Success</string>
     <string name="downloading">Downloading</string>
     <string name="installing">Installing</string>
     <string name="complete">Complete</string>
@@ -275,7 +276,7 @@
     <string name="show_scrollbar">Show Scrollbar</string>
     <string name="show_category_tabs">Show Category Tabs</string>
     <string name="unread_chapters">Unread chapters</string>
-    <string name="go_to_last_chapter">Go to last chapter chapters</string>
+    <string name="go_to_last_chapter">Go to last chapter</string>
     <string name="read_chapters">read chapters</string>
     <string name="show_all_category_tab">Show "All" Category Tab</string>
     <string name="show_count_in_category_tab">Show Count in Category Tab</string>

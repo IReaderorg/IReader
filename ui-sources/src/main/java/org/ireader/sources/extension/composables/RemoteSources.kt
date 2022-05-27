@@ -20,17 +20,18 @@ import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.common_models.entities.CatalogRemote
 import org.ireader.common_models.entities.key
 import org.ireader.sources.extension.CatalogItem
-import org.ireader.sources.extension.CatalogsState
+import org.ireader.sources.extension.ExtensionViewModel
 import org.ireader.sources.extension.SourceHeader
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun RemoteSourcesScreen(
     modifier: Modifier = Modifier,
-    state: CatalogsState,
+    state: ExtensionViewModel,
     onRefreshCatalogs: () -> Unit,
     onClickInstall: (Catalog) -> Unit,
     onClickUninstall: (Catalog) -> Unit,
+    onCancelInstaller: ((Catalog) -> Unit)? = null,
 ) {
     val scrollState = rememberLazyListState()
     val swipeState = rememberSwipeRefreshState(isRefreshing = state.isRefreshing)
@@ -85,68 +86,27 @@ fun RemoteSourcesScreen(
                                 installStep = if (catalog.source is CatalogInstalled) state.installSteps[catalog.source.pkgName] else null,
                                 onInstall = { onClickInstall(catalog.source) }.takeIf { catalog.source.hasUpdate },
                                 onUninstall = { onClickUninstall(catalog.source) }.takeIf { catalog.source is CatalogInstalled },
+                                onCancelInstaller = {
+                                    if (onCancelInstaller != null) {
+                                        onCancelInstaller(it)
+                                    }
+                                },
+                                showLoading = true
                             )
-                        }else if (catalog.source is CatalogRemote) {
+                        } else if (catalog.source is CatalogRemote) {
                             CatalogItem(
-                            catalog = catalog.source,
-                            installStep = state.installSteps[catalog.source.pkgName],
-                            onInstall = { onClickInstall(catalog.source) }
-                        )
+                                catalog = catalog.source,
+                                installStep = if (catalog.source is CatalogInstalled) state.installSteps[catalog.source.pkgName] else null,
+                                onInstall = { onClickInstall(catalog.source) },
+                                onCancelInstaller = onCancelInstaller,
+                                showLoading = true
+
+                            )
                         }
                     }
 
                 }
             }
         }
-
-//        LazyColumn(
-//            modifier = modifier
-//                .fillMaxSize(),
-//            state = scrollState,
-//            verticalArrangement = Arrangement.Top,
-//            horizontalAlignment = Alignment.CenterHorizontally
-//        ) {
-//            if (allCatalogs.isNotEmpty()) {
-//                item {
-//                    TextSection(
-//                        text = UiText.StringResource(R.string.installed),
-//                    )
-//                }
-//                items(allCatalogs.size) { index ->
-//                    val catalog = allCatalogs[index]
-//                    CatalogItem(
-//                        catalog = catalog,
-//                        installStep = if (catalog is CatalogInstalled) state.installSteps[catalog.pkgName] else null,
-//                        onInstall = { onClickInstall(catalog) }.takeIf { catalog.hasUpdate },
-//                        onUninstall = { onClickUninstall(catalog) }.takeIf { catalog is CatalogInstalled },
-//                    )
-//                }
-//            }
-//            if (state.remoteCatalogs.isNotEmpty()) {
-//                item {
-//                    TextSection(
-//                        text = UiText.StringResource(R.string.available),
-//                    )
-//                }
-//
-//                item {
-//                    LanguageChipGroup(
-//                        choices = state.languageChoices,
-//                        selected = state.selectedLanguage,
-//                        onClick = { state.selectedLanguage = it },
-//                        modifier = Modifier.padding(8.dp)
-//                    )
-//                }
-//
-//                    items(state.remoteCatalogs.size) { index ->
-//                        val catalog = state.remoteCatalogs[index]
-//                        CatalogItem(
-//                            catalog = catalog,
-//                            installStep = state.installSteps[catalog.pkgName],
-//                            onInstall = { onClickInstall(catalog) }
-//                        )
-//                    }
-//            }
-//        }
     }
 }

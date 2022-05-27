@@ -61,7 +61,8 @@ fun UserSourcesScreen(
                     catalog = catalog.source,
                     installStep = if (catalog.source is CatalogInstalled) state.installSteps[catalog.source.pkgName] else null,
                     onClick = { onClickCatalog(catalog.source) },
-                    onPinToggle = {  onClickTogglePinned(catalog.source) })
+                    onPinToggle = {  onClickTogglePinned(catalog.source) },
+                )
 
             }
         }

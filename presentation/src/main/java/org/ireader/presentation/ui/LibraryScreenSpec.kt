@@ -159,6 +159,9 @@ object LibraryScreenSpec : BottomNavScreenSpec {
                     vm.getCategory.deleteBookCategory(vm.deleteQueues)
                     vm.deleteQueues.clear()
                     vm.addQueues.clear()
+                    vm.selectedBooks.clear()
+                    vm.addQueues.clear()
+                    vm.deleteQueues.clear()
                 }
                 vm.showDialog = false
             },

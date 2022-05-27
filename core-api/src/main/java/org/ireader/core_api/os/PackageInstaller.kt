@@ -89,6 +89,7 @@ class PackageInstaller(
             intent ?: return
             val status = intent
                 .getIntExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_FAILURE)
+            Log.error { "Package Installer received ${intent.toString()}" }
 
             when (status) {
                 PackageInstaller.STATUS_PENDING_USER_ACTION -> {
@@ -141,7 +142,7 @@ class PackageInstaller(
                         "Package installer failed to install packages",
                         status.toString()
                     )
-                    deferred.complete(InstallStep.Error(UiText.DynamicString(context.string(R.string.package_installer_failed_to_install_packages)  + " $status")))
+                    deferred.complete(InstallStep.Error(UiText.DynamicString(context.string(R.string.package_installer_failed_to_install_packages) + " $status")))
                 }
             }
         }
@@ -150,15 +151,18 @@ class PackageInstaller(
 
 private const val INSTALL_ACTION = "PackageInstallerInstaller.INSTALL_ACTION"
 
-sealed class InstallStep(val name: UiText,error: UiText? = null) {
+sealed class InstallStep(val name: UiText, error: UiText? = null) {
     object Success : InstallStep(UiText.StringResource(R.string.success), null)
+    object Aborted : InstallStep(UiText.StringResource(R.string.aborted), null)
     object Downloading : InstallStep(UiText.StringResource(R.string.downloading), null)
     object Installing : InstallStep(UiText.StringResource(R.string.installing), null)
     object Completed : InstallStep(UiText.StringResource(R.string.completed), null)
     data class Error(val error: UiText) : InstallStep(UiText.StringResource(R.string.failed), error)
+
     fun isFinished(): Boolean {
         return this is Completed || this is Error || this is Success
     }
+
     fun isLoading(): Boolean {
         return this is Downloading || this is Installing
     }

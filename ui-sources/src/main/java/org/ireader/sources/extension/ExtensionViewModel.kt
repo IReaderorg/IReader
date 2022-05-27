@@ -41,6 +41,8 @@ class ExtensionViewModel @Inject constructor(
 
     var getCatalogJob: Job? = null
 
+    var installerJobs:MutableMap<Long,Job> = mutableMapOf()
+
     init {
         scope.launch {
             getCatalogsByType.subscribe(excludeRemoteInstalled = true)
@@ -78,7 +80,8 @@ class ExtensionViewModel @Inject constructor(
     }
 
     fun installCatalog(catalog: Catalog) {
-        scope.launch {
+        installerJobs.putIfAbsent(catalog.sourceId,Job())
+        installerJobs[catalog.sourceId] =  scope.launch {
             val isUpdate = catalog is CatalogInstalled
             val (pkgName, flow) = if (isUpdate) {
                 catalog as CatalogInstalled

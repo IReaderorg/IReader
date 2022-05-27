@@ -1,5 +1,6 @@
 package org.ireader.presentation.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -9,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -70,6 +70,7 @@ object BookDetailScreenSpec : ScreenSpec {
         val source = vm.source
         val catalog = vm.catalogSource
         val book = vm.book
+        val context = LocalContext.current
         BookDetailTopAppBar(
             onWebView = {
                 if (source != null && source is HttpSource && book != null)
@@ -93,6 +94,13 @@ object BookDetailScreenSpec : ScreenSpec {
                 }
             },
             onPopBackStack = {
+                context.findComponentActivity()?.lifecycleScope?.launch {
+                    if (vm.book?.favorite == false) {
+                        vm.book?.let {
+                            vm.deleteUseCase.deleteBookById(it.id)
+                        }
+                    }
+                }
                 controller.navController.popBackStack()
             },
             source = vm.source,
@@ -225,17 +233,19 @@ object BookDetailScreenSpec : ScreenSpec {
         val catalog = state.catalogSource
         val scope = rememberCoroutineScope()
 
-        DisposableEffect(controller.navBackStackEntry) {
-            onDispose {
-                context.findComponentActivity()?.lifecycleScope?.launch {
-                    if (vm.book?.favorite == false) {
-                        vm.book?.let {
-                            vm.deleteUseCase.deleteBookById(it.id)
-                        }
+
+
+        BackHandler() {
+            context.findComponentActivity()?.lifecycleScope?.launch {
+                if (vm.book?.favorite == false) {
+                    vm.book?.let {
+                        vm.deleteUseCase.deleteBookById(it.id)
                     }
                 }
             }
+            controller.navController.popBackStack()
         }
+
 
         BookDetailScreen(
             modifier = Modifier.padding(bottom = controller.scaffoldPadding.calculateBottomPadding()),

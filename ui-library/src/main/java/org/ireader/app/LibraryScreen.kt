@@ -125,9 +125,6 @@ fun LibraryScreen(
             EditCategoriesDialog(
                 vm = vm,
                 onConfirm = {
-                    vm.selectedBooks.clear()
-                    vm.addQueues.clear()
-                    vm.deleteQueues.clear()
                     onAddToCategoryConfirm()
                 },
                 dismissDialog = {
