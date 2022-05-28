@@ -67,7 +67,7 @@ android {
         named("release") {
             isShrinkResources = true
             isMinifyEnabled = true
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"),"proguard-rules.pro")
+            proguardFiles("proguard-android-optimize.txt", "proguard-rules.pro")
         }
         create("preview") {
             initWith(getByName("release"))
@@ -80,9 +80,7 @@ android {
         }
     }
 }
-hilt {
-    enableExperimentalClasspathAggregation = true
-}
+
 dependencies {
     implementation(androidx.emoji)
     implementation(androidx.appCompat)

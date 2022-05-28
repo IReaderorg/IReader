@@ -58,7 +58,7 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
     }
 
     fun showCategoryTabs(): Preference<Boolean> {
-        return preferenceStore.getBoolean("category_tabs", false)
+        return preferenceStore.getBoolean("category_tabs", true)
     }
 
     fun showAllCategory(): Preference<Boolean> {
@@ -66,7 +66,7 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
     }
 
     fun showCountInCategory(): Preference<Boolean> {
-        return preferenceStore.getBoolean("show_count_in_category", false)
+        return preferenceStore.getBoolean("show_count_in_category", true)
     }
 
     fun columnsInPortrait(): Preference<Int> {

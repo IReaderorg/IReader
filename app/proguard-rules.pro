@@ -3,6 +3,7 @@
 -dontobfuscate
 
 # Keep extension's common dependencies
+-keep class org.ireader.core_api.source.** { public protected *; }
 -keep,allowoptimization class org.ireader.** { public protected *; }
 -keep,allowoptimization class kotlinx.coroutines.** { public protected *; }
 -keep,allowoptimization class okhttp3.** { public protected *; }
@@ -10,6 +11,7 @@
 -keep,allowoptimization class org.jsoup.** { public protected *; }
 -keep,allowoptimization class kotlin.** { public protected *; }
 -keep,allowoptimization class io.ktor.** { public protected *; }
+-keep,allowoptimization class android.content.pm.** { public protected *; }
 -keep,allowoptimization class androidx.room.** { public protected *; }
 -keep,allowoptimization class com.google.dagger.** { public protected *; }
 -keep,allowoptimization class com.google.gson.** { public protected *; }
@@ -156,17 +158,7 @@
 # Gson specific classes
 -dontwarn sun.misc.**
 
-# Prevent proguard from stripping interface information from TypeAdapter, TypeAdapterFactory,
-# JsonSerializer, JsonDeserializer instances (so they can be used in @JsonAdapter)
--keep class * extends com.google.gson.TypeAdapter
--keep class * implements com.google.gson.TypeAdapterFactory
--keep class * implements com.google.gson.JsonSerializer
--keep class * implements com.google.gson.JsonDeserializer
 
-# Prevent R8 from leaving Data object members always null
--keepclassmembers,allowobfuscation class * {
-  @com.google.gson.annotations.SerializedName <fields>;
-}
 ##---------------End: proguard configuration for Gson  ----------
 
 ##---------------Begin: proguard configuration for kotlinx.serialization  ----------
@@ -182,7 +174,7 @@
 }
 
 -keep,includedescriptorclasses class eu.kanade.tachiyomi.**$$serializer { *; }
--keepclassmembers class eu.kanade.tachiyomi.** {
+-keepclassmembers class org.ireader.** {
     *** Companion;
 }
 -keepclasseswithmembers class eu.kanade.tachiyomi.** {

@@ -8,5 +8,5 @@ interface CatalogInstaller {
 
     fun install(catalog: CatalogRemote): Flow<InstallStep>
 
-    suspend fun uninstall(pkgName: String): Flow<InstallStep>
+    suspend fun uninstall(pkgName: String): InstallStep
 }

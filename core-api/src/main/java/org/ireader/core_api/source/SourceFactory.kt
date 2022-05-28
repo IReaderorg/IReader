@@ -1,5 +1,6 @@
 package org.ireader.core_api.source
 
+import androidx.annotation.Keep
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.get
 import io.ktor.client.request.post
@@ -22,6 +23,7 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 
+@Keep
 open class SourceFactory(
         private val deps: Dependencies,
         override val lang: String,

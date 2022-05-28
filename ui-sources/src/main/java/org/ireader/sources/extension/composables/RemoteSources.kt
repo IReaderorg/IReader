@@ -68,7 +68,7 @@ fun RemoteSourcesScreen(
                 key = {
                     when (it) {
                         is SourceUiModel.Header -> it.hashCode()
-                        is SourceUiModel.Item -> it.source.key(it.state)
+                        is SourceUiModel.Item ->  it.source.key(it.state)
                     }
                 },
             ) { catalog ->

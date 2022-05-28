@@ -6,6 +6,7 @@ import io.ktor.client.statement.bodyAsText
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import org.ireader.common_resources.REPO_URL
 import org.ireader.core_api.http.HttpClients
 import org.ireader.core_catalogs.service.CatalogRemoteApi
 import org.ireader.core_ui.CatalogNotFoundException
@@ -15,13 +16,13 @@ class CatalogGithubApi(
     private val httpClient: HttpClients,
 ) : CatalogRemoteApi {
 
-    private val repoUrl =
-        "https://raw.githubusercontent.com/kazemcodes/IReader-Sources/main"
+//    private val repoUrl =
+//        "https://raw.githubusercontent.com/IReaderorg/IReader-Repo/main"
 
     override suspend fun fetchCatalogs(): List<org.ireader.common_models.entities.CatalogRemote> {
         val response: String =
             httpClient.default
-                .get("$repoUrl/index.min.json")
+                .get("$REPO_URL/index.min.json")
                 .bodyAsText()
 
         val catalogs = Json.Default.decodeFromString<List<CatalogRemoteApiModel>>(response)
@@ -37,8 +38,8 @@ class CatalogGithubApi(
                 versionName = catalog.version,
                 versionCode = catalog.code,
                 lang = catalog.lang,
-                pkgUrl = "$repoUrl/apk/${catalog.apk}",
-                iconUrl = "$repoUrl/icon/${catalog.apk.replace(".apk", ".png")}",
+                pkgUrl = "$REPO_URL/apk/${catalog.apk}",
+                iconUrl = "$REPO_URL/icon/${catalog.apk.replace(".apk", ".png")}",
                 nsfw = catalog.nsfw
             )
         }

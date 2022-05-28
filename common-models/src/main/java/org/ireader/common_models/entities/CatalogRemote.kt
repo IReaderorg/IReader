@@ -6,6 +6,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import org.ireader.core_api.source.Source
 import java.io.File
+import kotlin.random.Random
 
 @Keep
 @Entity(tableName = CATALOG_REMOTE)
@@ -86,6 +87,7 @@ enum class  SourceState {
 }
 
 fun Catalog.key(state:SourceState) : String {
+    if (sourceId == -1L) return Random.nextLong().toString()
     return when(state) {
         SourceState.LastUsed -> "$sourceId-lastused"
         SourceState.Pinned -> "$sourceId-pinned"

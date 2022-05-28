@@ -42,9 +42,7 @@ android {
         )
     }
 }
-hilt {
-    enableExperimentalClasspathAggregation = true
-}
+
 
 dependencies {
 

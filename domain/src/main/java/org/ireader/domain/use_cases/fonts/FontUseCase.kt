@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.Flow
 import org.ireader.common_data.repository.FontRepository
 import org.ireader.common_models.entities.FontEntity
 import org.ireader.common_models.fonts.FontResource
+import org.ireader.common_resources.REPO_URL
 import org.ireader.core_api.http.HttpClients
 import javax.inject.Inject
 
@@ -45,7 +46,7 @@ class FontUseCase @Inject constructor(
 
 
     suspend fun getRemoteFonts() : FontResource {
-        val json : String = clients.default.get("https://raw.githubusercontent.com/kazemcodes/IReader-Sources/main/fonts.min.json", block = {}).body()
+        val json : String = clients.default.get("${REPO_URL}/main/fonts.min.json", block = {}).body()
         return Gson().fromJson(json,FontResource::class.java)
     }
 

@@ -1,5 +1,6 @@
 package org.ireader.core_api.source
 
+import androidx.annotation.Keep
 import io.ktor.client.HttpClient
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.url
@@ -14,6 +15,7 @@ import org.ireader.core_api.source.model.PageUrl
  * A simple implementation for sources from a website.
  */
 @Suppress("unused", "unused_parameter")
+@Keep
 abstract class HttpSource(private val dependencies: Dependencies) : CatalogSource {
 
     /**

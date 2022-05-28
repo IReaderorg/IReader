@@ -69,9 +69,13 @@ class AndroidCatalogInstaller(
      *
      * @param pkgName The package name of the extension to uninstall
      */
-    override suspend fun uninstall(pkgName: String): Flow<InstallStep> = flow {
-        packageInstaller.uninstallApk(pkgName)
-        installationChanges.notifyAppUninstall(pkgName)
-        emit(InstallStep.Idle)
+    override suspend fun uninstall(pkgName: String): InstallStep {
+        return try {
+            val deleted = packageInstaller.uninstall(pkgName)
+            installationChanges.notifyAppUninstall(pkgName)
+            deleted
+        } catch (e: Throwable) {
+            InstallStep.Error(UiText.ExceptionString(e))
+        }
     }
 }

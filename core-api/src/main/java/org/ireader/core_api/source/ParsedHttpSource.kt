@@ -1,5 +1,6 @@
 package org.ireader.core_api.source
 
+import androidx.annotation.Keep
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
@@ -17,6 +18,7 @@ import org.jsoup.nodes.Element
 import java.security.MessageDigest
 
 /** Taken from https://tachiyomi.org/ **/
+@Keep
 abstract class ParsedHttpSource(private val dependencies: Dependencies) : HttpSource(dependencies) {
 
 
