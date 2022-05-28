@@ -1,5 +1,3 @@
-
-
 package org.ireader.core_api.util
 
 import android.content.Context
@@ -15,7 +13,7 @@ import java.io.File
  */
 fun File.getUriCompat(context: Context): Uri {
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-        FileProvider.getUriForFile(context, "core-api" + ".provider", this)
+        FileProvider.getUriForFile(context, "${context.packageName}.provider", this)
     else Uri.fromFile(this)
 }
 

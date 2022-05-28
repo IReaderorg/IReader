@@ -13,6 +13,7 @@ import org.ireader.common_models.entities.Catalog
 import org.ireader.common_models.entities.CatalogInstalled
 import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.common_models.entities.CatalogRemote
+import org.ireader.common_resources.UiText
 import org.ireader.core_api.os.InstallStep
 import org.ireader.core_catalogs.interactor.GetCatalogsByType
 import org.ireader.core_catalogs.interactor.InstallCatalog
@@ -23,6 +24,7 @@ import org.ireader.core_catalogs.interactor.UpdateCatalog
 import org.ireader.core_ui.exceptionHandler
 import org.ireader.core_ui.preferences.UiPreferences
 import org.ireader.core_ui.viewmodel.BaseViewModel
+import org.ireader.core_ui.viewmodel.showSnackBar
 import org.ireader.domain.use_cases.remote.key.RemoteKeyUseCase
 import javax.inject.Inject
 
@@ -41,7 +43,16 @@ class ExtensionViewModel @Inject constructor(
 
     var getCatalogJob: Job? = null
 
-    var installerJobs:MutableMap<Long,Job> = mutableMapOf()
+    var installerJobs: MutableMap<Long, Job> = mutableMapOf()
+
+    override fun showSnackBar(message: UiText?) {
+        viewModelScope.launch {
+            message?.let {
+                _eventFlow.showSnackBar(it)
+
+            }
+        }
+    }
 
     init {
         scope.launch {
@@ -55,7 +66,6 @@ class ExtensionViewModel @Inject constructor(
                 }.launchIn(scope)
 
         }
-
 
         // Update catalogs whenever the query changes or there's a new update from the backend
 
@@ -80,32 +90,31 @@ class ExtensionViewModel @Inject constructor(
     }
 
     fun installCatalog(catalog: Catalog) {
-        installerJobs.putIfAbsent(catalog.sourceId,Job())
-        installerJobs[catalog.sourceId] =  scope.launch {
-            val isUpdate = catalog is CatalogInstalled
-            val (pkgName, flow) = if (isUpdate) {
-                catalog as CatalogInstalled
-                catalog.pkgName to updateCatalog.await(catalog)
-            } else {
-                catalog as CatalogRemote
-                catalog.pkgName to installCatalog.await(catalog)
-            }
-            flow.collect { step ->
-                if (step is InstallStep.Error) {
-                    showSnackBar(step.error)
+        installerJobs.putIfAbsent(catalog.sourceId, Job())
+        installerJobs[catalog.sourceId] =
+            scope.launch {
+                val isUpdate = catalog is CatalogInstalled
+                val (pkgName, flow) = if (isUpdate) {
+                    catalog as CatalogInstalled
+                    catalog.pkgName to updateCatalog.await(catalog)
+                } else {
+                    catalog as CatalogRemote
+                    catalog.pkgName to installCatalog.await(catalog)
                 }
-                state.installSteps = if (step != InstallStep.Completed) {
+                flow.collect { step ->
                     if (step is InstallStep.Error) {
                         showSnackBar(step.error)
-                    } else {
-                        showSnackBar(step.name)
                     }
-                    installSteps + (pkgName to step)
-                } else {
-                    installSteps - pkgName
+                    state.installSteps = if (step != InstallStep.Success) {
+                        if (step is InstallStep.Error) {
+                            showSnackBar(step.error)
+                        }
+                        installSteps + (pkgName to step)
+                    } else {
+                        installSteps - pkgName
+                    }
                 }
             }
-        }
     }
 
     fun togglePinnedCatalog(catalog: Catalog) {
@@ -117,11 +126,20 @@ class ExtensionViewModel @Inject constructor(
     fun uninstallCatalog(catalog: Catalog) {
         scope.launch {
             if (catalog is CatalogInstalled) {
-                val flow = uninstallCatalog.await(catalog)
-                if (flow is InstallStep.Error) {
-                    showSnackBar(flow.error)
-                }
+                uninstallCatalog.await(catalog)
             }
+        }
+    }
+
+    fun cancelCatalogJob(catalog: Catalog) {
+
+        installerJobs[catalog.sourceId]?.cancel()
+        installerJobs.remove(catalog.sourceId)
+        if (catalog is CatalogRemote) {
+            state.installSteps = installSteps + (catalog.pkgName to InstallStep.Idle)
+        }
+        if (catalog is CatalogInstalled) {
+            state.installSteps = installSteps + (catalog.pkgName to InstallStep.Idle)
         }
     }
 

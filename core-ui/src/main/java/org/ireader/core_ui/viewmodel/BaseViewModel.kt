@@ -36,7 +36,7 @@ abstract class BaseViewModel : androidx.lifecycle.ViewModel() {
     protected val _eventFlow = MutableSharedFlow<UiEvent>()
     open val eventFlow = _eventFlow.asSharedFlow()
 
-    fun showSnackBar(message: UiText?) {
+    open fun showSnackBar(message: UiText?) {
         viewModelScope.launch {
             _eventFlow.showSnackBar(message ?: UiText.StringResource(R.string.error_unknown))
         }

@@ -53,7 +53,6 @@ FROM library
     @Transaction
     suspend fun prepareExploreMode(reset: Boolean, list: List<org.ireader.common_models.entities.Book>, keys: List<RemoteKeys>) {
         if (reset) {
-            deleteUnUsedChapters()
             deleteAllRemoteKeys()
             deleteAllExploredBook()
         }

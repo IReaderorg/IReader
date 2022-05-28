@@ -80,7 +80,9 @@ android {
         }
     }
 }
-
+hilt {
+    enableExperimentalClasspathAggregation = true
+}
 dependencies {
     implementation(androidx.emoji)
     implementation(androidx.appCompat)
@@ -119,7 +121,7 @@ implementation(compose.compose.material3)
     /** Coroutine **/
     implementation(kotlinx.coroutines.core)
     implementation(kotlinx.coroutines.android)
-    implementation("com.google.firebase:firebase-analytics:17.2.2")
+    implementation("com.google.firebase:firebase-analytics:21.0.0")
 
     /** Hilt **/
     kapt(libs.hilt.androidcompiler)

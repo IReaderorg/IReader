@@ -8,8 +8,10 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.IntentSender
 import android.content.pm.PackageInstaller
+import android.net.Uri
 import android.os.Build
 import android.os.SystemClock
+import androidx.core.net.toUri
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -89,8 +91,8 @@ class PackageInstaller(
             intent ?: return
             val status = intent
                 .getIntExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_FAILURE)
-            Log.error { "Package Installer received ${intent.toString()}" }
 
+            Log.error { intent.extras.toString() }
             when (status) {
                 PackageInstaller.STATUS_PENDING_USER_ACTION -> {
                     val confirmationIntent = intent.getParcelableExtra<Intent>(Intent.EXTRA_INTENT)
@@ -99,13 +101,13 @@ class PackageInstaller(
                         deferred.complete(InstallStep.Error(UiText.StringResource(R.string.fatal_error)))
                         return
                     }
-                    confirmationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    confirmationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION)
                     try {
                         context.startActivity(confirmationIntent)
 
                         // Mark installation as completed even if it's not finished because we don't always
                         // receive the result callback
-                        //deferred.complete(InstallStep.Success)
+                        deferred.complete(InstallStep.Idle)
                     } catch (e: Throwable) {
                         Log.warn("Error while (un)installing package", e)
                         deferred.complete(InstallStep.Error(UiText.StringResource(R.string.installation_error)))
@@ -147,23 +149,50 @@ class PackageInstaller(
             }
         }
     }
+
+
+    companion object {
+        const val APK_MIME = "application/vnd.android.package-archive"
+        const val EXTRA_PKG_NAME = "ExtensionInstaller.extra.PKG_NAME"
+        const val EXTRA_FILE_PATH = "ExtensionInstaller.extra.FILE_PATH"
+        const val FILE_SCHEME = "file://"
+    }
+    fun <T> installApk(uri: Uri,pkgName: String,file:File, targetActivity:Class<T>) {
+        val intent = Intent(context, targetActivity)
+            .setDataAndType(uri, org.ireader.core_api.os.PackageInstaller.APK_MIME)
+            .putExtra(EXTRA_PKG_NAME, pkgName)
+            .putExtra(EXTRA_FILE_PATH, file.absolutePath)
+            .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        context.startActivity(intent)
+
+    }
+    /**
+     * Starts an intent to uninstall the extension by the given package name.
+     *
+     * @param pkgName The package name of the extension to uninstall
+     */
+    fun uninstallApk(pkgName: String) {
+        val intent = Intent(Intent.ACTION_UNINSTALL_PACKAGE, "package:$pkgName".toUri())
+            .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+        context.startActivity(intent)
+    }
 }
+
 
 private const val INSTALL_ACTION = "PackageInstallerInstaller.INSTALL_ACTION"
 
-sealed class InstallStep(val name: UiText, error: UiText? = null) {
+sealed class InstallStep(val name: UiText? = null, error: UiText? = null) {
     object Success : InstallStep(UiText.StringResource(R.string.success), null)
-    object Aborted : InstallStep(UiText.StringResource(R.string.aborted), null)
     object Downloading : InstallStep(UiText.StringResource(R.string.downloading), null)
-    object Installing : InstallStep(UiText.StringResource(R.string.installing), null)
-    object Completed : InstallStep(UiText.StringResource(R.string.completed), null)
+    object Idle : InstallStep()
     data class Error(val error: UiText) : InstallStep(UiText.StringResource(R.string.failed), error)
 
     fun isFinished(): Boolean {
-        return this is Completed || this is Error || this is Success
+        return this is Idle || this is Error || this is Success
     }
 
     fun isLoading(): Boolean {
-        return this is Downloading || this is Installing
+        return this is Downloading
     }
 }

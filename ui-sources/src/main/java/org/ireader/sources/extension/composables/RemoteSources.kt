@@ -91,16 +91,17 @@ fun RemoteSourcesScreen(
                                         onCancelInstaller(it)
                                     }
                                 },
-                                showLoading = true
                             )
                         } else if (catalog.source is CatalogRemote) {
                             CatalogItem(
                                 catalog = catalog.source,
-                                installStep = if (catalog.source is CatalogInstalled) state.installSteps[catalog.source.pkgName] else null,
+                                installStep = state.installSteps[catalog.source.pkgName],
                                 onInstall = { onClickInstall(catalog.source) },
-                                onCancelInstaller = onCancelInstaller,
-                                showLoading = true
-
+                                onCancelInstaller = {
+                                    if (onCancelInstaller != null) {
+                                        onCancelInstaller(it)
+                                    }
+                                },
                             )
                         }
                     }

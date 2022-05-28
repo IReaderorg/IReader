@@ -74,39 +74,56 @@
 
 
         </activity>
+        <activity
+            android:name="org.ireader.data.catalog.ExtensionInstallActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:exported="false" >
+        </activity>
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="${applicationId}.androidx-startup"
+        android:exported="false"
+        tools:node="merge">
+        <meta-data
+            android:name="androidx.work.WorkManagerInitializer"
+            android:value="androidx.startup"
+            tools:node="remove" />
+        <meta-data
+            android:name="androidx.emoji2.text.EmojiCompatInitializer"
+            tools:node="remove" />
+    </provider>
+    <receiver
+        android:name="org.ireader.domain.services.broadcast_receiver.AppBroadcastReceiver"
+        android:exported="false" />
+
+    <service
+        android:name="org.ireader.domain.services.tts_service.media_player.TTSService"
+        android:enabled="true"
+        android:exported="false">
+        <intent-filter>
+            <action android:name="android.media.browse.MediaBrowserService" />
+        </intent-filter>
+    </service>
+    <receiver
+        android:name="androidx.media.session.MediaButtonReceiver"
+        android:exported="false">
+        <intent-filter>
+            <action android:name="android.intent.action.MEDIA_BUTTON" />
+        </intent-filter>
+    </receiver>
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
             android:exported="false"
-            tools:node="merge">
+            android:grantUriPermissions="true">
             <meta-data
-                android:name="androidx.work.WorkManagerInitializer"
-                android:value="androidx.startup"
-                tools:node="remove" />
-            <meta-data
-                android:name="androidx.emoji2.text.EmojiCompatInitializer"
-                tools:node="remove" />
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths" />
         </provider>
-        <receiver
-            android:name="org.ireader.domain.services.broadcast_receiver.AppBroadcastReceiver"
-            android:exported="false" />
+        <meta-data android:name="android.webkit.WebView.EnableSafeBrowsing"
+            android:value="false" />
+        <meta-data android:name="android.webkit.WebView.MetricsOptOut"
+            android:value="true" />
+</application>
 
-        <service
-            android:name="org.ireader.domain.services.tts_service.media_player.TTSService"
-            android:enabled="true"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.media.browse.MediaBrowserService" />
-            </intent-filter>
-        </service>
-        <receiver
-            android:name="androidx.media.session.MediaButtonReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.intent.action.MEDIA_BUTTON" />
-            </intent-filter>
-        </receiver>
-
-    </application>
-
-</manifest>
+    </manifest>

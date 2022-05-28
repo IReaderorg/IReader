@@ -1,6 +1,5 @@
 package org.ireader.presentation.ui
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -15,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavDeepLink
 import androidx.navigation.navDeepLink
@@ -26,7 +24,6 @@ import org.ireader.bookDetails.components.BookDetailScreenBottomBar
 import org.ireader.bookDetails.components.ChapterCommandBottomSheet
 import org.ireader.bookDetails.viewmodel.BookDetailViewModel
 import org.ireader.common_extensions.async.viewModelIOCoroutine
-import org.ireader.common_extensions.findComponentActivity
 import org.ireader.common_extensions.getUrlWithoutDomain
 import org.ireader.common_resources.LAST_CHAPTER
 import org.ireader.common_resources.UiText
@@ -94,13 +91,6 @@ object BookDetailScreenSpec : ScreenSpec {
                 }
             },
             onPopBackStack = {
-                context.findComponentActivity()?.lifecycleScope?.launch {
-                    if (vm.book?.favorite == false) {
-                        vm.book?.let {
-                            vm.deleteUseCase.deleteBookById(it.id)
-                        }
-                    }
-                }
                 controller.navController.popBackStack()
             },
             source = vm.source,
@@ -232,20 +222,6 @@ object BookDetailScreenSpec : ScreenSpec {
         val source = state.catalogSource?.source
         val catalog = state.catalogSource
         val scope = rememberCoroutineScope()
-
-
-
-        BackHandler() {
-            context.findComponentActivity()?.lifecycleScope?.launch {
-                if (vm.book?.favorite == false) {
-                    vm.book?.let {
-                        vm.deleteUseCase.deleteBookById(it.id)
-                    }
-                }
-            }
-            controller.navController.popBackStack()
-        }
-
 
         BookDetailScreen(
             modifier = Modifier.padding(bottom = controller.scaffoldPadding.calculateBottomPadding()),

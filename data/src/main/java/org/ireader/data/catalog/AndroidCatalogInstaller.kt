@@ -13,6 +13,7 @@ import org.ireader.core_api.io.saveTo
 import org.ireader.core_api.log.Log
 import org.ireader.core_api.os.InstallStep
 import org.ireader.core_api.os.PackageInstaller
+import org.ireader.core_api.util.getUriCompat
 import org.ireader.core_catalogs.service.CatalogInstaller
 import java.io.File
 
@@ -40,50 +41,37 @@ class AndroidCatalogInstaller(
      *
      * @param catalog The catalog to install.
      */
-    override fun install(catalog: org.ireader.common_models.entities.CatalogRemote): Flow<InstallStep> = flow {
-        emit(InstallStep.Downloading)
-        val tmpApkFile = File(context.cacheDir, "${catalog.pkgName}.apk")
-        val tmpIconFile = File(context.cacheDir, "${catalog.pkgName}.png")
-        try {
-            val apkResponse: ByteReadChannel = client.get(catalog.pkgUrl) {
-                headers.append(HttpHeaders.CacheControl, "no-store")
-            }.body()
-            apkResponse.saveTo(tmpApkFile)
-
-            val iconResponse: ByteReadChannel = client.get(catalog.iconUrl) {
-                headers.append(HttpHeaders.CacheControl, "no-store")
-            }.body()
-            iconResponse.saveTo(tmpIconFile)
-            emit(InstallStep.Installing)
-            val success = packageInstaller.install(tmpApkFile, catalog.pkgName)
-
-            tmpApkFile.deleteRecursively()
-            tmpIconFile.deleteRecursively()
-            if (success is InstallStep.Success) {
-                installationChanges.notifyAppInstall(catalog.pkgName)
+    override fun install(catalog: org.ireader.common_models.entities.CatalogRemote): Flow<InstallStep> =
+        flow {
+            emit(InstallStep.Downloading)
+            val tmpApkFile = File(context.cacheDir, "${catalog.pkgName}.apk")
+            try {
+                val apkResponse: ByteReadChannel = client.get(catalog.pkgUrl) {
+                    headers.append(HttpHeaders.CacheControl, "no-store")
+                }.body()
+                apkResponse.saveTo(tmpApkFile)
+                emit(InstallStep.Idle)
+                packageInstaller.installApk(
+                    tmpApkFile.getUriCompat(context),
+                    catalog.pkgName,
+                    tmpApkFile,
+                    ExtensionInstallActivity::class.java
+                )
+            } catch (e: Throwable) {
+                Log.warn(e, "Error installing package")
+                emit(InstallStep.Error(UiText.ExceptionString(e)))
             }
-            emit(success)
-        } catch (e: Throwable) {
-            Log.warn(e, "Error installing package")
-            emit(InstallStep.Error(UiText.ExceptionString(e)))
-        } finally {
-            tmpApkFile.delete()
-            tmpIconFile.delete()
+
         }
-    }
 
     /**
      * Starts an intent to uninstall the extension by the given package name.
      *
      * @param pkgName The package name of the extension to uninstall
      */
-    override suspend fun uninstall(pkgName: String): InstallStep {
-        return try {
-            val deleted = packageInstaller.uninstall(pkgName)
-            installationChanges.notifyAppUninstall(pkgName)
-            deleted
-        } catch (e: Throwable) {
-            InstallStep.Error(UiText.ExceptionString(e))
-        }
+    override suspend fun uninstall(pkgName: String): Flow<InstallStep> = flow {
+        packageInstaller.uninstallApk(pkgName)
+        installationChanges.notifyAppUninstall(pkgName)
+        emit(InstallStep.Idle)
     }
 }

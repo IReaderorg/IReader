@@ -52,6 +52,7 @@ allprojects {
         }
     }
 
+
 }
 
 subprojects {
@@ -93,6 +94,7 @@ subprojects {
             dependencies {
                 add("coreLibraryDesugaring", libs.desugarJdkLibs)
             }
+
         }
     }
 

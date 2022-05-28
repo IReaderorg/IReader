@@ -54,7 +54,6 @@ fun CatalogItem(
     onUninstall: (() -> Unit)? = null,
     onPinToggle: (() -> Unit)? = null,
     onCancelInstaller:((Catalog) -> Unit)? = null,
-    showLoading:Boolean = false,
 ) {
     val title = buildAnnotatedString {
         append("${catalog.name} ")
@@ -105,7 +104,6 @@ fun CatalogItem(
                     .layoutId("icons")
                     .padding(end = 4.dp),
                 onCancelInstaller = onCancelInstaller,
-                showLoading = showLoading
             )
         },
         measurePolicy = { measurables, fullConstraints ->
@@ -179,7 +177,6 @@ private fun CatalogButtons(
     onPinToggle: (() -> Unit)?,
     onCancelInstaller:((Catalog) -> Unit)?,
     modifier: Modifier = Modifier,
-    showLoading:Boolean =false,
 ) {
     Row(modifier = modifier) {
         CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {

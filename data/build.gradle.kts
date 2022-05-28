@@ -4,6 +4,7 @@ plugins {
     id("kotlin-kapt")
     id("kotlin-parcelize")
     kotlin("plugin.serialization")
+    id("dagger.hilt.android.plugin")
 }
 
 android {
@@ -41,6 +42,9 @@ android {
         )
     }
 }
+hilt {
+    enableExperimentalClasspathAggregation = true
+}
 
 dependencies {
 
@@ -66,9 +70,10 @@ dependencies {
     implementation(project(mapOf("path" to ":core-ui")))
 
 
-    kapt(libs.hilt.compiler)
-    implementation(libs.hilt.androidcompiler)
+    kapt(libs.hilt.androidcompiler)
     implementation(libs.hilt.android)
+
+
 
     implementation(libs.jsoup)
 

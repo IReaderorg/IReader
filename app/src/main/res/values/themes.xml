@@ -5,6 +5,17 @@
         <item name="android:forceDarkAllowed" tools:targetApi="Q">false</item>
     </style>
 
+    <style name="Theme.compat" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation</item>
+        <item name="windowNoTitle">true</item>
+
+
+    </style>
+
     <style name="Theme.Splash" parent="Theme.App">
         <item name="colorBackgroundSplash">#FFF</item>
         <item name="iconSplashTint">#000000</item>
