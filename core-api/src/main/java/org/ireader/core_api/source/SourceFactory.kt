@@ -50,7 +50,7 @@ open class SourceFactory(
         )
     }
 
-    fun bookListParse(document: Document, elementSelector: String, nextPageSelector: String?, parser: (element: Element) -> MangaInfo): MangasPageInfo {
+    open fun bookListParse(document: Document, elementSelector: String, nextPageSelector: String?, parser: (element: Element) -> MangaInfo): MangasPageInfo {
         val books = document.select(elementSelector).map { element ->
             parser(element)
         }
@@ -62,11 +62,11 @@ open class SourceFactory(
         return MangasPageInfo(books, hasNextPage)
     }
 
-
-    fun requestBuilder(
+    open fun setUserAgent() = "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36"
+        open fun requestBuilder(
             url: String,
             block: HeadersBuilder.() -> Unit = {
-                append(HttpHeaders.UserAgent, "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36")
+                append(HttpHeaders.UserAgent, setUserAgent())
                 append(HttpHeaders.CacheControl, "max-age=0")
             }
     ): HttpRequestBuilder {
@@ -77,9 +77,10 @@ open class SourceFactory(
     }
 
 
+
     private val page = "{page}"
     private val query = "{query}"
-    private suspend fun getLists(baseExploreFetcher: BaseExploreFetcher, page: Int, query: String = ""): MangasPageInfo {
+    open  suspend fun getLists(baseExploreFetcher: BaseExploreFetcher, page: Int, query: String = ""): MangasPageInfo {
         if (baseExploreFetcher.selector == null) return MangasPageInfo(emptyList(), false)
         val res = requestBuilder("$baseUrl${
             (baseExploreFetcher.endpoint)?.replace(this.page, page.toString())?.replace(this
@@ -128,7 +129,7 @@ open class SourceFactory(
         return MangasPageInfo(emptyList(), false)
     }
 
-    fun chapterFromElement(element: Element): ChapterInfo {
+    open fun chapterFromElement(element: Element): ChapterInfo {
         if (chapterFetcher == null) return ChapterInfo("", "")
         val link = selectorReturnerStringType(element, chapterFetcher.linkSelector, chapterFetcher.linkAtt)
         val name = selectorReturnerStringType(element, chapterFetcher.nameSelector, chapterFetcher.nameAtt)
@@ -163,7 +164,7 @@ open class SourceFactory(
         return filterList
     }
 
-    fun detailParse(document: Document): MangaInfo {
+    open fun detailParse(document: Document): MangaInfo {
         val title = selectorReturnerStringType(document, detailFetcher.nameSelector, detailFetcher.nameAtt)
         val cover = selectorReturnerStringType(document, detailFetcher.coverSelector, detailFetcher.coverAtt)
         val authorBookSelector = selectorReturnerStringType(document, detailFetcher.authorBookSelector, detailFetcher.authorBookAtt)
@@ -191,7 +192,7 @@ open class SourceFactory(
         return pageContentParse(client.get(requestBuilder(chapter.key)).asJsoup())
     }
 
-    fun pageContentParse(document: Document): List<String> {
+    open fun pageContentParse(document: Document): List<String> {
         val par = selectorReturnerListType(document, selector = contentFetcher.pageContentSelector, contentFetcher.pageContentAtt)
         val head = selectorReturnerStringType(document, selector = contentFetcher.pageTitleSelector, contentFetcher.pageTitleAtt)
 
@@ -290,7 +291,7 @@ open class SourceFactory(
         }
     }
 
-    fun selectorReturnerStringType(
+    private fun selectorReturnerStringType(
             element: Element,
             selector: String? = null,
             att: String? = null,
@@ -306,7 +307,7 @@ open class SourceFactory(
         }
     }
 
-    fun selectorReturnerListType(
+    private fun selectorReturnerListType(
             element: Element,
             selector: String? = null,
             att: String? = null,
@@ -322,7 +323,7 @@ open class SourceFactory(
         }
     }
 
-    fun selectorReturnerListType(
+    private fun selectorReturnerListType(
             document: Document,
             selector: String? = null,
             att: String? = null,

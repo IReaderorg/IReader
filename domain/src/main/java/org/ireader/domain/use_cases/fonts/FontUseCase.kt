@@ -46,7 +46,7 @@ class FontUseCase @Inject constructor(
 
 
     suspend fun getRemoteFonts() : FontResource {
-        val json : String = clients.default.get("${REPO_URL}/main/fonts.min.json", block = {}).body()
+        val json : String = clients.default.get("${REPO_URL}/fonts.min.json", block = {}).body()
         return Gson().fromJson(json,FontResource::class.java)
     }
 

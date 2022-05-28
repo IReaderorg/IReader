@@ -217,8 +217,7 @@ private fun ChapterDetailBottomBar(
             tonalElevation = 4.dp
         ) {
             Row(
-                modifier = Modifier
-                    .fillMaxSize(),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {

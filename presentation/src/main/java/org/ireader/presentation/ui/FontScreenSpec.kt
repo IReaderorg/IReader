@@ -1,8 +1,11 @@
 package org.ireader.presentation.ui
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import org.ireader.components.components.SearchToolbar
@@ -40,9 +43,12 @@ object FontScreenSpec : ScreenSpec {
     ) {
         val vm: FontScreenViewModel = hiltViewModel(   controller.navBackStackEntry)
 
-        FontScreen(
-            vm
-        )
+        Box(modifier = Modifier.padding(controller.scaffoldPadding)) {
+            FontScreen(
+                vm
+            )
+        }
+
     }
 }
 
