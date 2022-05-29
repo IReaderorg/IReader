@@ -76,6 +76,7 @@ fun ExploreScreen(
     onPopBackStack: () -> Unit,
     snackBarHostState: SnackbarHostState,
     modalState: ModalBottomSheetState,
+    onLongClick: (BookItem) -> Unit = {},
     scaffoldPadding: PaddingValues
 ) {
     val scrollState = rememberLazyListState()
@@ -186,8 +187,8 @@ fun ExploreScreen(
                             onBook(book)
                         },
                         isLoading = vm.isLoading,
-
                         showInLibraryBadge = true,
+                        onLongClick = onLongClick
                     )
                 }
             }

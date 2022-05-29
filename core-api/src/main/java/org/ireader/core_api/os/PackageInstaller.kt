@@ -8,10 +8,8 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.IntentSender
 import android.content.pm.PackageInstaller
-import android.net.Uri
 import android.os.Build
 import android.os.SystemClock
-import androidx.core.net.toUri
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -50,6 +48,7 @@ class PackageInstaller(
                     }
                     session.commit(sender)
                 }
+
             }
         }
     }
@@ -72,6 +71,23 @@ class PackageInstaller(
             Intent(action),
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) PendingIntent.FLAG_MUTABLE else 0
         )
+        val packageInstallerCallBack = object:PackageInstaller.SessionCallback() {
+            override fun onCreated(p0: Int) {}
+
+            override fun onBadgingChanged(p0: Int) {}
+
+            override fun onActiveChanged(p0: Int, p1: Boolean) {}
+
+            override fun onProgressChanged(p0: Int, p1: Float) {}
+
+            override fun onFinished(p0: Int, result: Boolean) {
+              when(result) {
+                  true -> deferred.complete(InstallStep.Success)
+                  else -> deferred.complete(InstallStep.Idle)
+              }
+            }
+        }
+        packageInstaller.registerSessionCallback(packageInstallerCallBack)
         context.registerReceiver(receiver, IntentFilter(action))
         return try {
             block(broadcast.intentSender)
@@ -79,6 +95,7 @@ class PackageInstaller(
         } finally {
             context.unregisterReceiver(receiver)
             broadcast.cancel()
+            packageInstaller.unregisterSessionCallback(packageInstallerCallBack)
         }
     }
 
@@ -91,8 +108,6 @@ class PackageInstaller(
             intent ?: return
             val status = intent
                 .getIntExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_FAILURE)
-
-            Log.error { intent.extras.toString() }
             when (status) {
                 PackageInstaller.STATUS_PENDING_USER_ACTION -> {
                     val confirmationIntent = intent.getParcelableExtra<Intent>(Intent.EXTRA_INTENT)
@@ -107,7 +122,7 @@ class PackageInstaller(
 
                         // Mark installation as completed even if it's not finished because we don't always
                         // receive the result callback
-                        deferred.complete(InstallStep.Idle)
+                      //  deferred.complete(InstallStep.Idle)
                     } catch (e: Throwable) {
                         Log.warn("Error while (un)installing package", e)
                         deferred.complete(InstallStep.Error(UiText.StringResource(R.string.installation_error)))
@@ -118,10 +133,6 @@ class PackageInstaller(
                 }
                 PackageInstaller.STATUS_FAILURE_ABORTED -> {
                     deferred.complete(InstallStep.Error(UiText.StringResource(R.string.installation_error_aborted)))
-                    org.ireader.core_api.log.Log.warn(
-                        "Package installer failed to install packages",
-                        status.toString()
-                    )
                 }
                 PackageInstaller.STATUS_FAILURE_BLOCKED -> {
                     deferred.complete(InstallStep.Error(UiText.StringResource(R.string.installation_error_blocked)))
@@ -133,7 +144,6 @@ class PackageInstaller(
                     deferred.complete(InstallStep.Error(UiText.StringResource(R.string.installation_error_incompatible)))
                 }
                 PackageInstaller.STATUS_FAILURE_STORAGE -> {
-
                     deferred.complete(InstallStep.Error(UiText.StringResource(R.string.installation_error_Storage)))
                 }
                 PackageInstaller.STATUS_FAILURE_INVALID -> {
@@ -151,32 +161,6 @@ class PackageInstaller(
     }
 
 
-    companion object {
-        const val APK_MIME = "application/vnd.android.package-archive"
-        const val EXTRA_PKG_NAME = "ExtensionInstaller.extra.PKG_NAME"
-        const val EXTRA_FILE_PATH = "ExtensionInstaller.extra.FILE_PATH"
-        const val FILE_SCHEME = "file://"
-    }
-    fun <T> installApk(uri: Uri,pkgName: String,file:File, targetActivity:Class<T>) {
-        val intent = Intent(context, targetActivity)
-            .setDataAndType(uri, org.ireader.core_api.os.PackageInstaller.APK_MIME)
-            .putExtra(EXTRA_PKG_NAME, pkgName)
-            .putExtra(EXTRA_FILE_PATH, file.absolutePath)
-            .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        context.startActivity(intent)
-
-    }
-    /**
-     * Starts an intent to uninstall the extension by the given package name.
-     *
-     * @param pkgName The package name of the extension to uninstall
-     */
-    fun uninstallApk(pkgName: String) {
-        val intent = Intent(Intent.ACTION_UNINSTALL_PACKAGE, "package:$pkgName".toUri())
-            .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-
-        context.startActivity(intent)
-    }
 }
 
 

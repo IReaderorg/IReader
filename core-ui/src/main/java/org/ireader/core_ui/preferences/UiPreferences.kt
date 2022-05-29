@@ -65,4 +65,10 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
     fun lastUsedSource(): Preference<Long> {
         return preferenceStore.getLong("last_used_source", -1L)
     }
+    fun showUpdatesInButtonBar(): Preference<Boolean> {
+        return preferenceStore.getBoolean("show_updates_in_bottom_bar", true)
+    }
+    fun showHistoryInButtonBar(): Preference<Boolean> {
+        return preferenceStore.getBoolean("show_history_in_bottom_bar", true)
+    }
 }

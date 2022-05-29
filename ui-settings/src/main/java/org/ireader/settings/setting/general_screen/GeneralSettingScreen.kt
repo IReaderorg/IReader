@@ -11,6 +11,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import org.ireader.components.components.Components
 import org.ireader.components.components.SetupUiComponent
 import org.ireader.core_ui.preferences.AppPreferences
+import org.ireader.core_ui.preferences.UiPreferences
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.ui_settings.R
 import javax.inject.Inject
@@ -27,6 +28,14 @@ fun GeneralSettingScreen(
                 preference = vm.appUpdater,
                 title = context.getString(R.string.updater_is_enable)
             ),
+            Components.Switch(
+                preference = vm.showHistory,
+                title = context.getString(R.string.show_history)
+            ),
+            Components.Switch(
+                preference = vm.showUpdate,
+                title = context.getString(R.string.show_update)
+            ),
         )
     }
 
@@ -40,10 +49,12 @@ fun GeneralSettingScreen(
 }
 
 @HiltViewModel
-class GeneralSettingScreenViewModel @Inject constructor(private val appPreferences: AppPreferences) : BaseViewModel() {
+class GeneralSettingScreenViewModel @Inject constructor(private val appPreferences: AppPreferences,private val uiPreferences: UiPreferences) : BaseViewModel() {
 
     val appUpdater = appPreferences.appUpdater().asState()
 
+    var showHistory = uiPreferences.showHistoryInButtonBar().asState()
+    var showUpdate = uiPreferences.showUpdatesInButtonBar().asState()
 
 
 }

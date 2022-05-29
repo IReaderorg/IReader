@@ -23,7 +23,7 @@ interface CategoryDao:BaseDao<Category> {
     @Query("""
     -- User categories
     SELECT category.*, COUNT(bookcategory.bookId) AS bookCount
-    FROM category
+    FROM category 
     LEFT JOIN bookcategory
     ON category.id = bookcategory.categoryId
     WHERE category.id > 0
@@ -32,7 +32,7 @@ interface CategoryDao:BaseDao<Category> {
     -- Category.ALL
     SELECT *, (
       SELECT COUNT()
-      FROM library
+      FROM library WHERE favorite = 1
     ) AS bookCount
     FROM category
     WHERE category.id = -2
@@ -40,12 +40,12 @@ interface CategoryDao:BaseDao<Category> {
      -- Category.UNCATEGORIZED_ID
     SELECT *, (
       SELECT COUNT(library.id)
-      FROM library
+      FROM library 
       WHERE NOT EXISTS (
         SELECT bookcategory.bookId
         FROM bookcategory
         WHERE library.id = bookcategory.bookId
-      )
+      ) AND favorite = 1
     ) AS bookCount
     FROM category
     WHERE category.id = 0
@@ -64,7 +64,7 @@ interface CategoryDao:BaseDao<Category> {
     -- Category.ALL
     SELECT *, (
       SELECT COUNT()
-      FROM library
+      FROM library WHERE favorite = 1
     ) AS bookCount
     FROM category
     WHERE category.id = -2
@@ -77,7 +77,7 @@ interface CategoryDao:BaseDao<Category> {
         SELECT bookcategory.bookId
         FROM bookcategory
         WHERE library.id = bookcategory.bookId
-      )
+      ) AND favorite = 1
     ) AS bookCount
     FROM category
     WHERE category.id = 0

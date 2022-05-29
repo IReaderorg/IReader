@@ -74,11 +74,6 @@
 
 
         </activity>
-        <activity
-            android:name="org.ireader.data.catalog.ExtensionInstallActivity"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"
-            android:exported="false" >
-        </activity>
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="${applicationId}.androidx-startup"

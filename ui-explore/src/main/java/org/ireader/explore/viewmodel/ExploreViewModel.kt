@@ -3,11 +3,11 @@ package org.ireader.explore.viewmodel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import org.ireader.common_models.DisplayMode
+import org.ireader.common_models.entities.BookItem
 import org.ireader.common_models.entities.RemoteKeys
 import org.ireader.common_models.entities.toBook
 import org.ireader.common_resources.UiText
@@ -18,9 +18,9 @@ import org.ireader.core_api.source.model.Filter
 import org.ireader.core_api.source.model.MangasPageInfo
 import org.ireader.core_catalogs.CatalogStore
 import org.ireader.core_ui.exceptionHandler
-import org.ireader.core_ui.preferences.AppPreferences
 import org.ireader.core_ui.viewmodel.BaseViewModel
-import org.ireader.domain.use_cases.local.DeleteUseCase
+import org.ireader.domain.use_cases.local.LocalGetBookUseCases
+import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.preferences.reader_preferences.BrowseScreenPrefUseCase
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import org.ireader.domain.use_cases.remote.key.RemoteKeyUseCase
@@ -30,11 +30,11 @@ import javax.inject.Inject
 class ExploreViewModel @Inject constructor(
     private val state: ExploreStateImpl,
     private val remoteUseCases: RemoteUseCases,
-    private val deleteUseCase: DeleteUseCase,
     private val catalogStore: CatalogStore,
     private val browseScreenPrefUseCase: BrowseScreenPrefUseCase,
     private val remoteKeyUseCase: RemoteKeyUseCase,
-    private val appPreferences: AppPreferences,
+    private val getBookUseCases: LocalGetBookUseCases,
+    private val insertUseCases: LocalInsertUseCases,
     savedStateHandle: SavedStateHandle,
 ) : BaseViewModel(), ExploreState by state {
 
@@ -55,8 +55,6 @@ class ExploreViewModel @Inject constructor(
                 toggleSearchMode(true)
                 searchQuery = query
                 loadItems()
-//                getBooks(filters = listOf(Filter.Title().apply { this.value = query }),
-//                    source = source)
             } else {
                 val listings = source.getListings()
                 if (listings.isNotEmpty()) {
@@ -145,12 +143,6 @@ class ExploreViewModel @Inject constructor(
                         e?.let {
                             error = exceptionHandler(it)
                         }
-//                        error = when (it) {
-//
-//                            is EmptyQuery -> UiText.StringResource(R.string.query_must_not_be_empty)
-//                            is SourceNotFoundException -> UiText.StringResource(R.string.the_source_is_not_found)
-//                            else -> it?.let { it1 -> UiText.ExceptionString(it1) }
-//                        }
                     },
                     onSuccess = { items, newKey ->
                         val keys = items.mangas.map { book ->
@@ -181,9 +173,13 @@ class ExploreViewModel @Inject constructor(
 
     private var getBooksJob: Job? = null
 
-    private fun onQueryChange(query: String) {
-        state.searchQuery = query
+    suspend fun addToFavorite(bookItem: BookItem) {
+       getBookUseCases.findBookById(bookItem.id)?.let {  book ->
+
+        insertUseCases.insertBook(book.copy(favorite = !book.favorite))
+        }
     }
+
 
     fun toggleSearchMode(inSearchMode: Boolean) {
         state.isSearchModeEnable = inSearchMode
@@ -216,12 +212,6 @@ class ExploreViewModel @Inject constructor(
     }
 
 
-    fun removeExploreBooks() {
-        viewModelScope.launch(Dispatchers.IO) {
-            deleteUseCase.deleteAllExploreBook()
-            deleteUseCase.deleteAllRemoteKeys()
-        }
-    }
 
     fun toggleFilterMode(enable: Boolean? = null) {
         state.isFilterEnable = enable ?: !state.isFilterEnable

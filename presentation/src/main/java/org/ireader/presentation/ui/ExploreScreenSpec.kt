@@ -13,6 +13,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
 import kotlinx.coroutines.launch
+import org.ireader.common_extensions.launchIO
 import org.ireader.common_resources.UiText
 import org.ireader.components.components.EmptyScreenComposable
 import org.ireader.components.hideKeyboard
@@ -96,7 +97,12 @@ object ExploreScreenSpec : ScreenSpec {
                 },
                 snackBarHostState = controller.snackBarHostState,
                 modalState = controller.sheetState,
-                scaffoldPadding = controller.scaffoldPadding
+                scaffoldPadding = controller.scaffoldPadding,
+                onLongClick = {
+                    scope.launchIO {
+                        vm.addToFavorite(it)
+                    }
+                }
             )
         } else {
             EmptyScreenComposable(R.string.source_not_available,

@@ -43,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -60,8 +61,10 @@ import org.ireader.components.components.ISnackBarHost
 import org.ireader.core_ui.theme.AppColors
 import org.ireader.core_ui.theme.TransparentStatusBar
 import org.ireader.presentation.ui.BottomNavScreenSpec
+import org.ireader.presentation.ui.HistoryScreenSpec
 import org.ireader.presentation.ui.LibraryScreenSpec
 import org.ireader.presentation.ui.ScreenSpec
+import org.ireader.presentation.ui.UpdateScreenSpec
 
 @OptIn(
     ExperimentalMaterialApi::class, ExperimentalAnimationApi::class,
@@ -88,6 +91,7 @@ fun ScreenContent() {
         rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
+    val vm: ScreenContentViewModel = hiltViewModel()
     val (requestedHideBottomNav, requestHideBottomNav) = remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
@@ -186,7 +190,9 @@ fun ScreenContent() {
                                 contentColor = AppColors.current.onBars,
                                 tonalElevation = 5.dp,
                             ) {
-                                BottomNavScreenSpec.screens.forEach { bottomNavDestination ->
+                                BottomNavScreenSpec.screens.filter {
+                                    (if (vm.showHistory.value) true else it != HistoryScreenSpec) && (if (vm.showUpdate.value) true else it != UpdateScreenSpec)
+                                }.forEach { bottomNavDestination ->
                                     val isSelected: Boolean by derivedStateOf {
                                         currentDestination?.hierarchy?.any {
                                             it.route == bottomNavDestination.navHostRoute

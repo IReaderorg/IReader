@@ -70,6 +70,8 @@
 
     <string name="appearance">Appearance</string>
     <string name="updater_is_enable">Updater</string>
+    <string name="show_update">Show Update</string>
+    <string name="show_history">Show History</string>
     <string name="night_mode">Night Mode</string>
     <string name="dark_mode">Dark Mode</string>
     <string name="off">Off</string>

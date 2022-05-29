@@ -13,7 +13,6 @@ import org.ireader.core_api.io.saveTo
 import org.ireader.core_api.log.Log
 import org.ireader.core_api.os.InstallStep
 import org.ireader.core_api.os.PackageInstaller
-import org.ireader.core_api.util.getUriCompat
 import org.ireader.core_catalogs.service.CatalogInstaller
 import java.io.File
 
@@ -51,17 +50,18 @@ class AndroidCatalogInstaller(
                 }.body()
                 apkResponse.saveTo(tmpApkFile)
                 emit(InstallStep.Idle)
-                packageInstaller.installApk(
-                    tmpApkFile.getUriCompat(context),
-                    catalog.pkgName,
-                    tmpApkFile,
-                    ExtensionInstallActivity::class.java
-                )
+                val result = packageInstaller.install(tmpApkFile,catalog.pkgName)
+                if (result is InstallStep.Success) {
+                    installationChanges.notifyAppInstall(catalog.pkgName)
+                }
+                emit(result)
             } catch (e: Throwable) {
                 Log.warn(e, "Error installing package")
                 emit(InstallStep.Error(UiText.ExceptionString(e)))
-            }
+            } finally {
+                tmpApkFile.delete()
 
+            }
         }
 
     /**
