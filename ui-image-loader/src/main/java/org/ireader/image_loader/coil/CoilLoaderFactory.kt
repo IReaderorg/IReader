@@ -13,6 +13,7 @@ import org.ireader.core_catalogs.interactor.GetLocalCatalog
 import org.ireader.image_loader.LibraryCovers
 import org.ireader.image_loader.coil.cache.CoverCache
 import org.ireader.image_loader.coil.image_loaders.BookCoverFetcher
+import org.ireader.image_loader.coil.image_loaders.BookCoverKeyer
 
 class CoilLoaderFactory(
     private val context: Application,
@@ -32,6 +33,7 @@ class CoilLoaderFactory(
                 add(BookCoverFetcher.Factory(callFactoryLazy =lazy(callFactoryInit) ,diskCacheLazy = lazy(diskCacheInit),catalogStore, coverCache))
                 add(CatalogRemoteMapper())
                 add(CatalogInstalledFetcher.Factory())
+                    .add(BookCoverKeyer())
             })
             .crossfade(300)
             .diskCache {

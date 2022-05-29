@@ -67,7 +67,7 @@ fun BookDetailScreenLoadedComposable(
         Box {
 
             AsyncImage(
-                model = book.cover,
+                model = BookCover.from(book),
                 contentDescription = null,
                 onSuccess = {
                     if (!imageLoaded) {
@@ -115,6 +115,7 @@ fun BookDetailScreenLoadedComposable(
                         .clip(MaterialTheme.shapes.medium)
                         .border(2.dp, MaterialTheme.colorScheme.onBackground.copy(alpha = .1f)),
                     contentScale = ContentScale.Crop,
+                    useSavedCoverImage = true
                 )
                 Spacer(modifier = modifier.width(8.dp))
                 /** Book Info **/

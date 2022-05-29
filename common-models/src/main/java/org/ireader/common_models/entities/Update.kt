@@ -36,9 +36,9 @@ data class UpdateWithInfo(
     tableName = UPDATE_TABLE,
     foreignKeys = [
         ForeignKey(
-            entity = Chapter::class,
+            entity = Book::class,
             parentColumns = arrayOf("id"),
-            childColumns = arrayOf("chapterId"),
+            childColumns = arrayOf("bookId"),
             onDelete = ForeignKey.CASCADE,
         )],
 )

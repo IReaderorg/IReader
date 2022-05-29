@@ -135,6 +135,7 @@ fun TTSScreen(
                                         MaterialTheme.colorScheme.onBackground.copy(alpha = .2f)
                                     ),
                                 contentScale = ContentScale.Crop,
+                                useSavedCoverImage = true
                             )
 
                             BigSizeTextComposable(

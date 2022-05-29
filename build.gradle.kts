@@ -19,30 +19,19 @@ buildscript {
         classpath(libs.gradle.firebaseCrashlytic)
         classpath(libs.gradle.idea.ext)
         classpath("com.vanniktech:gradle-maven-publish-plugin:0.19.0")
-        classpath("com.google.gms:google-services:4.3.3")
     }
 }
 
 
 
 plugins {
-    id("com.autonomousapps.dependency-analysis") version "1.1.0"
+    id("com.autonomousapps.dependency-analysis") version "1.3.0"
     id("com.github.ben-manes.versions") version "0.42.0"
-    id("com.diffplug.spotless") version "6.3.0"
-}
-fun isNonStable(version: String): Boolean {
-    val stableKeyword = listOf("RELEASE", "FINAL", "GA").any { version.toUpperCase().contains(it) }
-    val regex = "^[0-9,.v-]+(-r)?$".toRegex()
-    val isStable = stableKeyword || regex.matches(version)
-    return isStable.not()
+    id("com.diffplug.spotless") version "6.6.1"
 }
 
+
 allprojects {
-    tasks.withType<com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask> {
-        rejectVersionIf {
-            isNonStable(candidate.version)
-        }
-    }
     tasks.withType<org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompile> {
         kotlinOptions {
             jvmTarget = "11"
@@ -51,8 +40,6 @@ allprojects {
             )
         }
     }
-
-
 }
 
 subprojects {
@@ -100,9 +87,9 @@ subprojects {
 
 }
 
-tasks.register("clean", Delete::class) {
-    delete(rootProject.buildDir)
-}
+//tasks.register("clean", Delete::class) {
+//    delete(rootProject.buildDir)
+//}
 
 // Git is needed in your system PATH for these commands to work.
 // If it's not installed, you can return a random value as a workaround

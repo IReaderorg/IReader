@@ -1,6 +1,8 @@
 package org.ireader.bookDetails.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -9,6 +11,8 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.ireader.common_extensions.findComponentActivity
+import org.ireader.common_extensions.launchIO
 import org.ireader.common_extensions.removeSameItemsFromList
 import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.CatalogLocal
@@ -62,7 +66,7 @@ class BookDetailViewModel @Inject constructor(
             toggleBookLoading(true)
             chapterIsLoading = true
             subscribeBook(bookId = bookId, onSuccess = { book ->
-                setDetailBook(book)
+                state.book = book
                 toggleBookLoading(false)
                 if (!initBooks) {
                     initBooks = true
@@ -120,9 +124,6 @@ class BookDetailViewModel @Inject constructor(
                 },
                 onSuccess = { resultBook ->
                     if (state.book != null) {
-                        setDetailBook(
-                            book = resultBook
-                        )
                         toggleBookLoading(false)
                         insertBookDetailToLocal(resultBook)
                     }
@@ -157,7 +158,6 @@ class BookDetailViewModel @Inject constructor(
                         ) {
                             it.key
                         }
-                    this@BookDetailViewModel.chapters = uniqueList
                     if (uniqueList.isNotEmpty()) {
                         withContext(Dispatchers.IO) {
                             localInsertUseCases.updateChaptersUseCase(book.id, uniqueList)
@@ -186,30 +186,30 @@ class BookDetailViewModel @Inject constructor(
         }
     }
 
-    fun toggleInLibrary(book: Book) {
+    fun toggleInLibrary(book: Book, context: Context) {
         this.inLibraryLoading = true
-        viewModelScope.launch(Dispatchers.IO) {
-            if (!book.favorite) {
-                insertBookDetailToLocal(
-                    book.copy(
-                        id = book.id,
-                        favorite = true,
-                        dataAdded = Calendar.getInstance().timeInMillis,
-                    )
-                )
-                updateChaptersEntity(true, book.id)
-            } else {
-                insertBookDetailToLocal(
-                    (
+        context.findComponentActivity()?.let {
+            it.lifecycleScope.launchIO {
+                if (!book.favorite) {
+                    insertBookDetailToLocal(
                         book.copy(
-                            id = book.id,
-                            favorite = false,
+                            favorite = true,
+                            dataAdded = Calendar.getInstance().timeInMillis,
                         )
-                        )
-                )
-                updateChaptersEntity(false, book.id)
+                    )
+                    updateChaptersEntity(true, book.id)
+                } else {
+                    insertBookDetailToLocal(
+                        (
+                            book.copy(
+                                favorite = false,
+                            )
+                            )
+                    )
+                    updateChaptersEntity(false, book.id)
+                }
+                this@BookDetailViewModel.inLibraryLoading = false
             }
-            this@BookDetailViewModel.inLibraryLoading = false
         }
     }
 
@@ -221,9 +221,6 @@ class BookDetailViewModel @Inject constructor(
         this.detailIsLoading = isLoading
     }
 
-    private fun setDetailBook(book: Book) {
-        this.book = book
-    }
 
     override fun onDestroy() {
         getBookDetailJob?.cancel()

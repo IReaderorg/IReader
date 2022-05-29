@@ -220,6 +220,7 @@ private fun BoxScope.ExploreScreenErrorComposable(
                 color = LocalContentColor.current.copy(alpha = ContentAlpha.medium()),
                 fontSize = 48.sp
             ),
+            color = MaterialTheme.colorScheme.onSurface
         )
         androidx.compose.material3.Text(
             text = error,
@@ -229,7 +230,8 @@ private fun BoxScope.ExploreScreenErrorComposable(
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .padding(top = 16.dp)
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = 16.dp),
+            color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(modifier = Modifier.height(32.dp))
 

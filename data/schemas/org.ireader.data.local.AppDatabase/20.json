@@ -1,8 +1,8 @@
 {
   "formatVersion": 1,
   "database": {
-    "version": 19,
-    "identityHash": "c29819308295e83da9d5556b8cfacca6",
+    "version": 20,
+    "identityHash": "70503fdebe02ad3e4af6410bf46ecc02",
     "entities": [
       {
         "tableName": "library",
@@ -246,7 +246,7 @@
       },
       {
         "tableName": "chapter",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `bookId` INTEGER NOT NULL, `key` TEXT NOT NULL, `name` TEXT NOT NULL, `read` INTEGER NOT NULL, `bookmark` INTEGER NOT NULL, `progress` INTEGER NOT NULL, `dateUpload` INTEGER NOT NULL, `dateFetch` INTEGER NOT NULL, `sourceOrder` INTEGER NOT NULL, `content` TEXT NOT NULL, `number` REAL NOT NULL, `translator` TEXT NOT NULL, FOREIGN KEY(`bookId`) REFERENCES `library`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `bookId` INTEGER NOT NULL, `key` TEXT NOT NULL, `name` TEXT NOT NULL, `read` INTEGER NOT NULL, `bookmark` INTEGER NOT NULL, `dateUpload` INTEGER NOT NULL, `dateFetch` INTEGER NOT NULL, `sourceOrder` INTEGER NOT NULL, `content` TEXT NOT NULL, `number` REAL NOT NULL, `translator` TEXT NOT NULL, FOREIGN KEY(`bookId`) REFERENCES `library`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -281,12 +281,6 @@
           {
             "fieldPath": "bookmark",
             "columnName": "bookmark",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "progress",
-            "columnName": "progress",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -394,7 +388,7 @@
       },
       {
         "tableName": "history",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`bookId` INTEGER NOT NULL, `chapterId` INTEGER NOT NULL, `readAt` INTEGER NOT NULL, PRIMARY KEY(`bookId`, `chapterId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`bookId` INTEGER NOT NULL, `chapterId` INTEGER NOT NULL, `readAt` INTEGER NOT NULL, `progress` INTEGER NOT NULL, PRIMARY KEY(`bookId`, `chapterId`))",
         "fields": [
           {
             "fieldPath": "bookId",
@@ -411,6 +405,12 @@
           {
             "fieldPath": "readAt",
             "columnName": "readAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "progress",
+            "columnName": "progress",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -611,7 +611,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c29819308295e83da9d5556b8cfacca6')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '70503fdebe02ad3e4af6410bf46ecc02')"
     ]
   }
 }

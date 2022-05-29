@@ -1,20 +1,20 @@
 [versions]
-ktor = "2.0.1"
+ktor = "2.0.2"
 room = "2.4.2"
 okhttp = "4.9.3"
 moshi = "1.13.0"
-hilt = "2.41"
+hilt = "2.42"
 retrofit = "2.9.0"
 aboutLibraries = "10.0.0-b03"
 ksp = "1.6.10-1.0.2"
 tinylog = "2.4.1"
-spotless = "6.3.0"
+spotless = "6.6.1"
 ktlint = "0.45.1"
 
 
 [libraries]
 desugarJdkLibs = "com.android.tools:desugar_jdk_libs:1.1.5"
-gradle-tools = "com.android.tools.build:gradle:7.2.0"
+gradle-tools = "com.android.tools.build:gradle:7.2.1"
 gradle-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version = "1.6.21" }
 gradle-kotlinSerialization = { module =  "org.jetbrains.kotlin:kotlin-serialization", version = "1.6.21" }
 gradle-hilt = "com.google.dagger:hilt-android-gradle-plugin:2.41"
@@ -58,7 +58,7 @@ hilt-worker = "androidx.hilt:hilt-work:1.0.0"
 hilt-androidtest = { module = "com.google.dagger:hilt-android-testing", version.ref = "hilt" }
 
 
-firebase-bom = "com.google.firebase:firebase-bom:29.3.1"
+firebase-bom = "com.google.firebase:firebase-bom:30.1.0"
 firebase-analyticKtx = { module = "com.google.firebase:firebase-analytics-ktx" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 firebase-analytic = { module = "com.google.firebase:firebase-analytics" }
@@ -68,7 +68,7 @@ multidex = "androidx.multidex:multidex:2.0.1"
 okio = "com.squareup.okio:okio:3.1.0"
 quickjsAndroid = "app.cash.quickjs:quickjs-android:0.9.2"
 quickjsJvm = "app.cash.quickjs:quickjs-jvm:0.9.2"
-jsoup = "org.jsoup:jsoup:1.14.3"
+jsoup = "org.jsoup:jsoup:1.15.1"
 
 tinylog-impl = { module = "org.tinylog:tinylog-impl", version.ref = "tinylog" }
 tinylog-api = { module = "org.tinylog:tinylog-api", version.ref = "tinylog" }

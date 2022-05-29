@@ -3,7 +3,6 @@ package org.ireader.core_api.source
 import androidx.annotation.Keep
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.get
-import io.ktor.client.request.post
 import io.ktor.client.request.url
 import io.ktor.http.HeadersBuilder
 import io.ktor.http.HttpHeaders
@@ -25,17 +24,17 @@ import org.jsoup.nodes.Element
 
 @Keep
 open class SourceFactory(
-        private val deps: Dependencies,
-        override val lang: String,
-        override val baseUrl: String,
-        override val id: Long,
-        override val name: String,
-        val filterList: FilterList = emptyList(),
-        private val commandList: CommandList = emptyList(),
-        private val exploreFetchers: List<BaseExploreFetcher>,
-        private val detailFetcher: SourceFactory.Detail,
-        private val chapterFetcher: SourceFactory.Chapters? = null,
-        private val contentFetcher: SourceFactory.Content,
+    private val deps: Dependencies,
+    override val lang: String,
+    override val baseUrl: String,
+    override val id: Long,
+    override val name: String,
+    val filterList: FilterList = emptyList(),
+    val commandList: CommandList = emptyList(),
+    val exploreFetchers: List<BaseExploreFetcher>,
+    val detailFetcher: SourceFactory.Detail,
+    val chapterFetcher: SourceFactory.Chapters? = null,
+    val contentFetcher: SourceFactory.Content,
 ) : HttpSource(deps) {
 
     override fun getCommands(): CommandList {
@@ -44,13 +43,20 @@ open class SourceFactory(
 
     class LatestListing() : Listing(name = "Latest")
 
+    open fun getCustomBaseUrl(): String = baseUrl
+
     override fun getListings(): List<Listing> {
         return listOf(
-                LatestListing()
+            LatestListing()
         )
     }
 
-    open fun bookListParse(document: Document, elementSelector: String, nextPageSelector: String?, parser: (element: Element) -> MangaInfo): MangasPageInfo {
+    open fun bookListParse(
+        document: Document,
+        elementSelector: String,
+        nextPageSelector: String?,
+        parser: (element: Element) -> MangaInfo
+    ): MangasPageInfo {
         val books = document.select(elementSelector).map { element ->
             parser(element)
         }
@@ -62,13 +68,15 @@ open class SourceFactory(
         return MangasPageInfo(books, hasNextPage)
     }
 
-    open fun setUserAgent() = "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36"
-        open fun requestBuilder(
-            url: String,
-            block: HeadersBuilder.() -> Unit = {
-                append(HttpHeaders.UserAgent, setUserAgent())
-                append(HttpHeaders.CacheControl, "max-age=0")
-            }
+    open fun getUserAgent() =
+        "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36"
+
+    open fun requestBuilder(
+        url: String,
+        block: HeadersBuilder.() -> Unit = {
+            append(HttpHeaders.UserAgent, getUserAgent())
+            append(HttpHeaders.CacheControl, "max-age=0")
+        }
     ): HttpRequestBuilder {
         return HttpRequestBuilder().apply {
             url(url)
@@ -76,36 +84,68 @@ open class SourceFactory(
         }
     }
 
+    open val page = "{page}"
+    open val query = "{query}"
 
+    open suspend fun getListRequest(
+        baseExploreFetcher: BaseExploreFetcher,
+        page: Int,
+        query: String = "",
+        key: String
+    ): Document {
+        val res = requestBuilder(
+            "${getCustomBaseUrl()}${
+                (baseExploreFetcher.endpoint)?.replace(this.page, page.toString())?.replace(
+                    this
+                        .query, query
+                )
+            }"
+        )
+        return  client.get(res).asJsoup()
+    }
 
-    private val page = "{page}"
-    private val query = "{query}"
-    open  suspend fun getLists(baseExploreFetcher: BaseExploreFetcher, page: Int, query: String = ""): MangasPageInfo {
+    open suspend fun getLists(
+        baseExploreFetcher: BaseExploreFetcher,
+        page: Int,
+        query: String = "",
+        key: String,
+        filters: FilterList,
+    ): MangasPageInfo {
         if (baseExploreFetcher.selector == null) return MangasPageInfo(emptyList(), false)
-        val res = requestBuilder("$baseUrl${
-            (baseExploreFetcher.endpoint)?.replace(this.page, page.toString())?.replace(this
-                    .query, query)
-        }")
         return bookListParse(
-                client.get(res).asJsoup(),
-                baseExploreFetcher.selector,
-                baseExploreFetcher.nextPageSelector
+            getListRequest(baseExploreFetcher, page, query, key),
+            baseExploreFetcher.selector,
+            baseExploreFetcher.nextPageSelector
         ) { element ->
 
-            val title = selectorReturnerStringType(element, baseExploreFetcher.nameSelector, baseExploreFetcher.nameAtt)
-            val url = selectorReturnerStringType(element, baseExploreFetcher.linkSelector, baseExploreFetcher.linkAtt)
-            val thumbnailUrl = selectorReturnerStringType(element, baseExploreFetcher.coverSelector, baseExploreFetcher.coverAtt)
+            val title = selectorReturnerStringType(
+                element,
+                baseExploreFetcher.nameSelector,
+                baseExploreFetcher.nameAtt
+            )
+            val url = selectorReturnerStringType(
+                element,
+                baseExploreFetcher.linkSelector,
+                baseExploreFetcher.linkAtt
+            )
+            val thumbnailUrl = selectorReturnerStringType(
+                element,
+                baseExploreFetcher.coverSelector,
+                baseExploreFetcher.coverAtt
+            )
 
-            MangaInfo(key = if (baseExploreFetcher.addBaseUrlToLink) baseUrl + url else url, title = title, cover = if (baseExploreFetcher.addBaseurlToCoverLink) baseUrl + thumbnailUrl else thumbnailUrl)
+            MangaInfo(
+                key = if (baseExploreFetcher.addBaseUrlToLink) baseUrl + url else url,
+                title = title,
+                cover = if (baseExploreFetcher.addBaseurlToCoverLink) baseUrl + thumbnailUrl else thumbnailUrl
+            )
         }
     }
 
-
     override suspend fun getMangaList(sort: Listing?, page: Int): MangasPageInfo {
-        return exploreFetchers.getOrNull(0)?.let {
-            return getLists(it, page,"")
+        return exploreFetchers.firstOrNull { it.type != Type.Search }?.let {
+            return getLists(it, page, "", it.key, emptyList())
         } ?: MangasPageInfo(emptyList(), false)
-
     }
 
     override suspend fun getMangaList(filters: FilterList, page: Int): MangasPageInfo {
@@ -114,14 +154,14 @@ open class SourceFactory(
 
         if (query != null) {
             exploreFetchers.firstOrNull { it.type == Type.Search }?.let {
-                return getLists(it, page,query)
+                return getLists(it, page, query,it.key,filters)
             } ?: MangasPageInfo(emptyList(), false)
         }
 
 
         if (sorts != null) {
             return exploreFetchers.filter { it.type != Type.Search }.getOrNull(sorts)?.let {
-                return getLists(it, page,"")
+                return getLists(it, page, "",it.key,filters)
             } ?: MangasPageInfo(emptyList(), false)
         }
 
@@ -131,30 +171,41 @@ open class SourceFactory(
 
     open fun chapterFromElement(element: Element): ChapterInfo {
         if (chapterFetcher == null) return ChapterInfo("", "")
-        val link = selectorReturnerStringType(element, chapterFetcher.linkSelector, chapterFetcher.linkAtt)
-        val name = selectorReturnerStringType(element, chapterFetcher.nameSelector, chapterFetcher.nameAtt)
-        return ChapterInfo(name = name, key = if (chapterFetcher.addBaseUrlToLink) baseUrl + link else link)
+        val link =
+            selectorReturnerStringType(element, chapterFetcher.linkSelector, chapterFetcher.linkAtt)
+        val name =
+            selectorReturnerStringType(element, chapterFetcher.nameSelector, chapterFetcher.nameAtt)
+        return ChapterInfo(
+            name = name,
+            key = if (chapterFetcher.addBaseUrlToLink) baseUrl + link else link
+        )
     }
 
     open fun chaptersParse(document: Document): List<ChapterInfo> {
-        return document.select(chapterFetcher?.selector?:"").map { chapterFromElement(it) }
+        return document.select(chapterFetcher?.selector ?: "").map { chapterFromElement(it) }
     }
 
+    open suspend fun getChapterListRequest(
+        manga: MangaInfo,
+        commands: List<Command<*>>
+    ): Document {
+        return client.get(requestBuilder(manga.key)).asJsoup()
+    }
 
-    override suspend fun getChapterList(manga: MangaInfo, commands: List<Command<*>>): List<ChapterInfo> {
+    override suspend fun getChapterList(
+        manga: MangaInfo,
+        commands: List<Command<*>>
+    ): List<ChapterInfo> {
         commands.findInstance<Command.Chapter.Fetch>()?.let { command ->
-            return chaptersParse(Jsoup.parse(command.html)).let { if  (chapterFetcher?.reverseChapterList == true) it.reversed() else it }
+            return chaptersParse(Jsoup.parse(command.html)).let { if (chapterFetcher?.reverseChapterList == true) it.reversed() else it }
         }
         if (chapterFetcher == null) return emptyList()
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
-                var chapters =
-                        chaptersParse(
-                                client.post(requestBuilder(manga.key)).asJsoup(),
-                        )
-                if (chapters.isEmpty()) {
-                    chapters = chaptersParse(client.post(requestBuilder(manga.key)).asJsoup())
-                }
+                val chapters =
+                    chaptersParse(
+                        getChapterListRequest(manga, commands),
+                    )
                 return@withContext if (chapterFetcher.reverseChapterList) chapters else chapters.reversed()
             }
         }.getOrThrow()
@@ -164,37 +215,86 @@ open class SourceFactory(
         return filterList
     }
 
+    open fun statusParser(text: String): Int {
+        return detailFetcher.status.getOrDefault(text, MangaInfo.UNKNOWN)
+    }
+
     open fun detailParse(document: Document): MangaInfo {
-        val title = selectorReturnerStringType(document, detailFetcher.nameSelector, detailFetcher.nameAtt)
-        val cover = selectorReturnerStringType(document, detailFetcher.coverSelector, detailFetcher.coverAtt)
-        val authorBookSelector = selectorReturnerStringType(document, detailFetcher.authorBookSelector, detailFetcher.authorBookAtt)
-        val description =
-                selectorReturnerListType(document, detailFetcher.descriptionSelector, detailFetcher.descriptionBookAtt).joinToString("\n\n")
-        val category = selectorReturnerListType(document, detailFetcher.categorySelector, detailFetcher.categoryAtt)
-        return MangaInfo(
-                title = title,
-                cover = cover,
-                description = description,
-                author = authorBookSelector,
-                genres = category,
-                key = ""
+        val title =
+            selectorReturnerStringType(document, detailFetcher.nameSelector, detailFetcher.nameAtt)
+        val cover = selectorReturnerStringType(
+            document,
+            detailFetcher.coverSelector,
+            detailFetcher.coverAtt
         )
+        val authorBookSelector = selectorReturnerStringType(
+            document,
+            detailFetcher.authorBookSelector,
+            detailFetcher.authorBookAtt
+        )
+        val status = statusParser(
+            selectorReturnerStringType(
+                document,
+                detailFetcher.statusSelector,
+                detailFetcher.statusAtt
+            )
+        )
+
+        val description =
+            selectorReturnerListType(
+                document,
+                detailFetcher.descriptionSelector,
+                detailFetcher.descriptionBookAtt
+            ).joinToString("\n\n")
+        val category = selectorReturnerListType(
+            document,
+            detailFetcher.categorySelector,
+            detailFetcher.categoryAtt
+        )
+        return MangaInfo(
+            title = title,
+            cover = cover,
+            description = description,
+            author = authorBookSelector,
+            genres = category,
+            status = status,
+            key = ""
+        )
+    }
+
+    open suspend fun getMangaDetailsRequest(
+        manga: MangaInfo,
+        commands: List<Command<*>>
+    ): Document {
+        return client.get(requestBuilder(manga.key)).asJsoup()
     }
 
     override suspend fun getMangaDetails(manga: MangaInfo, commands: List<Command<*>>): MangaInfo {
         commands.findInstance<Command.Detail.Fetch>()?.let {
             return detailParse(Jsoup.parse(it.html)).copy(key = it.url)
         }
-        return detailParse(client.get(requestBuilder(manga.key)).asJsoup())
+        return detailParse(getMangaDetailsRequest(manga, commands))
     }
 
-    open suspend fun getContents(chapter: ChapterInfo): List<String> {
-        return pageContentParse(client.get(requestBuilder(chapter.key)).asJsoup())
+    open suspend fun getContentRequest(chapter: ChapterInfo, commands: List<Command<*>>): Document {
+        return client.get(requestBuilder(chapter.key)).asJsoup()
+    }
+
+    open suspend fun getContents(chapter: ChapterInfo, commands: List<Command<*>>): List<String> {
+        return pageContentParse(getContentRequest(chapter, commands))
     }
 
     open fun pageContentParse(document: Document): List<String> {
-        val par = selectorReturnerListType(document, selector = contentFetcher.pageContentSelector, contentFetcher.pageContentAtt)
-        val head = selectorReturnerStringType(document, selector = contentFetcher.pageTitleSelector, contentFetcher.pageTitleAtt)
+        val par = selectorReturnerListType(
+            document,
+            selector = contentFetcher.pageContentSelector,
+            contentFetcher.pageContentAtt
+        )
+        val head = selectorReturnerStringType(
+            document,
+            selector = contentFetcher.pageTitleSelector,
+            contentFetcher.pageTitleAtt
+        )
 
         return listOf(head) + par
     }
@@ -203,68 +303,67 @@ open class SourceFactory(
         commands.findInstance<Command.Content.Fetch>()?.let { command ->
             return pageContentParse(Jsoup.parse(command.html)).map { Text(it) }
         }
-        return getContents(chapter).map { Text(it) }
+        return getContents(chapter,commands).map { Text(it) }
     }
 
-
     data class BaseExploreFetcher(
-            val key: String,
-            val endpoint: String? = null,
-            val selector: String? = null,
-            val addBaseUrlToLink: Boolean = false,
-            val nextPageSelector: String? = null,
-            val nextPageAtt: String? = null,
-            val nextPageValue: String? = null,
-            val addToStringEnd: String? = null,
-            val addBaseurlToCoverLink: Boolean = false,
-            val linkSelector: String? = null,
-            val linkAtt: String? = null,
-            val nameSelector: String? = null,
-            val nameAtt: String? = null,
-            val coverSelector: String? = null,
-            val coverAtt: String? = null,
-            val type: Type = Type.Others,
+        val key: String,
+        val endpoint: String? = null,
+        val selector: String? = null,
+        val addBaseUrlToLink: Boolean = false,
+        val nextPageSelector: String? = null,
+        val nextPageAtt: String? = null,
+        val nextPageValue: String? = null,
+        val addToStringEnd: String? = null,
+        val addBaseurlToCoverLink: Boolean = false,
+        val linkSelector: String? = null,
+        val linkAtt: String? = null,
+        val nameSelector: String? = null,
+        val nameAtt: String? = null,
+        val coverSelector: String? = null,
+        val coverAtt: String? = null,
+        val type: Type = Type.Others,
     )
 
-
     data class Detail(
-            val addBaseUrlToLink: Boolean = false,
-            val addBaseurlToCoverLink: Boolean = false,
-            val nameSelector: String? = null,
-            val nameAtt: String? = null,
-            val coverSelector: String? = null,
-            val coverAtt: String? = null,
-            val descriptionSelector: String? = null,
-            val descriptionBookAtt: String? = null,
-            val authorBookSelector: String? = null,
-            val authorBookAtt: String? = null,
-            val categorySelector: String? = null,
-            val categoryAtt: String? = null,
-            val type: Type = Type.Detail,
+        val addBaseUrlToLink: Boolean = false,
+        val addBaseurlToCoverLink: Boolean = false,
+        val nameSelector: String? = null,
+        val nameAtt: String? = null,
+        val coverSelector: String? = null,
+        val coverAtt: String? = null,
+        val descriptionSelector: String? = null,
+        val descriptionBookAtt: String? = null,
+        val authorBookSelector: String? = null,
+        val authorBookAtt: String? = null,
+        val categorySelector: String? = null,
+        val categoryAtt: String? = null,
+        val statusSelector: String? = null,
+        val statusAtt: String? = null,
+        val status: Map<String, Int> = emptyMap<String, Int>(),
+        val type: Type = Type.Detail,
     )
 
     data class Chapters(
-            val selector: String? = null,
-            val addBaseUrlToLink: Boolean = false,
-            val nextPageSelector: String? = null,
-            val nextPageAtt: String? = null,
-            val reverseChapterList: Boolean = true,
-            val linkSelector: String? = null,
-            val linkAtt: String? = null,
-            val nameSelector: String? = null,
-            val nameAtt: String? = null,
-            val type: Type = Type.Chapters,
+        val selector: String? = null,
+        val addBaseUrlToLink: Boolean = false,
+        val nextPageSelector: String? = null,
+        val nextPageAtt: String? = null,
+        val reverseChapterList: Boolean = true,
+        val linkSelector: String? = null,
+        val linkAtt: String? = null,
+        val nameSelector: String? = null,
+        val nameAtt: String? = null,
+        val type: Type = Type.Chapters,
     )
-
 
     data class Content(
-            val pageTitleSelector: String? = null,
-            val pageTitleAtt: String? = null,
-            val pageContentSelector: String? = null,
-            val pageContentAtt: String? = null,
-            val type: Type = Type.Content,
+        val pageTitleSelector: String? = null,
+        val pageTitleAtt: String? = null,
+        val pageContentSelector: String? = null,
+        val pageContentAtt: String? = null,
+        val type: Type = Type.Content,
     )
-
 
     enum class Type {
         Search,
@@ -274,11 +373,10 @@ open class SourceFactory(
         Others
     }
 
-
-    private fun selectorReturnerStringType(
-            document: Document,
-            selector: String? = null,
-            att: String? = null,
+    open fun selectorReturnerStringType(
+        document: Document,
+        selector: String? = null,
+        att: String? = null,
     ): String {
         if (selector.isNullOrBlank() && !att.isNullOrBlank()) {
             return document.attr(att)
@@ -291,10 +389,10 @@ open class SourceFactory(
         }
     }
 
-    private fun selectorReturnerStringType(
-            element: Element,
-            selector: String? = null,
-            att: String? = null,
+    open fun selectorReturnerStringType(
+        element: Element,
+        selector: String? = null,
+        att: String? = null,
     ): String {
         if (selector.isNullOrBlank() && !att.isNullOrBlank()) {
             return element.attr(att)
@@ -307,10 +405,10 @@ open class SourceFactory(
         }
     }
 
-    private fun selectorReturnerListType(
-            element: Element,
-            selector: String? = null,
-            att: String? = null,
+    open fun selectorReturnerListType(
+        element: Element,
+        selector: String? = null,
+        att: String? = null,
     ): List<String> {
         if (selector.isNullOrBlank() && !att.isNullOrBlank()) {
             return listOf(element.attr(att))
@@ -323,10 +421,10 @@ open class SourceFactory(
         }
     }
 
-    private fun selectorReturnerListType(
-            document: Document,
-            selector: String? = null,
-            att: String? = null,
+    open fun selectorReturnerListType(
+        document: Document,
+        selector: String? = null,
+        att: String? = null,
     ): List<String> {
         if (selector.isNullOrBlank() && !att.isNullOrBlank()) {
             return listOf(document.attr(att))
@@ -340,6 +438,4 @@ open class SourceFactory(
             return emptyList()
         }
     }
-
-
 }

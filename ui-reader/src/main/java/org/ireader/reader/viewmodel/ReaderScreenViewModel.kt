@@ -225,11 +225,14 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
                 if (index != -1) {
                     stateChapters.getOrNull(index)?.let { chapter ->
                         activity.lifecycleScope.launch {
-                            insertUseCases.insertChapter(
-                                chapter.copy(
-                                    progress = key.getOrNull(0)?.toInt() ?: 0,
+                            val history =historyUseCase.findHistory(chapter.id)?.let {
+                                historyUseCase.insertHistory(
+                                   it.copy(
+                                        progress = key.getOrNull(0)?.toInt() ?: 0,
+                                    )
                                 )
-                            )
+                            }
+
                             getChapterUseCase.updateLastReadTime(chapter)
                         }
                     }
@@ -237,7 +240,14 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
             } else {
                 stateChapter?.let { chapter ->
                     activity.lifecycleScope.launch {
-                        insertUseCases.insertChapter(chapter.copy(progress = scrollState.firstVisibleItemIndex))
+                      historyUseCase.findHistory(chapter.id)?.let {
+                            historyUseCase.insertHistory(
+                                it.copy(
+                                    progress = scrollState.firstVisibleItemIndex,
+                                )
+                            )
+                        }
+
                     }
                 }
             }

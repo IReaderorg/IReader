@@ -43,7 +43,7 @@ import java.util.concurrent.Executors
         FontEntity::class,
         BookCategory::class
     ],
-    version = 19,
+    version = 20,
     exportSchema = true,
 )
 @TypeConverters(DatabaseConverter::class)

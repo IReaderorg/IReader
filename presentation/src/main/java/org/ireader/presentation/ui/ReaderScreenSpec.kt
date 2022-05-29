@@ -159,7 +159,10 @@ object ReaderScreenSpec : ScreenSpec {
                 vm.readImmersiveMode(context)
             }
             kotlin.runCatching {
-                scrollState.scrollToItem(chapter?.progress ?: 1)
+                chapter?.id?.let {chapter-> vm.historyUseCase.findHistory(chapter)?.let {
+                    scrollState.scrollToItem(it.progress ?: 1)
+                } }
+
             }
         }
         LaunchedEffect(key1 = true) {

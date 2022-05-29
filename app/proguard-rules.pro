@@ -6,6 +6,7 @@
 -keep class org.ireader.core_api.source.** { public protected *; }
 -keep,allowoptimization class org.ireader.** { public protected *; }
 -keep,allowoptimization class kotlinx.coroutines.** { public protected *; }
+-keep,allowoptimization class androidx.preference.** { public protected *; }
 -keep,allowoptimization class okhttp3.** { public protected *; }
 -keep,allowoptimization class okio.** { public protected *; }
 -keep,allowoptimization class org.jsoup.** { public protected *; }

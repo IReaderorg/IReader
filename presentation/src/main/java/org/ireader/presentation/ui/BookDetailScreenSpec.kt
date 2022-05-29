@@ -113,6 +113,7 @@ object BookDetailScreenSpec : ScreenSpec {
         val book = vm.book
         val catalog = vm.catalogSource
         val scope = rememberCoroutineScope()
+        val context= LocalContext.current
 
         AnimatedVisibility(
             visible = true,
@@ -122,7 +123,7 @@ object BookDetailScreenSpec : ScreenSpec {
             if (book != null) {
                 BookDetailScreenBottomBar(
                     onToggleInLibrary = {
-                        vm.toggleInLibrary(book = book)
+                        vm.toggleInLibrary(book = book, context = context)
                     },
                     isInLibrary = book.favorite,
                     onDownload = {

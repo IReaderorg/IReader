@@ -13,4 +13,5 @@ data class History(
     val bookId: Long,
     val chapterId: Long,
     val readAt: Long,
+    val progress: Int = 0,
 )

@@ -27,7 +27,6 @@ data class Chapter(
     val name: String,
     val read: Boolean = false,
     val bookmark: Boolean = false,
-    val progress: Int = 0,
     val dateUpload: Long = 0,
     val dateFetch: Long = 0,
     val sourceOrder: Int = 0,
