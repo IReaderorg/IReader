@@ -10,6 +10,7 @@ ksp = "1.6.10-1.0.2"
 tinylog = "2.4.1"
 spotless = "6.6.1"
 ktlint = "0.45.1"
+roomigrant = "0.3.4"
 
 
 [libraries]
@@ -45,6 +46,9 @@ room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 room-paging = { module = "androidx.room:room-paging", version.ref = "room" }
 room-testing = { module = "androidx.room:room-testing", version.ref = "room" }
+
+room-roomigrant-lib = { module = "com.github.MatrixDev.Roomigrant:RoomigrantLib", version.ref = "roomigrant" }
+room-roomigrant-compiler = { module = "com.github.MatrixDev.Roomigrant:RoomigrantCompiler", version.ref = "roomigrant" }
 
 
 okhttp-okhttp3 = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }

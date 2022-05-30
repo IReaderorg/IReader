@@ -7,6 +7,7 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import dev.matrix.roomigrant.GenerateRoomMigrations
 import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.BookCategory
 import org.ireader.common_models.entities.CatalogRemote
@@ -47,6 +48,7 @@ import java.util.concurrent.Executors
     exportSchema = true,
 )
 @TypeConverters(DatabaseConverter::class)
+@GenerateRoomMigrations
 abstract class AppDatabase : RoomDatabase() {
     abstract val libraryBookDao: LibraryBookDao
     abstract val chapterDao: ChapterDao
@@ -55,8 +57,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract val catalogDao: CatalogDao
     abstract val historyDao: HistoryDao
     abstract val updatesDao: UpdatesDao
-    abstract val libraryDao:LibraryDao
-    abstract val categoryDao:CategoryDao
+    abstract val libraryDao: LibraryDao
+    abstract val categoryDao: CategoryDao
     abstract val bookCategoryDao: BookCategoryDao
     abstract val fontDao: FontDao
 
@@ -69,7 +71,7 @@ abstract class AppDatabase : RoomDatabase() {
                 INSTANCE ?: buildDatabase(context).also { INSTANCE = it }
             }
 
-        private fun buildDatabase(context: Context) :AppDatabase =
+        private fun buildDatabase(context: Context): AppDatabase =
             Room.databaseBuilder(
                 context.applicationContext,
                 AppDatabase::class.java,
@@ -81,16 +83,13 @@ abstract class AppDatabase : RoomDatabase() {
                         super.onCreate(db)
                         // insert the data on the IO Thread
                         Executors.newSingleThreadExecutor().execute {
-                           getInstance(context).categoryDao.insertDate(systemCategories)
+                            getInstance(context).categoryDao.insertDate(systemCategories)
                         }
                     }
                 })
-                .addMigrations(
-                    MIGRATION_8_9,
-                    MIGRATION_11_12
-                )
+                .addMigrations(*AppDatabase_Migrations.build())
                 .fallbackToDestructiveMigration()
-                .addCallback(object :RoomDatabase.Callback() {
+                .addCallback(object : RoomDatabase.Callback() {
                     override fun onCreate(db: SupportSQLiteDatabase) {
                         super.onCreate(db)
                         Executors.newSingleThreadExecutor().execute {
@@ -100,38 +99,75 @@ abstract class AppDatabase : RoomDatabase() {
                 })
                 .build()
 
-        val systemCategories = listOf<Category>(Category(id = Category.ALL_ID,"",Category.ALL_ID.toInt(),0,0),Category(id = Category.UNCATEGORIZED_ID,"", Category.UNCATEGORIZED_ID.toInt(),0,0),)
-
-    }
-
-}
-
-val MIGRATION_8_9 = object : Migration(8, 9) {
-    override fun migrate(database: SupportSQLiteDatabase) {
-        database.execSQL("ALTER TABLE book_table ADD COLUMN beingDownloaded INTEGER NOT NULL DEFAULT 0")
-        database.execSQL("ALTER TABLE book_table RENAME COLUMN download TO isDownloaded")
-    }
-}
-val MIGRATION_10_11 = object : Migration(10, 11) {
-    override fun migrate(database: SupportSQLiteDatabase) {
-        database.execSQL("ALTER TABLE library ADD COLUMN beingDownloaded INTEGER NOT NULL DEFAULT 0")
-        database.execSQL("ALTER TABLE library RENAME COLUMN download TO isDownloaded")
-    }
-}
-val MIGRATION_11_12 = object : Migration(11, 12) {
-    override fun migrate(database: SupportSQLiteDatabase) {
-        database.execSQL("ALTER TABLE library ADD COLUMN tableId INTEGER NOT NULL DEFAULT 0")
+        val systemCategories = listOf<Category>(
+            Category(id = Category.ALL_ID, "", Category.ALL_ID.toInt(), 0, 0),
+            Category(id = Category.UNCATEGORIZED_ID, "", Category.UNCATEGORIZED_ID.toInt(), 0, 0),
+        )
     }
 }
 
-val MIGRATION_12_11 = object : Migration(12, 13) {
+val MIGRATION_19_20 = object : Migration(11, 12) {
     override fun migrate(database: SupportSQLiteDatabase) {
-        database.execSQL("ALTER TABLE history_table RENAME TO history")
-    }
-}
-val MIGRATION_17_18 = object : Migration(17, 18) {
-    override fun migrate(database: SupportSQLiteDatabase) {
-        database.execSQL("ALTER TABLE history_table RENAME TO history")
-    }
-}
+        database.execSQL(
+            """
+                    CREATE TABLE chapter_new (
+            id INTEGER NOT NULL PRIMARY KEY,
+    bookId INTEGER NOT NULL,
+    `key` TEXT NOT NULL,
+    name TEXT NOT NULL,
+    translator TEXT,
+    read INTEGER NOT NULL,
+    bookmark INTEGER NOT NULL,
+    number REAL NOT NULL,
+    sourceOrder INTEGER NOT NULL,
+    content TEXT NOT NULL,
+    dateFetch INTEGER NOT NULL,
+    dateUpload INTEGER NOT NULL);
+        """.trimIndent()
+        )
 
+        database.execSQL(
+            """
+             INSERT INTO chapter_new (id, 
+        bookId,name,read,bookmark,dateUpload,dateFetch,sourceOrder,content,number,translator) SELECT id, 
+        bookId,name,read,bookmark,dateUpload,dateFetch,sourceOrder,content,number,translator FROM chapter
+        """.trimIndent()
+        )
+
+        database.execSQL(
+            """
+               DROP TABLE chapter
+        """.trimIndent()
+        )
+        database.execSQL(
+            """
+    ALTER TABLE chapter_new RENAME TO chapter
+        """.trimIndent()
+        )
+
+        database.execSQL(
+            """
+            CREATE TABLE history_new (
+            bookId INTEGER NOT NULL PRIMARY KEY,
+            chapterId INTEGER NOT NULL PRIMARY KEY,
+            readAt INTEGER NOT NULL,
+            progress INTEGER NOT NULL);
+        """.trimIndent()
+        )
+        database.execSQL(
+            """
+            INSERT INTO history_new (bookId,chapterId,readAt) SELECT bookId,chapterId,readAt FROM history
+        """.trimIndent()
+        )
+        database.execSQL(
+            """
+               DROP TABLE history
+        """.trimIndent()
+        )
+        database.execSQL(
+            """
+    ALTER TABLE history_new RENAME TO history
+        """.trimIndent()
+        )
+    }
+}

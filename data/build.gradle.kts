@@ -84,6 +84,8 @@ dependencies {
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
     kapt(libs.room.compiler)
+    implementation(libs.room.roomigrant.lib)
+    kapt(libs.room.roomigrant.compiler)
 
     implementation(libs.okhttp.interceptor)
 

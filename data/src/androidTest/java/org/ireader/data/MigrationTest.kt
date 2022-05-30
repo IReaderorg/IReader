@@ -8,8 +8,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
 import org.ireader.data.local.AppDatabase
-import org.ireader.data.local.MIGRATION_10_11
-import org.ireader.data.local.MIGRATION_11_12
+
+import org.ireader.data.local.MIGRATION_19_20
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -23,7 +23,7 @@ class MigrationTest {
 
     // Array of all migrations
     private val ALL_MIGRATIONS = arrayOf(
-        MIGRATION_11_12, MIGRATION_10_11
+        MIGRATION_19_20
     )
 
     @get:Rule
@@ -34,7 +34,7 @@ class MigrationTest {
     )
 
     @Test
-    fun migrate11to12() {
+    fun migrate19to20() {
         database = helper.createDatabase(TEST_DB, 11).apply {
 
             // (id,sourceId,link,title,author,description,genres,status,cover,customCover,favorite,lastUpdated,lastRead,dataAdded,viewer,flags)
@@ -48,7 +48,7 @@ class MigrationTest {
         }
 
         // ADDED a tableId
-        database = helper.runMigrationsAndValidate(TEST_DB, 12, true, MIGRATION_11_12)
+        database = helper.runMigrationsAndValidate(TEST_DB, 12, true, MIGRATION_19_20)
         val resultCursor = database.query("SELECT * FROM library")
         assertTrue(resultCursor.moveToFirst())
 
@@ -70,7 +70,7 @@ class MigrationTest {
             InstrumentationRegistry.getInstrumentation().targetContext,
             AppDatabase::class.java,
             TEST_DB
-        ).addMigrations(MIGRATION_11_12, MIGRATION_10_11).build().apply {
+        ).addMigrations(MIGRATION_19_20).build().apply {
             openHelper.writableDatabase.close()
         }
     }
