@@ -1,4 +1,4 @@
-package org.ireader.settings.setting.category_screen
+package org.ireader.settings.setting.category
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box

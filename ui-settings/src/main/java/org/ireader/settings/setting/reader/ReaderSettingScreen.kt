@@ -1,4 +1,4 @@
-package org.ireader.settings.setting.reader_screen
+package org.ireader.settings.setting.reader
 
 import androidx.compose.runtime.Composable
 

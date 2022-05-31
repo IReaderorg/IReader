@@ -55,7 +55,7 @@ object MoreScreenSpec : BottomNavScreenSpec {
             modifier = Modifier.padding(controller.scaffoldPadding),
             vm = vm,
             onAbout = {
-                controller.navController.navigate(AboutScreenSpec.navHostRoute)
+                controller.navController.navigate(AboutSettingSpec.navHostRoute)
             },
             onSettings = {
                 controller.navController.navigate(SettingScreenSpec.navHostRoute)

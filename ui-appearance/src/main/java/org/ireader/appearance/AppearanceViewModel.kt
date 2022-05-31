@@ -4,9 +4,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import dagger.hilt.android.lifecycle.HiltViewModel
+import org.ireader.core_ui.preferences.PreferenceValues
 import org.ireader.core_ui.preferences.UiPreferences
 import org.ireader.core_ui.theme.CustomizableAppColorsPreferenceState
-import org.ireader.core_ui.theme.ThemeMode
 import org.ireader.core_ui.theme.asState
 import org.ireader.core_ui.theme.getDarkColors
 import org.ireader.core_ui.theme.getLightColors
@@ -29,7 +29,7 @@ class AppearanceViewModel @Inject constructor(
     val lightColors = uiPreferences.getLightColors().asState(scope)
     val darkColors = uiPreferences.getDarkColors().asState(scope)
 
-    fun saveNightModePreferences(mode: ThemeMode) {
+    fun saveNightModePreferences(mode: PreferenceValues.ThemeMode) {
         uiPreferences.themeMode().set(mode)
     }
     @Composable

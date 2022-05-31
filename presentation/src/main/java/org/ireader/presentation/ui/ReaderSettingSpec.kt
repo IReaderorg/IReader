@@ -13,9 +13,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import org.ireader.components.components.Components
-import org.ireader.components.components.SetupUiComponent
+import org.ireader.components.components.setupUiComponent
 import org.ireader.components.components.TitleToolbar
-import org.ireader.settings.setting.reader_screen.ReaderSettingScreenViewModel
+import org.ireader.settings.setting.reader.ReaderSettingScreenViewModel
 import org.ireader.ui_settings.R
 
 object ReaderSettingSpec : ScreenSpec {
@@ -124,7 +124,7 @@ object ReaderSettingSpec : ScreenSpec {
                 .padding(controller.scaffoldPadding)
                 .fillMaxSize()
         ) {
-            SetupUiComponent(items)
+            setupUiComponent(items)
         }
 
     }

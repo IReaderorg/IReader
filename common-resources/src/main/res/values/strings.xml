@@ -21,6 +21,15 @@
     <string name="category">Categories</string>
     <string name="help">Help</string>
     <string name="pref_incognito_mode">Incognito mode</string>
+    <string name="lock_never">Never</string>
+    <string name="lock_always">Always</string>
+    <string name="lock_when_idle">Lock when Idle After</string>
+    <string name="authentication">Authentication</string>
+    <string name="authenticate_to_confirm_change">Authenticate to confirm change</string>
+    <plurals name="lock_after_mins">
+        <item quantity="one">After %1$s minute</item>
+        <item quantity="other">After %1$s minutes</item>
+    </plurals>
     <string name="pref_incognito_mode_summary">Pause reading history</string>
     <string name="no_app_was_found_to_lauch">Something went wrong. you don\'t have the required app.</string>
     <string name="the_downloads_was_interrupted">The Downloads was interrupted</string>
@@ -55,6 +64,7 @@
     <string name="sort">Sort</string>
     <string name="search">Search</string>
     <string name="webView">WebView</string>
+    <string name="browse">Browse</string>
     <string name="open_last_chapter">Open last chapter</string>
     <string name="in_library">in Library</string>
     <string name="compact_layout">Compact Layout</string>
@@ -71,6 +81,10 @@
     <string name="appearance">Appearance</string>
     <string name="updater_is_enable">Updater</string>
     <string name="show_update">Show Update</string>
+    <string name="confirm_exit">Confirm Exit</string>
+    <string name="use_auth">Require unlock</string>
+    <string name="manage_notification">Manage Notification</string>
+    <string name="confirm_exit_message">Press back again to exit</string>
     <string name="show_history">Show History</string>
     <string name="night_mode">Night Mode</string>
     <string name="dark_mode">Dark Mode</string>
@@ -210,6 +224,9 @@
     <string name="label_backup">restoring from Backup</string>
     <string name="label_library">Checking Library</string>
     <string name="library">Library</string>
+    <string name="security">Security</string>
+    <string name="secure_screen">Secure Screen</string>
+    <string name="tracking">Tracking</string>
     <string name="label_recent_updates">Recent Updates</string>
     <string name="popular_book">Most Popular</string>
     <string name="copied_to_clipboard">Copied to clipboard</string>
@@ -245,7 +262,9 @@
     <string name="database_was_cleared">Database was cleared.</string>
     <string name="clear_all_chapters">Clear All Chapters</string>
     <string name="clear_all_database">Clear All Database</string>
+    <string name="clear_all_cover_cache">Clear All Cover Cache</string>
     <string name="clear_all_cache">Clear All Cache</string>
+    <string name="unlock_app">Unlock</string>
     <string name="reset_setting">Reset Setting</string>
     <string name="reset_reader_screen_settings">Reset Reader Screen Settings</string>
     <string name="pin">Pin</string>
@@ -289,6 +308,7 @@
     <string name="immersive_mode">Immersive mode</string>
     <string name="general">General</string>
     <string name="use_default_image_loader">Use the Default Image Loader</string>
+    <string name="system_default">Default</string>
     <string name="reader">Reader</string>
     <string name="landscape">Landscape</string>
     <string name="portrait">Portrait</string>

@@ -17,7 +17,7 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone
 
-object AboutScreenSpec : ScreenSpec {
+object AboutSettingSpec : ScreenSpec {
 
     override val navHostRoute: String = "about_screen_route"
     @ExperimentalMaterial3Api

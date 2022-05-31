@@ -14,11 +14,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
+import org.ireader.core_ui.preferences.PreferenceValues
 import org.ireader.core_ui.preferences.UiPreferences
 import org.ireader.core_ui.theme.AppRippleTheme
 import org.ireader.core_ui.theme.ExtraColors
 import org.ireader.core_ui.theme.Theme
-import org.ireader.core_ui.theme.ThemeMode
 import org.ireader.core_ui.theme.asState
 import org.ireader.core_ui.theme.dark
 import org.ireader.core_ui.theme.getDarkColors
@@ -45,9 +45,9 @@ class AppThemeViewModel @Inject constructor(
     @Composable
     fun getRippleTheme(): RippleTheme {
         return when (themeMode) {
-            ThemeMode.System -> AppRippleTheme(!isSystemInDarkTheme())
-            ThemeMode.Light -> AppRippleTheme(true)
-            ThemeMode.Dark -> AppRippleTheme(false)
+            PreferenceValues.ThemeMode.System -> AppRippleTheme(!isSystemInDarkTheme())
+            PreferenceValues.ThemeMode.Light -> AppRippleTheme(true)
+            PreferenceValues.ThemeMode.Dark -> AppRippleTheme(false)
         }
     }
     @Composable
@@ -70,7 +70,7 @@ class AppThemeViewModel @Inject constructor(
 
     @Composable
     private fun getBaseTheme(
-        themeMode: ThemeMode,
+        themeMode: PreferenceValues.ThemeMode,
         colorTheme: Int,
     ): Theme {
         @Composable
@@ -85,13 +85,13 @@ class AppThemeViewModel @Inject constructor(
         }
 
         return when (themeMode) {
-            ThemeMode.System -> if (!isSystemInDarkTheme()) {
+            PreferenceValues.ThemeMode.System -> if (!isSystemInDarkTheme()) {
                 getTheme(true,)
             } else {
                 getTheme(false)
             }
-            ThemeMode.Light -> getTheme(true)
-            ThemeMode.Dark -> getTheme(false)
+            PreferenceValues.ThemeMode.Light -> getTheme(true)
+            PreferenceValues.ThemeMode.Dark -> getTheme(false)
         }
     }
 

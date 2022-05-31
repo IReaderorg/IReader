@@ -24,7 +24,7 @@ sealed interface ScreenSpec {
             ExtensionScreenSpec,
             MoreScreenSpec,
             AppearanceScreenSpec,
-            AboutScreenSpec,
+            AboutSettingSpec,
             AdvanceSettingSpec,
             BookDetailScreenSpec,
             DownloaderScreenSpec,
@@ -39,7 +39,12 @@ sealed interface ScreenSpec {
             ReaderSettingSpec,
             FontScreenSpec,
             CategoryScreenSpec,
-            GeneralScreenSpec
+            GeneralScreenSpec,
+            BrowseSettingSpec,
+            DownloadSettingSpec,
+            LibraryScreenSpec,
+            SecuritySettingSpec,
+            TrackingSettingSpec
         ).associateBy { it.navHostRoute }
     }
 

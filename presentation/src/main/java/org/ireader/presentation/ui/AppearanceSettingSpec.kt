@@ -1,6 +1,5 @@
 package org.ireader.presentation.ui
 
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,10 +37,7 @@ object AppearanceScreenSpec : ScreenSpec {
         )
     }
 
-    @OptIn(
-        ExperimentalAnimationApi::class,
-        ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class
-    )
+
     @Composable
     override fun Content(
         controller: ScreenSpec.Controller

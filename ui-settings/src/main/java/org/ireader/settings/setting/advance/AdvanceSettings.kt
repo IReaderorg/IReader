@@ -1,4 +1,4 @@
-package org.ireader.settings.setting.advance_setting
+package org.ireader.settings.setting.advance
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -16,14 +16,14 @@ import org.ireader.common_resources.UiEvent
 import org.ireader.common_resources.UiText
 import org.ireader.components.components.component.PreferenceRow
 import org.ireader.components.text_related.TextSection
-import org.ireader.settings.setting.SettingViewModel
+import org.ireader.settings.setting.AdvanceSettingViewModel
 import org.ireader.ui_settings.R
 
 @OptIn(ExperimentalSerializationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun AdvanceSettings(
     modifier: Modifier = Modifier,
-    vm: SettingViewModel,
+    vm: AdvanceSettingViewModel,
     onBackStack: () -> Unit,
     snackBarHostState:SnackbarHostState
 

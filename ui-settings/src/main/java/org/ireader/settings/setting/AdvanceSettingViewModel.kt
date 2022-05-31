@@ -9,21 +9,15 @@ import org.ireader.core_ui.theme.OrientationMode
 import org.ireader.core_ui.theme.Roboto
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.use_cases.local.DeleteUseCase
-import org.ireader.domain.use_cases.local.LocalGetBookUseCases
-import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
-import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.preferences.reader_preferences.ReaderPrefUseCases
-import org.ireader.image_loader.LibraryCovers
+import org.ireader.image_loader.coil.cache.CoverCache
 import javax.inject.Inject
 
 @HiltViewModel
-class SettingViewModel @Inject constructor(
+class AdvanceSettingViewModel @Inject constructor(
     private val deleteUseCase: DeleteUseCase,
-    private val libraryCovers: LibraryCovers,
-    private val booksUseCasa: LocalGetBookUseCases,
-    private val chapterUseCase: LocalGetChapterUseCase,
-    private val insertUseCases: LocalInsertUseCases,
     private val prefUseCases: ReaderPrefUseCases,
+    val coverCache: CoverCache
 
 ) : BaseViewModel() {
     private val _state = mutableStateOf(SettingState())

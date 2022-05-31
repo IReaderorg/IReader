@@ -11,8 +11,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import org.ireader.common_resources.R
 import org.ireader.components.components.TitleToolbar
-import org.ireader.settings.setting.category_screen.CategoryScreen
-import org.ireader.settings.setting.category_screen.CategoryScreenViewModel
+import org.ireader.settings.setting.category.CategoryScreen
+import org.ireader.settings.setting.category.CategoryScreenViewModel
 
 object CategoryScreenSpec : ScreenSpec {
 

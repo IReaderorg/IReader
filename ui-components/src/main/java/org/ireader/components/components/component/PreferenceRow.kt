@@ -50,7 +50,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow.Companion.Ellipsis
 import androidx.compose.ui.unit.dp
@@ -78,7 +77,7 @@ fun PreferenceRow(
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
     subtitle: String? = null,
-    clickable:Boolean = true,
+    clickable: Boolean = true,
     action: @Composable (() -> Unit)? = null,
 ) {
     val height = if (subtitle != null) 72.dp else 56.dp
@@ -93,15 +92,13 @@ fun PreferenceRow(
             .fillMaxWidth()
             .heightIn(min = height)
             .apply {
-                  if (clickable) {
-                      this.combinedClickable(
-                          onLongClick = onLongClick,
-                          onClick = onClick,
-                      )
-                  }
-            }
-
-        ,
+                if (clickable) {
+                    this.combinedClickable(
+                        onLongClick = onLongClick,
+                        onClick = onClick,
+                    )
+                }
+            },
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (painter != null) {
@@ -167,10 +164,11 @@ fun SwitchPreference(
         action = {
             Switch(
                 checked = preference.value,
-                onCheckedChange = null,
+                onCheckedChange = { preference.value = !preference.value },
             )
         },
         onClick = { preference.value = !preference.value },
+        clickable = true,
     )
 }
 
@@ -342,7 +340,7 @@ fun SliderPreference(
     valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
     onValueChangeFinished: ((Float) -> Unit)? = null,
     steps: Int = 0,
-    isEnable:Boolean = true
+    isEnable: Boolean = true
 ) {
 
     val height = if (subtitle != null) 72.dp else 56.dp
@@ -477,8 +475,6 @@ fun ChipPreference(
     )
 }
 
-
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun <Key> ChipChoicePreference(
@@ -488,7 +484,7 @@ fun <Key> ChipChoicePreference(
     subtitle: String? = null,
     icon: ImageVector? = null,
     onValue: ((Key) -> Unit)? = null,
-    onFailToFindElement:String = ""
+    onFailToFindElement: String = ""
 ) {
     var showDialog by remember { mutableStateOf(false) }
     PreferenceRow(
@@ -510,7 +506,7 @@ fun <Key> ChipChoicePreference(
                 shape = RoundedCornerShape(4.dp),
                 content = {
                     CaptionTextComposable(
-                        text =  choices[preference.value] ?:onFailToFindElement,
+                        text = choices[preference.value] ?: onFailToFindElement,
                         maxLine = 1,
                         align = TextAlign.Center,
                         modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
@@ -584,13 +580,20 @@ fun SwitchPreference(
     title: String,
     subtitle: String? = null,
     icon: ImageVector? = null,
+    onValue: ((Boolean) -> Unit)? = null
 ) {
     PreferenceRow(
         title = title,
         subtitle = subtitle,
         icon = icon,
         action = { Switch(checked = preference.value, onCheckedChange = null) },
-        onClick = { preference.value = !preference.value }
+        onClick = {
+            if (onValue != null) {
+                onValue(preference.value)
+            } else {
+                preference.value = !preference.value
+            }
+        }
     )
 }
 
@@ -610,22 +613,22 @@ fun SwitchPreference(
     )
 }
 
-@Composable
-fun <Key> ChoicePreference(
-    preference: PreferenceMutableState<Key>,
-    choices: Map<Key, Int>,
-    title: Int,
-    subtitle: String? = null,
-    onValue: ((Key) -> Unit)? = null
-) {
-    ChoicePreference(
-        preference,
-        choices.mapValues { map -> stringResource(map.value) },
-        stringResource(title),
-        subtitle,
-        onValue
-    )
-}
+//@Composable
+//fun <Key> ChoicePreference(
+//    preference: PreferenceMutableState<Key>,
+//    choices: Map<Key, String>,
+//    title: String,
+//    subtitle: String? = null,
+//    onValue: ((Key) -> Unit)? = null
+//) {
+//    ChoicePreference(
+//        preference,
+//        choices.mapValues { map -> stringResource(map.value) },
+//        stringResource(title),
+//        subtitle,
+//        onValue
+//    )
+//}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

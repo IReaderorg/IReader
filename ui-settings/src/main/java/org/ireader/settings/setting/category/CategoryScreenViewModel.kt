@@ -1,4 +1,4 @@
-package org.ireader.settings.setting.category_screen
+package org.ireader.settings.setting.category
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf

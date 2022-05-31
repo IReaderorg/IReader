@@ -64,8 +64,15 @@ class CatalogModule {
 
     @Provides
     @Singleton
+    fun provideCoverCache( context: Application):CoverCache {
+        return CoverCache(context)
+    }
+
+    @Provides
+    @Singleton
     fun provideImageLoader(
         context: Application,
+        coverCache: CoverCache,
         libraryCovers: LibraryCovers,
         client: HttpClients,
         getLocalCatalog: GetLocalCatalog,
@@ -76,10 +83,12 @@ class CatalogModule {
             context = context,
             getLocalCatalog = getLocalCatalog,
             libraryCovers = libraryCovers,
-            coverCache = CoverCache(context),
+            coverCache = coverCache,
             catalogStore = catalogStore
         )
     }
+
+
 
     @Provides
     @Singleton

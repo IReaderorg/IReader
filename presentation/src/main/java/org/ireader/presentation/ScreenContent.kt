@@ -57,6 +57,7 @@ import org.ireader.common_resources.ARG_HAVE_VARIANT_BOTTOM_BAR
 import org.ireader.common_resources.ARG_HIDE_BOTTOM_BAR
 import org.ireader.common_resources.ARG_SYSTEM_BAR_PADDING
 import org.ireader.common_resources.ARG_TRANSPARENT_STATUS_BAR
+import org.ireader.components.components.ConfirmExitBackHandler
 import org.ireader.components.components.ISnackBarHost
 import org.ireader.core_ui.theme.AppColors
 import org.ireader.core_ui.theme.TransparentStatusBar
@@ -94,6 +95,8 @@ fun ScreenContent() {
     val vm: ScreenContentViewModel = hiltViewModel()
     val (requestedHideBottomNav, requestHideBottomNav) = remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+
+    ConfirmExitBackHandler(vm.confirmExit.value)
 
     DisposableEffect(navBackStackEntry) {
         onDispose {

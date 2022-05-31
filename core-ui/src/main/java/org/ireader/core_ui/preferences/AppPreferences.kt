@@ -54,10 +54,9 @@ class AppPreferences(
         return preferenceStore.getBoolean(SORT_DESC_LIBRARY_SCREEN, true)
     }
 
-
-
     fun lastUpdateCheck(): Preference<Long> {
-        return preferenceStore.getLong(Last_UPDATE_CHECK, 0)
+        return preferenceStore.getLong(AppPreferences.Last_UPDATE_CHECK, 0)
     }
+
 }
 

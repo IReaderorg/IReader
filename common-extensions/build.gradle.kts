@@ -14,6 +14,7 @@ dependencies {
     implementation(project(Modules.commonResources))
 
     implementation(androidx.browser)
+    implementation(androidx.biometric)
     implementation(androidx.lifecycle.viewmodelktx)
     implementation(androidx.appCompat)
     implementation(libs.jsoup)

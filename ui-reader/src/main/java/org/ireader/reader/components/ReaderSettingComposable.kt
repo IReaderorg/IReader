@@ -31,12 +31,12 @@ import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.launch
 import org.ireader.components.components.Components
-import org.ireader.components.components.SetupUiComponent
 import org.ireader.components.components.component.ChipChoicePreference
 import org.ireader.components.components.component.ChipPreference
 import org.ireader.components.components.component.ColorPreference
 import org.ireader.components.components.component.PreferenceRow
 import org.ireader.components.components.component.SwitchPreference
+import org.ireader.components.components.setupUiComponent
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.core_ui.preferences.ReadingMode
@@ -206,7 +206,7 @@ fun ReaderSettingMainLayout(
                             }
                         )
                     }
-                    SetupUiComponent(items)
+                    setupUiComponent(items)
                 }
             },
             TabItem(

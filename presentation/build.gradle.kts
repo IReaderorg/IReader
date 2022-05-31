@@ -30,6 +30,7 @@ dependencies {
     implementation(project(Modules.core))
     implementation(project(Modules.coreUi))
     implementation(project(Modules.coreApi))
+    implementation(androidx.biometric)
     implementation(project(Modules.commonModels))
     implementation(project(Modules.commonResources))
     implementation(project(Modules.commonData))

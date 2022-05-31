@@ -3,6 +3,7 @@ package org.ireader.core_api.source
 import androidx.annotation.Keep
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.get
+import io.ktor.client.request.headers
 import io.ktor.client.request.url
 import io.ktor.http.HeadersBuilder
 import io.ktor.http.HttpHeaders
@@ -71,6 +72,13 @@ open class SourceFactory(
     open fun getUserAgent() =
         "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36"
 
+    open fun HttpRequestBuilder.headersBuilder(block: HeadersBuilder.() -> Unit = {
+        append(HttpHeaders.UserAgent, getUserAgent())
+        append(HttpHeaders.CacheControl, "max-age=0")
+    }) {
+        headers(block)
+    }
+
     open fun requestBuilder(
         url: String,
         block: HeadersBuilder.() -> Unit = {
@@ -80,7 +88,7 @@ open class SourceFactory(
     ): HttpRequestBuilder {
         return HttpRequestBuilder().apply {
             url(url)
-            HeadersBuilder().apply(block)
+            headers(block)
         }
     }
 

@@ -26,14 +26,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.ireader.components.components.Toolbar
 import org.ireader.components.components.component.ChoicePreference
 import org.ireader.components.components.component.ColorPreference
+import org.ireader.core_ui.preferences.PreferenceValues
 import org.ireader.core_ui.theme.AppColors
 import org.ireader.core_ui.theme.Theme
-import org.ireader.core_ui.theme.ThemeMode
 import org.ireader.core_ui.theme.dark
 import org.ireader.core_ui.theme.isLight
 import org.ireader.core_ui.theme.light
@@ -45,7 +46,7 @@ import org.ireader.ui_appearance.R
 fun AppearanceSettingScreen(
     modifier: Modifier = Modifier,
     onPopBackStack: () -> Unit,
-    saveDarkModePreference: (ThemeMode) -> Unit,
+    saveDarkModePreference: (PreferenceValues.ThemeMode) -> Unit,
     vm: AppearanceViewModel
 ) {
     val customizedColors = vm.getCustomizedColors()
@@ -63,11 +64,11 @@ fun AppearanceSettingScreen(
             ChoicePreference(
                 preference = vm.themeMode,
                 choices = mapOf(
-                    ThemeMode.System to R.string.follow_system_settings,
-                    ThemeMode.Light to R.string.light,
-                    ThemeMode.Dark to R.string.dark
+                    PreferenceValues.ThemeMode.System to stringResource(id =  R.string.follow_system_settings),
+                    PreferenceValues.ThemeMode.Light to stringResource(id =R.string.light),
+                    PreferenceValues.ThemeMode.Dark to stringResource(id =R.string.dark)
                 ),
-                title = R.string.theme,
+                title = stringResource(id = R.string.theme),
                 subtitle = null,
                 onValue = {
                     vm.saveNightModePreferences(it)

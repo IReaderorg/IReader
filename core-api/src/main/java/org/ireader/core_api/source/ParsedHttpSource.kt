@@ -29,25 +29,26 @@ abstract class ParsedHttpSource(private val dependencies: Dependencies) : HttpSo
                 .reduce(Long::or) and Long.MAX_VALUE
     }
 
-
-    open fun HttpRequestBuilder.headersBuilder() {
-        headers {
-            append(HttpHeaders.UserAgent, "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36")
-            append(HttpHeaders.CacheControl, "max-age=0")
-        }
+    open fun getUserAgent() =
+        "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36"
+    open fun HttpRequestBuilder.headersBuilder(block: HeadersBuilder.() -> Unit = {
+        append(HttpHeaders.UserAgent, getUserAgent())
+        append(HttpHeaders.CacheControl, "max-age=0")
+    }) {
+        headers(block)
     }
 
 
     fun requestBuilder(
             url: String,
             block: HeadersBuilder.() -> Unit = {
-                append(HttpHeaders.UserAgent, "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36")
+                append(HttpHeaders.UserAgent, getUserAgent())
                 append(HttpHeaders.CacheControl, "max-age=0")
             }
     ): HttpRequestBuilder {
         return HttpRequestBuilder().apply {
             url(url)
-            HeadersBuilder().apply(block)
+            headers(block)
         }
     }
 

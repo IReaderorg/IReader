@@ -1,14 +1,16 @@
 package org.ireader.core_ui.preferences
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import org.ireader.core_api.prefs.Preference
 import org.ireader.core_api.prefs.PreferenceStore
 import org.ireader.core_api.prefs.getEnum
-import org.ireader.core_ui.theme.ThemeMode
 
 class UiPreferences(private val preferenceStore: PreferenceStore) {
 
-    fun themeMode(): Preference<ThemeMode> {
-        return preferenceStore.getEnum("theme_mode", ThemeMode.System)
+    fun themeMode(): Preference<PreferenceValues.ThemeMode> {
+        return preferenceStore.getEnum("theme_mode", PreferenceValues.ThemeMode.System)
     }
 
     fun colorTheme(): Preference<Int> {
@@ -61,6 +63,21 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
 
     fun incognitoMode(): Preference<Boolean> {
         return preferenceStore.getBoolean("incognito_mode", false)
+    }
+    fun useAuthenticator(): Preference<Boolean> {
+        return preferenceStore.getBoolean("use_authenticator", false)
+    }
+    fun lastAppUnlock(): Preference<Long> {
+        return preferenceStore.getLong("last_app_unlock", 0)
+    }
+    fun lockAppAfter(): Preference<Long> {
+        return preferenceStore.getLong("lock_app_after", 0)
+    }
+    var isAppLocked by mutableStateOf(true)
+
+
+    fun secureScreen(): Preference<PreferenceValues.SecureScreenMode> {
+        return preferenceStore.getEnum("secure_screen", PreferenceValues.SecureScreenMode.INCOGNITO)
     }
     fun lastUsedSource(): Preference<Long> {
         return preferenceStore.getLong("last_used_source", -1L)

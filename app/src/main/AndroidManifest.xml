@@ -74,6 +74,10 @@
 
 
         </activity>
+        <activity android:name="org.ireader.presentation.ui.UnlockActivity"
+            android:theme="@style/Theme.Splash"
+            android:exported="false"
+            />
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="${applicationId}.androidx-startup"
