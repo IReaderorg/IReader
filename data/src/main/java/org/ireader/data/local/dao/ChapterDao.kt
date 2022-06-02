@@ -5,7 +5,6 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 import org.ireader.common_models.entities.Chapter
 
@@ -132,7 +131,7 @@ interface ChapterDao : BaseDao<org.ireader.common_models.entities.Chapter> {
     suspend fun deleteChaptersByBookId(bookId: Long)
 
     @Delete
-    suspend fun deleteChaptersByBookId(chapters: List<org.ireader.common_models.entities.Chapter>)
+    suspend fun deleteChapters(chapters: List<org.ireader.common_models.entities.Chapter>)
 
     @Delete
     suspend fun deleteChapter(chapter: org.ireader.common_models.entities.Chapter)
@@ -140,12 +139,5 @@ interface ChapterDao : BaseDao<org.ireader.common_models.entities.Chapter> {
     @Query("DELETE FROM chapter ")
     suspend fun deleteAllChapters()
 
-    @Transaction
-    suspend fun updateChapters(
-        bookId: Long,
-        chapters: List<org.ireader.common_models.entities.Chapter>
-    ) {
-        deleteChaptersByBookId(bookId)
-        insertChapters(chapters)
-    }
+
 }

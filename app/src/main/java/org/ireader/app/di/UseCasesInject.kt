@@ -55,7 +55,6 @@ import org.ireader.domain.use_cases.local.delete_usecases.chapter.DeleteAllChapt
 import org.ireader.domain.use_cases.local.delete_usecases.chapter.DeleteChapterByChapter
 import org.ireader.domain.use_cases.local.delete_usecases.chapter.DeleteChapters
 import org.ireader.domain.use_cases.local.delete_usecases.chapter.DeleteChaptersByBookId
-import org.ireader.domain.use_cases.local.delete_usecases.chapter.UpdateChaptersUseCase
 import org.ireader.domain.use_cases.local.insert_usecases.InsertBook
 import org.ireader.domain.use_cases.local.insert_usecases.InsertBookAndChapters
 import org.ireader.domain.use_cases.local.insert_usecases.InsertBooks
@@ -135,7 +134,6 @@ class UseCasesInject {
             insertBooks = InsertBooks(localBookRepository),
             insertChapter = InsertChapter(localChapterRepository),
             insertChapters = InsertChapters(localChapterRepository),
-            updateChaptersUseCase = UpdateChaptersUseCase(localChapterRepository)
         )
     }
 

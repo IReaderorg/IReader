@@ -10,7 +10,10 @@ class CategoryRepositoryImpl(
     private val dao: CategoryDao,
 ) : org.ireader.common_data.repository.CategoryRepository {
     override fun subscribeAll(): Flow<List<CategoryWithCount>> {
-        return dao.subscribeAll().map { list -> list.map { it.toCategoryWithCount() } }
+        return dao.subscribeAll().map { list ->
+            list.map {
+            it.toCategoryWithCount()
+        } }
     }
 
     override suspend fun findAll(): List<CategoryWithCount> {

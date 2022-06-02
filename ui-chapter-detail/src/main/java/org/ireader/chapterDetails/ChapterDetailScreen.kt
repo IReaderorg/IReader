@@ -44,7 +44,7 @@ import androidx.compose.ui.unit.dp
 import org.ireader.chapterDetails.viewmodel.ChapterDetailViewModel
 import org.ireader.common_models.entities.Chapter
 import org.ireader.components.CustomTextField
-import org.ireader.components.components.ChapterListItemComposable
+import org.ireader.components.components.ChapterRow
 import org.ireader.components.list.scrollbars.LazyColumnScrollbar
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.core_ui.theme.AppColors
@@ -173,7 +173,7 @@ private fun ChaptersContent(
             state = scrollState
         ) {
             items(chapters.value.size) { index ->
-                ChapterListItemComposable(
+                ChapterRow(
                     modifier = Modifier,
                     chapter = chapters.value[index],
                     onItemClick = {
@@ -185,6 +185,18 @@ private fun ChaptersContent(
                         onLongClick(chapters.value[index])
                     }
                 )
+//                ChapterListItemComposable(
+//                    modifier = Modifier,
+//                    chapter = chapters.value[index],
+//                    onItemClick = {
+//                        onItemClick(chapters.value[index])
+//                    },
+//                    isLastRead = isLastRead(chapters.value[index]),
+//                    isSelected = isSelected(chapters.value[index]),
+//                    onLongClick = {
+//                        onLongClick(chapters.value[index])
+//                    }
+//                )
             }
         }
     }

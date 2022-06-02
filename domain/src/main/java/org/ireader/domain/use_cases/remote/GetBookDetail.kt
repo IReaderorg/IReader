@@ -33,8 +33,8 @@ class GetBookDetail @Inject constructor(
 
                     onSuccess(
                         updateBook(
-                            bookDetail.toBook(catalog.sourceId),
-                            book
+                            newBook = bookDetail.toBook(catalog.sourceId, bookId = book.id),
+                            oldBook = book
                         )
                     )
                 } catch (e: CancellationException) {

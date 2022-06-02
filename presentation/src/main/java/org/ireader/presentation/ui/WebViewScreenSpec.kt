@@ -68,28 +68,11 @@ object WebViewScreenSpec : ScreenSpec {
             onModalBottomSheetHide = {
                 scope.launch {
                     controller.sheetState.hide()
-
                 }
             },
             onModalBottomSheetShow = {
                 scope.launch {
                     controller.sheetState.show()
-                }
-            },
-            onFetchChapters = {
-
-            },
-            onFetchChapter = {
-
-            },
-            onFetchBook = {
-                val book = vm.stateBook
-                val source = vm.source
-                if (source != null) {
-                    vm.getDetails(
-                        book = book,
-                        webView = it,
-                    )
                 }
             },
             source = vm.source,

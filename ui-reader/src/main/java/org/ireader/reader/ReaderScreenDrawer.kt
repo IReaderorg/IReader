@@ -22,7 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import org.ireader.common_models.entities.Chapter
-import org.ireader.components.components.ChapterListItemComposable
+import org.ireader.components.components.ChapterRow
 import org.ireader.components.list.scrollbars.LazyColumnScrollbar
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.BigSizeTextComposable
@@ -77,7 +77,7 @@ fun ReaderScreenDrawer(
                 state = drawerScrollState
             ) {
                 items(count = chapters.size) { index ->
-                    ChapterListItemComposable(
+                    ChapterRow(
                         modifier = modifier,
                         chapter = chapters[index],
                         onItemClick = { onChapter(chapters[index]) },

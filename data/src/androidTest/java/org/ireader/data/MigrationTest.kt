@@ -8,8 +8,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
 import org.ireader.data.local.AppDatabase
-
-import org.ireader.data.local.MIGRATION_19_20
+import org.ireader.data.local.AppDatabase_Migrations
+import org.ireader.data.local.MIGRATION_20_21
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -23,7 +23,7 @@ class MigrationTest {
 
     // Array of all migrations
     private val ALL_MIGRATIONS = arrayOf(
-        MIGRATION_19_20
+        MIGRATION_20_21
     )
 
     @get:Rule
@@ -34,13 +34,13 @@ class MigrationTest {
     )
 
     @Test
-    fun migrate19to20() {
-        database = helper.createDatabase(TEST_DB, 11).apply {
+    fun migrate20to21() {
+        database = helper.createDatabase(TEST_DB, 20).apply {
 
             // (id,sourceId,link,title,author,description,genres,status,cover,customCover,favorite,lastUpdated,lastRead,dataAdded,viewer,flags)
             execSQL(
                 """
-                INSERT INTO library  VALUES (0,0,'google.com','test book','myself','this is test','',0,'','',0,0,0,0,0,0)
+                INSERT INTO library(`id`,`sourceId`,`title`,`key`,`tableId`,`type`,`author`,`description`,`genres`,`status`,`cover`,`customCover`,`favorite`,`lastUpdate`,`lastInit`,`dataAdded`,`viewer`,`flags`) VALUES(10,10,"test","test.com",0,0,"author","desc","",0,"cover","customCOver",0,0,0,0,0,0)
                 """.trimIndent()
             )
 
@@ -48,14 +48,16 @@ class MigrationTest {
         }
 
         // ADDED a tableId
-        database = helper.runMigrationsAndValidate(TEST_DB, 12, true, MIGRATION_19_20)
+        database = helper.runMigrationsAndValidate(TEST_DB, 21, true, MIGRATION_20_21)
         val resultCursor = database.query("SELECT * FROM library")
         assertTrue(resultCursor.moveToFirst())
 
-        val tableIdIndex = resultCursor.getColumnIndex("tableId")
+        print("db result is  $resultCursor")
 
-        val tableIdFromDatabase = resultCursor.getLong(tableIdIndex)
-        assertThat(tableIdFromDatabase).isEqualTo(0)
+        val tableIdIndex = resultCursor.getColumnIndex("title")
+
+        val title = resultCursor.getString(tableIdIndex)
+        assertThat(title).isEqualTo("test")
     }
 
     @Test
@@ -70,7 +72,7 @@ class MigrationTest {
             InstrumentationRegistry.getInstrumentation().targetContext,
             AppDatabase::class.java,
             TEST_DB
-        ).addMigrations(MIGRATION_19_20).build().apply {
+        ).addMigrations(*AppDatabase_Migrations.build()).build().apply {
             openHelper.writableDatabase.close()
         }
     }

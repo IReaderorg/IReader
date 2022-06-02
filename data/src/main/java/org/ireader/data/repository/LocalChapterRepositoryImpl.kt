@@ -77,10 +77,10 @@ class LocalChapterRepositoryImpl @Inject constructor(private val daoLibrary: Cha
     }
 
     override suspend fun deleteChapters(chapters: List<org.ireader.common_models.entities.Chapter>) {
-        return daoLibrary.deleteChaptersByBookId(chapters)
+        return daoLibrary.deleteChapters(chapters)
     }
 
-    override suspend fun deleteChapterByChapter(chapter: org.ireader.common_models.entities.Chapter) {
+    override suspend fun deleteChapter(chapter: org.ireader.common_models.entities.Chapter) {
         return daoLibrary.deleteChapter(chapter)
     }
 
@@ -88,7 +88,4 @@ class LocalChapterRepositoryImpl @Inject constructor(private val daoLibrary: Cha
         return daoLibrary.deleteAllChapters()
     }
 
-    override suspend fun updateChapters(bookId: Long, chapters: List<org.ireader.common_models.entities.Chapter>) {
-        daoLibrary.updateChapters(bookId, chapters)
-    }
 }

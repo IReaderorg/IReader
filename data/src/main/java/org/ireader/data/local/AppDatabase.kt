@@ -44,7 +44,7 @@ import java.util.concurrent.Executors
         FontEntity::class,
         BookCategory::class
     ],
-    version = 20,
+    version = 21,
     exportSchema = true,
 )
 @TypeConverters(DatabaseConverter::class)
@@ -77,26 +77,17 @@ abstract class AppDatabase : RoomDatabase() {
                 AppDatabase::class.java,
                 DATABASE_NAME
             )
+                .addMigrations(MIGRATION_20_21())
                 // prepopulate the database after onCreate was called
                 .addCallback(object : Callback() {
                     override fun onCreate(db: SupportSQLiteDatabase) {
                         super.onCreate(db)
-                        // insert the data on the IO Thread
                         Executors.newSingleThreadExecutor().execute {
                             getInstance(context).categoryDao.insertDate(systemCategories)
                         }
                     }
                 })
-                .addMigrations(*AppDatabase_Migrations.build())
                 .fallbackToDestructiveMigration()
-                .addCallback(object : RoomDatabase.Callback() {
-                    override fun onCreate(db: SupportSQLiteDatabase) {
-                        super.onCreate(db)
-                        Executors.newSingleThreadExecutor().execute {
-
-                        }
-                    }
-                })
                 .build()
 
         val systemCategories = listOf<Category>(
@@ -106,68 +97,11 @@ abstract class AppDatabase : RoomDatabase() {
     }
 }
 
-val MIGRATION_19_20 = object : Migration(11, 12) {
+internal fun MIGRATION_20_21() = object : Migration(20, 21) {
     override fun migrate(database: SupportSQLiteDatabase) {
-        database.execSQL(
-            """
-                    CREATE TABLE chapter_new (
-            id INTEGER NOT NULL PRIMARY KEY,
-    bookId INTEGER NOT NULL,
-    `key` TEXT NOT NULL,
-    name TEXT NOT NULL,
-    translator TEXT,
-    read INTEGER NOT NULL,
-    bookmark INTEGER NOT NULL,
-    number REAL NOT NULL,
-    sourceOrder INTEGER NOT NULL,
-    content TEXT NOT NULL,
-    dateFetch INTEGER NOT NULL,
-    dateUpload INTEGER NOT NULL);
-        """.trimIndent()
-        )
-
-        database.execSQL(
-            """
-             INSERT INTO chapter_new (id, 
-        bookId,name,read,bookmark,dateUpload,dateFetch,sourceOrder,content,number,translator) SELECT id, 
-        bookId,name,read,bookmark,dateUpload,dateFetch,sourceOrder,content,number,translator FROM chapter
-        """.trimIndent()
-        )
-
-        database.execSQL(
-            """
-               DROP TABLE chapter
-        """.trimIndent()
-        )
-        database.execSQL(
-            """
-    ALTER TABLE chapter_new RENAME TO chapter
-        """.trimIndent()
-        )
-
-        database.execSQL(
-            """
-            CREATE TABLE history_new (
-            bookId INTEGER NOT NULL PRIMARY KEY,
-            chapterId INTEGER NOT NULL PRIMARY KEY,
-            readAt INTEGER NOT NULL,
-            progress INTEGER NOT NULL);
-        """.trimIndent()
-        )
-        database.execSQL(
-            """
-            INSERT INTO history_new (bookId,chapterId,readAt) SELECT bookId,chapterId,readAt FROM history
-        """.trimIndent()
-        )
-        database.execSQL(
-            """
-               DROP TABLE history
-        """.trimIndent()
-        )
-        database.execSQL(
-            """
-    ALTER TABLE history_new RENAME TO history
-        """.trimIndent()
-        )
+        database.execSQL("""CREATE TABLE IF NOT EXISTS `history_MERGE_TABLE` (`bookId` INTEGER NOT NULL, `chapterId` INTEGER NOT NULL, `readAt` INTEGER NOT NULL, `progress` INTEGER NOT NULL, PRIMARY KEY(`bookId`, `chapterId`), FOREIGN KEY(`bookId`) REFERENCES `library`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE  )""")
+        database.execSQL("""INSERT INTO `history_MERGE_TABLE` (`bookId`,`chapterId`,`readAt`, `progress`) SELECT `bookId`,`chapterId`,`readAt`, `progress` FROM `history`""")
+        database.execSQL("""DROP TABLE IF EXISTS `history`""")
+        database.execSQL("""ALTER TABLE `history_MERGE_TABLE` RENAME TO `history`""")
     }
 }

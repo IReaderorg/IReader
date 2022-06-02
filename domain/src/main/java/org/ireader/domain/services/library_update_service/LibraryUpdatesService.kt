@@ -78,14 +78,16 @@ class LibraryUpdatesService @AssistedInject constructor(
                         val remoteChapters = mutableListOf<Chapter>()
                         remoteUseCases.getRemoteChapters(
                             book, source,
-                            onSuccess = {
+                            onRemoteSuccess = {
                                 builder.setContentText(book.title)
                                 builder.setSubText(index.toString())
                                 builder.setProgress(libraryBooks.size, index, false)
                                 notify(Notifications.ID_LIBRARY_PROGRESS, builder.build())
                                 remoteChapters.addAll(it)
                             },
-                            onError = {}
+                            onError = {},
+                            oldChapters = chapters,
+                            onSuccess = {}
                         )
 
                         val newChapters =

@@ -56,5 +56,8 @@ fun ChapterInfo.toChapter(bookId: Long): Chapter {
         name = name,
         key = key,
         bookId = bookId,
+        number = number,
+        dateUpload = dateUpload,
+        translator = this.scanlator,
     )
 }

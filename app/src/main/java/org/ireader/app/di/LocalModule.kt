@@ -9,10 +9,19 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.ktor.client.plugins.cookies.CookiesStorage
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import okio.FileSystem
 import okio.Path.Companion.toOkioPath
 import org.ireader.app.BuildConfig
 import org.ireader.app.R
+import org.ireader.common_extensions.async.ApplicationScope
+import org.ireader.common_extensions.async.DefaultDispatcher
+import org.ireader.common_extensions.async.IoDispatcher
+import org.ireader.common_extensions.async.MainDispatcher
+import org.ireader.common_extensions.async.MainImmediateDispatcher
 import org.ireader.common_resources.ProjectConfig
 import org.ireader.core_api.http.AcceptAllCookiesStorage
 import org.ireader.core_api.prefs.AndroidPreferenceStore
@@ -61,7 +70,6 @@ class LocalModule {
     }
 
 
-
     @OptIn(ExperimentalTextApi::class)
     @Provides
     @Singleton
@@ -72,4 +80,27 @@ class LocalModule {
             certificates = R.array.com_google_android_gms_fonts_certs
         )
     }
+    @Provides
+    @Singleton
+    @ApplicationScope
+    fun provideActivityCoroutineScope(
+        @DefaultDispatcher defaultDispatcher: CoroutineDispatcher
+    ): CoroutineScope {
+        return CoroutineScope(defaultDispatcher +  SupervisorJob())
+    }
+    @DefaultDispatcher
+    @Provides
+    fun providesDefaultDispatcher(): CoroutineDispatcher = Dispatchers.Default
+
+    @IoDispatcher
+    @Provides
+    fun providesIoDispatcher(): CoroutineDispatcher = Dispatchers.IO
+
+    @MainDispatcher
+    @Provides
+    fun providesMainDispatcher(): CoroutineDispatcher = Dispatchers.Main
+
+    @MainImmediateDispatcher
+    @Provides
+    fun providesMainImmediateDispatcher(): CoroutineDispatcher = Dispatchers.Main.immediate
 }

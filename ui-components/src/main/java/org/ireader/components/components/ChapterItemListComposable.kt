@@ -2,25 +2,37 @@ package org.ireader.components.components
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material3.Icon
-import androidx.compose.material.ListItem
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.PublishedWithChanges
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.unit.dp
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.ireader.common_models.entities.Chapter
+import org.ireader.core_api.util.DateTimeFormatter
+import org.ireader.core_api.util.format
 import org.ireader.core_ui.modifier.selectedBackground
 
-@OptIn( ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
+private val dateFormat = DateTimeFormatter("dd/MM/yy")
+
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ChapterListItemComposable(
+fun ChapterRow(
     modifier: Modifier = Modifier,
     chapter: Chapter,
     onItemClick: () -> Unit,
@@ -29,39 +41,64 @@ fun ChapterListItemComposable(
     isSelected: Boolean = false,
     isLoading: Boolean = false,
 ) {
-
-    ListItem(
-        modifier = modifier
-            .combinedClickable(
-                onClick = { onItemClick() },
-                onLongClick = { onLongClick() }
+    Row(
+        modifier = Modifier
+            .height(64.dp)
+            .combinedClickable(onClick = onItemClick, onLongClick = onLongClick)
+            .selectedBackground(isSelected)
+            .padding(start = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (chapter.bookmark) {
+            Icon(
+                modifier = Modifier
+                    .padding(end = 18.dp)
+                    .align(Alignment.CenterVertically),
+                imageVector = Icons.Default.Bookmark,
+                contentDescription = "Bookmarked",
+                tint = MaterialTheme.colorScheme.primary,
             )
-            .selectedBackground(isSelected),
-        icon = if (chapter.bookmark) {
-            {
-                Icon(
-                    imageVector = Icons.Default.Bookmark,
-                    contentDescription = "Bookmarked",
-                    tint = MaterialTheme.colorScheme.primary,
-                )
-            }
-        } else null,
-        text = {
+        }
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+
             Text(
-                text = chapter.name,
-                color = if (!isLastRead) {
-                    if (chapter.read) MaterialTheme.colorScheme.onBackground.copy(
-                        alpha = .4f
-                    ) else MaterialTheme.colorScheme.onBackground
-                } else {
-                    MaterialTheme.colorScheme.primary
+                buildAnnotatedString {
+                    if (chapter.number != -1f) {
+                        append("${chapter.number}   ")
+                    }
+                    append(chapter.name)
                 },
                 style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.SemiBold,
-                overflow = TextOverflow.Ellipsis,
+                color = if (isLastRead) MaterialTheme.colorScheme.primary else LocalContentColor.current.copy(
+                    alpha = if (chapter.read) ContentAlpha.disabled else ContentAlpha.high
+                )
             )
-        },
-        trailing = {
+            val subtitleStr = buildAnnotatedString {
+                if (chapter.dateUpload > 0) {
+                    val instant = Instant.fromEpochMilliseconds(chapter.dateUpload)
+                    val dateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
+                    append(dateTime.format(dateFormat))
+                }
+                if (chapter.translator.isNotBlank()) {
+                    if (length > 0) append(" • ")
+                    append(chapter.translator)
+                }
+            }
+            if (subtitleStr.text.isNotBlank()) {
+                Text(
+                    subtitleStr,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = LocalContentColor.current.copy(
+                        alpha = if (chapter.read) ContentAlpha.disabled else ContentAlpha.medium
+                    )
+                )
+            }
+
+        }
+        Row(modifier = Modifier.padding(horizontal = 16.dp)) {
             if (isLoading) {
                 ShowLoading()
             }
@@ -72,19 +109,7 @@ fun ChapterListItemComposable(
                     tint = MaterialTheme.colorScheme.onBackground,
                 )
             }
-        },
-        secondaryText = {
-
-            Text(
-                text = if (chapter.dateUpload != 0L) chapter.dateUpload.toString() else "",
-                fontStyle = FontStyle.Italic,
-                color = if (chapter.read) MaterialTheme.colorScheme.onBackground.copy(
-                    alpha = .4f
-                ) else MaterialTheme.colorScheme.onBackground,
-                fontWeight = FontWeight.SemiBold,
-                style = MaterialTheme.typography.labelSmall
-            )
         }
 
-    )
+    }
 }

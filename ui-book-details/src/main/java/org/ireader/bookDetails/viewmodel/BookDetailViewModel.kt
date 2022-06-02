@@ -2,21 +2,18 @@ package org.ireader.bookDetails.viewmodel
 
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.ireader.common_extensions.findComponentActivity
+import org.ireader.common_extensions.async.ApplicationScope
+import org.ireader.common_extensions.async.withIOContext
 import org.ireader.common_extensions.launchIO
-import org.ireader.common_extensions.removeSameItemsFromList
 import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.CatalogLocal
-import org.ireader.common_models.entities.Chapter
 import org.ireader.common_resources.UiText
 import org.ireader.core.R
 import org.ireader.core_api.log.Log
@@ -24,7 +21,6 @@ import org.ireader.core_api.source.CatalogSource
 import org.ireader.core_api.source.model.CommandList
 import org.ireader.core_catalogs.interactor.GetLocalCatalog
 import org.ireader.core_ui.viewmodel.BaseViewModel
-import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
@@ -42,15 +38,14 @@ class BookDetailViewModel @Inject constructor(
     private val getLocalCatalog: GetLocalCatalog,
     val state: DetailStateImpl,
     val chapterState: ChapterStateImpl,
-    val deleteUseCase: DeleteUseCase,
     private val serviceUseCases: ServiceUseCases,
+    @ApplicationScope private val applicationScope: CoroutineScope
 ) : BaseViewModel(), DetailState by state, ChapterState by chapterState {
 
     var getBookDetailJob: Job? = null
     var getChapterDetailJob: Job? = null
 
     var initBooks = false
-    var initChapters = false
 
     init {
         val bookId = savedStateHandle.get<Long>("bookId")
@@ -65,23 +60,8 @@ class BookDetailViewModel @Inject constructor(
             }
             toggleBookLoading(true)
             chapterIsLoading = true
-            subscribeBook(bookId = bookId, onSuccess = { book ->
-                state.book = book
-                toggleBookLoading(false)
-                if (!initBooks) {
-                    initBooks = true
-                    if (book.lastUpdate < 1L && source != null) {
-                        getRemoteBookDetail(book, catalogSource)
-                        getRemoteChapterDetail(book, catalogSource)
-                    } else {
-                        toggleBookLoading(false)
-                        chapterIsLoading = false
-                    }
-                }
-            })
-            subscribeChapters(bookId = bookId, onSuccess = { snapshot ->
-                chapters = snapshot
-            })
+            subscribeBook(bookId = bookId)
+            subscribeChapters(bookId = bookId)
         } else {
             viewModelScope.launch {
                 showSnackBar(UiText.StringResource(R.string.something_is_wrong_with_this_book))
@@ -89,44 +69,56 @@ class BookDetailViewModel @Inject constructor(
         }
     }
 
-    private fun subscribeBook(bookId: Long, onSuccess: suspend (Book) -> Unit) {
+    private fun subscribeBook(bookId: Long) {
         getBookUseCases.subscribeBookById(bookId)
             .onEach { snapshot ->
-                snapshot?.let { book ->
-                    onSuccess(book)
+                state.book = snapshot
+                toggleBookLoading(false)
+                if (!initBooks) {
+                    initBooks = true
+                    if (snapshot != null && snapshot.lastUpdate < 1L && source != null) {
+                        getRemoteBookDetail(snapshot, catalogSource)
+                        getRemoteChapterDetail(snapshot, catalogSource)
+                    } else {
+                        toggleBookLoading(false)
+                        chapterIsLoading = false
+                    }
                 }
-            }.launchIn(viewModelScope)
+            }.launchIn(scope)
     }
 
-    private fun subscribeChapters(bookId: Long, onSuccess: suspend (List<Chapter>) -> Unit = {}) {
-        getChapterUseCase.subscribeChaptersByBookId(bookId)
-            .onEach { snapshot ->
-                if (snapshot.isNotEmpty()) {
-                    onSuccess(snapshot)
-                }
-            }.launchIn(viewModelScope)
+    /**
+     * sometimes the chapters snapshot is empty as if they were deleted,
+     * I wasn't able to find why, so I decide to insert chapters again.
+     *
+     */
+    private fun subscribeChapters(bookId: Long) {
+        getChapterUseCase.subscribeChaptersByBookId(bookId).onEach { snapshot ->
+            if (snapshot.isNotEmpty()) {
+                chapters = snapshot
+            } else {
+                localInsertUseCases.insertChapters(chapters)
+            }
+        }.launchIn(viewModelScope)
     }
 
     suspend fun getRemoteBookDetail(book: Book, source: CatalogLocal?) {
         toggleBookLoading(true)
         getBookDetailJob?.cancel()
-        getBookDetailJob = viewModelScope.launch(Dispatchers.IO) {
+        getBookDetailJob = viewModelScope.launch {
             remoteUseCases.getBookDetail(
                 book = book,
                 catalog = source,
                 onError = { message ->
                     toggleBookLoading(false)
-                    insertBookDetailToLocal(state.book!!)
                     if (message != null) {
                         Log.error { message.toString() }
                         showSnackBar(message)
                     }
                 },
                 onSuccess = { resultBook ->
-                    if (state.book != null) {
-                        toggleBookLoading(false)
-                        insertBookDetailToLocal(resultBook)
-                    }
+                    toggleBookLoading(false)
+                    localInsertUseCases.insertBook(resultBook)
                 }
 
             )
@@ -151,65 +143,35 @@ class BookDetailViewModel @Inject constructor(
                     chapterIsLoading = false
                 },
                 onSuccess = { result ->
-                    val uniqueList =
-                        removeSameItemsFromList(
-                            chapterState.chapters,
-                            result
-                        ) {
-                            it.key
-                        }
-                    if (uniqueList.isNotEmpty()) {
-                        withContext(Dispatchers.IO) {
-                            localInsertUseCases.updateChaptersUseCase(book.id, uniqueList)
-                        }
+                    withIOContext {
+                        localInsertUseCases.insertChapters(result)
                     }
                     chapterIsLoading = false
                 },
-                commands = commands
-            )
-        }
-    }
-
-    private fun insertBookDetailToLocal(book: Book) {
-        viewModelScope.launch(Dispatchers.IO) {
-            localInsertUseCases.insertBook(book.copy(dataAdded = Calendar.getInstance().timeInMillis))
-        }
-    }
-
-    private fun updateChaptersEntity(inLibrary: Boolean, bookId: Long) {
-        viewModelScope.launch(Dispatchers.IO) {
-            localInsertUseCases.insertChapters(
-                chapterState.chapters.map {
-                    it.copy(bookId = bookId)
-                }
+                commands = commands,
+                oldChapters = chapterState.chapters
             )
         }
     }
 
     fun toggleInLibrary(book: Book, context: Context) {
         this.inLibraryLoading = true
-        context.findComponentActivity()?.let {
-            it.lifecycleScope.launchIO {
-                if (!book.favorite) {
-                    insertBookDetailToLocal(
-                        book.copy(
-                            favorite = true,
-                            dataAdded = Calendar.getInstance().timeInMillis,
-                        )
+        applicationScope.launchIO {
+            if (!book.favorite) {
+                localInsertUseCases.insertBook(
+                    book.copy(
+                        favorite = true,
+                        dataAdded = Calendar.getInstance().timeInMillis,
                     )
-                    updateChaptersEntity(true, book.id)
-                } else {
-                    insertBookDetailToLocal(
-                        (
-                            book.copy(
-                                favorite = false,
-                            )
-                            )
+                )
+            } else {
+                localInsertUseCases.insertBook(
+                    book.copy(
+                        favorite = false,
                     )
-                    updateChaptersEntity(false, book.id)
-                }
-                this@BookDetailViewModel.inLibraryLoading = false
+                )
             }
+            this@BookDetailViewModel.inLibraryLoading = false
         }
     }
 
@@ -219,11 +181,5 @@ class BookDetailViewModel @Inject constructor(
 
     private fun toggleBookLoading(isLoading: Boolean) {
         this.detailIsLoading = isLoading
-    }
-
-
-    override fun onDestroy() {
-        getBookDetailJob?.cancel()
-        super.onDestroy()
     }
 }

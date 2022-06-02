@@ -51,7 +51,9 @@ object AppearanceScreenSpec : ScreenSpec {
             onPopBackStack = {
                 controller.navController.popBackStack()
             },
-            vm = viewModel
+            vm = viewModel,
+            scaffoldPaddingValues = controller.scaffoldPadding
+
         )
     }
 }

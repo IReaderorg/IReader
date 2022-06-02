@@ -52,11 +52,10 @@ interface LocalChapterRepository {
 
     suspend fun deleteChapters(chapters: List<Chapter>)
 
-    suspend fun deleteChapterByChapter(
+    suspend fun deleteChapter(
         chapter: Chapter,
     )
 
     suspend fun deleteAllChapters()
 
-    suspend fun updateChapters(bookId: Long, chapters: List<Chapter>)
 }

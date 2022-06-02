@@ -24,7 +24,7 @@ import org.ireader.bookDetails.components.BookDetailScreenBottomBar
 import org.ireader.bookDetails.components.ChapterCommandBottomSheet
 import org.ireader.bookDetails.viewmodel.BookDetailViewModel
 import org.ireader.common_extensions.async.viewModelIOCoroutine
-import org.ireader.common_extensions.getUrlWithoutDomain
+import org.ireader.common_models.entities.Book
 import org.ireader.common_resources.LAST_CHAPTER
 import org.ireader.common_resources.UiText
 import org.ireader.core_api.source.CatalogSource
@@ -73,9 +73,7 @@ object BookDetailScreenSpec : ScreenSpec {
                 if (source != null && source is HttpSource && book != null)
                     controller.navController.navigate(
                         WebViewScreenSpec.buildRoute(
-                            url = (source).baseUrl + getUrlWithoutDomain(
-                                book.key,
-                            ),
+                            url = book.key,
                             sourceId = book.sourceId,
                             bookId = book.id,
                             chapterId = null
@@ -244,7 +242,7 @@ object BookDetailScreenSpec : ScreenSpec {
                     )
                 }
             },
-            book = book,
+            book = book?: Book(key = "", sourceId = 0, title = ""),
             detailState = vm,
             onTitle = {
                 try {
@@ -255,6 +253,8 @@ object BookDetailScreenSpec : ScreenSpec {
             snackBarHostState = controller.snackBarHostState,
             chapterState = vm,
             modalBottomSheetState = controller.sheetState,
+            isSummaryExpanded = vm.expandedSummary,
+            source = vm.source
         )
     }
 }

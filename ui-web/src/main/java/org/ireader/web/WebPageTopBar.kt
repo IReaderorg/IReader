@@ -16,6 +16,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import org.ireader.components.CustomTextField
 import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.BuildDropDownMenu
@@ -25,7 +26,6 @@ import org.ireader.core.R
 import org.ireader.core_api.source.CatalogSource
 import org.ireader.core_api.source.findInstance
 import org.ireader.core_api.source.model.Command
-import org.ireader.components.CustomTextField
 
 @Composable
 fun WebPageTopBar(
@@ -99,7 +99,7 @@ fun WebPageTopBar(
                         goForward()
                     },
                 )
-            if (source != null && source.getCommands().findInstance<Command.Detail.Fetch>()!= null && state.stateBook == null ) {
+            if (source != null && source.getCommands().findInstance<Command.Detail.Fetch>()!= null ) {
                 list.add(
                     DropDownMenuItem(
                         stringResource(org.ireader.core.R.string.fetch_book)

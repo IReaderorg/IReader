@@ -69,9 +69,6 @@ fun WebPageScreen(
     onModalBottomSheetShow: () -> Unit,
     onModalBottomSheetHide: () -> Unit,
     source: CatalogSource?,
-    onFetchBook: (WebView) -> Unit,
-    onFetchChapter: (WebView) -> Unit,
-    onFetchChapters: (WebView) -> Unit,
     snackBarHostState: SnackbarHostState,
     scaffoldPadding: PaddingValues
 ) {
@@ -133,12 +130,6 @@ fun WebPageScreen(
     }
 
 
-    LaunchedEffect(key1 = webViewState.loadingState) {
-        if (webViewState.loadingState == LoadingState.Finished) {
-
-            viewModel.updateCookies(webView?.url ?: "")
-        }
-    }
 
     val refreshState = rememberSwipeRefreshState(isRefreshing = viewModel.isLoading)
     Box(modifier = Modifier.padding(scaffoldPadding)) {

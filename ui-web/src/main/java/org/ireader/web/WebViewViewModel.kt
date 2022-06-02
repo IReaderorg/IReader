@@ -88,15 +88,6 @@ class WebViewPageModel @Inject constructor(
         this.url = url
     }
 
-    fun updateCookies(url: String) {
-//        val cf = CookieManager.getInstance()?.getCookie("cf_clearance")
-//        Log.error { "CF = $cf" }
-//        viewModelScope.launch {
-//            cf?.let {
-//                constantCookiesStorage.addCookie(Url(url), Cookie("cf_clearance", cf))
-//            }
-//        }
-    }
 
     fun updateWebUrl(url: String) {
         webUrl = url
@@ -150,6 +141,7 @@ class WebViewPageModel @Inject constructor(
         viewModelScope.launch {
             val pageSource = webView.getHtml()
             val url = webView.url ?: ""
+            val localChapters = getChapterUseCase.findChaptersByBookId(book.id)
             remoteUseCases.getRemoteChapters(
                 book,
                 catalog,
@@ -157,6 +149,7 @@ class WebViewPageModel @Inject constructor(
                     showSnackBar(it)
                 },
                 onSuccess = { result ->
+
                     webChapters = result
                     if (result.isNotEmpty()) {
                         showSnackBar(UiText.StringResource(R.string.success))
@@ -165,7 +158,8 @@ class WebViewPageModel @Inject constructor(
                         showSnackBar(UiText.StringResource(R.string.failed))
                     }
                 },
-                commands = listOf(Command.Chapter.Fetch(url = url, pageSource))
+                commands = listOf(Command.Chapter.Fetch(url = url, pageSource)),
+                oldChapters = localChapters
             )
 
         }

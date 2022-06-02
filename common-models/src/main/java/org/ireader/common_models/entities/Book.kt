@@ -67,9 +67,9 @@ fun String.takeIf(statement: () -> Boolean, defaultValue: String): String {
     }
 }
 
-fun MangaInfo.toBook(sourceId: Long, tableId: Long = 0, lastUpdated: Long = 0): Book {
+fun MangaInfo.toBook(sourceId: Long,bookId:Long = 0, tableId: Long = 0, lastUpdated: Long = 0): Book {
     return Book(
-        id = 0,
+        id = bookId,
         sourceId = sourceId,
         customCover = this.cover,
         cover = this.cover,

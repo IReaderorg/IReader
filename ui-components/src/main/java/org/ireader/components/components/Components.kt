@@ -20,7 +20,7 @@ import org.ireader.core_ui.ui.PreferenceMutableState
 sealed class Components {
     data class Header(
         val text: String,
-        val toUpper: Boolean = true,
+        val toUpper: Boolean = false,
         val padding: PaddingValues = PaddingValues(16.dp),
         val visible: Boolean = true,
 

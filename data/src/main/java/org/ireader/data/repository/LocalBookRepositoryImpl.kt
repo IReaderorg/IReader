@@ -127,7 +127,7 @@ class LocalBookRepositoryImpl(
         return bookDao.subscribeBooksByKey(key, title).distinctUntilChanged()
     }
 
-    override suspend fun insertBooks(book: List<org.ireader.common_models.entities.Book>): List<Long> {
+    override suspend fun insertBooks(book: List<Book>): List<Long> {
         return remoteKeysDao.insert(book)
     }
 
