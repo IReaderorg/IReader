@@ -1,6 +1,7 @@
 package org.ireader.domain.use_cases.updates
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.datetime.LocalDate
 import org.ireader.common_data.repository.UpdatesRepository
 import org.ireader.common_models.entities.Update
 import org.ireader.common_models.entities.UpdateWithInfo
@@ -13,7 +14,7 @@ data class UpdateUseCases(
 )
 
 class SubscribeUpdates @Inject constructor(private val updatesRepository: UpdatesRepository) {
-    suspend operator fun invoke(): Flow<Map<String, List<UpdateWithInfo>>> {
+    suspend operator fun invoke(): Flow<Map<LocalDate, List<UpdateWithInfo>>> {
         return updatesRepository.subscribeAllUpdates()
     }
 }

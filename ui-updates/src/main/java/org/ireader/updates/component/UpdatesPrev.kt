@@ -17,7 +17,7 @@ private val book
         chapterTitle = "Name",
         read = false,
         number = 69f,
-        date = 46164684548
+        date = ""
     )
 
 @Preview(showBackground = true)

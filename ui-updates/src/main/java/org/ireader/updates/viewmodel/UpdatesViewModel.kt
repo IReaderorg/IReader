@@ -1,5 +1,6 @@
 package org.ireader.updates.viewmodel
 
+import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -8,6 +9,7 @@ import org.ireader.common_extensions.launchIO
 import org.ireader.common_models.entities.Chapter
 import org.ireader.common_models.entities.UpdateWithInfo
 import org.ireader.core_catalogs.interactor.GetLocalCatalog
+import org.ireader.core_ui.preferences.UiPreferences
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
@@ -25,8 +27,10 @@ class UpdatesViewModel @Inject constructor(
     private val getChapterUseCase: LocalGetChapterUseCase,
     private val insertUseCases: LocalInsertUseCases,
     private val serviceUseCases: ServiceUseCases,
+    private val uiPreferences: UiPreferences
 ) : BaseViewModel(), UpdateState by updateStateImpl {
-
+    val dateFormat by uiPreferences.dateFormat().asState()
+    val relativeFormat by uiPreferences.relativeTime().asState()
     init {
         viewModelScope.launch {
             updateUseCases.subscribeUpdates().collect {

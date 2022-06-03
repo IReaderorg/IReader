@@ -25,6 +25,7 @@ import org.ireader.domain.services.tts_service.media_player.TTSService
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.domain.use_cases.local.LocalGetBookUseCases
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
+import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.preferences.reader_preferences.ReaderPrefUseCases
 import org.ireader.domain.use_cases.preferences.reader_preferences.TextReaderPrefUseCase
 import org.ireader.domain.use_cases.remote.RemoteUseCases
@@ -43,6 +44,7 @@ class TTSViewModel @Inject constructor(
     val speechPrefUseCases: TextReaderPrefUseCase,
     private val readerUseCases: ReaderPrefUseCases,
     private val readerPreferences: ReaderPreferences,
+    private val insertUseCases: LocalInsertUseCases,
 ) : BaseViewModel(),
     TTSState by ttsState {
 
@@ -267,6 +269,7 @@ class TTSViewModel @Inject constructor(
             catalog,
             onSuccess = { result ->
                 ttsChapter = result
+                insertUseCases.insertChapter(result)
             },
             onError = {
 

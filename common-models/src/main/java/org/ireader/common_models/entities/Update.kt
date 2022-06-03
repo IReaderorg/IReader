@@ -17,7 +17,7 @@ data class UpdateWithInfo(
     val chapterTitle: String,
     val read: Boolean = false,
     val number: Float = -1f,
-    val date: Long,
+    val date: String,
     val downloaded: Boolean = false,
 ) {
     companion object {

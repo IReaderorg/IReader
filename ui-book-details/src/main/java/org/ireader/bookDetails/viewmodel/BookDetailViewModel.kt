@@ -94,11 +94,7 @@ class BookDetailViewModel @Inject constructor(
      */
     private fun subscribeChapters(bookId: Long) {
         getChapterUseCase.subscribeChaptersByBookId(bookId).onEach { snapshot ->
-            if (snapshot.isNotEmpty()) {
                 chapters = snapshot
-            } else {
-                localInsertUseCases.insertChapters(chapters)
-            }
         }.launchIn(viewModelScope)
     }
 
@@ -118,7 +114,7 @@ class BookDetailViewModel @Inject constructor(
                 },
                 onSuccess = { resultBook ->
                     toggleBookLoading(false)
-                    localInsertUseCases.insertBook(resultBook)
+                    localInsertUseCases.updateBook.update(resultBook)
                 }
 
             )
@@ -158,14 +154,14 @@ class BookDetailViewModel @Inject constructor(
         this.inLibraryLoading = true
         applicationScope.launchIO {
             if (!book.favorite) {
-                localInsertUseCases.insertBook(
+                localInsertUseCases.updateBook.update(
                     book.copy(
                         favorite = true,
                         dataAdded = Calendar.getInstance().timeInMillis,
                     )
                 )
             } else {
-                localInsertUseCases.insertBook(
+                localInsertUseCases.updateBook.update(
                     book.copy(
                         favorite = false,
                     )

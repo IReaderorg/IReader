@@ -25,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -51,6 +52,7 @@ fun AppearanceSettingScreen(
     vm: AppearanceViewModel,
     scaffoldPaddingValues: PaddingValues
 ) {
+    val context = LocalContext.current
     val customizedColors = vm.getCustomizedColors()
     val isLight = MaterialTheme.colorScheme.isLight()
     val themesForCurrentMode = remember(isLight) {
@@ -118,6 +120,40 @@ fun AppearanceSettingScreen(
                     unsetColor = AppColors.current.bars
                 )
             },
+            Components.Header(
+                text = "Timestamp",
+            ),
+            Components.Dynamic {
+                ChoicePreference(
+                    preference = vm.relativeTime,
+                    choices = vm.relativeTimes.associateWith { value ->
+                        when (value) {
+                            PreferenceValues.RelativeTime.Off -> context.getString(R.string.off)
+                            PreferenceValues.RelativeTime.Day -> context.getString(R.string.pref_relative_time_short)
+                            PreferenceValues.RelativeTime.Week -> context.getString(R.string.pref_relative_time_long)
+                            else -> context.getString(R.string.off)
+                        }
+                    },
+                    title = stringResource(id = R.string.pref_relative_format),
+                    subtitle = null,
+                )
+            },
+//            Components.Dynamic {
+//                ChoicePreference(
+//                    preference = vm.dateFormat,
+//                    choices = vm.dateFormats.associateWith { value ->
+//                        val now = Date().time
+//                        val formattedDate = vm.uiPreferences.getDateFormat(value).format(now)
+//                        if (value == "") {
+//                            "${context.getString(R.string.system_default)} ($formattedDate)"
+//                        } else {
+//                            "$value ($formattedDate)"
+//                        }
+//                    },
+//                    title = stringResource(id = R.string.date_format),
+//                    subtitle = null,
+//                )
+//            },
 
 
 

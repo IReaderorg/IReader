@@ -19,6 +19,7 @@ import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.Chapter
 import org.ireader.common_resources.UiText
 import org.ireader.core.R
+import org.ireader.core_ui.preferences.UiPreferences
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.domain.use_cases.history.HistoryUseCase
@@ -38,6 +39,7 @@ class ChapterDetailViewModel @Inject constructor(
     private val state: ChapterDetailStateImpl,
     private val serviceUseCases: ServiceUseCases,
     private val historyUseCase: HistoryUseCase,
+    val uiPreferences: UiPreferences
 ) : BaseViewModel(), ChapterDetailState by state {
 
     init {

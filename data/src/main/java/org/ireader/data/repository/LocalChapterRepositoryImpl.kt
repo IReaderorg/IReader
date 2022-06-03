@@ -62,12 +62,12 @@ class LocalChapterRepositoryImpl @Inject constructor(private val daoLibrary: Cha
     /******************************Insert******************************/
     override suspend fun insertChapters(
         chapters: List<org.ireader.common_models.entities.Chapter>,
-    ): List<Long> {
-        return daoLibrary.insertChapters(chapters = chapters)
+    ) :List<Long> {
+     return   daoLibrary.insertOrUpdate(chapters)
     }
 
     override suspend fun insertChapter(chapter: org.ireader.common_models.entities.Chapter): Long {
-        return daoLibrary.insertChapter(chapter)
+        return daoLibrary.insertOrUpdate(chapter)
     }
 
     /**************************************************************/

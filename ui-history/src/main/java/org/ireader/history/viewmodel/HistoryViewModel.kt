@@ -1,8 +1,10 @@
 package org.ireader.history.viewmodel
 
+import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import org.ireader.core_ui.preferences.UiPreferences
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.use_cases.history.HistoryUseCase
 import javax.inject.Inject
@@ -11,8 +13,11 @@ import javax.inject.Inject
 class HistoryViewModel @Inject constructor(
     private val state: HistoryStateImpl,
     val historyUseCase: HistoryUseCase,
+    val uiPreferences: UiPreferences,
 ) : BaseViewModel(), HistoryState by state {
 
+    val dateFormat by uiPreferences.dateFormat().asState()
+    val relativeFormat by uiPreferences.relativeTime().asState()
     fun getHistoryBooks() {
         viewModelScope.launch {
             historyUseCase.findHistoriesPaging(searchQuery).collect { histories ->

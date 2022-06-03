@@ -10,14 +10,14 @@ import androidx.compose.ui.res.stringResource
 import org.ireader.common_models.entities.HistoryWithRelations
 import org.ireader.core_ui.ui.EmptyScreen
 import org.ireader.core_ui.ui.LoadingScreen
-import org.ireader.history.viewmodel.HistoryState
+import org.ireader.history.viewmodel.HistoryViewModel
 import org.ireader.ui_history.R
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryScreen(
     modifier: Modifier = Modifier,
-    state: HistoryState,
+    state: HistoryViewModel,
     onHistory: (HistoryWithRelations) -> Unit,
     onHistoryDelete: (HistoryWithRelations) -> Unit,
     onHistoryPlay: (HistoryWithRelations) -> Unit,

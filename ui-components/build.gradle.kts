@@ -19,6 +19,7 @@ dependencies {
     implementation(project(Modules.uiImageLoader))
     implementation(project(Modules.coreApi))
     implementation(project(Modules.commonResources))
+    implementation(project(Modules.commonExtensions))
     implementation(compose.compose.icons)
     implementation(compose.compose.coil)
     implementation(compose.compose.foundation)

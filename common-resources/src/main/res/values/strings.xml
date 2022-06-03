@@ -43,6 +43,12 @@
     <string name="error">Error</string>
     <string name="refresh">Refresh</string>
     <string name="toggle_search_mode_off">Toggle search mode off</string>
+    <string name="recently">Recently</string>
+    <string name="relative_time_today">Today</string>
+    <plurals name="relative_time">
+        <item quantity="one">Yesterday</item>
+        <item quantity="other">%1$d days ago</item>
+    </plurals>
     <string name="display_mode">Display Mode</string>
     <string name="tabs">Tabs</string>
     <string name="badge">Badge</string>
@@ -89,6 +95,11 @@
     <string name="show_history">Show History</string>
     <string name="night_mode">Night Mode</string>
     <string name="dark_mode">Dark Mode</string>
+    <string name="second">Second</string>
+    <string name="minutes">Minute</string>
+    <string name="hour">Day</string>
+    <string name="days">Hour</string>
+    <string name="weeks">Week</string>
     <string name="off">Off</string>
     <string name="on">On</string>
     <string name="auto">Auto</string>
@@ -366,6 +377,10 @@
     <string name="select">Select</string>
     <string name="presents">Presents</string>
     <string name="theme">Theme</string>
+    <string name="date_format">Date Format</string>
+    <string name="pref_relative_format">Relative timestamps</string>
+    <string name="pref_relative_time_short">Short (Today, Yesterday)</string>
+    <string name="pref_relative_time_long">Long (Short+, n days ago)</string>
     <string name="follow_system_settings">Follow system settings</string>
     <string name="dark">Dark Mode</string>
     <string name="light">Light mode</string>

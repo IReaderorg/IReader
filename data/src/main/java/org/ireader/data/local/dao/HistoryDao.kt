@@ -2,6 +2,7 @@ package org.ireader.data.local.dao
 
 import androidx.room.Dao
 import androidx.room.Query
+import androidx.room.Transaction
 import org.ireader.common_models.entities.History
 import org.ireader.common_models.entities.HistoryWithRelations
 
@@ -37,4 +38,37 @@ interface HistoryDao : BaseDao<org.ireader.common_models.entities.History> {
 
     @Query("DELETE FROM history")
     suspend fun deleteAllHistory()
+
+
+
+    @Transaction
+    suspend fun insertOrUpdate(objList: List<org.ireader.common_models.entities.History>) {
+        val insertResult = insert(objList)
+        val updateList = mutableListOf<org.ireader.common_models.entities.History>()
+
+
+        for (i in insertResult.indices) {
+            if (insertResult[i] == -1L) {
+                updateList.add(objList[i])
+            }
+        }
+
+        if (!updateList.isEmpty()) update(updateList)
+    }
+    @Transaction
+    suspend fun insertOrUpdate(objList: org.ireader.common_models.entities.History) {
+        val objectToInsert = listOf(objList)
+        val insertResult = insert(objectToInsert)
+        val updateList = mutableListOf<org.ireader.common_models.entities.History>()
+
+
+        for (i in insertResult.indices) {
+            if (insertResult[i] == -1L) {
+                updateList.add(objectToInsert[i])
+            }
+        }
+
+        if (!updateList.isEmpty()) update(updateList)
+    }
+
 }

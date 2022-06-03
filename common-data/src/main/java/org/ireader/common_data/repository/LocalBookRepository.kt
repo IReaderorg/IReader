@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.BookItem
 import org.ireader.common_models.entities.Chapter
+import org.ireader.common_models.entities.LibraryBook
 import org.ireader.common_models.library.LibrarySort
 
 interface LocalBookRepository {
@@ -62,6 +63,10 @@ interface LocalBookRepository {
 
     /****************************************************/
 
+
+    suspend fun updateBook(book: Book)
+    suspend fun updateBook(book: LibraryBook,favorite:Boolean)
+    suspend fun updateBook(book: List<Book>)
     suspend fun insertBook(book: Book): Long
     suspend fun insertBooks(book: List<Book>): List<Long>
 

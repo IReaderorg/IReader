@@ -37,6 +37,7 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -54,6 +55,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow.Companion.Ellipsis
 import androidx.compose.ui.unit.dp
 import org.ireader.components.reusable_composable.CaptionTextComposable
+import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.core_ui.ui.PreferenceMutableState
 import org.ireader.core_ui.utils.horizontalPadding
 
@@ -637,7 +639,9 @@ fun <Key> ChoicePreference(
     choices: Map<Key, String>,
     title: String,
     subtitle: String? = null,
-    onValue: ((Key) -> Unit)? = null
+    onValue: ((Key) -> Unit)? = null,
+    confirmText:String = "",
+    onConfirm:(() -> Unit)?=null
 ) {
     var showDialog by remember { mutableStateOf(false) }
 
@@ -678,7 +682,14 @@ fun <Key> ChoicePreference(
                     }
                 }
             },
-            confirmButton = {}
+            confirmButton = {
+                if (onConfirm != null) {
+                    TextButton(onClick = onConfirm) {
+                        MidSizeTextComposable(text = confirmText)
+                    }
+                }
+
+            }
         )
     }
 }

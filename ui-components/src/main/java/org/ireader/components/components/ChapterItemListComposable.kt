@@ -23,12 +23,12 @@ import androidx.compose.ui.unit.dp
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import org.ireader.common_extensions.asRelativeTimeString
 import org.ireader.common_models.entities.Chapter
-import org.ireader.core_api.util.DateTimeFormatter
-import org.ireader.core_api.util.format
 import org.ireader.core_ui.modifier.selectedBackground
+import org.ireader.core_ui.preferences.PreferenceValues
 
-private val dateFormat = DateTimeFormatter("dd/MM/yy")
+private val dateFormat = org.ireader.core_api.util.DateTimeFormatter("dd/MM/yy")
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -79,8 +79,8 @@ fun ChapterRow(
             val subtitleStr = buildAnnotatedString {
                 if (chapter.dateUpload > 0) {
                     val instant = Instant.fromEpochMilliseconds(chapter.dateUpload)
-                    val dateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
-                    append(dateTime.format(dateFormat))
+                    val date = instant.toLocalDateTime(TimeZone.currentSystemDefault())
+                    append(date.date.asRelativeTimeString(range = PreferenceValues.RelativeTime.Seconds))
                 }
                 if (chapter.translator.isNotBlank()) {
                     if (length > 0) append(" • ")

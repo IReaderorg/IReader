@@ -33,12 +33,14 @@ import org.ireader.ui_reader.R
 @Composable
 fun ReaderScreenDrawer(
     modifier: Modifier = Modifier,
+    relativeTime:Int = 0,
+    dateFormat: String = "",
     chapter: Chapter?,
     onChapter: (chapter: Chapter) -> Unit,
     chapters: List<Chapter>,
     onReverseIcon: () -> Unit,
     drawerScrollState: LazyListState,
-    onMap: (LazyListState) -> Unit
+    onMap: (LazyListState) -> Unit,
 ) {
 
     Column(
@@ -81,7 +83,7 @@ fun ReaderScreenDrawer(
                         modifier = modifier,
                         chapter = chapters[index],
                         onItemClick = { onChapter(chapters[index]) },
-                        isLastRead = chapter?.id ==chapters[index].id
+                        isLastRead = chapter?.id ==chapters[index].id,
                     )
                 }
             }

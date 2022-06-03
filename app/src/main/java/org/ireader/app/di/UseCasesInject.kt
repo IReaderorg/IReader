@@ -60,6 +60,7 @@ import org.ireader.domain.use_cases.local.insert_usecases.InsertBookAndChapters
 import org.ireader.domain.use_cases.local.insert_usecases.InsertBooks
 import org.ireader.domain.use_cases.local.insert_usecases.InsertChapter
 import org.ireader.domain.use_cases.local.insert_usecases.InsertChapters
+import org.ireader.domain.use_cases.local.insert_usecases.UpdateBook
 import org.ireader.domain.use_cases.preferences.reader_preferences.AutoScrollMode
 import org.ireader.domain.use_cases.preferences.reader_preferences.BackgroundColorUseCase
 import org.ireader.domain.use_cases.preferences.reader_preferences.BrightnessStateUseCase
@@ -134,6 +135,7 @@ class UseCasesInject {
             insertBooks = InsertBooks(localBookRepository),
             insertChapter = InsertChapter(localChapterRepository),
             insertChapters = InsertChapters(localChapterRepository),
+            updateBook = UpdateBook(localBookRepository)
         )
     }
 

@@ -30,12 +30,13 @@ import org.ireader.core_ui.ui.LoadingScreen
 import org.ireader.ui_updates.R
 import org.ireader.updates.component.UpdatesContent
 import org.ireader.updates.viewmodel.UpdateState
+import org.ireader.updates.viewmodel.UpdatesViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UpdateScreen(
     modifier: Modifier = Modifier,
-    state: UpdateState,
+    state: UpdatesViewModel,
     onUpdate: (UpdateWithInfo) -> Unit,
     onLongUpdate: (UpdateWithInfo) -> Unit,
     onCoverUpdate: (UpdateWithInfo) -> Unit,

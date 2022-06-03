@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.BookItem
+import org.ireader.common_models.entities.LibraryBook
 import org.ireader.common_models.library.LibrarySort
 import org.ireader.data.local.dao.LibraryBookDao
 import org.ireader.data.local.dao.RemoteKeysDao
@@ -57,7 +58,7 @@ class LocalBookRepositoryImpl(
         lastChecked: Boolean,
         desc: Boolean,
     ): Flow<List<org.ireader.common_models.entities.BookItem>> {
-        return  when {
+        return when {
             sortByAbs -> bookDao.subscribeBookByAlphabets()
             sortByDateAdded -> bookDao.subscribeBookByDateAdded()
             sortByLastRead -> bookDao.subscribeBookByLatest()
@@ -68,34 +69,7 @@ class LocalBookRepositoryImpl(
             lastChecked -> bookDao.subscribeBookByLastUpdate()
             else -> bookDao.subscribeBookByLatest()
         }.distinctUntilChanged().map { if (desc) it.reversed() else it }
-
-
-//        return when {
-//            sortByLastRead -> bookDao.subscribeLatestRead(desc)
-//            sortByTotalChapters -> bookDao.subscribeTotalChapter(desc)
-//            latestChapter -> bookDao.subscribeLatestChapter(desc)
-//            else -> {
-//                bookDao.subscribeAllInLibraryBooks(
-//                    sortByAbs = sortByAbs,
-//                    sortByDateAdded = sortByDateAdded,
-//                    sortByLastRead = sortByLastRead,
-//                    desc = desc,
-//                    dateFetched = dateFetched,
-//                    dateAdded = dateAdded,
-//                    sortByTotalChapter = sortByTotalChapters,
-//                    lastChecked = lastChecked
-//                )
-//            }
-//        }
     }
-
-//    override suspend fun findAllInLibraryBooks(
-//        sortType: SortType,
-//        isAsc: Boolean,
-//        unreadFilter: Boolean,
-//    ): List<org.ireader.common_models.entities.Book> {
-//        return bookDao.findAllInLibraryBooks()
-//    }
 
     override fun getBooksByQueryPagingSource(query: String): Flow<org.ireader.common_models.entities.Book> {
         return bookDao.searchBook(query)
@@ -128,7 +102,7 @@ class LocalBookRepositoryImpl(
     }
 
     override suspend fun insertBooks(book: List<Book>): List<Long> {
-        return remoteKeysDao.insert(book)
+        return remoteKeysDao.insertOrUpdate(book)
     }
 
     override suspend fun deleteBooks(book: List<org.ireader.common_models.entities.Book>) {
@@ -145,6 +119,18 @@ class LocalBookRepositoryImpl(
     }
 
     override suspend fun insertBook(book: org.ireader.common_models.entities.Book): Long {
-        return bookDao.insertBook(book)
+        return bookDao.insertOrUpdate(book)
+    }
+
+    override suspend fun updateBook(book: Book) {
+        return bookDao.update(book)
+    }
+
+    override suspend fun updateBook(book: LibraryBook,favorite:Boolean) {
+        return bookDao.updateLibraryBook(id = book.id, favorite = favorite)
+    }
+
+    override suspend fun updateBook(book: List<Book>) {
+        return bookDao.update(book)
     }
 }

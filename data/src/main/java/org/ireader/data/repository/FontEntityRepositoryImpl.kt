@@ -20,12 +20,12 @@ class FontEntityRepositoryImpl(
         return fontDao.findAllFontEntities()
     }
 
-    override suspend fun insertFont(fontEntity: FontEntity): Long {
-        return fontDao.insert(fontEntity)
+    override suspend fun insertFont(fontEntity: FontEntity) {
+        return fontDao.insertOrUpdate(fontEntity)
     }
 
-    override suspend fun insertFonts(fontEntity: List<FontEntity>): List<Long> {
-        return fontDao.insert(fontEntity)
+    override suspend fun insertFonts(fontEntity: List<FontEntity>){
+        return fontDao.insertOrUpdate(fontEntity)
     }
 
     override suspend fun deleteFonts(fonts: List<FontEntity>) {

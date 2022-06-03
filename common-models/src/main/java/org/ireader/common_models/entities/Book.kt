@@ -215,7 +215,3 @@ data class DownloadedBook(
     val totalChapters: Int,
     val totalDownloadedChapter: Int
 )
-
-
-
-

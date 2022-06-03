@@ -7,11 +7,12 @@ import androidx.room.Query
 import androidx.room.RewriteQueriesToDropUnusedColumns
 import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
+import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.BookItem
 import org.ireader.common_models.entities.Chapter
 
 @Dao
-interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
+interface LibraryBookDao : BaseDao<Book> {
 
     @RewriteQueriesToDropUnusedColumns
     @Query("SELECT * FROM library")
@@ -268,7 +269,7 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
         books: List<org.ireader.common_models.entities.Book>,
         chapters: List<org.ireader.common_models.entities.Chapter>
     ) {
-        insert(books)
+        insertOrUpdate(books)
         insertChapters(chapters)
     }
 
@@ -278,6 +279,45 @@ interface LibraryBookDao : BaseDao<org.ireader.common_models.entities.Book> {
     )
     fun insertChapters(chapters: List<org.ireader.common_models.entities.Chapter>)
 
+    @Transaction
+    suspend fun insertOrUpdate(objList: List<Book>): List<Long> {
+        val insertResult = insert(objList)
+        val updateList = mutableListOf<Book>()
+        val idList = mutableListOf<Long>()
+
+        for (i in insertResult.indices) {
+            if (insertResult[i] == -1L) {
+                updateList.add(objList[i])
+                idList.add(objList[i].id)
+            } else {
+                idList.add(insertResult[i])
+            }
+        }
+
+        if (!updateList.isEmpty()) update(updateList)
+        return idList
+    }
+    @Transaction
+    suspend fun insertOrUpdate(objList: Book): Long {
+        val objectToInsert = listOf(objList)
+        val insertResult = insert(objectToInsert)
+        val updateList = mutableListOf<Book>()
+        val idList = mutableListOf<Long>()
+
+        for (i in insertResult.indices) {
+            if (insertResult[i] == -1L) {
+                updateList.add(objectToInsert[i])
+                idList.add(objectToInsert[i].id)
+            } else {
+                idList.add(insertResult[i])
+            }
+        }
+
+        if (!updateList.isEmpty()) update(updateList)
+        return idList.firstOrNull()?:-1
+    }
 
 
+    @Query("UPDATE library SET favorite  = :favorite WHERE `id` = :id")
+    suspend fun updateLibraryBook(id:Long,favorite:Boolean)
 }

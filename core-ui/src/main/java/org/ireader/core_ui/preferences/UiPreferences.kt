@@ -6,6 +6,9 @@ import androidx.compose.runtime.setValue
 import org.ireader.core_api.prefs.Preference
 import org.ireader.core_api.prefs.PreferenceStore
 import org.ireader.core_api.prefs.getEnum
+import java.text.DateFormat
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class UiPreferences(private val preferenceStore: PreferenceStore) {
 
@@ -55,6 +58,14 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
 
     fun dateFormat(): Preference<String> {
         return preferenceStore.getString("date_format", "")
+    }
+    fun relativeTime(): Preference<PreferenceValues.RelativeTime> {
+        return preferenceStore.getEnum("relative_time", PreferenceValues.RelativeTime.Day)
+    }
+
+    fun getDateFormat(format: String = dateFormat().get()): DateFormat = when (format) {
+        "" -> DateFormat.getDateInstance(DateFormat.SHORT)
+        else -> SimpleDateFormat(format, Locale.getDefault())
     }
 
     fun downloadedOnly(): Preference<Boolean> {

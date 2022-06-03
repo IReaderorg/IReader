@@ -24,11 +24,14 @@ class AppearanceViewModel @Inject constructor(
 
     val themeMode = uiPreferences.themeMode().asState()
     val colorTheme = uiPreferences.colorTheme().asState()
-//    val lightTheme = uiPreferences.lightTheme().asState()
-//    val darkTheme = uiPreferences.darkTheme().asState()
+    val dateFormat = uiPreferences.dateFormat().asState()
+    val relativeTime = uiPreferences.relativeTime().asState()
     val lightColors = uiPreferences.getLightColors().asState(scope)
     val darkColors = uiPreferences.getDarkColors().asState(scope)
 
+
+    val dateFormats = arrayOf("", "MM/dd/yy", "dd/MM/yy", "yyyy-MM-dd", "dd MMM yyyy", "MMM dd, yyyy")
+    val relativeTimes = arrayOf(PreferenceValues.RelativeTime.Off, PreferenceValues.RelativeTime.Day,PreferenceValues.RelativeTime.Week)
     fun saveNightModePreferences(mode: PreferenceValues.ThemeMode) {
         uiPreferences.themeMode().set(mode)
     }

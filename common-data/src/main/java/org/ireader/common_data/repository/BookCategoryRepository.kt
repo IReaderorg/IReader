@@ -8,8 +8,8 @@ interface BookCategoryRepository {
 
     suspend fun findAll(): List<BookCategory>
 
-    suspend fun insert(category: BookCategory): Long
-    suspend fun insertAll(category: List<BookCategory>): List<Long>
+    suspend fun insert(category: BookCategory)
+    suspend fun insertAll(category: List<BookCategory>)
     suspend fun delete(category: BookCategory)
     suspend fun deleteAll(category: List<BookCategory>)
 

@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.pm.ActivityInfo
 import android.view.WindowManager
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.lifecycle.SavedStateHandle
@@ -23,6 +24,7 @@ import org.ireader.common_resources.UiText
 import org.ireader.core_catalogs.interactor.GetLocalCatalog
 import org.ireader.core_ui.preferences.ReaderPreferences
 import org.ireader.core_ui.preferences.ReadingMode
+import org.ireader.core_ui.preferences.UiPreferences
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.domain.use_cases.history.HistoryUseCase
@@ -47,12 +49,15 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
     val prefFunc: ReaderPrefFunctionsImpl,
     val savedStateHandle: SavedStateHandle,
     val readerPreferences: ReaderPreferences,
+    val uiPreferences : UiPreferences,
     val googleFontProvider: GoogleFont.Provider
 ) : BaseViewModel(),
     ReaderScreenPreferencesState by prefState,
     ReaderScreenState by state,
     ReaderPrefFunctions by prefFunc {
 
+    val dateFormat by uiPreferences.dateFormat().asState()
+    val relativeTime by uiPreferences.relativeTime().asState()
     val backgroundColor = readerPreferences.backgroundColorReader().asState()
     val textColor = readerPreferences.textColorReader().asState()
     val selectedScrollBarColor = readerPreferences.selectedScrollBarColor().asState()

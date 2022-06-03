@@ -10,4 +10,5 @@ dependencies {
     implementation(project(Modules.commonModels))
     implementation(project(Modules.commonResources))
     implementation(kotlinx.coroutines.android)
+    implementation(kotlinx.datetime)
 }

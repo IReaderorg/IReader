@@ -183,7 +183,7 @@ private fun ChaptersContent(
                     isSelected = isSelected(chapters.value[index]),
                     onLongClick = {
                         onLongClick(chapters.value[index])
-                    }
+                    },
                 )
 //                ChapterListItemComposable(
 //                    modifier = Modifier,

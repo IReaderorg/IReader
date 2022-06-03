@@ -10,14 +10,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import org.ireader.common_extensions.asRelativeTimeString
 import org.ireader.common_models.entities.UpdateWithInfo
 import org.ireader.components.text_related.TextSection
-import org.ireader.updates.viewmodel.UpdateState
+import org.ireader.updates.viewmodel.UpdatesViewModel
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun UpdatesContent(
-    state: UpdateState,
+    state: UpdatesViewModel,
     onClickItem: (UpdateWithInfo) -> Unit,
     onLongClickItem: (UpdateWithInfo) -> Unit,
     onClickCover: (UpdateWithInfo) -> Unit,
@@ -33,7 +34,7 @@ fun UpdatesContent(
             state.updates.forEach { (date, updates) ->
                 item {
                     TextSection(
-                        text =date
+                        text =date.asRelativeTimeString(range = state.relativeFormat)
                     )
                 }
                 items(

@@ -21,11 +21,11 @@ class CategoryRepositoryImpl(
     }
 
     override suspend fun insert(category: Category): Long {
-        return dao.insert(category)
+        return dao.insertOrUpdate(category)
     }
 
     override suspend fun insertAll(category: List<Category>): List<Long> {
-        return dao.insert(category)
+        return dao.insertOrUpdate(category)
     }
 
     override suspend fun delete(category: Category) {

@@ -16,12 +16,12 @@ class BookCategoryRepositoryImpl(
         return dao.findAll()
     }
 
-    override suspend fun insert(category: BookCategory): Long {
-        return dao.insert(category)
+    override suspend fun insert(category: BookCategory) {
+        return dao.insertOrUpdate(category)
     }
 
-    override suspend fun insertAll(category: List<BookCategory>): List<Long> {
-        return dao.insert(category)
+    override suspend fun insertAll(category: List<BookCategory>) {
+        return dao.insertOrUpdate(category)
     }
 
     override suspend fun delete(category: BookCategory) {

@@ -11,9 +11,9 @@ interface DownloadRepository {
 
 
 
-    suspend fun insertDownload(savedDownload: Download): Long
+    suspend fun insertDownload(savedDownload: Download)
 
-    suspend fun insertDownloads(savedDownloads: List<Download>): List<Long>
+    suspend fun insertDownloads(savedDownloads: List<Download>)
 
     suspend fun deleteSavedDownload(savedDownload: Download)
 

@@ -9,8 +9,8 @@ interface FontRepository {
     suspend fun findAllFontEntities(): List<FontEntity>
 
 
-    suspend fun insertFont(fontEntity: FontEntity): Long
-    suspend fun insertFonts(fontEntity: List<FontEntity>): List<Long>
+    suspend fun insertFont(fontEntity: FontEntity)
+    suspend fun insertFonts(fontEntity: List<FontEntity>)
 
     suspend fun deleteFonts(fonts: List<FontEntity>)
 

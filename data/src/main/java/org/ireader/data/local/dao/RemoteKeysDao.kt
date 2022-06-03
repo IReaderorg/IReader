@@ -121,4 +121,42 @@ FROM library
     """
     )
     suspend fun deleteUnusedBooks()
+
+    @Transaction
+    suspend fun insertOrUpdate(objList: List<org.ireader.common_models.entities.Book>): List<Long> {
+        val insertResult = insert(objList)
+        val updateList = mutableListOf<org.ireader.common_models.entities.Book>()
+        val idList = mutableListOf<Long>()
+
+        for (i in insertResult.indices) {
+            if (insertResult[i] == -1L) {
+                updateList.add(objList[i])
+                idList.add(objList[i].id)
+            } else {
+                idList.add(insertResult[i])
+            }
+        }
+
+        if (!updateList.isEmpty()) update(updateList)
+        return idList
+    }
+    @Transaction
+    suspend fun insertOrUpdate(objList: org.ireader.common_models.entities.Book): Long {
+        val objectToInsert = listOf(objList)
+        val insertResult = insert(objectToInsert)
+        val updateList = mutableListOf<org.ireader.common_models.entities.Book>()
+        val idList = mutableListOf<Long>()
+
+        for (i in insertResult.indices) {
+            if (insertResult[i] == -1L) {
+                updateList.add(objectToInsert[i])
+                idList.add(objectToInsert[i].id)
+            } else {
+                idList.add(insertResult[i])
+            }
+        }
+
+        if (!updateList.isEmpty()) update(updateList)
+        return idList.firstOrNull()?:-1
+    }
 }

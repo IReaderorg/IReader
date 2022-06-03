@@ -18,4 +18,15 @@ object PreferenceValues {
         INCOGNITO(R.string.pref_incognito_mode),
         NEVER(R.string.lock_never),
     }
+
+    enum class RelativeTime {
+        Off,
+        Seconds,
+        Minutes,
+        Hour,
+        Day,
+        Week;
+    }
+
+
 }

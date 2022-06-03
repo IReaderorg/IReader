@@ -28,11 +28,11 @@ class FontUseCase @Inject constructor(
         return fontRepository.subscribeFontEntity()
     }
 
-    suspend fun insertFont(fontEntity: FontEntity): Long {
+    suspend fun insertFont(fontEntity: FontEntity) {
         return fontRepository.insertFont(fontEntity)
     }
 
-    suspend fun insertFonts(fontEntity: List<FontEntity>): List<Long> {
+    suspend fun insertFonts(fontEntity: List<FontEntity>) {
         return fontRepository.insertFonts(fontEntity)
     }
 

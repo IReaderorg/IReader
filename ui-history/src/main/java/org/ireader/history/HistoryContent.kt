@@ -5,14 +5,15 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
+import org.ireader.common_extensions.asRelativeTimeString
 import org.ireader.common_models.entities.HistoryWithRelations
 import org.ireader.components.text_related.TextSection
-import org.ireader.history.viewmodel.HistoryState
+import org.ireader.history.viewmodel.HistoryViewModel
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HistoryContent(
-    state: HistoryState,
+    state: HistoryViewModel,
     onBookCover: (HistoryWithRelations) -> Unit,
     onClickItem: (HistoryWithRelations) -> Unit,
     onClickDelete: (HistoryWithRelations) -> Unit,
@@ -27,7 +28,7 @@ fun HistoryContent(
         state.history.forEach { (date, history) ->
             item {
                 TextSection(
-                    text = date
+                    text = date.asRelativeTimeString(range = state.relativeFormat)
                 )
             }
             items(
