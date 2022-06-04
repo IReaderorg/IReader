@@ -67,7 +67,7 @@ fun ChapterRow(
             Text(
                 buildAnnotatedString {
                     if (chapter.number != -1f) {
-                        append("${chapter.number}   ")
+                        append("${chapter.number.toInt()}   ")
                     }
                     append(chapter.name)
                 },

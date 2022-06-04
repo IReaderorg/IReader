@@ -3,6 +3,7 @@ package org.ireader.reader
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,12 +13,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -32,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.pager.ExperimentalPagerApi
 import dev.chrisbanes.snapper.ExperimentalSnapperApi
 import kotlinx.coroutines.launch
+import org.ireader.common_models.entities.Chapter
 import org.ireader.core_ui.preferences.ReadingMode
 import org.ireader.reader.components.MainBottomSettingComposable
 import org.ireader.reader.reverse_swip_refresh.SwipeRefreshState
@@ -45,7 +47,8 @@ import org.ireader.reader.viewmodel.ReaderScreenViewModel
 @Composable
 fun ReadingScreen(
     vm: ReaderScreenViewModel,
-    scrollState: LazyListState,
+    scrollState: ScrollState,
+    lazyListState: LazyListState,
     swipeState: SwipeRefreshState,
     onNext: (reset:Boolean) -> Unit,
     onPrev: (reset: Boolean) -> Unit,
@@ -58,7 +61,8 @@ fun ReadingScreen(
     onSliderFinished: () -> Unit,
     onSliderChange: (index: Float) -> Unit,
     onReaderPlay: () -> Unit,
-    scaffoldPaddingValues: PaddingValues
+    scaffoldPaddingValues: PaddingValues,
+    onChapterShown:(chapter:Chapter) -> Unit,
 ) {
 
     val modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
@@ -93,10 +97,7 @@ fun ReadingScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(vm.backgroundColor.value)
-//            .systemBarsPadding()
-//            .systemBarsPadding()
-        ,
+            .background(vm.backgroundColor.value),
         contentAlignment = Alignment.Center,
     ) {
         Crossfade(
@@ -120,7 +121,7 @@ fun ReadingScreen(
                     ModalBottomSheetLayout(
                         modifier = Modifier
                             .fillMaxWidth(),
-                        sheetBackgroundColor = MaterialTheme.colorScheme.surface,
+                        sheetBackgroundColor = MaterialTheme.colorScheme.surface.copy(ContentAlpha.high),
                         sheetContentColor = MaterialTheme.colorScheme.onSurface,
                         scrimColor = Color.Transparent,
                         sheetElevation = 0.dp,
@@ -129,11 +130,6 @@ fun ReadingScreen(
                             Column(
                                 Modifier.height(130.dp),
                             ) {
-                                Divider(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = .2f),
-                                    thickness = 1.dp
-                                )
                                 Spacer(modifier = Modifier.height(5.dp))
                                 MainBottomSettingComposable(
                                     scope = scope,
@@ -166,6 +162,9 @@ fun ReadingScreen(
                             modalState = modalBottomSheetState,
                             toggleReaderMode = toggleReaderMode,
                             uiState = vm,
+                            lazyListState = lazyListState,
+                            onChapterShown = onChapterShown
+
                         )
                     }
                 }

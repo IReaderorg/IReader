@@ -2,7 +2,6 @@ package org.ireader.common_data.repository
 
 import kotlinx.coroutines.flow.Flow
 import org.ireader.common_models.entities.Book
-import org.ireader.common_models.entities.BookItem
 import org.ireader.common_models.entities.Chapter
 import org.ireader.common_models.entities.LibraryBook
 import org.ireader.common_models.library.LibrarySort
@@ -23,25 +22,7 @@ interface LocalBookRepository {
         unreadFilter: Boolean = false,
     ): List<Book>
 
-    fun getBooksByQueryPagingSource(query: String): Flow<Book>
 
-    fun subscribeAllInLibrary(
-        sortByAbs: Boolean,
-        sortByDateAdded: Boolean,
-        sortByLastRead: Boolean,
-        dateFetched: Boolean,
-        sortByTotalChapters: Boolean,
-        dateAdded: Boolean,
-        latestChapter: Boolean,
-        lastChecked: Boolean,
-        desc: Boolean,
-    ): Flow<List<BookItem>>
-
-    suspend fun findUnreadBooks(): List<BookItem>
-
-    suspend fun findCompletedBooks(): List<BookItem>
-
-    suspend fun findDownloadedBooks(): List<BookItem>
 
     suspend fun findBookByKey(key: String): Book?
 

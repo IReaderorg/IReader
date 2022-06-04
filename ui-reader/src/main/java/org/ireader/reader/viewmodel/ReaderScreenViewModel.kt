@@ -3,6 +3,7 @@ package org.ireader.reader.viewmodel
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.view.WindowManager
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.text.ExperimentalTextApi
@@ -49,7 +50,7 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
     val prefFunc: ReaderPrefFunctionsImpl,
     val savedStateHandle: SavedStateHandle,
     val readerPreferences: ReaderPreferences,
-    val uiPreferences : UiPreferences,
+    val uiPreferences: UiPreferences,
     val googleFontProvider: GoogleFont.Provider
 ) : BaseViewModel(),
     ReaderScreenPreferencesState by prefState,
@@ -74,6 +75,8 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
     var autoScrollInterval = readerPreferences.autoScrollInterval().asState()
     val autoBrightnessMode = readerPreferences.autoBrightness().asState()
     val immersiveMode = readerPreferences.immersiveMode().asState()
+    val brightness = readerPreferences.brightness().asState()
+
     val isScrollIndicatorDraggable = readerPreferences.isScrollIndicatorDraggable().asState()
     val font = readerPreferences.font().asState()
 
@@ -190,7 +193,8 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
     var getChapterJob: Job? = null
 
     fun nextChapter(): Chapter {
-        val chapter = if (readingMode.value == ReadingMode.Continues) chapterShell.lastOrNull() else stateChapter
+        val chapter =
+            if (readingMode.value == ReadingMode.Continues) chapterShell.lastOrNull() else stateChapter
         val index = stateChapters.indexOfFirst { it.id == chapter?.id }
         if (index != -1) {
             currentChapterIndex = index
@@ -201,7 +205,8 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
     }
 
     fun prevChapter(): Chapter {
-        val chapter = if (readingMode.value == ReadingMode.Continues) chapterShell.getOrNull(0) else stateChapter
+        val chapter =
+            if (readingMode.value == ReadingMode.Continues) chapterShell.getOrNull(0) else stateChapter
         val index = stateChapters.indexOfFirst { it.id == chapter?.id }
         if (index != -1) {
             currentChapterIndex = index
@@ -211,9 +216,30 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
         throw IllegalAccessException("List doesn't contains ${chapter?.name}")
     }
 
+    fun prepareReaderSetting(context: Context,scrollState: ScrollState) {
+        viewModelScope.launch {
+            readImmersiveMode(context)
+        }
+        viewModelScope.launch {
+            readOrientation(context)
+        }
+        viewModelScope.launch {
+            kotlin.runCatching {
+                stateChapter?.id?.let { chapter ->
+                    historyUseCase.findHistory(chapter)?.let {
+                        scrollState.scrollTo(it.progress ?: 1)
+                    }
+                }
+
+            }
+        }
+
+    }
+
     fun restoreSetting(
         context: Context,
-        scrollState: LazyListState,
+        scrollState: ScrollState,
+        lazyScrollState: LazyListState
     ) {
         val activity = context.findComponentActivity()
         if (activity != null) {
@@ -223,36 +249,37 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
             layoutParams.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
             activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
             window.attributes = layoutParams
-            if (readingMode.value == ReadingMode.Continues) {
-                val key =
-                    scrollState.layoutInfo.visibleItemsInfo.firstOrNull()?.key.toString().split("-")
-                val index = stateChapters.indexOfFirst { it.id == key.getOrNull(1)?.toLong() }
-                if (index != -1) {
-                    stateChapters.getOrNull(index)?.let { chapter ->
+            when (readingMode.value) {
+                ReadingMode.Page -> {
+                    stateChapter?.let { chapter ->
                         activity.lifecycleScope.launch {
-                            val history =historyUseCase.findHistory(chapter.id)?.let {
+                            historyUseCase.findHistory(chapter.id)?.let {
                                 historyUseCase.insertHistory(
-                                   it.copy(
-                                        progress = key.getOrNull(0)?.toInt() ?: 0,
+                                    it.copy(
+                                        progress = scrollState.value,
                                     )
                                 )
                             }
 
-                            getChapterUseCase.updateLastReadTime(chapter)
                         }
                     }
                 }
-            } else {
-                stateChapter?.let { chapter ->
-                    activity.lifecycleScope.launch {
-                      historyUseCase.findHistory(chapter.id)?.let {
-                            historyUseCase.insertHistory(
-                                it.copy(
-                                    progress = scrollState.firstVisibleItemIndex,
-                                )
-                            )
-                        }
+                ReadingMode.Continues -> {
+                    val index = stateChapters.indexOfFirst { it.id == stateChapter?.id }
+                    if (index != -1) {
+                        stateChapters.getOrNull(index)?.let { chapter ->
+                            activity.lifecycleScope.launch {
+                                historyUseCase.findHistory(chapter.id)?.let {
+                                    historyUseCase.insertHistory(
+                                        it.copy(
+                                            progress = 0
+                                        )
+                                    )
+                                }
 
+                                getChapterUseCase.updateLastReadTime(chapter)
+                            }
+                        }
                     }
                 }
             }
@@ -278,9 +305,9 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
         }
     }
 
-    suspend fun clearChapterShell(scrollState:LazyListState?,force:Boolean = false) {
+    suspend fun clearChapterShell(scrollState: ScrollState?, force: Boolean = false) {
         if (readingMode.value == ReadingMode.Continues || force) {
-            scrollState?.scrollToItem(0, 0)
+            scrollState?.scrollTo(0)
             chapterShell.clear()
         }
     }

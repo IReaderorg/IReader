@@ -40,7 +40,7 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
     }
 
     override fun ReaderScreenViewModel.saveBrightness(brightness: Float, context: Context) {
-        this.brightness = brightness
+        this.brightness.value = brightness
         val activity = context.findComponentActivity()
         if (activity != null) {
             activity.brightness(brightness)
@@ -79,7 +79,7 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
             val window = activity.window
             if (!autoBrightnessMode.value) {
                 val layoutParams: WindowManager.LayoutParams = window.attributes
-                layoutParams.screenBrightness = brightness
+                layoutParams.screenBrightness = brightness.value
                 window.attributes = layoutParams
                 //this.brightness = brightness
             } else {
@@ -131,11 +131,6 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
     }
 
     override fun ReaderScreenViewModel.hideSystemBars(context: Context) {
-        val activity = context.findComponentActivity()
-        if (activity != null) {
-
-            activity.hideSystemUI()
-
-        }
+        context.findComponentActivity()?.hideSystemUI()
     }
 }

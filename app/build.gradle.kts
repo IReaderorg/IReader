@@ -63,6 +63,9 @@ android {
         named("debug") {
             versionNameSuffix = "-${getCommitCount()}"
             applicationIdSuffix = ".debug"
+            extra["enableCrashlytics"] = false
+            extra["alwaysUpdateBuildId"] = false
+            isCrunchPngs = false
         }
         named("release") {
             isShrinkResources = true

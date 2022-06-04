@@ -2,9 +2,7 @@ package org.ireader.data.repository
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
 import org.ireader.common_models.entities.Book
-import org.ireader.common_models.entities.BookItem
 import org.ireader.common_models.entities.LibraryBook
 import org.ireader.common_models.library.LibrarySort
 import org.ireader.data.local.dao.LibraryBookDao
@@ -35,45 +33,6 @@ class LocalBookRepositoryImpl(
         return bookDao.findAllInLibraryBooks()
     }
 
-    override suspend fun findUnreadBooks(): List<org.ireader.common_models.entities.BookItem> {
-        return bookDao.findUnreadBooks()
-    }
-
-    override suspend fun findCompletedBooks(): List<org.ireader.common_models.entities.BookItem> {
-        return bookDao.findCompletedBooks()
-    }
-
-    override suspend fun findDownloadedBooks(): List<BookItem> {
-        return bookDao.findDownloadedBooks()
-    }
-
-    override fun subscribeAllInLibrary(
-        sortByAbs: Boolean,
-        sortByDateAdded: Boolean,
-        sortByLastRead: Boolean,
-        dateFetched: Boolean,
-        sortByTotalChapters: Boolean,
-        dateAdded: Boolean,
-        latestChapter: Boolean,
-        lastChecked: Boolean,
-        desc: Boolean,
-    ): Flow<List<org.ireader.common_models.entities.BookItem>> {
-        return when {
-            sortByAbs -> bookDao.subscribeBookByAlphabets()
-            sortByDateAdded -> bookDao.subscribeBookByDateAdded()
-            sortByLastRead -> bookDao.subscribeBookByLatest()
-            dateFetched -> bookDao.subscribeBookByDateFetched()
-            sortByTotalChapters -> bookDao.subscribeBookByTotalChapter()
-            dateAdded -> bookDao.subscribeBookByDateAdded()
-            latestChapter -> bookDao.subscribeBookByLatest()
-            lastChecked -> bookDao.subscribeBookByLastUpdate()
-            else -> bookDao.subscribeBookByLatest()
-        }.distinctUntilChanged().map { if (desc) it.reversed() else it }
-    }
-
-    override fun getBooksByQueryPagingSource(query: String): Flow<org.ireader.common_models.entities.Book> {
-        return bookDao.searchBook(query)
-    }
 
     /*******************GET **************************************/
 

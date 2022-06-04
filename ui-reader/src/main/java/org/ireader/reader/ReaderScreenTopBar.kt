@@ -4,7 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Text
@@ -15,8 +15,6 @@ import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.ExpandLess
-import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.MaterialTheme
@@ -26,7 +24,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
 import org.ireader.common_models.entities.Chapter
 import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.AppIconButton
@@ -48,7 +45,6 @@ fun ReaderScreenTopBar(
     onRefresh: () -> Unit,
     onWebView: () -> Unit,
     onBookMark: () -> Unit,
-    scrollState: LazyListState,
     onPopBackStack: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
@@ -93,7 +89,7 @@ fun ReaderScreenTopBar(
                     )
                 }
             },
-            backgroundColor = MaterialTheme.colorScheme.surface,
+            backgroundColor = MaterialTheme.colorScheme.surface.copy(ContentAlpha.disabled),
             contentColor = MaterialTheme.colorScheme.onSurface,
             elevation = 0.dp,
             navigationIcon = {
@@ -123,45 +119,6 @@ fun ReaderScreenTopBar(
                                 vm.searchQuery = ""
                                 vm.searchMode = false
                                 vm.queriedTextIndex.clear()
-                            },
-                        )
-                        AppIconButton(
-                            imageVector = Icons.Default.ExpandMore,
-                            contentDescription = stringResource(R.string.previous_result),
-                            onClick = {
-                                vm.currentViewingSearchResultIndex.let { index ->
-                                    chapter?.let {
-                                        if (index < chapter.content.lastIndex) {
-                                            scope.launch {
-                                                try {
-                                                    vm.currentViewingSearchResultIndex += 1
-                                                    scrollState.scrollToItem(vm.queriedTextIndex[index])
-                                                } catch (e: Throwable) {
-                                                    vm.currentViewingSearchResultIndex = 0
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            },
-                        )
-                        AppIconButton(
-                            imageVector = Icons.Default.ExpandLess,
-                            contentDescription = stringResource(R.string.next_result),
-                            onClick = {
-                                vm.currentViewingSearchResultIndex.let { index ->
-                                    if (index > 0) {
-
-                                        scope.launch {
-                                            try {
-                                                vm.currentViewingSearchResultIndex -= 1
-                                                scrollState.scrollToItem(vm.queriedTextIndex[index])
-                                            } catch (e: Throwable) {
-                                                vm.currentViewingSearchResultIndex = 0
-                                            }
-                                        }
-                                    }
-                                }
                             },
                         )
                     }

@@ -1,5 +1,7 @@
 package org.ireader.common_extensions
 
+import kotlin.math.abs
+
 /**
  * Returns a new list that replaces the item at the given [position] with [newItem].
  */
@@ -27,6 +29,7 @@ inline fun <T> List<T>.replaceFirst(predicate: (T) -> Boolean, newItem: T): List
     }
     return this
 }
+fun List<Int>.closestValue(value: Int) = minByOrNull { abs(value - it) }
 
 /**
  * Removes the first item of this collection that matches the given [predicate].

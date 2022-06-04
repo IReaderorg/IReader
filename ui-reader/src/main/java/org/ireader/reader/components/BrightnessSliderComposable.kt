@@ -43,7 +43,7 @@ fun BrightnessSliderComposable(
                 contentDescription = stringResource(R.string.less_brightness),
             )
             Slider(
-                viewModel.brightness,
+                viewModel.brightness.value,
                 onValueChange = onChangeBrightness,
                 modifier = Modifier
                     .fillMaxWidth()

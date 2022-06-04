@@ -21,25 +21,32 @@ class FindChapterByKey @Inject constructor(private val localChapterRepository: o
     }
 }
 
-class UpdateLastReadTime @Inject constructor(private val insertUseCases: LocalInsertUseCases,private val historyUseCase: HistoryUseCase,private val uiPreferences: UiPreferences) {
-    suspend operator fun invoke(chapter: Chapter,updateDateFetched:Boolean = false) {
+class UpdateLastReadTime @Inject constructor(
+    private val insertUseCases: LocalInsertUseCases,
+    private val historyUseCase: HistoryUseCase,
+    private val uiPreferences: UiPreferences
+) {
+    suspend operator fun invoke(chapter: Chapter, updateDateFetched: Boolean = false) {
 
         if (!uiPreferences.incognitoMode().read()) {
-        insertUseCases.insertChapter(
-            chapter = chapter.copy(
-                read = true,
-                dateFetch = if (updateDateFetched) Clock.System.now().toEpochMilliseconds() else chapter.dateFetch
+            val history = historyUseCase.findHistory(chapter.id)
+            insertUseCases.insertChapter(
+                chapter = chapter.copy(
+                    read = true,
+                    dateFetch = if (updateDateFetched) Clock.System.now()
+                        .toEpochMilliseconds() else chapter.dateFetch
+                )
             )
-        )
+
 
             historyUseCase.insertHistory(
                 History(
                     bookId = chapter.bookId,
                     chapterId = chapter.id,
-                    readAt = currentTimeToLong()
+                    readAt = currentTimeToLong(),
+                    progress = history?.progress?:0
                 )
             )
         }
-
     }
 }

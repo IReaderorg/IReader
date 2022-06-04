@@ -1,6 +1,6 @@
 package org.ireader.reader.viewmodel
 
-import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.ScrollState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.runtime.State
@@ -19,7 +19,7 @@ import javax.inject.Inject
 open class ReaderScreenStateImpl @Inject constructor() : ReaderScreenState {
     override var isLoading by mutableStateOf<Boolean>(false)
 
-    override var readerScrollState by mutableStateOf<LazyListState?>(null)
+    override var readerScrollState by mutableStateOf<ScrollState?>(null)
     @ExperimentalMaterialApi
     override var modalBottomSheetState by mutableStateOf<ModalBottomSheetState?>(null)
     override var isDrawerAsc by mutableStateOf<Boolean>(true)
@@ -28,6 +28,7 @@ open class ReaderScreenStateImpl @Inject constructor() : ReaderScreenState {
     override var isSettingModeEnable by mutableStateOf<Boolean>(false)
     override var isMainBottomModeEnable by mutableStateOf<Boolean>(false)
     override var currentChapterIndex: Int by mutableStateOf<Int>(0)
+    override var maxScrollstate: Int by mutableStateOf<Int>(0)
     override val source: Source? by derivedStateOf { catalog?.source }
     override var catalog: CatalogLocal? by mutableStateOf<CatalogLocal?>(null)
     override var stateChapters: List<Chapter> by mutableStateOf<List<Chapter>>(emptyList())
@@ -52,6 +53,7 @@ interface ReaderScreenState {
     var isMainBottomModeEnable: Boolean
 
     var currentChapterIndex: Int
+    var maxScrollstate: Int
     val source: Source?
     var catalog: CatalogLocal?
     var stateChapters: List<Chapter>
@@ -62,17 +64,12 @@ interface ReaderScreenState {
     val chapterShell : SnapshotStateList<Chapter>
 
 
-    var readerScrollState:LazyListState?
+    var readerScrollState:ScrollState?
     @OptIn(ExperimentalMaterialApi::class) var modalBottomSheetState: ModalBottomSheetState?
 }
 
 open class ReaderScreenPreferencesStateImpl @Inject constructor() : ReaderScreenPreferencesState {
     override var isAsc by mutableStateOf<Boolean>(true)
-
-
-
-    override var brightness by mutableStateOf<Float>(0.3f)
-
 
     override var isChaptersReversed by mutableStateOf<Boolean>(false)
 
@@ -96,7 +93,6 @@ interface ReaderScreenPreferencesState {
     var isAsc: Boolean
 
 
-    var brightness: Float
 
 
     var isChaptersReversed: Boolean

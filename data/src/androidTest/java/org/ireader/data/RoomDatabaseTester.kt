@@ -39,7 +39,7 @@ class RoomDatabaseTester {
     fun writeUserAndReadInList() = runBlocking {
         val user: org.ireader.common_models.entities.Book =
             org.ireader.common_models.entities.Book(key = "", sourceId = 1L, title = "")
-        bookDao.insertBook(user)
+        bookDao.insert(user)
         val byName = bookDao.findBookById(1L)
         assertThat(byName != null).isTrue()
     }

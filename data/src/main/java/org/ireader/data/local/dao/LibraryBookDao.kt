@@ -8,7 +8,6 @@ import androidx.room.RewriteQueriesToDropUnusedColumns
 import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 import org.ireader.common_models.entities.Book
-import org.ireader.common_models.entities.BookItem
 import org.ireader.common_models.entities.Chapter
 
 @Dao
@@ -20,205 +19,9 @@ interface LibraryBookDao : BaseDao<Book> {
     @RewriteQueriesToDropUnusedColumns
     @Query("""SELECT  * FROM library WHERE favorite = 1 """)
     fun subscribeAllLocalBooks(): Flow<List<org.ireader.common_models.entities.Book>>
-    @RewriteQueriesToDropUnusedColumns
-    @Query(
-        """SELECT  library.* ,
-        MAX(history.readAt) as lastRead
-        FROM  library
-        LEFT JOIN chapter ON library.id = chapter.bookId
-        LEFT JOIN history ON history.bookId = chapter.bookId
-        GROUP BY library.id
-        HAVING library.favorite = 1
-        ORDER BY lastRead
-        """
-    )
-    fun subscribeBookByLatest(): Flow<List<BookItem>>
-    @RewriteQueriesToDropUnusedColumns
-    @Query(
-        """SELECT  library.*
-        FROM  library
-        WHERE library.favorite = 1
-        ORDER BY library.title
-        """
-    )
-    fun subscribeBookByAlphabets(): Flow<List<BookItem>>
-    @RewriteQueriesToDropUnusedColumns
-    @Query(
-        """SELECT  library.*
-        FROM  library
-        WHERE library.favorite = 1
-        ORDER BY library.dataAdded
-        """
-    )
-    fun subscribeBookByDateAdded(): Flow<List<BookItem>>
-    @RewriteQueriesToDropUnusedColumns
-    @Query(
-        """SELECT  library.*
-        FROM  library
-        LEFT JOIN chapter ON library.id = chapter.bookId 
-        GROUP BY library.id
-        HAVING library.favorite = 1 AND chapter.dateFetch == (
-            SELECT MAX(chapter.dateFetch) FROM chapter as ch1 WHERE ch1.id = chapter.id
-        )
-        ORDER BY chapter.dateFetch
-        """
-    )
-    fun subscribeBookByDateFetched(): Flow<List<BookItem>>
-    @RewriteQueriesToDropUnusedColumns
-    @Query(
-        """SELECT  library.*,
-                    COUNT(DISTINCT chapter.id) AS totalChapters
-        FROM  library
-        LEFT JOIN chapter ON library.id = chapter.bookId
-                GROUP BY library.id
-        HAVING library.favorite = 1
-        ORDER BY totalChapters
-        """
-    )
-    fun subscribeBookByTotalChapter(): Flow<List<BookItem>>
-    @RewriteQueriesToDropUnusedColumns
-    @Query(
-        """SELECT  library.*
-        FROM  library
-        WHERE library.favorite = 1
-        ORDER BY library.lastUpdate
-        """
-    )
-    fun subscribeBookByLastUpdate(): Flow<List<BookItem>>
-    @RewriteQueriesToDropUnusedColumns
-    @Query(
-        """SELECT  library.* ,
-        MAX(history.readAt) as lastRead,
-        COUNT(DISTINCT chapter.id) AS totalChapters,
-        SUM(chapter.read) as isRead,
-        SUM(chapter.content > 10) AS totalDownload
-        FROM  library
-        LEFT JOIN chapter ON library.id = chapter.bookId
-                LEFT JOIN history ON history.bookId = chapter.bookId
-        GROUP BY library.id
-        HAVING library.favorite = 1
-        ORDER BY 
-        CASE WHEN :desc = 1 AND :sortByAbs = 1 THEN library.title END DESC,
-        CASE WHEN :desc = 0 AND :sortByAbs = 1 THEN  library.title END ASC,
-        CASE WHEN :desc = 1 AND :sortByDateAdded = 1 THEN library.dataAdded END DESC,
-        CASE WHEN :desc = 0 AND :sortByDateAdded = 1 THEN  library.dataAdded END ASC,
-        CASE WHEN :desc = 1 AND :sortByLastRead = 1 THEN lastRead END DESC,
-        CASE WHEN :desc = 0 AND :sortByLastRead = 1 THEN  lastRead END ASC,
-        CASE WHEN :desc = 1 AND :dateFetched = 1 THEN dateFetch END DESC,
-        CASE WHEN :desc = 0 AND :dateFetched = 1 THEN  dateFetch END ASC,
-        CASE WHEN :desc = 1 AND :dateAdded = 1 THEN dataAdded END DESC,
-        CASE WHEN :desc = 0 AND :dateAdded = 1 THEN  dataAdded END ASC,
-        CASE WHEN :desc = 1 AND :sortByTotalChapter = 1 THEN  totalChapters END DESC,
-        CASE WHEN :desc = 0 AND :sortByTotalChapter = 1 THEN  totalChapters END ASC,
-        CASE WHEN :desc = 1 AND :lastChecked = 1 THEN  lastUpdate END DESC,
-        CASE WHEN :desc = 0 AND :lastChecked = 1 THEN  lastUpdate END ASC
-        """
-    )
-    fun subscribeAllInLibraryBooks(
-        sortByAbs: Boolean = false,
-        sortByDateAdded: Boolean = false,
-        sortByLastRead: Boolean = false,
-        sortByTotalChapter: Boolean = false,
-        dateFetched: Boolean = false,
-        dateAdded: Boolean = false,
-        lastChecked: Boolean = false,
-        desc: Boolean = false,
-    ): Flow<List<org.ireader.common_models.entities.BookItem>>
-    @RewriteQueriesToDropUnusedColumns
-    @Query(
-        """
-    SELECT library.*,
-    MAX(history.readAt) AS max,
-    SUM(chapter.content > 0) AS totalDownload
-    FROM library
-    LEFT JOIN chapter
-    ON library.id = chapter.bookId
-    LEFT JOIN history
-    ON chapter.id = history.chapterId
-    WHERE library.favorite = 1
-    GROUP BY library.id
-    ORDER BY
-    CASE WHEN :desc = 1 THEN  max END DESC,
-    CASE WHEN :desc = 0 THEN  max END ASC
-"""
-    )
-    fun subscribeLatestRead(desc: Boolean): Flow<List<org.ireader.common_models.entities.BookItem>>
-    @RewriteQueriesToDropUnusedColumns
-    @Query(
-        """
-    SELECT library.*, MAX(chapter.dateUpload) AS max,
-    SUM(chapter.content > 10) AS totalDownload
-    FROM library
-    LEFT JOIN chapter
-    ON library.id = chapter.bookId
-    GROUP BY library.id
-    ORDER by
-    CASE WHEN :desc = 1 THEN  max END DESC,
-    CASE WHEN :desc = 0 THEN  max END ASC
-"""
-    )
-    fun subscribeLatestChapter(desc: Boolean): Flow<List<org.ireader.common_models.entities.BookItem>>
-    @RewriteQueriesToDropUnusedColumns
-    @Query(
-        """
-    SELECT library.*, SUM(CASE WHEN chapter.read == 0 THEN 1 ELSE 0 END) AS unread,
-    SUM(chapter.content > 10) AS totalDownload
-    FROM library
-    JOIN chapter
-    ON library.id = chapter.bookId
-    GROUP BY library.id
-    HAVING library.favorite = 1
-    ORDER by 
-    CASE WHEN :desc = 1 THEN  COUNT(*) END DESC,
-    CASE WHEN :desc = 0 THEN  COUNT(*) END ASC
-"""
-    )
-    fun subscribeTotalChapter(desc: Boolean): Flow<List<org.ireader.common_models.entities.BookItem>>
-    @RewriteQueriesToDropUnusedColumns
-    @Query(
-        """
-    SELECT library.*, 
-    SUM(chapter.content > 10) AS totalDownload,
-    SUM(CASE WHEN chapter.read == 0 THEN 1 ELSE 0 END) AS unread,
-    COUNT(*) AS total
-    FROM library
-    LEFT JOIN chapter
-    ON library.id = chapter.bookId
-    GROUP BY library.id
-    HAVING library.favorite = 1 AND unread == total
-"""
-    )
-    suspend fun findUnreadBooks(): List<org.ireader.common_models.entities.BookItem>
-    @RewriteQueriesToDropUnusedColumns
-    @Query(
-        """
-    SELECT library.*, 
-    SUM(length(chapter.content) > 10) as total_download,
-    SUM(chapter.content > 10) AS totalDownload,
-    COUNT(*) AS total
-    FROM library
-    LEFT JOIN chapter
-    ON library.id = chapter.bookId
-    GROUP BY library.id
-    HAVING library.favorite = 1 AND total_download == total
-"""
-    )
-    suspend fun findCompletedBooks(): List<org.ireader.common_models.entities.BookItem>
-    @RewriteQueriesToDropUnusedColumns
-    @Query(
-        """
-    SELECT library.*, 
-    SUM(chapter.content > 10) AS totalDownload,
-    SUM(CASE WHEN chapter.read == 0 THEN 1 ELSE 0 END) AS unread,
-    COUNT(*) AS total
-    FROM library
-    LEFT JOIN chapter
-    ON library.id = chapter.bookId
-    GROUP BY library.id
-    HAVING library.favorite = 1 AND unread == 0
-"""
-    )
-    suspend fun findDownloadedBooks(): List<org.ireader.common_models.entities.BookItem>
+
+
+
 
     @Query("SELECT * FROM library WHERE favorite = 1")
     suspend fun findAllInLibraryBooks(): List<org.ireader.common_models.entities.Book>
@@ -248,8 +51,6 @@ interface LibraryBookDao : BaseDao<Book> {
     @Query("SELECT * FROM library WHERE title LIKE '%' || :query || '%' AND favorite = 1")
     fun searchBook(query: String): Flow<org.ireader.common_models.entities.Book>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertBook(book: org.ireader.common_models.entities.Book): Long
 
     @Query("DELETE FROM library WHERE id = :bookId ")
     suspend fun deleteBook(bookId: Long)
