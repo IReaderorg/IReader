@@ -20,14 +20,14 @@ class CreateCategoryWithName @Inject internal constructor(
       return@f Result.CategoryAlreadyExistsError(name)
     }
 
-    val nextOrder = categories.maxByOrNull { it.category.sort }?.category?.sort?.plus(1) ?: 0
+    val nextOrder = categories.maxByOrNull { it.category.order }?.category?.order?.plus(1) ?: 0
     val newCategory = Category(
       name = name,
-      sort = nextOrder
+      order = nextOrder
     )
 
     try {
-      categoryRepository.insert(newCategory)
+      categoryRepository.insertOrUpdate(newCategory)
     } catch (e: Exception) {
       return@f Result.InternalError(e)
     }

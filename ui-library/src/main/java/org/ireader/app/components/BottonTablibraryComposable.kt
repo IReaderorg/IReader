@@ -27,8 +27,10 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ScrollableTabRow
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,8 +43,6 @@ import com.google.accompanist.pager.PagerState
 import kotlinx.coroutines.launch
 import org.ireader.app.viewmodel.LibraryViewModel
 import org.ireader.common_models.DisplayMode
-import org.ireader.common_models.LayoutType
-import org.ireader.common_models.layouts
 import org.ireader.common_models.library.LibraryFilter
 import org.ireader.common_models.library.LibrarySort
 import org.ireader.components.components.component.pagerTabIndicatorOffset
@@ -89,7 +89,7 @@ fun ScrollableTabs(
     modifier: Modifier = Modifier,
     libraryTabs: List<String>,
     pagerState: PagerState,
-    visible: Boolean= true,
+    visible: Boolean = true,
 ) {
     val scope = rememberCoroutineScope()
     // OR ScrollableTabRow()
@@ -137,10 +137,17 @@ fun TabsContent(
     sortType: LibrarySort,
     isSortDesc: Boolean,
     onSortSelected: (LibrarySort) -> Unit,
-    layoutType: LayoutType,
+    layoutType: DisplayMode,
     onLayoutSelected: (DisplayMode) -> Unit,
     vm: LibraryViewModel
 ) {
+    val layouts = remember {
+        listOf(
+            DisplayMode.CompactGrid,
+            DisplayMode.ComfortableGrid,
+            DisplayMode.List,
+        )
+    }
     HorizontalPager(
         count = libraryTabs.size,
         state = pagerState,
@@ -251,15 +258,38 @@ private fun LazyListScope.DispalyPage(
         ) {
             ClickableRow(onClick = { onLayoutSelected(layout) }) {
                 androidx.compose.material3.RadioButton(
-                    selected = vm.layout == layout.layout,
+                    selected = vm.layout == layout,
                     onClick = { onLayoutSelected(layout) },
                     modifier = Modifier.padding(horizontal = 15.dp)
                 )
 
-                MidSizeTextComposable(text = stringResource(id = layout.title))
+                when (layout) {
+                    DisplayMode.CompactGrid -> {
+                        MidSizeTextComposable(text = stringResource(id = R.string.compact_layout))
+                    }
+                    DisplayMode.ComfortableGrid -> {
+                        MidSizeTextComposable(text = stringResource(id = R.string.grid_layout))
+                    }
+                    DisplayMode.List -> {
+                        MidSizeTextComposable(text = stringResource(id = R.string.list_layout))
+                    }
+                }
 
             }
         }
+    }
+    item {
+        TextSection(
+            text = stringResource(R.string.columns),
+            padding = PaddingValues(vertical = 12.dp, horizontal = 20.dp),
+            style = MaterialTheme.typography.bodyMedium,
+            toUpper = false
+        )
+    }
+    item {
+        Slider(modifier =  Modifier.padding(horizontal = 20.dp), value = vm.columnInPortrait.toFloat(), onValueChange = {
+            vm.columnInPortrait = it.toInt()
+        }, steps = 10, valueRange = 0f..10f)
     }
     item {
         TextSection(

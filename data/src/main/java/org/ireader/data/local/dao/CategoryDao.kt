@@ -50,7 +50,7 @@ interface CategoryDao:BaseDao<Category> {
     ) AS bookCount
     FROM category
     WHERE category.id = 0
-    ORDER BY sort;
+    ORDER BY `order`;
     """)
     fun subscribeAll(): Flow<List<CategoryWithRelation>>
     @Query("""
@@ -82,9 +82,18 @@ interface CategoryDao:BaseDao<Category> {
     ) AS bookCount
     FROM category
     WHERE category.id = 0
-    ORDER BY sort;
+    ORDER BY `order`;
     """)
     suspend fun findAll(): List<CategoryWithRelation>
+
+    @Query("""
+        SELECT * FROM category WHERE id = :categoryId LIMIT 1
+    """)
+    suspend fun find(categoryId: Long): Category
+    @Query("""
+       UPDATE category SET flags = coalesce(:flags,0)
+    """)
+    suspend fun updateAllFlags(flags: Long)
 
     @Insert
     fun insertDate(date:List<Category>)

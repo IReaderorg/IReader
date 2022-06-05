@@ -3,6 +3,7 @@ package org.ireader.app.viewmodel
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -13,9 +14,11 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.state.ToggleableState
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -73,6 +76,11 @@ class LibraryViewModel @Inject constructor(
     val addQueues: SnapshotStateList<BookCategory> = mutableStateListOf()
     var showDialog: Boolean by mutableStateOf(false)
 
+    val perCategorySettings = libraryPreferences.perCategorySettings().asState()
+    val layouts = libraryPreferences.categoryFlags().asState()
+    var columnInPortrait by libraryPreferences.columnsInPortrait().asState()
+    val columnInLandscape by libraryPreferences.columnsInLandscape().asState()
+    val layout by derivedStateOf { DisplayMode.getFlag(layouts.value) ?: DisplayMode.CompactGrid }
     init {
         readLayoutTypeAndFilterTypeAndSortType()
         libraryPreferences.showAllCategory().stateIn(scope)
@@ -92,8 +100,15 @@ class LibraryViewModel @Inject constructor(
     private val loadedManga = mutableMapOf<Long, List<BookItem>>()
 
     fun onLayoutTypeChange(layoutType: DisplayMode) {
-        libraryScreenPrefUseCases.libraryLayoutTypeUseCase.save(layoutType.layoutIndex)
-        this.layout = layoutType.layout
+        categories.firstOrNull { it.id == lastUsedCategory.value }?.let { category ->
+            viewModelScope.launch {
+                libraryScreenPrefUseCases.libraryLayoutTypeUseCase.await(
+                    category = category.category,
+                    displayMode = layoutType
+                )
+            }
+
+        }
     }
 
     fun downloadChapters() {
@@ -124,7 +139,7 @@ class LibraryViewModel @Inject constructor(
     fun deleteBooks() {
         viewModelScope.launch(Dispatchers.IO) {
             books.filter { it.id in selectedBooks }.forEach {
-                insertUseCases.updateBook.update(it,false)
+                insertUseCases.updateBook.update(it, false)
             }
             selectedBooks.clear()
         }
@@ -133,9 +148,7 @@ class LibraryViewModel @Inject constructor(
     fun readLayoutTypeAndFilterTypeAndSortType() {
         viewModelScope.launch {
             val sortType = libraryScreenPrefUseCases.sortersUseCase.read()
-            val layoutType = libraryScreenPrefUseCases.libraryLayoutTypeUseCase.read().layout
             val sortBy = libraryScreenPrefUseCases.sortersDescUseCase.read()
-            this@LibraryViewModel.layout = layoutType
             this@LibraryViewModel.sortType = sortType
             this@LibraryViewModel.desc = sortBy
         }
@@ -242,6 +255,14 @@ class LibraryViewModel @Inject constructor(
                 .onEach { loadedManga[categoryId] = it }
                 .onCompletion { loadedManga.remove(categoryId) }
         }.collectAsState(emptyList())
+    }
+
+    fun getColumnsForOrientation(isLandscape: Boolean, scope: CoroutineScope): StateFlow<Int> {
+        return if (isLandscape) {
+            libraryPreferences.columnsInLandscape()
+        } else {
+            libraryPreferences.columnsInPortrait()
+        }.stateIn(scope)
     }
 
     override fun onDestroy() {

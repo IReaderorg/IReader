@@ -135,6 +135,11 @@ object ReaderScreenSpec : ScreenSpec {
                 vm.readBrightness(context)
             }
         }
+        LaunchedEffect(key1 = vm.orientation.value ) {
+            vm.prefFunc.apply {
+                vm.readOrientation(context)
+            }
+        }
         LaunchedEffect(key1 = vm.initialized) {
             vm.prepareReaderSetting(context,scrollState)
 

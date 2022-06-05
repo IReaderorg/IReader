@@ -29,12 +29,12 @@ class AppPreferences(
 
 
 
-    fun libraryLayoutType(): Preference<Int> {
-        return preferenceStore.getInt(SAVED_LIBRARY_LAYOUT_KEY, 0)
+    fun libraryLayoutType(): Preference<Long> {
+        return preferenceStore.getLong(SAVED_LIBRARY_LAYOUT_KEY, 0)
     }
 
-    fun exploreLayoutType(): Preference<Int> {
-        return preferenceStore.getInt(SAVED_BROWSE_LAYOUT_KEY, 0)
+    fun exploreLayoutType(): Preference<Long> {
+        return preferenceStore.getLong(SAVED_BROWSE_LAYOUT_KEY, 0)
     }
 
     fun dohStateKey(): Preference<Int> {

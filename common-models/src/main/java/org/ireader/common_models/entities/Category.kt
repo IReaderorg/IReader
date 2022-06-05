@@ -9,9 +9,9 @@ data class Category(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     val name: String = "",
-    val sort: Int = 0,
+    val order: Int = 0,
     val updateInterval: Int = 0,
-    val flags: Int = 0,
+    val flags: Long = 0,
 ) {
 
     private val isUncategorized get() = id == UNCATEGORIZED_ID

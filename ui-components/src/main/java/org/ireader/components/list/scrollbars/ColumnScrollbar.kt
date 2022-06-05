@@ -120,7 +120,7 @@ private fun MainColumnScrollbar(
                 .1f
             }
         }
-//
+
         val normalizedThumbSize by remember {
             derivedStateOf {
                 normalizedThumbSizeReal.coerceAtLeast(thumbMinHeight)
@@ -138,7 +138,7 @@ private fun MainColumnScrollbar(
         val maxPossibleOffset = remember {
             (1f - (constraints.maxHeight / 100)) *  -100
         }
-        /***/
+       
         val scrollAsPercent by remember {
             derivedStateOf {
                 if (state.maxValue == 0) return@derivedStateOf 0f

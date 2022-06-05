@@ -9,7 +9,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
 import org.ireader.data.local.AppDatabase
 import org.ireader.data.local.AppDatabase_Migrations
-import org.ireader.data.local.MIGRATION_20_21
+import org.ireader.data.local.MIGRATION_21_22
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -23,7 +23,7 @@ class MigrationTest {
 
     // Array of all migrations
     private val ALL_MIGRATIONS = arrayOf(
-        MIGRATION_20_21
+        MIGRATION_21_22()
     )
 
     @get:Rule
@@ -34,8 +34,8 @@ class MigrationTest {
     )
 
     @Test
-    fun migrate20to21() {
-        database = helper.createDatabase(TEST_DB, 20).apply {
+    fun migrate21to22() {
+        database = helper.createDatabase(TEST_DB, 21).apply {
 
             // (id,sourceId,link,title,author,description,genres,status,cover,customCover,favorite,lastUpdated,lastRead,dataAdded,viewer,flags)
             execSQL(
@@ -48,7 +48,7 @@ class MigrationTest {
         }
 
         // ADDED a tableId
-        database = helper.runMigrationsAndValidate(TEST_DB, 21, true, MIGRATION_20_21)
+        database = helper.runMigrationsAndValidate(TEST_DB, 22, true, MIGRATION_21_22())
         val resultCursor = database.query("SELECT * FROM library")
         assertTrue(resultCursor.moveToFirst())
 

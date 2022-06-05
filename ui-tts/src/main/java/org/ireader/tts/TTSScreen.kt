@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -40,6 +41,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -92,7 +94,13 @@ fun TTSScreen(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        val maxHeight = remember {
+            constraints.maxHeight
+        }
+        val maxWidth= remember {
+            constraints.maxWidth
+        }
         Column(
             modifier = Modifier
                 .align(Alignment.TopStart)
@@ -118,7 +126,6 @@ fun TTSScreen(
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .weight(6f)
                                 .padding(top = 16.dp),
                             verticalArrangement = Arrangement.Top,
                             horizontalAlignment = Alignment.CenterHorizontally
@@ -127,8 +134,8 @@ fun TTSScreen(
                                 image = BookCover.from(book),
                                 modifier = Modifier
                                     .padding(8.dp)
-                                    .height(180.dp)
-                                    .width(120.dp)
+                                    .height((maxHeight / 15).dp)
+                                    .width((maxWidth / 10).dp)
                                     .clip(MaterialTheme.shapes.medium)
                                     .border(
                                         2.dp,
@@ -163,7 +170,7 @@ fun TTSScreen(
                                         vertical = 8.dp
                                     )
                                     .fillMaxWidth()
-                                    .height(200.dp)
+                                    .height((maxHeight / 15).dp)
                                     .verticalScroll(rememberScrollState())
                                     .align(Alignment.CenterHorizontally),
                                 text = if (content.isNotEmpty() && vm.currentReadingParagraph <= content.lastIndex && index <= content.lastIndex) content[index] else "",
@@ -178,7 +185,7 @@ fun TTSScreen(
 
                         Column(
                             modifier = Modifier
-                                .weight(6f)
+                                .height((maxHeight / 10).dp)
                                 .fillMaxWidth(),
                             verticalArrangement = Arrangement.Center,
                             horizontalAlignment = Alignment.CenterHorizontally
@@ -199,9 +206,10 @@ fun TTSScreen(
                                     }
                                 }
                             )
-                            Spacer(modifier = Modifier.height(32.dp))
+                         //   Spacer(modifier = Modifier.height(32.dp))
                             TTLScreenPlay(
-                                modifier = Modifier.weight(8f),
+                                modifier = Modifier
+                                    .height((maxHeight / 15).dp),
                                 onPlay = onPlay,
                                 onNext = onNext,
                                 onPrev = onPrev,

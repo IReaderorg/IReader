@@ -203,12 +203,12 @@ class ExploreViewModel @Inject constructor(
     }
 
     fun saveLayoutType(layoutType: DisplayMode) {
-        state.layout = layoutType.layout
-        browseScreenPrefUseCase.browseLayoutTypeUseCase.save(layoutType.layoutIndex)
+        state.layout = layoutType
+        browseScreenPrefUseCase.browseLayoutTypeUseCase.save(layoutType)
     }
 
     private suspend fun readLayoutType() {
-        state.layout = browseScreenPrefUseCase.browseLayoutTypeUseCase.read().layout
+        state.layout = browseScreenPrefUseCase.browseLayoutTypeUseCase.read()
     }
 
 

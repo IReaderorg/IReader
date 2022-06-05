@@ -165,7 +165,10 @@ object LibraryScreenSpec : BottomNavScreenSpec {
                 }
                 vm.showDialog = false
             },
-            requestHideBottomNav = controller.requestHideNavigator
+            requestHideBottomNav = controller.requestHideNavigator,
+            getColumnsForOrientation = { isLandscape ->
+              vm.getColumnsForOrientation(isLandscape,this)
+            }
         )
     }
 }

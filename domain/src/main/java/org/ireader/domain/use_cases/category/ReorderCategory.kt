@@ -26,11 +26,11 @@ class ReorderCategory @Inject internal constructor(
     reorderedCategories.add(newPosition, movedCategory)
 
     val updates = reorderedCategories.mapIndexed { index, category ->
-      category.category.copy(sort = index)
+      category.category.copy(order = index)
     }
 
     try {
-      categoryRepository.insertAll(updates)
+      categoryRepository.insertOrUpdate(updates)
     } catch (e: Exception) {
       return@f Result.InternalError(e)
     }

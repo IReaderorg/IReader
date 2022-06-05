@@ -52,6 +52,7 @@
     <string name="display_mode">Display Mode</string>
     <string name="tabs">Tabs</string>
     <string name="badge">Badge</string>
+    <string name="columns">Columns</string>
     <string name="display">Display</string>
     <string name="unread">Unread</string>
     <string name="completed">Completed</string>

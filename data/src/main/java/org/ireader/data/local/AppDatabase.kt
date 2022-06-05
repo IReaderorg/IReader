@@ -44,7 +44,7 @@ import java.util.concurrent.Executors
         FontEntity::class,
         BookCategory::class
     ],
-    version = 21,
+    version = 22,
     exportSchema = true,
 )
 @TypeConverters(DatabaseConverter::class)
@@ -77,7 +77,7 @@ abstract class AppDatabase : RoomDatabase() {
                 AppDatabase::class.java,
                 DATABASE_NAME
             )
-                .addMigrations(MIGRATION_20_21())
+                .addMigrations(MIGRATION_20_21(), MIGRATION_21_22())
                 // prepopulate the database after onCreate was called
                 .addCallback(object : Callback() {
                     override fun onCreate(db: SupportSQLiteDatabase) {
@@ -96,6 +96,17 @@ abstract class AppDatabase : RoomDatabase() {
         )
     }
 }
+
+internal fun MIGRATION_21_22() = object : Migration(21, 22) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        database.execSQL("""CREATE TABLE IF NOT EXISTS `category_MERGE_TABLE` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `order` INTEGER NOT NULL, `updateInterval` INTEGER NOT NULL, `flags` INTEGER NOT NULL)""")
+        database.execSQL("""INSERT INTO `category_MERGE_TABLE` (`id`,`name`,`updateInterval`,`flags`,`order`) SELECT `category`.`id`,`category`.`name`,`category`.`updateInterval`,`category`.`flags`,`category`.`sort` FROM `category`""")
+        database.execSQL("""DROP TABLE IF EXISTS `category`""")
+        database.execSQL("""ALTER TABLE `category_MERGE_TABLE` RENAME TO `category`""")
+    }
+}
+
+
 
 internal fun MIGRATION_20_21() = object : Migration(20, 21) {
     override fun migrate(database: SupportSQLiteDatabase) {

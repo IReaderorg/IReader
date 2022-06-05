@@ -6,12 +6,14 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import org.ireader.common_data.repository.CategoryRepository
 import org.ireader.common_data.repository.DownloadRepository
 import org.ireader.common_data.repository.HistoryRepository
 import org.ireader.common_data.repository.LocalBookRepository
 import org.ireader.common_data.repository.RemoteKeyRepository
 import org.ireader.common_data.repository.UpdatesRepository
 import org.ireader.core_ui.preferences.AppPreferences
+import org.ireader.core_ui.preferences.LibraryPreferences
 import org.ireader.core_ui.preferences.ReaderPreferences
 import org.ireader.core_ui.preferences.UiPreferences
 import org.ireader.domain.use_cases.download.DownloadUseCases
@@ -230,10 +232,12 @@ class UseCasesInject {
     @Provides
     @Singleton
     fun providesLibraryScreenPrefUseCases(
-        appPreferences: AppPreferences
+        appPreferences: AppPreferences,
+        libraryPreferences: LibraryPreferences,
+        categoryRepository: CategoryRepository
     ): LibraryScreenPrefUseCases {
         return LibraryScreenPrefUseCases(
-          libraryLayoutTypeUseCase = LibraryLayoutTypeUseCase(appPreferences),
+          libraryLayoutTypeUseCase = LibraryLayoutTypeUseCase(libraryPreferences,categoryRepository),
             sortersDescUseCase = SortersDescUseCase(appPreferences),
             sortersUseCase = SortersUseCase(appPreferences)
         )

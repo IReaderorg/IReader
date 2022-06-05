@@ -1,6 +1,5 @@
 package org.ireader.explore
 
-
 import androidx.compose.foundation.background
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
@@ -16,10 +15,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import org.ireader.common_models.DisplayMode
-import org.ireader.common_models.LayoutType
-import org.ireader.common_models.layouts
+import org.ireader.common_models.getLayoutName
 import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.AppTextField
@@ -43,15 +42,19 @@ fun BrowseTopAppBar(
     onWebView: () -> Unit,
     onPop: () -> Unit,
     onLayoutTypeSelect: (DisplayMode) -> Unit,
-    currentLayout: LayoutType,
+    currentLayout: DisplayMode,
 ) {
     var topMenu by remember {
         mutableStateOf(false)
     }
+    val layouts = remember {
+        listOf(DisplayMode.ComfortableGrid,DisplayMode.CompactGrid,DisplayMode.List)
+    }
+    val context = LocalContext.current
     Toolbar(
         title = {
             if (!state.isSearchModeEnable) {
-                BigSizeTextComposable(text = source?.name?:"")
+                BigSizeTextComposable(text = source?.name ?: "")
             } else {
                 AppTextField(
                     query = state.searchQuery ?: "",
@@ -68,17 +71,17 @@ fun BrowseTopAppBar(
             if (state.isSearchModeEnable) {
                 AppIconButton(
                     imageVector = Icons.Default.Close,
-                   contentDescription = stringResource(R.string.close),
+                    contentDescription = stringResource(R.string.close),
                     onClick = {
                         onSearchDisable()
                     },
                 )
             } else if (source?.getFilters()
-                ?.find { it is Filter.Title } != null
+                    ?.find { it is Filter.Title } != null
             ) {
                 AppIconButton(
                     imageVector = Icons.Default.Search,
-                    contentDescription =  stringResource(R.string.search),
+                    contentDescription = stringResource(R.string.search),
                     onClick = {
                         onSearchEnable()
                     },
@@ -87,7 +90,7 @@ fun BrowseTopAppBar(
             if (source is HttpSource) {
                 AppIconButton(
                     imageVector = Icons.Default.Public,
-                   contentDescription = stringResource(R.string.webView),
+                    contentDescription = stringResource(R.string.webView),
                     onClick = {
                         onWebView()
                     },
@@ -95,7 +98,7 @@ fun BrowseTopAppBar(
             }
             AppIconButton(
                 imageVector = Icons.Default.GridView,
-               contentDescription = stringResource(R.string.layout),
+                contentDescription = stringResource(R.string.layout),
                 onClick = {
                     topMenu = true
                 },
@@ -113,8 +116,8 @@ fun BrowseTopAppBar(
                         topMenu = false
                     }) {
                         RadioButton(
-                            text = stringResource(id = layout.title),
-                            selected = currentLayout == layout.layout,
+                            text = layout.getLayoutName(context =context ),
+                            selected = currentLayout == layout,
                             onClick = {
                                 onLayoutTypeSelect(layout)
                                 topMenu = false

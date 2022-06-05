@@ -4,7 +4,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import org.ireader.common_models.LayoutType
+import org.ireader.common_models.DisplayMode
 import org.ireader.common_models.entities.BookItem
 import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.common_resources.UiText
@@ -16,7 +16,7 @@ import javax.inject.Inject
 interface ExploreState {
     var isLoading: Boolean
     var error: UiText?
-    val layout: LayoutType
+    val layout: DisplayMode
     val isSearchModeEnable: Boolean
     var searchQuery: String?
     val source: CatalogSource?
@@ -38,7 +38,7 @@ interface ExploreState {
 open class ExploreStateImpl @Inject constructor() : ExploreState {
     override var isLoading by mutableStateOf<Boolean>(false)
     override var error by mutableStateOf<UiText?>(null)
-    override var layout by mutableStateOf<LayoutType>(LayoutType.GridLayout)
+    override var layout by mutableStateOf<DisplayMode>(DisplayMode.ComfortableGrid)
     override var isSearchModeEnable by mutableStateOf<Boolean>(false)
     override var searchQuery by mutableStateOf<String?>(null)
     override val source: CatalogSource? by derivedStateOf {

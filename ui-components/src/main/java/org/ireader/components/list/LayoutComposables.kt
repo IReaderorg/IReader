@@ -5,7 +5,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import org.ireader.common_models.LayoutType
+import org.ireader.common_models.DisplayMode
 import org.ireader.common_models.entities.BookItem
 import org.ireader.components.list.layouts.CompactGridLayoutComposable
 import org.ireader.components.list.layouts.GridLayoutComposable
@@ -19,7 +19,7 @@ fun LayoutComposable(
     onClick: (book: BookItem) -> Unit,
     onLongClick: (BookItem) -> Unit = {},
     selection: List<Long> = emptyList<Long>(),
-    layout: LayoutType,
+    layout: DisplayMode,
     scrollState: LazyListState,
     gridState: LazyGridState,
     source: Source? = null,
@@ -29,10 +29,11 @@ fun LayoutComposable(
     showGoToLastChapterBadge: Boolean = false,
     showUnreadBadge: Boolean = false,
     showReadBadge: Boolean = false,
-    showInLibraryBadge:Boolean = false
+    showInLibraryBadge:Boolean = false,
+    columns:Int?=null,
 ) {
         when (layout) {
-            is LayoutType.GridLayout -> {
+             DisplayMode.ComfortableGrid -> {
                 GridLayoutComposable(
                     books = books,
                     onClick = { book ->
@@ -48,9 +49,10 @@ fun LayoutComposable(
                     showInLibraryBadge = showInLibraryBadge,
                     showReadBadge = showReadBadge,
                     showUnreadBadge = showUnreadBadge,
+                    columns = columns?:3
                 )
             }
-            is LayoutType.ListLayout -> {
+            DisplayMode.List -> {
                 LinearListDisplay(
                     books = books, onClick = { book ->
                         onClick(book)
@@ -67,7 +69,7 @@ fun LayoutComposable(
                     showUnreadBadge = showUnreadBadge,
                 )
             }
-            is LayoutType.CompactGrid -> {
+            DisplayMode.CompactGrid -> {
                 CompactGridLayoutComposable(
                     books = books,
                     onClick = { book ->
@@ -83,6 +85,7 @@ fun LayoutComposable(
                     showInLibraryBadge = showInLibraryBadge,
                     showReadBadge = showReadBadge,
                     showUnreadBadge = showUnreadBadge,
+                    columns = columns?:2
                 )
             }
         }

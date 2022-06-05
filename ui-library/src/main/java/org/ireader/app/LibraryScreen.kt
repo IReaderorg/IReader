@@ -30,10 +30,15 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -43,11 +48,14 @@ import com.google.accompanist.pager.rememberPagerState
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.StateFlow
 import org.ireader.app.components.EditCategoriesDialog
 import org.ireader.app.components.ScrollableTabs
 import org.ireader.app.components.visibleName
 import org.ireader.app.viewmodel.LibraryViewModel
-import org.ireader.common_models.LayoutType
+import org.ireader.common_models.DisplayMode
+import org.ireader.common_models.DisplayMode.Companion.displayMode
 import org.ireader.common_models.entities.BookItem
 import org.ireader.common_models.entities.CategoryWithCount
 import org.ireader.common_models.entities.toBookCategory
@@ -82,6 +90,7 @@ fun LibraryScreen(
     scaffoldPadding: PaddingValues,
     onAddToCategoryConfirm: () -> Unit,
     requestHideBottomNav: (Boolean) -> Unit,
+    getColumnsForOrientation: CoroutineScope.(Boolean) -> StateFlow<Int>,
 ) {
 
     LaunchedEffect(vm.selectionMode) {
@@ -118,7 +127,8 @@ fun LibraryScreen(
                     goToLatestChapter = goToLatestChapter,
                     onPageChanged = {
                         vm.setSelectedPage(it)
-                    }
+                    },
+                    getColumnsForOrientation= getColumnsForOrientation
                 )
 
             }
@@ -181,7 +191,8 @@ private fun LibraryContent(
     onBook: (book: BookItem) -> Unit,
     onLongBook: (book: BookItem) -> Unit,
     goToLatestChapter: (book: BookItem) -> Unit,
-    onPageChanged: (Int) -> Unit
+    onPageChanged: (Int) -> Unit,
+    getColumnsForOrientation: CoroutineScope.(Boolean) -> StateFlow<Int>,
 ) {
     if (vm.categories.isEmpty()) return
     val horizontalPager = rememberPagerState(initialPage = vm.selectedCategoryIndex)
@@ -211,7 +222,8 @@ private fun LibraryContent(
         currentPage = vm.selectedCategoryIndex,
         showUnreadBadge = vm.unreadBadge.value,
         showReadBadge  = vm.readBadge.value,
-        showGoToLastChapterBadge = vm.goToLastChapterBadge.value
+        showGoToLastChapterBadge = vm.goToLastChapterBadge.value,
+        getColumnsForOrientation = getColumnsForOrientation
 
     )
 }
@@ -268,14 +280,15 @@ fun LibraryPager(
     goToLatestChapter: (book: BookItem) -> Unit = {},
     categories: List<CategoryWithCount>,
     pageCount: Int,
-    layout: LayoutType,
+    layout: DisplayMode,
     selection: List<Long> = emptyList<Long>(),
     currentPage: Int,
     onPageChange: @Composable (page: Int) -> State<List<BookItem>>,
     showGoToLastChapterBadge: Boolean = false,
     showUnreadBadge: Boolean = false,
     showReadBadge: Boolean = false,
-    showInLibraryBadge:Boolean = false
+    showInLibraryBadge:Boolean = false,
+    getColumnsForOrientation: CoroutineScope.(Boolean) -> StateFlow<Int>,
 ) {
     HorizontalPager(
         count = pageCount,
@@ -284,6 +297,17 @@ fun LibraryPager(
         val books by onPageChange(page)
         val gridState = rememberLazyGridState()
         val lazyListState = rememberLazyListState()
+        val displayMode =  categories[page].category.displayMode
+        val columns by if (displayMode != DisplayMode.List) {
+            val window = LocalConfiguration.current
+            val isLandscape = window.screenWidthDp > window.screenHeightDp
+
+            with(rememberCoroutineScope()) {
+                remember(isLandscape) { getColumnsForOrientation(isLandscape) }.collectAsState()
+            }
+        } else {
+            remember { mutableStateOf(0) }
+        }
         LazyColumnScrollbar(
             listState = lazyListState,
         ) {
@@ -300,6 +324,7 @@ fun LibraryPager(
                 showGoToLastChapterBadge = showGoToLastChapterBadge,
                 showReadBadge = showReadBadge,
                 showUnreadBadge = showUnreadBadge,
+                columns = columns
             )
         }
 

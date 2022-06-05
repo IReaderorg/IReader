@@ -36,14 +36,20 @@ fun CompactGridLayoutComposable(
     showGoToLastChapterBadge: Boolean = false,
     showUnreadBadge: Boolean = false,
     showReadBadge: Boolean = false,
-    showInLibraryBadge:Boolean = false
+    showInLibraryBadge:Boolean = false,
+    columns:Int = 2
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
+        val cells = if (columns > 1) {
+            GridCells.Fixed(columns)
+        } else {
+            GridCells.Adaptive(160.dp)
+        }
 
         LazyVerticalGrid(
             state = scrollState,
             modifier = modifier.fillMaxSize(),
-            columns = GridCells.Fixed(2),
+            columns = cells,
             contentPadding = PaddingValues(8.dp),
             content = {
                 items(

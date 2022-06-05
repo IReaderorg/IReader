@@ -9,7 +9,7 @@ import org.ireader.common_models.entities.LibraryBook
 
 @Dao
 interface LibraryDao : BaseDao<org.ireader.common_models.entities.Book> {
-
+    @RewriteQueriesToDropUnusedColumns
     @Query(
         """
 
@@ -61,7 +61,7 @@ interface LibraryDao : BaseDao<org.ireader.common_models.entities.Book> {
         """
     )
     fun subscribeAll(sort: String): Flow<List<LibraryBook>>
-
+    @RewriteQueriesToDropUnusedColumns
     @Query(
         """
                 SELECT library.id, library.sourceId, library.`key`, library.title, library.status, library.cover,
@@ -112,7 +112,7 @@ interface LibraryDao : BaseDao<org.ireader.common_models.entities.Book> {
         """
     )
     suspend fun findAll(sort: String): List<LibraryBook>
-
+    @RewriteQueriesToDropUnusedColumns
     @Query(
         """
         SELECT library.id, library.sourceId, library.'key', library.title, library.status, library.cover,
@@ -165,7 +165,7 @@ interface LibraryDao : BaseDao<org.ireader.common_models.entities.Book> {
         """
     )
     fun subscribeUncategorized(sort: String): Flow<List<LibraryBook>>
-
+    @RewriteQueriesToDropUnusedColumns
     @Query(
         """
         SELECT library.id, library.sourceId, library.'key', library.title, library.status, library.cover,
@@ -218,7 +218,7 @@ interface LibraryDao : BaseDao<org.ireader.common_models.entities.Book> {
         """
     )
     suspend fun findUncategorized(sort: String): List<LibraryBook>
-
+    @RewriteQueriesToDropUnusedColumns
     @Query(
         """
         SELECT library.id, library.sourceId, library.'key', library.title, library.status, library.cover,
@@ -255,7 +255,7 @@ interface LibraryDao : BaseDao<org.ireader.common_models.entities.Book> {
         """
     )
     fun subscribeAllWithTotalChapters(sort: String): Flow<List<LibraryBook>>
-
+    @RewriteQueriesToDropUnusedColumns
     @Query(
         """
         SELECT library.id, library.sourceId, library.'key', library.title, library.status, library.cover,
@@ -289,7 +289,7 @@ interface LibraryDao : BaseDao<org.ireader.common_models.entities.Book> {
         """
     )
     suspend fun findAllWithTotalChapters(sort: String): List<LibraryBook>
-
+    @RewriteQueriesToDropUnusedColumns
     @Query(
         """
         SELECT library.id, library.sourceId, library.'key', library.title, library.status, library.cover,
@@ -325,7 +325,7 @@ interface LibraryDao : BaseDao<org.ireader.common_models.entities.Book> {
         """
     )
     suspend fun findUncategorizedWithTotalChapters(): List<LibraryBook>
-
+    @RewriteQueriesToDropUnusedColumns
     @Query(
         """
         SELECT library.id, library.sourceId, library.'key', library.title, library.status, library.cover,
@@ -362,7 +362,7 @@ interface LibraryDao : BaseDao<org.ireader.common_models.entities.Book> {
         """
     )
     suspend fun subscribeUncategorizedWithTotalChapters(): List<LibraryBook>
-
+    @RewriteQueriesToDropUnusedColumns
     @Query(
         """
              SELECT library.id, library.sourceId, library.'key', library.title, library.status, library.cover, library.customCover, library.favorite,
@@ -414,7 +414,7 @@ interface LibraryDao : BaseDao<org.ireader.common_models.entities.Book> {
         """
     )
     fun subscribeAllInCategory(sort: String, categoryId: Long): Flow<List<LibraryBook>>
-
+    @RewriteQueriesToDropUnusedColumns
     @Query(
         """
              SELECT library.id, library.sourceId, library.'key', library.title, library.status, library.cover, library.customCover, library.favorite,
@@ -466,7 +466,7 @@ interface LibraryDao : BaseDao<org.ireader.common_models.entities.Book> {
         """
     )
     suspend fun findAllInCategory(sort: String, categoryId: Long): List<LibraryBook>
-
+    @RewriteQueriesToDropUnusedColumns
     @Query(
         """
         SELECT library.id, library.sourceId, library.'key', library.title, library.status, library.cover, library.customCover, library.favorite,

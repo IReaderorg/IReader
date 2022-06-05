@@ -10,9 +10,9 @@ data class CategoryWithCount(val category: Category, val bookCount: Int) {
 data class CategoryWithRelation(
     val id: Long = 0,
     val name: String = "",
-    val sort: Int = 0,
+    val order: Int = 0,
     val updateInterval: Int = 0,
-    val flags: Int = 0,
+    val flags: Long = 0,
     val bookCount: Int
 ) {
     fun toCategoryWithCount(): CategoryWithCount {
@@ -21,7 +21,7 @@ data class CategoryWithRelation(
                 name = name,
                 flags = flags,
                 id = id,
-                sort = sort,
+                order = order,
                 updateInterval = updateInterval,
             ),
             bookCount = bookCount

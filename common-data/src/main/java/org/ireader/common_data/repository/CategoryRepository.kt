@@ -9,9 +9,11 @@ interface CategoryRepository {
     fun subscribeAll(): Flow<List<CategoryWithCount>>
 
     suspend fun findAll(): List<CategoryWithCount>
+    suspend fun find(categoryId:Long): Category
+    suspend fun updateAllFlags(flags:Long)
 
-    suspend fun insert(category: Category): Long
-    suspend fun insertAll(category: List<Category>): List<Long>
+    suspend fun insertOrUpdate(category: Category): Long
+    suspend fun insertOrUpdate(category: List<Category>): List<Long>
     suspend fun delete(category: Category)
     suspend fun deleteAll(category: List<Category>)
 

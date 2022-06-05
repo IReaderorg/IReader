@@ -20,11 +20,19 @@ class CategoryRepositoryImpl(
         return dao.findAll().map { it.toCategoryWithCount() }
     }
 
-    override suspend fun insert(category: Category): Long {
+    override suspend fun find(categoryId: Long): Category {
+        return dao.find(categoryId)
+    }
+
+    override suspend fun updateAllFlags(flags: Long) {
+        dao.updateAllFlags(flags)
+    }
+
+    override suspend fun insertOrUpdate(category: Category): Long {
         return dao.insertOrUpdate(category)
     }
 
-    override suspend fun insertAll(category: List<Category>): List<Long> {
+    override suspend fun insertOrUpdate(category: List<Category>): List<Long> {
         return dao.insertOrUpdate(category)
     }
 

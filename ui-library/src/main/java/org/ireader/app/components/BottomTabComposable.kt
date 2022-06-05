@@ -11,7 +11,6 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.PagerState
 import org.ireader.app.viewmodel.LibraryViewModel
 import org.ireader.common_models.DisplayMode
-import org.ireader.common_models.LayoutType
 import org.ireader.common_models.library.LibraryFilter
 import org.ireader.common_models.library.LibrarySort
 import org.ireader.ui_library.R
@@ -27,7 +26,7 @@ fun BottomTabComposable(
     sortType: LibrarySort,
     isSortDesc: Boolean,
     onSortSelected: (LibrarySort) -> Unit,
-    layoutType: LayoutType,
+    layoutType: DisplayMode,
     onLayoutSelected: (DisplayMode) -> Unit,
     vm:LibraryViewModel
 ) {
