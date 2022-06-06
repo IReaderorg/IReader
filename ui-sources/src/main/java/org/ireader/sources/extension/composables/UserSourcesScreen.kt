@@ -15,14 +15,14 @@ import org.ireader.common_models.entities.CatalogInstalled
 import org.ireader.common_models.entities.SourceState
 import org.ireader.common_models.entities.key
 import org.ireader.sources.extension.CatalogItem
-import org.ireader.sources.extension.CatalogsState
+import org.ireader.sources.extension.ExtensionViewModel
 import org.ireader.sources.extension.SourceHeader
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun UserSourcesScreen(
     modifier: Modifier = Modifier,
-    state: CatalogsState,
+    state: ExtensionViewModel,
     onClickCatalog: (Catalog) -> Unit,
     onClickTogglePinned: (Catalog) -> Unit,
 ) {

@@ -195,7 +195,7 @@ private fun PagedReaderText(
     Box(modifier = Modifier.fillMaxSize()) {
 
         ColumnScrollbar(
-            listState = scrollState,
+            state = scrollState,
             padding = if (vm.scrollIndicatorPadding.value < 0) 0.dp else vm.scrollIndicatorPadding.value.dp,
             thickness = if (vm.scrollIndicatorWith.value < 0) 0.dp else vm.scrollIndicatorWith.value.dp,
             enable = vm.showScrollIndicator.value,

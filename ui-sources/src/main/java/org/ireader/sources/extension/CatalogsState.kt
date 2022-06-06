@@ -11,8 +11,6 @@ import org.ireader.common_models.entities.SourceState
 import org.ireader.core_api.os.InstallStep
 import org.ireader.sources.extension.SourceKeys.AVAILABLE
 import org.ireader.sources.extension.SourceKeys.INSTALLED_KEY
-import org.ireader.sources.extension.SourceKeys.LAST_USED_KEY
-import org.ireader.sources.extension.SourceKeys.PINNED_KEY
 import org.ireader.sources.extension.composables.SourceUiModel
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -20,13 +18,13 @@ import javax.inject.Singleton
 interface CatalogsState {
     val pinnedCatalogs: List<CatalogLocal>
     val unpinnedCatalogs: List<CatalogLocal>
-    var lastReadCatalog: Long?
+
     val remoteCatalogs: List<CatalogRemote>
     val languageChoices: List<LanguageChoice>
     var selectedLanguage: LanguageChoice
     val installSteps: Map<String, InstallStep>
     val isRefreshing: Boolean
-    val userSources: List<SourceUiModel>
+  //  val userSources: List<SourceUiModel>
     val remoteSources: List<SourceUiModel>
     var searchQuery: String?
     var currentPagerPage: Int
@@ -43,51 +41,51 @@ class CatalogsStateImpl @Inject constructor() : CatalogsState {
 
     override var pinnedCatalogs by mutableStateOf(emptyList<CatalogLocal>())
     override var unpinnedCatalogs by mutableStateOf(emptyList<CatalogLocal>())
-    override var lastReadCatalog: Long? by mutableStateOf(null)
+
     override var remoteCatalogs by mutableStateOf(emptyList<CatalogRemote>())
     override var languageChoices by mutableStateOf(emptyList<LanguageChoice>())
-    override val userSources: List<SourceUiModel> by derivedStateOf {
-        val list = mutableListOf<SourceUiModel>()
-        if (lastReadCatalog != null) {
-
-           (pinnedCatalogs + unpinnedCatalogs).firstOrNull {
-                it.sourceId == lastReadCatalog
-            }?.let { c ->
-                list.addAll(
-                    listOf<SourceUiModel>(
-                        SourceUiModel.Header(LAST_USED_KEY),
-                        SourceUiModel.Item(c,SourceState.LastUsed)
-
-                    )
-                )
-            }
-
-        }
-
-        if (pinnedCatalogs.isNotEmpty()) {
-            list.addAll(
-                listOf<SourceUiModel>(
-                    SourceUiModel.Header(PINNED_KEY),
-                    *pinnedCatalogs.map { source ->
-                        SourceUiModel.Item(source,SourceState.Pinned)
-                    }.toTypedArray()
-                )
-            )
-        }
-        if (unpinnedCatalogs.isNotEmpty()) {
-            list.addAll(unpinnedCatalogs.groupBy {
-                it.source?.lang ?: "others"
-            }.flatMap {
-                listOf<SourceUiModel>(
-                    SourceUiModel.Header(it.key),
-                    *it.value.map { source ->
-                        SourceUiModel.Item(source,SourceState.UnPinned)
-                    }.toTypedArray()
-                )
-            })
-        }
-        list
-    }
+//    override val userSources: List<SourceUiModel> by derivedStateOf {
+//        val list = mutableListOf<SourceUiModel>()
+//        if (lastReadCatalog != null) {
+//
+//           (pinnedCatalogs + unpinnedCatalogs).firstOrNull {
+//                it.sourceId == lastReadCatalog
+//            }?.let { c ->
+//                list.addAll(
+//                    listOf<SourceUiModel>(
+//                        SourceUiModel.Header(LAST_USED_KEY),
+//                        SourceUiModel.Item(c,SourceState.LastUsed)
+//
+//                    )
+//                )
+//            }
+//
+//        }
+//
+//        if (pinnedCatalogs.isNotEmpty()) {
+//            list.addAll(
+//                listOf<SourceUiModel>(
+//                    SourceUiModel.Header(PINNED_KEY),
+//                    *pinnedCatalogs.map { source ->
+//                        SourceUiModel.Item(source,SourceState.Pinned)
+//                    }.toTypedArray()
+//                )
+//            )
+//        }
+//        if (unpinnedCatalogs.isNotEmpty()) {
+//            list.addAll(unpinnedCatalogs.groupBy {
+//                it.source?.lang ?: "others"
+//            }.flatMap {
+//                listOf<SourceUiModel>(
+//                    SourceUiModel.Header(it.key),
+//                    *it.value.map { source ->
+//                        SourceUiModel.Item(source,SourceState.UnPinned)
+//                    }.toTypedArray()
+//                )
+//            })
+//        }
+//        list
+//    }
     override val remoteSources: List<SourceUiModel> by derivedStateOf {
         val allCatalogs = pinnedCatalogs + unpinnedCatalogs
         val list = mutableListOf<SourceUiModel>()

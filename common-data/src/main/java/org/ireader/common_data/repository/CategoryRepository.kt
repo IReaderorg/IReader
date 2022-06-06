@@ -10,6 +10,7 @@ interface CategoryRepository {
 
     suspend fun findAll(): List<CategoryWithCount>
     suspend fun find(categoryId:Long): Category
+    suspend fun findCategoriesOfBook(bookId:Long): List<Category>
     suspend fun updateAllFlags(flags:Long)
 
     suspend fun insertOrUpdate(category: Category): Long

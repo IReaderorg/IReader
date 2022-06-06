@@ -6,12 +6,14 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import org.ireader.common_data.repository.BookCategoryRepository
+import org.ireader.common_data.repository.BookRepository
 import org.ireader.common_data.repository.CategoryRepository
 import org.ireader.common_data.repository.DownloadRepository
 import org.ireader.common_data.repository.HistoryRepository
-import org.ireader.common_data.repository.LocalBookRepository
 import org.ireader.common_data.repository.RemoteKeyRepository
 import org.ireader.common_data.repository.UpdatesRepository
+import org.ireader.core_api.db.Transactions
 import org.ireader.core_ui.preferences.AppPreferences
 import org.ireader.core_ui.preferences.LibraryPreferences
 import org.ireader.core_ui.preferences.ReaderPreferences
@@ -53,6 +55,7 @@ import org.ireader.domain.use_cases.local.delete_usecases.book.DeleteAllBooks
 import org.ireader.domain.use_cases.local.delete_usecases.book.DeleteAllExploreBook
 import org.ireader.domain.use_cases.local.delete_usecases.book.DeleteBookById
 import org.ireader.domain.use_cases.local.delete_usecases.book.DeleteBooks
+import org.ireader.domain.use_cases.local.delete_usecases.book.UnFavoriteBook
 import org.ireader.domain.use_cases.local.delete_usecases.chapter.DeleteAllChapters
 import org.ireader.domain.use_cases.local.delete_usecases.chapter.DeleteChapterByChapter
 import org.ireader.domain.use_cases.local.delete_usecases.chapter.DeleteChapters
@@ -128,16 +131,16 @@ class UseCasesInject {
     @Provides
     @Singleton
     fun provideLocalInsertUseCases(
-       localChapterRepository: org.ireader.common_data.repository.LocalChapterRepository,
-    localBookRepository: LocalBookRepository
+       chapterRepository: org.ireader.common_data.repository.ChapterRepository,
+    bookRepository: BookRepository
     ): LocalInsertUseCases {
         return LocalInsertUseCases(
-            insertBook = InsertBook(localBookRepository),
-            insertBookAndChapters = InsertBookAndChapters(localBookRepository),
-            insertBooks = InsertBooks(localBookRepository),
-            insertChapter = InsertChapter(localChapterRepository),
-            insertChapters = InsertChapters(localChapterRepository),
-            updateBook = UpdateBook(localBookRepository)
+            insertBook = InsertBook(bookRepository),
+            insertBookAndChapters = InsertBookAndChapters(bookRepository),
+            insertBooks = InsertBooks(bookRepository),
+            insertChapter = InsertChapter(chapterRepository),
+            insertChapters = InsertChapters(chapterRepository),
+            updateBook = UpdateBook(bookRepository)
         )
     }
 
@@ -145,58 +148,61 @@ class UseCasesInject {
     @Provides
     @Singleton
     fun provideLocalGetBookUseCases(
-        localBookRepository: LocalBookRepository
+        bookRepository: BookRepository
     ): LocalGetBookUseCases {
         return LocalGetBookUseCases(
-          findAllInLibraryBooks = FindAllInLibraryBooks(localBookRepository),
-            findBookById = FindBookById(localBookRepository),
-            findBookByKey = FindBookByKey(localBookRepository),
-            findBooksByKey = FindBooksByKey(localBookRepository),
-            subscribeBookById = SubscribeBookById(localBookRepository),
-            subscribeBooksByKey = SubscribeBooksByKey(localBookRepository),
-            SubscribeInLibraryBooks = SubscribeInLibraryBooks(localBookRepository),
+          findAllInLibraryBooks = FindAllInLibraryBooks(bookRepository),
+            findBookById = FindBookById(bookRepository),
+            findBookByKey = FindBookByKey(bookRepository),
+            findBooksByKey = FindBooksByKey(bookRepository),
+            subscribeBookById = SubscribeBookById(bookRepository),
+            subscribeBooksByKey = SubscribeBooksByKey(bookRepository),
+            SubscribeInLibraryBooks = SubscribeInLibraryBooks(bookRepository),
         )
     }
 
     @Provides
     @Singleton
     fun provideLocalChapterUseCase(
-        localChapterRepository: org.ireader.common_data.repository.LocalChapterRepository,
+        chapterRepository: org.ireader.common_data.repository.ChapterRepository,
         historyUseCase: HistoryUseCase,
         insertUseCases: LocalInsertUseCases,
         uiPreferences: UiPreferences
     ): LocalGetChapterUseCase {
         return LocalGetChapterUseCase(
-            findAllInLibraryChapters = FindAllInLibraryChapters(localChapterRepository),
-            findChapterById = FindChapterById(localChapterRepository),
-            findChapterByKey = FindChapterByKey(localChapterRepository),
-            findChaptersByBookId = FindChaptersByBookId(localChapterRepository),
-            findChaptersByKey = FindChaptersByKey(localChapterRepository),
-            findFirstChapter = FindFirstChapter(localChapterRepository),
-            findLastReadChapter = FindLastReadChapter(localChapterRepository),
-            subscribeChapterById = SubscribeChapterById(localChapterRepository),
-            subscribeChaptersByBookId = SubscribeChaptersByBookId(localChapterRepository),
-            subscribeLastReadChapter = SubscribeLastReadChapter(localChapterRepository),
+            findAllInLibraryChapters = FindAllInLibraryChapters(chapterRepository),
+            findChapterById = FindChapterById(chapterRepository),
+            findChapterByKey = FindChapterByKey(chapterRepository),
+            findChaptersByBookId = FindChaptersByBookId(chapterRepository),
+            findChaptersByKey = FindChaptersByKey(chapterRepository),
+            findFirstChapter = FindFirstChapter(chapterRepository),
+            findLastReadChapter = FindLastReadChapter(chapterRepository),
+            subscribeChapterById = SubscribeChapterById(chapterRepository),
+            subscribeChaptersByBookId = SubscribeChaptersByBookId(chapterRepository),
+            subscribeLastReadChapter = SubscribeLastReadChapter(chapterRepository),
             updateLastReadTime = UpdateLastReadTime(insertUseCases = insertUseCases, historyUseCase = historyUseCase, uiPreferences = uiPreferences)
         )
     }
     @Provides
     @Singleton
     fun provideDeleteUseCase(
-        localChapterRepository: org.ireader.common_data.repository.LocalChapterRepository,
-        localBookRepository: LocalBookRepository,
-        remoteKeyRepository: RemoteKeyRepository
+        chapterRepository: org.ireader.common_data.repository.ChapterRepository,
+        bookRepository: BookRepository,
+        remoteKeyRepository: RemoteKeyRepository,
+        bookCategoryRepository: BookCategoryRepository,
+        transactions: Transactions
     ): DeleteUseCase {
         return DeleteUseCase(
-            deleteAllBook = DeleteAllBooks(localBookRepository),
-            deleteAllChapters = DeleteAllChapters(localChapterRepository),
-            deleteAllExploreBook = DeleteAllExploreBook(localBookRepository),
+            deleteAllBook = DeleteAllBooks(bookRepository),
+            deleteAllChapters = DeleteAllChapters(chapterRepository),
+            deleteAllExploreBook = DeleteAllExploreBook(bookRepository),
             deleteAllRemoteKeys = DeleteAllRemoteKeys(remoteKeyRepository),
-            deleteBookById = DeleteBookById(localBookRepository),
-            deleteBooks = DeleteBooks(localBookRepository),
-            deleteChapterByChapter = DeleteChapterByChapter(localChapterRepository),
-            deleteChapters = DeleteChapters(localChapterRepository),
-            deleteChaptersByBookId = DeleteChaptersByBookId(localChapterRepository)
+            deleteBookById = DeleteBookById(bookRepository),
+            deleteBooks = DeleteBooks(bookRepository),
+            deleteChapterByChapter = DeleteChapterByChapter(chapterRepository),
+            deleteChapters = DeleteChapters(chapterRepository),
+            deleteChaptersByBookId = DeleteChaptersByBookId(chapterRepository),
+            unFavoriteBook = UnFavoriteBook(bookRepository, bookCategoryRepository = bookCategoryRepository,transactions)
         )
     }
 

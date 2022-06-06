@@ -5,8 +5,8 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import org.ireader.data.local.dao.ChapterDao
 import javax.inject.Inject
 
-class LocalChapterRepositoryImpl @Inject constructor(private val daoLibrary: ChapterDao) :
-    org.ireader.common_data.repository.LocalChapterRepository {
+class ChapterRepositoryImpl @Inject constructor(private val daoLibrary: ChapterDao) :
+    org.ireader.common_data.repository.ChapterRepository {
 
 
     override suspend fun findAllChapters(): List<org.ireader.common_models.entities.Chapter> {

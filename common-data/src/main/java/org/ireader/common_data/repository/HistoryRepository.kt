@@ -8,6 +8,7 @@ interface HistoryRepository {
     suspend fun findHistory(id: Long): History?
 
     suspend fun findHistoryByBookId(bookId: Long): History?
+    suspend fun findHistoriesByBookId(bookId: Long): List<History>
      fun subscribeHistoryByBookId(bookId: Long): Flow<History?>
 
     fun findHistoriesPaging(query: String): Flow<Map<kotlinx.datetime.LocalDate, List<HistoryWithRelations>>>

@@ -59,7 +59,8 @@ class LocalModule {
             includeUpdater =BuildConfig.INCLUDE_UPDATER ,
             preview =BuildConfig.PREVIEW ,
             versionCode = BuildConfig.VERSION_CODE,
-            versionName = BuildConfig.VERSION_NAME
+            versionName = BuildConfig.VERSION_NAME,
+            applicationId = BuildConfig.APPLICATION_ID
         )
     }
 

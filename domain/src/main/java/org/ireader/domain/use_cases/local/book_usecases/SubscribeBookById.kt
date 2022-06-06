@@ -7,15 +7,15 @@ import javax.inject.Inject
 /**
  * return a book from id
  */
-class SubscribeBookById @Inject constructor(private val localBookRepository: org.ireader.common_data.repository.LocalBookRepository) {
+class SubscribeBookById @Inject constructor(private val bookRepository: org.ireader.common_data.repository.BookRepository) {
     operator fun invoke(id: Long): Flow<Book?> {
-        return localBookRepository.subscribeBookById(id = id)
+        return bookRepository.subscribeBookById(id = id)
     }
 }
 
-class FindBookById @Inject constructor(private val localBookRepository: org.ireader.common_data.repository.LocalBookRepository) {
+class FindBookById @Inject constructor(private val bookRepository: org.ireader.common_data.repository.BookRepository) {
     suspend operator fun invoke(id: Long): Book? {
-        return localBookRepository.findBookById(id = id)
+        return bookRepository.findBookById(id = id)
     }
 }
 

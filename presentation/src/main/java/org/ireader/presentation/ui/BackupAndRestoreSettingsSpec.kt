@@ -16,13 +16,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.serialization.SerializationException
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
 import org.ireader.common_extensions.findComponentActivity
 import org.ireader.common_extensions.launchIO
-import org.ireader.common_models.BackUpBook
 import org.ireader.common_resources.UiEvent
 import org.ireader.common_resources.UiText
 import org.ireader.components.components.TitleToolbar
@@ -41,7 +38,7 @@ object BackupAndRestoreScreenSpec : ScreenSpec {
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun TopBar(
-                controller: ScreenSpec.Controller
+        controller: ScreenSpec.Controller
     ) {
         TitleToolbar(
             title = stringResource(R.string.backup_and_restore),
@@ -49,13 +46,11 @@ object BackupAndRestoreScreenSpec : ScreenSpec {
         )
     }
 
-
-
     @Composable
     override fun Content(
         controller: ScreenSpec.Controller
     ) {
-        val vm: BackupScreenViewModel = hiltViewModel(   controller.navBackStackEntry)
+        val vm: BackupScreenViewModel = hiltViewModel(controller.navBackStackEntry)
         val context = LocalContext.current
         val scope = rememberCoroutineScope()
 
@@ -75,57 +70,74 @@ object BackupAndRestoreScreenSpec : ScreenSpec {
         val onBackup =
             rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultIntent ->
                 if (resultIntent.resultCode == Activity.RESULT_OK && resultIntent.data != null) {
-                    scope.launchIO {
-                        try {
-                            val contentResolver = context.findComponentActivity()!!.contentResolver
-                            val uri = resultIntent.data!!.data!!
-                            val pfd = contentResolver.openFileDescriptor(uri, "w")
-                            pfd?.use {
-                                FileOutputStream(pfd.fileDescriptor).use { outputStream ->
-                                    outputStream.write(vm.getAllBooks().toByteArray())
-                                }
-                            }
-                        } catch (e: SerializationException) {
-                            vm.showSnackBar(UiText.ExceptionString(e))
-                        } catch (e: Throwable) {
-                            vm.showSnackBar(UiText.ExceptionString(e))
-                        }
+                    val uri = resultIntent.data!!.data!!
+
+                    context.findComponentActivity()?.lifecycleScope?.launchIO {
+                        val result = vm.createBackup.saveTo(uri,context, onError = {
+                            vm.showSnackBar(it)
+                        }, onSuccess = {
+                            vm.showSnackBar((UiText.StringResource(R.string.backup_created_successfully)))
+                        })
                     }
+//                    scope.launchIO {
+//                        try {
+//                            val contentResolver = context.findComponentActivity()!!.contentResolver
+//                            val pfd = contentResolver.openFileDescriptor(uri, "w")
+//                            pfd?.use {
+//                                FileOutputStream(pfd.fileDescriptor).use { outputStream ->
+//                                    outputStream.write(vm.getAllBooks().toByteArray())
+//                                }
+//                            }
+//                        } catch (e: SerializationException) {
+//                            vm.showSnackBar(UiText.ExceptionString(e))
+//                        } catch (e: Throwable) {
+//                            vm.showSnackBar(UiText.ExceptionString(e))
+//                        }
+//                    }
                 }
             }
 
         val onRestore =
             rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultIntent ->
                 if (resultIntent.resultCode == Activity.RESULT_OK && resultIntent.data != null) {
-                    try {
-                        scope.launchIO {
-                            val contentResolver = context.findComponentActivity()!!.contentResolver
-                            val uri = resultIntent.data!!.data!!
-                            contentResolver
-                                .takePersistableUriPermission(
-                                    uri,
-                                    Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                                )
-                            val pfd = contentResolver.openFileDescriptor(uri, "r")
-                            pfd?.use {
-                                FileInputStream(pfd.fileDescriptor).use { stream ->
-                                    val txt = stream.readBytes().decodeToString()
-                                    kotlin.runCatching {
-                                        vm.insertBackup(
-                                            Json.decodeFromString<List<BackUpBook>>(
-                                                txt
-                                            )
-                                        )
-                                        vm.showSnackBar(UiText.StringResource(R.string.restoredSuccessfully))
-                                    }.getOrElse { e ->
-                                        vm.showSnackBar(UiText.ExceptionString(e))
-                                    }
-                                }
-                            }
-                        }
-                    } catch (e: Throwable) {
-                        vm.showSnackBar(UiText.ExceptionString(e))
+                    val uri = resultIntent.data!!.data!!
+                    context.findComponentActivity()?.lifecycleScope?.launchIO {
+                        vm.restoreBackup.restoreFrom(uri,context, onError = {
+                            vm.showSnackBar(it)
+                        }, onSuccess = {
+                            vm.showSnackBar((UiText.StringResource(R.string.restoredSuccessfully)))
+                        })
+                       // vm.showSnackBar(UiText.DynamicString("RESTORED"))
                     }
+//                    try {
+//                        scope.launchIO {
+//                            val contentResolver = context.findComponentActivity()!!.contentResolver
+//
+//                            contentResolver
+//                                .takePersistableUriPermission(
+//                                    uri,
+//                                    Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+//                                )
+//                            val pfd = contentResolver.openFileDescriptor(uri, "r")
+//                            pfd?.use {
+//                                FileInputStream(pfd.fileDescriptor).use { stream ->
+//                                    val txt = stream.readBytes().decodeToString()
+//                                    kotlin.runCatching {
+//                                        vm.insertBackup(
+//                                            Json.decodeFromString<List<BackUpBook>>(
+//                                                txt
+//                                            )
+//                                        )
+//                                        vm.showSnackBar(UiText.StringResource(R.string.restoredSuccessfully))
+//                                    }.getOrElse { e ->
+//                                        vm.showSnackBar(UiText.ExceptionString(e))
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    } catch (e: Throwable) {
+//                        vm.showSnackBar(UiText.ExceptionString(e))
+//                    }
                 }
             }
 
@@ -164,41 +176,41 @@ object BackupAndRestoreScreenSpec : ScreenSpec {
 }
 
 fun restoreBackup(
-    context:Context,
+    context: Context,
     resultIntent: ActivityResult,
-    onSuccess:(String) -> Unit,
-    onError:(Throwable) -> Unit
+    onSuccess: (String) -> Unit,
+    onError: (Throwable) -> Unit
 ) {
     try {
-            val contentResolver = context.findComponentActivity()!!.contentResolver
-            val uri = resultIntent.data!!.data!!
-            contentResolver
-                .takePersistableUriPermission(
-                    uri,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                )
-            val pfd = contentResolver.openFileDescriptor(uri, "r")
-            pfd?.use {
-                FileInputStream(pfd.fileDescriptor).use { stream ->
-                    val txt = stream.readBytes().decodeToString()
-                    kotlin.runCatching {
-                        onSuccess(txt)
-                    }.getOrElse { e ->
-                        onError(e)
-                    }
+        val contentResolver = context.findComponentActivity()!!.contentResolver
+        val uri = resultIntent.data!!.data!!
+        contentResolver
+            .takePersistableUriPermission(
+                uri,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            )
+        val pfd = contentResolver.openFileDescriptor(uri, "r")
+        pfd?.use {
+            FileInputStream(pfd.fileDescriptor).use { stream ->
+                val txt = stream.readBytes().decodeToString()
+                kotlin.runCatching {
+                    onSuccess(txt)
+                }.getOrElse { e ->
+                    onError(e)
                 }
             }
-
+        }
     } catch (e: Throwable) {
         onError(e)
     }
 }
 
+
 fun makeBackup(
-    context:Context,
+    context: Context,
     resultIntent: ActivityResult,
-    text:String,
-    onError:(Throwable) -> Unit
+    text: String,
+    onError: (Throwable) -> Unit
 ) {
     try {
         val contentResolver = context.findComponentActivity()!!.contentResolver

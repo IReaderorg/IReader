@@ -2,14 +2,14 @@ package org.ireader.data.local.dao
 
 import androidx.room.Dao
 import androidx.room.Query
-import androidx.room.RewriteQueriesToDropUnusedColumns
 import kotlinx.coroutines.flow.Flow
+import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.DownloadedBook
 import org.ireader.common_models.entities.LibraryBook
 
 @Dao
 interface LibraryDao : BaseDao<org.ireader.common_models.entities.Book> {
-    @RewriteQueriesToDropUnusedColumns
+
     @Query(
         """
 
@@ -41,7 +41,7 @@ interface LibraryDao : BaseDao<org.ireader.common_models.entities.Book> {
       WHEN :sort = 'lastRead' THEN lastRead
       WHEN :sort = 'lastUpdated' THEN lastUpdate
       WHEN :sort = 'unread' THEN unread
-      WHEN :sort = 'dateAdded' THEN dataAdded
+      WHEN :sort = 'dateAdded' THEN dateAdded
       WHEN :sort = 'dateFetched' THEN C.dateFetch
       WHEN :sort = 'source' THEN sourceId
     END,
@@ -50,7 +50,7 @@ interface LibraryDao : BaseDao<org.ireader.common_models.entities.Book> {
       WHEN :sort = 'lastReadDesc' THEN lastRead
       WHEN :sort = 'lastUpdatedDesc' THEN lastUpdate
       WHEN :sort = 'unreadDesc' THEN unread
-      WHEN :sort = 'dateAddedDesc' THEN dataAdded
+      WHEN :sort = 'dateAddedDesc' THEN dateAdded
       WHEN :sort = 'dateFetchedDesc' THEN C.dateFetch
       WHEN :sort = 'sourceDesc' THEN sourceId
     END DESC,
@@ -61,7 +61,7 @@ interface LibraryDao : BaseDao<org.ireader.common_models.entities.Book> {
         """
     )
     fun subscribeAll(sort: String): Flow<List<LibraryBook>>
-    @RewriteQueriesToDropUnusedColumns
+
     @Query(
         """
                 SELECT library.id, library.sourceId, library.`key`, library.title, library.status, library.cover,
@@ -92,7 +92,7 @@ interface LibraryDao : BaseDao<org.ireader.common_models.entities.Book> {
       WHEN :sort = 'lastRead' THEN lastRead
       WHEN :sort = 'lastUpdated' THEN lastUpdate
       WHEN :sort = 'unread' THEN unread
-      WHEN :sort = 'dateAdded' THEN dataAdded
+      WHEN :sort = 'dateAdded' THEN dateAdded
       WHEN :sort = 'dateFetched' THEN C.dateFetch
       WHEN :sort = 'source' THEN sourceId
     END,
@@ -101,7 +101,7 @@ interface LibraryDao : BaseDao<org.ireader.common_models.entities.Book> {
       WHEN :sort = 'lastReadDesc' THEN lastRead
       WHEN :sort = 'lastUpdatedDesc' THEN lastUpdate
       WHEN :sort = 'unreadDesc' THEN unread
-      WHEN :sort = 'dateAddedDesc' THEN dataAdded
+      WHEN :sort = 'dateAddedDesc' THEN dateAdded
       WHEN :sort = 'dateFetchedDesc' THEN C.dateFetch
       WHEN :sort = 'sourceDesc' THEN sourceId
     END DESC,
@@ -112,7 +112,7 @@ interface LibraryDao : BaseDao<org.ireader.common_models.entities.Book> {
         """
     )
     suspend fun findAll(sort: String): List<LibraryBook>
-    @RewriteQueriesToDropUnusedColumns
+
     @Query(
         """
         SELECT library.id, library.sourceId, library.'key', library.title, library.status, library.cover,
@@ -145,7 +145,7 @@ interface LibraryDao : BaseDao<org.ireader.common_models.entities.Book> {
       WHEN :sort = 'lastRead' THEN lastRead
       WHEN :sort = 'lastUpdated' THEN lastUpdate
       WHEN :sort = 'unread' THEN unread
-      WHEN :sort = 'dateAdded' THEN dataAdded
+      WHEN :sort = 'dateAdded' THEN dateAdded
       WHEN :sort = 'dateFetched' THEN C.dateFetch
       WHEN :sort = 'source' THEN sourceId
     END,
@@ -154,7 +154,7 @@ interface LibraryDao : BaseDao<org.ireader.common_models.entities.Book> {
       WHEN :sort = 'lastReadDesc' THEN lastRead
       WHEN :sort = 'lastUpdatedDesc' THEN lastUpdate
       WHEN :sort = 'unreadDesc' THEN unread
-      WHEN :sort = 'dateAddedDesc' THEN dataAdded
+      WHEN :sort = 'dateAddedDesc' THEN dateAdded
       WHEN :sort = 'dateFetchedDesc' THEN C.dateFetch
       WHEN :sort = 'sourceDesc' THEN sourceId
     END DESC,
@@ -165,7 +165,7 @@ interface LibraryDao : BaseDao<org.ireader.common_models.entities.Book> {
         """
     )
     fun subscribeUncategorized(sort: String): Flow<List<LibraryBook>>
-    @RewriteQueriesToDropUnusedColumns
+
     @Query(
         """
         SELECT library.id, library.sourceId, library.'key', library.title, library.status, library.cover,
@@ -198,7 +198,7 @@ interface LibraryDao : BaseDao<org.ireader.common_models.entities.Book> {
       WHEN :sort = 'lastRead' THEN lastRead
       WHEN :sort = 'lastUpdated' THEN lastUpdate
       WHEN :sort = 'unread' THEN unread
-      WHEN :sort = 'dateAdded' THEN dataAdded
+      WHEN :sort = 'dateAdded' THEN dateAdded
       WHEN :sort = 'dateFetched' THEN C.dateFetch
       WHEN :sort = 'source' THEN sourceId
     END,
@@ -207,7 +207,7 @@ interface LibraryDao : BaseDao<org.ireader.common_models.entities.Book> {
       WHEN :sort = 'lastReadDesc' THEN lastRead
       WHEN :sort = 'lastUpdatedDesc' THEN lastUpdate
       WHEN :sort = 'unreadDesc' THEN unread
-      WHEN :sort = 'dateAddedDesc' THEN dataAdded
+      WHEN :sort = 'dateAddedDesc' THEN dateAdded
       WHEN :sort = 'dateFetchedDesc' THEN C.dateFetch
       WHEN :sort = 'sourceDesc' THEN sourceId
     END DESC,
@@ -218,7 +218,7 @@ interface LibraryDao : BaseDao<org.ireader.common_models.entities.Book> {
         """
     )
     suspend fun findUncategorized(sort: String): List<LibraryBook>
-    @RewriteQueriesToDropUnusedColumns
+
     @Query(
         """
         SELECT library.id, library.sourceId, library.'key', library.title, library.status, library.cover,
@@ -255,7 +255,7 @@ interface LibraryDao : BaseDao<org.ireader.common_models.entities.Book> {
         """
     )
     fun subscribeAllWithTotalChapters(sort: String): Flow<List<LibraryBook>>
-    @RewriteQueriesToDropUnusedColumns
+
     @Query(
         """
         SELECT library.id, library.sourceId, library.'key', library.title, library.status, library.cover,
@@ -289,7 +289,7 @@ interface LibraryDao : BaseDao<org.ireader.common_models.entities.Book> {
         """
     )
     suspend fun findAllWithTotalChapters(sort: String): List<LibraryBook>
-    @RewriteQueriesToDropUnusedColumns
+
     @Query(
         """
         SELECT library.id, library.sourceId, library.'key', library.title, library.status, library.cover,
@@ -325,7 +325,7 @@ interface LibraryDao : BaseDao<org.ireader.common_models.entities.Book> {
         """
     )
     suspend fun findUncategorizedWithTotalChapters(): List<LibraryBook>
-    @RewriteQueriesToDropUnusedColumns
+
     @Query(
         """
         SELECT library.id, library.sourceId, library.'key', library.title, library.status, library.cover,
@@ -362,7 +362,7 @@ interface LibraryDao : BaseDao<org.ireader.common_models.entities.Book> {
         """
     )
     suspend fun subscribeUncategorizedWithTotalChapters(): List<LibraryBook>
-    @RewriteQueriesToDropUnusedColumns
+
     @Query(
         """
              SELECT library.id, library.sourceId, library.'key', library.title, library.status, library.cover, library.customCover, library.favorite,
@@ -394,7 +394,7 @@ interface LibraryDao : BaseDao<org.ireader.common_models.entities.Book> {
       WHEN :sort = 'lastRead' THEN lastRead
       WHEN :sort = 'lastUpdated' THEN lastUpdate
       WHEN :sort = 'unread' THEN unread
-      WHEN :sort = 'dateAdded' THEN dataAdded
+      WHEN :sort = 'dateAdded' THEN dateAdded
       WHEN :sort = 'dateFetched' THEN C.dateFetch
       WHEN :sort = 'source' THEN sourceId
     END,
@@ -403,7 +403,7 @@ interface LibraryDao : BaseDao<org.ireader.common_models.entities.Book> {
       WHEN :sort = 'lastReadDesc' THEN lastRead
       WHEN :sort = 'lastUpdatedDesc' THEN lastUpdate
       WHEN :sort = 'unreadDesc' THEN unread
-      WHEN :sort = 'dateAddedDesc' THEN dataAdded
+      WHEN :sort = 'dateAddedDesc' THEN dateAdded
       WHEN :sort = 'dateFetchedDesc' THEN C.dateFetch
       WHEN :sort = 'sourceDesc' THEN sourceId
     END DESC,
@@ -414,7 +414,7 @@ interface LibraryDao : BaseDao<org.ireader.common_models.entities.Book> {
         """
     )
     fun subscribeAllInCategory(sort: String, categoryId: Long): Flow<List<LibraryBook>>
-    @RewriteQueriesToDropUnusedColumns
+
     @Query(
         """
              SELECT library.id, library.sourceId, library.'key', library.title, library.status, library.cover, library.customCover, library.favorite,
@@ -446,7 +446,7 @@ interface LibraryDao : BaseDao<org.ireader.common_models.entities.Book> {
       WHEN :sort = 'lastRead' THEN lastRead
       WHEN :sort = 'lastUpdated' THEN lastUpdate
       WHEN :sort = 'unread' THEN unread
-      WHEN :sort = 'dateAdded' THEN dataAdded
+      WHEN :sort = 'dateAdded' THEN dateAdded
       WHEN :sort = 'dateFetched' THEN C.dateFetch
       WHEN :sort = 'source' THEN sourceId
     END,
@@ -455,7 +455,7 @@ interface LibraryDao : BaseDao<org.ireader.common_models.entities.Book> {
       WHEN :sort = 'lastReadDesc' THEN lastRead
       WHEN :sort = 'lastUpdatedDesc' THEN lastUpdate
       WHEN :sort = 'unreadDesc' THEN unread
-      WHEN :sort = 'dateAddedDesc' THEN dataAdded
+      WHEN :sort = 'dateAddedDesc' THEN dateAdded
       WHEN :sort = 'dateFetchedDesc' THEN C.dateFetch
       WHEN :sort = 'sourceDesc' THEN sourceId
     END DESC,
@@ -466,7 +466,7 @@ interface LibraryDao : BaseDao<org.ireader.common_models.entities.Book> {
         """
     )
     suspend fun findAllInCategory(sort: String, categoryId: Long): List<LibraryBook>
-    @RewriteQueriesToDropUnusedColumns
+
     @Query(
         """
         SELECT library.id, library.sourceId, library.'key', library.title, library.status, library.cover, library.customCover, library.favorite,
@@ -541,7 +541,7 @@ interface LibraryDao : BaseDao<org.ireader.common_models.entities.Book> {
     )
     fun findAllInCategoryWithTotalChapters(categoryId: Long): Flow<List<LibraryBook>>
 
-    @RewriteQueriesToDropUnusedColumns
+
     @Query(
         """
         SELECT library.id,COUNT(chapter.id) as totalChapters,SUM(chapter.content > 0) as totalDownloadedChapter
@@ -552,4 +552,11 @@ interface LibraryDao : BaseDao<org.ireader.common_models.entities.Book> {
         """
     )
     fun findDownloadedBooks(): List<DownloadedBook>
+
+    @Query(
+        """
+        SELECT * FROM library WHERE favorite = 1
+        """
+    )
+    fun findFavorites(): List<Book>
 }

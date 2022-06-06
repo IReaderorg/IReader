@@ -8,20 +8,20 @@ import javax.inject.Inject
  * get all Chapter using a bookId
  * note: if nothing is found it return a resource of error
  */
-class SubscribeChaptersByBookId @Inject constructor(private val localChapterRepository: org.ireader.common_data.repository.LocalChapterRepository) {
+class SubscribeChaptersByBookId @Inject constructor(private val chapterRepository: org.ireader.common_data.repository.ChapterRepository) {
     operator fun invoke(
         bookId: Long,
         isAsc: Boolean = true,
     ): Flow<List<Chapter>>{
-        return localChapterRepository.subscribeChaptersByBookId(bookId = bookId, isAsc)
+        return chapterRepository.subscribeChaptersByBookId(bookId = bookId, isAsc)
     }
 }
 
-class FindChaptersByBookId @Inject constructor(private val localChapterRepository: org.ireader.common_data.repository.LocalChapterRepository) {
+class FindChaptersByBookId @Inject constructor(private val chapterRepository: org.ireader.common_data.repository.ChapterRepository) {
     suspend operator fun invoke(
         bookId: Long,
         isAsc: Boolean = true,
     ): List<Chapter> {
-        return localChapterRepository.findChaptersByBookId(bookId = bookId, isAsc)
+        return chapterRepository.findChaptersByBookId(bookId = bookId, isAsc)
     }
 }

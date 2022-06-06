@@ -137,6 +137,7 @@
 
 
     <string name="create_backup">Create Backup</string>
+    <string name="backup_created_successfully">Create Backup Successfully</string>
     <string name="restore_backup">Restore Backup</string>
 
     <string name="download">Download</string>

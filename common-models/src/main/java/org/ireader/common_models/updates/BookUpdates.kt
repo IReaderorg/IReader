@@ -7,7 +7,6 @@ data class BookUpdates(
     val sourceId: Long? = null,
     val key: String? = null,
     val title: String? = null,
-    val translator: String? = null,
     val author: String? = null,
     val description: String? = null,
     val genres: List<String>? = null,

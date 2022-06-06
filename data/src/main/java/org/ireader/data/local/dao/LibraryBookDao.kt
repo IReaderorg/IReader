@@ -35,6 +35,9 @@ interface LibraryBookDao : BaseDao<Book> {
     @Query("SELECT * FROM library WHERE id = :bookId Limit 1")
     suspend fun findBookById(bookId: Long): org.ireader.common_models.entities.Book?
 
+    @Query("SELECT * FROM library WHERE `key` = :key AND sourceId = :sourceId")
+    suspend fun find(key:String,sourceId:Long):Book?
+
 
     @Query("SELECT * FROM library WHERE `key` = :key Limit 1")
     suspend fun findBookByKey(key: String): org.ireader.common_models.entities.Book?

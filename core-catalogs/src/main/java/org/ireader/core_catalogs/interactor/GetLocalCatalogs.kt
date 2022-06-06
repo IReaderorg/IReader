@@ -4,14 +4,14 @@ package org.ireader.core_catalogs.interactor
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import org.ireader.common_data.repository.LocalBookRepository
+import org.ireader.common_data.repository.BookRepository
 import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.core_catalogs.CatalogStore
 import org.ireader.core_catalogs.model.CatalogSort
 
 class GetLocalCatalogs(
     private val catalogStore: CatalogStore,
-    private val libraryRepository: LocalBookRepository,
+    private val libraryRepository: BookRepository,
 ) {
 
     suspend fun subscribe(sort: CatalogSort = CatalogSort.Favorites): Flow<List<CatalogLocal>> {

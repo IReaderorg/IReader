@@ -28,7 +28,7 @@ dependencies {
 
     implementation(project(Modules.coreApi))
     implementation(androidx.media)
-
+    implementation(kotlinx.serialization.protobuf)
     implementation(kotlinx.datetime)
     implementation(compose.compose.activity)
     implementation(compose.compose.ui)

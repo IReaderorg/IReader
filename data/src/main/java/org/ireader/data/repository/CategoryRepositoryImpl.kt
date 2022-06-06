@@ -24,6 +24,10 @@ class CategoryRepositoryImpl(
         return dao.find(categoryId)
     }
 
+    override suspend fun findCategoriesOfBook(bookId: Long): List<Category> {
+        return  dao.findCategoriesOfBook(bookId)
+    }
+
     override suspend fun updateAllFlags(flags: Long) {
         dao.updateAllFlags(flags)
     }

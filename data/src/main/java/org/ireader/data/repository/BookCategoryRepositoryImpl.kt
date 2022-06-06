@@ -28,6 +28,10 @@ class BookCategoryRepositoryImpl(
         return dao.delete(category)
     }
 
+    override suspend fun delete(bookId: Long) {
+        return dao.delete(bookId)
+    }
+
     override suspend fun deleteAll(category: List<BookCategory>) {
         return dao.delete(category)
     }

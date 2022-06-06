@@ -21,14 +21,14 @@ import org.ireader.data.local.dao.LibraryDao
 import org.ireader.data.local.dao.RemoteKeysDao
 import org.ireader.data.local.dao.UpdatesDao
 import org.ireader.data.repository.BookCategoryRepositoryImpl
+import org.ireader.data.repository.BookRepositoryImpl
 import org.ireader.data.repository.CatalogRemoteRepositoryImpl
 import org.ireader.data.repository.CategoryRepositoryImpl
+import org.ireader.data.repository.ChapterRepositoryImpl
 import org.ireader.data.repository.DownloadRepositoryImpl
 import org.ireader.data.repository.FontEntityRepositoryImpl
 import org.ireader.data.repository.HistoryRepositoryImpl
 import org.ireader.data.repository.LibraryRepositoryImpl
-import org.ireader.data.repository.LocalBookRepositoryImpl
-import org.ireader.data.repository.LocalChapterRepositoryImpl
 import org.ireader.data.repository.RemoteKeyRepositoryImpl
 import org.ireader.data.repository.UpdatesRepositoryImpl
 import javax.inject.Singleton
@@ -92,8 +92,8 @@ class RepositoryInject {
 
     @Provides
     @Singleton
-    fun providesLocalChapterRepository(ChapterDao: ChapterDao): org.ireader.common_data.repository.LocalChapterRepository {
-        return LocalChapterRepositoryImpl(ChapterDao)
+    fun providesLocalChapterRepository(ChapterDao: ChapterDao): org.ireader.common_data.repository.ChapterRepository {
+        return ChapterRepositoryImpl(ChapterDao)
     }
 
     @Provides
@@ -101,8 +101,8 @@ class RepositoryInject {
     fun providesLibraryRepository(
         libraryBookDao: LibraryBookDao,
         remoteKeysDao: RemoteKeysDao,
-    ): org.ireader.common_data.repository.LocalBookRepository {
-        return LocalBookRepositoryImpl(
+    ): org.ireader.common_data.repository.BookRepository {
+        return BookRepositoryImpl(
             libraryBookDao,
             remoteKeysDao = remoteKeysDao
         )

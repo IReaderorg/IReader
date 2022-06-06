@@ -14,7 +14,9 @@ plugins {
     kotlin("plugin.serialization")
     id("com.google.firebase.crashlytics")
 }
-
+hilt {
+    enableExperimentalClasspathAggregation = true
+}
 android {
     compileSdk = ProjectConfig.compileSdk
     defaultConfig {

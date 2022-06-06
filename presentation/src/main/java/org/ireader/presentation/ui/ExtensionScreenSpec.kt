@@ -88,8 +88,8 @@ object ExtensionScreenSpec : BottomNavScreenSpec {
             modifier = Modifier.padding(controller.scaffoldPadding),
             vm = vm,
             onClickCatalog = {
-                if (vm.uiPreferences.incognitoMode().get()) {
-                    vm.uiPreferences.lastUsedSource().set(it.sourceId)
+                if (!vm.incognito.value) {
+                    vm.lastUsedSource.value = it.sourceId
                 }
                 controller.navController.navigate(
                     ExploreScreenSpec.buildRoute(

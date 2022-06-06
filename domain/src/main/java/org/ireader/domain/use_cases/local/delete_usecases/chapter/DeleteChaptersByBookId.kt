@@ -5,10 +5,10 @@ import javax.inject.Inject
 /**
  * Delete All Chapters that is have a bookId
  */
-class DeleteChaptersByBookId @Inject constructor(private val localChapterRepository: org.ireader.common_data.repository.LocalChapterRepository) {
+class DeleteChaptersByBookId @Inject constructor(private val chapterRepository: org.ireader.common_data.repository.ChapterRepository) {
     suspend operator fun invoke(bookId: Long) {
         return org.ireader.common_extensions.withIOContext {
-            return@withIOContext localChapterRepository.deleteChaptersByBookId(bookId)
+            return@withIOContext chapterRepository.deleteChaptersByBookId(bookId)
         }
     }
 }

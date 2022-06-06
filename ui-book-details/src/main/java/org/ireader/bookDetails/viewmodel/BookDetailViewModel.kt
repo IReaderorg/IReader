@@ -21,6 +21,7 @@ import org.ireader.core_api.source.CatalogSource
 import org.ireader.core_api.source.model.CommandList
 import org.ireader.core_catalogs.interactor.GetLocalCatalog
 import org.ireader.core_ui.viewmodel.BaseViewModel
+import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
@@ -39,6 +40,7 @@ class BookDetailViewModel @Inject constructor(
     val state: DetailStateImpl,
     val chapterState: ChapterStateImpl,
     private val serviceUseCases: ServiceUseCases,
+    val deleteUseCase: DeleteUseCase,
     @ApplicationScope private val applicationScope: CoroutineScope
 ) : BaseViewModel(), DetailState by state, ChapterState by chapterState {
 
@@ -157,15 +159,16 @@ class BookDetailViewModel @Inject constructor(
                 localInsertUseCases.updateBook.update(
                     book.copy(
                         favorite = true,
-                        dataAdded = Calendar.getInstance().timeInMillis,
+                        dateAdded = Calendar.getInstance().timeInMillis,
                     )
                 )
             } else {
-                localInsertUseCases.updateBook.update(
-                    book.copy(
-                        favorite = false,
-                    )
-                )
+                deleteUseCase.unFavoriteBook(listOf(book.id))
+//                localInsertUseCases.updateBook.update(
+//                    book.copy(
+//                        favorite = false,
+//                    )
+//                )
             }
             this@BookDetailViewModel.inLibraryLoading = false
         }

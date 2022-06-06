@@ -1,5 +1,7 @@
 package org.ireader.sources.extension
 
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -13,6 +15,7 @@ import org.ireader.common_models.entities.Catalog
 import org.ireader.common_models.entities.CatalogInstalled
 import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.common_models.entities.CatalogRemote
+import org.ireader.common_models.entities.SourceState
 import org.ireader.common_resources.UiText
 import org.ireader.core_api.os.InstallStep
 import org.ireader.core_catalogs.interactor.GetCatalogsByType
@@ -26,6 +29,7 @@ import org.ireader.core_ui.preferences.UiPreferences
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.core_ui.viewmodel.showSnackBar
 import org.ireader.domain.use_cases.remote.key.RemoteKeyUseCase
+import org.ireader.sources.extension.composables.SourceUiModel
 import javax.inject.Inject
 
 @HiltViewModel
@@ -40,6 +44,51 @@ class ExtensionViewModel @Inject constructor(
     private val remoteKeyUseCase: RemoteKeyUseCase,
     val uiPreferences: UiPreferences,
 ) : BaseViewModel(), CatalogsState by state {
+
+    val incognito = uiPreferences.incognitoMode().asState()
+    val lastUsedSource = uiPreferences.lastUsedSource().asState()
+    val userSources: List<SourceUiModel> by derivedStateOf {
+        val list = mutableListOf<SourceUiModel>()
+        if (lastUsedSource.value != -1L) {
+
+            (pinnedCatalogs + unpinnedCatalogs).firstOrNull {
+                it.sourceId == lastUsedSource.value
+            }?.let { c ->
+                list.addAll(
+                    listOf<SourceUiModel>(
+                        SourceUiModel.Header(SourceKeys.LAST_USED_KEY),
+                        SourceUiModel.Item(c, SourceState.LastUsed)
+
+                    )
+                )
+            }
+
+        }
+
+        if (pinnedCatalogs.isNotEmpty()) {
+            list.addAll(
+                listOf<SourceUiModel>(
+                    SourceUiModel.Header(SourceKeys.PINNED_KEY),
+                    *pinnedCatalogs.map { source ->
+                        SourceUiModel.Item(source, SourceState.Pinned)
+                    }.toTypedArray()
+                )
+            )
+        }
+        if (unpinnedCatalogs.isNotEmpty()) {
+            list.addAll(unpinnedCatalogs.groupBy {
+                it.source?.lang ?: "others"
+            }.flatMap {
+                listOf<SourceUiModel>(
+                    SourceUiModel.Header(it.key),
+                    *it.value.map { source ->
+                        SourceUiModel.Item(source, SourceState.UnPinned)
+                    }.toTypedArray()
+                )
+            })
+        }
+        list
+    }
 
     var getCatalogJob: Job? = null
 
@@ -75,11 +124,6 @@ class ExtensionViewModel @Inject constructor(
 
         snapshotFlow { state.allUnpinnedCatalogs.filteredByQuery(searchQuery) }
             .onEach { state.unpinnedCatalogs = it }.launchIn(viewModelScope)
-
-
-        scope.launch {
-            lastReadCatalog = uiPreferences.lastUsedSource().read()
-        }
 
 
         snapshotFlow {

@@ -99,10 +99,15 @@ abstract class AppDatabase : RoomDatabase() {
 
 internal fun MIGRATION_21_22() = object : Migration(21, 22) {
     override fun migrate(database: SupportSQLiteDatabase) {
+        database.execSQL("""CREATE TABLE IF NOT EXISTS `library_MERGE_TABLE` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `sourceId` INTEGER NOT NULL, `title` TEXT NOT NULL, `key` TEXT NOT NULL, `tableId` INTEGER NOT NULL, `type` INTEGER NOT NULL, `author` TEXT NOT NULL, `description` TEXT NOT NULL, `genres` TEXT NOT NULL, `status` INTEGER NOT NULL, `cover` TEXT NOT NULL, `customCover` TEXT NOT NULL, `favorite` INTEGER NOT NULL, `lastUpdate` INTEGER NOT NULL, `lastInit` INTEGER NOT NULL, `dateAdded` INTEGER NOT NULL, `viewer` INTEGER NOT NULL, `flags` INTEGER NOT NULL)""")
+        database.execSQL("""INSERT INTO `library_MERGE_TABLE` (`id`,`sourceId`,`title`,`key`,`tableId`,`type`,`author`,`description`,`genres`,`status`,`cover`,`customCover`,`favorite`,`lastUpdate`,`lastInit`,`viewer`,`flags`,`dateAdded`) SELECT `library`.`id`,`library`.`sourceId`,`library`.`title`,`library`.`key`,`library`.`tableId`,`library`.`type`,`library`.`author`,`library`.`description`,`library`.`genres`,`library`.`status`,`library`.`cover`,`library`.`customCover`,`library`.`favorite`,`library`.`lastUpdate`,`library`.`lastInit`,`library`.`viewer`,`library`.`flags`,`library`.`dataAdded` FROM `library`""")
+        database.execSQL("""DROP TABLE IF EXISTS `library`""")
+        database.execSQL("""ALTER TABLE `library_MERGE_TABLE` RENAME TO `library`""")
         database.execSQL("""CREATE TABLE IF NOT EXISTS `category_MERGE_TABLE` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `order` INTEGER NOT NULL, `updateInterval` INTEGER NOT NULL, `flags` INTEGER NOT NULL)""")
         database.execSQL("""INSERT INTO `category_MERGE_TABLE` (`id`,`name`,`updateInterval`,`flags`,`order`) SELECT `category`.`id`,`category`.`name`,`category`.`updateInterval`,`category`.`flags`,`category`.`sort` FROM `category`""")
         database.execSQL("""DROP TABLE IF EXISTS `category`""")
         database.execSQL("""ALTER TABLE `category_MERGE_TABLE` RENAME TO `category`""")
+
     }
 }
 

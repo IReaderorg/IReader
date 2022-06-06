@@ -7,7 +7,7 @@ import org.ireader.common_models.library.LibraryFilter
 import org.ireader.common_models.library.LibrarySort
 import javax.inject.Inject
 
-class SubscribeInLibraryBooks @Inject constructor(private val localBookRepository: org.ireader.common_data.repository.LocalBookRepository) {
+class SubscribeInLibraryBooks @Inject constructor(private val bookRepository: org.ireader.common_data.repository.BookRepository) {
     operator fun invoke(
         sortType: LibrarySort,
         desc: Boolean,

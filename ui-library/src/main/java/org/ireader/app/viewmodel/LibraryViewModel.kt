@@ -81,6 +81,7 @@ class LibraryViewModel @Inject constructor(
     var columnInPortrait by libraryPreferences.columnsInPortrait().asState()
     val columnInLandscape by libraryPreferences.columnsInLandscape().asState()
     val layout by derivedStateOf { DisplayMode.getFlag(layouts.value) ?: DisplayMode.CompactGrid }
+
     init {
         readLayoutTypeAndFilterTypeAndSortType()
         libraryPreferences.showAllCategory().stateIn(scope)
@@ -138,10 +139,14 @@ class LibraryViewModel @Inject constructor(
 
     fun deleteBooks() {
         viewModelScope.launch(Dispatchers.IO) {
-            books.filter { it.id in selectedBooks }.forEach {
-                insertUseCases.updateBook.update(it, false)
+            kotlin.runCatching {
+                deleteUseCase.unFavoriteBook(selectedBooks)
             }
-            selectedBooks.clear()
+//            books.filter { it.id in selectedBooks }.let {
+//
+//            }
+            //insertUseCases.updateBook.update(it, false)
+        selectedBooks.clear()
         }
     }
 

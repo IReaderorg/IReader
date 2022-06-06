@@ -9,6 +9,8 @@ import kotlinx.serialization.json.encodeToJsonElement
 import org.ireader.common_extensions.convertLongToTime
 import org.ireader.common_models.BackUpBook
 import org.ireader.core_ui.viewmodel.BaseViewModel
+import org.ireader.domain.use_cases.backup.CreateBackup
+import org.ireader.domain.use_cases.backup.RestoreBackup
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetBookUseCases
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
@@ -27,17 +29,18 @@ class BackupScreenViewModel @Inject constructor(
     private val chapterUseCase: LocalGetChapterUseCase,
     private val insertUseCases: LocalInsertUseCases,
     private val prefUseCases: ReaderPrefUseCases,
-
+    val restoreBackup: RestoreBackup,
+    val createBackup: CreateBackup,
 ) : BaseViewModel() {
     private val _state = mutableStateOf(SettingState())
     val state: State<SettingState> = _state
 
     fun onLocalBackupRequested(onStart: (Intent) -> Unit) {
-        val mimeTypes = arrayOf("text/plain")
-        val fn = "backup ${convertLongToTime(Calendar.getInstance().timeInMillis)}.txt"
+        val mimeTypes = arrayOf("application/gzip")
+        val fn = "IReader_${convertLongToTime(Calendar.getInstance().timeInMillis)}.proto"
         val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
             .addCategory(Intent.CATEGORY_OPENABLE)
-            .setType("text/plain")
+            .setType("application/gzip")
             .putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
             .putExtra(
                 Intent.EXTRA_TITLE, fn
@@ -47,10 +50,10 @@ class BackupScreenViewModel @Inject constructor(
     }
 
     fun onRestoreBackupRequested(onStart: (Intent) -> Unit) {
-        val mimeTypes = arrayOf("text/plain")
+        val mimeTypes = arrayOf("application/gzip")
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
             .addCategory(Intent.CATEGORY_OPENABLE)
-            .setType("*/*")
+            .setType("application/*")
             .putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
             .addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
             .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)

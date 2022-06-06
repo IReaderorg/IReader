@@ -8,10 +8,10 @@ import org.ireader.common_models.library.LibrarySort
 import org.ireader.data.local.dao.LibraryBookDao
 import org.ireader.data.local.dao.RemoteKeysDao
 
-class LocalBookRepositoryImpl(
+class BookRepositoryImpl(
     private val bookDao: LibraryBookDao,
     private val remoteKeysDao: RemoteKeysDao,
-) : org.ireader.common_data.repository.LocalBookRepository {
+) : org.ireader.common_data.repository.BookRepository {
 
     override suspend fun findAllBooks(): List<org.ireader.common_models.entities.Book> {
         return bookDao.findAllBooks()
@@ -23,6 +23,10 @@ class LocalBookRepositoryImpl(
 
     override suspend fun findBookById(id: Long): org.ireader.common_models.entities.Book? {
         return bookDao.findBookById(id)
+    }
+
+    override suspend fun find(key: String, sourceId: Long):Book? {
+        return bookDao.find(key, sourceId)
     }
 
     override suspend fun findAllInLibraryBooks(

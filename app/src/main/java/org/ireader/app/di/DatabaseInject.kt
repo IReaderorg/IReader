@@ -6,6 +6,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import okio.FileSystem
+import org.ireader.core_api.db.Transactions
 import org.ireader.data.local.AppDatabase
 import org.ireader.data.local.dao.BookCategoryDao
 import org.ireader.data.local.dao.CatalogDao
@@ -18,6 +20,7 @@ import org.ireader.data.local.dao.LibraryBookDao
 import org.ireader.data.local.dao.LibraryDao
 import org.ireader.data.local.dao.RemoteKeysDao
 import org.ireader.data.local.dao.UpdatesDao
+import org.ireader.data.repository.DatabaseTransactions
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
@@ -67,8 +70,16 @@ object DatabaseInject {
         fun provideLibraryDao(
             db: AppDatabase,
         ): LibraryDao = db.libraryDao
+        @Provides
+        fun provideFileSystem(): FileSystem {
+            return FileSystem.SYSTEM
+        }
 
         @Provides
         fun provideCatalogDao(db: AppDatabase): CatalogDao = db.catalogDao
+        @Provides
+        fun provideTransactions(db: AppDatabase): Transactions {
+            return DatabaseTransactions(db)
+        }
     }
 }

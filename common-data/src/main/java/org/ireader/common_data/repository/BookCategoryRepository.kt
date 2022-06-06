@@ -11,6 +11,7 @@ interface BookCategoryRepository {
     suspend fun insert(category: BookCategory)
     suspend fun insertAll(category: List<BookCategory>)
     suspend fun delete(category: BookCategory)
+    suspend fun delete(bookId: Long)
     suspend fun deleteAll(category: List<BookCategory>)
 
 }

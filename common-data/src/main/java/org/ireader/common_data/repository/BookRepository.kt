@@ -6,7 +6,7 @@ import org.ireader.common_models.entities.Chapter
 import org.ireader.common_models.entities.LibraryBook
 import org.ireader.common_models.library.LibrarySort
 
-interface LocalBookRepository {
+interface BookRepository {
 
     /***************************************************/
 
@@ -15,6 +15,7 @@ interface LocalBookRepository {
     fun subscribeBookById(id: Long): Flow<Book?>
     suspend fun findBookById(id: Long): Book?
 
+    suspend fun find(key:String,sourceId:Long): Book?
 
     suspend fun findAllInLibraryBooks(
         sortType: LibrarySort,

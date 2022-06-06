@@ -9,15 +9,15 @@ import org.ireader.domain.use_cases.history.HistoryUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import javax.inject.Inject
 
-class FindChaptersByKey @Inject constructor(private val localChapterRepository: org.ireader.common_data.repository.LocalChapterRepository) {
+class FindChaptersByKey @Inject constructor(private val chapterRepository: org.ireader.common_data.repository.ChapterRepository) {
     suspend operator fun invoke(key: String): List<Chapter> {
-        return localChapterRepository.findChaptersByKey(key)
+        return chapterRepository.findChaptersByKey(key)
     }
 }
 
-class FindChapterByKey @Inject constructor(private val localChapterRepository: org.ireader.common_data.repository.LocalChapterRepository) {
+class FindChapterByKey @Inject constructor(private val chapterRepository: org.ireader.common_data.repository.ChapterRepository) {
     suspend operator fun invoke(key: String): Chapter? {
-        return localChapterRepository.findChapterByKey(key)
+        return chapterRepository.findChapterByKey(key)
     }
 }
 

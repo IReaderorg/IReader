@@ -13,7 +13,7 @@ fun updateBook(newBook: Book, oldBook: Book): Book {
         customCover = oldBook.customCover,
         flags = oldBook.flags,
         key = newBook.key.ifBlank { oldBook.key },
-        dataAdded = oldBook.dataAdded,
+        dateAdded = oldBook.dateAdded,
         lastUpdate = Calendar.getInstance().timeInMillis,
         favorite = oldBook.favorite,
         title = newBook.title.takeIf(statement = {

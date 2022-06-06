@@ -1,24 +1,23 @@
 package org.ireader.domain.use_cases.local
 
 import kotlinx.coroutines.flow.Flow
-import org.ireader.common_data.repository.LocalBookRepository
 import org.ireader.common_models.entities.Book
 import javax.inject.Inject
 
-class FindBooksByKey @Inject constructor(private val localBookRepository: org.ireader.common_data.repository.LocalBookRepository) {
+class FindBooksByKey @Inject constructor(private val bookRepository: org.ireader.common_data.repository.BookRepository) {
     suspend operator fun invoke(key: String): List<Book> {
-        return localBookRepository.findBooksByKey(key)
+        return bookRepository.findBooksByKey(key)
     }
 }
 
-class SubscribeBooksByKey @Inject constructor(private val localBookRepository: org.ireader.common_data.repository.LocalBookRepository) {
+class SubscribeBooksByKey @Inject constructor(private val bookRepository: org.ireader.common_data.repository.BookRepository) {
     suspend operator fun invoke(key: String, title: String): Flow<List<Book>> {
-        return localBookRepository.subscribeBooksByKey(key, title)
+        return bookRepository.subscribeBooksByKey(key, title)
     }
 }
 
-class FindBookByKey @Inject constructor(private val localBookRepository: org.ireader.common_data.repository.LocalBookRepository) {
+class FindBookByKey @Inject constructor(private val bookRepository: org.ireader.common_data.repository.BookRepository) {
     suspend operator fun invoke(key: String): Book? {
-        return localBookRepository.findBookByKey(key)
+        return bookRepository.findBookByKey(key)
     }
 }

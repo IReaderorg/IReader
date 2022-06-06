@@ -6,8 +6,8 @@ import javax.inject.Inject
 /**
  * Delete a chapter @DELETE
  */
-class DeleteChapterByChapter @Inject constructor(private val localChapterRepository: org.ireader.common_data.repository.LocalChapterRepository) {
+class DeleteChapterByChapter @Inject constructor(private val chapterRepository: org.ireader.common_data.repository.ChapterRepository) {
     suspend operator fun invoke(chapter: Chapter) {
-        return localChapterRepository.deleteChapter(chapter)
+        return chapterRepository.deleteChapter(chapter)
     }
 }

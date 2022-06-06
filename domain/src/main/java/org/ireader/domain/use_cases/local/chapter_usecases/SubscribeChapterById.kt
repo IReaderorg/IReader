@@ -10,32 +10,32 @@ import javax.inject.Inject
  * get one Chapter using a chapterId
  * note: if nothing is found it return a resource of error
  */
-class SubscribeChapterById @Inject constructor(private val localChapterRepository: org.ireader.common_data.repository.LocalChapterRepository) {
+class SubscribeChapterById @Inject constructor(private val chapterRepository: org.ireader.common_data.repository.ChapterRepository) {
     operator fun invoke(
         chapterId: Long,
     ): Flow<Chapter?> {
-        return localChapterRepository.subscribeChapterById(chapterId = chapterId)
+        return chapterRepository.subscribeChapterById(chapterId = chapterId)
             .distinctUntilChanged()
     }
 }
 
-class FindChapterById @Inject constructor(private val localChapterRepository: org.ireader.common_data.repository.LocalChapterRepository) {
+class FindChapterById @Inject constructor(private val chapterRepository: org.ireader.common_data.repository.ChapterRepository) {
     suspend operator fun invoke(
         chapterId: Long,
         bookId: Long? = null,
     ): Chapter? {
         return if (chapterId != LAST_CHAPTER) {
-            localChapterRepository.findChapterById(chapterId = chapterId)
+            chapterRepository.findChapterById(chapterId = chapterId)
         } else if (bookId != null) {
-            localChapterRepository.findLastReadChapter(bookId)
+            chapterRepository.findLastReadChapter(bookId)
         } else null
     }
 }
 
 
 
-class FindAllInLibraryChapters @Inject constructor(private val localChapterRepository: org.ireader.common_data.repository.LocalChapterRepository) {
+class FindAllInLibraryChapters @Inject constructor(private val chapterRepository: org.ireader.common_data.repository.ChapterRepository) {
     suspend operator fun invoke(): List<Chapter> {
-        return localChapterRepository.findAllInLibraryChapter()
+        return chapterRepository.findAllInLibraryChapter()
     }
 }

@@ -9,19 +9,21 @@ import org.ireader.common_models.entities.Category
 import org.ireader.common_models.entities.CategoryWithRelation
 
 @Dao
-interface CategoryDao:BaseDao<Category> {
+interface CategoryDao : BaseDao<Category> {
 
-    @Query("""
+    @Query(
+        """
         SELECT category.* FROM category
         JOIN library ON category.flags = library.flags
         WHERE library.flags = :flags
-    """)
+    """
+    )
     fun subscribeCategoryByFlags(
         flags: Long,
     ): Flow<List<Category>>
 
-
-    @Query("""
+    @Query(
+        """
     -- User categories
     SELECT category.*, COUNT(bookcategory.bookId) AS bookCount
     FROM category 
@@ -51,9 +53,12 @@ interface CategoryDao:BaseDao<Category> {
     FROM category
     WHERE category.id = 0
     ORDER BY `order`;
-    """)
+    """
+    )
     fun subscribeAll(): Flow<List<CategoryWithRelation>>
-    @Query("""
+
+    @Query(
+        """
     -- User categories
     SELECT category.*, COUNT(bookcategory.bookId) AS bookCount
     FROM category
@@ -73,7 +78,7 @@ interface CategoryDao:BaseDao<Category> {
      -- Category.UNCATEGORIZED_ID
     SELECT *, (
       SELECT COUNT(library.id)
-      FROM library
+      FROM library 
       WHERE NOT EXISTS (
         SELECT bookcategory.bookId
         FROM bookcategory
@@ -82,21 +87,37 @@ interface CategoryDao:BaseDao<Category> {
     ) AS bookCount
     FROM category
     WHERE category.id = 0
-    ORDER BY `order`;
-    """)
+    ORDER BY `order`
+    """
+    )
     suspend fun findAll(): List<CategoryWithRelation>
 
-    @Query("""
+    @Query(
+        """
         SELECT * FROM category WHERE id = :categoryId LIMIT 1
-    """)
+    """
+    )
     suspend fun find(categoryId: Long): Category
-    @Query("""
+
+    @Query(
+        """
        UPDATE category SET flags = coalesce(:flags,0)
-    """)
+    """
+    )
     suspend fun updateAllFlags(flags: Long)
 
+    @Query(
+        """
+      SELECT category.*
+        FROM category
+    JOIN bookcategory ON category.id = bookcategory.categoryId
+    WHERE bookcategory.bookId = :bookId
+    """
+    )
+    suspend fun findCategoriesOfBook(bookId: Long): List<Category>
+
     @Insert
-    fun insertDate(date:List<Category>)
+    fun insertDate(date: List<Category>)
 
     @Transaction
     suspend fun insertOrUpdate(objList: List<org.ireader.common_models.entities.Category>): List<Long> {
@@ -116,6 +137,7 @@ interface CategoryDao:BaseDao<Category> {
         if (!updateList.isEmpty()) update(updateList)
         return idList
     }
+
     @Transaction
     suspend fun insertOrUpdate(objList: org.ireader.common_models.entities.Category): Long {
         val objectToInsert = listOf(objList)
@@ -133,7 +155,6 @@ interface CategoryDao:BaseDao<Category> {
         }
 
         if (!updateList.isEmpty()) update(updateList)
-        return idList.firstOrNull()?:-1
+        return idList.firstOrNull() ?: -1
     }
-
 }

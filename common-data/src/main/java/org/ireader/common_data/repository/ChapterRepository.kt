@@ -3,7 +3,7 @@ package org.ireader.common_data.repository
 import kotlinx.coroutines.flow.Flow
 import org.ireader.common_models.entities.Chapter
 
-interface LocalChapterRepository {
+interface ChapterRepository {
 
     fun subscribeChapterById(
         chapterId: Long,

@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 22,
-    "identityHash": "3d789b7c1fea47f1c92da085dbdad04d",
+    "identityHash": "927fcbd05d4cb590262363b48baf30d7",
     "entities": [
       {
         "tableName": "library",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `sourceId` INTEGER NOT NULL, `title` TEXT NOT NULL, `key` TEXT NOT NULL, `tableId` INTEGER NOT NULL, `type` INTEGER NOT NULL, `author` TEXT NOT NULL, `description` TEXT NOT NULL, `genres` TEXT NOT NULL, `status` INTEGER NOT NULL, `cover` TEXT NOT NULL, `customCover` TEXT NOT NULL, `favorite` INTEGER NOT NULL, `lastUpdate` INTEGER NOT NULL, `lastInit` INTEGER NOT NULL, `dataAdded` INTEGER NOT NULL, `viewer` INTEGER NOT NULL, `flags` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `sourceId` INTEGER NOT NULL, `title` TEXT NOT NULL, `key` TEXT NOT NULL, `tableId` INTEGER NOT NULL, `type` INTEGER NOT NULL, `author` TEXT NOT NULL, `description` TEXT NOT NULL, `genres` TEXT NOT NULL, `status` INTEGER NOT NULL, `cover` TEXT NOT NULL, `customCover` TEXT NOT NULL, `favorite` INTEGER NOT NULL, `lastUpdate` INTEGER NOT NULL, `lastInit` INTEGER NOT NULL, `dateAdded` INTEGER NOT NULL, `viewer` INTEGER NOT NULL, `flags` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -99,8 +99,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "dataAdded",
-            "columnName": "dataAdded",
+            "fieldPath": "dateAdded",
+            "columnName": "dateAdded",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -623,7 +623,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3d789b7c1fea47f1c92da085dbdad04d')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '927fcbd05d4cb590262363b48baf30d7')"
     ]
   }
 }

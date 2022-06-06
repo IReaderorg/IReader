@@ -8,34 +8,34 @@ import javax.inject.Inject
  * Get latest read chapter
  *  * note: if nothing is found it return a resource of error
  */
-class SubscribeLastReadChapter @Inject constructor(private val localChapterRepository: org.ireader.common_data.repository.LocalChapterRepository) {
+class SubscribeLastReadChapter @Inject constructor(private val chapterRepository: org.ireader.common_data.repository.ChapterRepository) {
     operator fun invoke(
         bookId: Long?,
     ): Flow<Chapter?>? {
-        return bookId?.let { localChapterRepository.subscribeLastReadChapter(it) }
+        return bookId?.let { chapterRepository.subscribeLastReadChapter(it) }
     }
 }
 
-    class FindLastReadChapter @Inject constructor(private val localChapterRepository: org.ireader.common_data.repository.LocalChapterRepository) {
+    class FindLastReadChapter @Inject constructor(private val chapterRepository: org.ireader.common_data.repository.ChapterRepository) {
         suspend operator fun invoke(
             bookId: Long,
         ): Chapter? {
-            return localChapterRepository.findLastReadChapter(bookId)
+            return chapterRepository.findLastReadChapter(bookId)
         }
     }
 
-    class SubscribeFirstChapter @Inject constructor(private val localChapterRepository: org.ireader.common_data.repository.LocalChapterRepository) {
+    class SubscribeFirstChapter @Inject constructor(private val chapterRepository: org.ireader.common_data.repository.ChapterRepository) {
         operator fun invoke(
             bookId: Long,
         ): Flow<Chapter?> {
-            return localChapterRepository.subscribeFirstChapter(bookId)
+            return chapterRepository.subscribeFirstChapter(bookId)
         }
     }
 
-    class FindFirstChapter @Inject constructor(private val localChapterRepository: org.ireader.common_data.repository.LocalChapterRepository) {
+    class FindFirstChapter @Inject constructor(private val chapterRepository: org.ireader.common_data.repository.ChapterRepository) {
         suspend operator fun invoke(
             bookId: Long,
         ): Chapter? {
-            return localChapterRepository.findFirstChapter(bookId)
+            return chapterRepository.findFirstChapter(bookId)
         }
     }

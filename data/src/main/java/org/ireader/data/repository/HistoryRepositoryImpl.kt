@@ -19,6 +19,10 @@ class HistoryRepositoryImpl constructor(private val historyDao: HistoryDao) :
         return historyDao.findHistoryByBookId(bookId)
     }
 
+    override suspend fun findHistoriesByBookId(bookId: Long): List<History> {
+        return historyDao.findHistoriesByBookId(bookId)
+    }
+
     override fun subscribeHistoryByBookId(bookId: Long): Flow<History?> {
         return historyDao.subscribeHistoryByBookId(bookId)
     }

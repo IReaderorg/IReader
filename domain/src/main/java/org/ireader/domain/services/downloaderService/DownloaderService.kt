@@ -32,8 +32,8 @@ import org.ireader.domain.use_cases.remote.RemoteUseCases
 class DownloaderService @AssistedInject constructor(
     @Assisted private val context: Context,
     @Assisted params: WorkerParameters,
-    private val bookRepo: org.ireader.common_data.repository.LocalBookRepository,
-    private val chapterRepo: org.ireader.common_data.repository.LocalChapterRepository,
+    private val bookRepo: org.ireader.common_data.repository.BookRepository,
+    private val chapterRepo: org.ireader.common_data.repository.ChapterRepository,
     private val remoteUseCases: RemoteUseCases,
     private val extensions: CatalogStore,
     private val insertUseCases: LocalInsertUseCases,

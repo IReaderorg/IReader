@@ -7,5 +7,6 @@ data class ProjectConfig(
     val includeUpdater :Boolean,
     val preview :Boolean,
     val versionName:String,
-    val versionCode:Int
+    val versionCode:Int,
+    val applicationId : String = "ir.kazemcodes.infinityreader"
 )

@@ -18,6 +18,11 @@ interface BookCategoryDao : BaseDao<BookCategory> {
     """)
     suspend fun findAll(): List<BookCategory>
 
+    @Query("""
+        DELETE FROM bookcategory WHERE bookId = :bookId
+    """)
+    suspend fun delete(bookId:Long)
+
     @Transaction
     suspend fun insertOrUpdate(objList: List<org.ireader.common_models.entities.BookCategory>) {
         val insertResult = insert(objList)

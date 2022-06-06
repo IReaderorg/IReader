@@ -6,15 +6,15 @@ import javax.inject.Inject
 /**
  * Delete All Books That are paged in Explore Screen
  */
-class DeleteAllExploreBook @Inject constructor(private val localBookRepository: org.ireader.common_data.repository.LocalBookRepository) {
+class DeleteAllExploreBook @Inject constructor(private val bookRepository: org.ireader.common_data.repository.BookRepository) {
     suspend operator fun invoke() {
-        return localBookRepository.deleteAllExploreBook()
+        return bookRepository.deleteAllExploreBook()
     }
 }
 
-class DeleteBooks @Inject constructor(private val localBookRepository: org.ireader.common_data.repository.LocalBookRepository) {
+class DeleteBooks @Inject constructor(private val bookRepository: org.ireader.common_data.repository.BookRepository) {
     suspend operator fun invoke(books: List<Book>) {
-        localBookRepository.deleteBooks(books)
+        bookRepository.deleteBooks(books)
     }
 }
 

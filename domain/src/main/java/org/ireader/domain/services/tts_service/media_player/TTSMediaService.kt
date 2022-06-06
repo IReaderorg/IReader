@@ -55,10 +55,10 @@ import kotlin.time.ExperimentalTime
 class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeListener {
 
     @Inject
-    lateinit var bookRepo: org.ireader.common_data.repository.LocalBookRepository
+    lateinit var bookRepo: org.ireader.common_data.repository.BookRepository
 
     @Inject
-    lateinit var chapterRepo: org.ireader.common_data.repository.LocalChapterRepository
+    lateinit var chapterRepo: org.ireader.common_data.repository.ChapterRepository
 
     @Inject
     lateinit var chapterUseCase: LocalGetChapterUseCase

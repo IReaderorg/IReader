@@ -12,6 +12,9 @@ interface HistoryDao : BaseDao<org.ireader.common_models.entities.History> {
     @Query("SELECT * FROM history WHERE chapterId = :id LIMIT 1")
     suspend fun findHistory(id: Long): org.ireader.common_models.entities.History?
 
+    @Query("SELECT * FROM history WHERE bookId = :bookId")
+    suspend fun findHistoriesByBookId(bookId: Long): List<History>
+
     @Query("SELECT history.* FROM history GROUP  By history.chapterId HAVING bookId = :bookId  ORDER BY history.readAt DESC LIMIT 1")
     suspend fun findHistoryByBookId(bookId: Long): org.ireader.common_models.entities.History?
 

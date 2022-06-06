@@ -24,7 +24,7 @@ data class Book(
     override val favorite: Boolean = false,
     val lastUpdate: Long = 0,
     val lastInit: Long = 0,
-    val dataAdded: Long = 0,
+    val dateAdded: Long = 0,
     val viewer: Int = 0,
     val flags: Int = 0,
 ) : BaseBook {
@@ -75,7 +75,7 @@ fun MangaInfo.toBook(sourceId: Long,bookId:Long = 0, tableId: Long = 0, lastUpda
         cover = this.cover,
         flags = 0,
         key = this.key,
-        dataAdded = 0L,
+        dateAdded = 0L,
         lastUpdate = lastUpdated,
         favorite = false,
         title = this.title,
@@ -95,7 +95,7 @@ fun MangaInfo.fromBookInfo(sourceId: Long): Book {
         cover = this.cover,
         flags = 0,
         key = this.key,
-        dataAdded = 0L,
+        dateAdded = 0L,
         lastUpdate = 0L,
         favorite = false,
         title = this.title,
@@ -140,7 +140,7 @@ fun BookWithInfo.toBook(): Book {
         cover = this.cover,
         flags = 0,
         key = this.link,
-        dataAdded = 0L,
+        dateAdded = 0L,
         lastUpdate = 0L,
         favorite = false,
         title = this.title,
@@ -185,7 +185,7 @@ data class LibraryBook(
             id = id,
             sourceId = sourceId,
             title = title,
-            key = key
+            key = key,
         )
     }
 }

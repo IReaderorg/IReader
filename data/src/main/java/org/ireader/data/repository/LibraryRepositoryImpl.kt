@@ -1,6 +1,7 @@
 package org.ireader.data.repository
 
 import kotlinx.coroutines.flow.Flow
+import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.DownloadedBook
 import org.ireader.common_models.entities.LibraryBook
 import org.ireader.common_models.library.LibrarySort
@@ -44,5 +45,9 @@ class LibraryRepositoryImpl(
 
     override suspend fun findDownloadedBooks(): List<DownloadedBook> {
         return bookDao.findDownloadedBooks()
+    }
+
+    override suspend fun findFavorites(): List<Book> {
+        return bookDao.findFavorites()
     }
 }

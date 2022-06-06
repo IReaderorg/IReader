@@ -6,7 +6,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.ktor.client.plugins.cookies.CookiesStorage
-import org.ireader.common_data.repository.LocalBookRepository
+import org.ireader.common_data.repository.BookRepository
 import org.ireader.core_api.http.BrowseEngine
 import org.ireader.core_api.http.HttpClients
 import org.ireader.core_api.os.PackageInstaller
@@ -168,7 +168,7 @@ class CatalogModule {
     @Singleton
     fun providesGetLocalCatalogs(
         catalogStore: CatalogStore,
-        libraryRepository: LocalBookRepository,
+        libraryRepository: BookRepository,
     ): GetLocalCatalogs {
         return GetLocalCatalogs(catalogStore, libraryRepository)
     }
