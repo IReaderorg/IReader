@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
@@ -36,7 +35,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.text.ExperimentalTextApi
@@ -204,7 +202,7 @@ private fun PagedReaderText(
             isDraggable = vm.isScrollIndicatorDraggable.value,
             rightSide = vm.scrollIndicatorAlignment.value == PreferenceAlignment.Right
         ) {
-            Column(modifier = Modifier.verticalScroll(scrollState)) {
+            Column(modifier = Modifier.fillMaxSize().verticalScroll(scrollState)) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -216,12 +214,7 @@ private fun PagedReaderText(
                             Text(
                                 modifier = modifier
                                     .fillMaxWidth()
-                                    .padding(horizontal = vm.paragraphsIndent.value.dp)
-                                    .background(
-                                        if (index in vm.queriedTextIndex) vm.textColor.value.copy(
-                                            .1f
-                                        ) else Color.Transparent
-                                    ),
+                                    .padding(horizontal = vm.paragraphsIndent.value.dp),
                                 text = text.plus(
                                     "\n".repeat(vm.distanceBetweenParagraphs.value)
                                 ),
@@ -261,7 +254,7 @@ private fun ContinuesReaderPage(
         lastChapterId?.let { onChapterShown(it) }
     }
     LaunchedEffect(key1 = scrollState.layoutInfo.visibleItemsInfo.firstOrNull()?.key) {
-        vm.chapterShell.firstOrNull { it.id == scrollState.layoutInfo.visibleItemsInfo.firstOrNull()?.key }
+        vm.chapterShell.firstOrNull { it.id == scrollState.layoutInfo.visibleItemsInfo.firstOrNull()?.key.toString().substringAfter("-").toLong() }
             ?.let { chapter ->
                 if (chapter.id != lastChapterId?.id) {
                     lastChapterId = chapter
@@ -269,6 +262,13 @@ private fun ContinuesReaderPage(
                 }
             }
 
+    }
+    val items by remember {
+        derivedStateOf {
+            vm.chapterShell.map { chapter ->
+                chapter.content.map { chapter.id to it }
+            }.flatten()
+        }
     }
 
     LazyColumnScrollbar(
@@ -283,47 +283,36 @@ private fun ContinuesReaderPage(
     ) {
 
         LazyColumn(
-            modifier = modifier,
+            modifier = modifier.fillMaxSize(),
             state = scrollState,
         ) {
             items(
-                items = vm.chapterShell,
-                key = { chapter ->
-                    chapter.id
+                count = items.size,
+                key = { index ->
+                    "$index-${items[index].first}"
                 }
-            ) { chapter ->
-                Column(
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    chapter.content.forEachIndexed { index, text ->
-                        TextSelectionContainer(selectable = vm.selectableMode.value) {
-                            Text(
-                                modifier = modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = vm.paragraphsIndent.value.dp)
-                                    .background(
-                                        if (index in vm.queriedTextIndex) vm.textColor.value.copy(
-                                            .1f
-                                        ) else Color.Transparent
-                                    ),
-                                text = text.plus(
-                                    "\n".repeat(
-                                        vm.distanceBetweenParagraphs.value
-                                    )
-                                ),
-                                fontSize = vm.fontSize.value.sp,
-                                fontFamily = vm.font.value.fontFamily,
-                                textAlign = mapTextAlign(vm.textAlignment.value),
-                                color = vm.textColor.value,
-                                lineHeight = vm.lineHeight.value.sp,
-                            )
-                        }
-                    }
-                    LaunchedEffect(key1 = true) {
-                        Log.error { "RECOMPOSE" }
-                    }
-                }
+            ) { index ->
 
+                TextSelectionContainer(selectable = vm.selectableMode.value) {
+                    Text(
+                        modifier = modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = vm.paragraphsIndent.value.dp),
+                        text = items[index].second.plus(
+                            "\n".repeat(
+                                vm.distanceBetweenParagraphs.value
+                            )
+                        ),
+                        fontSize = vm.fontSize.value.sp,
+                        fontFamily = vm.font.value.fontFamily,
+                        textAlign = mapTextAlign(vm.textAlignment.value),
+                        color = vm.textColor.value,
+                        lineHeight = vm.lineHeight.value.sp,
+                    )
+                }
+//                LaunchedEffect(key1 = true) {
+//                    Log.error { "RECOMPOSE" }
+//                }
             }
 
         }
@@ -355,7 +344,7 @@ fun ContinuousReaderPageWithScrollState(
         Log.error { "UPDATED $firstVisibleItem" }
     }
     Column(
-        modifier = modifier.verticalScroll(scrollState),
+        modifier = modifier.fillMaxSize().verticalScroll(scrollState),
     ) {
         vm.chapterShell.forEachIndexed { index, chapter ->
             Column(
@@ -381,12 +370,7 @@ fun ContinuousReaderPageWithScrollState(
                         Text(
                             modifier = modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = vm.paragraphsIndent.value.dp)
-                                .background(
-                                    if (index in vm.queriedTextIndex) vm.textColor.value.copy(
-                                        .1f
-                                    ) else Color.Transparent
-                                ),
+                                .padding(horizontal = vm.paragraphsIndent.value.dp),
                             text = text.plus(
                                 "\n".repeat(
                                     vm.distanceBetweenParagraphs.value

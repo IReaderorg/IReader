@@ -78,9 +78,8 @@ open class ReaderScreenPreferencesStateImpl @Inject constructor() : ReaderScreen
     override var autoScrollMode: Boolean by mutableStateOf<Boolean>(false)
 
     override var initialized by mutableStateOf<Boolean>(false)
-    override var searchMode by mutableStateOf<Boolean>(false)
+
     override var searchQuery by mutableStateOf<String>("")
-    override var queriedTextIndex: SnapshotStateList<Int> = mutableStateListOf()
     override var currentViewingSearchResultIndex by mutableStateOf<Int>(0)
     override var expandTopMenu by mutableStateOf<Boolean>(false)
 
@@ -105,10 +104,8 @@ interface ReaderScreenPreferencesState {
     var autoScrollMode:Boolean
 
     var initialized: Boolean
-    var searchMode: Boolean
     var expandTopMenu: Boolean
     var searchQuery: String
-    var queriedTextIndex: SnapshotStateList<Int>
     var currentViewingSearchResultIndex: Int
 
     var scrollMode : Boolean

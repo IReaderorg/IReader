@@ -68,6 +68,10 @@ class BookRepositoryImpl(
         return remoteKeysDao.insertOrUpdate(book)
     }
 
+    override suspend fun delete(key: String) {
+        return bookDao.delete(key)
+    }
+
     override suspend fun deleteBooks(book: List<org.ireader.common_models.entities.Book>) {
         remoteKeysDao.delete(book)
     }

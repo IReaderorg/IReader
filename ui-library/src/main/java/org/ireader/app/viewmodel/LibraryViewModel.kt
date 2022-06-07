@@ -78,7 +78,7 @@ class LibraryViewModel @Inject constructor(
 
     val perCategorySettings = libraryPreferences.perCategorySettings().asState()
     val layouts = libraryPreferences.categoryFlags().asState()
-    var columnInPortrait by libraryPreferences.columnsInPortrait().asState()
+    var columnInPortrait = libraryPreferences.columnsInPortrait().asState()
     val columnInLandscape by libraryPreferences.columnsInLandscape().asState()
     val layout by derivedStateOf { DisplayMode.getFlag(layouts.value) ?: DisplayMode.CompactGrid }
 

@@ -394,12 +394,12 @@ fun SliderPreference(
         Slider(
             modifier = Modifier
                 .widthIn(max = 200.dp),
-            value = preferenceAsFloat?.value ?: preferenceAsInt?.value?.toFloat()
-            ?: preferenceAsLong?.value?.toFloat() ?: mutablePreferences?.value ?: 0F,
+            value = preferenceAsFloat?.lazyValue ?: preferenceAsInt?.lazyValue?.toFloat()
+            ?: preferenceAsLong?.lazyValue?.toFloat() ?: mutablePreferences?.value ?: 0F,
             onValueChange = {
-                preferenceAsFloat?.value = it
-                preferenceAsInt?.value = it.toInt()
-                preferenceAsLong?.value = it.toLong()
+                preferenceAsFloat?.lazyValue = it
+                preferenceAsInt?.lazyValue = it.toInt()
+                preferenceAsLong?.lazyValue = it.toLong()
                 mutablePreferences?.value = it
                 onValueChange(it)
             },

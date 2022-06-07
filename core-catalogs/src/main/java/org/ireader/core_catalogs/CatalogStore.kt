@@ -13,6 +13,7 @@ import org.ireader.common_models.entities.CatalogBundled
 import org.ireader.common_models.entities.CatalogInstalled
 import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.common_models.entities.CatalogRemote
+import org.ireader.core_api.source.LocalSource
 import org.ireader.core_api.util.replace
 import org.ireader.core_catalogs.service.CatalogInstallationChange
 import org.ireader.core_catalogs.service.CatalogInstallationChanges
@@ -108,6 +109,9 @@ class CatalogStore(
     }
 
     fun get(sourceId: Long): CatalogLocal? {
+        if (sourceId == -200L) {
+            return CatalogBundled(source = LocalSource())
+        }
         return catalogsBySource[sourceId]
     }
 

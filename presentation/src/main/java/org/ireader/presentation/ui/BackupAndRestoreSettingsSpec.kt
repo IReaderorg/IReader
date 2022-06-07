@@ -23,6 +23,7 @@ import org.ireader.common_extensions.launchIO
 import org.ireader.common_resources.UiEvent
 import org.ireader.common_resources.UiText
 import org.ireader.components.components.TitleToolbar
+import org.ireader.core_api.log.Log
 import org.ireader.settings.setting.SettingsSection
 import org.ireader.settings.setting.backups.BackUpAndRestoreScreen
 import org.ireader.settings.setting.backups.BackupScreenViewModel
@@ -73,7 +74,7 @@ object BackupAndRestoreScreenSpec : ScreenSpec {
                     val uri = resultIntent.data!!.data!!
 
                     context.findComponentActivity()?.lifecycleScope?.launchIO {
-                        val result = vm.createBackup.saveTo(uri,context, onError = {
+                        val result = vm.createBackup.saveTo(uri, context, onError = {
                             vm.showSnackBar(it)
                         }, onSuccess = {
                             vm.showSnackBar((UiText.StringResource(R.string.backup_created_successfully)))
@@ -96,18 +97,26 @@ object BackupAndRestoreScreenSpec : ScreenSpec {
 //                    }
                 }
             }
+        val launcher = rememberLauncherForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { isGranted: Boolean ->
+            if (isGranted) {
 
+            } else {
+
+            }
+        }
         val onRestore =
             rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultIntent ->
                 if (resultIntent.resultCode == Activity.RESULT_OK && resultIntent.data != null) {
                     val uri = resultIntent.data!!.data!!
                     context.findComponentActivity()?.lifecycleScope?.launchIO {
-                        vm.restoreBackup.restoreFrom(uri,context, onError = {
+                        vm.restoreBackup.restoreFrom(uri, context, onError = {
                             vm.showSnackBar(it)
                         }, onSuccess = {
                             vm.showSnackBar((UiText.StringResource(R.string.restoredSuccessfully)))
                         })
-                       // vm.showSnackBar(UiText.DynamicString("RESTORED"))
+                        // vm.showSnackBar(UiText.DynamicString("RESTORED"))
                     }
 //                    try {
 //                        scope.launchIO {
@@ -140,6 +149,33 @@ object BackupAndRestoreScreenSpec : ScreenSpec {
 //                    }
                 }
             }
+        val onEpub =
+            rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultIntent ->
+                if (resultIntent.resultCode == Activity.RESULT_OK && resultIntent.data != null) {
+                    try {
+
+                        val uri = resultIntent.data!!.data!!
+                        context.contentResolver.openInputStream(uri)!!.use {
+
+                            val epub = vm.epubParser.parse(
+                                it,
+                            )
+                            scope.launchIO {
+                                vm.importEpub(epub,context)
+                            }
+
+                        }
+                    } catch (e: Throwable) {
+                        Log.error(e, "epub parser throws an exception")
+                    }
+//                        if (it != null) {
+//                            val epup = createEpubBook(it)
+//                            scope.launchIO {
+//                                vm.importEpub(epup,context)
+//                            }
+//                        }
+                }
+            }
 
         val settingItems = listOf(
             SettingsSection(
@@ -159,6 +195,17 @@ object BackupAndRestoreScreenSpec : ScreenSpec {
                     ?.let { activity ->
                         vm.onRestoreBackupRequested { intent: Intent ->
                             onRestore.launch(intent)
+                        }
+                    }
+            },
+
+            SettingsSection(
+                org.ireader.ui_settings.R.string.import_epub,
+            ) {
+                context.findComponentActivity()
+                    ?.let { activity ->
+                        vm.onEpubBackupRequested { intent: Intent ->
+                            onEpub.launch(intent)
                         }
                     }
             },
@@ -204,7 +251,6 @@ fun restoreBackup(
         onError(e)
     }
 }
-
 
 fun makeBackup(
     context: Context,

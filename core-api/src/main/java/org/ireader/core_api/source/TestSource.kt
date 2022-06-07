@@ -156,7 +156,7 @@ class TestSource : CatalogSource {
     }
     private fun getTestChapters(commands: List<Command<*>>): List<ChapterInfo> {
         val chapters = mutableListOf<ChapterInfo>()
-        org.ireader.core_api.log.Log.error { commands.toString() }
+
         return when(val cmd = commands.firstOrNull()) {
             is Command.Chapter.Text -> {
                 chapters.add(ChapterInfo(
@@ -167,7 +167,7 @@ class TestSource : CatalogSource {
                 chapters
             }
             is Command.Chapter.Select -> {
-                org.ireader.core_api.log.Log.error { cmd.value.toString() }
+
                 chapters.add(ChapterInfo(
                     Clock.System.now().toEpochMilliseconds().toString(),
                     "Chapter ${cmd.options[cmd.value]}",

@@ -51,6 +51,7 @@ interface BookRepository {
     suspend fun updateBook(book: List<Book>)
     suspend fun insertBook(book: Book): Long
     suspend fun insertBooks(book: List<Book>): List<Long>
+    suspend fun delete(key: String)
 
     /**************************************************/
 

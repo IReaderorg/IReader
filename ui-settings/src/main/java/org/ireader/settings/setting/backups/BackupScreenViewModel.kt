@@ -11,6 +11,8 @@ import org.ireader.common_models.BackUpBook
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.use_cases.backup.CreateBackup
 import org.ireader.domain.use_cases.backup.RestoreBackup
+import org.ireader.domain.use_cases.epub.epup_parser.epubparser.EpubParser
+import org.ireader.domain.use_cases.epub.importer.ImportEpub
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetBookUseCases
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
@@ -31,6 +33,8 @@ class BackupScreenViewModel @Inject constructor(
     private val prefUseCases: ReaderPrefUseCases,
     val restoreBackup: RestoreBackup,
     val createBackup: CreateBackup,
+    val importEpub: ImportEpub,
+    val epubParser: EpubParser
 ) : BaseViewModel() {
     private val _state = mutableStateOf(SettingState())
     val state: State<SettingState> = _state
@@ -51,6 +55,17 @@ class BackupScreenViewModel @Inject constructor(
 
     fun onRestoreBackupRequested(onStart: (Intent) -> Unit) {
         val mimeTypes = arrayOf("application/gzip")
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+            .addCategory(Intent.CATEGORY_OPENABLE)
+            .setType("application/*")
+            .putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
+            .addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+
+        onStart(intent)
+    }
+    fun onEpubBackupRequested(onStart: (Intent) -> Unit) {
+        val mimeTypes = arrayOf("application/*")
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
             .addCategory(Intent.CATEGORY_OPENABLE)
             .setType("application/*")

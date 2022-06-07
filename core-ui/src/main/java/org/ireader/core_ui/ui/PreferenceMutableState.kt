@@ -13,6 +13,7 @@ class PreferenceMutableState<T>(
 ) : MutableState<T> {
 
     private val state = mutableStateOf(preference.get())
+    private val lazyState = mutableStateOf(preference.get())
 
     init {
         scope.launch(Dispatchers.Main) {
@@ -24,6 +25,17 @@ class PreferenceMutableState<T>(
                 }
         }
     }
+
+    /**
+     * we can use this for times that we need to update UI immediately
+     * and changes happens too fast like using it in slider
+     */
+    var lazyValue: T
+        get() = lazyState.value
+        set(value) {
+            lazyState.value = value
+            preference.set(value)
+        }
 
     override var value: T
         get() = state.value

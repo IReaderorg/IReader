@@ -58,6 +58,14 @@ interface LibraryBookDao : BaseDao<Book> {
     @Query("DELETE FROM library WHERE id = :bookId ")
     suspend fun deleteBook(bookId: Long)
 
+    @Query(
+        """
+        DELETE  FROM library 
+        WHERE `key` = :key
+    """
+    )
+    suspend fun delete(key:String)
+
     @Query("DELETE FROM library")
     suspend fun deleteAllBook()
 
