@@ -3,6 +3,7 @@ package org.ireader.bookDetails
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.material.icons.filled.Public
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -28,7 +29,8 @@ fun BookDetailTopAppBar(
     onWebView: () -> Unit,
     onRefresh: () -> Unit,
     onPopBackStack: () -> Unit,
-    onCommand: () -> Unit
+    onCommand: () -> Unit,
+    onShare:() -> Unit
 ) {
     Toolbar(
         title = {},
@@ -42,6 +44,15 @@ fun BookDetailTopAppBar(
                 Icon(
                     imageVector = Icons.Default.Autorenew,
                     contentDescription = stringResource(id = R.string.refresh),
+                    tint = MaterialTheme.colorScheme.onBackground,
+                )
+            }
+            IconButton(onClick = {
+                onShare()
+            }) {
+                Icon(
+                    imageVector = Icons.Default.Share,
+                    contentDescription = stringResource(id = R.string.share),
                     tint = MaterialTheme.colorScheme.onBackground,
                 )
             }

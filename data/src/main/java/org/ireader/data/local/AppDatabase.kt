@@ -83,17 +83,25 @@ abstract class AppDatabase : RoomDatabase() {
                     override fun onCreate(db: SupportSQLiteDatabase) {
                         super.onCreate(db)
                         Executors.newSingleThreadExecutor().execute {
-                            getInstance(context).categoryDao.insertDate(systemCategories)
+                            db.execSQL("""
+                                INSERT OR IGNORE INTO category VALUES (-1, "", 0, 0, 0);
+                            """.trimIndent())
+                            db.execSQL("""
+                                INSERT OR IGNORE INTO category VALUES (-2, "", 0, 0, 0);
+                            """.trimIndent())
+                            db.execSQL("""
+                                CREATE TRIGGER IF NOT EXISTS system_categories_deletion_trigger BEFORE DELETE ON category
+                                BEGIN SELECT CASE
+                                  WHEN old.id <= 0 THEN
+                                    RAISE(ABORT, 'System category cant be deleted')
+                                  END;
+                                END
+                            """.trimIndent())
                         }
                     }
                 })
                 .fallbackToDestructiveMigration()
                 .build()
-
-        val systemCategories = listOf<Category>(
-            Category(id = Category.ALL_ID, "", Category.ALL_ID.toInt(), 0, 0),
-            Category(id = Category.UNCATEGORIZED_ID, "", Category.UNCATEGORIZED_ID.toInt(), 0, 0),
-        )
     }
 }
 

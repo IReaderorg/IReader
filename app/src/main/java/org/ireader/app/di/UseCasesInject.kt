@@ -6,9 +6,11 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import ir.kazemcodes.epub.epubparser.EpubParser
 import org.ireader.common_data.repository.BookCategoryRepository
 import org.ireader.common_data.repository.BookRepository
 import org.ireader.common_data.repository.CategoryRepository
+import org.ireader.common_data.repository.ChapterRepository
 import org.ireader.common_data.repository.DownloadRepository
 import org.ireader.common_data.repository.HistoryRepository
 import org.ireader.common_data.repository.RemoteKeyRepository
@@ -28,6 +30,7 @@ import org.ireader.domain.use_cases.download.get.FindDownloadsUseCase
 import org.ireader.domain.use_cases.download.get.SubscribeDownloadsUseCase
 import org.ireader.domain.use_cases.download.insert.InsertDownload
 import org.ireader.domain.use_cases.download.insert.InsertDownloads
+import org.ireader.domain.use_cases.epub.EpubCreator
 import org.ireader.domain.use_cases.history.HistoryUseCase
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.FindBookByKey
@@ -55,6 +58,7 @@ import org.ireader.domain.use_cases.local.delete_usecases.book.DeleteAllBooks
 import org.ireader.domain.use_cases.local.delete_usecases.book.DeleteAllExploreBook
 import org.ireader.domain.use_cases.local.delete_usecases.book.DeleteBookById
 import org.ireader.domain.use_cases.local.delete_usecases.book.DeleteBooks
+import org.ireader.domain.use_cases.local.delete_usecases.book.DeleteNotInLibraryBooks
 import org.ireader.domain.use_cases.local.delete_usecases.book.UnFavoriteBook
 import org.ireader.domain.use_cases.local.delete_usecases.chapter.DeleteAllChapters
 import org.ireader.domain.use_cases.local.delete_usecases.chapter.DeleteChapterByChapter
@@ -110,6 +114,7 @@ import org.ireader.domain.use_cases.updates.DeleteAllUpdates
 import org.ireader.domain.use_cases.updates.DeleteUpdates
 import org.ireader.domain.use_cases.updates.SubscribeUpdates
 import org.ireader.domain.use_cases.updates.UpdateUseCases
+import org.ireader.image_loader.coil.cache.CoverCache
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
@@ -202,7 +207,8 @@ class UseCasesInject {
             deleteChapterByChapter = DeleteChapterByChapter(chapterRepository),
             deleteChapters = DeleteChapters(chapterRepository),
             deleteChaptersByBookId = DeleteChaptersByBookId(chapterRepository),
-            unFavoriteBook = UnFavoriteBook(bookRepository, bookCategoryRepository = bookCategoryRepository,transactions)
+            unFavoriteBook = UnFavoriteBook(bookRepository, bookCategoryRepository = bookCategoryRepository,transactions),
+            deleteNotInLibraryBooks = DeleteNotInLibraryBooks(bookRepository)
         )
     }
 
@@ -293,7 +299,7 @@ class UseCasesInject {
     @Provides
     @Singleton
     fun providesUpdateUseCases(
-        updatesRepository: UpdatesRepository
+        updatesRepository: UpdatesRepository,
     ): UpdateUseCases {
         return UpdateUseCases(
             subscribeUpdates = SubscribeUpdates(updatesRepository),
@@ -301,6 +307,22 @@ class UseCasesInject {
             deleteUpdates = DeleteUpdates(updatesRepository),
         )
     }
+
+
+    @Provides
+    fun providesEpubParser(
+    ): EpubParser {
+        return EpubParser()
+    }
+
+    @Provides
+    fun providesEpubCreator(
+      coverCache: CoverCache,
+        chapterRepository: ChapterRepository
+    ): EpubCreator {
+        return EpubCreator(coverCache, chapterRepository)
+    }
+
     @Provides
     @Singleton
     fun providesDownloadUseCases(

@@ -26,3 +26,13 @@ class UnFavoriteBook @Inject constructor(
     }
 }
 
+class DeleteNotInLibraryBooks @Inject constructor(
+    private val bookRepository: org.ireader.common_data.repository.BookRepository,
+) {
+    suspend operator fun invoke() {
+        bookRepository.deleteNotInLibraryBooks()
+    }
+}
+
+
+

@@ -1,6 +1,7 @@
 package org.ireader.bookDetails.viewmodel
 
 import android.content.Context
+import android.content.Intent
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,6 +22,7 @@ import org.ireader.core_api.source.CatalogSource
 import org.ireader.core_api.source.model.CommandList
 import org.ireader.core_catalogs.interactor.GetLocalCatalog
 import org.ireader.core_ui.viewmodel.BaseViewModel
+import org.ireader.domain.use_cases.epub.EpubCreator
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
@@ -41,13 +43,15 @@ class BookDetailViewModel @Inject constructor(
     val chapterState: ChapterStateImpl,
     private val serviceUseCases: ServiceUseCases,
     val deleteUseCase: DeleteUseCase,
-    @ApplicationScope private val applicationScope: CoroutineScope
+    @ApplicationScope private val applicationScope: CoroutineScope,
+    val createEpub: EpubCreator
 ) : BaseViewModel(), DetailState by state, ChapterState by chapterState {
 
     var getBookDetailJob: Job? = null
     var getChapterDetailJob: Job? = null
 
     var initBooks = false
+
 
     init {
         val bookId = savedStateHandle.get<Long>("bookId")
@@ -98,6 +102,26 @@ class BookDetailViewModel @Inject constructor(
         getChapterUseCase.subscribeChaptersByBookId(bookId).onEach { snapshot ->
                 chapters = snapshot
         }.launchIn(viewModelScope)
+    }
+    private val reservedChars = "|\\?*<\":>+[]/'"
+    private fun sanitizeFilename(name: String): String {
+        var tempName = name
+        for (c in reservedChars) {
+            tempName = tempName.replace(c, ' ')
+        }
+        return tempName.replace("  ", " ")
+    }
+    fun onEpubCreateRequested(book: Book,onStart: (Intent) -> Unit) {
+        val mimeTypes = arrayOf("application/epub+zip")
+        val fn = "${sanitizeFilename(book.title)}.epub"
+        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
+            .addCategory(Intent.CATEGORY_OPENABLE)
+            .setType("application/epub+zip")
+            .putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
+            .putExtra(Intent.EXTRA_TITLE, fn
+            )
+
+        onStart(intent)
     }
 
     suspend fun getRemoteBookDetail(book: Book, source: CatalogLocal?) {

@@ -24,6 +24,7 @@ import org.ireader.common_resources.UiEvent
 import org.ireader.common_resources.UiText
 import org.ireader.components.components.TitleToolbar
 import org.ireader.core_api.log.Log
+import org.ireader.settings.setting.ImportMode
 import org.ireader.settings.setting.SettingsSection
 import org.ireader.settings.setting.backups.BackUpAndRestoreScreen
 import org.ireader.settings.setting.backups.BackupScreenViewModel
@@ -97,15 +98,7 @@ object BackupAndRestoreScreenSpec : ScreenSpec {
 //                    }
                 }
             }
-        val launcher = rememberLauncherForActivityResult(
-            ActivityResultContracts.RequestPermission()
-        ) { isGranted: Boolean ->
-            if (isGranted) {
 
-            } else {
-
-            }
-        }
         val onRestore =
             rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultIntent ->
                 if (resultIntent.resultCode == Activity.RESULT_OK && resultIntent.data != null) {
@@ -116,64 +109,33 @@ object BackupAndRestoreScreenSpec : ScreenSpec {
                         }, onSuccess = {
                             vm.showSnackBar((UiText.StringResource(R.string.restoredSuccessfully)))
                         })
-                        // vm.showSnackBar(UiText.DynamicString("RESTORED"))
                     }
-//                    try {
-//                        scope.launchIO {
-//                            val contentResolver = context.findComponentActivity()!!.contentResolver
-//
-//                            contentResolver
-//                                .takePersistableUriPermission(
-//                                    uri,
-//                                    Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-//                                )
-//                            val pfd = contentResolver.openFileDescriptor(uri, "r")
-//                            pfd?.use {
-//                                FileInputStream(pfd.fileDescriptor).use { stream ->
-//                                    val txt = stream.readBytes().decodeToString()
-//                                    kotlin.runCatching {
-//                                        vm.insertBackup(
-//                                            Json.decodeFromString<List<BackUpBook>>(
-//                                                txt
-//                                            )
-//                                        )
-//                                        vm.showSnackBar(UiText.StringResource(R.string.restoredSuccessfully))
-//                                    }.getOrElse { e ->
-//                                        vm.showSnackBar(UiText.ExceptionString(e))
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    } catch (e: Throwable) {
-//                        vm.showSnackBar(UiText.ExceptionString(e))
-//                    }
                 }
             }
         val onEpub =
             rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultIntent ->
                 if (resultIntent.resultCode == Activity.RESULT_OK && resultIntent.data != null) {
-                    try {
 
-                        val uri = resultIntent.data!!.data!!
-                        context.contentResolver.openInputStream(uri)!!.use {
-
-                            val epub = vm.epubParser.parse(
-                                it,
-                            )
-                            scope.launchIO {
-                                vm.importEpub(epub,context)
+                    val uri = resultIntent.data!!.data!!
+                    scope.launchIO {
+                        try {
+                            when (vm.importMode.value) {
+                                ImportMode.JavaMode -> {
+                                    scope.launchIO {
+                                        vm.importEpub.parseUsingJavaMethod(uri, context)
+                                        vm.showSnackBar(UiText.StringResource(R.string.success))
+                                    }
+                                }
+                                ImportMode.KotlinMode -> {
+                                    vm.importEpub.parseUsingKotlin(uri, context)
+                                    vm.showSnackBar(UiText.StringResource(R.string.success))
+                                }
                             }
-
+                        } catch (e: Throwable) {
+                            Log.error(e, "epub parser throws an exception")
+                            vm.showSnackBar(UiText.ExceptionString(e))
                         }
-                    } catch (e: Throwable) {
-                        Log.error(e, "epub parser throws an exception")
                     }
-//                        if (it != null) {
-//                            val epup = createEpubBook(it)
-//                            scope.launchIO {
-//                                vm.importEpub(epup,context)
-//                            }
-//                        }
                 }
             }
 
@@ -200,11 +162,23 @@ object BackupAndRestoreScreenSpec : ScreenSpec {
             },
 
             SettingsSection(
-                org.ireader.ui_settings.R.string.import_epub,
+                org.ireader.ui_settings.R.string.import_epub_first_mode,
             ) {
                 context.findComponentActivity()
                     ?.let { activity ->
-                        vm.onEpubBackupRequested { intent: Intent ->
+                        vm.importMode.value = ImportMode.JavaMode
+                        vm.onEpubImportRequested { intent: Intent ->
+                            onEpub.launch(intent)
+                        }
+                    }
+            },
+            SettingsSection(
+                org.ireader.ui_settings.R.string.import_epub_second_mode,
+            ) {
+                context.findComponentActivity()
+                    ?.let { activity ->
+                        vm.onEpubImportRequested { intent: Intent ->
+                            vm.importMode.value = ImportMode.KotlinMode
                             onEpub.launch(intent)
                         }
                     }
@@ -214,7 +188,8 @@ object BackupAndRestoreScreenSpec : ScreenSpec {
         BackUpAndRestoreScreen(
             modifier = Modifier.padding(controller.scaffoldPadding),
             items = settingItems,
-            onBackStack = {
+            onBackStack =
+            {
                 controller.navController.popBackStack()
             },
             snackbarHostState = controller.snackBarHostState

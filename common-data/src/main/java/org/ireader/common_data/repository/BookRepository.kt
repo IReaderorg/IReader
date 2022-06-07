@@ -42,6 +42,7 @@ interface BookRepository {
     suspend fun deleteBookById(id: Long)
 
     suspend fun deleteAllBooks()
+    suspend fun deleteNotInLibraryBooks()
 
     /****************************************************/
 

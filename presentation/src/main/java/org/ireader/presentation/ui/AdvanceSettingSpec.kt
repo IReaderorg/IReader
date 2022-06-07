@@ -6,8 +6,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.collectLatest
 import org.ireader.common_extensions.getCacheSize
+import org.ireader.common_extensions.launchIO
 import org.ireader.common_resources.UiEvent
 import org.ireader.common_resources.UiText
 import org.ireader.components.components.Components
@@ -61,6 +63,18 @@ object AdvanceSettingSpec : ScreenSpec {
                     vm.showSnackBar(
                         UiText.StringResource(R.string.database_was_cleared)
                     )
+                }
+            ),
+            Components.Row(
+                title = stringResource(id = R.string.clear_not_in_library_books),
+                onClick = {
+                    vm.viewModelScope.launchIO {
+                        vm.deleteUseCase.deleteNotInLibraryBooks()
+                        vm.showSnackBar(
+                            UiText.StringResource(R.string.success)
+                        )
+                    }
+
                 }
             ),
             Components.Row(

@@ -45,9 +45,11 @@ dependencyResolutionManagement {
         mavenCentral()
         google()
         maven(url = "https://maven.pkg.jetbrains.space/public/p/compose/dev")
-        maven(url = "https://jitpack.io")
         maven(url = "https://oss.sonatype.org/content/repositories/snapshots/")
         maven(url = "https://s01.oss.sonatype.org/content/repositories/snapshots/")
+
+        maven(url = "https://jitpack.io")
+        maven(url ="https://github.com/psiegman/mvn-repo/raw/master/releases")
     }
     versionCatalogs {
         create("compose") {
@@ -71,3 +73,4 @@ dependencyResolutionManagement {
 
 
 
+include(":epub")

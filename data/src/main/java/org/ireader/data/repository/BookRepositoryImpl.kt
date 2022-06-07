@@ -52,6 +52,10 @@ class BookRepositoryImpl(
         return bookDao.deleteAllBook()
     }
 
+    override suspend fun deleteNotInLibraryBooks() {
+        return bookDao.deleteNotInLibraryBooks()
+    }
+
     override suspend fun findBookByKey(key: String): org.ireader.common_models.entities.Book? {
         return bookDao.findBookByKey(key = key)
     }

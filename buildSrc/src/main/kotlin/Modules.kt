@@ -27,5 +27,6 @@ object Modules {
     const val uiComponents = ":ui-components"
     const val uiImageLoader = ":ui-image-loader"
     const val commonExtensions = ":common-extensions"
+    const val epub = ":epub"
 
 }

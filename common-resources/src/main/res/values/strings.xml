@@ -42,6 +42,7 @@
     <string name="loading">Loading</string>
     <string name="error">Error</string>
     <string name="refresh">Refresh</string>
+    <string name="share">Share</string>
     <string name="toggle_search_mode_off">Toggle search mode off</string>
     <string name="recently">Recently</string>
     <string name="relative_time_today">Today</string>
@@ -142,6 +143,7 @@
 
     <string name="download">Download</string>
     <string name="bookmark">Bookmark</string>
+    <string name="wait">Please Wait</string>
     <string name="success">Success</string>
     <string name="aborted">Success</string>
     <string name="downloading">Downloading</string>
@@ -162,6 +164,15 @@
     <string name="mark_as_not_read">Mark as Not read</string>
     <string name="mark_previous_as_read">Mark Previous as read</string>
     <string name="return_to_previous_screen">Return to previous screen</string>
+
+
+    <string name="title">Title</string>
+    <string name="last_read">Last Read</string>
+    <string name="last_update">Last Updated</string>
+    <string name="date_added">Date Added</string>
+    <string name="date_fetched">Date Fetched</string>
+    <string name="total_chapter">Total Chapters</string>
+    <string name="source">Source</string>
 
 
 
@@ -271,12 +282,14 @@
     <string name="backup">Backup</string>
     <string name="backup_and_restore">Backup and restore</string>
     <string name="restore">Restore</string>
-    <string name="import_epub">Import Epub</string>
+    <string name="import_epub_first_mode">Import Epub First Method</string>
+    <string name="import_epub_second_mode">Import Epub Second Method</string>
     <string name="data">Data</string>
     <string name="chapters_was_cleared">Chapters was cleared</string>
     <string name="database_was_cleared">Database was cleared.</string>
     <string name="clear_all_chapters">Clear All Chapters</string>
     <string name="clear_all_database">Clear All Database</string>
+    <string name="clear_not_in_library_books">Clear All not in library books</string>
     <string name="clear_all_cover_cache">Clear All Cover Cache</string>
     <string name="clear_all_cache">Clear All Cache</string>
     <string name="unlock_app">Unlock</string>

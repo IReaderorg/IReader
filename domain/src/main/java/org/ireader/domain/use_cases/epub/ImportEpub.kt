@@ -9,7 +9,7 @@
 //import org.ireader.common_models.entities.Book
 //import org.ireader.common_models.entities.Chapter
 //import org.ireader.core_api.source.LocalSource
-//import org.ireader.domain.use_cases.epub.epup_parser.model.EpubBook
+//import ir.kazemcodes.epub.model.EpubBook
 //import java.io.File
 //import javax.inject.Inject
 //

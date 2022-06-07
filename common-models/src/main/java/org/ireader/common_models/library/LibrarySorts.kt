@@ -1,5 +1,8 @@
 package org.ireader.common_models.library
 
+import org.ireader.common_models.R
+import org.ireader.common_resources.UiText
+
 data class LibrarySort(val type: Type, val isAscending: Boolean) {
 
     enum class Type {
@@ -11,7 +14,24 @@ data class LibrarySort(val type: Type, val isAscending: Boolean) {
         DateFetched,
         TotalChapters,
         Source;
+
+        companion object {
+            fun name(type: Type) : UiText {
+               return when(type) {
+                    Type.DateFetched -> UiText.StringResource(R.string.date_fetched)
+                    Type.DateAdded -> UiText.StringResource(R.string.date_added)
+                    Type.Title -> UiText.StringResource(R.string.title)
+                    Type.Unread -> UiText.StringResource(R.string.unread)
+                    Type.Source -> UiText.StringResource(R.string.source)
+                    Type.TotalChapters -> UiText.StringResource(R.string.total_chapter)
+                    Type.LastRead -> UiText.StringResource(R.string.last_read)
+                    Type.LastUpdated -> UiText.StringResource(R.string.last_update)
+                }
+            }
+        }
+
     }
+
 
     companion object {
         val types = Type.values()

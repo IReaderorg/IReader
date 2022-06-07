@@ -18,6 +18,13 @@ android {
 
 dependencies {
 
+    implementation("nl.siegmann.epublib:epublib-core:3.1") {
+        exclude(group="org.slf4j")
+        exclude(group="xmlpull")
+    }
+    implementation("org.slf4j:slf4j-android:1.7.25")
+
+
     implementation(project(Modules.core))
     implementation(project(Modules.coreUi))
     implementation(project(Modules.commonData))
@@ -27,6 +34,7 @@ dependencies {
     implementation(project(Modules.coreCatalogs))
 
     implementation(project(Modules.coreApi))
+    implementation(project(Modules.epub))
     implementation(androidx.media)
     implementation(kotlinx.serialization.protobuf)
     implementation(kotlinx.datetime)

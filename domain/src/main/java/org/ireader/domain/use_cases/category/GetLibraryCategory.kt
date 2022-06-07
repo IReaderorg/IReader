@@ -14,20 +14,17 @@ class CategoriesUseCases @Inject internal constructor(
     private val repo : CategoryRepository,
     private val bookCategoryRepository : BookCategoryRepository,
 ) {
-    private val systemCategories = listOf<Category>(
-        Category(id = Category.ALL_ID, "", Category.ALL_ID.toInt(), 0, 0),
-        Category(id = Category.UNCATEGORIZED_ID, "", Category.UNCATEGORIZED_ID.toInt(), 0, 0),
-    )
+
     suspend fun await(): List<CategoryWithCount> {
         return repo.findAll()
     }
+    val systemCategories = listOf<Category>(
+        Category(id = Category.ALL_ID, "", Category.ALL_ID.toInt(), 0, 0),
+        Category(id = Category.UNCATEGORIZED_ID, "", Category.UNCATEGORIZED_ID.toInt(), 0, 0),
+    )
 
     fun subscribe(withAllCategory: Boolean): Flow<List<CategoryWithCount>> {
-        return repo.subscribeAll()
-            .map { categories ->
-//                if (!categories.map { it.id }.contains(-1)) {
-//                    repo.insertAll(systemCategories)
-//                }
+        return repo.subscribeAll().map { categories ->
                 categories.mapNotNull { categoryAndCount ->
                     val (category, count) = categoryAndCount
                     when (category.id) {

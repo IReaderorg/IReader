@@ -15,7 +15,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AdvanceSettingViewModel @Inject constructor(
-    private val deleteUseCase: DeleteUseCase,
+    val deleteUseCase: DeleteUseCase,
     private val prefUseCases: ReaderPrefUseCases,
     val coverCache: CoverCache
 

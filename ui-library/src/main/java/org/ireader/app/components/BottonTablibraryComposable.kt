@@ -34,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
@@ -213,7 +214,9 @@ private fun LazyListScope.SortPage(
     sorting: LibrarySort,
     onClick: (LibrarySort.Type) -> Unit
 ) {
+
     items(LibrarySort.types) { type ->
+        val context = LocalContext.current
         ClickableRow(onClick = { onClick(type) }) {
             val iconModifier = Modifier.requiredWidth(56.dp)
             if (sorting.type == type) {
@@ -231,7 +234,7 @@ private fun LazyListScope.SortPage(
             } else {
                 Spacer(iconModifier)
             }
-            Text(type.name)
+            Text(LibrarySort.Type.name(type).asString(context = context))
         }
     }
 }

@@ -4,11 +4,12 @@ buildscript {
     repositories {
         mavenCentral()
         google()
-        jcenter()
         maven("https://plugins.gradle.org/m2/")
         maven("https://oss.sonatype.org/content/repositories/snapshots/")
         maven("https://s01.oss.sonatype.org/content/repositories/snapshots/")
         gradlePluginPortal()
+        maven(url = "https://jitpack.io")
+        maven(url ="https://github.com/psiegman/mvn-repo/raw/master/releases")
     }
     dependencies {
         classpath(libs.gradle.tools)
@@ -28,6 +29,8 @@ plugins {
     id("com.autonomousapps.dependency-analysis") version "1.3.0"
     id("com.github.ben-manes.versions") version "0.42.0"
     id("com.diffplug.spotless") version "6.6.1"
+    id("com.android.library") version "7.2.1" apply false
+    id("org.jetbrains.kotlin.android") version "1.6.21" apply false
 }
 
 

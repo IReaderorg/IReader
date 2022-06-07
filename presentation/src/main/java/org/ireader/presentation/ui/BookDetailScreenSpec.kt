@@ -1,5 +1,8 @@
 package org.ireader.presentation.ui
 
+import android.app.Activity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -14,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavDeepLink
 import androidx.navigation.navDeepLink
@@ -24,12 +28,15 @@ import org.ireader.bookDetails.components.BookDetailScreenBottomBar
 import org.ireader.bookDetails.components.ChapterCommandBottomSheet
 import org.ireader.bookDetails.viewmodel.BookDetailViewModel
 import org.ireader.common_extensions.async.viewModelIOCoroutine
+import org.ireader.common_extensions.findComponentActivity
+import org.ireader.common_extensions.launchIO
 import org.ireader.common_models.entities.Book
 import org.ireader.common_resources.LAST_CHAPTER
 import org.ireader.common_resources.UiText
 import org.ireader.core_api.source.CatalogSource
 import org.ireader.core_api.source.HttpSource
 import org.ireader.domain.ui.NavigationArgs
+import org.ireader.presentation.R
 
 object BookDetailScreenSpec : ScreenSpec {
 
@@ -68,6 +75,24 @@ object BookDetailScreenSpec : ScreenSpec {
         val catalog = vm.catalogSource
         val book = vm.book
         val context = LocalContext.current
+        val onShare =
+            rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultIntent ->
+                if (resultIntent.resultCode == Activity.RESULT_OK && resultIntent.data != null) {
+                    val uri = resultIntent.data!!.data!!
+                    context.findComponentActivity()?.lifecycleScope?.launchIO {
+                        try {
+                            vm.book?.let {
+                                vm.showSnackBar(UiText.StringResource(R.string.wait))
+                                vm.createEpub(it, uri, context)
+                                vm.showSnackBar(UiText.StringResource(R.string.success))
+                            }
+                        }catch (e:Exception) {
+                            vm.showSnackBar(UiText.ExceptionString(e))
+                        }
+
+                    }
+                }
+            }
         BookDetailTopAppBar(
             onWebView = {
                 if (source != null && source is HttpSource && book != null)
@@ -96,6 +121,13 @@ object BookDetailScreenSpec : ScreenSpec {
                 scope.launch {
                     controller.sheetState.show()
                 }
+            },
+            onShare = {
+                book?.let { book ->
+                    vm.onEpubCreateRequested(book) {
+                        onShare.launch(it)
+                    }
+                }
             }
         )
     }
@@ -111,7 +143,7 @@ object BookDetailScreenSpec : ScreenSpec {
         val book = vm.book
         val catalog = vm.catalogSource
         val scope = rememberCoroutineScope()
-        val context= LocalContext.current
+        val context = LocalContext.current
 
         AnimatedVisibility(
             visible = true,
@@ -222,6 +254,20 @@ object BookDetailScreenSpec : ScreenSpec {
         val catalog = state.catalogSource
         val scope = rememberCoroutineScope()
 
+//        LaunchedEffect(key1 = true) {
+//            vm.eventFlow.collectLatest { event ->
+//                when (event) {
+//                    is UiEvent.ShowSnackbar -> {
+//                        controller.snackBarHostState.showSnackbar(
+//                            event.uiText.asString(context)
+//                        )
+//                    }
+//                    else -> {}
+//                }
+//            }
+//        }
+
+
         BookDetailScreen(
             modifier = Modifier.padding(bottom = controller.scaffoldPadding.calculateBottomPadding()),
             onSummaryExpand = {
@@ -242,7 +288,7 @@ object BookDetailScreenSpec : ScreenSpec {
                     )
                 }
             },
-            book = book?: Book(key = "", sourceId = 0, title = ""),
+            book = book ?: Book(key = "", sourceId = 0, title = ""),
             detailState = vm,
             onTitle = {
                 try {
