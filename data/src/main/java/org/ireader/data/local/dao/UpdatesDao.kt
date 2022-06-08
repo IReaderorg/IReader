@@ -28,6 +28,8 @@ interface UpdatesDao : BaseDao<org.ireader.common_models.entities.Update> {
         FROM updates
          JOIN library ON library.id == updates.bookId 
          JOIN chapter ON chapter.id == updates.chapterId
+         GROUP BY chapter.id 
+         ORDER BY chapter.id DESC
 
     """
     )

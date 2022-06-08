@@ -113,7 +113,7 @@ class LibraryUpdatesService @AssistedInject constructor(
                                 )
                             )
                             updatesUseCase(
-                                newChapters.reversed().mapIndexed { index, chapter ->
+                                newChapters.mapIndexed { index, chapter ->
                                     Update(
                                         chapterId = chapterIds[index],
                                         bookId = chapter.bookId,
