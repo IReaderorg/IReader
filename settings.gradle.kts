@@ -70,7 +70,3 @@ dependencyResolutionManagement {
 
     }
 }
-
-
-
-include(":epub")

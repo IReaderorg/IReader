@@ -13,8 +13,12 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import org.ireader.common_models.entities.BookItem
 import org.ireader.common_resources.UiText
@@ -57,9 +61,16 @@ fun CompactGridLayoutComposable(
                     key = { index ->
                     books[index].id
                 },
+
                     contentType = { "books"  }) { index ->
+                    val height = remember {
+                        mutableStateOf(IntSize(0,0))
+                    }
+
                     BookImage(
-                        modifier = Modifier.animateItemPlacement(),
+                        modifier = Modifier.animateItemPlacement().onGloballyPositioned {
+                            height.value = it.size
+                        },
                         onClick = { onClick(books[index]) },
                         book = books[index],
                         ratio = 6f / 9f,
@@ -67,7 +78,7 @@ fun CompactGridLayoutComposable(
                         onLongClick = { onLongClick(books[index]) },
                     ) {
                         if (showGoToLastChapterBadge) {
-                            GoToLastReadComposable(onClick = { goToLatestChapter(books[index]) })
+                            GoToLastReadComposable(onClick = { goToLatestChapter(books[index]) }, size = (height.value.height / 20).dp)
                         }
                         if (showUnreadBadge || showUnreadBadge) {
                             LibraryBadges(

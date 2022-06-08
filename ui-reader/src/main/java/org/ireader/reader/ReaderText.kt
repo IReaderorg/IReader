@@ -89,78 +89,80 @@ fun ReaderText(
         val maxHeight = remember {
             constraints.maxHeight.toFloat()
         }
-        MultiSwipeRefresh(
-            modifier = Modifier.fillMaxSize(),
-            state = swipeState,
-            indicators = listOf(
-                ISwipeRefreshIndicator(
-                    (scrollState.value == 0 && vm.readingMode.value == ReadingMode.Page) || (vm.readingMode.value == ReadingMode.Continues && lazyListState.firstVisibleItemScrollOffset == 0),
-                    alignment = Alignment.TopCenter,
-                    indicator = { _, _ ->
-                        ArrowIndicator(
-                            icon = Icons.Default.KeyboardArrowUp,
-                            swipeRefreshState = swipeState,
-                            refreshTriggerDistance = 80.dp,
-                            color = vm.textColor.value
-                        )
-                    }, onRefresh = {
-                        onPrev()
-                    }
-                ),
-                ISwipeRefreshIndicator(
-                    (scrollState.value != 0 && vm.readingMode.value == ReadingMode.Page) || (vm.readingMode.value == ReadingMode.Continues && lazyListState.firstVisibleItemScrollOffset != 0),
-                    alignment = Alignment.BottomCenter,
-                    onRefresh = {
-                        onNext()
-                    },
-                    indicator = { _, _ ->
-                        ArrowIndicator(
-                            icon = Icons.Default.KeyboardArrowDown,
-                            swipeRefreshState = swipeState,
-                            refreshTriggerDistance = 80.dp,
-                            color = vm.textColor.value
-                        )
-                    }
-                ),
-            ),
-        ) {
-            when (vm.readingMode.value) {
-                ReadingMode.Page -> {
-                    PagedReaderText(
-                        interactionSource = interactionSource,
-                        scrollState = scrollState,
-                        vm = vm,
-                        maxHeight = maxHeight,
-                        onNext = onNext,
-                        onPrev = onPrev,
-                        toggleReaderMode = toggleReaderMode
-                    )
-                }
-                ReadingMode.Continues -> {
-                    ContinuesReaderPage(
-                        interactionSource = interactionSource,
-                        scrollState = lazyListState,
-                        vm = vm,
-                        maxHeight = maxHeight,
-                        onNext = onNext,
-                        onPrev = onPrev,
-                        toggleReaderMode = toggleReaderMode,
-                        onChapterShown = onChapterShown
-                    )
-                }
-            }
-            ReaderHorizontalScreen(
-                interactionSource = interactionSource,
-                scrollState = scrollState,
-                vm = vm,
-                maxHeight = maxHeight,
-                onNext = onNext,
-                onPrev = onPrev,
-                toggleReaderMode = toggleReaderMode
-            )
 
+
+            MultiSwipeRefresh(
+                modifier = Modifier.fillMaxSize(),
+                state = swipeState,
+                indicators = listOf(
+                    ISwipeRefreshIndicator(
+                        (scrollState.value == 0 && vm.readingMode.value == ReadingMode.Page) || (vm.readingMode.value == ReadingMode.Continues && lazyListState.firstVisibleItemScrollOffset == 0),
+                        alignment = Alignment.TopCenter,
+                        indicator = { _, _ ->
+                            ArrowIndicator(
+                                icon = Icons.Default.KeyboardArrowUp,
+                                swipeRefreshState = swipeState,
+                                refreshTriggerDistance = 80.dp,
+                                color = vm.textColor.value
+                            )
+                        }, onRefresh = {
+                            onPrev()
+                        }
+                    ),
+                    ISwipeRefreshIndicator(
+                        (scrollState.value != 0 && vm.readingMode.value == ReadingMode.Page) || (vm.readingMode.value == ReadingMode.Continues && lazyListState.firstVisibleItemScrollOffset != 0),
+                        alignment = Alignment.BottomCenter,
+                        onRefresh = {
+                            onNext()
+                        },
+                        indicator = { _, _ ->
+                            ArrowIndicator(
+                                icon = Icons.Default.KeyboardArrowDown,
+                                swipeRefreshState = swipeState,
+                                refreshTriggerDistance = 80.dp,
+                                color = vm.textColor.value
+                            )
+                        }
+                    ),
+                ),
+            ) {
+                when (vm.readingMode.value) {
+                    ReadingMode.Page -> {
+                        PagedReaderText(
+                            interactionSource = interactionSource,
+                            scrollState = scrollState,
+                            vm = vm,
+                            maxHeight = maxHeight,
+                            onNext = onNext,
+                            onPrev = onPrev,
+                            toggleReaderMode = toggleReaderMode
+                        )
+                    }
+                    ReadingMode.Continues -> {
+                        ContinuesReaderPage(
+                            interactionSource = interactionSource,
+                            scrollState = lazyListState,
+                            vm = vm,
+                            maxHeight = maxHeight,
+                            onNext = onNext,
+                            onPrev = onPrev,
+                            toggleReaderMode = toggleReaderMode,
+                            onChapterShown = onChapterShown
+                        )
+                    }
+                }
+                ReaderHorizontalScreen(
+                    interactionSource = interactionSource,
+                    scrollState = scrollState,
+                    vm = vm,
+                    maxHeight = maxHeight,
+                    onNext = onNext,
+                    onPrev = onPrev,
+                    toggleReaderMode = toggleReaderMode
+                )
+
+            }
         }
-    }
 }
 
 @Composable
@@ -202,7 +204,9 @@ private fun PagedReaderText(
             isDraggable = vm.isScrollIndicatorDraggable.value,
             rightSide = vm.scrollIndicatorAlignment.value == PreferenceAlignment.Right
         ) {
-            Column(modifier = Modifier.fillMaxSize().verticalScroll(scrollState)) {
+            Column(modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState)) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -254,13 +258,16 @@ private fun ContinuesReaderPage(
         lastChapterId?.let { onChapterShown(it) }
     }
     LaunchedEffect(key1 = scrollState.layoutInfo.visibleItemsInfo.firstOrNull()?.key) {
-        vm.chapterShell.firstOrNull { it.id == scrollState.layoutInfo.visibleItemsInfo.firstOrNull()?.key.toString().substringAfter("-").toLong() }
-            ?.let { chapter ->
-                if (chapter.id != lastChapterId?.id) {
-                    lastChapterId = chapter
-                    Log.error { "UPDATE" }
+        runCatching {
+            vm.chapterShell.firstOrNull { it.id == scrollState.layoutInfo.visibleItemsInfo.firstOrNull()?.key.toString().substringAfter("-").toLong() }
+                ?.let { chapter ->
+                    if (chapter.id != lastChapterId?.id) {
+                        lastChapterId = chapter
+                        Log.error { "UPDATE" }
+                    }
                 }
-            }
+        }
+
 
     }
     val items by remember {
@@ -338,7 +345,9 @@ fun ContinuousReaderPageWithScrollState(
         }
     }
     Column(
-        modifier = modifier.fillMaxSize().verticalScroll(scrollState),
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(scrollState),
     ) {
         vm.chapterShell.forEachIndexed { index, chapter ->
             Column(

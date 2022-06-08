@@ -34,7 +34,7 @@ dependencies {
     implementation(project(Modules.coreCatalogs))
 
     implementation(project(Modules.coreApi))
-    implementation(project(Modules.epub))
+
     implementation(androidx.media)
     implementation(kotlinx.serialization.protobuf)
     implementation(kotlinx.datetime)

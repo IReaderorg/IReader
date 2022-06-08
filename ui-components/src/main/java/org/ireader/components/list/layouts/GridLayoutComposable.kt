@@ -9,8 +9,12 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import org.ireader.common_models.entities.BookItem
 import org.ireader.common_resources.UiText
@@ -31,8 +35,8 @@ fun GridLayoutComposable(
     showGoToLastChapterBadge: Boolean = false,
     showUnreadBadge: Boolean = false,
     showReadBadge: Boolean = false,
-    showInLibraryBadge:Boolean = false,
-    columns:Int =  3 ,
+    showInLibraryBadge: Boolean = false,
+    columns: Int = 3,
 ) {
     val cells = if (columns > 1) {
         GridCells.Fixed(columns)
@@ -52,16 +56,27 @@ fun GridLayoutComposable(
                     },
                     contentType = { "books" },
                 ) { book ->
+                    val height = remember {
+                        mutableStateOf(IntSize(0,0))
+                    }
 
+                    org.ireader.core_api.log.Log.error { height.toString() }
                     BookImage(
+                        modifier.onGloballyPositioned {
+                          height.value = it.size
+                        },
                         onClick = { onClick(book) },
                         book = book,
                         ratio = 6f / 10f,
                         selected = book.id in selection,
                         onLongClick = { onLongClick(book) },
                     ) {
+
                         if (showGoToLastChapterBadge) {
-                            GoToLastReadComposable(onClick = { goToLatestChapter(book) })
+                            GoToLastReadComposable(
+                                onClick = { goToLatestChapter(book) },
+                                size = (height.value.height / 20).dp
+                            )
                         }
                         if (showUnreadBadge || showUnreadBadge) {
                             LibraryBadges(
@@ -75,7 +90,9 @@ fun GridLayoutComposable(
                         }
                     }
                 }
+
             }
+
         )
         if (isLoading && scrollState.isScrolledToTheEnd()) {
             CircularProgressIndicator(

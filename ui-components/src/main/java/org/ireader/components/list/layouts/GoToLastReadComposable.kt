@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.ireader.common_resources.UiText
 import org.ireader.components.reusable_composable.AppIconButton
@@ -26,13 +27,13 @@ import org.ireader.components.reusable_composable.SuperSmallTextComposable
 import org.ireader.ui_components.R
 
 @Composable
-fun GoToLastReadComposable(modifier: Modifier = Modifier,onClick: () -> Unit) {
+fun GoToLastReadComposable(modifier: Modifier = Modifier,size: Dp = 40.dp,onClick: () -> Unit) {
     Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.TopEnd) {
         OutlinedButton(
             onClick = {},
             modifier = Modifier
                 .padding(5.dp)
-                .size(40.dp),
+                .size( size),
             shape = CircleShape,
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.background.copy(alpha = .3f)),
             contentPadding = PaddingValues(0.dp), // avoid the little icon

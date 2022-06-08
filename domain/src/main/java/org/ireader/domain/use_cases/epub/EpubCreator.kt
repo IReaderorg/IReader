@@ -33,7 +33,7 @@ class EpubCreator @Inject constructor(
         }
 
         chapters.forEachIndexed { index, chapter ->
-            val resource : Resource = Resource("$index-${chapter.name}",chapter.content.map { "<p>$it</p>" }.joinToString("\n").toByteArray(),"${chapter.name}-$index.html", MediatypeService.XHTML)
+            val resource : Resource = Resource("$index",chapter.content.map { "<p>$it</p>" }.joinToString("\n").toByteArray(),"${chapter.name}-$index.html", MediatypeService.XHTML)
             epubBook.addSection(chapter.name,resource)
         }
         writeToUri(uri,context,epubBook)

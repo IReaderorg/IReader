@@ -25,8 +25,6 @@ class AdvanceSettingViewModel @Inject constructor(
     private val _state = mutableStateOf(SettingState())
     val state: State<SettingState> = _state
 
-    val importMode = mutableStateOf(ImportMode.JavaMode)
-
     fun deleteAllDatabase() {
         viewModelScope.launchIO {
             deleteUseCase.deleteAllBook()
@@ -67,10 +65,4 @@ class AdvanceSettingViewModel @Inject constructor(
         onStart(intent)
     }
 
-}
-
-
-enum class ImportMode {
-    JavaMode,
-    KotlinMode
 }

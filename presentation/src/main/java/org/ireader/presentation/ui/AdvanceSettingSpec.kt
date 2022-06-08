@@ -11,6 +11,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.collectLatest
 import org.ireader.common_extensions.findComponentActivity
@@ -23,12 +24,12 @@ import org.ireader.components.components.SetupSettingComponents
 import org.ireader.components.components.TitleToolbar
 import org.ireader.core_api.log.Log
 import org.ireader.settings.setting.AdvanceSettingViewModel
-import org.ireader.settings.setting.ImportMode
 import org.ireader.ui_settings.R
 
 object AdvanceSettingSpec : ScreenSpec {
 
     override val navHostRoute: String = "advance_setting_route"
+
     @ExperimentalMaterial3Api
     @Composable
     override fun TopBar(
@@ -36,7 +37,7 @@ object AdvanceSettingSpec : ScreenSpec {
     ) {
         TitleToolbar(
             title = stringResource(R.string.advance_setting),
-            navController =controller. navController
+            navController = controller.navController
         )
     }
 
@@ -44,7 +45,7 @@ object AdvanceSettingSpec : ScreenSpec {
     override fun Content(
         controller: ScreenSpec.Controller
     ) {
-        val vm: AdvanceSettingViewModel = hiltViewModel(   controller.navBackStackEntry)
+        val vm: AdvanceSettingViewModel = hiltViewModel(controller.navBackStackEntry)
         val context = LocalContext.current
         val snackBarHostState = controller.snackBarHostState
         val scope = rememberCoroutineScope()
@@ -63,20 +64,11 @@ object AdvanceSettingSpec : ScreenSpec {
         val onEpub =
             rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultIntent ->
                 if (resultIntent.resultCode == Activity.RESULT_OK && resultIntent.data != null) {
-
                     val uri = resultIntent.data!!.data!!
-                    scope.launchIO {
+                    context.findComponentActivity()?.lifecycleScope?.launchIO {
                         try {
-                            when (vm.importMode.value) {
-                                ImportMode.JavaMode -> {
-                                        vm.importEpub.parseUsingJavaMethod(uri, context)
-                                        vm.showSnackBar(UiText.StringResource(R.string.success))
-                                }
-                                ImportMode.KotlinMode -> {
-                                    vm.importEpub.parseUsingKotlin(uri, context)
-                                    vm.showSnackBar(UiText.StringResource(R.string.success))
-                                }
-                            }
+                            vm.importEpub.parse(uri, context)
+                            vm.showSnackBar(UiText.StringResource(R.string.success))
                         } catch (e: Throwable) {
                             Log.error(e, "epub parser throws an exception")
                             vm.showSnackBar(UiText.ExceptionString(e))
@@ -84,7 +76,6 @@ object AdvanceSettingSpec : ScreenSpec {
                     }
                 }
             }
-
 
         val items = listOf<Components>(
             Components.Header(stringResource(R.string.data)),
@@ -142,31 +133,18 @@ object AdvanceSettingSpec : ScreenSpec {
             ),
             Components.Header(stringResource(R.string.epub)),
             Components.Row(
-               title =  stringResource(id = R.string.import_epub_first_mode),
-                onClick = {
-                    context.findComponentActivity()
-                        ?.let { activity ->
-                            vm.importMode.value = ImportMode.JavaMode
-                            vm.onEpubImportRequested { intent: Intent ->
-                                onEpub.launch(intent)
-                            }
-                        }
-                }
-            ),
-            Components.Row(
-                title =  stringResource(id = R.string.import_epub_second_mode),
+                title = stringResource(id = R.string.import_epub),
                 onClick = {
                     context.findComponentActivity()
                         ?.let { activity ->
                             vm.onEpubImportRequested { intent: Intent ->
-                                vm.importMode.value = ImportMode.KotlinMode
                                 onEpub.launch(intent)
                             }
                         }
                 }
             ),
 
-        )
+            )
 
         SetupSettingComponents(scaffoldPadding = controller.scaffoldPadding, items = items)
 
@@ -179,6 +157,5 @@ object AdvanceSettingSpec : ScreenSpec {
 //                snackBarHostState = controller.snackBarHostState
 //            )
 //        }
-
     }
 }

@@ -17,17 +17,19 @@ class LocalSource: Source {
         const val SOURCE_ID = -200L
     }
     override suspend fun getMangaDetails(manga: MangaInfo, commands: List<Command<*>>): MangaInfo {
-        throw Exception("this is a local source")
+        throw LocalSourceException()
     }
 
     override suspend fun getChapterList(
         manga: MangaInfo,
         commands: List<Command<*>>
     ): List<ChapterInfo> {
-        throw Exception("this is a local source")
+        throw LocalSourceException()
     }
 
     override suspend fun getPageList(chapter: ChapterInfo, commands: List<Command<*>>): List<Page> {
-        throw Exception("this is a local source")
+        throw LocalSourceException()
     }
 }
+
+class LocalSourceException : Exception("this is a local source")

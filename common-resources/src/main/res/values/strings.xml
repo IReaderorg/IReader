@@ -292,8 +292,7 @@
     <string name="backup">Backup</string>
     <string name="backup_and_restore">Backup and restore</string>
     <string name="restore">Restore</string>
-    <string name="import_epub_first_mode">Import Epub First Method</string>
-    <string name="import_epub_second_mode">Import Epub Second Method</string>
+    <string name="import_epub">Import Epub</string>
     <string name="data">Data</string>
     <string name="chapters_was_cleared">Chapters was cleared</string>
     <string name="database_was_cleared">Database was cleared.</string>

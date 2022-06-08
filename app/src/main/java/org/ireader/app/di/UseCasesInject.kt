@@ -6,7 +6,6 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import ir.kazemcodes.epub.epubparser.EpubParser
 import org.ireader.common_data.repository.BookCategoryRepository
 import org.ireader.common_data.repository.BookRepository
 import org.ireader.common_data.repository.CategoryRepository
@@ -309,11 +308,7 @@ class UseCasesInject {
     }
 
 
-    @Provides
-    fun providesEpubParser(
-    ): EpubParser {
-        return EpubParser()
-    }
+
 
     @Provides
     fun providesEpubCreator(

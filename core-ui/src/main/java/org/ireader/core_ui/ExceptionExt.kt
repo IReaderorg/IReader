@@ -6,6 +6,7 @@ import org.ireader.common_resources.UiText
 import org.ireader.core.exceptions.EmptyQuery
 import org.ireader.core.exceptions.SourceNotFoundException
 import org.ireader.core_api.log.Log
+import org.ireader.core_api.source.LocalSourceException
 import java.io.IOException
 import java.net.SocketTimeoutException
 import java.util.concurrent.TimeoutException
@@ -39,6 +40,7 @@ fun exceptionHandler(e: Throwable): UiText? {
             UiText.StringResource(org.ireader.common_resources.R.string.catalog_not_found_error)
         }
         is EmptyQuery -> UiText.StringResource(R.string.query_must_not_be_empty)
+        is LocalSourceException -> null
 
         is SourceNotFoundException -> UiText.StringResource(R.string.the_source_is_not_found)
         else -> {
