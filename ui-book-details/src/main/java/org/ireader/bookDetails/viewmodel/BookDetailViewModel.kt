@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.ireader.common_extensions.async.ApplicationScope
 import org.ireader.common_extensions.async.withIOContext
-import org.ireader.common_extensions.launchIO
+import org.ireader.common_extensions.withUIContext
 import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.common_resources.UiText
@@ -51,7 +51,6 @@ class BookDetailViewModel @Inject constructor(
     var getChapterDetailJob: Job? = null
 
     var initBooks = false
-
 
     init {
         val bookId = savedStateHandle.get<Long>("bookId")
@@ -100,9 +99,10 @@ class BookDetailViewModel @Inject constructor(
      */
     private fun subscribeChapters(bookId: Long) {
         getChapterUseCase.subscribeChaptersByBookId(bookId).onEach { snapshot ->
-                chapters = snapshot
+            chapters = snapshot
         }.launchIn(viewModelScope)
     }
+
     private val reservedChars = "|\\?*<\":>+[]/'"
     private fun sanitizeFilename(name: String): String {
         var tempName = name
@@ -111,14 +111,16 @@ class BookDetailViewModel @Inject constructor(
         }
         return tempName.replace("  ", " ")
     }
-    fun onEpubCreateRequested(book: Book,onStart: (Intent) -> Unit) {
+
+    fun onEpubCreateRequested(book: Book, onStart: (Intent) -> Unit) {
         val mimeTypes = arrayOf("application/epub+zip")
         val fn = "${sanitizeFilename(book.title)}.epub"
         val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
             .addCategory(Intent.CATEGORY_OPENABLE)
             .setType("application/epub+zip")
             .putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
-            .putExtra(Intent.EXTRA_TITLE, fn
+            .putExtra(
+                Intent.EXTRA_TITLE, fn
             )
 
         onStart(intent)
@@ -132,14 +134,18 @@ class BookDetailViewModel @Inject constructor(
                 book = book,
                 catalog = source,
                 onError = { message ->
-                    toggleBookLoading(false)
-                    if (message != null) {
-                        Log.error { message.toString() }
-                        showSnackBar(message)
+                    withUIContext {
+                        toggleBookLoading(false)
+                        if (message != null) {
+                            Log.error { message.toString() }
+                            showSnackBar(message)
+                        }
                     }
                 },
                 onSuccess = { resultBook ->
-                    toggleBookLoading(false)
+                    withUIContext {
+                        toggleBookLoading(false)
+                    }
                     localInsertUseCases.updateBook.update(resultBook)
                 }
 
@@ -162,13 +168,16 @@ class BookDetailViewModel @Inject constructor(
                 onError = { message ->
                     Log.error { message.toString() }
                     showSnackBar(message)
-                    chapterIsLoading = false
+                    withUIContext {
+                        chapterIsLoading = false
+
+                    }
                 },
                 onSuccess = { result ->
-                    withIOContext {
-                        localInsertUseCases.insertChapters(result)
+                    localInsertUseCases.insertChapters(result)
+                    withUIContext {
+                        chapterIsLoading = false
                     }
-                    chapterIsLoading = false
                 },
                 commands = commands,
                 oldChapters = chapterState.chapters
@@ -178,16 +187,20 @@ class BookDetailViewModel @Inject constructor(
 
     fun toggleInLibrary(book: Book, context: Context) {
         this.inLibraryLoading = true
-        applicationScope.launchIO {
+        applicationScope.launch {
             if (!book.favorite) {
-                localInsertUseCases.updateBook.update(
-                    book.copy(
-                        favorite = true,
-                        dateAdded = Calendar.getInstance().timeInMillis,
+                withIOContext {
+                    localInsertUseCases.updateBook.update(
+                        book.copy(
+                            favorite = true,
+                            dateAdded = Calendar.getInstance().timeInMillis,
+                        )
                     )
-                )
+                }
             } else {
-                deleteUseCase.unFavoriteBook(listOf(book.id))
+                withIOContext {
+                    deleteUseCase.unFavoriteBook(listOf(book.id))
+                }
 //                localInsertUseCases.updateBook.update(
 //                    book.copy(
 //                        favorite = false,

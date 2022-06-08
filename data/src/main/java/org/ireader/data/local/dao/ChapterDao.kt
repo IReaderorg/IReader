@@ -25,7 +25,36 @@ interface ChapterDao : BaseDao<Chapter> {
     @Query("SELECT * FROM chapter")
     suspend fun findAllChapters(): List<org.ireader.common_models.entities.Chapter>
 
-
+    @Query(
+        """
+                SELECT chapter.*
+    FROM chapter
+    GROUP BY chapter.id
+    HAVING chapter.bookId = :bookId
+    ORDER BY
+    CASE
+      WHEN :sort = 'default' THEN id
+      WHEN :sort = 'by_name' THEN name
+      WHEN :sort = 'by_source' THEN sourceOrder
+      WHEN :sort = 'by_chapter_number' THEN number
+      WHEN :sort = 'date_fetched' THEN dateFetch
+      WHEN :sort = 'date_upload' THEN dateUpload
+      WHEN :sort = 'read' THEN read
+      WHEN :sort = 'bookmark' THEN bookmark
+    END,
+    CASE
+      WHEN :sort = 'defaultDesc' THEN id
+      WHEN :sort = 'by_nameDesc' THEN name
+      WHEN :sort = 'by_sourceDesc' THEN sourceOrder
+      WHEN :sort = 'by_chapter_numberDesc' THEN number
+      WHEN :sort = 'date_fetchedDesc' THEN dateFetch
+      WHEN :sort = 'date_uploadDesc' THEN dateUpload
+      WHEN :sort = 'readDesc' THEN read
+      WHEN :sort = 'bookmarkDesc' THEN bookmark
+    END DESC
+        """
+    )
+    fun subscribe(bookId: Long, sort: String) : Flow<List<Chapter>>
 
     @Query(
         """
@@ -59,7 +88,6 @@ interface ChapterDao : BaseDao<Chapter> {
         bookId: Long,
         isAsc: Boolean
     ): List<org.ireader.common_models.entities.Chapter>
-
 
     @Query(
         """SELECT * FROM chapter WHERE `key`= :key
@@ -139,6 +167,7 @@ interface ChapterDao : BaseDao<Chapter> {
 
     @Query("DELETE FROM chapter ")
     suspend fun deleteAllChapters()
+
     @Transaction
     suspend fun insertOrUpdate(objList: List<org.ireader.common_models.entities.Chapter>): List<Long> {
         val insertResult = insert(objList)
@@ -157,6 +186,7 @@ interface ChapterDao : BaseDao<Chapter> {
         if (!updateList.isEmpty()) update(updateList)
         return idList
     }
+
     @Transaction
     suspend fun insertOrUpdate(objList: org.ireader.common_models.entities.Chapter): Long {
         val objectToInsert = listOf(objList)
@@ -174,8 +204,6 @@ interface ChapterDao : BaseDao<Chapter> {
         }
 
         if (!updateList.isEmpty()) update(updateList)
-        return idList.firstOrNull()?:-1
+        return idList.firstOrNull() ?: -1
     }
-
-
 }

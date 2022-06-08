@@ -20,6 +20,11 @@ interface ChapterRepository {
 
     fun subscribeChaptersByBookId(
         bookId: Long,
+        sort: String,
+    ): Flow<List<Chapter>>
+
+    fun subscribeChaptersByBookId(
+        bookId: Long,
         isAsc: Boolean = true,
     ): Flow<List<Chapter>>
 

@@ -3,8 +3,11 @@ package org.ireader.chapterDetails.viewmodel
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,6 +18,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
+import org.ireader.chapterDetails.ChapterDisplayMode
+import org.ireader.chapterDetails.ChapterSort
+import org.ireader.chapterDetails.ChaptersFilters
+import org.ireader.chapterDetails.parameter
 import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.Chapter
 import org.ireader.common_resources.UiText
@@ -41,6 +48,9 @@ class ChapterDetailViewModel @Inject constructor(
     private val historyUseCase: HistoryUseCase,
     val uiPreferences: UiPreferences
 ) : BaseViewModel(), ChapterDetailState by state {
+    var filters = mutableStateOf<List<ChaptersFilters>>(ChaptersFilters.getDefault(true))
+    var sorting = mutableStateOf<ChapterSort>(ChapterSort.default)
+    var layout by mutableStateOf(ChapterDisplayMode.ChapterNumber)
 
     init {
         val sourceId = savedStateHandle.get<Long>(NavigationArgs.sourceId.name)
@@ -61,7 +71,6 @@ class ChapterDetailViewModel @Inject constructor(
             is ChapterDetailEvent.ToggleOrder -> {
                 this.chapters = this.chapters.reversed()
                 toggleAsc()
-                //book?.let { getLocalChaptersByPaging(isAsc = isAsc) }
             }
         }
     }
@@ -84,27 +93,60 @@ class ChapterDetailViewModel @Inject constructor(
             }
         }
     }
+
     @Composable
     fun getChapters(book: Book): State<List<Chapter>> {
         val scope = rememberCoroutineScope()
-        val unfiltered = remember(book.id, isAsc) {
+        val unfiltered = remember(book.id, sorting.value,filters.value) {
             getChapterUseCase.subscribeChaptersByBookId(
                 bookId = book.id,
-                isAsc = isAsc,
+                sort = sorting.value.parameter,
             ).shareIn(scope, SharingStarted.WhileSubscribed(1000), 1)
         }
 
-        return remember( state.query,book.id,isAsc) {
+        return remember(state.query, book.id, sorting.value,filters.value) {
             val query = state.query
             if (query.isNullOrBlank()) {
                 unfiltered
             } else {
-                unfiltered.map { mangas ->
-                    mangas.filter { it.name.contains(query, true) }
+                unfiltered.map { chapters ->
+                    chapters.filter { it.name.contains(query, true) }
+                }
+            }.map { it.filteredWith(filters.value) }.onEach {
+                state.chapters = it
+            }
+        }.collectAsState(emptyList())
+    }
+
+    private fun List<Chapter>.filteredWith(filters: List<ChaptersFilters>): List<Chapter> {
+        if (filters.isEmpty()) return this
+        val validFilters =
+            filters.filter { it.value == ChaptersFilters.Value.Included || it.value == ChaptersFilters.Value.Excluded }
+        var filteredList = this
+        for (filter in validFilters) {
+            val filterFn: (Chapter) -> Boolean = when (filter.type) {
+                ChaptersFilters.Type.Unread -> {
+                    {
+                        !it.read
+                    }
+                }
+                ChaptersFilters.Type.Bookmarked -> {
+                    { book -> book.bookmark }
+                }
+                ChaptersFilters.Type.Downloaded -> {
+                    {
+                        it.content.joinToString("").isNotBlank()
+                    }
                 }
             }
-                .onEach { state.chapters = it }
-        }.collectAsState(emptyList())
+            filteredList = when (filter.value) {
+                ChaptersFilters.Value.Included -> filter(filterFn)
+                ChaptersFilters.Value.Excluded -> filterNot(filterFn)
+                ChaptersFilters.Value.Missing -> this
+            }
+        }
+
+        return filteredList
     }
 
     fun autoSortChapterInDB() {
@@ -182,6 +224,33 @@ class ChapterDetailViewModel @Inject constructor(
     fun downloadChapters() {
         book?.let { book ->
             serviceUseCases.startDownloadServicesUseCase(chapterIds = this@ChapterDetailViewModel.selection.toLongArray())
+        }
+    }
+
+    fun toggleFilter(type: ChaptersFilters.Type) {
+        val newFilters = filters.value
+            .map { filterState ->
+                if (type == filterState.type) {
+                    ChaptersFilters(
+                        type, when (filterState.value) {
+                            ChaptersFilters.Value.Included -> ChaptersFilters.Value.Excluded
+                            ChaptersFilters.Value.Excluded -> ChaptersFilters.Value.Missing
+                            ChaptersFilters.Value.Missing -> ChaptersFilters.Value.Included
+                        }
+                    )
+                } else {
+                    filterState
+                }
+            }
+        this.filters.value = newFilters
+    }
+
+    fun toggleSort(type: ChapterSort.Type) {
+        val currentSort = sorting
+        sorting.value = if (type == currentSort.value.type) {
+            currentSort.value.copy(isAscending = !currentSort.value.isAscending)
+        } else {
+            currentSort.value.copy(type = type)
         }
     }
 }

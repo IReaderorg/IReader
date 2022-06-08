@@ -1,13 +1,19 @@
 package org.ireader.presentation.ui
 
+import android.app.Activity
+import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.collectLatest
+import org.ireader.common_extensions.findComponentActivity
 import org.ireader.common_extensions.getCacheSize
 import org.ireader.common_extensions.launchIO
 import org.ireader.common_resources.UiEvent
@@ -15,7 +21,9 @@ import org.ireader.common_resources.UiText
 import org.ireader.components.components.Components
 import org.ireader.components.components.SetupSettingComponents
 import org.ireader.components.components.TitleToolbar
+import org.ireader.core_api.log.Log
 import org.ireader.settings.setting.AdvanceSettingViewModel
+import org.ireader.settings.setting.ImportMode
 import org.ireader.ui_settings.R
 
 object AdvanceSettingSpec : ScreenSpec {
@@ -39,6 +47,7 @@ object AdvanceSettingSpec : ScreenSpec {
         val vm: AdvanceSettingViewModel = hiltViewModel(   controller.navBackStackEntry)
         val context = LocalContext.current
         val snackBarHostState = controller.snackBarHostState
+        val scope = rememberCoroutineScope()
         LaunchedEffect(key1 = true) {
 
             vm.eventFlow.collectLatest { event ->
@@ -51,7 +60,30 @@ object AdvanceSettingSpec : ScreenSpec {
                 }
             }
         }
+        val onEpub =
+            rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultIntent ->
+                if (resultIntent.resultCode == Activity.RESULT_OK && resultIntent.data != null) {
 
+                    val uri = resultIntent.data!!.data!!
+                    scope.launchIO {
+                        try {
+                            when (vm.importMode.value) {
+                                ImportMode.JavaMode -> {
+                                        vm.importEpub.parseUsingJavaMethod(uri, context)
+                                        vm.showSnackBar(UiText.StringResource(R.string.success))
+                                }
+                                ImportMode.KotlinMode -> {
+                                    vm.importEpub.parseUsingKotlin(uri, context)
+                                    vm.showSnackBar(UiText.StringResource(R.string.success))
+                                }
+                            }
+                        } catch (e: Throwable) {
+                            Log.error(e, "epub parser throws an exception")
+                            vm.showSnackBar(UiText.ExceptionString(e))
+                        }
+                    }
+                }
+            }
 
 
         val items = listOf<Components>(
@@ -108,6 +140,32 @@ object AdvanceSettingSpec : ScreenSpec {
                     vm.deleteDefaultSettings()
                 }
             ),
+            Components.Header(stringResource(R.string.epub)),
+            Components.Row(
+               title =  stringResource(id = R.string.import_epub_first_mode),
+                onClick = {
+                    context.findComponentActivity()
+                        ?.let { activity ->
+                            vm.importMode.value = ImportMode.JavaMode
+                            vm.onEpubImportRequested { intent: Intent ->
+                                onEpub.launch(intent)
+                            }
+                        }
+                }
+            ),
+            Components.Row(
+                title =  stringResource(id = R.string.import_epub_second_mode),
+                onClick = {
+                    context.findComponentActivity()
+                        ?.let { activity ->
+                            vm.onEpubImportRequested { intent: Intent ->
+                                vm.importMode.value = ImportMode.KotlinMode
+                                onEpub.launch(intent)
+                            }
+                        }
+                }
+            ),
+
         )
 
         SetupSettingComponents(scaffoldPadding = controller.scaffoldPadding, items = items)

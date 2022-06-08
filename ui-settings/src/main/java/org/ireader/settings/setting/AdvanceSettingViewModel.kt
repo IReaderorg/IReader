@@ -1,5 +1,6 @@
 package org.ireader.settings.setting
 
+import android.content.Intent
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
@@ -8,6 +9,7 @@ import org.ireader.common_extensions.launchIO
 import org.ireader.core_ui.theme.OrientationMode
 import org.ireader.core_ui.theme.Roboto
 import org.ireader.core_ui.viewmodel.BaseViewModel
+import org.ireader.domain.use_cases.epub.importer.ImportEpub
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.preferences.reader_preferences.ReaderPrefUseCases
 import org.ireader.image_loader.coil.cache.CoverCache
@@ -17,11 +19,13 @@ import javax.inject.Inject
 class AdvanceSettingViewModel @Inject constructor(
     val deleteUseCase: DeleteUseCase,
     private val prefUseCases: ReaderPrefUseCases,
-    val coverCache: CoverCache
-
-) : BaseViewModel() {
+    val coverCache: CoverCache,
+    val importEpub: ImportEpub,
+    ) : BaseViewModel() {
     private val _state = mutableStateOf(SettingState())
     val state: State<SettingState> = _state
+
+    val importMode = mutableStateOf(ImportMode.JavaMode)
 
     fun deleteAllDatabase() {
         viewModelScope.launchIO {
@@ -51,6 +55,22 @@ class AdvanceSettingViewModel @Inject constructor(
             prefUseCases.scrollIndicatorUseCase.saveWidth(0)
         }
     }
+    fun onEpubImportRequested(onStart: (Intent) -> Unit) {
+        val mimeTypes = arrayOf("application/epub+zip")
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+            .addCategory(Intent.CATEGORY_OPENABLE)
+            .setType("application/epub+zip")
+            .putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
+            .addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+
+        onStart(intent)
+    }
+
 }
 
 
+enum class ImportMode {
+    JavaMode,
+    KotlinMode
+}

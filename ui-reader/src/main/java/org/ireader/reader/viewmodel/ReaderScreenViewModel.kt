@@ -181,7 +181,7 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
         getChapterJob = viewModelScope.launch {
             getChapterUseCase.subscribeChaptersByBookId(
                 bookId = bookId,
-                isAsc = prefState.isAsc,
+                sort = if (prefState.isAsc) "default" else "defaultDesc",
             )
                 .collect {
                     stateChapters = it

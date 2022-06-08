@@ -94,6 +94,7 @@ fun ScreenContent() {
 
     val vm: ScreenContentViewModel = hiltViewModel()
     val (requestedHideBottomNav, requestHideBottomNav) = remember { mutableStateOf(false) }
+    val (requestedHideTopBar, requestHideTopBar) = remember { mutableStateOf(true) }
     val scope = rememberCoroutineScope()
 
     ConfirmExitBackHandler(vm.confirmExit.value)
@@ -104,7 +105,6 @@ fun ScreenContent() {
             scope.launch {
                 modalBottomSheetState.hide()
                 drawerState.close()
-
             }
         }
     }
@@ -116,11 +116,13 @@ fun ScreenContent() {
             if (navStackEntry != null) {
                 screenSpec?.BottomModalSheet(
                     ScreenSpec.Controller(
-                        navController,
-                        navStackEntry,
-                        snackBarHostState,
-                        modalBottomSheetState,
-                        drawerState
+                        navController = navController,
+                        navBackStackEntry = navStackEntry,
+                        snackBarHostState = snackBarHostState,
+                        sheetState = modalBottomSheetState,
+                        drawerState = drawerState,
+                        requestHideNavigator = requestHideBottomNav,
+                        requestHideTopAppbar = requestHideTopBar
                     )
                 )
             }
@@ -133,11 +135,12 @@ fun ScreenContent() {
                     screenSpec?.ModalDrawer(
                         ScreenSpec.Controller(
                             navController = navController,
+                            navBackStackEntry = navStackEntry,
                             snackBarHostState = snackBarHostState,
                             sheetState = modalBottomSheetState,
                             drawerState = drawerState,
                             requestHideNavigator = requestHideBottomNav,
-                            navBackStackEntry = navStackEntry
+                            requestHideTopAppbar = requestHideTopBar
                         )
                     )
                 }
@@ -151,16 +154,23 @@ fun ScreenContent() {
                         .navigationBarsPadding(),
                     topBar = {
                         if (navStackEntry != null) {
-                            screenSpec?.TopBar(
-                                ScreenSpec.Controller(
-                                    navController = navController,
-                                    snackBarHostState = snackBarHostState,
-                                    sheetState = modalBottomSheetState,
-                                    drawerState = drawerState,
-                                    requestHideNavigator = requestHideBottomNav,
-                                    navBackStackEntry = navStackEntry
+                            AnimatedVisibility(
+                                visible = requestedHideTopBar,
+                                enter = slideInVertically(initialOffsetY = { it }),
+                                exit = slideOutVertically(targetOffsetY = { it })
+                            ) {
+                                screenSpec?.TopBar(
+                                    ScreenSpec.Controller(
+                                        navController = navController,
+                                        navBackStackEntry = navStackEntry,
+                                        snackBarHostState = snackBarHostState,
+                                        sheetState = modalBottomSheetState,
+                                        drawerState = drawerState,
+                                        requestHideNavigator = requestHideBottomNav,
+                                        requestHideTopAppbar = requestHideTopBar
+                                    )
                                 )
-                            )
+                            }
                         }
                     },
                     bottomBar = {
@@ -171,11 +181,12 @@ fun ScreenContent() {
                                     screenSpec?.BottomAppBar(
                                         ScreenSpec.Controller(
                                             navController = navController,
+                                            navBackStackEntry = navStackEntry,
                                             snackBarHostState = snackBarHostState,
                                             sheetState = modalBottomSheetState,
                                             drawerState = drawerState,
                                             requestHideNavigator = requestHideBottomNav,
-                                            navBackStackEntry = navStackEntry
+                                            requestHideTopAppbar = requestHideTopBar,
                                         )
                                     )
                                 }
@@ -183,7 +194,7 @@ fun ScreenContent() {
                         }
 
                         AnimatedVisibility(
-                            visible = hideBottomBar == null || hideBottomBar == true || requestedHideBottomNav,
+                            visible = (hideBottomBar == null || hideBottomBar == true) && !requestedHideBottomNav,
                             enter = slideInVertically(initialOffsetY = { it }),
                             exit = slideOutVertically(targetOffsetY = { it })
                         ) {
@@ -269,7 +280,8 @@ fun ScreenContent() {
                                         sheetState = modalBottomSheetState,
                                         drawerState = drawerState,
                                         requestHideNavigator = requestHideBottomNav,
-                                        scaffoldPadding = padding
+                                        requestHideTopAppbar = requestHideTopBar,
+                                        scaffoldPadding = padding,
                                     )
                                 )
                             }

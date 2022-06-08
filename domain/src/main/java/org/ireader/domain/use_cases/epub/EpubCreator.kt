@@ -31,6 +31,7 @@ class EpubCreator @Inject constructor(
         if (cover?.exists() == true) {
             epubBook.coverImage = Resource(cover.readBytes(), MediaType("cover", ".jpg"))
         }
+
         chapters.forEachIndexed { index, chapter ->
             val resource : Resource = Resource("$index-${chapter.name}",chapter.content.map { "<p>$it</p>" }.joinToString("\n").toByteArray(),"${chapter.name}-$index.html", MediatypeService.XHTML)
             epubBook.addSection(chapter.name,resource)

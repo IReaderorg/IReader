@@ -80,6 +80,8 @@
     <string name="grid_layout">Grid Layout</string>
     <string name="list_layout">List Layout</string>
     <string name="decrease">Decrease</string>
+    <string name="source_title">Source Title</string>
+    <string name="chapter_number">Chapter Number</string>
     <string name="increase">Increase</string>
     <string name="version">Version</string>
     <string name="whats_new">Whats New</string>
@@ -145,6 +147,7 @@
     <string name="bookmark">Bookmark</string>
     <string name="wait">Please Wait</string>
     <string name="success">Success</string>
+    <string name="epub">Epub</string>
     <string name="aborted">Success</string>
     <string name="downloading">Downloading</string>
     <string name="installing">Installing</string>
@@ -173,6 +176,13 @@
     <string name="date_fetched">Date Fetched</string>
     <string name="total_chapter">Total Chapters</string>
     <string name="source">Source</string>
+    <string name="by_name">By Name</string>
+    <string name="by_source">By Source</string>
+    <string name="by_chapter_number">By chapter number</string>
+    <string name="by_bookmark">By bookmark</string>
+    <string name="by_date_fetched">By date fetched</string>
+    <string name="by_date_uploaded">By date Uploaded</string>
+    <string name="by_date_read">By read</string>
 
 
 

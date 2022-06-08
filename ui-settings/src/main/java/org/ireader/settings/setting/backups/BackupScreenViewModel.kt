@@ -11,14 +11,12 @@ import org.ireader.common_models.BackUpBook
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.use_cases.backup.CreateBackup
 import org.ireader.domain.use_cases.backup.RestoreBackup
-import org.ireader.domain.use_cases.epub.importer.ImportEpub
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetBookUseCases
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.preferences.reader_preferences.ReaderPrefUseCases
 import org.ireader.image_loader.LibraryCovers
-import org.ireader.settings.setting.ImportMode
 import org.ireader.settings.setting.SettingState
 import java.util.Calendar
 import javax.inject.Inject
@@ -33,12 +31,10 @@ class BackupScreenViewModel @Inject constructor(
     private val prefUseCases: ReaderPrefUseCases,
     val restoreBackup: RestoreBackup,
     val createBackup: CreateBackup,
-    val importEpub: ImportEpub,
-
 ) : BaseViewModel() {
     private val _state = mutableStateOf(SettingState())
     val state: State<SettingState> = _state
-    val importMode = mutableStateOf(ImportMode.JavaMode)
+
 
     fun onLocalBackupRequested(onStart: (Intent) -> Unit) {
         val mimeTypes = arrayOf("application/gzip")
@@ -56,17 +52,6 @@ class BackupScreenViewModel @Inject constructor(
 
     fun onRestoreBackupRequested(onStart: (Intent) -> Unit) {
         val mimeTypes = arrayOf("application/gzip")
-        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
-            .addCategory(Intent.CATEGORY_OPENABLE)
-            .setType("application/*")
-            .putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
-            .addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
-            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-
-        onStart(intent)
-    }
-    fun onEpubImportRequested(onStart: (Intent) -> Unit) {
-        val mimeTypes = arrayOf("application/*")
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
             .addCategory(Intent.CATEGORY_OPENABLE)
             .setType("application/*")

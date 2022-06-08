@@ -109,7 +109,7 @@ class ImportEpub @Inject constructor(
             .let { bookRepository.insertBook(it) }
         val chapterExtensions = listOf("xhtml", "xml", "html").map { ".$it" }
         val information =
-            epub.tableOfContents?.tocReferences?.associate { it.completeHref to it.title }
+            epub.tableOfContents?.tocReferences?.associate { it?.completeHref to it?.title }
         var index = 0
 
         epub.resources.all.filter { item ->

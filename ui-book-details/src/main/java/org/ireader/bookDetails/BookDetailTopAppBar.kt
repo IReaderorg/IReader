@@ -2,8 +2,8 @@ package org.ireader.bookDetails
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Autorenew
+import androidx.compose.material.icons.filled.IosShare
 import androidx.compose.material.icons.filled.Public
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -51,7 +51,7 @@ fun BookDetailTopAppBar(
                 onShare()
             }) {
                 Icon(
-                    imageVector = Icons.Default.Share,
+                    imageVector = Icons.Default.IosShare,
                     contentDescription = stringResource(id = R.string.share),
                     tint = MaterialTheme.colorScheme.onBackground,
                 )

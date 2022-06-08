@@ -6,6 +6,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewModelScope
@@ -100,6 +101,10 @@ object LibraryScreenSpec : BottomNavScreenSpec {
         controller:ScreenSpec.Controller
     ) {
         val vm: LibraryViewModel = hiltViewModel(controller.navBackStackEntry)
+
+        LaunchedEffect(key1 = vm.selectionMode ) {
+         controller.requestHideNavigator(vm.selectionMode)
+        }
 
 
         LibraryScreen(

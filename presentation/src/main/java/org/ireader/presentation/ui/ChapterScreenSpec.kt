@@ -20,10 +20,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.launch
 import org.ireader.chapterDetails.ChapterDetailScreen
 import org.ireader.chapterDetails.ChapterDetailTopAppBar
-import org.ireader.chapterDetails.viewmodel.ChapterDetailEvent
+import org.ireader.chapterDetails.ChapterScreenBottomTabComposable
 import org.ireader.chapterDetails.viewmodel.ChapterDetailViewModel
 import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.components.reusable_composable.MidSizeTextComposable
@@ -38,6 +40,7 @@ object ChapterScreenSpec : ScreenSpec {
         NavigationArgs.bookId,
         NavigationArgs.sourceId,
         NavigationArgs.haveDrawer,
+        NavigationArgs.showModalSheet,
     )
 
     fun buildRoute(
@@ -71,7 +74,11 @@ object ChapterScreenSpec : ScreenSpec {
                 vm.selection.addAll(ids)
             },
             onReverseClick = {
-                vm.onEvent(ChapterDetailEvent.ToggleOrder)
+                //vm.onEvent(ChapterDetailEvent.ToggleOrder)
+                scope.launch {
+                controller.sheetState.show()
+
+                }
             },
             onPopBackStack = {
                 controller.navController.popBackStack()
@@ -167,6 +174,34 @@ object ChapterScreenSpec : ScreenSpec {
             },
             vm = vm,
             scaffoldPadding = controller.scaffoldPadding
+        )
+    }
+
+
+    @OptIn(ExperimentalPagerApi::class, ExperimentalMaterialApi::class)
+    @Composable
+    override fun BottomModalSheet(
+        controller: ScreenSpec.Controller
+    ) {
+        val vm: ChapterDetailViewModel = hiltViewModel(controller.navBackStackEntry)
+
+        val pagerState = rememberPagerState()
+        ChapterScreenBottomTabComposable(
+            pagerState = pagerState,
+            filters = vm.filters.value,
+            toggleFilter = {
+                vm.toggleFilter(it.type)
+            },
+            onSortSelected = {
+                vm.toggleSort(it.type)
+            },
+            sortType = vm.sorting.value,
+            isSortDesc = vm.isAsc,
+            onLayoutSelected = { layout ->
+              vm.layout = layout
+            },
+            layoutType = vm.layout,
+            vm = vm
         )
     }
 }

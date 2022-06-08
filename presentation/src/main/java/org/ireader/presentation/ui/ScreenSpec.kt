@@ -61,7 +61,8 @@ sealed interface ScreenSpec {
         val sheetState: ModalBottomSheetState,
         val drawerState: DrawerState,
         val scaffoldPadding: PaddingValues = PaddingValues(0.dp),
-        val requestHideNavigator: (Boolean) -> Unit = {}
+        val requestHideNavigator: (Boolean) -> Unit = {},
+        val requestHideTopAppbar: (Boolean) -> Unit = {},
     )
 
 

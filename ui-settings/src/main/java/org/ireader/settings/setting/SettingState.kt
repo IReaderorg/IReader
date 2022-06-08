@@ -6,7 +6,3 @@ data class SettingState(
     val dialogState: Boolean = false,
     val importMode: ImportMode = ImportMode.JavaMode,
 )
-enum class ImportMode {
-    JavaMode,
-    KotlinMode
-}

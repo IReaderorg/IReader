@@ -23,8 +23,6 @@ import org.ireader.common_extensions.launchIO
 import org.ireader.common_resources.UiEvent
 import org.ireader.common_resources.UiText
 import org.ireader.components.components.TitleToolbar
-import org.ireader.core_api.log.Log
-import org.ireader.settings.setting.ImportMode
 import org.ireader.settings.setting.SettingsSection
 import org.ireader.settings.setting.backups.BackUpAndRestoreScreen
 import org.ireader.settings.setting.backups.BackupScreenViewModel
@@ -112,32 +110,7 @@ object BackupAndRestoreScreenSpec : ScreenSpec {
                     }
                 }
             }
-        val onEpub =
-            rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultIntent ->
-                if (resultIntent.resultCode == Activity.RESULT_OK && resultIntent.data != null) {
 
-                    val uri = resultIntent.data!!.data!!
-                    scope.launchIO {
-                        try {
-                            when (vm.importMode.value) {
-                                ImportMode.JavaMode -> {
-                                    scope.launchIO {
-                                        vm.importEpub.parseUsingJavaMethod(uri, context)
-                                        vm.showSnackBar(UiText.StringResource(R.string.success))
-                                    }
-                                }
-                                ImportMode.KotlinMode -> {
-                                    vm.importEpub.parseUsingKotlin(uri, context)
-                                    vm.showSnackBar(UiText.StringResource(R.string.success))
-                                }
-                            }
-                        } catch (e: Throwable) {
-                            Log.error(e, "epub parser throws an exception")
-                            vm.showSnackBar(UiText.ExceptionString(e))
-                        }
-                    }
-                }
-            }
 
         val settingItems = listOf(
             SettingsSection(
@@ -161,28 +134,7 @@ object BackupAndRestoreScreenSpec : ScreenSpec {
                     }
             },
 
-            SettingsSection(
-                org.ireader.ui_settings.R.string.import_epub_first_mode,
-            ) {
-                context.findComponentActivity()
-                    ?.let { activity ->
-                        vm.importMode.value = ImportMode.JavaMode
-                        vm.onEpubImportRequested { intent: Intent ->
-                            onEpub.launch(intent)
-                        }
-                    }
-            },
-            SettingsSection(
-                org.ireader.ui_settings.R.string.import_epub_second_mode,
-            ) {
-                context.findComponentActivity()
-                    ?.let { activity ->
-                        vm.onEpubImportRequested { intent: Intent ->
-                            vm.importMode.value = ImportMode.KotlinMode
-                            onEpub.launch(intent)
-                        }
-                    }
-            },
+
         )
 
         BackUpAndRestoreScreen(

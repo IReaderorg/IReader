@@ -2,6 +2,7 @@ package org.ireader.domain.use_cases.local.chapter_usecases
 
 import kotlinx.coroutines.flow.Flow
 import org.ireader.common_models.entities.Chapter
+import org.ireader.common_models.library.LibrarySort
 import javax.inject.Inject
 
 /**
@@ -11,9 +12,9 @@ import javax.inject.Inject
 class SubscribeChaptersByBookId @Inject constructor(private val chapterRepository: org.ireader.common_data.repository.ChapterRepository) {
     operator fun invoke(
         bookId: Long,
-        isAsc: Boolean = true,
+        sort: String = "default",
     ): Flow<List<Chapter>>{
-        return chapterRepository.subscribeChaptersByBookId(bookId = bookId, isAsc)
+        return chapterRepository.subscribeChaptersByBookId(bookId = bookId, sort)
     }
 }
 

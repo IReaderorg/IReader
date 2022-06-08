@@ -7,7 +7,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -100,7 +100,7 @@ fun LibraryScreen(
 
 
 
-    Box(
+    BoxWithConstraints(
         modifier = Modifier
             .padding(scaffoldPadding)
             .fillMaxSize(),
@@ -170,6 +170,7 @@ fun LibraryScreen(
                     )
                 }
             }
+
             LibrarySelectionBar(
                 modifier = Modifier.align(Alignment.BottomCenter),
                 visible = vm.selectionMode,

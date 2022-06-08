@@ -310,9 +310,6 @@ private fun ContinuesReaderPage(
                         lineHeight = vm.lineHeight.value.sp,
                     )
                 }
-//                LaunchedEffect(key1 = true) {
-//                    Log.error { "RECOMPOSE" }
-//                }
             }
 
         }
@@ -339,9 +336,6 @@ fun ContinuousReaderPageWithScrollState(
                 it <= scrollState.value
             }
         }
-    }
-    LaunchedEffect(key1 = firstVisibleItem) {
-        Log.error { "UPDATED $firstVisibleItem" }
     }
     Column(
         modifier = modifier.fillMaxSize().verticalScroll(scrollState),
@@ -383,9 +377,6 @@ fun ContinuousReaderPageWithScrollState(
                             lineHeight = vm.lineHeight.value.sp,
                         )
                     }
-                }
-                LaunchedEffect(key1 = true) {
-                    Log.error { "RECOMPOSE" }
                 }
             }
         }

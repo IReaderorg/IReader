@@ -2,6 +2,7 @@ package org.ireader.data.repository
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import org.ireader.common_models.entities.Chapter
 import org.ireader.data.local.dao.ChapterDao
 import javax.inject.Inject
 
@@ -23,6 +24,10 @@ class ChapterRepositoryImpl @Inject constructor(private val daoLibrary: ChapterD
 
     override suspend fun findAllInLibraryChapter(): List<org.ireader.common_models.entities.Chapter> {
         return daoLibrary.findAllInLibraryChapters()
+    }
+
+    override fun subscribeChaptersByBookId(bookId: Long, sort: String): Flow<List<Chapter>> {
+        return daoLibrary.subscribe(bookId,sort)
     }
 
     override fun subscribeChaptersByBookId(bookId: Long, isAsc: Boolean): Flow<List<org.ireader.common_models.entities.Chapter>> {
