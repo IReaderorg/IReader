@@ -7,6 +7,10 @@ import android.view.View
 import android.view.View.GONE
 import android.view.WindowManager
 import androidx.annotation.UiThread
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
+
 /**
  *  Makes the activity enter fullscreen mode.
  */
@@ -110,6 +114,14 @@ fun Activity.showSystemUI() {
     window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
         or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
         or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
+
+    val windowInsetsController =
+        ViewCompat.getWindowInsetsController(window.decorView) ?: return
+    // Configure the behavior of the hidden system bars
+    windowInsetsController.systemBarsBehavior =
+        WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+    // Hide both the status bar and the navigation bar
+    windowInsetsController.show(WindowInsetsCompat.Type.systemBars())
 }
 
 
@@ -130,6 +142,13 @@ fun Activity.hideSystemUI() {
         or View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
 
         or View.SYSTEM_UI_FLAG_IMMERSIVE)
+    val windowInsetsController =
+        ViewCompat.getWindowInsetsController(window.decorView) ?: return
+    // Configure the behavior of the hidden system bars
+    windowInsetsController.systemBarsBehavior =
+        WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+    // Hide both the status bar and the navigation bar
+    windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
 }
 
 var Activity.brightness: Float?

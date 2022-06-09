@@ -22,8 +22,8 @@ IReader is a free and open source applicaiton for Android.
 
 | Views    | Dark                                                       | Light                                                        |
 | -------- | ---------------------------------------------------------- | ------------------------------------------------------------ |
-| Library  | ![library_view_dark](screenshots/library-dark.jpeg)         | ![library_view_light](/screenshots/library-light.jpeg)         |
-| Book     | ![book_view_dark](screenshots/detail-dark.jpeg)               | ![book_view_light](screenshots/detail-light.jpeg)               |
+| Library  | ![library_view_dark](screenshots/library-dark.png)         | ![library_view_light](screenshots/library-light.png)         |
+| Book     | ![book_view_dark](screenshots/detail-dark.png)               | ![book_view_light](screenshots/detail-light.png)               |
 | Reader     | ![book_view_dark](screenshots/reader-dark.png)               | ![book_view_light](screenshots/reader-light.png)               |
 
 ## License

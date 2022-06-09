@@ -7,6 +7,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.ktor.client.plugins.cookies.CookiesStorage
 import org.ireader.common_data.repository.BookRepository
+import org.ireader.core_api.http.AcceptAllCookiesStorage
 import org.ireader.core_api.http.BrowseEngine
 import org.ireader.core_api.http.HttpClients
 import org.ireader.core_api.os.PackageInstaller
@@ -76,7 +77,8 @@ class CatalogModule {
         libraryCovers: LibraryCovers,
         client: HttpClients,
         getLocalCatalog: GetLocalCatalog,
-        catalogStore: CatalogStore
+        catalogStore: CatalogStore,
+        cookiesStorage: CookiesStorage
     ): CoilLoaderFactory {
         return CoilLoaderFactory(
             client = client,
@@ -84,7 +86,8 @@ class CatalogModule {
             getLocalCatalog = getLocalCatalog,
             libraryCovers = libraryCovers,
             coverCache = coverCache,
-            catalogStore = catalogStore
+            catalogStore = catalogStore,
+            cookiesStorage = cookiesStorage
         )
     }
 

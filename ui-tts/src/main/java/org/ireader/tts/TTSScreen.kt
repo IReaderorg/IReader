@@ -97,7 +97,7 @@ fun TTSScreen(
         val maxHeight = remember {
             constraints.maxHeight
         }
-        val maxWidth= remember {
+        val maxWidth = remember {
             constraints.maxWidth
         }
         Column(
@@ -151,7 +151,7 @@ fun TTSScreen(
                                 overflow = TextOverflow.Ellipsis
                             )
                             MidSizeTextComposable(
-                                text =book.title,
+                                text = book.title,
                                 align = TextAlign.Center,
                                 maxLine = 1,
                                 overflow = TextOverflow.Ellipsis
@@ -205,7 +205,7 @@ fun TTSScreen(
                                     }
                                 }
                             )
-                         //   Spacer(modifier = Modifier.height(32.dp))
+                            //   Spacer(modifier = Modifier.height(32.dp))
                             TTLScreenPlay(
                                 modifier = Modifier
                                     .height((maxHeight / 15).dp),
@@ -258,7 +258,7 @@ private fun TTLScreenSetting(
                     )
             )
             Spacer(modifier = Modifier.width(16.dp))
-            MidSizeTextComposable(text =string(id = R.string.content).uppercase())
+            MidSizeTextComposable(text = string(id = R.string.content).uppercase())
         }
         Divider(
             modifier = Modifier
@@ -356,10 +356,14 @@ private fun TTLScreenPlay(
                     onClick = onPrevPar,
                     tint = MaterialTheme.colorScheme.onBackground
                 )
-                Box{
+                Box {
                     when {
                         vm.isLoading.value -> {
-                            ShowLoading()
+                            Box(
+                                modifier = Modifier.size(80.dp)
+                            ) {
+                                ShowLoading()
+                            }
                         }
                         vm.isPlaying -> {
                             AppIconButton(

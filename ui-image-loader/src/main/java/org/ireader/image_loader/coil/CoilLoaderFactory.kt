@@ -6,6 +6,7 @@ import coil.ComponentRegistry
 import coil.ImageLoader
 import coil.ImageLoaderFactory
 import coil.disk.DiskCache
+import io.ktor.client.plugins.cookies.CookiesStorage
 import org.ireader.core_api.http.HttpClients
 import org.ireader.core_api.http.okhttp
 import org.ireader.core_catalogs.CatalogStore
@@ -22,6 +23,7 @@ class CoilLoaderFactory(
     private val getLocalCatalog: GetLocalCatalog,
     private val catalogStore: CatalogStore,
     private val coverCache: CoverCache,
+    private val cookiesStorage: CookiesStorage
 ) : ImageLoaderFactory {
 
     override fun newImageLoader(): ImageLoader {
