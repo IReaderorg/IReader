@@ -1,12 +1,13 @@
 package org.ireader.settings.setting
 
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import org.ireader.common_extensions.launchIO
-import org.ireader.core_ui.theme.OrientationMode
+import org.ireader.core_ui.preferences.ReaderPreferences
 import org.ireader.core_ui.theme.Roboto
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.use_cases.epub.importer.ImportEpub
@@ -21,6 +22,7 @@ class AdvanceSettingViewModel @Inject constructor(
     private val prefUseCases: ReaderPrefUseCases,
     val coverCache: CoverCache,
     val importEpub: ImportEpub,
+    private val readerPreferences: ReaderPreferences
     ) : BaseViewModel() {
     private val _state = mutableStateOf(SettingState())
     val state: State<SettingState> = _state
@@ -46,7 +48,7 @@ class AdvanceSettingViewModel @Inject constructor(
             prefUseCases.fontHeightUseCase.save(25)
             prefUseCases.fontSizeStateUseCase.save(18)
             prefUseCases.paragraphDistanceUseCase.save(2)
-            prefUseCases.orientationUseCase.save(OrientationMode.Portrait)
+            readerPreferences.orientation().set(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)
             prefUseCases.paragraphIndentUseCase.save(8)
             prefUseCases.scrollModeUseCase.save(true)
             prefUseCases.scrollIndicatorUseCase.savePadding(0)

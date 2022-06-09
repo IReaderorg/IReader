@@ -39,7 +39,7 @@
     <application
         android:name="org.ireader.app.MyApplication"
         android:allowBackup="true"
-        android:configChanges="orientation|screenLayout|screenSize"
+        android:configChanges="orientation|screenSize|screenLayout"
         android:fullBackupOnly="true"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"

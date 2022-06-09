@@ -50,6 +50,10 @@
         <entry key="..\:/Programming/Android/d-projects/IReader-main-project/common-resources/src/main/res/drawable/ic_splash_night.xml" value="0.2635" />
         <entry key="..\:/Programming/Android/d-projects/IReader-main-project/common-resources/src/main/res/drawable/ic_update.xml" value="0.2635" />
         <entry key="..\:/Programming/Android/d-projects/IReader-main-project/common-resources/src/main/res/drawable/ic_wallpaper.xml" value="0.2635" />
+        <entry key="..\:/Programming/Android/d-projects/IReader-main-project/common-resources/src/main/res/drawable/pause.xml" value="0.174" />
+        <entry key="..\:/Programming/Android/d-projects/IReader-main-project/common-resources/src/main/res/drawable/pause_circle.xml" value="0.174" />
+        <entry key="..\:/Programming/Android/d-projects/IReader-main-project/common-resources/src/main/res/drawable/play.xml" value="0.174" />
+        <entry key="..\:/Programming/Android/d-projects/IReader-main-project/common-resources/src/main/res/drawable/play_circle.xml" value="0.174" />
         <entry key="..\:/Programming/Android/d-projects/IReader-main-project/common-resources/src/main/res/drawable/spash_icon.xml" value="0.1595" />
         <entry key="..\:/Programming/Android/d-projects/IReader-main-project/common-resources/src/main/res/layout/media_notification.xml" value="0.22735507246376813" />
         <entry key="..\:/Programming/Android/d-projects/IReader-main-project/common-ui-resources/src/main/res/drawable/baseline_warning_24.xml" value="0.2635" />

@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -169,22 +170,37 @@ fun AppIcon(
 @Composable
 fun AppIconButton(
     modifier: Modifier = Modifier,
-    imageVector: ImageVector,
+    imageVector: ImageVector?=null,
+    painter: Painter?=null,
     contentDescription: String? = null,
     onClick: () -> Unit = {},
     tint: Color = MaterialTheme.colorScheme.onSurface,
 ) {
     IconButton(
+        modifier = modifier,
         onClick = {
             onClick()
         },
     ) {
-        Icon(
-            modifier = modifier,
-            imageVector = imageVector,
-            contentDescription = contentDescription,
-            tint = tint
-        )
+        when {
+            painter != null -> {
+                Icon(
+                    modifier = modifier,
+                    painter = painter,
+                    contentDescription = contentDescription,
+                    tint = tint
+                )
+            }
+            imageVector !=null -> {
+                Icon(
+                    modifier = modifier,
+                    imageVector = imageVector,
+                    contentDescription = contentDescription,
+                    tint = tint
+                )
+            }
+        }
+
     }
 }
 

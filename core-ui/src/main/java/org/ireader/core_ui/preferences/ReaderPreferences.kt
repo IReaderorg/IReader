@@ -1,5 +1,6 @@
 package org.ireader.core_ui.preferences
 
+import android.content.pm.ActivityInfo
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.ExperimentalTextApi
@@ -8,7 +9,6 @@ import org.ireader.core_api.prefs.Preference
 import org.ireader.core_api.prefs.PreferenceStore
 import org.ireader.core_api.prefs.getEnum
 import org.ireader.core_ui.theme.FontType
-import org.ireader.core_ui.theme.OrientationMode
 import org.ireader.core_ui.theme.Roboto
 import org.ireader.core_ui.theme.prefs.IReaderVoice
 import org.ireader.core_ui.theme.prefs.asColor
@@ -33,7 +33,7 @@ class ReaderPreferences @OptIn(ExperimentalTextApi::class) constructor(
         const val SAVED_FONT_HEIGHT = "font_height"
         const val SAVED_PARAGRAPH_DISTANCE = "paragraph_distance"
         const val SAVED_PARAGRAPH_INDENT = "paragraph_indent"
-        const val SAVED_ORIENTATION = "orientation_reader"
+        const val SAVED_ORIENTATION = "orientation_reader_screen"
         const val SLEEP_TIMER = "tts_sleep_timer"
         const val SLEEP_TIMER_MODE = "tts_sleep_mode"
 
@@ -112,8 +112,8 @@ class ReaderPreferences @OptIn(ExperimentalTextApi::class) constructor(
         return preferenceStore.getInt(SAVED_PARAGRAPH_DISTANCE, 2)
     }
 
-    fun orientation(): Preference<OrientationMode> {
-        return preferenceStore.getEnum(SAVED_ORIENTATION, OrientationMode.Portrait)
+    fun orientation(): Preference<Int> {
+        return preferenceStore.getInt(SAVED_ORIENTATION, ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)
     }
 
     fun sleepTime(): Preference<Long> {

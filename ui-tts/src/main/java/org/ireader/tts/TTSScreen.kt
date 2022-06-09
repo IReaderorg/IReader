@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
@@ -27,8 +26,8 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.material.icons.filled.FastRewind
 import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.PauseCircle
+import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
@@ -357,16 +356,7 @@ private fun TTLScreenPlay(
                     onClick = onPrevPar,
                     tint = MaterialTheme.colorScheme.onBackground
                 )
-                Box(
-                    modifier = Modifier
-                        .size(80.dp)
-                        .border(
-                            1.dp,
-                            MaterialTheme.colorScheme.onBackground.copy(.4f),
-                            CircleShape
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
+                Box{
                     when {
                         vm.isLoading.value -> {
                             ShowLoading()
@@ -374,7 +364,7 @@ private fun TTLScreenPlay(
                         vm.isPlaying -> {
                             AppIconButton(
                                 modifier = Modifier.size(80.dp),
-                                imageVector = Icons.Filled.Pause,
+                                imageVector = Icons.Filled.PauseCircle,
                                 contentDescription = stringResource(R.string.play),
                                 onClick = onPlay,
                                 tint = MaterialTheme.colorScheme.onBackground
@@ -383,7 +373,7 @@ private fun TTLScreenPlay(
                         else -> {
                             AppIconButton(
                                 modifier = Modifier.size(80.dp),
-                                imageVector = Icons.Filled.PlayArrow,
+                                imageVector = Icons.Filled.PlayCircle,
                                 contentDescription = stringResource(R.string.pause),
                                 onClick = onPlay,
                                 tint = MaterialTheme.colorScheme.onBackground

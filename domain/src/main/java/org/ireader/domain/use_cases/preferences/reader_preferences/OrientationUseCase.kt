@@ -4,22 +4,11 @@ import org.ireader.common_models.library.LibrarySort
 import org.ireader.common_models.library.deserialize
 import org.ireader.core_ui.preferences.AppPreferences
 import org.ireader.core_ui.preferences.ReaderPreferences
-import org.ireader.core_ui.theme.OrientationMode
 import org.ireader.core_ui.theme.prefs.IReaderVoice
 import org.ireader.core_ui.ui.PreferenceAlignment
 import javax.inject.Inject
 
-class OrientationUseCase(
-    private val prefs: ReaderPreferences,
-) {
-    fun save(orientation: OrientationMode) {
-        prefs.orientation().set(orientation)
-    }
 
-    suspend fun read(): OrientationMode {
-        return prefs.orientation().get()
-    }
-}
 
 class TextAlignmentUseCase(
     private val prefs: ReaderPreferences,

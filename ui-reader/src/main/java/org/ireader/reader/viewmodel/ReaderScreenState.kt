@@ -111,8 +111,3 @@ interface ReaderScreenPreferencesState {
     var scrollMode : Boolean
   //  val isVerticalScrolling : Boolean
 }
-
-sealed class Orientation(val index: Int) {
-    object Portrait : Orientation(0)
-    object Landscape : Orientation(1)
-}

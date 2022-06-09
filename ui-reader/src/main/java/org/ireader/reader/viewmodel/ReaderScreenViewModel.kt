@@ -6,6 +6,7 @@ import android.view.WindowManager
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.lifecycle.SavedStateHandle
@@ -68,6 +69,7 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
     val showScrollIndicator = readerPreferences.showScrollIndicator().asState()
     val textAlignment = readerPreferences.textAlign().asState()
     val orientation = readerPreferences.orientation().asState()
+    var lastOrientationChangedTime = mutableStateOf(kotlinx.datetime.Clock.System.now().toEpochMilliseconds())
     val scrollIndicatorWith = readerPreferences.scrollIndicatorWith().asState()
     val scrollIndicatorPadding = readerPreferences.scrollIndicatorPadding().asState()
     val scrollIndicatorAlignment = readerPreferences.scrollBarAlignment().asState()

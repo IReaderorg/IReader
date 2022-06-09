@@ -25,6 +25,9 @@
 -keep,allowoptimization class com.google.accompanist.** { public protected *; }
 -keep,allowoptimization class androidx.compose.** { public protected *; }
 -keep,allowoptimization class org.tinylog.** { public protected *; }
+-keep,allowoptimization class nl.siegmann.epublib.** { public protected *; }
+-keep,allowoptimization class org.slf4j.** { public protected *; }
+-keep class org.xmlpull.** { public protected *; }
 
 
 -dontwarn android.support.**

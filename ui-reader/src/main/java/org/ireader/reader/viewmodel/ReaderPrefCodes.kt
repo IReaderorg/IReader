@@ -5,14 +5,16 @@ import android.content.Context
 import android.content.pm.ActivityInfo
 import android.view.WindowManager
 import androidx.compose.ui.graphics.Color
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import org.ireader.common_extensions.brightness
 import org.ireader.common_extensions.findComponentActivity
 import org.ireader.common_extensions.hideSystemUI
 import org.ireader.common_extensions.isImmersiveModeEnabled
 import org.ireader.common_extensions.showSystemUI
-import org.ireader.core_ui.theme.OrientationMode
 import org.ireader.core_ui.theme.readerScreenBackgroundColors
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 
 interface ReaderPrefFunctions {
     fun ReaderScreenViewModel.toggleReaderMode(enable: Boolean? = null)
@@ -94,15 +96,13 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
     @SuppressLint("SourceLockedOrientationActivity")
     override suspend fun ReaderScreenViewModel.readOrientation(context: Context) {
         val activity = context.findComponentActivity()
-        if (activity != null) {
-            when (orientation.value) {
-                    OrientationMode.Portrait -> {
-                    activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-                }
-                OrientationMode.Landscape -> {
-                    activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-                }
-            }
+        val lastCheck = Instant.fromEpochMilliseconds(lastOrientationChangedTime.value)
+        val now = Clock.System.now()
+        if (activity != null && (now - lastCheck) > 1.seconds) {
+            activity.requestedOrientation = orientation.value
+            lastOrientationChangedTime.value = Clock.System.now().toEpochMilliseconds()
+        } else {
+            activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
         }
     }
 

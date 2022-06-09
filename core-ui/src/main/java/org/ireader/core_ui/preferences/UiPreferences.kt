@@ -88,7 +88,7 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
 
 
     fun secureScreen(): Preference<PreferenceValues.SecureScreenMode> {
-        return preferenceStore.getEnum("secure_screen", PreferenceValues.SecureScreenMode.INCOGNITO)
+        return preferenceStore.getEnum("secure_screen", PreferenceValues.SecureScreenMode.NEVER)
     }
     fun lastUsedSource(): Preference<Long> {
         return preferenceStore.getLong("last_used_source", -1L)

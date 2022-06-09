@@ -11,24 +11,18 @@ import org.ireader.common_models.BackUpBook
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.use_cases.backup.CreateBackup
 import org.ireader.domain.use_cases.backup.RestoreBackup
-import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetBookUseCases
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
-import org.ireader.domain.use_cases.preferences.reader_preferences.ReaderPrefUseCases
-import org.ireader.image_loader.LibraryCovers
 import org.ireader.settings.setting.SettingState
 import java.util.Calendar
 import javax.inject.Inject
 
 @HiltViewModel
 class BackupScreenViewModel @Inject constructor(
-    private val deleteUseCase: DeleteUseCase,
-    private val libraryCovers: LibraryCovers,
     private val booksUseCasa: LocalGetBookUseCases,
     private val chapterUseCase: LocalGetChapterUseCase,
     private val insertUseCases: LocalInsertUseCases,
-    private val prefUseCases: ReaderPrefUseCases,
     val restoreBackup: RestoreBackup,
     val createBackup: CreateBackup,
 ) : BaseViewModel() {
@@ -38,7 +32,7 @@ class BackupScreenViewModel @Inject constructor(
 
     fun onLocalBackupRequested(onStart: (Intent) -> Unit) {
         val mimeTypes = arrayOf("application/gzip")
-        val fn = "IReader_${convertLongToTime(Calendar.getInstance().timeInMillis)}.proto"
+        val fn = "IReader_${convertLongToTime(Calendar.getInstance().timeInMillis)}.gz"
         val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
             .addCategory(Intent.CATEGORY_OPENABLE)
             .setType("application/gzip")

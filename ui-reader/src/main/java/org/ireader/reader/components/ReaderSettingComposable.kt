@@ -1,5 +1,6 @@
 package org.ireader.reader.components
 
+import android.content.pm.ActivityInfo
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -40,7 +41,6 @@ import org.ireader.components.components.setupUiComponent
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.core_ui.preferences.ReadingMode
-import org.ireader.core_ui.theme.OrientationMode
 import org.ireader.core_ui.theme.fonts
 import org.ireader.core_ui.ui.Colour.contentColor
 import org.ireader.core_ui.ui.PreferenceAlignment
@@ -246,11 +246,11 @@ fun ReaderSettingMainLayout(
                                 stringResource(id = R.string.landscape),
                                 stringResource(id = R.string.portrait),
                             ),
-                            selected = vm.orientation.value.ordinal,
+                            selected = vm.orientation.value,
                             onValueChange = {
                                 when (it) {
-                                    0 -> vm.orientation.value = OrientationMode.Landscape
-                                    1 -> vm.orientation.value = OrientationMode.Portrait
+                                    0 -> vm.orientation.value = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                                    1 -> vm.orientation.value = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                                 }
                             },
                             title = stringResource(id = R.string.orientation)

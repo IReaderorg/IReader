@@ -292,7 +292,7 @@ private fun LazyListScope.DispalyPage(
     item {
         Slider(modifier =  Modifier.padding(horizontal = 20.dp), value = vm.columnInPortrait.lazyValue.toFloat(), onValueChange = {
             vm.columnInPortrait.lazyValue = it.toInt()
-        }, steps = 10, valueRange = 0f..10f)
+        }, valueRange = 0f..10f)
     }
     item {
         TextSection(

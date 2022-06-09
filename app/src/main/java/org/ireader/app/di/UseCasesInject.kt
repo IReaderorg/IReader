@@ -78,7 +78,6 @@ import org.ireader.domain.use_cases.preferences.reader_preferences.FontHeightUse
 import org.ireader.domain.use_cases.preferences.reader_preferences.FontSizeStateUseCase
 import org.ireader.domain.use_cases.preferences.reader_preferences.ImmersiveModeUseCase
 import org.ireader.domain.use_cases.preferences.reader_preferences.LibraryLayoutTypeUseCase
-import org.ireader.domain.use_cases.preferences.reader_preferences.OrientationUseCase
 import org.ireader.domain.use_cases.preferences.reader_preferences.ParagraphDistanceUseCase
 import org.ireader.domain.use_cases.preferences.reader_preferences.ParagraphIndentUseCase
 import org.ireader.domain.use_cases.preferences.reader_preferences.ReaderPrefUseCases
@@ -265,7 +264,6 @@ class UseCasesInject {
             fontHeightUseCase = FontHeightUseCase(prefs),
             fontSizeStateUseCase = FontSizeStateUseCase(prefs),
             immersiveModeUseCase = ImmersiveModeUseCase(prefs),
-            orientationUseCase = OrientationUseCase(prefs),
             paragraphDistanceUseCase = ParagraphDistanceUseCase(prefs),
             paragraphIndentUseCase = ParagraphIndentUseCase(prefs),
             scrollIndicatorUseCase = ScrollIndicatorUseCase(prefs),

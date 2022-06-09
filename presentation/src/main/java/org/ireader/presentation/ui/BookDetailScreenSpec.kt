@@ -86,7 +86,7 @@ object BookDetailScreenSpec : ScreenSpec {
                                 vm.createEpub(it, uri, context)
                                 vm.showSnackBar(UiText.StringResource(R.string.success))
                             }
-                        }catch (e:Exception) {
+                        }catch (e:Throwable) {
                             vm.showSnackBar(UiText.ExceptionString(e))
                         }
 
