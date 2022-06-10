@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -13,6 +15,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
 import kotlinx.coroutines.launch
+import okhttp3.Headers
 import org.ireader.common_extensions.launchIO
 import org.ireader.common_resources.UiText
 import org.ireader.components.components.EmptyScreenComposable
@@ -24,6 +27,7 @@ import org.ireader.explore.BrowseTopAppBar
 import org.ireader.explore.ExploreScreen
 import org.ireader.explore.FilterBottomSheet
 import org.ireader.explore.viewmodel.ExploreViewModel
+import org.ireader.image_loader.coil.image_loaders.convertToOkHttpRequest
 
 @OptIn(
     ExperimentalAnimationApi::class,
@@ -55,10 +59,13 @@ object ExploreScreenSpec : ScreenSpec {
     override fun Content(
         controller: ScreenSpec.Controller
     ) {
-        val vm: ExploreViewModel = hiltViewModel(   controller.navBackStackEntry)
+        val vm: ExploreViewModel = hiltViewModel(controller.navBackStackEntry)
         val focusManager = LocalFocusManager.current
         val source = vm.source
         val scope = rememberCoroutineScope()
+        val headers = remember {
+            mutableStateOf<Headers?>(null)
+        }
         if (source != null) {
             ExploreScreen(
                 modifier = Modifier.padding(paddingValues = controller.scaffoldPadding),
@@ -98,6 +105,14 @@ object ExploreScreenSpec : ScreenSpec {
                 snackBarHostState = controller.snackBarHostState,
                 modalState = controller.sheetState,
                 scaffoldPadding = controller.scaffoldPadding,
+                headers = {
+                    if (headers.value == null) {
+                        headers.value =
+                            (source as? HttpSource)?.getCoverRequest(it)?.second?.build()
+                                ?.convertToOkHttpRequest()?.headers
+                        headers.value
+                    } else headers.value
+                },
                 onLongClick = {
                     scope.launchIO {
                         vm.addToFavorite(it)
@@ -117,7 +132,7 @@ object ExploreScreenSpec : ScreenSpec {
     override fun BottomModalSheet(
         controller: ScreenSpec.Controller
     ) {
-        val vm: ExploreViewModel = hiltViewModel(   controller.navBackStackEntry)
+        val vm: ExploreViewModel = hiltViewModel(controller.navBackStackEntry)
         val source = vm.source
         val scope = rememberCoroutineScope()
         val focusManager = LocalFocusManager.current
@@ -128,11 +143,11 @@ object ExploreScreenSpec : ScreenSpec {
                 vm.stateFilters = mFilters
                 vm.searchQuery = null
                 vm.loadItems(reset = true)
-                hideKeyboard(softwareKeyboardController = keyboardController,focusManager)
+                hideKeyboard(softwareKeyboardController = keyboardController, focusManager)
             },
             filters = vm.modifiedFilter,
             onReset = {
-                vm.modifiedFilter = source?.getFilters()?: emptyList()
+                vm.modifiedFilter = source?.getFilters() ?: emptyList()
             },
             onUpdate = {
                 vm.modifiedFilter = it
@@ -144,7 +159,7 @@ object ExploreScreenSpec : ScreenSpec {
     override fun TopBar(
         controller: ScreenSpec.Controller
     ) {
-        val vm: ExploreViewModel = hiltViewModel(   controller.navBackStackEntry)
+        val vm: ExploreViewModel = hiltViewModel(controller.navBackStackEntry)
         val focusManager = LocalFocusManager.current
         val source = vm.source
         val scope = rememberCoroutineScope()
@@ -169,10 +184,10 @@ object ExploreScreenSpec : ScreenSpec {
                 focusManager.clearFocus()
             },
             onSearchDisable = {
-            vm.toggleSearchMode(false)
-            vm.searchQuery = null
-            vm.loadItems(true)
-        },
+                vm.toggleSearchMode(false)
+                vm.searchQuery = null
+                vm.loadItems(true)
+            },
             onSearchEnable = {
                 vm.toggleSearchMode(true)
             },

@@ -31,6 +31,7 @@ fun LayoutComposable(
     showReadBadge: Boolean = false,
     showInLibraryBadge:Boolean = false,
     columns:Int?=null,
+    headers: ((url:String) -> okhttp3.Headers?)? = null,
 ) {
         when (layout) {
              DisplayMode.ComfortableGrid -> {
@@ -49,6 +50,7 @@ fun LayoutComposable(
                     showInLibraryBadge = showInLibraryBadge,
                     showReadBadge = showReadBadge,
                     showUnreadBadge = showUnreadBadge,
+                    headers = headers,
                     columns = columns?:3
                 )
             }
@@ -67,6 +69,7 @@ fun LayoutComposable(
                     showInLibraryBadge = showInLibraryBadge,
                     showReadBadge = showReadBadge,
                     showUnreadBadge = showUnreadBadge,
+                    headers = headers
                 )
             }
             DisplayMode.CompactGrid -> {

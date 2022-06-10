@@ -7,7 +7,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.ktor.client.plugins.cookies.CookiesStorage
 import org.ireader.common_data.repository.BookRepository
-import org.ireader.core_api.http.AcceptAllCookiesStorage
 import org.ireader.core_api.http.BrowseEngine
 import org.ireader.core_api.http.HttpClients
 import org.ireader.core_api.os.PackageInstaller
@@ -29,7 +28,6 @@ import org.ireader.data.catalog.AndroidCatalogInstallationChanges
 import org.ireader.data.catalog.AndroidCatalogInstaller
 import org.ireader.data.catalog.AndroidCatalogLoader
 import org.ireader.data.catalog.CatalogGithubApi
-import org.ireader.image_loader.LibraryCovers
 import org.ireader.image_loader.coil.CoilLoaderFactory
 import org.ireader.image_loader.coil.cache.CoverCache
 import javax.inject.Singleton
@@ -74,20 +72,14 @@ class CatalogModule {
     fun provideImageLoader(
         context: Application,
         coverCache: CoverCache,
-        libraryCovers: LibraryCovers,
         client: HttpClients,
-        getLocalCatalog: GetLocalCatalog,
         catalogStore: CatalogStore,
-        cookiesStorage: CookiesStorage
     ): CoilLoaderFactory {
         return CoilLoaderFactory(
             client = client,
             context = context,
-            getLocalCatalog = getLocalCatalog,
-            libraryCovers = libraryCovers,
             coverCache = coverCache,
             catalogStore = catalogStore,
-            cookiesStorage = cookiesStorage
         )
     }
 

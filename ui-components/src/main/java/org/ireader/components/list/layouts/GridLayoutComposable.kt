@@ -36,6 +36,7 @@ fun GridLayoutComposable(
     showUnreadBadge: Boolean = false,
     showReadBadge: Boolean = false,
     showInLibraryBadge: Boolean = false,
+    headers: ((url:String) -> okhttp3.Headers?)? = null,
     columns: Int = 3,
 ) {
     val cells = if (columns > 1) {
@@ -67,6 +68,7 @@ fun GridLayoutComposable(
                         book = book,
                         ratio = 6f / 10f,
                         selected = book.id in selection,
+                        header = headers,
                         onLongClick = { onLongClick(book) },
                     ) {
 

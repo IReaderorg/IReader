@@ -37,6 +37,7 @@ fun BookImage(
     book: BaseBook,
     ratio: Float = 3f / 4f,
     selected: Boolean = false,
+    header: ((url:String) -> okhttp3.Headers?)? = null,
     badge: @Composable BoxScope.() -> Unit,
 ) {
     Box(
@@ -61,6 +62,7 @@ fun BookImage(
                 .clip(RoundedCornerShape(4.dp))
                 .align(Alignment.Center),
             image = BookCover.from(book),
+            headers = header,
         )
 
         Box(

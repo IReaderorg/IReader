@@ -41,7 +41,8 @@ fun CompactGridLayoutComposable(
     showUnreadBadge: Boolean = false,
     showReadBadge: Boolean = false,
     showInLibraryBadge:Boolean = false,
-    columns:Int = 2
+    columns:Int = 2,
+    header: ((url:String) -> okhttp3.Headers?)? = null,
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         val cells = if (columns > 1) {
@@ -75,6 +76,7 @@ fun CompactGridLayoutComposable(
                         book = books[index],
                         ratio = 6f / 9f,
                         selected = books[index].id in selection,
+                        header = header,
                         onLongClick = { onLongClick(books[index]) },
                     ) {
                         if (showGoToLastChapterBadge) {

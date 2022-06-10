@@ -77,6 +77,7 @@ fun ExploreScreen(
     snackBarHostState: SnackbarHostState,
     modalState: ModalBottomSheetState,
     onLongClick: (BookItem) -> Unit = {},
+    headers: ((url:String) -> okhttp3.Headers?)? = null,
     scaffoldPadding: PaddingValues
 ) {
     val scrollState = rememberLazyListState()
@@ -188,7 +189,8 @@ fun ExploreScreen(
                         },
                         isLoading = vm.isLoading,
                         showInLibraryBadge = true,
-                        onLongClick = onLongClick
+                        onLongClick = onLongClick,
+                        headers= headers,
                     )
                 }
             }

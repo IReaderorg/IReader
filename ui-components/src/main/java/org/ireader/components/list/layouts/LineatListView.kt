@@ -36,6 +36,7 @@ fun LinearBookItem(
     title: String,
     selected: Boolean = false,
     book: BookItem,
+    headers: ((url:String) -> okhttp3.Headers?)? = null,
 
 ) {
 
@@ -59,7 +60,8 @@ fun LinearBookItem(
                         if (selected) MaterialTheme.colorScheme.primary.copy(alpha = .5f) else MaterialTheme.colorScheme.onBackground.copy(
                             alpha = .1f
                         )
-                    )
+                    ),
+                headers = headers
             )
             Spacer(modifier = Modifier.width(15.dp))
             Text(
@@ -86,7 +88,8 @@ fun LinearListDisplay(
     showGoToLastChapterBadge: Boolean = false,
     showUnreadBadge: Boolean = false,
     showReadBadge: Boolean = false,
-    showInLibraryBadge:Boolean = false
+    showInLibraryBadge:Boolean = false,
+    headers: ((url:String) -> okhttp3.Headers?)? = null,
 ) {
     LazyColumn(modifier = Modifier.fillMaxSize(), state = scrollState) {
         items(count = books.size, key = { index ->
@@ -102,6 +105,7 @@ fun LinearListDisplay(
                     onLongClick = { onClick(books[index]) },
                 ).animateItemPlacement(),
                 selected = books[index].id in selection,
+                headers = headers
             )
         }
         item {

@@ -2,50 +2,46 @@ package org.ireader.image_loader.coil
 
 import android.app.Application
 import android.content.Context
-import coil.ComponentRegistry
 import coil.ImageLoader
 import coil.ImageLoaderFactory
 import coil.disk.DiskCache
-import io.ktor.client.plugins.cookies.CookiesStorage
 import org.ireader.core_api.http.HttpClients
 import org.ireader.core_api.http.okhttp
 import org.ireader.core_catalogs.CatalogStore
-import org.ireader.core_catalogs.interactor.GetLocalCatalog
-import org.ireader.image_loader.LibraryCovers
 import org.ireader.image_loader.coil.cache.CoverCache
 import org.ireader.image_loader.coil.image_loaders.BookCoverFetcher
 import org.ireader.image_loader.coil.image_loaders.BookCoverKeyer
 
 class CoilLoaderFactory(
     private val context: Application,
-    private val libraryCovers: LibraryCovers,
     private val client: HttpClients,
-    private val getLocalCatalog: GetLocalCatalog,
     private val catalogStore: CatalogStore,
     private val coverCache: CoverCache,
-    private val cookiesStorage: CookiesStorage
 ) : ImageLoaderFactory {
 
     override fun newImageLoader(): ImageLoader {
-        val diskCacheInit = { CoilDiskCache.get(context) }
-        val callFactoryInit = { client.default.okhttp }
-
-        return ImageLoader.Builder(context)
-            .components(fun ComponentRegistry.Builder.() {
-                add(BookCoverFetcher.Factory(callFactoryLazy =lazy(callFactoryInit) ,diskCacheLazy = lazy(diskCacheInit),catalogStore, coverCache))
+        return ImageLoader.Builder(context).apply {
+            val diskCacheInit = { CoilDiskCache.get(context) }
+            val callFactoryInit = { client.default.okhttp }
+            components {
+                add(
+                    BookCoverFetcher.Factory(
+                        callFactoryLazy = lazy(callFactoryInit),
+                        diskCacheLazy = lazy(diskCacheInit),
+                        catalogStore,
+                        coverCache
+                    )
+                )
                 add(CatalogRemoteMapper())
                 add(CatalogInstalledFetcher.Factory())
-                    .add(BookCoverKeyer())
-            })
-            .crossfade(300)
-            .diskCache {
-                DiskCache.Builder()
-                    .directory(context.cacheDir.resolve("image_cache"))
-                    .build()
+                add(BookCoverKeyer())
             }
-            .callFactory(callFactoryInit)
-            .build()
+            crossfade(300)
+            diskCache(diskCacheInit)
+            callFactory(callFactoryInit)
+        }.build()
     }
+
     /**
      * Direct copy of Coil's internal SingletonDiskCache so that [BookCoverFetcher] can access it.
      */
