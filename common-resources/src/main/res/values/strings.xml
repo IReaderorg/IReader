@@ -327,7 +327,13 @@
     <string name="interval">Interval</string>
     <string name="offset">Offset</string>
     <string name="scrollIndicator">ScrollBar</string>
+    <string name="margins">Margin</string>
+    <string name="content_padding">Content Padding</string>
     <string name="padding">Padding</string>
+    <string name="top">Top</string>
+    <string name="top_content_padding">Top content padding</string>
+    <string name="bottom_content_padding">Bottom content padding</string>
+    <string name="bottom">Bottom</string>
     <string name="width">Width</string>
     <string name="colors">Colors</string>
     <string name="scroll_mode">Scroll Mode</string>

@@ -134,6 +134,25 @@ class ReaderPreferences @OptIn(ExperimentalTextApi::class) constructor(
     fun paragraphIndent(): Preference<Int> {
         return preferenceStore.getInt(SAVED_PARAGRAPH_INDENT, 8)
     }
+    fun topMargin(): Preference<Int> {
+        return preferenceStore.getInt("reader_top_margin", 0)
+    }
+    fun leftMargin(): Preference<Int> {
+        return preferenceStore.getInt("reader_left_margin", 0)
+    }
+    fun rightMargin(): Preference<Int> {
+        return preferenceStore.getInt("reader_right_margin", 0)
+    }
+    fun bottomMargin(): Preference<Int> {
+        return preferenceStore.getInt("reader_bottom_margin", 0)
+    }
+
+    fun topContentPadding(): Preference<Int> {
+        return preferenceStore.getInt("reader_top_padding", 2)
+    }
+    fun bottomContentPadding(): Preference<Int> {
+        return preferenceStore.getInt("reader_bottom_padding", 2)
+    }
 
     fun scrollMode(): Preference<Boolean> {
         return preferenceStore.getBoolean(SCROLL_MODE, true)

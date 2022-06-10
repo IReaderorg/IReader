@@ -140,6 +140,44 @@ fun ReaderSettingMainLayout(
                         },
                         selected = vm.scrollIndicatorAlignment.value.ordinal
                     ),
+                    Components.Header(
+                        stringResource(id = R.string.margins)
+                    ),
+                    Components.Slider(
+                        preferenceAsInt = vm.topMargin,
+                        title = stringResource(id = R.string.top),
+                        trailing = vm.topMargin.value.toString(),
+                        valueRange = 0F..200F,
+                    ),
+                    Components.Slider(
+                        preferenceAsInt = vm.bottomMargin,
+                        title = stringResource(id = R.string.bottom),
+                        trailing = vm.bottomMargin.value.toString(),
+                        valueRange = 0F..200F,
+                    ),Components.Slider(
+                        preferenceAsInt = vm.leftMargin,
+                        title = stringResource(id = R.string.left),
+                        trailing = vm.leftMargin.value.toString(),
+                        valueRange = 0F..200F,
+                    ),Components.Slider(
+                        preferenceAsInt = vm.rightMargin,
+                        title = stringResource(id = R.string.right),
+                        trailing = vm.rightMargin.value.toString(),
+                        valueRange = 0F..200F,
+                    ),Components.Header(
+                        stringResource(id = R.string.content_padding)
+                    ),Components.Slider(
+                        preferenceAsInt = vm.topContentPadding,
+                        title = stringResource(id = R.string.top),
+                        trailing = vm.topContentPadding.value.toString(),
+                        valueRange = 0F..32F,
+                    )
+                    ,Components.Slider(
+                        preferenceAsInt = vm.bottomContentPadding,
+                        title = stringResource(id = R.string.bottom),
+                        trailing = vm.bottomContentPadding.value.toString(),
+                        valueRange = 0F..32F,
+                    ),
                 )
                 LazyColumn(
                     verticalArrangement = Arrangement.Top,

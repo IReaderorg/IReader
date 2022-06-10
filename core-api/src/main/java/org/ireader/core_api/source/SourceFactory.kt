@@ -11,7 +11,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.ireader.core_api.source.model.ChapterInfo
 import org.ireader.core_api.source.model.Command
-import org.ireader.core_api.source.model.CommandList
 import org.ireader.core_api.source.model.Filter
 import org.ireader.core_api.source.model.FilterList
 import org.ireader.core_api.source.model.Listing
@@ -23,62 +22,94 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 
+/**
+ * a simple class that makes Source Creation difficulty lower
+ *
+ * check out this site for more info [check out](https://github.com/IReaderorg/IReader/blob/master/core-api/src/main/java/org/ireader/core_api/source/SourceFactory.kt)
+ */
 @Keep
-open class SourceFactory(
-    private val deps: Dependencies,
-    override val lang: String,
-    override val baseUrl: String,
-    override val id: Long,
-    override val name: String,
-    val filterList: FilterList = emptyList(),
-    val commandList: CommandList = emptyList(),
-    val exploreFetchers: List<BaseExploreFetcher>,
-    val detailFetcher: SourceFactory.Detail,
-    val chapterFetcher: SourceFactory.Chapters? = null,
-    val contentFetcher: SourceFactory.Content,
+abstract class SourceFactory(
+    private val deps: Dependencies
 ) : HttpSource(deps) {
 
-    override fun getCommands(): CommandList {
-        return commandList
-    }
+    /**
+     * devs need to fill this if they wanted parse detail functionality
+     */
+    open val detailFetcher: SourceFactory.Detail = SourceFactory.Detail()
+    /**
+     * devs need to fill this if they wanted parse chapters functionality
+     */
+    open val chapterFetcher: SourceFactory.Chapters = SourceFactory.Chapters()
+    /**
+     * devs need to fill this if they wanted parse content functionality
+     */
+    open val contentFetcher: SourceFactory.Content = SourceFactory.Content()
+    /**
+     * devs need to fill this if they wanted parse explore functionality
+     */
+    open val exploreFetchers: List<BaseExploreFetcher> = listOf()
 
     class LatestListing() : Listing(name = "Latest")
 
+    /**
+     * the custom baseUrl
+     */
     open fun getCustomBaseUrl(): String = baseUrl
 
+    /**
+     * the default listing, it must have a default value
+     * if not the [getMangaList] return nothing
+     */
     override fun getListings(): List<Listing> {
         return listOf(
             LatestListing()
         )
     }
 
+    /**
+     * parse books based on selector that is passed from [BaseExploreFetcher]
+     */
     open fun bookListParse(
         document: Document,
         elementSelector: String,
-        nextPageSelector: String?,
+        baseExploreFetcher: BaseExploreFetcher,
         parser: (element: Element) -> MangaInfo
     ): MangasPageInfo {
         val books = document.select(elementSelector).map { element ->
             parser(element)
         }
-
-        val hasNextPage = nextPageSelector?.let { selector ->
-            document.select(selector).first()
-        } != null
+        val hasNextPage : Boolean = selectorReturnerStringType(document,baseExploreFetcher.nextPageSelector,baseExploreFetcher.nextPageAtt).let { string ->
+            if (baseExploreFetcher.nextPageValue != null) {
+                string == baseExploreFetcher.nextPageValue
+            } else {
+                string.isNotBlank()
+            }
+        }
 
         return MangasPageInfo(books, hasNextPage)
     }
 
+    /**
+     * default user agent for requests
+     */
     open fun getUserAgent() =
         "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36"
 
-    open fun HttpRequestBuilder.headersBuilder(block: HeadersBuilder.() -> Unit = {
-        append(HttpHeaders.UserAgent, getUserAgent())
-        append(HttpHeaders.CacheControl, "max-age=0")
-    }) {
+    /**
+     * simple header builder
+     */
+    open fun HttpRequestBuilder.headersBuilder(
+        block: HeadersBuilder.() -> Unit = {
+            append(HttpHeaders.UserAgent, getUserAgent())
+            append(HttpHeaders.CacheControl, "max-age=0")
+        }
+    ) {
         headers(block)
     }
 
+    /**
+     * the current request builder to make  ktor request easier to write
+     */
     open fun requestBuilder(
         url: String,
         block: HeadersBuilder.() -> Unit = {
@@ -95,11 +126,13 @@ open class SourceFactory(
     open val page = "{page}"
     open val query = "{query}"
 
+    /**
+     * the request for each [BaseExploreFetcher]
+     */
     open suspend fun getListRequest(
         baseExploreFetcher: BaseExploreFetcher,
         page: Int,
         query: String = "",
-        key: String
     ): Document {
         val res = requestBuilder(
             "${getCustomBaseUrl()}${
@@ -109,67 +142,86 @@ open class SourceFactory(
                 )
             }"
         )
-        return  client.get(res).asJsoup()
+        return client.get(res).asJsoup()
     }
 
+    /**
+     * parse the documents based on selector that is passes from [BaseExploreFetcher]
+     */
     open suspend fun getLists(
         baseExploreFetcher: BaseExploreFetcher,
         page: Int,
         query: String = "",
-        key: String,
         filters: FilterList,
     ): MangasPageInfo {
         if (baseExploreFetcher.selector == null) return MangasPageInfo(emptyList(), false)
         return bookListParse(
-            getListRequest(baseExploreFetcher, page, query, key),
+            getListRequest(baseExploreFetcher, page, query),
             baseExploreFetcher.selector,
-            baseExploreFetcher.nextPageSelector
+            baseExploreFetcher
         ) { element ->
 
             val title = selectorReturnerStringType(
                 element,
                 baseExploreFetcher.nameSelector,
                 baseExploreFetcher.nameAtt
-            )
+            ).let { baseExploreFetcher.onName(it,baseExploreFetcher.key) }
             val url = selectorReturnerStringType(
                 element,
                 baseExploreFetcher.linkSelector,
                 baseExploreFetcher.linkAtt
-            )
+            ).let { url ->
+                baseExploreFetcher.onLink(url,baseExploreFetcher.key)
+            }.let { mainUrl ->
+                if (baseExploreFetcher.addBaseUrlToLink) baseUrl + mainUrl else mainUrl
+            }
             val thumbnailUrl = selectorReturnerStringType(
                 element,
                 baseExploreFetcher.coverSelector,
                 baseExploreFetcher.coverAtt
-            )
+            ).let {
+                baseExploreFetcher.onCover(it,baseExploreFetcher.key)
+            }
 
             MangaInfo(
-                key = if (baseExploreFetcher.addBaseUrlToLink) baseUrl + url else url,
+                key = url,
                 title = title,
                 cover = if (baseExploreFetcher.addBaseurlToCoverLink) baseUrl + thumbnailUrl else thumbnailUrl
             )
         }
     }
-
+    /**
+     * this function is the first funciton that app request,
+     * @param sort the sorts which users takes comes from [getListings] currently it does nothing in the main app
+     * @param page current page
+     * @return [MangasPageInfo]
+     */
     override suspend fun getMangaList(sort: Listing?, page: Int): MangasPageInfo {
         return exploreFetchers.firstOrNull { it.type != Type.Search }?.let {
-            return getLists(it, page, "", it.key, emptyList())
+            return getLists(it, page, "", emptyList())
         } ?: MangasPageInfo(emptyList(), false)
     }
 
+    /**
+     * @param filters filters that users passed over to the source
+                        this filters comes from the [getFilters]
+     * @param page current page
+     * @return [MangasPageInfo]
+     */
     override suspend fun getMangaList(filters: FilterList, page: Int): MangasPageInfo {
         val sorts = filters.findInstance<Filter.Sort>()?.value?.index
         val query = filters.findInstance<Filter.Title>()?.value
 
         if (query != null) {
             exploreFetchers.firstOrNull { it.type == Type.Search }?.let {
-                return getLists(it, page, query,it.key,filters)
+                return getLists(it, page, query, filters)
             } ?: MangasPageInfo(emptyList(), false)
         }
 
 
         if (sorts != null) {
             return exploreFetchers.filter { it.type != Type.Search }.getOrNull(sorts)?.let {
-                return getLists(it, page, "",it.key,filters)
+                return getLists(it, page, "", filters)
             } ?: MangasPageInfo(emptyList(), false)
         }
 
@@ -177,19 +229,35 @@ open class SourceFactory(
         return MangasPageInfo(emptyList(), false)
     }
 
+    /**
+     * a function that parse each elements that is passed from [chaptersParse] and return a [ChapterInfo]
+     */
     open fun chapterFromElement(element: Element): ChapterInfo {
-        if (chapterFetcher == null) return ChapterInfo("", "")
         val link =
-            selectorReturnerStringType(element, chapterFetcher.linkSelector, chapterFetcher.linkAtt)
+            selectorReturnerStringType(element, chapterFetcher.linkSelector, chapterFetcher.linkAtt).let { chapterFetcher.onLink(it)}
         val name =
-            selectorReturnerStringType(element, chapterFetcher.nameSelector, chapterFetcher.nameAtt)
+            selectorReturnerStringType(element, chapterFetcher.nameSelector, chapterFetcher.nameAtt).let { chapterFetcher.onName(it) }
         val translator =
-            selectorReturnerStringType(element, chapterFetcher.translatorSelector, chapterFetcher.translatorAtt)
+            selectorReturnerStringType(
+                element,
+                chapterFetcher.translatorSelector,
+                chapterFetcher.translatorAtt
+            ).let { chapterFetcher.onTranslator(it) }
 
-        val releaseDate = selectorReturnerStringType(element,chapterFetcher.releaseDateSelector,chapterFetcher.releaseDateAtt).let {
-            chapterFetcher.releaseDateParser(it)
+        val releaseDate = selectorReturnerStringType(
+            element,
+            chapterFetcher.uploadDateSelector,
+            chapterFetcher.uploadDateAtt
+        ).let {
+            chapterFetcher.uploadDateParser(it)
         }
-        val number = selectorReturnerStringType(element,chapterFetcher.numberSelector,chapterFetcher.numberAtt).let {
+        val number = selectorReturnerStringType(
+            element,
+            chapterFetcher.numberSelector,
+            chapterFetcher.numberAtt
+        ).let {
+            chapterFetcher.onNumber(it)
+        }.let {
             kotlin.runCatching {
                 it.toFloat()
             }.getOrDefault(-1f)
@@ -203,10 +271,16 @@ open class SourceFactory(
         )
     }
 
+    /**
+     * a function that get document from [getChapterList] and
+     * based on chapterFetcher's selector parameter it would pass each element to [chapterFromElement]
+     */
     open fun chaptersParse(document: Document): List<ChapterInfo> {
-        return document.select(chapterFetcher?.selector ?: "").map { chapterFromElement(it) }
+        return document.select(chapterFetcher.selector ?: "").map { chapterFromElement(it) }
     }
-
+    /**
+     * a request that take a [book](MangaInfo)  and return a document
+     */
     open suspend fun getChapterListRequest(
         manga: MangaInfo,
         commands: List<Command<*>>
@@ -214,14 +288,22 @@ open class SourceFactory(
         return client.get(requestBuilder(manga.key)).asJsoup()
     }
 
+    /**
+     * @param manga the manga that is passed from main app app, which is get from [getMangaList] or [getMangaList]
+     * @param commands commands that is passes over from main app
+     *                  this list can  have [Command.Detail.Chapters]
+     *                  which the source should return List<[ChapterInfo]>
+     *                  this is optional, this command is only available if you add
+     *                  this command to command list
+     * @return return List<[ChapterInfo]>
+     */
     override suspend fun getChapterList(
         manga: MangaInfo,
         commands: List<Command<*>>
     ): List<ChapterInfo> {
         commands.findInstance<Command.Chapter.Fetch>()?.let { command ->
-            return chaptersParse(Jsoup.parse(command.html)).let { if (chapterFetcher?.reverseChapterList == true) it.reversed() else it }
+            return chaptersParse(Jsoup.parse(command.html)).let { if (chapterFetcher.reverseChapterList) it.reversed() else it }
         }
-        if (chapterFetcher == null) return emptyList()
         return kotlin.runCatching {
             return@runCatching withContext(Dispatchers.IO) {
                 val chapters =
@@ -233,33 +315,55 @@ open class SourceFactory(
         }.getOrThrow()
     }
 
-    override fun getFilters(): FilterList {
-        return filterList
-    }
+    /**
+     * the function that parse book Status
+     * @return a status
+     *          which should be one of
+     *
+                        const val UNKNOWN = 0
 
+                        const val ONGOING = 1
+
+                        const val COMPLETED = 2
+
+                        const val LICENSED = 3
+
+                        const val PUBLISHING_FINISHED = 4
+
+                        const val CANCELLED = 5
+
+                        const val ON_HIATUS = 6
+     *
+     *
+     *
+     */
     open fun statusParser(text: String): Int {
         return detailFetcher.status.getOrDefault(text, MangaInfo.UNKNOWN)
     }
 
+    /**
+     * a function that takes a document that is passed from [getMangaDetailsRequest]
+     * it return as [MangaInfo] base on detail fetcher
+     */
     open fun detailParse(document: Document): MangaInfo {
         val title =
-            selectorReturnerStringType(document, detailFetcher.nameSelector, detailFetcher.nameAtt)
+            selectorReturnerStringType(document, detailFetcher.nameSelector, detailFetcher.nameAtt).let { detailFetcher.onName(it) }
         val cover = selectorReturnerStringType(
             document,
             detailFetcher.coverSelector,
             detailFetcher.coverAtt
-        )
+        ).let { detailFetcher.onCover(it) }
         val authorBookSelector = selectorReturnerStringType(
             document,
             detailFetcher.authorBookSelector,
             detailFetcher.authorBookAtt
-        )
+        ).let { detailFetcher.onAuthor(it) }
         val status = statusParser(
             selectorReturnerStringType(
                 document,
                 detailFetcher.statusSelector,
                 detailFetcher.statusAtt
-            )
+            ).let { detailFetcher.onStatus(it) }
         )
 
         val description =
@@ -267,15 +371,15 @@ open class SourceFactory(
                 document,
                 detailFetcher.descriptionSelector,
                 detailFetcher.descriptionBookAtt
-            ).joinToString("\n\n")
+            ).let { detailFetcher.onDescription(it) }.joinToString("\n\n")
         val category = selectorReturnerListType(
             document,
             detailFetcher.categorySelector,
             detailFetcher.categoryAtt
-        )
+        ).let { detailFetcher.onCategory(it) }
         return MangaInfo(
             title = title,
-            cover = cover,
+            cover = if(detailFetcher.addBaseurlToCoverLink) baseUrl + cover else cover,
             description = description,
             author = authorBookSelector,
             genres = category,
@@ -283,14 +387,24 @@ open class SourceFactory(
             key = "",
         )
     }
-
+    /**
+     * the request handler for book detail request which return a documents that is passed to [getMangaDetails]
+     */
     open suspend fun getMangaDetailsRequest(
         manga: MangaInfo,
         commands: List<Command<*>>
     ): Document {
         return client.get(requestBuilder(manga.key)).asJsoup()
     }
-
+    /**
+     * @param manga the book that is passed from main app app, which is get from [getMangaList] or [getMangaList]
+     * @param commands commands that is passes over from main app
+     *                  this list can  have [Command.Detail.Fetch]
+     *                  which the source should return MangaInfo
+     *                  this is optional, this command is only available if you add
+     *                  this command to command list
+     * @return return a [MangaInfo]
+     */
     override suspend fun getMangaDetails(manga: MangaInfo, commands: List<Command<*>>): MangaInfo {
         commands.findInstance<Command.Detail.Fetch>()?.let {
             return detailParse(Jsoup.parse(it.html)).copy(key = it.url)
@@ -298,36 +412,85 @@ open class SourceFactory(
         return detailParse(getMangaDetailsRequest(manga, commands))
     }
 
+    /**
+     * the request handler for content request which return a documents that is passed to [getContents]
+     */
     open suspend fun getContentRequest(chapter: ChapterInfo, commands: List<Command<*>>): Document {
         return client.get(requestBuilder(chapter.key)).asJsoup()
     }
 
+    /**
+     * a wrapper around getPageList that return a List<String>
+     */
     open suspend fun getContents(chapter: ChapterInfo, commands: List<Command<*>>): List<String> {
         return pageContentParse(getContentRequest(chapter, commands))
     }
 
+    /**
+     * parse chapter contents based on contentFetcher
+     */
     open fun pageContentParse(document: Document): List<String> {
         val par = selectorReturnerListType(
             document,
             selector = contentFetcher.pageContentSelector,
             contentFetcher.pageContentAtt
-        )
+        ).let {
+            contentFetcher.onContent(it)
+        }
         val head = selectorReturnerStringType(
             document,
             selector = contentFetcher.pageTitleSelector,
             contentFetcher.pageTitleAtt
-        )
+        ).let {
+            contentFetcher.onTitle(it)
+        }
 
         return listOf(head) + par
     }
 
+    /**
+     * @param chapter the chapter that is passed from main app app
+     * @param commands commands that is passes over from main app
+     *                  this list can  have Command.Content.Fetch
+     *                  which the source should return the content of chapter
+     *                  this is optional, this command is only available if you add
+     *                  this command to command list
+     * @return a Page which is basically list of strings, need to map Strings to Text()
+     */
     override suspend fun getPageList(chapter: ChapterInfo, commands: List<Command<*>>): List<Page> {
         commands.findInstance<Command.Content.Fetch>()?.let { command ->
             return pageContentParse(Jsoup.parse(command.html)).map { Text(it) }
         }
-        return getContents(chapter,commands).map { Text(it) }
+        return getContents(chapter, commands).map { Text(it) }
     }
 
+    /**
+     * @param key the key that is passed to to request and get list,
+     *              and must be unique for each ExploreFetcher,devs can
+     *              use this to customize requests
+     * @param endpoint the endpoints for each fetcher example : "/popular/{page}/{query}
+     *                  replace the pages in url with "{url}
+     *                  replace the query in the url with {query}
+     *
+     * @param selector selector for each book elements
+     * @param addBaseUrlToLink add baseUrl to Link
+     * @param nextPageSelector the selector for the element that indicated that next page exists
+     * @param nextPageAtt the attribute for the element that indicated that next page exists
+     * @param nextPageValue the expected value that next page,
+                            this value can be left empty
+     * @param onLink  this value pass a string and after applying the required changed
+                                it should return the changed link
+     * @param addBaseurlToCoverLink "true" if you want to add baseUrl to link
+     * @param linkSelector selector for link of book
+     * @param linkAtt attribute for the link of book
+     * @param onName it take title that is get based on selector and attribute and it should return a value after applying changes
+     * @param nameSelector selector for name of book
+     * @param nameAtt attribute for name of book
+     * @param coverSelector selector for cover of book
+     * @param coverAtt attribute for cover of book
+     * @param onCover it take title that is get based on selector and attribute and it should return a value after applying changes
+     * @param type the type this data class, don't change this parameter
+     */
     data class BaseExploreFetcher(
         val key: String,
         val endpoint: String? = null,
@@ -336,64 +499,137 @@ open class SourceFactory(
         val nextPageSelector: String? = null,
         val nextPageAtt: String? = null,
         val nextPageValue: String? = null,
-        val addToStringEnd: String? = null,
         val addBaseurlToCoverLink: Boolean = false,
         val linkSelector: String? = null,
         val linkAtt: String? = null,
+        val onLink:(url:String,key:String) -> String = {url,_ ->  url },
         val nameSelector: String? = null,
         val nameAtt: String? = null,
+        val onName:(String,key:String) -> String ={url,_ ->  url },
         val coverSelector: String? = null,
         val coverAtt: String? = null,
+        val onCover:(String,key:String) -> String = {url,_ ->  url },
         val type: Type = Type.Others,
     )
 
+    /**
+     * all parameter are optional
+     * @param addBaseurlToCoverLink "true" if you want to add base url to cover link
+     * @param onName it take title that is get based on selector and attribute and it should return a value after applying changes
+     * @param nameSelector the selector for the name of book
+     * @param nameAtt the attribute for the name of book
+     * @param onCover it take title that is get based on selector and attribute and it should return a value after applying changes
+     * @param coverSelector the selector for the cover of book
+     * @param coverAtt the attribute for the cover of att
+     * @param descriptionSelector the selector for the description of book
+     * @param descriptionBookAtt the attribute for the description of book
+     * @param onDescription it take title that is get based on selector and attribute and it should return a value after applying changes
+     * @param authorBookSelector the selector for the author of book
+     * @param authorBookAtt the attribute for the author of book
+     * @param onAuthor it take title that is get based on selector and attribute and it should return a value after applying changes
+     * @param categorySelector the selector for the category of book
+     * @param categoryAtt the attribute for the category of book
+     * @param onCategory it take title that is get based on selector and attribute and it should return a value after applying changes
+     * @param statusSelector the selector for the status of book
+     * @param statusAtt the attribute for the status of book
+     * @param onStatus it take title that is get based on selector and attribute and it should return a value after applying changes
+     * @param status a map that take expected value as key and take the result Status as value @example "OnGoing" to MangaInfo.ONGOING
+     * @param type the type this data class, don't change this parameter
+     */
     data class Detail(
-        val addBaseUrlToLink: Boolean = false,
         val addBaseurlToCoverLink: Boolean = false,
         val nameSelector: String? = null,
         val nameAtt: String? = null,
+        val onName: (String) -> String = { it },
         val coverSelector: String? = null,
         val coverAtt: String? = null,
+        val onCover: (String) -> String = { it },
         val descriptionSelector: String? = null,
         val descriptionBookAtt: String? = null,
+        val onDescription: (List<String>) -> List<String> = { it },
         val authorBookSelector: String? = null,
         val authorBookAtt: String? = null,
+        val onAuthor: (String) -> String = { it },
         val categorySelector: String? = null,
         val categoryAtt: String? = null,
+        val onCategory: (List<String>) -> List<String> = { it },
         val statusSelector: String? = null,
         val statusAtt: String? = null,
+        val onStatus: (String) -> String = { it },
         val status: Map<String, Int> = emptyMap<String, Int>(),
         val type: Type = Type.Detail,
     )
 
+    /**
+     * all parameter are optional
+     * @param selector selector for each chapter elements
+     * @param addBaseUrlToLink true, if you want to add baseUrl to the url
+     * @param reverseChapterList "true" if you want to reverse chapter list
+     * @param linkSelector the selector for the link of chapter
+     * @param linkAtt the attribute for the link of chapter
+     * @param onLink it take title that is get based on selector and attribute and it should return a value after applying changes
+     * @param nameSelector the selector for the name of chapter
+     * @param nameAtt the attribute for the name of chapter
+     * @param onName it take title that is get based on selector and attribute and it should return a value after applying changes
+     * @param numberSelector the selector for the number of chapter
+     * @param numberAtt the attribute for the number of chapter
+     * @param onNumber it take title that is get based on selector and attribute and it should return a value after applying changes
+     * @param uploadDateSelector  the selector for the uploadDate of chapter
+     * @param uploadDateAtt the attribute for the uploadDate of chapter
+     * @param uploadDateParser take a string which is the string that document get from "uploadDateSelector" and "uploadDateAtt"
+     * @param translatorSelector the selector for the translator of chapter
+     * @param translatorAtt the attribute for the translator of chapter
+     * @param onTranslator it take title that is get based on selector and attribute and it should return a value after applying changes
+     * @param type the type this data class, don't change this parameter
+     */
     data class Chapters(
         val selector: String? = null,
         val addBaseUrlToLink: Boolean = false,
-        val nextPageSelector: String? = null,
-        val nextPageAtt: String? = null,
         val reverseChapterList: Boolean = true,
         val linkSelector: String? = null,
+        val onLink:((String) -> String)= { it },
         val linkAtt: String? = null,
         val nameSelector: String? = null,
         val nameAtt: String? = null,
-        val numberSelector:String?=null,
-        val numberAtt:String?=null,
-        val releaseDateSelector:String?=null,
-        val releaseDateAtt:String?=null,
-        val releaseDateParser:(String) -> Long = { 0L },
-        val translatorSelector:String?=null,
-        val translatorAtt:String?=null,
+        val onName:((String) -> String)= { it },
+        val numberSelector: String? = null,
+        val numberAtt: String? = null,
+        val onNumber:((String) -> String) = { it },
+        val uploadDateSelector: String? = null,
+        val uploadDateAtt: String? = null,
+        val uploadDateParser: (String) -> Long = { 0L },
+        val translatorSelector: String? = null,
+        val translatorAtt: String? = null,
+        val onTranslator:((String) -> String)={ it },
         val type: Type = Type.Chapters,
     )
 
+    /**
+     * all parameter are optional
+     * @param pageTitleSelector selector for title of novel
+     * @param pageTitleAtt att for title of novel
+     * @param onTitle it take title that is get based on selector and attribute and it should return a value after applying changes
+     * @param pageContentSelector selector for content of novel
+     * @param pageContentAtt att for content of novel
+     * @param onContent it take title that is get based on selector and attribute and it should return a value after applying changes
+     * @param type the type this data class, don't change this parameter
+     */
     data class Content(
         val pageTitleSelector: String? = null,
         val pageTitleAtt: String? = null,
+        val onTitle: (String) -> String = { it },
         val pageContentSelector: String? = null,
         val pageContentAtt: String? = null,
+        val onContent: (List<String>) -> List<String> = { it },
         val type: Type = Type.Content,
     )
 
+    /**
+     * type of fetchers
+     * if there are not under any types like popular, date, new, then
+     * it is part of "Other" Typ]e
+     *
+     */
     enum class Type {
         Search,
         Detail,
@@ -402,69 +638,81 @@ open class SourceFactory(
         Others
     }
 
+    /**
+     * get list of text based on selector and attribute
+     */
     open fun selectorReturnerStringType(
         document: Document,
         selector: String? = null,
         att: String? = null,
     ): String {
-        if (selector.isNullOrBlank() && !att.isNullOrBlank()) {
-            return document.attr(att)
+        return if (selector.isNullOrBlank() && !att.isNullOrBlank()) {
+            document.attr(att)
         } else if (!selector.isNullOrBlank() && att.isNullOrBlank()) {
-            return document.select(selector).text()
+            document.select(selector).text()
         } else if (!selector.isNullOrBlank() && !att.isNullOrBlank()) {
-            return document.select(selector).attr(att)
+            document.select(selector).attr(att)
         } else {
-            return ""
+            ""
         }
     }
 
+    /**
+     * get list of text based on selector and attribute
+     */
     open fun selectorReturnerStringType(
         element: Element,
         selector: String? = null,
         att: String? = null,
     ): String {
-        if (selector.isNullOrBlank() && !att.isNullOrBlank()) {
-            return element.attr(att)
+        return if (selector.isNullOrBlank() && !att.isNullOrBlank()) {
+            element.attr(att)
         } else if (!selector.isNullOrBlank() && att.isNullOrBlank()) {
-            return element.select(selector).text()
+            element.select(selector).text()
         } else if (!selector.isNullOrBlank() && !att.isNullOrBlank()) {
-            return element.select(selector).attr(att)
+            element.select(selector).attr(att)
         } else {
-            return ""
+            ""
         }
     }
 
+    /**
+     * get list of text based on selector and attribute
+     */
     open fun selectorReturnerListType(
         element: Element,
         selector: String? = null,
         att: String? = null,
     ): List<String> {
-        if (selector.isNullOrBlank() && !att.isNullOrBlank()) {
-            return listOf(element.attr(att))
+        return if (selector.isNullOrBlank() && !att.isNullOrBlank()) {
+            listOf(element.attr(att))
         } else if (!selector.isNullOrBlank() && att.isNullOrBlank()) {
-            return element.select(selector).eachText()
+            element.select(selector).eachText()
         } else if (!selector.isNullOrBlank() && !att.isNullOrBlank()) {
-            return listOf(element.select(selector).attr(att))
+            listOf(element.select(selector).attr(att))
         } else {
-            return emptyList()
+            emptyList()
         }
     }
 
+    /**
+     * get a list of text based on selector and attribute
+     */
     open fun selectorReturnerListType(
         document: Document,
         selector: String? = null,
         att: String? = null,
     ): List<String> {
-        if (selector.isNullOrBlank() && !att.isNullOrBlank()) {
-            return listOf(document.attr(att))
+        return if (selector.isNullOrBlank() && !att.isNullOrBlank()) {
+            listOf(document.attr(att))
         } else if (!selector.isNullOrBlank() && att.isNullOrBlank()) {
-            return document.select(selector).map {
+            document.select(selector).map {
                 it.text()
             }
         } else if (!selector.isNullOrBlank() && !att.isNullOrBlank()) {
-            return listOf(document.select(selector).attr(att))
+            listOf(document.select(selector).attr(att))
         } else {
-            return emptyList()
+            emptyList()
         }
     }
 }
