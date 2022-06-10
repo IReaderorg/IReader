@@ -183,9 +183,23 @@ open class SourceFactory(
             selectorReturnerStringType(element, chapterFetcher.linkSelector, chapterFetcher.linkAtt)
         val name =
             selectorReturnerStringType(element, chapterFetcher.nameSelector, chapterFetcher.nameAtt)
+        val translator =
+            selectorReturnerStringType(element, chapterFetcher.translatorSelector, chapterFetcher.translatorAtt)
+
+        val releaseDate = selectorReturnerStringType(element,chapterFetcher.releaseDateSelector,chapterFetcher.releaseDateAtt).let {
+            chapterFetcher.releaseDateParser(it)
+        }
+        val number = selectorReturnerStringType(element,chapterFetcher.numberSelector,chapterFetcher.numberAtt).let {
+            kotlin.runCatching {
+                it.toFloat()
+            }.getOrDefault(-1f)
+        }
         return ChapterInfo(
             name = name,
-            key = if (chapterFetcher.addBaseUrlToLink) baseUrl + link else link
+            key = if (chapterFetcher.addBaseUrlToLink) baseUrl + link else link,
+            number = number,
+            dateUpload = releaseDate,
+            scanlator = translator
         )
     }
 
@@ -266,7 +280,7 @@ open class SourceFactory(
             author = authorBookSelector,
             genres = category,
             status = status,
-            key = ""
+            key = "",
         )
     }
 
@@ -362,6 +376,13 @@ open class SourceFactory(
         val linkAtt: String? = null,
         val nameSelector: String? = null,
         val nameAtt: String? = null,
+        val numberSelector:String?=null,
+        val numberAtt:String?=null,
+        val releaseDateSelector:String?=null,
+        val releaseDateAtt:String?=null,
+        val releaseDateParser:(String) -> Long = { 0L },
+        val translatorSelector:String?=null,
+        val translatorAtt:String?=null,
         val type: Type = Type.Chapters,
     )
 

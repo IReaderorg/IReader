@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.FlipToBack
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.filled.Sort
+import androidx.compose.material.icons.filled.SyncAlt
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -26,6 +27,7 @@ fun ChapterDetailTopAppBar(
     onClickCancelSelection: () -> Unit,
     onClickSelectAll: () -> Unit,
     onClickFlipSelection: () -> Unit,
+    onSelectBetween:() -> Unit,
     onReverseClick: () -> Unit,
     onPopBackStack: () -> Unit,
     onMap: () -> Unit,
@@ -37,7 +39,8 @@ fun ChapterDetailTopAppBar(
                     selectionSize = state.selection.size,
                     onClickCancelSelection = onClickCancelSelection,
                     onClickSelectAll = onClickSelectAll,
-                    onClickInvertSelection = onClickFlipSelection
+                    onClickInvertSelection = onClickFlipSelection,
+                    onSelectBetween = onSelectBetween
                 )
             }
             else -> {
@@ -106,6 +109,7 @@ private fun EditModeChapterDetailTopAppBar(
     onClickCancelSelection: () -> Unit,
     onClickSelectAll: () -> Unit,
     onClickInvertSelection: () -> Unit,
+    onSelectBetween: () -> Unit,
 ) {
     Toolbar(
         title = { BigSizeTextComposable(text = "$selectionSize") },
@@ -115,6 +119,7 @@ private fun EditModeChapterDetailTopAppBar(
         actions = {
             AppIconButton(imageVector =Icons.Default.SelectAll ,contentDescription = stringResource(R.string.select_all), onClick = onClickSelectAll)
             AppIconButton(imageVector =Icons.Default.FlipToBack ,contentDescription = stringResource(R.string.select_inverted), onClick = onClickInvertSelection)
+            AppIconButton(imageVector =Icons.Default.SyncAlt ,contentDescription = stringResource(R.string.select_between), onClick = onSelectBetween)
         }
     )
 }

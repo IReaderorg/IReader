@@ -59,8 +59,6 @@ fun GridLayoutComposable(
                     val height = remember {
                         mutableStateOf(IntSize(0,0))
                     }
-
-                    org.ireader.core_api.log.Log.error { height.toString() }
                     BookImage(
                         modifier.onGloballyPositioned {
                           height.value = it.size

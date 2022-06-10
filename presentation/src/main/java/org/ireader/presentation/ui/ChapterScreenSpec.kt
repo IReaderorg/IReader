@@ -55,7 +55,7 @@ object ChapterScreenSpec : ScreenSpec {
     override fun TopBar(
         controller: ScreenSpec.Controller
     ) {
-        val vm: ChapterDetailViewModel = hiltViewModel(   controller.navBackStackEntry)
+        val vm: ChapterDetailViewModel = hiltViewModel(controller.navBackStackEntry)
         val scrollState = vm.scrollState
         val scope = rememberCoroutineScope()
         ChapterDetailTopAppBar(
@@ -76,7 +76,7 @@ object ChapterScreenSpec : ScreenSpec {
             onReverseClick = {
                 //vm.onEvent(ChapterDetailEvent.ToggleOrder)
                 scope.launch {
-                controller.sheetState.show()
+                    controller.sheetState.show()
 
                 }
             },
@@ -93,15 +93,31 @@ object ChapterScreenSpec : ScreenSpec {
                     } catch (e: Throwable) {
                     }
                 }
+            },
+            onSelectBetween = {
+                val ids: List<Long> =
+                    vm.chapters.map { it.id }
+                        .filter { it in vm.selection }.distinct().sortedBy { it }.let {
+                            val list = mutableListOf<Long>()
+                            val min = it.minOrNull() ?: 0
+                            val max = it.maxOrNull() ?: 0
+                            for(id in min..max) {
+                                list.add(id)
+                            }
+                            list
+                        }
+                vm.selection.clear()
+                vm.selection.addAll(ids)
             }
         )
     }
+
     @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
     @Composable
     override fun ModalDrawer(
         controller: ScreenSpec.Controller
     ) {
-        val vm: ChapterDetailViewModel = hiltViewModel(   controller.navBackStackEntry)
+        val vm: ChapterDetailViewModel = hiltViewModel(controller.navBackStackEntry)
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -124,7 +140,7 @@ object ChapterScreenSpec : ScreenSpec {
                 modifier = Modifier.fillMaxWidth(),
                 onClick = { vm.autoSortChapterInDB() }
             ) {
-                MidSizeTextComposable(text =stringResource(R.string.auto_sort_chapters_in_db))
+                MidSizeTextComposable(text = stringResource(R.string.auto_sort_chapters_in_db))
             }
         }
     }
@@ -137,7 +153,7 @@ object ChapterScreenSpec : ScreenSpec {
     override fun Content(
         controller: ScreenSpec.Controller
     ) {
-        val vm: ChapterDetailViewModel = hiltViewModel(   controller.navBackStackEntry)
+        val vm: ChapterDetailViewModel = hiltViewModel(controller.navBackStackEntry)
         val book = vm.book
         ChapterDetailScreen(
             onItemClick = { chapter ->
@@ -147,7 +163,7 @@ object ChapterScreenSpec : ScreenSpec {
                             ReaderScreenSpec.buildRoute(
                                 bookId = book.id,
                                 sourceId = book.sourceId,
-                                chapterId =chapter.id,
+                                chapterId = chapter.id,
                             )
                         )
                     }
@@ -177,7 +193,6 @@ object ChapterScreenSpec : ScreenSpec {
         )
     }
 
-
     @OptIn(ExperimentalPagerApi::class, ExperimentalMaterialApi::class)
     @Composable
     override fun BottomModalSheet(
@@ -198,7 +213,7 @@ object ChapterScreenSpec : ScreenSpec {
             sortType = vm.sorting.value,
             isSortDesc = vm.isAsc,
             onLayoutSelected = { layout ->
-              vm.layout = layout
+                vm.layout = layout
             },
             layoutType = vm.layout,
             vm = vm

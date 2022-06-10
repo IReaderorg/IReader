@@ -126,29 +126,31 @@ fun ReaderText(
                     ),
                 ),
             ) {
-                when (vm.readingMode.value) {
-                    ReadingMode.Page -> {
-                        PagedReaderText(
-                            interactionSource = interactionSource,
-                            scrollState = scrollState,
-                            vm = vm,
-                            maxHeight = maxHeight,
-                            onNext = onNext,
-                            onPrev = onPrev,
-                            toggleReaderMode = toggleReaderMode
-                        )
-                    }
-                    ReadingMode.Continues -> {
-                        ContinuesReaderPage(
-                            interactionSource = interactionSource,
-                            scrollState = lazyListState,
-                            vm = vm,
-                            maxHeight = maxHeight,
-                            onNext = onNext,
-                            onPrev = onPrev,
-                            toggleReaderMode = toggleReaderMode,
-                            onChapterShown = onChapterShown
-                        )
+                TextSelectionContainer(selectable = vm.selectableMode.value) {
+                    when (vm.readingMode.value) {
+                        ReadingMode.Page -> {
+                            PagedReaderText(
+                                interactionSource = interactionSource,
+                                scrollState = scrollState,
+                                vm = vm,
+                                maxHeight = maxHeight,
+                                onNext = onNext,
+                                onPrev = onPrev,
+                                toggleReaderMode = toggleReaderMode
+                            )
+                        }
+                        ReadingMode.Continues -> {
+                            ContinuesReaderPage(
+                                interactionSource = interactionSource,
+                                scrollState = lazyListState,
+                                vm = vm,
+                                maxHeight = maxHeight,
+                                onNext = onNext,
+                                onPrev = onPrev,
+                                toggleReaderMode = toggleReaderMode,
+                                onChapterShown = onChapterShown
+                            )
+                        }
                     }
                 }
                 ReaderHorizontalScreen(
@@ -214,7 +216,6 @@ private fun PagedReaderText(
 
                 ) {
                     vm.stateContent.forEachIndexed { index, text ->
-                        TextSelectionContainer(selectable = vm.selectableMode.value) {
                             Text(
                                 modifier = modifier
                                     .fillMaxWidth()
@@ -229,8 +230,6 @@ private fun PagedReaderText(
                                 lineHeight = vm.lineHeight.value.sp,
                             )
                         }
-
-                    }
                 }
 
             }
@@ -299,8 +298,6 @@ private fun ContinuesReaderPage(
                     "$index-${items[index].first}"
                 }
             ) { index ->
-
-                TextSelectionContainer(selectable = vm.selectableMode.value) {
                     Text(
                         modifier = modifier
                             .fillMaxWidth()
@@ -316,7 +313,6 @@ private fun ContinuesReaderPage(
                         color = vm.textColor.value,
                         lineHeight = vm.lineHeight.value.sp,
                     )
-                }
             }
 
         }
@@ -369,7 +365,6 @@ fun ContinuousReaderPageWithScrollState(
                     }
             ) {
                 chapter.content.forEachIndexed { index, text ->
-                    TextSelectionContainer(selectable = vm.selectableMode.value) {
                         Text(
                             modifier = modifier
                                 .fillMaxWidth()
@@ -386,7 +381,6 @@ fun ContinuousReaderPageWithScrollState(
                             lineHeight = vm.lineHeight.value.sp,
                         )
                     }
-                }
             }
         }
 

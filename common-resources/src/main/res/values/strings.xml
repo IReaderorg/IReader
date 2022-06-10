@@ -395,6 +395,7 @@
     <string name="more">More</string>
     <string name="select_all">Select All</string>
     <string name="select_inverted">Select Inverted</string>
+    <string name="select_between">Select Between</string>
     <string name="website">IReader</string>
     <string name="less_brightness">Less Brightness</string>
     <string name="more_brightness">More Brightness</string>
