@@ -338,7 +338,7 @@ abstract class SourceFactory(
      *
      */
     open fun statusParser(text: String): Int {
-        return detailFetcher.status.getOrDefault(text, MangaInfo.UNKNOWN)
+        return detailFetcher.onStatus(text)
     }
 
     /**
@@ -363,7 +363,7 @@ abstract class SourceFactory(
                 document,
                 detailFetcher.statusSelector,
                 detailFetcher.statusAtt
-            ).let { detailFetcher.onStatus(it) }
+            )
         )
 
         val description =
@@ -532,7 +532,7 @@ abstract class SourceFactory(
      * @param onCategory it take title that is get based on selector and attribute and it should return a value after applying changes
      * @param statusSelector the selector for the status of book
      * @param statusAtt the attribute for the status of book
-     * @param onStatus it take title that is get based on selector and attribute and it should return a value after applying changes
+     * @param onStatus it take title that is get based on selector and attribute and it should return a value after applying changes, the value must be [MangaInfo.status]
      * @param status a map that take expected value as key and take the result Status as value @example "OnGoing" to MangaInfo.ONGOING
      * @param type the type this data class, don't change this parameter
      */
@@ -555,8 +555,7 @@ abstract class SourceFactory(
         val onCategory: (List<String>) -> List<String> = { it },
         val statusSelector: String? = null,
         val statusAtt: String? = null,
-        val onStatus: (String) -> String = { it },
-        val status: Map<String, Int> = emptyMap<String, Int>(),
+        val onStatus: (String) -> Int = { MangaInfo.UNKNOWN },
         val type: Type = Type.Detail,
     )
 

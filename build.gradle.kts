@@ -19,7 +19,7 @@ buildscript {
         classpath(libs.gradle.google)
         classpath(libs.gradle.firebaseCrashlytic)
         classpath(libs.gradle.idea.ext)
-        classpath("com.vanniktech:gradle-maven-publish-plugin:0.19.0")
+        classpath("com.vanniktech:gradle-maven-publish-plugin:0.20.0")
     }
 }
 
@@ -67,7 +67,7 @@ subprojects {
         useJUnitPlatform()
     }
     plugins.withType<com.android.build.gradle.BasePlugin> {
-        configure<com.android.build.gradle.BaseExtension> {
+        configure<com.android.build.gradle.BaseExtension>() {
             compileSdkVersion(ProjectConfig.compileSdk)
             defaultConfig {
                 minSdk = ProjectConfig.minSdk

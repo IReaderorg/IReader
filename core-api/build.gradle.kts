@@ -2,11 +2,10 @@ plugins {
     id("com.android.library")
     id("kotlin-android")
     id("org.jetbrains.gradle.plugin.idea-ext")
-    id("com.vanniktech.maven.publish")
+    id("com.vanniktech.maven.publish.base")
     `maven-publish`
     signing
 }
-
 dependencies {
     implementation(project(Modules.commonResources))
     api(kotlinx.coroutines.core)
@@ -30,13 +29,18 @@ dependencies {
     api(libs.ktor.okhttp)
 }
 
-val packageVersion = "1.2-SNAPSHOT"
-mavenPublish {
-    sonatypeHost = null
 
-}
-mavenPublishing {
-    com.vanniktech.maven.publish.AndroidSingleVariantLibrary()
+val packageVersion = "1.2-SNAPSHOT"
+
+configure<com.vanniktech.maven.publish.MavenPublishBaseExtension> {
+    group = requireNotNull(project.findProperty("GROUP"))
+    version = requireNotNull(project.findProperty("VERSION_NAME"))
+    mavenPublishing {
+        //publishToMavenCentral(com.vanniktech.maven.publish.SonatypeHost.S01)
+        signAllPublications()
+        configure(com.vanniktech.maven.publish.AndroidSingleVariantLibrary())
+    }
+    pomFromGradleProperties()
 }
 
 publishing {
