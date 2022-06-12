@@ -135,7 +135,7 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
         }
     }
 
-    suspend fun getLocalChapter(chapterId: Long?, next: Boolean = true): Chapter? {
+    suspend fun getLocalChapter(chapterId: Long?, next: Boolean = true,force: Boolean=false): Chapter? {
         if (chapterId == null) return null
 
         isLoading = true
@@ -143,7 +143,7 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
         chapter.let {
             stateChapter = it
         }
-        if (chapter?.isEmpty() == true) {
+        if (chapter != null && (chapter.isEmpty() || force)) {
             state.source?.let { source -> getRemoteChapter(chapter) }
         }
         stateChapter?.let { ch -> getChapterUseCase.updateLastReadTime(ch) }
