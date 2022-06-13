@@ -52,7 +52,7 @@ class AdvanceSettingViewModel @Inject constructor(
             prefUseCases.paragraphIndentUseCase.save(8)
             prefUseCases.scrollModeUseCase.save(true)
             prefUseCases.scrollIndicatorUseCase.savePadding(0)
-            prefUseCases.scrollIndicatorUseCase.saveWidth(0)
+            readerPreferences.textWeight().set(400)
         }
     }
     fun onEpubImportRequested(onStart: (Intent) -> Unit) {

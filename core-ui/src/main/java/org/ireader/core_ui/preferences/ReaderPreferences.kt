@@ -153,6 +153,12 @@ class ReaderPreferences @OptIn(ExperimentalTextApi::class) constructor(
     fun bottomContentPadding(): Preference<Int> {
         return preferenceStore.getInt("reader_bottom_padding", 2)
     }
+    fun betweenLetterSpaces(): Preference<Int> {
+        return preferenceStore.getInt("reader_text_space", 0)
+    }
+    fun textWeight(): Preference<Int> {
+        return preferenceStore.getInt("reader_text_weight", 400)
+    }
 
     fun scrollMode(): Preference<Boolean> {
         return preferenceStore.getBoolean(SCROLL_MODE, true)

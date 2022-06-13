@@ -32,6 +32,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
@@ -213,23 +214,11 @@ private fun PagedReaderText(
 
                 ) {
                     vm.stateContent.forEachIndexed { index, text ->
-                        Text(
-                            modifier = modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = vm.paragraphsIndent.value.dp),
-                            text = setText(
-                                text = text,
-                                index = index,
-                                isLast = index == vm.stateContent.lastIndex,
-                                topContentPadding = vm.topContentPadding.value,
-                                contentPadding = vm.distanceBetweenParagraphs.value,
-                                bottomContentPadding = vm.bottomContentPadding.value
-                            ),
-                            fontSize = vm.fontSize.value.sp,
-                            fontFamily = vm.font.value.fontFamily,
-                            textAlign = mapTextAlign(vm.textAlignment.value),
-                            color = vm.textColor.value,
-                            lineHeight = vm.lineHeight.value.sp,
+                        MainText(
+                            modifier = modifier,
+                            index = index,
+                            text = text,
+                            vm= vm
                         )
                     }
                 }
@@ -238,6 +227,35 @@ private fun PagedReaderText(
         }
 
     }
+}
+
+@Composable
+private fun MainText(
+    modifier: Modifier,
+    index: Int,
+    text: String,
+    vm: ReaderScreenViewModel
+) {
+    Text(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = vm.paragraphsIndent.value.dp),
+        text = setText(
+            text = text,
+            index = index,
+            isLast = index == vm.stateContent.lastIndex,
+            topContentPadding = vm.topContentPadding.value,
+            contentPadding = vm.distanceBetweenParagraphs.value,
+            bottomContentPadding = vm.bottomContentPadding.value
+        ),
+        fontSize = vm.fontSize.value.sp,
+        fontFamily = vm.font.value.fontFamily,
+        textAlign = mapTextAlign(vm.textAlignment.value),
+        color = vm.textColor.value,
+        lineHeight = vm.lineHeight.value.sp,
+        letterSpacing = vm.betweenLetterSpaces.value.sp,
+        fontWeight = FontWeight(vm.textWeight.value),
+    )
 }
 
 @Composable
@@ -303,23 +321,11 @@ private fun ContinuesReaderPage(
                     "$index-${items[index].first}"
                 }
             ) { index ->
-                Text(
-                    modifier = modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = vm.paragraphsIndent.value.dp),
-                    text = setText(
-                        text = items[index].second,
-                        index = index,
-                        isLast = index == items.lastIndex,
-                        topContentPadding = vm.topContentPadding.value,
-                        contentPadding = vm.distanceBetweenParagraphs.value,
-                        bottomContentPadding = vm.bottomContentPadding.value
-                    ),
-                    fontSize = vm.fontSize.value.sp,
-                    fontFamily = vm.font.value.fontFamily,
-                    textAlign = mapTextAlign(vm.textAlignment.value),
-                    color = vm.textColor.value,
-                    lineHeight = vm.lineHeight.value.sp,
+                MainText(
+                    modifier = modifier,
+                    index = index,
+                    text = items[index].second,
+                    vm= vm
                 )
             }
 

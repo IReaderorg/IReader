@@ -312,6 +312,7 @@
     <string name="text_align_justify">Text Align Justify</string>
     <string name="text_align_right">Text Align right</string>
     <string name="font_size">Font Size</string>
+    <string name="font_weight">Font Weight</string>
     <string name="font">Font</string>
     <string name="page">Page</string>
     <string name="continues">Continue</string>
@@ -334,6 +335,7 @@
     <string name="top_content_padding">Top content padding</string>
     <string name="bottom_content_padding">Bottom content padding</string>
     <string name="bottom">Bottom</string>
+    <string name="letter">Letter</string>
     <string name="width">Width</string>
     <string name="colors">Colors</string>
     <string name="scroll_mode">Scroll Mode</string>

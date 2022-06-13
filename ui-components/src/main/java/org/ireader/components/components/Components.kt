@@ -124,6 +124,7 @@ fun LazyListScope.setupUiComponent(
                             onValueChangeFinished = {
                                 component.onValueChangeFinished?.let { it1 -> it1(it) }
                             },
+                            steps = component.steps
                         )
                     }
                 }

@@ -72,6 +72,12 @@ fun ReaderSettingMainLayout(
                         trailing = vm.fontSize.value.toInt().toString(),
                         valueRange = 8.0F..32.0F,
                     ),
+                    Components.Slider(
+                        preferenceAsInt = vm.textWeight,
+                        title = stringResource(id = R.string.font_weight),
+                        trailing = vm.textWeight.value.toInt().toString(),
+                        valueRange = 1f..900F,
+                    ),
                     Components.Header(
                         stringResource(id = R.string.paragraph)
                     ),
@@ -154,28 +160,38 @@ fun ReaderSettingMainLayout(
                         title = stringResource(id = R.string.bottom),
                         trailing = vm.bottomMargin.value.toString(),
                         valueRange = 0F..200F,
-                    ),Components.Slider(
+                    ),
+                    Components.Slider(
                         preferenceAsInt = vm.leftMargin,
                         title = stringResource(id = R.string.left),
                         trailing = vm.leftMargin.value.toString(),
                         valueRange = 0F..200F,
-                    ),Components.Slider(
+                    ),
+                    Components.Slider(
                         preferenceAsInt = vm.rightMargin,
                         title = stringResource(id = R.string.right),
                         trailing = vm.rightMargin.value.toString(),
                         valueRange = 0F..200F,
-                    ),Components.Header(
+                    ),
+                    Components.Header(
                         stringResource(id = R.string.content_padding)
-                    ),Components.Slider(
+                    ),
+                    Components.Slider(
                         preferenceAsInt = vm.topContentPadding,
                         title = stringResource(id = R.string.top),
                         trailing = vm.topContentPadding.value.toString(),
                         valueRange = 0F..32F,
-                    )
-                    ,Components.Slider(
+                    ),
+                    Components.Slider(
                         preferenceAsInt = vm.bottomContentPadding,
                         title = stringResource(id = R.string.bottom),
                         trailing = vm.bottomContentPadding.value.toString(),
+                        valueRange = 0F..32F,
+                    ),
+                    Components.Slider(
+                        preferenceAsInt = vm.betweenLetterSpaces,
+                        title = stringResource(id = R.string.letter),
+                        trailing = vm.betweenLetterSpaces.value.toString(),
                         valueRange = 0F..32F,
                     ),
                 )
@@ -287,8 +303,10 @@ fun ReaderSettingMainLayout(
                             selected = vm.orientation.value,
                             onValueChange = {
                                 when (it) {
-                                    0 -> vm.orientation.value = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-                                    1 -> vm.orientation.value = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                                    0 -> vm.orientation.value =
+                                        ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                                    1 -> vm.orientation.value =
+                                        ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                                 }
                             },
                             title = stringResource(id = R.string.orientation)
