@@ -14,7 +14,6 @@ import org.ireader.common_models.entities.CatalogRemote
 import org.ireader.common_models.entities.Category
 import org.ireader.common_models.entities.Chapter
 import org.ireader.common_models.entities.Download
-import org.ireader.common_models.entities.FontEntity
 import org.ireader.common_models.entities.History
 import org.ireader.common_models.entities.RemoteKeys
 import org.ireader.common_models.entities.Update
@@ -23,7 +22,6 @@ import org.ireader.data.local.dao.CatalogDao
 import org.ireader.data.local.dao.CategoryDao
 import org.ireader.data.local.dao.ChapterDao
 import org.ireader.data.local.dao.DownloadDao
-import org.ireader.data.local.dao.FontDao
 import org.ireader.data.local.dao.HistoryDao
 import org.ireader.data.local.dao.LibraryBookDao
 import org.ireader.data.local.dao.LibraryDao
@@ -41,10 +39,9 @@ import java.util.concurrent.Executors
         History::class,
         Update::class,
         RemoteKeys::class,
-        FontEntity::class,
         BookCategory::class
     ],
-    version = 22,
+    version = 23,
     exportSchema = true,
 )
 @TypeConverters(DatabaseConverter::class)
@@ -60,7 +57,6 @@ abstract class AppDatabase : RoomDatabase() {
     abstract val libraryDao: LibraryDao
     abstract val categoryDao: CategoryDao
     abstract val bookCategoryDao: BookCategoryDao
-    abstract val fontDao: FontDao
 
     companion object {
         const val DATABASE_NAME = "infinity_db"
@@ -77,7 +73,7 @@ abstract class AppDatabase : RoomDatabase() {
                 AppDatabase::class.java,
                 DATABASE_NAME
             )
-                .addMigrations(MIGRATION_20_21(), MIGRATION_21_22())
+                .addMigrations(MIGRATION_20_21(), MIGRATION_21_22(), MIGRATION_22_23())
                 // prepopulate the database after onCreate was called
                 .addCallback(object : Callback() {
                     override fun onCreate(db: SupportSQLiteDatabase) {
@@ -104,6 +100,13 @@ abstract class AppDatabase : RoomDatabase() {
                 .build()
     }
 }
+
+internal fun MIGRATION_22_23() = object : Migration(22, 23) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        database.execSQL("""DROP TABLE IF EXISTS `fonts`""")
+    }
+}
+
 
 internal fun MIGRATION_21_22() = object : Migration(21, 22) {
     override fun migrate(database: SupportSQLiteDatabase) {

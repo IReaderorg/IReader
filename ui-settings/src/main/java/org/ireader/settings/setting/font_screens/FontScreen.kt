@@ -21,13 +21,13 @@ fun FontScreen(
     LazyColumn {
         items(count = vm.uiFonts.size) { index ->
             PreferenceRow(
-                title = vm.uiFonts[index].fontName,
+                title = vm.uiFonts[index],
                 onClick = {
                     vm.readerPreferences.font()
-                        .set(FontType(vm.uiFonts[index].fontName, Roboto.fontFamily))
+                        .set(FontType(vm.uiFonts[index], Roboto.fontFamily))
                 },
                 action = {
-                    if (vm.uiFonts[index].fontName == vm.font.value.fontName) {
+                    if (vm.uiFonts[index] == vm.font.value.fontName) {
                         AppIcon(
                             modifier = Modifier.padding(16.dp) ,
                             imageVector = Icons.Default.Check,

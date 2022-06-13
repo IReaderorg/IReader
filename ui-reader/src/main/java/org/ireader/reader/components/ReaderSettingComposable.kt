@@ -328,6 +328,12 @@ fun ReaderSettingMainLayout(
                     }
                     item {
                         SwitchPreference(
+                            preference = vm.screenAlwaysOn,
+                            title = stringResource(id = R.string.screen_always_on),
+                        )
+                    }
+                    item {
+                        SwitchPreference(
                             preference = vm.selectableMode,
                             title = stringResource(id = R.string.selectable_mode),
                         )

@@ -136,14 +136,20 @@ object ReaderScreenSpec : ScreenSpec {
                 vm.readBrightness(context)
             }
         }
-        LaunchedEffect(key1 = vm.orientation.value ) {
+        LaunchedEffect(key1 = vm.orientation.value) {
             vm.prefFunc.apply {
                 vm.readOrientation(context)
             }
         }
 
+        LaunchedEffect(key1 = vm.screenAlwaysOn.value) {
+            vm.prefFunc.apply {
+                vm.screenAlwaysOnUseCase(context, vm.screenAlwaysOn.value)
+            }
+        }
+
         LaunchedEffect(key1 = vm.initialized) {
-            vm.prepareReaderSetting(context,scrollState)
+            vm.prepareReaderSetting(context, scrollState)
 
         }
         LaunchedEffect(key1 = true) {
@@ -208,7 +214,6 @@ object ReaderScreenSpec : ScreenSpec {
                             }
                         }
                     },
-                    scaffoldPaddingValues = controller.scaffoldPadding,
                     onPrev = { reset ->
                         try {
                             if (currentIndex > 0) {
@@ -364,7 +369,8 @@ object ReaderScreenSpec : ScreenSpec {
             exit = slideOutVertically(targetOffsetY = { -it })
         ) {
             ReaderScreenDrawer(
-                modifier = Modifier.statusBarsPadding(),
+                modifier = Modifier
+                    .statusBarsPadding(),
                 onReverseIcon = {
                     vm.isDrawerAsc = !vm.isDrawerAsc
                 },

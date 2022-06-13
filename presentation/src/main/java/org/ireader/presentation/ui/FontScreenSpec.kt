@@ -33,7 +33,7 @@ object FontScreenSpec : ScreenSpec {
             },
             onSearch = {
                 vm.searchQuery = it
-            }
+            },
         )
     }
 

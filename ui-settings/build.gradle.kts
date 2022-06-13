@@ -22,6 +22,7 @@ dependencies {
     implementation(project(Modules.commonExtensions))
     implementation(project(Modules.commonResources))
     implementation(compose.compose.icons)
+    implementation(compose.compose.googlFonts)
     implementation(compose.compose.navigation)
     implementation(compose.compose.foundation)
     implementation(compose.compose.animations)

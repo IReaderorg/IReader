@@ -14,7 +14,6 @@ import org.ireader.data.local.dao.CatalogDao
 import org.ireader.data.local.dao.CategoryDao
 import org.ireader.data.local.dao.ChapterDao
 import org.ireader.data.local.dao.DownloadDao
-import org.ireader.data.local.dao.FontDao
 import org.ireader.data.local.dao.HistoryDao
 import org.ireader.data.local.dao.LibraryBookDao
 import org.ireader.data.local.dao.LibraryDao
@@ -34,52 +33,61 @@ object DatabaseInject {
         return AppDatabase.getInstance(app)
     }
 
-    @InstallIn(SingletonComponent::class)
-    @Module
-    object DatabaseDaoModule {
+    @Singleton
+    @Provides
+    fun providesBookDao(db: AppDatabase): LibraryBookDao {
+        return db.libraryBookDao
+    }
 
-        @Provides
-        fun providesBookDao(db: AppDatabase): LibraryBookDao {
-            return db.libraryBookDao
-        }
+    @Singleton
+    @Provides
+    fun provideChapterDao(db: AppDatabase): ChapterDao = db.chapterDao
 
-        @Provides
-        fun provideChapterDao(db: AppDatabase): ChapterDao = db.chapterDao
+    @Singleton
+    @Provides
+    fun provideRemoteKeyDao(db: AppDatabase): RemoteKeysDao = db.remoteKeysDao
 
-        @Provides
-        fun provideRemoteKeyDao(db: AppDatabase): RemoteKeysDao = db.remoteKeysDao
+    @Singleton
+    @Provides
+    fun provideHistoryDao(db: AppDatabase): HistoryDao = db.historyDao
 
-        @Provides
-        fun provideHistoryDao(db: AppDatabase): HistoryDao = db.historyDao
+    @Singleton
+    @Provides
+    fun provideUpdatesDao(db: AppDatabase): UpdatesDao = db.updatesDao
 
-        @Provides
-        fun provideUpdatesDao(db: AppDatabase): UpdatesDao = db.updatesDao
-        @Provides
-        fun provideFontDao(db: AppDatabase): FontDao = db.fontDao
+    @Singleton
+    @Provides
+    fun provideCategoryDao(db: AppDatabase): CategoryDao = db.categoryDao
 
-        @Provides
-        fun provideCategoryDao(db: AppDatabase): CategoryDao = db.categoryDao
-        @Provides
-        fun provideBookCategoryDao(db: AppDatabase): BookCategoryDao = db.bookCategoryDao
+    @Singleton
+    @Provides
+    fun provideBookCategoryDao(db: AppDatabase): BookCategoryDao = db.bookCategoryDao
 
-        @Provides
-        fun provideDownloadDao(
-            db: AppDatabase,
-        ): DownloadDao = db.downloadDao
-        @Provides
-        fun provideLibraryDao(
-            db: AppDatabase,
-        ): LibraryDao = db.libraryDao
-        @Provides
-        fun provideFileSystem(): FileSystem {
-            return FileSystem.SYSTEM
-        }
+    @Singleton
+    @Provides
+    fun provideDownloadDao(
+        db: AppDatabase,
+    ): DownloadDao = db.downloadDao
 
-        @Provides
-        fun provideCatalogDao(db: AppDatabase): CatalogDao = db.catalogDao
-        @Provides
-        fun provideTransactions(db: AppDatabase): Transactions {
-            return DatabaseTransactions(db)
-        }
+    @Singleton
+    @Provides
+    fun provideLibraryDao(
+        db: AppDatabase,
+    ): LibraryDao = db.libraryDao
+
+    @Singleton
+    @Provides
+    fun provideFileSystem(): FileSystem {
+        return FileSystem.SYSTEM
+    }
+
+    @Singleton
+    @Provides
+    fun provideCatalogDao(db: AppDatabase): CatalogDao = db.catalogDao
+
+    @Singleton
+    @Provides
+    fun provideTransactions(db: AppDatabase): Transactions {
+        return DatabaseTransactions(db)
     }
 }

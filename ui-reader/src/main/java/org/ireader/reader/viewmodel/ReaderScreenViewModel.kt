@@ -33,6 +33,7 @@ import org.ireader.domain.use_cases.history.HistoryUseCase
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.preferences.reader_preferences.ReaderPrefUseCases
+import org.ireader.domain.use_cases.reader.ScreenAlwaysOn
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import javax.inject.Inject
 
@@ -52,7 +53,8 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
     val savedStateHandle: SavedStateHandle,
     val readerPreferences: ReaderPreferences,
     val uiPreferences: UiPreferences,
-    val googleFontProvider: GoogleFont.Provider
+    val googleFontProvider: GoogleFont.Provider,
+    val screenAlwaysOnUseCase: ScreenAlwaysOn,
 ) : BaseViewModel(),
     ReaderScreenPreferencesState by prefState,
     ReaderScreenState by state,
@@ -62,6 +64,7 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
     val relativeTime by uiPreferences.relativeTime().asState()
     val backgroundColor = readerPreferences.backgroundColorReader().asState()
     val topContentPadding = readerPreferences.topContentPadding().asState()
+    val screenAlwaysOn = readerPreferences.screenAlwaysOn().asState()
     val bottomContentPadding = readerPreferences.bottomContentPadding().asState()
     val topMargin = readerPreferences.topMargin().asState()
     val leftMargin = readerPreferences.leftMargin().asState()
@@ -259,6 +262,7 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
             layoutParams.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
             activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
             window.attributes = layoutParams
+            screenAlwaysOnUseCase(context,false)
             when (readingMode.value) {
                 ReadingMode.Page -> {
                     stateChapter?.let { chapter ->

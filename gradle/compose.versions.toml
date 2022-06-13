@@ -21,7 +21,7 @@ compose-testing = { module = "androidx.compose.ui:ui-test-junit4", version.ref =
 compose-composeTooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose" }
 compose-uiTestManifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "compose" }
 compose-j4Unit = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "compose" }
-compose-googlFonts = "androidx.compose.ui:ui-text-google-fonts:1.2.0-beta01"
+compose-googlFonts =  { module ="androidx.compose.ui:ui-text-google-fonts", version.ref = "compose" }
 
 
 compose-navigation = { module = "androidx.navigation:navigation-compose", version = "2.5.0-rc01" }

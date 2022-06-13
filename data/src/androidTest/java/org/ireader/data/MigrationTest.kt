@@ -10,6 +10,7 @@ import com.google.common.truth.Truth.assertThat
 import org.ireader.data.local.AppDatabase
 import org.ireader.data.local.AppDatabase_Migrations
 import org.ireader.data.local.MIGRATION_21_22
+import org.ireader.data.local.MIGRATION_22_23
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -35,12 +36,12 @@ class MigrationTest {
 
     @Test
     fun migrate21to22() {
-        database = helper.createDatabase(TEST_DB, 21).apply {
+        database = helper.createDatabase(TEST_DB, 22).apply {
 
             // (id,sourceId,link,title,author,description,genres,status,cover,customCover,favorite,lastUpdated,lastRead,dataAdded,viewer,flags)
             execSQL(
                 """
-                INSERT INTO library(`id`,`sourceId`,`title`,`key`,`tableId`,`type`,`author`,`description`,`genres`,`status`,`cover`,`customCover`,`favorite`,`lastUpdate`,`lastInit`,`dataAdded`,`viewer`,`flags`) VALUES(10,10,"test","test.com",0,0,"author","desc","",0,"cover","customCOver",0,0,0,0,0,0)
+                INSERT INTO library(`id`,`sourceId`,`title`,`key`,`tableId`,`type`,`author`,`description`,`genres`,`status`,`cover`,`customCover`,`favorite`,`lastUpdate`,`lastInit`,`dateAdded`,`viewer`,`flags`) VALUES(10,10,"test","test.com",0,0,"author","desc","",0,"cover","customCOver",0,0,0,0,0,0)
                 """.trimIndent()
             )
 
@@ -48,7 +49,7 @@ class MigrationTest {
         }
 
         // ADDED a tableId
-        database = helper.runMigrationsAndValidate(TEST_DB, 22, true, MIGRATION_21_22())
+        database = helper.runMigrationsAndValidate(TEST_DB, 23, true, MIGRATION_22_23())
         val resultCursor = database.query("SELECT * FROM library")
         assertTrue(resultCursor.moveToFirst())
 

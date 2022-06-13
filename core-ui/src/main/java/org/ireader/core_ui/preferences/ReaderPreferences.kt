@@ -159,6 +159,9 @@ class ReaderPreferences @OptIn(ExperimentalTextApi::class) constructor(
     fun textWeight(): Preference<Int> {
         return preferenceStore.getInt("reader_text_weight", 400)
     }
+    fun screenAlwaysOn(): Preference<Boolean> {
+        return preferenceStore.getBoolean("reader_always_on", false)
+    }
 
     fun scrollMode(): Preference<Boolean> {
         return preferenceStore.getBoolean(SCROLL_MODE, true)

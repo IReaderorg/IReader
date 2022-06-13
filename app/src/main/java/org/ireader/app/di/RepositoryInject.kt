@@ -6,7 +6,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import org.ireader.common_data.repository.BookCategoryRepository
 import org.ireader.common_data.repository.CategoryRepository
-import org.ireader.common_data.repository.FontRepository
 import org.ireader.common_data.repository.LibraryRepository
 import org.ireader.core_catalogs.service.CatalogRemoteRepository
 import org.ireader.data.local.dao.BookCategoryDao
@@ -14,7 +13,6 @@ import org.ireader.data.local.dao.CatalogDao
 import org.ireader.data.local.dao.CategoryDao
 import org.ireader.data.local.dao.ChapterDao
 import org.ireader.data.local.dao.DownloadDao
-import org.ireader.data.local.dao.FontDao
 import org.ireader.data.local.dao.HistoryDao
 import org.ireader.data.local.dao.LibraryBookDao
 import org.ireader.data.local.dao.LibraryDao
@@ -26,7 +24,6 @@ import org.ireader.data.repository.CatalogRemoteRepositoryImpl
 import org.ireader.data.repository.CategoryRepositoryImpl
 import org.ireader.data.repository.ChapterRepositoryImpl
 import org.ireader.data.repository.DownloadRepositoryImpl
-import org.ireader.data.repository.FontEntityRepositoryImpl
 import org.ireader.data.repository.HistoryRepositoryImpl
 import org.ireader.data.repository.LibraryRepositoryImpl
 import org.ireader.data.repository.RemoteKeyRepositoryImpl
@@ -62,13 +59,7 @@ class RepositoryInject {
     ): org.ireader.common_data.repository.UpdatesRepository {
         return UpdatesRepositoryImpl(updatesDao)
     }
-    @Singleton
-    @Provides
-    fun provideFontRepository(
-        fontDao: FontDao,
-    ): FontRepository {
-        return FontEntityRepositoryImpl(fontDao)
-    }
+
     @Singleton
     @Provides
     fun provideLibraryRepository(

@@ -192,6 +192,7 @@ fun SearchToolbar(
                     contentDescription = stringResource(R.string.toggle_search_mode_off),
                     onClick = {
                         isSearchModeEnable = false
+                        query = ""
                     }
                 )
             } else {

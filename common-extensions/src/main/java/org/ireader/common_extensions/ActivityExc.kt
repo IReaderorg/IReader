@@ -7,7 +7,7 @@ import android.view.View
 import android.view.View.GONE
 import android.view.WindowManager
 import androidx.annotation.UiThread
-import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 
@@ -21,7 +21,6 @@ fun Activity.enterFullScreenMode() {
     @Suppress("DEPRECATION")
     window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
 }
-
 
 /**
  * Makes the Activity exit fullscreen mode.
@@ -40,10 +39,10 @@ fun Activity.enableFullScreen() {
         WindowManager.LayoutParams.FLAG_FULLSCREEN
     )
 }
+
 @Suppress("DEPRECATION")
 val Activity.isImmersiveModeEnabled
     get() = window.decorView.systemUiVisibility or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY == window.decorView.systemUiVisibility
-
 
 /**
  * Sets the screen brightness. Call this before setContentView.
@@ -55,7 +54,6 @@ fun Activity.brightness(brightness: Float = 1f) {
     window.attributes = params
     window.addFlags(WindowManager.LayoutParams.FLAGS_CHANGED)
 }
-
 
 @SuppressLint("ObsoleteSdkInt")
 @Suppress("DEPRECATION")
@@ -85,14 +83,16 @@ fun Activity.showBottomBar() {
     }
 }
 
-
 /**
  * Created by hristijan on 3/29/19 to long live and prosper !
  */
 @Suppress("DEPRECATION")
 fun Activity.enableImmersiveMode() {
     val window = window
-    window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)
+    window.setFlags(
+        WindowManager.LayoutParams.FLAG_FULLSCREEN,
+        WindowManager.LayoutParams.FLAG_FULLSCREEN
+    )
     window.decorView.setOnSystemUiVisibilityChangeListener { visibility ->
         if (visibility != 0)
             return@setOnSystemUiVisibilityChangeListener
@@ -105,18 +105,20 @@ fun Activity.enableImmersiveMode() {
             or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
     }
 }
+
 /**
  * This snippet shows the system bars. It does this by removing all the flags
  * except for the ones that make the content appear under the system bars.
  */
-@Suppress("DEPRECATION")
+//@Suppress("DEPRECATION")
 fun Activity.showSystemUI() {
-    window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-        or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-        or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
+//    window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+//        or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+//        or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
 
-    val windowInsetsController =
-        ViewCompat.getWindowInsetsController(window.decorView) ?: return
+    val windowInsetsController =  WindowCompat.getInsetsController(window, window.decorView)
+
+
     // Configure the behavior of the hidden system bars
     windowInsetsController.systemBarsBehavior =
         WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
@@ -124,26 +126,20 @@ fun Activity.showSystemUI() {
     windowInsetsController.show(WindowInsetsCompat.Type.systemBars())
 }
 
-
-
 /**
  * This snippet hides the system bars.
  */
 @Suppress("DEPRECATION")
 fun Activity.hideSystemUI() {
-    // Set the IMMERSIVE flag.
-    // Set the content to appear under the system bars so that the content
-    // doesn't resize when the system bars hide and show.
-    window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-        or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-        or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-        or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
-
-        or View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
-
-        or View.SYSTEM_UI_FLAG_IMMERSIVE)
-    val windowInsetsController =
-        ViewCompat.getWindowInsetsController(window.decorView) ?: return
+//    window.decorView.systemUiVisibility = (
+//        View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+//            or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+//            or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+//            or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+//            or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+//            or View.SYSTEM_UI_FLAG_FULLSCREEN
+//        )
+    val windowInsetsController =  WindowCompat.getInsetsController(window, window.decorView)
     // Configure the behavior of the hidden system bars
     windowInsetsController.systemBarsBehavior =
         WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
