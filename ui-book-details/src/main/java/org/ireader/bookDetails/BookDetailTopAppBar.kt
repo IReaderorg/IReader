@@ -34,6 +34,7 @@ fun BookDetailTopAppBar(
 ) {
     Toolbar(
         title = {},
+        applyInsets = true,
         backgroundColor = Color.Transparent,
         contentColor = MaterialTheme.colorScheme.onBackground,
         elevation = 0.dp,

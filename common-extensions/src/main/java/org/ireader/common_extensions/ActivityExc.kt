@@ -7,7 +7,6 @@ import android.view.View
 import android.view.View.GONE
 import android.view.WindowManager
 import androidx.annotation.UiThread
-import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 
@@ -97,12 +96,14 @@ fun Activity.enableImmersiveMode() {
         if (visibility != 0)
             return@setOnSystemUiVisibilityChangeListener
 
-        window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+        window.decorView.systemUiVisibility = (
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
             or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
             or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
             or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
             or View.SYSTEM_UI_FLAG_FULLSCREEN
-            or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
+            or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+            )
     }
 }
 
@@ -110,20 +111,17 @@ fun Activity.enableImmersiveMode() {
  * This snippet shows the system bars. It does this by removing all the flags
  * except for the ones that make the content appear under the system bars.
  */
-//@Suppress("DEPRECATION")
+@Suppress("DEPRECATION")
 fun Activity.showSystemUI() {
-//    window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-//        or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-//        or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
-
-    val windowInsetsController =  WindowCompat.getInsetsController(window, window.decorView)
-
-
-    // Configure the behavior of the hidden system bars
+        window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+        or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+        or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
+    window.decorView.fitsSystemWindows = false
+    val windowInsetsController = WindowInsetsControllerCompat(window, window.decorView)
     windowInsetsController.systemBarsBehavior =
         WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-    // Hide both the status bar and the navigation bar
     windowInsetsController.show(WindowInsetsCompat.Type.systemBars())
+
 }
 
 /**
@@ -131,19 +129,18 @@ fun Activity.showSystemUI() {
  */
 @Suppress("DEPRECATION")
 fun Activity.hideSystemUI() {
-//    window.decorView.systemUiVisibility = (
-//        View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-//            or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-//            or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-//            or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-//            or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-//            or View.SYSTEM_UI_FLAG_FULLSCREEN
-//        )
-    val windowInsetsController =  WindowCompat.getInsetsController(window, window.decorView)
-    // Configure the behavior of the hidden system bars
+        window.decorView.systemUiVisibility = (
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                or View.SYSTEM_UI_FLAG_FULLSCREEN
+                or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+        )
+    window.decorView.fitsSystemWindows = false
+    val windowInsetsController = WindowInsetsControllerCompat(window, window.decorView)
     windowInsetsController.systemBarsBehavior =
         WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-    // Hide both the status bar and the navigation bar
     windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
 }
 

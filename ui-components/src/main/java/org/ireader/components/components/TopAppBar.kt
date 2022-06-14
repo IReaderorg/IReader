@@ -40,7 +40,7 @@ fun Toolbar(
     backgroundColor: Color = AppColors.current.bars,
     contentColor: Color = AppColors.current.onBars,
     elevation: Dp = 0.dp,
-    applyInsets: Boolean = true,
+    applyInsets: Boolean = false,
 ) {
 
     Surface(
@@ -89,7 +89,7 @@ fun MidSizeToolbar(
     backgroundColor: Color = AppColors.current.bars,
     contentColor: Color = AppColors.current.onBars,
     elevation: Dp = 0.dp,
-    applyInsets: Boolean = true,
+    applyInsets: Boolean = false,
 ) {
 
     Surface(

@@ -85,8 +85,8 @@ fun ScreenContent() {
     val haveDrawer = navBackStackEntry?.arguments?.getBoolean(ARG_HAVE_DRAWER) ?: false
     val haveVariantBottomAppBar =
         navBackStackEntry?.arguments?.getBoolean(ARG_HAVE_VARIANT_BOTTOM_BAR) ?: false
-    val systemBarPadding =
-        navBackStackEntry?.arguments?.getBoolean(ARG_SYSTEM_BAR_PADDING) ?: false
+    val systemBarPadding = navBackStackEntry?.arguments?.getBoolean(ARG_SYSTEM_BAR_PADDING) ?: false
+
     val snackBarHostState = remember { SnackbarHostState() }
     val modalBottomSheetState =
         rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
@@ -94,14 +94,30 @@ fun ScreenContent() {
 
     val vm: ScreenContentViewModel = hiltViewModel()
     val (requestedHideBottomNav, requestHideBottomNav) = remember { mutableStateOf(false) }
+    val (requestedHideSystemNavBar, requestHideSystemNavBar) = remember { mutableStateOf(false) }
+    val (requestedHideSystemStatusBar, requestHideSystemStatusBar) = remember { mutableStateOf(false) }
     val (requestedHideTopBar, requestHideTopBar) = remember { mutableStateOf(true) }
     val scope = rememberCoroutineScope()
+    val scaffoldModifier = remember(requestedHideSystemNavBar,requestedHideSystemStatusBar) {
+        derivedStateOf {
+            when {
+                requestedHideSystemNavBar && requestedHideSystemStatusBar -> Modifier
+                !requestedHideSystemNavBar && requestedHideSystemStatusBar -> Modifier.navigationBarsPadding()
+                requestedHideSystemNavBar && !requestedHideSystemStatusBar -> Modifier.statusBarsPadding()
+                requestedHideSystemStatusBar -> Modifier.navigationBarsPadding()
+                requestedHideSystemNavBar -> Modifier.statusBarsPadding()
+                else -> Modifier.navigationBarsPadding().statusBarsPadding()
+            }
+        }
+    }
 
     ConfirmExitBackHandler(vm.confirmExit.value)
 
     DisposableEffect(navBackStackEntry) {
         onDispose {
             requestHideBottomNav(false)
+            requestHideSystemStatusBar(false)
+            requestHideSystemNavBar(false)
             scope.launch {
                 modalBottomSheetState.hide()
                 drawerState.close()
@@ -122,7 +138,9 @@ fun ScreenContent() {
                         sheetState = modalBottomSheetState,
                         drawerState = drawerState,
                         requestHideNavigator = requestHideBottomNav,
-                        requestHideTopAppbar = requestHideTopBar
+                        requestHideTopAppbar = requestHideTopBar,
+                        requestedHideSystemStatusBar = requestHideSystemStatusBar,
+                        requestHideSystemNavbar = requestHideSystemNavBar
                     )
                 )
             }
@@ -140,7 +158,9 @@ fun ScreenContent() {
                             sheetState = modalBottomSheetState,
                             drawerState = drawerState,
                             requestHideNavigator = requestHideBottomNav,
-                            requestHideTopAppbar = requestHideTopBar
+                            requestHideTopAppbar = requestHideTopBar,
+                            requestedHideSystemStatusBar = requestHideSystemStatusBar,
+                            requestHideSystemNavbar = requestHideSystemNavBar
                         )
                     )
                 }
@@ -149,9 +169,7 @@ fun ScreenContent() {
         ) {
             TransparentStatusBar(enable = transparentStatusBar) {
                 Scaffold(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .navigationBarsPadding(),
+                    modifier = scaffoldModifier.value,
                     topBar = {
                         if (navStackEntry != null) {
                             AnimatedVisibility(
@@ -167,7 +185,9 @@ fun ScreenContent() {
                                         sheetState = modalBottomSheetState,
                                         drawerState = drawerState,
                                         requestHideNavigator = requestHideBottomNav,
-                                        requestHideTopAppbar = requestHideTopBar
+                                        requestHideTopAppbar = requestHideTopBar,
+                                        requestedHideSystemStatusBar = requestHideSystemStatusBar,
+                                        requestHideSystemNavbar = requestHideSystemNavBar
                                     )
                                 )
                             }
@@ -187,6 +207,8 @@ fun ScreenContent() {
                                             drawerState = drawerState,
                                             requestHideNavigator = requestHideBottomNav,
                                             requestHideTopAppbar = requestHideTopBar,
+                                            requestedHideSystemStatusBar = requestHideSystemStatusBar,
+                                            requestHideSystemNavbar = requestHideSystemNavBar
                                         )
                                     )
                                 }
@@ -282,6 +304,8 @@ fun ScreenContent() {
                                         requestHideNavigator = requestHideBottomNav,
                                         requestHideTopAppbar = requestHideTopBar,
                                         scaffoldPadding = padding,
+                                        requestedHideSystemStatusBar = requestHideSystemStatusBar,
+                                        requestHideSystemNavbar = requestHideSystemNavBar
                                     )
                                 )
                             }
@@ -364,9 +388,6 @@ fun IBottomAppBar(
         )
     }
 }
-
-
-
 
 
 

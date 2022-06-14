@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -86,7 +88,7 @@ object BookDetailScreenSpec : ScreenSpec {
                                 vm.createEpub(it, uri, context)
                                 vm.showSnackBar(UiText.StringResource(R.string.success))
                             }
-                        }catch (e:Throwable) {
+                        } catch (e: Throwable) {
                             vm.showSnackBar(UiText.ExceptionString(e))
                         }
 
@@ -266,6 +268,15 @@ object BookDetailScreenSpec : ScreenSpec {
 //                }
 //            }
 //        }
+        DisposableEffect(key1 = true ) {
+            onDispose {
+                controller.requestedHideSystemStatusBar(false)
+
+            }
+        }
+        LaunchedEffect(true) {
+            controller.requestedHideSystemStatusBar(true)
+        }
 
 
         BookDetailScreen(

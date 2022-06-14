@@ -32,6 +32,8 @@ class MainActivity : ComponentActivity(),SecureActivityDelegate by SecureActivit
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
         installSplashScreen()
+
+
         setContent {
             AppTheme {
                 Surface(

@@ -24,27 +24,35 @@ fun AppTheme(
     val transparentStatusBar = LocalTransparentStatusBar.current.enabled
 
     val isLight = materialColors.isLight()
-    systemUiController.setNavigationBarColor(
-        color = customColors.bars,
-        darkIcons =  customColors.isBarLight,
-    )
     systemUiController.setSystemBarsColor(
         color = customColors.bars,
-        darkIcons = customColors.isBarLight,
+        darkIcons =  customColors.isBarLight,
         isNavigationBarContrastEnforced = false
     )
     LaunchedEffect(customColors.isBarLight, transparentStatusBar) {
         val darkIcons =
             if (transparentStatusBar) isLight else customColors.isBarLight
-        systemUiController.setSystemBarsColor(
-            color = Color.Transparent,
-            darkIcons = darkIcons,
-            isNavigationBarContrastEnforced = false
-        )
-        systemUiController.setNavigationBarColor(
-            color = customColors.bars,
-            darkIcons =  customColors.isBarLight,
-        )
+//        systemUiController.setSystemBarsColor(
+//            color = customColors.bars,
+//            darkIcons =  customColors.isBarLight,
+//        )
+        if (transparentStatusBar) {
+            systemUiController.setStatusBarColor(
+                color = Color.Transparent,
+                darkIcons = darkIcons,
+            )
+            systemUiController.setNavigationBarColor(
+                color = customColors.bars,
+                darkIcons = customColors.isBarLight,
+            )
+        } else {
+            systemUiController.setSystemBarsColor(
+                color = customColors.bars,
+                darkIcons = customColors.isBarLight,
+            )
+        }
+
+
     }
 
     AppColors(

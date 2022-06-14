@@ -4,7 +4,7 @@ import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.graphics.luminance
 
 
-fun ColorScheme.isLight() = this.background.luminance() > 0.5
+fun ColorScheme.isLight() = this.surface.luminance() > 0.5
 
 //val ColorScheme.isLight: Boolean
 //    get() = this.background.luminance() > 0.5

@@ -16,7 +16,7 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -32,6 +32,7 @@ import org.ireader.ui_reader.R
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ReaderScreenTopBar(
+    modifier :Modifier,
     isReaderModeEnable: Boolean,
     isLoaded: Boolean,
     vm: ReaderScreenViewModel,
@@ -43,13 +44,14 @@ fun ReaderScreenTopBar(
     onBookMark: () -> Unit,
     onPopBackStack: () -> Unit,
 ) {
-    val scope = rememberCoroutineScope()
+
     AnimatedVisibility(
         visible = !isReaderModeEnable && isLoaded,
         enter = slideInVertically(initialOffsetY = { -it }, animationSpec = tween(250)),
         exit = slideOutVertically(targetOffsetY = { -it }, animationSpec = tween(250))
     ) {
         Toolbar(
+            modifier = modifier,
             title = {
                 Text(
                     text = chapter?.name ?: "",
@@ -106,36 +108,37 @@ fun ReaderScreenTopBar(
                 }
             }
         )
-    }
-    if (!isLoaded) {
-        Toolbar(
-            title = {},
-            elevation = 0.dp,
-            backgroundColor = vm.backgroundColor.value,
-            actions = {
-                if (chapter != null) {
-                    AppIconButton(
-                        imageVector = Icons.Default.Autorenew,
-                        contentDescription = stringResource(R.string.refresh),
-                        onClick = {
-                            onRefresh()
-                        },
-                        tint = vm.textColor.value
-                    )
-                    AppIconButton(
-                        imageVector = Icons.Default.Public,
-                        contentDescription = stringResource(R.string.webView),
-                        onClick = {
-                            onWebView()
-                        },
-                        tint = vm.textColor.value
-                    )
-                }
-            },
-            navigationIcon = {
-                TopAppBarBackButton(onClick = {
-                    onPopBackStack()
-                }, tint = vm.textColor.value)
-            })
+
+        if (!isLoaded) {
+            Toolbar(
+                title = {},
+                elevation = 0.dp,
+                backgroundColor = vm.backgroundColor.value,
+                actions = {
+                    if (chapter != null) {
+                        AppIconButton(
+                            imageVector = Icons.Default.Autorenew,
+                            contentDescription = stringResource(R.string.refresh),
+                            onClick = {
+                                onRefresh()
+                            },
+                            tint = vm.textColor.value
+                        )
+                        AppIconButton(
+                            imageVector = Icons.Default.Public,
+                            contentDescription = stringResource(R.string.webView),
+                            onClick = {
+                                onWebView()
+                            },
+                            tint = vm.textColor.value
+                        )
+                    }
+                },
+                navigationIcon = {
+                    TopAppBarBackButton(onClick = {
+                        onPopBackStack()
+                    }, tint = vm.textColor.value)
+                })
+        }
     }
 }

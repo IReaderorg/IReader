@@ -50,7 +50,7 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:screenOrientation="fullSensor"
         android:supportsRtl="true"
-        android:theme="@style/Theme.App">
+        android:theme="@style/Theme.Splash">
         <activity
             android:name=".MainActivity"
             android:exported="true"

@@ -26,8 +26,7 @@ interface ReaderPrefFunctions {
     suspend fun ReaderScreenViewModel.readBrightness(context: Context)
     suspend fun ReaderScreenViewModel.readOrientation(context: Context)
     fun ReaderScreenViewModel.setReaderTextColor(color: Color)
-    fun ReaderScreenViewModel.toggleImmersiveMode(isEnable: Boolean,context:Context)
-    suspend fun ReaderScreenViewModel.readImmersiveMode(context: Context)
+    suspend fun ReaderScreenViewModel.readImmersiveMode(context: Context,onHideNav:(Boolean) -> Unit,onHideStatus:(Boolean) -> Unit)
     fun ReaderScreenViewModel.showSystemBars(context: Context)
     fun ReaderScreenViewModel.hideSystemBars(context: Context)
 }
@@ -51,24 +50,25 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
     }
 
 
-    override suspend fun ReaderScreenViewModel.readImmersiveMode(context: Context) {
+    override suspend fun ReaderScreenViewModel.readImmersiveMode(
+        context: Context,
+        onHideNav: (Boolean) -> Unit,
+        onHideStatus: (Boolean) -> Unit
+    ) {
         context.findComponentActivity()?.let { activity ->
 
-            if (immersiveMode.value && !activity.isImmersiveModeEnabled) {
+            if (immersiveMode.value) {
+                onHideNav(true)
+                onHideStatus(true)
                 hideSystemBars(context = context)
             } else if (activity.isImmersiveModeEnabled) {
+                onHideNav(false)
+                onHideStatus(false)
                 showSystemBars(context)
             }
         }
     }
 
-    override fun ReaderScreenViewModel.toggleImmersiveMode(isEnable: Boolean,context: Context) {
-        if (isEnable) {
-            hideSystemBars(context = context)
-        } else {
-            showSystemBars(context)
-        }
-    }
 
     override fun ReaderScreenViewModel.toggleAutoScrollMode() {
         autoScrollMode = !autoScrollMode

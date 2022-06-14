@@ -229,9 +229,9 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
         throw IllegalAccessException("List doesn't contains ${chapter?.name}")
     }
 
-    fun prepareReaderSetting(context: Context,scrollState: ScrollState) {
+    fun prepareReaderSetting(context: Context,scrollState: ScrollState,onHideNav:(Boolean) -> Unit,onHideStatus:(Boolean) -> Unit) {
         viewModelScope.launch {
-            readImmersiveMode(context)
+            readImmersiveMode(context, onHideNav = onHideNav,onHideStatus = onHideStatus)
         }
         viewModelScope.launch {
             readOrientation(context)

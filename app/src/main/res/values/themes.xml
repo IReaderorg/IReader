@@ -5,7 +5,7 @@
         <item name="android:forceDarkAllowed" tools:targetApi="Q">false</item>
     </style>
 
-    <style name="Theme.compat" parent="Theme.AppCompat.NoActionBar">
+    <style name="Theme.compat" parent="Theme.App">
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:colorBackgroundCacheHint">@null</item>
@@ -22,6 +22,9 @@
         <item name="android:windowBackground">@drawable/bg_splash</item>
         <item name="android:statusBarColor">?attr/colorBackgroundSplash</item>
         <item name="android:navigationBarColor">?attr/colorBackgroundSplash</item>
+        <item name="postSplashScreenTheme">@style/Theme.App</item>
+
+
 
     </style>
 

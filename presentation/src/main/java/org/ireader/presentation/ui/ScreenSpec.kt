@@ -63,6 +63,8 @@ sealed interface ScreenSpec {
         val scaffoldPadding: PaddingValues = PaddingValues(0.dp),
         val requestHideNavigator: (Boolean) -> Unit = {},
         val requestHideTopAppbar: (Boolean) -> Unit = {},
+        val requestHideSystemNavbar:(Boolean) -> Unit = {},
+        val requestedHideSystemStatusBar:(Boolean) -> Unit = {},
     )
 
 
