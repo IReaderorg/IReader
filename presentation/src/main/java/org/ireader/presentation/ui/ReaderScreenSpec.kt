@@ -1,5 +1,6 @@
 package org.ireader.presentation.ui
 
+import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.slideInVertically
@@ -22,6 +23,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -29,7 +31,6 @@ import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavDeepLink
 import androidx.navigation.navDeepLink
 import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -40,6 +41,7 @@ import org.ireader.core.R
 import org.ireader.core_api.log.Log
 import org.ireader.core_ui.preferences.ReadingMode
 import org.ireader.core_ui.theme.AppColors
+import org.ireader.core_ui.theme.CustomSystemColor
 import org.ireader.core_ui.theme.Roboto
 import org.ireader.core_ui.theme.fonts
 import org.ireader.domain.ui.NavigationArgs
@@ -144,10 +146,17 @@ object ReaderScreenSpec : ScreenSpec {
             }
         }
         val bars = AppColors.current
-        val systemController = rememberSystemUiController()
+        LaunchedEffect(key1 = true) {
+            if (Build.VERSION.SDK_INT < 25 && bars.isBarLight) {
+                controller.requestedCustomSystemColor(CustomSystemColor(Color.LightGray, bars.bars))
+            } else {
+                controller.requestedCustomSystemColor(CustomSystemColor(bars.bars, bars.bars))
+
+            }
+        }
+
         LaunchedEffect(key1 = vm.initialized) {
-            systemController.setNavigationBarColor(bars.bars, bars.isBarLight)
-            systemController.setStatusBarColor(bars.bars, bars.isBarLight)
+
             vm.prepareReaderSetting(
                 context,
                 scrollState,
@@ -155,12 +164,7 @@ object ReaderScreenSpec : ScreenSpec {
                 onHideStatus = controller.requestedHideSystemStatusBar
             )
         }
-        DisposableEffect(key1 = true ) {
-            onDispose {
-                systemController.setSystemBarsColor(bars.bars, bars.isBarLight)
-                systemController.setNavigationBarColor(bars.bars, bars.isBarLight)
-            }
-        }
+
         LaunchedEffect(key1 = vm.immersiveMode.value) {
             vm.prefFunc.apply {
                 vm.readImmersiveMode(

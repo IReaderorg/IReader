@@ -13,20 +13,20 @@ dependencies {
     api(kotlinx.datetime)
     api(kotlinx.serialization.json)
 
-    api(libs.ktor.core)
-    implementation(libs.ktor.contentNegotiation)
-    implementation(libs.ktor.contentNegotiation.gson)
+    api(common.ktor.core)
+    implementation(common.ktor.contentNegotiation)
+    implementation(common.ktor.contentNegotiation.gson)
 
-    api(libs.okio)
-    api(libs.hilt.android)
+    api(common.okio)
+    api(common.hilt.android)
 
     implementation(androidx.core)
     implementation(androidx.lifecycle.runtime)
     implementation(androidx.dataStore)
-    implementation(libs.quickjsAndroid)
-    compileOnly(libs.jsoup)
-    implementation(libs.bundles.tinylog)
-    api(libs.ktor.okhttp)
+    implementation(common.quickjsAndroid)
+    compileOnly(common.jsoup)
+    implementation(common.bundles.tinylog)
+    api(common.ktor.okhttp)
 }
 
 

@@ -117,10 +117,10 @@ implementation(compose.compose.material3)
     implementation(project(Modules.uiSources))
 
     /** Firebase **/
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.analyticKtx)
-    implementation(libs.firebase.analytic)
-    implementation(libs.firebase.crashlytics)
+    implementation(platform(common.firebase.bom))
+    implementation(common.firebase.analyticKtx)
+    implementation(common.firebase.analytic)
+    implementation(common.firebase.crashlytics)
 
     /** Coroutine **/
     implementation(kotlinx.coroutines.core)
@@ -128,24 +128,24 @@ implementation(compose.compose.material3)
     implementation("com.google.firebase:firebase-analytics:21.0.0")
 
     /** Hilt **/
-    kapt(libs.hilt.androidcompiler)
+    kapt(common.hilt.androidcompiler)
 
-    implementation(libs.hilt.android)
+    implementation(common.hilt.android)
     implementation(androidx.work.runtime)
-    implementation(libs.hilt.worker)
+    implementation(common.hilt.worker)
 
     implementation(compose.compose.runtime)
 
     /** Room **/
-    implementation(libs.room.runtime)
-    implementation(libs.room.ktx)
-    kapt(libs.room.compiler)
+    implementation(common.room.runtime)
+    implementation(common.room.ktx)
+    kapt(common.room.compiler)
 
     testImplementation(test.bundles.common)
-    testImplementation(libs.hilt.androidtest)
-    testImplementation(libs.room.testing)
-    androidTestImplementation(libs.hilt.androidtest)
-    androidTestImplementation(libs.room.testing)
+    testImplementation(common.hilt.androidtest)
+    testImplementation(common.room.testing)
+    androidTestImplementation(common.hilt.androidtest)
+    androidTestImplementation(common.room.testing)
     androidTestImplementation(test.bundles.common)
 }
 

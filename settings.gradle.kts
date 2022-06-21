@@ -67,6 +67,9 @@ dependencyResolutionManagement {
         create("test") {
             from(files("gradle/testing.versions.toml"))
         }
+        create("common") {
+            from(files("gradle/common.versions.toml"))
+        }
 
     }
 }

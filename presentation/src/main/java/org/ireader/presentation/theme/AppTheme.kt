@@ -5,9 +5,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import org.ireader.core_ui.theme.AppColors
+import org.ireader.core_ui.theme.LocalCustomStatusBar
 import org.ireader.core_ui.theme.LocalTransparentStatusBar
 import org.ireader.core_ui.theme.Shapes
 import org.ireader.core_ui.theme.isLight
@@ -22,21 +24,32 @@ fun AppTheme(
     val rippleTheme = vm.getRippleTheme()
     val systemUiController = rememberSystemUiController()
     val transparentStatusBar = LocalTransparentStatusBar.current.enabled
+    val isCustomColorEnable  = LocalCustomStatusBar.current.enabled
+    val status  = LocalCustomStatusBar.current.enabled
+    val navigation  = LocalCustomStatusBar.current.enabled
+    val customStatusColor  = LocalCustomStatusBar.current
 
-    val isLight = materialColors.isLight()
     systemUiController.setSystemBarsColor(
         color = customColors.bars,
         darkIcons =  customColors.isBarLight,
         isNavigationBarContrastEnforced = false
     )
-    LaunchedEffect(customColors.isBarLight, transparentStatusBar) {
+    LaunchedEffect(customColors.isBarLight, transparentStatusBar,isCustomColorEnable,status,navigation) {
+        val isLight = materialColors.isLight()
         val darkIcons =
             if (transparentStatusBar) isLight else customColors.isBarLight
-//        systemUiController.setSystemBarsColor(
-//            color = customColors.bars,
-//            darkIcons =  customColors.isBarLight,
-//        )
-        if (transparentStatusBar) {
+
+        if (isCustomColorEnable) {
+            systemUiController.setStatusBarColor(
+                color = customStatusColor.statusBar,
+                darkIcons = customStatusColor.statusBar.luminance() > 0.5,
+            )
+            systemUiController.setNavigationBarColor(
+                color = customStatusColor.navigationBar,
+                darkIcons = customStatusColor.navigationBar.luminance() > 0.5,
+            )
+        } else
+            if (transparentStatusBar) {
             systemUiController.setStatusBarColor(
                 color = Color.Transparent,
                 darkIcons = darkIcons,

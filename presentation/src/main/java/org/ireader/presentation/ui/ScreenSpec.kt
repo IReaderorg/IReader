@@ -12,6 +12,7 @@ import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavDeepLink
+import org.ireader.core_ui.theme.CustomSystemColor
 
 @OptIn(ExperimentalMaterialApi::class)
 sealed interface ScreenSpec {
@@ -65,6 +66,7 @@ sealed interface ScreenSpec {
         val requestHideTopAppbar: (Boolean) -> Unit = {},
         val requestHideSystemNavbar:(Boolean) -> Unit = {},
         val requestedHideSystemStatusBar:(Boolean) -> Unit = {},
+        val requestedCustomSystemColor:(CustomSystemColor?) -> Unit = {},
     )
 
 

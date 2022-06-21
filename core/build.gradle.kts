@@ -22,20 +22,20 @@ dependencies {
     implementation(compose.compose.coil)
     implementation(androidx.browser)
 
-    implementation(libs.okhttp.doh)
-    implementation(libs.okio)
+    implementation(common.okhttp.doh)
+    implementation(common.okio)
 
-    implementation(libs.hilt.android)
+    implementation(common.hilt.android)
 
-    implementation(libs.jsoup)
+    implementation(common.jsoup)
     implementation(androidx.dataStore)
 
     implementation(kotlinx.stdlib)
 
-    implementation(libs.ktor.core)
-    implementation(libs.ktor.core.android)
-    implementation(libs.ktor.contentNegotiation)
-    implementation(libs.ktor.okhttp)
+    implementation(common.ktor.core)
+    implementation(common.ktor.core.android)
+    implementation(common.ktor.contentNegotiation)
+    implementation(common.ktor.okhttp)
 
     testImplementation(test.bundles.common)
     androidTestImplementation(test.bundles.common)

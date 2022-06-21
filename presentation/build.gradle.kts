@@ -86,14 +86,14 @@ implementation(compose.compose.material3)
 
     implementation(androidx.work.runtime)
 
-    implementation(libs.room.runtime)
-    implementation(libs.room.ktx)
+    implementation(common.room.runtime)
+    implementation(common.room.ktx)
     implementation(project(mapOf("path" to ":common-models")))
-    kapt(libs.room.compiler)
+    kapt(common.room.compiler)
 
-    implementation(libs.hilt.android)
-    kapt(libs.hilt.androidcompiler)
-    // kapt(libs.hilt.compiler)
+    implementation(common.hilt.android)
+    kapt(common.hilt.androidcompiler)
+    // kapt(common.hilt.compiler)
 
     testImplementation(test.bundles.common)
     androidTestImplementation(test.bundles.common)

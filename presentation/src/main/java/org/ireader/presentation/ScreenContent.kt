@@ -40,6 +40,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -60,6 +61,8 @@ import org.ireader.common_resources.ARG_TRANSPARENT_STATUS_BAR
 import org.ireader.components.components.ConfirmExitBackHandler
 import org.ireader.components.components.ISnackBarHost
 import org.ireader.core_ui.theme.AppColors
+import org.ireader.core_ui.theme.CustomStatusBar
+import org.ireader.core_ui.theme.CustomSystemColor
 import org.ireader.core_ui.theme.TransparentStatusBar
 import org.ireader.presentation.ui.BottomNavScreenSpec
 import org.ireader.presentation.ui.HistoryScreenSpec
@@ -97,6 +100,7 @@ fun ScreenContent() {
     val (requestedHideSystemNavBar, requestHideSystemNavBar) = remember { mutableStateOf(false) }
     val (requestedHideSystemStatusBar, requestHideSystemStatusBar) = remember { mutableStateOf(false) }
     val (requestedHideTopBar, requestHideTopBar) = remember { mutableStateOf(true) }
+    val (requestCustomSystemColor, requestedCustomColor) = remember { mutableStateOf<CustomSystemColor?>(null) }
     val scope = rememberCoroutineScope()
     val scaffoldModifier = remember(requestedHideSystemNavBar,requestedHideSystemStatusBar) {
         derivedStateOf {
@@ -106,7 +110,9 @@ fun ScreenContent() {
                 requestedHideSystemNavBar && !requestedHideSystemStatusBar -> Modifier.statusBarsPadding()
                 requestedHideSystemStatusBar -> Modifier.navigationBarsPadding()
                 requestedHideSystemNavBar -> Modifier.statusBarsPadding()
-                else -> Modifier.navigationBarsPadding().statusBarsPadding()
+                else -> Modifier
+                    .navigationBarsPadding()
+                    .statusBarsPadding()
             }
         }
     }
@@ -118,6 +124,7 @@ fun ScreenContent() {
             requestHideBottomNav(false)
             requestHideSystemStatusBar(false)
             requestHideSystemNavBar(false)
+            requestedCustomColor(null)
             scope.launch {
                 modalBottomSheetState.hide()
                 drawerState.close()
@@ -140,7 +147,8 @@ fun ScreenContent() {
                         requestHideNavigator = requestHideBottomNav,
                         requestHideTopAppbar = requestHideTopBar,
                         requestedHideSystemStatusBar = requestHideSystemStatusBar,
-                        requestHideSystemNavbar = requestHideSystemNavBar
+                        requestHideSystemNavbar = requestHideSystemNavBar,
+                        requestedCustomSystemColor = requestedCustomColor
                     )
                 )
             }
@@ -160,45 +168,26 @@ fun ScreenContent() {
                             requestHideNavigator = requestHideBottomNav,
                             requestHideTopAppbar = requestHideTopBar,
                             requestedHideSystemStatusBar = requestHideSystemStatusBar,
-                            requestHideSystemNavbar = requestHideSystemNavBar
+                            requestHideSystemNavbar = requestHideSystemNavBar,
+                            requestedCustomSystemColor = requestedCustomColor
                         )
                     )
                 }
             },
             isEnable = haveDrawer,
         ) {
-            TransparentStatusBar(enable = transparentStatusBar) {
-                Scaffold(
-                    modifier = scaffoldModifier.value,
-                    topBar = {
-                        if (navStackEntry != null) {
-                            AnimatedVisibility(
-                                visible = requestedHideTopBar,
-                                enter = slideInVertically(initialOffsetY = { it }),
-                                exit = slideOutVertically(targetOffsetY = { it })
-                            ) {
-                                screenSpec?.TopBar(
-                                    ScreenSpec.Controller(
-                                        navController = navController,
-                                        navBackStackEntry = navStackEntry,
-                                        snackBarHostState = snackBarHostState,
-                                        sheetState = modalBottomSheetState,
-                                        drawerState = drawerState,
-                                        requestHideNavigator = requestHideBottomNav,
-                                        requestHideTopAppbar = requestHideTopBar,
-                                        requestedHideSystemStatusBar = requestHideSystemStatusBar,
-                                        requestHideSystemNavbar = requestHideSystemNavBar
-                                    )
-                                )
-                            }
-                        }
-                    },
-                    bottomBar = {
-                        if (navStackEntry != null) {
-                            IBottomAppBar(
-                                isEnable = haveVariantBottomAppBar,
-                                sheetContent = {
-                                    screenSpec?.BottomAppBar(
+            CustomStatusBar(enable = requestCustomSystemColor != null ,statusBar = requestCustomSystemColor?.status ?: Color.White, navigationBar = requestCustomSystemColor?.navigation ?: Color.White) {
+                TransparentStatusBar(enable = transparentStatusBar) {
+                    Scaffold(
+                        modifier = scaffoldModifier.value,
+                        topBar = {
+                            if (navStackEntry != null) {
+                                AnimatedVisibility(
+                                    visible = requestedHideTopBar,
+                                    enter = slideInVertically(initialOffsetY = { it }),
+                                    exit = slideOutVertically(targetOffsetY = { it })
+                                ) {
+                                    screenSpec?.TopBar(
                                         ScreenSpec.Controller(
                                             navController = navController,
                                             navBackStackEntry = navStackEntry,
@@ -208,106 +197,131 @@ fun ScreenContent() {
                                             requestHideNavigator = requestHideBottomNav,
                                             requestHideTopAppbar = requestHideTopBar,
                                             requestedHideSystemStatusBar = requestHideSystemStatusBar,
-                                            requestHideSystemNavbar = requestHideSystemNavBar
+                                            requestHideSystemNavbar = requestHideSystemNavBar,
+                                            requestedCustomSystemColor = requestedCustomColor
                                         )
                                     )
                                 }
-                            )
-                        }
-
-                        AnimatedVisibility(
-                            visible = (hideBottomBar == null || hideBottomBar == true) && !requestedHideBottomNav,
-                            enter = slideInVertically(initialOffsetY = { it }),
-                            exit = slideOutVertically(targetOffsetY = { it })
-                        ) {
-                            NavigationBar(
-                                modifier = Modifier.fillMaxWidth(),
-                                containerColor = AppColors.current.bars,
-                                contentColor = AppColors.current.onBars,
-                                tonalElevation = 5.dp,
-                            ) {
-                                BottomNavScreenSpec.screens.filter {
-                                    (if (vm.showHistory.value) true else it != HistoryScreenSpec) && (if (vm.showUpdate.value) true else it != UpdateScreenSpec)
-                                }.forEach { bottomNavDestination ->
-                                    val isSelected: Boolean by derivedStateOf {
-                                        currentDestination?.hierarchy?.any {
-                                            it.route == bottomNavDestination.navHostRoute
-                                        } == true
+                            }
+                        },
+                        bottomBar = {
+                            if (navStackEntry != null) {
+                                IBottomAppBar(
+                                    isEnable = haveVariantBottomAppBar,
+                                    sheetContent = {
+                                        screenSpec?.BottomAppBar(
+                                            ScreenSpec.Controller(
+                                                navController = navController,
+                                                navBackStackEntry = navStackEntry,
+                                                snackBarHostState = snackBarHostState,
+                                                sheetState = modalBottomSheetState,
+                                                drawerState = drawerState,
+                                                requestHideNavigator = requestHideBottomNav,
+                                                requestHideTopAppbar = requestHideTopBar,
+                                                requestedHideSystemStatusBar = requestHideSystemStatusBar,
+                                                requestHideSystemNavbar = requestHideSystemNavBar,
+                                                requestedCustomSystemColor = requestedCustomColor
+                                            )
+                                        )
                                     }
-                                    NavigationBarItem(
-                                        icon = {
-                                            Icon(
-                                                bottomNavDestination.icon,
-                                                contentDescription = null,
-                                                tint = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onBackground
-                                            )
-                                        },
-                                        label = {
-                                            Text(
-                                                stringResource(bottomNavDestination.label),
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis,
-                                                color = MaterialTheme.colorScheme.onBackground
-                                            )
-                                        },
-                                        colors = NavigationBarItemDefaults.colors(
-                                            indicatorColor = MaterialTheme.colorScheme.primaryContainer,
-                                            unselectedTextColor = MaterialTheme.colorScheme.onBackground,
-                                            selectedTextColor = MaterialTheme.colorScheme.onBackground,
-                                            selectedIconColor = MaterialTheme.colorScheme.onBackground,
-                                            unselectedIconColor = MaterialTheme.colorScheme.onBackground
-                                        ),
-                                        alwaysShowLabel = true,
-                                        selected = isSelected,
-                                        onClick = {
-                                            navController.navigate(bottomNavDestination.navHostRoute) {
-                                                popUpTo(navController.graph.findStartDestination().id) {
-                                                    saveState = true
+                                )
+                            }
+
+                            AnimatedVisibility(
+                                visible = (hideBottomBar == null || hideBottomBar == true) && !requestedHideBottomNav,
+                                enter = slideInVertically(initialOffsetY = { it }),
+                                exit = slideOutVertically(targetOffsetY = { it })
+                            ) {
+                                NavigationBar(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    containerColor = AppColors.current.bars,
+                                    contentColor = AppColors.current.onBars,
+                                    tonalElevation = 5.dp,
+                                ) {
+                                    BottomNavScreenSpec.screens.filter {
+                                        (if (vm.showHistory.value) true else it != HistoryScreenSpec) && (if (vm.showUpdate.value) true else it != UpdateScreenSpec)
+                                    }.forEach { bottomNavDestination ->
+                                        val isSelected: Boolean by derivedStateOf {
+                                            currentDestination?.hierarchy?.any {
+                                                it.route == bottomNavDestination.navHostRoute
+                                            } == true
+                                        }
+                                        NavigationBarItem(
+                                            icon = {
+                                                Icon(
+                                                    bottomNavDestination.icon,
+                                                    contentDescription = null,
+                                                    tint = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onBackground
+                                                )
+                                            },
+                                            label = {
+                                                Text(
+                                                    stringResource(bottomNavDestination.label),
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis,
+                                                    color = MaterialTheme.colorScheme.onBackground
+                                                )
+                                            },
+                                            colors = NavigationBarItemDefaults.colors(
+                                                indicatorColor = MaterialTheme.colorScheme.primaryContainer,
+                                                unselectedTextColor = MaterialTheme.colorScheme.onBackground,
+                                                selectedTextColor = MaterialTheme.colorScheme.onBackground,
+                                                selectedIconColor = MaterialTheme.colorScheme.onBackground,
+                                                unselectedIconColor = MaterialTheme.colorScheme.onBackground
+                                            ),
+                                            alwaysShowLabel = true,
+                                            selected = isSelected,
+                                            onClick = {
+                                                navController.navigate(bottomNavDestination.navHostRoute) {
+                                                    popUpTo(navController.graph.findStartDestination().id) {
+                                                        saveState = true
+                                                    }
+                                                    launchSingleTop = true
+                                                    restoreState = true
                                                 }
-                                                launchSingleTop = true
-                                                restoreState = true
-                                            }
-                                        },
-                                    )
+                                            },
+                                        )
+                                    }
                                 }
                             }
-                        }
-                    },
-                    snackbarHost = { ISnackBarHost(snackBarHostState = snackBarHostState) },
-                ) { padding ->
-                    AnimatedNavHost(
-                        modifier = Modifier.fillMaxSize(),
-                        navController = navController,
-                        startDestination = LibraryScreenSpec.navHostRoute,
-                        enterTransition = {
-                            fadeIn(animationSpec = tween(500))
                         },
-                        exitTransition = {
-                            fadeOut(animationSpec = tween(500))
-                        },
-                    ) {
+                        snackbarHost = { ISnackBarHost(snackBarHostState = snackBarHostState) },
+                    ) { padding ->
+                        AnimatedNavHost(
+                            modifier = Modifier.fillMaxSize(),
+                            navController = navController,
+                            startDestination = LibraryScreenSpec.navHostRoute,
+                            enterTransition = {
+                                fadeIn(animationSpec = tween(500))
+                            },
+                            exitTransition = {
+                                fadeOut(animationSpec = tween(500))
+                            },
+                        ) {
 
-                        ScreenSpec.allScreens.values.forEach { screen ->
-                            composable(
-                                route = screen.navHostRoute,
-                                arguments = screen.arguments,
-                                deepLinks = screen.deepLinks,
-                            ) { navBackStackEntry ->
+                            ScreenSpec.allScreens.values.forEach { screen ->
+                                composable(
+                                    route = screen.navHostRoute,
+                                    arguments = screen.arguments,
+                                    deepLinks = screen.deepLinks,
+                                ) { navBackStackEntry ->
 
-                                screen.Content(
-                                    ScreenSpec.Controller(
-                                        navController = navController,
-                                        navBackStackEntry = navBackStackEntry,
-                                        snackBarHostState = snackBarHostState,
-                                        sheetState = modalBottomSheetState,
-                                        drawerState = drawerState,
-                                        requestHideNavigator = requestHideBottomNav,
-                                        requestHideTopAppbar = requestHideTopBar,
-                                        scaffoldPadding = padding,
-                                        requestedHideSystemStatusBar = requestHideSystemStatusBar,
-                                        requestHideSystemNavbar = requestHideSystemNavBar
+                                    screen.Content(
+                                        ScreenSpec.Controller(
+                                            navController = navController,
+                                            navBackStackEntry = navBackStackEntry,
+                                            snackBarHostState = snackBarHostState,
+                                            sheetState = modalBottomSheetState,
+                                            drawerState = drawerState,
+                                            requestHideNavigator = requestHideBottomNav,
+                                            requestHideTopAppbar = requestHideTopBar,
+                                            scaffoldPadding = padding,
+                                            requestedHideSystemStatusBar = requestHideSystemStatusBar,
+                                            requestHideSystemNavbar = requestHideSystemNavBar,
+                                            requestedCustomSystemColor = requestedCustomColor
+                                        )
                                     )
-                                )
+                                }
                             }
                         }
                     }
