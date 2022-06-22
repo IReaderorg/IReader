@@ -61,7 +61,6 @@ import org.ireader.common_resources.ARG_TRANSPARENT_STATUS_BAR
 import org.ireader.components.components.ConfirmExitBackHandler
 import org.ireader.components.components.ISnackBarHost
 import org.ireader.core_ui.theme.AppColors
-import org.ireader.core_ui.theme.CustomStatusBar
 import org.ireader.core_ui.theme.CustomSystemColor
 import org.ireader.core_ui.theme.TransparentStatusBar
 import org.ireader.presentation.ui.BottomNavScreenSpec
@@ -176,7 +175,7 @@ fun ScreenContent() {
             },
             isEnable = haveDrawer,
         ) {
-            CustomStatusBar(enable = requestCustomSystemColor != null ,statusBar = requestCustomSystemColor?.status ?: Color.White, navigationBar = requestCustomSystemColor?.navigation ?: Color.White) {
+            CustomSystemColor(enable = requestCustomSystemColor != null ,statusBar = requestCustomSystemColor?.status ?: Color.White, navigationBar = requestCustomSystemColor?.navigation ?: Color.White) {
                 TransparentStatusBar(enable = transparentStatusBar) {
                     Scaffold(
                         modifier = scaffoldModifier.value,

@@ -117,7 +117,7 @@ fun SearchToolbar(
     title: String,
     onSearch: ((String) -> Unit)?= null,
     onValueChange:((String) -> Unit)? = null,
-    actions: (RowScope.() -> Unit?)? = null,
+    actions: ( @Composable RowScope.() -> Unit?)? = null,
     onPopBackStack: (() -> Unit)? = null
 ) {
     val focusManager = LocalFocusManager.current

@@ -1,5 +1,6 @@
 package org.ireader.settings.setting.font_screens
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.googlefonts.GoogleFont
@@ -21,6 +22,7 @@ class FontScreenViewModel @OptIn(ExperimentalTextApi::class)
 ) : BaseViewModel(),FontScreenState by fontScreenState  {
 
     val font = readerPreferences.font().asState()
+    val previewMode = mutableStateOf(false)
 
     init {
         setup()
@@ -28,7 +30,6 @@ class FontScreenViewModel @OptIn(ExperimentalTextApi::class)
 
 
 
-    @OptIn(ExperimentalTextApi::class)
     private fun setup() {
         viewModelScope.launch {
             fontScreenState.fonts =  fontUseCase.getRemoteFonts()

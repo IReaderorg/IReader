@@ -24,14 +24,14 @@ fun TransparentStatusBar(enable: Boolean = false, content: @Composable () -> Uni
 }
 
 @Composable
-fun CustomStatusBar(
+fun CustomSystemColor(
     enable: Boolean = false,
     statusBar: Color,
     navigationBar: Color,
     content: @Composable () -> Unit
 ) {
     if (enable) {
-        val state = LocalCustomStatusBar.current
+        val state = LocalCustomSystemCOlor.current
         LaunchedEffect(key1 = statusBar, key2 = navigationBar) {
             state.statusBar = statusBar
             state.navigationBar = navigationBar
@@ -48,7 +48,7 @@ fun CustomStatusBar(
 }
 
 val LocalTransparentStatusBar = staticCompositionLocalOf { TransparentStatusBar(false) }
-val LocalCustomStatusBar = staticCompositionLocalOf { CustomStatusBar(false) }
+val LocalCustomSystemCOlor = staticCompositionLocalOf { CustomStatusBar(false) }
 
 class TransparentStatusBar(enabled: Boolean) {
     var enabled by mutableStateOf(enabled)

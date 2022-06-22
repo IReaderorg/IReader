@@ -9,7 +9,7 @@ import androidx.compose.ui.graphics.luminance
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import org.ireader.core_ui.theme.AppColors
-import org.ireader.core_ui.theme.LocalCustomStatusBar
+import org.ireader.core_ui.theme.LocalCustomSystemCOlor
 import org.ireader.core_ui.theme.LocalTransparentStatusBar
 import org.ireader.core_ui.theme.Shapes
 import org.ireader.core_ui.theme.isLight
@@ -24,10 +24,10 @@ fun AppTheme(
     val rippleTheme = vm.getRippleTheme()
     val systemUiController = rememberSystemUiController()
     val transparentStatusBar = LocalTransparentStatusBar.current.enabled
-    val isCustomColorEnable  = LocalCustomStatusBar.current.enabled
-    val status  = LocalCustomStatusBar.current.enabled
-    val navigation  = LocalCustomStatusBar.current.enabled
-    val customStatusColor  = LocalCustomStatusBar.current
+    val isCustomColorEnable  = LocalCustomSystemCOlor.current.enabled
+    val status  = LocalCustomSystemCOlor.current.enabled
+    val navigation  = LocalCustomSystemCOlor.current.enabled
+    val customStatusColor  = LocalCustomSystemCOlor.current
 
     systemUiController.setSystemBarsColor(
         color = customColors.bars,
