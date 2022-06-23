@@ -3,9 +3,13 @@ package org.ireader.core_ui.preferences
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.ireader.core_api.prefs.Preference
 import org.ireader.core_api.prefs.PreferenceStore
 import org.ireader.core_api.prefs.getEnum
+import org.ireader.core_ui.theme.prefs.CustomThemes
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -18,6 +22,15 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
 
     fun colorTheme(): Preference<Int> {
         return preferenceStore.getInt("color_theme", 0)
+    }
+
+    fun customTheme(): Preference<CustomThemes> {
+        return preferenceStore.getObject<CustomThemes>("custom_themes",
+            CustomThemes(), serializer = {
+                Json.encodeToString(it)
+            }, deserializer = {
+                Json.decodeFromString<CustomThemes>(it)
+            })
     }
 
     fun colorPrimaryLight(): Preference<Int> {
@@ -59,6 +72,7 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
     fun dateFormat(): Preference<String> {
         return preferenceStore.getString("date_format", "")
     }
+
     fun relativeTime(): Preference<PreferenceValues.RelativeTime> {
         return preferenceStore.getEnum("relative_time", PreferenceValues.RelativeTime.Day)
     }
@@ -75,27 +89,33 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
     fun incognitoMode(): Preference<Boolean> {
         return preferenceStore.getBoolean("incognito_mode", false)
     }
+
     fun useAuthenticator(): Preference<Boolean> {
         return preferenceStore.getBoolean("use_authenticator", false)
     }
+
     fun lastAppUnlock(): Preference<Long> {
         return preferenceStore.getLong("last_app_unlock", 0)
     }
+
     fun lockAppAfter(): Preference<Long> {
         return preferenceStore.getLong("lock_app_after", 0)
     }
-    var isAppLocked by mutableStateOf(true)
 
+    var isAppLocked by mutableStateOf(true)
 
     fun secureScreen(): Preference<PreferenceValues.SecureScreenMode> {
         return preferenceStore.getEnum("secure_screen", PreferenceValues.SecureScreenMode.NEVER)
     }
+
     fun lastUsedSource(): Preference<Long> {
         return preferenceStore.getLong("last_used_source", -1L)
     }
+
     fun showUpdatesInButtonBar(): Preference<Boolean> {
         return preferenceStore.getBoolean("show_updates_in_bottom_bar", true)
     }
+
     fun showHistoryInButtonBar(): Preference<Boolean> {
         return preferenceStore.getBoolean("show_history_in_bottom_bar", true)
     }

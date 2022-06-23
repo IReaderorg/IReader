@@ -21,6 +21,7 @@ data class Theme(
     val materialColors: ColorScheme,
     val extraColors: ExtraColors,
 )
+
 data class BaseTheme(
     val id: Int,
     val lightColor: ColorScheme,
@@ -46,7 +47,7 @@ fun BaseTheme.dark():Theme {
 
 
 
-val themes = listOf<BaseTheme>(
+val themes = mutableListOf<BaseTheme>(
     BaseTheme(
         id = 0,
         lightColor = LightThemeColorsTachiyomi,

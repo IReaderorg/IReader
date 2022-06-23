@@ -6,11 +6,14 @@ import androidx.compose.runtime.mutableStateOf
 import dagger.hilt.android.lifecycle.HiltViewModel
 import org.ireader.core_ui.preferences.PreferenceValues
 import org.ireader.core_ui.preferences.UiPreferences
+import org.ireader.core_ui.theme.BaseTheme
 import org.ireader.core_ui.theme.CustomizableAppColorsPreferenceState
+import org.ireader.core_ui.theme.ExtraColors
 import org.ireader.core_ui.theme.asState
 import org.ireader.core_ui.theme.getDarkColors
 import org.ireader.core_ui.theme.getLightColors
 import org.ireader.core_ui.theme.isLight
+import org.ireader.core_ui.theme.themes
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import javax.inject.Inject
 
@@ -21,6 +24,9 @@ class AppearanceViewModel @Inject constructor(
 
     private val _state = mutableStateOf(MainScreenState())
     val state = _state
+
+    val savable = mutableStateOf(false)
+    val customThemes = uiPreferences.customTheme()
 
     val themeMode = uiPreferences.themeMode().asState()
     val colorTheme = uiPreferences.colorTheme().asState()
@@ -38,6 +44,17 @@ class AppearanceViewModel @Inject constructor(
     @Composable
     fun getCustomizedColors(): CustomizableAppColorsPreferenceState {
         return if (MaterialTheme.colorScheme.isLight()) lightColors else darkColors
+    }
+
+    fun getThemes(id:Int): BaseTheme? {
+        val themes = themes.getOrNull(colorTheme.value)
+        return themes?.copy(
+            id = id,
+            lightColor = themes.lightColor.copy(primary = lightColors.primary, secondary = lightColors.secondary),
+            darkColor =themes.darkColor.copy(primary = darkColors.primary, secondary = darkColors.secondary),
+            lightExtraColors = ExtraColors(bars = lightColors.bars),
+            darkExtraColors = ExtraColors(bars = darkColors.bars),
+        )
     }
 }
 

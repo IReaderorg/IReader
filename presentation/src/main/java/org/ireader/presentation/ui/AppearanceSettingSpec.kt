@@ -2,6 +2,8 @@ package org.ireader.presentation.ui
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -11,8 +13,12 @@ import androidx.navigation.NavController
 import org.ireader.appearance.AppearanceSettingScreen
 import org.ireader.appearance.AppearanceViewModel
 import org.ireader.components.components.Toolbar
+import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.components.reusable_composable.TopAppBarBackButton
+import org.ireader.core_ui.theme.prefs.CustomThemes
+import org.ireader.core_ui.theme.prefs.toCustomTheme
+import org.ireader.core_ui.theme.themes
 import org.ireader.ui_appearance.R
 
 object AppearanceScreenSpec : ScreenSpec {
@@ -25,6 +31,7 @@ object AppearanceScreenSpec : ScreenSpec {
     override fun TopBar(
         controller: ScreenSpec.Controller
     ) {
+        val viewModel: AppearanceViewModel = hiltViewModel(controller.navBackStackEntry)
         Toolbar(
             title = {
                 BigSizeTextComposable(text = stringResource(R.string.appearance))
@@ -33,16 +40,25 @@ object AppearanceScreenSpec : ScreenSpec {
                 TopAppBarBackButton() {
                     popBackStack(controller.navController)
                 }
+            },
+            actions = {
+                    AppIconButton(
+                        imageVector = Icons.Default.Save,
+                        onClick = {
+                            viewModel.getThemes(themes.lastIndex)?.let {
+                                viewModel.customThemes.set(CustomThemes(listOf(it.toCustomTheme())))
+                            }
+                        }
+                    )
             }
         )
     }
-
 
     @Composable
     override fun Content(
         controller: ScreenSpec.Controller
     ) {
-        val viewModel: AppearanceViewModel = hiltViewModel(   controller.navBackStackEntry)
+        val viewModel: AppearanceViewModel = hiltViewModel(controller.navBackStackEntry)
         AppearanceSettingScreen(
             modifier = Modifier.padding(controller.scaffoldPadding),
             saveDarkModePreference = { theme ->

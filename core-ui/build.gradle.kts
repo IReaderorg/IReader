@@ -47,6 +47,8 @@ implementation(compose.compose.material3)
 
     implementation(accompanist.systemUiController)
 
+
+    implementation(kotlinx.serialization.protobuf)
     testImplementation(test.junit4)
     testImplementation(test.extJunit)
     testImplementation(test.espresso)

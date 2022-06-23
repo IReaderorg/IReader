@@ -9,11 +9,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.takeOrElse
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import org.ireader.core_ui.preferences.PreferenceValues
 import org.ireader.core_ui.preferences.UiPreferences
 import org.ireader.core_ui.theme.AppRippleTheme
@@ -25,6 +28,7 @@ import org.ireader.core_ui.theme.getDarkColors
 import org.ireader.core_ui.theme.getLightColors
 import org.ireader.core_ui.theme.isLight
 import org.ireader.core_ui.theme.light
+import org.ireader.core_ui.theme.prefs.toBaseTheme
 import org.ireader.core_ui.theme.themes
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import javax.inject.Inject
@@ -36,12 +40,19 @@ class AppThemeViewModel @Inject constructor(
 ) : BaseViewModel() {
     private val themeMode by uiPreferences.themeMode().asState()
     private val colorTheme by uiPreferences.colorTheme().asState()
+    private val customTheme = uiPreferences.customTheme()
 //    private val lightTheme by uiPreferences.lightTheme().asState()
 //    private val darkTheme by uiPreferences.darkTheme().asState()
 
     private val baseThemeJob = SupervisorJob()
     private val baseThemeScope = CoroutineScope(baseThemeJob)
 
+    init {
+        customTheme.get().themes.let {customs ->  themes.addAll(customs.map { it.toBaseTheme() }) }
+        customTheme.changes().onEach { custom ->
+            themes.addAll(custom.themes.map { it.toBaseTheme() })
+        }.launchIn(viewModelScope)
+    }
     @Composable
     fun getRippleTheme(): RippleTheme {
         return when (themeMode) {
@@ -50,6 +61,7 @@ class AppThemeViewModel @Inject constructor(
             PreferenceValues.ThemeMode.Dark -> AppRippleTheme(false)
         }
     }
+
     @Composable
     fun getColors(): Pair<ColorScheme, ExtraColors> {
         val baseTheme = getBaseTheme(themeMode, colorTheme)
@@ -75,18 +87,19 @@ class AppThemeViewModel @Inject constructor(
     ): Theme {
         @Composable
         fun getTheme(fallbackIsLight: Boolean): Theme {
+
             return themes.firstOrNull { it.id == colorTheme }?.let {
                 if (fallbackIsLight) {
                     it.light()
-                }else {
+                } else {
                     it.dark()
                 }
-            }?: themes.first { it.lightColor.isLight() == fallbackIsLight }.light()
+            } ?: if (fallbackIsLight) themes.first().light() else themes.first().dark()
         }
 
         return when (themeMode) {
             PreferenceValues.ThemeMode.System -> if (!isSystemInDarkTheme()) {
-                getTheme(true,)
+                getTheme(true)
             } else {
                 getTheme(false)
             }

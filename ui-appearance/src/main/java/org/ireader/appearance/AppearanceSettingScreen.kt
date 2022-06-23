@@ -195,7 +195,7 @@ private fun ThemeItem(
                     .weight(1f)
                     .padding(6.dp)
             ) {
-                Text("Text", fontSize = 11.sp)
+                Text("Text", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurface)
                 Button(
                     onClick = {},
                     enabled = false,
