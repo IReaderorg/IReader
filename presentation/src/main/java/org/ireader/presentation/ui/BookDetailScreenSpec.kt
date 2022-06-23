@@ -23,6 +23,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavDeepLink
 import androidx.navigation.navDeepLink
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.ireader.bookDetails.BookDetailScreen
 import org.ireader.bookDetails.BookDetailTopAppBar
@@ -34,6 +35,7 @@ import org.ireader.common_extensions.findComponentActivity
 import org.ireader.common_extensions.launchIO
 import org.ireader.common_models.entities.Book
 import org.ireader.common_resources.LAST_CHAPTER
+import org.ireader.common_resources.UiEvent
 import org.ireader.common_resources.UiText
 import org.ireader.core_api.source.CatalogSource
 import org.ireader.core_api.source.HttpSource
@@ -247,9 +249,22 @@ object BookDetailScreenSpec : ScreenSpec {
     override fun Content(
         controller: ScreenSpec.Controller
     ) {
-
         val vm: BookDetailViewModel = hiltViewModel(controller.navBackStackEntry)
         val context = LocalContext.current
+        LaunchedEffect(key1 = true) {
+            vm.eventFlow.collectLatest { event ->
+                when (event) {
+                    is UiEvent.ShowSnackbar -> {
+                        controller.snackBarHostState.showSnackbar(
+                            event.uiText.asString(context)
+                        )
+                    }
+                    else -> {}
+                }
+            }
+        }
+
+
         val state = vm
         val book = state.book
         val source = state.catalogSource?.source
