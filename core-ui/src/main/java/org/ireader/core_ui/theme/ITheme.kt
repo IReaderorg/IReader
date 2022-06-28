@@ -30,14 +30,15 @@ data class BaseTheme(
     val darkExtraColors: ExtraColors,
 )
 
-fun BaseTheme.light():Theme {
+fun BaseTheme.light(): Theme {
     return Theme(
         id,
         lightColor,
         lightExtraColors
     )
 }
-fun BaseTheme.dark():Theme {
+
+fun BaseTheme.dark(): Theme {
     return Theme(
         id,
         darkColor,
@@ -45,112 +46,108 @@ fun BaseTheme.dark():Theme {
     )
 }
 
-
-
 val themes = mutableListOf<BaseTheme>(
-    BaseTheme(
-        id = 0,
-        lightColor = LightThemeColorsTachiyomi,
-        darkColor = DarkThemeColorsTachiyomi,
-        darkExtraColors =ExtraColors(
-            bars = DarkThemeColorsTachiyomi.surface,
-            onBars = DarkThemeColorsTachiyomi.onSurface
+        BaseTheme(
+            id = 0,
+            lightColor = LightThemeColorsTachiyomi,
+            darkColor = DarkThemeColorsTachiyomi,
+            darkExtraColors = ExtraColors(
+                bars = DarkThemeColorsTachiyomi.surface,
+                onBars = DarkThemeColorsTachiyomi.onSurface
+            ),
+            lightExtraColors = ExtraColors(
+                bars = LightThemeColorsTachiyomi.surface,
+                onBars = LightThemeColorsTachiyomi.onSurface
+            )
         ),
-        lightExtraColors = ExtraColors(
-            bars = LightThemeColorsTachiyomi.surface,
-            onBars = LightThemeColorsTachiyomi.onSurface
-        )
-    ),
-    BaseTheme(
-        id = 1,
-        lightColor = lightColorScheme(
-            primary = Colour.blue_accent,
-            primaryContainer = Colour.blue_700,
-            onPrimary = Colour.white_50,
-            secondary = Colour.blue_accent,
-            onSecondary = Colour.white_50,
-            background = Colour.white_50,
-            surface = Colour.white_50,
-            onBackground = Colour.black_900,
-            onSurface = Colour.black_900,
-            error = Colour.red_600,
-            onError = Colour.white_50,
-        ),
-        darkColor = darkColorScheme(
-            primary = Colour.blue_accent,
-            primaryContainer = Colour.blue_600,
-            onPrimary = Colour.black_900,
-            secondary = Colour.blue_accent,
-            onSecondary = Colour.black_900,
-            background = Color(0xFF121212),
-            surface = Color(0xFF000000),
-            onBackground = Colour.white_50,
-            onSurface = Colour.white_50,
-            error = Colour.red_600,
-            onError = Colour.black_900,
-        ),
-        lightExtraColors = ExtraColors(
-            bars = Color.White,
-            onBars = Color.Black
-        ),
-        darkExtraColors = ExtraColors(
-            bars = Color(0xFF181818),
-            onBars = Color.White
-        ),
+        BaseTheme(
+            id = 1,
+            lightColor = lightColorScheme(
+                primary = Colour.blue_accent,
+                primaryContainer = Colour.blue_700,
+                onPrimary = Colour.white_50,
+                secondary = Colour.blue_accent,
+                onSecondary = Colour.white_50,
+                background = Colour.white_50,
+                surface = Colour.white_50,
+                onBackground = Colour.black_900,
+                onSurface = Colour.black_900,
+                error = Colour.red_600,
+                onError = Colour.white_50,
+            ),
+            darkColor = darkColorScheme(
+                primary = Colour.blue_accent,
+                primaryContainer = Colour.blue_600,
+                onPrimary = Colour.black_900,
+                secondary = Colour.blue_accent,
+                onSecondary = Colour.black_900,
+                background = Color(0xFF121212),
+                surface = Color(0xFF000000),
+                onBackground = Colour.white_50,
+                onSurface = Colour.white_50,
+                error = Colour.red_600,
+                onError = Colour.black_900,
+            ),
+            lightExtraColors = ExtraColors(
+                bars = Color.White,
+                onBars = Color.Black
+            ),
+            darkExtraColors = ExtraColors(
+                bars = Color(0xFF181818),
+                onBars = Color.White
+            ),
 
-    ),
-    BaseTheme(
-        id = 2,
-        lightColor = MidNightLightColorScheme,
-        darkColor = MidNightDarkColorScheme,
-        darkExtraColors =ExtraColors(
-            bars = MidNightDarkColorScheme.surface,
-            onBars = MidNightDarkColorScheme.onSurface
+            ),
+        BaseTheme(
+            id = 2,
+            lightColor = MidNightLightColorScheme,
+            darkColor = MidNightDarkColorScheme,
+            darkExtraColors = ExtraColors(
+                bars = MidNightDarkColorScheme.surface,
+                onBars = MidNightDarkColorScheme.onSurface
+            ),
+            lightExtraColors = ExtraColors(
+                bars = MidNightLightColorScheme.surface,
+                onBars = MidNightLightColorScheme.onSurface
+            )
         ),
-        lightExtraColors = ExtraColors(
-            bars = MidNightLightColorScheme.surface,
-            onBars = MidNightLightColorScheme.onSurface
-        )
-    ),
-    BaseTheme(
-        id = 3,
-        lightColor = GreenAppleLightThemeColors,
-        darkColor = GreenAppleDarkThemeColors,
-        darkExtraColors =ExtraColors(
-            bars = GreenAppleDarkThemeColors.surface,
-            onBars = GreenAppleDarkThemeColors.onSurface
+        BaseTheme(
+            id = 3,
+            lightColor = GreenAppleLightThemeColors,
+            darkColor = GreenAppleDarkThemeColors,
+            darkExtraColors = ExtraColors(
+                bars = GreenAppleDarkThemeColors.surface,
+                onBars = GreenAppleDarkThemeColors.onSurface
+            ),
+            lightExtraColors = ExtraColors(
+                bars = GreenAppleLightThemeColors.surface,
+                onBars = GreenAppleLightThemeColors.onSurface
+            )
         ),
-        lightExtraColors = ExtraColors(
-            bars = GreenAppleLightThemeColors.surface,
-            onBars = GreenAppleLightThemeColors.onSurface
-        )
-    ),
-    BaseTheme(
-        id = 4,
-        lightColor = LightThemeColorsStrawberries,
-        darkColor = DarkThemeColorsStrawberries,
-        darkExtraColors =ExtraColors(
-            bars = DarkThemeColorsStrawberries.surface,
-            onBars = DarkThemeColorsStrawberries.onSurface
+        BaseTheme(
+            id = 4,
+            lightColor = LightThemeColorsStrawberries,
+            darkColor = DarkThemeColorsStrawberries,
+            darkExtraColors = ExtraColors(
+                bars = DarkThemeColorsStrawberries.surface,
+                onBars = DarkThemeColorsStrawberries.onSurface
+            ),
+            lightExtraColors = ExtraColors(
+                bars = LightThemeColorsStrawberries.surface,
+                onBars = LightThemeColorsStrawberries.onSurface
+            )
         ),
-        lightExtraColors = ExtraColors(
-            bars = LightThemeColorsStrawberries.surface,
-            onBars = LightThemeColorsStrawberries.onSurface
-        )
-    ),
-    BaseTheme(
-        id = 5,
-        lightColor = LightThemeColorsTako,
-        darkColor = DarkThemeColorsTako,
-        darkExtraColors =ExtraColors(
-            bars = DarkThemeColorsTako.surface,
-            onBars = DarkThemeColorsTako.onSurface
+        BaseTheme(
+            id = 5,
+            lightColor = LightThemeColorsTako,
+            darkColor = DarkThemeColorsTako,
+            darkExtraColors = ExtraColors(
+                bars = DarkThemeColorsTako.surface,
+                onBars = DarkThemeColorsTako.onSurface
+            ),
+            lightExtraColors = ExtraColors(
+                bars = LightThemeColorsTako.surface,
+                onBars = LightThemeColorsTako.onSurface
+            )
         ),
-        lightExtraColors = ExtraColors(
-            bars = LightThemeColorsTako.surface,
-            onBars = LightThemeColorsTako.onSurface
-        )
-    ),
-
-
 )

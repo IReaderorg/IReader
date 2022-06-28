@@ -6,19 +6,25 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import org.ireader.appearance.AppearanceSettingScreen
 import org.ireader.appearance.AppearanceViewModel
+import org.ireader.common_resources.UiText
 import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.components.reusable_composable.TopAppBarBackButton
+import org.ireader.core_ui.preferences.PreferenceValues
+import org.ireader.core_ui.theme.AppColors
 import org.ireader.core_ui.theme.prefs.CustomThemes
 import org.ireader.core_ui.theme.prefs.toCustomTheme
 import org.ireader.core_ui.theme.themes
+import org.ireader.core_ui.ui.SnackBarListener
 import org.ireader.ui_appearance.R
 
 object AppearanceScreenSpec : ScreenSpec {
@@ -31,7 +37,14 @@ object AppearanceScreenSpec : ScreenSpec {
     override fun TopBar(
         controller: ScreenSpec.Controller
     ) {
-        val viewModel: AppearanceViewModel = hiltViewModel(controller.navBackStackEntry)
+        val vm: AppearanceViewModel = hiltViewModel(controller.navBackStackEntry)
+        val theme = derivedStateOf { themes.getOrNull(vm.colorTheme.value) }
+        val currentPallet by derivedStateOf { if (vm.themeMode.value == PreferenceValues.ThemeMode.Dark) theme.value?.darkColor else theme.value?.lightColor }
+        val customizedColor = vm.getCustomizedColors()
+        val appbarColors = AppColors.current
+        val isSavable =
+            derivedStateOf { currentPallet?.primary != customizedColor.value.primary || currentPallet?.secondary != customizedColor.value.secondary || appbarColors.bars != customizedColor.value.bars }
+
         Toolbar(
             title = {
                 BigSizeTextComposable(text = stringResource(R.string.appearance))
@@ -42,14 +55,18 @@ object AppearanceScreenSpec : ScreenSpec {
                 }
             },
             actions = {
+                if (isSavable.value) {
                     AppIconButton(
                         imageVector = Icons.Default.Save,
                         onClick = {
-                            viewModel.getThemes(themes.lastIndex)?.let {
-                                viewModel.customThemes.set(CustomThemes(listOf(it.toCustomTheme())))
+                            vm.getThemes(themes.lastIndex)?.let {
+                                vm.customThemes.set(CustomThemes(listOf(it.toCustomTheme())))
+                                vm.showSnackBar(UiText.StringResource(R.string.theme_was_saved))
                             }
                         }
                     )
+                }
+
             }
         )
     }
@@ -59,6 +76,7 @@ object AppearanceScreenSpec : ScreenSpec {
         controller: ScreenSpec.Controller
     ) {
         val viewModel: AppearanceViewModel = hiltViewModel(controller.navBackStackEntry)
+        SnackBarListener(viewModel, controller.snackBarHostState)
         AppearanceSettingScreen(
             modifier = Modifier.padding(controller.scaffoldPadding),
             saveDarkModePreference = { theme ->

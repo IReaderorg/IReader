@@ -2,6 +2,8 @@ package org.ireader.appearance
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import dagger.hilt.android.lifecycle.HiltViewModel
 import org.ireader.core_ui.preferences.PreferenceValues
@@ -34,6 +36,7 @@ class AppearanceViewModel @Inject constructor(
     val relativeTime = uiPreferences.relativeTime().asState()
     val lightColors = uiPreferences.getLightColors().asState(scope)
     val darkColors = uiPreferences.getDarkColors().asState(scope)
+    val uiThemes = themes
 
 
     val dateFormats = arrayOf("", "MM/dd/yy", "dd/MM/yy", "yyyy-MM-dd", "dd MMM yyyy", "MMM dd, yyyy")
@@ -42,8 +45,12 @@ class AppearanceViewModel @Inject constructor(
         uiPreferences.themeMode().set(mode)
     }
     @Composable
-    fun getCustomizedColors(): CustomizableAppColorsPreferenceState {
-        return if (MaterialTheme.colorScheme.isLight()) lightColors else darkColors
+    fun getCustomizedColors(): State<CustomizableAppColorsPreferenceState> {
+        val isLight = MaterialTheme.colorScheme.isLight()
+        return derivedStateOf {
+            if (isLight) lightColors else darkColors
+        }
+        // if (MaterialTheme.colorScheme.isLight()) lightColors else darkColors
     }
 
     fun getThemes(id:Int): BaseTheme? {

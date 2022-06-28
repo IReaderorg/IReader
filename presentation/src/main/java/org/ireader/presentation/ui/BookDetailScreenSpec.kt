@@ -243,7 +243,7 @@ object BookDetailScreenSpec : ScreenSpec {
     }
 
     @OptIn(
-        ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class
+        ExperimentalMaterialApi::class
     )
     @Composable
     override fun Content(
@@ -263,26 +263,12 @@ object BookDetailScreenSpec : ScreenSpec {
                 }
             }
         }
-
-
         val state = vm
         val book = state.book
         val source = state.catalogSource?.source
         val catalog = state.catalogSource
         val scope = rememberCoroutineScope()
 
-//        LaunchedEffect(key1 = true) {
-//            vm.eventFlow.collectLatest { event ->
-//                when (event) {
-//                    is UiEvent.ShowSnackbar -> {
-//                        controller.snackBarHostState.showSnackbar(
-//                            event.uiText.asString(context)
-//                        )
-//                    }
-//                    else -> {}
-//                }
-//            }
-//        }
         DisposableEffect(key1 = true ) {
             onDispose {
                 controller.requestedHideSystemStatusBar(false)

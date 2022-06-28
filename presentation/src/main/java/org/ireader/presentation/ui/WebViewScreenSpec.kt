@@ -3,6 +3,8 @@ package org.ireader.presentation.ui
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
@@ -12,8 +14,6 @@ import com.google.accompanist.web.WebContent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import org.ireader.domain.ui.NavigationArgs
-import org.ireader.web.WebPageBottomLayout
-import org.ireader.web.WebPageEvents
 import org.ireader.web.WebPageScreen
 import org.ireader.web.WebPageTopBar
 import org.ireader.web.WebViewPageModel
@@ -87,12 +87,13 @@ object WebViewScreenSpec : ScreenSpec {
     ) {
         val vm: WebViewPageModel = hiltViewModel   (controller.navBackStackEntry)
         val webView = vm.webView
+        val url by derivedStateOf { vm.webUrl}
         val source = vm.source
+
         WebPageTopBar(
-            urlToRender = vm.url,
+            urlToRender = url ?:vm.url,
             onGo = {
-                vm.webViewState?.content = WebContent.Url(vm.url)
-                // webView.value?.loadUrl(viewModel.state.url)
+                vm.webViewState?.content = WebContent.Url(vm.webUrl)
                 vm.updateWebUrl(vm.url)
             },
             refresh = {
@@ -105,7 +106,7 @@ object WebViewScreenSpec : ScreenSpec {
                 webView?.goForward()
             },
             onValueChange = {
-                vm.updateUrl(it)
+                vm.webUrl = it
             },
             onPopBackStack = {
                 controller.navController.popBackStack()
@@ -148,53 +149,6 @@ object WebViewScreenSpec : ScreenSpec {
                 }
             },
             state = vm,
-        )
-    }
-
-    @Composable
-    override fun BottomModalSheet(
-        controller: ScreenSpec.Controller
-    ) {
-        val vm: WebViewPageModel = hiltViewModel   (controller.navBackStackEntry)
-        val webView = vm.webView
-        val scope = rememberCoroutineScope()
-        WebPageBottomLayout(
-            onConfirm = {
-                scope.launch {
-                    controller.sheetState.hide()
-                }
-                webView?.let { webview ->
-                    val book = vm.webBook
-                    val chapter = vm.webChapter
-                    val chapters = vm.webChapters
-                    if (book != null) {
-                        vm.insertBook(book.copy(favorite = true))
-                    }
-                    if (chapter != null) {
-                        vm.insertChapter(chapter)
-                    }
-                    if (book != null) {
-                        vm.insertChapters(chapters)
-                    }
-                }
-            },
-            onCancel = {
-                scope.launch {
-                    controller.sheetState.hide()
-                }
-                vm.onEvent(WebPageEvents.Cancel)
-            },
-            state = vm,
-            onBook = { bookId ->
-                vm.source?.let { source ->
-                    controller.navController.navigate(
-                        BookDetailScreenSpec.buildRoute(
-                            source.id,
-                            bookId = bookId
-                        )
-                    )
-                }
-            }
         )
     }
 }

@@ -53,14 +53,16 @@ fun AppearanceSettingScreen(
     scaffoldPaddingValues: PaddingValues
 ) {
     val context = LocalContext.current
-    val customizedColors = vm.getCustomizedColors()
+    val customizedColors = vm.getCustomizedColors().value
     val isLight = MaterialTheme.colorScheme.isLight()
+
     val themesForCurrentMode = remember(isLight) {
         if (isLight)
             themes.filter { it.light().materialColors.isLight() == isLight }.map { it.light() }
         else
             themes.filter { it.light().materialColors.isLight() != isLight }.map { it.dark() }
     }
+
 
     val items : List<Components> = remember {
         listOf<Components>(

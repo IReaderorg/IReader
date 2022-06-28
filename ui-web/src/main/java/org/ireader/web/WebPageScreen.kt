@@ -1,8 +1,5 @@
 package org.ireader.web
 
-import android.webkit.WebView
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,7 +17,6 @@ import androidx.compose.material.Button
 import androidx.compose.material.Checkbox
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.LinearProgressIndicator
-import androidx.compose.material.Surface
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
@@ -30,33 +26,25 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.google.accompanist.web.AccompanistWebChromeClient
-import com.google.accompanist.web.LoadingState
 import com.google.accompanist.web.WebView
 import com.google.accompanist.web.rememberWebViewState
+import io.ktor.http.HttpHeaders
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.collectLatest
-import org.ireader.common_resources.UiEvent
-import org.ireader.common_resources.UiText
 import org.ireader.components.reusable_composable.AppIconButton
-import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.core.R
 import org.ireader.core_api.source.CatalogSource
+import org.ireader.core_api.source.HttpSource
+import org.ireader.core_ui.ui.SnackBarListener
 import org.ireader.domain.utils.setDefaultSettings
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
@@ -72,72 +60,32 @@ fun WebPageScreen(
     snackBarHostState: SnackbarHostState,
     scaffoldPadding: PaddingValues
 ) {
-
-    val context = LocalContext.current
-    var webView by remember {
-        mutableStateOf<WebView?>(null)
+    val userAgent = remember {
+        (source as? HttpSource )?.getCoverRequest("")?.second?.headers?.get(HttpHeaders.UserAgent)
     }
-    val webUrl = remember {
-        mutableStateOf(viewModel.webUrl)
-    }
-
-    LaunchedEffect(key1 = webView.hashCode()) {
-        viewModel.webView = webView
-    }
-    val webViewState = rememberWebViewState(url = webUrl.value)
+    val webViewState = rememberWebViewState(url = viewModel.url)
 
     LaunchedEffect(key1 = webViewState.hashCode()) {
         viewModel.webViewState = webViewState
     }
 
+    LaunchedEffect(key1 = webViewState.content.getCurrentUrl()) {
+        webViewState.content.getCurrentUrl()?.let { viewModel.webUrl = it }
+    }
     val accompanistState = AccompanistWebChromeClient()
 
     DisposableEffect(key1 = true) {
         onDispose {
-            webView?.destroy()
+            viewModel.webView?.destroy()
         }
     }
-
-
-    LaunchedEffect(key1 = true) {
-        viewModel.uiFLow.collectLatest { event ->
-            when (event) {
-                is WebPageEvents.ShowModalSheet -> {
-                    onModalBottomSheetShow()
-                }
-                is WebPageEvents.Cancel -> {
-                    onModalBottomSheetHide()
-                }
-                is WebPageEvents.OnConfirm -> {
-                    onModalBottomSheetHide()
-                }
-                else -> {}
-            }
-        }
-
-    }
-    LaunchedEffect(key1 = true) {
-        viewModel.eventFlow.collectLatest { event ->
-            when (event) {
-                is UiEvent.ShowSnackbar -> {
-                    snackBarHostState.showSnackbar(
-                        event.uiText.asString(context)
-                    )
-                }
-                else -> {}
-            }
-        }
-    }
-
-
-
+    SnackBarListener(vm = viewModel, host = snackBarHostState)
     val refreshState = rememberSwipeRefreshState(isRefreshing = viewModel.isLoading)
     Box(modifier = Modifier.padding(scaffoldPadding)) {
-
         SwipeRefresh(
             state = refreshState,
             onRefresh = {
-                webView?.reload()
+                viewModel.webView?.reload()
                 viewModel.toggleLoading(true)
             },
             indicator = { state, trigger ->
@@ -157,12 +105,12 @@ fun WebPageScreen(
                         .fillMaxWidth(),
                 )
             }
-
             WebView(
                 state = webViewState,
                 onCreated = {
-                    webView = it
+                    viewModel.webView = it
                     it.setDefaultSettings()
+                    userAgent?.let { ua -> it.setUserAgent(ua) }
                 },
                 chromeClient = accompanistState
             )
@@ -170,31 +118,7 @@ fun WebPageScreen(
     }
 }
 
-@Composable
-fun ScrollableAppBar(
-    title: UiText,
-    modifier: Modifier = Modifier,
-    navigationIcon: @Composable (() -> Unit)? = null,
-    background: Color = MaterialTheme.colorScheme.primary,
-    scrollUpState: Boolean,
-) {
-    val position by animateFloatAsState(if (scrollUpState) -150f else 0f)
 
-    Surface(modifier = Modifier.graphicsLayer { translationY = (position) }, elevation = 8.dp) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp)
-                .background(color = background),
-        )
-        Row(modifier = modifier.padding(start = 12.dp)) {
-            if (navigationIcon != null) {
-                navigationIcon()
-            }
-            BigSizeTextComposable(text = title.asString(LocalContext.current))
-        }
-    }
-}
 
 @Composable
 fun WebPageBottomLayout(

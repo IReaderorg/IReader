@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
@@ -30,7 +31,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavDeepLink
 import androidx.navigation.navDeepLink
-import com.google.accompanist.pager.ExperimentalPagerApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -95,7 +95,7 @@ object ReaderScreenSpec : ScreenSpec {
     )
 
     @OptIn(
-        ExperimentalPagerApi::class, ExperimentalAnimationApi::class,
+        ExperimentalAnimationApi::class,
         ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class
     )
     @Composable
@@ -381,6 +381,7 @@ object ReaderScreenSpec : ScreenSpec {
             exit = slideOutVertically(targetOffsetY = { -it })
         ) {
             ReaderScreenDrawer(
+                modifier = if(vm.immersiveMode.value) Modifier else Modifier.systemBarsPadding(),
                 onReverseIcon = {
                     vm.isDrawerAsc = !vm.isDrawerAsc
                 },

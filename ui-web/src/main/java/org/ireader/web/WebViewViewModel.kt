@@ -1,6 +1,5 @@
 package org.ireader.web
 
-import android.annotation.SuppressLint
 import android.webkit.WebView
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -14,8 +13,6 @@ import com.google.accompanist.web.WebViewState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.CatalogLocal
@@ -34,8 +31,6 @@ import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 import javax.inject.Inject
 
-/**This is fake Alert **/
-@SuppressLint("StaticFieldLeak")
 
 @HiltViewModel
 class WebViewPageModel @Inject constructor(
@@ -77,14 +72,13 @@ class WebViewPageModel @Inject constructor(
         updateWebUrl(url = url)
     }
 
-    private val _uiFLow = MutableSharedFlow<WebPageEvents>()
-    val uiFLow = _uiFLow.asSharedFlow()
+
 
     fun toggleLoading(loading: Boolean) {
         isLoading = loading
     }
 
-    fun updateUrl(url: String) {
+    private fun updateUrl(url: String) {
         this.url = url
     }
 
@@ -93,13 +87,6 @@ class WebViewPageModel @Inject constructor(
         webUrl = url
     }
 
-    fun onEvent(event: WebPageEvents) {
-        when (event) {
-            is WebPageEvents.OnConfirm -> {
-            }
-            else -> {}
-        }
-    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getContentFromWebView(
