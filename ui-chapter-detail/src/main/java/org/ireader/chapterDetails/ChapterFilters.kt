@@ -73,8 +73,3 @@ fun ChaptersFilters.Companion.deserializeList(
 }
 
 
-enum class ChapterDisplayMode {
-    Default,
-    SourceTitle,
-    ChapterNumber
-}

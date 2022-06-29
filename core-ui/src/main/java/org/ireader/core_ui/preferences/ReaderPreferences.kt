@@ -171,8 +171,8 @@ class ReaderPreferences @OptIn(ExperimentalTextApi::class) constructor(
         return preferenceStore.getBoolean(SCROLL_INDICATOR_IS_ENABLE, true)
     }
 
-    fun isScrollIndicatorDraggable(): Preference<Boolean> {
-        return preferenceStore.getBoolean(SCROLL_INDICATOR_IS_DRAGGABLE, true)
+    fun scrollbarMode(): Preference<PreferenceValues.ScrollbarSelectionMode> {
+        return preferenceStore.getEnum(SCROLL_INDICATOR_IS_DRAGGABLE, PreferenceValues.ScrollbarSelectionMode.Full)
     }
 
     fun selectableText(): Preference<Boolean> {
@@ -214,6 +214,9 @@ class ReaderPreferences @OptIn(ExperimentalTextApi::class) constructor(
     fun speechLanguage(): Preference<String> {
         return preferenceStore.getString(TEXT_READER_SPEECH_LANGUAGE, "")
     }
+    fun showChapterNumberPreferences(): Preference<ChapterDisplayMode> {
+        return preferenceStore.getEnum("chapter_layout_mode", ChapterDisplayMode.Default)
+    }
 }
 
 enum class ReadingMode {
@@ -231,3 +234,8 @@ enum class ReadingMode {
     }
 }
 
+enum class ChapterDisplayMode {
+    Default,
+    SourceTitle,
+    ChapterNumber
+}

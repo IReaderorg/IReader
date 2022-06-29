@@ -161,6 +161,9 @@
     <string name="speech_rate">Speech Rate</string>
     <string name="auto_next_chapter">Auto Next Chapter</string>
     <string name="enable_sleep_timer">Sleep Mode</string>
+    <string name="full">Full</string>
+    <string name="partial">Partial</string>
+    <string name="disable">Disable</string>
     <string name="mark_as_read">Mark as read</string>
     <string name="delete_update">Delete Update</string>
     <string name="no_new_update_available">No New Updates is Available.</string>
@@ -349,6 +352,7 @@
     <string name="show_count_in_category_tab">Show Count in Category Tab</string>
     <string name="scrollbar_draggable">ScrollBar Draggable</string>
     <string name="orientation">Orientation</string>
+    <string name="scrollbar_mode">ScrollBar Mode</string>
     <string name="autoScroll">AutoScroll</string>
     <string name="reading_mode">Reading Mode</string>
     <string name="immersive_mode">Immersive mode</string>

@@ -18,7 +18,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
-import org.ireader.chapterDetails.ChapterDisplayMode
 import org.ireader.chapterDetails.ChapterSort
 import org.ireader.chapterDetails.ChaptersFilters
 import org.ireader.chapterDetails.parameter
@@ -26,6 +25,7 @@ import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.Chapter
 import org.ireader.common_resources.UiText
 import org.ireader.core.R
+import org.ireader.core_ui.preferences.ReaderPreferences
 import org.ireader.core_ui.preferences.UiPreferences
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.ui.NavigationArgs
@@ -46,11 +46,12 @@ class ChapterDetailViewModel @Inject constructor(
     private val state: ChapterDetailStateImpl,
     private val serviceUseCases: ServiceUseCases,
     private val historyUseCase: HistoryUseCase,
+    private val readerPreferences: ReaderPreferences,
     val uiPreferences: UiPreferences
 ) : BaseViewModel(), ChapterDetailState by state {
     var filters = mutableStateOf<List<ChaptersFilters>>(ChaptersFilters.getDefault(true))
     var sorting = mutableStateOf<ChapterSort>(ChapterSort.default)
-    var layout by mutableStateOf(ChapterDisplayMode.ChapterNumber)
+    var layout by readerPreferences.showChapterNumberPreferences().asState()
 
     init {
         val sourceId = savedStateHandle.get<Long>(NavigationArgs.sourceId.name)

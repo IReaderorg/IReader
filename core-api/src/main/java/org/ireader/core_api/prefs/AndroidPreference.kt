@@ -135,11 +135,20 @@ internal sealed class AndroidPreference<K, T>(
     ) : AndroidPreference<T, T>(store, scope, key, defaultValue) {
 
         override fun read(preferences: Preferences, key: Key<T>): T? {
-            return preferences[key]
+            return kotlin.runCatching {
+                preferences[key]
+            }.getOrElse {
+                preferences.toMutablePreferences().clear()
+                null
+            }
         }
 
         override fun write(preferences: MutablePreferences, key: Key<T>, value: T) {
-            preferences[key] = value
+            kotlin.runCatching {
+                preferences[key] = value
+            }.getOrElse {
+                preferences.clear()
+            }
         }
     }
 
@@ -157,7 +166,7 @@ internal sealed class AndroidPreference<K, T>(
 
         override fun read(preferences: Preferences, key: Key<String>): T? {
             return kotlin.runCatching {
-                 preferences[key]?.let(deserializer)
+                preferences[key]?.let(deserializer)
             }.getOrElse {
                 preferences.toMutablePreferences().clear()
                 null

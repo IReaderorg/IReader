@@ -11,7 +11,7 @@ import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.PublishedWithChanges
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -40,6 +40,7 @@ fun ChapterRow(
     isLastRead: Boolean = false,
     isSelected: Boolean = false,
     isLoading: Boolean = false,
+    showNumber: Boolean = true,
 ) {
     Row(
         modifier = Modifier
@@ -66,7 +67,7 @@ fun ChapterRow(
 
             Text(
                 buildAnnotatedString {
-                    if (chapter.number != -1f) {
+                    if (chapter.number != -1f && showNumber) {
                         append("${chapter.number.toInt()}   ")
                     }
                     append(chapter.name)
@@ -104,7 +105,7 @@ fun ChapterRow(
             }
             if (chapter.content.joinToString(" , ").length > 10) {
                 Icon(
-                    imageVector = Icons.Default.PublishedWithChanges,
+                    imageVector = Icons.Filled.CheckCircle,
                     contentDescription = "Cached",
                     tint = MaterialTheme.colorScheme.onBackground,
                 )

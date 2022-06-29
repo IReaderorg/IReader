@@ -18,10 +18,10 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -199,7 +199,7 @@ private fun PagedReaderText(
             enable = vm.showScrollIndicator.value,
             thumbColor = vm.unselectedScrollBarColor.value,
             thumbSelectedColor = vm.selectedScrollBarColor.value,
-            isDraggable = vm.isScrollIndicatorDraggable.value,
+            selectionMode = vm.isScrollIndicatorDraggable.value,
             rightSide = vm.scrollIndicatorAlignment.value == PreferenceAlignment.Right
         ) {
             Column(
@@ -307,7 +307,7 @@ private fun ContinuesReaderPage(
         enable = vm.showScrollIndicator.value,
         thumbColor = vm.unselectedScrollBarColor.value,
         thumbSelectedColor = vm.selectedScrollBarColor.value,
-        isDraggable = vm.isScrollIndicatorDraggable.value,
+        selectionMode = vm.isScrollIndicatorDraggable.value,
         rightSide = vm.scrollIndicatorAlignment.value == PreferenceAlignment.Right,
     ) {
 

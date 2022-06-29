@@ -1,5 +1,5 @@
 [versions]
-compose = "1.2.0-beta03"
+compose = "1.2.0-rc02"
 activity = "1.4.0"
 lifecycle = "2.4.1"
 
@@ -34,6 +34,9 @@ compose-coil = "io.coil-kt:coil-compose:2.1.0"
 compose-destinations-core = "io.github.raamcosta.compose-destinations:core:1.5.1-beta"
 compose-destinations-animation = "io.github.raamcosta.compose-destinations:animations-core:1.5.1-beta"
 compose-destinations-ksp = "io.github.raamcosta.compose-destinations:ksp:1.5.1-beta"
+
+
+
 
 [bundles]
 

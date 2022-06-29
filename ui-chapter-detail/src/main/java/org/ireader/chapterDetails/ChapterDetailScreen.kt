@@ -47,6 +47,7 @@ import org.ireader.components.CustomTextField
 import org.ireader.components.components.ChapterRow
 import org.ireader.components.list.scrollbars.LazyColumnScrollbar
 import org.ireader.components.reusable_composable.AppIconButton
+import org.ireader.core_ui.preferences.ChapterDisplayMode
 import org.ireader.core_ui.theme.AppColors
 import org.ireader.core_ui.ui.EmptyScreen
 import org.ireader.core_ui.ui.LoadingScreen
@@ -184,19 +185,8 @@ private fun ChaptersContent(
                     onLongClick = {
                         onLongClick(chapters.value[index])
                     },
+                    showNumber = vm.layout == ChapterDisplayMode.ChapterNumber || vm.layout == ChapterDisplayMode.Default
                 )
-//                ChapterListItemComposable(
-//                    modifier = Modifier,
-//                    chapter = chapters.value[index],
-//                    onItemClick = {
-//                        onItemClick(chapters.value[index])
-//                    },
-//                    isLastRead = isLastRead(chapters.value[index]),
-//                    isSelected = isSelected(chapters.value[index]),
-//                    onLongClick = {
-//                        onLongClick(chapters.value[index])
-//                    }
-//                )
             }
         }
     }

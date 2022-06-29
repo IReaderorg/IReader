@@ -11,6 +11,7 @@ tinylog = "2.4.1"
 spotless = "6.6.1"
 ktlint = "0.45.1"
 roomigrant = "0.3.4"
+markdown = "4.6.2"
 
 
 [libraries]

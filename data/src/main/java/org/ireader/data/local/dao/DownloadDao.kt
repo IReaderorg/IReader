@@ -58,18 +58,19 @@ interface DownloadDao : BaseDao<org.ireader.common_models.entities.Download> {
     }
     @Transaction
     suspend fun insertOrUpdate(objList: Download) {
-        val objectToInsert = listOf(objList)
-        val insertResult = insert(objectToInsert)
-        val updateList = mutableListOf<Download>()
-        val idList = mutableListOf<Long>()
-
-        for (i in insertResult.indices) {
-            if (insertResult[i] == -1L) {
-                updateList.add(objectToInsert[i])
+        kotlin.runCatching {
+            val objectToInsert = listOf(objList)
+            val insertResult = insert(objectToInsert)
+            val updateList = mutableListOf<Download>()
+            for (i in insertResult.indices) {
+                if (insertResult[i] == -1L) {
+                    updateList.add(objectToInsert[i])
+                }
             }
+
+            if (updateList.isNotEmpty()) update(updateList)
         }
 
-        if (!updateList.isEmpty()) update(updateList)
     }
 
 }

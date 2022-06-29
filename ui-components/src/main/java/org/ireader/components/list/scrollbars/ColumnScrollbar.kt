@@ -36,8 +36,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import kotlinx.coroutines.launch
+import org.ireader.core_ui.preferences.PreferenceValues
 
 /**
+ * taken from https://github.com/nanihadesuka/LazyColumnScrollbar
  * Scrollbar for Column
  *
  * @param rightSide true -> right,  false -> left
@@ -57,7 +59,7 @@ fun ColumnScrollbar(
     thumbShape: Shape = CircleShape,
     indicatorContent: (@Composable (normalizedOffset: Float, isThumbSelected: Boolean) -> Unit)? = null,
     enable: Boolean = true,
-    isDraggable: Boolean = true,
+    selectionMode: PreferenceValues.ScrollbarSelectionMode = PreferenceValues.ScrollbarSelectionMode.Thumb,
     content: @Composable () -> Unit
 ) {
     BoxWithConstraints {
@@ -73,6 +75,7 @@ fun ColumnScrollbar(
                 thumbSelectedColor = thumbSelectedColor,
                 thumbShape = thumbShape,
                 visibleHeightDp = with(LocalDensity.current) { constraints.maxHeight.toDp() },
+                selectionMode = selectionMode,
                 indicatorContent = indicatorContent
             )
         }
@@ -99,8 +102,8 @@ private fun ColumnScrollbar(
     thumbSelectedColor: Color = Color(0xFF5281CA),
     thumbShape: Shape = CircleShape,
     indicatorContent: (@Composable (normalizedOffset: Float, isThumbSelected: Boolean) -> Unit)? = null,
+    selectionMode: PreferenceValues.ScrollbarSelectionMode = PreferenceValues.ScrollbarSelectionMode.Thumb,
     visibleHeightDp: Dp,
-    isDraggable: Boolean = true,
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -149,7 +152,8 @@ private fun ColumnScrollbar(
     }
 
     fun setDragOffset(value: Float) {
-        dragOffset = value.coerceIn(0f, 1f - normalizedThumbSizeUpdated)
+        val maxValue = (1f - normalizedThumbSize).coerceAtLeast(0f)
+        dragOffset = value.coerceIn(0f, maxValue)
     }
 
     fun setScrollOffset(newOffset: Float) {
@@ -179,10 +183,6 @@ private fun ColumnScrollbar(
             .alpha(alpha)
             .fillMaxWidth()
     ) {
-        val dragState = rememberDraggableState { delta ->
-            setScrollOffset(dragOffset + delta / constraints.maxHeight.toFloat())
-        }
-
         if (indicatorContent != null) BoxWithConstraints(
             Modifier
                 .align(if (rightSide) Alignment.TopEnd else Alignment.TopStart)
@@ -226,18 +226,34 @@ private fun ColumnScrollbar(
             Modifier
                 .align(if (rightSide) Alignment.TopEnd else Alignment.TopStart)
                 .fillMaxHeight()
-                .draggable(state = dragState,
-                    enabled = isDraggable,
+                .draggable(
+                    state = rememberDraggableState { delta ->
+                        if (isSelected) {
+                            setScrollOffset(dragOffset + delta / constraints.maxHeight.toFloat())
+                        }
+                    },
                     orientation = Orientation.Vertical,
+                    enabled = selectionMode != PreferenceValues.ScrollbarSelectionMode.Disabled,
                     startDragImmediately = true,
                     onDragStarted = { offset ->
                         val newOffset = offset.y / constraints.maxHeight.toFloat()
                         val currentOffset = normalizedOffsetPosition
-                        if (newOffset in currentOffset..(currentOffset + normalizedThumbSizeUpdated)) setDragOffset(
-                            currentOffset
-                        )
-                        else setScrollOffset(newOffset)
-                        isSelected = true
+                        when (selectionMode) {
+                            PreferenceValues.ScrollbarSelectionMode.Full -> {
+                                if (newOffset in currentOffset..(currentOffset + normalizedThumbSizeUpdated))
+                                    setDragOffset(currentOffset)
+                                else
+                                    setScrollOffset(newOffset)
+                                isSelected = true
+                            }
+                            PreferenceValues.ScrollbarSelectionMode.Thumb -> {
+                                if (newOffset in currentOffset..(currentOffset + normalizedThumbSizeUpdated)) {
+                                    setDragOffset(currentOffset)
+                                    isSelected = true
+                                }
+                            }
+                            PreferenceValues.ScrollbarSelectionMode.Disabled -> Unit
+                        }
                     },
                     onDragStopped = {
                         isSelected = false

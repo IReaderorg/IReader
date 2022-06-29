@@ -7,6 +7,7 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.lifecycle.SavedStateHandle
@@ -89,8 +90,8 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
     val autoBrightnessMode = readerPreferences.autoBrightness().asState()
     val immersiveMode = readerPreferences.immersiveMode().asState()
     val brightness = readerPreferences.brightness().asState()
-
-    val isScrollIndicatorDraggable = readerPreferences.isScrollIndicatorDraggable().asState()
+    var chapterNumberMode by readerPreferences.showChapterNumberPreferences().asState()
+    val isScrollIndicatorDraggable = readerPreferences.scrollbarMode().asState()
     val font = readerPreferences.font().asState()
 
     val selectableMode = readerPreferences.selectableText().asState()

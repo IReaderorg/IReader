@@ -93,14 +93,14 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
 
     private lateinit var mediaCallback: TTSSessionCallback
     private lateinit var notificationController: NotificationController
-    private  var controller: MediaControllerCompat?=null
+    private var controller: MediaControllerCompat? = null
 
     private var player: TextToSpeech? = null
 
     private var serviceJob: Job? = null
     private var isPlayerDispose = false
     private var isHooked = false
-    private var focusRequest: AudioFocusRequest?=null
+    private var focusRequest: AudioFocusRequest? = null
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     companion object {
@@ -277,13 +277,15 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
 
     fun hookNotification() {
         if (!isNotificationForeground) {
-            startService(Intent(applicationContext, TTSService::class.java))
-            scope.launch {
-                startForeground(
-                    Notifications.ID_TTS,
-                    ttsNotificationBuilder.buildNotification(mediaSession.sessionToken)
-                )
-                isNotificationForeground = true
+            kotlin.runCatching {
+                startService(Intent(applicationContext, TTSService::class.java))
+                scope.launch {
+                    startForeground(
+                        Notifications.ID_TTS,
+                        ttsNotificationBuilder.buildNotification(mediaSession.sessionToken)
+                    )
+                    isNotificationForeground = true
+                }
             }
         }
         if (isPlayerDispose) {
@@ -308,8 +310,8 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
                 })
                 build()
             }
-            focusRequest?.let {  focusRequest ->
-            am.requestAudioFocus(focusRequest)
+            focusRequest?.let { focusRequest ->
+                am.requestAudioFocus(focusRequest)
             }
         } else {
             @Suppress("DEPRECATION")
@@ -457,7 +459,6 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
             }
             state.startTime = Clock.System.now()
             startService(Player.PLAY)
-
         }
 
         override fun onPause() {
@@ -588,9 +589,14 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
                                                     .cancel(Notifications.ID_TTS)
                                                 player?.stop()
                                                 state.utteranceId = ""
-                                                val am = baseContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+                                                val am =
+                                                    baseContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
                                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                                    focusRequest?.let { am.abandonAudioFocusRequest(it) }
+                                                    focusRequest?.let {
+                                                        am.abandonAudioFocusRequest(
+                                                            it
+                                                        )
+                                                    }
                                                 } else {
                                                     @Suppress("DEPRECATION")
                                                     am.abandonAudioFocus(this@TTSService)
@@ -906,7 +912,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
         val lastCheckPref = state.startTime
         val currentSleepTime = state.sleepTime.minutes
         val now = Clock.System.now()
-        if ( lastCheckPref != null && now - lastCheckPref > currentSleepTime && state.sleepMode) {
+        if (lastCheckPref != null && now - lastCheckPref > currentSleepTime && state.sleepMode) {
             startService(Player.CANCEL)
         }
     }

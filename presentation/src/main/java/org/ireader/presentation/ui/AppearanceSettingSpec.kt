@@ -1,7 +1,7 @@
 package org.ireader.presentation.ui
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,7 +32,6 @@ object AppearanceScreenSpec : ScreenSpec {
     override val navHostRoute: String = "appearance_setting_route"
 
     @ExperimentalMaterial3Api
-    @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun TopBar(
         controller: ScreenSpec.Controller
@@ -43,7 +42,11 @@ object AppearanceScreenSpec : ScreenSpec {
         val customizedColor = vm.getCustomizedColors()
         val appbarColors = AppColors.current
         val isSavable =
-            derivedStateOf { currentPallet?.primary != customizedColor.value.primary || currentPallet?.secondary != customizedColor.value.secondary || appbarColors.bars != customizedColor.value.bars }
+            derivedStateOf {
+               ( currentPallet?.primary != customizedColor.value.primary ||
+                    currentPallet?.secondary != customizedColor.value.secondary ||
+                    appbarColors.bars != customizedColor.value.bars)
+            }
 
         Toolbar(
             title = {
@@ -55,7 +58,9 @@ object AppearanceScreenSpec : ScreenSpec {
                 }
             },
             actions = {
-                if (isSavable.value) {
+                AnimatedVisibility(
+                    visible = isSavable.value,
+                ) {
                     AppIconButton(
                         imageVector = Icons.Default.Save,
                         onClick = {

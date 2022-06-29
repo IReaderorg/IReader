@@ -31,7 +31,7 @@ class ReaderSettingScreenViewModel @Inject constructor(
     var autoScrollInterval = readerPreferences.autoScrollInterval().asState()
     val autoBrightnessMode = readerPreferences.autoBrightness().asState()
     val immersiveMode = readerPreferences.immersiveMode().asState()
-    val isScrollIndicatorDraggable = readerPreferences.isScrollIndicatorDraggable().asState()
+    val scrollbarMode = readerPreferences.scrollbarMode().asState()
     val font = readerPreferences.font().asState()
 
     val selectableMode = readerPreferences.selectableText().asState()

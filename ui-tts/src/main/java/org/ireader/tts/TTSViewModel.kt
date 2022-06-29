@@ -139,8 +139,10 @@ class TTSViewModel @Inject constructor(
     }
 
     override fun onDestroy() {
-        browser?.disconnect()
-        textReader?.shutdown()
+        kotlin.runCatching {
+            browser?.disconnect()
+            textReader?.shutdown()
+        }
         super.onDestroy()
     }
 

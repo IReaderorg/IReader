@@ -10,6 +10,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.PagerState
 import org.ireader.chapterDetails.viewmodel.ChapterDetailViewModel
+import org.ireader.core_ui.preferences.ChapterDisplayMode
 import org.ireader.ui_chapter_detail.R
 
 

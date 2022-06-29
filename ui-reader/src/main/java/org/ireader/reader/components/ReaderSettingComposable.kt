@@ -40,6 +40,7 @@ import org.ireader.components.components.component.SwitchPreference
 import org.ireader.components.components.setupUiComponent
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.MidSizeTextComposable
+import org.ireader.core_ui.preferences.PreferenceValues
 import org.ireader.core_ui.preferences.ReadingMode
 import org.ireader.core_ui.theme.fonts
 import org.ireader.core_ui.ui.Colour.contentColor
@@ -312,7 +313,20 @@ fun ReaderSettingMainLayout(
                             title = stringResource(id = R.string.orientation)
                         )
                     }
-
+                    item {
+                        ChipPreference(
+                            preference = listOf(
+                                stringResource(id = R.string.full),
+                                stringResource(id = R.string.partial),
+                                stringResource(id = R.string.disable),
+                            ),
+                            selected = vm.isScrollIndicatorDraggable.value.ordinal,
+                            onValueChange = {
+                                vm.isScrollIndicatorDraggable.value =  PreferenceValues.ScrollbarSelectionMode.valueOf(it)
+                            },
+                            title = stringResource(id = R.string.scrollbar_mode)
+                        )
+                    }
                     item {
                         SwitchPreference(
                             preference = vm.autoScrollMode,
@@ -344,12 +358,7 @@ fun ReaderSettingMainLayout(
                             title = stringResource(id = R.string.show_scrollbar),
                         )
                     }
-                    item {
-                        SwitchPreference(
-                            preference = vm.isScrollIndicatorDraggable,
-                            title = stringResource(id = R.string.scrollbar_draggable),
-                        )
-                    }
+
                 }
 
             },

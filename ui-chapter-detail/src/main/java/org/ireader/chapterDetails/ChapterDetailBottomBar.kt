@@ -37,6 +37,7 @@ import kotlinx.coroutines.launch
 import org.ireader.chapterDetails.viewmodel.ChapterDetailViewModel
 import org.ireader.components.components.component.pagerTabIndicatorOffset
 import org.ireader.components.reusable_composable.MidSizeTextComposable
+import org.ireader.core_ui.preferences.ChapterDisplayMode
 import org.ireader.core_ui.ui.Colour.contentColor
 import org.ireader.ui_chapter_detail.R
 
